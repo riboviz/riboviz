@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Ribovix: Main</title>
+		<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+		<script src="http://code.jquery.com/jquery.js"></script>
+		<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+		<script src="http://d3js.org/topojson.v1.min.js"></script>
+		<script src="http://d3js.org/queue.v1.min.js"></script>
+		<script type="text/javascript" src="//d3js.org/d3.v3.min.js"></script>
+		<script src="http://d3js.org/d3.v3.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+		<link rel="stylesheet"	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous" media="screen">
+			<link href="css/style.css" rel="stylesheet" media="screen">
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+	
+
+
+		
+		<style type="text/css">
+	
+			body {
+  				font: 12px sans-serif;
+			}
+			.axis path,
+			.axis line {
+  				fill: none;
+  				stroke: #000;
+  				shape-rendering: crispEdges;
+			}
+			.axis text {
+				font-family: sans-serif;
+				font-size: 11px;
+			}	
+			.x.axis path {
+  				display: none;
+			}
+			.line{
+  				fill: none;
+  				stroke: rgb(239,138,98);
+  				stroke-width: 1.5px;
+  				.style("stroke-opacity", 0.5)
+  				shape-rendering: auto;
+			}
+
+			.circle {
+  				fill: none;
+  				stroke: steelblue;
+			}
+		</style>
+		<link href="css/style.css" rel="stylesheet" media="screen">
+	</head>
+
+	<body>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="http://code.jquery.com/jquery.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+
+		<nav class="navbar navbar-default navbar-static-top" role="navigation">			<div class="container">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+
+					<a class="navbar-brand" href="/Frontend/index.html">
+						<div class="navtitle">
+							<span class="c4">r</span><span class="c4">i</span><span class="c4">b</span><span class="c4">o</span><span class="c7">v</span><span class="c7">i</span><span class="c7">z</span>
+						</div>
+					</a>
+
+				</div>
+				<div class="collapse navbar-collapse" id="navbar-collapse">
+			
+					<ul class="nav navbar-nav navbar-right nav-tabs">
+						
+						<li role="presentation">
+						
+							<a href="DataPage.html">Data</a>
+					
+						</li>
+						
+						<li role="presentation">
+						
+							<a href="GeneBased.html">Gene of interest</a>
+					
+						</li>
+						
+						<li role="presentation">
+						
+							<a href="MethodsPage.html">
+								Methods
+							</a>
+						</li>
+						
+						<li class="dropdown" role="presentation">
+						
+							<a href="HelpPage.html">
+								Help	
+						</li>
+
+					</ul>
+										
+						<a class="navbar-brand" href="/"></a>
+					<ul class="nav navbar-nav navbar-left">
+						<li class="dropdown hidden-xs">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+								Weinberg et al. 2016 <span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu">
+								<li class="dropdown-header"></li>
+
+									<li>
+										<a href="/Frontend/DataPage.html">Explore other data sets or add your own</a>
+									</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+
+	
+
+<div class="container">
+<div class="row hidden-xs">
+	<div class="col-md-9 paperbox">
+		<div class="c10">   Analysis and Visualization of Ribosome Profiling Data</div>
+	</div>
+</div>
+</div>
+
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+
+
+<div class="container">
+<div class="row">
+	<div class="col-md-4">
+		<div class="io-container title">
+			Metagenomic analyses
+		</div>
+	</div>
+</div>
+</div>
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+
+
+<div class="container">
+  <div class="row">
+  <div class="col-md-4">
+      <h4>3 nucleotide periodicity</h4>
+	<p> Analysis of all mapped reads to visualize the expected three-nucleotide periodicity along the ORFs, as well as ribosome accumulation at the start and stop
+codons. Maybe more details here... </p>
+
+    </div>
+    <div class="col-md-8" >
+    <button  id="5prime" class="btn btn-default">5'</button>
+    <button  id="3prime" class="btn btn-default">3'</button>
+    <div  id="nucleotidePeriodicity"> </div>
+    </div>
+  </div>
+</div>
+ 
+<div class="bigspacer"></div> 
+
+    
+
+<div class="bigspacer"></div>
+<div class="container">
+  <div class="row">
+<div class="col-md-4">
+    <div class="spacer"></div>
+      <h4>Read count histogram</h4>
+      <p> Explanation of the figure here and how this is a distribution of read counts. here  blah blah blah blah</p>
+          <div class="bigspacer"></div>
+	</div>
+	 <div class="col-md-8" class="ReadCountHistogram" id="ReadCountHistogram"></div> 
+ </div>
+</div>
+	
+ 
+ 
+<div class="bigspacer"></div>
+<div class="container">
+  <div class="row">
+    <div class="col-md-4">
+      <h4> Codon specific distribution of reads.</h4>
+			 <p> explanation of the bias possible and the figure here explanation of the bias possible and the figure hereexplanation of the bias possible and the figure 
+			 Click for either 3prime or 5 prime below :</p>
+<form>
+<input class="fig5radio" type="radio" name="inputsrc51" id="defaultInput51" value="0" checked/><label for="defaultInput51">3' end </label> 
+<input class="fig5radio" type="radio" name="inputsrc51" id="thisPostInput51" value="1"/>
+<label for="thisPostInput51">5' end</label>
+</form>
+
+</div>
+
+	<div class="col-md-8" id="CodonBias"></div>
+  </div>
+</div>
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-4">
+      <h4> Excess codon specific RPF counts.</h4>
+			 <p> explanation of the bias possible and the figure here explanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure here </p>
+	</div>
+	<div class="col-md-8" id="ExcessCodonSpecificRPF"></div>
+  </div>
+</div>
+
+
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-4">
+          <div class="bigspacer"></div>
+      <div class="bigspacer"></div>
+      <h4> Nucleotide bias along the ribosome.</h4>
+			 <p> explanation of the bias possible and the figure here explanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure here </p>
+			 
+ <div class="spacer"></div>   
+<form>
+ <label for="nValue" text-align: right">Select ribosome profile length:    <span id="nValue-value"></span></label>
+  <input  class="fig3radio" type="number" min="15" max="*js*" step="1" value="28" id="nValue">
+<p> Select Frame:
+<input class="fig3radio" type="radio" name="inputsrc1" id="defaultInput1" value="0" checked/><label for="defaultInput1">1 </label> 
+<input class="fig3radio" type="radio" name="inputsrc1" id="thisPostInput1" value="1"/>
+<label for="thisPostInput1">2</label>
+<input class="fig3radio" type="radio" name="inputsrc1" id="thisPostInput1" value="2"/>
+<label for="thisPostInput1">3</label>
+<div class="spacer"></div>
+</form>
+
+<button class="btn btn-default" id="Compare" class="fig3radio" onClick="document.getElementById('fig3radiotest').style.display='block';">Compare with other datasets</button>
+<button class="btn btn-default" value="Reset to default" id="reset" class="fig3radio" onClick="document.getElementById('fig3radiotest').style.display='none';">Reset</button>
+
+<div class="radio-toolbar" id="fig3radiotest" style="display:none;">
+<form>
+<p> For nucleotide 
+<input class="fig3radio2" type="radio" name="inputsrc3" id="defaultInput3" value="A" /><label for="defaultInput3">A </label> 
+<input class="fig3radio2" type="radio" name="inputsrc3" id="thisPostInput3" value="T"/>
+<label for="thisPostInput3">T</label>
+<input class="fig3radio2" type="radio" name="inputsrc3" id="thisPostInput3" value="G"/>
+<label for="thisPostInput3">G</label>
+<input class="fig3radio2" type="radio" name="inputsrc3" id="thisPostInput3" value="C"/>
+<label for="thisPostInput3">C</label>
+</form>
+</div class="radio-toolbar"> 
+	</div>
+	<div class="col-md-8" >
+	<div class="im-centered">  
+	 <div class="row">
+	 <div class="col-md-1" ></div>
+<div class="col-md-7">
+ <div class="bigspacer"></div>
+ <div class="bigspacer"></div>   
+
+</div>
+</div>
+   </div>
+<div class="row">
+    <div  class="col-md-8" id="Nucleotide"> </div>
+   </div> 
+</div>  
+</div>
+</div>
+
+ 
+ 
+ 
+<div class="bigspacer"></div>
+<div class="container">
+  <div class="row">
+    
+    <div class="col-md-4">
+    <h4> Correlations reads and features.</h4>	
+
+ <p> explanation of the bias possible and the figure here explanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure here </p>
+
+<form>
+<input class="Thecorrs2" type="radio" name="features" id="defaultInput1" value="Length" checked/><label for="defaultInput1">Length</label> 
+<input class="Thecorrs2" type="radio" name="features" id="thisPostInput1" value="FEatg"/><label for="thisPostInput1">FEatg</label>
+<input class="Thecorrs2" type="radio" name="features" id="thisPostInput1" value="FEcap"/><label for="thisPostInput1">FEcap</label>
+<input class="Thecorrs2" type="radio" name="features" id="thisPostInput1" value="uATG"/><label for="thisPostInput1">uATG</label>
+<input class="Thecorrs2" type="radio" name="features" id="thisPostInput1" value="utr"/><label for="thisPostInput1">utr</label>
+<input class="Thecorrs2" type="radio" name="features" id="thisPostInput1" value="gc"/><label for="thisPostInput1">gc</label>
+<input class="Thecorrs2" type="radio" name="features" id="thisPostInput1" value="polyA"/><label for="thisPostInput1">polyA</label>
+</form>
+
+</div>
+	
+	
+	<div class="row">
+    	<div class="col-md-4">
+			<p class="CorrelationsReadsandFeatures" id="CorrelationsReadsandFeatures"></p>
+		</div>
+
+	</div>	
+
+
+  </div>
+</div>
+
+
+<!-- 
+<div class="container">
+  <div class="row">
+  
+    <div class="col-md-4">
+    <h4>Correlations abundances and reads</h4>
+    
+     <p> explanation of the bias possible and the figure here explanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure here </p>
+
+
+
+		<form>
+		<input class="Thecorrs" type="radio" name="site" id="defaultInput" value="A" checked/><label for="defaultInput">A</label> 
+		<input class="Thecorrs" type="radio" name="site" id="thisPostInput" value="P"/><label for="thisPostInput">P</label>
+		<input class="Thecorrs" type="radio" name="site" id="thisPostInput" value="E" ><label for="thisPostInput">E</label> 
+		</form>
+		<form>
+		<input class="Thecorrs" type="radio" name="abundance" id="defaultInput1" value="GCN" checked/><label for="defaultInput1">GCN</label> 
+		<input class="Thecorrs" type="radio" name="abundance" id="thisPostInput1" value="tAI"/>
+		<label for="thisPostInput1">tAI</label>
+		<input class="Thecorrs" type="radio" name="abundance" id="thisPostInput1" value="RNAseq"/>
+		<label for="thisPostInput1">RNAseq</label>
+		<input class="Thecorrs" type="radio" name="abundance" id="thisPostInput1" value="Microarray"/>
+		<label for="thisPostInput1">Microarray</label>
+		</form>
+	</div>
+
+	<div class="row">
+    	<div class="col-md-4" class="CorrelationsAbundancesReads" id="CorrelationsAbundancesReads"></div>
+		  
+	<!~~ 
+
+		<div class="col-md-4" class="HistogramsCorrsnonCHX" id="HistogramsCorrsnonCHX"></div>
+		<div class="col-md-4" class="HistogramsCorrsCHX" id="HistogramsCorrsCHX"></div>
+ ~~>
+
+	</div>	
+
+</div>
+</div>
+
+
+ -->
+
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+
+`<div class="container">		
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			Gene based analyses
+		</div>
+	</div>
+	<div class="col-md-9" align="justify">
+		 <a href="#">Click here</a> to acess the  the gene based analyses.<p>
+		
+			
+	</div>
+</div>
+</div>
+
+
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+
+`<div class="container">		
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			Rationale and details
+		</div>
+	</div>
+	<div class="col-md-9" align="justify">
+		 <a href="/Frontend/GeneBased.html">Click here</a> for help with the riboviz interface or watch the tutorial video below.<p>
+		 <p> <b>Ribosome profiling </b> is a new technique...
+			
+	</div>
+</div>
+</div>
+
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<hr>
+		<div class="center text-gray smallnote">
+			&copy; 2016 Oana Carja, Premal Shah
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+
+
+<script src="/Frontend/js/3ntIndex.js"></script>
+<script src="/Frontend/js/ReadCountHistogramIndex.js"></script>
+<script src="/Frontend/js/CodonSpecificDistributionIndex.js"></script>
+<script src="/Frontend/js/NucleotideBiasAlongRPIndex.js"></script>
+<script src="/Frontend/js/ExcessCodonSpecificRPFIndex.js"></script>
+<script src="/Frontend/js/CorrelationsReadsFeaturesIndex.js"></script>
+<script src="/Frontend/js/CorrelationsAbundancesReadsIndex.js"></script> 
+
+
+
+	</body>
+
+</html>
