@@ -1,0 +1,1 @@
+path<-dirname((parent.frame(2)$ofile)) #local path of current script,e.g.'/Users/xtj/Documents/shahlab/shinyProject/localRibo'
