@@ -6,7 +6,7 @@ var MyApp2 = {
 		};
 
 	
-var marginFigure8 = {top: 60, right: 20, bottom: 20, left: 100},
+var marginFigure8 = {top: 60, right: 20, bottom: 50, left: 100},
 		paddingFigure8=5,
     	widthFigure8 = 700 - marginFigure8.left - marginFigure8.right,
     	heightFigure8 = 400 - marginFigure8.top - marginFigure8.bottom;
@@ -17,7 +17,8 @@ var marginFigure8C = {top: 20, right: 60, bottom: 20, left:50},
     	widthFigure8C = 400 - marginFigure8C.left - marginFigure8C.right,
     	heightFigure8C = 400 - marginFigure8C.top - marginFigure8C.bottom;
     
-var xFigure8 = d3.scale.linear()
+var xFigure8 = d3.scale.log()
+	.base(10)
     .range([paddingFigure8, widthFigure8]);
 
 var yFigure8 = d3.scale.linear()
@@ -43,8 +44,8 @@ var svgFigure8 = d3.select("#CorrelationsReadsandFeatures").append("svg")
     .attr("transform", "translate(" + marginFigure8.left + "," + marginFigure8.top + ")");
  
 			
-var xFigure8C = d3.scale.ordinal().rangeRoundBands([0, widthFigure8C], .05);
-var yFigure8C = d3.scale.linear().range([heightFigure8C-paddingFigure8C,paddingFigure8C]);
+// var xFigure8C = d3.scale.ordinal().rangeRoundBands([0, widthFigure8C], .05);
+// var yFigure8C = d3.scale.linear().range([heightFigure8C-paddingFigure8C,paddingFigure8C]);
 
 
 				svgFigure8.append("g")
@@ -81,6 +82,16 @@ var yFigure8C = d3.scale.linear().range([heightFigure8C-paddingFigure8C,paddingF
         			.attr("transform", "rotate(0)")
         			.style("font-size","16px");
         			
+        		// now add titles to the axes
+        		svgFigure8.append("text")
+            		.attr("text-anchor", "middle")  
+            		.attr("transform", "translate("+(0-paddingFigure8*8)+","+(heightFigure8/2)+")rotate(-90)")  
+            		.text("Selected feature");
+
+       			svgFigure8.append("text")
+            		.attr("text-anchor", "middle")  
+            		.attr("transform", "translate("+ (widthFigure8/2) +","+(heightFigure8+paddingFigure8*6.5)+")")  
+            		.text("Log 10 Read Counts");
  
 	var string="../../Data/";
 
@@ -109,10 +120,9 @@ function analyze(error, data, data1) {
 
 	
 
-xFigure8.domain(d3.extent(data, function(d) { return d.RPF; }));
-yFigure8.domain(d3.extent(data, function(d) { return d.Length; }));
+ xFigure8.domain(d3.extent(data, function(d) { return d.RPF; }));
+ yFigure8.domain(d3.extent(data, function(d) { return d.Length; }));
 
-	
 
 function updateFigure8(data, value1, value2) {
 
@@ -133,9 +143,10 @@ var  data = data.map( function (d) {
     
    
     
-	xFigure8.domain(d3.extent(data, function(d) { return d.d1; }));
+	xFigure8.domain(d3.extent(data, function(d) { return d.d1; })).nice();
   	yFigure8.domain(d3.extent(data, function(d) { return d.d2; }));
-  
+   
+   
   // DATA JOIN
   // Join new data with old elements, if any.
   var textFigure8 = svgFigure8.selectAll("circle")

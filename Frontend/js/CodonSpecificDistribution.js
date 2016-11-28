@@ -22,6 +22,11 @@ var xFigure5 = d3.scale.linear()
 	var yAxisFigure5 = d3.svg.axis()
     	.scale(yFigure5)
     	.orient("left").ticks(10);
+    	
+    var area = d3.svg.area()
+    .x(function(d) { return xFigure5(d.Position); })
+    .y0(function(d) { return yFigure5(d.Reads+d.SD); })
+    .y1(function(d) { return yFigure5(d.Reads-d.SD); });
 
 	var svglineFigure5 = d3.svg.line()
     	.x(function(d) { return xFigure5(d.Position); })
@@ -59,7 +64,16 @@ var xFigure5 = d3.scale.linear()
       		.attr("class", "y axis")
       		.call(yAxisFigure5);
       		
-      		
+      		// now add titles to the axes
+        svgFigure5.append("text")
+            .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+            .attr("transform", "translate("+(0-paddingFigure5)+","+(heightFigure5/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
+            .text("Relative normalized reads");
+
+       svgFigure5.append("text")
+            .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+            .attr("transform", "translate("+ (widthFigure5/2) +","+(heightFigure5+paddingFigure5)+")")  // centre below axis
+            .text("Codon position");
       			
 d3.selectAll(".form-control")
 .on("change.5", change5);
@@ -84,6 +98,7 @@ function change5() {
     		d.X5prime = +d.X5prime;
     		d.Reads = +d.Reads;
     		d.Type = +d.Type;
+    		d.SD = +d.SD;
     		d.DataType = d.DataType;
   		});
     
@@ -125,7 +140,21 @@ var freqFigure5 = svgFigure5.selectAll(".nucleotide")
 	
 
  
-  freqFigure5.select("g .nucleotide path")
+ freqFigure5.select("g .nucleotide .area")
+      		.transition()
+  			.ease("linear")
+			.delay(function(d, i) {
+					return i / datanew.length * 500;
+			})
+			.duration(750)
+      		.attr("class", "area")
+      		.attr("id", function(d) { return "tag2"+d.key; }) // assign ID
+      		.attr("d", function(d) { return area(d.values); })
+      		.style("stroke-fill", function(d) { return colorFigure5(d.key); })
+      		.style("stroke-opacity", 0.5);
+        
+
+ 			freqFigure5.select("g .nucleotide .line")
   			.transition()
   			.ease("linear")
 			.delay(function(d, i) {
@@ -148,11 +177,11 @@ var freqFigure5 = svgFigure5.selectAll(".nucleotide")
       		.attr("y", 135)
       		.attr("class", "legend")
       		.text(function(d) {
-      		if(d.name==100 & value1=="RPF"){return " RPF Data"};
+      		if(d.name==100 & value1=="RPF"){return "Data"};
       		if(d.name==0 & value1=="RPF"){return "FF"};
       		if(d.name==1 & value1=="RPF"){return "CHX"};
       		if(d.name==1 & value1=="mRNA"){return "BG"};
-      		if(d.name==100 & value1=="mRNA"){return " mRNA Data"};
+      		if(d.name==100 & value1=="mRNA"){return "mRNA Data"};
       		 })
       		.style("stroke", function(d) { return colorFigure5(d.name); })
       		.style("fill", function(d) { return colorFigure5(d.name); })
@@ -164,6 +193,12 @@ var freqFigure5 = svgFigure5.selectAll(".nucleotide")
 	var freqgroup=freqFigure5.enter().append("g").attr("class", "nucleotide");
 	   
       
+          	freqgroup.append("path")
+      		.attr("class", "area")
+      		.attr("id", function(d) { return "tag2"+d.key; }) // assign ID
+      		.attr("d",  function(d) { return area(d.values); })
+      		.style("fill", function(d) { return colorFigure5(d.key); })
+      		.style("fill-opacity", 0.5);
       //add path to line group		
   			freqgroup.append("path")
       		.attr("class", "line")
@@ -181,7 +216,7 @@ var freqFigure5 = svgFigure5.selectAll(".nucleotide")
       		.attr("y", 135)
       		.attr("class", "legend")
       		.text(function(d) {
-      		if(d.name==100 & value1=="RPF"){return " RPF Data"};
+      		if(d.name==100 & value1=="RPF"){return "Data"};
       		if(d.name==0 & value1=="RPF"){return "FF"};
       		if(d.name==1 & value1=="RPF"){return "CHX"};
       		if(d.name==1 & value1=="mRNA"){return "BG"};

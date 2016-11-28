@@ -1,6 +1,6 @@
 setTimeout(function() {
             //Width and height
-			var marginFigure2 = {top: 0, right: 20, bottom: 20, left: 100},
+			var marginFigure2 = {top: 0, right: 20, bottom: 70, left: 100},
     			widthFigure2 = 700 - marginFigure2.left - marginFigure2.right,
     			paddingFigure2=30,
     			paddingxFigure2=5,
@@ -40,6 +40,17 @@ setTimeout(function() {
       						svgFigure2.append("g")
       				.attr("class", "y axis")
       				.call(yAxisFigure2);
+      				
+      				// now add titles to the axes
+        svgFigure2.append("text")
+            .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+            .attr("transform", "translate("+(0-paddingFigure2*2.5)+","+(heightFigure2/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
+            .text("Read count");
+
+       svgFigure2.append("text")
+            .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+            .attr("transform", "translate("+ (widthFigure2/2) +","+(heightFigure2+paddingFigure2*1.3)+")")  // centre below axis
+            .text("Read length");
 			
 d3.selectAll(".form-control")
 .on("change.2",change2);

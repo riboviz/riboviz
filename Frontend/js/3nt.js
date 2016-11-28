@@ -2,7 +2,7 @@ setTimeout(function() {
 
 			
 			//Width and height
-			var marginFigure1 = {top: 20, right: 20, bottom: 20, left: 100},
+			var marginFigure1 = {top: 20, right: 20, bottom: 50, left: 100},
     			widthFigure1 = 700 - marginFigure1.left - marginFigure1.right,
     			paddingFigure1=10,
     			heightFigure1 = 250 - marginFigure1.top - marginFigure1.bottom;
@@ -65,6 +65,18 @@ setTimeout(function() {
   				svgFigure1.append("g")
       				.attr("class", "y axis")
       				.call(yAxisFigure1);
+      				
+      			// now add titles to the axes
+        svgFigure1.append("text")
+            .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+            .attr("transform", "translate("+(0-paddingFigure1*6)+","+(heightFigure1/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
+            .text("Mapped reads");
+
+       svgFigure1.append("text")
+            .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+            .attr("transform", "translate("+ (widthFigure1/2) +","+(heightFigure1+paddingFigure1*4)+")")  // centre below axis
+            .text("Distance from translation start/stop (nt)");
+      				  	
       				  			
     
 d3.selectAll(".form-control")

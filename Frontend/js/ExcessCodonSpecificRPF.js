@@ -1,7 +1,7 @@
 setTimeout(function() {
 
 //Width and height
-			var marginFigure6 = {top: 20, right: 10, bottom: 20, left: 100},
+			var marginFigure6 = {top: 20, right: 10, bottom: 50, left: 100},
     			widthFigure6 = 700 - marginFigure6.left - marginFigure6.right,
     			paddingFigure6=5,
     			paddingFigure6l=50
@@ -31,7 +31,11 @@ setTimeout(function() {
     			.scale(yFigure6)
     			.orient("left");
     		
-			
+			var areaF6 = d3.svg.area()
+    			.x(function(d) { return xFigure6(d.Codon); })
+    			.y0(function(d) { return yFigure6(d.excess_reads+d.SD); })
+    			.y1(function(d) { return yFigure6(d.excess_reads-d.SD); });
+    
 			//Define line
 			var valuelineFigure6 = d3.svg.line()
     			.x(function(d) { return xFigure6(d.Codon); })
@@ -72,7 +76,17 @@ setTimeout(function() {
       				.attr("class", "y axis")
       				.attr("transform", "translate(" + 0 + "," + (0-paddingFigure6) + ")")
       				.call(yAxisFigure6);
-      				
+      			
+      			// now add titles to the axes
+        		svgFigure6.append("text")
+            		.attr("text-anchor", "middle")  
+            		.attr("transform", "translate("+(0-paddingFigure6*6.5)+","+(heightFigure6/2)+")rotate(-90)")  
+            		.text("Codon specific normalized reads");
+
+       			svgFigure6.append("text")
+            		.attr("text-anchor", "middle")  
+            		.attr("transform", "translate("+ (widthFigure6/2) +","+(heightFigure6+paddingFigure6*6.5)+")")  
+            		.text("Codon");	
       					
 d3.selectAll(".form-control")
 .on("change.6", change6);
@@ -104,8 +118,7 @@ function change6() {
       				
 function updateFigure6(data) {
       				
-var datanew = data;
-console.log(datanew); 
+var datanew = data; 
 
     			var nucleotide = d3.nest()
         			.key(function(d) {return d.CHX;})
@@ -117,13 +130,27 @@ console.log(datanew);
   
 
   				xFigure6.domain(datanew.map(function(d) { return d.Codon; }));
-  				yFigure6.domain([d3.min(datanew, function(d) { return d.excess_reads; }),d3.max(datanew, function(d) { return d.excess_reads; })]);
+  				yFigure6.domain([d3.min(datanew, function(d) { return d.excess_reads-d.SD; }),d3.max(datanew, function(d) { return d.excess_reads+d.SD; })]);
 
 
 var freqFigure6 = svgFigure6.selectAll(".nucleotide")
       		.data(nucleotide);
 
- freqFigure6.select("g .nucleotide path")
+freqFigure6.select("g .nucleotide .area")
+      		.transition()
+  			.ease("linear")
+			.delay(function(d, i) {
+					return i / datanew.length * 500;
+			})
+			.duration(500)
+      		.attr("class", "area")
+      		.attr("id", function(d) { return "tag2"+d.key; }) // assign ID
+      		.attr("d", function(d) { return areaF6(d.values); })
+      		.style("stroke-fill", function(d) { return colorFigure6(d.key); })
+      		.style("stroke-opacity", 0.15);
+        
+
+ freqFigure6.select("g .nucleotide .line")
   			.transition()
   			.ease("linear")
 			.delay(function(d, i) {
@@ -146,6 +173,12 @@ var freqFigure6 = svgFigure6.selectAll(".nucleotide")
       		      		
 var lineSvg6=freqFigure6.enter().append("g").attr("class", "nucleotide");
         
+        		lineSvg6.append("path")
+      				.attr("class", "area")
+      				.attr("id", function(d) { return "tag2"+d.key; }) // assign ID
+      				.attr("d",  function(d) { return areaF6(d.values); })
+      				.style("fill", function(d) { return colorFigure6(d.key); })
+      				.style("fill-opacity", 0.15);
 				//Create the line
     			lineSvg6.append("path")
              		.attr("class", "line")

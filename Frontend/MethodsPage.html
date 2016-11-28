@@ -70,7 +70,7 @@
 						<li role="presentation">
 						
 							<a href="DataPage.html">
-								Data
+								Datasets
 							</a>
 					
 						</li>
@@ -123,8 +123,20 @@
 		</div>
 	</div>
 	<div class="col-md-9" align="justify">
-		 <a href="/help/#frequencies">Click here</a> for help with the riboviz interface or watch the tutorial video below.<p>
-		 <p> <b>Ribosome profiling </b> is a new technique... write write write
+		 
+		 <p> Analyses of mRNA abundances have been used to gain insight into almost every area of modern biology.  But ultimately, it is protein synthesis that is central to almost every function of the cell. Even though mRNA expression have been used as a proxy for protein production and ultimately molecular function, the correlation between mRNA and protein levels has been shown to be quite weak, likely driven by post-transcriptional regulation. <b>Ribosome profiling (RiboSeq)</b> is a novel technique to study the process and output of translation, the next obvious step following analyses done at the transcription level.  At the core of this technique is the observation that a ribosome translating a fragment of mRNA protects around 30 nucleotides of this mRNA from nuclease activity.  High-throughput sequencing of these ribosome protected fragments (called ribosome footprints) offers a precise record of the number and location of the ribosomes at the time at which translation is stopped. Mapping the position of the ribosome protected fragments indicates the translated regions within the transcriptome.  Moreover, ribosomes spend different periods of time at different positions, leading to variation in the footprint density along the mRNA transcript. This provides an estimate of how much protein is being produced from each mRNA. Importantly, ribosome profiling is as precise and detailed as RNA sequencing. Even in a short time, since its introduction in 2009, ribosome profiling has been playing a key role in driving biological discovery. </p>
+		
+	<p>	However, the method is not without its limitations.  In mammalian cells, there can be over 10 million unique footprints. The quantification and processing of this set of footprints still remains a challenge and requires computational and domain specific knowledge. One might assume that the similarity of ribosome profiling and RNA-seq allows the use of well established bioinformatic tools with this new type of data. However, ribosome profiling data differs from RNA-seq data in how it is distributed across the genome.  The map and density of ribosomal footprints across the genome contain much more additional information that RNA-seq, which traditional bioinformatics pipelines are not designed to analyze. </p>
+
+
+<p> We developed a bioinformatic tool-kit, <b> RiboViz</b>, for analyzing and visualizing ribosome profiling data, an essential next step in order for this technology to reach maturation. In implementation,  <b>RiboViz</b> consists of a comprehensive and flexible backend analysis pipeline and a web application for visualization. </p>
+
+
+<p> Currently, the literature consists of a mix of studies, some which use cycloheximide and some which use flash freezing. In general, each experimental step can potentially cause spurious results ands distortions in the data output. <b> RiboViz</b> can surface potential biases in the data due to experimental abnormalities as well as provide the user the ability to compare and contrast different data sets obtained by different experimental conditions. </p>
+
+<p>  The backend pipeline for processing the raw reads is available GITHUB LINK HERE.
+In addition to the metagenomic analyses, a R/Shiny integration allows the user to select a gene of interest and compare ribosomal densities along its ORF with up to three other data sets.
+</p>
 			
 	</div>
 </div>
@@ -135,11 +147,15 @@
 <div class="row">
 	<div class="col-md-3">
 		<div class="io-container title">
-			Data cleanup
+			Data cleanup and backend processing
 		</div>
 	</div>
 	<div class="col-md-9" align="justify">
-		 <p> write write write<p>
+		 <p> A major challenge in the analysis of ribosome sequencing data is to be able to map ambiguous reads and remove potential experimental biases that may lead to spurious results using a rigorous quality control processing pipeline. The fact that ribosome footprints have such short sizes preclude any of the longer read or pair end approaches used with other type of sequencing datasets.Profiling datasets typically contain reads from either poly-adenlyated libraries or reads from libraries prepared with a pre-adynlyated linker. These linkers are trimmed using cutadapt and trailing poly-As are removed using custom python scripts based on an iterative procedure described in Ingolia, 2010. Processed reads are mapped to the yeast genome in two steps.  Reads are first mapped to all yeast rRNAs using bowtie with two mismatches allowed per read and all mapped reads will be discarded. All unmapped reads are then be mapped to the yeast genome using bowtie. Reads that map uniquely to a genomic position with at most one mismatch are used for all downstream analyses. All  mapped reads are stored in HDF5 data format using custom R scripts for rapid and easy access to position-specific reads mapping to any gene or sets of genes from an experiment.
+
+At the end of the backend pipeline, HDF5 files are exported containing .... These files can be downloaded... (TO FILL).
+
+<p>
 			
 	</div>
 </div>
@@ -156,7 +172,7 @@
 	<div class="col-md-9">
 		<hr>
 		<div class="center text-gray smallnote">
-			&copy; 2016 Oana Carja, Premal Shah, .....
+			&copy; 2016 Oana Carja, Premal Shah
 		</div>
 	</div>
 </div>
