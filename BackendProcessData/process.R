@@ -34,7 +34,7 @@ a<-read.table(paste("/Users/carja/Dropbox/RiboViz/ProjectFolder2/VizData/F3_posf
 b<-read.table(paste("/Users/carja/Dropbox/RiboViz/ProjectFolder2/VizData/F3_posfreq_rpf_chx_bg.tsv", sep=""), header=TRUE, sep="\t", row.names=NULL, stringsAsFactors=FALSE)
 c<-read.table(paste("/Users/carja/Dropbox/RiboViz/ProjectFolder2/VizData/F3_posfreq_rpf_ff_bg.tsv", sep=""), header=TRUE, sep="\t", row.names=NULL, stringsAsFactors=FALSE)
 
-for (i in 103:nrow(f2)){
+for (i in 1:nrow(f2)){
 print(i) 
 newdf=data.frame("Year"=rep(f2[i,]$Year, 36), "Author"=rep(f2[i,]$Author, 36),"Dataset"=rep(f2[i,]$Dataset, 36),"key"=15:50, "value"=as.integer(f2[i,][1, 4:39]))
 year=newdf$Year[1]
