@@ -68,20 +68,28 @@ G=as.numeric(a1[3,5:(length(thevec1)+5-1)])
 T=as.numeric(a1[4,5:(length(thevec1)+5-1)])
 Length=thevec1
 CHX=rep(100, length(A))
-newdf=data.frame("Length"=Length, "Position"=Position, "Frame"=Frame, "A"=A, "C"=C, "G"=G, "T"=T, "CHX"=CHX)
+newdf=data.frame("Length"=Length, "Position"=Position, "Frame"=Frame, "A"=A, "C"=C, "G"=G, "T"=T, "ASD"=rep(0, length(Position)), "CSD"=rep(0, length(Position)), "GSD"=rep(0, length(Position)), "TSD"=rep(0, length(Position)), "CHX"=CHX)
 
 Ab=as.numeric(b[1,3:(length(thevec1)+5-1-2)])
+AbSD=as.numeric(b[2,3:(length(thevec1)+5-1-2)])
 Cb=as.numeric(b[3,3:(length(thevec1)+5-1-2)])
+CbSD=as.numeric(b[4,3:(length(thevec1)+5-1-2)])
 Gb=as.numeric(b[5,3:(length(thevec1)+5-1-2)])
+GbSD=as.numeric(b[6,3:(length(thevec1)+5-1-2)])
 Tb=as.numeric(b[7,3:(length(thevec1)+5-1-2)])
+TbSD=as.numeric(b[8,3:(length(thevec1)+5-1-2)])
 CHXb=rep(1, length(Ab))
-newdfb=data.frame("Length"=Length, "Position"=Position, "Frame"=Frame, "A"=Ab, "C"=Cb, "G"=Gb, "T"=Tb, "CHX"=CHXb)
+newdfb=data.frame("Length"=Length, "Position"=Position, "Frame"=Frame, "A"=Ab, "C"=Cb, "G"=Gb, "T"=Tb, "ASD"=AbSD, "CSD"=CbSD, "GSD"=GbSD, "TSD"=TbSD,"CHX"=CHXb)
 Ac=as.numeric(c[1,3:(length(thevec1)+5-1-2)])
+AcSD=as.numeric(c[2,3:(length(thevec1)+5-1-2)])
 Cc=as.numeric(c[3,3:(length(thevec1)+5-1-2)])
+CcSD=as.numeric(c[4,3:(length(thevec1)+5-1-2)])
 Gc=as.numeric(c[5,3:(length(thevec1)+5-1-2)])
+GcSD=as.numeric(c[6,3:(length(thevec1)+5-1-2)])
 Tc=as.numeric(c[7,3:(length(thevec1)+5-1-2)])
+TcSD=as.numeric(c[8,3:(length(thevec1)+5-1-2)])
 CHXc=rep(0, length(Ac))
-newdfc=data.frame("Length"=Length, "Position"=Position, "Frame"=Frame, "A"=Ac, "C"=Cc, "G"=Gc, "T"=Tc, "CHX"=CHXc)
+newdfc=data.frame("Length"=Length, "Position"=Position, "Frame"=Frame, "A"=Ac, "C"=Cc, "G"=Gc, "T"=Tc, "ASD"=AcSD, "CSD"=CcSD, "GSD"=GcSD, "TSD"=TcSD, "CHX"=CHXc)
 
 newdffinal=rbind(newdf, newdfb, newdfc)
 write.table(newdffinal,file=paste("/Users/carja/Dropbox/RiboViz/RibovizPush/Data/F3_Temp_Year_",a1$Year[1],"_Author_",a1$Author[1],"_Dataset_", a1$Dataset[1],"_data.tsv",sep=""), row.names=FALSE, append=FALSE, sep="\t")
@@ -123,8 +131,8 @@ dim(a1[,4:503]) #1 500
 if (nrow(a1)>0){
 newdf1=data.frame("Year"=rep(a1$Year, 500), "Author"=rep(a1$Author, 500),"Dataset"=rep(a1$Dataset, 500),"Position"=499:0, "X5prime"=rep(0, 500), "Reads"=as.numeric(a1[1, 4:503]), "SD"=rep(0, 500), "Type"=rep(100, 500), "DataType"=rep("RPF", 500))
 
-newdfb=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=499:0, "X5prime"=rep(0, 500), "Reads"=as.numeric(b[1, 2:501]), "SD"=rep(0, 500), "Type"=rep(1, 500), "DataType"=rep("RPF", 500))
-newdfc=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=499:0, "X5prime"=rep(0, 500), "Reads"=as.numeric(c[1, 2:501]), "SD"=rep(0, 500), "Type"=rep(0, 500), "DataType"=rep("RPF", 500))
+newdfb=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=499:0, "X5prime"=rep(0, 500), "Reads"=as.numeric(b[1, 2:501]), "SD"=as.numeric(b[2, 2:501]), "Type"=rep(1, 500), "DataType"=rep("RPF", 500))
+newdfc=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=499:0, "X5prime"=rep(0, 500), "Reads"=as.numeric(c[1, 2:501]), "SD"=as.numeric(c[2, 2:501]), "Type"=rep(0, 500), "DataType"=rep("RPF", 500))
 
 newdftotal1=rbind(newdf1, newdfb, newdfc)
 
@@ -139,11 +147,11 @@ a1=a[which(a$Year==year & a$Author==author & a$Dataset==dataset),]
 
 dim(a1[,4:503]) #1 500
 
-newdf1=data.frame("Year"=rep(a1$Year, 500), "Author"=rep(a1$Author, 500),"Dataset"=rep(a1$Dataset, 500),"Position"=499:0, "X5prime"=rep(1, 500), "Reads"=as.numeric(a1[1, 4:503]), "SD"=rep(0, 500), "Type"=rep(100, 500), "DataType"=rep("RPF", 500))
+newdf1=data.frame("Year"=rep(a1$Year, 500), "Author"=rep(a1$Author, 500),"Dataset"=rep(a1$Dataset, 500),"Position"=0:499, "X5prime"=rep(1, 500), "Reads"=as.numeric(a1[1, 4:503]), "SD"=rep(0, 500), "Type"=rep(100, 500), "DataType"=rep("RPF", 500))
 
 
-newdfb=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=499:0, "X5prime"=rep(1, 500), "Reads"=as.numeric(b[1, 2:501]), "SD"=rep(0, 500), "Type"=rep(1, 500), "DataType"=rep("RPF", 500))
-newdfc=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=499:0, "X5prime"=rep(1, 500), "Reads"=as.numeric(c[1, 2:501]), "SD"=rep(0, 500), "Type"=rep(0, 500), "DataType"=rep("RPF", 500))
+newdfb=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=0:499, "X5prime"=rep(1, 500), "Reads"=as.numeric(b[1, 2:501]), "SD"=as.numeric(b[2, 2:501]), "Type"=rep(1, 500), "DataType"=rep("RPF", 500))
+newdfc=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=0:499, "X5prime"=rep(1, 500), "Reads"=as.numeric(c[1, 2:501]), "SD"=as.numeric(c[2, 2:501]), "Type"=rep(0, 500), "DataType"=rep("RPF", 500))
 
 newdftotal2=rbind(newdf1, newdfb, newdfc)
 
@@ -177,7 +185,7 @@ dim(a1[,4:503]) #1 500
 if (nrow(a1)>0){
 newdf1=data.frame("Year"=rep(a1$Year, 500), "Author"=rep(a1$Author, 500),"Dataset"=rep(a1$Dataset, 500),"Position"=499:0, "X5prime"=rep(0, 500), "Reads"=as.numeric(a1[1, 4:503]), "SD"=rep(0, 500), "Type"=rep(100, 500), "DataType"=rep("mRNA", 500))
 
-newdfb=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=499:0, "X5prime"=rep(0, 500), "Reads"=as.numeric(b[1, 2:501]), "SD"=rep(0, 500), "Type"=rep(1, 500), "DataType"=rep("mRNA", 500))
+newdfb=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=499:0, "X5prime"=rep(0, 500), "Reads"=as.numeric(b[1, 2:501]), "SD"=as.numeric(b[2, 2:501]), "Type"=rep(1, 500), "DataType"=rep("mRNA", 500))
 newdfc=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=499:0, "X5prime"=rep(0, 500), "Reads"=rep(0, 500), "SD"=rep(0, 500), "Type"=rep(0, 500), "DataType"=rep("mRNA", 500))
 
 newdftotal1=rbind(newdf1, newdfb, newdfc)
@@ -193,11 +201,11 @@ a1=a[which(a$Year==year & a$Author==author & a$Dataset==dataset),]
 
 dim(a1[,4:503]) #1 500
 
-newdf1=data.frame("Year"=rep(a1$Year, 500), "Author"=rep(a1$Author, 500),"Dataset"=rep(a1$Dataset, 500),"Position"=499:0, "X5prime"=rep(1, 500), "Reads"=as.numeric(a1[1, 4:503]), "SD"=rep(0, 500), "Type"=rep(100, 500), "DataType"=rep("mRNA", 500))
+newdf1=data.frame("Year"=rep(a1$Year, 500), "Author"=rep(a1$Author, 500),"Dataset"=rep(a1$Dataset, 500),"Position"=0:499, "X5prime"=rep(1, 500), "Reads"=as.numeric(a1[1, 4:503]), "SD"=rep(0, 500), "Type"=rep(100, 500), "DataType"=rep("mRNA", 500))
 
 
-newdfb=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=499:0, "X5prime"=rep(1, 500), "Reads"=as.numeric(b[1, 2:501]), "SD"=rep(0, 500), "Type"=rep(1, 500), "DataType"=rep("mRNA", 500))
-newdfc=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=499:0, "X5prime"=rep(1, 500), "Reads"=rep(0, 500), "SD"=rep(0, 500), "Type"=rep(0, 500), "DataType"=rep("mRNA", 500))
+newdfb=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=0:499, "X5prime"=rep(1, 500), "Reads"=as.numeric(b[1, 2:501]), "SD"=as.numeric(b[2, 2:501]), "Type"=rep(1, 500), "DataType"=rep("mRNA", 500))
+newdfc=data.frame("Year"=rep("All", 500), "Author"=rep("All", 500),"Dataset"=rep("All", 500),"Position"=0:499, "X5prime"=rep(1, 500), "Reads"=rep(0, 500), "SD"=rep(0, 500), "Type"=rep(0, 500), "DataType"=rep("mRNA", 500))
 
 newdftotal2=rbind(newdf1, newdfb, newdfc)
 
@@ -268,9 +276,9 @@ dataset=as.character(newdf$Dataset[1])
 a1=a[which(a$Year==year & a$Author==author & a$Dataset==dataset),]
 dim(a1[,4:64]) #1 61
 if (nrow(a1)>0){
-
+b<-read.table(paste("/Users/carja/Dropbox/RiboViz/ProjectFolder2/VizData/F8_features.tsv", sep=""), header=TRUE, sep="\t", row.names=NULL, stringsAsFactors=FALSE)
 b$RPF=as.numeric(a1[4:length(a1)])
-
+b=b[-which(b$RPF==0),]
 write.table(b,file=paste("/Users/carja/Dropbox/RiboViz/RibovizPush/Data/F8_Year_",a1$Year[1],"_Author_",a1$Author[1],"_Dataset_", a1$Dataset[1],"_data.tsv",sep=""), row.names=FALSE, append=FALSE, sep="\t")
 
 }
@@ -348,3 +356,7 @@ f$mRNA[i]=1}
 }
 f[342,4]=1
 write.table(f,file=paste("/Users/carja/Dropbox/RiboViz/RibovizPush/Data/AllData.tsv",sep=""), row.names=FALSE, append=FALSE, sep="\t")
+
+
+
+a<-read.table(paste("/Users/carja/Dropbox/RiboViz/RibovizPush/Data/F3_Temp_Year_2014_Author_Pop_Dataset_WT_rpf_data.tsv",sep=""), header=TRUE, sep="\t", row.names=NULL, stringsAsFactors=FALSE)
