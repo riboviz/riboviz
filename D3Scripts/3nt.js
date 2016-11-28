@@ -77,6 +77,19 @@
   				svgFigure1.append("g")
       				.attr("class", "y axis")
       				.call(yAxisFigure1);
+      				
+      				
+      		// now add titles to the axes
+        svgFigure1.append("text")
+            .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+            .attr("transform", "translate("+ (padding/2) +","+(height/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
+            .text("Value");
+
+       svgFigure1.append("text")
+            .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+            .attr("transform", "translate("+ (width/2) +","+(height-(padding/3))+")")  // centre below axis
+            .text("Date");
+
       				  				
     				
 function updateFigure1(data, value1, value2, value3, value4) {
@@ -284,4 +297,5 @@ function change1() {
 
 });
 
-
+ 
+        

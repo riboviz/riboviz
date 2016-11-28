@@ -17,7 +17,8 @@ var marginFigure8C = {top: 20, right: 60, bottom: 20, left:50},
     	widthFigure8C = 400 - marginFigure8C.left - marginFigure8C.right,
     	heightFigure8C = 400 - marginFigure8C.top - marginFigure8C.bottom;
     
-var xFigure8 = d3.scale.linear()
+var xFigure8 = d3.scale.log()
+	.base(10)
     .range([paddingFigure8, widthFigure8]);
 
 var yFigure8 = d3.scale.linear()
@@ -97,10 +98,16 @@ svgFigure8.append("g")
         			//.text("FEatg")
         			.style("font-size","13px");
         			
-        		// 	svgFigure8.append("line")
-// 					.attr("class", "r-line")
-//  					.attr("stroke", "black")
-//  					.style("stroke-width",0.9);
+// now add titles to the axes
+        		svgFigure8.append("text")
+            		.attr("text-anchor", "middle")  
+            		.attr("transform", "translate("+(0-paddingFigure8*8.5)+","+(heightFigure8/2)+")rotate(-90)")  
+            		.text("Selected feature");
+
+       			svgFigure8.append("text")
+            		.attr("text-anchor", "middle")  
+            		.attr("transform", "translate("+ (widthFigure8/2) +","+(heightFigure8+paddingFigure8*6.5)+")")  
+            		.text("Log 10 Read Counts");
 
 
 d3.selectAll(".form-control")
@@ -137,7 +144,7 @@ function analyze(error, data, data1) {
     d.polyA = +d.polyA;
   });
 
-console.log(data);	
+	
 
 xFigure8.domain(d3.extent(data, function(d) { return d.RPF; }));
 yFigure8.domain(d3.extent(data, function(d) { return d.Length; }));

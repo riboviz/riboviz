@@ -71,7 +71,7 @@
 						<li role="presentation">
 						
 							<a href="DataPage.html">
-								Data
+								Datasets
 							</a>
 					
 						</li>
@@ -208,8 +208,10 @@
   <div class="row">
   <div class="col-md-4">
       <h4>3 nucleotide periodicity</h4>
-	<p> Analysis of all mapped reads to visualize the expected three-nucleotide periodicity along the ORFs, as well as ribosome accumulation at the start and stop
-codons. Maybe more details here... </p>
+	<p> After inferring the codon at the A site of
+each footprint, mapped reads are plotted to visualize the expected three-nucleotide periodicity along the
+ORFs, as well as ribosome accumulation at the start and stop
+codons. </p>
 <button id="download1" type=button class="btn btn-default">Download data</button>
     </div>
     <div class="col-md-8" >
@@ -231,7 +233,7 @@ codons. Maybe more details here... </p>
 <div class="col-md-4">
     <div class="spacer"></div>
       <h4>Read count histogram</h4>
-      <p> Explanation of the figure here and how this is a distribution of read counts. here  blah blah blah blah</p>
+      <p> Distribution of lengths of reads mapped to coding sequences.</p>
       <button id="download2" type=button class="btn btn-default">Download data</button>
 
           <div class="bigspacer"></div>
@@ -242,12 +244,21 @@ codons. Maybe more details here... </p>
 	
  
  
+<div class="bigspacer"></div> 
+
+    
+
 <div class="bigspacer"></div>
 <div class="container">
   <div class="row">
     <div class="col-md-4">
-      <h4> Codon specific distribution of reads.</h4>
-			 <p> explanation of the bias possible and the figure here explanation of the bias possible and the figure hereexplanation of the bias possible and the figure </p>
+      <h4> Codon specific distribution of reads</h4>
+			 <p> To examine the global landscape of 80S ribosomes, we average
+the position-specific RPF densities of individual genes into
+a composite metagene, in which each gene was first normalized
+for its overall density of RPFs and then
+weighted equally in the average. The size of the initiation ramps was shown to vary between studies and has been attributed to use of CHX pre-treatment. Here we compare the data with an average of previous studies, using either CHX or Flash Freeze pre-treatment. Standard deviation represented by area shading around the lines.
+			 </p>
 			 
 
 			Click for either 3prime or 5 prime below :
@@ -263,13 +274,17 @@ codons. Maybe more details here... </p>
   </div>
 </div>
 
+<div class="bigspacer"></div> 
 
+    
+
+<div class="bigspacer"></div>
 <div class="container" id="hideformRNA">
 <div class="container">
   <div class="row">
     <div class="col-md-4">
-      <h4> Excess codon specific RPF counts.</h4>
-			 <p> explanation of the bias possible and the figure here explanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure here </p>
+      <h4>Excess codon specific RPF counts</h4>
+			 <p>Comparison of codon-specific RPFs under different pre-treatment. Standard deviation represented by area shading around the lines. </p>
 			 <button id="download4" type=button class="btn btn-default">Download data</button>
 
 	</div>
@@ -278,14 +293,18 @@ codons. Maybe more details here... </p>
 </div>
 
 
+<div class="bigspacer"></div> 
 
+    
+
+<div class="bigspacer"></div>
 <div class="container">
   <div class="row">
     <div class="col-md-4">
           <div class="bigspacer"></div>
       <div class="bigspacer"></div>
-      <h4> Nucleotide bias along the ribosome.</h4>
-			 <p> explanation of the bias possible and the figure here explanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure here </p>
+      <h4> Nucleotide bias along the ribosome</h4>
+			 <p> Premal to fill explanation here. </p>
 	<button id="download5" type=button class="btn btn-default">Download data</button>
 		 
  <div class="spacer"></div>   
@@ -337,15 +356,19 @@ codons. Maybe more details here... </p>
 
 </div> <!-- end hide mRNA  -->
 
- 
+<div class="bigspacer"></div> 
+
+    
+
+<div class="bigspacer"></div> 
 <div class="bigspacer"></div>
 <div class="container">
   <div class="row">
     
     <div class="col-md-4">
-    <h4> Correlations reads and features.</h4>	
+    <h4> Correlations reads and features</h4>	
 
- <p> explanation of the bias possible and the figure here explanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure hereexplanation of the bias possible and the figure here </p>
+ <p> Correlations read counts and features. (Premal add here to explain features) </p>
 <button id="download6" type=button class="btn btn-default">Download data</button>
 
 <form>
@@ -373,43 +396,21 @@ codons. Maybe more details here... </p>
 </div>
 
 
-<!-- 
-
-<div class="container">
-  <div class="row">
-  
-    <div class="col-md-9">
-    <h4>Correlations abundances and reads</h4>
-		<form>
-		<input class="Thecorrs" type="radio" name="site" id="defaultInput" value="A" checked/><label for="defaultInput">A</label> 
-		<input class="Thecorrs" type="radio" name="site" id="thisPostInput" value="P"/><label for="thisPostInput">P</label>
-		<input class="Thecorrs" type="radio" name="site" id="thisPostInput" value="E" ><label for="thisPostInput">E</label> 
-		</form>
-		<form>
-		<input class="Thecorrs" type="radio" name="abundance" id="defaultInput1" value="GCN" checked/><label for="defaultInput1">GCN</label> 
-		<input class="Thecorrs" type="radio" name="abundance" id="thisPostInput1" value="tAI"/>
-		<label for="thisPostInput1">tAI</label>
-		<input class="Thecorrs" type="radio" name="abundance" id="thisPostInput1" value="RNAseq"/>
-		<label for="thisPostInput1">RNAseq</label>
-		<input class="Thecorrs" type="radio" name="abundance" id="thisPostInput1" value="Microarray"/>
-		<label for="thisPostInput1">Microarray</label>
-		</form>
+`<div class="container">		
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			Download this dataset
+		</div>
 	</div>
-
-	<div class="row">
-    	<div class="col-md-4" class="CorrelationsAbundancesReads" id="CorrelationsAbundancesReads"></div>
-		  
-	
-<div class="col-md-4" class="HistogramsCorrsnonCHX" id="HistogramsCorrsnonCHX"></div>
-		<div class="col-md-4" class="HistogramsCorrsCHX" id="HistogramsCorrsCHX"></div>
-
-	</div>	
-
+	<div class="col-md-9" align="justify">
+		 <p> This will download the dataset selected in the INSERT FORMAT HERE.</p>
+		 <button id="download1" type=button class="btn btn-default">Download dataset</button>
+		
+			
+	</div>
 </div>
 </div>
-
-
- -->
 
 
 <div class="row">
@@ -437,14 +438,6 @@ codons. Maybe more details here... </p>
 <script src="/Frontend/js/ExcessCodonSpecificRPF.js"></script>
 <script src="/Frontend/js/NucleotideBiasAlongRP.js"></script>
 <script src="/Frontend/js/CorrelationsReadsFeatures.js"></script>
-<!-- 
-
-
-<script src="../D3Scripts/NucleotideBiasAlongRP.js"></script>
-<script src="../D3Scripts/CorrelationsReadsFeatures.js"></script>
-<script src="../D3Scripts/CorrelationsAbundancesReads.js"></script> 
-
- -->
 
 
 	</body>
