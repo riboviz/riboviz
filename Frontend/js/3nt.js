@@ -312,6 +312,14 @@ d3.select("#download1")
 		.on("click", function (){
 			window.open(thefile );
 		});
+
+//for the downloadALL button at the bottom of the page -- code Here
+var thefileDatasetALL=string.concat("Year_", year1, "_Author_", author1,"_Dastaset_",thedataset1,"_AllData.?");		
+d3.select("#downloadALL")
+		.on("click", function (){
+			window.open(thefileDatasetALL);
+		});
+		
 		
 		
 

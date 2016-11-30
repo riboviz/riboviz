@@ -92,7 +92,7 @@ var marginFigure3 = {top: 0, right: 80, bottom: 70, left: 100},
 
 	var string="../../Data/";
 
-	var thefile=string.concat("F3_Temp_Year_2014_Author_Pop_Dataset_WT_rpf_data.tsv");
+	var thefile=string.concat("F3_Temp_Year_2016_Author_Weinberg_Dataset_RPF_data.tsv");
 	
 	d3.tsv(thefile, function(error, data) {
   		if (error) throw error;

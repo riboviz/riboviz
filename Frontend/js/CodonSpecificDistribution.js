@@ -130,8 +130,8 @@ var nucleotide = d3.nest()
 
   		yFigure5.domain([
   			0,
-    		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Reads; }); })+
-    		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Reads; }); })/5
+    		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Reads+v.SD; }); })+
+    		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Reads+v.SD; }); })/5
   		]);
   		
        		 		
