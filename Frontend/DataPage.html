@@ -242,13 +242,9 @@ codons. </p>
  </div>
 </div>
 	
- 
- 
-<div class="bigspacer"></div> 
-
-    
 
 <div class="bigspacer"></div>
+<div class="container" id="hideformRNA">
 <div class="container">
   <div class="row">
     <div class="col-md-4">
@@ -257,16 +253,17 @@ codons. </p>
 the position-specific RPF densities of individual genes into
 a composite metagene, in which each gene was first normalized
 for its overall density of RPFs and then
-weighted equally in the average. The size of the initiation ramps was shown to vary between studies and has been attributed to use of CHX pre-treatment. Here we compare the data with an average of previous studies, using either CHX or Flash Freeze pre-treatment. Standard deviation represented by area shading around the lines.
-			 </p>
+weighted equally in the average. The size of the initiation ramps was shown to vary between studies and has been attributed to use of CHX pre-treatment. Here we compare the data with an average of previous studies, using either CHX or Flash Freeze pre-treatment. Standard deviation represented by area shading around the lines.</p>
+			 
 			 
 
-			Click for either 3prime or 5 prime below :
+			 <p> Click for either 3prime or 5 prime below :
 <form>
 <input class="fig4radio" type="radio" name="inputsrc51" id="defaultInput51" value="3" checked/><label for="defaultInput51">3' end </label> 
 <input class="fig4radio" type="radio" name="inputsrc51" id="thisPostInput51" value="5"/>
 <label for="thisPostInput51">5' end</label>
 </form>
+</p>
  <button id="download3" type=button class="btn btn-default">Download data</button>
 </div>
 
@@ -274,12 +271,13 @@ weighted equally in the average. The size of the initiation ramps was shown to v
   </div>
 </div>
 
+ 
 <div class="bigspacer"></div> 
 
     
 
-<div class="bigspacer"></div>
-<div class="container" id="hideformRNA">
+
+<div class="bigspacer"></div> 
 <div class="container">
   <div class="row">
     <div class="col-md-4">
@@ -354,11 +352,7 @@ weighted equally in the average. The size of the initiation ramps was shown to v
 </div>
 </div>
 
-</div> <!-- end hide mRNA  -->
-
-<div class="bigspacer"></div> 
-
-    
+   
 
 <div class="bigspacer"></div> 
 <div class="bigspacer"></div>
@@ -396,7 +390,51 @@ weighted equally in the average. The size of the initiation ramps was shown to v
 </div>
 
 
-<!-- 
+<div class="bigspacer"></div>
+<div class="container">
+  <div class="row">
+    
+    <div class="col-md-4">
+    <h4> Correlations abundances and reads</h4>	
+    <p>(Premal add here to explain features) </p>
+    <div class="spacer"></div>
+	<form>
+		<input class="Thecorrs" type="radio" name="site" id="defaultInput" value="A" checked/><label for="defaultInput">A</label> 
+		<input class="Thecorrs" type="radio" name="site" id="thisPostInput" value="P"/><label for="thisPostInput">P</label>
+		<input class="Thecorrs" type="radio" name="site" id="thisPostInput" value="E" ><label for="thisPostInput">E</label> 
+		</form>
+		<form>
+		<input class="Thecorrs" type="radio" name="abundance" id="defaultInput1" value="GCN" checked/><label for="defaultInput1">tRNA</label> 
+		<input class="Thecorrs" type="radio" name="abundance" id="thisPostInput1" value="tAI"/>
+		<label for="thisPostInput1">tAI</label>
+		<div class="spacer"></div>
+		<input class="Thecorrs" type="radio" name="abundance" id="thisPostInput1" value="RNAseq"/>
+		<label for="thisPostInput1">log(RNAseq)</label>
+		<input class="Thecorrs" type="radio" name="abundance" id="thisPostInput1" value="Microarray"/>
+		<label for="thisPostInput1">log(Microarray)</label>
+		</form>
+</div>
+<div class="row">
+    	<div class="col-md-4">
+			<p class="CorrelationsAbundancesReads" id="CorrelationsAbundancesReads"></p>
+			<div class="col-md-2">
+			<p style="padding:0px 0px 0px 340px;" class="HistogramsCorrsnonCHX" id="HistogramsCorrsnonCHX"></p>
+			</div>
+			
+			<div class="col-md-2">
+			<p class="HistogramsCorrsCHX" id="HistogramsCorrsCHX"></p>
+			</div>
+		</div>
+</div>	
+</div>
+</div>
+
+
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+
+</div> <!-- end hide mRNA  -->
+ 
 <div class="container">		
 <div class="row">
 	<div class="col-md-3">
@@ -412,8 +450,27 @@ weighted equally in the average. The size of the initiation ramps was shown to v
 	</div>
 </div>
 </div>
- -->
 
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+
+`<div class="container">		
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			Gene based analyses
+		</div>
+	</div>
+	<div class="col-md-9" align="justify">
+		 <p>Gene by gene analyses are available <a href="/Frontend/GeneBased.html">here</a> or through the Gene of interest tab.</p>
+		
+			
+	</div>
+</div>
+</div>
+
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
 
 <div class="row">
 	<div class="col-md-3"></div>
@@ -435,17 +492,18 @@ weighted equally in the average. The size of the initiation ramps was shown to v
 
 
 
+
 <script src="/Frontend/js/3nt.js"></script> 
 <script src="/Frontend/js/ReadCountHistogram.js"></script>
-<script src="/Frontend/js/CodonSpecificDistribution.js"></script>
-<script src="/Frontend/js/ExcessCodonSpecificRPF.js"></script>
+ <script src="/Frontend/js/CodonSpecificDistribution.js"></script> 
 <script src="/Frontend/js/NucleotideBiasAlongRP.js"></script>
-<script src="/Frontend/js/CorrelationsReadsFeatures.js"></script>
-<!-- 
 
-<script src="/Frontend/js/NucleotideBiasAlongRP.js"></script>
+<script src="/Frontend/js/ExcessCodonSpecificRPF.js"></script>
+
+
+
 <script src="/Frontend/js/CorrelationsReadsFeatures.js"></script>
- -->
+<script src="/Frontend/js/CorrelationsAbundancesReads.js"></script>
 
 
 

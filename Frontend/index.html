@@ -307,19 +307,53 @@ weighted equally in the average. The size of the initiation ramps was shown to v
 </form>
 
 </div>
-	
-	
-	<div class="row">
+<div class="row">
     	<div class="col-md-4">
 			<p class="CorrelationsReadsandFeatures" id="CorrelationsReadsandFeatures"></p>
 		</div>
-
-	</div>	
-
-
-  </div>
+</div>	
+</div>
 </div>
 
+
+<div class="bigspacer"></div>
+<div class="container">
+  <div class="row">
+    
+    <div class="col-md-4">
+    <h4> Correlations abundances and reads</h4>	
+    <p>(Premal add here to explain features) </p>
+    <div class="spacer"></div>
+	<form>
+		<input class="Thecorrs" type="radio" name="site" id="defaultInput" value="A" checked/><label for="defaultInput">A</label> 
+		<input class="Thecorrs" type="radio" name="site" id="thisPostInput" value="P"/><label for="thisPostInput">P</label>
+		<input class="Thecorrs" type="radio" name="site" id="thisPostInput" value="E" ><label for="thisPostInput">E</label> 
+		</form>
+		<form>
+		<input class="Thecorrs" type="radio" name="abundance" id="defaultInput1" value="GCN" checked/><label for="defaultInput1">tRNA</label> 
+		<input class="Thecorrs" type="radio" name="abundance" id="thisPostInput1" value="tAI"/>
+		<label for="thisPostInput1">tAI</label>
+		<div class="spacer"></div>
+		<input class="Thecorrs" type="radio" name="abundance" id="thisPostInput1" value="RNAseq"/>
+		<label for="thisPostInput1">log(RNAseq)</label>
+		<input class="Thecorrs" type="radio" name="abundance" id="thisPostInput1" value="Microarray"/>
+		<label for="thisPostInput1">log(Microarray)</label>
+		</form>
+</div>
+<div class="row">
+    	<div class="col-md-4">
+			<p class="CorrelationsAbundancesReads" id="CorrelationsAbundancesReads"></p>
+			<div class="col-md-2">
+			<p style="padding:0px 0px 0px 340px;" class="HistogramsCorrsnonCHX" id="HistogramsCorrsnonCHX"></p>
+			</div>
+			
+			<div class="col-md-2">
+			<p class="HistogramsCorrsCHX" id="HistogramsCorrsCHX"></p>
+			</div>
+		</div>
+</div>	
+</div>
+</div>
 
 
 <div class="bigspacer"></div>
@@ -400,11 +434,13 @@ In addition to the metagenomic analyses, a R/Shiny integration allows the user t
 <script src="/Frontend/js/ExcessCodonSpecificRPFIndex.js"></script>
 <script src="/Frontend/js/NucleotideBiasAlongRPIndex.js"></script>
 <script src="/Frontend/js/CorrelationsReadsFeaturesIndex.js"></script>
-<!-- 
+<script src="/Frontend/js/CorrelationsAbundancesReadsIndex.js"></script>
 
-<script src="/Frontend/js/CorrelationsReadsFeaturesIndex.js"></script>
-<script src="/Frontend/js/CorrelationsAbundancesReadsIndex.js"></script> 
- -->
+
+
+
+ 
+
 
 
 

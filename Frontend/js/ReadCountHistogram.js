@@ -139,7 +139,7 @@ freqFigure2.exit()
 
 			
 			
-//Upposition X axis
+
 						svgFigure2.select(".x.axis")
 							.transition()
 							.ease("linear")

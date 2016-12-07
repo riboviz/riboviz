@@ -23,14 +23,14 @@ var xFigure4 = d3.scale.linear()
     	.scale(yFigure4)
     	.orient("left").ticks(10);
     	
-    var area = d3.svg.area()
+    var area4 = d3.svg.area()
     .x(function(d) { return xFigure4(d.Position); })
-    .y0(function(d) { return yFigure4(d.Reads+d.SD); })
-    .y1(function(d) { return yFigure4(d.Reads-d.SD); });
+    .y0(function(d) { return yFigure4(d.Mean+d.SD); })
+    .y1(function(d) { return yFigure4(d.Mean-d.SD); });
 
 	var svglineFigure4 = d3.svg.line()
     	.x(function(d) { return xFigure4(d.Position); })
-    	.y(function(d) { return yFigure4(d.Reads); });
+    	.y(function(d) { return yFigure4(d.Mean); });
     	
     	
 
@@ -99,7 +99,7 @@ function change4() {
     		d.DataType = d.DataType;
   		});
     
-console.log(data);
+
 
 function updateFigure4(data, value2, value3) {
 
@@ -110,8 +110,8 @@ var datanew = datanewfirst.filter(function(d, key) {
     
     });
  
-var value1=d3.map(datanew, function(d){return d.DataType;}).keys();
-console.log(value1);
+// var value1=d3.map(datanew, function(d){return d.DataType;}).keys();
+
 
 var nucleotide = d3.nest()
         .key(function(d) {return d.BG;})
@@ -135,7 +135,7 @@ var nucleotide = d3.nest()
 var freqFigure4 = svgFigure4.selectAll(".nucleotide")
       		.data(nucleotide);
 	
-console.log(nucleotide);
+
  
  freqFigure4.select("g .nucleotide .area")
       		.transition()
@@ -146,7 +146,7 @@ console.log(nucleotide);
 			.duration(750)
       		.attr("class", "area")
       		.attr("id", function(d) { return "tag2"+d.key; }) // assign ID
-      		.attr("d", function(d) { return area(d.values); })
+      		.attr("d", function(d) { return area4(d.values); })
       		.style("stroke-fill", function(d) { return colorFigure4(d.key); })
       		.style("stroke-opacity", 0.5);
         
@@ -174,11 +174,9 @@ console.log(nucleotide);
       		.attr("y", 135)
       		.attr("class", "legend")
       		.text(function(d) {
-      		if(d.name=="Data" & value1=="RPF"){return "Data"};
-      		if(d.name=="FF" & value1=="RPF"){return "FF"};
-      		if(d.name=="CHX" & value1=="RPF"){return "CHX"};
-      		if(d.name==1 & value1=="mRNA"){return "BG"};
-      		if(d.name==100 & value1=="mRNA"){return "mRNA Data"};
+      		if(d.name=="Data" ){return "Data"};
+      		if(d.name=="FF" ){return "FF"};
+      		if(d.name=="CHX" ){return "CHX"};
       		 })
       		.style("stroke", function(d) { return colorFigure4(d.name); })
       		.style("fill", function(d) { return colorFigure4(d.name); })
@@ -193,14 +191,14 @@ console.log(nucleotide);
           	freqgroup.append("path")
       		.attr("class", "area")
       		.attr("id", function(d) { return "tag2"+d.key; }) // assign ID
-      		.attr("d",  function(d) { return area(d.values); })
+      		.attr("d",  function(d) { return area4(d.values); })
       		.style("fill", function(d) { return colorFigure4(d.key); })
       		.style("fill-opacity", 0.5);
          
   			freqgroup.append("path")
       		.attr("class", "line")
       		.attr("id", function(d) { return "tag"+d.key; }) // assign ID
-      		.attr("d", function(d) { console.log(d.values);return svglineFigure4(d.values); })
+      		.attr("d", function(d) { return svglineFigure4(d.values); })
       		.style("stroke", function(d) { return colorFigure4(d.key); });
   
    
@@ -214,12 +212,9 @@ console.log(nucleotide);
       		.attr("y", 135)
       		.attr("class", "legend")
       		.text(function(d) {
-      		if(d.name=="Data" & value1=="RPF"){return "Data"};
-      		if(d.name=="FF" & value1=="RPF"){return "FF"};
-      		if(d.name=="CHX" & value1=="RPF"){return "CHX"};
-      		if(d.name==1 & value1=="mRNA"){return "Other"};
-      		//if(d.name==1& value1=="RPF"){return "CHX"};
-      		if(d.name==100 & value1=="mRNA"){return "Data"};
+      		if(d.name=="Data" ){return "Data"};
+      		if(d.name=="FF" ){return "FF"};
+      		if(d.name=="CHX" ){return "CHX"};
       		 })
       		.style("stroke", function(d) { return colorFigure4(d.name); })
       		.style("fill", function(d) { return colorFigure4(d.name); })
