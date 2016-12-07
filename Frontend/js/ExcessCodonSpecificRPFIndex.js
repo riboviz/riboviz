@@ -1,73 +1,70 @@
             //Width and height
-			var marginFigure6 = {top: 20, right: 10, bottom: 50, left: 100},
-    			widthFigure6 = 700 - marginFigure6.left - marginFigure6.right,
-    			paddingFigure6=5,
-    			paddingFigure6l=50
-    			heightFigure6 = 300 - marginFigure6.top - marginFigure6.bottom;
+			var marginFigure5 = {top: 20, right: 10, bottom: 50, left: 100},
+    			widthFigure5 = 700 - marginFigure5.left - marginFigure5.right,
+    			paddingFigure5=5,
+    			paddingFigure5l=50
+    			heightFigure5 = 300 - marginFigure5.top - marginFigure5.bottom;
     			
     			
-			var colorFigure6 = d3.scale.category20()
+			var colorFigure5 = d3.scale.category20()
 					.domain(["Data", "CHX", "FF"])
   					.range(["rgb(239,138,98)", "#a6cee3", "#1f78b4"]);
     			
-    		var xFigure6 = d3.scale.ordinal()
-    					.rangeRoundBands([paddingFigure6, widthFigure6 - paddingFigure6 * 2], .1);
+    		var xFigure5 = d3.scale.ordinal()
+    					.rangeRoundBands([paddingFigure5, widthFigure5 - paddingFigure5 * 2], .1);
 
-			var yFigure6 = d3.scale.linear()
-    						.range([heightFigure6-paddingFigure6*2, paddingFigure6]);
+			var yFigure5 = d3.scale.linear()
+    						.range([heightFigure5-paddingFigure5*2, paddingFigure5]);
     			
 			
 			//Define X axis
-			var xAxisFigure6 = d3.svg.axis()
-    			.scale(xFigure6)
+			var xAxisFigure5 = d3.svg.axis()
+    			.scale(xFigure5)
     			.orient("bottom");
 			
 			//Define Y axis
-			var yAxisFigure6 = d3.svg.axis()
-    			.scale(yFigure6)
+			var yAxisFigure5 = d3.svg.axis()
+    			.scale(yFigure5)
     			.orient("left");
     		
 			
 			var areaF6 = d3.svg.area()
-    			.x(function(d) { return xFigure6(d.Codon); })
-    			.y0(function(d) { return yFigure6(d.excess_reads+d.SD); })
-    			.y1(function(d) { return yFigure6(d.excess_reads-d.SD); });
+    			.x(function(d) { return xFigure5(d.Codon); })
+    			.y0(function(d) { return yFigure5(d.Mean+d.SD); })
+    			.y1(function(d) { return yFigure5(d.Mean-d.SD); });
     
 			//Define line
-			var valuelineFigure6 = d3.svg.line()
-    			.x(function(d) { return xFigure6(d.Codon); })
-    			.y(function(d) { return yFigure6(d.excess_reads); });
+			var valuelineFigure5 = d3.svg.line()
+    			.x(function(d) { return xFigure5(d.Codon); })
+    			.y(function(d) { return yFigure5(d.Mean); });
     			
     		
 			
 			//Create SVG element
-			var svgFigure6 = d3.select("#ExcessCodonSpecificRPF")
+			var svgFigure5 = d3.select("#ExcessCodonSpecificRPF")
 						.append("svg")
-    					.attr("width", widthFigure6 + 2*marginFigure6.left + marginFigure6.right)
-    					.attr("height", heightFigure6 + marginFigure6.top + marginFigure6.bottom)
+    					.attr("width", widthFigure5 + 2*marginFigure5.left + marginFigure5.right)
+    					.attr("height", heightFigure5 + marginFigure5.top + marginFigure5.bottom)
   						.append("g")
-    					.attr("transform", "translate(" + marginFigure6.left + "," + marginFigure6.top + ")");
+    					.attr("transform", "translate(" + marginFigure5.left + "," + marginFigure5.top + ")");
 
 
 			//Load data
-			d3.tsv("../../Data/F6_Year_2016_Author_Weinberg_Dataset_RPF_data.tsv", function(error, data) {
+			d3.tsv("../../Data/F5_2016_Weinberg_RPF.tsv", function(error, data) {
   				if (error) throw error;
 
   				data.forEach(function(d) {
-  					d.Year = d.Year;
-  					d.Author = d.Author;
-  					d.Dataset = d.Dataset;
     				d.Codon = d.Codon;
-    				d.excess_reads = +d.excess_reads;
-    				d.CHX=d.CHX
+    				d.Mean = +d.Mean;
+    				d.BG=d.BG
     				d.SD=+d.SD
   				});
 				
   				//x-axis	
-  				svgFigure6.append("g")
+  				svgFigure5.append("g")
       				.attr("class", "x axis")
-      				.attr("transform", "translate(0," + (heightFigure6-3*paddingFigure6) + ")")
-      			.call(xAxisFigure6)
+      				.attr("transform", "translate(0," + (heightFigure5-3*paddingFigure5) + ")")
+      			.call(xAxisFigure5)
       			.selectAll("text")
     				.attr("y", 0)
     				.attr("x", 10)
@@ -76,52 +73,52 @@
     				.style("text-anchor", "start");
   
     			//x-axis line
-    			svgFigure6.selectAll(".x.axis")	
+    			svgFigure5.selectAll(".x.axis")	
   					.append("rect")
-  	   				.attr("width", widthFigure6)
+  	   				.attr("width", widthFigure5)
   	   				.attr("height",1)
   	   				.attr("fill","#000")
 				
 				//y-axis
-  				svgFigure6.append("g")
+  				svgFigure5.append("g")
       				.attr("class", "y axis")
-      				.attr("transform", "translate(" + 0 + "," + (0-paddingFigure6) + ")")
-      				.call(yAxisFigure6);
+      				.attr("transform", "translate(" + 0 + "," + (0-paddingFigure5) + ")")
+      				.call(yAxisFigure5);
       				
       			// now add titles to the axes
-        		svgFigure6.append("text")
+        		svgFigure5.append("text")
             		.attr("text-anchor", "middle")  
-            		.attr("transform", "translate("+(0-paddingFigure6*6.5)+","+(heightFigure6/2)+")rotate(-90)")  
+            		.attr("transform", "translate("+(0-paddingFigure5*6.5)+","+(heightFigure5/2)+")rotate(-90)")  
             		.text("Codon specific normalized reads");
 
-       			svgFigure6.append("text")
+       			svgFigure5.append("text")
             		.attr("text-anchor", "middle")  
-            		.attr("transform", "translate("+ (widthFigure6/2) +","+(heightFigure6+paddingFigure6*6.5)+")")  
+            		.attr("transform", "translate("+ (widthFigure5/2) +","+(heightFigure5+paddingFigure5*6.5)+")")  
             		.text("Codon");
       				
-function updateFigure6(data) {
+function updateFigure5(data) {
       				
 var datanew = data;
  
  
 
     			var nucleotide = d3.nest()
-        			.key(function(d) {return d.CHX;})
+        			.key(function(d) {return d.BG;})
         			.entries(datanew);
         
       
-				legendSpace6 =  widthFigure6/nucleotide.length;
-  				colorFigure6.domain(["Data", "CHX", "FF"]);
+				legendSpace6 =  widthFigure5/nucleotide.length;
+  				colorFigure5.domain(["Data", "CHX", "FF"]);
   
 
-  				xFigure6.domain(datanew.map(function(d) { return d.Codon; }));
-  				yFigure6.domain([d3.min(datanew, function(d) { return d.excess_reads-d.SD; }),d3.max(datanew, function(d) { return d.excess_reads+d.SD; })]);
+  				xFigure5.domain(datanew.map(function(d) { return d.Codon; }));
+  				yFigure5.domain([d3.min(datanew, function(d) { return d.Mean-d.SD; }),d3.max(datanew, function(d) { return d.Mean+d.SD; })]);
 
 
-var freqFigure6 = svgFigure6.selectAll(".nucleotide")
+var freqFigure5 = svgFigure5.selectAll(".nucleotide")
       		.data(nucleotide);
 
-freqFigure6.select("g .nucleotide .area")
+freqFigure5.select("g .nucleotide .area")
       		.transition()
   			.ease("linear")
 			.delay(function(d, i) {
@@ -131,11 +128,11 @@ freqFigure6.select("g .nucleotide .area")
       		.attr("class", "area")
       		.attr("id", function(d) { return "tag2"+d.key; }) // assign ID
       		.attr("d", function(d) { return areaF6(d.values); })
-      		.style("stroke-fill", function(d) { return colorFigure6(d.key); })
+      		.style("stroke-fill", function(d) { return colorFigure5(d.key); })
       		.style("stroke-opacity", 0.15);
         
 
- freqFigure6.select("g .nucleotide .line")
+ freqFigure5.select("g .nucleotide .line")
   			.transition()
   			.ease("linear")
 			.delay(function(d, i) {
@@ -144,11 +141,11 @@ freqFigure6.select("g .nucleotide .area")
 			.duration(750)
       		.attr("class", "line")
              		.attr("id", function(d) { return "tag"+d.key; }) // assign ID
-             		.attr("d", function(d) { return valuelineFigure6(d.values); })
-      		        .style("stroke", function(d) { return colorFigure6(d.key); })
+             		.attr("d", function(d) { return valuelineFigure5(d.values); })
+      		        .style("stroke", function(d) { return colorFigure5(d.key); })
       		        .filter(function(d) { return !isNaN(d.values)});;
       		
-   freqFigure6.select("g .nucleotide text")
+   freqFigure5.select("g .nucleotide text")
   			.transition()
   			.ease("linear")
 			.delay(function(d, i) {
@@ -157,34 +154,34 @@ freqFigure6.select("g .nucleotide .area")
 			.duration(500);
       		   		
       		      		
-var lineSvg6=freqFigure6.enter().append("g").attr("class", "nucleotide");
+var lineSvg6=freqFigure5.enter().append("g").attr("class", "nucleotide");
         
 				
 				lineSvg6.append("path")
       				.attr("class", "area")
       				.attr("id", function(d) { return "tag2"+d.key; }) // assign ID
       				.attr("d",  function(d) { return areaF6(d.values); })
-      				.style("fill", function(d) { return colorFigure6(d.key); })
+      				.style("fill", function(d) { return colorFigure5(d.key); })
       				.style("fill-opacity", 0.15);
 				
 				//Create the line
     			lineSvg6.append("path")
              		.attr("class", "line")
              		.attr("id", function(d) { return "tag"+d.key; }) // assign ID
-             		.attr("d", function(d) { return valuelineFigure6(d.values); })
-      		        .style("stroke", function(d) { return colorFigure6(d.key); });
+             		.attr("d", function(d) { return valuelineFigure5(d.values); })
+      		        .style("stroke", function(d) { return colorFigure5(d.key); });
 
  
 
       lineSvg6.append("text")
     			.datum(function(d) { return {name: d.key, value: d.values[d.values.length - 1]}; })
-				.attr("transform", function(d, i) { return "translate(" + ((widthFigure6-paddingFigure6l*11/10)) + "," + ((legendSpace6/7)+i*legendSpace6/7)+ ")"; })
-      			.attr("x", paddingFigure6l/5)
+				.attr("transform", function(d, i) { return "translate(" + ((widthFigure5-paddingFigure5l*11/10)) + "," + ((legendSpace6/7)+i*legendSpace6/7)+ ")"; })
+      			.attr("x", paddingFigure5l/5)
       			.attr("y", 30)
       			.attr("class", "legend")
       			.text(function(d) {  return d.name; })
-      			.style("stroke", function(d) { return colorFigure6(d.name); })
-      			.style("fill", function(d) { return colorFigure6(d.name); })
+      			.style("stroke", function(d) { return colorFigure5(d.name); })
+      			.style("fill", function(d) { return colorFigure5(d.name); })
       			.style("font-size","20px")
       			.on("click", function(name){
       				console.log(name.name);
@@ -224,7 +221,7 @@ lineSvg6.transition()
      		
       	// EXIT
   // Remove old elements as needed.	
-  freqFigure6.exit()
+  freqFigure5.exit()
   .transition()
     .ease("linear")
 			.delay(function(d, i) {
@@ -236,15 +233,15 @@ lineSvg6.transition()
       
 
        //Update X axis
-	svgFigure6.select(".x.axis")
+	svgFigure5.select(".x.axis")
 		.transition()
 					.ease("linear")
 			.delay(function(d, i) {
 					return i / datanew.length * 500;
 			})
 		.duration(550)
-		.attr("transform", "translate(0," + (heightFigure6-3*paddingFigure6) + ")")
-		.call(xAxisFigure6)
+		.attr("transform", "translate(0," + (heightFigure5-3*paddingFigure5) + ")")
+		.call(xAxisFigure5)
 		.selectAll("text")
     				.attr("y", 0)
     				.attr("x", 10)
@@ -254,7 +251,7 @@ lineSvg6.transition()
 		
 		
     							
-		svgFigure6.select(".xaxis_label")
+		svgFigure5.select(".xaxis_label")
 			.transition()
 			.ease("linear")
 			.delay(function(d, i) {
@@ -264,21 +261,21 @@ lineSvg6.transition()
 					
     							
 	//Update Y axis
-	svgFigure6.select(".y.axis")
+	svgFigure5.select(".y.axis")
 			.transition()
 						.ease("linear")
 			.delay(function(d, i) {
 					return i / datanew.length * 500;
 			})
 			.duration(550)
-			.call(yAxisFigure6);
+			.call(yAxisFigure5);
 	
 
       				        	
  
  };
  
-updateFigure6(data);
+updateFigure5(data);
 
 
 

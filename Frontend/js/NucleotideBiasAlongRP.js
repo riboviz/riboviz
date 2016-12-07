@@ -93,7 +93,7 @@ function change3() {
 	
 
 	var string="../Data/";
-	var thefile=string.concat("F3_Temp_Year_",year3,"_Author_",author3, "_Dataset_", thedataset3,"_data.tsv");
+	var thefile=string.concat("F3_",year3,"_",author3, "_", thedataset3,".tsv");
 	d3.tsv(thefile, function(error, data) {
   		if (error) throw error;
   		data.forEach(function(d) {

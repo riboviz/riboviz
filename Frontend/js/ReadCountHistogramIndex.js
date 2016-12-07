@@ -25,17 +25,13 @@
   				.append("g")
     			.attr("transform", "translate(" + marginFigure2.left + "," + marginFigure2.top + ")");
 
-			d3.tsv("../Data/F2_Year_2016_Author_Weinberg_Dastaset_RPF_All.tsv", function(error, data) {
+			d3.tsv("../Data/F2_2016_Weinberg_RPF.tsv", function(error, data) {
 
 				if (error) throw error;
     			data.forEach(function(d) {
-    			d.Year = +d.Year;
-  				d.Author = d.Author;
-  				d.Dataset = d.Dataset;
-        			d.key = d.key;
-        			d.value = +d.value;
+        			d.key = d.Length;
+        			d.value = +d.Counts;
     			});
-	
 
 	svgFigure2.append("g")
       				.attr("class", "x axis")

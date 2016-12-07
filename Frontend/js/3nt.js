@@ -90,19 +90,16 @@ function change1() {
 
     var string="../Data/";
 	
-	var thefile=string.concat("F1_Year_", year1, "_Author_", author1,"_Dastaset_",thedataset1,"_All.tsv");
+	var thefile=string.concat("F1_", year1, "_", author1,"_",thedataset1,".tsv");
 
 	       
 	d3.tsv(thefile, function(error, data) {
   		
   		if (error) throw error;
   		data.forEach(function(d) {
-  			d.Year = +d.Year;
-  			d.Author = d.Author;
-  			d.Dataset = d.Dataset;
-    		d.position = +d.position;
-    		d.count = +d.count;
-    		d.end=+d.end;
+    		d.position = +d.Position;
+    		d.count = +d.Counts;
+    		d.end=+d.End;
   		});
 			
  				
