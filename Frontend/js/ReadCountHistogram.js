@@ -61,20 +61,18 @@ function change2() {
 	var thedataset2=d3.select("#dataform").node().value;
 	var string="../Data/";
 	
-	var thefile=string.concat("F2_Year_", year2, "_Author_", author2,"_Dastaset_",thedataset2,"_All.tsv");
+	var thefile=string.concat("F2_", year2, "_", author2,"_",thedataset2,".tsv");
 
 	d3.tsv(thefile, function(error, data) {
 
 				if (error) throw error;
     			data.forEach(function(d) {
-    			d.Year = +d.Year;
-  				d.Author = d.Author;
-  				d.Dataset = d.Dataset;
-        			d.key = d.key;
-        			d.value = +d.value;
+        			d.key = d.Length;
+        			d.value = +d.Counts;
     			});
 	
-		
+						
+	
 	function updateFigure2(data) {
 
 

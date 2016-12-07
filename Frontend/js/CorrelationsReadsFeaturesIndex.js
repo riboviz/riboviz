@@ -6,96 +6,95 @@ var MyApp2 = {
 		};
 
 	
-var marginFigure8 = {top: 60, right: 20, bottom: 50, left: 100},
-		paddingFigure8=5,
-    	widthFigure8 = 700 - marginFigure8.left - marginFigure8.right,
-    	heightFigure8 = 400 - marginFigure8.top - marginFigure8.bottom;
+var marginFigure7 = {top: 60, right: 20, bottom: 50, left: 100},
+		paddingFigure7=5,
+    	widthFigure7 = 700 - marginFigure7.left - marginFigure7.right,
+    	heightFigure7 = 400 - marginFigure7.top - marginFigure7.bottom;
     	
-var marginFigure8C = {top: 20, right: 60, bottom: 20, left:50},
-		paddingFigure8C=5,
-		paddingxFigure8C=10,
-    	widthFigure8C = 400 - marginFigure8C.left - marginFigure8C.right,
-    	heightFigure8C = 400 - marginFigure8C.top - marginFigure8C.bottom;
+var marginFigure7C = {top: 20, right: 60, bottom: 20, left:50},
+		paddingFigure7C=5,
+		paddingxFigure7C=10,
+    	widthFigure7C = 400 - marginFigure7C.left - marginFigure7C.right,
+    	heightFigure7C = 400 - marginFigure7C.top - marginFigure7C.bottom;
     
-var xFigure8 = d3.scale.log()
-	.base(10)
-    .range([paddingFigure8, widthFigure8]);
+var xFigure7 = d3.scale.linear()
+     .range([paddingFigure7, widthFigure7]);
 
-var yFigure8 = d3.scale.linear()
-    .range([heightFigure8-paddingFigure8, 0]);
+var yFigure7 = d3.scale.linear()
+    .range([heightFigure7-paddingFigure7, 0]);
 
-var colorFigure8 = d3.scale.category20()
+var colorFigure7 = d3.scale.category20()
   			.range(["#9ecae1"]);
 
-var xAxisFigure8 = d3.svg.axis()
-    .scale(xFigure8)
+var xAxisFigure7 = d3.svg.axis()
+    .scale(xFigure7)
     .orient("bottom");
     //.ticks(7);
 
-var yAxisFigure8 = d3.svg.axis()
-    .scale(yFigure8)
+var yAxisFigure7 = d3.svg.axis()
+    .scale(yFigure7)
     .orient("left");//.ticks(7);
 
 
-var svgFigure8 = d3.select("#CorrelationsReadsandFeatures").append("svg")
-    .attr("width", widthFigure8 + marginFigure8.left + marginFigure8.right)
-    .attr("height", heightFigure8+2*marginFigure8.top + marginFigure8.bottom)
+var svgFigure7 = d3.select("#CorrelationsReadsandFeatures").append("svg")
+    .attr("width", widthFigure7 + marginFigure7.left + marginFigure7.right)
+    .attr("height", heightFigure7+2*marginFigure7.top + marginFigure7.bottom)
   .append("g")
-    .attr("transform", "translate(" + marginFigure8.left + "," + marginFigure8.top + ")");
+    .attr("transform", "translate(" + marginFigure7.left + "," + marginFigure7.top + ")");
  
 			
-// var xFigure8C = d3.scale.ordinal().rangeRoundBands([0, widthFigure8C], .05);
-// var yFigure8C = d3.scale.linear().range([heightFigure8C-paddingFigure8C,paddingFigure8C]);
+// var xFigure7C = d3.scale.ordinal().rangeRoundBands([0, widthFigure7C], .05);
+// var yFigure7C = d3.scale.linear().range([heightFigure7C-paddingFigure7C,paddingFigure7C]);
 
 
-				svgFigure8.append("g")
+				svgFigure7.append("g")
       				.attr("class", "x axis")
-      				.attr("transform", "translate(0," + heightFigure8 + ")")
-      				.call(xAxisFigure8);
+      				.attr("transform", "translate(0," + heightFigure7 + ")")
+      				.call(xAxisFigure7);
     				    				
-				svgFigure8.append("text")     
+				svgFigure7.append("text")     
 					.attr("class", "xaxis_label1")
-					.attr("transform", "translate(" + (widthFigure8 / 2) + " ," + (heightFigure8 + paddingFigure8*8) + ")")
+					.attr("transform", "translate(" + (widthFigure7 / 2) + " ," + (heightFigure7 + paddingFigure7*8) + ")")
 					.style("text-anchor", "middle")
 					//.text("Length")
 					.style("font-size","13px");
         				
 				//y-axis
-  				svgFigure8.append("g")
+  				svgFigure7.append("g")
       				.attr("class", "y axis")
-      				.call(yAxisFigure8);
+      				.call(yAxisFigure7);
 	
-      			svgFigure8.append("text")    
+      			svgFigure7.append("text")    
       				.attr("class", "yaxis_label")
-        			.attr("y", heightFigure8 /2 )
-        			.attr("x", -paddingFigure8*6)
+        			.attr("y", heightFigure7 /2 )
+        			.attr("x", -paddingFigure7*6)
         			.style("text-anchor", "middle")
         			.attr("transform", "rotate(0)")
         			//.text("FEatg")
         			.style("font-size","13px");
         			
-        		svgFigure8.append("text")
+        		svgFigure7.append("text")
 					.attr("class", "r-label")
-					.attr("y", -5*paddingFigure8 )
-        			.attr("x", paddingFigure8*15)
+					.attr("y", -5*paddingFigure7 )
+        			.attr("x", paddingFigure7*15)
         			.style("text-anchor", "middle")
         			.attr("transform", "rotate(0)")
         			.style("font-size","16px");
         			
         		// now add titles to the axes
-        		svgFigure8.append("text")
+        		svgFigure7.append("text")
             		.attr("text-anchor", "middle")  
-            		.attr("transform", "translate("+(0-paddingFigure8*8)+","+(heightFigure8/2)+")rotate(-90)")  
+            		.attr("transform", "translate("+(0-paddingFigure7*8)+","+(heightFigure7/2)+")rotate(-90)")  
             		.text("Selected feature");
 
-       			svgFigure8.append("text")
+       			svgFigure7.append("text")
             		.attr("text-anchor", "middle")  
-            		.attr("transform", "translate("+ (widthFigure8/2) +","+(heightFigure8+paddingFigure8*6.5)+")")  
+            		.attr("transform", "translate("+ (widthFigure7/2) +","+(heightFigure7+paddingFigure7*6.5)+")")  
             		.text("Log 10 Read Counts");
  
 	var string="../../Data/";
 
-	var thefile=string.concat("F8_Year_2016_Author_Weinberg_Dataset_RPF_data.tsv");
+	var thefile=string.concat("F7_2016_Weinberg_RPF.tsv");
 
 
 queue()
@@ -120,11 +119,11 @@ function analyze(error, data, data1) {
 
 	
 
- xFigure8.domain(d3.extent(data, function(d) { return d.RPF; }));
- yFigure8.domain(d3.extent(data, function(d) { return d.Length; }));
+ xFigure7.domain(d3.extent(data, function(d) { return d.RPF; }));
+ yFigure7.domain(d3.extent(data, function(d) { return d.Length; }));
 
 
-function updateFigure8(data, value1, value2) {
+function updateFigure7(data, value1, value2) {
 
 
 var  data = data.map( function (d) { 
@@ -143,34 +142,34 @@ var  data = data.map( function (d) {
     
    
     
-	xFigure8.domain(d3.extent(data, function(d) { return d.d1; })).nice();
-  	yFigure8.domain(d3.extent(data, function(d) { return d.d2; }));
+	xFigure7.domain(d3.extent(data, function(d) { return d.d1; })).nice();
+  	yFigure7.domain(d3.extent(data, function(d) { return d.d2; }));
    
    
   // DATA JOIN
   // Join new data with old elements, if any.
-  var textFigure8 = svgFigure8.selectAll("circle")
+  var textFigure7 = svgFigure7.selectAll("circle")
       .data(data);
 
   // UPDATE
   // Update old elements as needed.
-  textFigure8.attr("class", "update")
+  textFigure7.attr("class", "update")
   			.transition()
   			.ease("linear")
 			.delay(function(d, i) {
 					return i / data.length * 500;
 			})
       .duration(750)
-      .attr("cx", function(d) { return xFigure8(d.d1); })
-      .attr("cy", function(d) { return yFigure8(d.d2); })
+      .attr("cx", function(d) { return xFigure7(d.d1); })
+      .attr("cy", function(d) { return yFigure7(d.d2); })
       .filter(function(d) { return !isNaN(d.d1) && !isNaN(d.d2)});
 
   // ENTER
   // Create new elements as needed.
-  textFigure8.enter().append("circle")
+  textFigure7.enter().append("circle")
       .attr("class", "enter")
-      .attr("cx", function(d) { return xFigure8(d.d1); })
-      .attr("cy", function(d) { return yFigure8(d.d2); })
+      .attr("cx", function(d) { return xFigure7(d.d1); })
+      .attr("cy", function(d) { return yFigure7(d.d2); })
       .style("fill-opacity", 0.2)
       .style("fill","rgb(166,206,227)")
       .attr("r", 3)
@@ -182,13 +181,13 @@ var  data = data.map( function (d) {
 					return i / data.length * 500;
 			})
       .duration(750)
-      .attr("cx", function(d) { return xFigure8(d.d1); })
-      .attr("cy", function(d) { return yFigure8(d.d2); })
+      .attr("cx", function(d) { return xFigure7(d.d1); })
+      .attr("cy", function(d) { return yFigure7(d.d2); })
       .style("fill-opacity", 1);
       //.filter(function(d) { return !isNaN(d.d1) && !isNaN(d.d2)});
 
 
-textFigure8.exit().attr("class", "exit")
+textFigure7.exit().attr("class", "exit")
     .transition()
     			.ease("linear")
 			.delay(function(d, i) {
@@ -216,7 +215,7 @@ textFigure8.exit().attr("class", "exit")
 	var y2 =leastSquaresCoeff[0] *x2+ leastSquaresCoeff[1]; 
     MyApp2.thecorr=thecor;
       
-    svgFigure8.select(".r-label")			
+    svgFigure7.select(".r-label")			
 			.text("Correlation coefficient: r=" + thecor.toFixed(2))
 			.style("font-size","16px")
 			.transition()
@@ -227,26 +226,26 @@ textFigure8.exit().attr("class", "exit")
 			.duration(750);
 
       //Update X axis
-	svgFigure8.select(".x.axis")
+	svgFigure7.select(".x.axis")
 		.transition()
 					.ease("linear")
 			.delay(function(d, i) {
 					return i / data.length * 500;
 			})
 		.duration(250)
-		.call(xAxisFigure8);
+		.call(xAxisFigure7);
 					
 	//Update Y axis
-	svgFigure8.select(".y.axis")
+	svgFigure7.select(".y.axis")
 			.transition()
 						.ease("linear")
 			.delay(function(d, i) {
 					return i / data.length * 500;
 			})
 			.duration(250)
-			.call(yAxisFigure8);
+			.call(yAxisFigure7);
 						
-		svgFigure8.select(".xaxis_label1")
+		svgFigure7.select(".xaxis_label1")
 			.transition()
 			.ease("linear")
 			.delay(function(d, i) {
@@ -255,7 +254,7 @@ textFigure8.exit().attr("class", "exit")
 			.duration(250);
             // .text("d1");
 						
-		svgFigure8.select(".yaxis_label")
+		svgFigure7.select(".yaxis_label")
 			.transition()
 			.ease("linear")
 			.delay(function(d, i) {
@@ -330,14 +329,14 @@ function pearsonCorrelation(prefs, p1, p2) {
 		return [slope, intercept, rSquare];
 	};
 
-updateFigure8(data, "RPF", "Length"); 
+updateFigure7(data, "RPF", "Length"); 
 
 d3.selectAll(".Thecorrs2")
-      .on("change", changeit8);
+      .on("change", changeit7);
 
-function changeit8() {
+function changeit7() {
     var feature= d3.select('input[name="features"]:checked').node().value;
-    updateFigure8(data, "RPF", feature);	
+    updateFigure7(data, "RPF", feature);	
 };
 
 

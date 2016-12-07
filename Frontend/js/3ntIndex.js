@@ -45,18 +45,14 @@
     					.attr("transform", "translate(" + marginFigure1.left + "," + marginFigure1.top + ")");
 			
     
-	d3.tsv("../Data/F1_Year_2016_Author_Weinberg_Dastaset_RPF_All.tsv", function(error, data) {
+	d3.tsv("../Data/F1_2016_Weinberg_RPF.tsv", function(error, data) {
   		
   		if (error) throw error;
   		data.forEach(function(d) {
-  			d.Year = +d.Year;
-  			d.Author = d.Author;
-  			d.Dataset = d.Dataset;
-    		d.position = +d.position;
-    		d.count = +d.count;
-    		d.end=+d.end;
+    		d.position = +d.Position;
+    		d.count = +d.Counts;
+    		d.end=+d.End;
   		});
-					
 
   
 				//x-axis	
