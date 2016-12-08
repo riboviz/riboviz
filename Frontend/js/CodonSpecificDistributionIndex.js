@@ -110,15 +110,17 @@ var nucleotide = d3.nest()
  legendSpace =  widthFigure4/nucleotide.length;
  
  
- xFigure4.domain(d3.extent(datanew, function(d) { return d.Position; }));
-
-  		yFigure4.domain([
-  			0,
-    		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Mean+v.SD; }); })+
-    		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Mean+v.SD; }); })/5
-  		]);
+  xFigure4.domain(d3.extent(datanew, function(d) { return d.Position; }));
+// 
+//   		yFigure4.domain([
+//   			0,
+//     		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Mean+v.SD; }); })+
+//     		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Mean+v.SD; }); })/5
+//   		]);
   		
-       		 		
+ yFigure4.domain([0, 6]);
+
+   		 		
 var freqFigure4 = svgFigure4.selectAll(".nucleotide")
       		.data(nucleotide);
       		
