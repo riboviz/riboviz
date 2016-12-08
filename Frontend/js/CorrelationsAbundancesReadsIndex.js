@@ -512,7 +512,7 @@ var textFigure6 = svgFigure6C.selectAll("rect")
       .attr("x", function(d) { return xFigure6C(d.Values); })
       				.attr("width", xFigure6C.rangeBand())
       				.attr("y", function(d) { return yFigure6C(d.Counts); })
-      				.attr("height", function(d) { return heightFigure6C - yFigure6C(d.Counts)-paddingxFigure6C; }).style("fill", "#bcbddc")
+      				.attr("height", function(d) { return heightFigure6C - yFigure6C(d.Counts)-paddingxFigure6C; }).style("fill", "#bcbddc").style("opacity", .65)
       //.text(function(d) { return d; })
     .transition()
   			.ease("linear")
@@ -523,7 +523,7 @@ var textFigure6 = svgFigure6C.selectAll("rect")
       .attr("x", function(d) { return xFigure6C(d.Values); })
       				.attr("width", xFigure6C.rangeBand())
       				.attr("y", function(d) { return yFigure6C(d.Counts); })
-      				.attr("height", function(d) { return heightFigure6C - yFigure6C(d.Counts)-paddingxFigure6C; }).style("fill", "#bcbddc");
+      				.attr("height", function(d) { return heightFigure6C - yFigure6C(d.Counts)-paddingxFigure6C; }).style("fill", "#bcbddc").style("opacity", .65);
 
 
 textFigure6.exit().attr("class", "exit")
@@ -630,7 +630,7 @@ var textFigure6 = svgFigure6nC.selectAll("rect")
       .attr("x", function(d) { return xFigure6nC(d.Values); })
       				.attr("width", xFigure6nC.rangeBand())
       				.attr("y", function(d) { return yFigure6nC(d.Counts); })
-      				.attr("height", function(d) { return heightFigure6C - yFigure6nC(d.Counts)-paddingxFigure6C; }).style("fill", "#bcbddc")
+      				.attr("height", function(d) { return heightFigure6C - yFigure6nC(d.Counts)-paddingxFigure6C; }).style("fill", "#bcbddc").style("opacity", .65)  
       //.text(function(d) { return d; })
     .transition()
   			.ease("linear")
@@ -641,7 +641,7 @@ var textFigure6 = svgFigure6nC.selectAll("rect")
       .attr("x", function(d) { return xFigure6nC(d.Values); })
       				.attr("width", xFigure6nC.rangeBand())
       				.attr("y", function(d) { return yFigure6nC(d.Counts); })
-      				.attr("height", function(d) { return heightFigure6C - yFigure6nC(d.Counts)-paddingxFigure6C; }).style("fill", "#bcbddc");
+      				.attr("height", function(d) { return heightFigure6C - yFigure6nC(d.Counts)-paddingxFigure6C; }).style("fill", "#bcbddc").style("opacity", .65)  ;
 
 
 textFigure6.exit().attr("class", "exit")

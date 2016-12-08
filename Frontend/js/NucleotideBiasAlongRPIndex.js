@@ -15,12 +15,12 @@ var marginFigure3 = {top: 0, right: 80, bottom: 70, left: 100},
 
 	var colorFigure3 = d3.scale.category20()
 					.domain(["A", "T", "C", "G"])
-  					.range(["#a6cee3", "#1f78b4", "#b2df8a" , "#33a02c"]);
+  					.range(["#bcbddc", "#1f78b4", "#b2df8a" , "rgb(239,138,98)"]);
   					
   					
   	var colorFigure32 = d3.scale.category20()
-					.domain(["FF", "CHX", "Data"])
-  					.range(["#1f78b4", "#a6cee3", "rgb(239,138,98)"]);
+					.domain([ "Data", "FF", "CHX"])
+  					.range(["rgb(239,138,98)", "#a1d99b", "#9ecae1"]);
   					
   					
 	var bisectDateFigure3 = d3.bisector(function(d) { return d.Position; }).right;
@@ -431,8 +431,8 @@ var freqFigure3 = svgFigure3.selectAll(".nucleotide")
       		if(d.key==1){return "CHX"};
       		if(d.key==100){return "Data"};
       		 })
-      		.style("stroke", function(d) { return colorFigure32(["FF", "CHX", "Data"]); })
-      		.style("fill", function(d) { return colorFigure32(["FF", "CHX", "Data"]); })
+      		.style("stroke", function(d) { return colorFigure32(["Data", "FF", "CHX"]); })
+      		.style("fill", function(d) { return colorFigure32(["Data", "FF", "CHX"]); })
       		.style("font-size","20px")
 
                  

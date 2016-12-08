@@ -12,7 +12,7 @@ var xFigure4 = d3.scale.linear()
 
 	var colorFigure4 = d3.scale.category20()
 					.domain(["Data","FF", "CHX"])
-  					.range(["#a1d99b", "#9ecae1", "#bcbddc"] ); 
+  					.range(["rgb(239,138,98)", "#a1d99b", "#9ecae1"] ); 
 	
 	var xAxisFigure4 = d3.svg.axis()
     	.scale(xFigure4)
