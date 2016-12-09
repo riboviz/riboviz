@@ -5,13 +5,13 @@ library(reshape2)
 library(cowplot)
 
 shinyServer<-function(input,output){
-  path<-'./'
+  path<-'/data/riboseq/'
   df<-read.table(paste0(path,'Supp/data_unq.tsv')) #stores the year/author/database information
   names(df)=c('year','author','journal','NA','database','NA','NA','NA','dbtype','condition','geoID')
   year_vector<-as.vector(unique(df$year)) #vector containing all years
   author_vector<-as.vector(unique(df$author)) #vector containing all authors from all years
   
-  rpkmpath<-'./RPKM/'
+  rpkmpath<-'/home/txing/shinyProject/data/RPKM/'
   d1<-read.delim(paste0(rpkmpath,'F8_RPKMs_modified.tsv'))
   d2<-read.delim(paste0(rpkmpath,'bgdb.tsv'))
   
@@ -97,11 +97,21 @@ shinyServer<-function(input,output){
         state$dtype<-vector()
         
         #legends are above the plots on top left
-        output$l1<-renderText(state$temp1[1])
-        if (length(state$temp1)>1){
-          output$l2<-renderText(state$temp1[2])}
+        if (length(state$temp1)==1){
+          output$l1<-renderText(state$temp1[1])
+          output$l2<-renderText('')
+          output$l3<-renderText('')
+        }
+        if (length(state$temp1)==2){
+          output$l1<-renderText(state$temp1[1])
+          output$l2<-renderText(state$temp1[2])
+          output$l3<-renderText('')
+        }
         if (length(state$temp1)==3){
-          output$l3<-renderText(state$temp1[3])}
+          output$l1<-renderText(state$temp1[1])
+          output$l2<-renderText(state$temp1[2])
+          output$l3<-renderText(state$temp1[3])
+        }
         
         if(input$txt %in% names(d2)){ #check if gene name is correct
           output$errormsg<-renderText('')     
@@ -153,9 +163,13 @@ shinyServer<-function(input,output){
               labs(x=labx,y=laby) +
               theme_classic() +
               theme(
-                axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-                axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'),
-                legend.position = 'none' #remove legend
+                axis.line.x = element_line(colour = 'black', size=0.6, linetype='solid'),
+                axis.line.y = element_line(colour = 'black', size=0.6, linetype='solid'),
+                legend.position = 'none', #remove legend
+                axis.text = element_text(size=15), #axis label size
+                axis.ticks.length=unit(0.3,"cm"), #axis ticks size
+                axis.title=element_text(size=15), #axis title size
+                plot.title = element_text(size=18)
               )
           }
           
@@ -305,22 +319,24 @@ shinyServer<-function(input,output){
           
           myfun_rpkm<-function(databasetype){
             ii<-which(state$dtype==databasetype)
-            vline<-state$vline[ii]
-            lbl<-state$temp1[ii]
+            vline<-state$vline[ii] #vertical line
+            #lbl<-state$temp1[ii] #label
             
             if(databasetype=='mRNA'){dat<-dat_mrna}
             else if(databasetype=='RPF'){dat<-dat_rpf}
             
             ggplot(dat, aes_string(x=input$txt)) +
               geom_histogram(bins = input$bins, position='dodge',alpha=0.5,color=rgb(189,189,189,maxColorValue=255),fill=rgb(189,189,189,maxColorValue=255)) +
-              #theme(legend.position='top') +
               ggtitle(databasetype) +
-              #labs(x='Read length',y='Read count') +
               theme_classic() +
               theme(
                 axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-                axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) +
-              geom_vline(xintercept = vline,color=color3[1:length(vline)],size=1) 
+                axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'),
+                axis.text = element_text(size=15), #axis label size
+                axis.ticks.length=unit(0.3,"cm"), #axis ticks size
+                axis.title=element_text(size=15), #axis title size
+                plot.title = element_text(size=18)) +
+              geom_vline(xintercept = vline,color=color3[ii],size=1) 
             
           }
           #---------------------------------- plot11
@@ -328,112 +344,125 @@ shinyServer<-function(input,output){
           ranges <- reactiveValues(x = NULL)
           ptype <-reactiveValues(x=0) #this is used so that the zoomed plot(plot22) doesn' show up until plot11 of corresponding type shows first
           
-          output$plot11<-renderPlot({ #isolate in the renderPlot() so that it will only update when the input$clickplot button is fired
-            input$clickplot
-            isolate({
-              if(input$select=='rbl'){
-                myfun2(15:50,state$attrdat,'readLength','yeast_reads_based_on_location.csv')
-                x<-15:50
-                y<-data.frame(matrix(as.integer(state$attrdat),ncol=length(state$temp)))
-                maxy<-max(y)
-                names(y)<-state$temp1
-                dat<- melt(data.frame(x, y),id='x')
-                ggplot(dat, aes(x = x, y=value, fill = variable)) +
-                  geom_bar(stat='identity',position = 'dodge') +
-                  ggtitle("Read counts by length") +
-                  labs(x='Read length',y='Read count') +
-                  scale_x_continuous(breaks=seq(15,50,by=1)) +
-                  theme_classic() +
-                  theme(
-                    axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-                    axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'),
-                    legend.position = 'none' #remove legend
-                  ) +
-                  scale_fill_manual(values=color3)
-              }
-              
-              else if(input$select=='rbp' & input$radioreads == '1'){
-                myfun_rbp()
-              }
-              
-              else if(input$select=='rbp' & input$radioreads == '2'){
-                myfun_rbp_norm()
-              }
-              
-              else if(input$select=='rbpl' & input$radioreads == '1'){
-                if (input$txt2 %in% c(15:50)){ #check if input$txt2 is valid
-                  output$errormsg<-renderText('')
-                  myfun_rbpl()
-                }
-                else{
-                  output$errormsg<-renderText('Error: please enter a length between 15-50')
-                  myfun_errormsg()
-                }
-              }
-              
-              else if(input$select=='rbpl' & input$radioreads == '2'){
-                if (input$txt2 %in% c(15:50)){ #check if input$txt2 is valid
-                  output$errormsg<-renderText('')
-                  myfun_rbpl_norm()
-                }
-                else{
-                  output$errormsg<-renderText('Error: please enter a length between 15-50')
-                  myfun_errormsg_norm()
-                }
-              }
-              
-              else if(input$select=='rbc' & input$radioreads == '1'){
-                myfun_rbc()
-              }
-              
-              else if(input$select=='rbc' & input$radioreads == '2'){
-                myfun_rbc_norm()
-              }
-              
-              else if(input$select=='rpkm'){
+          if(input$select=='rpkm'){
+            output$plot11<-renderPlot(width = 800,height=800,{ #isolate in the renderPlot() so that it will only update when the input$clickplot button is fired
+              input$clickplot
+              isolate({
                 p1<-myfun_rpkm('mRNA')
                 p2<-myfun_rpkm('RPF')
                 plot_grid(p1, p2, ncol = 1, nrow = 2) #to display the two RPKM plots as one plot
+              })
+            }
+            )
+          }
+          
+          else {
+            output$plot11<-renderPlot(width = 1000,height=500,{
+              input$clickplot
+              isolate({
+                if(input$select=='rbl'){
+                  myfun2(15:50,state$attrdat,'readLength','yeast_reads_based_on_location.csv')
+                  x<-15:50
+                  y<-data.frame(matrix(as.integer(state$attrdat),ncol=length(state$temp)))
+                  maxy<-max(y)
+                  names(y)<-state$temp1
+                  dat<- melt(data.frame(x, y),id='x')
+                  ggplot(dat, aes(x = x, y=value, fill = variable)) +
+                    geom_bar(stat='identity',position = 'dodge') +
+                    ggtitle("Read counts by length") +
+                    labs(x='Read length',y='Read count') +
+                    scale_x_continuous(breaks=seq(15,50,by=1)) +
+                    theme_classic() +
+                    theme(
+                      axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
+                      axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'),
+                      legend.position = 'none', #remove legend
+                      axis.text = element_text(size=15), #axis label size
+                      axis.ticks.length=unit(0.3,"cm"), #axis ticks size
+                      axis.title=element_text(size=15), #axis title size
+                      plot.title = element_text(size=18)
+                    ) +
+                    scale_fill_manual(values=color3)
+                }
                 
-              }
-            })
-          }  )
+                else if(input$select=='rbp' & input$radioreads == '1'){
+                  myfun_rbp()
+                }
+                
+                else if(input$select=='rbp' & input$radioreads == '2'){
+                  myfun_rbp_norm()
+                }
+                
+                else if(input$select=='rbpl' & input$radioreads == '1'){
+                  if (input$txt2 %in% c(15:50)){ #check if input$txt2 is valid
+                    output$errormsg<-renderText('')
+                    myfun_rbpl()
+                  }
+                  else{
+                    output$errormsg<-renderText('Error: please enter a length between 15-50')
+                    myfun_errormsg()
+                  }
+                }
+                
+                else if(input$select=='rbpl' & input$radioreads == '2'){
+                  if (input$txt2 %in% c(15:50)){ #check if input$txt2 is valid
+                    output$errormsg<-renderText('')
+                    myfun_rbpl_norm()
+                  }
+                  else{
+                    output$errormsg<-renderText('Error: please enter a length between 15-50')
+                    myfun_errormsg()
+                  }
+                }
+                
+                else if(input$select=='rbc' & input$radioreads == '1'){
+                  myfun_rbc()
+                }
+                
+                else if(input$select=='rbc' & input$radioreads == '2'){
+                  myfun_rbc_norm()
+                }
+              })
+            }
+            )
+          }
+          
           #---------------------------------------------------------------------plot22: zooming plots
-          output$plot22<-renderPlot({
+          output$plot22<-renderPlot(width = 1000,height=500,{
             if(input$select=='rbp' & ptype$x==1 & input$radioreads=='1'){
               myfun_rbp() +
                 coord_cartesian(xlim = ranges$x) +
-                ggtitle('Zooming plot')
+                ggtitle('Select a region to zoom')
             }
             
             else if(input$select=='rbp' & ptype$x==2 & input$radioreads=='2'){
               myfun_rbp_norm() +
                 coord_cartesian(xlim = ranges$x) +
-                ggtitle('Zooming plot')
+                ggtitle('Select a region to zoom')
             }
             
             else if(input$select=='rbpl' & ptype$x==3 & input$radioreads=='1'){
               myfun_rbpl() +
                 coord_cartesian(xlim = ranges$x) +
-                ggtitle('Zooming plot')
+                ggtitle('Select a region to zoom')
             }
             
             else if(input$select=='rbpl' & ptype$x==4 & input$radioreads=='2'){
               myfun_rbpl_norm() +
                 coord_cartesian(xlim = ranges$x) +
-                ggtitle('Zooming plot')
+                ggtitle('Select a region to zoom')
             }
             
             else if(input$select=='rbc' & ptype$x==5 & input$radioreads=='1'){
               myfun_rbc() +
                 coord_cartesian(xlim = ranges$x) +
-                ggtitle('Zooming plot')
+                ggtitle('Select a region to zoom')
             }
             
             else if(input$select=='rbc' & ptype$x==6 & input$radioreads=='2'){
               myfun_rbc_norm() +
                 coord_cartesian(xlim = ranges$x) +
-                ggtitle('Zooming plot')
+                ggtitle('Select a region to zoom')
             }
           })
           #---------------------
@@ -447,48 +476,6 @@ shinyServer<-function(input,output){
               ranges$x <- NULL
             }
           })
-          
-          #--------------------------------UIplot: multiple plots for 'reads by length' plot
-          # Insert the right number of plot output objects into the web page
-          output$plots <- renderUI({
-            plot_output_list <- lapply(1:length(state$temp), function(i) {
-              plotname <- paste("plot", i, sep="")
-              plotOutput(plotname)
-              #plotOutput(plotname, height = 320, width = 700)
-            })
-            
-            do.call(tagList, plot_output_list)# Convert the list to a tagList - this is necessary for the list of items to display properly.
-          })
-          
-          # Call renderPlot for each one. Plots are only actually generated when they are visible on the web page.
-          for (i in 1:length(state$temp)) {
-            # Need local so that each item gets its own number. Without it, the value of i in the renderPlot() will be the same across all instances, because of when the expression is evaluated.
-            local({
-              my_i <- i
-              plotname <- paste("plot", my_i, sep="")
-              
-              output[[plotname]] <- renderPlot({
-                input$clickplot
-                isolate({
-                  if(input$select=='rbl'){
-                    #barplot(state$attrdat[(36*(my_i-1)+1):(36*my_i)],main='Read counts by Length',xlab='Read length',ylab='Read count',names.arg = c(15:50),col='blue')
-                    x<-15:50
-                    dat<-data.frame(x,y=state$attrdat[(36*(my_i-1)+1):(36*my_i)])
-                    ggplot(dat, aes(x=x, y=y)) +
-                      geom_bar(stat='identity') +
-                      ggtitle("Read counts by length") +
-                      labs(x='Read length',y='Read count') +
-                      scale_x_continuous(breaks=seq(15,50,by=1)) +
-                      theme_classic() +
-                      theme(
-                        axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-                        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')
-                      )
-                  }
-                })
-              })
-            })
-          }
         }
         #--------------------
         else{
