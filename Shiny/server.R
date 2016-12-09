@@ -5,13 +5,13 @@ library(reshape2)
 library(cowplot)
 
 shinyServer<-function(input,output){
-  path<-'/data/riboseq/'
+  path<-'./'
   df<-read.table(paste0(path,'Supp/data_unq.tsv')) #stores the year/author/database information
   names(df)=c('year','author','journal','NA','database','NA','NA','NA','dbtype','condition','geoID')
   year_vector<-as.vector(unique(df$year)) #vector containing all years
   author_vector<-as.vector(unique(df$author)) #vector containing all authors from all years
   
-  rpkmpath<-'/home/txing/shinyProject/data/RPKM/'
+  rpkmpath<-'./RPKM/'
   d1<-read.delim(paste0(rpkmpath,'F8_RPKMs_modified.tsv'))
   d2<-read.delim(paste0(rpkmpath,'bgdb.tsv'))
   
