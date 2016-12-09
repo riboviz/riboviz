@@ -555,6 +555,6 @@ function changeit3() {
 }); //data
 
 
-}, 10); //timeout
+}, 100); //timeout
 
 	

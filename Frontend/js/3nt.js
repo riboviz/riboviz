@@ -324,4 +324,4 @@ d3.select("#downloadALL")
 
 }; //change form
 
-}, 30); //timeout
+}, 100); //timeout

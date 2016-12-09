@@ -322,4 +322,4 @@ d3.select("#download3")
 
 }; //change form
 
-}, 30); //timeout
+}, 100); //timeout

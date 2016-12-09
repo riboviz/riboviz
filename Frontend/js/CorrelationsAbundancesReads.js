@@ -722,4 +722,4 @@ function changeit6() {
 }; //end of analyze function
 
  }; //change form
-}, 10); //timeout
+}, 100); //timeout

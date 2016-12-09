@@ -372,5 +372,5 @@ d3.select("#download6")
 
 }; //change form
 
-}, 30); //timeout
+}, 100); //timeout
 	
