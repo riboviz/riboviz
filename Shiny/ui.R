@@ -11,7 +11,7 @@ shinyUI<-fixedPage(
     tags$style(HTML('#clickadd{background-color:orange}'))
   ),
   options = list(scrollX = TRUE), #scroll bar for the page
-  titlePanel('Explore the RPF and mRNA databases'),
+  #titlePanel('Explore the RPF and mRNA databases'),
   
   fixedRow(
     column(4, #id='sidebar',
@@ -67,22 +67,24 @@ shinyUI<-fixedPage(
            
            #---------below is legend for the plots 
            textOutput('l1'),
-           tags$head(tags$style("#l1{color: rgb(67,162,202)}")),
+           tags$head(tags$style("#l1{color: rgb(67,162,202);font-size: 18px}")),
            textOutput('l2'),
-           tags$head(tags$style("#l2{color: rgb(254,178,76)}")),
+           tags$head(tags$style("#l2{color: rgb(254,178,76);font-size: 18px}")),
            textOutput('l3'),
-           tags$head(tags$style("#l3{color: rgb(136,86,167)}")),
+           tags$head(tags$style("#l3{color: rgb(136,86,167);font-size: 18px;}")),
            
            plotOutput('plot11',
                       dblclick = "plot11_dblclick",
                       brush = brushOpts(
                         id = "plot11_brush",
                         resetOnNew = TRUE),
-                      width = 1000,height=500),
+                      inline = TRUE),
+           #width = 1000,height=500),
            
-           plotOutput('plot22',width = 1000,height=500),
+           plotOutput('plot22',inline = TRUE)
+           #width = 1000,height=500)
            
-           uiOutput("plots",width = 1000,height=500)
+           #uiOutput("plots",width = 1000,height=500)
     )
            )
   )
