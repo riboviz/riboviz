@@ -12,7 +12,7 @@ var xFigure4 = d3.scale.linear()
 
 	var colorFigure4 = d3.scale.category20()
 					.domain(["Data","FF", "CHX"])
-  					.range(["#a1d99b", "#9ecae1", "#bcbddc"] ); 
+  					.range(["rgb(239,138,98)", "#a1d99b", "#9ecae1"] ); 
 	
 	var xAxisFigure4 = d3.svg.axis()
     	.scale(xFigure4)
@@ -110,15 +110,17 @@ var nucleotide = d3.nest()
  legendSpace =  widthFigure4/nucleotide.length;
  
  
- xFigure4.domain(d3.extent(datanew, function(d) { return d.Position; }));
-
-  		yFigure4.domain([
-  			0,
-    		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Mean+v.SD; }); })+
-    		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Mean+v.SD; }); })/5
-  		]);
+  xFigure4.domain(d3.extent(datanew, function(d) { return d.Position; }));
+// 
+//   		yFigure4.domain([
+//   			0,
+//     		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Mean+v.SD; }); })+
+//     		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Mean+v.SD; }); })/5
+//   		]);
   		
-       		 		
+ yFigure4.domain([0, 6]);
+
+   		 		
 var freqFigure4 = svgFigure4.selectAll(".nucleotide")
       		.data(nucleotide);
       		

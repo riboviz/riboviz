@@ -7,8 +7,8 @@
     			
     			
 			var colorFigure5 = d3.scale.category20()
-					.domain(["Data", "CHX", "FF"])
-  					.range(["rgb(239,138,98)", "#a6cee3", "#1f78b4"]);
+					.domain(["Data", "FF", "CHX", ])
+  					.range(["rgb(239,138,98)", "#a1d99b", "#9ecae1"]);
     			
     		var xFigure5 = d3.scale.ordinal()
     					.rangeRoundBands([paddingFigure5, widthFigure5 - paddingFigure5 * 2], .1);
@@ -108,7 +108,7 @@ var datanew = data;
         
       
 				legendSpace5 =  widthFigure5/nucleotide.length;
-  				colorFigure5.domain(["Data", "CHX", "FF"]);
+  				colorFigure5.domain(["Data", "FF", "CHX"]);
   
 
   				xFigure5.domain(datanew.map(function(d) { return d.Codon; }));
