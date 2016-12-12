@@ -363,7 +363,7 @@ shinyServer<-function(input,output){
                 if(input$select=='rbl'){
                   myfun2(15:50,state$attrdat,'readLength','yeast_reads_based_on_location.csv')
                   x<-15:50
-                  y<-data.frame(matrix(as.integer(state$attrdat),ncol=length(state$temp)))
+                  y<-data.frame(prop.table(matrix(as.integer(state$attrdat),ncol=length(state$temp))))
                   maxy<-max(y)
                   names(y)<-state$temp1
                   dat<- melt(data.frame(x, y),id='x')

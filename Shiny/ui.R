@@ -55,7 +55,7 @@ shinyUI<-fixedPage(
             sliderInput(inputId = 'bins',label='Choose bins for the histogram',min=5,max=30, value = 10)),
           conditionalPanel(
             condition="input.select=='rbp' | input.select=='rbpl' | input.select=='rbc'",
-            radioButtons(inputId = 'radioreads',label = "Select read type", choices = list("Regular reads" = 1, "Normalized reads" = 2), selected = 1)
+            radioButtons(inputId = 'radioreads',label = "Select read type", choices = list("Regular reads" = 1, "Normalized reads" = 2), selected = 2)
           ),
           actionButton(inputId = 'clickplot',label='Click to plot'),
           downloadButton(outputId = 'down',label='Download data')
