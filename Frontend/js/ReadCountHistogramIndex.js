@@ -53,12 +53,12 @@
         svgFigure2.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+(0-paddingFigure2*2.4)+","+(heightFigure2/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
-            .text("Read count");
+            .text("Read count").style("font-size","16px");
 
        svgFigure2.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
-            .attr("transform", "translate("+ (widthFigure2/2) +","+(heightFigure2+paddingFigure2)+")")  // centre below axis
-            .text("Read length");
+            .attr("transform", "translate("+ (widthFigure2/2) +","+(heightFigure2+paddingFigure2*1.3)+")")  // centre below axis
+            .text("Read length").style("font-size","16px");
       				  		
       					
 	function updateFigure2() {

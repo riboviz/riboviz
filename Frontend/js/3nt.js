@@ -70,12 +70,12 @@ setTimeout(function() {
         svgFigure1.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+(0-paddingFigure1*6)+","+(heightFigure1/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
-            .text("Mapped reads");
+            .text("Mapped reads").style("font-size","16px");
 
        svgFigure1.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure1/2) +","+(heightFigure1+paddingFigure1*4)+")")  // centre below axis
-            .text("Distance from translation start/stop (nt)");
+            .text("Distance from translation start/stop (nt)").style("font-size","16px");
       				  	
       				  			
     

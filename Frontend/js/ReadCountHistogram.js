@@ -35,7 +35,7 @@ setTimeout(function() {
       					.attr("dy", "-.55em")
       					.attr("transform", "rotate(0)" )
       					.attr("transform", "translate(17," +15+ ")")
-      					.style("font-size","12px");
+      					.style("font-size","16px");
       					
       						svgFigure2.append("g")
       				.attr("class", "y axis")
@@ -44,13 +44,13 @@ setTimeout(function() {
       				// now add titles to the axes
         svgFigure2.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
-            .attr("transform", "translate("+(0-paddingFigure2*2.5)+","+(heightFigure2/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
-            .text("Read count");
+            .attr("transform", "translate("+(0-paddingFigure2*2.2)+","+(heightFigure2/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
+            .text("Read count").style("font-size","16px");
 
        svgFigure2.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure2/2) +","+(heightFigure2+paddingFigure2*1.3)+")")  // centre below axis
-            .text("Read length");
+            .text("Read length").style("font-size","16px");
 			
 d3.selectAll(".form-control")
 .on("change.2",change2);
