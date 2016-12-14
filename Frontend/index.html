@@ -181,11 +181,10 @@
 <div class="container">
   <div class="row">
   <div class="col-md-4">
-      <h4>3 nucleotide periodicity</h4>
-	<p> After inferring the codon at the A site of
-each footprint, mapped reads are plotted to visualize the expected three-nucleotide periodicity along the
-ORFs, as well as ribosome accumulation at the start and stop
-codons. </p>
+      <h4>Nucleotide periodicity of mapped reads</h4>
+	<p> All mapped reads are aligned by their 5' ends. Ribosome-footprint reads exhibit a three-nucleotide periodicity
+	along the ORF. Footprinting reads also show accumulation at the start and codon codons.
+	 </p>
 
     </div>
     <div class="col-md-8" >
@@ -219,17 +218,18 @@ codons. </p>
 <div class="container">
   <div class="row">
     <div class="col-md-4">
-      <h4> Codon specific distribution of reads.</h4>
-			 <p> To examine the global landscape of 80S ribosomes, we average
-the position-specific RPF densities of individual genes into
-a composite metagene, in which each gene was first normalized
-for its overall density of RPFs and then
-weighted equally in the average. The size of the initiation ramps was shown to vary between studies and has been attributed to use of CHX pre-treatment. Here we compare the data with an average of previous studies, using either CHX or Flash Freeze pre-treatment. Standard deviation represented by area shading around the lines.</p>
-			 Click for either 3 prime or 5 prime end below :
+      <h4> Position-specific distribution of reads.</h4>
+	<p> Metagene analyses of RPF and RNA-seq reads.
+ Mapped reads at each position (codon for RPF and nucleotide for mRNA) are normalized by the mean within each ORF, and then averaged with
+	equal weight for each position across all ORFs.
+	The size of the RPF `ramp' varies between studies and can be largely attributed to use of CHX pre-treatment. 
+	Each dataset is compated with an average of representative studies with and without CHX pre-treatment. 
+	Shaded areas represent standard errors around the mean lines.
+			 Select either 3' or 5' ends below :
 <form>
-<input class="fig4radio" type="radio" name="inputsrc51" id="defaultInput51" value="3" checked/><label for="defaultInput51">3' end </label> 
-<input class="fig4radio" type="radio" name="inputsrc51" id="thisPostInput51" value="5"/>
-<label for="thisPostInput51">5' end</label>
+<input class="fig4radio" type="radio" name="inputsrc51" id="defaultInput51" value="5" checked/><label for="defaultInput51">5' end </label> 
+<input class="fig4radio" type="radio" name="inputsrc51" id="thisPostInput51" value="3"/>
+<label for="thisPostInput51">3' end</label>
 </form>
 
 </div>
@@ -242,8 +242,13 @@ weighted equally in the average. The size of the initiation ramps was shown to v
 <div class="container">
   <div class="row">
     <div class="col-md-4">
-      <h4> Excess codon specific RPF counts.</h4>
-			 <p> Comparison of codon-specific RPFs under different pre-treatment. Standard deviation represented by area shading around the lines. </p>
+      <h4> Excess codon-specific RPF reads in 5' ends of ORFs.</h4>
+	<p> For each of the codons, densities of RPFs with
+	ribosomal A sites mapping to that codon were calculated using either only the ramp region of each
+	ORF (codons 1-200) or the remainder of each ORF. Datasets with CHX pre-treatment typically have
+	higher excess codon-specific reads compared to non-CHX datasets.
+	Shaded areas represent standard deviation.
+	</p>
 	</div>
 	<div class="col-md-8" id="ExcessCodonSpecificRPF"></div>
   </div>
@@ -255,8 +260,8 @@ weighted equally in the average. The size of the initiation ramps was shown to v
     <div class="col-md-4">
           <div class="bigspacer"></div>
       <div class="bigspacer"></div>
-      <h4> Nucleotide bias along the ribosome.</h4>
-			 <p> Premal to fill explanation here. </p>
+      <h4> Nucleotide frequencies along mapped reads.</h4>
+			 <p> All mapped reads of a particular length are aligned and nucleotide frequencies are estimated at each position. </p>
 			 
  <div class="spacer"></div>   
 <form>
@@ -313,9 +318,8 @@ weighted equally in the average. The size of the initiation ramps was shown to v
   <div class="row">
     
     <div class="col-md-4">
-    <h4> Correlations reads and features</h4>	
-
- <p> Correlations read counts and features. (Premal add here to explain features) </p>
+    <h4> Sequence-based features and normalized reads</h4>
+    <p> Correlations between coding sequence features and gene-specific RPKM values </p>	
 
 <form>
 <input class="Thecorrs2" type="radio" name="features" id="defaultInput1" value="Length" checked/><label for="defaultInput1">Length</label> 
@@ -342,8 +346,8 @@ weighted equally in the average. The size of the initiation ramps was shown to v
   <div class="row">
     
     <div class="col-md-4">
-    <h4> Correlations abundances and reads</h4>	
-    <p>(Premal add here to explain features) </p>
+    <h4> tRNA abundances and codon-specific reads</h4>	
+    <p> Correlation between codon-specific normalized reads mapped to either A, P, or E-site of the read and various estimates of tRNA abundances </p>
     <div class="spacer"></div>
 	<form>
 		<input class="Thecorrs" type="radio" name="site" id="defaultInput" value="A" checked/><label for="defaultInput">A</label> 
@@ -437,7 +441,7 @@ In addition to the metagenomic analyses, a R/Shiny integration allows the user t
 	<div class="col-md-9">
 		<hr>
 		<div class="center text-gray smallnote">
-			&copy; 2016 Oana Carja, Premal Shah
+			&copy; 2016 Oana Carja and Premal Shah
 		</div>
 	</div>
 </div>
