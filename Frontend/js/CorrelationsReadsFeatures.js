@@ -71,7 +71,7 @@ svgFigure7.append("g")
 					.attr("transform", "translate(" + (widthFigure7 / 2) + " ," + (heightFigure7 + paddingFigure7*8) + ")")
 					.style("text-anchor", "middle")
 					//.text("Length")
-					.style("font-size","13px");
+					.style("font-size","16px");
         				
 				//y-axis
   				svgFigure7.append("g")
@@ -86,7 +86,7 @@ svgFigure7.append("g")
         			.style("text-anchor", "middle")
         			.attr("transform", "rotate(0)")
         			//.text("FEatg")
-        			.style("font-size","13px");
+        			.style("font-size","16px");
         			
         		svgFigure7.append("text")
 					.attr("class", "r-label")
@@ -95,18 +95,18 @@ svgFigure7.append("g")
         			.style("text-anchor", "middle")
         			.attr("transform", "rotate(0)")
         			//.text("FEatg")
-        			.style("font-size","13px");
+        			.style("font-size","16px");
         			
 // now add titles to the axes
         		svgFigure7.append("text")
             		.attr("text-anchor", "middle")  
             		.attr("transform", "translate("+(0-paddingFigure7*8.5)+","+(heightFigure7/2)+")rotate(-90)")  
-            		.text("Selected feature");
+            		.text("Selected feature").style("font-size","16px");
 
        			svgFigure7.append("text")
             		.attr("text-anchor", "middle")  
-            		.attr("transform", "translate("+ (widthFigure7/2) +","+(heightFigure7+paddingFigure7*6.5)+")")  
-            		.text("Log 10 Read Counts");
+            		.attr("transform", "translate("+ (widthFigure7/2) +","+(heightFigure7+paddingFigure7*6.9)+")")  
+            		.text("Log 10 read counts").style("font-size","16px");
 
 
 d3.selectAll(".form-control")

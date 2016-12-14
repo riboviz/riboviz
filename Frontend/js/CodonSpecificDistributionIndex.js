@@ -70,7 +70,7 @@ var xFigure4 = d3.scale.linear()
       				.attr("class", "xaxis_label")
       				.attr("transform", "translate(" + (widthFigure4 / 2) + " ," + (heightFigure4 + paddingFigure4*8) + ")")
         			.style("text-anchor", "middle")
-        			.style("font-size","13px");
+        			.style("font-size","16px");
   	   
   		svgFigure4.append("g")
       		.attr("class", "y axis")
@@ -80,12 +80,12 @@ var xFigure4 = d3.scale.linear()
         svgFigure4.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+(0-paddingFigure4)+","+(heightFigure4/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
-            .text("Relative normalized reads");
+            .text("Relative normalized reads").style("font-size","16px");
 
        svgFigure4.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
-            .attr("transform", "translate("+ (widthFigure4/2) +","+(heightFigure4+paddingFigure4)+")")  // centre below axis
-            .text("Codon position");
+            .attr("transform", "translate("+ (widthFigure4/2) +","+(heightFigure4+paddingFigure4*1.1)+")")  // centre below axis
+            .text("Codon position").style("font-size","16px");
       
 
 

@@ -89,12 +89,12 @@
         		svgFigure5.append("text")
             		.attr("text-anchor", "middle")  
             		.attr("transform", "translate("+(0-paddingFigure5*6.5)+","+(heightFigure5/2)+")rotate(-90)")  
-            		.text("Codon specific normalized reads");
+            		.text("Log2 ratio of normalized reads").style("font-size","16px");
 
        			svgFigure5.append("text")
             		.attr("text-anchor", "middle")  
             		.attr("transform", "translate("+ (widthFigure5/2) +","+(heightFigure5+paddingFigure5*6.5)+")")  
-            		.text("Codon");
+            		.text("Codon").style("font-size","16px");
       				
 function updateFigure5(data) {
       				

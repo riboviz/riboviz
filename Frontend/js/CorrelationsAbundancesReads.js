@@ -143,7 +143,7 @@ var svgFigure6nC = d3.select("#HistogramsCorrsCHX").append("svg")
        svgFigure6.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure6/2) +","+(heightFigure6+paddingFigure6)+")")  // centre below axis
-            .text("A, P or E");
+            .text("A, P or E").style("font-size","16px");
         
         svgFigure6C.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
