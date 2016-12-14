@@ -82,12 +82,12 @@ var marginFigure3 = {top: 0, right: 80, bottom: 70, left: 100},
         svgFigure3.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+(0-paddingFigure3*1.2)+","+(heightFigure3/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
-            .text("Frequency").style("font-size","16px");
+            .text("Frequency").style("font-size","16px").style("fill","#777777");
 
        svgFigure3.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure3/2) +","+(heightFigure3+paddingFigure3)+")")  // centre below axis
-            .text("Position on the ribosome").style("font-size","16px");
+            .text("Position on the ribosome").style("font-size","16px").style("fill","#777777");
             
 
 	var string="../../Data/";
@@ -555,6 +555,6 @@ function changeit3() {
 }); //data
 
 
-}, 100); //timeout
+}, 500); //timeout
 
 	

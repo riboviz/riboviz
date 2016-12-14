@@ -121,7 +121,7 @@ var svgFigure6nC = d3.select("#HistogramsCorrsCHX").append("svg")
         		svgFigure6.append("text")
 					.attr("class", "r-label")
 					.attr("y", -1*paddingFigure6 )
-        			.attr("x", 3*paddingFigure6)
+        			.attr("x", 2.6*paddingFigure6)
         			.style("text-anchor", "middle")
         			.attr("transform", "rotate(0)")
         			//.text("FEatg")
@@ -143,17 +143,17 @@ var svgFigure6nC = d3.select("#HistogramsCorrsCHX").append("svg")
        svgFigure6.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure6/2) +","+(heightFigure6+paddingFigure6)+")")  // centre below axis
-            .text("A, P or E").style("font-size","16px");
+            .text("A, P or E").style("font-size","16px").style("fill","#777777");
         
         svgFigure6C.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure6C/2) +","+(heightFigure6C+paddingFigure6C)+")")  // centre below axis
-            .text("background correlations CHX pre-treatment");
+            .text("background correlations CHX pre-treatment").style("fill","#777777");
             
             svgFigure6nC.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure6C/2) +","+(heightFigure6C+paddingFigure6C)+")")  // centre below axis
-            .text("background correlations FF pre-treatment");
+            .text("background correlations FF pre-treatment").style("fill","#777777");
             
             
 svgFigure6C.append("g").append("line")
@@ -318,7 +318,7 @@ textFigure6.exit().attr("class", "exit")
       
     svgFigure6.select(".r-label")			
 			.text("Correlation coefficient: r=" + thecor.toFixed(2))//leastSquaresCoeff[2])
-			.style("font-size","16px")
+			.style("font-size","16px").style("fill","#777777")
 			.transition()
 			.ease("linear")
 			.delay(function(d, i) {
@@ -717,9 +717,12 @@ function changeit6() {
    	updatehistogram1(data1, testabundance, testsite);	
    	updatehistogram2(data1, testabundance, testsite);	
 };
-
+d3.select("#download6")
+		.on("click", function (){
+			window.open(thefile6);
+		});
 
 }; //end of analyze function
 
  }; //change form
-}, 100); //timeout
+}, 500); //timeout

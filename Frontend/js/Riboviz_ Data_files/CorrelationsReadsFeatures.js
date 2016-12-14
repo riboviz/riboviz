@@ -91,7 +91,7 @@ svgFigure7.append("g")
         		svgFigure7.append("text")
 					.attr("class", "r-label")
 					.attr("y", -5*paddingFigure7 )
-        			.attr("x", paddingFigure7*15)
+        			.attr("x", paddingFigure7*30)
         			.style("text-anchor", "middle")
         			.attr("transform", "rotate(0)")
         			//.text("FEatg")
@@ -101,12 +101,12 @@ svgFigure7.append("g")
         		svgFigure7.append("text")
             		.attr("text-anchor", "middle")  
             		.attr("transform", "translate("+(0-paddingFigure7*8.5)+","+(heightFigure7/2)+")rotate(-90)")  
-            		.text("Selected feature").style("font-size","16px").style("fill","#777777");
+            		.text("Selected feature").style("font-size","16px");
 
        			svgFigure7.append("text")
             		.attr("text-anchor", "middle")  
             		.attr("transform", "translate("+ (widthFigure7/2) +","+(heightFigure7+paddingFigure7*6.9)+")")  
-            		.text("Log 10 read counts").style("font-size","16px").style("fill","#777777");
+            		.text("Log 10 read counts").style("font-size","16px");
 
 
 d3.selectAll(".form-control")
@@ -242,7 +242,7 @@ textFigure7.exit().attr("class", "exit")
       
     svgFigure7.select(".r-label")			
 			.text("Correlation coefficient: r=" + thecor.toFixed(2))
-			.style("font-size","16px").style("fill","#777777")
+			.style("font-size","16px")
 			.transition()
 			.ease("linear")
 			.delay(function(d, i) {
@@ -363,7 +363,7 @@ function changeit7() {
     var feature= d3.select('input[name="features"]:checked').node().value;
     updateFigure7(data, "RPF", feature);	
 };
-d3.select("#download7")
+d3.select("#download6")
 		.on("click", function (){
 			window.open(thefile );
 		});

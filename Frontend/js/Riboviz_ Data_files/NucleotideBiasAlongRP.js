@@ -72,12 +72,12 @@ var marginFigure3 = {top: 0, right: 60, bottom: 70, left: 100},
         svgFigure3.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+(0-paddingFigure3*7)+","+(heightFigure3/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
-            .text("Frequency").style("font-size","16px").style("fill","#777777");
+            .text("Frequency").style("font-size","16px");
 
        svgFigure3.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure3/2) +","+(heightFigure3+paddingFigure3*6.3)+")")  // centre below axis
-            .text("Position on the ribosome").style("font-size","16px").style("fill","#777777");
+            .text("Position on the ribosome").style("font-size","16px");
             
 
 
@@ -554,7 +554,7 @@ var display1=document.getElementById('fig3radiotest').style.display;
 
 }; //change form
 
-}, 700); //timeout
+}, 500); //timeout
 	
 
 

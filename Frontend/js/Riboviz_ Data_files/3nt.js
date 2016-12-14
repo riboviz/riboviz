@@ -1,3 +1,6 @@
+setTimeout(function() {
+
+			
 			//Width and height
 			var marginFigure1 = {top: 20, right: 20, bottom: 50, left: 100},
     			widthFigure1 = 700 - marginFigure1.left - marginFigure1.right,
@@ -44,18 +47,7 @@
   						.append("g")
     					.attr("transform", "translate(" + marginFigure1.left + "," + marginFigure1.top + ")");
 			
-    
-	d3.tsv("../Data/F1_2016_Weinberg_RPF.tsv", function(error, data) {
-  		
-  		if (error) throw error;
-  		data.forEach(function(d) {
-    		d.position = +d.Position;
-    		d.count = +d.Counts;
-    		d.end=+d.End;
-  		});
-
-  
-				//x-axis	
+    //x-axis	
   				svgFigure1.append("g")
       				.attr("class", "x axis")
       				.attr("transform", "translate(0," + (heightFigure1) + ")")
@@ -67,29 +59,54 @@
   					.append("rect")
   	   				.attr("width", widthFigure1)
   	   				.attr("height",1)
-  	   				.attr("fill","#000");
+  	   				.attr("fill","#000")
 				
 				//y-axis
   				svgFigure1.append("g")
       				.attr("class", "y axis")
       				.call(yAxisFigure1);
       				
-      				// now add titles to the axes
+      			// now add titles to the axes
         svgFigure1.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+(0-paddingFigure1*6)+","+(heightFigure1/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
-            .text("Mapped reads").style("font-size","16px").style("fill","#777777");
+            .text("Mapped reads").style("font-size","16px");
 
        svgFigure1.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
-            .attr("transform", "translate("+ (widthFigure1/2) +","+(heightFigure1+paddingFigure1*3.6)+")")  // centre below axis
-            .text("Distance from translation start/stop (nt)").style("font-size","16px").style("fill","#777777");
-      				  				
-    				
-function updateFigure1(value4) {
+            .attr("transform", "translate("+ (widthFigure1/2) +","+(heightFigure1+paddingFigure1*4)+")")  // centre below axis
+            .text("Distance from translation start/stop (nt)").style("font-size","16px");
+      				  	
+      				  			
+    
+d3.selectAll(".form-control")
+.on("change.1", change1);
+
+
+function change1() {
+	var year1=d3.select("#yearform").node().value;
+	var author1=d3.select("#authorform").node().value;
+	var thedataset1=d3.select("#dataform").node().value;    
+
+    var string="../Data/";
+	
+	var thefile=string.concat("F1_", year1, "_", author1,"_",thedataset1,".tsv");
+
+	       
+	d3.tsv(thefile, function(error, data) {
+  		
+  		if (error) throw error;
+  		data.forEach(function(d) {
+    		d.position = +d.Position;
+    		d.count = +d.Counts;
+    		d.end=+d.End;
+  		});
+			
+ 				
+function updateFigure1(data,  value4) {
       				
 var datanew = data.filter(function(d, key) { 
-            return (d.end==value4);
+            return ( d.end==value4 ); 
     
     });
   
@@ -125,7 +142,6 @@ var freqgroup=freqFigure1.enter().append("g").attr("class", "datanew");
 					
 					freqgroup.append("path")
              		.attr("class", "line")
-             		.style("stroke-opacity", 0.1)
              		.attr("d", valuelineFigure1(datanew));
              		
              		freqgroup.append("circle")
@@ -205,6 +221,14 @@ freqFigure1.exit()
 							})
 							.duration(600)
 							.call(xAxisFigure1);
+							
+// 									svgFigure1.select(".xaxis_label")
+// 			.transition()
+// 			.ease("linear")
+// 			.delay(function(d, i) {
+// 					return i / datanew.length * 500;
+// 			})
+// 			.duration(600);
 				
 						//Upposition Y axis
 						svgFigure1.select(".y.axis")
@@ -267,20 +291,37 @@ function mousemove() {
 
 };
 
-	updateFigure1(5);
+
+
+updateFigure1(data, 5);
 	
 	d3.select(document.getElementById("3prime"))
 	.on("click", function() {
-		updateFigure1(3);
+		updateFigure1(data,  3);
 	});
 	d3.select(document.getElementById("5prime"))
 	.on("click", function() {
-		updateFigure1(5);
+		updateFigure1(data,  5);
 	});
 
 
-});
+d3.select("#download1")
+		.on("click", function (){
+			window.open(thefile );
+		});
 
+//for the downloadALL button at the bottom of the page -- code Here
+var thefileDatasetALL=string.concat(year1, "_", author1,"_",thedataset1,".gz");		
+d3.select("#downloadALL")
+		.on("click", function (){
+			window.open(thefileDatasetALL);
+		});
+		
+		
+		
 
+}); //data
 
+}; //change form
 
+}, 500); //timeout
