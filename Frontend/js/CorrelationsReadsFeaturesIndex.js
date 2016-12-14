@@ -57,7 +57,7 @@ var svgFigure7 = d3.select("#CorrelationsReadsandFeatures").append("svg")
 					.attr("transform", "translate(" + (widthFigure7 / 2) + " ," + (heightFigure7 + paddingFigure7*8) + ")")
 					.style("text-anchor", "middle")
 					//.text("Length")
-					.style("font-size","13px");
+					.style("font-size","16px");
         				
 				//y-axis
   				svgFigure7.append("g")
@@ -71,7 +71,7 @@ var svgFigure7 = d3.select("#CorrelationsReadsandFeatures").append("svg")
         			.style("text-anchor", "middle")
         			.attr("transform", "rotate(0)")
         			//.text("FEatg")
-        			.style("font-size","13px");
+        			.style("font-size","16px");
         			
         		svgFigure7.append("text")
 					.attr("class", "r-label")
@@ -85,12 +85,12 @@ var svgFigure7 = d3.select("#CorrelationsReadsandFeatures").append("svg")
         		svgFigure7.append("text")
             		.attr("text-anchor", "middle")  
             		.attr("transform", "translate("+(0-paddingFigure7*8)+","+(heightFigure7/2)+")rotate(-90)")  
-            		.text("Selected feature");
+            		.text("Selected feature").style("font-size","16px");
 
        			svgFigure7.append("text")
             		.attr("text-anchor", "middle")  
             		.attr("transform", "translate("+ (widthFigure7/2) +","+(heightFigure7+paddingFigure7*6.5)+")")  
-            		.text("Log 10 Read Counts");
+            		.text("Log 10 read counts").style("font-size","16px");
  
 	var string="../../Data/";
 
