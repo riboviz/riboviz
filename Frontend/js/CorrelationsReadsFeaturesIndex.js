@@ -85,12 +85,12 @@ var svgFigure7 = d3.select("#CorrelationsReadsandFeatures").append("svg")
         		svgFigure7.append("text")
             		.attr("text-anchor", "middle")  
             		.attr("transform", "translate("+(0-paddingFigure7*8)+","+(heightFigure7/2)+")rotate(-90)")  
-            		.text("Selected feature").style("font-size","16px");
+            		.text("Selected feature").style("font-size","16px").style("fill","#777777");
 
        			svgFigure7.append("text")
             		.attr("text-anchor", "middle")  
             		.attr("transform", "translate("+ (widthFigure7/2) +","+(heightFigure7+paddingFigure7*6.5)+")")  
-            		.text("Log 10 read counts").style("font-size","16px");
+            		.text("Log 10 read counts").style("font-size","16px").style("fill","#777777");
  
 	var string="../../Data/";
 
@@ -217,7 +217,7 @@ textFigure7.exit().attr("class", "exit")
       
     svgFigure7.select(".r-label")			
 			.text("Correlation coefficient: r=" + thecor.toFixed(2))
-			.style("font-size","16px")
+			.style("font-size","16px").style("fill","#777777")
 			.transition()
 			.ease("linear")
 			.delay(function(d, i) {

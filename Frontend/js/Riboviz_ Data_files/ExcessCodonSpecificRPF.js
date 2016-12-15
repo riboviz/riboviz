@@ -1,17 +1,21 @@
-            //Width and height
+setTimeout(function() {
+
+//Width and height
 			var marginFigure5 = {top: 20, right: 10, bottom: 50, left: 100},
     			widthFigure5 = 700 - marginFigure5.left - marginFigure5.right,
     			paddingFigure5=5,
     			paddingFigure5l=50
     			heightFigure5 = 300 - marginFigure5.top - marginFigure5.bottom;
     			
-    			
-			var colorFigure5 = d3.scale.category20()
+
+					var colorFigure5 = d3.scale.category20()
 					.domain(["Data", "FF", "CHX", ])
   					.range(["rgb(239,138,98)", "#a1d99b", "#9ecae1"]);
-    			
+    		
+    		//Create scale functions	
     		var xFigure5 = d3.scale.ordinal()
     					.rangeRoundBands([paddingFigure5, widthFigure5 - paddingFigure5 * 2], .1);
+    						
 
 			var yFigure5 = d3.scale.linear()
     						.range([heightFigure5-paddingFigure5*2, paddingFigure5]);
@@ -27,7 +31,6 @@
     			.scale(yFigure5)
     			.orient("left");
     		
-			
 			var areaF5 = d3.svg.area()
     			.x(function(d) { return xFigure5(d.Codon); })
     			.y0(function(d) { return yFigure5(d.Mean+d.SD); })
@@ -48,19 +51,8 @@
   						.append("g")
     					.attr("transform", "translate(" + marginFigure5.left + "," + marginFigure5.top + ")");
 
-
-			//Load data
-			d3.tsv("../../Data/F5_2016_Weinberg_RPF.tsv", function(error, data) {
-  				if (error) throw error;
-
-  				data.forEach(function(d) {
-    				d.Codon = d.Codon;
-    				d.Mean = +d.Mean;
-    				d.BG=d.BG
-    				d.SD=+d.SD
-  				});
-				
-  				//x-axis	
+    
+//x-axis	
   				svgFigure5.append("g")
       				.attr("class", "x axis")
       				.attr("transform", "translate(0," + (heightFigure5-3*paddingFigure5) + ")")
@@ -84,23 +76,46 @@
       				.attr("class", "y axis")
       				.attr("transform", "translate(" + 0 + "," + (0-paddingFigure5) + ")")
       				.call(yAxisFigure5);
-      				
+      			
       			// now add titles to the axes
         		svgFigure5.append("text")
             		.attr("text-anchor", "middle")  
             		.attr("transform", "translate("+(0-paddingFigure5*6.5)+","+(heightFigure5/2)+")rotate(-90)")  
-            		.text("Log2 ratio of normalized reads").style("font-size","16px").style("fill","#777777");
+            		.text("Log2 ratio of normalized reads").style("font-size","16px");
 
        			svgFigure5.append("text")
             		.attr("text-anchor", "middle")  
-            		.attr("transform", "translate("+ (widthFigure5/2) +","+(heightFigure5+paddingFigure5*6.5)+")")  
-            		.text("Codon").style("font-size","16px").style("fill","#777777");
+            		.attr("transform", "translate("+ (widthFigure5/2) +","+(heightFigure5+paddingFigure5*6.8)+")")  
+            		.text("Codon").style("font-size","16px");	
+      					
+d3.selectAll(".form-control")
+.on("change.5", change5);
+
+
+function change5() {
+	var year5=d3.select("#yearform").node().value;
+	var author5=d3.select("#authorform").node().value;
+	var thedataset5=d3.select("#dataform").node().value;
+	
+	var string="../Data/";
+	
+	var thefile=string.concat("F5_", year5, "_", author5,"_",thedataset5,".tsv");
+
+	       
+	d3.tsv(thefile, function(error, data) {
+  				if (error) throw error;
+  				data.forEach(function(d) {
+    				d.Codon = d.Codon;
+    				d.Mean = +d.Mean;
+    				d.BG=d.BG;
+    				d.SD=+d.SD;
+  				});
+
+				
       				
 function updateFigure5(data) {
       				
-var datanew = data;
- 
- 
+var datanew = data; 
 
     			var nucleotide = d3.nest()
         			.key(function(d) {return d.BG;})
@@ -150,20 +165,17 @@ freqFigure5.select("g .nucleotide .area")
   			.ease("linear")
 			.delay(function(d, i) {
 					return i / datanew.length * 500;
-			})
-			.duration(500);
+			});
       		   		
       		      		
 var lineSvg5=freqFigure5.enter().append("g").attr("class", "nucleotide");
         
-				
-				lineSvg5.append("path")
+        		lineSvg5.append("path")
       				.attr("class", "area")
       				.attr("id", function(d) { return "tag2"+d.key; }) // assign ID
       				.attr("d",  function(d) { return areaF5(d.values); })
       				.style("fill", function(d) { return colorFigure5(d.key); })
       				.style("fill-opacity", 0.15);
-				
 				//Create the line
     			lineSvg5.append("path")
              		.attr("class", "line")
@@ -177,7 +189,7 @@ var lineSvg5=freqFigure5.enter().append("g").attr("class", "nucleotide");
     			.datum(function(d) { return {name: d.key, value: d.values[d.values.length - 1]}; })
 				.attr("transform", function(d, i) { return "translate(" + ((widthFigure5-paddingFigure5l*11/10)) + "," + ((legendSpace5/7)+i*legendSpace5/7)+ ")"; })
       			.attr("x", paddingFigure5l/5)
-      			.attr("y", 30)
+      			.attr("y", 10)
       			.attr("class", "legend")
       			.text(function(d) {  return d.name; })
       			.style("stroke", function(d) { return colorFigure5(d.name); })
@@ -195,7 +207,7 @@ var lineSvg5=freqFigure5.enter().append("g").attr("class", "nucleotide");
                  d3.select("#tag"+name.name)
                      .transition().duration(100) 
                      .style("opacity", newOpacity);
-                if (name.name=="FF"){d3.select("#tagFF")
+                if (name.name=="non-CHX"){d3.select("#tagFF")
                      .transition().duration(100) 
                      .style("opacity", newOpacity);} 
                 if (name.name=="CHX"){d3.select("#tagCHX")
@@ -231,7 +243,9 @@ lineSvg5.transition()
       .style("fill-opacity", 1)
       .remove();
       
-
+    
+  
+       		// now should really update the axes
        //Update X axis
 	svgFigure5.select(".x.axis")
 		.transition()
@@ -275,12 +289,17 @@ lineSvg5.transition()
  
  };
  
+
+
 updateFigure5(data);
 
+d3.select("#download4")
+		.on("click", function (){
+			window.open(thefile );
+		});
+		
+}); //data
 
+}; //change form
 
-
- 				
-
-});
-        		
+}, 500); //timeout       		

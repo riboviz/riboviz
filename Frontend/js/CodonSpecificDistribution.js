@@ -68,12 +68,12 @@ var xFigure4 = d3.scale.linear()
         svgFigure4.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+(0-paddingFigure4)+","+(heightFigure4/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
-            .text("Relative normalized reads").style("font-size","16px");
+            .text("Relative normalized reads").style("font-size","16px").style("fill","#777777");
 
        svgFigure4.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure4/2) +","+(heightFigure4+paddingFigure4)+")")  // centre below axis
-            .text("Codon position").style("font-size","16px");
+            .text("Codon position").style("font-size","16px").style("fill","#777777");
       			
 d3.selectAll(".form-control")
 .on("change.4", change4);
@@ -123,12 +123,12 @@ var nucleotide = d3.nest()
  
  
  xFigure4.domain(d3.extent(datanew, function(d) { return d.Position; }));
-
-  		yFigure4.domain([
-  			0,
-    		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Mean+v.SD; }); })+
-    		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Mean+v.SD; }); })/5
-  		]);
+ yFigure4.domain([0, 6]);
+  		// yFigure4.domain([
+//   			0,
+//     		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Mean+v.SD; }); })+
+//     		d3.max(nucleotide, function(c) { return d3.max(c.values, function(v) { return v.Mean+v.SD; }); })/5
+//   		]);
   		
        		 		
 var freqFigure4 = svgFigure4.selectAll(".nucleotide")
@@ -322,4 +322,4 @@ d3.select("#download3")
 
 }; //change form
 
-}, 100); //timeout
+}, 500); //timeout

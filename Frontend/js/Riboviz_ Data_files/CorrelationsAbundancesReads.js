@@ -79,17 +79,28 @@ var svgFigure6nC = d3.select("#HistogramsCorrsCHX").append("svg")
     			.attr("transform", "translate(" + marginFigure6C.left + "," + marginFigure6C.top + ")");
 
 
-svgFigure6.append("g")
+					svgFigure6.append("g")
       				.attr("class", "x axis")
       				.attr("transform", "translate(0," + heightFigure6 + ")")
-      				.call(xAxisFigure6);
+      				.call(xAxisFigure6)
+      				.selectAll("text")
+      					.style("text-anchor", "end")
+      					.attr("dx", "-.8em")
+      					.attr("dy", "-.55em")
+      					.attr("transform", "rotate(0)" )
+      					.attr("transform", "translate(17," +15+ ")")
+      					.style("font-size","12px");
+      				
+      				
+      				
+      					
     				    				
-				svgFigure6.append("text")      // text label for the x axis
-					.attr("class", "xaxis_label1")
-					.attr("transform", "translate(" + (widthFigure6 / 2) + " ," + (heightFigure6 + paddingFigure6*8) + ")")
-					.style("text-anchor", "middle")
-					//.text("Length")
-					.style("font-size","13px");
+				// svgFigure6.append("text")      // text label for the x axis
+// 					.attr("class", "xaxis_label1")
+// 					.attr("transform", "translate(" + (widthFigure6 / 2) + " ," + (heightFigure6 + paddingFigure6*8) + ")")
+// 					.style("text-anchor", "middle")
+// 					//.text("Length")
+// 					.style("font-size","13px");
         				
 				//y-axis
   				svgFigure6.append("g")
@@ -110,7 +121,7 @@ svgFigure6.append("g")
         		svgFigure6.append("text")
 					.attr("class", "r-label")
 					.attr("y", -1*paddingFigure6 )
-        			.attr("x", 2.6*paddingFigure6)
+        			.attr("x", 3*paddingFigure6)
         			.style("text-anchor", "middle")
         			.attr("transform", "rotate(0)")
         			//.text("FEatg")
@@ -123,7 +134,7 @@ svgFigure6.append("g")
  						
  						
  						
- 				// now add titles to the axes
+ 				
         svgFigure6.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+(0-paddingFigure6)+","+(heightFigure6/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
@@ -132,37 +143,70 @@ svgFigure6.append("g")
        svgFigure6.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure6/2) +","+(heightFigure6+paddingFigure6)+")")  // centre below axis
-            .text("A, P or E").style("font-size","16px").style("fill","#777777");
+            .text("A, P or E").style("font-size","16px");
         
         svgFigure6C.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure6C/2) +","+(heightFigure6C+paddingFigure6C)+")")  // centre below axis
-            .text("background correlations CHX pre-treatment").style("fill","#777777");
+            .text("background correlations CHX pre-treatment");
             
             svgFigure6nC.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure6C/2) +","+(heightFigure6C+paddingFigure6C)+")")  // centre below axis
-            .text("background correlations FF pre-treatment").style("fill","#777777");
+            .text("background correlations FF pre-treatment");
             
             
-        			
-// d3.selectAll(".form-control")
-// .on("change.6", change6);
-// 
-// 
-// function change6() {
-// 	var year6=d3.select("#yearform").node().value;
-// 	console.log(year6);
-// 	var author6=d3.select("#authorform").node().value;
-// 	console.log(author6);
-// 	var thedataset6=d3.select("#dataform").node().value;
-// 	console.log(thedataset6);
-	// var string6="../Data/";
-// 	var thefile6=string6.concat("F6_2016_Weinberg_RPF.tsv");
+svgFigure6C.append("g").append("line")
+		.attr("class", "r-line").attr("stroke", "grey")
+ 					.style("stroke-width",0.9);		
+    					
+svgFigure6C.append("g")
+      				.attr("class", "x axis")
+      				.attr("transform", "translate(0," + heightFigure6C + ")")
+      				.call(xAxisFigure6C);
+    
+svgFigure6C.append("text")
+    .attr("class", "xaxis_label")
+      					.style("text-anchor", "end")
+      					.attr("dx", "-.8em")
+      					.attr("dy", "-.55em")
+      					.attr("transform", "rotate(0)" )
+      					.attr("transform", "translate(17," +15+ ")")
+      					.style("font-size","12px");
+      					
+ 
+ svgFigure6nC.append("g").append("line")
+		.attr("class", "r-line2").attr("stroke", "grey")
+ 					.style("stroke-width",0.9);		
+    					
+svgFigure6nC.append("g")
+      				.attr("class", "x axis")
+      				.attr("transform", "translate(0," + heightFigure6C + ")")
+      				.call(xAxisFigure6nC);
+    
+svgFigure6nC.append("text")
+    .attr("class", "xaxislabel")
+      					.style("text-anchor", "end")
+      					.attr("dx", "-.8em")
+      					.attr("dy", "-.55em")
+      					.attr("transform", "rotate(0)" )
+      					.attr("transform", "translate(17," +15+ ")")
+      					.style("font-size","12px");
+      					
+      					        			
+d3.selectAll(".form-control")
+.on("change.6", change6);
 
 
+function change6() {
+	var year6=d3.select("#yearform").node().value;
+	var author6=d3.select("#authorform").node().value;
+	var thedataset6=d3.select("#dataform").node().value;
+	var string6="../Data/";
+	var thefile6=string6.concat("F6_",year6,"_",author6, "_", thedataset6,".tsv");	
+	
 queue()
-  .defer(d3.tsv, "../Data/F6_2016_Weinberg_RPF.tsv")
+  .defer(d3.tsv,thefile6)
   .defer(d3.tsv, "../Data/F6_Counts.tsv")
   .await(analyze);
 
@@ -274,7 +318,7 @@ textFigure6.exit().attr("class", "exit")
       
     svgFigure6.select(".r-label")			
 			.text("Correlation coefficient: r=" + thecor.toFixed(2))//leastSquaresCoeff[2])
-			.style("font-size","16px").style("fill","#777777")
+			.style("font-size","16px")
 			.transition()
 			.ease("linear")
 			.delay(function(d, i) {
@@ -418,43 +462,6 @@ data1.forEach(function(d) {
         			d.Values=+d.Values;
         			d.CHX=d.CHX
     			});  			
-
-svgFigure6C.append("g").append("line")
-		.attr("class", "r-line").attr("stroke", "grey")
- 					.style("stroke-width",0.9);		
-    					
-svgFigure6C.append("g")
-      				.attr("class", "x axis")
-      				.attr("transform", "translate(0," + heightFigure6C + ")")
-      				.call(xAxisFigure6C);
-    
-svgFigure6C.append("text")
-    .attr("class", "xaxis_label")
-      					.style("text-anchor", "end")
-      					.attr("dx", "-.8em")
-      					.attr("dy", "-.55em")
-      					.attr("transform", "rotate(0)" )
-      					.attr("transform", "translate(17," +15+ ")")
-      					.style("font-size","12px");
-      					
- 
- svgFigure6nC.append("g").append("line")
-		.attr("class", "r-line2").attr("stroke", "grey")
- 					.style("stroke-width",0.9);		
-    					
-svgFigure6nC.append("g")
-      				.attr("class", "x axis")
-      				.attr("transform", "translate(0," + heightFigure6C + ")")
-      				.call(xAxisFigure6nC);
-    
-svgFigure6nC.append("text")
-    .attr("class", "xaxislabel")
-      					.style("text-anchor", "end")
-      					.attr("dx", "-.8em")
-      					.attr("dy", "-.55em")
-      					.attr("transform", "rotate(0)" )
-      					.attr("transform", "translate(17," +15+ ")")
-      					.style("font-size","12px");
       					
       					    					
 //update function for the second panel     			
@@ -543,7 +550,7 @@ textFigure6.exit().attr("class", "exit")
 			.delay(function(d, i) {
 					return i / data.length * 500;
 			})
-		.duration(250)
+		.duration(500)
 		.call(xAxisFigure6C);
 		
 svgFigure6C.select(".xaxis_label")
@@ -552,7 +559,7 @@ svgFigure6C.select(".xaxis_label")
 			.delay(function(d, i) {
 					return i / data.length * 500;
 			})
-			.duration(250);
+			.duration(500);
 
 		
 svgFigure6C.select(".r-line")
@@ -571,7 +578,9 @@ svgFigure6C.select(".r-line")
             .attr("y1", 0)
             .attr("y2", heightFigure6C).style("stroke-width",2)
       		.style("stroke", "grey");	     
-					
+
+
+      					
 }; //update function 2
 
 
@@ -630,7 +639,7 @@ var textFigure6 = svgFigure6nC.selectAll("rect")
       .attr("x", function(d) { return xFigure6nC(d.Values); })
       				.attr("width", xFigure6nC.rangeBand())
       				.attr("y", function(d) { return yFigure6nC(d.Counts); })
-      				.attr("height", function(d) { return heightFigure6C - yFigure6nC(d.Counts)-paddingxFigure6C; }).style("fill", "#bcbddc").style("opacity", .65)  
+      				.attr("height", function(d) { return heightFigure6C - yFigure6nC(d.Counts)-paddingxFigure6C; }).style("fill", "#bcbddc").style("opacity", .65)
       //.text(function(d) { return d; })
     .transition()
   			.ease("linear")
@@ -641,7 +650,7 @@ var textFigure6 = svgFigure6nC.selectAll("rect")
       .attr("x", function(d) { return xFigure6nC(d.Values); })
       				.attr("width", xFigure6nC.rangeBand())
       				.attr("y", function(d) { return yFigure6nC(d.Counts); })
-      				.attr("height", function(d) { return heightFigure6C - yFigure6nC(d.Counts)-paddingxFigure6C; }).style("fill", "#bcbddc").style("opacity", .65)  ;
+      				.attr("height", function(d) { return heightFigure6C - yFigure6nC(d.Counts)-paddingxFigure6C; }).style("fill", "#bcbddc").style("opacity", .65);
 
 
 textFigure6.exit().attr("class", "exit")
@@ -712,5 +721,5 @@ function changeit6() {
 
 }; //end of analyze function
 
-// }; //change form
+ }; //change form
 }, 500); //timeout
