@@ -19,7 +19,7 @@ var marginFigure3 = {top: 0, right: 80, bottom: 70, left: 100},
   					
   					
   	var colorFigure32 = d3.scale.category20()
-					.domain([ "Data", "FF", "CHX"])
+					.domain([ "100", "0", "1"])
   					.range(["rgb(239,138,98)", "#a1d99b", "#9ecae1"]);
   					
   					
@@ -34,6 +34,11 @@ var marginFigure3 = {top: 0, right: 80, bottom: 70, left: 100},
     	.orient("left").ticks(10);
 
 	var areaFigure3 = d3.svg.area()
+    .x(function(d) { return xFigure3(d.Position); })
+    .y0(function(d) { return yFigure3(d.frequencies+d.frequenciesSD); })
+    .y1(function(d) { return yFigure3(d.frequencies-d.frequenciesSD); });
+    
+    var areaFigure33 = d3.svg.area()
     .x(function(d) { return xFigure3(d.Position); })
     .y0(function(d) { return yFigure3(d.frequencies+d.frequenciesSD); })
     .y1(function(d) { return yFigure3(d.frequencies-d.frequenciesSD); });
@@ -100,7 +105,7 @@ var marginFigure3 = {top: 0, right: 80, bottom: 70, left: 100},
     		d.Position = +d.Position;
     		d.Length= +d.Length;
     		d.Frame= +d.Frame;
-    		d.CHX= d.CHX;
+    		d.CHX= +d.CHX;
   		});
     
 
@@ -114,9 +119,10 @@ var datanew = data.filter(function(d) {
     });
  
 legendSpace = heightFigure3/datanew.length;
+console.log("re");
+console.log(datanew);
 
-
-colorFigure3.domain(d3.keys(datanew[0]).filter(function(key) { return (key !== "Length" & key !=="Position" & key !== "Frame" & key !== "CHX" & key !== "ASD" & key !== "CSD" & key !== "GSD" & key !== "TSD"); }));
+// colorFigure3.domain(d3.keys(datanew[0]).filter(function(key) { return (key !== "Length" & key !=="Position" & key !== "Frame" & key !== "CHX" & key !== "ASD" & key !== "CSD" & key !== "GSD" & key !== "TSD"); }));
 
 
   	var nucleotide = colorFigure3.domain().map(function(name) {
@@ -141,6 +147,18 @@ colorFigure3.domain(d3.keys(datanew[0]).filter(function(key) { return (key !== "
       		 		
 var freqFigure3 = svgFigure3.selectAll(".nucleotide")
       		.data(nucleotide);
+      		
+      		freqFigure3.select("g .nucleotide .line")
+  			.transition()
+  			.ease("linear")
+			.delay(function(d, i) {
+					return i / datanew.length * 500;
+			})
+			.duration(400)
+      		.attr("class", "line")
+      		.attr("id", function(d) { return "tag"+d.name; }) // assign ID
+      		.attr("d", function(d) { return svglineFigure3(d.values); })
+      		.style("stroke", function(d) { return colorFigure3(d.name); });
 
 		freqFigure3.select("g .nucleotide .area")
       		.transition()
@@ -152,21 +170,10 @@ var freqFigure3 = svgFigure3.selectAll(".nucleotide")
       		.attr("class", "area")
       		.attr("id", function(d) { return "tag2"+d.name; }) // assign ID
       		.attr("d", function(d) { return areaFigure3(d.values); })
-      		.style("stroke-fill", function(d) { return colorFigure3(d.name); })
-      		.style("stroke-opacity", 0.2);   
+      		.style("fill", function(d) { return colorFigure3(d.name); })
+      		.style("fill-opacity", 0.5);   
       		
       		
-  		freqFigure3.select("g .nucleotide .line")
-  			.transition()
-  			.ease("linear")
-			.delay(function(d, i) {
-					return i / datanew.length * 500;
-			})
-			.duration(400)
-      		.attr("class", "line")
-      		.attr("id", function(d) { return "tag"+d.name; }) // assign ID
-      		.attr("d", function(d) { return svglineFigure3(d.values); })
-      		.style("stroke", function(d) { return colorFigure3(d.name); });
       		
       		freqFigure3.select("g .nucleotide text")
   			.transition()
@@ -189,20 +196,20 @@ var freqFigure3 = svgFigure3.selectAll(".nucleotide")
       		var freqgroup=freqFigure3.enter().append("g").attr("class", "nucleotide");
       		 
       //add path to line group	
-            	freqgroup.append("path")
+            	
+      					
+  			freqgroup.append("path")
+      		.attr("class", "line")
+      		.attr("id", function(d) { return "tag"+d.name; }) // assign ID
+      		.attr("d", function(d) { return svglineFigure3(d.values); })
+      		.style("stroke", function(d) { return colorFigure3(d.name); });
+      		
+	freqgroup.append("path")
       				.attr("class", "area")
       				.attr("id", function(d) { return "tag2"+d.name; }) // assign ID
       				.attr("d",  function(d) { return areaFigure3(d.values); })
       				.style("fill", function(d) { return colorFigure3(d.name); })
       				.style("fill-opacity", 0.2);
-      					
-  			freqgroup.append("path")
-      		.attr("class", "line")
-      		.attr("id", function(d) { return "tag2"+d.name; }) // assign ID
-      		.attr("d", function(d) { return svglineFigure3(d.values); })
-      		.style("stroke", function(d) { return colorFigure3(d.name); });
-      		
-	
             
       	freqgroup.append("text")
   		.datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
@@ -223,7 +230,7 @@ var freqFigure3 = svgFigure3.selectAll(".nucleotide")
                  console.log(active);
                  console.log(newOpacity); 
                  //Hide or show the elements based on the ID
-                 d3.select("#tag"+name.name)
+                 d3.select("#tag3"+name.name)
                      .transition().duration(100) 
                      .style("opacity", newOpacity);
                 if (name.name=="A"){d3.select("#tagA")
@@ -340,7 +347,7 @@ var nucleotide = d3.nest()
 legendSpace2 = heightFigure3/value2;
 
 
-colorFigure32.domain(["FF", "CHX", "Data"]);
+
 
        xFigure3.domain(d3.extent(datanew3, function(d) { return d.Position; }));
 
@@ -363,10 +370,10 @@ var freqFigure3 = svgFigure3.selectAll(".nucleotide")
 			})
 			.duration(400)
       		.attr("class", "area")
-      		.attr("id", function(d) { return "tag"+d.key; }) // assign ID
-      		.attr("d", function(d) { return areaFigure3(d.values); })
-      		.style("stroke-fill", function(d) { return colorFigure32(d.key); })
-      		.style("stroke-opacity", 0.2);
+      		.attr("id", function(d) { return "tag2"+d.key; }) // assign ID
+      		.attr("d", function(d) { return areaFigure33(d.values); })
+      		.style("fill", function(d) { return colorFigure32(d.key); })
+      		.style("fill-opacity", 0.5);
         
 
   freqFigure3.select("g .nucleotide .line")
@@ -393,9 +400,9 @@ var freqFigure3 = svgFigure3.selectAll(".nucleotide")
       		.attr("y", 30)
       		.attr("class", "legend")
       		.text(function(d) { 
+      		if(d.key==100){return "Data"};
       		if(d.key==0){return "FF"};
       		if(d.key==1){return "CHX"};
-      		if(d.key==100){return "Data"};
       		 })
       		.style("stroke", function(d) { return colorFigure32(d.key); })
       		.style("fill", function(d) { return colorFigure32(d.key); })
@@ -410,7 +417,7 @@ var freqFigure3 = svgFigure3.selectAll(".nucleotide")
       				.attr("id", function(d) { return "tag"+d.key; }) // assign ID
       				.attr("d",  function(d) { return areaFigure3(d.values); })
       				.style("fill", function(d) { return colorFigure32(d.key); })
-      				.style("fill-opacity", 0.2);
+      				.style("fill-opacity", 0.5);
       				
   			freqgroup2.append("path")
       		.attr("class", "line")
@@ -427,12 +434,12 @@ var freqFigure3 = svgFigure3.selectAll(".nucleotide")
       		.attr("y", 30)
       		.attr("class", "legend")
       		.text(function(d) { 
+      		if(d.key==100){return "Data"};
       		if(d.key==0){return "FF"};
       		if(d.key==1){return "CHX"};
-      		if(d.key==100){return "Data"};
       		 })
-      		.style("stroke", function(d) { return colorFigure32(["Data", "FF", "CHX"]); })
-      		.style("fill", function(d) { return colorFigure32(["Data", "FF", "CHX"]); })
+      		.style("stroke", function(d) { return colorFigure32(d.key); })
+      		.style("fill", function(d) { return colorFigure32(d.key); })
       		.style("font-size","20px")
 
                  
@@ -490,7 +497,7 @@ var freqFigure3 = svgFigure3.selectAll(".nucleotide")
              
 }; //updateCHX
 
-    
+
  updateFigure3(data, 0, 28, 100);   
     
     
@@ -516,7 +523,6 @@ function changeit3() {
 		updateFigure3(data, frames, nval, 100);
 	}
 	if ( display1 =="block"){
-
 		var nucleo= d3.select('input[name="inputsrc3"]:checked').node().value;
 		updateFigure3CHX(data, frames, nval, nucleo);
 

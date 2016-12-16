@@ -17,7 +17,7 @@ var marginFigure3 = {top: 0, right: 60, bottom: 70, left: 100},
   					
   					
   	var colorFigure32 = d3.scale.category20()
-					.domain([ "Data", "FF", "CHX"])
+					.domain([ "100", "0", "1"])
   					.range(["rgb(239,138,98)", "#a1d99b", "#9ecae1"]);
   					
   					
@@ -100,7 +100,7 @@ function change3() {
     		d.Position = +d.Position;
     		d.Length= +d.Length;
     		d.Frame= +d.Frame;
-    		d.CHX= d.CHX;
+    		d.CHX= +d.CHX;
   		});
     
 var nrLength=data[data.length-1].Position;
@@ -114,7 +114,7 @@ var datanew = data.filter(function(d) {
 legendSpace = heightFigure3/datanew.length;
 
 
-colorFigure3.domain(d3.keys(datanew[0]).filter(function(key) { return (key !== "Length" & key !=="Position" & key !== "Frame" & key !== "CHX" & key !== "ASD" & key !== "CSD" & key !== "GSD" & key !== "TSD"); }));
+// colorFigure3.domain(d3.keys(datanew[0]).filter(function(key) { return (key !== "Length" & key !=="Position" & key !== "Frame" & key !== "CHX" & key !== "ASD" & key !== "CSD" & key !== "GSD" & key !== "TSD"); }));
 
 
   	var nucleotide = colorFigure3.domain().map(function(name) {
@@ -340,8 +340,6 @@ var nucleotide = d3.nest()
 legendSpace2 = heightFigure3/value2;
 
 
-colorFigure32.domain(["FF", "CHX", "Data"]);
-
        xFigure3.domain(d3.extent(datanew3, function(d) { return d.Position; }));
 
   		yFigure3.domain([
@@ -365,8 +363,8 @@ var freqFigure3 = svgFigure3.selectAll(".nucleotide")
       		.attr("class", "area")
       		.attr("id", function(d) { return "tag"+d.key; }) // assign ID
       		.attr("d", function(d) { return areaFigure3(d.values); })
-      		.style("stroke-fill", function(d) { return colorFigure32(d.key); })
-      		.style("stroke-opacity", 0.2);
+      		.style("fill", function(d) { return colorFigure32(d.key); })
+      		.style("fill-opacity", 0.5);
         
 
   freqFigure3.select("g .nucleotide .line")
@@ -412,7 +410,7 @@ var freqFigure3 = svgFigure3.selectAll(".nucleotide")
       				.attr("id", function(d) { return "tag"+d.key; }) // assign ID
       				.attr("d",  function(d) { return areaFigure3(d.values); })
       				.style("fill", function(d) { return colorFigure32(d.key); })
-      				.style("fill-opacity", 0.2);
+      				.style("fill-opacity", 0.5);
       						
   			freqgroup2.append("path")
       		.attr("class", "line")
@@ -433,8 +431,8 @@ var freqFigure3 = svgFigure3.selectAll(".nucleotide")
       		if(d.key==1){return "CHX"};
       		if(d.key==100){return "Data"};
       		 })
-      		.style("stroke", function(d) { return colorFigure32(["Data", "FF", "CHX"]); })
-      		.style("fill", function(d) { return colorFigure32(["Data", "FF", "CHX"]); })
+      		.style("stroke", function(d) { return colorFigure32(d.key); })
+      		.style("fill", function(d) { return colorFigure32(d.key); })
       		.style("font-size","20px");
                  
  
@@ -492,10 +490,17 @@ var freqFigure3 = svgFigure3.selectAll(".nucleotide")
 }; //updateCHX
 
 
+ updateFigure3(data, 0, 28, 100);    
     
- updateFigure3(data, d3.select('input[name="inputsrc1"]:checked').node().value, d3.select("#nValue").node().value, 100);   
     d3.selectAll(".fig3radio")
       .on("change", changeit3);
+      
+    d3.select("#Compare")
+  				.on("click", changeit3);
+  	d3.select("#reset")
+  				.on("click",  function() {
+  				updateFigure3(data, 0, 28, 100);
+  			});
 	
 function changeit3() {
 
@@ -532,10 +537,7 @@ var display1=document.getElementById('fig3radiotest').style.display;
   		
   	};
   	
-  d3.select("#Compare")
-  				.on("click",  function() {
-  				
-  			});
+
   						
   d3.select("#reset")
   				.on("click",  function() {
