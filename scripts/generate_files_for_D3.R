@@ -284,10 +284,12 @@ write.table(out_df,file=outfile,sep="\t",row=F,col=T,quote=F)
 bg <- read.table("./F7_BG.tsv",h=T)
 out <- lapply(genes, function(x){a <- h5read(fid,paste("/",x,"/",dataset,"/reads/data",sep="")); l<- dim(a)[2]-450; s <- sum(a[,226:(dim(a)[2]-225)]);c(s,l)})
 a <- matrix(unlist(out),ncol=2,byrow=T)
-b <- a[,1]*1e9/(sum(a[,1])*a[,2])
+b <- log10(a[,1]*1e9/(sum(a[,1])*a[,2]))
 
 names(b) <- genes
 outfile <- paste("F7_",dataset,".tsv",sep="")
 
 bg$Data <- b
+bg$Corr <- 0
+bg$Corr[a[,1]>=64] <- 1
 write.table(bg,file=outfile,sep="\t",row=F,col=T,quote=F)
