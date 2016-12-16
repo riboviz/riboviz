@@ -107,7 +107,7 @@ function analyze(error, data, data1) {
 
 
   	data.forEach(function(d) {
-    d.RPF = +d.RPF;
+    d.RPF = +d.Data;
     d.Length = +d.Length;
     d.FEatg = +d.FE_atg;
     d.FEcap = +d.FE_cap;
@@ -115,6 +115,7 @@ function analyze(error, data, data1) {
     d.utr = +d.utr;
     d.gc = +d.utr_gc;
     d.polyA = +d.polyA;
+    d.Corr=+d.Corr;
   });
 
 	
@@ -137,9 +138,11 @@ var  data = data.map( function (d) {
     if(value2=="polyA"){choosethetwo=d.polyA};
     return { 
       d1: +choosetheone,
-      d2: +choosethetwo}; 
+      d2: +choosethetwo,
+      Corr: +d.Corr}; 
 });
     
+ console.log(data);
    
     
 	xFigure7.domain(d3.extent(data, function(d) { return d.d1; })).nice();
@@ -197,15 +200,14 @@ textFigure7.exit().attr("class", "exit")
       .style("fill-opacity", 1e-6)
       .remove();
       
-	  
-		var xSeries = data.map(function(d) { return d.d1; });
-		xSeriesreg=xSeries.sort(function(a, b) {
+	  var datafiltered = data.filter(function(d, key) { 
+            return (d.Corr==1 )}); 
+	  var xSeries = datafiltered.map(function(d) { return d.d1; });
+	  xSeriesreg=xSeries.sort(function(a, b) {
   				return Number(a) - Number(b);
 				});
-
-
-	var xSeriesreal = data.map(function(d) { return d.d1; });
-	var ySeries = data.map(function(d) { return d.d2; });
+	var xSeriesreal = datafiltered.map(function(d) { return d.d1; });
+	var ySeries = datafiltered.map(function(d) { return d.d2; });
 	thecorv=[xSeriesreal, ySeries];
 	var thecor=pearsonCorrelation(thecorv,0,1);
 	var leastSquaresCoeff = leastSquares(xSeriesreal, ySeries);

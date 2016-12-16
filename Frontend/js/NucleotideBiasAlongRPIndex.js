@@ -119,8 +119,7 @@ var datanew = data.filter(function(d) {
     });
  
 legendSpace = heightFigure3/datanew.length;
-console.log("re");
-console.log(datanew);
+
 
 // colorFigure3.domain(d3.keys(datanew[0]).filter(function(key) { return (key !== "Length" & key !=="Position" & key !== "Frame" & key !== "CHX" & key !== "ASD" & key !== "CSD" & key !== "GSD" & key !== "TSD"); }));
 
