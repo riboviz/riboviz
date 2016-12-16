@@ -112,7 +112,8 @@ var datanew = data;
   
 
   				xFigure5.domain(datanew.map(function(d) { return d.Codon; }));
-  				yFigure5.domain([d3.min(datanew, function(d) { return d.Mean-d.SD; }),d3.max(datanew, function(d) { return d.Mean+d.SD; })]);
+  				 yFigure5.domain([d3.min(datanew, function(d) { return d.Mean-d.SD; }),d3.max(datanew, function(d) { return d.Mean+d.SD; })]);
+  				//yFigure5.domain([-2, 2]);
 
 
 var freqFigure5 = svgFigure5.selectAll(".nucleotide")
@@ -175,7 +176,7 @@ var lineSvg5=freqFigure5.enter().append("g").attr("class", "nucleotide");
 
       lineSvg5.append("text")
     			.datum(function(d) { return {name: d.key, value: d.values[d.values.length - 1]}; })
-				.attr("transform", function(d, i) { return "translate(" + ((widthFigure5-paddingFigure5l*11/10)) + "," + ((legendSpace5/7)+i*legendSpace5/7)+ ")"; })
+				.attr("transform", function(d, i) { return "translate(" + ((widthFigure5-0.5*paddingFigure5l)) + "," + ((legendSpace5/7)+i*legendSpace5/7)+ ")"; })
       			.attr("x", paddingFigure5l/5)
       			.attr("y", 30)
       			.attr("class", "legend")

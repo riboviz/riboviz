@@ -127,12 +127,12 @@ svgFigure6.append("g")
         svgFigure6.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+(0-paddingFigure6)+","+(heightFigure6/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
-            .text("");
+            .text("Codon-specific ribosome density").style("font-size","16px").style("fill","#777777");
 
        svgFigure6.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure6/2) +","+(heightFigure6+paddingFigure6)+")")  // centre below axis
-            .text("A, P or E").style("font-size","16px").style("fill","#777777");
+            .text("1/tRNA abundances").style("font-size","16px").style("fill","#777777");
         
         svgFigure6C.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
@@ -263,7 +263,7 @@ textFigure6.exit().attr("class", "exit")
 	var xSeriesreal = data.map(function(d) { return d.d1; });
 	var ySeries = data.map(function(d) { return d.d2; });
 	thecorv=[xSeriesreal, ySeries];
-	var thecor=pearsonCorrelation(thecorv,0,1);
+	var thecor=spearmanCorrelation(thecorv,0,1);
 	var leastSquaresCoeff = leastSquares(xSeriesreal, ySeries);
 	var x1 = xSeriesreg[0];
 	var y1 = leastSquaresCoeff[0] *x1+ leastSquaresCoeff[1];
@@ -378,7 +378,39 @@ function pearsonCorrelation(prefs, p1, p2) {
 
   return num / den;
 };
+function spearmanCorrelation(multiList, p1, p2){
+    N=multiList[p1].length;
+    order=[];
+    sum=0;
 
+    for(i=0;i<N;i++){
+        order.push([multiList[p1][i], multiList[p2][i]]);
+    }
+
+    order.sort(function(a,b){
+        return a[0]-b[0]
+    });
+
+    for(i=0;i<N;i++){
+        order[i].push(i+1);
+    }
+
+    order.sort(function(a,b){
+        return a[1]-b[1]
+    });
+
+    for(i=0;i<N;i++){
+        order[i].push(i+1);
+    }
+    for(i=0;i<N;i++){
+        sum+=Math.pow((order[i][2])-(order[i][3]), 2);
+
+    }
+
+    r=1-(6*sum/(N*(N*N-1)));
+
+    return r;
+}
 
 
 // returns slope, intercept and r-square of the line

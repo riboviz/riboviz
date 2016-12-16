@@ -183,6 +183,122 @@ At the end of the backend pipeline, HDF5 files are exported containing .... Thes
 	</div>
 </div>
 
+
+<p>The <strong>RiboViz</strong> web application is available at www.riboviz.org. Through this web framework, the user can interactively explore publicly available ribosome profiling datasets using JavaScript/D3 (Bostock et al., 2011), <a href="http://jquery.com">JQuery</a> and <a href="http://getbootstrap.com">Boostrap</a> for metagenomic analyses and R/Shiny for the gene-specific analyses. The visualization framework of <strong>RiboViz</strong> allows the user to select from available <strong>RiboSeq</strong> datasets and visualize different aspects of the data.</p>
+<p>In short, the framework allows visualization of the expected three-nucleotide periodicity along the ORFs, accumulation of footprinting reads at the start and stop codons, the distribution of ribosomal-footprint lengths, the position-specific nucleotide frequencies of all mapped reads, as well as the codon-specific densities of ribosomes. The display also shows the correlation between gene-specific estimates of ribosome densities and various sequence-based features. The user can interactively explore the data and download parsed datasets used to generate each figure.</p>
+<p>The plots also allow the user to compare data with aggregates of other data sets. Ribosome profiling has been shown to exhibit experimental abnormalities that need to be tested for when analyzing a new data set. For example, translocation elongation inhibitors (such as cycloheximide) can alter the local distribution of ribosomes on the mRNA. An advantage of using cycloheximide (CHX) as a pre-treatment is that it prevents the runoff of ribosomes that can otherwise occur during harvesting. However, this treatment can also have some undesirable effects and can produce aberrant snapshots of where the ribosomes are stalling. This happens especially near the translation start and stop codons (ribosome accumulation at start codons and depletion at stop codons) and it can lead to spurious results. In addition, because CHX binding to the 80S ribosome is both non-instantaneous and reversible, the kinetics of CHX binding and dissociation presumably allow newly initiated ribosomes to translocate beyond the start codon. Another possible effect of CHX treatment is that ribosomes might preferentially arrest at specific codons that do not necessarily correspond to codons that are more abundantly occupied by ribosomes in untreated cells.</p>
+<p>Currently, the literature consists of a mix of studies, some which use cycloheximide and some which use flash freezing. In general, each experimental step can potentially cause spurious results and distortions in the data output. Three of the <strong>RiboViz</strong> visualizations will surface potential biases in the data by providing the user the ability to compare and contrast different datasets obtained by different experimental conditions.</p>
+<p>In addition to the metagenomic analyses, an R/Shiny integration allows the user to select a gene of interest and compare ribosomal densities along its ORF with up to three other data sets.</p>
+<h2 id="required-software">Required software</h2>
+<ul>
+<li><a href="">Cutadapt</a></li>
+<li><a href="">Bowtie</a></li>
+<li>R packages</li>
+<li><a href="">Rsamtools</a></li>
+<li><a href="">rhdf5</a></li>
+<li><a href="">rtracklayer</a></li>
+<li><a href="">parallel</a></li>
+<li><a href="">RcppRoll</a></li>
+<li><a href="">data.table</a></li>
+</ul>
+<h2 id="input-files">Input files</h2>
+<p>Merge all fastq files from an experiment into a single fastq file <code>data.fq</code></p>
+<pre><code>cat file1.fq &gt;&gt; data.fq
+cat file2.fq &gt;&gt; data.fq
+.
+.
+.</code></pre>
+<h2 id="download-coding-and-rrna-sequences">Download coding and rRNA sequences</h2>
+<p>Download <em>S. cerevisiae</em> rRNA sequences from <a href="google.com">here</a>.</p>
+<p>Download <em>S. cerevisiae</em> coding sequences from <a href="google.com">here</a>.</p>
+<h2 id="generate-bowtie-indices">Generate <a href="">Bowtie</a> indices</h2>
+<p><a href="">Bowtie</a> indices will be used for mapping raw sequencing reads to either ribosomal RNA or ORFs in yeast.</p>
+<pre><code>bowtie-build rRNA.fa rRNA_bowtie
+bowtie-build Scer.fa Scer_bowtie</code></pre>
+<h3 id="trim-adapters-from-reads-using-cutadapt">Trim adapters from reads using <a href="">cutadapt</a></h3>
+<pre><code>cutadapt --trim-n -O 1 -m 5 -a &lt;3&#39; adapter&gt; -o data.trim.fq data.fq</code></pre>
+<h3 id="remove-reads-that-map-to-ribosomal-rnas-rrnas">Remove reads that map to ribosomal RNAs (rRNAs)</h3>
+<p>Map reads to rRNA allowing up to 2 mismatches using <a href="">Bowtie</a></p>
+<pre><code>bowtie -p &lt;#_of_cores&gt; -v 2 --un data.unmap.trim.fq ./rRNA_bowtie data.trim.fq -S data.rrna_map.sam</code></pre>
+<h3 id="map-non-rrna-reads-to-yeast-genome">Map non-rRNA reads to yeast genome</h3>
+<p>We map non-rRNA reads to the yeast genome in two steps. In the first step, we allow two mismatches between the read and the coding sequence. We trim the 5' nucleotide of a read if a mismatch occurs in the first (5' end) base of a read. These mismatches are likely due to the addition of untemplated bases in the 5' ends of reads by reverse transcriptase during cDNA synthesis (<a href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0085270">1</a>,<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4248317/">2</a>).</p>
+<blockquote>
+<p>First map with two allowed mismatches</p>
+</blockquote>
+<pre><code>bowtie -p &lt;#_of_cores&gt; -v 2 --best ./Scer_bowtie data.unmap.trim.fq -S data.Sc_map1.sam</code></pre>
+<blockquote>
+<p>Get all uniquely mapped reads</p>
+</blockquote>
+<pre><code>grep &quot;XA:i&quot; data.Sc_map1.sam &gt; data.Sc_map1_unq.sam</code></pre>
+<blockquote>
+<p>Trim 5' ends of reads with mismatches</p>
+</blockquote>
+<pre><code>perl trim_5p_mismatch.pl</code></pre>
+<blockquote>
+<p>Second map with a single mismatch</p>
+</blockquote>
+<pre><code>bowtie -p &lt;#_of_cores&gt; -v 1 -m 1 --best ./Scer_bowtie output.fq -S data.Sc_map2.sam</code></pre>
+<blockquote>
+<p>Convert output into .BAM files</p>
+</blockquote>
+<pre><code>cat data.Sc_map2.sam | grep -v XM | samtools view -Sb | samtools sort &gt; output.bam
+samtools index output.bam output.bai</code></pre>
+<p>For all subsequent analyses of ribosome footprinting and RNA-seq datasets, we first convert the BAM file into a Hierarchical Data Format (<a href="https://en.wikipedia.org/wiki/Hierarchical_Data_Format">HDF5</a>) format. HDF5 allows for rapid access to mapped reads of a particular length to any coding sequence. To learn more about accessing and manipulating HDF5 files in R, read <a href="">this</a>.</p>
+<h3 id="hdf5-file-architecture">HDF5 file architecture</h3>
+<p>The HDF5 file is organized in the following hierarchy <code>/&lt;Gene&gt;/&lt;Dataset&gt;/reads/data</code>. Snippet from an example HDF5 file is shown below.</p>
+<pre><code>                              group              name       otype  dclass       dim
+0                                 /           YAL001C   H5I_GROUP                  
+1                          /YAL001C 2016_Weinberg_RPF   H5I_GROUP                  
+2        /YAL001C/2016_Weinberg_RPF             reads   H5I_GROUP                  
+3  /YAL001C/2016_Weinberg_RPF/reads              data H5I_DATASET INTEGER 36 x 3980
+4                                 /           YAL002W   H5I_GROUP                  
+5                          /YAL002W 2016_Weinberg_RPF   H5I_GROUP                  
+6        /YAL002W/2016_Weinberg_RPF             reads   H5I_GROUP                  
+7  /YAL002W/2016_Weinberg_RPF/reads              data H5I_DATASET INTEGER 36 x 4322
+8                                 /           YAL003W   H5I_GROUP                  
+9                          /YAL003W 2016_Weinberg_RPF   H5I_GROUP                  
+10       /YAL003W/2016_Weinberg_RPF             reads   H5I_GROUP                  
+11 /YAL003W/2016_Weinberg_RPF/reads              data H5I_DATASET INTEGER 36 x 1118</code></pre>
+<p>The <code>data</code> table is an integer table with each rows representing a read length and columns representing nucleotide positions. The first row corresponds to reads of length 15 and the last row corresponds to reads of length 50. All reads are mapped to their 5' ends (see below).</p>
+<figure>
+<img src="http://gdurl.com/ztKk" alt="as" /><figcaption>as</figcaption>
+</figure>
+<h4 id="read-attributes">Read attributes</h4>
+<p>The <code>reads</code> group in <code>/&lt;Gene&gt;/&lt;Dataset&gt;/reads/data</code> have several attributes associated with it. These are summary statistics and other information about the gene and dataset within the <code>reads</code> group. The list of attributes are</p>
+<ul>
+<li><code>reads_total</code> : Sum of reads of all lenghts between -25 to +25 of a CDS</li>
+<li><code>buffer_left</code> : Number of nucleotides upstream of the start codon (ATG) - 250nt</li>
+<li><code>buffer_right</code> : Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) - 247nt</li>
+<li><code>start_codon_pos</code> : Positions corresponding to the start codon - (251,252,253)</li>
+<li><code>stop_codon_pos</code> : Positions corresponding to the stop codon (variable)</li>
+<li><code>reads_by_len</code> : Sum of reads between -25 to +25 of a CDS for each length</li>
+<li><code>lengths</code> : Lengths of mapped reads (15-50)</li>
+</ul>
+<h3 id="convert-bam-to-hdf5">Convert BAM to HDF5</h3>
+<blockquote>
+<p>Prerequisites</p>
+</blockquote>
+<ul>
+<li><code>BAM file</code> : Obtain from <a href="https://github.com/shahpr/RiboViz/wiki/3.-Mapping-mRNA-and-ribosome-protected-reads-to-genome">here</a></li>
+<li><code>GTF file</code> : Download from <a href="">here</a></li>
+<li>R packages</li>
+<li>parallels</li>
+<li>Rsamtools</li>
+<li>rhdf5</li>
+</ul>
+<blockquote>
+<p>Single core</p>
+</blockquote>
+<pre><code>R CMD BATCH &#39;--args dataset=&quot;&lt;dataset_name&gt;&quot; hdfile=&quot;&lt;hdf5_output_filename&gt;&quot; bamFile=&quot;&lt;BAM_filename&gt;&quot; gtfFile=&quot;&lt;GTF_filename&gt;&quot;&#39; bam_to_hdf5.R output.Rout</code></pre>
+<blockquote>
+<p>Multicore using <a href="">parallels</a></p>
+</blockquote>
+<pre><code>R CMD BATCH &#39;--args ncores=&quot;&lt;#_of_cores&gt;&quot; dataset=&quot;&lt;dataset_name&gt;&quot; hdfile=&quot;&lt;hdf5_output_filename&gt;&quot; bamFile=&quot;&lt;.BAM_filename&gt;&quot; gtfFile=&quot;&lt;GTF_filename&gt;&quot;&#39; bam_to_hdf5.R output.Rout</code></pre>
+<p>The following scripts will parse an HDF5 file and generate files for individual figures needed for D3 visualization.</p>
+
+
+
+
 <div class="row">
 	<div class="col-md-3"></div>
 	<div class="col-md-9">

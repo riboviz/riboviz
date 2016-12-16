@@ -104,7 +104,7 @@ var nucleotide = d3.nest()
         .key(function(d) {return d.BG;})
         .entries(datanew);
   		
- console.log(nucleotide);
+
  
  colorFigure4.domain(["Data", "FF", "CHX"]);
  legendSpace =  widthFigure4/nucleotide.length;
@@ -174,7 +174,7 @@ var freqFigure4 = svgFigure4.selectAll(".nucleotide")
   			freqgroup.append("path")
       		.attr("class", "line")
       		.attr("id", function(d) { return "tag"+d.key; }) // assign ID
-      		.attr("d", function(d) { console.log(d.values);return svglineFigure4(d.values); })
+      		.attr("d", function(d) { return svglineFigure4(d.values); })
       		.style("stroke", function(d) { return colorFigure4(d.key); });
   
    
@@ -201,7 +201,7 @@ var freqFigure4 = svgFigure4.selectAll(".nucleotide")
       		.style("fill", function(d) { return colorFigure4(d.name); })
       		.style("font-size","20px")
       		.on("click", function(name){
-      				console.log(name.name);
+      	
                  
                  //Determine if current line is visible 
                  var active   = name.active ? false : true,
