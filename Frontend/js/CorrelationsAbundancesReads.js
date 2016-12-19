@@ -304,7 +304,7 @@ textFigure6.exit().attr("class", "exit")
 				});
 
 
-	var xSeriesreal = data.map(function(d) { return d.d1; });
+	var xSeriesreal = data.map(function(d) { return d.d1; });       
 	var ySeries = data.map(function(d) { return d.d2; });
 	thecorv=[xSeriesreal, ySeries];
 	var thecor=spearmanCorrelation(thecorv,0,1);
