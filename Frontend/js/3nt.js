@@ -315,13 +315,19 @@ d3.select("#download1")
 		});
 
 //for the downloadALL button at the bottom of the page -- code Here
-var thefileDatasetALL=string.concat(year1, "_", author1,"_",thedataset1,".gz");		
+var thefileDatasetALL=string.concat(year1, "_", author1,"_",thedataset1,".tar.gz");		
 d3.select("#downloadALL")
 		.on("click", function (){
 			window.open(thefileDatasetALL);
 		});
 		
-		
+//for the downloadH5 button at the bottom of the page 
+var thefileDatasetALLH5=string.concat(year1,"/",author1,"/", thedataset1, "/", year1, "_", author1,"_",thedataset1,".h5");		
+d3.select("#downloadALLH5")
+		.on("click", function (){
+			window.open(thefileDatasetALLH5);
+		});
+				
 		
 
 }; //analyze
