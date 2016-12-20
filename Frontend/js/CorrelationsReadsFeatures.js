@@ -169,7 +169,10 @@ var  data = data.map( function (d) {
 });
     
    
-    
+    var opa = d3.scale.linear()
+            .domain([0, 1])
+            .range([0.4, 1]);
+            
 	xFigure7.domain(d3.extent(data, function(d) { return d.d1; }));
   	yFigure7.domain(d3.extent(data, function(d) { return d.d2; }));
   
@@ -197,7 +200,7 @@ var  data = data.map( function (d) {
       .attr("class", "enter")
       .attr("cx", function(d) { return xFigure7(d.d1); })
       .attr("cy", function(d) { return yFigure7(d.d2); })
-      .style("fill-opacity", 0.2)
+      .style("fill-opacity", function(d) { return opa(d.Corr); })
       .style("fill","rgb(166,206,227)")
       .attr("r", 3)
       .filter(function(d) { return !isNaN(d.d1) && !isNaN(d.d2)})
@@ -210,7 +213,7 @@ var  data = data.map( function (d) {
       .duration(750)
       .attr("cx", function(d) { return xFigure7(d.d1); })
       .attr("cy", function(d) { return yFigure7(d.d2); })
-      .style("fill-opacity", 1);
+      .style("fill-opacity", function(d) { return opa(d.Corr); });
       //.filter(function(d) { return !isNaN(d.d1) && !isNaN(d.d2)});
 
 

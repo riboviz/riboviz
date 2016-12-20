@@ -17,7 +17,7 @@ function isEmpty(str) {
 }
 
 d3.tsv("../../Data/AllData.tsv", function(error, data) {
-  		
+  	
   		if (error) throw error;
   		data.forEach(function(d) {
   			d.Year = +d.Year;

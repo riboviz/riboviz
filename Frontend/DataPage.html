@@ -106,7 +106,8 @@
 						<li class="dropdown" role="presentation">
 						
 							<a href="HelpPage.html" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-								Help	
+								Help
+								</a>	
 						</li>
 
 					</ul>
@@ -155,7 +156,7 @@
 		<label class="col-xs-4 control-label">Choose study from</label>
 			<div class="col-xs-8 controls">
 			<select id="yearform" name="yearform" class="form-control form-control2">
-			<option value="0"> year </option>
+            <option value="0"> year </option>
 			<option value="2009">2009</option>
 			<option value="2012">2012</option>
 			<option value="2013">2013</option>
@@ -225,7 +226,7 @@
   <div class="col-md-4">
       <h4>Nucleotide periodicity of mapped reads</h4>
 	<p> All mapped reads are aligned by their 5' ends. Ribosome-footprint reads exhibit a three-nucleotide periodicity
-	along the ORF. Footprinting reads also show accumulation at the start and codon codons. </p>
+	along the ORF. Footprinting reads also show accumulation at the start and end codons. </p>
 <button id="download1" type=button class="btn btn-default">Download data</button>
     </div>
     <div class="col-md-8" >
@@ -261,12 +262,12 @@
 <div class="container">
   <div class="row">
     <div class="col-md-4">
-      <h4> Position-specific distribution of reads.</h4>
+      <h4> Position-specific distribution of reads</h4>
 	<p> Metagene analyses of RPF and RNA-seq reads.
  Mapped reads at each position (codon for RPF and nucleotide for mRNA) are normalized by the mean within each ORF, and then averaged with
 	equal weight for each position across all ORFs.
 	The size of the RPF `ramp' varies between studies and can be largely attributed to use of CHX pre-treatment. 
-	Each dataset is compated with an average of representative studies with and without CHX pre-treatment. 
+	Each dataset is compared with an average of representative studies with and without CHX pre-treatment. 
 	Shaded areas represent standard errors around the mean lines.</p>
 			 
 			 
@@ -296,7 +297,7 @@
 <div class="container">
   <div class="row">
     <div class="col-md-4">
-      <h4> Excess codon-specific RPF reads in 5' ends of ORFs.</h4>
+      <h4> Excess codon-specific RPF reads in 5' ends of ORFs</h4>
 	<p> For each of the codons, densities of RPFs with
 	ribosomal A sites mapping to that codon were calculated using either only the ramp region of each
 	ORF (codons 1-200) or the remainder of each ORF. Datasets with CHX pre-treatment typically have
@@ -321,7 +322,7 @@
     <div class="col-md-4">
           <div class="bigspacer"></div>
       <div class="bigspacer"></div>
-      <h4> Nucleotide frequencies along mapped reads.</h4>
+      <h4> Nucleotide frequencies along mapped reads</h4>
 			 <p> All mapped reads of a particular length are aligned and nucleotide frequencies are estimated at each position. </p>
 	
 		 
@@ -472,9 +473,11 @@
 		</div>
 	</div>
 	<div class="col-md-9" align="justify">
-	
+	<p> Download  .tar.gz file. </p>
 		 <button id="downloadALL" type=button class="btn btn-default">Download dataset</button>
-		
+		 <div class="spacer"></div>
+	<p> Download  .h5 file. </p>
+		 <button id="downloadALLH5" type=button class="btn btn-default">Download dataset H5 format</button>	
 			
 	</div>
 </div>
@@ -527,6 +530,7 @@
 <script src="/Frontend/js/ExcessCodonSpecificRPF.js"></script>
 <script src="/Frontend/js/CorrelationsReadsFeatures.js"></script>
 <script src="/Frontend/js/CorrelationsAbundancesReads.js"></script>
+
 
 
 

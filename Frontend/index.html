@@ -86,7 +86,7 @@
 						<span class="icon-bar"></span>
 					</button>
 
-					<a class="navbar-brand" href="/Frontend/index.html">
+					<a class="navbar-brand" href="https://riboviz.org/">
 						<div class="navtitle">
 							<span class="c4">r</span><span class="c4">i</span><span class="c4">b</span><span class="c4">o</span><span class="c7">v</span><span class="c7">i</span><span class="c7">z</span>
 						</div>
@@ -119,12 +119,13 @@
 						<li class="dropdown" role="presentation">
 						
 							<a href="HelpPage.html">
-								Help	
+								Help
+							</a>	
 						</li>
 
 					</ul>
 										
-						<a class="navbar-brand" href="/"></a>
+<!-- 						<a class="navbar-brand" href="/"></a> -->
 					
 <!-- 
 <ul class="nav navbar-nav navbar-left">
@@ -183,7 +184,7 @@
   <div class="col-md-4">
       <h4>Nucleotide periodicity of mapped reads</h4>
 	<p> All mapped reads are aligned by their 5' ends. Ribosome-footprint reads exhibit a three-nucleotide periodicity
-	along the ORF. Footprinting reads also show accumulation at the start and codon codons.
+	along the ORF. Footprinting reads also show accumulation at the start and end codons.
 	 </p>
 
     </div>
@@ -205,7 +206,7 @@
 <div class="col-md-4">
     <div class="spacer"></div>
       <h4>Read count histogram</h4>
-      <p> Distribution of lengths of reads mapped to coding sequences. </p>
+      <p> Distribution of lengths of reads mapped to coding sequences </p>
           <div class="bigspacer"></div>
 	</div>
 	 <div class="col-md-8" class="ReadCountHistogram" id="ReadCountHistogram"></div> 
@@ -218,12 +219,12 @@
 <div class="container">
   <div class="row">
     <div class="col-md-4">
-      <h4> Position-specific distribution of reads.</h4>
+      <h4> Position-specific distribution of reads</h4>
 	<p> Metagene analyses of RPF and RNA-seq reads.
  Mapped reads at each position (codon for RPF and nucleotide for mRNA) are normalized by the mean within each ORF, and then averaged with
 	equal weight for each position across all ORFs.
 	The size of the RPF `ramp' varies between studies and can be largely attributed to use of CHX pre-treatment. 
-	Each dataset is compated with an average of representative studies with and without CHX pre-treatment. 
+	Each dataset is compared with an average of representative studies with and without CHX pre-treatment. 
 	Shaded areas represent standard errors around the mean lines.
 			 Select either 3' or 5' ends below :
 <form>
@@ -242,7 +243,7 @@
 <div class="container">
   <div class="row">
     <div class="col-md-4">
-      <h4> Excess codon-specific RPF reads in 5' ends of ORFs.</h4>
+      <h4> Excess codon-specific RPF reads in 5' ends of ORFs</h4>
 	<p> For each of the codons, densities of RPFs with
 	ribosomal A sites mapping to that codon were calculated using either only the ramp region of each
 	ORF (codons 1-200) or the remainder of each ORF. Datasets with CHX pre-treatment typically have
@@ -260,7 +261,7 @@
     <div class="col-md-4">
           <div class="bigspacer"></div>
       <div class="bigspacer"></div>
-      <h4> Nucleotide frequencies along mapped reads.</h4>
+      <h4> Nucleotide frequencies along mapped reads</h4>
 			 <p> All mapped reads of a particular length are aligned and nucleotide frequencies are estimated at each position. </p>
 			 
  <div class="spacer"></div>   
@@ -411,7 +412,7 @@
 		</div>
 	</div>
 	<div class="col-md-9" align="justify">
-		<p> Analyses of mRNA abundances have been used to gain insight into almost every area of modern biology.  But ultimately, it is protein synthesis that is central to almost every function of the cell. Even though mRNA expression have been used as a proxy for protein production and ultimately molecular function, the correlation between mRNA and protein levels has been shown to be quite weak, likely driven by post-transcriptional regulation. <b>Ribosome profiling (RiboSeq)</b> is a novel technique to study the process and output of translation, the next obvious step following analyses done at the transcription level.  At the core of this technique is the observation that a ribosome translating a fragment of mRNA protects around 30 nucleotides of this mRNA from nuclease activity.  High-throughput sequencing of these ribosome protected fragments (called ribosome footprints) offers a precise record of the number and location of the ribosomes at the time at which translation is stopped. Mapping the position of the ribosome protected fragments indicates the translated regions within the transcriptome.  Moreover, ribosomes spend different periods of time at different positions, leading to variation in the footprint density along the mRNA transcript. This provides an estimate of how much protein is being produced from each mRNA. Importantly, ribosome profiling is as precise and detailed as RNA sequencing. Even in a short time, since its introduction in 2009, ribosome profiling has been playing a key role in driving biological discovery. </p>
+		<p> Analyses of mRNA abundances have been used to gain insight into almost every area of modern biology.  But ultimately, it is protein synthesis that is central to almost every function of the cell. Even though mRNA expression have been used as a proxy for protein production and ultimately molecular function, the correlation between mRNA and protein levels has been shown to be quite weak, likely driven by post-transcriptional regulation. <b>Ribosome profiling</b> is a novel technique to study the process and output of translation, the next obvious step following analyses done at the transcription level.  At the core of this technique is the observation that a ribosome translating a fragment of mRNA protects around 30 nucleotides of this mRNA from nuclease activity.  High-throughput sequencing of these ribosome protected fragments (called ribosome footprints) offers a precise record of the number and location of the ribosomes at the time at which translation is stopped. Mapping the position of the ribosome protected fragments indicates the translated regions within the transcriptome.  Moreover, ribosomes spend different periods of time at different positions, leading to variation in the footprint density along the mRNA transcript. This provides an estimate of how much protein is being produced from each mRNA. Importantly, ribosome profiling is as precise and detailed as RNA sequencing. Even in a short time, since its introduction in 2009, ribosome profiling has been playing a key role in driving biological discovery. </p>
 		
 	<p>	However, the method is not without its limitations.  In mammalian cells, there can be over 10 million unique footprints. The quantification and processing of this set of footprints still remains a challenge and requires computational and domain specific knowledge. One might assume that the similarity of ribosome profiling and RNA-seq allows the use of well established bioinformatic tools with this new type of data. However, ribosome profiling data differs from RNA-seq data in how it is distributed across the genome.  The map and density of ribosomal footprints across the genome contain much more additional information that RNA-seq, which traditional bioinformatics pipelines are not designed to analyze. </p>
 
@@ -421,7 +422,7 @@
 
 <p> Currently, the literature consists of a mix of studies, some which use cycloheximide and some which use flash freezing. In general, each experimental step can potentially cause spurious results ands distortions in the data output. <b> riboviz</b> can surface potential biases in the data due to experimental abnormalities as well as provide the user the ability to compare and contrast different data sets obtained by different experimental conditions. </p>
 
-<p>  The backend pipeline for processing the raw reads is available GITHUB LINK HERE.
+<p>  The backend pipeline for processing the raw reads is available <a href=https://github.com/OanaCarja/RiboViz><b>on GitHub</b></a>.
 In addition to the metagenomic analyses, a R/Shiny integration allows the user to select a gene of interest and compare ribosomal densities along its ORF with up to three other data sets.
 </p>
 		 
