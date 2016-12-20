@@ -87,9 +87,13 @@ function change4() {
 	var thefile=string.concat("F4_", year4, "_", author4,"_",thedataset4,".tsv");
 
 	       
-	d3.tsv(thefile, function(error, data) {
-  		
-  		if (error) throw error;
+queue()
+  .defer(d3.tsv,thefile)
+  .await(analyze);
+
+function analyze(error, data) {
+  if(error) { console.log(error); }	   
+  
   		data.forEach(function(d) {
     		d.Position = +d.Position;
     		d.End = +d.End;
@@ -319,7 +323,7 @@ d3.select("#download3")
 			window.open(thefile );
 		});
 		
-}); //data
+}; //data
 
 }; //change form
 

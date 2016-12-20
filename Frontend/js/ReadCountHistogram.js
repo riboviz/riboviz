@@ -63,9 +63,13 @@ function change2() {
 	
 	var thefile=string.concat("F2_", year2, "_", author2,"_",thedataset2,".tsv");
 
-	d3.tsv(thefile, function(error, data) {
+queue()
+  .defer(d3.tsv,thefile)
+  .await(analyze);
 
-				if (error) throw error;
+function analyze(error, data) {
+  if(error) { console.log(error); }	   
+  
     			data.forEach(function(d) {
         			d.key = d.Length;
         			d.value = +d.Counts;
@@ -170,7 +174,7 @@ d3.select("#download2")
 			window.open(thefile );
 		});
 		
-}); //data
+}; //data
 
 }; //change form
 

@@ -105,7 +105,8 @@
 						<li class="dropdown" role="presentation">
 						
 							<a href="HelpPage.html" >
-								Help	
+								Help
+								</a>	
 						</li>
 
 					</ul>
@@ -192,7 +193,8 @@ At the end of the backend pipeline, HDF5 files are exported containing .... Thes
 		</div>
 	</div>
 	<div class="col-md-9" align="justify">
-<p>The <strong>riboviz</strong> web application is available at www.riboviz.org. Through this web framework, the user can interactively explore publicly available ribosome profiling datasets using JavaScript/D3 (Bostock et al., 2011), <a href="http://jquery.com">JQuery</a> and <a href="http://getbootstrap.com">Boostrap</a> for metagenomic analyses and R/Shiny for the gene-specific analyses. The visualization framework of <strong>riboviz</strong> allows the user to select from available <strong>riboseq</strong> datasets and visualize different aspects of the data.</p>
+	<div class="spacer"></div>
+<p>Through this web framework, the user can interactively explore publicly available ribosome profiling datasets using JavaScript/D3 (Bostock et al., 2011), <a href="http://jquery.com">JQuery</a> and <a href="http://getbootstrap.com">Boostrap</a> for metagenomic analyses and R/Shiny for the gene-specific analyses. The visualization framework of <strong>riboviz</strong> allows the user to select from available <strong>riboseq</strong> datasets and visualize different aspects of the data.</p>
 <p>In short, the framework allows visualization of the expected three-nucleotide periodicity along the ORFs, accumulation of footprinting reads at the start and stop codons, the distribution of ribosomal-footprint lengths, the position-specific nucleotide frequencies of all mapped reads, as well as the codon-specific densities of ribosomes. The display also shows the correlation between gene-specific estimates of ribosome densities and various sequence-based features. The user can interactively explore the data and download parsed datasets used to generate each figure.</p>
 <p>The plots also allow the user to compare data with aggregates of other data sets. Ribosome profiling has been shown to exhibit experimental abnormalities that need to be tested for when analyzing a new data set. For example, translocation elongation inhibitors (such as cycloheximide) can alter the local distribution of ribosomes on the mRNA. An advantage of using cycloheximide (CHX) as a pre-treatment is that it prevents the runoff of ribosomes that can otherwise occur during harvesting. However, this treatment can also have some undesirable effects and can produce aberrant snapshots of where the ribosomes are stalling. This happens especially near the translation start and stop codons (ribosome accumulation at start codons and depletion at stop codons) and it can lead to spurious results. In addition, because CHX binding to the 80S ribosome is both non-instantaneous and reversible, the kinetics of CHX binding and dissociation presumably allow newly initiated ribosomes to translocate beyond the start codon. Another possible effect of CHX treatment is that ribosomes might preferentially arrest at specific codons that do not necessarily correspond to codons that are more abundantly occupied by ribosomes in untreated cells.</p>
 <p>Currently, the literature consists of a mix of studies, some which use cycloheximide and some which use flash freezing. In general, each experimental step can potentially cause spurious results and distortions in the data output. Three of the <strong>riboviz</strong> visualizations will surface potential biases in the data by providing the user the ability to compare and contrast different datasets obtained by different experimental conditions.</p>

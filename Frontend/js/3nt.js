@@ -77,7 +77,8 @@ setTimeout(function() {
             .attr("transform", "translate("+ (widthFigure1/2) +","+(heightFigure1+paddingFigure1*4)+")")  // centre below axis
             .text("Distance from translation start/stop (nt)").style("font-size","16px").style("fill","#777777");
       				  	
-      				  			
+ 
+   				  			
     
 d3.selectAll(".form-control")
 .on("change.1", change1);
@@ -92,10 +93,13 @@ function change1() {
 	
 	var thefile=string.concat("F1_", year1, "_", author1,"_",thedataset1,".tsv");
 
-	       
-	d3.tsv(thefile, function(error, data) {
-  		
-  		if (error) throw error;
+queue()
+  .defer(d3.tsv,thefile)
+  .await(analyze);
+
+function analyze(error, data) {
+  if(error) { console.log(error); }	       
+  
   		data.forEach(function(d) {
     		d.position = +d.Position;
     		d.count = +d.Counts;
@@ -320,8 +324,8 @@ d3.select("#downloadALL")
 		
 		
 
-}); //data
+}; //analyze
 
 }; //change form
 
-}, 500); //timeout
+}, 100); //timeout

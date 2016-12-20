@@ -94,8 +94,14 @@ function change3() {
 
 	var string="../Data/";
 	var thefile=string.concat("F3_",year3,"_",author3, "_", thedataset3,".tsv");
-	d3.tsv(thefile, function(error, data) {
-  		if (error) throw error;
+	
+queue()
+  .defer(d3.tsv,thefile)
+  .await(analyze);
+
+function analyze(error, data) {
+  if(error) { console.log(error); }	
+     
   		data.forEach(function(d) {
     		d.Position = +d.Position;
     		d.Length= +d.Length;
@@ -552,7 +558,7 @@ var display1=document.getElementById('fig3radiotest').style.display;
 		});
 		       
 
-}); //data
+}; //data
 
 }; //change form
 
