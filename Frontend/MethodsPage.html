@@ -362,6 +362,8 @@ samtools index output.bam output.bai</code></pre>
 </blockquote>
 <pre><code>R CMD BATCH &#39;--args ncores=&quot;&lt;#_of_cores&gt;&quot; dataset=&quot;&lt;dataset_name&gt;&quot; hdfile=&quot;&lt;hdf5_output_filename&gt;&quot; bamFile=&quot;&lt;.BAM_filename&gt;&quot; gtfFile=&quot;&lt;GTF_filename&gt;&quot;&#39; bam_to_hdf5.R output.Rout</code></pre>
 
+<div class="bigspacer"></div>
+
 <h4 id="process-for-d3">Process data for D3 visualization</h4>
 <p>The following script will parse an HDF5 file and generate files for individual figures needed for D3 visualization.</p>
 <pre><code>R CMD BATCH &#39;--args dataset=&quot;&lt;dataset_name&gt;&quot; hdfile=&quot;&lt;hdf5_input_filename&gt;&quot; rpf=&quot;&lt;RPF=1|mRNA=0&gt;&quot; generate_files_for_D3.R output.Rout</code></pre>
