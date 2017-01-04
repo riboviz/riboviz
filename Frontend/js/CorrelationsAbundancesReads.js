@@ -146,12 +146,12 @@ var svgFigure6nC = d3.select("#HistogramsCorrsCHX").append("svg")
         svgFigure6C.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure6C/2) +","+(heightFigure6C)+")")  // centre below axis
-            .text("correlations in CHX datasets").style("fill","#777777");
+            .text("correlations in FF datasets").style("fill","#777777");
             
             svgFigure6nC.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure6C/2) +","+(heightFigure6C)+")")  // centre below axis
-            .text("correlations in FF datasets").style("fill","#777777");
+            .text("correlations in CHX datasets").style("fill","#777777");
             
             
 svgFigure6C.append("g").append("line")
