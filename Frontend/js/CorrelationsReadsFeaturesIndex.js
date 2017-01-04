@@ -90,7 +90,7 @@ var svgFigure7 = d3.select("#CorrelationsReadsandFeatures").append("svg")
        			svgFigure7.append("text")
             		.attr("text-anchor", "middle")  
             		.attr("transform", "translate("+ (widthFigure7/2) +","+(heightFigure7+paddingFigure7*6.5)+")")  
-            		.text("Log 10 read counts").style("font-size","16px").style("fill","#777777");
+            		.text("Log 10 RPKM").style("font-size","16px").style("fill","#777777");
  
 	var string="../../Data/";
 
@@ -146,6 +146,11 @@ var  data = data.map( function (d) {
         var opa = d3.scale.linear()
             .domain([0, 1])
             .range([0.4, 1]);
+            
+          var opaColor = d3.scale.linear()
+            .domain([0, 1])
+            .range(["rgb(239,138,98)", "rgb(166,206,227)"]);
+            
 	xFigure7.domain(d3.extent(data, function(d) { return d.d1; })).nice();
   	yFigure7.domain(d3.extent(data, function(d) { return d.d2; }));
    
@@ -175,7 +180,7 @@ var  data = data.map( function (d) {
       .attr("cx", function(d) { return xFigure7(d.d1); })
       .attr("cy", function(d) { return yFigure7(d.d2); })
       .style("fill-opacity", function(d) { return opa(d.Corr); })
-      .style("fill","rgb(166,206,227)")
+      .style("fill", function(d) { return opaColor(d.Corr); })
       .attr("r", 3)
       .filter(function(d) { return !isNaN(d.d1) && !isNaN(d.d2)})
       //.text(function(d) { return d; })
@@ -187,7 +192,8 @@ var  data = data.map( function (d) {
       .duration(750)
       .attr("cx", function(d) { return xFigure7(d.d1); })
       .attr("cy", function(d) { return yFigure7(d.d2); })
-      .style("fill-opacity", function(d) { return opa(d.Corr); });
+      .style("fill-opacity", function(d) { return opa(d.Corr); })
+      .style("fill", function(d) { return opaColor(d.Corr); });
       //.filter(function(d) { return !isNaN(d.d1) && !isNaN(d.d2)});
 
 
@@ -219,7 +225,7 @@ textFigure7.exit().attr("class", "exit")
     MyApp2.thecorr=thecor;
       
     svgFigure7.select(".r-label")			
-			.text("Correlation coefficient: r=" + thecor.toFixed(2))
+			.text("Pearson correlation coefficient: r=" + thecor.toFixed(2))
 			.style("font-size","16px").style("fill","#777777")
 			.transition()
 			.ease("linear")

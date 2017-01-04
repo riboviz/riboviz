@@ -73,7 +73,7 @@ var xFigure4 = d3.scale.linear()
        svgFigure4.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure4/2) +","+(heightFigure4+paddingFigure4)+")")  // centre below axis
-            .text("Codon position").style("font-size","16px").style("fill","#777777");
+            .text("Nucleotide position").style("font-size","16px").style("fill","#777777");
       			
 d3.selectAll(".form-control")
 .on("change.4", change4);

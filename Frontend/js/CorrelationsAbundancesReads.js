@@ -12,8 +12,8 @@ var marginFigure6 = {top: 100, right: 200, bottom: 50, left: 100},
     	
 var marginFigure6C = {top: 20, right: 60, bottom: 70, left:100},
 		paddingFigure6C=35,
-		paddingxFigure6C=10,
-    	widthFigure6C = 350 - marginFigure6C.left - marginFigure6C.right,
+		paddingxFigure6C=34,
+    	widthFigure6C = 400 - marginFigure6C.left - marginFigure6C.right,
     	heightFigure6C = 350 - marginFigure6C.top - marginFigure6C.bottom;
     
 var xFigure6 = d3.scale.linear()
@@ -51,8 +51,7 @@ var xAxisFigure6C = d3.svg.axis()
 
 var yAxisFigure6C = d3.svg.axis()
     			.scale(yFigure6C)
-    			.orient("left")
-    			.ticks(10);
+    			.orient("left");
 
 var svgFigure6C = d3.select("#HistogramsCorrsnonCHX").append("svg")
     			.attr("width", widthFigure6C + marginFigure6C.left + marginFigure6C.right)
@@ -69,8 +68,7 @@ var xAxisFigure6nC = d3.svg.axis()
 
 var yAxisFigure6nC = d3.svg.axis()
     			.scale(yFigure6nC)
-    			.orient("left")
-    			.ticks(10);
+    			.orient("left");
 
 var svgFigure6nC = d3.select("#HistogramsCorrsCHX").append("svg")
     			.attr("width", widthFigure6C + marginFigure6C.left + marginFigure6C.right)
@@ -143,17 +141,17 @@ var svgFigure6nC = d3.select("#HistogramsCorrsCHX").append("svg")
        svgFigure6.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure6/2) +","+(heightFigure6+paddingFigure6)+")")  // centre below axis
-            .text("1/tRNA abundances").style("font-size","16px").style("fill","#777777");
+            .text("tRNA abundances").style("font-size","16px").style("fill","#777777");
         
         svgFigure6C.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
-            .attr("transform", "translate("+ (widthFigure6C/2) +","+(heightFigure6C+paddingFigure6C)+")")  // centre below axis
-            .text("background correlations CHX pre-treatment").style("fill","#777777");
+            .attr("transform", "translate("+ (widthFigure6C/2) +","+(heightFigure6C)+")")  // centre below axis
+            .text("correlations in CHX datasets").style("fill","#777777");
             
             svgFigure6nC.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
-            .attr("transform", "translate("+ (widthFigure6C/2) +","+(heightFigure6C+paddingFigure6C)+")")  // centre below axis
-            .text("background correlations FF pre-treatment").style("fill","#777777");
+            .attr("transform", "translate("+ (widthFigure6C/2) +","+(heightFigure6C)+")")  // centre below axis
+            .text("correlations in FF datasets").style("fill","#777777");
             
             
 svgFigure6C.append("g").append("line")
@@ -162,8 +160,12 @@ svgFigure6C.append("g").append("line")
     					
 svgFigure6C.append("g")
       				.attr("class", "x axis")
-      				.attr("transform", "translate(0," + heightFigure6C + ")")
+      				.attr("transform", "translate(0," + (heightFigure6C-paddingxFigure6C) + ")")
       				.call(xAxisFigure6C);
+
+svgFigure6C.append("g")
+      				.attr("class", "y axis")
+      				.call(yAxisFigure6C);
     
 svgFigure6C.append("text")
     .attr("class", "xaxis_label")
@@ -180,8 +182,12 @@ svgFigure6C.append("text")
  					.style("stroke-width",0.9);		
     					
 svgFigure6nC.append("g")
+      				.attr("class", "y axis")
+      				.call(yAxisFigure6nC);
+
+svgFigure6nC.append("g")
       				.attr("class", "x axis")
-      				.attr("transform", "translate(0," + heightFigure6C + ")")
+      				.attr("transform", "translate(0," + (heightFigure6C-paddingxFigure6C) + ")")
       				.call(xAxisFigure6nC);
     
 svgFigure6nC.append("text")
@@ -240,7 +246,7 @@ var  data = data.map( function (d) {
       d1: +choosetheone,
       d2: +choosethetwo}; 
 });
-    
+  
     
     
 	xFigure6.domain(d3.extent(data, function(d) { return d.d1; }));
@@ -317,7 +323,7 @@ textFigure6.exit().attr("class", "exit")
     MyApp.thecorr=thecor;
       
     svgFigure6.select(".r-label")			
-			.text("Correlation coefficient: r=" + thecor.toFixed(2))//leastSquaresCoeff[2])
+			.text("Spearman correlation coefficient: r=" + thecor.toFixed(2))//leastSquaresCoeff[2])
 			.style("font-size","16px").style("fill","#777777")
 			.transition()
 			.ease("linear")
@@ -585,6 +591,15 @@ textFigure6.exit().attr("class", "exit")
 		.duration(500)
 		.call(xAxisFigure6C);
 		
+svgFigure6C.select(".y.axis")
+		.transition()
+					.ease("linear")
+			.delay(function(d, i) {
+					return i / data.length * 500;
+			})
+		.duration(500)
+		.call(yAxisFigure6C);
+		
 svgFigure6C.select(".xaxis_label")
 			.transition()
 			.ease("linear")
@@ -608,7 +623,7 @@ svgFigure6C.select(".r-line")
 			.duration(750).attr("x1", xFigure6C(closestnr) + xFigure6C.rangeBand()/2)
             .attr("x2", xFigure6C(closestnr) + xFigure6C.rangeBand()/2)
             .attr("y1", 0)
-            .attr("y2", heightFigure6C).style("stroke-width",2)
+            .attr("y2", (heightFigure6C-paddingxFigure6C)).style("stroke-width",2)
       		.style("stroke", "grey");	     
 
 
@@ -705,6 +720,15 @@ textFigure6.exit().attr("class", "exit")
 		.duration(250)
 		.call(xAxisFigure6nC);
 		
+ svgFigure6nC.select(".y.axis")
+		.transition()
+					.ease("linear")
+			.delay(function(d, i) {
+					return i / data.length * 500;
+			})
+		.duration(250)
+		.call(yAxisFigure6nC);
+		
 svgFigure6nC.select(".xaxislabel")
 			.transition()
 			.ease("linear")
@@ -728,7 +752,7 @@ svgFigure6nC.select(".r-line2")
 			.duration(750).attr("x1", xFigure6nC(closestnr) + xFigure6nC.rangeBand()/2)
             .attr("x2", xFigure6nC(closestnr) + xFigure6nC.rangeBand()/2)
             .attr("y1", 0)
-            .attr("y2", heightFigure6C).style("stroke-width",2)
+            .attr("y2", (heightFigure6C-paddingxFigure6C)).style("stroke-width",2)
       		.style("stroke", "grey");	     
 					
 }; //update function 3
