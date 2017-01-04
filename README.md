@@ -5,5 +5,5 @@
 
 <p> Existing yeast datasets consist of a mix of studies, some of which use elongation inhibitors such as cycloheximide (CHX) and others that flash freeze the samples to prevent initiation and elongation during sample preparation. In general, each experimental step can potentially introduce biases in processed datasets. <b>riboviz</b> can help identify these biases by allowing users to compare and contrast datasets obtained under different experimental conditions. </p>
 
-<p>  Codes for processing the raw reads is available <a href=https://github.com/shahpr/RiboViz><b>on GitHub</b></a>.
+<p>  All the codes for processing the raw reads is available <a href=https://github.com/shahpr/RiboViz/scripts><b>here</b></a>.
 In addition to the metagenomic analyses, a R/Shiny integration allows the user to select a gene of interest and compare ribosomal densities of its ORF across three data sets.
