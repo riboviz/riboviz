@@ -214,7 +214,7 @@ At the end of the backend pipeline, HDF5 files are exported containing .... Thes
 		</div>
 	</div>
 	<div class="col-md-9" align="justify">
-        <h3 id="github-wiki">A Github wiki of the methods can be found <a href="https://github.com/shahpr/RiboViz/wiki">here</a></h3>
+        <h4 id="github-wiki">A Github wiki of the methods can be found <a href="https://github.com/shahpr/RiboViz/wiki">here</a></h4>
     </div>
     </div>
 
@@ -227,7 +227,7 @@ At the end of the backend pipeline, HDF5 files are exported containing .... Thes
 	</div>
 	<div class="col-md-9" align="justify">
 	
-<h3 id="required-software">Required software</h3>
+<h4 id="required-software">Required software</h4>
 <ul>
 <li><a href="https://github.com/marcelm/cutadapt">Cutadapt</a></li>
 <li><a href="http://bowtie-bio.sourceforge.net/index.shtml">Bowtie</a></li>
@@ -242,7 +242,7 @@ At the end of the backend pipeline, HDF5 files are exported containing .... Thes
 <div class="bigspacer"></div>
 
 
-<h3 id="input-files">Input files</h3>
+<h4 id="input-files">Input files</h4>
 <p>Merge all fastq files from an experiment into a single fastq file <code>data.fq</code></p>
 <pre><code>cat file1.fq &gt;&gt; data.fq
 cat file2.fq &gt;&gt; data.fq
@@ -253,30 +253,30 @@ cat file2.fq &gt;&gt; data.fq
 <div class="bigspacer"></div>
 
 
-<h3 id="download-coding-and-rrna-sequences">Download coding and rRNA sequences</h3>
+<h4 id="download-coding-and-rrna-sequences">Download coding and rRNA sequences</h4>
 <p>Download <em>S. cerevisiae</em> rRNA sequences from <a href="http://gdurl.com/KGnn/download">here</a>.</p>
 <p>Download <em>S. cerevisiae</em> coding sequences from <a href="http://gdurl.com/MSck/download">here</a>.</p>
 
 <div class="bigspacer"></div>
 
 
-<h3 id="generate-bowtie-indices">Generate <a href="http://bowtie-bio.sourceforge.net/index.shtml">Bowtie</a> indices</h3>
+<h4 id="generate-bowtie-indices">Generate <a href="http://bowtie-bio.sourceforge.net/index.shtml">Bowtie</a> indices</h4>
 <p><a href="http://bowtie-bio.sourceforge.net/index.shtml">Bowtie</a> indices will be used for mapping raw sequencing reads to either ribosomal RNA or ORFs in yeast.</p>
 <pre><code>bowtie-build rRNA.fa rRNA_bowtie
 bowtie-build Scer.fa Scer_bowtie</code></pre>
 <div class="bigspacer"></div>
 
 
-<h3 id="trim-adapters-from-reads-using-cutadapt">Trim adapters from reads using <a href="https://github.com/marcelm/cutadapt">cutadapt</a></h3>
+<h4 id="trim-adapters-from-reads-using-cutadapt">Trim adapters from reads using <a href="https://github.com/marcelm/cutadapt">cutadapt</a></h4>
 <pre><code>cutadapt --trim-n -O 1 -m 5 -a &lt;3&#39; adapter&gt; -o data.trim.fq data.fq</code></pre>
-<h3 id="remove-reads-that-map-to-ribosomal-rnas-rrnas">Remove reads that map to ribosomal RNAs (rRNAs)</h3>
+<h4 id="remove-reads-that-map-to-ribosomal-rnas-rrnas">Remove reads that map to ribosomal RNAs (rRNAs)</h4>
 <p>Map reads to rRNA allowing up to 2 mismatches using <a href="http://bowtie-bio.sourceforge.net/index.shtml">Bowtie</a></p>
 <pre><code>bowtie -p &lt;#_of_cores&gt; -v 2 --un data.unmap.trim.fq ./rRNA_bowtie data.trim.fq -S data.rrna_map.sam</code></pre>
 
 <div class="bigspacer"></div>
 
 
-<h3 id="map-non-rrna-reads-to-yeast-genome">Map non-rRNA reads to yeast genome</h3>
+<h4 id="map-non-rrna-reads-to-yeast-genome">Map non-rRNA reads to yeast genome</h4>
 <p>We map non-rRNA reads to the yeast genome in two steps. In the first step, we allow two mismatches between the read and the coding sequence. We trim the 5' nucleotide of a read if a mismatch occurs in the first (5' end) base of a read. These mismatches are likely due to the addition of untemplated bases in the 5' ends of reads by reverse transcriptase during cDNA synthesis (<a href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0085270">1</a>,<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4248317/">2</a>).</p>
 <blockquote>
 <p>First map with two allowed mismatches</p>
@@ -304,7 +304,7 @@ samtools index output.bam output.bai</code></pre>
 <div class="bigspacer"></div>
 
 
-<h3 id="hdf5-file-architecture">HDF5 file architecture</h3>
+<h4 id="hdf5-file-architecture">HDF5 file architecture</h4>
 <p>The HDF5 file is organized in the following hierarchy <code>/&lt;Gene&gt;/&lt;Dataset&gt;/reads/data</code>. Snippet from an example HDF5 file is shown below.</p>
 <pre><code>                              group              name       otype  dclass       dim
 0                                 /           YAL001C   H5I_GROUP                  
@@ -327,7 +327,7 @@ samtools index output.bam output.bai</code></pre>
 <div class="bigspacer"></div>
 
 
-<h3 id="read-attributes">Read attributes</h3>
+<h4 id="read-attributes">Read attributes</h4>
 <p>The <code>reads</code> group in <code>/&lt;Gene&gt;/&lt;Dataset&gt;/reads/data</code> have several attributes associated with it. These are summary statistics and other information about the gene and dataset within the <code>reads</code> group. The list of attributes are</p>
 <ul>
 <li><code>reads_total</code> : Sum of reads of all lenghts between -25 to +25 of a CDS</li>
@@ -342,7 +342,7 @@ samtools index output.bam output.bai</code></pre>
 <div class="bigspacer"></div>
 
 
-<h3 id="convert-bam-to-hdf5">Convert BAM to HDF5</h3>
+<h4 id="convert-bam-to-hdf5">Convert BAM to HDF5</h4>
 <blockquote>
 <p>Prerequisites</p>
 </blockquote>
