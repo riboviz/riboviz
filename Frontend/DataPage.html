@@ -226,7 +226,7 @@
   <div class="col-md-4">
       <h4>Nucleotide periodicity of mapped reads</h4>
 	<p> All mapped reads are aligned by their 5' ends. Ribosome-footprint reads exhibit a three-nucleotide periodicity
-	along the ORF. Footprinting reads also show accumulation at the start and end codons. </p>
+	along the ORF. Footprinting reads also show accumulation at the start and stop codons. </p>
 <button id="download1" type=button class="btn btn-default">Download data</button>
     </div>
     <div class="col-md-8" >
@@ -266,8 +266,9 @@
 	<p> Metagene analyses of RPF and RNA-seq reads.
  Mapped reads at each position (codon for RPF and nucleotide for mRNA) are normalized by the mean within each ORF, and then averaged with
 	equal weight for each position across all ORFs.
-	The size of the RPF `ramp' varies between studies and can be largely attributed to use of CHX pre-treatment. 
-	Each dataset is compared with an average of representative studies with and without CHX pre-treatment. 
+	The size of the RPF 'ramp' varies between studies and can be largely attributed to use of CHX pre-treatment. 
+	Each RPF dataset is compared with an average of representative studies with and without CHX pre-treatment. 
+    Each mRNA dataset is compared with an average of representative studies.
 	Shaded areas represent standard errors around the mean lines.</p>
 			 
 			 
@@ -328,7 +329,7 @@
 		 
  <div class="spacer"></div>   
 <form>
- <label for="nValue" text-align: right">Select ribosome profile length:    <span id="nValue-value"></span></label>
+ <label for="nValue" text-align: right>Select ribosome profile length:    <span id="nValue-value"></span></label>
   <input  class="fig3radio" type="number" min="15" max="*js*" step="1" value="28" id="nValue">
 <p> Select Frame:
 <input class="fig3radio" type="radio" name="inputsrc1" id="defaultInput13" value="0" checked/><label for="defaultInput1">1 </label> 
@@ -432,8 +433,7 @@
     
     <div class="col-md-4">
     <h4> Sequence-based features and normalized reads</h4>
-    <p> Correlations between coding sequence features and gene-specific RPKM values. </p>	
-
+    <p> Correlations between coding sequence features and gene-specific RPKM values. Correlations are estimated based on genes with at least 64 mapped reads (blue dots). </p>	
 
 
 <form>
@@ -469,15 +469,15 @@
 <div class="row">
 	<div class="col-md-3">
 		<div class="io-container title">
-			Download this dataset
+			Download
 		</div>
 	</div>
 	<div class="col-md-9" align="justify">
-	<p> Download  .tar.gz file. </p>
-		 <button id="downloadALL" type=button class="btn btn-default">Download dataset</button>
+	<!-- <p> Download  .tar.gz file. </p> --></label>
+		 <button id="downloadALL" type=button class="btn btn-default">Download all processed data</button>
 		 <div class="spacer"></div>
-	<p> Download  .h5 file. </p>
-		 <button id="downloadALLH5" type=button class="btn btn-default">Download dataset H5 format</button>	
+	<!-- <p> Download  .h5 file. </p>-->
+		 <button id="downloadALLH5" type=button class="btn btn-default">Download data in HDF5 format</button>	
 			
 	</div>
 </div>
@@ -494,7 +494,7 @@
 		</div>
 	</div>
 	<div class="col-md-9" align="justify">
-		 <p>Gene by gene analyses are available <a href="/Frontend/GeneBased.html">here</a> or through the Gene of interest tab.</p>
+		 <p>Gene by gene analyses are available <a href="/Frontend/GeneBased.html">here</a> or through the <b>Gene of interest</b> tab.</p>
 		
 			
 	</div>
@@ -509,7 +509,7 @@
 	<div class="col-md-9">
 		<hr>
 		<div class="center text-gray smallnote">
-			&copy; 2016 Oana Carja and Premal Shah
+			&copy; 2017 Oana Carja and Premal Shah
 		</div>
 	</div>
 </div>
