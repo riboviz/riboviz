@@ -1,12 +1,20 @@
 #!/usr/bin/env bash
 
 # prepRiboviz.sh: 
-
-## !EXPLAIN INPUTS AND OUTPUTS
+## Shell script for preparing ribosome profiling data for RiboViz or other analysis, that 
+# - processes all fastq.gz files in an input directory  (-in), 
+# - cuts out sequencing library adapters (CTGTAGGCACC or -adapters)
+# - removes rRNA or other contaminating reads by hisat2 alignment to rRNA index file (-rRNA)
+# - aligns remaining reads to ORFs or other hisat2 index file (-orf)
+# - trims 5' mismatches from reads and removes reads with more than 2 mismatches
+# - parallelizes over many processes (-p), except for cutadapt which isn't parallel
+# - puts all intermediate files into a temporary directory (-tmp)
+# - when finished, the script will put useful output files in another directory (-out)
+# Note that the bamfiles ${fn_outbam} are directly usable in genome browsers, etc.
 
 function usage
 {
-    echo "usage: prepRiboviz [-rRNA rRNA_index_file] [-orf orf_index_file] [-in dir_in] [-out dir_out] [-a adapters] [-p processes] [-tmp tmp_dir]"
+    echo "usage: prepRiboviz [-in dir_in] [-rRNA rRNA_index_file] [-orf orf_index_file]  [-out dir_out] [-a adapters] [-p processes] [-tmp tmp_dir]"
 }
 
 tmp_dir=tmp
@@ -16,14 +24,14 @@ processes=4
 #----- check for arguments -----
 while [ "$1" != "" ]; do
     case $1 in
+        -in )                   shift
+                                dir_in=$1
+                                ;;
         -rRNA )                 shift
                                 rRNA_index_file=$1
                                 ;;
         -orf )                  shift
                                 orf_index_file=$1
-                                ;;
-        -in )                   shift
-                                dir_in=$1
                                 ;;
         -out )                  shift
                                 dir_out=$1
