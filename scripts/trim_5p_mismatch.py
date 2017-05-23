@@ -3,7 +3,8 @@
 ## Remove a single 5' mismatched nt AND filter reads with more than specified mismatches from sam file
 ## only checks positive-strand alignments
 ## example:
-##   python trim_5p_mismatch.py -in testdata_trim_5p_mismatch.sam -out test_trim_5p_mismatch_clean.sam
+##   python trim_5p_mismatch.py -in testdata_trim_5p_mismatch.sam -out testdata_trim_5p_mismatch_clean.sam
+##   python trim_5p_mismatch.py -in testdata_trim_5pos5neg.sam -out testdata_trim_5pos5neg_clean.sam
 ##   python trim_5p_mismatch.py -in data_map1.sam -out data_map1_clean.sam
 
 import pysam, argparse, re
@@ -13,8 +14,16 @@ if __name__=="__main__" :
     parser.add_argument("-in","--samfilein",dest="samfilein",nargs='?',help="sam file input")
     parser.add_argument("-out","--samfileout",dest="samfileout",nargs='?',help="sam file output")
     parser.add_argument("-mm","--mismatches",dest="mismatches",nargs='?',default=1L,type=int,help="number of mismatches to allow")
-    parser.add_argument("-5p","--fivepremove",dest="fivepremove",nargs='?',default=True,help="remove 5' mismatched nt")
+    fivep_parser = parser.add_mutually_exclusive_group(required=False)
+    fivep_parser.add_argument("-5p","--fivepremove", dest='fivepremove', action='store_true')
+    fivep_parser.add_argument("-no5p","--nofivepremove", dest='fivepremove', action='store_false')
+    parser.set_defaults(fivepremove=True)
+    fivepm_parser = parser.add_mutually_exclusive_group(required=False)
+    fivepm_parser.add_argument("-5m","--fivepminus", dest='fivepminus', action='store_true')
+    fivepm_parser.add_argument("-no5m","--nofivepminus", dest='fivepminus', action='store_false')
+    parser.set_defaults(fivepminus=True)
     options = parser.parse_args()
+    print options
     
     print "trim_5p_mismatch.py running"
     
@@ -42,8 +51,10 @@ if __name__=="__main__" :
             continue
         # count mismatches in read
         nmismatch = sum( [ MDtag.count(L) for L in "ATCG" ] )
-        if options.fivepremove & ( MDtag[0]=="0" ) :
-            # If the 5' nt is mismatched... 
+        
+        # import pdb; pdb.set_trace()
+        if options.fivepremove & ( MDtag[0]=="0" ) & (read.flag==0) :
+            # If the 5' nt is mismatched on a plus-strand read... 
             if MDtag[2] in ["A","T","C","G","0"] :
                 # 2nd nt is also mismatched; discard
                 ndiscarded += 1
@@ -80,6 +91,38 @@ if __name__=="__main__" :
                 print read
                 ndiscarded += 1
                 continue
+        
+        if options.fivepminus & ( MDtag[-1]=="0" ) & (read.flag==16) :
+            # If the 5' nt is mismatched on a minus strand read... 
+            # positive sense is with template; read is reverse-complement
+            if MDtag[-3] in ["A","T","C","G"] :
+                # 2nd nt is also mismatched; discard
+                ndiscarded += 1
+                continue
+            # ... soft-clip 5' nt
+            # don't increment position of alignment!
+            # edit MD tag to remove trailing mismatch
+            read.set_tag('MD', re.sub( "[ATCG]0$", "", MDtag ) )
+            # lower the number of mismatches by 1
+            nmismatch -= 1
+            read.set_tag('NM', nmismatch)
+            # edit CIGAR string to increase soft clip
+            cigarstring = read.cigarstring
+            if ( not "S" in cigarstring ) :
+                # read is not soft-clipped on left
+                # find number of terminal matches
+                ntermmatch = int( re.findall( r"([0-9]+)M$", cigarstring )[0] )
+                # add initial "1S" and reduce initial match by 1
+                newtermbit = str( ntermmatch - 1L ) + "M1S"
+                read.cigarstring = re.sub( r"([0-9]+)M$", newtermbit, cigarstring )
+                ntrimmed += 1
+            else :
+                # Cry for help and discard
+                print "Odd cigar string for read : "
+                print read
+                ndiscarded += 1
+                continue
+        
         if nmismatch <= options.mismatches : 
             # write to output if <= mm mismatches
             nwritten += 1
@@ -97,3 +140,5 @@ if __name__=="__main__" :
     print "discarded:\t" + str(ndiscarded)
     print "trimmed:\t" + str(ntrimmed)
     print "written:\t" + str(nwritten)
+    if options.fivepminus :
+        print "warning: option fivepminus set, soft-clipped reads on minus strand may have been discarded even if below threshold mismatches"
