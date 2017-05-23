@@ -1,7 +1,6 @@
 #! python
 
 ## Remove a single 5' mismatched nt AND filter reads with more than specified mismatches from sam file
-## only checks positive-strand alignments
 ## example:
 ##   python trim_5p_mismatch.py -in testdata_trim_5p_mismatch.sam -out testdata_trim_5p_mismatch_clean.sam
 ##   python trim_5p_mismatch.py -in testdata_trim_5pos5neg.sam -out testdata_trim_5pos5neg_clean.sam
@@ -18,10 +17,6 @@ if __name__=="__main__" :
     fivep_parser.add_argument("-5p","--fivepremove", dest='fivepremove', action='store_true')
     fivep_parser.add_argument("-no5p","--nofivepremove", dest='fivepremove', action='store_false')
     parser.set_defaults(fivepremove=True)
-    fivepm_parser = parser.add_mutually_exclusive_group(required=False)
-    fivepm_parser.add_argument("-5m","--fivepminus", dest='fivepminus', action='store_true')
-    fivepm_parser.add_argument("-no5m","--nofivepminus", dest='fivepminus', action='store_false')
-    parser.set_defaults(fivepminus=True)
     options = parser.parse_args()
     print options
     
@@ -50,78 +45,79 @@ if __name__=="__main__" :
             ndiscarded += 1
             continue
         # count mismatches in read
-        nmismatch = sum( [ MDtag.count(L) for L in "ATCG" ] )
+        nmismatch = read.get_tag('NM')
+        # nmismatch = sum( [ MDtag.count(L) for L in "ATCG" ] )
         
-        # import pdb; pdb.set_trace()
-        if options.fivepremove & ( MDtag[0]=="0" ) & (read.flag==0) :
-            # If the 5' nt is mismatched on a plus-strand read... 
-            if MDtag[2] in ["A","T","C","G","0"] :
-                # 2nd nt is also mismatched; discard
-                ndiscarded += 1
-                continue
-            # ... soft-clip 5' nt
-            # increment position of alignment
-            read.pos += 1
-            # edit MD tag to remove leading mismatch
-            read.set_tag('MD', re.sub( "^0[ATCG]", "", MDtag ) )
-            # lower the number of mismatches by 1
-            nmismatch -= 1
-            read.set_tag('NM', nmismatch)
-            # edit CIGAR string to increase soft clip
-            cigarstring = read.cigarstring
-            if ( not "S" in cigarstring ) or ( cigarstring.find("S") > cigarstring.find("M") ) :
-                # read is not soft-clipped on left
-                # find number of initial matches
-                ninitmatch = int( re.findall( r"^([0-9]+)M", cigarstring )[0] )
-                # add initial "1S" and reduce initial match by 1
-                newinitbit = "1S" + str( ninitmatch - 1L ) + "M"
-                read.cigarstring = re.sub( r"^([0-9]+)M", newinitbit, cigarstring )
+        if nmismatch > 0 & options.fivepremove:
+            # if there are any mismatches ..
+            
+            # import pdb; pdb.set_trace()
+            if ( MDtag[0]=="0" ) & (read.flag==0) :
+                # If the 5' nt is mismatched on a plus-strand read... 
+                if MDtag[2] in ["A","T","C","G","0"] :
+                    # 2nd nt is also mismatched; discard
+                    ndiscarded += 1
+                    continue
+                # ... soft-clip 5' nt
+                # increment position of alignment
+                read.pos += 1
+                # edit MD tag to remove leading mismatch
+                read.set_tag('MD', re.sub( "^0[ATCG]", "", MDtag ) )
+                # lower the number of mismatches by 1
+                nmismatch -= 1
+                read.set_tag('NM', nmismatch)
+                # edit CIGAR string to increase soft clip
+                cigarstring = read.cigarstring
+                if ( not "S" in cigarstring[:3] ) :
+                    # read is not soft-clipped on left
+                    # find number of initial matches
+                    ninitmatch = int( re.findall( r"^([0-9]+)M", cigarstring )[0] )
+                    # add initial "1S" and reduce initial match by 1
+                    newinitbit = "1S" + str( ninitmatch - 1L ) + "M"
+                    read.cigarstring = re.sub( r"^([0-9]+)M", newinitbit, cigarstring )
+                else :
+                    # read is soft-clipped on left
+                    nsoftclip = int( re.findall( r"^([0-9]+)S", cigarstring )[0] )
+                    ninitmatch = int( re.findall( r"([0-9]+)M", cigarstring )[0] )
+                    # add 1 to left soft-clip and reduce initial match by 1
+                    newinitbit = str( nsoftclip + 1L ) + "S" + str( ninitmatch - 1L ) + "M"
+                    read.cigarstring = re.sub( r"^([0-9]+)S([0-9]+)M", newinitbit, cigarstring )
+                # count the read as trimmed
                 ntrimmed += 1
-            elif ( cigarstring.find("S") < cigarstring.find("M") ) :
-                # read is soft-clipped on left
-                nsoftclip = int( re.findall( r"^([0-9]+)S", cigarstring )[0] )
-                ninitmatch = int( re.findall( r"([0-9]+)M", cigarstring )[0] )
-                # add 1 to left soft-clip and reduce initial match by 1
-                newinitbit = str( nsoftclip + 1L ) + "S" + str( ninitmatch - 1L ) + "M"
-                read.cigarstring = re.sub( r"^([0-9]+)S([0-9]+)M", newinitbit, cigarstring )
-                ntrimmed += 1
-            else :
-                # Cry for help and discard
-                print "Odd cigar string for read : "
-                print read
-                ndiscarded += 1
-                continue
         
-        if options.fivepminus & ( MDtag[-1]=="0" ) & (read.flag==16) :
-            # If the 5' nt is mismatched on a minus strand read... 
-            # positive sense is with template; read is reverse-complement
-            if MDtag[-3] in ["A","T","C","G"] :
-                # 2nd nt is also mismatched; discard
-                ndiscarded += 1
-                continue
-            # ... soft-clip 5' nt
-            # don't increment position of alignment!
-            # edit MD tag to remove trailing mismatch
-            read.set_tag('MD', re.sub( "[ATCG]0$", "", MDtag ) )
-            # lower the number of mismatches by 1
-            nmismatch -= 1
-            read.set_tag('NM', nmismatch)
-            # edit CIGAR string to increase soft clip
-            cigarstring = read.cigarstring
-            if ( not "S" in cigarstring ) :
-                # read is not soft-clipped on left
-                # find number of terminal matches
-                ntermmatch = int( re.findall( r"([0-9]+)M$", cigarstring )[0] )
-                # add initial "1S" and reduce initial match by 1
-                newtermbit = str( ntermmatch - 1L ) + "M1S"
-                read.cigarstring = re.sub( r"([0-9]+)M$", newtermbit, cigarstring )
+            if ( MDtag[-1]=="0" ) & (read.flag==16) :
+                # If the 5' nt is mismatched on a minus strand read... 
+                # positive sense is with template; read is reverse-complement
+                if MDtag[-3] in ["A","T","C","G"] :
+                    # 2nd nt is also mismatched; discard
+                    ndiscarded += 1
+                    continue
+                # ... soft-clip 5' nt
+                # don't increment position of alignment!
+                # edit MD tag to remove trailing mismatch
+                read.set_tag('MD', re.sub( "[ATCG]0$", "", MDtag ) )
+                # lower the number of mismatches by 1
+                nmismatch -= 1
+                read.set_tag('NM', nmismatch)
+                # edit CIGAR string to increase soft clip
+                cigarstring = read.cigarstring
+                if ( cigarstring[-1] != "S" ) :
+                    # read is not soft-clipped on left ( = right along template)
+                    # find number of terminal matches
+                    ntermmatch = int( re.findall( r"([0-9]+)M$", cigarstring )[0] )
+                    # add initial "1S" and reduce initial match by 1
+                    newtermbit = str( ntermmatch - 1L ) + "M1S"
+                    read.cigarstring = re.sub( r"([0-9]+)M$", newtermbit, cigarstring )
+                else :
+                    # read is soft-clipped on left ( = right along template)
+                    # find number of terminal matches
+                    nsoftclip = int( re.findall( r"([0-9]+)S$", cigarstring )[0] )
+                    ntermmatch = int( re.findall( r"([0-9]+)M", cigarstring )[-1] )
+                    # add initial "1S" and reduce initial match by 1
+                    newtermbit = str( ntermmatch - 1L ) + "M" + str( nsoftclip + 1L ) + "S"
+                    read.cigarstring = re.sub( r"([0-9]+)M([0-9]+)S$", newtermbit, cigarstring )
+                # count the read as trimmed
                 ntrimmed += 1
-            else :
-                # Cry for help and discard
-                print "Odd cigar string for read : "
-                print read
-                ndiscarded += 1
-                continue
         
         if nmismatch <= options.mismatches : 
             # write to output if <= mm mismatches
@@ -140,5 +136,3 @@ if __name__=="__main__" :
     print "discarded:\t" + str(ndiscarded)
     print "trimmed:\t" + str(ntrimmed)
     print "written:\t" + str(nwritten)
-    if options.fivepminus :
-        print "warning: option fivepminus set, soft-clipped reads on minus strand may have been discarded even if below threshold mismatches"
