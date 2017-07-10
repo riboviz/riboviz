@@ -7,11 +7,11 @@ library(RColorBrewer)
 library(data.table) # To use rbindlist()
 library(tidyr) # To use gather()
 
-load("/home/txing/RiboTest/newRibo/riboViz.RData")     # Contains d1:F8_RPKMs_modified.tsv, d2:bgdb.tsv, df:data_unq.tsv
+load("/home/txing/RiboViz/newRibo/riboViz.RData")     # Contains d1:F8_RPKMs_modified.tsv, d2:bgdb.tsv, df:data_unq.tsv
 
 shinyServer <- function(input, output){
   path <- "./"
-  yseq = '/home/txing/RiboTest/newRibo/yeast_seq.h5'   # Stores nucleotide and codon sequences for all yeast genes
+  yseq = '/home/txing/RiboViz/newRibo/yeast_seq.h5'   # Stores nucleotide and codon sequences for all yeast genes
   codonseq = reactive({h5read(yseq,paste0(input$slct_gene, '/codon'))}) # Read in codons sequence for all genes
   ntseq = reactive({h5read(yseq,paste0(input$slct_gene, '/nt'))}) # Read in nucleotide sequence for all genes
   

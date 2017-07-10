@@ -9,7 +9,7 @@ library(tidyr) # To use gather()
 
 
 
-load("/home/txing/RiboTest/newRibo/riboViz.RData")
+load("/home/txing/RiboViz/newRibo/riboViz.RData")
 
 shinyUI <- fixedPage(
   fixedRow(
@@ -89,7 +89,8 @@ shinyUI <- fixedPage(
     fixedRow(  
     column(4,
            div(h3("Reads by Codon"),style = "color:grey"),
-           div(p("Codon specific mapped reads."),style = "color:grey")
+           div(p("Codon specific mapped reads. The normalized reads are expressed as the proportion of total 
+                 reads for corresponding nucleotides, and the mean for all codons."), style = "color:grey")
     ),
     column(8,
            plotlyOutput("plotrbc"))
@@ -108,7 +109,8 @@ shinyUI <- fixedPage(
     fixedRow( 
       column(4,
              div(h3("RPKM"),style = "color:grey"),
-             div(p("The overall abundance of specific gene relative to its abundance in a curated set of wild-type datasets."),
+             div(p("RPKM stands for Reads Per Kilobase of transcript per Million mapped reads. This plot presents
+                   the overall abundance of specific gene relative to its abundance in a curated set of wild-type datasets."),
                  style = "color:grey")
       ),
       column(8,
