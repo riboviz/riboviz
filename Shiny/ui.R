@@ -3,6 +3,7 @@ library(rhdf5)
 library(ggplot2)
 library(reshape2)
 library(cowplot)
+library(plotly)
 
 #For future database update, you need an updated file listing all year,author and database name like 'data_unq.tsv',
 
@@ -16,6 +17,7 @@ shinyUI<-fixedPage(
   fixedRow(
     column(4, #id='sidebar',
            #select input with the list of datasets
+           textOutput("test"),
            selectInput(inputId = 'selectyear',label='Select the year of publication',choices=c(2016,2015,2014,2013,2012,2009)),
            
            uiOutput('vauthor'), #3 dynamic drop down menus
@@ -73,16 +75,16 @@ shinyUI<-fixedPage(
            textOutput('l3'),
            tags$head(tags$style("#l3{color: rgb(136,86,167);font-size: 18px;}")),
            
-           plotOutput('plot11',
-                      dblclick = "plot11_dblclick",
-                      brush = brushOpts(
-                        id = "plot11_brush",
-                        resetOnNew = TRUE),
-                      inline = TRUE),
-           #width = 1000,height=500),
+           plotlyOutput('plot11',width = 5000, height = 1000)#,
+                      #dblclick = "plot11_dblclick",
+                      #brush = brushOpts(
+                      #  id = "plot11_brush",
+                      #  resetOnNew = TRUE),
+                      #inline = TRUE),
+           ##width = 1000,height=500),
            
-           plotOutput('plot22',inline = TRUE)
-           #width = 1000,height=500)
+           #plotOutput('plot22',inline = TRUE)
+           ##width = 1000,height=500)
            
            #uiOutput("plots",width = 1000,height=500)
     )
