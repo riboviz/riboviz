@@ -4,6 +4,97 @@ library(rtracklayer, quietly=T)
 library(rhdf5, quietly=T)
 library(parallel, quietly=T)
 
+reads_to_list <- function(gene_location, bamFile, read_range, flank, mult_exon=TRUE)
+{
+  # Computes matrix of read counts with starting position and read length
+  # on a signle gene whose co-ordinates are supplied as arguments
+  #  
+  # Args:
+  #   gene_location: (list) gff line containing gene co-ordinates
+  #   bamFile: (string) name of bamFile with reads in it
+  #   read_range: (int) vector of integer read lengths, e.g. 15:50 
+  #   flank: (int) width of flanking region to include outside gene body/CDS
+  #   mult_exon: If TRUE, uses only the first supplied exon for gene co-ordinates
+  #
+  # Returns:
+  #   output: matrix of integer counts for each row/start position and column/read length
+  #
+
+  if(!mult_exon)
+    # If the gene is a single exon gene but multiple GRanges specified,
+    # use the first GRange
+  { gene_location <- gene_location[1]
+  }
+  
+  # Number of read length categories
+  read_range_len <- length(read_range)
+
+  # Specify output matrix to store read data
+  gene_length = sum(sum(coverage(gene_location))
+  output <- matrix(0,nrow=read_range_len,ncol=gene_length + 2*flank))
+  
+  # Expand genomic locations to include flanking region positions
+  if(length(gene_location)==1) 
+  {	# For single exon genes
+    start(gene_location) <- start(gene_location) - flank
+    end(gene_location) <- end(gene_location) + flank
+  }else{
+    # For multiple exon genes
+    start(gene_location)[start(gene_location)==min(start(gene_location))] <- 
+        start(gene_location)[start(gene_location)==min(start(gene_location))] - flank
+    end(gene_location)[end(gene_location)==max(end(gene_location))] <- 
+        end(gene_location)[end(gene_location)==max(end(gene_location))] + flank
+  }
+  
+  # Specify variables to read in and create a parameter file for bam data
+  bam_what <- c("strand", "pos", "qwidth")
+  bam_param <- ScanBamParam(which = gene_location, what = bam_what)
+  
+  # Read in bam data
+  bam_data <- scanBam(bamFile, param=bam_param)
+  
+  # Subset reads that are on the same strand at the genomic location
+  read_strand <- unlist(lapply(bam_data,function(x)x$strand))
+  read_location <- unlist(lapply(bam_data,function(x)x$pos))[read_strand==as.factor(strand(gene_location)[1])]
+  read_width <- unlist(lapply(bam_data,function(x)x$qwid))[read_strand==as.factor(strand(gene_location)[1])]
+  
+  # Column numbers based on genomic position
+  nucleotide_pos <- unlist(which(coverage(gene_location)[seqnames(gene_location)[1]]==1))
+  
+  # If the specified flanking regions of a gene end up outside the chromosome locations (<0)
+  # add pseudo columns with negative numbers
+  if(min(start(gene_location))<min(nucleotide_pos))
+  { nucleotide_pos <- c(min(start(gene_location)):0,nucleotide_pos)
+  }
+  
+  # Count reads whose 5' ends map to each nucleotide and save them in output matrix
+  if(all(strand(gene_location)=="+")){
+    # For genes on positive strands
+    j <- 1 # counter for output row
+    for(i in read_range){
+      read_loc_len_i <- read_location[read_width==i] # subset reads of a particular length 
+      count_reads_len_i <- table(factor(read_loc_len_i,levels=nucleotide_pos)) # count reads of a particular length 
+      output[j,] <- c(count_reads_len_i)
+      j <- j+1
+    } 
+  } 
+  
+  if(all(strand(gene_location)=="-")){
+    # For genes on negative strands
+    j <- 1 # counter for output row
+    for(i in read_range){
+      read_loc_len_i <- read_width[read_width==i]+read_location[read_width==i]-1 # subset reads of a particular length 
+      count_reads_len_i <- table(factor(read_loc_len_i,levels=nucleotide_pos)) # count reads of a particular length
+      output[j,] <- c(rev(count_reads_len_i))
+      j <- j+1
+    }
+  }
+  
+  # Return the output matrix
+  return(output);
+}
+
+
 # Initialize default parameters
 Ncores <- 1 # Number of cores for parallelization
 MinReadLen <- 10 # Minimum read length in H5 output
@@ -32,9 +123,6 @@ if(length(args)==0){
 
 # Range of read lengths 
 read_range <- MinReadLen:MaxReadLen
-
-# Read in mapping function
-source("./reads_to_list_2.R")
 
 # Read in the positions of all exons/genes in GFF format and subset CDS locations
 gff <- readGFFAsGRanges(gffFile)
