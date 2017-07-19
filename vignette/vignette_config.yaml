@@ -1,0 +1,18 @@
+dir_in: vignette_data # input directory
+dir_out: vignette_data/output # output directory
+dir_tmp: vignette_data/tmp # tmp directory for intermediate files
+rRNA_index_file: # 
+orf_index_file:
+adapters: CTGTAGGCACC
+processes: 4
+MinReadLen: 10 # Minimum read length in H5 output
+MaxReadLen <- 50 # Maximum read length in H5 output
+Buffer <- 250 # Length of flanking region around the CDS
+PrimaryID <- "gene_id" # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
+SecondID <- NULL # Secondary gene IDs to access the data (COX1, EFB1, etc.)
+bamFile <- "input.bam" # Location of BAM file
+hdfile <- "output.h5" # Location of H5 output file
+gffFile <- NULL # Location of GFF2/GFF3 annotation file
+dataset <- "data" # Name of the dataset
+StopInCDS <- FALSE # Are stop codons part of the CDS annotations in GFF?
+test <- FALSE # Is this a test run
