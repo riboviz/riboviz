@@ -1,4 +1,5 @@
 .gitignore
+.DS_Store
 oldData/
 Shiny/2009
 Shiny/2010
