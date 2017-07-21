@@ -1,2 +1,5 @@
 .gitignore
 oldData/
+.Rproj.user
+RiboViz.Rproj
+.RData
