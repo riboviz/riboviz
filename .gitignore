@@ -1,5 +1,9 @@
 .gitignore
+.DS_Store
 oldData/
 .Rproj.user
 RiboViz.Rproj
 .RData
+Shiny/2009
+Shiny/2010
+Shiny/Supp

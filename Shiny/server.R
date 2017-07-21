@@ -3,6 +3,7 @@ library(rhdf5)
 library(ggplot2)
 library(reshape2)
 library(cowplot)
+library(plotly)
 
 shinyServer<-function(input,output){
   path<-'./'
@@ -57,11 +58,13 @@ shinyServer<-function(input,output){
   
   observe({ #when reset button(input$clickempty) is pressed, values$selectdb is reset to empty
     if (input$clickempty==0) return()
-    values$selectdb<-NULL
+    values$selectdb <- NULL
   })
   
   temp<-reactive({tail(unique(values$selectdb),max_db)}) #stores the last 3 user selected databases
+  #temp() e.g. 2016/Weinberg/unselected_total_RNA
   temp1<-reactive({gsub('/','\t',temp())})
+  #temp1() e.g. 2016 Weinberg unselected_total_RNA
   output$sdb<-renderUI(if(length(values$selectdb)>0){HTML(paste(temp1(),collapse = '<br/>'))}) #print on the webpage what these <=3 databases are
   output$dbselect_text<-renderText(paste('You may select ',3-length(temp()),' more databases'))
   
@@ -135,11 +138,13 @@ shinyServer<-function(input,output){
                 write.csv(data(), file)})
           }
           
-          for (i in 1:length(temp())){
+          for (i in 1:length(temp())){ #temp() e.g. 2016/Weinberg/unselected_total_RNA
             state$geoid[i]<-as.character(df[(df$year==unlist(strsplit(temp()[i],'/'))[1])&(df$author==unlist(strsplit(temp()[i],'/'))[2])&(df$database==unlist(strsplit(temp()[i],'/'))[3]),11])
             state$inf[i]<-paste0(path,temp()[i],'/',state$geoid[i],'.h5')
             state$transtemp[i]<-paste(unlist(strsplit(temp()[i],'/'))[1],unlist(strsplit(temp()[i],'/'))[2],unlist(strsplit(temp()[i],'/'))[3],sep='_')
+            #transtemp e.g. 2016_Weinberg_unselected_total_RNA
             state$attrdat<-c(state$attrdat,h5readAttributes(file=state$inf[i],name=paste(input$txt,'/',state$transtemp[i],'/reads',sep=''))$reads_by_len)
+            #output$test <- renderText(state$attrdat)
             
             state$coord<-dim(h5read(state$inf[1],paste(input$txt,'/',state$transtemp[1],'/reads/data',sep='')))[2] #nucleotide coordinate including left(250) and right(247) buffer, e.g.3980 for YAL001C
             state$d[[i]]<-h5read(state$inf[i],paste(input$txt,'/',state$transtemp[i],'/reads/data',sep=''))
@@ -325,7 +330,7 @@ shinyServer<-function(input,output){
             if(databasetype=='mRNA'){dat<-dat_mrna}
             else if(databasetype=='RPF'){dat<-dat_rpf}
             
-            ggplot(dat, aes_string(x=input$txt)) +
+            p<-ggplot(dat, aes_string(x=input$txt)) +
               geom_histogram(bins = input$bins, position='dodge',alpha=0.5,color=rgb(189,189,189,maxColorValue=255),fill=rgb(189,189,189,maxColorValue=255)) +
               ggtitle(databasetype) +
               theme_classic() +
@@ -337,6 +342,7 @@ shinyServer<-function(input,output){
                 axis.title=element_text(size=15), #axis title size
                 plot.title = element_text(size=18)) +
               geom_vline(xintercept = vline,color=color3[ii],size=1) 
+            ggplotly(p)
             
           }
           #---------------------------------- plot11
@@ -345,19 +351,20 @@ shinyServer<-function(input,output){
           ptype <-reactiveValues(x=0) #this is used so that the zoomed plot(plot22) doesn' show up until plot11 of corresponding type shows first
           
           if(input$select=='rpkm'){
-            output$plot11<-renderPlot(width = 800,height=800,{ #isolate in the renderPlot() so that it will only update when the input$clickplot button is fired
+            output$plot11<-renderPlotly({#width = 800,height=800,{ #isolate in the renderPlot() so that it will only update when the input$clickplot button is fired
               input$clickplot
               isolate({
                 p1<-myfun_rpkm('mRNA')
                 p2<-myfun_rpkm('RPF')
-                plot_grid(p1, p2, ncol = 1, nrow = 2) #to display the two RPKM plots as one plot
+                subplot(p1, p2)
+                #plot_grid(p1, p2, ncol = 1, nrow = 2) #to display the two RPKM plots as one plot, function of library(cowplot)
               })
             }
             )
           }
           
           else {
-            output$plot11<-renderPlot(width = 1000,height=500,{
+            output$plot11<-renderPlotly({#width = 1000,height=500,{
               input$clickplot
               isolate({
                 if(input$select=='rbl'){
@@ -367,7 +374,7 @@ shinyServer<-function(input,output){
                   maxy<-max(y)
                   names(y)<-state$temp1
                   dat<- melt(data.frame(x, y),id='x')
-                  ggplot(dat, aes(x = x, y=value, fill = variable)) +
+                  p<-ggplot(dat, aes(x = x, y=value, fill = variable)) +
                     geom_bar(stat='identity',position = 'dodge') +
                     ggtitle("Reads by length") +
                     labs(x='Read length',y='Frequency of read lengths') +
@@ -383,6 +390,7 @@ shinyServer<-function(input,output){
                       plot.title = element_text(size=18)
                     ) +
                     scale_fill_manual(values=color3)
+                  ggplotly(p)
                 }
                 
                 else if(input$select=='rbp' & input$radioreads == '1'){
