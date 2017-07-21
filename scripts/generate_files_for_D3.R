@@ -36,7 +36,7 @@ genes <- h5ls(fid,recursive = 1)$name
 out <- lapply(genes,function(gene){get_nt_period(fid=fid,gene=gene,dataset=dataset,left=226,right=225)})
 names(out) <- genes
 
-pos <- -20:25
+pos <- -25:25
 out_df_5p <- data.frame(Position=pos)
 out_df_3p <- data.frame(Position=pos)
 
