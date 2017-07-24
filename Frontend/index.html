@@ -14,7 +14,7 @@
 		<script type="text/javascript" src="js/d3.v3.min.js"></script>
 		<script type="text/javascript" src="js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="js/bootstrap.min.css"></script>
-
+        
 		<!-- 
 <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 		<script src="http://code.jquery.com/jquery.js"></script>
@@ -64,7 +64,19 @@
   				fill: none;
   				stroke: steelblue;
 			}
-			
+			div.tooltip {
+  				position: absolute;
+  				text-align: center;
+  				width: 80px;
+  				height: 28px;
+  				padding: 5px;
+  				font: 12px helvetica;
+  				background: white;
+  				border: 5px;
+  				border-radius: 10px;
+			}
+
+
 		</style>
 		<link href="css/style.css" rel="stylesheet" media="screen">
 	</head>
@@ -100,6 +112,12 @@
 						<li role="presentation">
 						
 							<a href="DataPage.html">Datasets</a>
+					
+						</li>
+						
+						<li role="presentation">
+						
+							<a href="TE.html">TE</a>
 					
 						</li>
 						
@@ -419,8 +437,13 @@
 
 <p> Existing yeast datasets consist of a mix of studies, some of which use elongation inhibitors such as cycloheximide (CHX) and others that flash freeze (FF) the samples to prevent initiation and elongation during sample preparation. In general, each experimental step can potentially introduce biases in processed datasets. <b>riboviz</b> can help identify these biases by allowing users to compare and contrast datasets obtained under different experimental conditions. </p>
 
+<<<<<<< HEAD
+<p>  Codes for processing the raw reads is available on <a href=https://github.com/shahpr/RiboViz><b>GitHub</b></a>.
+In addition to the metagenomic analyses, a R/Shiny integration allows the user to select a gene of interest and compare ribosomal densities of its ORF across three data sets.
+=======
 <p>  Codes for processing the raw reads is available <a href=https://github.com/shahpr/RiboViz><b>on GitHub</b></a>.
 In addition to the metagenomic analyses, a R/Shiny integration allows the user to select a gene of interest and compare ribosomal densities of its ORF across up to three different data sets.
+>>>>>>> c53caa13cb7beb0154a724f0e04ba3719042a2bd
 </p>
 		 
 	</div>
@@ -451,13 +474,15 @@ In addition to the metagenomic analyses, a R/Shiny integration allows the user t
 </div>
 
 
-<script src="/Frontend/js/3ntIndex.js"></script>
-<script src="/Frontend/js/ReadCountHistogramIndex.js"></script>
-<script src="/Frontend/js/CodonSpecificDistributionIndex.js"></script>
-<script src="/Frontend/js/ExcessCodonSpecificRPFIndex.js"></script>
-<script src="/Frontend/js/NucleotideBiasAlongRPIndex.js"></script>
-<script src="/Frontend/js/CorrelationsReadsFeaturesIndex.js"></script>
-<script src="/Frontend/js/CorrelationsAbundancesReadsIndex.js"></script>
+<script src="/Frontend/js/3ntIndex.js?2"></script>
+<script src="/Frontend/js/ReadCountHistogramIndex.js?2"></script>
+<script src="/Frontend/js/CodonSpecificDistributionIndex.js?2"></script>
+<script src="/Frontend/js/ExcessCodonSpecificRPFIndex.js?2"></script>
+<script src="/Frontend/js/NucleotideBiasAlongRPIndex.js?2"></script>
+
+<script src="/Frontend/js/CorrelationsReadsFeaturesIndex.js?2"></script>
+
+<script src="/Frontend/js/CorrelationsAbundancesReadsIndex.js?2"></script>
 
 
 

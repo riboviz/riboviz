@@ -2,91 +2,143 @@ library(shiny)
 library(rhdf5)
 library(ggplot2)
 library(reshape2)
-library(cowplot)
 library(plotly)
+library(RColorBrewer)
+library(data.table) # To use rbindlist()
+library(tidyr) # To use gather()
 
-#For future database update, you need an updated file listing all year,author and database name like 'data_unq.tsv',
 
-shinyUI<-fixedPage(
-  tags$head(
-    tags$style(HTML('#clickadd{background-color:orange}'))
-  ),
-  options = list(scrollX = TRUE), #scroll bar for the page
-  #titlePanel('Explore the RPF and mRNA databases'),
-  
+
+load("./riboViz.RData")
+
+shinyUI <- fixedPage(
   fixedRow(
-    column(4, #id='sidebar',
-           #select input with the list of datasets
-           textOutput("test"),
-           selectInput(inputId = 'selectyear',label='Select the year of publication',choices=c(2016,2015,2014,2013,2012,2009)),
-           
-           uiOutput('vauthor'), #3 dynamic drop down menus
-           uiOutput('vdb'),
-           
-           actionButton(inputId = 'clickadd',label='Add to selected database (max 3)'),
-           actionButton(inputId = 'go',label='Go'), 
-           br(),
-           br(),
-           actionButton(inputId = 'clickempty',label='Reset database selections'),
-           br(),
-           br(),
-           
-           textOutput("dbselect_text"),
-           tags$head(tags$style("#dbselect_text{color: red;   #manage the font color and style of the output text
-                                #font-size: 20px;
-                                #font-style: italic;
-                                }"
-        )
-           ), 
-        htmlOutput('sdb'),
-        br(),
-        
-        #------------above is to select databases,below is to select plot type 
-        conditionalPanel(
-          condition='input.go!=0 & input.clickadd!=0',
-          
-          textInput(inputId = 'txt',label='Write the gene name of interest',value = 'YAL001C', placeholder = 'e.g. YAL001C'),
-          selectInput(inputId = 'select',label='Select a type of plot',
-                      choices = c('Reads by length'='rbl','Reads by position'='rbp','Reads by position and length'='rbpl','Reads by codon'='rbc','RPKM comparison with WT'='rpkm')),
-          conditionalPanel(
-            condition = "input.select == 'rbpl'",
-            textInput(inputId = 'txt2',label='Write the read length of interest',placeholder='ranging from 15-50')
-          ),
-          conditionalPanel(
-            condition = "input.select == 'rpkm'",
-            sliderInput(inputId = 'bins',label='Choose bins for the histogram',min=5,max=30, value = 10)),
-          conditionalPanel(
-            condition="input.select=='rbp' | input.select=='rbpl' | input.select=='rbc'",
-            radioButtons(inputId = 'radioreads',label = "Select read type", choices = list("Regular reads" = 1, "Normalized reads" = 2), selected = 2)
-          ),
-          actionButton(inputId = 'clickplot',label='Click to plot'),
-          downloadButton(outputId = 'down',label='Download data')
-        )
-           ),
-    column(8,
-           textOutput('errormsg'),
-           tags$head(tags$style("#errormsg{color: red}")), 
-           
-           #---------below is legend for the plots 
-           textOutput('l1'),
-           tags$head(tags$style("#l1{color: rgb(67,162,202);font-size: 18px}")),
-           textOutput('l2'),
-           tags$head(tags$style("#l2{color: rgb(254,178,76);font-size: 18px}")),
-           textOutput('l3'),
-           tags$head(tags$style("#l3{color: rgb(136,86,167);font-size: 18px;}")),
-           
-           plotlyOutput('plot11',width = 5000, height = 1000)#,
-                      #dblclick = "plot11_dblclick",
-                      #brush = brushOpts(
-                      #  id = "plot11_brush",
-                      #  resetOnNew = TRUE),
-                      #inline = TRUE),
-           ##width = 1000,height=500),
-           
-           #plotOutput('plot22',inline = TRUE)
-           ##width = 1000,height=500)
-           
-           #uiOutput("plots",width = 1000,height=500)
+  # Where selection for databases and genes are made
+    column(2,
+         selectInput("slct_gene", "Genes",
+                    names(d2)[6:length(names(d2))], 
+                    selected = 'YAL001C')),
+     column(4,    
+          selectizeInput("slct_db", "Databases",
+                         paste(df$year, df$author, df$database, sep = " "), 
+                         multiple = TRUE, 
+                         selected = "2016 Weinberg unselected_total_RNA",
+                         options = list(maxItems=9))),
+
+     column(5, 
+       br(),
+       htmlOutput("txt_legends"))              
+    ),
+
+  fixedRow(
+    column(12,
+           htmlOutput("txt_test"),
+           textOutput("txt_errmsg"),
+           tags$head(tags$style("#txt_errmsg{color: red}"))
     )
-           )
+  ),
+  
+  ###################################### Conditional Panel
+    conditionalPanel(
+      condition="input.slct_db != null", # Plots only show up when database selection is not empty
+    fixedRow(            # Where the 1st plot appears
+      column(4,
+             div(h3("Reads by Length"),style = "color:grey"),
+             div(p("The distribution of reads of specific lengths along the ORF."),
+                 style = "color:grey")
+             
+      ),
+      column(8,
+             plotlyOutput("plotrbl"))#,width = 600, height = 350))
+      ),
+  
+    br(),
+    br(),
+
+    fixedRow(
+      column(4,offset = 4,
+      selectInput("slct_readlen", "Select the read length of interest",
+                  c("All read lengths",15:50), 
+                  selected = "All read lengths")),
+      column(4, 
+      radioButtons(inputId = 'btn_rbpl',label = "Select read type", 
+                   choices = list("Regular reads" = 1, "Normalized reads" = 2), 
+                   selected = 1, inline=TRUE))),
+
+    fixedRow(  
+    column(4,
+           div(h3("Reads by Position and Length"),style = "color:grey"),
+           div(p("Gene/read length/position-specific distribution of mapped reads along the 5' UTR, ORF and 3' UTR lengths.
+                 The ORF is indicated by the shaded grey area. The normalized reads are expressed as the proportion of actual
+                 reads and the mean within each ORF."),
+               style = "color:grey")
+    ),
+    column(8,
+           plotlyOutput("plotrbpl"))
+    ),
+  
+    br(),
+    br(),
+
+    fixedRow(
+      column(4, offset=8,
+             radioButtons(inputId = 'btn_rbc',label = "Select read type", 
+                          choices = list("Regular reads" = 1, "Normalized reads" = 2), 
+                          selected = 1, inline=TRUE))),
+    
+    fixedRow(  
+    column(4,
+           div(h3("Reads by Codon"),style = "color:grey"),
+           div(p("Codon specific mapped reads. The normalized reads are expressed as the proportion of total 
+                 reads for corresponding nucleotides, and the mean for all codons."), style = "color:grey")
+    ),
+    column(8,
+           plotlyOutput("plotrbc"))
+    ),
+    
+    br(),
+    br(),
+    fixedRow(
+      column(8, offset=4,
+             sliderInput(inputId = 'bin_rpkm',label='Choose bins for the histogram',min=5,max=30, value = 10))
+    ),
+  
+    br(),
+    br(),
+  
+    fixedRow( 
+      column(4,
+             div(h3("RPKM"),style = "color:grey"),
+             div(p("RPKM stands for Reads Per Kilobase of transcript per Million mapped reads. This plot presents
+                   the overall abundance of specific gene relative to its abundance in a curated set of wild-type datasets."),
+                 style = "color:grey")
+      ),
+      column(8,
+             plotlyOutput("plotrpkm"))),
+    
+    
+    fixedRow( 
+      column(4,
+             div(h3("RPKM Density"),style = "color:grey"),
+             div(p("The abundance of specific gene relative to the abundances of all other genes in the same data set."),
+                 style = "color:grey")
+      ),
+      column(8,
+             plotlyOutput("plotrpkmdens"))),
+    
+    br(),
+    br(),
+    
+    fixedRow(
+      column(4,
+            div(h3("Download"),style = "color:grey"), 
+            br()),
+            
+      column(8,
+             br(),
+             downloadButton(outputId = 'dwld_data',label='Download all data')
+            )
+      ),
+    br()
+    )
   )

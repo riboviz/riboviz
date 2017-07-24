@@ -35,6 +35,11 @@ var yAxisFigure7 = d3.svg.axis()
     .scale(yFigure7)
     .orient("left");//.ticks(7);
 
+var tipFigure7 = d3.select("#CorrelationsReadsandFeatures")
+      .append('div')
+      .attr('class', 'tooltip')
+      .style("opacity", 0);
+
 
 var svgFigure7 = d3.select("#CorrelationsReadsandFeatures").append("svg")
     .attr("width", widthFigure7 + marginFigure7.left + marginFigure7.right)
@@ -65,7 +70,16 @@ svgFigure7.append("g")
       				.attr("class", "x axis")
       				.attr("transform", "translate(0," + heightFigure7 + ")")
       				.call(xAxisFigure7);
-    				    				
+    				   
+    				   
+    				//x-axis line
+    			svgFigure7.selectAll(".x.axis")	
+  					.append("rect")
+  	   				.attr("width", widthFigure7)
+  	   				.attr("height",1)
+  	   				.attr("fill","#000")
+  	   				
+  	   				 				
 				svgFigure7.append("text")      // text label for the x axis
 					.attr("class", "xaxis_label1")
 					.attr("transform", "translate(" + (widthFigure7 / 2) + " ," + (heightFigure7 + paddingFigure7*8) + ")")
@@ -142,6 +156,7 @@ function analyze(error, data, data1) {
     d.gc = +d.utr_gc;
     d.polyA = +d.polyA;
     d.Corr=+d.Corr;
+    d.ORF=d.ORF;
   });
 
 	
@@ -165,6 +180,7 @@ var  data = data.map( function (d) {
     return { 
       d1: +choosetheone,
       d2: +choosethetwo,
+      ORF: d.ORF,
       Corr: +d.Corr}; 
 });
     
@@ -207,7 +223,19 @@ var  data = data.map( function (d) {
       .style("fill", function(d) { return opaColor(d.Corr); })
       .attr("r", 3)
       .filter(function(d) { return !isNaN(d.d1) && !isNaN(d.d2)})
-      //.text(function(d) { return d; })
+      .on("mouseover", function(d) {		
+            tipFigure7.transition()		
+                .duration(20)		
+                .style("opacity", .9);		
+            tipFigure7.html(d.ORF)	
+                .style("left",xFigure7(d.d1) +70+ 'px')		
+                .style("top", yFigure7(d.d2) +20 + 'px');	
+            })					
+        .on("mouseout", function(d) {		
+            tipFigure7.transition()		
+                .delay(50)		
+                .style("opacity", 0);	
+        })
     .transition()
     			.ease("linear")
 			.delay(function(d, i) {

@@ -34,7 +34,11 @@ var yAxisFigure6 = d3.svg.axis()
     .scale(yFigure6)
     .orient("left");//.ticks(7);
 
-
+var tipFigure6 = d3.select("#CorrelationsAbundancesReads")
+      .append('div')
+      .attr('class', 'tooltip')
+      .style("opacity", 0);
+      
 var svgFigure6 = d3.select("#CorrelationsAbundancesReads").append("svg")
     .attr("width", widthFigure6 + marginFigure6.left + marginFigure6.right)
     .attr("height", heightFigure6+2*marginFigure6.top + marginFigure6.bottom)
@@ -89,7 +93,12 @@ var svgFigure6nC = d3.select("#HistogramsCorrsCHX").append("svg")
       					.attr("transform", "translate(17," +15+ ")")
       					.style("font-size","12px");
       				
-      				
+      					//x-axis line
+    			svgFigure6.selectAll(".x.axis")	
+  					.append("rect")
+  	   				.attr("width", widthFigure6)
+  	   				.attr("height",1)
+  	   				.attr("fill","#000")
       				
       					
     				    				
@@ -145,8 +154,21 @@ var svgFigure6nC = d3.select("#HistogramsCorrsCHX").append("svg")
         
         svgFigure6C.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+            .attr("transform", "translate("+(0-paddingFigure6C)+","+(heightFigure6C/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
+            .text("Correlation counts").style("fill","#777777");
+
+
+        svgFigure6C.append("text")
+            .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (widthFigure6C/2) +","+(heightFigure6C)+")")  // centre below axis
             .text("correlations in FF datasets").style("fill","#777777");
+            
+            
+            svgFigure6nC.append("text")
+            .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+            .attr("transform", "translate("+(0-paddingFigure6C)+","+(heightFigure6C/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
+            .text("Correlation counts").style("fill","#777777");
+            
             
             svgFigure6nC.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
@@ -228,6 +250,7 @@ function analyze(error, data, data1) {
     d.tAI = +d.tAI ;
     d.RNAseq = +Math.log10(d.RNAseq);
     d.Microarray = +Math.log10(d.Microarray);
+    d.Codon = d.Codon;
   });
 
 function updateFigure6(data, value1, value2) {
@@ -244,7 +267,8 @@ var  data = data.map( function (d) {
 	
     return { 
       d1: +choosetheone,
-      d2: +choosethetwo}; 
+      d2: +choosethetwo,
+      Codon: d.Codon}; 
 });
   
     
@@ -280,7 +304,19 @@ var  data = data.map( function (d) {
       .style("fill","#bcbddc")
       .attr("r", 5)
       .filter(function(d) { return !isNaN(d.d1) && !isNaN(d.d2)})
-      //.text(function(d) { return d; })
+      .on("mouseover", function(d) {		
+            tipFigure6.transition()		
+                .duration(10)		
+                .style("opacity", 1);		
+            tipFigure6.html("Codon "+d.Codon)	
+                .style("left",xFigure6(d.d1) +40+ 'px')		
+                .style("top", yFigure6(d.d2) +70 + 'px');	
+            })					
+        .on("mouseout", function(d) {		
+            tipFigure6.transition()		
+                .delay(50)		
+                .style("opacity", 0);	
+        })
     .transition()
     			.ease("linear")
 			.delay(function(d, i) {

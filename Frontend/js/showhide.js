@@ -9,7 +9,7 @@ function toggleFields() {
      } else {
          $("#author").show();
          $("#dataset").show();
-         $("#hideallatfirst").show();
+         $("#hideallatfirst").show()
          }
   }
 function isEmpty(str) {

@@ -35,6 +35,10 @@ var yAxisFigure7 = d3.svg.axis()
     .scale(yFigure7)
     .orient("left");//.ticks(7);
 
+var tipFigure7 = d3.select("#CorrelationsReadsandFeatures")
+      .append('div')
+      .attr('class', 'tooltip')
+      .style("opacity", 0);
 
 var svgFigure7 = d3.select("#CorrelationsReadsandFeatures").append("svg")
     .attr("width", widthFigure7 + marginFigure7.left + marginFigure7.right)
@@ -42,7 +46,7 @@ var svgFigure7 = d3.select("#CorrelationsReadsandFeatures").append("svg")
   .append("g")
     .attr("transform", "translate(" + marginFigure7.left + "," + marginFigure7.top + ")");
  
-			
+	
 // var xFigure7C = d3.scale.ordinal().rangeRoundBands([0, widthFigure7C], .05);
 // var yFigure7C = d3.scale.linear().range([heightFigure7C-paddingFigure7C,paddingFigure7C]);
 
@@ -51,7 +55,16 @@ var svgFigure7 = d3.select("#CorrelationsReadsandFeatures").append("svg")
       				.attr("class", "x axis")
       				.attr("transform", "translate(0," + heightFigure7 + ")")
       				.call(xAxisFigure7);
-    				    				
+    				    	
+    				    	
+    		    	//x-axis line
+    			svgFigure7.selectAll(".x.axis")	
+  					.append("rect")
+  	   				.attr("width", widthFigure7)
+  	   				.attr("height",1)
+  	   				.attr("fill","#000")
+  	   				
+  	   							
 				svgFigure7.append("text")     
 					.attr("class", "xaxis_label1")
 					.attr("transform", "translate(" + (widthFigure7 / 2) + " ," + (heightFigure7 + paddingFigure7*8) + ")")
@@ -95,7 +108,7 @@ var svgFigure7 = d3.select("#CorrelationsReadsandFeatures").append("svg")
 	var string="../../Data/";
 
 	var thefile=string.concat("F7_2016_Weinberg_RPF.tsv");
-
+      
 
 queue()
   .defer(d3.tsv, thefile)
@@ -116,6 +129,7 @@ function analyze(error, data, data1) {
     d.gc = +d.utr_gc;
     d.polyA = +d.polyA;
     d.Corr=+d.Corr;
+    d.ORF=d.ORF;
   });
 
 	
@@ -139,6 +153,7 @@ var  data = data.map( function (d) {
     return { 
       d1: +choosetheone,
       d2: +choosethetwo,
+      ORF: d.ORF,
       Corr: +d.Corr}; 
 });
     
@@ -183,7 +198,19 @@ var  data = data.map( function (d) {
       .style("fill", function(d) { return opaColor(d.Corr); })
       .attr("r", 3)
       .filter(function(d) { return !isNaN(d.d1) && !isNaN(d.d2)})
-      //.text(function(d) { return d; })
+    .on("mouseover", function(d) {		
+            tipFigure7.transition()		
+                .duration(20)		
+                .style("opacity", .9);		
+            tipFigure7.html(d.ORF)	
+                .style("left",xFigure7(d.d1) +70+ 'px')		
+                .style("top", yFigure7(d.d2) +20 + 'px');	
+            })					
+        .on("mouseout", function(d) {		
+            tipFigure7.transition()		
+                .delay(50)		
+                .style("opacity", 0);	
+        })
     .transition()
     			.ease("linear")
 			.delay(function(d, i) {
@@ -194,9 +221,8 @@ var  data = data.map( function (d) {
       .attr("cy", function(d) { return yFigure7(d.d2); })
       .style("fill-opacity", function(d) { return opa(d.Corr); })
       .style("fill", function(d) { return opaColor(d.Corr); });
-      //.filter(function(d) { return !isNaN(d.d1) && !isNaN(d.d2)});
-
-
+      
+     
 textFigure7.exit().attr("class", "exit")
     .transition()
     			.ease("linear")
@@ -345,7 +371,8 @@ d3.selectAll(".Thecorrs2")
 
 function changeit7() {
     var feature= d3.select('input[name="features"]:checked').node().value;
-    updateFigure7(data, "RPF", feature);	
+    updateFigure7(data, "RPF", feature);
+   	
 };
 
 

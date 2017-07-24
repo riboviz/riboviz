@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Riboviz: TE</title>
+		<script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+		<script type="text/javascript" src="js/jquery.js"></script>
+		<script type="text/javascript" src="js/jquery-migrate-1.2.1.min.js"></script>
+		<script type="text/javascript" src="js/topojson.v1.min.js"></script>
+		<script type="text/javascript" src="js/queue.v1.min.js"></script>
+		<script type="text/javascript" src="js/d3.v3.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<!-- 		<script type="text/javascript" src="js/bootstrap.min.css"></script> -->
+
+		<!-- 
+<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+		<script src="http://code.jquery.com/jquery.js"></script>
+		<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+		<script src="http://d3js.org/topojson.v1.min.js"></script>
+		<script src="http://d3js.org/queue.v1.min.js"></script>
+		<script type="text/javascript" src="//d3js.org/d3.v3.min.js"></script>
+		<script src="http://d3js.org/d3.v3.min.js"></script>
+ -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+		<link rel="stylesheet"	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous" media="screen">
+			<link href="css/style.css" rel="stylesheet" media="screen">
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		
+		<script type="text/javascript" src="js/showhideRPF.js"></script>
+		<script type="text/javascript" src="js/showhideRNA.js"></script>
+		<script type="text/javascript" src="js/FileSaver.js"></script>
+		
+		
+			<style type="text/css">
+			.axis path,
+			.axis line {
+  				fill: none;
+  				stroke: #000;
+  				shape-rendering: crispEdges;
+			}
+
+			.axis text {
+				font-family: sans-serif;
+				font-size: 11px;
+			}	
+			.x.axis path {
+  				display: none;
+			}
+			.line {
+  				fill: none;
+  				stroke: rgb(239,138,98);
+  				stroke-width: 2px;
+			}
+
+			.circle {
+  				fill: none;
+  				stroke: steelblue;
+			}
+			div.tooltip {
+  				position: absolute;
+  				text-align: center;
+  				width: 80px;
+  				height: 28px;
+  				padding: 5px;
+  				font: 12px helvetica;
+  				background: white;
+  				border: 5px;
+  				border-radius: 10px;
+			}
+		</style>	
+	</head>
+	<body>
+
+		<nav class="navbar navbar-default navbar-static-top" role="navigation">			<div class="container">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+
+					<a class="navbar-brand" href="index.html">
+						<div class="navtitle">
+							<span class="c4">r</span><span class="c4">i</span><span class="c4">b</span><span class="c4">o</span><span class="c7">v</span><span class="c7">i</span><span class="c7">z</span>
+						</div>
+					</a>
+
+				</div>
+				<div class="collapse navbar-collapse" id="navbar-collapse">
+			
+					<ul class="nav navbar-nav navbar-right nav-tabs">
+						
+						<li role="presentation">
+						
+							<a href="DataPage.html">
+								Datasets
+							</a>
+					
+						</li>
+						<li role="presentation">
+						
+							<a href="TE.html">TE</a>
+					
+						</li>
+						<li role="presentation">
+						
+							<a href="GeneBased.html">Gene of interest</a>
+					
+						</li>
+						<li role="presentation">
+						
+							<a href="MethodsPage.html">
+								Methods
+							</a>
+						</li>
+						
+						<li class="dropdown" role="presentation">
+						
+							<a href="HelpPage.html" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+								Help
+								</a>	
+						</li>
+
+					</ul>
+					
+				</div>
+			
+
+			</div>
+		</nav>
+
+	
+
+<div class="container">
+<div class="row hidden-xs">
+	<div class="col-md-9 paperbox">
+		<div class="c10">   Analysis and Visualization of Ribosome  Profiling  Data</div>
+	</div>
+</div>
+</div>
+
+
+
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+
+<div class="container">
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			Get RPF data
+		</div>
+	</div>
+</div>
+</div>
+		
+<div class="bigspacer"></div> 
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"></a> 
+
+
+<div class="container">
+  <div class="row">
+  
+  <div class="col-md-4">        		
+		<form class="form-horizontal form-small">
+		<div class="form-group" id="year" name="year">
+		<label class="col-xs-4 control-label">Choose study from</label>
+			<div class="col-xs-8 controls">
+			<select id="yearform" name="yearform" class="form-control form-control">
+            <option value="0"> year </option>
+			<option value="2009">2009</option>
+			<option value="2012">2012</option>
+			<option value="2013">2013</option>
+			<option value="2014">2014</option>
+			<option value="2015">2015</option>
+			<option value="2016">2016</option>
+			</select>
+			</div>
+		</div>
+		</form>
+   </div>
+
+  <div class="col-md-4">        		
+		<form class="form-horizontal form-small">
+		<div class="form-group" id="author" name="author">
+		<label class="col-xs-4 control-label">From authors</label>
+			<div class="col-xs-8 controls">
+			<select id="authorform" name="authorform" class="form-control form-control">
+			</select>
+			</div>
+		</div>
+		</form>
+   </div>
+   
+<div class="col-md-4">
+	<form class="form-horizontal form-small">
+		<div id="dataset" name="dataset" class="form-group">
+		<label class="col-xs-4 control-label">Dataset</label>
+		<div class="col-xs-8 controls">
+		<select id="dataform" class="form-control form-control">
+		</select>
+		</div>
+		</div>
+	</form>			
+<div><!-- end second column -->
+
+
+  </div><!-- end row  -->
+</div><!-- end container  -->
+
+
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+
+<div class="container">
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			Get RNA data
+		</div>
+	</div>
+</div>
+</div>
+		
+<div class="bigspacer"></div> 
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"></a> 
+
+
+<div class="container">
+  <div class="row">
+  
+  <div class="col-md-4">        		
+		<form class="form-horizontal form-small">
+		<div class="form-group" id="year2" name="year2">
+		<label class="col-xs-4 control-label">Choose study from</label>
+			<div class="col-xs-8 controls">
+			<select id="yearform2" name="yearform2" class="form-control form-control">
+            <option value="0"> year </option>
+			<option value="2009">2009</option>
+			<option value="2012">2012</option>
+			<option value="2013">2013</option>
+			<option value="2014">2014</option>
+			<option value="2015">2015</option>
+			<option value="2016">2016</option>
+			</select>
+			</div>
+		</div>
+		</form>
+   </div>
+
+  <div class="col-md-4">        		
+		<form class="form-horizontal form-small">
+		<div class="form-group" id="author2" name="author2">
+		<label class="col-xs-4 control-label">From authors</label>
+			<div class="col-xs-8 controls">
+			<select id="authorform2" name="authorform2" class="form-control form-control">
+			</select>
+			</div>
+		</div>
+		</form>
+   </div>
+   
+<div class="col-md-4">
+	<form class="form-horizontal form-small">
+		<div id="dataset2" name="dataset2" class="form-group">
+		<label class="col-xs-4 control-label">Dataset</label>
+		<div class="col-xs-8 controls">
+		<select id="dataform2" class="form-control form-control">
+		</select>
+		</div>
+		</div>
+	</form>			
+<div><!-- end second column -->
+
+
+  </div><!-- end row  -->
+</div><!-- end container  -->
+
+
+<div class="container" id="hideallatfirst">
+
+
+ 
+<div class="bigspacer"></div> 				
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+
+
+<div class="container">
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			
+		</div>
+	</div>
+</div>
+</div>
+<div class="container">
+  <div class="row">
+    
+    <div class="col-md-4">
+    <h4> Correlation RNA and RPF</h4>
+    <p> Correlations between RPF and RNA values. Correlations are estimated based on genes with at least 64 mapped reads (blue dots). </p>	
+</div>
+	
+	
+	<div class="row">
+    	<div class="col-md-4">
+			<p class="CorrelationsRNAandRPF" id="CorrelationsRNAandRPF"></p>
+		</div>
+
+	</div>	
+
+
+  </div>
+</div>
+
+
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+
+
+<div class="container">
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			
+		</div>
+	</div>
+</div>
+</div>
+<div class="container">
+  <div class="row">
+    
+    <div class="col-md-4">
+    <h4> Sequence-based features and TE values</h4>
+    <p> Correlations between coding sequence features and gene-specific TE values. Correlations are estimated based on genes with at least 64 mapped reads (blue dots). </p>	
+
+
+<form>
+<input class="Thecorrs2" type="radio" name="features" id="defaultInput18" value="Length" checked/><label for="defaultInput18">Length</label> 
+<input class="Thecorrs2" type="radio" name="features" id="thisPostInput1" value="FEatg"/><label for="thisPostInput1">FEatg</label>
+<input class="Thecorrs2" type="radio" name="features" id="thisPostInput1" value="FEcap"/><label for="thisPostInput1">FEcap</label>
+<input class="Thecorrs2" type="radio" name="features" id="thisPostInput1" value="uATG"/><label for="thisPostInput1">uATG</label>
+<input class="Thecorrs2" type="radio" name="features" id="thisPostInput1" value="utr"/><label for="thisPostInput1">utr</label>
+<input class="Thecorrs2" type="radio" name="features" id="thisPostInput1" value="gc"/><label for="thisPostInput1">gc</label>
+<input class="Thecorrs2" type="radio" name="features" id="thisPostInput1" value="polyA"/><label for="thisPostInput1">polyA</label>
+</form>
+
+</div>
+	
+	
+	<div class="row">
+    	<div class="col-md-4">
+			<p class="CorrelationsReadsandFeatures" id="CorrelationsReadsandFeatures"></p>
+		</div>
+
+	</div>	
+
+
+  </div>
+</div>
+
+
+
+<div class="bigspacer"></div>
+<div class="bigspacer"></div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<hr>
+		<div class="center text-gray smallnote">
+			&copy; 2017 Oana Carja and Premal Shah
+		</div>
+	</div>
+</div>
+
+
+
+</div>	<!-- 	end of hide all at first	 -->
+
+<div class="bigspacer"></div> 
+<div class="bigspacer"></div>
+<div class="bigspacer"></div> 
+
+
+<script src="/Frontend/js/CorrelationsRNAandRPFforTE.js?2"></script>
+<script src="/Frontend/js/CorrelationsReadsFeaturesTE.js?2"></script>
+
+
+
+
