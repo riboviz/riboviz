@@ -14,11 +14,14 @@ Config etc in root of vignette:
   
 Input data, in vignette/input:
   - vignette_2009_Ingolia_rpf-rich-1.fastq.gz of example reads
-  - scer_10genes.fasta sequence file to align to
-  - scer_rRNA.fasta rRNA sequence file to avoid aligning to
-  - scer_10genes.gff genome feature file to specify start and stop co-ordinates
+  - yeast_YAL_CDS_w_250utrs.fa sequence file to align to from just left arm of chromosome 1
+  - yeast_YAL_CDS_w_250utrs.gff3 matched genome feature file to specify start and stop co-ordinates
+  - yeast_rRNA_R64-1-1.fa rRNA sequence file to avoid aligning to
 
 Running the vignette produces the following outputs:
+
+Index files, in vignette/index:
+
 
 Intermediate outputs, in vignette/tmp:
   - vignette_trim.fq, trimmed reads

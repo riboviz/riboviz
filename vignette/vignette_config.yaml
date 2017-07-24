@@ -1,18 +1,28 @@
-dir_in: vignette_data # input directory
+dir_in: vignette_data/input # input directory
 dir_out: vignette_data/output # output directory
 dir_tmp: vignette_data/tmp # tmp directory for intermediate files
-rRNA_index_file: # 
-orf_index_file:
-adapters: CTGTAGGCACC
-processes: 4
+dir_index: vignette_data/index
+make_index: TRUE # if true, remake hisat2 indices from fasta files
+rRNA_fasta: yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning to
+orf_fasta: yeast_YAL_CDS_w_250utrs.fa # orf file to align to
+orf_gff_file: yeast_YAL_CDS_w_250utrs.gff3 # gff3 file for ORFs
+make_indices: TRUE
+aligner: hisat2 #
+rRNA_index_file: vignette_data/index/yeast_rRNA # rRNA index file
+orf_index_file: vignette_data/index/YAL_CDS_w_250 # ORF index file
+adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
+nprocesses: 4 # number of processes to parallelize over
 MinReadLen: 10 # Minimum read length in H5 output
-MaxReadLen <- 50 # Maximum read length in H5 output
-Buffer <- 250 # Length of flanking region around the CDS
-PrimaryID <- "gene_id" # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
-SecondID <- NULL # Secondary gene IDs to access the data (COX1, EFB1, etc.)
-bamFile <- "input.bam" # Location of BAM file
-hdfile <- "output.h5" # Location of H5 output file
-gffFile <- NULL # Location of GFF2/GFF3 annotation file
-dataset <- "data" # Name of the dataset
-StopInCDS <- FALSE # Are stop codons part of the CDS annotations in GFF?
-test <- FALSE # Is this a test run
+MaxReadLen: 50 # Maximum read length in H5 output
+Buffer: 250 # Length of flanking region around the CDS
+PrimaryID: gene_id # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
+SecondID: NULL # Secondary gene IDs to access the data (COX1, EFB1, etc.)
+bamFile: input.bam # Location of BAM file
+hdfile: output.h5 # Location of H5 output file
+gffFile: NULL # Location of GFF2/GFF3 annotation file
+dataset: data # Name of the dataset
+StopInCDS: FALSE # Are stop codons part of the CDS annotations in GFF?
+test: FALSE # Is this a test run
+
+
+
