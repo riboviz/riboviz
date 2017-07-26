@@ -85,7 +85,7 @@ if __name__=="__main__" :
                 # count the read as trimmed
                 ntrimmed += 1
         
-            if ( MDtag[-1]=="0" ) & (read.flag==16) :
+            if ( bool( re.search( "[ATCG]0$", MDtag ) ) ) & (read.flag==16) :
                 # If the 5' nt is mismatched on a minus strand read... 
                 # positive sense is with template; read is reverse-complement
                 if MDtag[-3] in ["A","T","C","G"] :
