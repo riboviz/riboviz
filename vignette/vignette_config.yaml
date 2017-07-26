@@ -1,15 +1,21 @@
-dir_in: vignette_data/input # input directory
-dir_out: vignette_data/output # output directory
-dir_tmp: vignette_data/tmp # tmp directory for intermediate files
-dir_index: vignette_data/index
+dir_in: vignette/input # input directory
+dir_out: vignette/output # output directory
+dir_tmp: vignette/tmp # tmp directory for intermediate files
 make_index: TRUE # if true, remake hisat2 indices from fasta files
-rRNA_fasta: yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning to
-orf_fasta: yeast_YAL_CDS_w_250utrs.fa # orf file to align to
+rRNA_fasta: vignette/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning to
+orf_fasta: vignette/input/yeast_YAL_CDS_w_250utrs.fa # orf file to align to
 orf_gff_file: yeast_YAL_CDS_w_250utrs.gff3 # gff3 file for ORFs
-make_indices: TRUE
-aligner: hisat2 #
-rRNA_index_file: vignette_data/index/yeast_rRNA # rRNA index file
-orf_index_file: vignette_data/index/YAL_CDS_w_250 # ORF index file
+aligner: hisat2 # short read aligner to use
+build_indices: TRUE # build indices for aligner?
+dir_index: vignette/index # directory to put built indices in
+rRNA_index: vignette/index/yeast_rRNA # rRNA index file
+orf_index: vignette/index/YAL_CDS_w_250 # ORF index file
+fq_files: # fastq files to be processed
+  WTnone: SRR1042855_s1mi.fastq.gz
+  WT3AT: SRR1042855_s1mi.fastq.gz
+test: # fastq files to be processed
+  - thing1
+  - thing2
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
 nprocesses: 4 # number of processes to parallelize over
 MinReadLen: 10 # Minimum read length in H5 output

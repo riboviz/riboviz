@@ -13,10 +13,11 @@ Config etc in root of vignette:
   - vignette_config.yaml, contains all config information
   
 Input data, in vignette/input:
-  - vignette_2009_Ingolia_rpf-rich-1.fastq.gz of example reads
   - yeast_YAL_CDS_w_250utrs.fa sequence file to align to from just left arm of chromosome 1
   - yeast_YAL_CDS_w_250utrs.gff3 matched genome feature file to specify start and stop co-ordinates
   - yeast_rRNA_R64-1-1.fa rRNA sequence file to avoid aligning to
+  - SRR1042855_s1mi.fastq.gz about 1mi sampled RPFs wild-type no additive from Guydosh & Green 2014
+  - SRR1042864_s1mi.fastq.gz about 1mi sampled RPFs wild-type + 3-AT from Guydosh & Green 2014
 
 Running the vignette produces the following outputs:
 
