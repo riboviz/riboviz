@@ -4,7 +4,7 @@ dir_tmp: vignette/tmp # tmp directory for intermediate files
 make_index: TRUE # if true, remake hisat2 indices from fasta files
 rRNA_fasta: vignette/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning to
 orf_fasta: vignette/input/yeast_YAL_CDS_w_250utrs.fa # orf file to align to
-orf_gff_file: yeast_YAL_CDS_w_250utrs.gff3 # gff3 file for ORFs
+orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3 # GFF2/GFF3 file for ORFs
 aligner: hisat2 # short read aligner to use
 build_indices: TRUE # build indices for aligner?
 dir_index: vignette/index # directory to put built indices in
@@ -13,22 +13,16 @@ orf_index: vignette/index/YAL_CDS_w_250 # ORF index file
 fq_files: # fastq files to be processed
   WTnone: SRR1042855_s1mi.fastq.gz
   WT3AT: SRR1042855_s1mi.fastq.gz
-test: # fastq files to be processed
-  - thing1
-  - thing2
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
 nprocesses: 4 # number of processes to parallelize over
 MinReadLen: 10 # Minimum read length in H5 output
 MaxReadLen: 50 # Maximum read length in H5 output
 Buffer: 250 # Length of flanking region around the CDS
-PrimaryID: gene_id # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
+PrimaryID: Name # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
 SecondID: NULL # Secondary gene IDs to access the data (COX1, EFB1, etc.)
-bamFile: input.bam # Location of BAM file
-hdfile: output.h5 # Location of H5 output file
-gffFile: NULL # Location of GFF2/GFF3 annotation file
 dataset: data # Name of the dataset
 StopInCDS: FALSE # Are stop codons part of the CDS annotations in GFF?
-test: FALSE # Is this a test run
+isTestRun: FALSE # Is this a test run
 
 
 
