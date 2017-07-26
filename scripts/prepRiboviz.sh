@@ -80,8 +80,8 @@ for fq in ${fqfs}
     fn_orf_mapped=${dir_tmp}/${fn_stem}_orf_map.sam
     fn_orf_mapped_clean=${dir_tmp}/${fn_stem}_orf_map_clean.sam
     fn_nonaligned=${dir_tmp}/${fn_stem}_unaligned.sam
-    ##  bam file
-    fn_outbam=${dir_out}/${fn_stem}
+    ##  bam + h5 files
+    fn_out=${dir_out}/${fn_stem}
     ##
     ## cut illumina adapters
     cutadapt --trim-n -O 1 -m 5 -a ${adapters} -o ${fn_trim} ${fn}
@@ -102,18 +102,23 @@ for fq in ${fqfs}
     ## convert sam (text) output to bam file (compressed binary)
     samtools view -b ${fn_orf_mapped_clean} | \
     ## sort bam file on genome and write
-    samtools sort -@ ${nprocesses} -O bam -o ${fn_outbam}.bam -
+    samtools sort -@ ${nprocesses} -O bam -o ${fn_out}.bam -
     ## index bamfile
-    samtools index ${fn_outbam}.bam
+    samtools index ${fn_out}.bam
     #####
     ## LOOK HERE!!!
     ## this is the point where we need to run reads_to_list, etc, to make length-sensitive alignments
+    #     echo R CMD BATCH "--args Ncores=${nprocesses} SecondID=${SecondID} bamFile=${fn_outbam}.bam hdfile=${fn_outbam}.h5 gffFile=${orf_gff_file}" ${dir_scripts}/bam_to_h5.R
+    #     R CMD BATCH "--args Ncores=${nprocesses} SecondID=${SecondID} bamFile=${fn_outbam}.bam hdfile=${fn_outbam}.h5 gffFile=${orf_gff_file}" ${dir_scripts}/bam_to_h5.R
+    #  
+    echo Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --SecondID=${SecondID} --bamFile=${fn_outbam}.bam --hdFile=${fn_outbam}.h5 --orf_gff_file=${orf_gff_file}
+    Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --SecondID=${SecondID} --bamFile=${fn_outbam}.bam --hdFile=${fn_outbam}.h5 --orf_gff_file=${orf_gff_file}
     #####
-    ## genome coverage as bedgraph
-    ## calculate genome coverage for plus strand
-    bedtools genomecov -ibam ${fn_outbam}.bam -bga -5 -strand + > ${fn_outbam}_plus.bedgraph
-    ## calculate genome coverage for minus strand
-    bedtools genomecov -ibam ${fn_outbam}.bam -bga -5 -strand - > ${fn_outbam}_minus.bedgraph
+    ## transcriptome coverage as bedgraph
+    ## calculate transcriptome coverage for plus strand
+    bedtools genomecov -ibam ${fn_out}.bam -bga -5 -strand + > ${fn_out}_plus.bedgraph
+    ## calculate transcriptome coverage for minus strand
+    bedtools genomecov -ibam ${fn_out}.bam -bga -5 -strand - > ${fn_out}_minus.bedgraph
     ## ctrl-c interrupts entire loop, not just current iteration
     trap exit SIGINT
 done

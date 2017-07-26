@@ -3,6 +3,7 @@ library(Rsamtools, quietly=T)
 library(rtracklayer, quietly=T)
 library(rhdf5, quietly=T)
 library(parallel, quietly=T)
+library(optparse,quietly=T)
 
 reads_to_list <- function(gene_location, bamFile, read_range, flank, mult_exon=TRUE)
 {
@@ -30,8 +31,8 @@ reads_to_list <- function(gene_location, bamFile, read_range, flank, mult_exon=T
   read_range_len <- length(read_range)
 
   # Specify output matrix to store read data
-  gene_length = sum(sum(coverage(gene_location))
-  output <- matrix(0,nrow=read_range_len,ncol=gene_length + 2*flank))
+  gene_length = sum(sum(coverage(gene_location)))
+  output <- matrix(0,nrow=read_range_len,ncol=gene_length + 2*flank)
   
   # Expand genomic locations to include flanking region positions
   if(length(gene_location)==1) 
@@ -95,37 +96,61 @@ reads_to_list <- function(gene_location, bamFile, read_range, flank, mult_exon=T
 }
 
 
-# Initialize default parameters
-Ncores <- 1 # Number of cores for parallelization
-MinReadLen <- 10 # Minimum read length in H5 output
-MaxReadLen <- 50 # Maximum read length in H5 output
-Buffer <- 250 # Length of flanking region around the CDS
-PrimaryID <- "gene_id" # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
-SecondID <- NULL # Secondary gene IDs to access the data (COX1, EFB1, etc.)
-bamFile <- "input.bam" # Location of BAM file
-hdfile <- "output.h5" # Location of H5 output file
-gffFile <- NULL # Location of GFF2/GFF3 annotation file
-dataset <- "data" # Name of the dataset
-StopInCDS <- FALSE # Are stop codons part of the CDS annotations in GFF?
-test <- FALSE # Is this a test run
+# define input options for optparse package
+option_list <- list( 
+    make_option("--Ncores", type="integer", default=1,
+        help="Number of cores for parallelization"),
+    make_option("--MinReadLen", type="integer", default=10,
+        help="Minimum read length in H5 output"),
+    make_option("--MaxReadLen", type="integer", default=50,
+        help="Maximum read length in H5 output"),
+    make_option("--Buffer", type="integer", default=150,
+        help="Length of flanking region around the CDS"),
+    make_option("--PrimaryID", type="character", default="gene_id",
+        help="Primary gene IDs to access the data (YAL001C, YAL003W, etc.)"),
+    make_option("--SecondID", type="character", default=NULL,
+        help="Secondary gene IDs to access the data (COX1, EFB1, etc.)"),
+    make_option("--bamFile", type="character", default="input.bam",
+        help="Location of BAM input file"),
+    make_option("--hdFile", type="character", default="output.h5",
+        help="Location of H5 output file"),
+    make_option("--orf_gff_file", type="character", default=NULL,
+        help="GFF2/GFF3 annotation file"),
+    make_option("--dataset", type="character", default="data",
+        help="Name of the dataset"),
+    make_option("--StopInCDS", type="logical", default=FALSE,
+        help="Are stop codons part of the CDS annotations in GFF?"),
+    make_option("--isTestRun", type="logical", default=FALSE,
+        help="Is this a test run?")
+    )
 
 # Read in commandline arguments
-args=(commandArgs(TRUE))
+opt <- parse_args(OptionParser(option_list=option_list))
+attach(opt)
 
-if(length(args)==0){
-  print("No arguments supplied.")
-  quit(status=1)
-}else{
-  for(i in 1:length(args)){
-    eval(parse(text=args[[i]]))
-  }
-}
+# defunct alternative options for command line input
+# comargs=(commandArgs(TRUE))
+# 
+# if(length(comargs)==0){
+#   print("No arguments supplied.")
+#   quit(status=1)
+# } else if(length(comargs)==1 & endsWith(comargs[[1]],".yaml")){
+#   library(yaml,quietly=T)
+#   print("Arguments supplied in yaml file.")
+#   configopts <- yaml.load_file(comargs[[1]])
+#   attach(configopts)
+# } else {
+#   print("Arguments supplied in command line.")
+#   for(i in 1:length(comargs)){
+#     eval(parse(text=comargs[[i]]))
+#   }
+# }
 
 # Range of read lengths 
 read_range <- MinReadLen:MaxReadLen
 
 # Read in the positions of all exons/genes in GFF format and subset CDS locations
-gff <- readGFFAsGRanges(gffFile)
+gff <- readGFFAsGRanges(orf_gff_file)
 gff <- gff[gff$type=="CDS"]
 
 # Read in the list of genes
@@ -138,29 +163,43 @@ gff_pid <- mcols(gff)[PrimaryID][,1]
 
 print("Mapping reads to CDS")
 
-if(test){
+if(isTestRun){
   genes <- genes[1:50]
+  gff <- gff[ gff_pid %in% genes]
 }
 
+# get seqinfo from bamFile
+bamFileSeqInfo <- seqinfo(scanBamHeader(bamFile))
+
 # Map the reads to individual nucleotide position for each gene
-outputList <- mclapply(genes, 
+outputList <- 
+    # mclapply(genes, # parallel version, take out for debugging
+    lapply(genes,
                        function(x){
-                         gene_location <- gff[gff_pid==x]
+                           # select gene location
+                           gene_location=gff[gff_pid==x]
+                           # restrict seqlevels to avoid scanBam error
+                           xseqname <- 
+                               as.character(seqnames(gene_location)[1])
+                           seqlevels(gene_location) <- xseqname
+                           # get reads to list
                          reads_to_list(gene_location=gene_location, 
                                        bamFile=bamFile, 
                                        read_range=read_range, 
                                        flank=Buffer, 
                                        mult_exon=TRUE);
-                         }, 
-                       mc.cores=Ncores)
+                         }
+                     )
+# , 
+#                        mc.cores=Ncores)
 
 names(outputList) <- genes
 
 # HDF5 section
 print("Saving mapped reads in a H5 file")
 
-h5createFile(hdfile) # Create the output h5 file
-fid <- H5Fopen(hdfile) # Filehandle for the h5 file
+h5createFile(hdFile) # Create the output h5 file
+fid <- H5Fopen(hdFile) # Filehandle for the h5 file
 
 # Start codon position
 start_cod <- (Buffer+1):(Buffer+3)
@@ -189,7 +228,7 @@ for(gene in genes){
   
   # Symbolic link with alternate ids
   if(!is.null(SecondID) & alt_genes[[gene]]!=gene){
-    H5Lcreate_external(hdfile, gene, base_gid, alt_genes[[gene]])
+    H5Lcreate_external(hdFile, gene, base_gid, alt_genes[[gene]])
   }
   
   # Location of stop codon nucleotides in output matrix
