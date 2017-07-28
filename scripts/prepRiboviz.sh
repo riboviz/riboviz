@@ -24,7 +24,10 @@ dir_scripts=$(dirname $0)
 # include parse_yaml function
 . ${dir_scripts}/parse_yaml.sh
 config_yaml=$1
-config_yaml=vignette/vignette_config.yaml # just for debugging from command line
+
+## for debugging from command line staring at Riboviz directory
+# dir_scripts=scripts
+# config_yaml=vignette/vignette_config.yaml 
 
 #----- print parameters from yaml -----
 echo "prepRiboviz running with input parameters:"
@@ -109,15 +112,17 @@ for fq in ${fqfs}
     ## index bamfile
     samtools index ${fn_out}.bam
     ##
+    if [ ${make_bedgraph} == TRUE ]; then
+        ## transcriptome coverage as bedgraph
+        ## calculate transcriptome coverage for plus strand
+        bedtools genomecov -ibam ${fn_out}.bam -bga -5 -strand + > ${fn_out}_plus.bedgraph
+        ## calculate transcriptome coverage for minus strand
+        bedtools genomecov -ibam ${fn_out}.bam -bga -5 -strand - > ${fn_out}_minus.bedgraph
+    fi
     ## run reads_to_list to make length-sensitive alignments in h5 format
-    echo Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_outbam}.bam --hdFile=${fn_outbam}.h5 --orf_gff_file=${orf_gff_file}
-    Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_outbam}.bam --hdFile=${fn_outbam}.h5 --orf_gff_file=${orf_gff_file}
+    echo Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_out}.bam --hdFile=${fn_out}.h5 --orf_gff_file=${orf_gff_file}
+    Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_out}.bam --hdFile=${fn_out}.h5 --orf_gff_file=${orf_gff_file}
     ##
-    ## transcriptome coverage as bedgraph
-    ## calculate transcriptome coverage for plus strand
-    bedtools genomecov -ibam ${fn_out}.bam -bga -5 -strand + > ${fn_out}_plus.bedgraph
-    ## calculate transcriptome coverage for minus strand
-    bedtools genomecov -ibam ${fn_out}.bam -bga -5 -strand - > ${fn_out}_minus.bedgraph
     ## ctrl-c interrupts entire loop, not just current iteration
     trap exit SIGINT
 done
