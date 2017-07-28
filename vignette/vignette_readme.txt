@@ -2,9 +2,8 @@ vignette_readme.txt
 
 Folder vignette contains the files to run a vignette of the Riboviz package up to the h5 output.
 
-To run the vignette, from the riboviz root directory:
-bash prepRiboviz.sh vignette/vignette_config.yaml
-## Currently this is ambition not reality.
+To run the vignette, from the Riboviz root directory:
+bash scripts/prepRiboviz.sh vignette/vignette_config.yaml
 
 
 Contents:
