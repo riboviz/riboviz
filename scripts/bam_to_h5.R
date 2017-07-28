@@ -55,9 +55,9 @@ reads_to_list <- function(gene_location, bamFile, read_range, flank, mult_exon=T
   bam_data <- scanBam(bamFile, param=bam_param)
   
   # Subset reads that are on the same strand at the genomic location
-  read_strand <- unlist(lapply(bam_data,function(x)x$strand))
-  read_location <- unlist(lapply(bam_data,function(x)x$pos))[read_strand==as.factor(strand(gene_location)[1])]
-  read_width <- unlist(lapply(bam_data,function(x)x$qwid))[read_strand==as.factor(strand(gene_location)[1])]
+  read_strand <- unlist(lapply(bam_data,function(x) x$strand ))
+  read_location <- unlist(lapply(bam_data,function(x) x$pos ))[read_strand==as.factor(strand(gene_location)[1])]
+  read_width <- unlist(lapply(bam_data,function(x) x$qwid ))[read_strand==as.factor(strand(gene_location)[1])]
   
   # Column numbers based on genomic position
   nucleotide_pos <- unlist(which(coverage(gene_location)[seqnames(gene_location)[1]]==1))
@@ -104,7 +104,7 @@ option_list <- list(
         help="Minimum read length in H5 output"),
     make_option("--MaxReadLen", type="integer", default=50,
         help="Maximum read length in H5 output"),
-    make_option("--Buffer", type="integer", default=150,
+    make_option("--Buffer", type="integer", default=250,
         help="Length of flanking region around the CDS"),
     make_option("--PrimaryID", type="character", default="gene_id",
         help="Primary gene IDs to access the data (YAL001C, YAL003W, etc.)"),
@@ -126,8 +126,16 @@ option_list <- list(
 
 # Read in commandline arguments
 opt <- parse_args(OptionParser(option_list=option_list))
+if (opt$SecondID == "NULL") {
+  # unquote NULL option in SecondID
+  SecondID <- NULL
+}
 attach(opt)
 
+print("bam_to_h5.R running with parameters:")
+opt
+
+#####
 # defunct alternative options for command line input
 # comargs=(commandArgs(TRUE))
 # 
@@ -145,6 +153,23 @@ attach(opt)
 #     eval(parse(text=comargs[[i]]))
 #   }
 # }
+#####
+
+debugVignette <- FALSE
+if (debugVignette) {
+    # to debug bam_to_h5.R in Riboviz vignette
+    # supplies non-default options needed.
+    bamFile <- 'vignette/output/SRR1042855_s1mi.bam'
+    hdFile <- 'vignette/output/SRR1042855_s1mi.h5'
+    orf_gff_file <- 'vignette/input/yeast_YAL_CDS_w_250utrs.gff3'
+    Ncores <- 4
+    isTestRun <- TRUE
+    PrimaryID <- "Name"
+    SecondID <- NULL
+    # gene <- "YAL038W" # use this to debug single gene for reads_to_list
+}
+
+
 
 # Range of read lengths 
 read_range <- MinReadLen:MaxReadLen
@@ -168,26 +193,27 @@ if(isTestRun){
   gff <- gff[ gff_pid %in% genes]
 }
 
+## desirable to check seqlevels here rather than wait for later error
 # get seqinfo from bamFile
-bamFileSeqInfo <- seqinfo(scanBamHeader(bamFile))
+# bamFileSeqInfo <- seqinfo(scanBamHeader(bamFile))
 
 # Map the reads to individual nucleotide position for each gene
 outputList <- 
     # mclapply(genes, # parallel version, take out for debugging
     lapply(genes,
-                       function(x){
+                       function(gene){
                            # select gene location
-                           gene_location=gff[gff_pid==x]
+                           gene_location=gff[gff_pid==gene]
                            # restrict seqlevels to avoid scanBam error
-                           xseqname <- 
+                           geneseqname <- 
                                as.character(seqnames(gene_location)[1])
-                           seqlevels(gene_location) <- xseqname
+                           seqlevels(gene_location) <- geneseqname
                            # get reads to list
                          reads_to_list(gene_location=gene_location, 
                                        bamFile=bamFile, 
                                        read_range=read_range, 
                                        flank=Buffer, 
-                                       mult_exon=TRUE);
+                                       mult_exon=TRUE)
                          }
                      )
 # , 
@@ -227,8 +253,10 @@ for(gene in genes){
   mapped_reads <- paste(gene,dataset,"reads",sep="/")
   
   # Symbolic link with alternate ids
-  if(!is.null(SecondID) & alt_genes[[gene]]!=gene){
-    H5Lcreate_external(hdFile, gene, base_gid, alt_genes[[gene]])
+  if(!is.null(SecondID)){ 
+    if(alt_genes[[gene]]!=gene){
+      H5Lcreate_external(hdFile, gene, base_gid, alt_genes[[gene]])
+    }
   }
   
   # Location of stop codon nucleotides in output matrix
@@ -270,8 +298,11 @@ for(gene in genes){
   # Close H5 gene group handle
   H5Gclose(gid)
 }
+
 if(!is.null(SecondID)){
   H5Gclose(base_gid)
 }
 
 H5close()
+
+print("bam_to_h5.R done")

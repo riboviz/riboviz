@@ -98,22 +98,21 @@ for fq in ${fqfs}
     --un ${fn_nonaligned} \
     -x ${orf_index} -S ${fn_orf_mapped} -U ${fn_nonrRNA}
     ## Trim 5' mismatched nt and remove reads with >1 mismatch
+    echo python ${dir_scripts}/trim_5p_mismatch.py -mm 2 -in ${fn_orf_mapped} -out ${fn_orf_mapped_clean}
     python ${dir_scripts}/trim_5p_mismatch.py -mm 2 -in ${fn_orf_mapped} -out ${fn_orf_mapped_clean}
     ## convert sam (text) output to bam file (compressed binary)
+    echo samtools view -b ${fn_orf_mapped_clean} 
+    echo samtools sort -@ ${nprocesses} -O bam -o ${fn_out}.bam -
     samtools view -b ${fn_orf_mapped_clean} | \
     ## sort bam file on genome and write
     samtools sort -@ ${nprocesses} -O bam -o ${fn_out}.bam -
     ## index bamfile
     samtools index ${fn_out}.bam
-    #####
-    ## LOOK HERE!!!
-    ## this is the point where we need to run reads_to_list, etc, to make length-sensitive alignments
-    #     echo R CMD BATCH "--args Ncores=${nprocesses} SecondID=${SecondID} bamFile=${fn_outbam}.bam hdfile=${fn_outbam}.h5 gffFile=${orf_gff_file}" ${dir_scripts}/bam_to_h5.R
-    #     R CMD BATCH "--args Ncores=${nprocesses} SecondID=${SecondID} bamFile=${fn_outbam}.bam hdfile=${fn_outbam}.h5 gffFile=${orf_gff_file}" ${dir_scripts}/bam_to_h5.R
-    #  
-    echo Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --SecondID=${SecondID} --bamFile=${fn_outbam}.bam --hdFile=${fn_outbam}.h5 --orf_gff_file=${orf_gff_file}
-    Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --SecondID=${SecondID} --bamFile=${fn_outbam}.bam --hdFile=${fn_outbam}.h5 --orf_gff_file=${orf_gff_file}
-    #####
+    ##
+    ## run reads_to_list to make length-sensitive alignments in h5 format
+    echo Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_outbam}.bam --hdFile=${fn_outbam}.h5 --orf_gff_file=${orf_gff_file}
+    Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_outbam}.bam --hdFile=${fn_outbam}.h5 --orf_gff_file=${orf_gff_file}
+    ##
     ## transcriptome coverage as bedgraph
     ## calculate transcriptome coverage for plus strand
     bedtools genomecov -ibam ${fn_out}.bam -bga -5 -strand + > ${fn_out}_plus.bedgraph
