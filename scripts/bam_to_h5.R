@@ -1,9 +1,12 @@
 # Read in dependent packages
-library(Rsamtools, quietly=T)
-library(rtracklayer, quietly=T)
-library(rhdf5, quietly=T)
-library(parallel, quietly=T)
-library(optparse,quietly=T)
+suppressMessages(library(Rsamtools, quietly = T))
+suppressMessages(library(rtracklayer, quietly = T))
+suppressMessages(library(rhdf5, quietly = T))
+suppressMessages(library(parallel, quietly = T))
+suppressMessages(library(optparse,quietly = T))
+suppressMessages(library(RcppRoll, quietly = T))
+suppressMessages(library(ggplot2, quietly = T))
+suppressMessages(library(tidyr, quietly = T))
 
 reads_to_list <- function(gene_location, bamFile, read_range, flank, mult_exon=TRUE)
 {

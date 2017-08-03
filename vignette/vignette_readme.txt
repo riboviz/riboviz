@@ -44,3 +44,15 @@ Outputs, in vignette/output
   - SRR1042864_s1mi_minus.bedgraph
   - SRR1042864_s1mi_plus.bedgraph
   - SRR1042864_s1mi.h5
+  - SRR1042855_s1mi_3nt_periodicity.tsv
+  - SRR1042855_s1mi_3nt_periodicity.pdf
+  - SRR1042855_s1mi_read_lengths.tsv
+  - SRR1042855_s1mi_read_lengths.pdf
+  - SRR1042855_s1mi_pos_sp_nt_freq.tsv
+  - SRR1042855_s1mi_pos_sp_rpf_norm_reads.pdf
+  - SRR1042855_s1mi_pos_sp_rpf_norm_reads.tsv
+  - SRR1042855_s1mi_features.pdf
+  - SRR1042855_s1mi_features.tsv
+  - SRR1042855_s1mi_codon_ribodens.tsv
+  - SRR1042855_s1mi_codon_ribodens.pdf
+
