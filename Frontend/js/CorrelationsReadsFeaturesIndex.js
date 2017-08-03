@@ -242,6 +242,8 @@ textFigure7.exit().attr("class", "exit")
 	var xSeriesreal = datafiltered.map(function(d) { return d.d1; });
 	var ySeries = datafiltered.map(function(d) { return d.d2; });
 	thecorv=[xSeriesreal, ySeries];
+	console.log(thecorv);
+	console.log(pearsonCorrelation(thecorv,0,1));
 	var thecor=pearsonCorrelation(thecorv,0,1);
 	var leastSquaresCoeff = leastSquares(xSeriesreal, ySeries);
 	var x1 = xSeriesreg[0];

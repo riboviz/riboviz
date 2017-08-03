@@ -260,6 +260,8 @@ textFigureE.exit().attr("class", "exit")
 	  
 	var datafiltered = data.filter(function(d, key) { 
             return (d.Corr==1 )}); 
+    var datafiltered = datafiltered.filter(function(d, key) { 
+            return (!isNaN(d.d1) && !isNaN(d.d2))});
 	  var xSeries = datafiltered.map(function(d) { return d.d1; });
 	  xSeriesreg=xSeries.sort(function(a, b) {
   				return Number(a) - Number(b);
@@ -267,7 +269,6 @@ textFigureE.exit().attr("class", "exit")
 	var xSeriesreal = datafiltered.map(function(d) { return d.d1; });
 	var ySeries = datafiltered.map(function(d) { return d.d2; });
 	thecorv=[xSeriesreal, ySeries];
-	console.log(thecorv);
 	var thecor=pearsonCorrelation(thecorv,0,1);
 	var leastSquaresCoeff = leastSquares(xSeriesreal, ySeries);
 	var x1 = xSeriesreg[0];
@@ -275,7 +276,7 @@ textFigureE.exit().attr("class", "exit")
 	var x2 = xSeriesreg[xSeriesreg.length - 1];
 	var y2 =leastSquaresCoeff[0] *x2+ leastSquaresCoeff[1]; 
     MyApp2.thecorr=thecor;
-      console.log(thecor);
+
     svgFigureE.select(".r-label")			
 			.text("Pearson correlation coefficient: r=" + thecor.toFixed(2))
 			.style("font-size","16px").style("fill","#777777")
@@ -324,6 +325,14 @@ textFigureE.exit().attr("class", "exit")
 			.duration(250);
              //.text("d2");
 };
+
+function cleaner(arr) {
+   return arr.filter(function(item){ 
+      return typeof item == "string" || (typeof item == "number" && item);
+              /** Any string**/        /** Numbers without NaN & 0 **/
+   });
+}
+
 
 function pearsonCorrelation(prefs, p1, p2) {
   var si = [];

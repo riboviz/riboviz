@@ -66,7 +66,7 @@ var svgFigure7 = d3.select("#CorrelationsReadsandFeatures").append("svg")
 //   				.append("g")
 //     			.attr("transform", "translate(" + marginFigure7C.left + "," + marginFigure7C.top + ")");
 
-svgFigure7.append("g")
+               svgFigure7.append("g")
       				.attr("class", "x axis")
       				.attr("transform", "translate(0," + heightFigure7 + ")")
       				.call(xAxisFigure7);
