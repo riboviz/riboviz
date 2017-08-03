@@ -9,6 +9,7 @@
 # - aligns remaining reads to ORFs or other hisat2 index file (-orf)
 # - trims 5' mismatches from reads and removes reads with more than 2 mismatches
 # - parallelizes over many processes (-p), except for cutadapt which isn't parallel
+# - generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets,
 # - puts all intermediate files into a temporary directory (-tmp)
 # - when finished, the script will put useful output files in another directory (-out)
 # Note that the bamfiles ${fn_outbam} are directly usable in genome browsers, etc.
@@ -122,6 +123,10 @@ for fq in ${fqfs}
     ## run reads_to_list to make length-sensitive alignments in h5 format
     echo Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_out}.bam --hdFile=${fn_out}.h5 --orf_gff_file=${orf_gff_file}
     Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_out}.bam --hdFile=${fn_out}.h5 --orf_gff_file=${orf_gff_file}
+    ##
+    ## generate summary statistics and analyses plots
+    echo Rscript --vanilla ${dir_scripts}/generate_stats_figs.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --hdFile=${fn_out}.h5 --out_prefix=${fn_out} --rpf=${rpf} --orf_fasta=${orf_fasta} --dir_out=${dir_out} --dir_scripts=${dir_scripts}
+    Rscript --vanilla ${dir_scripts}/generate_stats_figs.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --hdFile=${fn_out}.h5 --out_prefix=${fn_out} --rpf=${rpf} --orf_fasta=${orf_fasta} --dir_out=${dir_out} --dir_scripts=${dir_scripts}
     ##
     ## ctrl-c interrupts entire loop, not just current iteration
     trap exit SIGINT

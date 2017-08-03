@@ -13,7 +13,7 @@ rRNA_index: vignette/index/yeast_rRNA # rRNA index file
 orf_index: vignette/index/YAL_CDS_w_250 # ORF index file
 fq_files: # fastq files to be processed
   WTnone: SRR1042855_s1mi.fastq.gz
-  WT3AT: SRR1042864_s1mi.fastq.gz
+#  WT3AT: SRR1042864_s1mi.fastq.gz
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
 nprocesses: 4 # number of processes to parallelize over
 MinReadLen: 10 # Minimum read length in H5 output
@@ -24,6 +24,7 @@ SecondID: NULL # Secondary gene IDs to access the data (COX1, EFB1, etc.)
 dataset: data # Name of the dataset
 StopInCDS: FALSE # Are stop codons part of the CDS annotations in GFF?
 isTestRun: FALSE # Is this a test run
+rpf: TRUE # Is the dataset an RPF or mRNA dataset?
 
 
 
