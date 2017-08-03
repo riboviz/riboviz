@@ -49,7 +49,7 @@ shinyUI <- fixedPage(
              
       ),
       column(8,
-             plotlyOutput("plotrbl"))#,width = 600, height = 350))
+             plotlyOutput("plotrbl"))#,width = 600, height = 350)),
       ),
   
     br(),

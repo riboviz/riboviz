@@ -121,7 +121,9 @@ shinyServer <- function(input, output){
           y <- data.frame(matrix(as.integer(unlist(state$ddat)),ncol = length(dbslash())))
         }
         
-        dat <- melt(data.frame(x,y),id='x')
+        dat_rename <- data.frame(x, y)
+        colnames(dat_rename) <- c("x",input$slct_db)
+        dat<- melt(dat_rename, id='x')
         
         p <- myfun_ggplot(dat,'Read position','Read count') +
           geom_rect(aes(xmin = 251, xmax = (max(x)-247), ymin = 0, ymax = max(value), col = NA),   # Add grey shading to the coding region
@@ -140,9 +142,9 @@ shinyServer <- function(input, output){
         for (i in 1:length(input$slct_db)){
           p$x$data[[i]]$name <- " "            # Change the legend text to empty
           
-          p$x$data[[i]]$text <- paste("Read position:", dat$x, "<br>",               # Customize the content of tooltip
-                                      "Read count:", round(dat$value,3), "<br>",
-                                      "Database:", input$slct_db, "<br>",
+          p$x$data[[i]]$text <- paste("Read position:", dat$x[dat$variable==input$slct_db[i]], "<br>",               # Customize the content of tooltip
+                                      "Read count:", round(dat$value[dat$variable==input$slct_db[i]],3), "<br>",
+                                      "Database:", input$slct_db[i], "<br>",
                                       "Sequence:", ntseq())
         }
         
@@ -170,7 +172,10 @@ shinyServer <- function(input, output){
             normy <- data.frame(t(t(matrix(as.integer(unlist(state$sumd)),ncol = length(input$slct_db)))/state$meanreadsrbp))
           }
           
-          dat <- melt(data.frame(x,normy),id = 'x')
+          dat_rename <- data.frame(x, normy)
+          colnames(dat_rename) <- c("x",input$slct_db)
+          dat<- melt(dat_rename, id='x')
+          
           p <- myfun_ggplot(dat,'Read position','Normalized reads') +
             geom_rect(aes(xmin = 251, xmax = (max(x)-247), ymin = 0, ymax = max(value), col = NA), fill = "gray",alpha = 0.2) # Add shading to the coding region
           
@@ -195,7 +200,10 @@ shinyServer <- function(input, output){
             normy <- data.frame(t(t(matrix(as.integer(unlist(state$ddat)), ncol = length(input$slct_db))) / state$meanreadsrbpl))
           }
           
-          dat <- melt(data.frame(x,normy),id='x')
+          dat_rename <- data.frame(x, normy)
+          colnames(dat_rename) <- c("x",input$slct_db)
+          dat<- melt(dat_rename, id='x')
+          
           p <- myfun_ggplot(dat,'Read position','Normalized reads') +
             geom_rect(aes(xmin = 251, xmax = (max(x)-247), ymin = 0, ymax = max(value), col = NA), fill = "gray",alpha=0.2) # Add shading to the coding region
           
@@ -213,9 +221,9 @@ shinyServer <- function(input, output){
         for (i in 1:length(input$slct_db)){
           p$x$data[[i]]$name <- " "            # Change the legend text to empty, only legend labels remaining
           
-          p$x$data[[i]]$text <- paste("Read position:", dat$x, "<br>",               # Customize the content of tooltip
-                                      "Normalized read:", round(dat$value,3), "<br>",
-                                      "Database:", input$slct_db, "<br>",
+          p$x$data[[i]]$text <- paste("Read position:", dat$x[dat$variable==input$slct_db[i]], "<br>",               # Customize the content of tooltip
+                                      "Normalized read:", round(dat$value[dat$variable==input$slct_db[i]],3), "<br>",
+                                      "Database:", input$slct_db[i], "<br>",
                                       "Sequence:", ntseq())
         }
         
@@ -230,7 +238,11 @@ shinyServer <- function(input, output){
         x <- 1:state$num_of_codons
         y <- data.frame(matrix(as.numeric(unlist(state$newcd)),ncol = length(dbslash())))
         maxy <- max(y)
-        dat <- melt(data.frame(x,y), id="x")
+        
+        dat_rename <- data.frame(x, y)
+        colnames(dat_rename) <- c("x",input$slct_db)
+        dat<- melt(dat_rename, id='x')
+        
         p <- myfun_ggplot(dat,'Codon position','Read count') 
         p <- ggplotly(p, dynamicTicks = TRUE)%>%layout(autosize = F, width = 650, height = 370, legend=list(orientation= "h"))
         
@@ -245,9 +257,9 @@ shinyServer <- function(input, output){
         for (i in 1:length(input$slct_db)){
           p$x$data[[i]]$name <- " "            # Change the legend text to empty
           
-          p$x$data[[i]]$text <- paste("Codon position:", dat$x, "<br>",               # Customize the content of tooltip
-                                      "Read count:", round(dat$value,3), "<br>",
-                                      "Database:", input$slct_db, "<br>",
+          p$x$data[[i]]$text <- paste("Codon position:", dat$x[dat$variable==input$slct_db[i]], "<br>",               # Customize the content of tooltip
+                                      "Read count:", round(dat$value[dat$variable==input$slct_db[i]],3), "<br>",
+                                      "Database:", input$slct_db[i], "<br>",
                                       "Codon sequence:", codonseq())
         }
         
@@ -273,7 +285,10 @@ shinyServer <- function(input, output){
           normy <- data.frame(t(t(matrix(as.numeric(unlist(state$newcd)), ncol = length(input$slct_db))) / state$meanreadsrbc))
         }
         
-        dat <- melt(data.frame(x,normy),id = 'x')
+        dat_rename <- data.frame(x, normy)
+        colnames(dat_rename) <- c("x",input$slct_db)
+        dat<- melt(dat_rename, id='x')
+        
         p <- myfun_ggplot(dat,'Codon position','Normalized reads')
         p <- ggplotly(p, dynamicTicks = TRUE)%>%layout(autosize = F, width = 650, height = 370, legend = list(orientation = "h"))
         
@@ -291,9 +306,9 @@ shinyServer <- function(input, output){
         for (i in 1:length(input$slct_db)){
           p$x$data[[i]]$name <- " "            # Change the legend text to empty
           
-          p$x$data[[i]]$text <- paste("Codon position:", dat$x, "<br>",               # Customize the content of tooltip
-                                      "Normalized read:", round(dat$value,3), "<br>",
-                                      "Database:", input$slct_db, "<br>",
+          p$x$data[[i]]$text <- paste("Codon position:", dat$x[dat$variable==input$slct_db[i]], "<br>",               # Customize the content of tooltip
+                                      "Normalized read:", round(dat$value[dat$variable==input$slct_db[i]],3), "<br>",
+                                      "Database:", input$slct_db[i], "<br>",
                                       "Codon sequence:", codonseq())
         }
         p$x$layout$legend$y <- 1.2             # Set the legend above plot, range -2 to 3
@@ -352,7 +367,9 @@ shinyServer <- function(input, output){
         state$downdata_rbl <- temp
         
         maxy <- max(y) 
-        dat<- melt(data.frame(x, y), id='x')
+        dat_rename <- data.frame(x, y)
+        colnames(dat_rename) <- c("x",input$slct_db)
+        dat<- melt(dat_rename, id='x')
         
         p <- ggplot(dat, aes(x = x, y = value, fill = variable)) +
              geom_bar(stat = 'identity', position = 'dodge') +
@@ -365,12 +382,12 @@ shinyServer <- function(input, output){
         
         p <- ggplotly(p, dynamicTicks = TRUE)%>%layout(autosize = F, width = 650, height = 370, legend=list(orientation= "h"))
         p <- plotly_build(p)
-        
+
         for (i in 1 : length(input$slct_db)){
           p$x$data[[i]]$name <- " "            # Change the legend text to empty
-          p$x$data[[i]]$text <- paste("Read length:", dat$x, "<br>",               # Customize the content of tooltip
-                                      "Frequency:", round(dat$value, 3), "<br>",
-                                      "Database:", input$slct_db)
+          p$x$data[[i]]$text <- paste("Read length:", dat$x[dat$variable==input$slct_db[i]], "<br>",               # Customize the content of tooltip
+                                      "Frequency:", round(dat$value[dat$variable==input$slct_db[i]], 3), "<br>",
+                                      "Database:", input$slct_db[i])
         }
         p$x$layout$legend$y <- 1.2             # Set the legend above plot, range -2 to 3
         p
