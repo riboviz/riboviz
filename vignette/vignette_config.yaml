@@ -12,8 +12,8 @@ dir_index: vignette/index # directory to put built indices in
 rRNA_index: vignette/index/yeast_rRNA # rRNA index file
 orf_index: vignette/index/YAL_CDS_w_250 # ORF index file
 fq_files: # fastq files to be processed
-  WTnone: SRR1042855_s1mi.fastq.gz
-#  WT3AT: SRR1042864_s1mi.fastq.gz
+  WTnone: SRR1042855_s1mi.fastq.gz # do not use "_" in dataset name
+  WT3AT: SRR1042864_s1mi.fastq.gz
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
 nprocesses: 4 # number of processes to parallelize over
 MinReadLen: 10 # Minimum read length in H5 output
