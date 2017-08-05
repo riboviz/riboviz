@@ -40,7 +40,7 @@ eval $(parse_yaml ${config_yaml})
 
 #----- build indices if necessary -----
 if [ ${build_indices} == TRUE ]; then
-    mkdir ${dir_index}
+    mkdir -p ${dir_index}
     hisat2-build ${rRNA_fasta} ${rRNA_index}
     hisat2-build ${orf_fasta} ${orf_index}
 fi
@@ -57,8 +57,8 @@ fi
 
 
 #----- create temp and output directory -----
-mkdir ${dir_tmp}
-mkdir ${dir_out}
+mkdir -p ${dir_tmp}
+mkdir -p ${dir_out}
 
 #----- loop over fastq.gz files -----
 fqfs=$(compgen -A variable | grep "fq_files")
@@ -72,8 +72,9 @@ for fq in ${fqfs}
     echo processing file ${fn_nodir}
     ## get filename stem
     # fn_nodir=$(basename ${fn})
-    fn_stem=${fn_nodir%%.fastq.gz}
-    ## make filenames for:
+    # fn_stem=${fn_nodir%%.fastq.gz} # use fastq file names as file prefix
+    eval fn_stem=${fq##*_}	# use user-defined dataset name as file prefix
+	## make filenames for:
     ##  trimmed reads
     fn_trim=${dir_tmp}/${fn_stem}_trim.fq
     ##  trimmed non-rRNA reads
