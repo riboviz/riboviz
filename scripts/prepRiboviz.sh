@@ -122,8 +122,8 @@ for fq in ${fqfs}
         bedtools genomecov -ibam ${fn_out}.bam -bga -5 -strand - > ${fn_out}_minus.bedgraph
     fi
     ## run reads_to_list to make length-sensitive alignments in h5 format
-    echo Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_out}.bam --hdFile=${fn_out}.h5 --orf_gff_file=${orf_gff_file}
-    Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_out}.bam --hdFile=${fn_out}.h5 --orf_gff_file=${orf_gff_file}
+    echo Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_out}.bam --hdFile=${fn_out}.h5 --orf_gff_file=${orf_gff_file} --ribovizGFF=${ribovizGFF}
+    Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_out}.bam --hdFile=${fn_out}.h5 --orf_gff_file=${orf_gff_file} --ribovizGFF=${ribovizGFF}
     ##
     ## generate summary statistics and analyses plots
     echo Rscript --vanilla ${dir_scripts}/generate_stats_figs.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --hdFile=${fn_out}.h5 --out_prefix=${fn_out} --rpf=${rpf} --orf_fasta=${orf_fasta} --dir_out=${dir_out} --dir_scripts=${dir_scripts}
