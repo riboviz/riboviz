@@ -8,7 +8,7 @@ suppressMessages(library(RcppRoll, quietly = T))
 suppressMessages(library(ggplot2, quietly = T))
 suppressMessages(library(tidyr, quietly = T))
 
-reads_to_list <- function(gene_location, bamFile, read_range, flank, mult_exon=TRUE)
+reads_to_list <- function(gene_location, bamFile, read_range, left_flank,right_flank, mult_exon=TRUE)
 {
   # Computes matrix of read counts with starting position and read length
   # on a signle gene whose co-ordinates are supplied as arguments
@@ -35,19 +35,26 @@ reads_to_list <- function(gene_location, bamFile, read_range, flank, mult_exon=T
 
   # Specify output matrix to store read data
   gene_length = sum(sum(coverage(gene_location)))
-  output <- matrix(0,nrow=read_range_len,ncol=gene_length + 2*flank)
+  output <- matrix(0,nrow=read_range_len,ncol=(gene_length + left_flank + right_flank))
+  
+  # If CDS is on negative strand
+  if(as.character(strand(gene_location)[1])=="-"){
+    tmp <- left_flank
+    left_flank <- right_flank
+    right_flank <- tmp
+  }
   
   # Expand genomic locations to include flanking region positions
   if(length(gene_location)==1) 
   {	# For single exon genes
-    start(gene_location) <- start(gene_location) - flank
-    end(gene_location) <- end(gene_location) + flank
+    start(gene_location) <- start(gene_location) - left_flank
+    end(gene_location) <- end(gene_location) + right_flank
   }else{
     # For multiple exon genes
     start(gene_location)[start(gene_location)==min(start(gene_location))] <- 
-        start(gene_location)[start(gene_location)==min(start(gene_location))] - flank
+        start(gene_location)[start(gene_location)==min(start(gene_location))] - left_flank
     end(gene_location)[end(gene_location)==max(end(gene_location))] <- 
-        end(gene_location)[end(gene_location)==max(end(gene_location))] + flank
+        end(gene_location)[end(gene_location)==max(end(gene_location))] + right_flank
   }
   
   # Specify variables to read in and create a parameter file for bam data
@@ -123,6 +130,8 @@ option_list <- list(
         help="Name of the dataset"),
     make_option("--StopInCDS", type="logical", default=FALSE,
         help="Are stop codons part of the CDS annotations in GFF?"),
+    make_option("--ribovizGFF", type="logical", default=TRUE,
+                help="Is the GFF file with UTR5, CDS, and UTR3 elements per gene?"),
     make_option("--isTestRun", type="logical", default=FALSE,
         help="Is this a test run?")
     )
@@ -179,7 +188,10 @@ read_range <- MinReadLen:MaxReadLen
 
 # Read in the positions of all exons/genes in GFF format and subset CDS locations
 gff <- readGFFAsGRanges(orf_gff_file)
-gff <- gff[gff$type=="CDS"]
+
+if(!ribovizGFF){
+  gff <- gff[gff$type=="CDS"]
+}
 
 # Read in the list of genes
 genes <- unique(mcols(gff)[PrimaryID][,1])
@@ -202,8 +214,8 @@ if(isTestRun){
 
 # Map the reads to individual nucleotide position for each gene
 outputList <- 
-    # mclapply(genes, # parallel version, take out for debugging
-    lapply(genes,
+     mclapply(genes, # parallel version, take out for debugging
+    # lapply(genes,
                        function(gene){
                            # select gene location
                            gene_location=gff[gff_pid==gene]
@@ -211,16 +223,26 @@ outputList <-
                            geneseqname <- 
                                as.character(seqnames(gene_location)[1])
                            seqlevels(gene_location) <- geneseqname
+                           # if GFF contains UTR5, CDS, and UTR3 elements
+                           if(ribovizGFF){
+                             Buffer_l <- width(gene_location[gene_location$type=="UTR5"])
+                             Buffer_r <- width(gene_location[gene_location$type=="UTR3"])
+                             gene_location <- gene_location[gene_location$type=="CDS"]
+                           }else{
+                             Buffer_l <- Buffer
+                             Buffer_r <- Buffer
+                           }
                            # get reads to list
                          reads_to_list(gene_location=gene_location, 
                                        bamFile=bamFile, 
                                        read_range=read_range, 
-                                       flank=Buffer, 
+                                       left_flank=Buffer_l,
+                                       right_flank=Buffer_r, 
                                        mult_exon=TRUE)
                          }
-                     )
-# , 
-#                        mc.cores=Ncores)
+                    # )
+ , 
+                        mc.cores=Ncores)
 
 names(outputList) <- genes
 
@@ -231,7 +253,9 @@ h5createFile(hdFile) # Create the output h5 file
 fid <- H5Fopen(hdFile) # Filehandle for the h5 file
 
 # Start codon position
-start_cod <- (Buffer+1):(Buffer+3)
+if(!ribovizGFF){
+  start_cod <- (Buffer+1):(Buffer+3)
+}
 # Stop codon offset
 if(StopInCDS){
   offset <- 2
@@ -248,6 +272,18 @@ for(gene in genes){
   # Get the output matrix of read counts by position and length for a gene 
   output <- outputList[[gene]]
   
+  # Location of start and stop codon nucleotides in output matrix
+  gene_location=gff[gff_pid==gene]
+  if(ribovizGFF){
+    start_codon_loc <- start(gene_location[gene_location$type=="CDS"])
+    start_cod <- start_codon_loc:(start_codon_loc+2)
+    stop_codon_loc <- start(gene_location[gene_location$type=="UTR3"])-3
+  }else{
+    stop_codon_loc <- ncol(output)-Buffer-offset
+  }
+  
+  stop_cod <- stop_codon_loc:(stop_codon_loc+2)
+  
   # Create H5 groups for each gene
   h5createGroup(fid,gene)
   h5createGroup(fid,paste(gene,dataset,sep="/"))
@@ -262,10 +298,6 @@ for(gene in genes){
     }
   }
   
-  # Location of stop codon nucleotides in output matrix
-  stop_codon_loc <- ncol(output)-Buffer-offset
-  stop_cod <- stop_codon_loc:(stop_codon_loc+2)
-  
   # Create a handle for H5 group for the gene
   gid <- H5Gopen(fid, mapped_reads)
   
@@ -278,18 +310,21 @@ for(gene in genes){
   h5createAttribute(gid,"reads_by_len",c(1,length(read_range)))
   h5createAttribute(gid,"lengths",c(1,length(read_range)))
   
-  # Count number of reads that map to the CDS of a gene
-  # We include reads mapping to 25 bases up/downstream of CDS in this count
-  cod_total <- output[,(start_cod[1]-25):(stop_cod[3]+25)]
+  # # Count number of reads that map to the CDS of a gene
+  # # We include reads mapping to 25 bases up/downstream of CDS in this count
+  # ifelse(start_cod[1]>25, up_atg <- (start_cod[1]-25), up_atg <- start_cod[1])
+  # ifelse(ncol(output)>(stop_cod[3]+25), down_taa <- (stop_cod[3]+25), down_taa <- stop_cod[3])
+  # 
+  # cod_total <- output[,up_atg:down_taa]
   
   # Write the attributes of the gene group
-  h5writeAttribute.integer(sum(cod_total),gid,name="reads_total")
-  h5writeAttribute.integer(Buffer,gid,name="buffer_left")
-  h5writeAttribute.integer(Buffer,gid,name="buffer_right")
+  h5writeAttribute.integer(sum(output),gid,name="reads_total")
+  h5writeAttribute.integer((start_codon_loc-1),gid,name="buffer_left")
+  h5writeAttribute.integer((ncol(output)-stop_cod[3]),gid,name="buffer_right")
   h5writeAttribute.integer(start_cod,gid,name="start_codon_pos")
   h5writeAttribute.integer(stop_cod,gid,name="stop_codon_pos")
   h5writeAttribute.integer(read_range,gid,name="lengths")
-  h5writeAttribute.integer(apply(cod_total,1,sum),gid,name="reads_by_len")
+  h5writeAttribute.integer(apply(output,1,sum),gid,name="reads_by_len")
   
   # Specify a dataset within the gene group to store the values and degree of compression
   read_data <- paste(mapped_reads,"data",sep="/")

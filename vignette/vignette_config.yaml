@@ -25,6 +25,6 @@ dataset: data # Name of the dataset
 StopInCDS: FALSE # Are stop codons part of the CDS annotations in GFF?
 isTestRun: FALSE # Is this a test run
 rpf: TRUE # Is the dataset an RPF or mRNA dataset?
-
+ribovizGFF: TRUE # Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3
 
 
