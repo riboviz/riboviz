@@ -36,23 +36,35 @@ Intermediate outputs, in vignette/tmp:
 (note these are uncompressed and large)
 
 Outputs, in vignette/output
-  - SRR1042855_s1mi.bam
-  - SRR1042855_s1mi_minus.bedgraph
-  - SRR1042855_s1mi_plus.bedgraph
-  - SRR1042855_s1mi.h5
-  - SRR1042864_s1mi.bam
-  - SRR1042864_s1mi_minus.bedgraph
-  - SRR1042864_s1mi_plus.bedgraph
-  - SRR1042864_s1mi.h5
-  - SRR1042855_s1mi_3nt_periodicity.tsv
-  - SRR1042855_s1mi_3nt_periodicity.pdf
-  - SRR1042855_s1mi_read_lengths.tsv
-  - SRR1042855_s1mi_read_lengths.pdf
-  - SRR1042855_s1mi_pos_sp_nt_freq.tsv
-  - SRR1042855_s1mi_pos_sp_rpf_norm_reads.pdf
-  - SRR1042855_s1mi_pos_sp_rpf_norm_reads.tsv
-  - SRR1042855_s1mi_features.pdf
-  - SRR1042855_s1mi_features.tsv
-  - SRR1042855_s1mi_codon_ribodens.tsv
-  - SRR1042855_s1mi_codon_ribodens.pdf
+  - WTnone.bam
+  - WTnone_minus.bedgraph
+  - WTnone_plus.bedgraph
+  - WTnone.h5
+  - WTnone_3nt_periodicity.tsv
+  - WTnone_3nt_periodicity.pdf
+  - WTnone_read_lengths.tsv
+  - WTnone_read_lengths.pdf
+  - WTnone_pos_sp_nt_freq.tsv
+  - WTnone_pos_sp_rpf_norm_reads.pdf
+  - WTnone_pos_sp_rpf_norm_reads.tsv
+  - WTnone_features.pdf
+  - WTnone_features.tsv
+  - WTnone_codon_ribodens.tsv
+  - WTnone_codon_ribodens.pdf
+
+  - WT3AT.bam
+  - WT3AT_minus.bedgraph
+  - WT3AT_plus.bedgraph
+  - WT3AT.h5
+  - WT3AT_3nt_periodicity.tsv
+  - WT3AT_3nt_periodicity.pdf
+  - WT3AT_read_lengths.tsv
+  - WT3AT_read_lengths.pdf
+  - WT3AT_pos_sp_nt_freq.tsv
+  - WT3AT_pos_sp_rpf_norm_reads.pdf
+  - WT3AT_pos_sp_rpf_norm_reads.tsv
+  - WT3AT_features.pdf
+  - WT3AT_features.tsv
+  - WT3AT_codon_ribodens.tsv
+  - WT3AT_codon_ribodens.pdf
 
