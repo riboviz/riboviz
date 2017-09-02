@@ -3,16 +3,20 @@
 # prepRiboviz.sh: 
 ## Shell script for preparing ribosome profiling data for RiboViz or other analysis, that 
 # - takes all configuration info from input yaml file.
-# - processes all fastq.gz files named in config file (-in), 
-# - cuts out sequencing library adapters (CTGTAGGCACC or -adapters)
-# - removes rRNA or other contaminating reads by hisat2 alignment to rRNA index file (-rRNA)
-# - aligns remaining reads to ORFs or other hisat2 index file (-orf)
+# - builds hisat2 indices if requested (build_indices is TRUE), in index directory (dir_index).
+# - processes all fastq.gz files named in config file (dir_in), 
+# - cuts out sequencing library adapters (CTGTAGGCACC or adapters)
+# - removes rRNA or other contaminating reads by hisat2 alignment to rRNA index file (rRNA_index)
+# - aligns remaining reads to ORFs or other hisat2 index file (orf_index)
 # - trims 5' mismatches from reads and removes reads with more than 2 mismatches
-# - parallelizes over many processes (-p), except for cutadapt which isn't parallel
-# - generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets,
-# - puts all intermediate files into a temporary directory (-tmp)
-# - when finished, the script will put useful output files in another directory (-out)
+# - parallelizes over many processes (nprocesses), except for cutadapt which isn't parallel
+# - makes length-sensitive alignments in compressed h5 format by running reads\_to\_list.R
+# - generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets, by running generate\_stats\_figs.R
+# - generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets
+# - puts all intermediate files into a temporary directory (dir_tmp)
+# - when finished, the script will put useful output files in another directory (dir_out)
 # Note that the bamfiles ${fn_outbam} are directly usable in genome browsers, etc.
+# Also optionally exports bedgraph files for plus and minus strands, if (make_bedgraph) is TRUE
 
 # function usage
 {
