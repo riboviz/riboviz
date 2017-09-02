@@ -37,6 +37,7 @@ Intermediate outputs, in vignette/tmp:
 
 Outputs, in vignette/output
   - WTnone.bam
+  - WTnone.bam.bai
   - WTnone_minus.bedgraph
   - WTnone_plus.bedgraph
   - WTnone.h5
@@ -53,6 +54,7 @@ Outputs, in vignette/output
   - WTnone_codon_ribodens.pdf
 
   - WT3AT.bam
+  - WT3AT.bam.bai
   - WT3AT_minus.bedgraph
   - WT3AT_plus.bedgraph
   - WT3AT.h5
