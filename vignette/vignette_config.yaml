@@ -5,7 +5,7 @@ make_index: TRUE # if true, remake hisat2 indices from fasta files
 rRNA_fasta: vignette/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning to
 orf_fasta: vignette/input/yeast_YAL_CDS_w_250utrs.fa # orf file to align to
 orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3 # GFF2/GFF3 file for ORFs
-aligner: hisat2 # short read aligner to use
+aligner: hisat2 # short read aligner to use. Currently only hisat2 works
 build_indices: TRUE # build indices for aligner?
 make_bedgraph: TRUE # output bedgraph.gzs of data, in addition to h5?
 dir_index: vignette/index # directory to put built indices in
@@ -14,6 +14,7 @@ orf_index: vignette/index/YAL_CDS_w_250 # ORF index file
 fq_files: # fastq files to be processed
   WTnone: SRR1042855_s1mi.fastq.gz # do not use "_" in dataset name
   WT3AT: SRR1042864_s1mi.fastq.gz
+  NotHere: example_missing_file.fastq.gz # prepRiboviz should give error message for missing files
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
 nprocesses: 4 # number of processes to parallelize over
 MinReadLen: 10 # Minimum read length in H5 output
