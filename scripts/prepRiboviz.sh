@@ -12,7 +12,6 @@
 # - parallelizes over many processes (nprocesses), except for cutadapt which isn't parallel
 # - makes length-sensitive alignments in compressed h5 format by running reads\_to\_list.R
 # - generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets, by running generate\_stats\_figs.R
-# - generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets
 # - puts all intermediate files into a temporary directory (dir_tmp)
 # - when finished, the script will put useful output files in another directory (dir_out)
 # Note that the bamfiles ${fn_outbam} are directly usable in genome browsers, etc.
@@ -46,7 +45,7 @@ eval $(parse_yaml ${config_yaml})
 if [ ${build_indices} == TRUE ]; then
     echo 
     echo "Building indices for alignment"
-    mkdir -p ${dir_index}
+    mkdir -p ${dir_index} # this is not really used; needs fixing
     echo hisat2-build ${rRNA_fasta} ${rRNA_index}
     hisat2-build ${rRNA_fasta} ${rRNA_index}
     echo "rRNA index built"
