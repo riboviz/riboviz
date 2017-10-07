@@ -141,12 +141,26 @@ for fq in ${fqfs}
             echo bedgraphs made on plus and minus strands
         fi
         ## run reads_to_list to make length-sensitive alignments in h5 format
-        echo Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_out}.bam --hdFile=${fn_out}.h5 --orf_gff_file=${orf_gff_file} --ribovizGFF=${ribovizGFF} --StopInCDS=${StopInCDS}
-        Rscript --vanilla ${dir_scripts}/bam_to_h5.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --SecondID=${SecondID} --bamFile=${fn_out}.bam --hdFile=${fn_out}.h5 --orf_gff_file=${orf_gff_file} --ribovizGFF=${ribovizGFF} --StopInCDS=${StopInCDS}
+        echo Rscript --vanilla ${dir_scripts}/bam_to_h5.R \
+        --Ncores=${nprocesses} --MinReadLen=${MinReadLen} --MaxReadLen=${MaxReadLen} --Buffer=${Buffer} \
+        --PrimaryID=${PrimaryID} --SecondID=${SecondID} --dataset=${dataset} --bamFile=${fn_out}.bam --hdFile=${fn_out}.h5 \
+        --orf_gff_file=${orf_gff_file} --ribovizGFF=${ribovizGFF} --StopInCDS=${StopInCDS}
+        #
+        Rscript --vanilla ${dir_scripts}/bam_to_h5.R \
+        --Ncores=${nprocesses} --MinReadLen=${MinReadLen} --MaxReadLen=${MaxReadLen} --Buffer=${Buffer} \
+        --PrimaryID=${PrimaryID} --SecondID=${SecondID} --dataset=${dataset} --bamFile=${fn_out}.bam --hdFile=${fn_out}.h5 \
+        --orf_gff_file=${orf_gff_file} --ribovizGFF=${ribovizGFF} --StopInCDS=${StopInCDS}
         ##
         ## generate summary statistics and analyses plots
-        echo Rscript --vanilla ${dir_scripts}/generate_stats_figs.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --hdFile=${fn_out}.h5 --out_prefix=${fn_out} --rpf=${rpf} --orf_fasta=${orf_fasta} --dir_out=${dir_out} --dir_scripts=${dir_scripts}
-        Rscript --vanilla ${dir_scripts}/generate_stats_figs.R --Ncores=${nprocesses} --PrimaryID=${PrimaryID} --hdFile=${fn_out}.h5 --out_prefix=${fn_out} --rpf=${rpf} --orf_fasta=${orf_fasta} --dir_out=${dir_out} --dir_scripts=${dir_scripts}
+        echo Rscript --vanilla ${dir_scripts}/generate_stats_figs.R \
+        --Ncores=${nprocesses} --MinReadLen=${MinReadLen} --MaxReadLen=${MaxReadLen} --Buffer=${Buffer} \
+        --PrimaryID=${PrimaryID} --dataset=${dataset} --hdFile=${fn_out}.h5 --out_prefix=${fn_out} --orf_fasta=${orf_fasta} \
+        --rpf=${rpf} --dir_out=${dir_out} --dir_scripts=${dir_scripts} 
+        #
+        Rscript --vanilla ${dir_scripts}/generate_stats_figs.R \
+        --Ncores=${nprocesses} --MinReadLen=${MinReadLen} --MaxReadLen=${MaxReadLen} --Buffer=${Buffer} \
+        --PrimaryID=${PrimaryID} --dataset=${dataset} --hdFile=${fn_out}.h5 --out_prefix=${fn_out} --orf_fasta=${orf_fasta} \
+        --rpf=${rpf} --dir_out=${dir_out} --dir_scripts=${dir_scripts} 
         ##
         echo finished processing sample ${fq}
         echo
