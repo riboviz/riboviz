@@ -424,7 +424,7 @@ print("Starting: Codon-specific ribosome densities for correlations with tRNAs")
 if(rpf){ 
   
   yeast_tRNAs <- read.table(paste0(dir_scripts,"/yeast_tRNAs.tsv"),h=T) # Read in yeast tRNA estimates
-  load(paste0(dir_scripts,"/codon_pos_i200.RData")) # Position of codons in each gene (numbering ignores first 200 codons)
+  load(paste0(dir_scripts,"/yeast_codon_pos_i200.RData")) # Position of codons in each gene (numbering ignores first 200 codons)
                                                     # Reads in an object named "codon_pos"
 
   out <- lapply(genes,function(gene){
