@@ -92,7 +92,7 @@ rsum <- colSums(matrix(unlist(y),byrow=T,nrow=length(x))) # Position-specific su
 out_data <- data.frame(
   Pos = rep(seq(-n_buffer+1,n_gene,1),2),
   Counts = c(lsum,rsum),
-  End = rep(c("5'","3'"),each=n_total)
+  End = factor(rep(c("5'","3'"),each=n_total),levels=c("5'","3'"))
 )
 
 # Plot
@@ -299,17 +299,18 @@ if(rpf){
   m5p <- m5p/mean(m5p[450:500])
   m3p <- m3p/mean(m3p[450:500])
   
-  # Prepare variables for output file
-  Position <- c(1:500,0:-499)
-  Mean <- c(m5p,m3p)
-  SD <- c(s5p,s3p)
-  End <- c(rep(5,500),rep(3,500))
+
 
   # Create a dataframe to store the output for plots/analyses
-  out_df <- data.frame(Position,Mean,SD,End)
+  out_df <- data.frame(  Position = c(1:500,0:-499),
+                         Mean = c(m5p,m3p),
+                         SD = c(s5p,s3p),
+                         End = factor(rep(c("5'","3'"),each=500),levels=c("5'","3'"))
+  )
   
   # Plot
-  pos_sp_rpf_norm_reads <- ggplot(out_df, aes(Position,Mean,col=as.factor(End))) + 
+  pos_sp_rpf_norm_reads <- ggplot(out_df, 
+                                  aes(Position,Mean,col=End)) + 
     geom_line() + 
     facet_grid(~End, scales="free") + 
     guides(col=FALSE)
@@ -356,17 +357,15 @@ if(!rpf){
   m5p <- m5p/mean(m5p[1350:1500])
   m3p <- m3p/mean(m3p[1350:1500])
   
-  # Prepare variables for output file
-  Position <- c(1:1500,0:-1499)
-  Mean <- c(m5p,m3p)
-  SD <- c(s5p,s3p)
-  End <- c(rep(5,1500),rep(3,1500))
 
   # Create a dataframe to store the output for plots/analyses
-  out_df <- data.frame(Position,Mean,SD,End)
+  out_df <- data.frame(Position=c(1:1500,0:-1499),
+                       Mean=c(m5p,m3p),
+                       SD=c(s5p,s3p),
+                       End=factor(rep(c("5'","3'"),each=1500),levels=c("5'","3'")))
 
   # Plot
-  pos_sp_mrna_norm_coverage <- ggplot(out_df, aes(Position,Mean,col=as.factor(End))) + 
+  pos_sp_mrna_norm_coverage <- ggplot(out_df, aes(Position,Mean,col=End)) + 
     geom_line() + 
     facet_grid(~End, scales="free") + 
     guides(col=FALSE)
@@ -425,7 +424,7 @@ print("Starting: Codon-specific ribosome densities for correlations with tRNAs")
 if(rpf){ 
   
   yeast_tRNAs <- read.table(paste0(dir_scripts,"/yeast_tRNAs.tsv"),h=T) # Read in yeast tRNA estimates
-  load(paste0(dir_scripts,"/codon_pos_i200.RData")) # Position of codons in each gene (numbering ignores first 200 codons)
+  load(paste0(dir_scripts,"/yeast_codon_pos_i200.RData")) # Position of codons in each gene (numbering ignores first 200 codons)
                                                     # Reads in an object named "codon_pos"
 
   out <- lapply(genes,function(gene){
