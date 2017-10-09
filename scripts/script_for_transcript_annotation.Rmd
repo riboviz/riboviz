@@ -5,8 +5,6 @@ output:
   html_document: default
 ---
 
-# Human datasets
-
 ### Packages
 ```{r, eval=FALSE}
 library(Biostrings)
@@ -14,6 +12,111 @@ library(rtracklayer)
 library(GenomicRanges)
 library(parallel)
 ```
+
+# Yeast datasets
+
+### Prepare S288c annotations and ORF seqs
+```{r, eval=FALSE}
+# Download annotations and genome seq from here - http://downloads.yeastgenome.org/sequence/S288C_reference/genome_releases/S288C_reference_genome_R64-2-1_20150113.tgz
+yeast_annot <- readGFFAsGRanges("./saccharomyces_cerevisiae_R64-2-1_20150113.gff")
+yeast_genome <- readDNAStringSet("./S288C_reference_sequence_R64-2-1_20150113.fsa")
+
+# Pad genomes with 250 N nts to provide null flanking regions for genes close to chromosomal boundaries
+yeast_genome <- xscat(DNAString(paste(rep("N",250),collapse="")),yeast_genome,DNAString(paste(rep("N",250),collapse="")))
+names(yeast_genome) <- paste("chr",c(as.character(as.roman(1:16)),"mt"),sep="")
+
+# Adjust the annotations for this 250nt shift
+yeast_annot <- shift(yeast_annot,250)
+
+# Get the annotations for all CDS of uncharacterized and verified genes
+cds_annot <- yeast_annot[(yeast_annot$orf_classification=="Uncharacterized" | yeast_annot$orf_classification=="Verified") & !is.na(yeast_annot$orf_classification) & yeast_annot$type=="CDS"]
+cds_annot$Name <- sapply(strsplit(cds_annot$Name,"_"), `[`, 1)
+
+```
+
+### Get ORF+UTR seqs
+```{r, eval=FALSE}
+# Funciton to resize GRanges while keeping track of multi-exon genes
+resize_gff_flank <- function(gene_location,flank){
+  if(length(gene_location)==1){	
+    start(gene_location) <- start(gene_location)-flank
+    end(gene_location) <- end(gene_location)+flank
+  }else{
+    start(gene_location)[start(gene_location)==min(start(gene_location))] <- start(gene_location)[start(gene_location)==min(start(gene_location))]-flank
+    end(gene_location)[end(gene_location)==max(end(gene_location))] <- end(gene_location)[end(gene_location)==max(end(gene_location))]+flank
+  }
+  return(gene_location)
+}
+
+# Resize all CDS with 250 nt UTR regions
+tmp_gff <- sapply(unique(cds_annot$Name),function(x){gene_location <- cds_annot[cds_annot$Name==x]; resize_gff_flank(gene_location = gene_location, flank=250)})
+cds_flank_annot <- unlist(GRangesList(tmp_gff))
+
+# Obtain sequences of CDS+UTRs from genome
+cds_flank_seq <- yeast_genome[cds_flank_annot]
+names(cds_flank_seq) <- cds_flank_annot$Name
+
+# Combine multi-exon genes into a single transcript
+output_seqlist <- list()
+cc <- 1
+for(i in unique(names(cds_flank_seq))){
+  output_seqlist[[cc]] <- c(unlist(cds_flank_seq[names(cds_flank_seq)==i]))
+  cc <- cc+1
+}
+output_seq <- DNAStringSet(output_seqlist)
+names(output_seq) <- unique(names(cds_flank_seq))
+
+# Write seqs to a FASTA file
+writeXStringSet(output_seq,filepath = "yeast_CDS_w_250utrs.fa",format = "fasta")
+```
+
+### Create a GFF file based on these transcripts
+```{r, eval=FALSE}
+len_gff <- c(matrix(c(rep(250,length(output_seq)), (width(output_seq)-500), rep(250,length(output_seq))),nrow=3,byrow = T))
+start_gff <- c(matrix(c(rep(1,length(output_seq)),rep(251,length(output_seq)), (width(output_seq)-249)),nrow=3,byrow = T))
+type_gff <- rep(c("UTR5","CDS","UTR3"),length(output_seq))
+
+# Create a GRange object to be saved as a GFF
+output_gff <- GRanges(seqnames = rep(names(output_seq),each=3), ranges = IRanges(start=start_gff, width=len_gff),strand = "+",type=type_gff,Name=rep(names(output_seq),each=3))
+export.gff3(output_gff, con=file("yeast_CDS_w_250utrs.gff3","w"))
+```
+
+### Create an RData object with gene-specific codon positions for riboviz plots
+```{r, eval=FALSE}
+seq <- output_seq
+gff <- output_gff
+
+seq <- seq[gff[gff$type=="CDS"]] # Restrict sequences to only CDS
+seq <- seq[width(seq)>600] # Remove sequences <200 codons
+
+seq <- DNAStringSet(seq,start=601) # Trim the first 200 codons from each CDS
+cods <- sapply(sapply(seq,codons),as.character) # Split the sequences into codons
+
+# Function to find positions for a codon in a CDS
+codon_pos_locator <- function(seq,codon,gene){
+  out <- NULL
+  pos <- which(seq==codon)
+  if(length(pos)>=1)
+    out <- cbind(gene,pos)
+  return(out)
+}
+
+out <- sapply(names(GENETIC_CODE),
+              function(codon){
+                allpos <- mclapply(names(cods),
+                                function(gene){
+                                  codon_pos_locator(seq=cods[[gene]],
+                                                    codon=codon,
+                                                    gene=gene)
+                                },mc.cores=50)
+                do.call(rbind,allpos)
+              })
+
+# Save output as an RData object
+save(out, "yeast_codon_pos_i200.RData")
+```
+
+# Human datasets
 
 ### Prepare GRCh38 annotations
 ```{r, eval=FALSE}
@@ -110,72 +213,40 @@ output_gff <- GRanges(seqnames = rep(names(cdna_sub),each=3), ranges = IRanges(s
 export.gff3(output_gff, file.path("human_appris_cdna.gff3"))
 ```
 
-# Yeast datasets
-
-### Prepare S288c annotations and ORF seqs
+### Create an RData object with gene-specific codon positions for riboviz plots
 ```{r, eval=FALSE}
-# Download annotations and genome seq from here - http://downloads.yeastgenome.org/sequence/S288C_reference/genome_releases/S288C_reference_genome_R64-2-1_20150113.tgz
-yeast_annot <- readGFFAsGRanges("./saccharomyces_cerevisiae_R64-2-1_20150113.gff")
-yeast_genome <- readDNAStringSet("./S288C_reference_sequence_R64-2-1_20150113.fsa")
+seq <- output_seq
+gff <- output_gff
 
-# Pad genomes with 250 N nts to provide null flanking regions for genes close to chromosomal boundaries
-yeast_genome <- xscat(DNAString(paste(rep("N",250),collapse="")),yeast_genome,DNAString(paste(rep("N",250),collapse="")))
-names(yeast_genome) <- paste("chr",c(as.character(as.roman(1:16)),"mt"),sep="")
+seq <- seq[gff[gff$type=="CDS"]] # Restrict sequences to only CDS
+seq <- seq[width(seq)>600] # Remove sequences <200 codons
 
-# Adjust the annotations for this 250nt shift
-yeast_annot <- shift(yeast_annot,250)
+seq <- DNAStringSet(seq,start=601) # Trim the first 200 codons from each CDS
+seq <- seq[width(seq)%%3==0] # Ignore any transcripts with frame-shifts
+cods <- sapply(sapply(seq,codons),as.character) # Split the sequences into codons
 
-# Get the annotations for all CDS of uncharacterized and verified genes
-cds_annot <- yeast_annot[(yeast_annot$orf_classification=="Uncharacterized" | yeast_annot$orf_classification=="Verified") & !is.na(yeast_annot$orf_classification) & yeast_annot$type=="CDS"]
-cds_annot$Name <- sapply(strsplit(cds_annot$Name,"_"), `[`, 1)
-
-```
-
-### Get ORF+UTR seqs
-```{r, eval=FALSE}
-# Funciton to resize GRanges while keeping track of multi-exon genes
-resize_gff_flank <- function(gene_location,flank){
-  if(length(gene_location)==1){	
-    start(gene_location) <- start(gene_location)-flank
-    end(gene_location) <- end(gene_location)+flank
-  }else{
-    start(gene_location)[start(gene_location)==min(start(gene_location))] <- start(gene_location)[start(gene_location)==min(start(gene_location))]-flank
-    end(gene_location)[end(gene_location)==max(end(gene_location))] <- end(gene_location)[end(gene_location)==max(end(gene_location))]+flank
-  }
-  return(gene_location)
+# Function to find positions for a codon in a CDS
+codon_pos_locator <- function(seq,codon,gene){
+  out <- NULL
+  pos <- which(seq==codon)
+  if(length(pos)>=1)
+    out <- cbind(gene,pos)
+  return(out)
 }
 
-# Resize all CDS with 250 nt UTR regions
-tmp_gff <- sapply(unique(cds_annot$Name),function(x){gene_location <- cds_annot[cds_annot$Name==x]; resize_gff_flank(gene_location = gene_location, flank=250)})
-cds_flank_annot <- unlist(GRangesList(tmp_gff))
+out <- sapply(names(GENETIC_CODE),
+              function(codon){
+                allpos <- mclapply(names(cods),
+                                function(gene){
+                                  codon_pos_locator(seq=cods[[gene]],
+                                                    codon=codon,
+                                                    gene=gene)
+                                },mc.cores=50)
+                do.call(rbind,allpos)
+              })
 
-# Obtain sequences of CDS+UTRs from genome
-cds_flank_seq <- yeast_genome[cds_flank_annot]
-names(cds_flank_seq) <- cds_flank_annot$Name
-
-# Combine multi-exon genes into a single transcript
-output_seqlist <- list()
-cc <- 1
-for(i in unique(names(cds_flank_seq))){
-  output_seqlist[[cc]] <- c(unlist(cds_flank_seq[names(cds_flank_seq)==i]))
-  cc <- cc+1
-}
-output_seq <- DNAStringSet(output_seqlist)
-names(output_seq) <- unique(names(cds_flank_seq))
-
-# Write seqs to a FASTA file
-writeXStringSet(output_seq,filepath = "../yeast_CDS_w_250utrs.fa",format = "fasta")
-```
-
-### Create a GFF file based on these transcripts
-```{r, eval=FALSE}
-len_gff <- c(matrix(c(rep(250,length(output_seq)), (width(output_seq)-500), rep(250,length(output_seq))),nrow=3,byrow = T))
-start_gff <- c(matrix(c(rep(1,length(output_seq)),rep(251,length(output_seq)), (width(output_seq)-249)),nrow=3,byrow = T))
-type_gff <- rep(c("UTR5","CDS","UTR3"),length(output_seq))
-
-# Create a GRange object to be saved as a GFF
-output_gff <- GRanges(seqnames = rep(names(output_seq),each=3), ranges = IRanges(start=start_gff, width=len_gff),strand = "+",type=type_gff,Name=rep(names(output_seq),each=3))
-export.gff3(output_gff, con=file("../yeast_CDS_w_250utrs.gff3","w"))
+# Save output as an RData object
+save(out, "human_codon_pos_i200.RData")
 ```
 
 # Mouse datasets
@@ -273,4 +344,40 @@ type_gff <- rep(c("UTR5","CDS","UTR3"),nrow(length_mat))
 # Create a GRange object to be saved as a GFF
 output_gff <- GRanges(seqnames = rep(names(cdna_sub),each=3), ranges = IRanges(start=start_gff, width=len_gff),strand = "+",type=type_gff,Name=rep(names(cdna_sub),each=3))
 export.gff3(output_gff, file.path("mouse_appris_cdna.gff3"))
+```
+
+### Create an RData object with gene-specific codon positions for riboviz plots
+```{r, eval=FALSE}
+seq <- output_seq
+gff <- output_gff
+
+seq <- seq[gff[gff$type=="CDS"]] # Restrict sequences to only CDS
+seq <- seq[width(seq)>600] # Remove sequences <200 codons
+
+seq <- DNAStringSet(seq,start=601) # Trim the first 200 codons from each CDS
+seq <- seq[width(seq)%%3==0] # Ignore any transcripts with frame-shifts
+cods <- sapply(sapply(seq,codons),as.character) # Split the sequences into codons
+
+# Function to find positions for a codon in a CDS
+codon_pos_locator <- function(seq,codon,gene){
+  out <- NULL
+  pos <- which(seq==codon)
+  if(length(pos)>=1)
+    out <- cbind(gene,pos)
+  return(out)
+}
+
+out <- sapply(names(GENETIC_CODE),
+              function(codon){
+                allpos <- mclapply(names(cods),
+                                function(gene){
+                                  codon_pos_locator(seq=cods[[gene]],
+                                                    codon=codon,
+                                                    gene=gene)
+                                },mc.cores=50)
+                do.call(rbind,allpos)
+              })
+
+# Save output as an RData object
+save(out, "mouse_codon_pos_i200.RData")
 ```
