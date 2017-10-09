@@ -1,0 +1,276 @@
+---
+title: "Preparing FASTA and annotation files for RiboViz"
+output:
+  html_notebook: default
+  html_document: default
+---
+
+# Human datasets
+
+### Packages
+```{r, eval=FALSE}
+library(Biostrings)
+library(rtracklayer)
+library(GenomicRanges)
+library(parallel)
+```
+
+### Prepare GRCh38 annotations
+```{r, eval=FALSE}
+# Download annotations from here - https://www.gencodegenes.org/releases/21.html
+hsap_annot <- readGFFAsGRanges("gencode.v21.annotation.gff3.gz")
+
+# Create a new transcript id column without versions ()
+mcols(hsap_annot)$tid <- sapply(strsplit(hsap_annot$transcript_id,"\\."), `[`, 1)
+```
+
+### Find the principal transcript for each gene
+```{r, eval=FALSE}
+# Download appris annotations from here - http://appris.bioinfo.cnio.es/
+
+# Read in Appris list
+appris <- read.table("human_appris_data.principal.txt")
+
+# Get a list of all principal transcripts
+princ_app <- appris[grep("P",as.character(appris[,5])),]
+princ_app <- princ_app[order(princ_app$V1),]
+
+# Pick the first principal transcript in genes with multiple principal transcripts
+all_enstt <- princ_app[!duplicated(princ_app[,1]),]
+```
+
+### Subset from official cdna list
+```{r, eval=FALSE}
+# Download CDNA seqs from here - http://ftp.ensembl.org/pub/release-83/fasta/homo_sapiens/cdna/
+
+# Read in CDNA sequences
+cdna_all <- readDNAStringSet("Homo_sapiens.GRCh38.cdna.all.fa.gz")
+cdna_names <- sapply(strsplit(names(cdna_all)," "), `[`, 1)
+cdna_names2 <- sapply(strsplit(cdna_names,"\\."), `[`, 1)
+
+# Subset principal appris CDNAs and rename the transcripts 
+cdna_sub <- cdna_all[cdna_names2 %in% all_enstt$V3]
+names(cdna_sub) <- cdna_names2[cdna_names2 %in% all_enstt$V3]
+
+# Exon annotations
+exon_annot <- hsap_annot[hsap_annot$type=="exon"]
+
+# Get transcript lengths from exon annotations
+trans_length <- mclapply(names(cdna_sub), function(x){
+  sum(width(exon_annot[exon_annot$tid==x]))
+  },mc.cores = 50)
+
+# Subset appris CDNAs whose lengths match with the annotations that are at least 150 bp
+cdna_sub <- cdna_sub[width(cdna_sub)==trans_length & width(cdna_sub)>=150]
+
+# Get CDS annotations for transcripts 
+cds_annot <- hsap_annot[hsap_annot$type=="CDS" & hsap_annot$tid %in% names(cdna_sub) ]
+exon_annot <- exon_annot[exon_annot$tid %in% unique(cds_annot$tid)]
+
+# Subset appris CDNAs that are CDS
+cdna_sub <- cdna_sub[names(cdna_sub) %in% cds_annot$tid]
+
+# Save the appris cdna seqs as a fasta file
+writeXStringSet(cdna_sub,filepath = "human_appris_cdna.fa",format = "fasta")
+```
+
+### Create a GFF file based on these transcripts
+```{r, eval=FALSE}
+# Function to get UTR and CDS lengths in each transcript
+get_utr_cds_len <- function(exon,cds,strand){
+  posdiff <- unlist(setdiff(ranges(exon),ranges(cds)))
+  utr5 <- sum(posdiff<min(start(cds)))
+  clen <- sum(width(cds))
+  utr3 <- sum(posdiff>max(end(cds)))
+  if(strand=="-"){
+    tmp <- utr3
+    utr3 <- utr5
+    utr5 <- tmp
+  }
+  return(c(utr5,clen,utr3))
+}
+
+# Get all UTR and CDS lengths
+all_lengths <- mclapply(names(cdna_sub),function(x){
+  exon <- exon_annot[exon_annot$tid==x]
+  cds <- cds_annot[cds_annot$tid==x]
+  strand <- as.character(strand(cds))[1]
+  get_utr_cds_len(exon = exon, cds = cds, strand = strand)
+}, mc.cores = 50)
+
+# Convert the output to a matrix such that the 3 columns represent utr5, cds, utr3
+length_mat <- matrix(unlist(all_lengths), ncol=3, byrow=T)
+
+len_gff <- c(t(length_mat))
+start_gff <- c(matrix(c(rep(1,nrow(length_mat)),(length_mat[,1]+1), (length_mat[,1]+length_mat[,2]+1)),nrow=3,byrow = T))
+type_gff <- rep(c("UTR5","CDS","UTR3"),nrow(length_mat))
+
+# Create a GRange object to be saved as a GFF
+output_gff <- GRanges(seqnames = rep(names(cdna_sub),each=3), ranges = IRanges(start=start_gff, width=len_gff),strand = "+",type=type_gff,Name=rep(names(cdna_sub),each=3))
+export.gff3(output_gff, file.path("human_appris_cdna.gff3"))
+```
+
+# Yeast datasets
+
+### Prepare S288c annotations and ORF seqs
+```{r, eval=FALSE}
+# Download annotations and genome seq from here - http://downloads.yeastgenome.org/sequence/S288C_reference/genome_releases/S288C_reference_genome_R64-2-1_20150113.tgz
+yeast_annot <- readGFFAsGRanges("./saccharomyces_cerevisiae_R64-2-1_20150113.gff")
+yeast_genome <- readDNAStringSet("./S288C_reference_sequence_R64-2-1_20150113.fsa")
+
+# Pad genomes with 250 N nts to provide null flanking regions for genes close to chromosomal boundaries
+yeast_genome <- xscat(DNAString(paste(rep("N",250),collapse="")),yeast_genome,DNAString(paste(rep("N",250),collapse="")))
+names(yeast_genome) <- paste("chr",c(as.character(as.roman(1:16)),"mt"),sep="")
+
+# Adjust the annotations for this 250nt shift
+yeast_annot <- shift(yeast_annot,250)
+
+# Get the annotations for all CDS of uncharacterized and verified genes
+cds_annot <- yeast_annot[(yeast_annot$orf_classification=="Uncharacterized" | yeast_annot$orf_classification=="Verified") & !is.na(yeast_annot$orf_classification) & yeast_annot$type=="CDS"]
+cds_annot$Name <- sapply(strsplit(cds_annot$Name,"_"), `[`, 1)
+
+```
+
+### Get ORF+UTR seqs
+```{r, eval=FALSE}
+# Funciton to resize GRanges while keeping track of multi-exon genes
+resize_gff_flank <- function(gene_location,flank){
+  if(length(gene_location)==1){	
+    start(gene_location) <- start(gene_location)-flank
+    end(gene_location) <- end(gene_location)+flank
+  }else{
+    start(gene_location)[start(gene_location)==min(start(gene_location))] <- start(gene_location)[start(gene_location)==min(start(gene_location))]-flank
+    end(gene_location)[end(gene_location)==max(end(gene_location))] <- end(gene_location)[end(gene_location)==max(end(gene_location))]+flank
+  }
+  return(gene_location)
+}
+
+# Resize all CDS with 250 nt UTR regions
+tmp_gff <- sapply(unique(cds_annot$Name),function(x){gene_location <- cds_annot[cds_annot$Name==x]; resize_gff_flank(gene_location = gene_location, flank=250)})
+cds_flank_annot <- unlist(GRangesList(tmp_gff))
+
+# Obtain sequences of CDS+UTRs from genome
+cds_flank_seq <- yeast_genome[cds_flank_annot]
+names(cds_flank_seq) <- cds_flank_annot$Name
+
+# Combine multi-exon genes into a single transcript
+output_seqlist <- list()
+cc <- 1
+for(i in unique(names(cds_flank_seq))){
+  output_seqlist[[cc]] <- c(unlist(cds_flank_seq[names(cds_flank_seq)==i]))
+  cc <- cc+1
+}
+output_seq <- DNAStringSet(output_seqlist)
+names(output_seq) <- unique(names(cds_flank_seq))
+
+# Write seqs to a FASTA file
+writeXStringSet(output_seq,filepath = "../yeast_CDS_w_250utrs.fa",format = "fasta")
+```
+
+### Create a GFF file based on these transcripts
+```{r, eval=FALSE}
+len_gff <- c(matrix(c(rep(250,length(output_seq)), (width(output_seq)-500), rep(250,length(output_seq))),nrow=3,byrow = T))
+start_gff <- c(matrix(c(rep(1,length(output_seq)),rep(251,length(output_seq)), (width(output_seq)-249)),nrow=3,byrow = T))
+type_gff <- rep(c("UTR5","CDS","UTR3"),length(output_seq))
+
+# Create a GRange object to be saved as a GFF
+output_gff <- GRanges(seqnames = rep(names(output_seq),each=3), ranges = IRanges(start=start_gff, width=len_gff),strand = "+",type=type_gff,Name=rep(names(output_seq),each=3))
+export.gff3(output_gff, con=file("../yeast_CDS_w_250utrs.gff3","w"))
+```
+
+# Mouse datasets
+
+### Prepare GRCh38 annotations
+```{r, eval=FALSE}
+# Download annotations from here - https://www.gencodegenes.org/releases/21.html
+mouse_annot <- readGFFAsGRanges("./gencode.vM14.annotation.gff3.gz")
+
+# Create a new transcript id column without versions ()
+mcols(mouse_annot)$tid <- sapply(strsplit(mouse_annot$transcript_id,"\\."), `[`, 1)
+```
+
+### Find the principal transcript for each gene
+```{r, eval=FALSE}
+# Download appris annotations from here - http://appris.bioinfo.cnio.es/
+
+# Read in Appris list
+appris <- read.table("mouse_appris_data.principal.txt")
+
+# Get a list of all principal transcripts
+princ_app <- appris[grep("P",as.character(appris[,5])),]
+princ_app <- princ_app[order(princ_app$V1),]
+
+# Pick the first principal transcript in genes with multiple principal transcripts
+all_enstt <- princ_app[!duplicated(princ_app[,1]),]
+```
+
+### Subset from official cdna list
+```{r, eval=FALSE}
+# Download CDNA seqs from here - http://ftp.ensembl.org/pub/release-83/fasta/mus_musculus/cdna/
+
+# Read in CDNA sequences
+cdna_all <- readDNAStringSet("./Mus_musculus.GRCm38.cdna.all.fa.gz")
+cdna_names <- sapply(strsplit(names(cdna_all)," "), `[`, 1)
+cdna_names2 <- sapply(strsplit(cdna_names,"\\."), `[`, 1)
+
+# Subset principal appris CDNAs and rename the transcripts 
+cdna_sub <- cdna_all[cdna_names2 %in% all_enstt$V3]
+names(cdna_sub) <- cdna_names2[cdna_names2 %in% all_enstt$V3]
+
+# Exon annotations
+exon_annot <- mouse_annot[mouse_annot$type=="exon"]
+
+# Get transcript lengths from exon annotations
+trans_length <- mclapply(names(cdna_sub), function(x){
+  sum(width(exon_annot[exon_annot$tid==x]))
+  },mc.cores = 50)
+
+# Subset appris CDNAs whose lengths match with the annotations that are at least 150 bp
+cdna_sub <- cdna_sub[width(cdna_sub)==trans_length & width(cdna_sub)>=150]
+
+# Get CDS annotations for transcripts 
+cds_annot <- mouse_annot[mouse_annot$type=="CDS" & mouse_annot$tid %in% names(cdna_sub) ]
+exon_annot <- exon_annot[exon_annot$tid %in% unique(cds_annot$tid)]
+
+# Subset appris CDNAs that are CDS
+cdna_sub <- cdna_sub[names(cdna_sub) %in% cds_annot$tid]
+
+# Save the appris cdna seqs as a fasta file
+writeXStringSet(cdna_sub,filepath = "mouse_appris_cdna.fa",format = "fasta")
+```
+
+### Create a GFF file based on these transcripts
+```{r, eval=FALSE}
+# Function to get UTR and CDS lengths in each transcript
+get_utr_cds_len <- function(exon,cds,strand){
+  posdiff <- unlist(setdiff(ranges(exon),ranges(cds)))
+  utr5 <- sum(posdiff<min(start(cds)))
+  clen <- sum(width(cds))
+  utr3 <- sum(posdiff>max(end(cds)))
+  if(strand=="-"){
+    tmp <- utr3
+    utr3 <- utr5
+    utr5 <- tmp
+  }
+  return(c(utr5,clen,utr3))
+}
+
+# Get all UTR and CDS lengths
+all_lengths <- mclapply(names(cdna_sub),function(x){
+  exon <- exon_annot[exon_annot$tid==x]
+  cds <- cds_annot[cds_annot$tid==x]
+  strand <- as.character(strand(cds))[1]
+  get_utr_cds_len(exon = exon, cds = cds, strand = strand)
+}, mc.cores = 50)
+
+# Convert the output to a matrix such that the 3 columns represent utr5, cds, utr3
+length_mat <- matrix(unlist(all_lengths), ncol=3, byrow=T)
+
+len_gff <- c(t(length_mat))
+start_gff <- c(matrix(c(rep(1,nrow(length_mat)),(length_mat[,1]+1), (length_mat[,1]+length_mat[,2]+1)),nrow=3,byrow = T))
+type_gff <- rep(c("UTR5","CDS","UTR3"),nrow(length_mat))
+
+# Create a GRange object to be saved as a GFF
+output_gff <- GRanges(seqnames = rep(names(cdna_sub),each=3), ranges = IRanges(start=start_gff, width=len_gff),strand = "+",type=type_gff,Name=rep(names(cdna_sub),each=3))
+export.gff3(output_gff, file.path("mouse_appris_cdna.gff3"))
+```
