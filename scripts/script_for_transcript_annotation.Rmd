@@ -1,19 +1,22 @@
 ---
 title: "Preparing FASTA and annotation files for RiboViz"
-output:
-  html_notebook: default
-  html_document: default
+output: 
+  html_notebook: 
+    toc: yes
+    toc_depth: 4
+    toc_float: TRUE
 ---
 
-### Packages
+## Packages
 ```{r, eval=FALSE}
 library(Biostrings)
 library(rtracklayer)
 library(GenomicRanges)
 library(parallel)
+library(rhdf5)
 ```
 
-# Yeast datasets
+## Yeast datasets
 
 ### Prepare S288c annotations and ORF seqs
 ```{r, eval=FALSE}
@@ -22,14 +25,18 @@ yeast_annot <- readGFFAsGRanges("./saccharomyces_cerevisiae_R64-2-1_20150113.gff
 yeast_genome <- readDNAStringSet("./S288C_reference_sequence_R64-2-1_20150113.fsa")
 
 # Pad genomes with 250 N nts to provide null flanking regions for genes close to chromosomal boundaries
-yeast_genome <- xscat(DNAString(paste(rep("N",250),collapse="")),yeast_genome,DNAString(paste(rep("N",250),collapse="")))
+yeast_genome <- xscat(DNAString(paste(rep("N",250),collapse="")),
+                      yeast_genome,
+                      DNAString(paste(rep("N",250),collapse="")))
+
 names(yeast_genome) <- paste("chr",c(as.character(as.roman(1:16)),"mt"),sep="")
 
 # Adjust the annotations for this 250nt shift
 yeast_annot <- shift(yeast_annot,250)
 
 # Get the annotations for all CDS of uncharacterized and verified genes
-cds_annot <- yeast_annot[(yeast_annot$orf_classification=="Uncharacterized" | yeast_annot$orf_classification=="Verified") & !is.na(yeast_annot$orf_classification) & yeast_annot$type=="CDS"]
+cds_annot <- yeast_annot[(yeast_annot$orf_classification=="Uncharacterized" | yeast_annot$orf_classification=="Verified") &
+                           !is.na(yeast_annot$orf_classification) & yeast_annot$type=="CDS"]
 cds_annot$Name <- sapply(strsplit(cds_annot$Name,"_"), `[`, 1)
 
 ```
@@ -49,7 +56,11 @@ resize_gff_flank <- function(gene_location,flank){
 }
 
 # Resize all CDS with 250 nt UTR regions
-tmp_gff <- sapply(unique(cds_annot$Name),function(x){gene_location <- cds_annot[cds_annot$Name==x]; resize_gff_flank(gene_location = gene_location, flank=250)})
+tmp_gff <- sapply(unique(cds_annot$Name),
+                  function(x){
+                    gene_location <- cds_annot[cds_annot$Name==x]; 
+                    resize_gff_flank(gene_location = gene_location, flank=250)
+                    })
 cds_flank_annot <- unlist(GRangesList(tmp_gff))
 
 # Obtain sequences of CDS+UTRs from genome
@@ -61,6 +72,9 @@ output_seqlist <- list()
 cc <- 1
 for(i in unique(names(cds_flank_seq))){
   output_seqlist[[cc]] <- c(unlist(cds_flank_seq[names(cds_flank_seq)==i]))
+  if(any(strand(cds_flank_annot[cds_flank_annot$Name==i])=="-")){
+    output_seqlist[[cc]] <- reverseComplement(output_seqlist[[cc]])
+  }
   cc <- cc+1
 }
 output_seq <- DNAStringSet(output_seqlist)
@@ -77,7 +91,10 @@ start_gff <- c(matrix(c(rep(1,length(output_seq)),rep(251,length(output_seq)), (
 type_gff <- rep(c("UTR5","CDS","UTR3"),length(output_seq))
 
 # Create a GRange object to be saved as a GFF
-output_gff <- GRanges(seqnames = rep(names(output_seq),each=3), ranges = IRanges(start=start_gff, width=len_gff),strand = "+",type=type_gff,Name=rep(names(output_seq),each=3))
+output_gff <- GRanges(seqnames = rep(names(output_seq),each=3), 
+                      ranges = IRanges(start=start_gff, width=len_gff),
+                      strand = "+",type=type_gff,
+                      Name=rep(names(output_seq),each=3))
 export.gff3(output_gff, con=file("yeast_CDS_w_250utrs.gff3","w"))
 ```
 
@@ -116,7 +133,44 @@ out <- sapply(names(GENETIC_CODE),
 save(out, "yeast_codon_pos_i200.RData")
 ```
 
-# Human datasets
+### Create h5 file with gene-specific `nt` and `codon` sequences for `Shiny` plots
+```{r, eval=FALSE}
+hdfile <- "yeast_seq.h5"
+
+seq <- output_seq
+gff <- output_gff
+
+nt_seq <- strsplit(as.character(seq),"")
+seq <- seq[gff[gff$type=="CDS"]] # Restrict sequences to only CDS
+cod_seq <- sapply(sapply(seq,codons),as.character) # Split the sequences into codons
+
+# Save seq data as H5 file
+h5createFile(hdfile) # Create the output h5 file
+fid <- H5Fopen(hdfile) # Filehandle for the h5 file
+
+for(gene in names(nt_seq)){
+  # Get the output matrix of read counts by position and length for a gene 
+  tmp_nt <- nt_seq[[gene]]
+  tmp_cod <- cod_seq[[gene]]
+  
+  # Create H5 groups for each gene
+  h5createGroup(fid,gene)
+  
+  # Specify a dataset within the gene group to store the values and degree of compression
+  nt_dname <- paste(gene,"nt",sep="/")
+  cod_dname <- paste(gene,"codon",sep="/")
+  
+  h5createDataset(fid,nt_dname,dims=c(1,length(tmp_nt)), storage.mode="character",size=2,level=7)
+  h5createDataset(fid,cod_dname,dims=c(1,length(tmp_cod)), storage.mode="character",size=4,level=7)
+  
+  # Write the dataset within the gene group
+  h5write(as.matrix(t(tmp_nt)),fid,name=nt_dname,start=c(1,1))
+  h5write(as.matrix(t(tmp_cod)),fid,name=cod_dname,start=c(1,1))
+}
+H5close()
+```
+
+## Human datasets
 
 ### Prepare GRCh38 annotations
 ```{r, eval=FALSE}
@@ -209,7 +263,10 @@ start_gff <- c(matrix(c(rep(1,nrow(length_mat)),(length_mat[,1]+1), (length_mat[
 type_gff <- rep(c("UTR5","CDS","UTR3"),nrow(length_mat))
 
 # Create a GRange object to be saved as a GFF
-output_gff <- GRanges(seqnames = rep(names(cdna_sub),each=3), ranges = IRanges(start=start_gff, width=len_gff),strand = "+",type=type_gff,Name=rep(names(cdna_sub),each=3))
+output_gff <- GRanges(seqnames = rep(names(cdna_sub),each=3), 
+                      ranges = IRanges(start=start_gff, width=len_gff),
+                      strand = "+",type=type_gff,
+                      Name=rep(names(cdna_sub),each=3))
 export.gff3(output_gff, file.path("human_appris_cdna.gff3"))
 ```
 
@@ -249,7 +306,44 @@ out <- sapply(names(GENETIC_CODE),
 save(out, "human_codon_pos_i200.RData")
 ```
 
-# Mouse datasets
+### Create h5 file with gene-specific `nt` and `codon` sequences for `Shiny` plots
+```{r}
+hdfile <- "human_seq.h5"
+
+seq <- output_seq
+gff <- output_gff
+
+nt_seq <- strsplit(as.character(seq),"")
+seq <- seq[gff[gff$type=="CDS"]] # Restrict sequences to only CDS
+cod_seq <- sapply(sapply(seq,codons),as.character) # Split the sequences into codons
+
+# Save seq data as H5 file
+h5createFile(hdfile) # Create the output h5 file
+fid <- H5Fopen(hdfile) # Filehandle for the h5 file
+
+for(gene in names(nt_seq)){
+  # Get the output matrix of read counts by position and length for a gene 
+  tmp_nt <- nt_seq[[gene]]
+  tmp_cod <- cod_seq[[gene]]
+  
+  # Create H5 groups for each gene
+  h5createGroup(fid,gene)
+  
+  # Specify a dataset within the gene group to store the values and degree of compression
+  nt_dname <- paste(gene,"nt",sep="/")
+  cod_dname <- paste(gene,"codon",sep="/")
+  
+  h5createDataset(fid,nt_dname,dims=c(1,length(tmp_nt)), storage.mode="character",size=2,level=7)
+  h5createDataset(fid,cod_dname,dims=c(1,length(tmp_cod)), storage.mode="character",size=4,level=7)
+  
+  # Write the dataset within the gene group
+  h5write(as.matrix(t(tmp_nt)),fid,name=nt_dname,start=c(1,1))
+  h5write(as.matrix(t(tmp_cod)),fid,name=cod_dname,start=c(1,1))
+}
+H5close()
+```
+
+## Mouse datasets
 
 ### Prepare GRCh38 annotations
 ```{r, eval=FALSE}
@@ -342,7 +436,10 @@ start_gff <- c(matrix(c(rep(1,nrow(length_mat)),(length_mat[,1]+1), (length_mat[
 type_gff <- rep(c("UTR5","CDS","UTR3"),nrow(length_mat))
 
 # Create a GRange object to be saved as a GFF
-output_gff <- GRanges(seqnames = rep(names(cdna_sub),each=3), ranges = IRanges(start=start_gff, width=len_gff),strand = "+",type=type_gff,Name=rep(names(cdna_sub),each=3))
+output_gff <- GRanges(seqnames = rep(names(cdna_sub),each=3), 
+                      ranges = IRanges(start=start_gff, width=len_gff),
+                      strand = "+",type=type_gff,
+                      Name=rep(names(cdna_sub),each=3))
 export.gff3(output_gff, file.path("mouse_appris_cdna.gff3"))
 ```
 
@@ -380,4 +477,41 @@ out <- sapply(names(GENETIC_CODE),
 
 # Save output as an RData object
 save(out, "mouse_codon_pos_i200.RData")
+```
+
+### Create h5 file with gene-specific `nt` and `codon` sequences for `Shiny` plots
+```{r, eval=FALSE}
+hdfile <- "mouse_seq.h5"
+
+seq <- output_seq
+gff <- output_gff
+
+nt_seq <- strsplit(as.character(seq),"")
+seq <- seq[gff[gff$type=="CDS"]] # Restrict sequences to only CDS
+cod_seq <- sapply(sapply(seq,codons),as.character) # Split the sequences into codons
+
+# Save seq data as H5 file
+h5createFile(hdfile) # Create the output h5 file
+fid <- H5Fopen(hdfile) # Filehandle for the h5 file
+
+for(gene in names(nt_seq)){
+  # Get the output matrix of read counts by position and length for a gene 
+  tmp_nt <- nt_seq[[gene]]
+  tmp_cod <- cod_seq[[gene]]
+  
+  # Create H5 groups for each gene
+  h5createGroup(fid,gene)
+  
+  # Specify a dataset within the gene group to store the values and degree of compression
+  nt_dname <- paste(gene,"nt",sep="/")
+  cod_dname <- paste(gene,"codon",sep="/")
+  
+  h5createDataset(fid,nt_dname,dims=c(1,length(tmp_nt)), storage.mode="character",size=2,level=7)
+  h5createDataset(fid,cod_dname,dims=c(1,length(tmp_cod)), storage.mode="character",size=4,level=7)
+  
+  # Write the dataset within the gene group
+  h5write(as.matrix(t(tmp_nt)),fid,name=nt_dname,start=c(1,1))
+  h5write(as.matrix(t(tmp_cod)),fid,name=cod_dname,start=c(1,1))
+}
+H5close()
 ```
