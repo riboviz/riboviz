@@ -14,7 +14,7 @@ import argparse, gffutils
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
-from warnings import warn
+# from warnings import warn
 
 if __name__=="__main__" :
     # take input options
@@ -47,10 +47,10 @@ if __name__=="__main__" :
         CDS_trans = Seq( CDS_seq, IUPAC.ambiguous_dna ).translate()
         
         if ( CDS_trans[0] != "M" ) :
-            warn( CDS_coord.seqid + " doesn't start with ATG" )
+            print( CDS_coord.seqid + " doesn't start with ATG" )
         if ( CDS_trans[-1] != "*" ) :
-            warn( CDS_coord.seqid + " doesn't stop at end" )
+            print( CDS_coord.seqid + " doesn't stop at end" )
         if any( [ L == "*"  for L in CDS_trans[:-1] ] ) : 
-            warn( CDS_coord.seqid + " has internal STOP" )
+            print( CDS_coord.seqid + " has internal STOP" )
     
     print("Done checking")
