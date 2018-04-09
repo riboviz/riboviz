@@ -425,7 +425,7 @@ if(rpf){
   
   yeast_tRNAs <- read.table(paste0(dir_scripts,"/yeast_tRNAs.tsv"),h=T) # Read in yeast tRNA estimates
   load(paste0(dir_scripts,"/yeast_codon_pos_i200.RData")) # Position of codons in each gene (numbering ignores first 200 codons)
-                                                    # Reads in an object named "codon_pos"
+                                                          # Reads in an object named "codon_pos"
 
   out <- lapply(genes,function(gene){
     # From "Position specific distribution of reads" plot
@@ -466,7 +466,7 @@ if(rpf){
   
   # Save plot and file
   ggsave(cod_dens_tRNA_plot, filename = paste0(out_prefix,"_codon_ribodens.pdf"))
-  write.table(yeast_features,file=paste0(out_prefix,"_codon_ribodens.tsv"),sep="\t",row=F,col=T,quote=F)
+  write.table(out_df,file=paste0(out_prefix,"_codon_ribodens.tsv"),sep="\t",row=F,col=T,quote=F)
 }
 
 print("Completed: Codon-specific ribosome densities for correlations with tRNAs")

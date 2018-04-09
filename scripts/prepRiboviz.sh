@@ -107,7 +107,7 @@ for fq in ${fqfs}
         fn_out=${dir_out}/${fn_stem}
         ##
         ## cut illumina adapters
-        cutadapt --trim-n -O 1 -m 5 -a ${adapters} -o ${fn_trim} ${fn}
+        cutadapt --trim-n -O 1 -m 5 -a ${adapters} -o ${fn_trim} ${fn} -j ${nprocesses}
         ## Map reads to rRNA
         echo hisat2 -p ${nprocesses} -N 1 --un ${fn_nonrRNA} -x ${rRNA_index} \
         -S ${fn_rRNA_mapped} -U ${fn_trim}

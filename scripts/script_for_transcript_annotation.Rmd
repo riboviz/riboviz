@@ -1,10 +1,13 @@
 ---
 title: "Preparing FASTA and annotation files for RiboViz"
-output: 
-  html_notebook: 
+output:
+  html_notebook:
     toc: yes
     toc_depth: 4
-    toc_float: TRUE
+    toc_float: yes
+  html_document:
+    toc: yes
+    toc_depth: '4'
 ---
 
 ## Packages
@@ -21,8 +24,8 @@ library(rhdf5)
 ### Prepare S288c annotations and ORF seqs
 ```{r, eval=FALSE}
 # Download annotations and genome seq from here - http://downloads.yeastgenome.org/sequence/S288C_reference/genome_releases/S288C_reference_genome_R64-2-1_20150113.tgz
-yeast_annot <- readGFFAsGRanges("./saccharomyces_cerevisiae_R64-2-1_20150113.gff")
-yeast_genome <- readDNAStringSet("./S288C_reference_sequence_R64-2-1_20150113.fsa")
+yeast_annot <- readGFFAsGRanges("saccharomyces_cerevisiae_R64-2-1_20150113.gff")
+yeast_genome <- readDNAStringSet("S288C_reference_sequence_R64-2-1_20150113.fsa")
 
 # Pad genomes with 250 N nts to provide null flanking regions for genes close to chromosomal boundaries
 yeast_genome <- xscat(DNAString(paste(rep("N",250),collapse="")),
@@ -118,7 +121,7 @@ codon_pos_locator <- function(seq,codon,gene){
   return(out)
 }
 
-out <- sapply(names(GENETIC_CODE),
+codon_pos <- sapply(names(GENETIC_CODE),
               function(codon){
                 allpos <- mclapply(names(cods),
                                 function(gene){
@@ -128,9 +131,10 @@ out <- sapply(names(GENETIC_CODE),
                                 },mc.cores=50)
                 do.call(rbind,allpos)
               })
+codon_pos <- codon_pos[!names(codon_pos) %in% c("TAG","TAA","TGA")]
 
 # Save output as an RData object
-save(out, "yeast_codon_pos_i200.RData")
+save(codon_pos, file = "yeast_codon_pos_i200.RData")
 ```
 
 ### Create h5 file with gene-specific `nt` and `codon` sequences for `Shiny` plots
@@ -291,7 +295,7 @@ codon_pos_locator <- function(seq,codon,gene){
   return(out)
 }
 
-out <- sapply(names(GENETIC_CODE),
+codon_pos <- sapply(names(GENETIC_CODE),
               function(codon){
                 allpos <- mclapply(names(cods),
                                 function(gene){
@@ -302,6 +306,7 @@ out <- sapply(names(GENETIC_CODE),
                 do.call(rbind,allpos)
               })
 
+codon_pos <- codon_pos[!names(codon_pos) %in% c("TAG","TAA","TGA")]
 # Save output as an RData object
 save(out, "human_codon_pos_i200.RData")
 ```
@@ -464,7 +469,7 @@ codon_pos_locator <- function(seq,codon,gene){
   return(out)
 }
 
-out <- sapply(names(GENETIC_CODE),
+codon_pos <- sapply(names(GENETIC_CODE),
               function(codon){
                 allpos <- mclapply(names(cods),
                                 function(gene){
@@ -475,6 +480,7 @@ out <- sapply(names(GENETIC_CODE),
                 do.call(rbind,allpos)
               })
 
+codon_pos <- codon_pos[!names(codon_pos) %in% c("TAG","TAA","TGA")]
 # Save output as an RData object
 save(out, "mouse_codon_pos_i200.RData")
 ```
