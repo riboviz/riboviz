@@ -33,7 +33,9 @@ option_list <- list(
   make_option("--dir_out", type="character", default="./",
               help="Output directory"),
   make_option("--dir_scripts", type="character", default="./scripts/",
-              help="Scripts directory")
+              help="Scripts directory"),
+  make_option("--orf_gff_file", type="character", default=NULL,
+              help="riboviz generated GFF2/GFF3 annotation file")
 )
 
 # Read in commandline arguments
@@ -55,6 +57,9 @@ cod_seq <- readDNAStringSet(orf_fasta)
 # Range of read lengths 
 read_range <- MinReadLen:MaxReadLen
 
+# Read in the positions of all exons/genes in GFF format and subset CDS locations
+gff <- readGFFAsGRanges(orf_gff_file)
+
 #####################################################################################
 #####################################################################################
 ### Check for 3nt periodicity
@@ -74,16 +79,37 @@ n_total <- n_buffer+n_gene
 # NOTE: Do not use mclapply when accessing H5 data
 
 # Get gene and position specific total counts of all lengths
+
+### OLD code for a fixed BUFFER size
+# gene_sp_pos_counts <- lapply(genes,function(gene){
+#   get_nt_period(fid=fid,
+#                 gene=gene,
+#                 dataset=dataset,
+#                 left=(Buffer-n_buffer),
+#                 right=(Buffer-n_buffer))
+#   })
+
 gene_sp_pos_counts <- lapply(genes,function(gene){
-  get_nt_period(fid=fid,
-                gene=gene,
-                dataset=dataset,
-                left=(Buffer-n_buffer),
-                right=(Buffer-n_buffer))
-  })
+  utr5 <- width(gff[gff$type=="UTR5" & gff$Name==gene])
+  n_buffer_utr5 <- ifelse(utr5 >= n_buffer,n_buffer,0)
+  utr3 <- width(gff[gff$type=="UTR3" & gff$Name==gene])
+  n_buffer_utr3 <- ifelse(utr3 >= n_buffer,n_buffer,0)
+  nt_period <- get_nt_period(fid=fid,
+                             gene=gene,
+                             dataset=dataset,
+                             left=(utr5-n_buffer_utr5)+1,
+                             right=utr3-n_buffer_utr3)
+  
+  c(rep(0,n_buffer-n_buffer_utr5),
+    nt_period,
+    rep(0,n_buffer-n_buffer_utr3))
+})
 
 x <- lapply(gene_sp_pos_counts,head,n=n_total) # Subset reads mapping to a fixed region across genes (5')
 y <- lapply(gene_sp_pos_counts,tail,n=n_total) # Subset reads mapping to a fixed region across genes (3')
+a <- sapply(x,length)
+x <- x[a==n_total]
+y <- y[a==n_total]
 
 lsum <- colSums(matrix(unlist(x),byrow=T,nrow=length(x))) # Position-specific sums of reads (5')
 rsum <- colSums(matrix(unlist(y),byrow=T,nrow=length(x))) # Position-specific sums of reads (3')
@@ -96,10 +122,13 @@ out_data <- data.frame(
 )
 
 # Plot
-nt_period_plot <- ggplot(out_data, aes(x=Pos,y=Counts,col=End)) + 
+tmp <- out_data
+out_data$End <- factor(out_data$End, levels = c("5'", "3'"))
+nt_period_plot <- ggplot(out_data, aes(x=Pos, y=Counts, col=Data)) + 
   geom_line() + 
-  facet_grid(~End) +
-  guides(col=FALSE)
+  facet_wrap(~End, scales="free") + 
+  scale_y_log10() +
+  labs(x = "Nucleotide Position", y = "Read counts")
 
 # Save plot and file
 ggsave(nt_period_plot, filename = paste0(out_prefix,"_3nt_periodicity.pdf"))
