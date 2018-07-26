@@ -22,7 +22,7 @@ library(rhdf5)
 ## Yeast datasets
 
 ### Prepare S288c annotations and ORF seqs
-```{r, eval=FALSE}
+```{r}
 # Download annotations and genome seq from here - http://downloads.yeastgenome.org/sequence/S288C_reference/genome_releases/S288C_reference_genome_R64-2-1_20150113.tgz
 yeast_annot <- readGFFAsGRanges("saccharomyces_cerevisiae_R64-2-1_20150113.gff")
 yeast_genome <- readDNAStringSet("S288C_reference_sequence_R64-2-1_20150113.fsa")
@@ -276,7 +276,7 @@ export.gff3(output_gff, file.path("human_appris_cdna.gff3"))
 
 ### Create an RData object with gene-specific codon positions for riboviz plots
 ```{r, eval=FALSE}
-seq <- output_seq
+seq <- cdna_sub
 gff <- output_gff
 
 seq <- seq[gff[gff$type=="CDS"]] # Restrict sequences to only CDS
@@ -308,18 +308,20 @@ codon_pos <- sapply(names(GENETIC_CODE),
 
 codon_pos <- codon_pos[!names(codon_pos) %in% c("TAG","TAA","TGA")]
 # Save output as an RData object
-save(out, "human_codon_pos_i200.RData")
+save(codon_pos, file = "human_codon_pos_i200.RData")
 ```
 
 ### Create h5 file with gene-specific `nt` and `codon` sequences for `Shiny` plots
 ```{r}
 hdfile <- "human_seq.h5"
 
-seq <- output_seq
+seq <- cdna_sub
 gff <- output_gff
 
-nt_seq <- strsplit(as.character(seq),"")
 seq <- seq[gff[gff$type=="CDS"]] # Restrict sequences to only CDS
+seq <- seq[width(seq)%%3==0] # Ignore any transcripts with frame-shifts
+
+nt_seq <- strsplit(as.character(seq),"")
 cod_seq <- sapply(sapply(seq,codons),as.character) # Split the sequences into codons
 
 # Save seq data as H5 file
@@ -450,7 +452,7 @@ export.gff3(output_gff, file.path("mouse_appris_cdna.gff3"))
 
 ### Create an RData object with gene-specific codon positions for riboviz plots
 ```{r, eval=FALSE}
-seq <- output_seq
+seq <- cdna_sub
 gff <- output_gff
 
 seq <- seq[gff[gff$type=="CDS"]] # Restrict sequences to only CDS
@@ -482,18 +484,20 @@ codon_pos <- sapply(names(GENETIC_CODE),
 
 codon_pos <- codon_pos[!names(codon_pos) %in% c("TAG","TAA","TGA")]
 # Save output as an RData object
-save(out, "mouse_codon_pos_i200.RData")
+save(codon_pos, file = "mouse_codon_pos_i200.RData")
 ```
 
 ### Create h5 file with gene-specific `nt` and `codon` sequences for `Shiny` plots
 ```{r, eval=FALSE}
 hdfile <- "mouse_seq.h5"
 
-seq <- output_seq
+seq <- cdna_sub
 gff <- output_gff
 
-nt_seq <- strsplit(as.character(seq),"")
 seq <- seq[gff[gff$type=="CDS"]] # Restrict sequences to only CDS
+seq <- seq[width(seq)%%3==0] # Ignore any transcripts with frame-shifts
+
+nt_seq <- strsplit(as.character(seq),"")
 cod_seq <- sapply(sapply(seq,codons),as.character) # Split the sequences into codons
 
 # Save seq data as H5 file
