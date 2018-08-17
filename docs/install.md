@@ -20,7 +20,7 @@ If you already have Python you can skip this step. If you don't have Python then
 
 Either Python 2.7+ or Python 3.6+ can be used.
 
-### Install Miniconda Python 2.7
+### Miniconda Python 2.7
 
 ```bash
 wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda2.sh
@@ -39,7 +39,7 @@ python -V
 Python 2.7.15 :: Anaconda, Inc.
 ```
 
-### Install Miniconda Python 3.6
+### Miniconda Python 3.6
 
 ```bash
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda3.sh
@@ -375,7 +375,7 @@ If you get:
 
 Then check you installed the `libcurl4-openssl-dev` package.
 
-### RcppRoll
+## RcppRoll
 
 Web site: [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html)
 
@@ -385,7 +385,7 @@ Install in R:
 install.packages("RcppRoll")
 ```
 
-### optparse
+## optparse
 
 Web site: [optparse](https://cran.r-project.org/web/packages/optparse/index.html)
 
@@ -395,7 +395,7 @@ Install in R:
 install.packages("optparse")
 ```
 
-### tidyr
+## tidyr
 
 Web site: [tidyr](https://cran.r-project.org/web/packages/tidyr/index.html)
 
@@ -405,7 +405,7 @@ Install in R:
 install.packages("tidyr")
 ```
 
-### ggplot2
+## ggplot2
 
 Web site: [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html)
 
@@ -415,7 +415,7 @@ Install in R:
 install.packages("ggplot2")
 ```
 
-### shiny
+## shiny
 
 Web site: [shiny](https://cran.r-project.org/web/packages/shiny/index.html):
 
@@ -425,7 +425,20 @@ Install in R:
 install.packages("shiny")
 ```
 
-### Check names and versions of packages
+## Check names and versions of Python packages
+
+Run:
+
+```bash
+conda list
+```
+```
+cutadapt                  1.16 ...
+
+pysam                     0.14.1 ...
+```
+
+## Check names and versions of R packages
 
 From [list user installed packages](https://www.r-bloggers.com/list-of-user-installed-r-packages-and-their-versions/):
 
