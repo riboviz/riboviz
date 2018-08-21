@@ -417,13 +417,41 @@ install.packages("ggplot2")
 
 ## shiny
 
-Web site: [shiny](https://cran.r-project.org/web/packages/shiny/index.html):
+Web site: [shiny](https://cran.r-project.org/web/packages/shiny/index.html)
 
 Install in R:
 
 ```R
 install.packages("shiny")
 ```
+
+## plotly
+
+Web site: [plotly](https://plot.ly)
+
+Install required packages:
+
+```bash
+sudo apt-get install -y libssl-dev
+sudo apt-get install -y libcurl4-openssl-dev
+```
+
+Install in R:
+
+```R
+install.packages("plotly")
+```
+
+
+**Troubleshooting: ERROR: dependency "httr" is not available for package "plotly"""
+
+If you get:
+
+```
+ERROR: dependency "httr" is not available for package "plotly"
+```
+
+Then check you installed the `libssl-dev` and `libcurl4-openssl-dev` packages.
 
 ## Check names and versions of Python packages
 
@@ -455,6 +483,8 @@ print(ip, row.names=FALSE)
               ggplot2     3.0.0
 ...
              optparse     1.6.0
+...
+               plotly     4.8.0
 ...
              RcppRoll     0.3.0
 ...
