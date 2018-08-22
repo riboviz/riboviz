@@ -35,4 +35,27 @@ cat condition2_subsetC.fastq condition2_subsetD.fastq | gzip >> condition2.fastq
 .
 ```
 
-It is easiest if you put all these files in a single input folder. Alternatively, you could symlink them from a single folder.
+It is easiest if you put all these files in a single input folder. Alternatively, you could symlink them from a single folder. For example, given:
+
+```
+samples/
+    condition1/
+        condition1.fastq.gz
+    condition2/
+        condition2.fastq.gz
+```
+
+This can be symlinked into a single folder as follows:
+
+```bash
+mkdir data
+cd data/
+ln -s ../samples/condition1/condition1.fastq.gz
+ln -s ../samples/condition2/condition2.fastq.gz
+ls -l
+```
+```
+total 0
+lrwxrwxrwx 1 ubuntu ubuntu 41 Aug 22 02:55 condition1.fastq.gz -> ../samples/condition1/condition1.fastq.gz
+lrwxrwxrwx 1 ubuntu ubuntu 41 Aug 22 02:55 condition2.fastq.gz -> ../samples/condition2/condition2.fastq.gz
+```
