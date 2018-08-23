@@ -124,11 +124,12 @@ out_data <- data.frame(
 # Plot
 tmp <- out_data
 out_data$End <- factor(out_data$End, levels = c("5'", "3'"))
-nt_period_plot <- ggplot(out_data, aes(x=Pos, y=Counts, col=Data)) + 
+nt_period_plot <- ggplot(out_data, aes(x=Pos, y=Counts)) + 
   geom_line() + 
   facet_wrap(~End, scales="free") + 
-  scale_y_log10() +
   labs(x = "Nucleotide Position", y = "Read counts")
+
+browser()
 
 # Save plot and file
 ggsave(nt_period_plot, filename = paste0(out_prefix,"_3nt_periodicity.pdf"))
