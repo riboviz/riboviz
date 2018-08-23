@@ -81,21 +81,22 @@ Riboviz generates many intermediate files that could be large, i.e. about the sa
 
 ## Run the "vignette"
 
-If using Python 2.x then, edit `vignette/vignette_config.yaml`:
+By default, RiboViz is configured to use 1 process. If using Python 3.x then you can configure RiboViz to use more:
 
+* Open `vignette/vignette_config.yaml` in an editor.
 * Change:
-
-```
-nprocesses: 4 # number of processes to parallelize over
-```
-
-* to:
 
 ```
 nprocesses: 1 # number of processes to parallelize over
 ```
 
-* This needs to be done as `samtools`, which is invoked during the run, can only run under 1 process with Python 2.
+* to:
+
+```
+nprocesses: 4 # number of processes to parallelize over
+```
+
+* **Note:** `samtools`, which is invoked during the run, can only run under 1 process with Python 2.
 
 Set `scripts/prepRiboViz.sh` to be executable:
 
