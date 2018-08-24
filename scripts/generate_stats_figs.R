@@ -7,6 +7,8 @@ suppressMessages(library(optparse,quietly = T))
 suppressMessages(library(RcppRoll, quietly = T))
 suppressMessages(library(ggplot2, quietly = T))
 suppressMessages(library(tidyr, quietly = T))
+suppressMessages(library(purrr, quietly = T))
+
 
 # define input options for optparse package
 option_list <- list( 
@@ -64,6 +66,24 @@ gff <- readGFFAsGRanges(orf_gff_file)
 #####################################################################################
 ### Check for 3nt periodicity
 print("Starting: Check for 3nt periodicity")
+
+select_region <- function(data_mat,left,right) {
+}
+
+select_regionlist <- function(datalist,lefts,rights) {
+}
+
+collapse_to5pos <- function(data_mat) {
+}
+
+collapse2_metagene <- function(datalist) {
+}
+
+collapse1_metagene <- function(datalist) {
+}
+
+plot_2d <- function() {
+}
 
 get_nt_period <- function(fid,gene,dataset,left,right){
   data_mat <- H5Dread(H5Dopen(fid,paste0("/",gene,"/",dataset,"/reads/data")))  # Get the matrix of read counts
