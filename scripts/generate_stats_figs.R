@@ -136,7 +136,7 @@ rsum <- colSums(matrix(unlist(y),byrow=T,nrow=length(x))) # Position-specific su
 
 # Create a dataframe to store the output for plots/analyses
 out_data <- data.frame(
-  Pos = rep(seq(-n_buffer+1,n_gene,1),2),
+  Pos = c(seq(-n_buffer+1,n_gene,1),seq(-n_gene+1,n_buffer,1)),
   Counts = c(lsum,rsum),
   End = factor(rep(c("5'","3'"),each=n_total),levels=c("5'","3'"))
 )
