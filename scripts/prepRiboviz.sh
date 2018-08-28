@@ -155,12 +155,12 @@ for fq in ${fqfs}
         echo Rscript --vanilla ${dir_scripts}/generate_stats_figs.R \
         --Ncores=${nprocesses} --MinReadLen=${MinReadLen} --MaxReadLen=${MaxReadLen} --Buffer=${Buffer} \
         --PrimaryID=${PrimaryID} --dataset=${dataset} --hdFile=${fn_out}.h5 --out_prefix=${fn_out} --orf_fasta=${orf_fasta} \
-        --rpf=${rpf} --dir_out=${dir_out} --dir_scripts=${dir_scripts} 
+        --orf_gff_file=${orf_gff_file} --rpf=${rpf} --dir_out=${dir_out} --dir_scripts=${dir_scripts} 
         #
         Rscript --vanilla ${dir_scripts}/generate_stats_figs.R \
         --Ncores=${nprocesses} --MinReadLen=${MinReadLen} --MaxReadLen=${MaxReadLen} --Buffer=${Buffer} \
         --PrimaryID=${PrimaryID} --dataset=${dataset} --hdFile=${fn_out}.h5 --out_prefix=${fn_out} --orf_fasta=${orf_fasta} \
-        --rpf=${rpf} --dir_out=${dir_out} --dir_scripts=${dir_scripts} 
+        --orf_gff_file=${orf_gff_file} --rpf=${rpf} --dir_out=${dir_out} --dir_scripts=${dir_scripts} 
         ##
         echo finished processing sample ${fq}
         echo
