@@ -169,5 +169,8 @@ for fq in ${fqfs}
     trap exit SIGINT
 done
 
+echo collating TPMs across samples
+Rscript --vanilla ${dir_scripts}/collate_tpms.R --yaml=${config_yaml}
+
 echo "prepRiboviz.sh completed"
 echo
