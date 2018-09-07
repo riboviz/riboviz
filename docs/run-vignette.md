@@ -122,7 +122,7 @@ bash scripts/prepRiboviz.sh vignette/vignette_config.yaml
 Run:
 
 ```bash
-0python scripts/prepRiboviz.py scripts/ vignette/vignette_config.yaml
+python scripts/prepRiboviz.py scripts/ vignette/vignette_config.yaml
 ```
 
 ### Check the expected output files
