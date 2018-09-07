@@ -1,8 +1,13 @@
 # Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file
 
-RiboViz is designed to be run from a single script, `scripts/prepRiboviz.sh`, using a single configuration file in [YAML](http://www.yaml.org/) format containing all the information required for the analysis.
+RiboViz is designed to be run from a single script using a single configuration file in [YAML](http://www.yaml.org/) format containing all the information required for the analysis.
 
-You can run a "vignette" of the back-end analysis pipeline, to demostrate RiboViz's capabilities. An example for *Saccharomyces cerevisiae* reads, up to the output of HDF5 files, is in the `vignette/` directory.
+There are two implementations of this script available:
+
+* `scripts/prepRiboviz.sh`, a bash shell implementation.
+* `scripts/prepRiboviz.py`, a Python implementation.
+
+Using either of these scripts, you can run a "vignette" of the back-end analysis pipeline, to demostrate RiboViz's capabilities. An example for *Saccharomyces cerevisiae* reads, up to the output of HDF5 files, is in the `vignette/` directory.
 
 ## `vignette` directory contents
 
@@ -18,9 +23,9 @@ SRR1042864_s1mi.fastq.gz      # about 1mi-sampled RPFs wild-type + 3-AT from Guy
 
 `vignette/vignette_config.yaml` contains configuration information in YAML.
 
-## What `prepRiboviz.sh` does
+## What `prepRiboviz.sh` and `prepRiboviz.py` do
 
-`prepRiboviz.sh` is a shell script for preparing ribosome profiling data for RiboViz or other analyses. It does the following (`names` in brackets correspond to variables in the YAML configuration file):
+Each script prepares ribosome profiling data for RiboViz or other analyses. They each do the following (`names` in brackets correspond to variables in the YAML configuration file):
 
 * Reads configuration information from the YAML configuration file.
 * Builds hisat2 indices if requested (`build_indices=TRUE`, by default), in an index directory (`dir_index`).
@@ -98,6 +103,8 @@ nprocesses: 4 # number of processes to parallelize over
 
 * **Note:** `samtools`, which is invoked during the run, can only run under 1 process with Python 2.
 
+### Run `scripts/prepRiboViz.sh`
+
 Set `scripts/prepRiboViz.sh` to be executable:
 
 ```bash
@@ -109,6 +116,16 @@ Run:
 ```bash
 bash scripts/prepRiboviz.sh vignette/vignette_config.yaml
 ```
+
+### Run `scripts/prepRiboViz.py`
+
+Run:
+
+```bash
+0python scripts/prepRiboviz.py scripts/ vignette/vignette_config.yaml
+```
+
+### Check the expected output files
 
 You should expect to see the following files produced.
 
@@ -235,10 +252,10 @@ Swap:           969         619         350
 
 Divide the free memory by the number of processes, `nprocesses` e.g. 1024/4 = 256MB.
 
-Edit `scripts/prepRiboviz.sh` and change the lines:
+If using `prepRiboviz.sh` then edit `scripts/prepRiboviz.sh` and change the lines:
 
 
-```
+```bash
         echo samtools sort -@ ${nprocesses} -O bam -o ${fn_out}.bam -
 
         samtools sort -@ ${nprocesses} -O bam -o ${fn_out}.bam -
@@ -246,18 +263,32 @@ Edit `scripts/prepRiboviz.sh` and change the lines:
 
 to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
 
-```
+```bash
         echo samtools sort -@ ${nprocesses} -m 256M -O bam -o ${fn_out}.bam -
 
         samtools sort -@ ${nprocesses} -m 256M -O bam -o ${fn_out}.bam -
 ```
 
+If using `prepRiboviz.py` then edit `scripts/prepRiboviz.py` and change the lines:
+
+```python
+    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]), "-O", "bam", "-o", fn_out + ".bam", "-"]
+```
+
+to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
+
+```python
+    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]), "-m", "256M", "-O", "bam", "-o", fn_out + ".bam", "-"]
+```
+
 ## Troubleshooting: capturing output
 
-To both display all output from the script that is printed at the terminal, and capture it into a file, run:
+To both display all output from the script that is printed at the terminal, and capture it into a file, run, for example:
 
 ```bash
 bash scripts/prepRiboviz.sh vignette/vignette_config.yaml 2>&1 | tee vignette-script.txt
+
+python scripts/prepRiboviz.py scripts/ vignette/vignette_config.yaml  2>&1 | tee script.txt
 ```
 
 ## Cleaning up to run again
