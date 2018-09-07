@@ -272,13 +272,16 @@ to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
 If using `prepRiboviz.py` then edit `scripts/prepRiboviz.py` and change the lines:
 
 ```python
-    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]), "-O", "bam", "-o", fn_out + ".bam", "-"]
+    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
+                "-O", "bam", "-o", fn_out + ".bam", "-"]
 ```
 
 to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
 
 ```python
-    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]), "-m", "256M", "-O", "bam", "-o", fn_out + ".bam", "-"]
+    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
+                "-m", "256M",
+                "-O", "bam", "-o", fn_out + ".bam", "-"]
 ```
 
 ## Troubleshooting: capturing output
