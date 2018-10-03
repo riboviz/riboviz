@@ -35,7 +35,11 @@ option_list <- list(
   make_option("--dir_scripts", type="character", default="./scripts/",
               help="Scripts directory"),
   make_option("--orf_gff_file", type="character", default=NULL,
-              help="riboviz generated GFF2/GFF3 annotation file")
+              help="riboviz generated GFF2/GFF3 annotation file"),
+  make_option("--features_file", type="character", default=NULL,
+              help="features file, columns are gene features and rows are genes"),
+    make_option("--count_threshold", type="integer", default=64,
+              help="threshold for count of reads per gene to be included in plot")
 )
 
 # Read in commandline arguments
@@ -425,10 +429,10 @@ reads_per_kb <- gene_sp_reads*1e3/gene_len
 yeast_features$tpm <- reads_per_kb*1e6/sum(reads_per_kb)
 
 # Prepare data for plot
-plot_data <- yeast_features[gene_sp_reads>=64,] # Consider only genes with at least 64 mapped reads
+plot_data <- yeast_features[gene_sp_reads >= count_threshold,] # Consider only genes with at least count_threshold mapped reads
 
 plot_data <- plot_data %>%
-  gather(Feature,Value, 2:8)
+  gather(Feature,Value, -gene, -tpm)
 
 features_plot <- ggplot(plot_data, aes(x=tpm, y=Value)) +
   geom_point(alpha=0.3) +
