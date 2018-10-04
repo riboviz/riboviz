@@ -26,7 +26,7 @@ if __name__=="__main__" :
     gffin   = options.gffin
     fastain = options.fastain
     
-    print( "Checking fasta file " + fastain + "\n with gff file " + gffin )
+    print(( "Checking fasta file " + fastain + "\n with gff file " + gffin ))
     
     # open fasta and gff files
     gffdb = gffutils.create_db(gffin, dbfn='test.db', force=True, keep_order=True,
@@ -47,10 +47,10 @@ if __name__=="__main__" :
         CDS_trans = Seq( CDS_seq, IUPAC.ambiguous_dna ).translate()
         
         if ( CDS_trans[0] != "M" ) :
-            print( CDS_coord.seqid + " doesn't start with ATG" )
+            print(( CDS_coord.seqid + " doesn't start with ATG" ))
         if ( CDS_trans[-1] != "*" ) :
-            print( CDS_coord.seqid + " doesn't stop at end" )
+            print(( CDS_coord.seqid + " doesn't stop at end" ))
         if any( [ L == "*"  for L in CDS_trans[:-1] ] ) : 
-            print( CDS_coord.seqid + " has internal STOP" )
+            print(( CDS_coord.seqid + " has internal STOP" ))
     
     print("Done checking")
