@@ -38,7 +38,7 @@ option_list <- list(
               help="riboviz generated GFF2/GFF3 annotation file"),
   make_option("--features_file", type="character", default=NULL,
               help="features file, columns are gene features and rows are genes"),
-    make_option("--count_threshold", type="integer", default=64,
+  make_option("--count_threshold", type="integer", default=64,
               help="threshold for count of reads per gene to be included in plot")
 )
 
@@ -412,24 +412,51 @@ print("Completed: Position specific distribution of reads")
 
 #####################################################################################
 #####################################################################################
-### Correlations between TPMs of genes with their sequence-based features
+### Calculate TPMs of genes
 
-print("Starting: Correlations between TPMs of genes with their sequence-based features")
-
-yeast_features <- read.table(paste0(dir_scripts,"/yeast_features.tsv"),h=T)
-yeast_features <- yeast_features[match(genes,yeast_features$ORF),]
-yeast_features <- yeast_features[!is.na(yeast_features$ORF),]
+print("Starting: Calculate TPMs of genes")
 
 # Read length-specific total counts stored as attributes of 'reads_total' in H5 file
-gene_sp_reads <- sapply(yeast_features$ORF, function(gene){H5Aread(H5Aopen(H5Gopen(fid,paste0("/",gene,"/",dataset,"/reads")),"reads_total"))})
-gene_len <- 3*(10^yeast_features$Length_log10) + 50 # CDS + 50nt
+get_gene_len <- function(gene,ffid=fid) {
+    start_codon_pos <- H5Aread(H5Aopen(H5Gopen(ffid,paste0("/",gene,"/",dataset,"/reads")),"start_codon_pos"))[1]
+    stop_codon_pos <- H5Aread(H5Aopen(H5Gopen(ffid,paste0("/",gene,"/",dataset,"/reads")),"stop_codon_pos"))[1]
+    return(stop_codon_pos - start_codon_pos)
+}
+
+get_gene_reads_total <- function(gene,ffid=fid) {
+    H5Aread(H5Aopen(H5Gopen(ffid,paste0("/",gene,"/",dataset,"/reads")),"reads_total"))
+}
+
+get_gene_readdensity <- function(gene,ffid=fid,buffer=50) {
+    # buffer
+    get_gene_reads_total(gene,ffid) / ( get_gene_len(gene,ffid) + 50 )
+}
 
 # Calculate transcripts per million (TPM)
-reads_per_kb <- gene_sp_reads*1e3/gene_len
-yeast_features$tpm <- reads_per_kb*1e6/sum(reads_per_kb)
+reads_per_b <- sapply(features$ORF, get_gene_readdensity, ffid=fid)
+
+tpms_tbl <- data.frame(ORF=genes,
+                  rpb=reads_per_b,
+                  tpm=reads_per_b*1e6/sum(reads_per_b) )
+
+write.table(tpms,file=paste0(out_prefix,"_tpms.tsv"),
+            sep="\t",row=F,col=T,quote=F)
+
+
+#####################################################################################
+#####################################################################################
+### Correlations between TPMs of genes with their sequence-based features
+
+if (!is.null(features)file) {
+print("Starting: Correlations between TPMs of genes with their sequence-based features")
+
+features <- read.table(features_file,h=T)
+features <- features[match(genes,features$ORF),]
+features <- features[!is.na(features$ORF),]
+features <- merge(features,tpms,by=ORF)
 
 # Prepare data for plot
-plot_data <- yeast_features[gene_sp_reads >= count_threshold,] # Consider only genes with at least count_threshold mapped reads
+plot_data <- features[gene_sp_reads >= count_threshold,] # Consider only genes with at least count_threshold mapped reads
 
 plot_data <- plot_data %>%
   gather(Feature,Value, -gene, -tpm)
@@ -443,9 +470,10 @@ features_plot <- ggplot(plot_data, aes(x=tpm, y=Value)) +
 
 # Save plot and file
 ggsave(features_plot, filename = paste0(out_prefix,"_features.pdf"))
-write.table(yeast_features,file=paste0(out_prefix,"_features.tsv"),sep="\t",row=F,col=T,quote=F)
+write.table(features,file=paste0(out_prefix,"_features.tsv"),sep="\t",row=F,col=T,quote=F)
 
 print("Completed: Correlations between TPMs of genes with their sequence-based features")
+}
 
 #####################################################################################
 #####################################################################################
