@@ -7,6 +7,7 @@ suppressMessages(library(optparse,quietly = T))
 suppressMessages(library(RcppRoll, quietly = T))
 suppressMessages(library(ggplot2, quietly = T))
 suppressMessages(library(tidyr, quietly = T))
+suppressMessages(library(dplyr, quietly = T))
 
 # define input options for optparse package
 option_list <- list( 
@@ -433,11 +434,13 @@ get_gene_readdensity <- function(gene,ffid=fid,buffer=50) {
 }
 
 # Calculate transcripts per million (TPM)
-reads_per_b <- sapply(features$ORF, get_gene_readdensity, ffid=fid)
+gene_sp_reads <- sapply(genes, get_gene_reads_total, ffid=fid)
+reads_per_b <- sapply(genes, get_gene_readdensity, ffid=fid)
 
-tpms_tbl <- data.frame(ORF=genes,
-                  rpb=reads_per_b,
-                  tpm=reads_per_b*1e6/sum(reads_per_b) )
+tpms <- data.frame(ORF=genes,
+                   readcount=gene_sp_reads,
+                   rpb=reads_per_b,
+                   tpm=reads_per_b*1e6/sum(reads_per_b) )
 
 write.table(tpms,file=paste0(out_prefix,"_tpms.tsv"),
             sep="\t",row=F,col=T,quote=F)
@@ -447,19 +450,22 @@ write.table(tpms,file=paste0(out_prefix,"_tpms.tsv"),
 #####################################################################################
 ### Correlations between TPMs of genes with their sequence-based features
 
-if (!is.null(features)file) {
+if ( !is.null( features_file) ) {
 print("Starting: Correlations between TPMs of genes with their sequence-based features")
 
 features <- read.table(features_file,h=T)
-features <- features[match(genes,features$ORF),]
-features <- features[!is.na(features$ORF),]
-features <- merge(features,tpms,by=ORF)
+# features <- features[match(genes,features$ORF),] 
+# features <- features[!is.na(features$ORF),]
+# features <- merge(features,tpms,by="ORF")
+
 
 # Prepare data for plot
-plot_data <- features[gene_sp_reads >= count_threshold,] # Consider only genes with at least count_threshold mapped reads
+# Consider only genes with at least count_threshold mapped reads
 
-plot_data <- plot_data %>%
-  gather(Feature,Value, -gene, -tpm)
+plot_data <- merge(features,tpms,by="ORF") %>%
+    filter(readcount >= count_threshold, !is.na(ORF)) %>%
+    select(-readcount,-rpb) %>%
+    gather(Feature,Value, -ORF, -tpm)
 
 features_plot <- ggplot(plot_data, aes(x=tpm, y=Value)) +
   geom_point(alpha=0.3) +
