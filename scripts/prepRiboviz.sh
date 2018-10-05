@@ -155,12 +155,14 @@ for fq in ${fqfs}
         echo Rscript --vanilla ${dir_scripts}/generate_stats_figs.R \
         --Ncores=${nprocesses} --MinReadLen=${MinReadLen} --MaxReadLen=${MaxReadLen} --Buffer=${Buffer} \
         --PrimaryID=${PrimaryID} --dataset=${dataset} --hdFile=${fn_out}.h5 --out_prefix=${fn_out} --orf_fasta=${orf_fasta} \
-        --orf_gff_file=${orf_gff_file} --rpf=${rpf} --dir_out=${dir_out} --dir_scripts=${dir_scripts} --features_file=${features_file}
+        --orf_gff_file=${orf_gff_file} --rpf=${rpf} --dir_out=${dir_out} --dir_scripts=${dir_scripts} \
+        --features_file=${features_file} --do_pos_sp_nt_freq=${do_pos_sp_nt_freq}
         #
         Rscript --vanilla ${dir_scripts}/generate_stats_figs.R \
         --Ncores=${nprocesses} --MinReadLen=${MinReadLen} --MaxReadLen=${MaxReadLen} --Buffer=${Buffer} \
         --PrimaryID=${PrimaryID} --dataset=${dataset} --hdFile=${fn_out}.h5 --out_prefix=${fn_out} --orf_fasta=${orf_fasta} \
-        --orf_gff_file=${orf_gff_file} --rpf=${rpf} --dir_out=${dir_out} --dir_scripts=${dir_scripts} --features_file=${features_file}
+        --orf_gff_file=${orf_gff_file} --rpf=${rpf} --dir_out=${dir_out} --dir_scripts=${dir_scripts} \
+        --features_file=${features_file}  --do_pos_sp_nt_freq=${do_pos_sp_nt_freq}
         ##
         echo finished processing sample ${fq}
         echo

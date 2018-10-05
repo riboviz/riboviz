@@ -40,7 +40,9 @@ option_list <- list(
   make_option("--features_file", type="character", default=NULL,
               help="features file, columns are gene features and rows are genes"),
   make_option("--count_threshold", type="integer", default=64,
-              help="threshold for count of reads per gene to be included in plot")
+              help="threshold for count of reads per gene to be included in plot"),
+  make_option("--do_pos_sp_nt_freq", type="logical", default=TRUE,
+              help="do calculate the position-specific nucleotide frequency")
 )
 
 # Read in commandline arguments
@@ -127,7 +129,6 @@ out_data <- data.frame(
 )
 
 # Plot
-tmp <- out_data
 out_data$End <- factor(out_data$End, levels = c("5'", "3'"))
 nt_period_plot <- ggplot(out_data, aes(x=Pos, y=Counts)) + 
   geom_line() + 
@@ -206,42 +207,46 @@ comb_freq <- function(allfr){
   return(nt_sp_freq)
 }
 
-all_out <- c()
-for(lid in 1:length(read_range)){
-  out <- lapply(genes,function(x){
-    get_nt_read_pos(fid=fid,gene=as.character(x),dataset=dataset,lid=lid,MinReadLen = MinReadLen) # For each read length convert reads to IRanges
-    })
-  names(out) <- genes
-
-  # Get position-specific nucleotide counts for reads in each frame
-  fr0 <- mclapply(genes,function(gene){cons_mat(gene=gene,pos_IR=out[[gene]],cframe=0,lid=lid)},mc.cores=Ncores)
-  allfr0 <- do.call(rbind,fr0)
-  fr1 <- mclapply(genes,function(gene){cons_mat(gene=gene,pos_IR=out[[gene]],cframe=1,lid=lid)},mc.cores=Ncores)
-  allfr1 <- do.call(rbind,fr1)
-  fr2 <- mclapply(genes,function(gene){cons_mat(gene=gene,pos_IR=out[[gene]],cframe=2,lid=lid)},mc.cores=Ncores)
-  allfr2 <- do.call(rbind,fr2)
-
-  # Get position-specific freq for all nts
-  cnt_fr0 <- signif(comb_freq(allfr0),3)
-  cnt_fr1 <- signif(comb_freq(allfr1),3)
-  cnt_fr2 <- signif(comb_freq(allfr2),3)
-
-  output <- data.frame(rbind(cnt_fr0,cnt_fr1,cnt_fr2))
-  all_out <- rbind(all_out,output)
+if(do_pos_sp_nt_freq) {
+    # This is in a conditional loop because it fails for some inputs
+    # and has not been debugged.
+    all_out <- c()
+    for(lid in 1:length(read_range)){
+        out <- lapply(genes,function(x){
+            get_nt_read_pos(fid=fid,gene=as.character(x),dataset=dataset,lid=lid,MinReadLen = MinReadLen) # For each read length convert reads to IRanges
+        })
+        names(out) <- genes
+        
+        # Get position-specific nucleotide counts for reads in each frame
+        fr0 <- mclapply(genes,function(gene){cons_mat(gene=gene,pos_IR=out[[gene]],cframe=0,lid=lid)},mc.cores=Ncores)
+        allfr0 <- do.call(rbind,fr0)
+        fr1 <- mclapply(genes,function(gene){cons_mat(gene=gene,pos_IR=out[[gene]],cframe=1,lid=lid)},mc.cores=Ncores)
+        allfr1 <- do.call(rbind,fr1)
+        fr2 <- mclapply(genes,function(gene){cons_mat(gene=gene,pos_IR=out[[gene]],cframe=2,lid=lid)},mc.cores=Ncores)
+        allfr2 <- do.call(rbind,fr2)
+        
+        # Get position-specific freq for all nts
+        cnt_fr0 <- signif(comb_freq(allfr0),3)
+        cnt_fr1 <- signif(comb_freq(allfr1),3)
+        cnt_fr2 <- signif(comb_freq(allfr2),3)
+        
+        output <- data.frame(rbind(cnt_fr0,cnt_fr1,cnt_fr2))
+        all_out <- rbind(all_out,output)
+    }
+    
+    # Prepare variables for output file
+    Length <- unlist(lapply(read_range,function(x){rep(x,x*3)}))
+    Position <- unlist(lapply(read_range,function(x){rep(1:x,3)}))
+    Frame <- unlist(lapply(read_range,function(x){rep(0:2,each=x)}))
+    
+    all_out <- cbind(Length,Position,Frame,all_out)
+    all_out[is.na(all_out)] <- 0
+    
+    # Save file
+    write.table(all_out,file=paste0(out_prefix,"_pos_sp_nt_freq.tsv"),sep="\t",row=F,col=T,quote=F)
+    
+    print("Completed nucleotide composition bias table")
 }
-
-# Prepare variables for output file
-Length <- unlist(lapply(read_range,function(x){rep(x,x*3)}))
-Position <- unlist(lapply(read_range,function(x){rep(1:x,3)}))
-Frame <- unlist(lapply(read_range,function(x){rep(0:2,each=x)}))
-
-all_out <- cbind(Length,Position,Frame,all_out)
-all_out[is.na(all_out)] <- 0
-
-# Save file
-write.table(all_out,file=paste0(out_prefix,"_pos_sp_nt_freq.tsv"),sep="\t",row=F,col=T,quote=F)
-
-print("Completed nucleotide composition bias table")
 
 #####################################################################################
 #####################################################################################
@@ -488,7 +493,7 @@ print("Starting: Codon-specific ribosome densities for correlations with tRNAs")
 
 # Only for RPF datasets
 if(rpf){ 
-  
+  # This still depends on yeast-specific arguments and should be edited.
   yeast_tRNAs <- read.table(paste0(dir_scripts,"/yeast_tRNAs.tsv"),h=T) # Read in yeast tRNA estimates
   load(paste0(dir_scripts,"/yeast_codon_pos_i200.RData")) # Position of codons in each gene (numbering ignores first 200 codons)
                                                           # Reads in an object named "codon_pos"
