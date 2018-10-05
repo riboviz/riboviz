@@ -476,7 +476,6 @@ features_plot <- ggplot(plot_data, aes(x=tpm, y=Value)) +
 
 # Save plot and file
 ggsave(features_plot, filename = paste0(out_prefix,"_features.pdf"))
-write.table(features,file=paste0(out_prefix,"_features.tsv"),sep="\t",row=F,col=T,quote=F)
 
 print("Completed: Correlations between TPMs of genes with their sequence-based features")
 }

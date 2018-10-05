@@ -37,6 +37,7 @@ Each script prepares ribosome profiling data for RiboViz or other analyses. They
 * Parallelizes over many processors (`nprocesses`), except for `cutadapt` which isn't parallel.
 * Makes length-sensitive alignments in compressed h5 format by running `scripts/reads_to_list.R`.
 * Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets, by running `scripts/generate_stats_figs.R`.
+* Estimates read counts, reads per base, and transcripts per million for each ORF in each sample.
 * Puts all intermediate files into a temporary directory (`dir_tmp`) which will be **large**.
 * When finished, puts useful output files into an output directory (`dir_out`).
 * Optionally exports bedgraph files for plus and minus strands (`make_bedgraph=TRUE`, by default).
@@ -65,9 +66,13 @@ For each of these names (e.g. `F`), many output files are produced in the output
 * `F_pos_sp_rpf_norm_reads.pdf`
 * `F_pos_sp_rpf_norm_reads.tsv`
 * `F_features.pdf`
-* `F_features.tsv`
+* `F_tpms.tsv`
 * `F_codon_ribodens.tsv`
 * `F_codon_ribodens.pdf`
+
+A  summary file is also put in the output directory :
+
+* `TPMs_collated.tsv`, tab-separated test file with the transcripts per million (tpm) for all samples 
 
 For each of these names (e.g. `F`), the intermediate files produced in the temporary directory (`dir_tmp`) are:
 
@@ -205,7 +210,7 @@ WTnone_pos_sp_nt_freq.tsv
 WTnone_pos_sp_rpf_norm_reads.pdf
 WTnone_pos_sp_rpf_norm_reads.tsv
 WTnone_features.pdf
-WTnone_features.tsv
+WTnone_tpms.tsv
 WTnone_codon_ribodens.tsv
 WTnone_codon_ribodens.pdf
 
@@ -222,9 +227,11 @@ WT3AT_pos_sp_nt_freq.tsv
 WT3AT_pos_sp_rpf_norm_reads.pdf
 WT3AT_pos_sp_rpf_norm_reads.tsv
 WT3AT_features.pdf
-WT3AT_features.tsv
+WT3AT_tpms.tsv
 WT3AT_codon_ribodens.tsv
 WT3AT_codon_ribodens.pdf
+
+TPMs_collated.tsv
 ```
 
 ## Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`

@@ -241,3 +241,11 @@ for fq_file in list(config["fq_files"].keys()):
     print(("Running: " + list_to_str(cmd)))
     subprocess.call(cmd)
     print(("Finished processing sample " + fq_file))
+
+print("collating TPMs across samples")
+cmd = ["Rscript", "--vanilla",
+	   os.path.join(dir_scripts, "collate_tpms.R"),
+	   "--yaml=" + config_yaml ]
+subprocess.call(cmd)
+
+print("finished running prepRiboviz.py")
