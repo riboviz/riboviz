@@ -235,7 +235,18 @@ for fq_file in list(config["fq_files"].keys()):
            # or above.
            # "--orf_gff_file=" + config["orf_gff_file"],
            "--dir_out=" + config["dir_out"],
-           "--dir_scripts=" + dir_scripts]
+           "--dir_scripts=" + dir_scripts,
+           "--orf_gff_file=" + config["orf_gff_file"],
+           "--features_file=" + config["features_file"],
+           "--do_pos_sp_nt_freq=" + config["do_pos_sp_nt_freq"]]
     print(("Running: " + list_to_str(cmd)))
     subprocess.call(cmd)
     print(("Finished processing sample " + fq_file))
+
+print("collating TPMs across samples")
+cmd = ["Rscript", "--vanilla",
+	   os.path.join(dir_scripts, "collate_tpms.R"),
+	   "--yaml=" + config_yaml ]
+subprocess.call(cmd)
+
+print("finished running prepRiboviz.py")

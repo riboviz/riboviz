@@ -42,13 +42,13 @@ get_tpms_bits <- function(fstem,ddir,fend,ORFs) {
 # make list of filenames
 
 # collate
-make_tpm_table <- function(yps) {
+make_tpm_table <- function(yps,fend="_tpms.tsv") {
     # ORFs <- readDNAStringSet(yps$orf_fasta) %>% names # if ORF list from fasta
-    ORFs <- paste0(yps$dir_out,"/",names(yps$fq_files)[1],"_features.tsv") %>%
+    ORFs <- paste0(yps$dir_out,"/",names(yps$fq_files)[1],fend) %>%
         read_tsv() %>%
         .$ORF
     tpm_list <- lapply(names(yps$fq_files), get_tpms_bits,
-                         ddir=yps$dir_out,fend="_features.tsv",
+                         ddir=yps$dir_out,fend=fend,
                          ORFs=ORFs)
     non_null_elts <- sapply(tpm_list,function(elt) !is.null(elt))
     names(tpm_list) <-  names(yps$fq_files)
