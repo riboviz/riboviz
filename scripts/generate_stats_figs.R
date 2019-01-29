@@ -276,7 +276,7 @@ get_mrna_coverage <- function(fid,gene,dataset,left,right,read_range,MinReadLen,
   reads_pos_subset <- reads_pos[,left:(dim(reads_pos)[2]-right)]   # Subset positions such that only CDS mapped reads are considered
   
   nt_IR_list <- lapply(read_range,function(w){IRanges(start=rep(1:ncol(reads_pos_subset),reads_pos_subset[(w-MinReadLen+1),]),width=w)})  # Create list of IRanges for position-specific reads of all length 
-  nt_IR <- unlist(RangesList(nt_IR_list)) # Combine IRanges from different read lengths
+  nt_IR <- unlist(as(nt_IR_list,"IRangesList")) # Combine IRanges from different read lengths
   nt_cov <- coverage(nt_IR) # Estimate nt-specific coverage of mRNA reads
 
   # Subset coverage to only CDS
