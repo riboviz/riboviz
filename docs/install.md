@@ -12,6 +12,13 @@ Only minimal installation instructions are given for each prerequisite. See the 
 
 Under Linux, installing some of these tools requires you to have `sudo` access to install and configure software. If you don't have `sudo` access you will have to ask a local system administrator to run these commands for you.
 
+### Windows users
+
+For Windows users it is suggested that you:
+
+* Either, use a virtual machine running under [VMWare Workstation Player](https://www.vmware.com/uk/products/workstation-player.html) or [Oracle VirtualBox](https://www.virtualbox.org/).
+* Or, try using Windows 10's [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about) which allows running of a Linux environment on Windows 10 without the need for a VM. Most command-line tools, utilities, and applications can be directly on Windows, unmodified. Ubuntu, openSUSE, Debian, Kali flavours of Linux can be used.
+
 ## Git
 
 Website: [Git](https://git-scm.com/)
@@ -500,3 +507,11 @@ Get RiboViz:
 ```bash
 git clone https://mikej888@github.com/RiboViz/RiboViz
 ```
+
+---
+
+## Tested platforms
+
+These instructions were tested on:
+
+* Ubuntu 18.04 with 8GB memory, 4 processors and 20GB RAM.
