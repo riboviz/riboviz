@@ -99,7 +99,7 @@ cutadapt --v
 
 **Note:** for Python 2.7 the version could be 1.18. It is OK to use this version.
 
-## samtools 1.7
+## samtools
 
 Web site: [Samtools](http://www.htslib.org/)
 
@@ -331,7 +331,7 @@ The downloaded source packages are in
 installation path not writeable, unable to update packages: foreign
 Warning message:
 In install.packages(pkgs = doing, lib = lib, ...) :
-  installation of package ‘Rsamtools’ had non-zero exit status
+  installation of package "Rsamtools" had non-zero exit status
 ```
 
 You may need to assign more memory to R or your machine.
