@@ -23,6 +23,14 @@ wget http://gdurl.com/KGnn/download -O sample-data/rrna.fa
 wget https://github.com/shahpr/RiboViz/blob/master/scripts/yeast_CDS_w_250utrs.gff3 -P sample-data
 ```
 
+The file sizes, and space requirements, are as follows (in KB):
+
+```
+8	rrna.fa
+64	yeast_CDS_w_250utrs.fa
+4100	yeast_CDS_w_250utrs.gff3
+```
+
 ## Prepare input files
 
 For each condition/sample in your experiment, merge all fastq files into a single gzipped fastq file, e.g. `condition1.fastq.gz`. The files are gzip-compressed to save space. For example:
