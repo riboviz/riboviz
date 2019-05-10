@@ -2,7 +2,7 @@
 
 ## About these instructions
 
-These instructions were written for and tested on Ubuntu 18.04 LTS bionic.
+These instructions were written for Ubuntu and tested on Ubuntu 18.04 LTS bionic.
 
 Other Linux flavours will require different commands to be run. Similarly, for other operating systems.
 
@@ -10,7 +10,15 @@ Other versions of the prerequisites may also be usable.
 
 Only minimal installation instructions are given for each prerequisite. See the documentation for each prerequisite for full instructions.
 
-Under Linux, installing some of these tools requires you to have `sudo` access to install and configure software (or a local system administrator to do this for you).
+Under Linux, installing some of these tools requires you to have `sudo` access to install and configure software. If you don't have `sudo` access you will have to ask a local system administrator to run these commands for you.
+
+## Git
+
+Website: [Git](https://git-scm.com/)
+
+```bash
+sudo apt-get install -y git
+```
 
 ## Python
 
@@ -27,16 +35,14 @@ wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O mi
 bash miniconda2.sh -b -p $HOME/miniconda2
 ```
 
-Set environment and check:
+Activate environment and check:
 
 ```bash
 source $HOME/miniconda2/bin/activate
-```
-```bash
 python -V
 ```
 ```
-Python 2.7.15 :: Anaconda, Inc.
+Python 2.7.16 :: Anaconda, Inc.
 ```
 
 ### Miniconda Python 3.6
@@ -46,16 +52,14 @@ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O mi
 bash miniconda3.sh -b -p $HOME/miniconda3
 ```
 
-Set environment and check:
+Activate environment and check:
 
 ```bash
 source $HOME/miniconda3/bin/activate
-```
-```bash
 python -V
 ```
 ```
-Python 3.6.5 :: Anaconda, Inc.
+Python 3.7.3
 ```
 
 ## Cutadapt
@@ -77,50 +81,27 @@ Check:
 conda list | grep cutadapt
 ```
 ```
-cutadapt                  1.16 ...
+cutadapt                  2.3             ...
 ```
-
 ```bash
 cutadapt --v
 ```
 ```
-1.16
+2.3
 ```
 
-## pysam
-
-Web sites:
-
-* [GitHub](https://github.com/pysam-developers/pysam/)
-* [readthedocs](https://pysam.readthedocs.io/)
-
-Install:
-
-```bash
-conda install -y -c bioconda pysam
-```
-
-Check:
-
-```bash:
-conda list | grep pysam
-```
-```
-pysam                     0.14.1 ...
-```
-
-pysam needs to be consistent with htslib/samtools. pysdam 0.14.1 wraps htslib/samtools versions 1.7.0 (see pysam [release notes](http://pysam.readthedocs.io/en/latest/release.html).
+**Note:** for Python 2.7 the version could be 1.18. It is OK to use this version.
 
 ## samtools 1.7
 
 Web site: [Samtools](http://www.htslib.org/)
 
-**Note:** the version installed must be compatible with pysam above.
+**Note:** the version installed must be compatible with pysam below.
 
 Install:
 
 ```bash
-sudo apt-get install samtools
+sudo apt-get install -y samtools
 ```
 
 Check:
@@ -134,6 +115,30 @@ Using htslib 1.7-2
 Copyright (C) 2018 Genome Research Ltd.
 ```
 
+## pysam
+
+Web sites:
+
+* [GitHub](https://github.com/pysam-developers/pysam/)
+* [readthedocs](https://pysam.readthedocs.io/)
+
+**Note:** the version of pysam must be compatible with the version of samtools above i.e. it must wrap a version of samtools equal to or greater than that which has been installed.  For example pysam 0.14.1 wraps samtools, and htslib, versions 1.7.0 (see [release notes](https://github.com/pysam-developers/pysam/releases/tag/v0.14)); pysam 0.15.1 wraps samtools, and htslib, versions 1.9.0 (see [release notes](https://github.com/pysam-developers/pysam/releases/tag/v0.15.0.1)).
+
+Install:
+
+```bash
+conda install -y -c bioconda pysam
+```
+
+Check:
+
+```bash
+conda list | grep pysam
+```
+```
+pysam                     0.15.2 ...
+```
+
 ## bedtools
 
 Web site: [bedtools](http://bedtools.readthedocs.io/en/latest/)
@@ -141,7 +146,7 @@ Web site: [bedtools](http://bedtools.readthedocs.io/en/latest/)
 Install:
 
 ```bash
-sudo apt-get install bedtools
+sudo apt-get install -y bedtools
 ```
 
 Check:
@@ -217,11 +222,11 @@ Web site: [HDF5](https://portal.hdfgroup.org/display/HDF5)
 
 Install:
 
-```
-sudo apt-get install hdf5-tools
+```bash
+sudo apt-get install -y hdf5-tools
 ```
 
-## Create `setenv.sh`
+## Create `setenv.sh` to configure paths in future
 
 ```bash
 #!/usr/bin/env bash
@@ -249,8 +254,8 @@ Install:
 ```bash
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 sudo apt-get update
-sudo apt-get install r-base
-sudo apt-get install r-base-dev
+sudo apt-get install -y r-base
+sudo apt-get install -y r-base-dev
 ```
 
 Check:
@@ -260,6 +265,16 @@ R --version
 ```
 ```
 R version 3.5.1 (2018-07-02) -- "Feather Spray"
+```
+
+## Packages required by R packages
+
+Install required packages:
+
+```bash
+sudo apt-get install -y libxml2-dev
+sudo apt-get install -y libssl-dev
+sudo apt-get install -y libcurl4-openssl-dev
 ```
 
 ## Rsamtools
@@ -289,7 +304,7 @@ See [Question: unable to update packages: foreign, Matrix](https://support.bioco
 You can check that it is available e.g.:
 
 ```bash
-ls ~/R/x86_64-pc-linux-gnu-library/3.5/Rsamtools/
+ls ~/R/x86_64-pc-linux-gnu-library/3.4/Rsamtools/
 ```
 ```
 DESCRIPTION  libs  LICENSE  Meta  NAMESPACE  NEWS
@@ -331,13 +346,6 @@ See "Troubleshooting: installation path not writeable" for Rsamtools above.
 ## rtracklayer
 
 Web site: [rtracklayer](https://bioconductor.org/packages/release/bioc/html/rtracklayer.html)
-
-Install required packages:
-
-```bash
-sudo apt-get install -y libxml2-dev
-sudo apt-get install -y libcurl4-openssl-dev
-```
 
 Install in R:
 
@@ -429,21 +437,13 @@ install.packages("shiny")
 
 Web site: [plotly](https://plot.ly)
 
-Install required packages:
-
-```bash
-sudo apt-get install -y libssl-dev
-sudo apt-get install -y libcurl4-openssl-dev
-```
-
 Install in R:
 
 ```R
 install.packages("plotly")
 ```
 
-
-**Troubleshooting: ERROR: dependency "httr" is not available for package "plotly"""
+**Troubleshooting: ERROR: dependency "httr" is not available for package "plotly"**
 
 If you get:
 
@@ -479,22 +479,24 @@ ip <- ip[is.na(ip$Priority),1:2,drop=FALSE]
 print(ip, row.names=FALSE)
 ```
 ```
-    Package   Version
-              ggplot2     3.0.0
-...
-             optparse     1.6.0
-...
-               plotly     4.8.0
-...
+              Package   Version
+              ggplot2     3.1.1
+             optparse     1.6.2
+               plotly     4.9.0
              RcppRoll     0.3.0
-...
-                rhdf5    2.24.0
-...
-            Rsamtools    1.32.2
-          rtracklayer    1.40.4
-...
-                shiny     1.1.0
-...
-                tidyr     0.8.1
-...
+                rhdf5    2.22.0
+            Rsamtools    1.30.0
+          rtracklayer    1.38.3
+                shiny     1.3.2
+                tidyr     0.8.3
+```
+
+---
+
+## RiboViz
+
+Get RiboViz:
+
+```bash
+git clone https://mikej888@github.com/RiboViz/RiboViz
 ```
