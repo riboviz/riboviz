@@ -435,7 +435,7 @@ install.packages("shiny")
 
 ## plotly
 
-Web site: [plotly](https://plot.ly)
+Web site: [plotly](https://cran.r-project.org/web/packages/plotly/index.html)
 
 Install in R:
 
