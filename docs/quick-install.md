@@ -1,4 +1,4 @@
-# Quick install prerequisites
+# Quick install scripts
 
 `scripts/` contains simple bash scripts to automate some of the installation of **riboviz**'s dependencies. They are the manual commands of [Install prerequisites](./install.md) in bash script form.
 
