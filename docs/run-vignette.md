@@ -133,6 +133,7 @@ Run:
 python scripts/prepRiboviz.py scripts/ vignette/vignette_config.yaml
 ```
 
+
 ### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
 
 If you see:
@@ -154,11 +155,67 @@ In get_tpms(paste0(ddir, "/", fstem, fend), ORFs) :
 
 then this is expected and can be ignored. This arises due to the missing input file described above which is used for testing.
 
-### Check the expected output files
+### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
+
+If using more than one process (`nprocesses` in `vignette/vignette_config.yaml` > 1) you might get the error:
+
+```
+samtools sort: couldn't allocate memory for bam_mem
+```
+
+This leads to a failure to create `.bam` and `.bam.bai` files are not in `vignette/output/`.
+
+You may need to explicitly set the amount of memory per thread in calls to `samtools sort`.
+
+Check how much free memory you have e.g.
+
+```bash
+free --mega
+```
+```
+              total        used        free      shared  buff/cache   available
+Mem:           2017         684        1028           2         303        1181
+Swap:           969         619         350
+```
+
+Divide the free memory by the number of processes, `nprocesses` e.g. 1024/4 = 256 MB.
+
+If using `prepRiboviz.sh` then edit `scripts/prepRiboviz.sh` and change the lines:
+
+```bash
+        echo samtools sort -@ ${nprocesses} -O bam -o ${fn_out}.bam -
+
+        samtools sort -@ ${nprocesses} -O bam -o ${fn_out}.bam -
+```
+
+to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
+
+```bash
+        echo samtools sort -@ ${nprocesses} -m 256M -O bam -o ${fn_out}.bam -
+
+        samtools sort -@ ${nprocesses} -m 256M -O bam -o ${fn_out}.bam -
+```
+
+If using `prepRiboviz.py` then edit `scripts/prepRiboviz.py` and change the lines:
+
+```python
+    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
+                "-O", "bam", "-o", fn_out + ".bam", "-"]
+```
+
+to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
+
+```python
+    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
+                "-m", "256M",
+                "-O", "bam", "-o", fn_out + ".bam", "-"]
+```
+
+## Check the expected output files
 
 You should expect to see the following files produced.
 
-**Index files in `vignette/index`**
+### Index files in `vignette/index`
 
 ```
 YAL_CDS_w_250.*.ht2  # hisat2 index from yeast_YAL_CDS_w_250utrs.
@@ -195,7 +252,7 @@ du -sm vignette/index/
 9	vignette/index/
 ```
 
-**Intermediate outputs in `vignette/tmp`**
+### Intermediate outputs in `vignette/tmp`
 
 ```
 *_trim.fq            # trimmed reads.
@@ -233,7 +290,7 @@ du -sm vignette/tmp/
 1040	vignette/tmp/
 ```
 
-**Outputs in `vignette/output`**
+### Outputs in `vignette/output`
 
 For example:
 
@@ -284,64 +341,7 @@ du -sm vignette/output/
 3	vignette/output/
 ```
 
-## Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
-
-If using more than one process (`nprocesses` in `vignette/vignette_config.yaml` > 1) you might get the error:
-
-```
-samtools sort: couldn't allocate memory for bam_mem
-```
-
-This leads to a failure to create `.bam` and `.bam.bai` files are not in `vignette/output/`.
-
-You may need to explicitly set the amount of memory per thread in calls to `samtools sort`.
-
-Check how much free memory you have e.g.
-
-```bash
-free --mega
-```
-```
-              total        used        free      shared  buff/cache   available
-Mem:           2017         684        1028           2         303        1181
-Swap:           969         619         350
-```
-
-Divide the free memory by the number of processes, `nprocesses` e.g. 1024/4 = 256 MB.
-
-If using `prepRiboviz.sh` then edit `scripts/prepRiboviz.sh` and change the lines:
-
-
-```bash
-        echo samtools sort -@ ${nprocesses} -O bam -o ${fn_out}.bam -
-
-        samtools sort -@ ${nprocesses} -O bam -o ${fn_out}.bam -
-```
-
-to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
-
-```bash
-        echo samtools sort -@ ${nprocesses} -m 256M -O bam -o ${fn_out}.bam -
-
-        samtools sort -@ ${nprocesses} -m 256M -O bam -o ${fn_out}.bam -
-```
-
-If using `prepRiboviz.py` then edit `scripts/prepRiboviz.py` and change the lines:
-
-```python
-    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
-                "-O", "bam", "-o", fn_out + ".bam", "-"]
-```
-
-to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
-
-```python
-    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
-                "-m", "256M",
-                "-O", "bam", "-o", fn_out + ".bam", "-"]
-```
-
-## Troubleshooting: capturing output
+## Capturing output
 
 To both display all output from the script that is printed at the terminal, and capture it into a file, run, for example:
 
