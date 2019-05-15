@@ -21,7 +21,14 @@ SRR1042855_s1mi.fastq.gz      # about 1mi-sampled RPFs wild-type no additive fro
 SRR1042864_s1mi.fastq.gz      # about 1mi-sampled RPFs wild-type + 3-AT from Guydosh & Green 2014.
 ```
 
-`vignette/vignette_config.yaml` contains configuration information in YAML.
+`vignette/vignette_config.yaml` contains configuration information in YAML. It specifies that the two `fastq.gz` files above are to be processed, along with an additional non-existent file which is used for testing:
+
+```
+fq_files: # fastq files to be processed
+  WTnone: SRR1042855_s1mi.fastq.gz # do not use "_" in dataset name
+  WT3AT: SRR1042864_s1mi.fastq.gz
+  NotHere: example_missing_file.fastq.gz # prepRiboviz should give error message for missing files
+```
 
 ## What `prepRiboviz.sh` and `prepRiboviz.py` do
 
@@ -125,6 +132,27 @@ Run:
 ```bash
 python scripts/prepRiboviz.py scripts/ vignette/vignette_config.yaml
 ```
+
+### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
+
+If you see:
+
+```
+File vignette/input/example_missing_file.fastq.gz not found
+```
+
+then this is expected and can be ignored. The vignette includes an attempt to analyse a missing input file, for testing, which is expected to fail.
+
+### Troubleshooting: `vignette/output/NotHere_tpms.tsv does not exist, returning empty list`
+
+If you see:
+
+```
+In get_tpms(paste0(ddir, "/", fstem, fend), ORFs) :
+  vignette/output/NotHere_tpms.tsv does not exist, returning empty list
+```
+
+then this is expected and can be ignored. This arises due to the missing input file described above which is used for testing.
 
 ### Check the expected output files
 
