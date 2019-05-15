@@ -2,16 +2,24 @@
 
 ## About these instructions
 
-These instructions were written for Ubuntu 18.04 and CentOS 7.4. Other Linux flavours will require different commands to be run. For Windows users it is suggested that you:
+These instructions were written for Ubuntu 18.04 and CentOS 7.4. Other Linux flavours will require different commands to be run.
+
+Other versions of the prerequisites, different from the versions stated, may be usable
+
+Only minimal installation instructions are given for each prerequisite. See the documentation for each prerequisite for full instructions.
+
+Installing some of these tools requires you to have permission to run `sudo` to install and configure software. If you don't have `sudo` access you will have to ask a local system administrator to run these commands for you.
+
+### Windows users
+
+We suggest that you:
 
 * Either, use a virtual machine running under [VMWare Workstation Player](https://www.vmware.com/uk/products/workstation-player.html) or [Oracle VirtualBox](https://www.virtualbox.org/).
 * Or, try using Windows 10's [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about) which allows running of a Linux environment on Windows 10 without the need for a VM. Most command-line tools, utilities, and applications can be directly on Windows, unmodified. Ubuntu, openSUSE, Debian, Kali flavours of Linux can be used.
 
-Other versions of the prerequisites may also be usable.
+### Mac OSX users
 
-Only minimal installation instructions are given for each prerequisite. See the documentation for each prerequisite for full instructions.
-
-Installing some of these tools requires you to have `sudo` access to install and configure software. If you don't have `sudo` access you will have to ask a local system administrator to run these commands for you.
+We suggest that you check out the web sites for each prerequisite for information on how to install the prerequisites under Mac OS X.
 
 ## Git
 
