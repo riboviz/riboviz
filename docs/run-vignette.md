@@ -207,7 +207,7 @@ du -sm vignette/tmp/
 
 **Outputs in `vignette/output`**
 
-* For example:
+For example:
 
 ```
 TPMs_collated.tsv
