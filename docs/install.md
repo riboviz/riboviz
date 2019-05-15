@@ -418,16 +418,36 @@ sudo yum install -y libcurl-devel
 sudo yum install -y libxml2-devel
 ```
 
-## Rsamtools
+## Bioconductor packages
 
-Web site: [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html)
+Web sites:
 
-Install in R:
+* [Bioconductor](https://bioconductor.org)
+* [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html)
+* [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html)
+* [rtracklayer](https://bioconductor.org/packages/release/bioc/html/rtracklayer.html)
+
+The commands to install Bioconductor packages depend on your version of R. For full details:
+
+* See Bioconductor/R compatibility on [Bioconductor releases](https://bioconductor.org/about/release-announcements/).
+* Click the link of a Bioconductor release consistent with your version of R.
+* Click the link of the specific packag.
+
+For example, for R 3.4, install in R:
 
 ```R
 source("https://bioconductor.org/biocLite.R")
-biocLite("BiocUpgrade")
 biocLite("Rsamtools")
+biocLite("rtracklayer")
+biocLite("rhdf5")
+
+For example, for R 3.5, install in R:
+
+```R
+install.packages("BiocManager")
+BiocManager::install("Rsamtools")
+BiocManager::install("rtracklayer")
+BiocManager::install("rhdf5")
 ```
 
 **Troubleshooting: installation path not writeable**
@@ -443,24 +463,19 @@ See [Question: unable to update packages: foreign, Matrix](https://support.bioco
 > That's not an error! You just got an informative message saying that two of the base R packages couldn't be updated...
 > All of your Bioconductor packages end up in the first dir, which is writeable by you, and the base and core packages go in the second dir, which is only writeable by an administrator. You shouldn't be running R as an administrator, like ever, so it's common for you to get the message that you saw. If you really care to update the core packages, you can run R as an administrator, do biocLite, and then restart as a lower-permissioned user after the update.
 
-You can check that it is available e.g.
+You can check that it is available (your exact path may differ):
 
 ```bash
 ls ~/R/x86_64-pc-linux-gnu-library/3.4/Rsamtools/
 ```
 
-or:
-
 ```bash
 ls ~/R/x86_64-redhat-linux-gnu-library/3.5/Rsamtools/
 ```
 
-(your exact path may differ)
-
 ```
 DESCRIPTION  libs  LICENSE  Meta  NAMESPACE  NEWS
 ```
-
 
 **Troubleshooting: Cannot allocate memory**
 
@@ -480,34 +495,6 @@ In install.packages(pkgs = doing, lib = lib, ...) :
 ```
 
 You may need to assign more memory to R or your machine.
-
-## rhdf5
-
-Web site: [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html)
-
-Install in R:
-
-```R
-biocLite("rhdf5")
-```
-
-**Troubleshooting: installation path not writeable**
-
-See "Troubleshooting: installation path not writeable" for Rsamtools above.
-
-## rtracklayer
-
-Web site: [rtracklayer](https://bioconductor.org/packages/release/bioc/html/rtracklayer.html)
-
-Install in R:
-
-```R
-biocLite("rtracklayer")
-```
-
-**Troubleshooting: installation path not writeable**
-
-See "Troubleshooting: installation path not writeable" for Rsamtools above.
 
 **Troubleshooting: installation of package "XML" had non-zero exit status**
 
@@ -605,6 +592,16 @@ ERROR: dependency "httr" is not available for package "plotly"
 
 Then check you installed the `libssl-dev` and `libcurl4-openssl-dev` packages.
 
+## readr
+
+Website: [readr](https://cran.r-project.org/web/packages/readr/index.html)
+
+Install in R:
+
+```R
+install.packages("readr")
+```
+
 ## Check names and versions of Python packages
 
 Run:
@@ -617,6 +614,8 @@ cutadapt                  1.16 ...
 
 pysam                     0.14.1 ...
 ```
+
+Your versions may differ from those shown.
 
 ## Check names and versions of R packages
 
@@ -636,12 +635,15 @@ print(ip, row.names=FALSE)
              optparse     1.6.2
                plotly     4.9.0
              RcppRoll     0.3.0
-                rhdf5    2.22.0
-            Rsamtools    1.30.0
-          rtracklayer    1.38.3
+                readr     1.3.1
+                rhdf5    2.26.2
+            Rsamtools    1.34.1
+          rtracklayer    1.42.2
                 shiny     1.3.2
                 tidyr     0.8.3
 ```
+
+Your versions may differ from those shown.
 
 ---
 
