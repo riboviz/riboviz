@@ -318,10 +318,10 @@ to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
 To both display all output from the script that is printed at the terminal, and capture it into a file, run, for example:
 
 ```bash
-bash scripts/prepRiboviz.sh vignette/vignette_config.yaml 2>&1 | tee vignette-script.txt
+bash scripts/prepRiboviz.sh vignette/vignette_config.yaml 2>&1 | tee vignette-script-bash.txt
 ```
 ```bash
-python scripts/prepRiboviz.py scripts/ vignette/vignette_config.yaml  2>&1 | tee script.txt
+python scripts/prepRiboviz.py scripts/ vignette/vignette_config.yaml  2>&1 | tee script-py.txt
 ```
 
 ## Cleaning up to run again
