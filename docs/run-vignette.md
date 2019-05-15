@@ -55,40 +55,40 @@ For each sample or condition you want to compare (which should be placed into a 
 fq_files:
   WTnone: SRR1042855_s1mi.fastq.gz 
   WT3AT: SRR1042864_s1mi.fastq.gz
-  F: data.fastq.gz
+  Example: data.fastq.gz
 ```
 
-For each of these names (e.g. `F`), many output files are produced in the output directory (`dir_out`):
+For each of these names (e.g. `Example`), many output files are produced in the output directory (`dir_out`):
 
-* `F.bam`, bamfile of reads mapped to transcripts, can be directly used in genome browsers.
-* `F.bam.bai`, bam index file for `F.bam`.
-* `F_minus.bedgraph`, (optional), bedgraph of reads from minus strand.
-* `F_plus.bedgraph`, (optional), bedgraph of reads from minus strand.
-* `F.h5`, length-sensitive alignments in compressed h5 format.
-* `F_3nt_periodicity.tsv`
-* `F_3nt_periodicity.pdf`
-* `F_read_lengths.tsv`
-* `F_read_lengths.pdf`
-* `F_pos_sp_nt_freq.tsv`
-* `F_pos_sp_rpf_norm_reads.pdf`
-* `F_pos_sp_rpf_norm_reads.tsv`
-* `F_features.pdf`
-* `F_tpms.tsv`
-* `F_codon_ribodens.tsv`
-* `F_codon_ribodens.pdf`
+* `Example.bam`, bamfile of reads mapped to transcripts, can be directly used in genome browsers.
+* `Example.bam.bai`, bam index file for `Example.bam`.
+* `Example_minus.bedgraph`, (optional), bedgraph of reads from minus strand.
+* `Example_plus.bedgraph`, (optional), bedgraph of reads from minus strand.
+* `Example.h5`, length-sensitive alignments in compressed h5 format.
+* `Example_3nt_periodicity.tsv`
+* `Example_3nt_periodicity.pdf`
+* `Example_read_lengths.tsv`
+* `Example_read_lengths.pdf`
+* `Example_pos_sp_nt_freq.tsv`
+* `Example_pos_sp_rpf_norm_reads.pdf`
+* `Example_pos_sp_rpf_norm_reads.tsv`
+* `Example_features.pdf`
+* `Example_tpms.tsv`
+* `Example_codon_ribodens.tsv`
+* `Example_codon_ribodens.pdf`
 
 A summary file is also put in the output directory:
 
 * `TPMs_collated.tsv`, tab-separated test file with the transcripts per million (tpm) for all samples 
 
-For each of these names (e.g. `F`), the intermediate files produced in the temporary directory (`dir_tmp`) are:
+For each of these names (e.g. `Example`), the intermediate files produced in the temporary directory (`dir_tmp`) are:
 
-* `F_trim.fq`, trimmed reads.
-* `F_nonrRNA.fq`, trimmed non-rRNA reads.
-* `F_rRNA_map.sam`, rRNA-mapped reads.
-* `F_orf_map.sam`, orf-mapped reads.
-* `F_orf_map_clean.sam`, orf-mapped reads with mismatched nt trimmed.
-* `F_unaligned.sam`, unaligned reads.
+* `Example_trim.fq`, trimmed reads.
+* `Example_nonrRNA.fq`, trimmed non-rRNA reads.
+* `Example_rRNA_map.sam`, rRNA-mapped reads.
+* `Example_orf_map.sam`, orf-mapped reads.
+* `Example_orf_map_clean.sam`, orf-mapped reads with mismatched nt trimmed.
+* `Example_unaligned.sam`, unaligned reads.
 
 The `_unaligned.sam` files could be used to find common contaminants or translated sequences not in your orf annotation.
 
