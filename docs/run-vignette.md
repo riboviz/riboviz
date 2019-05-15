@@ -36,7 +36,7 @@ Each script prepares ribosome profiling data for RiboViz or other analyses. They
 
 * Reads configuration information from the YAML configuration file.
 * Builds hisat2 indices if requested (`build_indices=TRUE`, by default), in an index directory (`dir_index`).
-* Processes all `fastq.gz` files named in the configuration file (`dir_in`).
+* Processes all `fastq.gz` files (`fq_files`) within the input directory  (`dir_in`).
 * Cuts out sequencing library adapters (`adapters=CTGTAGGCACC`, by default) with `cutadapt`.
 * Removes rRNA or other contaminating reads by hisat2 alignment to the rRNA index file (`rRNA_index`).
 * Aligns remaining reads to ORFs or another hisat2 index file (`orf_index`).
