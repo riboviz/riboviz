@@ -69,6 +69,17 @@ python -V
 Python 3.7.3
 ```
 
+## pyyaml
+
+Web sites:
+
+* [PyYAML](https://pyyaml.org/)
+* [GitHub](https://github.com/yaml/pyyaml/)
+
+```bash
+conda install -y pyyaml
+```
+
 ## Cutadapt
 
 Web sites:
