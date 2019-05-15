@@ -2,29 +2,55 @@
 
 ## About these instructions
 
-These instructions were written for Ubuntu and tested on Ubuntu 18.04 LTS bionic.
+These instructions were written for Ubuntu 18.04 and CentOS 7.4. Other Linux flavours will require different commands to be run. For Windows users it is suggested that you:
 
-Other Linux flavours will require different commands to be run. Similarly, for other operating systems.
+* Either, use a virtual machine running under [VMWare Workstation Player](https://www.vmware.com/uk/products/workstation-player.html) or [Oracle VirtualBox](https://www.virtualbox.org/).
+* Or, try using Windows 10's [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about) which allows running of a Linux environment on Windows 10 without the need for a VM. Most command-line tools, utilities, and applications can be directly on Windows, unmodified. Ubuntu, openSUSE, Debian, Kali flavours of Linux can be used.
 
 Other versions of the prerequisites may also be usable.
 
 Only minimal installation instructions are given for each prerequisite. See the documentation for each prerequisite for full instructions.
 
-Under Linux, installing some of these tools requires you to have `sudo` access to install and configure software. If you don't have `sudo` access you will have to ask a local system administrator to run these commands for you.
-
-### Windows users
-
-For Windows users it is suggested that you:
-
-* Either, use a virtual machine running under [VMWare Workstation Player](https://www.vmware.com/uk/products/workstation-player.html) or [Oracle VirtualBox](https://www.virtualbox.org/).
-* Or, try using Windows 10's [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about) which allows running of a Linux environment on Windows 10 without the need for a VM. Most command-line tools, utilities, and applications can be directly on Windows, unmodified. Ubuntu, openSUSE, Debian, Kali flavours of Linux can be used.
+Installing some of these tools requires you to have `sudo` access to install and configure software. If you don't have `sudo` access you will have to ask a local system administrator to run these commands for you.
 
 ## Git
 
 Website: [Git](https://git-scm.com/)
 
+### Ubuntu
+
+Install:
+
 ```bash
 sudo apt-get install -y git
+```
+
+### CentOS
+
+Install:
+
+```bash
+sudo yum install -y git
+```
+
+## cURL
+
+Website: [cURL](https://curl.haxx.se/)
+
+### Ubuntu
+
+Install:
+
+```bash
+sudo apt-get install -y curl
+```
+
+### CentOS
+
+Install:
+
+```bash
+sudo yum install -y curl
 ```
 
 ## Python
@@ -36,6 +62,8 @@ If you already have Python you can skip this step. If you don't have Python then
 Either Python 2.7+ or Python 3.6+ can be used.
 
 ### Miniconda Python 2.7
+
+Install:
 
 ```bash
 wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda2.sh
@@ -53,6 +81,8 @@ Python 2.7.16 :: Anaconda, Inc.
 ```
 
 ### Miniconda Python 3.6
+
+Install:
 
 ```bash
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda3.sh
@@ -75,6 +105,8 @@ Web sites:
 
 * [PyYAML](https://pyyaml.org/)
 * [GitHub](https://github.com/yaml/pyyaml/)
+
+Install:
 
 ```bash
 conda install -y pyyaml
@@ -116,13 +148,72 @@ Web site: [Samtools](http://www.htslib.org/)
 
 **Note:** the version installed must be compatible with pysam below.
 
-Install:
+### Install
+
+**Ubuntu**
 
 ```bash
 sudo apt-get install -y samtools
 ```
+**CentOS**
 
-Check:
+Get samtools, bcftools and htslib from Samtools [download](http://www.htslib.org/download/) page:
+
+```bash
+curl -LO https://github.com/samtools/samtools/releases/download/1.7/samtools-1.7.tar.bz2
+curl -LO https://github.com/samtools/bcftools/releases/download/1.9/bcftools-1.9.tar.bz2
+curl -LO https://github.com/samtools/htslib/releases/download/1.7/htslib-1.7.tar.bz2
+```
+
+Unpack:
+
+```bash
+bzip2 -dk samtools-1.7.tar.bz2 
+bzip2 -dk htslib-1.7.tar.bz2 
+bzip2 -dk bcftools-1.9.tar.bz2 
+tar -xf bcftools-1.9.tar
+tar -xf htslib-1.7.tar
+tar -xf samtools-1.7.tar
+```
+
+Install dependencies:
+
+```bash
+sudo yum install -y ncurses-devel
+sudo yum install -y zlib-devel
+sudo yum install -y bzip2-devel
+sudo yum install -y xz-devel
+```
+
+Build and install each package:
+
+```bash
+cd samtools-1.7
+./configure
+make
+sudo make install
+
+cd ~/bcftools-1.9
+./configure
+make
+sudo make install
+
+cd ~/htslib-1.7
+./configure
+make
+sudo make install
+```
+
+Check installation path:
+
+```bash
+which samtools
+```
+```
+/usr/local/bin/samtools
+```
+
+### Check
 
 ```bash
 samtools --version
@@ -161,13 +252,21 @@ pysam                     0.15.2 ...
 
 Web site: [bedtools](http://bedtools.readthedocs.io/en/latest/)
 
-Install:
+### Install
+
+**Ubuntu**
 
 ```bash
 sudo apt-get install -y bedtools
 ```
 
-Check:
+**CentOS**
+
+```bash
+sudo yum install -y BEDTools
+```
+
+### Check
 
 ```bash
 bedtools -version
@@ -238,10 +337,20 @@ Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 
 Web site: [HDF5](https://portal.hdfgroup.org/display/HDF5)
 
+### Ubuntu
+
 Install:
 
 ```bash
 sudo apt-get install -y hdf5-tools
+```
+
+### CentOS
+
+Install:
+
+```bash
+sudo yum install -y hdf5-devel
 ```
 
 ## Create `setenv.sh` to configure paths in future
@@ -261,22 +370,25 @@ Web sites:
 
 **Note:** Release 2.14.0 or later is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
 
-Edit `/etc/apt/sources.list` and add:
+### Install
 
-```
-deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/
-```
-
-Install:
+**Ubuntu**
 
 ```bash
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 sudo apt-get update
 sudo apt-get install -y r-base
 sudo apt-get install -y r-base-dev
 ```
 
-Check:
+**CentOS**
+
+```bash
+sudo yum update
+sudo yum install -y R
+sudo yum install -y R-devel
+```
+
+### Check
 
 ```bash
 R --version
@@ -287,12 +399,23 @@ R version 3.5.1 (2018-07-02) -- "Feather Spray"
 
 ## Packages required by R packages
 
-Install required packages:
+### Ubuntu
+
+Install:
 
 ```bash
 sudo apt-get install -y libxml2-dev
 sudo apt-get install -y libssl-dev
 sudo apt-get install -y libcurl4-openssl-dev
+```
+
+### CentOS
+
+Install:
+
+```bash
+sudo yum install -y libcurl-devel
+sudo yum install -y libxml2-devel
 ```
 
 ## Rsamtools
@@ -303,6 +426,7 @@ Install in R:
 
 ```R
 source("https://bioconductor.org/biocLite.R")
+biocLite("BiocUpgrade")
 biocLite("Rsamtools")
 ```
 
@@ -319,14 +443,24 @@ See [Question: unable to update packages: foreign, Matrix](https://support.bioco
 > That's not an error! You just got an informative message saying that two of the base R packages couldn't be updated...
 > All of your Bioconductor packages end up in the first dir, which is writeable by you, and the base and core packages go in the second dir, which is only writeable by an administrator. You shouldn't be running R as an administrator, like ever, so it's common for you to get the message that you saw. If you really care to update the core packages, you can run R as an administrator, do biocLite, and then restart as a lower-permissioned user after the update.
 
-You can check that it is available e.g.:
+You can check that it is available e.g.
 
 ```bash
 ls ~/R/x86_64-pc-linux-gnu-library/3.4/Rsamtools/
 ```
+
+or:
+
+```bash
+ls ~/R/x86_64-redhat-linux-gnu-library/3.5/Rsamtools/
+```
+
+(your exact path may differ)
+
 ```
 DESCRIPTION  libs  LICENSE  Meta  NAMESPACE  NEWS
 ```
+
 
 **Troubleshooting: Cannot allocate memory**
 
@@ -525,4 +659,5 @@ git clone https://mikej888@github.com/RiboViz/RiboViz
 
 These instructions were tested on:
 
-* Ubuntu 18.04 with 8GB memory, 4 processors and 20GB RAM.
+* Ubuntu 18.04, with 8GB memory, 4 processors and 20GB RAM.
+* CentOS Linux release 7.4.1708 (Core), with 8GB memory, 4 processors and 20GB RAM.

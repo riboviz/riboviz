@@ -133,6 +133,23 @@ Run:
 python scripts/prepRiboviz.py scripts/ vignette/vignette_config.yaml
 ```
 
+### Troubleshooting: `no package called "readr"`
+
+If you see:
+
+```
+Error in library(readr) : there is no package called "readr"
+```
+
+then install the R [readr](https://cran.r-project.org/web/packages/readr/index.html) package:
+
+```bash
+R
+```
+```R
+install.packages(c("readr"))
+```
+
 ### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
 
 If you see:
