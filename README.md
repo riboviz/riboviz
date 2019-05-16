@@ -14,7 +14,7 @@ In addition to the metagenomic analyses, an [R](https://www.r-project.org/)\/[Sh
 
 * [Introduction](./docs/introduction.md)
 * [Install prerequisites](./docs/install.md)
-* [Quick install prerequisites](./docs/quick-install.md)
+* [Quick install scripts](./docs/quick-install.md) (Ubuntu only)
 * [Map mRNA and ribosome protected reads to transcriptome and collect data intoan HDF5 file](./docs/run-vignette.md). This page describes how you can run a "vignette" of the back-end analysis pipeline, to demostrate RiboViz's capabilities.
 * [Prepare data](./docs/prepare-data.md)
 * [Structure of HDF5 data](./docs/hdf5-data.md)
