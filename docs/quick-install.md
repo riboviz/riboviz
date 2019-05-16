@@ -1,12 +1,12 @@
-# Quick install prerequisites
+# Quick install scripts
 
 `scripts/` contains simple bash scripts to automate some of the installation of **riboviz**'s dependencies. They are the manual commands of [Install prerequisites](./install.md) in bash script form.
 
+These scripts were written for Ubuntu 18.04 and CentOS 7.4.
+
+Running these scripts requires you to have permission to run `sudo` to install and configure software. If you don't have `sudo` access you will have to ask a local system administrator to run these commands for you.
+
 **Note:** These scripts are not robust and do not perform any error handling.
-
-These instructions were written for and tested on Ubuntu 18.04 LTS bionic.
-
-Installing some of these tools requires you to have `sudo` access to install and configure software (or a local system administrator to do this for you).
 
 Authenticate with `sudo`:
 
@@ -15,47 +15,89 @@ sudo su -
 CTRL-D
 ```
 
-Run the installer scripts:
+Install operating system packages:
 
+* Ubuntu:
+
+```bash
+source install-ubuntu.sh
 ```
-source install.sh
+
+* CentOS:
+
+```bash
+source install-centos.sh
+```
+
+Install Python:
+
+* **Note**: This script installs both Python 2 and 3. If you only want to install one or the other then edit the file and comment out the code that installs the version you do not want.
+
+```bash
 source install-py.sh
-source install-riboviz.sh
-source install-r.sh
 ```
 
-Start R:
+Install Hisat2 and Bowtie:
 
-```
-R
-```
-
-Run the R installer script:
-
-```
-source("install-r.R")
+```bash
+source install-hisat-bowtie.sh
 ```
 
-When prompted:
+Install R:
 
-```
-Would you like to use a personal library instead? (yes/No/cancel) 
+* Ubuntu:
+
+```bash
+source install-r-ubuntu.sh
 ```
 
-Enter:
+* CentOS
 
+```bash
+source install-r-centos.sh
 ```
-yes
+
+Install R packages:
+
+```bash
+Rscript install-R.r
+```
+
+Install R Bioconductor packages:
+
+* R 3.4 users:
+
+```bash
+Rscript install-r-3.4-bioconductor.R
+```
+
+* R 3.5 users:
+
+```bash
+Rscript install-r-3.5-bioconductor.R
 ```
 
 When complete, check that R's library paths include your personal library:
 
-```
-.libPaths()
+```bash
+Rscript -e ".libPaths()"
 ```
 
-You should see something like the following (with `/home/ubuntu/` replaced by your home directory):
+You should see something like:
+
+* Ubuntu:
 
 ```
-/home/ubuntu/R/x86_64-pc-linux-gnu-library/3.5
+[1] "/home/ubuntu/R/x86_64-pc-linux-gnu-library/3.4"
+[2] "/usr/local/lib/R/site-library"                 
+[3] "/usr/lib/R/site-library"                       
+[4] "/usr/lib/R/library"     
+```
+
+* CentOS:
+
+```
+[1] "/home/centos/R/x86_64-redhat-linux-gnu-library/3.5"
+[2] "/usr/lib64/R/library"                              
+[3] "/usr/share/R/library"  
 ```
