@@ -7,13 +7,15 @@ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O mi
 bash miniconda3.sh -b -p $HOME/miniconda3
 
 source $HOME/miniconda2/bin/activate
-conda install -y -c bioconda cutadapt 
+conda install -y pyyaml
+conda install -y -c bioconda cutadapt
 conda install -y -c bioconda pysam
 conda list
 source $HOME/miniconda2/bin/deactivate
 
 source $HOME/miniconda3/bin/activate
-conda install -y -c bioconda cutadapt 
+conda install -y pyyaml
+conda install -y -c bioconda cutadapt
 conda install -y -c bioconda pysam
 conda list
-source $HOME/miniconda3/bin/deactivate
+# source $HOME/miniconda3/bin/deactivate
