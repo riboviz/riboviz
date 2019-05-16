@@ -521,7 +521,7 @@ Your versions may differ from those shown.
 
 ## Check names and versions of R packages
 
-From [list user installed packages](https://www.r-bloggers.com/list-of-user-installed-r-packages-and-their-versions/):
+(from [list user installed packages](https://www.r-bloggers.com/list-of-user-installed-r-packages-and-their-versions/))
 
 Either run bash script:
 
