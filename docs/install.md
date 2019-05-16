@@ -21,11 +21,13 @@ We suggest that you:
 
 We suggest that you check out the web sites for each prerequisite for information on how to install the prerequisites under Mac OS X.
 
-## Git
+## General packages
+
+### Git
 
 Website: [Git](https://git-scm.com/)
 
-### Ubuntu
+**Ubuntu**
 
 Install:
 
@@ -33,7 +35,7 @@ Install:
 sudo apt-get install -y git
 ```
 
-### CentOS
+**CentOS**
 
 Install:
 
@@ -41,11 +43,11 @@ Install:
 sudo yum install -y git
 ```
 
-## cURL
+### cURL
 
 Website: [cURL](https://curl.haxx.se/)
 
-### Ubuntu
+**Ubuntu**
 
 Install:
 
@@ -53,12 +55,71 @@ Install:
 sudo apt-get install -y curl
 ```
 
-### CentOS
+**CentOS**
 
 Install:
 
 ```bash
 sudo yum install -y curl
+```
+
+### EPEL (CentOS only)
+
+Website [EPEL](https://fedoraproject.org/wiki/EPEL)
+
+Install:
+
+```bash
+sudo yum install -y epel-release
+```
+
+### bedtools
+
+Web site: [bedtools](http://bedtools.readthedocs.io/en/latest/)
+
+**Ubuntu**
+
+Install:
+
+```bash
+sudo apt-get install -y bedtools
+```
+
+**CentOS**
+
+Install:
+
+```bash
+sudo yum install -y BEDTools
+```
+
+**Check**
+
+```bash
+bedtools -version
+```
+```
+bedtools v2.26.0
+```
+
+### hdf5tools
+
+Web site: [HDF5](https://portal.hdfgroup.org/display/HDF5)
+
+**Ubuntu**
+
+Install:
+
+```bash
+sudo apt-get install -y hdf5-tools
+```
+
+**CentOS**
+
+Install:
+
+```bash
+sudo yum install -y hdf5-devel
 ```
 
 ## Python
@@ -107,7 +168,9 @@ python -V
 Python 3.7.3
 ```
 
-## pyyaml
+## Python packages
+
+### pyyaml
 
 Web sites:
 
@@ -120,7 +183,7 @@ Install:
 conda install -y pyyaml
 ```
 
-## Cutadapt
+### Cutadapt
 
 Web sites:
 
@@ -150,96 +213,12 @@ cutadapt --v
 
 **Note:** for Python 2.7 the version could be 1.18. It is OK to use this version.
 
-## samtools
-
-Web site: [Samtools](http://www.htslib.org/)
-
-**Note:** the version installed must be compatible with pysam below.
-
-### Install
-
-**Ubuntu**
-
-```bash
-sudo apt-get install -y samtools
-```
-**CentOS**
-
-Get samtools, bcftools and htslib from Samtools [download](http://www.htslib.org/download/) page:
-
-```bash
-curl -LO https://github.com/samtools/samtools/releases/download/1.7/samtools-1.7.tar.bz2
-curl -LO https://github.com/samtools/bcftools/releases/download/1.9/bcftools-1.9.tar.bz2
-curl -LO https://github.com/samtools/htslib/releases/download/1.7/htslib-1.7.tar.bz2
-```
-
-Unpack:
-
-```bash
-bzip2 -dk samtools-1.7.tar.bz2 
-bzip2 -dk htslib-1.7.tar.bz2 
-bzip2 -dk bcftools-1.9.tar.bz2 
-tar -xf bcftools-1.9.tar
-tar -xf htslib-1.7.tar
-tar -xf samtools-1.7.tar
-```
-
-Install dependencies:
-
-```bash
-sudo yum install -y ncurses-devel
-sudo yum install -y zlib-devel
-sudo yum install -y bzip2-devel
-sudo yum install -y xz-devel
-```
-
-Build and install each package:
-
-```bash
-cd samtools-1.7
-./configure
-make
-sudo make install
-
-cd ~/bcftools-1.9
-./configure
-make
-sudo make install
-
-cd ~/htslib-1.7
-./configure
-make
-sudo make install
-```
-
-Check installation path:
-
-```bash
-which samtools
-```
-```
-/usr/local/bin/samtools
-```
-
-### Check
-
-```bash
-samtools --version
-```
-```
-samtools 1.7
-Using htslib 1.7-2
-Copyright (C) 2018 Genome Research Ltd.
-```
-
-## pysam
+### pysam
 
 Web sites:
 
 * [GitHub](https://github.com/pysam-developers/pysam/)
 * [readthedocs](https://pysam.readthedocs.io/)
-
-**Note:** the version of pysam must be compatible with the version of samtools above i.e. it must wrap a version of samtools equal to or greater than that which has been installed.  For example pysam 0.14.1 wraps samtools, and htslib, versions 1.7.0 (see [release notes](https://github.com/pysam-developers/pysam/releases/tag/v0.14)); pysam 0.15.1 wraps samtools, and htslib, versions 1.9.0 (see [release notes](https://github.com/pysam-developers/pysam/releases/tag/v0.15.0.1)).
 
 Install:
 
@@ -255,32 +234,13 @@ conda list | grep pysam
 ```
 pysam                     0.15.2 ...
 ```
-
-## bedtools
-
-Web site: [bedtools](http://bedtools.readthedocs.io/en/latest/)
-
-### Install
-
-**Ubuntu**
-
 ```bash
-sudo apt-get install -y bedtools
-```
-
-**CentOS**
-
-```bash
-sudo yum install -y BEDTools
-```
-
-### Check
-
-```bash
-bedtools -version
+samtools --version
 ```
 ```
-bedtools v2.26.0
+samtools 1.9
+Using htslib 1.9
+Copyright (C) 2018 Genome Research Ltd.
 ```
 
 ## Hisat2
@@ -341,27 +301,7 @@ Options: -O3 -m64  -Wl,--hash-style=both -DWITH_TBB -DPOPCNT_CAPABILITY -g -O2 -
 Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 ```
 
-## hdf5tools
-
-Web site: [HDF5](https://portal.hdfgroup.org/display/HDF5)
-
-### Ubuntu
-
-Install:
-
-```bash
-sudo apt-get install -y hdf5-tools
-```
-
-### CentOS
-
-Install:
-
-```bash
-sudo yum install -y hdf5-devel
-```
-
-## Create `setenv.sh` to configure paths in future
+## Create `setenv.sh` to configure Hisat2 and Bowtie paths
 
 ```bash
 #!/usr/bin/env bash
@@ -378,22 +318,30 @@ Web sites:
 
 **Note:** Release 2.14.0 or later is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
 
-### Install
+### Install R and packages required by R packages to be installed
 
 **Ubuntu**
 
 ```bash
-sudo apt-get update
+sudo apt-get update -y
 sudo apt-get install -y r-base
 sudo apt-get install -y r-base-dev
+
+sudo apt-get install -y libxml2-dev
+sudo apt-get install -y libssl-dev
+sudo apt-get install -y libcurl4-openssl-dev
 ```
 
 **CentOS**
 
 ```bash
-sudo yum update
+sudo yum update -y
 sudo yum install -y R
 sudo yum install -y R-devel
+
+sudo yum install -y libxml2-devel
+sudo yum install -y openssl-devel
+sudo yum install -y libcurl-devel
 ```
 
 ### Check
@@ -405,28 +353,79 @@ R --version
 R version 3.5.1 (2018-07-02) -- "Feather Spray"
 ```
 
-## Packages required by R packages
+## R packages
 
-### Ubuntu
+### RcppRoll
 
-Install:
+Web site: [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html)
 
-```bash
-sudo apt-get install -y libxml2-dev
-sudo apt-get install -y libssl-dev
-sudo apt-get install -y libcurl4-openssl-dev
+Install in R:
+
+```R
+install.packages("RcppRoll")
 ```
 
-### CentOS
+### optparse
 
-Install:
+Web site: [optparse](https://cran.r-project.org/web/packages/optparse/index.html)
 
-```bash
-sudo yum install -y libcurl-devel
-sudo yum install -y libxml2-devel
+Install in R:
+
+```R
+install.packages("optparse")
 ```
 
-## Bioconductor packages
+### tidyr
+
+Web site: [tidyr](https://cran.r-project.org/web/packages/tidyr/index.html)
+
+Install in R:
+
+```R
+install.packages("tidyr")
+```
+
+### ggplot2
+
+Web site: [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html)
+
+Install in R:
+
+```R
+install.packages("ggplot2")
+```
+
+### shiny
+
+Web site: [shiny](https://cran.r-project.org/web/packages/shiny/index.html)
+
+Install in R:
+
+```R
+install.packages("shiny")
+```
+
+### plotly
+
+Web site: [plotly](https://cran.r-project.org/web/packages/plotly/index.html)
+
+Install in R:
+
+```R
+install.packages("plotly")
+```
+
+### readr
+
+Website: [readr](https://cran.r-project.org/web/packages/readr/index.html)
+
+Install in R:
+
+```R
+install.packages("readr")
+```
+
+### Bioconductor Rsamtools, rdf5, rtracklayer
 
 Web sites:
 
@@ -505,112 +504,6 @@ In install.packages(pkgs = doing, lib = lib, ...) :
 
 You may need to assign more memory to R or your machine.
 
-**Troubleshooting: installation of package "XML" had non-zero exit status**
-
-If you get:
-
-```
-1: In install.packages(pkgs = doing, lib = lib, ...) :
-  installation of package "XML" had non-zero exit status
-```
-
-Then check you installed the `libxml2-dev` package.
-
-**Troubleshooting: installation of package "RCurl"|"GenomeInfoDb"|"GenomicRanges" had non-zero exit status**
-
-If you get:
-
-```
-1: In install.packages(pkgs = doing, lib = lib, ...) :
-  installation of package "RCurl" had non-zero exit status
-2: In install.packages(pkgs = doing, lib = lib, ...) :
-  installation of package "GenomeInfoDb" had non-zero exit status
-3: In install.packages(pkgs = doing, lib = lib, ...) :
-  installation of package "GenomicRanges" had non-zero exit status
-```
-
-Then check you installed the `libcurl4-openssl-dev` package.
-
-## RcppRoll
-
-Web site: [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html)
-
-Install in R:
-
-```R
-install.packages("RcppRoll")
-```
-
-## optparse
-
-Web site: [optparse](https://cran.r-project.org/web/packages/optparse/index.html)
-
-Install in R:
-
-```R
-install.packages("optparse")
-```
-
-## tidyr
-
-Web site: [tidyr](https://cran.r-project.org/web/packages/tidyr/index.html)
-
-Install in R:
-
-```R
-install.packages("tidyr")
-```
-
-## ggplot2
-
-Web site: [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html)
-
-Install in R:
-
-```R
-install.packages("ggplot2")
-```
-
-## shiny
-
-Web site: [shiny](https://cran.r-project.org/web/packages/shiny/index.html)
-
-Install in R:
-
-```R
-install.packages("shiny")
-```
-
-## plotly
-
-Web site: [plotly](https://cran.r-project.org/web/packages/plotly/index.html)
-
-Install in R:
-
-```R
-install.packages("plotly")
-```
-
-**Troubleshooting: ERROR: dependency "httr" is not available for package "plotly"**
-
-If you get:
-
-```
-ERROR: dependency "httr" is not available for package "plotly"
-```
-
-Then check you installed the `libssl-dev` and `libcurl4-openssl-dev` packages.
-
-## readr
-
-Website: [readr](https://cran.r-project.org/web/packages/readr/index.html)
-
-Install in R:
-
-```R
-install.packages("readr")
-```
-
 ## Check names and versions of Python packages
 
 Run:
@@ -630,7 +523,13 @@ Your versions may differ from those shown.
 
 From [list user installed packages](https://www.r-bloggers.com/list-of-user-installed-r-packages-and-their-versions/):
 
-Run in R:
+Either run bash script:
+
+```bash
+Rscript install/list-r-packages.R
+```
+
+Or run in R:
 
 ```R
 ip <- as.data.frame(installed.packages()[,c(1,3:4)])
@@ -638,6 +537,7 @@ rownames(ip) <- NULL
 ip <- ip[is.na(ip$Priority),1:2,drop=FALSE]
 print(ip, row.names=FALSE)
 ```
+
 ```
               Package   Version
               ggplot2     3.1.1
