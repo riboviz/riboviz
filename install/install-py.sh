@@ -10,6 +10,9 @@ source $HOME/miniconda2/bin/activate
 conda install -y pyyaml
 conda install -y -c bioconda cutadapt
 conda install -y -c bioconda pysam
+conda install -y -c anaconda biopython
+pip install gffutils
+conda install -y -c anaconda h5py
 conda list
 source $HOME/miniconda2/bin/deactivate
 
@@ -17,5 +20,8 @@ source $HOME/miniconda3/bin/activate
 conda install -y pyyaml
 conda install -y -c bioconda cutadapt
 conda install -y -c bioconda pysam
+conda install -y -c anaconda biopython
+pip install gffutils
+conda install -y -c anaconda h5py
 conda list
-# source $HOME/miniconda3/bin/deactivate
+source $HOME/miniconda3/bin/deactivate

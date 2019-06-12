@@ -243,6 +243,94 @@ Using htslib 1.9
 Copyright (C) 2018 Genome Research Ltd.
 ```
 
+### BioPython
+
+Web site:
+
+* [Biopython](http://biopython.org/)
+
+Install:
+
+```bash
+conda install -y -c anaconda biopython
+```
+
+Check:
+
+```bash
+conda list | grep biopython
+```
+```
+biopython                 1.73             ...
+```
+
+### gffutils
+
+Web site:
+
+* [gffutils](http://daler.github.io/gffutils/)
+
+Install:
+
+```bash
+pip install gffutils
+```
+
+Check:
+
+```bash
+conda list | grep gffutils
+```
+```
+gffutils                  0.9                      ...
+```
+
+**Note:** `pip install` is recommended. Using
+
+```bash
+conda install -y -c bioconda gffutils
+```
+
+under Python 3, seems to confuse the Python environment and sets Python to:
+
+```bash
+python --version
+```
+```
+Python 2.7.16 :: Anaconda, Inc.
+```
+
+### h5py
+
+Web site:
+
+* [h5py](https://www.h5py.org/)
+
+Install:
+
+```bash
+conda install -y -c anaconda h5py 
+```
+
+Check:
+
+```bash
+conda list | grep h5py
+```
+```
+h5py                      2.9.0            ...
+```
+```bash
+python
+```
+```python
+import h5py
+h5py.run_tests()
+```
+```
+OK (skipped=16, expected failures=6)
+```
+
 ## Hisat2
 
 Web site: [Hisat2](https://ccb.jhu.edu/software/hisat2/index.shtml)
@@ -425,14 +513,16 @@ Install in R:
 install.packages("readr")
 ```
 
-### Bioconductor Rsamtools, rdf5, rtracklayer
+### Bioconductor Rsamtools, rdf5, rtracklayer, Biostrings, ShortRead
 
 Web sites:
 
 * [Bioconductor](https://bioconductor.org)
 * [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html)
-* [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html)
 * [rtracklayer](https://bioconductor.org/packages/release/bioc/html/rtracklayer.html)
+* [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html)
+* [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html)
+* [ShortRead](https://bioconductor.org/packages/release/bioc/html/ShortRead.html)
 
 The commands to install Bioconductor packages depend on your version of R. For full details:
 
@@ -447,6 +537,8 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("Rsamtools")
 biocLite("rtracklayer")
 biocLite("rhdf5")
+biocLite("Biostrings")
+biocLite("ShortRead")
 ```
 
 For example, for R 3.5, install in R:
@@ -456,6 +548,8 @@ install.packages("BiocManager")
 BiocManager::install("Rsamtools")
 BiocManager::install("rtracklayer")
 BiocManager::install("rhdf5")
+BiocManager::install("Biostrings")
+BiocManager::install("ShortRead")
 ```
 
 **Troubleshooting: installation path not writeable**
@@ -512,12 +606,21 @@ Run:
 conda list
 ```
 ```
-cutadapt                  1.16 ...
-
-pysam                     0.14.1 ...
+biopython                 1.73             ...
+cutadapt                  1.18             ...
+gffutils                  0.9              ...
+h5py                      2.9.0            ...
+pysam                     0.15.2           ...
+pyyaml                    5.1              ...
 ```
 
 Your versions may differ from those shown.
+
+Alternatively, run:
+
+```bash
+pip list
+```
 
 ## Check names and versions of R packages
 
@@ -539,17 +642,19 @@ print(ip, row.names=FALSE)
 ```
 
 ```
-              Package   Version
+            Biostrings    2.46.0
               ggplot2     3.1.1
              optparse     1.6.2
                plotly     4.9.0
              RcppRoll     0.3.0
                 readr     1.3.1
-                rhdf5    2.26.2
-            Rsamtools    1.34.1
-          rtracklayer    1.42.2
+                rhdf5    2.22.0
+            Rsamtools    1.30.0
+          rtracklayer    1.38.3
                 shiny     1.3.2
+            ShortRead    1.36.1
                 tidyr     0.8.3
+
 ```
 
 Your versions may differ from those shown.
