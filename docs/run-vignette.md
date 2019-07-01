@@ -2,7 +2,7 @@
 
 RiboViz is designed to be run from a single script using a single configuration file in [YAML](http://www.yaml.org/) format containing all the information required for the analysis.
 
-`scripts/prepRiboviz.py` contains a Python implementation of such a script.
+`pyscripts/prepRiboviz.py` contains a Python implementation of such a script.
 
 Using this script, you can run a "vignette" of the back-end analysis pipeline, to demostrate RiboViz's capabilities. An example for *Saccharomyces cerevisiae* reads, up to the output of HDF5 files, is in the `vignette/` directory.
 
@@ -37,10 +37,10 @@ The script prepares ribosome profiling data for RiboViz or other analyses. It do
 * Cuts out sequencing library adapters (`adapters=CTGTAGGCACC`, by default) with `cutadapt`.
 * Removes rRNA or other contaminating reads by hisat2 alignment to the rRNA index file (`rRNA_index`).
 * Aligns remaining reads to ORFs or another hisat2 index file (`orf_index`).
-* Trims 5' mismatches from reads and removes reads with more than 2 mismatches via a call to `scripts/trim5pmismatch.py`.
+* Trims 5' mismatches from reads and removes reads with more than 2 mismatches via a call to `pyscripts/trim5pmismatch.py`.
 * Parallelizes over many processors (`nprocesses`), except for `cutadapt` which isn't parallel.
-* Makes length-sensitive alignments in compressed h5 format by running `scripts/reads_to_list.R`.
-* Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets, by running `scripts/generate_stats_figs.R`.
+* Makes length-sensitive alignments in compressed h5 format by running `rscripts/reads_to_list.R`.
+* Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets, by running `rscripts/generate_stats_figs.R`.
 * Estimates read counts, reads per base, and transcripts per million for each ORF in each sample.
 * Puts all intermediate files into a temporary directory (`dir_tmp`) which will be **large**.
 * When finished, puts useful output files into an output directory (`dir_out`).
@@ -114,14 +114,14 @@ nprocesses: 4 # number of processes to parallelize over
 
 * **Note:** `samtools`, which is invoked during the run, can only run under 1 process with Python 2.
 
-### Run `scripts/prepRiboviz.py`
+### Run `pyscripts/prepRiboviz.py`
 
 Run:
 
 ```bash
-python scripts/prepRiboviz.py scripts/ vignette/vignette_config.yaml
+python pyscripts/prepRiboviz.py pyscripts/ rscripts/ data/ \
+    vignette/vignette_config.yaml
 ```
-
 
 ### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
 
@@ -170,7 +170,7 @@ Swap:           969         619         350
 Divide the free memory by the number of processes, `nprocesses` e.g. 1024/4 = 256 MB.
 ```
 
-Edit `scripts/prepRiboviz.py` and change the lines:
+Edit `pyscripts/prepRiboviz.py` and change the lines:
 
 ```python
     cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
@@ -320,7 +320,8 @@ du -sm vignette/output/
 To both display all output from the script that is printed at the terminal, and capture it into a file, run, for example:
 
 ```bash
-python scripts/prepRiboviz.py scripts/ vignette/vignette_config.yaml  2>&1 | tee script-py.txt
+python pyscripts/prepRiboviz.py pyscripts/ rscripts/ data/ \
+    vignette/vignette_config.yaml  2>&1 | tee script-py.txt
 ```
 
 ## Cleaning up to run again
