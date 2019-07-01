@@ -236,11 +236,7 @@ for fq_file in list(config["fq_files"].keys()):
            "--out_prefix=" + fn_out,
            "--orf_fasta=" + config["orf_fasta"],
            "--rpf=" + str(config["rpf"]),
-           # TODO: uncomment this line when using this
-           # script with commit
-           # f77beadc1a4ee71cb720bd90160533ed6db00d7e
-           # or above.
-           # "--orf_gff_file=" + config["orf_gff_file"],
+           "--orf_gff_file=" + config["orf_gff_file"],
            "--dir_out=" + config["dir_out"],
            "--dir_data=" + data_dir,
            "--orf_gff_file=" + config["orf_gff_file"],
