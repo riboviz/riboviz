@@ -10,25 +10,25 @@ For your organism, you will need:
 
 For example, for_S. cerevisiae_, download:
 
-* Transcript sequences, [yeast_CDS_w_250utrs.fa](https://github.com/shahpr/RiboViz/blob/master/scripts/yeast_CDS_w_250utrs.fa)
+* Transcript sequences, [yeast_CDS_w_250utrs.fa](https://raw.githubusercontent.com/RiboViz/RiboViz/master/scripts/yeast_CDS_w_250utrs.fa) (downloads from this Git repository)
 * rRNA sequences, [rrna.fa](http://gdurl.com/KGnn/download)
-* Coding sequences locations, [yeast_CDS_w_250utrs.gff3](https://github.com/shahpr/RiboViz/blob/master/scripts/yeast_CDS_w_250utrs.gff3)
+* Coding sequences locations, [yeast_CDS_w_250utrs.gff3](https://raw.githubusercontent.com/RiboViz/RiboViz/master/scripts/yeast_CDS_w_250utrs.gff3) (downloads from this Git repository)
 
 To download these files via bash:
 
 ```bash
 mkdir sample-data
-wget https://github.com/shahpr/RiboViz/blob/master/scripts/yeast_CDS_w_250utrs.fa -P sample-data
+wget https://raw.githubusercontent.com/RiboViz/RiboViz/master/scripts/yeast_CDS_w_250utrs.fa -P sample-data
 wget http://gdurl.com/KGnn/download -O sample-data/rrna.fa
-wget https://github.com/shahpr/RiboViz/blob/master/scripts/yeast_CDS_w_250utrs.gff3 -P sample-data
+wget https://raw.githubusercontent.com/RiboViz/RiboViz/master/scripts/yeast_CDS_w_250utrs.gff3 -P sample-data
 ```
 
-The file sizes, and space requirements, are as follows (in KB):
+The file sizes, and space requirements, are as follows:
 
 ```
-8	rrna.fa
-64	yeast_CDS_w_250utrs.fa
-4100	yeast_CDS_w_250utrs.gff3
+5.6K	rrna.fa
+ 12M	yeast_CDS_w_250utrs.fa
+885K	yeast_CDS_w_250utrs.gff3
 ```
 
 ## Prepare input files
