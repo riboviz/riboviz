@@ -117,7 +117,7 @@ nprocesses: 4 # number of processes to parallelize over
 
 * **Note:** `samtools`, which is invoked during the run, can only run under 1 process with Python 2.
 
-### Run `scripts/prepRiboViz.sh`
+### Run `scripts/prepRiboviz.sh`
 
 Run:
 
@@ -125,7 +125,7 @@ Run:
 bash scripts/prepRiboviz.sh vignette/vignette_config.yaml
 ```
 
-### Run `scripts/prepRiboViz.py`
+### Run `scripts/prepRiboviz.py`
 
 Run:
 
