@@ -11,7 +11,7 @@ dir_index: vignette/index # directory to put built indices in
 rRNA_index: vignette/index/yeast_rRNA # rRNA index file
 orf_index: vignette/index/YAL_CDS_w_250 # ORF index file
 fq_files: # fastq files to be processed
-  WTnone: SRR1042855_s1mi.fastq.gz # do not use "_" in dataset name
+  WTnone: SRR1042855_s1mi.fastq.gz
   WT3AT: SRR1042864_s1mi.fastq.gz
   NotHere: example_missing_file.fastq.gz # prepRiboviz should give error message for missing files
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
