@@ -2,12 +2,9 @@
 
 RiboViz is designed to be run from a single script using a single configuration file in [YAML](http://www.yaml.org/) format containing all the information required for the analysis.
 
-There are two implementations of this script available:
+`scripts/prepRiboviz.py` contains a Python implementation of such a script.
 
-* `scripts/prepRiboviz.sh`, a bash shell implementation.
-* `scripts/prepRiboviz.py`, a Python implementation.
-
-Using either of these scripts, you can run a "vignette" of the back-end analysis pipeline, to demostrate RiboViz's capabilities. An example for *Saccharomyces cerevisiae* reads, up to the output of HDF5 files, is in the `vignette/` directory.
+Using this script, you can run a "vignette" of the back-end analysis pipeline, to demostrate RiboViz's capabilities. An example for *Saccharomyces cerevisiae* reads, up to the output of HDF5 files, is in the `vignette/` directory.
 
 ## `vignette` directory contents
 
@@ -30,9 +27,9 @@ fq_files: # fastq files to be processed
   NotHere: example_missing_file.fastq.gz # prepRiboviz should give error message for missing files
 ```
 
-## What `prepRiboviz.sh` and `prepRiboviz.py` do
+## What `prepRiboviz.py` does
 
-Each script prepares ribosome profiling data for RiboViz or other analyses. They each do the following (`names` in brackets correspond to variables in the YAML configuration file):
+The script prepares ribosome profiling data for RiboViz or other analyses. It does the following (`names` in brackets correspond to variables in the YAML configuration file):
 
 * Reads configuration information from the YAML configuration file.
 * Builds hisat2 indices if requested (`build_indices=TRUE`, by default), in an index directory (`dir_index`).
@@ -117,14 +114,6 @@ nprocesses: 4 # number of processes to parallelize over
 
 * **Note:** `samtools`, which is invoked during the run, can only run under 1 process with Python 2.
 
-### Run `scripts/prepRiboviz.sh`
-
-Run:
-
-```bash
-bash scripts/prepRiboviz.sh vignette/vignette_config.yaml
-```
-
 ### Run `scripts/prepRiboviz.py`
 
 Run:
@@ -179,24 +168,9 @@ Swap:           969         619         350
 ```
 
 Divide the free memory by the number of processes, `nprocesses` e.g. 1024/4 = 256 MB.
-
-If using `prepRiboviz.sh` then edit `scripts/prepRiboviz.sh` and change the lines:
-
-```bash
-        echo samtools sort -@ ${nprocesses} -O bam -o ${fn_out}.bam -
-
-        samtools sort -@ ${nprocesses} -O bam -o ${fn_out}.bam -
 ```
 
-to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
-
-```bash
-        echo samtools sort -@ ${nprocesses} -m 256M -O bam -o ${fn_out}.bam -
-
-        samtools sort -@ ${nprocesses} -m 256M -O bam -o ${fn_out}.bam -
-```
-
-If using `prepRiboviz.py` then edit `scripts/prepRiboviz.py` and change the lines:
+Edit `scripts/prepRiboviz.py` and change the lines:
 
 ```python
     cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
@@ -345,9 +319,6 @@ du -sm vignette/output/
 
 To both display all output from the script that is printed at the terminal, and capture it into a file, run, for example:
 
-```bash
-bash scripts/prepRiboviz.sh vignette/vignette_config.yaml 2>&1 | tee vignette-script-bash.txt
-```
 ```bash
 python scripts/prepRiboviz.py scripts/ vignette/vignette_config.yaml  2>&1 | tee script-py.txt
 ```
