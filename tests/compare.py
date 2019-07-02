@@ -109,6 +109,9 @@ def equal_bedgraph(file1, file2):
     print("CHECK: equal_bedgraph")
     data1 = load_bedgraph(file1)
     data2 = load_bedgraph(file2)
+    assert data1.shape[0] == data2.shape[0],\
+        "Unequal bedGraph rows: %s (%d), %s (%d)"\
+        % (file1, data1.shape[0], file2, data2.shape[0])
     assert data1.equals(data2),\
         "Unequal bedGraph data: %s, %s" % (file1, file2)
 
@@ -256,6 +259,26 @@ def equal_bam_sam_reads(file1, file2):
 #            % (file1.filename, str(seg1), file2.filename, str(seg2))
 
 
+def equal_tsv(file1, file2):
+    """
+    Compare two tab-separated (TSV) files for equality.
+
+    :param file1: File name
+    :type file1: str or unicode
+    :param file2: File name
+    :type file2: str or unicode
+    :raise AssertionError: if files differ in their data
+    """
+    print("CHECK: equal_tsv")
+    data1 = pandas.read_csv(file1, sep="\t")
+    data2 = pandas.read_csv(file2, sep="\t")
+    assert data1.shape == data2.shape,\
+        "Unequal rows/columns: %s (%s), %s (%s)"\
+        % (file1, str(data1.shape), file2, str(data2.shape))
+    assert data1.equals(data2),\
+        "Unequal TSV data: %s, %s" % (file1, file2)
+
+
 def compare(file1, file2):
     """
     Compare two files for equality.
@@ -266,10 +289,10 @@ def compare(file1, file2):
     :type file2: str or unicode
     :raise AssertionError: if files differ
     """
-    assert os.path.exists(file1)
-    assert os.path.exists(file2)
-    assert os.path.isfile(file1)
-    assert os.path.isfile(file2)
+    assert os.path.exists(file1), "Non-existent file: %s" % file1
+    assert os.path.exists(file2), "Non-existent file: %s" % file2
+    assert not os.path.isdir(file1), "Directory: %s" % file1
+    assert not os.path.isdir(file2), "Directory: %s" % file2
 #    equal_names(file1, file2)
     ext = os.path.splitext(file1)[1]
     if ext in [".pdf", ".ht2", ".bai"]:
@@ -282,6 +305,8 @@ def compare(file1, file2):
         equal_bam(file1, file2)
     if ext in [".sam"]:
         equal_sam(file1, file2)
+    if ext in [".tsv"]:
+        equal_tsv(file1, file2)
 
 
 if __name__ == "__main__":
