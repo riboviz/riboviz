@@ -129,8 +129,8 @@ def equal_bam(file1, file2, has_index=True):
     applicable, their BAI files
     """
     print(("CHECK: equal_bam(has_index=" + str(has_index) + ")"))
-    with AlignmentFile(file1, mode="rb") as bam_file1,\
-            AlignmentFile(file2, mode="rb") as bam_file2:
+    with AlignmentFile(file1, mode="rb", check_sq=False) as bam_file1,\
+            AlignmentFile(file2, mode="rb", check_sq=False) as bam_file2:
         assert bam_file1.is_bam, "Non-BAM file: %s" % file1
         assert bam_file2.is_bam, "Non-BAM file: %s" % file2
         if has_index:
@@ -138,18 +138,12 @@ def equal_bam(file1, file2, has_index=True):
             # and opened.
             assert bam_file1.has_index(), "No BAM index: %s" % file1
             assert bam_file2.has_index(), "No BAM index: %s" % file2
+        equal_bam_sam_headers(bam_file1, bam_file2)
+        equal_bam_sam_references(bam_file1, bam_file2)
+
         stats1 = bam_file1.get_index_statistics()
-        stats2 = bam_file1.get_index_statistics()
+        stats2 = bam_file2.get_index_statistics()
         assert stats1 == stats2, "Unequal index statistics: %s, %s"\
-            % (file1, file2)
-        assert bam_file1.nreferences == bam_file2.nreferences,\
-            "Unequal number of reference sequences: %s (%d), %s (%d)"\
-            % (file1, bam_file1.nreferences, file2, bam_file2.nreferences)
-        assert bam_file1.references == bam_file2.references,\
-            "Unequal reference sequence names: %s, %s"\
-            % (file1, file2)
-        assert bam_file1.lengths == bam_file2.lengths,\
-            "Unequal reference sequence lengths: %s, %s"\
             % (file1, file2)
         assert bam_file1.nocoordinate == bam_file2.nocoordinate,\
             "Unequal number of reads without coordinates: %s (%d), %s (%d)"\
@@ -161,34 +155,105 @@ def equal_bam(file1, file2, has_index=True):
             "Unequal number of unmapped alignments: %s (%d), %s (%d)"\
             % (file1, bam_file1.unmapped, file2, bam_file2.unmapped)
 
-        keys1 = list(bam_file1.header.keys())
-        keys2 = list(bam_file2.header.keys())
-        assert keys1 == keys2,\
-            "Unequal header keys: %s, %s" % (file1, file2)
-        for key in keys1:
-            if key == "PG":
-                # Skip PG as this holds command-line invocation that
-                # created the file and paths within will differ.
-                continue
-            assert bam_file1.header[key] == bam_file2.header[key],\
-                "Unequal values for key %s: %s (%s), %s (%s)"\
-                % (key, file1, str(bam_file1.header[key]),
-                   file1, str(bam_file2.header[key]))
-        reads1 = [read for read in bam_file1.fetch()]
-        reads2 = [read for read in bam_file2.fetch()]
-        i = 0
-        for seg1, seg2 in zip(reads1, reads2):
-            i = i + 1
-            # compare returns -1 if seg1 < seg2, 0 if =, 1 if >
-            comparison = seg1.compare(seg2)
-            if comparison != 0:
-                print("Unequal segments:")
-                print(("Pair: " + str(i) + " Compare:" + str(comparison)))
-                print((str(seg1) + str(seg2)))
+        equal_bam_sam_reads(bam_file1, bam_file2)
+
+
+def equal_sam(file1, file2):
+    """
+    Compare two SAM files for equality.
+
+    :param file1: File name
+    :type file1: str or unicode
+    :param file2: File name
+    :type file2: str or unicode
+    :raise AssertionError: if files differ in their data
+    :raise Exception: if problems arise when loading the files
+    """
+    print("CHECK: equal_sam")
+    with AlignmentFile(file1, check_sq=False) as sam_file1,\
+            AlignmentFile(file2, check_sq=False) as sam_file2:
+        assert not sam_file1.is_bam, "Non-SAM file: %s" % file1
+        assert not sam_file2.is_bam, "Non-SAM file: %s" % file2
+        equal_bam_sam_headers(sam_file1, sam_file2)
+        equal_bam_sam_references(sam_file1, sam_file2)
+        equal_bam_sam_reads(sam_file1, sam_file2)
+
+
+def equal_bam_sam_references(file1, file2):
+    """
+    Compare BAM or SAM file references for equality.
+    Reference numbers, names and lengths are compared.
+
+    :param file1: File name
+    :type file1: pysam.AlignmentFile
+    :param file2: File name
+    :type file2: pysam.AlignmentFile
+    :raise AssertionError: if files differ in their references data
+    """
+    assert file1.nreferences == file2.nreferences,\
+        "Unequal number of reference sequences: %s (%d), %s (%d)"\
+        % (file1.filename, file1.nreferences,
+           file2.filename, file2.nreferences)
+    assert file1.references == file2.references,\
+        "Unequal reference sequence names: %s, %s"\
+        % (file1.filename, file2.filename)
+    assert file1.lengths == file2.lengths,\
+        "Unequal reference sequence lengths: %s, %s"\
+        % (file1.filename, file2.filename)
+
+
+def equal_bam_sam_headers(file1, file2):
+    """
+    Compare BAM or SAM file header data for equality.
+
+    Values for all but "PG" are compared. "PG" is not compared as it
+    holds information on the command-line invocation that created a
+    file and the file names and paths may differ.
+
+    :param file1: File name
+    :type file1: pysam.AlignmentFile
+    :param file2: File name
+    :type file2: pysam.AlignmentFile
+    :raise AssertionError: if files differ in their header data
+    """
+    keys1 = list(file1.header.keys())
+    keys2 = list(file2.header.keys())
+    assert keys1 == keys2,\
+        "Unequal header keys: %s, %s" % (file1.filename, file2.filename)
+    for key in keys1:
+        if key == "PG":
+            continue
+        assert file1.header[key] == file2.header[key],\
+            "Unequal values for key %s: %s (%s), %s (%s)"\
+            % (key, file1.filename, str(file1.header[key]),
+               file2.filename, str(file2.header[key]))
+
+
+def equal_bam_sam_reads(file1, file2):
+    """
+    Compare BAM or SAM reads for equality.
+
+    :param file1: File name
+    :type file1: pysam.AlignmentFile
+    :param file2: File name
+    :type file2: pysam.AlignmentFile
+    :raise AssertionError: if files differ in their header data
+    """
+    reads1 = [read for read in file1.fetch()]
+    reads2 = [read for read in file2.fetch()]
+    i = 0
+    for seg1, seg2 in zip(reads1, reads2):
+        i = i + 1
+        # compare returns -1 if seg1 < seg2, 0 if =, 1 if >
+        comparison = seg1.compare(seg2)
+        if comparison != 0:
+            print("Unequal segments:")
+            print(("Pair: " + str(i) + " Compare:" + str(comparison)))
+            print((str(seg1) + str(seg2)))
 # TODO uncomment when resolved how best to compare these.
-#            assert comparison == 0,\
-#                "Unequal segments: %s (%s), %s (%s)"\
-#                % (file1, str(seg1), file2, str(seg2))
+#        assert comparison == 0,\
+#            "Unequal segments: %s (%s), %s (%s)"\
+#            % (file1.filename, str(seg1), file2.filename, str(seg2))
 
 
 def compare(file1, file2):
@@ -207,7 +272,7 @@ def compare(file1, file2):
     assert os.path.isfile(file2)
 #    equal_names(file1, file2)
     ext = os.path.splitext(file1)[1]
-    if ext in [".pdf", ".ht2"]:
+    if ext in [".pdf", ".ht2", ".bai"]:
         equal_sizes(file1, file2)
     if ext in [".h5"]:
         equal_h5(file1, file2)
@@ -215,6 +280,8 @@ def compare(file1, file2):
         equal_bedgraph(file1, file2)
     if ext in [".bam"]:
         equal_bam(file1, file2)
+    if ext in [".sam"]:
+        equal_sam(file1, file2)
 
 
 if __name__ == "__main__":
