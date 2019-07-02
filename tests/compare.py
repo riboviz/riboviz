@@ -174,7 +174,6 @@ def equal_bam(file1, file2, has_index=True):
                 "Unequal values for key %s: %s (%s), %s (%s)"\
                 % (key, file1, str(bam_file1.header[key]),
                    file1, str(bam_file2.header[key]))
-        # In RiboViz order matters.
         reads1 = [read for read in bam_file1.fetch()]
         reads2 = [read for read in bam_file2.fetch()]
         i = 0
