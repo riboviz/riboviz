@@ -21,6 +21,8 @@ We suggest that you:
 
 We suggest that you check out the web sites for each prerequisite for information on how to install the prerequisites under Mac OS X.
 
+---
+
 ## General packages
 
 ### Git
@@ -122,6 +124,8 @@ Install:
 sudo yum install -y hdf5-devel
 ```
 
+---
+
 ## Python
 
 Web site: [python](https://www.python.org/)
@@ -167,6 +171,8 @@ python -V
 ```
 Python 3.7.3
 ```
+
+---
 
 ## Python packages
 
@@ -331,6 +337,8 @@ h5py.run_tests()
 OK (skipped=16, expected failures=6)
 ```
 
+---
+
 ## Hisat2
 
 Web site: [Hisat2](https://ccb.jhu.edu/software/hisat2/index.shtml)
@@ -358,6 +366,8 @@ Compiler: gcc version 4.8.2 (GCC)
 Options: -O3 -m64 -msse2 -funroll-loops -g3 -DPOPCNT_CAPABILITY
 Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 ```
+
+---
 
 ## Bowtie
 
@@ -396,6 +406,8 @@ Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 export PATH=~/hisat2-2.1.0:$PATH
 export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 ```
+
+---
 
 ## R 2.14.0+
 
@@ -440,6 +452,8 @@ R --version
 ```
 R version 3.5.1 (2018-07-02) -- "Feather Spray"
 ```
+
+---
 
 ## R packages
 
@@ -598,6 +612,8 @@ In install.packages(pkgs = doing, lib = lib, ...) :
 
 You may need to assign more memory to R or your machine.
 
+---
+
 ## Check names and versions of Python packages
 
 Run:
@@ -621,6 +637,8 @@ Alternatively, run:
 ```bash
 pip list
 ```
+
+---
 
 ## Check names and versions of R packages
 
@@ -667,6 +685,61 @@ Get RiboViz:
 
 ```bash
 git clone https://mikej888@github.com/RiboViz/RiboViz
+```
+
+---
+
+## Python packages for developers
+
+### pylint
+
+Web sites:
+
+* [Pylint](https://www.pylint.org/)
+* [BitBucket](https://bitbucket.org/logilab/pylint.org)
+
+Install:
+```bash
+conda install -y pylint
+```
+
+### pycodestyle
+
+Web sites:
+
+* [readthedocs](https://pycodestyle.readthedocs.io/)
+* [GitHub](https://github.com/pycqa/pycodestyle)
+
+Install:
+
+```bash
+conda install -y pycodestyle
+```
+
+### pandas
+
+Web sites:
+
+* [pandas](https://pandas.pydata.org/)
+* [GitHub](https://github.com/pandas-dev/pandas)
+
+Install:
+
+```bash
+conda install -y pandas
+```
+
+### pytest
+
+Web sites:
+
+* [pytest](https://pytest.org/)
+* [GitHub](https://github.com/pytest-dev/pytest/)
+
+Install:
+
+```bash
+conda install -y pytest
 ```
 
 ---
