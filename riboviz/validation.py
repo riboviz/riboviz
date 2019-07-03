@@ -21,7 +21,6 @@ def equal_sizes(file1, file2):
     :raise AssertionError: if file sizes differ
     :raise Exception: if problems arise when loading the files
     """
-    print("CHECK: equal_sizes")
     stat1 = os.stat(file1)
     stat2 = os.stat(file2)
     assert stat1.st_size == stat2.st_size,\
@@ -39,7 +38,6 @@ def equal_names(file1, file2):
     :raise AssertionError: if file names differ
     :raise Exception: if problems arise when loading the files
     """
-    print("CHECK: equal_names")
     local_file1 = os.path.split(file1)[1]
     local_file2 = os.path.split(file2)[1]
     assert local_file1 == local_file2,\
@@ -58,7 +56,6 @@ def equal_h5(file1, file2):
     :raise Exception: if problems arise when loading the files or
     running `h5diff`
     """
-    print("CHECK: equal_h5")
     # TODO implement in-Python comparison.
     cmd = ["h5diff", "-q", file1, file2]
     return_code = subprocess.call(cmd)
@@ -113,7 +110,6 @@ def equal_bedgraph(file1, file2):
     differ in their data
     :raise Exception: if problems arise when loading the files
     """
-    print("CHECK: equal_bedgraph")
     data1 = load_bedgraph(file1)
     data2 = load_bedgraph(file2)
     assert data1.shape[0] == data2.shape[0],\
@@ -147,7 +143,6 @@ def equal_bam(file1, file2):
     :raise Exception: if problems arise when loading the files or, if
     applicable, their complementary BAI files
     """
-    print("CHECK: equal_bam")
     with pysam.AlignmentFile(file1, mode="rb", check_sq=False) as bam_file1,\
             pysam.AlignmentFile(file2, mode="rb", check_sq=False) as bam_file2:
         assert bam_file1.is_bam, "Non-BAM file: %s" % file1
@@ -188,7 +183,6 @@ def equal_sam(file1, file2):
     :raise AssertionError: if files differ in their data
     :raise Exception: if problems arise when loading the files
     """
-    print("CHECK: equal_sam")
     with pysam.AlignmentFile(file1, check_sq=False) as sam_file1,\
             pysam.AlignmentFile(file2, check_sq=False) as sam_file2:
         assert not sam_file1.is_bam, "Non-SAM file: %s" % file1
@@ -289,7 +283,6 @@ def equal_tsv(file1, file2):
     :raise AssertionError: if files differ in their data
     :raise Exception: if problems arise when loading the files
     """
-    print("CHECK: equal_tsv")
     data1 = pandas.read_csv(file1, sep="\t")
     data2 = pandas.read_csv(file2, sep="\t")
     assert data1.shape == data2.shape,\
@@ -314,7 +307,6 @@ def equal_fastq(file1, file2):
     :raise AssertionError: if files differ in their data
     :raise Exception: if problems arise when loading the files
     """
-    print("CHECK: equal_fastq")
     seq_index1 = SeqIO.index(file1, "fastq")
     seq_index2 = SeqIO.index(file2, "fastq")
     assert len(seq_index1) == len(seq_index2),\
