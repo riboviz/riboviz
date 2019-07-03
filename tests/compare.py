@@ -5,6 +5,8 @@ import os
 import os.path
 import subprocess
 import sys
+
+from Bio import SeqIO
 import pandas
 import pysam
 
@@ -18,6 +20,7 @@ def equal_sizes(file1, file2):
     :param file2: File name
     :type file2: str or unicode
     :raise AssertionError: if file sizes differ
+    :raise Exception: if problems arise when loading the files
     """
     print("CHECK: equal_sizes")
     stat1 = os.stat(file1)
@@ -35,6 +38,7 @@ def equal_names(file1, file2):
     :param file2: File name
     :type file2: str or unicode
     :raise AssertionError: if file names differ
+    :raise Exception: if problems arise when loading the files
     """
     print("CHECK: equal_names")
     local_file1 = os.path.split(file1)[1]
@@ -52,9 +56,11 @@ def equal_h5(file1, file2):
     :param file2: File name
     :type file2: str or unicode
     :raise AssertionError: if files differ
+    :raise Exception: if problems arise when loading the files or
+    running `h5diff`
     """
     print("CHECK: equal_h5")
-    # TODO Implement in-Python comparison.
+    # TODO implement in-Python comparison.
     cmd = ["h5diff", file1, file2]
     return_code = subprocess.call(cmd)
     assert return_code == 0,\
@@ -65,7 +71,7 @@ def equal_h5(file1, file2):
 BEDGRAPH_COLUMNS = ["Chromosome", "Start", "End", "Data"]
 
 
-def load_bedgraph(file):
+def load_bedgraph(bed_file):
     """
     Load bedGraph file. A bedGraph file has format:
 
@@ -80,17 +86,18 @@ def load_bedgraph(file):
     The DataFrame returned has four column names: "Chromosome",
     "Start", "End", "Data".
 
-    :param file: File name
-    :type file: str or unicode
+    :param bed_file: File name
+    :type bed_file: str or unicode
     :return: bedGraph data
     :rtype: pandas.core.frame.DataFrame
     :raise AssertionError: if file does not have 4 columns
+    :raise Exception: if problems arise when loading the file
     """
     # TODO handle track-line, if provided.
-    data = pandas.read_csv(file, sep="\t", header=None)
+    data = pandas.read_csv(bed_file, sep="\t", header=None)
     assert data.shape[1] == len(BEDGRAPH_COLUMNS),\
-        "Invalid bedgraph file: %s. Expected 4 columns, found %d" % (
-            file, data.shape[1])
+        "Invalid bedgraph file: %s. Expected 4 columns, found %d"\
+        % (bed_file, data.shape[1])
     data.columns = BEDGRAPH_COLUMNS
     return data
 
@@ -105,6 +112,7 @@ def equal_bedgraph(file1, file2):
     :type file2: str or unicode
     :raise AssertionError: if files are not bedGraphs or they
     differ in their data
+    :raise Exception: if problems arise when loading the files
     """
     print("CHECK: equal_bedgraph")
     data1 = load_bedgraph(file1)
@@ -116,38 +124,42 @@ def equal_bedgraph(file1, file2):
         "Unequal bedGraph data: %s, %s" % (file1, file2)
 
 
-def equal_bam(file1, file2, has_index=True):
+def equal_bam(file1, file2):
     """
-    Compare two BAM files for equality.
+    Compare two BAM files for equality. The following are compared:
+
+    * Index-specific information:
+      - Index statistics.
+      - Number of unequal reads without coordinates.
+      - Number of mapped alignments.
+      - Number of unmapped alignments.
+    * Header values for all but "PG".
+    * Reference numbers, names and lengths.
+    * Reads
+
+    BAM files are required to have complementary BAI files.
 
     :param file1: File name
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
-    :param has_index: are files expected to have complementary BAI
-    files?
-    :type has_index: bool
-    :raise AssertionError: if files differ in their data
+    :raise AssertionError: if files differ in their data or they
+    are missing complementary BAI files
     :raise Exception: if problems arise when loading the files or, if
-    applicable, their BAI files
+    applicable, their complementary BAI files
     """
-    print(("CHECK: equal_bam(has_index=" + str(has_index) + ")"))
+    print("CHECK: equal_bam")
     with pysam.AlignmentFile(file1, mode="rb", check_sq=False) as bam_file1,\
             pysam.AlignmentFile(file2, mode="rb", check_sq=False) as bam_file2:
         assert bam_file1.is_bam, "Non-BAM file: %s" % file1
         assert bam_file2.is_bam, "Non-BAM file: %s" % file2
-        if has_index:
-            # If has_index() is True then an index file was found
-            # and opened.
-            assert bam_file1.has_index(), "No BAM index: %s" % file1
-            assert bam_file2.has_index(), "No BAM index: %s" % file2
-        equal_bam_sam_headers(bam_file1, bam_file2)
-        equal_bam_sam_references(bam_file1, bam_file2)
-
+        assert bam_file1.has_index(), "No BAM index: %s" % file1
+        assert bam_file2.has_index(), "No BAM index: %s" % file2
         stats1 = bam_file1.get_index_statistics()
         stats2 = bam_file2.get_index_statistics()
-        assert stats1 == stats2, "Unequal index statistics: %s, %s"\
-            % (file1, file2)
+        assert stats1 == stats2,\
+            "Unequal index statistics: %s (%s), %s (%s)"\
+            % (file1, str(stats1), file2, str(stats2))
         assert bam_file1.nocoordinate == bam_file2.nocoordinate,\
             "Unequal number of reads without coordinates: %s (%d), %s (%d)"\
             % (file1, bam_file1.nocoordinate, file2, bam_file2.nocoordinate)
@@ -157,13 +169,18 @@ def equal_bam(file1, file2, has_index=True):
         assert bam_file1.unmapped == bam_file2.unmapped,\
             "Unequal number of unmapped alignments: %s (%d), %s (%d)"\
             % (file1, bam_file1.unmapped, file2, bam_file2.unmapped)
-
+        equal_bam_sam_headers(bam_file1, bam_file2)
+        equal_bam_sam_references(bam_file1, bam_file2)
         equal_bam_sam_reads(bam_file1, bam_file2)
 
 
 def equal_sam(file1, file2):
     """
-    Compare two SAM files for equality.
+    Compare two SAM files for equality. The following are compared:
+
+    * Header values for all but "PG".
+    * Reference numbers, names and lengths.
+    * Reads.
 
     :param file1: File name
     :type file1: str or unicode
@@ -198,11 +215,13 @@ def equal_bam_sam_references(file1, file2):
         % (file1.filename, file1.nreferences,
            file2.filename, file2.nreferences)
     assert file1.references == file2.references,\
-        "Unequal reference sequence names: %s, %s"\
-        % (file1.filename, file2.filename)
+        "Unequal reference sequence names: %s (%s), %s (%s)"\
+        % (file1.filename, str(file1.references),
+           file2.filename, str(file2.references))
     assert file1.lengths == file2.lengths,\
-        "Unequal reference sequence lengths: %s, %s"\
-        % (file1.filename, file2.filename)
+        "Unequal reference sequence lengths: %s (%s), %s (%s)"\
+        % (file1.filename, str(file1.lengths),
+           file2.filename, str(file2.lengths))
 
 
 def equal_bam_sam_headers(file1, file2):
@@ -240,7 +259,7 @@ def equal_bam_sam_reads(file1, file2):
     :type file1: pysam.AlignmentFile
     :param file2: File name
     :type file2: pysam.AlignmentFile
-    :raise AssertionError: if files differ in their header data
+    :raise AssertionError: if files differ in their reads
     """
     reads1 = [read for read in file1.fetch()]
     reads2 = [read for read in file2.fetch()]
@@ -261,13 +280,14 @@ def equal_bam_sam_reads(file1, file2):
 
 def equal_tsv(file1, file2):
     """
-    Compare two tab-separated (TSV) files for equality.
+    Compare two tab-separated (TSV) files for exact equality.
 
     :param file1: File name
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
     :raise AssertionError: if files differ in their data
+    :raise Exception: if problems arise when loading the files
     """
     print("CHECK: equal_tsv")
     data1 = pandas.read_csv(file1, sep="\t")
@@ -277,6 +297,60 @@ def equal_tsv(file1, file2):
         % (file1, str(data1.shape), file2, str(data2.shape))
     assert data1.equals(data2),\
         "Unequal TSV data: %s, %s" % (file1, file2)
+
+
+def equal_fastq(file1, file2):
+    """
+    Compare two FASTQ files for equality. The following are compared:
+
+    * Both files have the same number of records.
+    * All records in file1 are also in file2. The order of records is
+      ignored.
+
+    :param file1: File name
+    :type file1: str or unicode
+    :param file2: File name
+    :type file2: str or unicode
+    :raise AssertionError: if files differ in their data
+    :raise Exception: if problems arise when loading the files
+    """
+    print("CHECK: equal_fastq")
+    seq_index1 = SeqIO.index(file1, "fastq")
+    seq_index2 = SeqIO.index(file2, "fastq")
+    assert len(seq_index1) == len(seq_index2),\
+        "Unequal number of sequences: %s (%d), %s (%d)"\
+        % (file1, len(seq_index1), file2, len(seq_index2))
+    for seq_id in seq_index1:
+        assert seq_id in seq_index2,\
+            "Missing ID: %s in %s but not in %s"\
+            % (seq_id, file1, file2)
+        seq1 = seq_index1[seq_id]
+        seq2 = seq_index2[seq_id]
+        assert seq1.name == seq2.name,\
+            "Unequal name: %s (%s), %s (%s)"\
+            % (file1, seq1.name, file2, seq2.name)
+        assert seq1.seq == seq2.seq,\
+            "Unequal sequence: %s (%s), %s (%s)"\
+            % (file1, seq1.seq, file2, seq2.seq)
+        assert seq1.annotations == seq2.annotations,\
+            "Unequal annotations: %s (%s), %s (%s)"\
+            % (file1, str(seq1.annotations),
+               file2, str(seq2.annotations))
+        assert seq1.dbxrefs == seq2.dbxrefs,\
+            "Unequal database cross-references: %s (%s), %s (%s)"\
+            % (file1, seq1.dbxrefs, file2, seq2.dbxrefs)
+        assert seq1.features == seq2.features,\
+            "Unequal features: %s (%s), %s (%s)"\
+            % (file1, seq1.features, file2, seq2.features)
+        assert seq1.letter_annotations == seq2.letter_annotations,\
+            "Unequal letter annotations: %s (%s), %s (%s)"\
+            % (file1, seq1.letter_annotations,
+               file2, seq2.letter_annotations)
+        assert seq1.description == seq2.description,\
+            "Unequal description: %s (%s), %s (%s)"\
+            % (file1, seq1.description, file2, seq2.description)
+    seq_index1.close()
+    seq_index2.close()
 
 
 def compare(file1, file2):
@@ -307,6 +381,8 @@ def compare(file1, file2):
         equal_sam(file1, file2)
     if ext in [".tsv"]:
         equal_tsv(file1, file2)
+    if ext in [".fq"]:
+        equal_fastq(file1, file2)
 
 
 if __name__ == "__main__":
