@@ -1,10 +1,9 @@
 """
-Helper methods for comparing files of different types.
+Helper methods for comparing and validating files of different types.
 """
 import os
 import os.path
 import subprocess
-import sys
 
 from Bio import SeqIO
 import pandas
@@ -271,8 +270,8 @@ def equal_bam_sam_reads(file1, file2):
         if comparison != 0:
             print("Unequal segments:")
             print(("Pair: " + str(i) + " Compare:" + str(comparison)))
-            print(str(seg1))
-            print(str(seg2))
+            print((str(seg1)))
+            print((str(seg2)))
 # TODO uncomment when resolved how best to compare these.
 #        assert comparison == 0,\
 #            "Unequal segments: %s (%s), %s (%s)"\
@@ -384,7 +383,3 @@ def compare(file1, file2):
         equal_tsv(file1, file2)
     if ext in [".fq"]:
         equal_fastq(file1, file2)
-
-
-if __name__ == "__main__":
-    compare(sys.argv[1], sys.argv[2])
