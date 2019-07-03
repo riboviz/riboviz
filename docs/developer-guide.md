@@ -8,13 +8,13 @@ It can be run as follows:
 
 * Python 3:
 
-```python
+```bash
 python -m pyscripts.compare_files <FILE> <FILE>
 ```
 
 * Python 2 or 3:
 
-```python
+```bash
 PYTHONPATH=. python pyscripts/compare_files.py <FILE> <FILE>
 ```
 
@@ -22,18 +22,20 @@ If the files are equivalent an exit code of 0 is returned. If the files are not 
 
 For example:
 
-```python
+```bash
 PYTHONPATH=. python pyscripts/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WT3AT.h5
 echo $?
 ```
 ```
 0
 ```
-```python
+```bash
 PYTHONPATH=. python pyscripts/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WTnone.h5
 ```
 ```
-Non-zero return code (1) from h5diff -q /home/ubuntu/RiboViz-Outputs/CentOS7/vignette-bash//output/WT3AT.h5 /home/ubuntu/RiboViz-Outputs/Ubuntu18/vignette-bash//output/WTnone.h5
+Non-zero return code (1) from h5diff -q .../output/WT3AT.h5 .../output/WTnone.h5
+```
+```bash
 echo $?
 ```
 ```
