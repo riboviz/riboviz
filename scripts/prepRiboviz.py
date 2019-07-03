@@ -120,7 +120,7 @@ for fq_file in list(config["fq_files"].keys()):
     fn_orf_mapped_clean = os.path.join(config["dir_tmp"],
                                        fn_stem + "_orf_map_clean.sam")
     fn_nonaligned = os.path.join(config["dir_tmp"],
-                                 fn_stem + "_unaligned.sam")
+                                 fn_stem + "_unaligned.fq")
     # bam and h5 files.
     fn_out = os.path.join(config["dir_out"], fn_stem)
 

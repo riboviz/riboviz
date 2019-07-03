@@ -102,7 +102,7 @@ for fq in ${fqfs}
         ##  orf-mapped reads
         fn_orf_mapped=${dir_tmp}/${fn_stem}_orf_map.sam
         fn_orf_mapped_clean=${dir_tmp}/${fn_stem}_orf_map_clean.sam
-        fn_nonaligned=${dir_tmp}/${fn_stem}_unaligned.sam
+        fn_nonaligned=${dir_tmp}/${fn_stem}_unaligned.fq
         ##  bam + h5 files
         fn_out=${dir_out}/${fn_stem}
         ##
