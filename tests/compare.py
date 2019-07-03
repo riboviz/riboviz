@@ -6,7 +6,7 @@ import os.path
 import subprocess
 import sys
 import pandas
-from pysam import AlignmentFile
+import pysam
 
 
 def equal_sizes(file1, file2):
@@ -132,8 +132,8 @@ def equal_bam(file1, file2, has_index=True):
     applicable, their BAI files
     """
     print(("CHECK: equal_bam(has_index=" + str(has_index) + ")"))
-    with AlignmentFile(file1, mode="rb", check_sq=False) as bam_file1,\
-            AlignmentFile(file2, mode="rb", check_sq=False) as bam_file2:
+    with pysam.AlignmentFile(file1, mode="rb", check_sq=False) as bam_file1,\
+            pysam.AlignmentFile(file2, mode="rb", check_sq=False) as bam_file2:
         assert bam_file1.is_bam, "Non-BAM file: %s" % file1
         assert bam_file2.is_bam, "Non-BAM file: %s" % file2
         if has_index:
@@ -173,8 +173,8 @@ def equal_sam(file1, file2):
     :raise Exception: if problems arise when loading the files
     """
     print("CHECK: equal_sam")
-    with AlignmentFile(file1, check_sq=False) as sam_file1,\
-            AlignmentFile(file2, check_sq=False) as sam_file2:
+    with pysam.AlignmentFile(file1, check_sq=False) as sam_file1,\
+            pysam.AlignmentFile(file2, check_sq=False) as sam_file2:
         assert not sam_file1.is_bam, "Non-SAM file: %s" % file1
         assert not sam_file2.is_bam, "Non-SAM file: %s" % file2
         equal_bam_sam_headers(sam_file1, sam_file2)
