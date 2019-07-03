@@ -4,16 +4,11 @@ RiboViz workflow.
 
 Usage:
 
-    python pyscripts/prepRiboViz.py \
-        <PYTHON_SCRIPTS_DIRECTORY>\
-        <R_SCRIPTS_DIRECTORY>\
-        <DATA_DIRECTORY>\
-        <YAML_CONFIG_FILE>
+    python scripts/prepRiboViz.py <SCRIPTS_DIRECTORY> <YAML_CONFIG_FILE>
 
 Example:
 
-    python pyscripts/prepRiboviz.py pyscripts/ rscripts/ data/\
-        vignette/vignette_config.yaml
+    python scripts/prepRiboviz.py scripts/ vignette/vignette_config.yaml
 
 Prepare ribosome profiling data for RiboViz or other analysis:
 
@@ -66,10 +61,8 @@ def list_to_str(lst):
     return ' '.join(map(str, lst))
 
 
-py_scripts = sys.argv[1]
-r_scripts = sys.argv[2]
-data_dir = sys.argv[3]
-config_yaml = sys.argv[4]
+dir_scripts = sys.argv[1]
+config_yaml = sys.argv[2]
 with open(config_yaml, 'r') as f:
     config = yaml.load(f)
 
@@ -127,7 +120,7 @@ for fq_file in list(config["fq_files"].keys()):
     fn_orf_mapped_clean = os.path.join(config["dir_tmp"],
                                        fn_stem + "_orf_map_clean.sam")
     fn_nonaligned = os.path.join(config["dir_tmp"],
-                                 fn_stem + "_unaligned.sam")
+                                 fn_stem + "_unaligned.fq")
     # bam and h5 files.
     fn_out = os.path.join(config["dir_out"], fn_stem)
 
@@ -155,7 +148,7 @@ for fq_file in list(config["fq_files"].keys()):
     subprocess.call(cmd)
 
     # Trim 5' mismatched nt and remove reads with >1 mismatch.
-    cmd = ["python", os.path.join(py_scripts, "trim_5p_mismatch.py"),
+    cmd = ["python", os.path.join(dir_scripts, "trim_5p_mismatch.py"),
            "-mm", "2", "-in", fn_orf_mapped,
            "-out", fn_orf_mapped_clean]
     print(("Running: " + list_to_str(cmd)))
@@ -208,7 +201,7 @@ for fq_file in list(config["fq_files"].keys()):
     if second_id is None:
         second_id = "NULL"
     cmd = ["Rscript", "--vanilla",
-           os.path.join(r_scripts, "bam_to_h5.R"),
+           os.path.join(dir_scripts, "bam_to_h5.R"),
            "--Ncores=" + str(config["nprocesses"]),
            "--MinReadLen=" + str(config["MinReadLen"]),
            "--MaxReadLen=" + str(config["MaxReadLen"]),
@@ -225,7 +218,7 @@ for fq_file in list(config["fq_files"].keys()):
     subprocess.call(cmd)
     # Generate summary statistics and analyses plots.
     cmd = ["Rscript", "--vanilla",
-           os.path.join(r_scripts, "generate_stats_figs.R"),
+           os.path.join(dir_scripts, "generate_stats_figs.R"),
            "--Ncores=" + str(config["nprocesses"]),
            "--MinReadLen=" + str(config["MinReadLen"]),
            "--MaxReadLen=" + str(config["MaxReadLen"]),
@@ -236,9 +229,13 @@ for fq_file in list(config["fq_files"].keys()):
            "--out_prefix=" + fn_out,
            "--orf_fasta=" + config["orf_fasta"],
            "--rpf=" + str(config["rpf"]),
-           "--orf_gff_file=" + config["orf_gff_file"],
+           # TODO: uncomment this line when using this
+           # script with commit
+           # f77beadc1a4ee71cb720bd90160533ed6db00d7e
+           # or above.
+           # "--orf_gff_file=" + config["orf_gff_file"],
            "--dir_out=" + config["dir_out"],
-           "--dir_data=" + data_dir,
+           "--dir_scripts=" + dir_scripts,
            "--orf_gff_file=" + config["orf_gff_file"],
            "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
@@ -248,7 +245,7 @@ for fq_file in list(config["fq_files"].keys()):
 
 print("collating TPMs across samples")
 cmd = ["Rscript", "--vanilla",
-	   os.path.join(r_scripts, "collate_tpms.R"),
+	   os.path.join(dir_scripts, "collate_tpms.R"),
 	   "--yaml=" + config_yaml ]
 subprocess.call(cmd)
 
