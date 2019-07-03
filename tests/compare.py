@@ -271,7 +271,8 @@ def equal_bam_sam_reads(file1, file2):
         if comparison != 0:
             print("Unequal segments:")
             print(("Pair: " + str(i) + " Compare:" + str(comparison)))
-            print((str(seg1) + str(seg2)))
+            print(str(seg1))
+            print(str(seg2))
 # TODO uncomment when resolved how best to compare these.
 #        assert comparison == 0,\
 #            "Unequal segments: %s (%s), %s (%s)"\
