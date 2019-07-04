@@ -127,7 +127,7 @@ The following files can be compared:
 
 ## Coding style
 
-Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible.
+Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible. For example, to run these on `validation.py`:
 
 ```bash
 pylint riboviz/validation.py
