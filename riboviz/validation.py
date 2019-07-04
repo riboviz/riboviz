@@ -143,8 +143,8 @@ def equal_bam(file1, file2):
     :raise Exception: if problems arise when loading the files or, if
     applicable, their complementary BAI files
     """
-    with pysam.AlignmentFile(file1, mode="rb", check_sq=False) as bam_file1,\
-            pysam.AlignmentFile(file2, mode="rb", check_sq=False) as bam_file2:
+    with pysam.AlignmentFile(file1, mode="rb") as bam_file1,\
+            pysam.AlignmentFile(file2, mode="rb") as bam_file2:
         assert bam_file1.is_bam, "Non-BAM file: %s" % file1
         assert bam_file2.is_bam, "Non-BAM file: %s" % file2
         assert bam_file1.has_index(), "No BAM index: %s" % file1
@@ -183,8 +183,8 @@ def equal_sam(file1, file2):
     :raise AssertionError: if files differ in their data
     :raise Exception: if problems arise when loading the files
     """
-    with pysam.AlignmentFile(file1, check_sq=False) as sam_file1,\
-            pysam.AlignmentFile(file2, check_sq=False) as sam_file2:
+    with pysam.AlignmentFile(file1) as sam_file1,\
+            pysam.AlignmentFile(file2) as sam_file2:
         assert sam_file1.is_sam, "Non-SAM file: %s" % file1
         assert sam_file2.is_sam, "Non-SAM file: %s" % file2
         equal_bam_sam_headers(sam_file1, sam_file2)
