@@ -185,8 +185,8 @@ def equal_sam(file1, file2):
     """
     with pysam.AlignmentFile(file1, check_sq=False) as sam_file1,\
             pysam.AlignmentFile(file2, check_sq=False) as sam_file2:
-        assert not sam_file1.is_bam, "Non-SAM file: %s" % file1
-        assert not sam_file2.is_bam, "Non-SAM file: %s" % file2
+        assert sam_file1.is_sam, "Non-SAM file: %s" % file1
+        assert sam_file2.is_sam, "Non-SAM file: %s" % file2
         equal_bam_sam_headers(sam_file1, sam_file2)
         equal_bam_sam_references(sam_file1, sam_file2)
         equal_bam_sam_reads(sam_file1, sam_file2)
