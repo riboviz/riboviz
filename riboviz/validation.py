@@ -285,22 +285,33 @@ def equal_bam_sam_reads(file1, file2):
     :type file2: pysam.AlignmentFile
     :raise AssertionError: if files differ in their reads
     """
+    # TODO devise memory-efficient and flexible way of comparing reads, assume BAM/SAM are sorted by position, factor in that reads with same position may differ in their order.
     reads1 = [read for read in file1.fetch()]
     reads2 = [read for read in file2.fetch()]
-    i = 0
+    pairs = 0
+    unequals = 0
+    # TODO remove verbose flag.
+    verbose = False
     for seg1, seg2 in zip(reads1, reads2):
-        i = i + 1
+        pairs = pairs + 1
         # compare returns -1 if seg1 < seg2, 0 if =, 1 if >
         comparison = seg1.compare(seg2)
         if comparison != 0:
-            print("Unequal segments:")
-            print(("Pair: " + str(i) + " Compare:" + str(comparison)))
-            print((str(seg1)))
-            print((str(seg2)))
-# TODO uncomment when resolved how best to compare these.
+            unequals = unequals + 1
+            if verbose:
+                print("Unequal segments:")
+                print(("Pair: " + str(pairs) + " Compare:" + str(comparison)))
+                print((str(seg1)))
+                print((str(seg2)))
+    # TODO fail on first unequal segment.
 #        assert comparison == 0,\
 #            "Unequal segments: %s (%s), %s (%s)"\
 #            % (file1.filename, str(seg1), file2.filename, str(seg2))
+#    assert unequals == 0,\
+#        "Unequal segments: %d/%d. %s, %s"\
+#        % (unequals, pairs, file1.filename, file2.filename)
+    print ("Unequal segments: %d/%d. %s, %s" %\
+           (unequals, pairs, file1.filename, file2.filename))
 
 
 def equal_tsv(file1, file2):
