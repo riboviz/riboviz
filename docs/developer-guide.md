@@ -1,6 +1,61 @@
 # Developer guide
 
-## Compare files
+## Install Python packages for developers
+
+### pylint
+
+Web sites:
+
+* [Pylint](https://www.pylint.org/)
+* [BitBucket](https://bitbucket.org/logilab/pylint.org)
+
+Install:
+```bash
+conda install -y pylint
+```
+
+### pycodestyle
+
+Web sites:
+
+* [readthedocs](https://pycodestyle.readthedocs.io/)
+* [GitHub](https://github.com/pycqa/pycodestyle)
+
+Install:
+
+```bash
+conda install -y pycodestyle
+```
+
+### pandas
+
+Web sites:
+
+* [pandas](https://pandas.pydata.org/)
+* [GitHub](https://github.com/pandas-dev/pandas)
+
+Install:
+
+```bash
+conda install -y pandas
+```
+
+### pytest
+
+Web sites:
+
+* [pytest](https://pytest.org/)
+* [GitHub](https://github.com/pytest-dev/pytest/)
+
+Install:
+
+```bash
+conda install -y pytest
+```
+
+---
+
+## Compare files for equality
 
 `pyscripts/compare_files.py` is a script that can compare the files output by any stage of the vignette, `pyscripts/prepRiboViz.py`.
 
@@ -67,3 +122,15 @@ The following files can be compared:
   - Reference numbers, names and lengths.
   - Reads.
 * `.tsv`: compare tab-separated (TSV) files for exact equality.
+
+---
+
+## Coding style
+
+Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible.
+
+```bash
+pylint riboviz/validation.py
+pycodestyle riboviz/validation.py
+2to3 riboviz/validation.py
+```
