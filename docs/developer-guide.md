@@ -105,6 +105,7 @@ The following files can be compared:
     - Number of unequal reads without coordinates.
     - Number of mapped alignments.
     - Number of unmapped alignments.
+  - Category, version, compression, description.
   - Header values for all but "PG".
   - Reference numbers, names and lengths.
   - Reads
@@ -118,6 +119,7 @@ The following files can be compared:
 * `.ht2`: compare HISAT2 file sizes for equality.
 * `.pdf`: compare PDF file sizes for equality.
 * `.sam`: compare SAM files for equality, including:
+  - Category, version, compression, description.
   - Header values for all but "PG".
   - Reference numbers, names and lengths.
   - Reads.

@@ -163,6 +163,7 @@ def equal_bam(file1, file2):
         assert bam_file1.unmapped == bam_file2.unmapped,\
             "Unequal number of unmapped alignments: %s (%d), %s (%d)"\
             % (file1, bam_file1.unmapped, file2, bam_file2.unmapped)
+        equal_bam_sam_metadata(bam_file1, bam_file2)
         equal_bam_sam_headers(bam_file1, bam_file2)
         equal_bam_sam_references(bam_file1, bam_file2)
         equal_bam_sam_reads(bam_file1, bam_file2)
@@ -187,9 +188,39 @@ def equal_sam(file1, file2):
             pysam.AlignmentFile(file2) as sam_file2:
         assert sam_file1.is_sam, "Non-SAM file: %s" % file1
         assert sam_file2.is_sam, "Non-SAM file: %s" % file2
+        equal_bam_sam_metadata(sam_file1, sam_file2)
         equal_bam_sam_headers(sam_file1, sam_file2)
         equal_bam_sam_references(sam_file1, sam_file2)
         equal_bam_sam_reads(sam_file1, sam_file2)
+
+
+def equal_bam_sam_metadata(file1, file2):
+    """
+    Compare BAM or SAM file metadata for equality.
+    Category, version, compression, description are compared.
+
+    :param file1: File name
+    :type file1: pysam.AlignmentFile
+    :param file2: File name
+    :type file2: pysam.AlignmentFile
+    :raise AssertionError: if files differ in their metadata
+    """
+    assert file1.category == file2.category,\
+        "Unequal category: %s (%s), %s (%s)"\
+        % (file1.filename, file1.category,
+           file2.filename, file2.category)
+    assert file1.version == file2.version,\
+        "Unequal version: %s (%s), %s (%s)"\
+        % (file1.filename, str(file1.version),
+           file2.filename, str(file2.version))
+    assert file1.compression == file2.compression,\
+        "Unequal compression: %s (%s), %s (%s)"\
+        % (file1.filename, file1.compression,
+           file2.filename, file2.compression)
+    assert file1.description == file2.description,\
+        "Unequal description: %s (%s), %s (%s)"\
+        % (file1.filename, file1.description,
+           file2.filename, file2.description)
 
 
 def equal_bam_sam_references(file1, file2):
