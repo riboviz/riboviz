@@ -359,6 +359,7 @@ def compare(file1, file2):
     assert os.path.exists(file2), "Non-existent file: %s" % file2
     assert not os.path.isdir(file1), "Directory: %s" % file1
     assert not os.path.isdir(file2), "Directory: %s" % file2
+    # TODO uncomment equal_names check when happy with test framework.
 #    equal_names(file1, file2)
     ext = os.path.splitext(file1)[1]
     if ext in [".pdf", ".ht2", ".bai"]:
