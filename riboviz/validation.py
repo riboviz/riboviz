@@ -286,8 +286,8 @@ def equal_bam_sam_reads(file1, file2):
     :raise AssertionError: if files differ in their reads
     """
     # TODO devise memory-efficient and flexible way of comparing reads, assume BAM/SAM are sorted by position, factor in that reads with same position may differ in their order.
-    reads1 = [read for read in file1.fetch()]
-    reads2 = [read for read in file2.fetch()]
+    reads1 = [read for read in file1.fetch(until_eof=True)]
+    reads2 = [read for read in file2.fetch(until_eof=True)]
     pairs = 0
     unequals = 0
     # TODO remove verbose flag.
