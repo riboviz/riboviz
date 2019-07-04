@@ -50,7 +50,6 @@ def test_tmp_fq(command_option):
                 os.path.join(actual_tmp, file_name))
 
 
-@pytest.mark.skip(reason=".sam files give rise to memory errors")
 def test_tmp_sam(command_option):
     (expected, actual) = command_option
     expected_tmp = os.path.join(expected, "tmp")
