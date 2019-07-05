@@ -64,13 +64,13 @@ It can be run as follows:
 * Python 3:
 
 ```bash
-python -m pyscripts.compare_files <FILE> <FILE>
+python -m pyscripts.compare_files <FILE1> <FILE2>
 ```
 
 * Python 2 or 3:
 
 ```bash
-PYTHONPATH=. python pyscripts/compare_files.py <FILE> <FILE>
+PYTHONPATH=. python pyscripts/compare_files.py <FILE1> <FILE2>
 ```
 
 If the files are equivalent an exit code of 0 is returned. If the files are not equivalent an error message is displayed and an exit code of 1 is returned.
@@ -124,6 +124,25 @@ The following files can be compared:
   - Reference numbers, names and lengths.
   - Reads.
 * `.tsv`: compare tab-separated (TSV) files for exact equality.
+
+---
+
+## Run vignette regression test suite
+
+The vignette (`pyscripts/prepRiboviz.py`) regression test suite compares two directories, each assumed to have `index/` `tmp/` and `output/` directories created by the vignette.
+
+The tests can be run using pytest:
+
+```bash
+pytest tests/test_vignette.py --expected=<DIR1> [--actual=<DIR2>]
+```
+
+where:
+
+* `--expected=<DIRECTORY>`: directory with expected vignette files.
+* `--actual=<DIRECTORY>`: directory to be validated against directory with expected vignette files. Default: `vignette/`
+
+For each file output by the vignette, the files are compared using the same comparisons as for `compare_files.py` above.
 
 ---
 
