@@ -99,7 +99,7 @@ echo $?
 
 The following files can be compared:
 
-* `.bam`: compare BAM files for equality, including:
+* `.bam`: compare sorted BAM files for equality, including:
   - Index-specific information:
     - Index statistics.
     - Number of unequal reads without coordinates.
@@ -110,6 +110,7 @@ The following files can be compared:
   - Reference numbers, names and lengths.
   - Reads
   - BAM files are required to have complementary BAI files.
+  - BAM files are expected to be sorted by leftmost coordinate position.
 * `.bam.bai`: compare BAI file sizes for equality.
 * `.bedgraph`: compare bedGraph file contents for equality.
 * `.fq`: compare FASTQ files for equality, including:
@@ -118,11 +119,12 @@ The following files can be compared:
 * `.h5`: compare HDF5 files for equality, using `h5diff`.
 * `.ht2`: compare HISAT2 file sizes for equality.
 * `.pdf`: compare PDF file sizes for equality.
-* `.sam`: compare SAM files for equality, including:
+* `.sam`: compare sorted SAM files for equality, including:
   - Category, version, compression, description.
   - Header values for all but "PG".
   - Reference numbers, names and lengths.
   - Reads.
+  - SAM files are expected to be sorted by leftmost coordinate position.
 * `.tsv`: compare tab-separated (TSV) files for exact equality.
 
 ---
