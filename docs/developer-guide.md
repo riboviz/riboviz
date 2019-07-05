@@ -158,6 +158,71 @@ For example:
 pytest -s -k "test_output_bam" tests/test_vignette.py --expected=<DIR1> --actual=<DIR2>
 ```
 
+A complete run looks like the following
+
+```bash
+pytest -v tests/test_vignette.py --expected=$HOME/expected-vignette --actual=$HOME/actual-vignette
+```
+```
+============================= test session starts ==============================
+...
+collected 51 items                                                             
+
+tests/test_vignette.py::test_index[YAL_CDS_w_250-1] PASSED               [  1%]
+tests/test_vignette.py::test_index[YAL_CDS_w_250-2] PASSED               [  3%]
+tests/test_vignette.py::test_index[YAL_CDS_w_250-3] PASSED               [  5%]
+tests/test_vignette.py::test_index[YAL_CDS_w_250-4] PASSED               [  7%]
+tests/test_vignette.py::test_index[YAL_CDS_w_250-5] PASSED               [  9%]
+tests/test_vignette.py::test_index[YAL_CDS_w_250-6] PASSED               [ 11%]
+tests/test_vignette.py::test_index[YAL_CDS_w_250-7] PASSED               [ 13%]
+tests/test_vignette.py::test_index[YAL_CDS_w_250-8] PASSED               [ 15%]
+tests/test_vignette.py::test_index[yeast_rRNA-1] PASSED                  [ 17%]
+tests/test_vignette.py::test_index[yeast_rRNA-2] PASSED                  [ 19%]
+tests/test_vignette.py::test_index[yeast_rRNA-3] PASSED                  [ 21%]
+tests/test_vignette.py::test_index[yeast_rRNA-4] PASSED                  [ 23%]
+tests/test_vignette.py::test_index[yeast_rRNA-5] PASSED                  [ 25%]
+tests/test_vignette.py::test_index[yeast_rRNA-6] PASSED                  [ 27%]
+tests/test_vignette.py::test_index[yeast_rRNA-7] PASSED                  [ 29%]
+tests/test_vignette.py::test_index[yeast_rRNA-8] PASSED                  [ 31%]
+tests/test_vignette.py::test_tmp_fq[WT3AT-nonrRNA] PASSED                [ 33%]
+tests/test_vignette.py::test_tmp_fq[WT3AT-trim] PASSED                   [ 35%]
+tests/test_vignette.py::test_tmp_fq[WT3AT-unaligned] PASSED              [ 37%]
+tests/test_vignette.py::test_tmp_fq[WTnone-nonrRNA] PASSED               [ 39%]
+tests/test_vignette.py::test_tmp_fq[WTnone-trim] PASSED                  [ 41%]
+tests/test_vignette.py::test_tmp_fq[WTnone-unaligned] PASSED             [ 43%]
+tests/test_vignette.py::test_tmp_sam[WT3AT-orf_map_clean] PASSED         [ 45%]
+tests/test_vignette.py::test_tmp_sam[WT3AT-orf_map] PASSED               [ 47%]
+tests/test_vignette.py::test_tmp_sam[WT3AT-rRNA_map] PASSED              [ 49%]
+tests/test_vignette.py::test_tmp_sam[WTnone-orf_map_clean] PASSED        [ 50%]
+tests/test_vignette.py::test_tmp_sam[WTnone-orf_map] PASSED              [ 52%]
+tests/test_vignette.py::test_tmp_sam[WTnone-rRNA_map] PASSED             [ 54%]
+tests/test_vignette.py::test_output_bai[WT3AT] PASSED                    [ 56%]
+tests/test_vignette.py::test_output_bai[WTnone] PASSED                   [ 58%]
+tests/test_vignette.py::test_output_bam[WT3AT] PASSED                    [ 60%]
+tests/test_vignette.py::test_output_bam[WTnone] PASSED                   [ 62%]
+tests/test_vignette.py::test_output_bedgraph[WT3AT-minus] PASSED         [ 64%]
+tests/test_vignette.py::test_output_bedgraph[WT3AT-plus] PASSED          [ 66%]
+tests/test_vignette.py::test_output_bedgraph[WTnone-minus] PASSED        [ 68%]
+tests/test_vignette.py::test_output_bedgraph[WTnone-plus] PASSED         [ 70%]
+tests/test_vignette.py::test_output_h5[WT3AT] PASSED                     [ 72%]
+tests/test_vignette.py::test_output_h5[WTnone] PASSED                    [ 74%]
+tests/test_vignette.py::test_output_tsv[WT3AT-3nt_periodicity] PASSED    [ 76%]
+tests/test_vignette.py::test_output_tsv[WT3AT-codon_ribodens] PASSED     [ 78%]
+tests/test_vignette.py::test_output_tsv[WT3AT-pos_sp_nt_freq] PASSED     [ 80%]
+tests/test_vignette.py::test_output_tsv[WT3AT-pos_sp_rpf_norm_reads] PASSED [ 82%]
+tests/test_vignette.py::test_output_tsv[WT3AT-read_lengths] PASSED       [ 84%]
+tests/test_vignette.py::test_output_tsv[WT3AT-tpms] PASSED               [ 86%]
+tests/test_vignette.py::test_output_tsv[WTnone-3nt_periodicity] PASSED   [ 88%]
+tests/test_vignette.py::test_output_tsv[WTnone-codon_ribodens] PASSED    [ 90%]
+tests/test_vignette.py::test_output_tsv[WTnone-pos_sp_nt_freq] PASSED    [ 92%]
+tests/test_vignette.py::test_output_tsv[WTnone-pos_sp_rpf_norm_reads] PASSED [ 94%]
+tests/test_vignette.py::test_output_tsv[WTnone-read_lengths] PASSED      [ 96%]
+tests/test_vignette.py::test_output_tsv[WTnone-tpms] PASSED              [ 98%]
+tests/test_vignette.py::test_output_tpms_collated_tsv PASSED             [100%]
+
+========================= 51 passed in 614.86 seconds ==========================
+```
+
 ---
 
 ## Coding style
