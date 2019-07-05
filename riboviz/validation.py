@@ -132,6 +132,9 @@ def equal_bam(file1, file2):
     * Reference numbers, names and lengths.
     * Reads
 
+    BAM files are assumed to have been sorted by their leftmost
+    coordinate position.
+
     BAM files are required to have complementary BAI files.
 
     :param file1: File name
@@ -176,6 +179,9 @@ def equal_sam(file1, file2):
     * Header values for all but "PG".
     * Reference numbers, names and lengths.
     * Reads.
+
+    SAM files are assumed to have been sorted by their leftmost
+    coordinate position.
 
     :param file1: File name
     :type file1: str or unicode
@@ -279,39 +285,118 @@ def equal_bam_sam_reads(file1, file2):
     """
     Compare BAM or SAM reads for equality.
 
+    BAM/SAM files are assumed to have been sorted by their leftmost
+    coordinate position.
+
     :param file1: File name
     :type file1: pysam.AlignmentFile
     :param file2: File name
     :type file2: pysam.AlignmentFile
     :raise AssertionError: if files differ in their reads
     """
-    # TODO devise memory-efficient and flexible way of comparing reads, assume BAM/SAM are sorted by position, factor in that reads with same position may differ in their order.
-    reads1 = [read for read in file1.fetch(until_eof=True)]
-    reads2 = [read for read in file2.fetch(until_eof=True)]
-    pairs = 0
-    unequals = 0
-    # TODO remove verbose flag.
-    verbose = False
-    for seg1, seg2 in zip(reads1, reads2):
-        pairs = pairs + 1
-        # compare returns -1 if seg1 < seg2, 0 if =, 1 if >
-        comparison = seg1.compare(seg2)
-        if comparison != 0:
-            unequals = unequals + 1
-            if verbose:
-                print("Unequal segments:")
-                print(("Pair: " + str(pairs) + " Compare:" + str(comparison)))
-                print((str(seg1)))
-                print((str(seg2)))
-    # TODO fail on first unequal segment.
-#        assert comparison == 0,\
-#            "Unequal segments: %s (%s), %s (%s)"\
-#            % (file1.filename, str(seg1), file2.filename, str(seg2))
-#    assert unequals == 0,\
-#        "Unequal segments: %d/%d. %s, %s"\
-#        % (unequals, pairs, file1.filename, file2.filename)
-    print ("Unequal segments: %d/%d. %s, %s" %\
-           (unequals, pairs, file1.filename, file2.filename))
+    # Get total number of reads in each file.
+    with pysam.AlignmentFile(file1.filename) as f1:
+        num_reads1 = f1.count()
+    with pysam.AlignmentFile(file2.filename) as f2:
+        num_reads2 = f2.count()
+    assert num_reads1 == num_reads2,\
+        "Unequal read counts: %s (%d), %s (%d)"\
+        % (file1.filename, num_reads1, file2.filename, num_reads2)
+    if num_reads1 == 0:
+        return
+    # Iterate through files in batches to reduce memory overheads.
+    # Exit when all reads have been processed.
+    iter1 = file1.fetch(until_eof=True)
+    iter2 = file2.fetch(until_eof=True)
+    read1 = next(iter1)  # Guaranteed to be at least one.
+    read_pos = read1.pos
+    num_reads_done1 = 1
+    num_reads_done2 = 0
+    all_done = False
+    while not all_done:
+        reads1 = [read1]
+        current_pos = read_pos
+        next_pos_read = None
+        # 1. Iterate through file1 to get all references with the same
+        #    leftmost coordinate position.
+        while read_pos == current_pos:
+            try:
+                read1 = next(iter1)
+                reads1.append(read1)
+                read_pos = read1.pos
+                num_reads_done1 = num_reads_done1 + 1
+            except StopIteration:
+                all_done = True
+                break
+        positions1 = {r1.pos for r1 in reads1}
+        # Internal check to ensure that logic above:
+        # * Either returns a batch with two positions i.e. a batch
+        #   where all reads share a common position, plus one extra
+        #   read representing the start of the next
+        #   batch. Unfortunately we can't look ahead in the iterator
+        #   so need to handle the extra read from the next batch.
+        # * Or returns a batch with one position i.e. a batch that
+        #   is terminated by the end of the file.
+        assert len(positions1) <= 2,\
+            "More than two positions in batch: %s (%s)"\
+            % (file1.filename, str(positions1))
+        # 3. If we've read the first read of the next batch then
+        #    remove its read from reads1 and keep for the next
+        #    iteration.
+        if len(positions1) == 2:
+            next_pos_read = reads1.pop()
+        # 2. Read the same number of reads from file2. This
+        #    should not fail as it is already known that both files
+        #    have the same number of reads.
+        reads2 = []
+        for _ in range(len(reads1)):
+            read2 = next(iter2)
+            reads2.append(read2)
+            num_reads_done2 = num_reads_done2 + 1
+        positions2 = {r2.pos for r2 in reads2}
+        # 3. Check that the reads from file2 all share a common
+        #    position and that this position is the same as for
+        #    file1. If not, then the files differ.
+        assert len(positions2) == 1,\
+            "Unequal positions: %s (%s), %s (%s)"\
+            % (file1.filename, current_pos,
+               file2.filename, str(positions2))
+        position2 = positions2.pop()  # Get only member.
+        assert current_pos == position2,\
+            "Unequal positions: %s (%s), %s (%s)"\
+            % (file1.filename, str(current_pos),
+               file2.filename, str(position2))
+        # 4. Check that the reads from each file are the same.
+        reads1.sort(key=get_segment_qname)
+        reads2.sort(key=get_segment_qname)
+        assert reads1 == reads2,\
+            "Unequal reads at position %s: %s, %s"\
+            % (str(current_pos), file1.filename, file2.filename)
+        # 5. Initialise for next iteration.
+        if next_pos_read is not None:
+            read1 = next_pos_read
+        else:
+            all_done = True
+    # Internal checks to ensure that logic above does check all reads.
+    assert num_reads_done1 == num_reads1,\
+        "Reads processed (%d) not equal to reads (%d) in file (%s)"\
+        % (num_reads_done1, num_reads1, file1.filename)
+    assert num_reads_done2 == num_reads2,\
+        "Reads processed (%d) not equal to reads (%d) in file (%s)"\
+        % (num_reads_done2, num_reads2, file2.filename)
+    print(("num_reads_done %d, %d" % (num_reads_done1, num_reads_done2)))
+
+
+def get_segment_qname(segment):
+    """
+    Return the qualified name of a read segment
+
+    :param segment: read segment
+    :type segment: pysam.libcalignedsegment.AlignedSegment
+    :return: qualified name
+    :rtype: str or unicode
+    """
+    return segment.qname
 
 
 def equal_tsv(file1, file2):
@@ -401,8 +486,7 @@ def compare(file1, file2):
     assert os.path.exists(file2), "Non-existent file: %s" % file2
     assert not os.path.isdir(file1), "Directory: %s" % file1
     assert not os.path.isdir(file2), "Directory: %s" % file2
-    # TODO uncomment equal_names check when happy with test framework.
-#    equal_names(file1, file2)
+    equal_names(file1, file2)
     ext = os.path.splitext(file1)[1]
     if ext in [".pdf", ".ht2", ".bai"]:
         equal_sizes(file1, file2)
