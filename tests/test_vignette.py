@@ -84,21 +84,25 @@ The directories are assumed to hold the following content:
       WTnone_tpms.tsv
 """
 import os
+import shutil
+import tempfile
 import pytest
+import pysam
 import riboviz
 import riboviz.validation
 
+# TODO remove print(...) when complete.
 # TODO replace iteration over files of the same format with parameterized tests, see https://docs.pytest.org/en/latest/parametrize.html and https://docs.pytest.org/en/latest/example/parametrize.html.
 
-
-# TODO remove test_vignette sample function once tests are completed.
-def test_vignette(command_option):
+@pytest.fixture(scope="module")
+def tmp_directory():
     """
-    Print command_option parameters.
+    Create a temporary directory for any test files, and delete it
+    after use.
     """
-    (expected, actual) = command_option
-    print(expected)
-    print(actual)
+    tmpdir = tempfile.mkdtemp("tmp_test_vignette")
+    yield tmpdir
+    shutil.rmtree(tmpdir)
 
 
 def test_index(command_option):
@@ -121,7 +125,6 @@ def test_index(command_option):
                 os.path.join(actual_index, file_name))
 
 
-@pytest.mark.skip(reason=".fq files take a long time to check")
 def test_tmp_fq(command_option):
     """
     Test tmp/*.fq files for equality.
@@ -142,24 +145,40 @@ def test_tmp_fq(command_option):
                 os.path.join(actual_tmp, file_name))
 
 
-def test_tmp_sam(command_option):
+def test_tmp_sam(command_option, tmp_directory):
     """
-    Test tmp/*.sam files for equality.
+    Test tmp/*.sam files for equality. The SAM files are sorted into
+    temporary SAM files which are then compared for equality.
 
     :param command_option: expected directory, actual directory
     (pytest fixture defined in conftest.py)
     :type command_option: tuple(str or unicode, str or unicode)
+    :param tmp_directory: directory for temporary SAM files
+    (pytest fixture)
+    :type tmp_directory: str or unicode
     """
     (expected, actual) = command_option
     expected_tmp = os.path.join(expected, "tmp")
     actual_tmp = os.path.join(actual, "tmp")
+    expected_tmp_copy = os.path.join(tmp_directory, "expected")
+    os.mkdir(expected_tmp_copy)
+    actual_tmp_copy = os.path.join(tmp_directory, "actual")
+    os.mkdir(actual_tmp_copy)
     for prefix in ["WT3AT", "WTnone"]:
         for content in ["orf_map_clean", "orf_map", "rRNA_map"]:
             file_name = "%s_%s.sam" % (prefix, content)
             print(file_name)
+            expected_tmp_file = os.path.join(expected_tmp_copy, file_name)
+            actual_tmp_file = os.path.join(actual_tmp_copy, file_name)
+            pysam.sort("-o",
+                       expected_tmp_file,
+                       os.path.join(expected_tmp, file_name))
+            pysam.sort("-o",
+                       actual_tmp_file,
+                       os.path.join(actual_tmp, file_name))
             riboviz.validation.compare(
-                os.path.join(expected_tmp, file_name),
-                os.path.join(actual_tmp, file_name))
+                expected_tmp_file,
+                actual_tmp_file)
 
 
 def test_output_bai(command_option):
@@ -183,7 +202,8 @@ def test_output_bai(command_option):
 
 def test_output_bam(command_option):
     """
-    Test output/*.bam files for equality.
+    Test output/*.bam files for equality. The BAM files are assumed to
+    be sorted by leftmost coordinate position.
 
     :param command_option: expected directory, actual directory
     (pytest fixture defined in conftest.py)
@@ -251,7 +271,9 @@ def test_output_tsv(command_option):
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
     for prefix in ["WT3AT", "WTnone"]:
-        for content in ["3nt_periodicity", "codon_ribodens", "pos_sp_nt_freq", "pos_sp_rpf_norm_reads", "read_lengths", "tpms"]:
+        for content in ["3nt_periodicity", "codon_ribodens",
+                        "pos_sp_nt_freq", "pos_sp_rpf_norm_reads",
+                        "read_lengths", "tpms"]:
             file_name = "%s_%s.tsv" % (prefix, content)
             print(file_name)
             riboviz.validation.compare(
