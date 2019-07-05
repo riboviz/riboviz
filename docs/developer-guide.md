@@ -146,6 +146,18 @@ where:
 
 For each file output by the vignette, the files are compared using the same comparisons as for `compare_files.py` above.
 
+Useful pytest flags are:
+
+* `-s`: disable output capture so, for example, `print` messages are shown.
+* `-v`: verbose mode, displays names of test functions run.
+* `-k`: run a specific test function.
+
+For example:
+
+```bash
+pytest -s -k "test_output_bam" tests/test_vignette.py --expected=<DIR1> --actual=<DIR2>
+```
+
 ---
 
 ## Coding style
