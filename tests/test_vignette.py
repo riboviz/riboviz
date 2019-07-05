@@ -88,7 +88,9 @@ import pytest
 import riboviz
 import riboviz.validation
 
+# TODO replace iteration over files of the same format with parameterized tests, see https://docs.pytest.org/en/latest/parametrize.html and https://docs.pytest.org/en/latest/example/parametrize.html.
 
+# TODO remove test_vignette sample function once tests are completed.
 def test_vignette(command_option):
     (expected, actual) = command_option
     print(expected)
