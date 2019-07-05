@@ -384,7 +384,6 @@ def equal_bam_sam_reads(file1, file2):
     assert num_reads_done2 == num_reads2,\
         "Reads processed (%d) not equal to reads (%d) in file (%s)"\
         % (num_reads_done2, num_reads2, file2.filename)
-    print(("num_reads_done %d, %d" % (num_reads_done1, num_reads_done2)))
 
 
 def get_segment_qname(segment):
