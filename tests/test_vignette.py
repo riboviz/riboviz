@@ -90,14 +90,25 @@ import riboviz.validation
 
 # TODO replace iteration over files of the same format with parameterized tests, see https://docs.pytest.org/en/latest/parametrize.html and https://docs.pytest.org/en/latest/example/parametrize.html.
 
+
 # TODO remove test_vignette sample function once tests are completed.
 def test_vignette(command_option):
+    """
+    Print command_option parameters.
+    """
     (expected, actual) = command_option
     print(expected)
     print(actual)
 
 
 def test_index(command_option):
+    """
+    Test index/*.ht2 files for equality.
+
+    :param command_option: expected directory, actual directory
+    (pytest fixture defined in conftest.py)
+    :type command_option: tuple(str or unicode, str or unicode)
+    """
     (expected, actual) = command_option
     expected_index = os.path.join(expected, "index")
     actual_index = os.path.join(actual, "index")
@@ -112,6 +123,13 @@ def test_index(command_option):
 
 @pytest.mark.skip(reason=".fq files take a long time to check")
 def test_tmp_fq(command_option):
+    """
+    Test tmp/*.fq files for equality.
+
+    :param command_option: expected directory, actual directory
+    (pytest fixture defined in conftest.py)
+    :type command_option: tuple(str or unicode, str or unicode)
+    """
     (expected, actual) = command_option
     expected_tmp = os.path.join(expected, "tmp")
     actual_tmp = os.path.join(actual, "tmp")
@@ -125,6 +143,13 @@ def test_tmp_fq(command_option):
 
 
 def test_tmp_sam(command_option):
+    """
+    Test tmp/*.sam files for equality.
+
+    :param command_option: expected directory, actual directory
+    (pytest fixture defined in conftest.py)
+    :type command_option: tuple(str or unicode, str or unicode)
+    """
     (expected, actual) = command_option
     expected_tmp = os.path.join(expected, "tmp")
     actual_tmp = os.path.join(actual, "tmp")
@@ -138,6 +163,13 @@ def test_tmp_sam(command_option):
 
 
 def test_output_bai(command_option):
+    """
+    Test output/*.bai files for equality.
+
+    :param command_option: expected directory, actual directory
+    (pytest fixture defined in conftest.py)
+    :type command_option: tuple(str or unicode, str or unicode)
+    """
     (expected, actual) = command_option
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
@@ -150,6 +182,13 @@ def test_output_bai(command_option):
 
 
 def test_output_bam(command_option):
+    """
+    Test output/*.bam files for equality.
+
+    :param command_option: expected directory, actual directory
+    (pytest fixture defined in conftest.py)
+    :type command_option: tuple(str or unicode, str or unicode)
+    """
     (expected, actual) = command_option
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
@@ -162,6 +201,13 @@ def test_output_bam(command_option):
 
 
 def test_output_bedgraph(command_option):
+    """
+    Test tmp/*.bedgraph files for equality.
+
+    :param command_option: expected directory, actual directory
+    (pytest fixture defined in conftest.py)
+    :type command_option: tuple(str or unicode, str or unicode)
+    """
     (expected, actual) = command_option
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
@@ -175,6 +221,13 @@ def test_output_bedgraph(command_option):
 
 
 def test_output_h5(command_option):
+    """
+    Test output/*.h5 files for equality.
+
+    :param command_option: expected directory, actual directory
+    (pytest fixture defined in conftest.py)
+    :type command_option: tuple(str or unicode, str or unicode)
+    """
     (expected, actual) = command_option
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
@@ -187,6 +240,13 @@ def test_output_h5(command_option):
 
 
 def test_output_tsv(command_option):
+    """
+    Test output/*tsv files for equality.
+
+    :param command_option: expected directory, actual directory
+    (pytest fixture defined in conftest.py)
+    :type command_option: tuple(str or unicode, str or unicode)
+    """
     (expected, actual) = command_option
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
@@ -200,6 +260,13 @@ def test_output_tsv(command_option):
 
 
 def test_output_tpms_collated_tsv(command_option):
+    """
+    Test output/TPMs_collated.tsv files for equality.
+
+    :param command_option: expected directory, actual directory
+    (pytest fixture defined in conftest.py)
+    :type command_option: tuple(str or unicode, str or unicode)
+    """
     (expected, actual) = command_option
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
