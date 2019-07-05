@@ -1,15 +1,87 @@
 """
-vignette (pyscripts/prepRiboviz.py) regression test suite.
+Vignette regression test suite
 
-Tests compare a directory's data files against another directory's
-data files.
+The vignette (`pyscripts/prepRiboviz.py`) regression test suite
+compares two directories, each assumed to have `index/` `tmp/` and
+`output/` directories created by the vignette.
 
-The tests need to be run using pytest and with two command-line
-options:
+The tests can be run using pytest:
 
-* '--expected=<DIRECTORY>': directory with expected data files.
-* '--actual=<DIRECTORY>': directory to be validated against directory
-  with expected data files.
+    pytest tests/test_vignette.py --expected=<DIR1> [--actual=<DIR2>]
+
+where:
+
+* `--expected=<DIRECTORY>`: directory with expected vignette files.
+* `--actual=<DIRECTORY>`: directory to be validated against directory
+  with expected vignette files. Default: `vignette/`
+
+The directories are assumed to hold the following content:
+
+
+    index/
+      YAL_CDS_w_250.1.ht2
+      YAL_CDS_w_250.2.ht2
+      YAL_CDS_w_250.3.ht2
+      YAL_CDS_w_250.4.ht2
+      YAL_CDS_w_250.5.ht2
+      YAL_CDS_w_250.6.ht2
+      YAL_CDS_w_250.7.ht2
+      YAL_CDS_w_250.8.ht2
+      yeast_rRNA.1.ht2
+      yeast_rRNA.2.ht2
+      yeast_rRNA.3.ht2
+      yeast_rRNA.4.ht2
+      yeast_rRNA.5.ht2
+      yeast_rRNA.6.ht2
+      yeast_rRNA.7.ht2
+      yeast_rRNA.8.ht2
+    tmp/
+      WT3AT_nonrRNA.fq
+      WT3AT_orf_map_clean.sam
+      WT3AT_orf_map.sam
+      WT3AT_rRNA_map.sam
+      WT3AT_trim.fq
+      WT3AT_unaligned.fq
+      WTnone_nonrRNA.fq
+      WTnone_orf_map_clean.sam
+      WTnone_orf_map.sam
+      WTnone_rRNA_map.sam
+      WTnone_trim.fq
+      WTnone_unaligned.fq
+    output/
+      TPMs_collated.tsv
+      WT3AT_3nt_periodicity.pdf
+      WT3AT_3nt_periodicity.tsv
+      WT3AT.bam
+      WT3AT.bam.bai
+      WT3AT_codon_ribodens.pdf
+      WT3AT_codon_ribodens.tsv
+      WT3AT_features.pdf
+      WT3AT.h5
+      WT3AT_minus.bedgraph
+      WT3AT_plus.bedgraph
+      WT3AT_pos_sp_nt_freq.tsv
+      WT3AT_pos_sp_rpf_norm_reads.pdf
+      WT3AT_pos_sp_rpf_norm_reads.tsv
+      WT3AT_read_lengths.pdf
+      WT3AT_read_lengths.tsv
+      WT3AT_tpms.tsv
+      WTnone_3nt_periodicity.pdf
+      WTnone_3nt_periodicity.tsv
+      WTnone.bam
+      WTnone.bam.bai
+      WTnone_codon_ribodens.pdf
+      WTnone_codon_ribodens.tsv
+      WTnone_features.pdf
+      WTnone.h5
+      WTnone_minus.bedgraph
+      WTnone_plus.bedgraph
+      WTnone_pos_sp_nt_freq.tsv
+      WTnone_pos_sp_rpf_norm_reads.pdf
+      WTnone_pos_sp_rpf_norm_reads.tsv
+      WTnone_read_lengths.pdf
+      WTnone_read_lengths.tsv
+      WTnone_tpms.tsv
 """
 import os
 import pytest
