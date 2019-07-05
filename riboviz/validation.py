@@ -472,7 +472,7 @@ def equal_fastq(file1, file2):
     seq_index2.close()
 
 
-def compare(file1, file2):
+def compare(file1, file2, compare_names=True):
     """
     Compare two files for equality.
 
@@ -480,13 +480,16 @@ def compare(file1, file2):
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
+    :param compare_names: compare file names?
+    :type: bool
     :raise AssertionError: if files differ
     """
     assert os.path.exists(file1), "Non-existent file: %s" % file1
     assert os.path.exists(file2), "Non-existent file: %s" % file2
     assert not os.path.isdir(file1), "Directory: %s" % file1
     assert not os.path.isdir(file2), "Directory: %s" % file2
-    equal_names(file1, file2)
+    if compare_names:
+        equal_names(file1, file2)
     ext = os.path.splitext(file1)[1]
     if ext in [".pdf", ".ht2", ".bai"]:
         equal_sizes(file1, file2)
