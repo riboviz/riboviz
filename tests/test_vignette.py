@@ -92,7 +92,7 @@ import riboviz
 import riboviz.validation
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def tmp_directory():
     """
     Create a temporary directory for any test files, and delete it
@@ -152,7 +152,7 @@ def test_tmp_fq(command_option, prefix, content):
 
 
 @pytest.mark.parametrize("content", ["orf_map_clean", "orf_map", "rRNA_map"])
-@pytest.mark.parametrize("prefix", ["YAL_CDS_w_250", "yeast_rRNA"])
+@pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
 def test_tmp_sam(command_option, tmp_directory, prefix, content):
     """
     Test tmp/*.sam files for equality. The SAM files are sorted into
