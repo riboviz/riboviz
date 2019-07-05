@@ -433,17 +433,15 @@ def equal_fastq(file1, file2):
     :raise AssertionError: if files differ in their data
     :raise Exception: if problems arise when loading the files
     """
-    seq_index1 = SeqIO.index(file1, "fastq")
-    seq_index2 = SeqIO.index(file2, "fastq")
-    assert len(seq_index1) == len(seq_index2),\
-        "Unequal number of sequences: %s (%d), %s (%d)"\
-        % (file1, len(seq_index1), file2, len(seq_index2))
-    for seq_id in seq_index1:
-        assert seq_id in seq_index2,\
+    seqs1 = {}
+    for seq1 in SeqIO.parse(file1, "fastq"):
+        seqs1[seq1.name] = seq1
+    for seq2 in SeqIO.parse(file2, "fastq"):
+        assert seq2.name in seqs1,\
             "Missing ID: %s in %s but not in %s"\
-            % (seq_id, file1, file2)
-        seq1 = seq_index1[seq_id]
-        seq2 = seq_index2[seq_id]
+            % (seq2.name, file2, file1)
+        seq1 = seqs1[seq2.name]
+        del seqs1[seq2.name]
         assert seq1.name == seq2.name,\
             "Unequal name: %s (%s), %s (%s)"\
             % (file1, seq1.name, file2, seq2.name)
@@ -467,8 +465,9 @@ def equal_fastq(file1, file2):
         assert seq1.description == seq2.description,\
             "Unequal description: %s (%s), %s (%s)"\
             % (file1, seq1.description, file2, seq2.description)
-    seq_index1.close()
-    seq_index2.close()
+    assert not seqs1,\
+        "Missing IDs: %s in %s but not in %s"\
+        % (str(seqs1), file1, file2)
 
 
 def compare(file1, file2, compare_names=True):
