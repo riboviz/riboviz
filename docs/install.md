@@ -684,7 +684,7 @@ Your versions may differ from those shown.
 Get RiboViz:
 
 ```bash
-git clone https://mikej888@github.com/RiboViz/RiboViz
+git clone https://github.com/riboviz/RiboViz
 ```
 
 ---
