@@ -234,3 +234,17 @@ pylint riboviz/validation.py
 pycodestyle riboviz/validation.py
 2to3 riboviz/validation.py
 ```
+
+---
+
+## Repository structure
+
+```
+data/      # Data files used by scripts and vignette
+pyscripts/ # Python scripts invoked by vignette and vignette itself
+riboviz/   # Python package code
+rscripts/  # R scripts invoked by vignette
+rmarkdown/ # Rmarkdown scripts for data preprocessing
+tests/     # Python tests including vignette regression test
+website/   # RiboViz Shiny server code and data
+```
