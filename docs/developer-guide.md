@@ -57,7 +57,7 @@ $ conda install -y pytest
 
 ## Compare files for equality
 
-`pyscripts/compare_files.py` is a script that can compare the files output by any stage of the vignette, `pyscripts/prep_riboViz.py`.
+`pyscripts/compare_files.py` is a script that can compare the files output by any stage of the vignette, `pyscripts/prep_riboviz.py`.
 
 It can be run as follows:
 
