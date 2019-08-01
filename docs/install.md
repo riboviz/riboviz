@@ -678,5 +678,9 @@ $ git clone https://github.com/riboviz/RiboViz
 
 These instructions were tested on:
 
-* Ubuntu 18.04, with 8GB memory, 4 processors and 20GB RAM.
-* CentOS Linux release 7.4.1708 (Core), with 8GB memory, 4 processors and 20GB RAM.
+| Operating System | Resources | Python | R |
+| ---------------- | --------- | ------ | - |
+| Ubuntu 18.04 | 8GB memory, 4 processors, 20GB RAM | 2.7.16 | 3.4.4 |
+| Ubuntu 18.04 | 8GB memory, 4 processors, 20GB RAM | 3.7.3 | 3.4.4 |
+| CentOS 7.4.1708 (Core) | 8GB memory, 4 processors, 20GB RAM | 2.7.16 | 3.5.2 |
+| CentOS 7.4.1708 (Core) | 8GB memory, 4 processors, 20GB RAM | 3.7.3 | 3.5.2 |
