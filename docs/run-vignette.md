@@ -2,7 +2,7 @@
 
 RiboViz is designed to be run from a single script using a single configuration file in [YAML](http://www.yaml.org/) format containing all the information required for the analysis.
 
-`pyscripts/prepRiboviz.py` contains a Python implementation of such a script.
+`pyscripts/prep_riboviz.py` contains a Python implementation of such a script.
 
 Using this script, you can run a "vignette" of the back-end analysis pipeline, to demostrate RiboViz's capabilities. An example for *Saccharomyces cerevisiae* reads, up to the output of HDF5 files, is in the `vignette/` directory.
 
@@ -24,10 +24,10 @@ SRR1042864_s1mi.fastq.gz      # about 1mi-sampled RPFs wild-type + 3-AT from Guy
 fq_files: # fastq files to be processed
   WTnone: SRR1042855_s1mi.fastq.gz # do not use "_" in dataset name
   WT3AT: SRR1042864_s1mi.fastq.gz
-  NotHere: example_missing_file.fastq.gz # prepRiboviz should give error message for missing files
+  NotHere: example_missing_file.fastq.gz # prep_riboviz should give error message for missing files
 ```
 
-## What `prepRiboviz.py` does
+## What `prep_riboviz.py` does
 
 The script prepares ribosome profiling data for RiboViz or other analyses. It does the following (`names` in brackets correspond to variables in the YAML configuration file):
 
@@ -114,12 +114,12 @@ nprocesses: 4 # number of processes to parallelize over
 
 * **Note:** `samtools`, which is invoked during the run, can only run under 1 process with Python 2.
 
-### Run `pyscripts/prepRiboviz.py`
+### Run `pyscripts/prep_riboviz.py`
 
 Run:
 
 ```bash
-python pyscripts/prepRiboviz.py pyscripts/ rscripts/ data/ \
+python pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
     vignette/vignette_config.yaml
 ```
 
@@ -170,7 +170,7 @@ Swap:           969         619         350
 Divide the free memory by the number of processes, `nprocesses` e.g. 1024/4 = 256 MB.
 ```
 
-Edit `pyscripts/prepRiboviz.py` and change the lines:
+Edit `pyscripts/prep_riboviz.py` and change the lines:
 
 ```python
     cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
@@ -300,7 +300,7 @@ du -sm vignette/output/
 To both display all output from the script that is printed at the terminal, and capture it into a file, run, for example:
 
 ```bash
-python pyscripts/prepRiboviz.py pyscripts/ rscripts/ data/ \
+python pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
     vignette/vignette_config.yaml  2>&1 | tee script-py.txt
 ```
 
@@ -324,7 +324,7 @@ If you have already generated hisat2 indices for the same organism and annotatio
 
 We suggest copying `vignette/vignette_config.yaml` and the rest of the `vignette` directory, and then customising it to fit your own dataset.
 
-## Anatomy of `prepRiboViz.py`
+## Anatomy of `prep_riboViz.py`
 
 A summary of the commands run and files output at each stage of a run of the vignette with the default configuration (but with `nprocesses: 4`) and input files.
 

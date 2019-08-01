@@ -57,7 +57,7 @@ conda install -y pytest
 
 ## Compare files for equality
 
-`pyscripts/compare_files.py` is a script that can compare the files output by any stage of the vignette, `pyscripts/prepRiboViz.py`.
+`pyscripts/compare_files.py` is a script that can compare the files output by any stage of the vignette, `pyscripts/prep_riboViz.py`.
 
 It can be run as follows:
 
@@ -131,7 +131,7 @@ The following files can be compared:
 
 ## Run vignette regression test suite
 
-The vignette (`pyscripts/prepRiboviz.py`) regression test suite compares two directories, each assumed to have `index/` `tmp/` and `output/` directories created by the vignette.
+The vignette (`pyscripts/prep_riboviz.py`) regression test suite compares two directories, each assumed to have `index/` `tmp/` and `output/` directories created by the vignette.
 
 The tests can be run using pytest:
 
