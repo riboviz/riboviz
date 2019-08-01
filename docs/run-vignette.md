@@ -116,7 +116,36 @@ nprocesses: 4 # number of processes to parallelize over
 
 ### Run `pyscripts/prep_riboviz.py`
 
-Run:
+If you have not already done so, activate your Python environment:
+
+* Miniconda Python 2.7+:
+
+```console
+$ source $HOME/miniconda2/bin/activate
+```
+
+* Miniconda Python 3.6+:
+
+```console
+$ source $HOME/miniconda3/bin/activate
+```
+
+If you have not already done so, set the paths to Hisat2 and Bowtie:
+
+* If you followed [Create `setenv.sh` to configure Hisat2 and Bowtie paths](https://github.com/riboviz/RiboViz/blob/develop/docs/install.md#create-setenvsh-to-configure-hisat2-and-bowtie-paths), then run:
+
+```console
+$ source $HOME/setenv.sh
+```
+
+* Otherwise, run the following (your directory names may be different, depending on the versions of Hisat2 and Bowtie you have):
+
+```console 
+export PATH=~/hisat2-2.1.0:$PATH
+export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
+```
+
+Run `prep_riboviz.py`:
 
 ```console
 $ python pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
