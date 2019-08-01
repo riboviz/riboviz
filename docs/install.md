@@ -678,9 +678,9 @@ $ git clone https://github.com/riboviz/RiboViz
 
 These instructions were tested on:
 
-| Operating System | Resources | Python | R |
-| ---------------- | --------- | ------ | - |
-| Ubuntu 18.04 | 8GB memory, 4 processors, 20GB RAM | 2.7.16 | 3.4.4 |
-| Ubuntu 18.04 | 8GB memory, 4 processors, 20GB RAM | 3.7.3 | 3.4.4 |
-| CentOS 7.4.1708 (Core) | 8GB memory, 4 processors, 20GB RAM | 2.7.16 | 3.5.2 |
-| CentOS 7.4.1708 (Core) | 8GB memory, 4 processors, 20GB RAM | 3.7.3 | 3.5.2 |
+| Operating System | Memory (GB) | Processors | RAM (GB) | Python | R |
+| ---------------- | ----------- | ---------- | -------- | ------ | - |
+| Ubuntu 18.04 | 8 | 4 | 20  | 2.7.16 | 3.4.4 |
+| Ubuntu 18.04 | 8 | 4 | 20  | 3.7.3 | 3.4.4 |
+| CentOS 7.4.1708 (Core) | 8 | 4 | 20 | 2.7.16 | 3.5.2 |
+| CentOS 7.4.1708 (Core) | 8 | 4 | 20 | 3.7.3 | 3.5.2 |
