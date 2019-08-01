@@ -95,7 +95,7 @@ Install:
 $ sudo yum install -y BEDTools
 ```
 
-**Check**
+**Check package has installed:**
 
 ```console
 $ bedtools -version
@@ -128,11 +128,13 @@ $ sudo yum install -y hdf5-devel
 
 Web site: [python](https://www.python.org/)
 
-If you already have Python you can skip this step. If you don't have Python then we recommend [Miniconda](https://conda.io/miniconda.html) Python.
+It is strongly recommended that you use [Miniconda](https://conda.io/miniconda.html) Python 2.7+ or 3.6+. Alternatively, use the [Anaconda Distribution]https://www.anaconda.com/distribution/) of Python 2.7+ or 3.6+.
 
-Either Python 2.7+ or Python 3.6+ can be used.
+The instructions which follow have been written under the assumption that you are using Miniconda Python. If using Anaconda then, when installing some packages, you will be told that they are already available. This is because Anaconda comes with a wide range of common Python packages.
 
-### Miniconda Python 2.7
+If you are using other distributions of Python you will need to consult the relevant documentation for each package for installation information.
+
+### Miniconda Python 2.7+
 
 Install:
 
@@ -140,6 +142,8 @@ Install:
 $ wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda2.sh
 $ bash miniconda2.sh -b -p $HOME/miniconda2
 ```
+
+**Note:** make sure you use `-O`, which provides a name for the downloaded file, and not `-o`, which provides the name of a file for messages about the download.
 
 Activate environment and check:
 
@@ -149,7 +153,23 @@ $ python -V
 Python 2.7.16 :: Anaconda, Inc.
 ```
 
-### Miniconda Python 3.6
+Your version of Python may differ from that shown.
+
+**Troubleshooting: `...command not found...`**
+
+If you see:
+
+```
+$ bash miniconda2.sh -b -p $HOME/miniconda2
+
+miniconda2.sh: line 1: --2019-07-31: command not found
+miniconda2.sh: line 2: syntax error near unexpected token `('
+miniconda2.sh: line 2: `Resolving repo.continuum.io (repo.continuum.io)... 104.18.200.79, 104.18.201.79, 2606:4700::6812:c94f, ...'
+```
+
+then rerun `wget` and use `-O`, not `-o`.
+
+### Miniconda Python 3.6+
 
 Install:
 
@@ -158,6 +178,8 @@ $ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O 
 $ bash miniconda3.sh -b -p $HOME/miniconda3
 ```
 
+**Note:** make sure you use `-O`, which provides a name for the downloaded file, and not `-o`, which provides the name of a file for messages about the download.
+
 Activate environment and check:
 
 ```console
@@ -165,6 +187,21 @@ $ source $HOME/miniconda3/bin/activate
 $ python -V
 Python 3.7.3
 ```
+
+Your version of Python may differ from that shown.
+
+**Troubleshooting: `...command not found...`**
+
+If you see:
+
+```
+$ bash miniconda3.sh -b -p $HOME/miniconda3
+miniconda3.sh: line 1: --2019-07-31: command not found
+miniconda3.sh: line 2: syntax error near unexpected token `('
+miniconda3.sh: line 2: `Resolving repo.continuum.io (repo.continuum.io)... 104.18.200.79, 104.18.201.79, 2606:4700::6812:c94f, ...'
+```
+
+then rerun `wget` and use `-O`, not `-o`.
 
 ---
 
@@ -196,11 +233,9 @@ Install:
 $ conda install -y -c bioconda cutadapt 
 ```
 
-Check:
+Check package has installed `cutadapt` tool:
 
 ```console
-$ conda list | grep cutadapt
-cutadapt                  2.3             ...
 $ cutadapt --v
 2.3
 ```
@@ -220,11 +255,9 @@ Install:
 $ conda install -y -c bioconda pysam
 ```
 
-Check:
+Check package has installed `samtools` tool:
 
 ```console
-$ conda list | grep pysam
-pysam                     0.15.2 ...
 $ samtools --version
 samtools 1.9
 Using htslib 1.9
@@ -243,13 +276,6 @@ Install:
 $ conda install -y -c anaconda biopython
 ```
 
-Check:
-
-```console
-$ conda list | grep biopython
-biopython                 1.73             ...
-```
-
 ### gffutils
 
 Web site:
@@ -260,13 +286,6 @@ Install:
 
 ```console
 $ pip install gffutils
-```
-
-Check:
-
-```console
-$ conda list | grep gffutils
-gffutils                  0.9                      ...
 ```
 
 **Note:** `pip install` is recommended. Using
@@ -294,11 +313,9 @@ Install:
 $ conda install -y -c anaconda h5py 
 ```
 
-Check:
+Check package has installed:
 
 ```console
-$ conda list | grep h5py
-h5py                      2.9.0            ...
 $ python
 ```
 ```python
@@ -307,6 +324,8 @@ $ python
 ...
 OK (skipped=16, expected failures=6)
 ```
+
+The test report should be `OK` as above. Your number of `skipped` and `expected failures` may differ, depending upon the version of h5py installed.
 
 ---
 
@@ -322,7 +341,9 @@ $ unzip hisat2-2.1.0-Linux_x86_64.zip
 $ ls hisat2-2.1.0/
 ```
 
-Update `PATH` and check:
+Your directory name may differ, depending on the version of Hisat2 you have.
+
+Update `PATH` and check `hisat2` tool is available:
 
 ```console
 $ export PATH=~/hisat2-2.1.0:$PATH
@@ -335,6 +356,8 @@ Compiler: gcc version 4.8.2 (GCC)
 Options: -O3 -m64 -msse2 -funroll-loops -g3 -DPOPCNT_CAPABILITY
 Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 ```
+
+Your version of Hisat2 may differ from that shown.
 
 ---
 
@@ -352,7 +375,9 @@ $ unzip bowtie.zip
 $ ls bowtie-1.2.2-linux-x86_64/
 ```
 
-Update `PATH` and check:
+Your directory name may differ, depending on the version of Bowtie you have.
+
+Update `PATH` and check `bowtie` tool is available:
 
 ```console
 $ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
@@ -366,14 +391,24 @@ Options: -O3 -m64  -Wl,--hash-style=both -DWITH_TBB -DPOPCNT_CAPABILITY -g -O2 -
 Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 ```
 
+Your version of Bowtie may differ from that shown.
+
 ## Create `setenv.sh` to configure Hisat2 and Bowtie paths
 
-Create a `setenv.sh` script with contents:
+Create a `setenv.sh` script with the paths to your Hisat2 and Bowtie directories. For example:
 
 ```console
 #!/usr/bin/env bash
 export PATH=~/hisat2-2.1.0:$PATH
 export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
+```
+
+Remember, your directory names may differ, depending on the versions of Hisat2 and Bowtie you have.
+
+In future you can configure the paths by running:
+
+```console
+$ source setenv.sh
 ```
 
 ---
@@ -386,6 +421,8 @@ Web sites:
 * [The Comprehensive R Archive Network](https://cran.r-project.org/) (CRAN).
 
 **Note:** Release 2.14.0 or later is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
+
+We recommend using R 3.4+.
 
 ### Install R and packages required by R packages to be installed
 
@@ -413,16 +450,29 @@ $ sudo yum install -y openssl-devel
 $ sudo yum install -y libcurl-devel
 ```
 
-### Check
+### Check R has installed
 
 ```console
 $ R --version
 R version 3.5.1 (2018-07-02) -- "Feather Spray"
 ```
 
+Your version of R may differ from that shown.
+
 ---
 
 ## R packages
+
+If, when installing R packages, you see a message like:
+
+```
+Would you like to use a personal library instead? (yes/No/cancel) yes
+Would you like to create a personal library
+"~/R/x86_64-pc-linux-gnu-library/3.6"
+to install packages into? (yes/No/cancel)
+```
+
+then enter `yes`.
 
 ### RcppRoll
 
@@ -509,7 +559,7 @@ The commands to install Bioconductor packages depend on your version of R. For f
 
 * See Bioconductor/R compatibility on [Bioconductor releases](https://bioconductor.org/about/release-announcements/).
 * Click the link of a Bioconductor release consistent with your version of R.
-* Click the link of the specific packag.
+* Click the link of the specific package.
 
 For example, for R 3.4, install in R:
 
@@ -593,7 +643,7 @@ Alternatively, run:
 $ pip list
 ```
 
-The Python packages will be listed:
+The Python packages and their versions will be listed:
 
 ```
 biopython                 1.73
@@ -632,7 +682,7 @@ Or run in R:
 > print(ip, row.names=FALSE)
 ```
 
-The R packages will be listed:
+The R packages and their versions will be listed:
 
 ```
             Biostrings    2.46.0
