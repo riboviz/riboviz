@@ -368,6 +368,8 @@ Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 
 ## Create `setenv.sh` to configure Hisat2 and Bowtie paths
 
+Create a `setenv.sh` script with contents:
+
 ```console
 #!/usr/bin/env bash
 export PATH=~/hisat2-2.1.0:$PATH
