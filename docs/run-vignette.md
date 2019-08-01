@@ -185,21 +185,14 @@ to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
                 "-O", "bam", "-o", fn_out + ".bam", "-"]
 ```
 
-## Check the expected output files
+### Check the expected output files
 
 You should expect to see the following files produced.
 
-### Index files in `vignette/index`
+Index files in `vignette/index`. For example:
 
 ```
-YAL_CDS_w_250.*.ht2  # hisat2 index from yeast_YAL_CDS_w_250utrs.
-yeast_rRNA.*.ht2     # hisat2 index from yeast_rRNA_R64-1-1.
-```
-
-For example:
-
-```
-YAL_CDS_w_250.1.ht2
+YAL_CDS_w_250.1.ht2 # hisat2 indices from yeast_YAL_CDS_w_250utrs.fa
 YAL_CDS_w_250.2.ht2
 YAL_CDS_w_250.3.ht2
 YAL_CDS_w_250.4.ht2
@@ -207,7 +200,7 @@ YAL_CDS_w_250.5.ht2
 YAL_CDS_w_250.6.ht2
 YAL_CDS_w_250.7.ht2
 YAL_CDS_w_250.8.ht2
-yeast_rRNA.1.ht2
+yeast_rRNA.1.ht2    # hisat2 indices from yeast_rRNA_R64-1-1.fa
 yeast_rRNA.2.ht2
 yeast_rRNA.3.ht2
 yeast_rRNA.4.ht2
@@ -217,7 +210,7 @@ yeast_rRNA.7.ht2
 yeast_rRNA.8.ht2
 ```
 
-For this example, the index files will occupy ~9 MB:
+For this example, the index files occupy ~9 MB:
 
 ```bash
 du -sm vignette/index/
@@ -226,26 +219,15 @@ du -sm vignette/index/
 9	vignette/index/
 ```
 
-### Intermediate outputs in `vignette/tmp`
+Intermediate outputs in `vignette/tmp`. For example:
 
 ```
-*_trim.fq            # trimmed reads.
-*_nonrRNA.fq         # trimmed non-rRNA reads.
-*_rRNA_map.sam       # rRNA-mapped reads.
-*_orf_map.sam        # orf-mapped reads.
-*_orf_map_clean.sam  # orf-mapped reads with mismatched nt trimmed.
-*_unaligned.sam      # unaligned reads.
-```
-
-For example:
-
-```
-WT3AT_nonrRNA.fq
-WT3AT_orf_map_clean.sam
-WT3AT_orf_map.sam
-WT3AT_rRNA_map.sam
-WT3AT_trim.fq
-WT3AT_unaligned.sam
+WT3AT_nonrRNA.fq         # trimmed non-rRNA reads
+WT3AT_orf_map_clean.sam  # orf-mapped reads with mismatched nt trimmed
+WT3AT_orf_map.sam        # orf-mapped reads
+WT3AT_rRNA_map.sam       # rRNA-mapped reads
+WT3AT_trim.fq            # trimmed reads
+WT3AT_unaligned.sam      # unaligned reads
 
 WTnone_nonrRNA.fq
 WTnone_orf_map_clean.sam
@@ -264,9 +246,7 @@ du -sm vignette/tmp/
 1040	vignette/tmp/
 ```
 
-### Outputs in `vignette/output`
-
-For example:
+Outputs in `vignette/output`. For example:
 
 ```
 TPMs_collated.tsv
@@ -306,7 +286,7 @@ WTnone_read_lengths.tsv
 WTnone_tpms.tsv
 ```
 
-For this example, the output files will occupy ~3 MB:
+For this example, the output files occupy ~3 MB:
 
 ```bash
 du -sm vignette/output/
@@ -343,3 +323,260 @@ If you have already generated hisat2 indices for the same organism and annotatio
 ## Customising the vignette
 
 We suggest copying `vignette/vignette_config.yaml` and the rest of the `vignette` directory, and then customising it to fit your own dataset.
+# prepRiboviz.sh vignette commands and outputs
+
+## Anatomy of `prepRiboViz.py`
+
+A summary of the commands run and files output at each stage of a run of the vignette with the default configuration (but with `nprocesses: 4`) and input files.
+
+### Inputs
+
+Configuration file:
+
+```
+vignette/vignette_config.yaml
+```
+
+Input files in `vignette/input/`:
+
+```
+SRR1042855_s1mi.fastq.gz
+SRR1042864_s1mi.fastq.gz
+yeast_rRNA_R64-1-1.fa
+yeast_YAL_CDS_w_250utrs.fa
+yeast_YAL_CDS_w_250utrs.gff3
+```
+
+Supplementary data files in `data/`:
+
+```
+yeast_codon_pos_i200.RData
+yeast_features.tsv
+yeast_tRNAs.tsv
+```
+
+### Build indices for alignment
+
+Build rRNA index: 
+
+```
+hisat2-build vignette/input/yeast_rRNA_R64-1-1.fa \
+    vignette/index/yeast_rRNA
+```
+
+Outputs files to `vignette/index/`:
+
+```
+yeast_rRNA.1.ht2
+yeast_rRNA.2.ht2
+yeast_rRNA.3.ht2
+yeast_rRNA.4.ht2
+yeast_rRNA.5.ht2
+yeast_rRNA.6.ht2
+yeast_rRNA.7.ht2
+yeast_rRNA.8.ht2
+```
+
+Build ORF index:
+
+```
+hisat2-build vignette/input/yeast_YAL_CDS_w_250utrs.fa \
+    vignette/index/YAL_CDS_w_250
+```
+
+Outputs files to `vignette/index/`:
+
+```
+YAL_CDS_w_250.1.ht2
+YAL_CDS_w_250.2.ht2
+YAL_CDS_w_250.3.ht2
+YAL_CDS_w_250.4.ht2
+YAL_CDS_w_250.5.ht2
+YAL_CDS_w_250.6.ht2
+YAL_CDS_w_250.7.ht2
+YAL_CDS_w_250.8.ht2
+```
+
+### Process file WT3AT (`SRR1042864_s1mi.fastq.gz`)
+
+Cut illumina adapters i.e. cut out sequencing library adapters (CTGTAGGCACC or adapters):
+
+```
+cutadapt --trim-n -O 1 -m 5 -a CTGTAGGCACC -o vignette/tmp/WT3AT_trim.fq \
+    vignette/input/SRR1042864_s1mi.fastq.gz -j 4
+```
+
+Outputs files to `vignette/tmp/`:
+
+```
+WT3AT_trim.fq
+```
+
+Map reads to RNA i.e. remove rRNA or other contaminating reads by HISAT2 alignment to rRNA index file:
+
+```
+hisat2 -p 4 -N 1 --un vignette/tmp/WT3AT_nonrRNA.fq \
+    -x vignette/index/yeast_rRNA -S vignette/tmp/WT3AT_rRNA_map.sam \
+    -U vignette/tmp/WT3AT_trim.fq
+```
+
+Outputs files to `vignette/tmp/`:
+
+```
+WT3AT_nonrRNA.fq
+WT3AT_rRNA_map.sam
+```
+
+Map to ORFs with (mostly) default settings, up to 2 alignments i.e. align remaining reads to ORFs or other HISAT2 index file:
+
+```
+hisat2 -p 4 -k 2 --no-spliced-alignment --rna-strandness F --no-unal \
+    --un vignette/tmp/WT3AT_unaligned.fq -x vignette/index/YAL_CDS_w_250 \
+    -S vignette/tmp/WT3AT_orf_map.sam -U vignette/tmp/WT3AT_nonrRNA.fq
+```
+
+Outputs files to `vignette/tmp/`:
+
+```
+WT3AT_orf_map.sam
+WT3AT_unaligned.fq
+```
+
+Trim 5' mismatched nt from reads and remove reads with more than 2 mismatches:
+
+```
+python pyscripts/trim_5p_mismatch.py -mm 2 \
+    -in vignette/tmp/WT3AT_orf_map.sam \
+    -out vignette/tmp/WT3AT_orf_map_clean.sam
+```
+
+Outputs files to `vignette/tmp/`:
+
+```
+WT3AT_orf_map_clean.sam
+```
+
+Convert sam (text) file to bam (compressed binary) file:
+
+```
+samtools view -b vignette/tmp/WT3AT_orf_map_clean.sam
+```
+
+Capture output piped from the above and sort bam file on genome:
+
+```
+samtools sort -@ 4 -O bam -o vignette/output/WT3AT.bam -
+```
+
+Outputs files to `vignette/output/`:
+
+```
+WT3AT.bam
+```
+
+Index bam file to create bai file:
+
+```
+samtools index vignette/output/WT3AT.bam
+```
+
+Outputs files to `vignette/output/`:
+
+```
+WT3AT.bam.bai
+```
+
+Calculate transcriptome coverage for plus strand and export as a bedgraph:
+
+```
+bedtools genomecov -ibam vignette/output/WT3AT.bam -bga -5 -strand +
+```
+
+streaming output into output file.
+
+Outputs files to `vignette/output/`:
+
+```
+WT3AT_plus.bedgraph
+```
+
+Calculate transcriptome coverage for minus strand and export as a bedgraph:
+
+```
+bedtools genomecov -ibam vignette/output/WT3AT.bam -bga -5 -strand -
+```
+
+streaming output into output file.
+
+Outputs files to `vignette/output/`:
+
+```
+WT3AT_minus.bedgraph
+```
+
+Make length-sensitive alignments in compressed h5 format:
+
+```
+Rscript --vanilla rscripts/bam_to_h5.R --Ncores=4 --MinReadLen=10 \
+    --MaxReadLen=50 --Buffer=250 --PrimaryID=Name --SecondID=NULL \
+    --dataset=vignette --bamFile=vignette/output/WT3AT.bam \
+    --hdFile=vignette/output/WT3AT.h5 \
+    --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
+    --ribovizGFF=True --StopInCDS=False
+```
+
+Outputs files to `vignette/output/`:
+
+```
+WT3AT.h5
+```
+
+Generate summary statistics, analyses plots and QC plots for both RPF and mRNA datasets:
+
+```
+Rscript --vanilla rscripts/generate_stats_figs.R --Ncores=4 \
+    --MinReadLen=10 --MaxReadLen=50 --Buffer=250 --PrimaryID=Name \
+    --dataset=vignette --hdFile=vignette/output/WT3AT.h5 \
+    --out_prefix=vignette/output/WT3AT \
+    --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True \
+    --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
+    --dir_out=vignette/output --dir_data=data/ \
+    --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
+    --features_file=data/yeast_features.tsv --do_pos_sp_nt_freq=True
+```
+
+This script uses `--dir_data=data/` to access and read `data/yeast_codon_pos_i200.RData` and `/data/yeast_tRNAs.tsv` also.
+
+Outputs files to `vignette/output/`:
+
+```
+WT3AT_3nt_periodicity.pdf
+WT3AT_3nt_periodicity.tsv
+WT3AT_codon_ribodens.pdf
+WT3AT_codon_ribodens.tsv
+WT3AT_features.pdf
+WT3AT_pos_sp_nt_freq.tsv
+WT3AT_pos_sp_rpf_norm_reads.pdf
+WT3AT_pos_sp_rpf_norm_reads.tsv
+WT3AT_read_lengths.pdf
+WT3AT_read_lengths.tsv
+WT3AT_tpms.tsv
+```
+
+### Process file WTnone (`SRR1042855_s1mi.fastq.gz`)
+
+The same commands are run but with `SRR1042855_s1mi.fastq.gz` being passed to `cutadapt`.
+
+The same types of file are output, but with prefix `WTnone`.
+
+### Collate TPMs across samples
+
+```
+Rscript --vanilla rscripts/collate_tpms.R --yaml=vignette/vignette_config.yaml
+```
+
+Outputs files to `vignette/output/`:
+
+```
+TPMs_collated.tsv
+```
