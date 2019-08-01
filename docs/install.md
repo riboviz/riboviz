@@ -128,7 +128,7 @@ $ sudo yum install -y hdf5-devel
 
 Web site: [python](https://www.python.org/)
 
-It is strongly recommended that you use [Miniconda](https://conda.io/miniconda.html) Python 2.7+ or 3.6+. Alternatively, use the [Anaconda Distribution]https://www.anaconda.com/distribution/) of Python 2.7+ or 3.6+.
+It is strongly recommended that you use [Miniconda](https://conda.io/miniconda.html) Python 2.7+ or 3.6+. Alternatively, use the [Anaconda Distribution](https://www.anaconda.com/distribution/) of Python 2.7+ or 3.6+.
 
 The instructions which follow have been written under the assumption that you are using Miniconda Python. If using Anaconda then, when installing some packages, you will be told that they are already available. This is because Anaconda comes with a wide range of common Python packages.
 
