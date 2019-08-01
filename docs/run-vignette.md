@@ -315,7 +315,7 @@ If you have already generated hisat2 indices for the same organism and annotatio
 
 We suggest copying `vignette/vignette_config.yaml` and the rest of the `vignette` directory, and then customising it to fit your own dataset.
 
-## Anatomy of `prep_riboViz.py`
+## Anatomy of `prep_riboviz.py`
 
 A summary of the commands run and files output at each stage of a run of the vignette with the default configuration (but with `nprocesses: 4`) and input files.
 
