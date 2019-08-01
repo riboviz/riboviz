@@ -20,7 +20,7 @@ SRR1042864_s1mi.fastq.gz      # about 1mi-sampled RPFs wild-type + 3-AT from Guy
 
 `vignette/vignette_config.yaml` contains configuration information in YAML. It specifies that the two `fastq.gz` files above are to be processed, along with an additional non-existent file which is used for testing:
 
-```
+```yaml
 fq_files: # fastq files to be processed
   WTnone: SRR1042855_s1mi.fastq.gz # do not use "_" in dataset name
   WT3AT: SRR1042864_s1mi.fastq.gz
@@ -48,7 +48,7 @@ The script prepares ribosome profiling data for RiboViz or other analyses. It do
 
 For each sample or condition you want to compare (which should be placed into a single `.fastq.gz` file in the input directory (`dir_in`)), the configuration file needs a sub-variable of `fq_files`, whose name will be used in the output files. For example:
 
-```
+```yaml
 fq_files:
   WTnone: SRR1042855_s1mi.fastq.gz 
   WT3AT: SRR1042864_s1mi.fastq.gz
@@ -118,8 +118,8 @@ nprocesses: 4 # number of processes to parallelize over
 
 Run:
 
-```bash
-python pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
+```console
+$ python pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
     vignette/vignette_config.yaml
 ```
 
@@ -158,17 +158,14 @@ You may need to explicitly set the amount of memory per thread in calls to `samt
 
 Check how much free memory you have e.g.
 
-```bash
-free --mega
-```
-```
+```console
+$ free --mega
               total        used        free      shared  buff/cache   available
 Mem:           2017         684        1028           2         303        1181
 Swap:           969         619         350
 ```
 
 Divide the free memory by the number of processes, `nprocesses` e.g. 1024/4 = 256 MB.
-```
 
 Edit `pyscripts/prep_riboviz.py` and change the lines:
 
@@ -212,10 +209,8 @@ yeast_rRNA.8.ht2
 
 For this example, the index files occupy ~9 MB:
 
-```bash
-du -sm vignette/index/
-```
-```
+```console
+$ du -sm vignette/index/
 9	vignette/index/
 ```
 
@@ -239,10 +234,8 @@ WTnone_unaligned.sam
 
 **Note:** these are uncompressed and large. For this example, the intermediate files will occupy ~1040 MB:
 
-```bash
-du -sm vignette/tmp/
-```
-```
+```console
+$ du -sm vignette/tmp/
 1040	vignette/tmp/
 ```
 
@@ -288,10 +281,8 @@ WTnone_tpms.tsv
 
 For this example, the output files occupy ~3 MB:
 
-```bash
-du -sm vignette/output/
-```
-```
+```console
+$ du -sm vignette/output/
 3	vignette/output/
 ```
 
@@ -299,8 +290,8 @@ du -sm vignette/output/
 
 To both display all output from the script that is printed at the terminal, and capture it into a file, run, for example:
 
-```bash
-python pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
+```console
+$ python pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
     vignette/vignette_config.yaml  2>&1 | tee script-py.txt
 ```
 
@@ -308,10 +299,10 @@ python pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
 
 Before rerunning the vignette, delete the auto-generated index, temporary and output directories:
 
-```bash
-rm -rf vignette/index
-rm -rf vignette/tmp
-rm -rf vignette/output
+```console
+$ rm -rf vignette/index
+$ rm -rf vignette/tmp
+$ rm -rf vignette/output
 ```
 
 You might also want to do this if you have run the vignette with a missing R package, and then want to run it again from scratch. Alternatively, you might have edited the vignette and committed your changes, and be submitting a pull request.

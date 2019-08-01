@@ -33,16 +33,16 @@ Website: [Git](https://git-scm.com/)
 
 Install:
 
-```bash
-sudo apt-get install -y git
+```console
+$ sudo apt-get install -y git
 ```
 
 **CentOS**
 
 Install:
 
-```bash
-sudo yum install -y git
+```console
+$ sudo yum install -y git
 ```
 
 ### cURL
@@ -53,16 +53,16 @@ Website: [cURL](https://curl.haxx.se/)
 
 Install:
 
-```bash
-sudo apt-get install -y curl
+```console
+$ sudo apt-get install -y curl
 ```
 
 **CentOS**
 
 Install:
 
-```bash
-sudo yum install -y curl
+```console
+$ sudo yum install -y curl
 ```
 
 ### EPEL (CentOS only)
@@ -71,8 +71,8 @@ Website [EPEL](https://fedoraproject.org/wiki/EPEL)
 
 Install:
 
-```bash
-sudo yum install -y epel-release
+```console
+$ sudo yum install -y epel-release
 ```
 
 ### bedtools
@@ -83,24 +83,22 @@ Web site: [bedtools](http://bedtools.readthedocs.io/en/latest/)
 
 Install:
 
-```bash
-sudo apt-get install -y bedtools
+```console
+$ sudo apt-get install -y bedtools
 ```
 
 **CentOS**
 
 Install:
 
-```bash
-sudo yum install -y BEDTools
+```console
+$ sudo yum install -y BEDTools
 ```
 
 **Check**
 
-```bash
-bedtools -version
-```
-```
+```console
+$ bedtools -version
 bedtools v2.26.0
 ```
 
@@ -112,16 +110,16 @@ Web site: [HDF5](https://portal.hdfgroup.org/display/HDF5)
 
 Install:
 
-```bash
-sudo apt-get install -y hdf5-tools
+```console
+$ sudo apt-get install -y hdf5-tools
 ```
 
 **CentOS**
 
 Install:
 
-```bash
-sudo yum install -y hdf5-devel
+```console
+$ sudo yum install -y hdf5-devel
 ```
 
 ---
@@ -138,18 +136,16 @@ Either Python 2.7+ or Python 3.6+ can be used.
 
 Install:
 
-```bash
-wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda2.sh
-bash miniconda2.sh -b -p $HOME/miniconda2
+```console
+$ wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda2.sh
+$ bash miniconda2.sh -b -p $HOME/miniconda2
 ```
 
 Activate environment and check:
 
-```bash
-source $HOME/miniconda2/bin/activate
-python -V
-```
-```
+```console
+$ source $HOME/miniconda2/bin/activate
+$ python -V
 Python 2.7.16 :: Anaconda, Inc.
 ```
 
@@ -157,18 +153,16 @@ Python 2.7.16 :: Anaconda, Inc.
 
 Install:
 
-```bash
-wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda3.sh
-bash miniconda3.sh -b -p $HOME/miniconda3
+```console
+$ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda3.sh
+$ bash miniconda3.sh -b -p $HOME/miniconda3
 ```
 
 Activate environment and check:
 
-```bash
-source $HOME/miniconda3/bin/activate
-python -V
-```
-```
+```console
+$ source $HOME/miniconda3/bin/activate
+$ python -V
 Python 3.7.3
 ```
 
@@ -185,8 +179,8 @@ Web sites:
 
 Install:
 
-```bash
-conda install -y pyyaml
+```console
+$ conda install -y pyyaml
 ```
 
 ### Cutadapt
@@ -198,22 +192,16 @@ Web sites:
 
 Install:
 
-```bash
-conda install -y -c bioconda cutadapt 
+```console
+$ conda install -y -c bioconda cutadapt 
 ```
 
 Check:
 
-```bash
-conda list | grep cutadapt
-```
-```
+```console
+$ conda list | grep cutadapt
 cutadapt                  2.3             ...
-```
-```bash
-cutadapt --v
-```
-```
+$ cutadapt --v
 2.3
 ```
 
@@ -228,22 +216,16 @@ Web sites:
 
 Install:
 
-```bash
-conda install -y -c bioconda pysam
+```console
+$ conda install -y -c bioconda pysam
 ```
 
 Check:
 
-```bash
-conda list | grep pysam
-```
-```
+```console
+$ conda list | grep pysam
 pysam                     0.15.2 ...
-```
-```bash
-samtools --version
-```
-```
+$ samtools --version
 samtools 1.9
 Using htslib 1.9
 Copyright (C) 2018 Genome Research Ltd.
@@ -257,16 +239,14 @@ Web site:
 
 Install:
 
-```bash
-conda install -y -c anaconda biopython
+```console
+$ conda install -y -c anaconda biopython
 ```
 
 Check:
 
-```bash
-conda list | grep biopython
-```
-```
+```console
+$ conda list | grep biopython
 biopython                 1.73             ...
 ```
 
@@ -278,31 +258,27 @@ Web site:
 
 Install:
 
-```bash
-pip install gffutils
+```console
+$ pip install gffutils
 ```
 
 Check:
 
-```bash
-conda list | grep gffutils
-```
-```
+```console
+$ conda list | grep gffutils
 gffutils                  0.9                      ...
 ```
 
 **Note:** `pip install` is recommended. Using
 
-```bash
-conda install -y -c bioconda gffutils
+```console
+$ conda install -y -c bioconda gffutils
 ```
 
 under Python 3, seems to confuse the Python environment and sets Python to:
 
-```bash
-python --version
-```
-```
+```console
+$ python --version
 Python 2.7.16 :: Anaconda, Inc.
 ```
 
@@ -314,26 +290,21 @@ Web site:
 
 Install:
 
-```bash
-conda install -y -c anaconda h5py 
+```console
+$ conda install -y -c anaconda h5py 
 ```
 
 Check:
 
-```bash
-conda list | grep h5py
-```
-```
+```console
+$ conda list | grep h5py
 h5py                      2.9.0            ...
-```
-```bash
-python
+$ python
 ```
 ```python
-import h5py
-h5py.run_tests()
-```
-```
+>>> import h5py
+>>> h5py.run_tests()
+...
 OK (skipped=16, expected failures=6)
 ```
 
@@ -345,19 +316,17 @@ Web site: [Hisat2](https://ccb.jhu.edu/software/hisat2/index.shtml)
 
 Install:
 
-```bash
-wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.1.0-Linux_x86_64.zip
-unzip hisat2-2.1.0-Linux_x86_64.zip 
-ls hisat2-2.1.0/
+```console
+$ wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.1.0-Linux_x86_64.zip
+$ unzip hisat2-2.1.0-Linux_x86_64.zip 
+$ ls hisat2-2.1.0/
 ```
 
 Update `PATH` and check:
 
-```bash
-export PATH=~/hisat2-2.1.0:$PATH
-hisat2 --version
-```
-```
+```console
+$ export PATH=~/hisat2-2.1.0:$PATH
+$ hisat2 --version
 /home/ubuntu/hisat2-2.1.0/hisat2-align-s version 2.1.0
 64-bit
 Built on login-node03
@@ -377,19 +346,17 @@ Web site: [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml)
 
 Install:
 
-```bash
-wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/1.2.2/bowtie-1.2.2-linux-x86_64.zip/download -O bowtie.zip
-unzip bowtie.zip
-ls bowtie-1.2.2-linux-x86_64/
+```console
+$ wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/1.2.2/bowtie-1.2.2-linux-x86_64.zip/download -O bowtie.zip
+$ unzip bowtie.zip
+$ ls bowtie-1.2.2-linux-x86_64/
 ```
 
 Update `PATH` and check:
 
-```bash
-export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
-bowtie --version
-```
-```
+```console
+$ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
+$ bowtie --version
 /home/ubuntu/bowtie-1.2.2-linux-x86_64/bowtie-align-s version 1.2.2
 64-bit
 Built on 462e5beae518
@@ -401,7 +368,7 @@ Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 
 ## Create `setenv.sh` to configure Hisat2 and Bowtie paths
 
-```bash
+```console
 #!/usr/bin/env bash
 export PATH=~/hisat2-2.1.0:$PATH
 export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
@@ -422,34 +389,32 @@ Web sites:
 
 **Ubuntu**
 
-```bash
-sudo apt-get update -y
-sudo apt-get install -y r-base
-sudo apt-get install -y r-base-dev
+```console
+$ sudo apt-get update -y
+$ sudo apt-get install -y r-base
+$ sudo apt-get install -y r-base-dev
 
-sudo apt-get install -y libxml2-dev
-sudo apt-get install -y libssl-dev
-sudo apt-get install -y libcurl4-openssl-dev
+$ sudo apt-get install -y libxml2-dev
+$ sudo apt-get install -y libssl-dev
+$ sudo apt-get install -y libcurl4-openssl-dev
 ```
 
 **CentOS**
 
-```bash
-sudo yum update -y
-sudo yum install -y R
-sudo yum install -y R-devel
+```console
+$ sudo yum update -y
+$ sudo yum install -y R
+$ sudo yum install -y R-devel
 
-sudo yum install -y libxml2-devel
-sudo yum install -y openssl-devel
-sudo yum install -y libcurl-devel
+$ sudo yum install -y libxml2-devel
+$ sudo yum install -y openssl-devel
+$ sudo yum install -y libcurl-devel
 ```
 
 ### Check
 
-```bash
-R --version
-```
-```
+```console
+$ R --version
 R version 3.5.1 (2018-07-02) -- "Feather Spray"
 ```
 
@@ -463,8 +428,8 @@ Web site: [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html
 
 Install in R:
 
-```R
-install.packages("RcppRoll")
+```r
+> install.packages("RcppRoll")
 ```
 
 ### optparse
@@ -473,8 +438,8 @@ Web site: [optparse](https://cran.r-project.org/web/packages/optparse/index.html
 
 Install in R:
 
-```R
-install.packages("optparse")
+```r
+> install.packages("optparse")
 ```
 
 ### tidyr
@@ -483,8 +448,8 @@ Web site: [tidyr](https://cran.r-project.org/web/packages/tidyr/index.html)
 
 Install in R:
 
-```R
-install.packages("tidyr")
+```r
+> install.packages("tidyr")
 ```
 
 ### ggplot2
@@ -493,8 +458,8 @@ Web site: [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html)
 
 Install in R:
 
-```R
-install.packages("ggplot2")
+```r
+> install.packages("ggplot2")
 ```
 
 ### shiny
@@ -503,8 +468,8 @@ Web site: [shiny](https://cran.r-project.org/web/packages/shiny/index.html)
 
 Install in R:
 
-```R
-install.packages("shiny")
+```r
+> install.packages("shiny")
 ```
 
 ### plotly
@@ -513,8 +478,8 @@ Web site: [plotly](https://cran.r-project.org/web/packages/plotly/index.html)
 
 Install in R:
 
-```R
-install.packages("plotly")
+```r
+> install.packages("plotly")
 ```
 
 ### readr
@@ -523,8 +488,8 @@ Website: [readr](https://cran.r-project.org/web/packages/readr/index.html)
 
 Install in R:
 
-```R
-install.packages("readr")
+```r
+> install.packages("readr")
 ```
 
 ### Bioconductor Rsamtools, rdf5, rtracklayer, Biostrings, ShortRead
@@ -546,24 +511,24 @@ The commands to install Bioconductor packages depend on your version of R. For f
 
 For example, for R 3.4, install in R:
 
-```R
-source("https://bioconductor.org/biocLite.R")
-biocLite("Rsamtools")
-biocLite("rtracklayer")
-biocLite("rhdf5")
-biocLite("Biostrings")
-biocLite("ShortRead")
+```r
+> source("https://bioconductor.org/biocLite.R")
+> biocLite("Rsamtools")
+> biocLite("rtracklayer")
+> biocLite("rhdf5")
+> biocLite("Biostrings")
+> biocLite("ShortRead")
 ```
 
 For example, for R 3.5, install in R:
 
-```R
-install.packages("BiocManager")
-BiocManager::install("Rsamtools")
-BiocManager::install("rtracklayer")
-BiocManager::install("rhdf5")
-BiocManager::install("Biostrings")
-BiocManager::install("ShortRead")
+```r
+> install.packages("BiocManager")
+> BiocManager::install("Rsamtools")
+> BiocManager::install("rtracklayer")
+> BiocManager::install("rhdf5")
+> BiocManager::install("Biostrings")
+> BiocManager::install("ShortRead")
 ```
 
 **Troubleshooting: installation path not writeable**
@@ -581,15 +546,13 @@ See [Question: unable to update packages: foreign, Matrix](https://support.bioco
 
 You can check that it is available (your exact path may differ):
 
-```bash
-ls ~/R/x86_64-pc-linux-gnu-library/3.4/Rsamtools/
+```console
+$ ls ~/R/x86_64-pc-linux-gnu-library/3.4/Rsamtools/
+DESCRIPTION  libs  LICENSE  Meta  NAMESPACE  NEWS
 ```
 
-```bash
-ls ~/R/x86_64-redhat-linux-gnu-library/3.5/Rsamtools/
-```
-
-```
+```console
+$ ls ~/R/x86_64-redhat-linux-gnu-library/3.5/Rsamtools/
 DESCRIPTION  libs  LICENSE  Meta  NAMESPACE  NEWS
 ```
 
@@ -603,7 +566,7 @@ Warning in q("no", status = status, runLast = FALSE) :
   system call failed: Cannot allocate memory
 
 The downloaded source packages are in
-	"/tmp/RtmpOEVbaL/downloaded_packages"
+        "/tmp/RtmpOEVbaL/downloaded_packages"
 installation path not writeable, unable to update packages: foreign
 Warning message:
 In install.packages(pkgs = doing, lib = lib, ...) :
@@ -618,25 +581,33 @@ You may need to assign more memory to R or your machine.
 
 Run:
 
-```bash
-conda list
+```console
+$ conda list
 ```
-```
-biopython                 1.73             ...
-cutadapt                  1.18             ...
-gffutils                  0.9              ...
-h5py                      2.9.0            ...
-pysam                     0.15.2           ...
-pyyaml                    5.1              ...
-```
-
-Your versions may differ from those shown.
 
 Alternatively, run:
 
-```bash
-pip list
+```console
+$ pip list
 ```
+
+The Python packages will be listed:
+
+```
+biopython                 1.73
+
+cutadapt                  1.18
+
+gffutils                  0.9
+
+h5py                      2.9.0
+
+pysam                     0.15.2
+
+pyyaml                    5.1
+```
+
+Your versions may differ from those shown.
 
 ---
 
@@ -646,33 +617,45 @@ pip list
 
 Either run bash script:
 
-```bash
-Rscript install/list-r-packages.R
+```console
+$ Rscript install/list-r-packages.R
 ```
 
 Or run in R:
 
-```R
-ip <- as.data.frame(installed.packages()[,c(1,3:4)])
-rownames(ip) <- NULL
-ip <- ip[is.na(ip$Priority),1:2,drop=FALSE]
-print(ip, row.names=FALSE)
+```r
+> ip <- as.data.frame(installed.packages()[,c(1,3:4)])
+> rownames(ip) <- NULL
+> ip <- ip[is.na(ip$Priority),1:2,drop=FALSE]
+> print(ip, row.names=FALSE)
 ```
+
+The R packages will be listed:
 
 ```
             Biostrings    2.46.0
-              ggplot2     3.1.1
-             optparse     1.6.2
-               plotly     4.9.0
-             RcppRoll     0.3.0
-                readr     1.3.1
-                rhdf5    2.22.0
-            Rsamtools    1.30.0
-          rtracklayer    1.38.3
-                shiny     1.3.2
-            ShortRead    1.36.1
-                tidyr     0.8.3
 
+            ggplot2     3.1.1
+
+            optparse     1.6.2
+
+            plotly     4.9.0
+
+            RcppRoll     0.3.0
+
+            readr     1.3.1
+
+            rhdf5    2.22.0
+
+            Rsamtools    1.30.0
+
+            rtracklayer    1.38.3
+
+            shiny     1.3.2
+
+            ShortRead    1.36.1
+
+            tidyr     0.8.3
 ```
 
 Your versions may differ from those shown.
@@ -683,8 +666,8 @@ Your versions may differ from those shown.
 
 Get RiboViz:
 
-```bash
-git clone https://github.com/riboviz/RiboViz
+```console
+$ git clone https://github.com/riboviz/RiboViz
 ```
 
 ---
