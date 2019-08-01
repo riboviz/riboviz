@@ -323,7 +323,6 @@ If you have already generated hisat2 indices for the same organism and annotatio
 ## Customising the vignette
 
 We suggest copying `vignette/vignette_config.yaml` and the rest of the `vignette` directory, and then customising it to fit your own dataset.
-# prepRiboviz.sh vignette commands and outputs
 
 ## Anatomy of `prepRiboViz.py`
 
