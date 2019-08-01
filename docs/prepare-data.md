@@ -16,11 +16,11 @@ For example, for_S. cerevisiae_, download:
 
 To download these files via bash:
 
-```bash
-mkdir sample-data
-wget https://raw.githubusercontent.com/RiboViz/RiboViz/master/data/yeast_CDS_w_250utrs.fa -P sample-data
-wget http://gdurl.com/KGnn/download -O sample-data/rrna.fa
-wget https://raw.githubusercontent.com/RiboViz/RiboViz/master/data/yeast_CDS_w_250utrs.gff3 -P sample-data
+```console
+$ mkdir sample-data
+$ wget https://raw.githubusercontent.com/RiboViz/RiboViz/master/data/yeast_CDS_w_250utrs.fa -P sample-data
+$ wget http://gdurl.com/KGnn/download -O sample-data/rrna.fa
+$ wget https://raw.githubusercontent.com/RiboViz/RiboViz/master/data/yeast_CDS_w_250utrs.gff3 -P sample-data
 ```
 
 The file sizes, and space requirements, are as follows:
@@ -35,9 +35,9 @@ The file sizes, and space requirements, are as follows:
 
 For each condition/sample in your experiment, merge all fastq files into a single gzipped fastq file, e.g. `condition1.fastq.gz`. The files are gzip-compressed to save space. For example:
 
-```bash
-cat condition1_subsetA.fastq condition1_subsetB.fastq | gzip >> condition1.fastq.gz
-cat condition2_subsetC.fastq condition2_subsetD.fastq | gzip >> condition2.fastq.gz
+```console
+$ cat condition1_subsetA.fastq condition1_subsetB.fastq | gzip >> condition1.fastq.gz
+$ cat condition2_subsetC.fastq condition2_subsetD.fastq | gzip >> condition2.fastq.gz
 .
 .
 .
@@ -55,14 +55,12 @@ samples/
 
 This can be symlinked into a single folder as follows:
 
-```bash
-mkdir data
-cd data/
-ln -s ../samples/condition1/condition1.fastq.gz
-ln -s ../samples/condition2/condition2.fastq.gz
-ls -l
-```
-```
+```console
+$ mkdir data
+$ cd data/
+$ ln -s ../samples/condition1/condition1.fastq.gz
+$ ln -s ../samples/condition2/condition2.fastq.gz
+$ ls -l
 total 0
 lrwxrwxrwx 1 ubuntu ubuntu 41 Aug 22 02:55 condition1.fastq.gz -> ../samples/condition1/condition1.fastq.gz
 lrwxrwxrwx 1 ubuntu ubuntu 41 Aug 22 02:55 condition2.fastq.gz -> ../samples/condition2/condition2.fastq.gz

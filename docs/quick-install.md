@@ -10,8 +10,8 @@ Running these scripts requires you to have permission to run `sudo` to install a
 
 Authenticate with `sudo`:
 
-```
-sudo su -
+```console
+$ sudo su -
 CTRL-D
 ```
 
@@ -19,68 +19,68 @@ Install operating system packages:
 
 * Ubuntu:
 
-```bash
-source install-ubuntu.sh
+```console
+$ source install-ubuntu.sh
 ```
 
 * CentOS:
 
-```bash
-source install-centos.sh
+```console
+$ source install-centos.sh
 ```
 
 Install Python:
 
 * **Note**: This script installs both Python 2 and 3. If you only want to install one or the other then edit the file and comment out the code that installs the version you do not want.
 
-```bash
-source install-py.sh
+```console
+$ source install-py.sh
 ```
 
 Install Hisat2 and Bowtie:
 
-```bash
-source install-hisat-bowtie.sh
+```console
+$ source install-hisat-bowtie.sh
 ```
 
 Install R:
 
 * Ubuntu:
 
-```bash
-source install-r-ubuntu.sh
+```console
+$ source install-r-ubuntu.sh
 ```
 
 * CentOS
 
-```bash
-source install-r-centos.sh
+```console
+$ source install-r-centos.sh
 ```
 
 Install R packages:
 
-```bash
-Rscript install-R.r
+```console
+$ Rscript install-R.r
 ```
 
 Install R Bioconductor packages:
 
 * R 3.4 users:
 
-```bash
-Rscript install-r-3.4-bioconductor.R
+```console
+$ Rscript install-r-3.4-bioconductor.R
 ```
 
 * R 3.5 users:
 
-```bash
-Rscript install-r-3.5-bioconductor.R
+```console
+$ Rscript install-r-3.5-bioconductor.R
 ```
 
 When complete, check that R's library paths include your personal library:
 
-```bash
-Rscript -e ".libPaths()"
+```console
+$ Rscript -e ".libPaths()"
 ```
 
 You should see something like:

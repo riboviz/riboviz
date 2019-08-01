@@ -10,8 +10,8 @@ Web sites:
 * [BitBucket](https://bitbucket.org/logilab/pylint.org)
 
 Install:
-```bash
-conda install -y pylint
+```console
+$ conda install -y pylint
 ```
 
 ### pycodestyle
@@ -23,8 +23,8 @@ Web sites:
 
 Install:
 
-```bash
-conda install -y pycodestyle
+```console
+$ conda install -y pycodestyle
 ```
 
 ### pandas
@@ -36,8 +36,8 @@ Web sites:
 
 Install:
 
-```bash
-conda install -y pandas
+```console
+$ conda install -y pandas
 ```
 
 ### pytest
@@ -49,8 +49,8 @@ Web sites:
 
 Install:
 
-```bash
-conda install -y pytest
+```console
+$ conda install -y pytest
 ```
 
 ---
@@ -63,37 +63,28 @@ It can be run as follows:
 
 * Python 3:
 
-```bash
-python -m pyscripts.compare_files <FILE1> <FILE2>
+```console
+$ python -m pyscripts.compare_files <FILE1> <FILE2>
 ```
 
 * Python 2 or 3:
 
-```bash
-PYTHONPATH=. python pyscripts/compare_files.py <FILE1> <FILE2>
+```console
+$ PYTHONPATH=. python pyscripts/compare_files.py <FILE1> <FILE2>
 ```
 
 If the files are equivalent an exit code of 0 is returned. If the files are not equivalent an error message is displayed and an exit code of 1 is returned.
 
 For example:
 
-```bash
-PYTHONPATH=. python pyscripts/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WT3AT.h5
-echo $?
-```
-```
+```console
+$ PYTHONPATH=. python pyscripts/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WT3AT.h5
+$ echo $?
 0
-```
-```bash
-PYTHONPATH=. python pyscripts/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WTnone.h5
-```
-```
+
+$ PYTHONPATH=. python pyscripts/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WTnone.h5
 Non-zero return code (1) from h5diff -q .../output/WT3AT.h5 .../output/WTnone.h5
-```
-```bash
-echo $?
-```
-```
+$ echo $?
 1
 ```
 
@@ -135,8 +126,8 @@ The vignette (`pyscripts/prep_riboviz.py`) regression test suite compares two di
 
 The tests can be run using pytest:
 
-```bash
-pytest tests/test_vignette.py --expected=<DIR1> [--actual=<DIR2>]
+```console
+$ pytest tests/test_vignette.py --expected=<DIR1> [--actual=<DIR2>]
 ```
 
 where:
@@ -154,16 +145,14 @@ Useful pytest flags are:
 
 For example:
 
-```bash
-pytest -s -k "test_output_bam" tests/test_vignette.py --expected=<DIR1> --actual=<DIR2>
+```console
+$ pytest -s -k "test_output_bam" tests/test_vignette.py --expected=<DIR1> --actual=<DIR2>
 ```
 
 A complete run looks like the following
 
-```bash
-pytest -v tests/test_vignette.py --expected=$HOME/expected-vignette --actual=$HOME/actual-vignette
-```
-```
+```console
+$ pytest -v tests/test_vignette.py --expected=$HOME/expected-vignette --actual=$HOME/actual-vignette
 ============================= test session starts ==============================
 ...
 collected 51 items                                                             
@@ -229,10 +218,10 @@ tests/test_vignette.py::test_output_tpms_collated_tsv PASSED             [100%]
 
 Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible. For example, to run these on `validation.py`:
 
-```bash
-pylint riboviz/validation.py
-pycodestyle riboviz/validation.py
-2to3 riboviz/validation.py
+```console
+$ pylint riboviz/validation.py
+$ pycodestyle riboviz/validation.py
+$ 2to3 riboviz/validation.py
 ```
 
 ---
