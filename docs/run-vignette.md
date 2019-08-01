@@ -132,7 +132,7 @@ $ source $HOME/miniconda3/bin/activate
 
 If you have not already done so, set the paths to Hisat2 and Bowtie:
 
-* If you followed [Create `setenv.sh` to configure Hisat2 and Bowtie paths](https://github.com/riboviz/RiboViz/blob/develop/docs/install.md#create-setenvsh-to-configure-hisat2-and-bowtie-paths), then run:
+* If you followed [Create `setenv.sh` to configure Hisat2 and Bowtie paths](./install.md#create-setenvsh-to-configure-hisat2-and-bowtie-paths), then run:
 
 ```console
 $ source $HOME/setenv.sh
