@@ -6,7 +6,8 @@ import os.path
 import subprocess
 
 from Bio import SeqIO
-import pandas
+import numpy as np
+import pandas as pd
 import pysam
 
 
@@ -90,7 +91,7 @@ def load_bedgraph(bed_file):
     :raise Exception: if problems arise when loading the file
     """
     # TODO handle track-line, if provided.
-    data = pandas.read_csv(bed_file, sep="\t", header=None)
+    data = pd.read_csv(bed_file, sep="\t", header=None)
     assert data.shape[1] == len(BEDGRAPH_COLUMNS),\
         "Invalid bedgraph file: %s. Expected 4 columns, found %d"\
         % (bed_file, data.shape[1])
@@ -398,24 +399,84 @@ def get_segment_qname(segment):
     return segment.qname
 
 
-def equal_tsv(file1, file2):
+def equal_dataframes(data1, data2, tolerance=0.0001):
     """
-    Compare two tab-separated (TSV) files for exact equality.
+    Compare two Pandas dataframes for equality.
+
+    The dataframes are expected to be two dimensional i.e. rows and
+    columns.
+
+    Dataframes are compared column-by-column:
+
+    * float64 columns are converted to numpy arrays then tested for
+      equality to within the given tolerance using
+      numpy.allclose. This is used instead of
+      pandas.testing.assert_frame_equal as there is an issue with how
+      that function handles precision (see
+      pandas.testing.assert_frame_equal doesn't do precision according
+      to the doc #25068,
+      https://github.com/pandas-dev/pandas/issues/25068). In addition,
+      "NAN" values are considered to be equal.
+    * All other columns (object, int64, bool, datetime64, timedelta)
+      are compared for exact equality using
+      pandas.core.series.Series.equals.
+
+    :param data1: dataframe
+    :type data1: pandas.core.frame.DataFrame
+    :param data2: dataframe
+    :type data2: pandas.core.frame.DataFrame
+    :param tolerance: tolerance for floating point comparisons
+    :type tolerance: float
+    :raise AssertionError: if DataFrames differ in their data
+    """
+    assert data1.shape == data2.shape,\
+        "Unequal shape: %s, %s"\
+        % (str(data1.shape), str(data2.shape))
+    assert data1.columns.equals(data2.columns),\
+        "Unequal column names: %s, %s"\
+        % (str(data1.columns), str(data2.columns))
+    for column in data1.columns:
+        column1 = data1[column]
+        column2 = data2[column]
+        if column1.dtype in (int, float) and column2.dtype in (int, float):
+            column_data1 = column1.to_numpy()
+            column_data2 = column2.to_numpy()
+            assert np.allclose(column_data1,
+                               column_data2,
+                               rtol=0,
+                               atol=tolerance,
+                               equal_nan=True),\
+                "Unequal column values: %s" % column
+        else:
+            assert column1.equals(column2),\
+                "Unequal column values: %s" % column
+
+
+def equal_tsv(file1, file2, tolerance=0.0001):
+    """
+    Compare two tab-separated (TSV) files for equality.
+
+    See equal_dataframes.
 
     :param file1: File name
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
+    :param tolerance: tolerance for floating point comparisons
+    :type tolerance: float
     :raise AssertionError: if files differ in their data
     :raise Exception: if problems arise when loading the files
     """
-    data1 = pandas.read_csv(file1, sep="\t")
-    data2 = pandas.read_csv(file2, sep="\t")
-    assert data1.shape == data2.shape,\
-        "Unequal rows/columns: %s (%s), %s (%s)"\
-        % (file1, str(data1.shape), file2, str(data2.shape))
-    assert data1.equals(data2),\
-        "Unequal TSV data: %s, %s" % (file1, file2)
+    data1 = pd.read_csv(file1, sep="\t")
+    data2 = pd.read_csv(file2, sep="\t")
+    try:
+        equal_dataframes(data1, data2, tolerance)
+    except AssertionError as e:
+        # Add file names to error message.
+        message = e.args[0]
+        message += " in file: " + str(file1) + ":" + str(file2)
+        e.args = (message,)
+        raise
 
 
 def equal_fastq(file1, file2):
