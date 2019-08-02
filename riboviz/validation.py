@@ -73,7 +73,7 @@ def load_bedgraph(bed_file):
     Load bedGraph file. A bedGraph file has format:
 
     * Track definition line.
-      - `track type=bedGraph ...` (optional)
+      - `track type=bedGraph ...`
     * Track data rows, each in 4 column BED format:
       - Chromosone (string)
       - Chromosone start coordinate (integer)
@@ -85,18 +85,24 @@ def load_bedgraph(bed_file):
 
     :param bed_file: File name
     :type bed_file: str or unicode
-    :return: bedGraph data
-    :rtype: pandas.core.frame.DataFrame
-    :raise AssertionError: if file does not have 4 columns
+    :return: bedGraph track and data
+    :rtype: tuple(str or unicode, pandas.core.frame.DataFrame)
+    :raise AssertionError: if the first line of the file does
+    not start with "track type=bedGraph" or the rest of the file
+    does not have 4 columns
     :raise Exception: if problems arise when loading the file
     """
-    # TODO handle track-line, if provided.
-    data = pd.read_csv(bed_file, sep="\t", header=None)
+    with open(bed_file) as f:
+        track = f.readline()
+    assert track.startswith("track type=bedGraph"),\
+        "Invalid bedgraph file: %s. Invalid track line: %s"\
+        % (bed_file, track)
+    data = pd.read_csv(bed_file, sep="\t", header=None, skiprows=1)
     assert data.shape[1] == len(BEDGRAPH_COLUMNS),\
         "Invalid bedgraph file: %s. Expected 4 columns, found %d"\
         % (bed_file, data.shape[1])
     data.columns = BEDGRAPH_COLUMNS
-    return data
+    return (track, data)
 
 
 def equal_bedgraph(file1, file2):
@@ -111,8 +117,11 @@ def equal_bedgraph(file1, file2):
     differ in their data
     :raise Exception: if problems arise when loading the files
     """
-    data1 = load_bedgraph(file1)
-    data2 = load_bedgraph(file2)
+    (track1, data1) = load_bedgraph(file1)
+    (track2, data2) = load_bedgraph(file2)
+    assert track1 == track2,\
+        "Unequal bedGraph tracks: %s (%s), %s (%s)"\
+        % (file1, track1, file2, track2)
     assert data1.shape[0] == data2.shape[0],\
         "Unequal bedGraph rows: %s (%d), %s (%d)"\
         % (file1, data1.shape[0], file2, data2.shape[0])
