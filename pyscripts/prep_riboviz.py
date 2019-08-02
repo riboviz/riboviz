@@ -187,7 +187,7 @@ for fq_file in list(config["fq_files"].keys()):
         # redirection from "bedtools" to ".bedgraph" files.
         # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
         cmd = ["bedtools", "genomecov", "-ibam", fn_out + ".bam",
-               "-bga", "-5", "-strand", "+"]
+               "-trackline", "-bga", "-5", "-strand", "+"]
         print(("Running: " + list_to_str(cmd)))
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         stdout, _ = p.communicate()
@@ -195,7 +195,7 @@ for fq_file in list(config["fq_files"].keys()):
             f.write(stdout)
         # Calculate transcriptome coverage for minus strand.
         cmd = ["bedtools", "genomecov", "-ibam", fn_out + ".bam",
-               "-bga", "-5", "-strand", "-"]
+               "-trackline", "-bga", "-5", "-strand", "-"]
         print(("Running: " + list_to_str(cmd)))
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         stdout, _ = p.communicate()
