@@ -61,7 +61,7 @@ This file is an input specified within the `vignette/vignette_config.yaml` file'
 
 **Vignette read data**
 
-The read data files are downsampled ribosome profiling data from *Saccharomyces cerevisiae*. 
+The read data files are downsampled ribosome profiling data from *Saccharomyces cerevisiae*. The data was downsampled to provide a dataset that was realistic, but small enough to run quickly.
 
 The data is from the paper Guydosh N.R. and Green R. "[Dom34 rescues ribosomes in 3' untranslated regions](https://www.ncbi.nlm.nih.gov/pubmed/24581494)", Cell. 2014 Feb 27;156(5):950-62. doi: [10.1016/j.cell.2014.02.006](https://doi.org/10.1016/j.cell.2014.02.006). The NCBI accession for the whole dataset is #GSE52968.
 
@@ -77,8 +77,6 @@ The data was sampled uniformly at random 1/50 reads from each file, producing ab
 
 * `vignette/input/SRR1042855_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type no additive.
 * `vignette/input/SRR1042864_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type + 3-AT.
-
-The data was downsampled to provide a dataset that was realistic, but small enough to run quickly.
 
 The data files are inputs specified within the `vignette/vignette_config.yaml` file's `fq_files` parameter:
 
