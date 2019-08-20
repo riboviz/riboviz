@@ -149,8 +149,10 @@ Run `prep_riboviz.py`:
 
 ```console
 $ python pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
-    vignette/vignette_config.yaml
+    vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
 ```
+
+The part of the command, `2>&1 | tee vignette-out.txt`, allows for the messages that `prep_riboviz.py` prints to be both printed onto the screen and also printed into the `vignette-out.txt` file so you can inspect it later. This can be useful if any problems arise.
 
 ### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
 
@@ -313,15 +315,6 @@ For this example, the output files occupy ~3 MB:
 ```console
 $ du -sm vignette/output/
 3	vignette/output/
-```
-
-## Capturing output
-
-To both display all output from the script that is printed at the terminal, and capture it into a file, run, for example:
-
-```console
-$ python pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
-    vignette/vignette_config.yaml  2>&1 | tee script-py.txt
 ```
 
 ## Cleaning up to run again
