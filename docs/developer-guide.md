@@ -240,7 +240,7 @@ website/   # RiboViz Shiny server code and data
 
 ---
 
-## Data files
+## Data file origins
 
 The following data files were created either manually or via the use of scripts outwith or within the repository.
 
