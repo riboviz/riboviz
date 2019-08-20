@@ -250,7 +250,7 @@ data/yeast_CDS_w_250utrs.gff3
 data/yeast_codon_pos_i200.RData
 ```
 
-Created by a run of [script_for_transcript_annotation.Rmd](../rmarkdown/script_for_transcript_annotation.Rmd) on third-party data. See [Inputs](./run-vignette.md) in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md) for details. These files are used as inputs to RiboViz.
+Created by a run of [script_for_transcript_annotation.Rmd](../rmarkdown/script_for_transcript_annotation.Rmd) on third-party data. See [Inputs](./run-vignette.md#inputs) in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md) for details. These files are used as inputs to RiboViz.
 
 ```
 vignette/input/yeast_YAL_CDS_w_250utrs.fa
@@ -260,7 +260,7 @@ vignette/input/SRR1042855_s1mi.fastq.gz
 vignette/input/SRR1042864_s1mi.fastq.gz
 ```
 
-Created manually from third-party data or the foregoing `data/` FILES. sEE [Inputs](./run-vignette.md) in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md) for details. These files are used as inputs to RiboViz.
+Created manually from third-party data or the foregoing `data/` FILES. See [Inputs](./run-vignette.md#inputs) in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md) for details. These files are used as inputs to RiboViz.
 
 ```
 data/testdata_trim_5p_mismatch.sam
