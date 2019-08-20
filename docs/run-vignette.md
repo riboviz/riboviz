@@ -24,7 +24,7 @@ This script processes the files `saccharomyces_cerevisiae_R64-2-1_20150113.gff` 
 * `data/yeast_CDS_w_250utrs.gff3`: coding sequences locations.
 * `data/yeast_codon_pos_i200.RData`: position of codons within each gene (the numbering ignores the first 200 codons).
 
-`yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were downsampled to provide a manageable data set for demonstration purposes. See [User data for analyses within the context of an organism"](#user-data-for-analyses-within-the-context-of-an-organism) below.
+`yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were downsampled to provide a manageable data set for demonstration purposes. See [User data for analyses within the context of an organism](#user-data-for-analyses-within-the-context-of-an-organism) below.
 
 When running RiboViz, `yeast_codon_pos_i200.RData` is read by [generate_stats_figs.R](../rscripts/generate_stats_figs.R) to help with generating plots and tables of results data.
 
@@ -53,7 +53,7 @@ The document [Appendix A1: Yeast Nomenclature Systematic Open Reading Frame (ORF
 
 **Ribosomal RNA (rRNA) contaminants to remove**
 
-Selected `RDN-n-n` sequences were copied and pasted from the file `rna_coding_R64-1-1_20110203.fasta` found in the file [genome release R64-1-1](https://downloads.yeastgenome.org/sequence/S288C_reference/genome_releases/S288C_reference_genome_R64-1-1_20110203.tgz) from the [Saccharomyces Genome Database](https://www.yeastgenome.org/) (note that this is one release earlier from that cited above). The resulting file was:
+Selected `RDN-n-n` sequences were copied and pasted from the file `rna_coding_R64-1-1_20110203.fasta` found in the file [genome release R64-1-1](https://downloads.yeastgenome.org/sequence/S288C_reference/genome_releases/S288C_reference_genome_R64-1-1_20110203.tgz) from the [Saccharomyces Genome Database](https://www.yeastgenome.org/) (note that this is one release earlier from that cited in [Organism-specific data](#organism-specific-data) above). The resulting file was:
 
 * `vignette/input/yeast_rRNA_R64-1-1.fa`: rRNA sequences to avoid aligning to.
 
