@@ -65,8 +65,8 @@ The read data files are downsampled ribosome profiling data from *Saccharomyces 
 
 The data is from the paper Guydosh N.R. and Green R. "[Dom34 rescues ribosomes in 3' untranslated regions](https://www.ncbi.nlm.nih.gov/pubmed/24581494)", Cell. 2014 Feb 27;156(5):950-62. doi: [10.1016/j.cell.2014.02.006](https://doi.org/10.1016/j.cell.2014.02.006). The NCBI accession for the whole dataset is #GSE52968.
 
-* SRX386986: GSM1279570: wild-type no additive: [SRR1042855](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042855
-* SRX386995: GSM1279579: wild-type plus 3-AT: [SRR1042864](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042864)
+* SRX386986: GSM1279570: wild-type no additive, [SRR1042855](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042855).
+* SRX386995: GSM1279579: wild-type plus 3-AT, [SRR1042864](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042864).
 
 In July 2017, these files files were imported using NCBI's [fastq-dump](https://ncbi.github.io/sra-tools/fastq-dump.html) and gzipped to produce:
 
