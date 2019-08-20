@@ -43,7 +43,7 @@ For an organism, the following data is required by RiboViz:
 As the yeast data files are very large, these were downsampled. The data files `yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were processed by filtering only ORFs in the left arm of chromosome 1, for which the ORF names start with `YALnnnx`. This produced the yeast genome and annotation data files:
 
 * `vignette/input/yeast_YAL_CDS_w_250utrs.fa`: transcript sequences to align to, from just the left arm of chromosome 1.
-* `vignette/input`yeast_YAL_CDS_w_250utrs.gff3`: matched genome feature file, specifying coding sequences locations (start and stop coordinates).
+* `vignette/input/yeast_YAL_CDS_w_250utrs.gff3`: matched genome feature file, specifying coding sequences locations (start and stop coordinates).
 
 `yeast_YAL_CDS_w_250utrs.fa` is an input specified within the `vignette/vignette_config.yaml` file's `orf_fasta` parameter.
 
