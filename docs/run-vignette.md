@@ -24,7 +24,7 @@ This script processes the files `saccharomyces_cerevisiae_R64-2-1_20150113.gff` 
 * `data/yeast_CDS_w_250utrs.gff3`: coding sequences locations.
 * `data/yeast_codon_pos_i200.RData`: position of codons within each gene (the numbering ignores the first 200 codons).
 
-`yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were downsampled to provide a manageable data set for demonstration purposes. See "User data for analyses within the context of an organism" below.
+`yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were downsampled to provide a manageable data set for demonstration purposes. See [User data for analyses within the context of an organism"](#user-data-for-analyses-within-the-context-of-an-organism) below.
 
 When running RiboViz, `yeast_codon_pos_i200.RData` is read by [generate_stats_figs.R](../rscripts/generate_stats_figs.R) to help with generating plots and tables of results data.
 
