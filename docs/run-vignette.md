@@ -103,7 +103,7 @@ The script prepares ribosome profiling data for RiboViz or other analyses. It do
 * Aligns remaining reads to ORFs or another hisat2 index file (`orf_index`).
 * Trims 5' mismatches from reads and removes reads with more than 2 mismatches via a call to `pyscripts/trim5pmismatch.py`.
 * Parallelizes over many processors (`nprocesses`), except for `cutadapt` which isn't parallel.
-* Makes length-sensitive alignments in compressed h5 format by running `rscripts/reads_to_list.R`.
+* Makes length-sensitive alignments in compressed h5 format by running `rscripts/bam_to_h5.R`.
 * Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets, by running `rscripts/generate_stats_figs.R`.
 * Estimates read counts, reads per base, and transcripts per million for each ORF in each sample.
 * Puts all intermediate files into a temporary directory (`dir_tmp`) which will be **large**.
