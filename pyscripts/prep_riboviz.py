@@ -32,7 +32,7 @@ Prepare ribosome profiling data for RiboViz or other analysis:
 * - Parallelize over many processes (config["nprocesses"]), except for
 *   cutadapt which isn't parallel.
 * - Make length-sensitive alignments in compressed h5 format by
-*   running "reads_to_list.R".
+*   running "bam_to_h5.R".
 * - Generate summary statistics, and analyses and QC plots for both
 *   RPF and mRNA datasets, by running "generate_stats_figs.R".
 * - Put all intermediate files into a temporary directory
@@ -203,7 +203,7 @@ for fq_file in list(config["fq_files"].keys()):
             f.write(stdout)
     print("bedgraphs made on plus and minus strands")
 
-    # Run reads_to_list to make length-sensitive alignments in h5 format.
+    # Run bam_to_h5 to make length-sensitive alignments in h5 format.
     second_id = config["SecondID"]
     if second_id is None:
         second_id = "NULL"
