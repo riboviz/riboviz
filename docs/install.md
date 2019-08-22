@@ -122,6 +122,35 @@ Install:
 $ sudo yum install -y hdf5-devel
 ```
 
+### pigz
+
+Web site: [pigz](http://zlib.net/pigz/)
+
+pigz is a parallel implementation of gzip for multi-processor, multi-core machines. It may already be available on your system. Check by running the following command:
+
+```console
+$ pigz --version
+pigz 2.4
+```
+
+If it is not present, please install it as follows:
+
+**Ubuntu**
+
+Install:
+
+```console
+$ sudo apt-get install -y pigz
+```
+
+**CentOS**
+
+Install:
+
+```console
+$ sudo yum install -y pigz
+```
+
 ---
 
 ## Python
