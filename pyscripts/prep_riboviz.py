@@ -249,7 +249,6 @@ for fq_file in list(config["fq_files"].keys()):
            "--orf_gff_file=" + config["orf_gff_file"],
            "--dir_out=" + config["dir_out"],
            "--dir_data=" + data_dir,
-           "--orf_gff_file=" + config["orf_gff_file"],
            "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
     print(("Running: " + list_to_str(cmd)))
