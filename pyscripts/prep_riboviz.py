@@ -29,10 +29,15 @@ Prepare ribosome profiling data for RiboViz or other analysis:
 *   (config["orf_index"]).
 * - Trim 5' mismatches from reads and remove reads with more than 2
 *   mismatches.
-* - Parallelize over many processes (config["nprocesses"]), except for
-*   cutadapt which isn't parallel.
+* - Parallelize over many processes (config["nprocesses"]):
+*   - This value is used to configure hisat2, samtools sort,
+*     bam_to_h5.R and generate_stats_figs.R.
+*   - For cutadapt and Python 3, the number of available processors
+*     on the host will be used.
+*   - For cutadapt and Python 2, its default of 1 processor will be
+*     used as cutadapt cannot run in parallel under Python 2.
 * - Make length-sensitive alignments in compressed h5 format by
-*   running "reads_to_list.R".
+*   running "bam_to_h5.R".
 * - Generate summary statistics, and analyses and QC plots for both
 *   RPF and mRNA datasets, by running "generate_stats_figs.R".
 * - Put all intermediate files into a temporary directory
@@ -79,6 +84,7 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
     :return: exit code
     :rtype: int
     """
+    print(("Running under Python " + sys.version))
     with open(config_yaml, 'r') as f:
         config = yaml.load(f)
 
@@ -141,12 +147,14 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
         fn_out = os.path.join(config["dir_out"], fn_stem)
 
         # Cut illumina adapters.
+        subprocess.call(cmd)
         cmd = ["cutadapt", "--trim-n", "-O", "1", "-m", "5",
-               "-a", config["adapters"], "-o", fn_trim, fn,
-               "-j", str(config["nprocesses"])]
+               "-a", config["adapters"], "-o", fn_trim, fn]
+        py_major = sys.version_info.major
+        if py_major == 3:
+            cmd += ["-j", str(0)]
         print(("Running: " + list_to_str(cmd)))
         subprocess.call(cmd)
-
         # Map reads to rRNA.
         cmd = ["hisat2", "-p", str(config["nprocesses"]), "-N", "1",
                "--un", fn_nonrRNA, "-x", config["rRNA_index"],
@@ -260,7 +268,6 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
            os.path.join(r_scripts, "collate_tpms.R"),
            "--yaml=" + config_yaml]
     subprocess.call(cmd)
-
     print("finished running prepRiboviz.py")
     return 0
 

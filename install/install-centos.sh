@@ -7,3 +7,5 @@ sudo yum install -y epel-release
 sudo yum install -y BEDTools
 bedtools -version
 sudo yum install -y hdf5-devel
+sudo yum install -y pigz
+pigz --version
