@@ -29,8 +29,13 @@ Prepare ribosome profiling data for RiboViz or other analysis:
 *   (config["orf_index"]).
 * - Trim 5' mismatches from reads and remove reads with more than 2
 *   mismatches.
-* - Parallelize over many processes (config["nprocesses"]), except for
-*   cutadapt which isn't parallel.
+* - Parallelize over many processes (config["nprocesses"]):
+*   - This value is used to configure hisat2, samtools sort,
+*     bam_to_h5.R and generate_stats_figs.R.
+*   - For cutadapt and Python 3, the number of available processors
+*     on the host will be used.
+*   - For cutadapt and Python 2, its default of 1 processor will be
+*     used as cutadapt cannot run in parallel under Python 2.
 * - Make length-sensitive alignments in compressed h5 format by
 *   running "bam_to_h5.R".
 * - Generate summary statistics, and analyses and QC plots for both
@@ -70,6 +75,9 @@ py_scripts = sys.argv[1]
 r_scripts = sys.argv[2]
 data_dir = sys.argv[3]
 config_yaml = sys.argv[4]
+
+print(("Running under Python " + sys.version))
+
 with open(config_yaml, 'r') as f:
     config = yaml.load(f)
 
@@ -133,8 +141,10 @@ for fq_file in list(config["fq_files"].keys()):
 
     # Cut illumina adapters.
     cmd = ["cutadapt", "--trim-n", "-O", "1", "-m", "5",
-           "-a", config["adapters"], "-o", fn_trim, fn,
-           "-j", str(config["nprocesses"])]
+           "-a", config["adapters"], "-o", fn_trim, fn]
+    py_major = sys.version_info.major
+    if py_major == 3:
+        cmd += ["-j", str(0)]
     print(("Running: " + list_to_str(cmd)))
     subprocess.call(cmd)
 
@@ -248,7 +258,7 @@ for fq_file in list(config["fq_files"].keys()):
 
 print("collating TPMs across samples")
 cmd = ["Rscript", "--vanilla",
-	   os.path.join(r_scripts, "collate_tpms.R"),
+           os.path.join(r_scripts, "collate_tpms.R"),
 	   "--yaml=" + config_yaml ]
 subprocess.call(cmd)
 

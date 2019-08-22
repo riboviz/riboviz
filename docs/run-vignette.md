@@ -102,7 +102,10 @@ The script prepares ribosome profiling data for RiboViz or other analyses. It do
 * Removes rRNA or other contaminating reads by hisat2 alignment to the rRNA index file (`rRNA_index`).
 * Aligns remaining reads to ORFs or another hisat2 index file (`orf_index`).
 * Trims 5' mismatches from reads and removes reads with more than 2 mismatches via a call to `pyscripts/trim5pmismatch.py`.
-* Parallelizes over many processors (`nprocesses`), except for `cutadapt` which isn't parallel.
+* Parallelizes over many processes (`nprocesses`):
+  - This value is used to configure hisat2, samtools sort, bam_to_h5.R and generate_stats_figs.R.
+  - For cutadapt and Python 3, the number of available processors on the host will be used.
+  - For cutadapt and Python 2, its default of 1 processor will be used as cutadapt cannot run in parallel under Python 2.
 * Makes length-sensitive alignments in compressed h5 format by running `rscripts/bam_to_h5.R`.
 * Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets, by running `rscripts/generate_stats_figs.R`.
 * Estimates read counts, reads per base, and transcripts per million for each ORF in each sample.
@@ -180,7 +183,7 @@ nprocesses: 1 # number of processes to parallelize over
 nprocesses: 4 # number of processes to parallelize over
 ```
 
-* **Note:** `samtools`, which is invoked during the run, can only run under 1 process with Python 2.
+* **Note:** `cutadapt` and `samtools`, which are invoked during the run, can only run under 1 process with Python 2.
 
 ### Run `pyscripts/prep_riboviz.py`
 
@@ -216,7 +219,7 @@ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 Run `prep_riboviz.py`:
 
 ```console
-$ python pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
+$ python -u pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
     vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
 ```
 
