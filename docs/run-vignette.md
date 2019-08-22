@@ -1,24 +1,84 @@
 # Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file
 
-RiboViz is designed to be run from a single script using a single configuration file in [YAML](http://www.yaml.org/) format containing all the information required for the analysis.
+RiboViz is designed to be run from a single script using a single configuration file in [YAML](http://www.yaml.org/) format containing all the information required for the analysis workflow.
 
-`pyscripts/prep_riboviz.py` contains a Python implementation of such a script.
+`pyscripts/prep_riboviz.py` contains a Python implementation of the RiboViz analysis workflow.
 
-Using this script, you can run a "vignette" of the back-end analysis pipeline, to demostrate RiboViz's capabilities. An example for *Saccharomyces cerevisiae* reads, up to the output of HDF5 files, is in the `vignette/` directory.
+Using this script, you can run a "vignette" of the workflow on a sample data set, to see RiboViz's capabilities. An example for *Saccharomyces cerevisiae* reads, up to the output of HDF5 files, is provided.
 
-## `vignette` directory contents
+`vignette/vignette_config.yaml` contains the workflow's configuration information, in YAML format.
 
-`vignette/input/` contains input data:
+---
 
-```
-yeast_YAL_CDS_w_250utrs.fa    # sequence file to align to from just left arm of chromosome 1.
-yeast_YAL_CDS_w_250utrs.gff3  # matched genome feature file to specify start and stop co-ordinates.
-yeast_rRNA_R64-1-1.fa         # rRNA sequence file to avoid aligning to.
-SRR1042855_s1mi.fastq.gz      # about 1mi-sampled RPFs wild-type no additive from Guydosh & Green 2014.
-SRR1042864_s1mi.fastq.gz      # about 1mi-sampled RPFs wild-type + 3-AT from Guydosh & Green 2014.
-```
+## Inputs
 
-`vignette/vignette_config.yaml` contains configuration information in YAML. It specifies that the two `fastq.gz` files above are to be processed, along with an additional non-existent file which is used for testing:
+### Organism-specific data
+
+`data/` holds genome and annotation data for *Saccharomyces cerevisiae* (yeast).
+
+Sequence and annotation files for the whole approximate *Saccharomyces cerevisiae* transcriptome were prepared using [script_for_transcript_annotation.Rmd](../rmarkdown/script_for_transcript_annotation.Rmd). 
+
+This script processes the files `saccharomyces_cerevisiae_R64-2-1_20150113.gff` and `S288C_reference_sequence_R64-2-1_20150113.fsa` from the file [genome release R64-2-1](https://downloads.yeastgenome.org/sequence/S288C_reference/genome_releases/S288C_reference_genome_R64-2-1_20150113.tgz) downloaded from the [Saccharomyces Genome Database](https://www.yeastgenome.org/). The script was used to produce the following files holding S288c annotations and ORF sequences:
+
+* `data/yeast_CDS_w_250utrs.fa`: transcript sequences.
+* `data/yeast_CDS_w_250utrs.gff3`: coding sequences locations.
+* `data/yeast_codon_pos_i200.RData`: position of codons within each gene (the numbering ignores the first 200 codons).
+
+`yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were downsampled to provide a manageable data set for demonstration purposes. See [User data for analyses within the context of an organism](#user-data-for-analyses-within-the-context-of-an-organism) below.
+
+When running RiboViz, `yeast_codon_pos_i200.RData` is read by [generate_stats_figs.R](../rscripts/generate_stats_figs.R) to help with generating plots and tables of results data.
+
+### User data for analyses within the context of an organism
+
+For an organism, the following data is required by RiboViz:
+
+* Transcript sequences in a FASTA file. The transcript sequences need to contain both coding regions and flanking regions (which could be fixed, or coincident with measured UTRs).
+* Locations of coding sequences within the transcripts in a GTF/GFF3 file.
+* Ribosomal rRNA and other contaminant sequences in a FASTA file.
+
+`vignette/input` holds sample data for *Saccharomyces cerevisiae*-related analyses.
+
+**Downsampled yeast transcriptome**
+
+As the yeast data files are very large, these were downsampled. The data files `yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were processed by filtering only ORFs in the left arm of chromosome 1, for which the ORF names start with `YALnnnx`. This produced the yeast genome and annotation data files:
+
+* `vignette/input/yeast_YAL_CDS_w_250utrs.fa`: transcript sequences to align to, from just the left arm of chromosome 1.
+* `vignette/input/yeast_YAL_CDS_w_250utrs.gff3`: matched genome feature file, specifying coding sequences locations (start and stop coordinates).
+
+`yeast_YAL_CDS_w_250utrs.fa` is an input specified within the `vignette/vignette_config.yaml` file's `orf_fasta` parameter.
+
+`yeast_YAL_CDS_w_250utrs.gff3` is an input specified within the `vignette/vignette_config.yaml` file's `orf_gff_file` parameter.
+
+The document [Appendix A1: Yeast Nomenclature Systematic Open Reading Frame (ORF) and Other Genetic Designations](https://onlinelibrary.wiley.com/doi/pdf/10.1002/9783527636778.app1) describes the ORF naming convention.
+
+**Ribosomal RNA (rRNA) contaminants to remove**
+
+Selected `RDN-n-n` sequences were copied and pasted from the file `rna_coding_R64-1-1_20110203.fasta` found in the file [genome release R64-1-1](https://downloads.yeastgenome.org/sequence/S288C_reference/genome_releases/S288C_reference_genome_R64-1-1_20110203.tgz) from the [Saccharomyces Genome Database](https://www.yeastgenome.org/) (note that this is one release earlier from that cited in [Organism-specific data](#organism-specific-data) above). The resulting file was:
+
+* `vignette/input/yeast_rRNA_R64-1-1.fa`: rRNA sequences to avoid aligning to.
+
+This file is an input specified within the `vignette/vignette_config.yaml` file's `rRNA_fasta` parameter.
+
+**Vignette read data**
+
+The read data files are downsampled ribosome profiling data from *Saccharomyces cerevisiae*. The data was downsampled to provide a dataset that was realistic, but small enough to run quickly.
+
+The data is from the paper Guydosh N.R. and Green R. "[Dom34 rescues ribosomes in 3' untranslated regions](https://www.ncbi.nlm.nih.gov/pubmed/24581494)", Cell. 2014 Feb 27;156(5):950-62. doi: [10.1016/j.cell.2014.02.006](https://doi.org/10.1016/j.cell.2014.02.006). The NCBI accession for the whole dataset is #GSE52968.
+
+* SRX386986: GSM1279570: wild-type no additive, [SRR1042855](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042855).
+* SRX386995: GSM1279579: wild-type plus 3-AT, [SRR1042864](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042864).
+
+In July 2017, these files were imported using NCBI's [fastq-dump](https://ncbi.github.io/sra-tools/fastq-dump.html) and gzipped to produce:
+
+* `SRR1042855.fastq.gz`
+* `SRR1042864.fastq.gz`
+
+The data was sampled uniformly at random 1/50 reads from each file, producing about 1 million reads total, to produce the read data files:
+
+* `vignette/input/SRR1042855_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type no additive.
+* `vignette/input/SRR1042864_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type + 3-AT.
+
+The data files are inputs specified within the `vignette/vignette_config.yaml` file's `fq_files` parameter:
 
 ```yaml
 fq_files: # fastq files to be processed
@@ -26,6 +86,10 @@ fq_files: # fastq files to be processed
   WT3AT: SRR1042864_s1mi.fastq.gz
   NotHere: example_missing_file.fastq.gz # prep_riboviz should give error message for missing files
 ```
+
+Note that the file specifies an additional, non-existent, file. This is used to test that the workflow processes valid files and ignores non-existent ones.
+
+---
 
 ## What `prep_riboviz.py` does
 
@@ -38,8 +102,11 @@ The script prepares ribosome profiling data for RiboViz or other analyses. It do
 * Removes rRNA or other contaminating reads by hisat2 alignment to the rRNA index file (`rRNA_index`).
 * Aligns remaining reads to ORFs or another hisat2 index file (`orf_index`).
 * Trims 5' mismatches from reads and removes reads with more than 2 mismatches via a call to `pyscripts/trim5pmismatch.py`.
-* Parallelizes over many processors (`nprocesses`), except for `cutadapt` which isn't parallel.
-* Makes length-sensitive alignments in compressed h5 format by running `rscripts/reads_to_list.R`.
+* Parallelizes over many processes (`nprocesses`):
+  - This value is used to configure hisat2, samtools sort, bam_to_h5.R and generate_stats_figs.R.
+  - For cutadapt and Python 3, the number of available processors on the host will be used.
+  - For cutadapt and Python 2, its default of 1 processor will be used as cutadapt cannot run in parallel under Python 2.
+* Makes length-sensitive alignments in compressed h5 format by running `rscripts/bam_to_h5.R`.
 * Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets, by running `rscripts/generate_stats_figs.R`.
 * Estimates read counts, reads per base, and transcripts per million for each ORF in each sample.
 * Puts all intermediate files into a temporary directory (`dir_tmp`) which will be **large**.
@@ -89,11 +156,15 @@ For each of these names (e.g. `Example`), the intermediate files produced in the
 
 The `_unaligned.sam` files could be used to find common contaminants or translated sequences not in your orf annotation.
 
+---
+
 ## Warning: a temporary directory is created which could be very large!
 
 Riboviz generates many intermediate files that could be large, i.e. about the same size as your input fasta files. All these files are placed in a temporary directory defined by a `dir_tmp` property in `vignette_config.yaml`, which, by default, is `vignette/tmp/`. Its contents can be inspected for troubleshooting if necessary. You should probably delete these temporary directories when you have completed your analysis.
 
 For the vignette the total size of the temporary files is ~1141 MB, and the total size of all the files in the `vignette/` post-run is ~1152 MB.
+
+---
 
 ## Run the "vignette"
 
@@ -112,7 +183,7 @@ nprocesses: 1 # number of processes to parallelize over
 nprocesses: 4 # number of processes to parallelize over
 ```
 
-* **Note:** `samtools`, which is invoked during the run, can only run under 1 process with Python 2.
+* **Note:** `cutadapt` and `samtools`, which are invoked during the run, can only run under 1 process with Python 2.
 
 ### Run `pyscripts/prep_riboviz.py`
 
@@ -148,9 +219,11 @@ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 Run `prep_riboviz.py`:
 
 ```console
-$ python pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
-    vignette/vignette_config.yaml
+$ python -u pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
+    vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
 ```
+
+The part of the command, `2>&1 | tee vignette-out.txt`, allows for the messages that `prep_riboviz.py` prints to be both printed onto the screen and also printed into the `vignette-out.txt` file so you can inspect it later. This can be useful if any problems arise.
 
 ### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
 
@@ -315,14 +388,7 @@ $ du -sm vignette/output/
 3	vignette/output/
 ```
 
-## Capturing output
-
-To both display all output from the script that is printed at the terminal, and capture it into a file, run, for example:
-
-```console
-$ python pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
-    vignette/vignette_config.yaml  2>&1 | tee script-py.txt
-```
+---
 
 ## Cleaning up to run again
 
@@ -336,13 +402,19 @@ $ rm -rf vignette/output
 
 You might also want to do this if you have run the vignette with a missing R package, and then want to run it again from scratch. Alternatively, you might have edited the vignette and committed your changes, and be submitting a pull request.
 
+---
+
 ## Using generated hisat2 indices
 
 If you have already generated hisat2 indices for the same organism and annotation, set `build_indices` in the configuration file to `FALSE` and use the same index directory (`dir_index`) that you built in to.
 
+---
+
 ## Customising the vignette
 
-We suggest copying `vignette/vignette_config.yaml` and the rest of the `vignette` directory, and then customising it to fit your own dataset.
+We suggest copying `vignette/vignette_config.yaml` and the rest of the `vignette` directory, and then customising it to fit your own datasets.
+
+---
 
 ## Anatomy of `prep_riboviz.py`
 
@@ -356,7 +428,7 @@ Configuration file:
 vignette/vignette_config.yaml
 ```
 
-Input files in `vignette/input/`:
+User input files in `vignette/input/`:
 
 ```
 SRR1042855_s1mi.fastq.gz
@@ -366,7 +438,7 @@ yeast_YAL_CDS_w_250utrs.fa
 yeast_YAL_CDS_w_250utrs.gff3
 ```
 
-Supplementary data files in `data/`:
+Organism data files in `data/`:
 
 ```
 yeast_codon_pos_i200.RData
