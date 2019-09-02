@@ -24,7 +24,7 @@ Prepare ribosome profiling data for RiboViz or other analysis:
 * - Cut out sequencing library adapters ("CTGTAGGCACC" or
 *   config["adapters").
 * - Remove rRNA or other contaminating reads by hisat2 alignment to
-*   rRNA index file (config["rRNA_index"]).
+*   rRNA index file (config["rRNA_index"])
 * - Align remaining reads to ORFs or other hisat2 index file
 *   (config["orf_index"]).
 * - Trim 5' mismatches from reads and remove reads with more than 2
@@ -71,6 +71,25 @@ def list_to_str(lst):
     return ' '.join(map(str, lst))
 
 
+def build_indices(fasta, ht_prefix):
+    """
+    Build indices for alignment via invocation of hisat2-build.
+    Index files have name <ht_prefix>.<N>.ht2.
+
+    :param fasta: FASTA file to be indexed
+    :type fasta: str or unicode
+    :param ht_prefix: Prefix of HT2 index files
+    :type ht_prefix: str or unicode
+    :raise FileNotFoundError: if hisat2-build cannot be found
+    :raise AssertionError: if hisat2-build returns non-zero exit
+    code
+    """
+    cmd = ["hisat2-build", fasta, ht_prefix]
+    print(("Running: " + list_to_str(cmd)))
+    exit_code = subprocess.call(cmd)
+    assert exit_code == 0, "%s failed with exit code %d" % (cmd, exit_code)
+
+
 def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
     """
     :param py_scripts: Directory with RiboViz Python scripts
@@ -88,20 +107,15 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
     with open(config_yaml, 'r') as f:
         config = yaml.load(f)
 
-    # Build indices if necessary.
+    # Build indices for alignment, if necessary/requested.
     if config["build_indices"]:
-        # Build indices for alignment
         if not os.path.exists(config["dir_index"]):
             os.makedirs(config["dir_index"])
-
-        cmd = ["hisat2-build", config["rRNA_fasta"], config["rRNA_index"]]
-        print(("Running: " + list_to_str(cmd)))
-        subprocess.call(cmd)
+        r_rna_index = os.path.join(config["dir_index"], config["rRNA_index"])
+        build_indices(config["rRNA_fasta"], r_rna_index)
         print("rRNA index built")
-
-        cmd = ["hisat2-build", config["orf_fasta"], config["orf_index"]]
-        print(("Running: " + list_to_str(cmd)))
-        subprocess.call(cmd)
+        orf_index = os.path.join(config["dir_index"], config["orf_index"])
+        build_indices(config["orf_fasta"], orf_index)
         print("orf index built")
 
     if len(glob.glob(os.path.join(config["dir_in"], "*.fastq.gz"))) == 0:
@@ -147,7 +161,6 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
         fn_out = os.path.join(config["dir_out"], fn_stem)
 
         # Cut illumina adapters.
-        subprocess.call(cmd)
         cmd = ["cutadapt", "--trim-n", "-O", "1", "-m", "5",
                "-a", config["adapters"], "-o", fn_trim, fn]
         py_major = sys.version_info.major
@@ -157,7 +170,7 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
         subprocess.call(cmd)
         # Map reads to rRNA.
         cmd = ["hisat2", "-p", str(config["nprocesses"]), "-N", "1",
-               "--un", fn_nonrRNA, "-x", config["rRNA_index"],
+               "--un", fn_nonrRNA, "-x", r_rna_index,
                "-S", fn_rRNA_mapped, "-U", fn_trim]
         print(("Running: " + list_to_str(cmd)))
         subprocess.call(cmd)
@@ -166,7 +179,7 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
         cmd = ["hisat2", "-p", str(config["nprocesses"]), "-k", "2",
                "--no-spliced-alignment", "--rna-strandness",
                "F", "--no-unal", "--un", fn_nonaligned,
-               "-x", config["orf_index"], "-S", fn_orf_mapped,
+               "-x", orf_index, "-S", fn_orf_mapped,
                "-U", fn_nonrRNA]
         print(("Running: " + list_to_str(cmd)))
         subprocess.call(cmd)
