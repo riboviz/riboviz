@@ -90,6 +90,183 @@ def build_indices(fasta, ht_prefix):
     assert exit_code == 0, "%s failed with exit code %d" % (cmd, exit_code)
 
 
+def process_sample(sample,
+                   fastq,
+                   r_rna_index,
+                   orf_index,
+                   config,
+                   tmp_dir,
+                   out_dir):
+    """
+    Process a single FASTQ sample file.
+
+    :param sample: Sample name
+    :type sample: str or unicode
+    :param FASTQ: Sample FASTQ file
+    :type FASTQ: str or unicode
+    :param r_rna_index: Prefix of rRNA HT2 index files
+    :type r_rna_index: str or unicode
+    :param orf_index: Prefix of ORF HT2 index files
+    :type orf_index: str or unicode
+    :param config: RiboViz configuration
+    :type config: dict
+    :param tmp_dir Temporary files directory
+    :type tmp_dir: str or unicode
+    :param out_dir Output files directory
+    :type out_dir: str or unicode
+    """
+    print(("Processing sample " + sample))
+    # TODO raise and catch in caller.
+    if not os.path.exists(fastq):
+        print(("File " + fastq + " not found"))
+        return
+    print(("Processing file " + fastq))
+
+    # Cut illumina adapters.
+
+    # Trimmed reads.
+    trim_fq = os.path.join(tmp_dir, sample + "_trim.fq")
+    cmd = ["cutadapt", "--trim-n", "-O", "1", "-m", "5",
+           "-a", config["adapters"], "-o", trim_fq, fastq]
+    py_major = sys.version_info.major
+    if py_major == 3:
+        # cutadapt and Python 3 allows all available processors to
+        # be requested.
+        cmd += ["-j", str(0)]
+    print(("Running: " + list_to_str(cmd)))
+    subprocess.call(cmd)
+
+    # Map reads to rRNA.
+
+    # Trimmed non-rRNA reads.
+    non_r_rna_trim_fq = os.path.join(tmp_dir, sample + "_nonrRNA.fq")
+    # rRNA-mapped reads.
+    r_rna_map_sam = os.path.join(tmp_dir, sample + "_rRNA_map.sam")
+    cmd = ["hisat2", "-p", str(config["nprocesses"]), "-N", "1",
+           "--un", non_r_rna_trim_fq, "-x", r_rna_index,
+           "-S", r_rna_map_sam, "-U", trim_fq]
+    print(("Running: " + list_to_str(cmd)))
+    subprocess.call(cmd)
+
+    # Map to ORFs with (mostly) default settings, up to 2 alignments.
+
+    # ORF-mapped reads.
+    orf_map_sam = os.path.join(tmp_dir, sample + "_orf_map.sam")
+    # Unaligned reads.
+    unaligned_fq = os.path.join(tmp_dir, sample + "_unaligned.fq")
+    cmd = ["hisat2", "-p", str(config["nprocesses"]), "-k", "2",
+           "--no-spliced-alignment", "--rna-strandness",
+           "F", "--no-unal", "--un", unaligned_fq,
+           "-x", orf_index, "-S", orf_map_sam,
+           "-U", non_r_rna_trim_fq]
+    print(("Running: " + list_to_str(cmd)))
+    subprocess.call(cmd)
+
+    # Trim 5' mismatched nt and remove reads with >1 mismatch.
+
+    # ORF-mapped reads.
+    orf_map_sam_clean = os.path.join(tmp_dir,
+                                     sample +
+                                     "_orf_map_clean.sam")
+    cmd = ["python", os.path.join(py_scripts, "trim_5p_mismatch.py"),
+           "-mm", "2", "-in", orf_map_sam,
+           "-out", orf_map_sam_clean]
+    print(("Running: " + list_to_str(cmd)))
+    subprocess.call(cmd)
+
+    # Convert SAM (text) output to BAM (compressed binary).
+
+    sample_out_prefix = os.path.join(out_dir, sample)
+    sample_out_bam = sample_out_prefix + ".bam"
+    # Use pattern suggested by following to implement pipe of
+    # "samtools view" output into "samtools sort".
+    # https://stackoverflow.com/questions/13332268/python-subprocess-command-with-pipe
+    cmd_view = ["samtools", "view", "-b", orf_map_sam_clean]
+    print(("Running: " + list_to_str(cmd_view)))
+    # Sort BAM file on genome and write.
+    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
+                "-O", "bam", "-o", sample_out_bam, "-"]
+    print(("Running: " + list_to_str(cmd_sort)))
+    process_view = subprocess.Popen(cmd_view, stdout=subprocess.PIPE)
+    output_sort = subprocess.check_output(cmd_sort, stdin=process_view.stdout)
+    process_view.wait()
+
+    # Index BAM file.
+    cmd = ["samtools", "index", sample_out_bam]
+    print(("Running: " + list_to_str(cmd)))
+    subprocess.call(cmd)
+
+    if config["make_bedgraph"]:
+        # Record transcriptome coverage as a bedgraph.
+        # Calculate transcriptome coverage for plus strand.
+        # Use pattern suggested by following to implement stdout
+        # redirection from "bedtools" to ".bedgraph" files.
+        # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
+        cmd = ["bedtools", "genomecov", "-ibam", sample_out_bam,
+               "-trackline", "-bga", "-5", "-strand", "+"]
+        print(("Running: " + list_to_str(cmd)))
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        stdout, _ = p.communicate()
+        with open(sample_out_prefix + "_plus.bedgraph", "wb") as f:
+            f.write(stdout)
+        # Calculate transcriptome coverage for minus strand.
+        cmd = ["bedtools", "genomecov", "-ibam", sample_out_bam,
+               "-trackline", "-bga", "-5", "-strand", "-"]
+        print(("Running: " + list_to_str(cmd)))
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        stdout, _ = p.communicate()
+        with open(sample_out_prefix + "_minus.bedgraph", "wb") as f:
+            f.write(stdout)
+        print("bedgraphs made on plus and minus strands")
+
+    # Make length-sensitive alignments in H5 format.
+
+    sample_out_h5 = sample_out_prefix + ".h5"
+    second_id = config["SecondID"]
+    if second_id is None:
+        second_id = "NULL"
+    cmd = ["Rscript", "--vanilla",
+           os.path.join(r_scripts, "bam_to_h5.R"),
+           "--Ncores=" + str(config["nprocesses"]),
+           "--MinReadLen=" + str(config["MinReadLen"]),
+           "--MaxReadLen=" + str(config["MaxReadLen"]),
+           "--Buffer=" + str(config["Buffer"]),
+           "--PrimaryID=" + config["PrimaryID"],
+           "--SecondID=" + second_id,
+           "--dataset=" + config["dataset"],
+           "--bamFile=" + sample_out_bam,
+           "--hdFile=" + sample_out_h5,
+           "--orf_gff_file=" + config["orf_gff_file"],
+           "--ribovizGFF=" + str(config["ribovizGFF"]),
+           "--StopInCDS=" + str(config["StopInCDS"])]
+    print(("Running: " + list_to_str(cmd)))
+    subprocess.call(cmd)
+
+    # Create summary statistics and analyses plots.
+
+    cmd = ["Rscript", "--vanilla",
+           os.path.join(r_scripts, "generate_stats_figs.R"),
+           "--Ncores=" + str(config["nprocesses"]),
+           "--MinReadLen=" + str(config["MinReadLen"]),
+           "--MaxReadLen=" + str(config["MaxReadLen"]),
+           "--Buffer=" + str(config["Buffer"]),
+           "--PrimaryID=" + config["PrimaryID"],
+           "--dataset=" + config["dataset"],
+           "--hdFile=" + sample_out_h5,
+           "--out_prefix=" + sample_out_prefix,
+           "--orf_fasta=" + config["orf_fasta"],
+           "--rpf=" + str(config["rpf"]),
+           "--orf_gff_file=" + config["orf_gff_file"],
+           "--dir_out=" + out_dir,
+           "--dir_data=" + data_dir,
+           "--orf_gff_file=" + config["orf_gff_file"],
+           "--features_file=" + config["features_file"],
+           "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
+    print(("Running: " + list_to_str(cmd)))
+    subprocess.call(cmd)
+    print(("Finished processing sample " + fastq))
+
+
 def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
     """
     :param py_scripts: Directory with RiboViz Python scripts
@@ -119,7 +296,9 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
         print("orf index built")
 
     if len(glob.glob(os.path.join(config["dir_in"], "*.fastq.gz"))) == 0:
-        print(("Directory " + config["dir_in"] + " contains no fastq.qz files"))
+        print(("Directory " +
+               config["dir_in"] +
+               " contains no fastq.qz files"))
         exit(1)
 
     if not os.path.exists(config["dir_tmp"]):
@@ -127,161 +306,26 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
     if not os.path.exists(config["dir_out"]):
         os.makedirs(config["dir_out"])
 
-    # Loop over fastq.gz files.
-    for fq_file in list(config["fq_files"].keys()):
-        print(("Processing fastq sample " + fq_file))
-        # Get file name.
-        fn_nodir = config["fq_files"][fq_file]
-        fn = os.path.join(config["dir_in"], fn_nodir)
-        if not os.path.exists(fn):
-            print(("File " + fn + " not found"))
-            continue
-        print(("Processing file " + fn))
+    # Loop over sample fastq.gz files.
+    print("Processing samples")
+    for sample in list(config["fq_files"].keys()):
+        fastq = os.path.join(config["dir_in"], config["fq_files"][sample])
+        process_sample(sample,
+                       fastq,
+                       r_rna_index,
+                       orf_index,
+                       config,
+                       config["dir_tmp"],
+                       config["dir_out"])
+    print("Finished processing samples")
 
-        # Use user-defined dataset name as file prefix.
-        fn_stem = fq_file
-        # Create tmp and out file names...
-        # Trimmed reads.
-        fn_trim = os.path.join(config["dir_tmp"],
-                               fn_stem + "_trim.fq")
-        # Trimmed non-rRNA reads.
-        fn_nonrRNA = os.path.join(config["dir_tmp"],
-                                  fn_stem + "_nonrRNA.fq")
-        # rRNA-mapped reads.
-        fn_rRNA_mapped = os.path.join(config["dir_tmp"],
-                                      fn_stem + "_rRNA_map.sam")
-        # orf-mapped reads.
-        fn_orf_mapped = os.path.join(config["dir_tmp"],
-                                     fn_stem + "_orf_map.sam")
-        fn_orf_mapped_clean = os.path.join(config["dir_tmp"],
-                                           fn_stem + "_orf_map_clean.sam")
-        fn_nonaligned = os.path.join(config["dir_tmp"],
-                                     fn_stem + "_unaligned.fq")
-        # bam and h5 files.
-        fn_out = os.path.join(config["dir_out"], fn_stem)
-
-        # Cut illumina adapters.
-        cmd = ["cutadapt", "--trim-n", "-O", "1", "-m", "5",
-               "-a", config["adapters"], "-o", fn_trim, fn]
-        py_major = sys.version_info.major
-        if py_major == 3:
-            cmd += ["-j", str(0)]
-        print(("Running: " + list_to_str(cmd)))
-        subprocess.call(cmd)
-        # Map reads to rRNA.
-        cmd = ["hisat2", "-p", str(config["nprocesses"]), "-N", "1",
-               "--un", fn_nonrRNA, "-x", r_rna_index,
-               "-S", fn_rRNA_mapped, "-U", fn_trim]
-        print(("Running: " + list_to_str(cmd)))
-        subprocess.call(cmd)
-
-        # Map to orfs with (mostly) default settings, up to 2 alignments.
-        cmd = ["hisat2", "-p", str(config["nprocesses"]), "-k", "2",
-               "--no-spliced-alignment", "--rna-strandness",
-               "F", "--no-unal", "--un", fn_nonaligned,
-               "-x", orf_index, "-S", fn_orf_mapped,
-               "-U", fn_nonrRNA]
-        print(("Running: " + list_to_str(cmd)))
-        subprocess.call(cmd)
-
-        # Trim 5' mismatched nt and remove reads with >1 mismatch.
-        cmd = ["python", os.path.join(py_scripts, "trim_5p_mismatch.py"),
-               "-mm", "2", "-in", fn_orf_mapped,
-               "-out", fn_orf_mapped_clean]
-        print(("Running: " + list_to_str(cmd)))
-        subprocess.call(cmd)
-
-        # Convert sam (text) output to bam file (compressed binary).
-        # Use pattern suggested by following to implement pipe of
-        # "samtools view" output into "samtools sort".
-        # https://stackoverflow.com/questions/13332268/python-subprocess-command-with-pipe
-        cmd_view = ["samtools", "view", "-b", fn_orf_mapped_clean]
-        print(("Running: " + list_to_str(cmd_view)))
-        # Sort bam file on genome and write.
-        cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
-                    "-O", "bam", "-o", fn_out + ".bam", "-"]
-        print(("Running: " + list_to_str(cmd_sort)))
-        process_view = subprocess.Popen(cmd_view, stdout=subprocess.PIPE)
-        output_sort = subprocess.check_output(cmd_sort, stdin=process_view.stdout)
-        process_view.wait()
-
-        # Index bamfile.
-        cmd = ["samtools", "index", fn_out + ".bam"]
-        print(("Running: " + list_to_str(cmd)))
-        subprocess.call(cmd)
-
-        if config["make_bedgraph"]:
-            # Transcriptome coverage as bedgraph.
-            # Calculate transcriptome coverage for plus strand.
-            # Use pattern suggested by following to implement stdout
-            # redirection from "bedtools" to ".bedgraph" files.
-            # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
-            cmd = ["bedtools", "genomecov", "-ibam", fn_out + ".bam",
-                   "-trackline", "-bga", "-5", "-strand", "+"]
-            print(("Running: " + list_to_str(cmd)))
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            stdout, _ = p.communicate()
-            with open(fn_out + "_plus.bedgraph", "wb") as f:
-                f.write(stdout)
-            # Calculate transcriptome coverage for minus strand.
-            cmd = ["bedtools", "genomecov", "-ibam", fn_out + ".bam",
-                   "-trackline", "-bga", "-5", "-strand", "-"]
-            print(("Running: " + list_to_str(cmd)))
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            stdout, _ = p.communicate()
-            with open(fn_out + "_minus.bedgraph", "wb") as f:
-                f.write(stdout)
-        print("bedgraphs made on plus and minus strands")
-
-        # Run reads_to_list to make length-sensitive alignments in h5 format.
-        second_id = config["SecondID"]
-        if second_id is None:
-            second_id = "NULL"
-        cmd = ["Rscript", "--vanilla",
-               os.path.join(r_scripts, "bam_to_h5.R"),
-               "--Ncores=" + str(config["nprocesses"]),
-               "--MinReadLen=" + str(config["MinReadLen"]),
-               "--MaxReadLen=" + str(config["MaxReadLen"]),
-               "--Buffer=" + str(config["Buffer"]),
-               "--PrimaryID=" + config["PrimaryID"],
-               "--SecondID=" + second_id,
-               "--dataset=" + config["dataset"],
-               "--bamFile=" + fn_out + ".bam",
-               "--hdFile=" + fn_out + ".h5",
-               "--orf_gff_file=" + config["orf_gff_file"],
-               "--ribovizGFF=" + str(config["ribovizGFF"]),
-               "--StopInCDS=" + str(config["StopInCDS"])]
-        print(("Running: " + list_to_str(cmd)))
-        subprocess.call(cmd)
-        # Generate summary statistics and analyses plots.
-        cmd = ["Rscript", "--vanilla",
-               os.path.join(r_scripts, "generate_stats_figs.R"),
-               "--Ncores=" + str(config["nprocesses"]),
-               "--MinReadLen=" + str(config["MinReadLen"]),
-               "--MaxReadLen=" + str(config["MaxReadLen"]),
-               "--Buffer=" + str(config["Buffer"]),
-               "--PrimaryID=" + config["PrimaryID"],
-               "--dataset=" + config["dataset"],
-               "--hdFile=" + fn_out + ".h5",
-               "--out_prefix=" + fn_out,
-               "--orf_fasta=" + config["orf_fasta"],
-               "--rpf=" + str(config["rpf"]),
-               "--orf_gff_file=" + config["orf_gff_file"],
-               "--dir_out=" + config["dir_out"],
-               "--dir_data=" + data_dir,
-               "--orf_gff_file=" + config["orf_gff_file"],
-               "--features_file=" + config["features_file"],
-               "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
-        print(("Running: " + list_to_str(cmd)))
-        subprocess.call(cmd)
-        print(("Finished processing sample " + fq_file))
-
-    print("collating TPMs across samples")
+    # Collate TPMs across sample results.
+    print("Collating TPMs across all processed amples")
     cmd = ["Rscript", "--vanilla",
            os.path.join(r_scripts, "collate_tpms.R"),
            "--yaml=" + config_yaml]
     subprocess.call(cmd)
-    print("finished running prepRiboviz.py")
+    print("Completed")
     return 0
 
 
