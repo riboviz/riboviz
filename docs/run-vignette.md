@@ -225,6 +225,14 @@ $ python -u pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
 
 The part of the command, `2>&1 | tee vignette-out.txt`, allows for the messages that `prep_riboviz.py` prints to be both printed onto the screen and also printed into the `vignette-out.txt` file so you can inspect it later. This can be useful if any problems arise.
 
+The exit code can be checked by running
+
+```console
+$ echo ${PIPESTATUS[0]}
+```
+
+If all went well an exit code of 0 will be returned.
+
 ### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
 
 If you see:
@@ -670,3 +678,14 @@ Outputs files to `vignette/output/`:
 ```
 TPMs_collated.tsv
 ```
+
+### Exit codes
+
+`prep_riboviz.py` returns the following exit codes:
+
+* 0: Processing successfully completed.
+* 1: Errors occurred loading configuration.
+* 2: Error occurred during indexing.
+* 3: No samples were provided.
+* 4: No sample was processed successfully.
+* 5: Error occurred during TPMs collation.
