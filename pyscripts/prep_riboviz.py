@@ -266,6 +266,24 @@ def process_sample(sample,
     subprocess.call(cmd)
     print(("Finished processing sample " + fastq))
 
+    
+def collate_tpms(config_yaml):
+    """
+    Collate TPMs across sample results.
+
+    :param config_yaml: YAML configuration file path
+    :type config_yaml: str or unicode
+    :raise FileNotFoundError: if Rscript cannot be found
+    :raise AssertionError: if collate_tpms.R returns non-zero exit
+    code
+    """
+    print("Collating TPMs across all processed amples")
+    cmd = ["Rscript", "--vanilla",
+           os.path.join(r_scripts, "collate_tpms.R"),
+           "--yaml=" + config_yaml]
+    exit_code = subprocess.call(cmd)
+    assert exit_code == 0, "%s failed with exit code %d" % (cmd, exit_code)
+
 
 def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
     """
@@ -320,11 +338,8 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
     print("Finished processing samples")
 
     # Collate TPMs across sample results.
-    print("Collating TPMs across all processed amples")
-    cmd = ["Rscript", "--vanilla",
-           os.path.join(r_scripts, "collate_tpms.R"),
-           "--yaml=" + config_yaml]
-    subprocess.call(cmd)
+    collate_tpms(config_yaml)
+
     print("Completed")
     return 0
 
