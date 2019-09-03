@@ -221,14 +221,14 @@ Run `prep_riboviz.py`:
 * Python 3:
 
 ```console
-$ python -u -m riboviz.tools.prep_riboviz riboviz/tools/ rscripts/ data/ \
+$ python -u -m riboviz.tools.prep_riboviz rscripts/ data/ \
     vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
 ```
 
 * Python 2 or 3:
 
 ```console
-$ PYTHONPATH=. python -u riboviz/tools/prep_riboviz.py riboviz/tools/ rscripts/ data/ \
+$ PYTHONPATH=. python -u riboviz/tools/prep_riboviz.py rscripts/ data/ \
     vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
 ```
 

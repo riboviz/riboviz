@@ -5,7 +5,6 @@ RiboViz workflow.
 Usage:
 
     PYTHONPATH=. python riboviz/tools/prep_riboviz.py \
-        <PYTHON_SCRIPTS_DIRECTORY>\
         <R_SCRIPTS_DIRECTORY>\
         <DATA_DIRECTORY>\
         <YAML_CONFIG_FILE>
@@ -13,7 +12,8 @@ Usage:
 Example:
 
     PYTHONPATH=. python riboviz/tools/prepRiboviz.py \
-        riboviz/tools/ rscripts/ data/\
+        rscripts/ \
+        data/ \
         vignette/vignette_config.yaml
 
 Prepare ribosome profiling data for RiboViz or other analysis:
@@ -416,10 +416,11 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
 
 
 if __name__ == "__main__":
-    py_scripts_arg = sys.argv[1]
-    r_scripts_arg = sys.argv[2]
-    data_dir_arg = sys.argv[3]
-    config_yaml_arg = sys.argv[4]
+    # Assume RiboViz Python scripts are peers in same directory.
+    py_scripts_arg = os.path.dirname(os.path.realpath(__file__))
+    r_scripts_arg = sys.argv[1]
+    data_dir_arg = sys.argv[2]
+    config_yaml_arg = sys.argv[3]
     exit_code = prep_riboviz(py_scripts_arg,
                              r_scripts_arg,
                              data_dir_arg,
