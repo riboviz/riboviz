@@ -1,13 +1,14 @@
 """
 Vignette regression test suite
 
-The vignette (`pyscripts/prepRiboviz.py`) regression test suite
-compares two directories, each assumed to have `index/` `tmp/` and
-`output/` directories created by the vignette.
+The vignette regression test suite compares two directories, each
+assumed to have `index/` `tmp/` and `output/` directories created by
+the vignette.
 
 The tests can be run using pytest:
 
-    pytest tests/test_vignette.py --expected=<DIR1> [--actual=<DIR2>]
+    pytest tests/test_vignette.py --expected=<DIRECTORY> \
+                                  [--actual=<DIRECTORY>]
 
 where:
 
