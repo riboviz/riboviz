@@ -186,8 +186,8 @@ def process_sample(sample,
 
     :param sample: Sample name
     :type sample: str or unicode
-    :param FASTQ: Sample FASTQ file
-    :type FASTQ: str or unicode
+    :param fastq: Sample FASTQ file
+    :type fastq: str or unicode
     :param r_rna_index: Prefix of rRNA HT2 index files
     :type r_rna_index: str or unicode
     :param orf_index: Prefix of ORF HT2 index files
