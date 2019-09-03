@@ -126,7 +126,6 @@ def riboviz_run(skip_workflow):
                                               r_scripts,
                                               data_dir,
                                               vignette_config)
-        exit_code = 0
         assert exit_code == 0, \
             "prep_riboviz returned non-zero exit code %d" % exit_code
     yield vignette
