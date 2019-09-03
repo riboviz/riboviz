@@ -135,8 +135,7 @@ def run_pipe_command(cmd1, cmd2):
     Helper function to run shell command and pipe output into another.
 
     Use pattern suggested by:
-    https://stackoverflow.com/questions/13332268/python-subprocess-command-with-pipe
-
+    https://docs.python.org/2/library/subprocess.html#replacing-shell-pipeline
     :param cmd: Commnand to run and its arguments
     :type cmd: list(str or unicode)
     :param cmd: Commnand to run and its arguments
@@ -145,9 +144,11 @@ def run_pipe_command(cmd1, cmd2):
     :raise AssertionError: if the commands returns a non-zero exit code
     """
     print(("Running: " + list_to_str(cmd1) + " | " + list_to_str(cmd2)))
-    process_view = subprocess.Popen(cmd1, stdout=subprocess.PIPE)
-    subprocess.check_output(cmd2, stdin=process_view.stdout)
-    exit_code = process_view.wait()
+    process1 = subprocess.Popen(cmd1, stdout=subprocess.PIPE)
+    process2 = subprocess.Popen(cmd2, stdin=process1.stdout)
+    process1.stdout.close()
+    output, _= process2.communicate()
+    exit_code = process2.returncode
     assert exit_code == 0, ("%s % %s failed with exit code %d"
                             % (cmd1, cmd2, exit_code))
 
