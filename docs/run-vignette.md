@@ -218,8 +218,17 @@ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 
 Run `prep_riboviz.py`:
 
+* Python 3:
+
 ```console
-$ python -u pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
+$ python -u -m pyscripts.prep_riboviz pyscripts/ rscripts/ data/ \
+    vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
+```
+
+* Python 2 or 3:
+
+```console
+$ PYTHONPATH=. python -u pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
     vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
 ```
 

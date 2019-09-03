@@ -61,10 +61,11 @@ Exit codes are as follows:
 
 import os
 import os.path
-import subprocess
 import sys
 import traceback
 import yaml
+from riboviz import utils
+from riboviz import process_utils
 
 
 EXIT_OK = 0
@@ -81,78 +82,6 @@ EXIT_COLLATION_ERROR = 5
 """ Error occurred during TPMs collation. """
 
 
-def list_to_str(lst):
-    """
-    Convert list to space-delimited string.
-
-    :param lst: list
-    :type lst: list
-    :return: list as string
-    :rtype: str or unicode
-    """
-    return ' '.join(map(str, lst))
-
-
-def run_command(cmd):
-    """
-    Helper function to run shell command.
-
-    :param cmd: Commnand to run and its arguments
-    :type cmd: list(str or unicode)
-    :raise FileNotFoundError: if the command being run cannot be found
-    :raise AssertionError: if the command returns a non-zero exit code
-    """
-    print(("Running: " + list_to_str(cmd)))
-    exit_code = subprocess.call(cmd)
-    assert exit_code == 0, "%s failed with exit code %d" % (cmd, exit_code)
-
-
-def run_redirect_command(cmd, out_file):
-    """
-    Helper function to run shell command and redirect output to a file.
-
-    Use pattern suggested by:
-    https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
-
-    :param cmd: Commnand to run and its arguments
-    :type cmd: list(str or unicode)
-    :param out_file: Output file
-    :type out_file: str or unicode
-    :raise FileNotFoundError: if the command being run cannot be found
-    :raise AssertionError: if the command returns a non-zero exit code
-    """
-    print(("Running: " + list_to_str(cmd)))
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-    stdout, _ = p.communicate()
-    exit_code = p.returncode
-    assert exit_code == 0, "%s failed with exit code %d" % (cmd, exit_code)
-    with open(out_file, "wb") as f:
-        f.write(stdout)
-
-
-def run_pipe_command(cmd1, cmd2):
-    """
-    Helper function to run shell command and pipe output into another.
-
-    Use pattern suggested by:
-    https://docs.python.org/2/library/subprocess.html#replacing-shell-pipeline
-    :param cmd: Commnand to run and its arguments
-    :type cmd: list(str or unicode)
-    :param cmd: Commnand to run and its arguments
-    :type cmd: list(str or unicode)
-    :raise FileNotFoundError: if the commands being run cannot be found
-    :raise AssertionError: if the commands returns a non-zero exit code
-    """
-    print(("Running: " + list_to_str(cmd1) + " | " + list_to_str(cmd2)))
-    process1 = subprocess.Popen(cmd1, stdout=subprocess.PIPE)
-    process2 = subprocess.Popen(cmd2, stdin=process1.stdout)
-    process1.stdout.close()
-    output, _= process2.communicate()
-    exit_code = process2.returncode
-    assert exit_code == 0, ("%s % %s failed with exit code %d"
-                            % (cmd1, cmd2, exit_code))
-
-
 def build_indices(fasta, ht_prefix):
     """
     Build indices for alignment via invocation of hisat2-build.
@@ -167,9 +96,8 @@ def build_indices(fasta, ht_prefix):
     code
     """
     cmd = ["hisat2-build", fasta, ht_prefix]
-    print(("Running: " + list_to_str(cmd)))
-    exit_code = subprocess.call(cmd)
-    assert exit_code == 0, "%s failed with exit code %d" % (cmd, exit_code)
+    print(("Running: " + utils.list_to_str(cmd)))
+    process_utils.run_command(cmd)
 
 
 def process_sample(sample,
@@ -221,7 +149,7 @@ def process_sample(sample,
         nprocesses = 1
     else:
         nprocesses = config["nprocesses"]
-    
+
     # Cut illumina adapters.
 
     # Trimmed reads.
@@ -233,7 +161,8 @@ def process_sample(sample,
         # cutadapt and Python 3 allows all available processors to
         # be requested.
         cmd += ["-j", str(0)]
-    run_command(cmd)
+    print(("Running: " + utils.list_to_str(cmd)))
+    process_utils.run_command(cmd)
 
     # Map reads to rRNA.
 
@@ -244,7 +173,8 @@ def process_sample(sample,
     cmd = ["hisat2", "-p", str(nprocesses), "-N", "1",
            "--un", non_r_rna_trim_fq, "-x", r_rna_index,
            "-S", r_rna_map_sam, "-U", trim_fq]
-    run_command(cmd)
+    print(("Running: " + utils.list_to_str(cmd)))
+    process_utils.run_command(cmd)
 
     # Map to ORFs with (mostly) default settings, up to 2 alignments.
 
@@ -257,7 +187,8 @@ def process_sample(sample,
            "F", "--no-unal", "--un", unaligned_fq,
            "-x", orf_index, "-S", orf_map_sam,
            "-U", non_r_rna_trim_fq]
-    run_command(cmd)
+    print(("Running: " + utils.list_to_str(cmd)))
+    process_utils.run_command(cmd)
 
     # Trim 5' mismatched nt and remove reads with >1 mismatch.
 
@@ -268,7 +199,8 @@ def process_sample(sample,
     cmd = ["python", os.path.join(py_scripts, "trim_5p_mismatch.py"),
            "-mm", "2", "-in", orf_map_sam,
            "-out", orf_map_sam_clean]
-    run_command(cmd)
+    print(("Running: " + utils.list_to_str(cmd)))
+    process_utils.run_command(cmd)
 
     # Convert SAM (text) output to BAM (compressed binary) and sort on
     # genome.
@@ -278,22 +210,31 @@ def process_sample(sample,
     cmd_view = ["samtools", "view", "-b", orf_map_sam_clean]
     cmd_sort = ["samtools", "sort", "-@", str(nprocesses),
                 "-O", "bam", "-o", sample_out_bam, "-"]
-    run_pipe_command(cmd_view, cmd_sort)
+    print(("Running: " + utils.list_to_str(cmd_view)
+           + " | " + utils.list_to_str(cmd_sort)))
+    process_utils.run_pipe_command(cmd_view, cmd_sort)
 
     # Index BAM file.
     cmd = ["samtools", "index", sample_out_bam]
-    run_command(cmd)
+    print(("Running: " + utils.list_to_str(cmd)))
+    process_utils.run_command(cmd)
 
     if config["make_bedgraph"]:
         # Record transcriptome coverage as a bedgraph.
         # Calculate transcriptome coverage for plus strand.
         cmd = ["bedtools", "genomecov", "-ibam", sample_out_bam,
                "-trackline", "-bga", "-5", "-strand", "+"]
-        run_redirect_command(cmd, sample_out_prefix + "_plus.bedgraph")
+        plus_bedgraph = sample_out_prefix + "_plus.bedgraph"
+        print(("Running: " + utils.list_to_str(cmd)
+               + " > " + plus_bedgraph))
+        process_utils.run_redirect_command(cmd, plus_bedgraph)
         # Calculate transcriptome coverage for minus strand.
         cmd = ["bedtools", "genomecov", "-ibam", sample_out_bam,
                "-trackline", "-bga", "-5", "-strand", "-"]
-        run_redirect_command(cmd, sample_out_prefix + "_minus.bedgraph")
+        minus_bedgraph = sample_out_prefix + "_minus.bedgraph"
+        print(("Running: " + utils.list_to_str(cmd)
+               + " > " + minus_bedgraph))
+        process_utils.run_redirect_command(cmd, minus_bedgraph)
         print("bedgraphs made on plus and minus strands")
 
     # Make length-sensitive alignments in H5 format.
@@ -316,7 +257,8 @@ def process_sample(sample,
            "--orf_gff_file=" + config["orf_gff_file"],
            "--ribovizGFF=" + str(config["ribovizGFF"]),
            "--StopInCDS=" + str(config["StopInCDS"])]
-    run_command(cmd)
+    print(("Running: " + utils.list_to_str(cmd)))
+    process_utils.run_command(cmd)
 
     # Create summary statistics and analyses plots.
 
@@ -337,7 +279,8 @@ def process_sample(sample,
            "--dir_data=" + data_dir,
            "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
-    run_command(cmd)
+    print(("Running: " + utils.list_to_str(cmd)))
+    process_utils.run_command(cmd)
     print(("Finished processing sample " + fastq))
 
 
@@ -360,7 +303,8 @@ def collate_tpms(config_yaml, r_scripts):
     cmd = ["Rscript", "--vanilla",
            os.path.join(r_scripts, "collate_tpms.R"),
            "--yaml=" + config_yaml]
-    run_command(cmd)
+    print(("Running: " + utils.list_to_str(cmd)))
+    process_utils.run_command(cmd)
 
 
 def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
@@ -471,9 +415,12 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
 
 
 if __name__ == "__main__":
-    py_scripts = sys.argv[1]
-    r_scripts = sys.argv[2]
-    data_dir = sys.argv[3]
-    config_yaml = sys.argv[4]
-    exit_code = prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml)
+    py_scripts_arg = sys.argv[1]
+    r_scripts_arg = sys.argv[2]
+    data_dir_arg = sys.argv[3]
+    config_yaml_arg = sys.argv[4]
+    exit_code = prep_riboviz(py_scripts_arg,
+                             r_scripts_arg,
+                             data_dir_arg,
+                             config_yaml_arg)
     sys.exit(exit_code)
