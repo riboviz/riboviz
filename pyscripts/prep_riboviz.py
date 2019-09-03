@@ -217,6 +217,11 @@ def process_sample(sample,
         raise FileNotFoundError(fastq)
     print(("Processing file " + fastq))
 
+    if "nprocesses" not in config:
+        nprocesses = 1
+    else:
+        nprocesses = config["nprocesses"]
+    
     # Cut illumina adapters.
 
     # Trimmed reads.
@@ -236,7 +241,7 @@ def process_sample(sample,
     non_r_rna_trim_fq = os.path.join(tmp_dir, sample + "_nonrRNA.fq")
     # rRNA-mapped reads.
     r_rna_map_sam = os.path.join(tmp_dir, sample + "_rRNA_map.sam")
-    cmd = ["hisat2", "-p", str(config["nprocesses"]), "-N", "1",
+    cmd = ["hisat2", "-p", str(nprocesses), "-N", "1",
            "--un", non_r_rna_trim_fq, "-x", r_rna_index,
            "-S", r_rna_map_sam, "-U", trim_fq]
     run_command(cmd)
@@ -247,7 +252,7 @@ def process_sample(sample,
     orf_map_sam = os.path.join(tmp_dir, sample + "_orf_map.sam")
     # Unaligned reads.
     unaligned_fq = os.path.join(tmp_dir, sample + "_unaligned.fq")
-    cmd = ["hisat2", "-p", str(config["nprocesses"]), "-k", "2",
+    cmd = ["hisat2", "-p", str(nprocesses), "-k", "2",
            "--no-spliced-alignment", "--rna-strandness",
            "F", "--no-unal", "--un", unaligned_fq,
            "-x", orf_index, "-S", orf_map_sam,
@@ -271,7 +276,7 @@ def process_sample(sample,
     sample_out_prefix = os.path.join(out_dir, sample)
     sample_out_bam = sample_out_prefix + ".bam"
     cmd_view = ["samtools", "view", "-b", orf_map_sam_clean]
-    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
+    cmd_sort = ["samtools", "sort", "-@", str(nprocesses),
                 "-O", "bam", "-o", sample_out_bam, "-"]
     run_pipe_command(cmd_view, cmd_sort)
 
@@ -299,7 +304,7 @@ def process_sample(sample,
         second_id = "NULL"
     cmd = ["Rscript", "--vanilla",
            os.path.join(r_scripts, "bam_to_h5.R"),
-           "--Ncores=" + str(config["nprocesses"]),
+           "--Ncores=" + str(nprocesses),
            "--MinReadLen=" + str(config["MinReadLen"]),
            "--MaxReadLen=" + str(config["MaxReadLen"]),
            "--Buffer=" + str(config["Buffer"]),
@@ -317,7 +322,7 @@ def process_sample(sample,
 
     cmd = ["Rscript", "--vanilla",
            os.path.join(r_scripts, "generate_stats_figs.R"),
-           "--Ncores=" + str(config["nprocesses"]),
+           "--Ncores=" + str(nprocesses),
            "--MinReadLen=" + str(config["MinReadLen"]),
            "--MaxReadLen=" + str(config["MaxReadLen"]),
            "--Buffer=" + str(config["Buffer"]),
