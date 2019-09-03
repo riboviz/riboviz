@@ -74,20 +74,20 @@ To request that a branch be merged into the `develop` branch create a new pull r
 
 ## Compare files for equality
 
-`pyscripts/compare_files.py` is a script that can compare the files output by any stage of the vignette, `pyscripts/prep_riboviz.py`.
+`riboviz/tools/compare_files.py` is a script that can compare the files output by any stage of the workflow, `riboviz/tools/prep_riboviz.py`.
 
 It can be run as follows:
 
 * Python 3:
 
 ```console
-$ python -m pyscripts.compare_files <FILE1> <FILE2>
+$ python -m riboviz.tools.compare_files <FILE1> <FILE2>
 ```
 
 * Python 2 or 3:
 
 ```console
-$ PYTHONPATH=. python pyscripts/compare_files.py <FILE1> <FILE2>
+$ PYTHONPATH=. python riboviz/tools/compare_files.py <FILE1> <FILE2>
 ```
 
 If the files are equivalent an exit code of 0 is returned. If the files are not equivalent an error message is displayed and an exit code of 1 is returned.
@@ -95,11 +95,11 @@ If the files are equivalent an exit code of 0 is returned. If the files are not 
 For example:
 
 ```console
-$ PYTHONPATH=. python pyscripts/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WT3AT.h5
+$ PYTHONPATH=. python riboviz/tools/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WT3AT.h5
 $ echo $?
 0
 
-$ PYTHONPATH=. python pyscripts/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WTnone.h5
+$ PYTHONPATH=. python riboviz/tools/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WTnone.h5
 Non-zero return code (1) from h5diff -q .../output/WT3AT.h5 .../output/WTnone.h5
 $ echo $?
 1
@@ -139,7 +139,7 @@ The following files can be compared:
 
 ## Run vignette regression test suite
 
-The vignette (`pyscripts/prep_riboviz.py`) regression test suite compares two directories, each assumed to have `index/` `tmp/` and `output/` directories created by the vignette.
+The vignette regression test suite compares two directories, each assumed to have `index/` `tmp/` and `output/` directories created by the vignette.
 
 The tests can be run using pytest:
 
@@ -247,8 +247,8 @@ $ 2to3 riboviz/validation.py
 
 ```
 data/      # Data files used by scripts and vignette
-pyscripts/ # Python scripts invoked by vignette and vignette itself
 riboviz/   # Python package code
+  tools/   # Python scripts invoked by RiboViz workflow and workflow itself
 rscripts/  # R scripts invoked by vignette
 rmarkdown/ # Rmarkdown scripts for data preprocessing
 tests/     # Python tests including vignette regression test
@@ -284,4 +284,4 @@ data/testdata_trim_5p_mismatch.sam
 data/testdata_trim_5pos5neg.sam
 ```
 
-Created by running RiboViz on the data in `vignette/`, copying and pasting lines from SAM files produced, then manually editing the lines to produce the desired range of outcomes. These files are used for testing [trim_5p_mismatch.py](../pyscripts/trim_5p_mismatch.py).
+Created by running RiboViz on the data in `vignette/`, copying and pasting lines from SAM files produced, then manually editing the lines to produce the desired range of outcomes. These files are used for testing [trim_5p_mismatch.py](../riboviz/tools/trim_5p_mismatch.py).

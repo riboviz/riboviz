@@ -8,7 +8,7 @@
 ## Some unusual genes (e.g. frameshifts) might not have this.
 ## 
 ## example:
-##   python pyscripts/check_fasta_gff.py -fa vignette/input/yeast_YAL_CDS_w_250utrs.fa -gff vignette/input/yeast_YAL_CDS_w_250utrs.gff3 
+##   python riboviz/tools/check_fasta_gff.py -fa vignette/input/yeast_YAL_CDS_w_250utrs.fa -gff vignette/input/yeast_YAL_CDS_w_250utrs.gff3 
 
 import argparse, gffutils
 from Bio import SeqIO

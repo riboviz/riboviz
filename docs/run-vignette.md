@@ -2,7 +2,7 @@
 
 RiboViz is designed to be run from a single script using a single configuration file in [YAML](http://www.yaml.org/) format containing all the information required for the analysis workflow.
 
-`pyscripts/prep_riboviz.py` contains a Python implementation of the RiboViz analysis workflow.
+`riboviz/tools/prep_riboviz.py` contains a Python implementation of the RiboViz analysis workflow.
 
 Using this script, you can run a "vignette" of the workflow on a sample data set, to see RiboViz's capabilities. An example for *Saccharomyces cerevisiae* reads, up to the output of HDF5 files, is provided.
 
@@ -101,7 +101,7 @@ The script prepares ribosome profiling data for RiboViz or other analyses. It do
 * Cuts out sequencing library adapters (`adapters=CTGTAGGCACC`, by default) with `cutadapt`.
 * Removes rRNA or other contaminating reads by hisat2 alignment to the rRNA index file (`rRNA_index`).
 * Aligns remaining reads to ORFs or another hisat2 index file (`orf_index`).
-* Trims 5' mismatches from reads and removes reads with more than 2 mismatches via a call to `pyscripts/trim5pmismatch.py`.
+* Trims 5' mismatches from reads and removes reads with more than 2 mismatches via a call to `riboviz/tools/trim5pmismatch.py`.
 * Parallelizes over many processes (`nprocesses`):
   - This value is used to configure hisat2, samtools sort, bam_to_h5.R and generate_stats_figs.R.
   - For cutadapt and Python 3, the number of available processors on the host will be used.
@@ -185,7 +185,7 @@ nprocesses: 4 # number of processes to parallelize over
 
 * **Note:** `cutadapt` and `samtools`, which are invoked during the run, can only run under 1 process with Python 2.
 
-### Run `pyscripts/prep_riboviz.py`
+### Run `prep_riboviz.py`
 
 If you have not already done so, activate your Python environment:
 
@@ -221,14 +221,14 @@ Run `prep_riboviz.py`:
 * Python 3:
 
 ```console
-$ python -u -m pyscripts.prep_riboviz pyscripts/ rscripts/ data/ \
+$ python -u -m riboviz.tools.prep_riboviz riboviz/tools/ rscripts/ data/ \
     vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
 ```
 
 * Python 2 or 3:
 
 ```console
-$ PYTHONPATH=. python -u pyscripts/prep_riboviz.py pyscripts/ rscripts/ data/ \
+$ PYTHONPATH=. python -u riboviz/tools/prep_riboviz.py riboviz/tools/ rscripts/ data/ \
     vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
 ```
 
@@ -286,17 +286,17 @@ Swap:           969         619         350
 
 Divide the free memory by the number of processes, `nprocesses` e.g. 1024/4 = 256 MB.
 
-Edit `pyscripts/prep_riboviz.py` and change the lines:
+Edit `riboviz/tools/prep_riboviz.py` and change the lines:
 
 ```python
-    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
+    cmd_sort = ["samtools", "sort", "-@", str(nprocesses),
                 "-O", "bam", "-o", fn_out + ".bam", "-"]
 ```
 
 to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
 
 ```python
-    cmd_sort = ["samtools", "sort", "-@", str(config["nprocesses"]),
+    cmd_sort = ["samtools", "sort", "-@", str(nprocesses),
                 "-m", "256M",
                 "-O", "bam", "-o", fn_out + ".bam", "-"]
 ```
@@ -553,7 +553,7 @@ WT3AT_unaligned.fq
 Trim 5' mismatched nt from reads and remove reads with more than 2 mismatches:
 
 ```
-python pyscripts/trim_5p_mismatch.py -mm 2 \
+python riboviz/tools/trim_5p_mismatch.py -mm 2 \
     -in vignette/tmp/WT3AT_orf_map.sam \
     -out vignette/tmp/WT3AT_orf_map_clean.sam
 ```
