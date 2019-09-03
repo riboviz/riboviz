@@ -117,7 +117,7 @@ def run_redirect_command(cmd, out_file):
     :param cmd: Commnand to run and its arguments
     :type cmd: list(str or unicode)
     :param out_file: Output file
-    :typw out_file: str or unicode
+    :type out_file: str or unicode
     :raise FileNotFoundError: if the command being run cannot be found
     :raise AssertionError: if the command returns a non-zero exit code
     """
