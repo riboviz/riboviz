@@ -57,6 +57,6 @@ def command_option(request):
     actual = request.config.getoption(ACTUAL)
     assert os.path.exists(expected) and os.path.isdir(expected),\
         "No such directory: %s" % expected
-    assert os.path.exists(expected) and os.path.isdir(actual),\
+    assert os.path.exists(actual) and os.path.isdir(actual),\
         "No such directory: %s" % actual
     return (expected, actual)
