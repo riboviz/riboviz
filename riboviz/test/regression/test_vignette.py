@@ -136,6 +136,9 @@ def tmp_directory():
     """
     Create a temporary directory for any test files, and delete it
     after use.
+
+    :return: directory
+    :rtype: str or unicode
     """
     tmpdir = tempfile.mkdtemp("tmp_test_vignette")
     yield tmpdir
