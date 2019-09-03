@@ -4,7 +4,7 @@ RiboViz workflow.
 
 Usage:
 
-    python pyscripts/prepRiboViz.py \
+    PYTHONPATH=. python riboviz/tools/prep_riboviz.py \
         <PYTHON_SCRIPTS_DIRECTORY>\
         <R_SCRIPTS_DIRECTORY>\
         <DATA_DIRECTORY>\
@@ -12,7 +12,8 @@ Usage:
 
 Example:
 
-    python pyscripts/prepRiboviz.py pyscripts/ rscripts/ data/\
+    PYTHONPATH=. python riboviz/tools/prepRiboviz.py \
+        riboviz/tools/ rscripts/ data/\
         vignette/vignette_config.yaml
 
 Prepare ribosome profiling data for RiboViz or other analysis:
