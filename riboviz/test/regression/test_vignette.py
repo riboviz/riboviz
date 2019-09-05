@@ -95,8 +95,9 @@ import pytest
 import pysam
 import riboviz
 import riboviz.process_utils
-import riboviz.validation
+import riboviz.test
 import riboviz.tools
+import riboviz.validation
 from riboviz.tools import prep_riboviz
 
 
@@ -113,22 +114,15 @@ def riboviz_run(skip_workflow):
     :rtype: tuple(int, str or unicode)
     """
     print(("Skip workflow:" + str(skip_workflow)))
-    # Get RiboViz repository base directory, parent of
-    # "riboviz" module directory.
-    base_path = os.path.dirname(os.path.dirname(riboviz.__file__))
-    vignette = os.path.join(base_path, "vignette")
     if not skip_workflow:
-        py_scripts = os.path.join(base_path, "riboviz/tools")
-        r_scripts = os.path.join(base_path, "rscripts")
-        data_dir = os.path.join(base_path, "data")
-        vignette_config = os.path.join(vignette, "vignette_config.yaml")
-        exit_code = prep_riboviz.prep_riboviz(py_scripts,
-                                              r_scripts,
-                                              data_dir,
-                                              vignette_config)
+        exit_code = prep_riboviz.prep_riboviz(
+            riboviz.test.PY_SCRIPTS,
+            riboviz.test.R_SCRIPTS,
+            riboviz.test.DATA_DIR,
+            riboviz.test.VIGNETTE_CONFIG)
         assert exit_code == 0, \
             "prep_riboviz returned non-zero exit code %d" % exit_code
-    yield vignette
+    yield riboviz.test.VIGNETTE_DIR
 
 
 @pytest.fixture(scope="function")
