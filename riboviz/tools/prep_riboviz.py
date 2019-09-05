@@ -336,7 +336,7 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
     # Extract configuration.
     try:
         with open(config_yaml, 'r') as f:
-            config = yaml.load(f)
+            config = yaml.load(f, yaml.SafeLoader)
     except Exception:
         traceback.print_exc(file=sys.stdout)
         return EXIT_CONFIG_ERROR

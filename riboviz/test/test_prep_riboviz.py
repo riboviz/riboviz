@@ -51,7 +51,7 @@ def configuration(arguments):
     """
     _, _, _, config_yaml = arguments
     with open(config_yaml, 'r') as f:
-        config = yaml.load(f)
+        config = yaml.load(f, yaml.SafeLoader)
 
     _, path = tempfile.mkstemp(prefix="tmp", suffix=".yaml")
     index_dir = tempfile.mkdtemp("tmp_test_prep_riboviz_index")
