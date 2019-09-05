@@ -631,7 +631,9 @@ Rscript --vanilla rscripts/generate_stats_figs.R --Ncores=4 \
     --out_prefix=vignette/output/WT3AT \
     --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True \
     --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
-    --dir_out=vignette/output --dir_data=data/ \
+    --dir_out=vignette/output \
+    --t_rna=data/yeast_tRNAs.tsv \
+    --codon_pos=data/yeast_codon_pos_i200.RData \
     --features_file=data/yeast_features.tsv --do_pos_sp_nt_freq=True
 ```
 
