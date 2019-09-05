@@ -235,6 +235,30 @@ riboviz/test/regression/test_vignette.py::test_output_tpms_collated_tsv PASSED  
 ========================= 51 passed in 614.86 seconds ==========================
 ```
 
+
+---
+
+## Run `prep_riboviz.py` tests
+
+Run tests of error conditions and exit codes:
+
+```console
+$ pytest -v riboviz/test/test_prep_riboviz.py 
+============================= test session starts ==============================
+platform linux2 -- Python 2.7.16, pytest-4.6.2, py-1.8.0, pluggy-0.12.0 -- /home/centos/miniconda2/bin/python
+cachedir: .pytest_cache
+rootdir: /home/centos/RiboViz
+collected 5 items                                                              
+
+riboviz/test/test_prep_riboviz.py::test_config_error_missing_config_file PASSED [ 20%]
+riboviz/test/test_prep_riboviz.py::test_index_error_missing_fa PASSED    [ 40%]
+riboviz/test/test_prep_riboviz.py::test_no_samples_error PASSED          [ 60%]
+riboviz/test/test_prep_riboviz.py::test_samples_error_missing_samples PASSED [ 80%]
+riboviz/test/test_prep_riboviz.py::test_config_error_missing_dir_in PASSED [100%]
+
+=========================== 5 passed in 0.71 seconds ===========================
+```
+
 ---
 
 ## Coding style
