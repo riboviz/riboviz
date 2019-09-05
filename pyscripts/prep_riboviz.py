@@ -248,7 +248,8 @@ for fq_file in list(config["fq_files"].keys()):
            "--rpf=" + str(config["rpf"]),
            "--orf_gff_file=" + config["orf_gff_file"],
            "--dir_out=" + config["dir_out"],
-           "--dir_data=" + data_dir,
+           "--t_rna=" + os.path.join(data_dir, "yeast_tRNAs.tsv"),
+           "--codon_pos=" + os.path.join(data_dir, "yeast_codon_pos_i200.RData"),
            "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
     print(("Running: " + list_to_str(cmd)))
