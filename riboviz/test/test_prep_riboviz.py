@@ -177,3 +177,32 @@ def test_samples_error_missing_samples(arguments, configuration):
                                           path)
     assert exit_code == prep_riboviz.EXIT_SAMPLES_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
+
+
+def test_config_error_missing_dir_in(arguments, configuration):
+    """
+    Test that a missing "dir_in" configuration value causes
+    EXIT_CONFIG_ERROR to be returned. Indexing is skipped to save
+    time.
+
+    :param arguments: Python scripts directory, R scripts directory,
+    data directory, vignette configuration file
+    (pytest fixture defined in this module)
+    :type arguments: tuple(str or unicode, str or unicode,
+    str or unicode, str or unicode)
+    :param configuration: configuration and path to configuration file
+    (pytest fixture defined in conftest.py)
+    :type configuration: tuple(dict, str or unicode)
+    """
+    py_scripts, r_scripts, data_dir, _ = arguments
+    config, path = configuration
+    config["build_indices"] = False
+    del config["dir_in"]
+    with open(path, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = prep_riboviz.prep_riboviz(py_scripts,
+                                          r_scripts,
+                                          data_dir,
+                                          path)
+    assert exit_code == prep_riboviz.EXIT_CONFIG_ERROR, \
+        "prep_riboviz returned with unexpected exit code %d" % exit_code
