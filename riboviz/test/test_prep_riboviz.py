@@ -7,6 +7,7 @@ import tempfile
 import pytest
 import yaml
 import riboviz
+import riboviz.test
 import riboviz.process_utils
 import riboviz.validation
 import riboviz.tools
@@ -24,13 +25,10 @@ def arguments():
     :rtype: tuple(str or unicode, str or unicode,
     str or unicode, str or unicode)
     """
-    base_path = os.path.dirname(os.path.dirname(riboviz.__file__))
-    py_scripts = os.path.join(base_path, "riboviz/tools")
-    r_scripts = os.path.join(base_path, "rscripts")
-    data_dir = os.path.join(base_path, "data")
-    vignette = os.path.join(base_path, "vignette")
-    vignette_config = os.path.join(vignette, "vignette_config.yaml")
-    arguments = (py_scripts, r_scripts, data_dir, vignette_config)
+    arguments = (riboviz.test.PY_SCRIPTS,
+                 riboviz.test.R_SCRIPTS,
+                 riboviz.test.DATA_DIR,
+                 riboviz.test.VIGNETTE_CONFIG)
     yield arguments
 
 
