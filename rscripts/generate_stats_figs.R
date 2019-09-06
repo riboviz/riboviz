@@ -33,8 +33,10 @@ option_list <- list(
               help="Is the dataset an RPF or mRNA dataset?"),
   make_option("--dir_out", type="character", default="./",
               help="Output directory"),
-  make_option("--dir_data", type="character", default="./data/",
-              help="Data directory"),
+  make_option("--t_rna", type="character", default=NULL,
+              help="tRNA estimates in .tsv file"),
+  make_option("--codon_pos", type="character", default=NULL,
+              help="Codon positions in each gene in .Rdata file"),
   make_option("--orf_gff_file", type="character", default=NULL,
               help="riboviz generated GFF2/GFF3 annotation file"),
   make_option("--features_file", type="character", default=NULL,
@@ -494,10 +496,9 @@ print("Starting: Codon-specific ribosome densities for correlations with tRNAs")
 # Only for RPF datasets
 if(rpf){ 
   # This still depends on yeast-specific arguments and should be edited.
-  yeast_tRNAs <- read.table(paste0(dir_data,"/yeast_tRNAs.tsv"),h=T) # Read in yeast tRNA estimates
-  load(paste0(dir_data,"/yeast_codon_pos_i200.RData")) # Position of codons in each gene (numbering ignores first 200 codons)
-                                                          # Reads in an object named "codon_pos"
-
+  yeast_tRNAs <- read.table(t_rna,h=T) # Read in yeast tRNA estimates
+  load(codon_pos) # Position of codons in each gene (numbering ignores first 200 codons)
+                  # Reads in an object named "codon_pos"
   out <- lapply(genes,function(gene){
     # From "Position specific distribution of reads" plot
     get_cod_pos_reads(fid=fid,gene=gene,dataset=dataset,left=(Buffer-15),right=(Buffer+11),MinReadLen = MinReadLen)}) # Get codon-based position-specific reads for each gene

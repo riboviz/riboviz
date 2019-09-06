@@ -277,7 +277,8 @@ def process_sample(sample,
            "--rpf=" + str(config["rpf"]),
            "--orf_gff_file=" + config["orf_gff_file"],
            "--dir_out=" + out_dir,
-           "--dir_data=" + data_dir,
+           "--t_rna=" + os.path.join(data_dir, "yeast_tRNAs.tsv"),
+           "--codon_pos=" + os.path.join(data_dir, "yeast_codon_pos_i200.RData"),
            "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
     print(("Running: " + utils.list_to_str(cmd)))
@@ -285,12 +286,14 @@ def process_sample(sample,
     print(("Finished processing sample " + fastq))
 
 
-def collate_tpms(config_yaml, r_scripts):
+def collate_tpms(out_dir, samples, r_scripts):
     """
     Collate TPMs across sample results.
 
-    :param config_yaml: YAML configuration file path
-    :type config_yaml: str or unicode
+    :param out_dir Output files directory
+    :type out_dir: str or unicode
+    :param samples: Sample names
+    :type samples: list(str or unicode)
     :param r_scripts:  Directory with RiboViz R scripts
     :type r_scripts: str or unicode
     :raise FileNotFoundError: if Rscript cannot be found
@@ -303,7 +306,8 @@ def collate_tpms(config_yaml, r_scripts):
     print("Collating TPMs across all processed samples")
     cmd = ["Rscript", "--vanilla",
            os.path.join(r_scripts, "collate_tpms.R"),
-           "--yaml=" + config_yaml]
+           "--dir_out=" + out_dir]
+    cmd += samples
     print(("Running: " + utils.list_to_str(cmd)))
     process_utils.run_command(cmd)
 
@@ -406,7 +410,7 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
 
     # Collate TPMs across sample results.
     try:
-        collate_tpms(config_yaml, r_scripts)
+        collate_tpms(out_dir, list(samples.keys()), r_scripts)
     except Exception:
         traceback.print_exc(file=sys.stdout)
         return EXIT_COLLATION_ERROR
