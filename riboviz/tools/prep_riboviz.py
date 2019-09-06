@@ -381,12 +381,12 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
         os.makedirs(out_dir)
     if ("fq_files" not in config) or \
        (config["fq_files"] is None) or \
-       (len(config["fq_files"]) == 0):
+       (not config["fq_files"]):
         print("No samples are defined")
         return EXIT_NO_SAMPLES_ERROR
     samples = config["fq_files"]
     num_samples = len(config["fq_files"])
-    failures = 0
+    successes = []
     for sample in list(samples.keys()):
         try:
             fastq = os.path.join(in_dir, samples[sample])
@@ -400,17 +400,17 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
                            data_dir,
                            tmp_dir,
                            out_dir)
+            successes.append(sample)
         except Exception:
             traceback.print_exc(file=sys.stdout)
-            failures += 1
     print(("Finished processing %d samples, %d failed"
-           % (num_samples, failures)))
-    if failures == num_samples:
+           % (num_samples, num_samples - len(successes))))
+    if not successes:
         return EXIT_SAMPLES_ERROR
 
     # Collate TPMs across sample results.
     try:
-        collate_tpms(out_dir, list(samples.keys()), r_scripts)
+        collate_tpms(out_dir, successes, r_scripts)
     except Exception:
         traceback.print_exc(file=sys.stdout)
         return EXIT_COLLATION_ERROR
