@@ -82,3 +82,55 @@ def run_pipe_command(cmd1, cmd2, out=sys.stdout, err=sys.stderr):
     exit_code = process2.returncode
     assert exit_code == 0, ("%s | %s failed with exit code %d"
                             % (cmd1, cmd2, exit_code))
+
+
+def run_logged_command(cmd, log_file):
+    """
+    Helper function to run shell command and capture stdout and stderr
+    in a log file.
+
+    :param cmd: Commnand to run and its arguments
+    :type cmd: list(str or unicode)
+    :param log_file: File to log stdout and stderr.
+    :type log_file: str or unicode
+    :raise FileNotFoundError: if the command being run cannot be found
+    :raise AssertionError: if the command returns a non-zero exit code
+    """
+    with open(log_file, "a") as f:
+        run_command(cmd, f, f)
+
+
+def run_logged_redirect_command(cmd, out, log_file):
+    """
+    Helper function to run shell command and redirect output to a file
+    and capture stderr in a log file.
+
+    :param cmd: Commnand to run and its arguments
+    :type cmd: list(str or unicode)
+    :param out: Output file name
+    :type out: str or unicode
+    :param log_file: File to log stdout and stderr.
+    :type log_file: str or unicode
+    :raise FileNotFoundError: if the command being run cannot be found
+    :raise AssertionError: if the command returns a non-zero exit code
+    """
+    with open(log_file, "a") as f:
+        run_redirect_command(cmd, out, f)
+
+
+def run_logged_pipe_command(cmd1, cmd2, log_file):
+    """
+    Helper function to run shell command and pipe output into another
+    and capture stdout and stderr in a log file.
+
+    :param cmd: Commnand to run and its arguments
+    :type cmd: list(str or unicode)
+    :param cmd: Commnand to run and its arguments
+    :type cmd: list(str or unicode)
+    :param log_file: File to log stdout and stderr.
+    :type log_file: str or unicode
+    :raise FileNotFoundError: if the commands being run cannot be found
+    :raise AssertionError: if the commands returns a non-zero exit code
+    """
+    with open(log_file, "a") as f:
+        run_pipe_command(cmd1, cmd2, f, f)

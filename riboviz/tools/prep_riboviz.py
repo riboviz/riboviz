@@ -96,9 +96,10 @@ def build_indices(fasta, ht_prefix):
     :raise AssertionError: if hisat2-build returns non-zero exit
     code
     """
+    log_file = "log_hisat.log"
     cmd = ["hisat2-build", fasta, ht_prefix]
     print(("Running: " + utils.list_to_str(cmd)))
-    process_utils.run_command(cmd)
+    process_utils.run_command(cmd, log_file, log_file)
 
 
 def process_sample(sample,

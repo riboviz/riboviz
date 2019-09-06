@@ -339,3 +339,93 @@ def test_run_pipe_command_log_out_err_one_file2(log_out):
     assert lines[0] == "cat: no-such-file: No such file or directory"
     assert lines[1] == "wc: invalid option -- 'x'"
     assert lines[2] == "Try 'wc --help' for more information."
+
+
+def test_run_logged_command(log_out):
+    """
+    Test writing output and errors to a single log file.
+
+    :param log_out: Output log file (via test fixture)
+    :type log_out: str or unicode
+    """
+    path = os.path.realpath(__file__)
+    cmd = ["ls", path, "no-such-file.txt", path]
+    try:
+        process_utils.run_logged_command(cmd, log_out)
+    except AssertionError:
+        pass
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 3
+    assert lines[0] == \
+        "ls: cannot access 'no-such-file.txt': No such file or directory"
+    assert lines[1] == path  # Output from ls
+    assert lines[2] == path  # Output from ls
+
+
+def test_run_logged_redirect_command(log_err, redirect):
+    """
+    Test writing errors to a log file.
+
+    :param log_err: Error log file (via test fixture)
+    :type log_err: str or unicode
+    :param redirect: File for redirected output (via test fixture)
+    :type redirect: str or unicode
+    """
+    path = os.path.realpath(__file__)
+    cmd = ["cat", path, "no-such-file.txt", path]
+    try:
+        process_utils.run_logged_redirect_command(cmd, redirect, log_err)
+    except AssertionError:
+        pass
+    # Compare path to captured redirect.
+    with open(path) as expected, open(redirect) as actual:
+        for line1, line2 in zip(expected, actual):
+            assert line1 == line2
+    lines = [line.rstrip('\n') for line in open(log_err)]
+    assert len(lines) == 1
+    assert lines[0] == \
+        "cat: no-such-file.txt: No such file or directory"
+
+
+def test_run_logged_pipe_command_log(log_out):
+    """
+    Test writing output and errors to a single log file where
+    the first command in the pipeline logs some error.
+
+    :param log_out: Output log file (via test fixture)
+    :type log_out: str or unicode
+    """
+    path = os.path.realpath(__file__)
+    num_lines = len([line for line in open(path)])
+    cmd1 = ["cat", path, "no-such-file", path]
+    cmd2 = ["wc", "-l"]
+    try:
+        process_utils.run_logged_pipe_command(cmd1, cmd2, log_out)
+    except AssertionError:
+        pass
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 2
+    assert lines[0] == "cat: no-such-file: No such file or directory"
+    assert str(num_lines * 2) == lines[1]  # Output from wc
+
+
+def test_run_logged_pipe_command2(log_out):
+    """
+    Test writing output and errors to a single log file where
+    the second command in the pipeline logs some error.
+
+    :param log_out: Output log file (via test fixture)
+    :type log_out: str or unicode
+    """
+    path = os.path.realpath(__file__)
+    cmd1 = ["cat", path, "no-such-file", path]
+    cmd2 = ["wc", "-l", "-x"]
+    try:
+        process_utils.run_logged_pipe_command(cmd1, cmd2, log_out)
+    except AssertionError:
+        pass
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 3
+    assert lines[0] == "cat: no-such-file: No such file or directory"
+    assert lines[1] == "wc: invalid option -- 'x'"
+    assert lines[2] == "Try 'wc --help' for more information."
