@@ -1,19 +1,24 @@
 """
 Vignette regression test suite
 
-The vignette (`pyscripts/prepRiboviz.py`) regression test suite
-compares two directories, each assumed to have `index/` `tmp/` and
-`output/` directories created by the vignette.
+The vignette regression test suite optionally runs prep_riboviz.py on
+the vignette data, in `vignette/`, then compares the results, in
+`vignette/`, to a directory of pre-calculated results.
 
 The tests can be run using pytest:
 
-    pytest tests/test_vignette.py --expected=<DIR1> [--actual=<DIR2>]
+    pytest riboviz/test/regression/test_vignette.py \
+        --expected=<DIRECTORY> \
+        [--skip-workflow]
 
 where:
 
-* `--expected=<DIRECTORY>`: directory with expected vignette files.
-* `--actual=<DIRECTORY>`: directory to be validated against directory
-  with expected vignette files. Default: `vignette/`
+* `--expected=<DIRECTORY>`: directory with expected vignette
+   files. This is assumed to	have `index/` `tmp/` and `output/`
+   directories.
+* `--skip-workflow`: request that the `prep_riboviz.py` workflow not
+   be run, instead use existing data files in `vignette/` for
+   testing.
 
 The directories are assumed to hold the following content:
 
@@ -89,7 +94,35 @@ import tempfile
 import pytest
 import pysam
 import riboviz
+import riboviz.process_utils
+import riboviz.test
+import riboviz.tools
 import riboviz.validation
+from riboviz.tools import prep_riboviz
+
+
+@pytest.fixture(scope="module")
+def riboviz_run(skip_workflow):
+    """
+    Fixture to optionally run RiboViz workflow on vignette data once
+    per module (i.e. once only) then pass vignette directory to
+    test methods.
+
+    :param skip_workflow: Should workflow not be run?
+    :type skip_workflow: bool
+    :return: directory with expected data files
+    :rtype: tuple(int, str or unicode)
+    """
+    print(("Skip workflow:" + str(skip_workflow)))
+    if not skip_workflow:
+        exit_code = prep_riboviz.prep_riboviz(
+            riboviz.test.PY_SCRIPTS,
+            riboviz.test.R_SCRIPTS,
+            riboviz.test.DATA_DIR,
+            riboviz.test.VIGNETTE_CONFIG)
+        assert exit_code == 0, \
+            "prep_riboviz returned non-zero exit code %d" % exit_code
+    yield riboviz.test.VIGNETTE_DIR
 
 
 @pytest.fixture(scope="function")
@@ -97,27 +130,33 @@ def tmp_directory():
     """
     Create a temporary directory for any test files, and delete it
     after use.
+
+    :return: directory
+    :rtype: str or unicode
     """
     tmpdir = tempfile.mkdtemp("tmp_test_vignette")
     yield tmpdir
     shutil.rmtree(tmpdir)
 
 
-@pytest.mark.parametrize("index", range(1, 9))
+@pytest.mark.parametrize("index", list(range(1, 9)))
 @pytest.mark.parametrize("prefix", ["YAL_CDS_w_250", "yeast_rRNA"])
-def test_index(command_option, prefix, index):
+def test_index(expected, riboviz_run, prefix, index):
     """
     Test index/*.ht2 files for equality.
 
-    :param command_option: expected directory, actual directory
+    :param expected: expected directory
     (pytest fixture defined in conftest.py)
-    :type command_option: tuple(str or unicode, str or unicode)
+    :type expected: str or unicode
+    :param riboviz_run: vignette directory
+    (pytest fixture defined in this module)
+    :type riboviz_run: str or unicode
     :param prefix: file name prefix e.g. YAL_CDS_w_250
     :type prefix: str or unicode
     :param index: file name index e.g. 1
     :type index: int
     """
-    (expected, actual) = command_option
+    actual = riboviz_run
     expected_index = os.path.join(expected, "index")
     actual_index = os.path.join(actual, "index")
     file_name = "%s.%d.ht2" % (prefix, index)
@@ -129,19 +168,22 @@ def test_index(command_option, prefix, index):
 
 @pytest.mark.parametrize("content", ["nonrRNA", "trim", "unaligned"])
 @pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_tmp_fq(command_option, prefix, content):
+def test_tmp_fq(expected, riboviz_run, prefix, content):
     """
     Test tmp/*.fq files for equality.
 
-    :param command_option: expected directory, actual directory
+    :param expected: expected directory
     (pytest fixture defined in conftest.py)
-    :type command_option: tuple(str or unicode, str or unicode)
+    :type expected: str or unicode
+    :param riboviz_run: vignette directory
+    (pytest fixture defined in this module)
+    :type riboviz_run: str or unicode
     :param prefix: file name prefix e.g. WT3AT
     :type prefix: str or unicode
     :param content: content e.g. nonrRNA
     :type content: str or unicode
     """
-    (expected, actual) = command_option
+    actual = riboviz_run
     expected_tmp = os.path.join(expected, "tmp")
     actual_tmp = os.path.join(actual, "tmp")
     file_name = "%s_%s.fq" % (prefix, content)
@@ -153,23 +195,26 @@ def test_tmp_fq(command_option, prefix, content):
 
 @pytest.mark.parametrize("content", ["orf_map_clean", "orf_map", "rRNA_map"])
 @pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_tmp_sam(command_option, tmp_directory, prefix, content):
+def test_tmp_sam(expected, riboviz_run, tmp_directory, prefix, content):
     """
     Test tmp/*.sam files for equality. The SAM files are sorted into
     temporary SAM files which are then compared for equality.
 
-    :param command_option: expected directory, actual directory
+    :param expected: expected directory
     (pytest fixture defined in conftest.py)
-    :type command_option: tuple(str or unicode, str or unicode)
-    :param tmp_directory: directory for temporary SAM files
-    (pytest fixture)
+    :type expected: str or unicode
+    :param riboviz_run: vignette directory
+    (pytest fixture defined in this module)
+    :type riboviz_run: str or unicode
+    :param tmp_directory: temporary files directory for test files
+    (pytest fixture defined in this module)
     :type tmp_directory: str or unicode
     :param prefix: file name prefix e.g. WT3AT
     :type prefix: str or unicode
     :param content: content e.g. orf_map_clean
     :type content: str or unicode
     """
-    (expected, actual) = command_option
+    actual = riboviz_run
     expected_tmp = os.path.join(expected, "tmp")
     actual_tmp = os.path.join(actual, "tmp")
     expected_tmp_copy = os.path.join(tmp_directory, "expected")
@@ -192,17 +237,20 @@ def test_tmp_sam(command_option, tmp_directory, prefix, content):
 
 
 @pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_output_bai(command_option, prefix):
+def test_output_bai(expected, riboviz_run, prefix):
     """
     Test output/*.bai files for equality.
 
-    :param command_option: expected directory, actual directory
+    :param expected: expected directory
     (pytest fixture defined in conftest.py)
-    :type command_option: tuple(str or unicode, str or unicode)
+    :type expected: str or unicode
+    :param riboviz_run: vignette directory
+    (pytest fixture defined in this module)
+    :type riboviz_run: str or unicode
     :param prefix: file name prefix e.g. WT3AT
     :type prefix: str or unicode
     """
-    (expected, actual) = command_option
+    actual = riboviz_run
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
     file_name = "%s.bam.bai" % prefix
@@ -213,18 +261,21 @@ def test_output_bai(command_option, prefix):
 
 
 @pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_output_bam(command_option, prefix):
+def test_output_bam(expected, riboviz_run, prefix):
     """
     Test output/*.bam files for equality. The BAM files are assumed to
     be sorted by leftmost coordinate position.
 
-    :param command_option: expected directory, actual directory
+    :param expected: expected directory
     (pytest fixture defined in conftest.py)
-    :type command_option: tuple(str or unicode, str or unicode)
+    :type expected: str or unicode
+    :param riboviz_run: vignette directory
+    (pytest fixture defined in this module)
+    :type riboviz_run: str or unicode
     :param prefix: file name prefix e.g. WT3AT
     :type prefix: str or unicode
     """
-    (expected, actual) = command_option
+    actual = riboviz_run
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
     file_name = "%s.bam" % prefix
@@ -236,19 +287,22 @@ def test_output_bam(command_option, prefix):
 
 @pytest.mark.parametrize("content", ["minus", "plus"])
 @pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_output_bedgraph(command_option, prefix, content):
+def test_output_bedgraph(expected, riboviz_run, prefix, content):
     """
     Test tmp/*.bedgraph files for equality.
 
-    :param command_option: expected directory, actual directory
+    :param expected: expected directory
     (pytest fixture defined in conftest.py)
-    :type command_option: tuple(str or unicode, str or unicode)
+    :type expected: str or unicode
+    :param riboviz_run: vignette directory
+    (pytest fixture defined in this module)
+    :type riboviz_run: str or unicode
     :param prefix: file name prefix e.g. WT3AT
     :type prefix: str or unicode
     :param content: content e.g. minus
     :type content: str or unicode
     """
-    (expected, actual) = command_option
+    actual = riboviz_run
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
     file_name = "%s_%s.bedgraph" % (prefix, content)
@@ -259,17 +313,20 @@ def test_output_bedgraph(command_option, prefix, content):
 
 
 @pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_output_h5(command_option, prefix):
+def test_output_h5(expected, riboviz_run, prefix):
     """
     Test output/*.h5 files for equality.
 
-    :param command_option: expected directory, actual directory
+    :param expected: expected directory
     (pytest fixture defined in conftest.py)
-    :type command_option: tuple(str or unicode, str or unicode)
+    :type expected: str or unicode
+    :param riboviz_run: vignette directory
+    (pytest fixture defined in this module)
+    :type riboviz_run: str or unicode
     :param prefix: file name prefix e.g. WT3AT
     :type prefix: str or unicode
     """
-    (expected, actual) = command_option
+    actual = riboviz_run
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
     file_name = "%s.h5" % prefix
@@ -287,19 +344,22 @@ def test_output_h5(command_option, prefix):
                           "read_lengths",
                           "tpms"])
 @pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_output_tsv(command_option, prefix, content):
+def test_output_tsv(expected, riboviz_run, prefix, content):
     """
     Test output/*tsv files for equality.
 
-    :param command_option: expected directory, actual directory
+    :param expected: expected directory
     (pytest fixture defined in conftest.py)
-    :type command_option: tuple(str or unicode, str or unicode)
+    :type expected: str or unicode
+    :param riboviz_run: vignette directory
+    (pytest fixture defined in this module)
+    :type riboviz_run: str or unicode
     :param prefix: file name prefix e.g. WT3AT
     :type prefix: str or unicode
     :param content: content e.g. 3nt_periodicity
     :type content: str or unicode
     """
-    (expected, actual) = command_option
+    actual = riboviz_run
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
     file_name = "%s_%s.tsv" % (prefix, content)
@@ -309,15 +369,18 @@ def test_output_tsv(command_option, prefix, content):
         os.path.join(actual_output, file_name))
 
 
-def test_output_tpms_collated_tsv(command_option):
+def test_output_tpms_collated_tsv(expected, riboviz_run):
     """
     Test output/TPMs_collated.tsv files for equality.
 
-    :param command_option: expected directory, actual directory
+    :param expected: expected directory
     (pytest fixture defined in conftest.py)
-    :type command_option: tuple(str or unicode, str or unicode)
+    :type expected: str or unicode
+    :param riboviz_run: vignette directory
+    (pytest fixture defined in this module)
+    :type riboviz_run: str or unicode
     """
-    (expected, actual) = command_option
+    actual = riboviz_run
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
     file_name = "TPMs_collated.tsv"
