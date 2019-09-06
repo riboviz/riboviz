@@ -680,12 +680,13 @@ The same types of file are output, but with prefix `WTnone`.
 
 ### Collate TPMs across samples
 
+Only successfully processed samples are collated.
+
 ```
 Rscript --vanilla rscripts/collate_tpms.R \
     --dir_out=vignette/output \
     WTnone \
-    WT3AT \
-    NotHere
+    WT3AT
 ```
 
 Outputs files to `vignette/output/`:
