@@ -83,7 +83,7 @@ EXIT_COLLATION_ERROR = 5
 """ Error occurred during TPMs collation. """
 
 
-def build_indices(fasta, ht_prefix):
+def build_indices(fasta, ht_prefix, log_file):
     """
     Build indices for alignment via invocation of hisat2-build.
     Index files have name <ht_prefix>.<N>.ht2.
@@ -92,14 +92,15 @@ def build_indices(fasta, ht_prefix):
     :type fasta: str or unicode
     :param ht_prefix: Prefix of HT2 index files
     :type ht_prefix: str or unicode
+    :param log_file: Log file
+    :type log_file: str or unicode
     :raise FileNotFoundError: if hisat2-build cannot be found
     :raise AssertionError: if hisat2-build returns non-zero exit
     code
     """
-    log_file = "log_hisat.log"
     cmd = ["hisat2-build", fasta, ht_prefix]
     print(("Running: " + utils.list_to_str(cmd)))
-    process_utils.run_command(cmd, log_file, log_file)
+    process_utils.run_logged_command(cmd, log_file)
 
 
 def process_sample(sample,
@@ -164,7 +165,8 @@ def process_sample(sample,
         # be requested.
         cmd += ["-j", str(0)]
     print(("Running: " + utils.list_to_str(cmd)))
-    process_utils.run_command(cmd)
+    log_file = "log_" + sample + "_cut_adapt.log"
+    process_utils.run_logged_command(cmd, log_file)
 
     # Map reads to rRNA.
 
@@ -176,7 +178,8 @@ def process_sample(sample,
            "--un", non_r_rna_trim_fq, "-x", r_rna_index,
            "-S", r_rna_map_sam, "-U", trim_fq]
     print(("Running: " + utils.list_to_str(cmd)))
-    process_utils.run_command(cmd)
+    log_file = "log_" + sample + "_hisat2_rrna.log"
+    process_utils.run_logged_command(cmd, log_file)
 
     # Map to ORFs with (mostly) default settings, up to 2 alignments.
 
@@ -190,7 +193,8 @@ def process_sample(sample,
            "-x", orf_index, "-S", orf_map_sam,
            "-U", non_r_rna_trim_fq]
     print(("Running: " + utils.list_to_str(cmd)))
-    process_utils.run_command(cmd)
+    log_file = "log_" + sample + "_hisat2_orf.log"
+    process_utils.run_logged_command(cmd, log_file)
 
     # Trim 5' mismatched nt and remove reads with >1 mismatch.
 
@@ -202,7 +206,8 @@ def process_sample(sample,
            "-mm", "2", "-in", orf_map_sam,
            "-out", orf_map_sam_clean]
     print(("Running: " + utils.list_to_str(cmd)))
-    process_utils.run_command(cmd)
+    log_file = "log_" + sample + "_trim_5p_mismatch.log"
+    process_utils.run_logged_command(cmd, log_file)
 
     # Convert SAM (text) output to BAM (compressed binary) and sort on
     # genome.
@@ -214,12 +219,14 @@ def process_sample(sample,
                 "-O", "bam", "-o", sample_out_bam, "-"]
     print(("Running: " + utils.list_to_str(cmd_view)
            + " | " + utils.list_to_str(cmd_sort)))
-    process_utils.run_pipe_command(cmd_view, cmd_sort)
+    log_file = "log_" + sample + "_samtools_view_sort.log"
+    process_utils.run_logged_pipe_command(cmd_view, cmd_sort, log_file)
 
     # Index BAM file.
     cmd = ["samtools", "index", sample_out_bam]
     print(("Running: " + utils.list_to_str(cmd)))
-    process_utils.run_command(cmd)
+    log_file = "log_" + sample + "_samtools_index.log"
+    process_utils.run_logged_command(cmd, log_file)
 
     if config["make_bedgraph"]:
         # Record transcriptome coverage as a bedgraph.
@@ -229,14 +236,16 @@ def process_sample(sample,
         plus_bedgraph = sample_out_prefix + "_plus.bedgraph"
         print(("Running: " + utils.list_to_str(cmd)
                + " > " + plus_bedgraph))
-        process_utils.run_redirect_command(cmd, plus_bedgraph)
+        log_file = "log_" + sample + "_bedtools_genome_cov_plus.log"
+        process_utils.run_logged_redirect_command(cmd, plus_bedgraph, log_file)
         # Calculate transcriptome coverage for minus strand.
         cmd = ["bedtools", "genomecov", "-ibam", sample_out_bam,
                "-trackline", "-bga", "-5", "-strand", "-"]
         minus_bedgraph = sample_out_prefix + "_minus.bedgraph"
         print(("Running: " + utils.list_to_str(cmd)
                + " > " + minus_bedgraph))
-        process_utils.run_redirect_command(cmd, minus_bedgraph)
+        log_file = "log_" + sample + "_bedtools_genome_cov_minus.log"
+        process_utils.run_logged_redirect_command(cmd, minus_bedgraph, log_file)
         print("bedgraphs made on plus and minus strands")
 
     # Make length-sensitive alignments in H5 format.
@@ -260,7 +269,8 @@ def process_sample(sample,
            "--ribovizGFF=" + str(config["ribovizGFF"]),
            "--StopInCDS=" + str(config["StopInCDS"])]
     print(("Running: " + utils.list_to_str(cmd)))
-    process_utils.run_command(cmd)
+    log_file = "log_" + sample + "_bam_to_h5.log"
+    process_utils.run_logged_command(cmd, log_file)
 
     # Create summary statistics and analyses plots.
 
@@ -283,11 +293,12 @@ def process_sample(sample,
            "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
     print(("Running: " + utils.list_to_str(cmd)))
-    process_utils.run_command(cmd)
+    log_file = "log_" + sample + "_generate_stats_figs.log"
+    process_utils.run_logged_command(cmd, log_file)
     print(("Finished processing sample " + fastq))
 
 
-def collate_tpms(out_dir, samples, r_scripts):
+def collate_tpms(out_dir, samples, r_scripts, log_file):
     """
     Collate TPMs across sample results.
 
@@ -297,6 +308,8 @@ def collate_tpms(out_dir, samples, r_scripts):
     :type samples: list(str or unicode)
     :param r_scripts:  Directory with RiboViz R scripts
     :type r_scripts: str or unicode
+    :param log_file: Log file
+    :type log_file: str or unicode
     :raise FileNotFoundError: if Rscript cannot be found
     :raise AssertionError: if collate_tpms.R returns non-zero exit
     code
@@ -310,7 +323,7 @@ def collate_tpms(out_dir, samples, r_scripts):
            "--dir_out=" + out_dir]
     cmd += samples
     print(("Running: " + utils.list_to_str(cmd)))
-    process_utils.run_command(cmd)
+    process_utils.run_logged_command(cmd, log_file)
 
 
 def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
@@ -354,11 +367,13 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
                 os.makedirs(index_dir)
             r_rna_index = os.path.join(index_dir,
                                        config["rRNA_index"])
-            build_indices(config["rRNA_fasta"], r_rna_index)
+            log_file = "log_hisat2_build_rrna.log"
+            build_indices(config["rRNA_fasta"], r_rna_index, log_file)
             print("rRNA index built")
             orf_index = os.path.join(index_dir,
                                      config["orf_index"])
-            build_indices(config["orf_fasta"], orf_index)
+            log_file = "log_hisat2_build_orf.log"
+            build_indices(config["orf_fasta"], orf_index, log_file)
             print("ORF index built")
     except KeyError:
         traceback.print_exc(file=sys.stdout)
@@ -411,7 +426,8 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
 
     # Collate TPMs across sample results.
     try:
-        collate_tpms(out_dir, successes, r_scripts)
+        log_file = "log_collate_tpms.log"
+        collate_tpms(out_dir, successes, r_scripts, log_file)
     except Exception:
         traceback.print_exc(file=sys.stdout)
         return EXIT_COLLATION_ERROR
