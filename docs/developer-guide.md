@@ -74,20 +74,20 @@ To request that a branch be merged into the `develop` branch create a new pull r
 
 ## Compare files for equality
 
-`pyscripts/compare_files.py` is a script that can compare the files output by any stage of the vignette, `pyscripts/prep_riboviz.py`.
+`riboviz/tools/compare_files.py` is a script that can compare the files output by any stage of the workflow, `riboviz/tools/prep_riboviz.py`.
 
 It can be run as follows:
 
 * Python 3:
 
 ```console
-$ python -m pyscripts.compare_files <FILE1> <FILE2>
+$ python -m riboviz.tools.compare_files <FILE1> <FILE2>
 ```
 
 * Python 2 or 3:
 
 ```console
-$ PYTHONPATH=. python pyscripts/compare_files.py <FILE1> <FILE2>
+$ PYTHONPATH=. python riboviz/tools/compare_files.py <FILE1> <FILE2>
 ```
 
 If the files are equivalent an exit code of 0 is returned. If the files are not equivalent an error message is displayed and an exit code of 1 is returned.
@@ -95,11 +95,11 @@ If the files are equivalent an exit code of 0 is returned. If the files are not 
 For example:
 
 ```console
-$ PYTHONPATH=. python pyscripts/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WT3AT.h5
+$ PYTHONPATH=. python riboviz/tools/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WT3AT.h5
 $ echo $?
 0
 
-$ PYTHONPATH=. python pyscripts/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WTnone.h5
+$ PYTHONPATH=. python riboviz/tools/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WTnone.h5
 Non-zero return code (1) from h5diff -q .../output/WT3AT.h5 .../output/WTnone.h5
 $ echo $?
 1
@@ -139,18 +139,20 @@ The following files can be compared:
 
 ## Run vignette regression test suite
 
-The vignette (`pyscripts/prep_riboviz.py`) regression test suite compares two directories, each assumed to have `index/` `tmp/` and `output/` directories created by the vignette.
+The vignette regression test suite optionally runs `prep_riboviz.py` on the vignette data, in `vignette/`, then compares the results, in `vignette/`, to a directory of pre-calculated results.
 
 The tests can be run using pytest:
 
 ```console
-$ pytest tests/test_vignette.py --expected=<DIR1> [--actual=<DIR2>]
+$ pytest riboviz/test/regression/test_vignette.py \
+        --expected=<DIRECTORY> \
+        [--skip-workflow]
 ```
 
 where:
 
-* `--expected=<DIRECTORY>`: directory with expected vignette files.
-* `--actual=<DIRECTORY>`: directory to be validated against directory with expected vignette files. Default: `vignette/`
+* `--expected=<DIRECTORY>`: directory with expected vignette files. This is assumed to have `index/` `tmp/` and `output/` directories.
+* `--skip-workflow`: request that the `prep_riboviz.py` workflow **not** be run, instead use existing data files in `vignette/` for testing.
 
 For each file output by the vignette, the files are compared using the same comparisons as for `compare_files.py` above.
 
@@ -160,73 +162,101 @@ Useful pytest flags are:
 * `-v`: verbose mode, displays names of test functions run.
 * `-k`: run a specific test function.
 
-For example:
+Specific subsets of tests, or individual tests, can be rerun, for example:
 
 ```console
-$ pytest -s -k "test_output_bam" tests/test_vignette.py --expected=<DIR1> --actual=<DIR2>
+$ pytest -s -k "test_output_bam" riboviz/test/regression/test_vignette.py --expected=<DIRECTORY> --skip-workflow
+
+$ pytest -v -k test_output_bam\[WT3AT\] riboviz/test/regression/test_vignette.py --expected=$HOME/vignette-20190802-4f28def --skip-workflow
 ```
 
-A complete run looks like the following
+Note that in such cases, if `--skip-workflow` is not provided then the workflow will be run in its entirety.
+
+A complete run may look like the following:
 
 ```console
-$ pytest -v tests/test_vignette.py --expected=$HOME/expected-vignette --actual=$HOME/actual-vignette
+$ pytest -v riboviz/test/regression/test_vignette.py --expected=$HOME/vignette-20190802-4f28def --skip-workflow
 ============================= test session starts ==============================
 ...
 collected 51 items                                                             
 
-tests/test_vignette.py::test_index[YAL_CDS_w_250-1] PASSED               [  1%]
-tests/test_vignette.py::test_index[YAL_CDS_w_250-2] PASSED               [  3%]
-tests/test_vignette.py::test_index[YAL_CDS_w_250-3] PASSED               [  5%]
-tests/test_vignette.py::test_index[YAL_CDS_w_250-4] PASSED               [  7%]
-tests/test_vignette.py::test_index[YAL_CDS_w_250-5] PASSED               [  9%]
-tests/test_vignette.py::test_index[YAL_CDS_w_250-6] PASSED               [ 11%]
-tests/test_vignette.py::test_index[YAL_CDS_w_250-7] PASSED               [ 13%]
-tests/test_vignette.py::test_index[YAL_CDS_w_250-8] PASSED               [ 15%]
-tests/test_vignette.py::test_index[yeast_rRNA-1] PASSED                  [ 17%]
-tests/test_vignette.py::test_index[yeast_rRNA-2] PASSED                  [ 19%]
-tests/test_vignette.py::test_index[yeast_rRNA-3] PASSED                  [ 21%]
-tests/test_vignette.py::test_index[yeast_rRNA-4] PASSED                  [ 23%]
-tests/test_vignette.py::test_index[yeast_rRNA-5] PASSED                  [ 25%]
-tests/test_vignette.py::test_index[yeast_rRNA-6] PASSED                  [ 27%]
-tests/test_vignette.py::test_index[yeast_rRNA-7] PASSED                  [ 29%]
-tests/test_vignette.py::test_index[yeast_rRNA-8] PASSED                  [ 31%]
-tests/test_vignette.py::test_tmp_fq[WT3AT-nonrRNA] PASSED                [ 33%]
-tests/test_vignette.py::test_tmp_fq[WT3AT-trim] PASSED                   [ 35%]
-tests/test_vignette.py::test_tmp_fq[WT3AT-unaligned] PASSED              [ 37%]
-tests/test_vignette.py::test_tmp_fq[WTnone-nonrRNA] PASSED               [ 39%]
-tests/test_vignette.py::test_tmp_fq[WTnone-trim] PASSED                  [ 41%]
-tests/test_vignette.py::test_tmp_fq[WTnone-unaligned] PASSED             [ 43%]
-tests/test_vignette.py::test_tmp_sam[WT3AT-orf_map_clean] PASSED         [ 45%]
-tests/test_vignette.py::test_tmp_sam[WT3AT-orf_map] PASSED               [ 47%]
-tests/test_vignette.py::test_tmp_sam[WT3AT-rRNA_map] PASSED              [ 49%]
-tests/test_vignette.py::test_tmp_sam[WTnone-orf_map_clean] PASSED        [ 50%]
-tests/test_vignette.py::test_tmp_sam[WTnone-orf_map] PASSED              [ 52%]
-tests/test_vignette.py::test_tmp_sam[WTnone-rRNA_map] PASSED             [ 54%]
-tests/test_vignette.py::test_output_bai[WT3AT] PASSED                    [ 56%]
-tests/test_vignette.py::test_output_bai[WTnone] PASSED                   [ 58%]
-tests/test_vignette.py::test_output_bam[WT3AT] PASSED                    [ 60%]
-tests/test_vignette.py::test_output_bam[WTnone] PASSED                   [ 62%]
-tests/test_vignette.py::test_output_bedgraph[WT3AT-minus] PASSED         [ 64%]
-tests/test_vignette.py::test_output_bedgraph[WT3AT-plus] PASSED          [ 66%]
-tests/test_vignette.py::test_output_bedgraph[WTnone-minus] PASSED        [ 68%]
-tests/test_vignette.py::test_output_bedgraph[WTnone-plus] PASSED         [ 70%]
-tests/test_vignette.py::test_output_h5[WT3AT] PASSED                     [ 72%]
-tests/test_vignette.py::test_output_h5[WTnone] PASSED                    [ 74%]
-tests/test_vignette.py::test_output_tsv[WT3AT-3nt_periodicity] PASSED    [ 76%]
-tests/test_vignette.py::test_output_tsv[WT3AT-codon_ribodens] PASSED     [ 78%]
-tests/test_vignette.py::test_output_tsv[WT3AT-pos_sp_nt_freq] PASSED     [ 80%]
-tests/test_vignette.py::test_output_tsv[WT3AT-pos_sp_rpf_norm_reads] PASSED [ 82%]
-tests/test_vignette.py::test_output_tsv[WT3AT-read_lengths] PASSED       [ 84%]
-tests/test_vignette.py::test_output_tsv[WT3AT-tpms] PASSED               [ 86%]
-tests/test_vignette.py::test_output_tsv[WTnone-3nt_periodicity] PASSED   [ 88%]
-tests/test_vignette.py::test_output_tsv[WTnone-codon_ribodens] PASSED    [ 90%]
-tests/test_vignette.py::test_output_tsv[WTnone-pos_sp_nt_freq] PASSED    [ 92%]
-tests/test_vignette.py::test_output_tsv[WTnone-pos_sp_rpf_norm_reads] PASSED [ 94%]
-tests/test_vignette.py::test_output_tsv[WTnone-read_lengths] PASSED      [ 96%]
-tests/test_vignette.py::test_output_tsv[WTnone-tpms] PASSED              [ 98%]
-tests/test_vignette.py::test_output_tpms_collated_tsv PASSED             [100%]
+riboviz/test/regression/test_vignette.py::test_index[YAL_CDS_w_250-1] PASSED               [  1%]
+riboviz/test/regression/test_vignette.py::test_index[YAL_CDS_w_250-2] PASSED               [  3%]
+riboviz/test/regression/test_vignette.py::test_index[YAL_CDS_w_250-3] PASSED               [  5%]
+riboviz/test/regression/test_vignette.py::test_index[YAL_CDS_w_250-4] PASSED               [  7%]
+riboviz/test/regression/test_vignette.py::test_index[YAL_CDS_w_250-5] PASSED               [  9%]
+riboviz/test/regression/test_vignette.py::test_index[YAL_CDS_w_250-6] PASSED               [ 11%]
+riboviz/test/regression/test_vignette.py::test_index[YAL_CDS_w_250-7] PASSED               [ 13%]
+riboviz/test/regression/test_vignette.py::test_index[YAL_CDS_w_250-8] PASSED               [ 15%]
+riboviz/test/regression/test_vignette.py::test_index[yeast_rRNA-1] PASSED                  [ 17%]
+riboviz/test/regression/test_vignette.py::test_index[yeast_rRNA-2] PASSED                  [ 19%]
+riboviz/test/regression/test_vignette.py::test_index[yeast_rRNA-3] PASSED                  [ 21%]
+riboviz/test/regression/test_vignette.py::test_index[yeast_rRNA-4] PASSED                  [ 23%]
+riboviz/test/regression/test_vignette.py::test_index[yeast_rRNA-5] PASSED                  [ 25%]
+riboviz/test/regression/test_vignette.py::test_index[yeast_rRNA-6] PASSED                  [ 27%]
+riboviz/test/regression/test_vignette.py::test_index[yeast_rRNA-7] PASSED                  [ 29%]
+riboviz/test/regression/test_vignette.py::test_index[yeast_rRNA-8] PASSED                  [ 31%]
+riboviz/test/regression/test_vignette.py::test_tmp_fq[WT3AT-nonrRNA] PASSED                [ 33%]
+riboviz/test/regression/test_vignette.py::test_tmp_fq[WT3AT-trim] PASSED                   [ 35%]
+riboviz/test/regression/test_vignette.py::test_tmp_fq[WT3AT-unaligned] PASSED              [ 37%]
+riboviz/test/regression/test_vignette.py::test_tmp_fq[WTnone-nonrRNA] PASSED               [ 39%]
+riboviz/test/regression/test_vignette.py::test_tmp_fq[WTnone-trim] PASSED                  [ 41%]
+riboviz/test/regression/test_vignette.py::test_tmp_fq[WTnone-unaligned] PASSED             [ 43%]
+riboviz/test/regression/test_vignette.py::test_tmp_sam[WT3AT-orf_map_clean] PASSED         [ 45%]
+riboviz/test/regression/test_vignette.py::test_tmp_sam[WT3AT-orf_map] PASSED               [ 47%]
+riboviz/test/regression/test_vignette.py::test_tmp_sam[WT3AT-rRNA_map] PASSED              [ 49%]
+riboviz/test/regression/test_vignette.py::test_tmp_sam[WTnone-orf_map_clean] PASSED        [ 50%]
+riboviz/test/regression/test_vignette.py::test_tmp_sam[WTnone-orf_map] PASSED              [ 52%]
+riboviz/test/regression/test_vignette.py::test_tmp_sam[WTnone-rRNA_map] PASSED             [ 54%]
+riboviz/test/regression/test_vignette.py::test_output_bai[WT3AT] PASSED                    [ 56%]
+riboviz/test/regression/test_vignette.py::test_output_bai[WTnone] PASSED                   [ 58%]
+riboviz/test/regression/test_vignette.py::test_output_bam[WT3AT] PASSED                    [ 60%]
+riboviz/test/regression/test_vignette.py::test_output_bam[WTnone] PASSED                   [ 62%]
+riboviz/test/regression/test_vignette.py::test_output_bedgraph[WT3AT-minus] PASSED         [ 64%]
+riboviz/test/regression/test_vignette.py::test_output_bedgraph[WT3AT-plus] PASSED          [ 66%]
+riboviz/test/regression/test_vignette.py::test_output_bedgraph[WTnone-minus] PASSED        [ 68%]
+riboviz/test/regression/test_vignette.py::test_output_bedgraph[WTnone-plus] PASSED         [ 70%]
+riboviz/test/regression/test_vignette.py::test_output_h5[WT3AT] PASSED                     [ 72%]
+riboviz/test/regression/test_vignette.py::test_output_h5[WTnone] PASSED                    [ 74%]
+riboviz/test/regression/test_vignette.py::test_output_tsv[WT3AT-3nt_periodicity] PASSED    [ 76%]
+riboviz/test/regression/test_vignette.py::test_output_tsv[WT3AT-codon_ribodens] PASSED     [ 78%]
+riboviz/test/regression/test_vignette.py::test_output_tsv[WT3AT-pos_sp_nt_freq] PASSED     [ 80%]
+riboviz/test/regression/test_vignette.py::test_output_tsv[WT3AT-pos_sp_rpf_norm_reads] PASSED [ 82%]
+riboviz/test/regression/test_vignette.py::test_output_tsv[WT3AT-read_lengths] PASSED       [ 84%]
+riboviz/test/regression/test_vignette.py::test_output_tsv[WT3AT-tpms] PASSED               [ 86%]
+riboviz/test/regression/test_vignette.py::test_output_tsv[WTnone-3nt_periodicity] PASSED   [ 88%]
+riboviz/test/regression/test_vignette.py::test_output_tsv[WTnone-codon_ribodens] PASSED    [ 90%]
+riboviz/test/regression/test_vignette.py::test_output_tsv[WTnone-pos_sp_nt_freq] PASSED    [ 92%]
+riboviz/test/regression/test_vignette.py::test_output_tsv[WTnone-pos_sp_rpf_norm_reads] PASSED [ 94%]
+riboviz/test/regression/test_vignette.py::test_output_tsv[WTnone-read_lengths] PASSED      [ 96%]
+riboviz/test/regression/test_vignette.py::test_output_tsv[WTnone-tpms] PASSED              [ 98%]
+riboviz/test/regression/test_vignette.py::test_output_tpms_collated_tsv PASSED             [100%]
 
 ========================= 51 passed in 614.86 seconds ==========================
+```
+
+
+---
+
+## Run `prep_riboviz.py` tests
+
+Run tests of error conditions and exit codes:
+
+```console
+$ pytest -v riboviz/test/tools/test_prep_riboviz.py 
+============================= test session starts ==============================
+platform linux2 -- Python 2.7.16, pytest-4.6.2, py-1.8.0, pluggy-0.12.0 -- /home/centos/miniconda2/bin/python
+cachedir: .pytest_cache
+rootdir: /home/centos/RiboViz
+collected 5 items                                                              
+
+riboviz/test/tools/test_prep_riboviz.py::test_config_error_missing_config_file PASSED [ 20%]
+riboviz/test/tools/test_prep_riboviz.py::test_index_error_missing_fa PASSED    [ 40%]
+riboviz/test/tools/test_prep_riboviz.py::test_no_samples_error PASSED          [ 60%]
+riboviz/test/tools/test_prep_riboviz.py::test_samples_error_missing_samples PASSED [ 80%]
+riboviz/test/tools/test_prep_riboviz.py::test_config_error_missing_dir_in PASSED [100%]
+
+=========================== 5 passed in 0.71 seconds ===========================
 ```
 
 ---
@@ -246,13 +276,14 @@ $ 2to3 riboviz/validation.py
 ## Repository structure
 
 ```
-data/      # Data files used by scripts and vignette
-pyscripts/ # Python scripts invoked by vignette and vignette itself
-riboviz/   # Python package code
-rscripts/  # R scripts invoked by vignette
-rmarkdown/ # Rmarkdown scripts for data preprocessing
-tests/     # Python tests including vignette regression test
-website/   # RiboViz Shiny server code and data
+data/            # Data files used by scripts and vignette
+riboviz/         # Python package code
+  tools/         # End-user scripts, including prep_riboviz.py
+  test/          # pytest-compliant tests
+    regression/  # prep_riboviz.py and vignette regression test
+rscripts/        # R scripts invoked by vignette
+rmarkdown/       # Rmarkdown scripts for data preprocessing
+website/          # RiboViz Shiny server code and data
 ```
 
 ---
@@ -284,4 +315,4 @@ data/testdata_trim_5p_mismatch.sam
 data/testdata_trim_5pos5neg.sam
 ```
 
-Created by running RiboViz on the data in `vignette/`, copying and pasting lines from SAM files produced, then manually editing the lines to produce the desired range of outcomes. These files are used for testing [trim_5p_mismatch.py](../pyscripts/trim_5p_mismatch.py).
+Created by running RiboViz on the data in `vignette/`, copying and pasting lines from SAM files produced, then manually editing the lines to produce the desired range of outcomes. These files are used for testing [trim_5p_mismatch.py](../riboviz/tools/trim_5p_mismatch.py).
