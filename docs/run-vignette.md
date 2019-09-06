@@ -664,7 +664,11 @@ The same types of file are output, but with prefix `WTnone`.
 ### Collate TPMs across samples
 
 ```
-Rscript --vanilla rscripts/collate_tpms.R --yaml=vignette/vignette_config.yaml
+Rscript --vanilla rscripts/collate_tpms.R \
+    --dir_out=vignette/output \
+    WTnone \
+    WT3AT \
+    NotHere
 ```
 
 Outputs files to `vignette/output/`:
