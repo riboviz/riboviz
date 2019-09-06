@@ -258,8 +258,9 @@ for fq_file in list(config["fq_files"].keys()):
 
 print("collating TPMs across samples")
 cmd = ["Rscript", "--vanilla",
-           os.path.join(r_scripts, "collate_tpms.R"),
-	   "--yaml=" + config_yaml ]
+       os.path.join(r_scripts, "collate_tpms.R"),
+       "--dir_out=" + config["dir_out"]]
+cmd += list(config["fq_files"].keys())
 subprocess.call(cmd)
 
 print("finished running prepRiboviz.py")
