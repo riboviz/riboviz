@@ -2,8 +2,6 @@
 process_utils tests.
 """
 import os.path
-import subprocess
-import sys
 import tempfile
 import pytest
 from riboviz import process_utils
@@ -23,7 +21,7 @@ def log_out():
         os.remove(out_file)
 
 
-@pytest.fixture(scope="function")        
+@pytest.fixture(scope="function")
 def log_err():
     """
     Create a temporary file for stderr logs and delete when done.
@@ -57,11 +55,14 @@ def test_run_command_stdout_stderr():
     Test writing output and errors to stdout and stderr. This
     test ensures no unexpected exceptions are thrown.
     """
-    cmd = ["ls", "-l", "riboviz", "xxx", "rscripts"]
+    path = os.path.realpath(__file__)
+    cmd = ["ls", path, "no-such-file.txt", path]
     try:
         process_utils.run_command(cmd)
     except AssertionError:
         pass
+
+
 def test_run_command_log_out_err(log_out, log_err):
     """
     Test writing output and errors to log files.
@@ -71,16 +72,23 @@ def test_run_command_log_out_err(log_out, log_err):
     :param log_err: Error log file (via test fixture)
     :type log_err: str or unicode
     """
-    cmd = ["ls", "-l", "riboviz", "xxx", "rscripts"]
+    path = os.path.realpath(__file__)
+    cmd = ["ls", path, "no-such-file.txt", path]
     with open(log_out, 'w') as out, open(log_err, 'w') as err:
         try:
             process_utils.run_command(cmd, out, err)
         except AssertionError:
             pass
-    # TODO validate log_out
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 2
+    assert lines[0] == path  # Output from ls
+    assert lines[1] == path  # Output from ls
     lines = [line.rstrip('\n') for line in open(log_err)]
-    assert 1 == len(lines)
-    assert "ls: cannot access 'xxx': No such file or directory" == lines[0]
+    assert len(lines) == 1
+    assert lines[0] == \
+        "ls: cannot access 'no-such-file.txt': No such file or directory"
+
+
 def test_run_command_log_out_error_one_file(log_out):
     """
     Test writing output and errors to a single log file.
@@ -88,63 +96,72 @@ def test_run_command_log_out_error_one_file(log_out):
     :param log_out: Output log file (via test fixture)
     :type log_out: str or unicode
     """
-    cmd = ["ls", "-l", "riboviz", "xxx", "rscripts"]
+    path = os.path.realpath(__file__)
+    cmd = ["ls", path, "no-such-file.txt", path]
     with open(log_out, "w") as out_err:
         try:
             process_utils.run_command(cmd, out_err, out_err)
         except AssertionError:
             pass
-    # TODO validate log_out
-    # lines = [line.rstrip('\n') for line in open(log_out)]
-    # assert 1 == len(lines)
-    # assert "ls: cannot access 'xxx': No such file or directory" == lines[0]
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 3
+    assert lines[0] == \
+        "ls: cannot access 'no-such-file.txt': No such file or directory"
+    assert lines[1] == path  # Output from ls
+    assert lines[2] == path  # Output from ls
 
-def test_run_command_stdout_stderr2():
+
+def test_run_command_log_out_err_alt(log_out, log_err):
     """
-    Test writing output and errors to stdout and stderr. This
-    test ensures no unexpected exceptions are thrown.
-    """
-    cmd = ["du", "-sb", "README.md", "xxx", "LICENSE"]
-    try:
-        process_utils.run_command(cmd)
-    except AssertionError:
-        pass
-def test_run_command_log_out_err2(log_out, log_err):
-    """
-    Test writing output and errors to log files.
+    Test another example of writing output and errors to log files.
 
     :param log_out: Output log file (via test fixture)
     :type log_out: str or unicode
     :param log_err: Error log file (via test fixture)
     :type log_err: str or unicode
     """
-    cmd = ["du", "-sb", "README.md", "xxx", "LICENSE"]
+    path = os.path.realpath(__file__)
+    num_lines = len([line for line in open(path)])
+    cmd = ["wc", "-l", path, "no-such-file.txt", path]
     with open(log_out, 'w') as out, open(log_err, 'w') as err:
         try:
             process_utils.run_command(cmd, out, err)
         except AssertionError:
             pass
-    # TODO validate log_out
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 3
+    assert lines[0] == "%5d %s" % (num_lines, path)  # Output from wc
+    assert lines[1] == "%5d %s" % (num_lines, path)  # Output from wc
+    assert lines[2] == "%5d total" % (num_lines * 2)  # Output from wc
     lines = [line.rstrip('\n') for line in open(log_err)]
-    assert 1 == len(lines)
-    assert "du: cannot access 'xxx': No such file or directory" == lines[0]
-def test_run_command_log_out_error_one_file2(log_out):
+    assert len(lines) == 1
+    assert lines[0] == \
+        "wc: no-such-file.txt: No such file or directory"
+
+
+def test_run_command_log_out_error_one_file_alt(log_out):
     """
-    Test writing output and errors to a single log file.
+    Test another example of writing output and errors to a single log
+    file.
 
     :param log_out: Output log file (via test fixture)
     :type log_out: str or unicode
     """
-    cmd = ["du", "-sb", "README.md", "xxx", "LICENSE"]
+    path = os.path.realpath(__file__)
+    num_lines = len([line for line in open(path)])
+    cmd = ["wc", "-l", path, "no-such-file.txt", path]
     with open(log_out, "w") as out_err:
         try:
             process_utils.run_command(cmd, out_err, out_err)
         except AssertionError:
             pass
-    # TODO validate log_out
-    # lines = [line.rstrip('\n') for line in open(log_out)]
-    # assert 1 == len(lines)
-    # assert "du: cannot access 'xxx': No such file or directory" == lines[0]
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 4
+    assert lines[0] == "%5d %s" % (num_lines, path)  # Output from wc
+    assert lines[1] == "wc: no-such-file.txt: No such file or directory"
+    assert lines[2] == "%5d %s" % (num_lines, path)  # Output from wc
+    assert lines[3] == "%5d total" % (num_lines * 2)  # Output from wc
+
 
 def test_run_redirect_command_stdout(redirect):
     """
@@ -154,12 +171,18 @@ def test_run_redirect_command_stdout(redirect):
     :param redirect: File for redirected output (via test fixture)
     :type redirect: str or unicode
     """
-    cmd = ["cat", "README.md", "xxx", "README.md"]
+    path = os.path.realpath(__file__)
+    cmd = ["cat", path, "no-such-file.txt"]
     try:
         process_utils.run_redirect_command(cmd, redirect)
     except AssertionError:
         pass
-    # TODO validate redirect
+    # Compare path to captured redirect.
+    with open(path) as expected, open(redirect) as actual:
+        for line1, line2 in zip(expected, actual):
+            assert line1 == line2
+
+
 def test_run_redirect_command_log_err(log_err, redirect):
     """
     Test writing errors to a log file.
@@ -169,17 +192,23 @@ def test_run_redirect_command_log_err(log_err, redirect):
     :param redirect: File for redirected output (via test fixture)
     :type redirect: str or unicode
     """
-    cmd = ["cat", "README.md", "xxx", "README.md"]
+    path = os.path.realpath(__file__)
+    cmd = ["cat", path, "no-such-file.txt", path]
     with open(log_err, "w") as err:
         try:
             process_utils.run_redirect_command(cmd, redirect, err)
         except AssertionError:
             pass
-    # TODO validate redirect
+    # Compare path to captured redirect.
+    with open(path) as expected, open(redirect) as actual:
+        for line1, line2 in zip(expected, actual):
+            assert line1 == line2
     lines = [line.rstrip('\n') for line in open(log_err)]
-    assert 1 == len(lines)
-    assert "cat: xxx: No such file or directory" == lines[0]
-        
+    assert len(lines) == 1
+    assert lines[0] == \
+        "cat: no-such-file.txt: No such file or directory"
+
+
 def test_run_pipe_command_stdout_stderr():
     """
     Test writing output and errors to stdout and stderr where
@@ -187,12 +216,15 @@ def test_run_pipe_command_stdout_stderr():
 
     This test ensures no unexpected exceptions are thrown.
     """
-    cmd1 = ["cat", "README.md", "xxx", "LICENSE"]
+    path = os.path.realpath(__file__)
+    cmd1 = ["cat", path, "no-such-file", path]
     cmd2 = ["wc", "-l"]
     try:
         process_utils.run_pipe_command(cmd1, cmd2)
     except AssertionError:
         pass
+
+
 def test_run_pipe_command_log_out_err(log_out, log_err):
     """
     Test writing output and errors to stdout and stderr where
@@ -203,17 +235,23 @@ def test_run_pipe_command_log_out_err(log_out, log_err):
     :param log_err: Error log file (via test fixture)
     :type log_err: str or unicode
     """
-    cmd1 = ["cat", "README.md", "xxx", "LICENSE"]
+    path = os.path.realpath(__file__)
+    num_lines = len([line for line in open(path)])
+    cmd1 = ["cat", path, "no-such-file", path]
     cmd2 = ["wc", "-l"]
     with open(log_out, 'w') as out, open(log_err, 'w') as err:
         try:
             process_utils.run_pipe_command(cmd1, cmd2, out, err)
         except AssertionError:
             pass
-    # TODO validate output
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 1
+    assert lines[0] == str(num_lines * 2)  # Output from wc
     lines = [line.rstrip('\n') for line in open(log_err)]
-    assert 1 == len(lines)
-    assert "cat: xxx: No such file or directory" == lines[0]
+    assert len(lines) == 1
+    assert lines[0] == "cat: no-such-file: No such file or directory"
+
+
 def test_run_pipe_command_log_out_err_one_file(log_out):
     """
     Test writing output and errors to a single log file where
@@ -222,17 +260,20 @@ def test_run_pipe_command_log_out_err_one_file(log_out):
     :param log_out: Output log file (via test fixture)
     :type log_out: str or unicode
     """
-    cmd1 = ["cat", "README.md", "xxx", "LICENSE"]
+    path = os.path.realpath(__file__)
+    num_lines = len([line for line in open(path)])
+    cmd1 = ["cat", path, "no-such-file", path]
     cmd2 = ["wc", "-l"]
     with open(log_out, 'w') as out_err:
         try:
             process_utils.run_pipe_command(cmd1, cmd2, out_err, out_err)
         except AssertionError:
             pass
-    # TODO validate output
-    # lines = [line.rstrip('\n') for line in open(log_out)]
-    # assert 1 == len(lines)
-    # assert "cat: xxx: No such file or directory" == lines[0]
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 2
+    assert lines[0] == "cat: no-such-file: No such file or directory"
+    assert str(num_lines * 2) == lines[1]  # Output from wc
+
 
 def test_run_pipe_command_stdout_stderr2():
     """
@@ -241,12 +282,15 @@ def test_run_pipe_command_stdout_stderr2():
 
     This test ensures no unexpected exceptions are thrown.
     """
-    cmd1 = ["cat", "README.md", "xxx", "LICENSE"]
+    path = os.path.realpath(__file__)
+    cmd1 = ["cat", path, "no-such-file", path]
     cmd2 = ["wc", "-l", "-x"]
     try:
         process_utils.run_pipe_command(cmd1, cmd2)
     except AssertionError:
         pass
+
+
 def test_run_pipe_command_log_out_err2(log_out, log_err):
     """
     Test writing output and errors to log files where
@@ -257,19 +301,22 @@ def test_run_pipe_command_log_out_err2(log_out, log_err):
     :param log_err: Error log file (via test fixture)
     :type log_err: str or unicode
     """
-    cmd1 = ["cat", "README.md", "xxx", "LICENSE"]
+    path = os.path.realpath(__file__)
+    cmd1 = ["cat", path, "no-such-file", path]
     cmd2 = ["wc", "-l", "-x"]
     with open(log_out, 'w') as out, open(log_err, 'w') as err:
         try:
             process_utils.run_pipe_command(cmd1, cmd2, out, err)
         except AssertionError:
             pass
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 0  # Expect output to be empty
     lines = [line.rstrip('\n') for line in open(log_err)]
-    # TODO validate output
-    assert 3 == len(lines)
-    assert "cat: xxx: No such file or directory" == lines[0]
-    assert "wc: invalid option -- 'x'" == lines[1]
-    assert "Try 'wc --help' for more information." == lines[2]
+    assert len(lines) == 3
+    assert lines[0] == "cat: no-such-file: No such file or directory"
+    assert lines[1] == "wc: invalid option -- 'x'"
+    assert lines[2] == "Try 'wc --help' for more information."
+
 
 def test_run_pipe_command_log_out_err_one_file2(log_out):
     """
@@ -279,16 +326,16 @@ def test_run_pipe_command_log_out_err_one_file2(log_out):
     :param log_out: Output log file (via test fixture)
     :type log_out: str or unicode
     """
-    cmd1 = ["cat", "README.md", "xxx", "LICENSE"]
+    path = os.path.realpath(__file__)
+    cmd1 = ["cat", path, "no-such-file", path]
     cmd2 = ["wc", "-l", "-x"]
     with open(log_out, 'w') as out_err:
         try:
             process_utils.run_pipe_command(cmd1, cmd2, out_err, out_err)
         except AssertionError:
             pass
-    # TODO validate output
-    # lines = [line.rstrip('\n') for line in open(log_out)]
-    # assert 3 == len(lines)
-    # assert "cat: xxx: No such file or directory" == lines[0]
-    # assert "wc: invalid option -- 'x'" == lines[1]
-    # assert "Try 'wc --help' for more information." == lines[2]
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 3
+    assert lines[0] == "cat: no-such-file: No such file or directory"
+    assert lines[1] == "wc: invalid option -- 'x'"
+    assert lines[2] == "Try 'wc --help' for more information."
