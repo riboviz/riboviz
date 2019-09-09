@@ -361,17 +361,17 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
 
     # Build indices for alignment, if necessary/requested.
     try:
+        index_dir = config["dir_index"]
+        r_rna_index = os.path.join(index_dir,
+                                   config["rRNA_index"])
+        orf_index = os.path.join(index_dir,
+                                 config["orf_index"])
         if config["build_indices"]:
-            index_dir = config["dir_index"]
             if not os.path.exists(index_dir):
                 os.makedirs(index_dir)
-            r_rna_index = os.path.join(index_dir,
-                                       config["rRNA_index"])
             log_file = "log_hisat2_build_rrna.log"
             build_indices(config["rRNA_fasta"], r_rna_index, log_file)
             print("rRNA index built")
-            orf_index = os.path.join(index_dir,
-                                     config["orf_index"])
             log_file = "log_hisat2_build_orf.log"
             build_indices(config["orf_fasta"], orf_index, log_file)
             print("ORF index built")
