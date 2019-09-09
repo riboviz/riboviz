@@ -221,14 +221,14 @@ Run `prep_riboviz.py`:
 * Python 3:
 
 ```console
-$ python -u -m riboviz.tools.prep_riboviz rscripts/ data/ \
+$ python -u -m riboviz.tools.prep_riboviz rscripts/ \
     vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
 ```
 
 * Python 2 or 3:
 
 ```console
-$ PYTHONPATH=. python -u riboviz/tools/prep_riboviz.py rscripts/ data/ \
+$ PYTHONPATH=. python -u riboviz/tools/prep_riboviz.py rscripts/ \
     vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
 ```
 
@@ -653,8 +653,6 @@ Rscript --vanilla rscripts/generate_stats_figs.R --Ncores=4 \
     --codon_pos=data/yeast_codon_pos_i200.RData \
     --features_file=data/yeast_features.tsv --do_pos_sp_nt_freq=True
 ```
-
-This script uses `--dir_data=data/` to access and read `data/yeast_codon_pos_i200.RData` and `/data/yeast_tRNAs.tsv` also.
 
 Outputs files to `vignette/output/`:
 

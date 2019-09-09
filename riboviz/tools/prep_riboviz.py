@@ -6,14 +6,12 @@ Usage:
 
     PYTHONPATH=. python riboviz/tools/prep_riboviz.py \
         <R_SCRIPTS_DIRECTORY>\
-        <DATA_DIRECTORY>\
         <YAML_CONFIG_FILE>
 
 Example:
 
     PYTHONPATH=. python riboviz/tools/prepRiboviz.py \
         rscripts/ \
-        data/ \
         vignette/vignette_config.yaml
 
 Prepare ribosome profiling data for RiboViz or other analysis:
@@ -108,7 +106,6 @@ def process_sample(sample,
                    config,
                    py_scripts,
                    r_scripts,
-                   data_dir,
                    tmp_dir,
                    out_dir):
     """
@@ -128,8 +125,6 @@ def process_sample(sample,
     :type py_scripts: str or unicode
     :param r_scripts:  Directory with RiboViz R scripts
     :type r_scripts: str or unicode
-    :param data_dir: Directory with data
-    :type data_dir: str or unicode
     :param tmp_dir Temporary files directory
     :type tmp_dir: str or unicode
     :param out_dir Output files directory
@@ -277,8 +272,8 @@ def process_sample(sample,
            "--rpf=" + str(config["rpf"]),
            "--orf_gff_file=" + config["orf_gff_file"],
            "--dir_out=" + out_dir,
-           "--t_rna=" + os.path.join(data_dir, "yeast_tRNAs.tsv"),
-           "--codon_pos=" + os.path.join(data_dir, "yeast_codon_pos_i200.RData"),
+           "--t_rna=" + config["t_rna"],
+           "--codon_pos=" + config["codon_pos"],
            "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
     print(("Running: " + utils.list_to_str(cmd)))
@@ -312,7 +307,7 @@ def collate_tpms(out_dir, samples, r_scripts):
     process_utils.run_command(cmd)
 
 
-def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
+def prep_riboviz(py_scripts, r_scripts, config_yaml):
     """
     Run the RiboViz workflow.
 
@@ -329,8 +324,6 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
     :type py_scripts: str or unicode
     :param r_scripts:  Directory with RiboViz R scripts
     :type r_scripts: str or unicode
-    :param data_dir: Directory with data
-    :type data_dir: str or unicode
     :param config_yaml: YAML configuration file path
     :type config_yaml: str or unicode
     :return: exit code
@@ -397,7 +390,6 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
                            config,
                            py_scripts,
                            r_scripts,
-                           data_dir,
                            tmp_dir,
                            out_dir)
             successes.append(sample)
@@ -423,10 +415,8 @@ if __name__ == "__main__":
     # Assume RiboViz Python scripts are peers in same directory.
     py_scripts_arg = os.path.dirname(os.path.realpath(__file__))
     r_scripts_arg = sys.argv[1]
-    data_dir_arg = sys.argv[2]
-    config_yaml_arg = sys.argv[3]
+    config_yaml_arg = sys.argv[2]
     exit_code = prep_riboviz(py_scripts_arg,
                              r_scripts_arg,
-                             data_dir_arg,
                              config_yaml_arg)
     sys.exit(exit_code)
