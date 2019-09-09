@@ -84,7 +84,7 @@ EXIT_COLLATION_ERROR = 5
 """ Error occurred during TPMs collation. """
 
 
-def build_indices(fasta, ht_prefix, log_file):
+def build_indices(fasta, ht_prefix, file_type, logs_dir):
     """
     Build indices for alignment via invocation of hisat2-build.
     Index files have name <ht_prefix>.<N>.ht2.
@@ -93,15 +93,40 @@ def build_indices(fasta, ht_prefix, log_file):
     :type fasta: str or unicode
     :param ht_prefix: Prefix of HT2 index files
     :type ht_prefix: str or unicode
-    :param log_file: Log file
-    :type log_file: str or unicode
+    :param logs_dir Log files directory
+    :type logs_dir: str or unicode
+    :param file_type: Type of file being indexed, used for logging
+    :type file_type: str or unicode
     :raise FileNotFoundError: if hisat2-build cannot be found
     :raise AssertionError: if hisat2-build returns non-zero exit
     code
     """
     cmd = ["hisat2-build", fasta, ht_prefix]
     print(("Running: " + utils.list_to_str(cmd)))
-    process_utils.run_logged_command(cmd, log_file)
+    process_utils.run_logged_command(
+        cmd,
+        os.path.join(logs_dir, "hisat2_build_" + file_type + ".log"))
+
+
+def get_sample_log_file(logs_dir, sample, step, index):
+    """
+    Get name of log file for a specific processing step applied to a
+    specific sample.
+
+    :param logs_dir Log files directory
+    :type logs_dir: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    :param step: Name of processing step
+    :type step: str or unicode
+    :param index: Index of processing step, 1..N
+    :type index: int
+    :return: file name
+    :rtype: str or unicode
+    """
+    return os.path.join(
+        logs_dir,
+        sample + ("_%02d_" % index) + step + ".log")
 
 
 def process_sample(sample,
@@ -147,7 +172,8 @@ def process_sample(sample,
     :raise KeyError: if config is missing required configuration
     """
     print(("Processing sample " + sample))
-    log_prefix = "log_" + sample
+    step = 1
+
     if not os.path.exists(fastq):
         print(("File " + fastq + " not found"))
         raise FileNotFoundError(fastq)
@@ -172,7 +198,8 @@ def process_sample(sample,
     print(("Running: " + utils.list_to_str(cmd)))
     process_utils.run_logged_command(
         cmd,
-        os.path.join(logs_dir, log_prefix + "_cut_adapt.log"))
+        get_sample_log_file(logs_dir, sample, "cut_adapt", step))
+    step += 1
 
     # Map reads to rRNA.
 
@@ -186,7 +213,8 @@ def process_sample(sample,
     print(("Running: " + utils.list_to_str(cmd)))
     process_utils.run_logged_command(
         cmd,
-        os.path.join(logs_dir, log_prefix + "_hisat2_rrna.log"))
+        get_sample_log_file(logs_dir, sample, "hisat2_rrna", step))
+    step += 1
 
     # Map to ORFs with (mostly) default settings, up to 2 alignments.
 
@@ -202,7 +230,8 @@ def process_sample(sample,
     print(("Running: " + utils.list_to_str(cmd)))
     process_utils.run_logged_command(
         cmd,
-        os.path.join(logs_dir, log_prefix + "_hisat2_orf.log"))
+        get_sample_log_file(logs_dir, sample, "hisat2_orf", step))
+    step += 1
 
     # Trim 5' mismatched nt and remove reads with >1 mismatch.
 
@@ -216,7 +245,8 @@ def process_sample(sample,
     print(("Running: " + utils.list_to_str(cmd)))
     process_utils.run_logged_command(
         cmd,
-        os.path.join(logs_dir, log_prefix + "_trim_5p_mismatch.log"))
+        get_sample_log_file(logs_dir, sample, "trim_5p_mismatch", step))
+    step += 1
 
     # Convert SAM (text) output to BAM (compressed binary) and sort on
     # genome.
@@ -231,14 +261,16 @@ def process_sample(sample,
     process_utils.run_logged_pipe_command(
         cmd_view,
         cmd_sort,
-        os.path.join(logs_dir, log_prefix + "_samtools_view_sort.log"))
+        get_sample_log_file(logs_dir, sample, "samtools_view_sort", step))
+    step += 1
 
     # Index BAM file.
     cmd = ["samtools", "index", sample_out_bam]
     print(("Running: " + utils.list_to_str(cmd)))
     process_utils.run_logged_command(
         cmd,
-        os.path.join(logs_dir, log_prefix + "_samtools_index.log"))
+        get_sample_log_file(logs_dir, sample, "samtools_index", step))
+    step += 1
 
     if config["make_bedgraph"]:
         # Record transcriptome coverage as a bedgraph.
@@ -251,8 +283,9 @@ def process_sample(sample,
         process_utils.run_logged_redirect_command(
             cmd,
             plus_bedgraph,
-            os.path.join(logs_dir,
-                         log_prefix + "_bedtools_genome_cov_plus.log"))
+            get_sample_log_file(
+                logs_dir, sample, "bedtools_genome_cov_plus", step))
+        step += 1
         # Calculate transcriptome coverage for minus strand.
         cmd = ["bedtools", "genomecov", "-ibam", sample_out_bam,
                "-trackline", "-bga", "-5", "-strand", "-"]
@@ -262,8 +295,9 @@ def process_sample(sample,
         process_utils.run_logged_redirect_command(
             cmd,
             minus_bedgraph,
-            os.path.join(logs_dir,
-                         log_prefix + "_bedtools_genome_cov_minus.log"))
+            get_sample_log_file(
+                logs_dir, sample, "bedtools_genome_cov_minus", step))
+        step += 1
         print("bedgraphs made on plus and minus strands")
 
     # Make length-sensitive alignments in H5 format.
@@ -289,7 +323,8 @@ def process_sample(sample,
     print(("Running: " + utils.list_to_str(cmd)))
     process_utils.run_logged_command(
         cmd,
-        os.path.join(logs_dir, log_prefix + "_bam_to_h5.log"))
+        get_sample_log_file(logs_dir, sample, "bam_to_h5", step))
+    step += 1
 
     # Create summary statistics and analyses plots.
 
@@ -314,11 +349,11 @@ def process_sample(sample,
     print(("Running: " + utils.list_to_str(cmd)))
     process_utils.run_logged_command(
         cmd,
-        os.path.join(logs_dir, log_prefix + "_generate_stats_figs.log"))
+        get_sample_log_file(logs_dir, sample, "generate_stats_figs", step))
     print(("Finished processing sample " + fastq))
 
 
-def collate_tpms(out_dir, samples, r_scripts, log_file):
+def collate_tpms(out_dir, samples, r_scripts, logs_dir):
     """
     Collate TPMs across sample results.
 
@@ -328,8 +363,8 @@ def collate_tpms(out_dir, samples, r_scripts, log_file):
     :type samples: list(str or unicode)
     :param r_scripts:  Directory with RiboViz R scripts
     :type r_scripts: str or unicode
-    :param log_file: Log file
-    :type log_file: str or unicode
+    :param logs_dir Log files directory
+    :type logs_dir: str or unicode
     :raise FileNotFoundError: if Rscript cannot be found
     :raise AssertionError: if collate_tpms.R returns non-zero exit
     code
@@ -338,12 +373,15 @@ def collate_tpms(out_dir, samples, r_scripts, log_file):
     non-zero exit code
     """
     print("Collating TPMs across all processed samples")
-    cmd = ["Rscript", "--vanilla",
+    cmd = ["Rscript",
+           "--vanilla",
            os.path.join(r_scripts, "collate_tpms.R"),
            "--dir_out=" + out_dir]
     cmd += samples
     print(("Running: " + utils.list_to_str(cmd)))
-    process_utils.run_logged_command(cmd, log_file)
+    process_utils.run_logged_command(
+        cmd,
+        os.path.join(logs_dir, "collate_tpms.log"))
 
 
 def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
@@ -404,15 +442,15 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
         if config["build_indices"]:
             if not os.path.exists(index_dir):
                 os.makedirs(index_dir)
-            build_indices(
-                config["rRNA_fasta"],
-                r_rna_index,
-                os.path.join(logs_dir, "log_hisat2_build_rrna.log"))
+            build_indices(config["rRNA_fasta"],
+                          r_rna_index,
+                          "r_rna",
+                          logs_dir)
             print("rRNA index built")
-            build_indices(
-                config["orf_fasta"],
-                orf_index,
-                os.path.join(logs_dir, "log_hisat2_build_orf.log"))
+            build_indices(config["orf_fasta"],
+                          orf_index,
+                          "orf",
+                          logs_dir)
             print("ORF index built")
     except KeyError:
         traceback.print_exc(file=sys.stdout)
@@ -466,10 +504,7 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
 
     # Collate TPMs across sample results.
     try:
-        collate_tpms(out_dir,
-                     successes,
-                     r_scripts,
-                     os.path.join(logs_dir, "log_collate_tpms.log"))
+        collate_tpms(out_dir, successes, r_scripts, logs_dir)
     except Exception:
         traceback.print_exc(file=sys.stdout)
         return EXIT_COLLATION_ERROR
