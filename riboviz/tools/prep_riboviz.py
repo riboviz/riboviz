@@ -346,12 +346,12 @@ def prep_riboviz(py_scripts, r_scripts, data_dir, config_yaml):
         return EXIT_CONFIG_ERROR
 
     # Build indices for alignment, if necessary/requested.
-    index_dir = config["dir_index"]
-    r_rna_index = os.path.join(index_dir,
-                               config["rRNA_index"])
-    orf_index = os.path.join(index_dir,
-                             config["orf_index"])
     try:
+        index_dir = config["dir_index"]
+        r_rna_index = os.path.join(index_dir,
+                                   config["rRNA_index"])
+        orf_index = os.path.join(index_dir,
+                                 config["orf_index"])
         if config["build_indices"]:
             if not os.path.exists(index_dir):
                 os.makedirs(index_dir)
