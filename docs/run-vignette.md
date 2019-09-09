@@ -654,8 +654,6 @@ Rscript --vanilla rscripts/generate_stats_figs.R --Ncores=4 \
     --features_file=data/yeast_features.tsv --do_pos_sp_nt_freq=True
 ```
 
-This script uses `--dir_data=data/` to access and read `data/yeast_codon_pos_i200.RData` and `/data/yeast_tRNAs.tsv` also.
-
 Outputs files to `vignette/output/`:
 
 ```
