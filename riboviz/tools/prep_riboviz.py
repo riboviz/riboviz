@@ -340,16 +340,16 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml):
 
     # Build indices for alignment, if necessary/requested.
     try:
+        index_dir = config["dir_index"]
+        r_rna_index = os.path.join(index_dir,
+                                   config["rRNA_index"])
+        orf_index = os.path.join(index_dir,
+                                 config["orf_index"])
         if config["build_indices"]:
-            index_dir = config["dir_index"]
             if not os.path.exists(index_dir):
                 os.makedirs(index_dir)
-            r_rna_index = os.path.join(index_dir,
-                                       config["rRNA_index"])
             build_indices(config["rRNA_fasta"], r_rna_index)
             print("rRNA index built")
-            orf_index = os.path.join(index_dir,
-                                     config["orf_index"])
             build_indices(config["orf_fasta"], orf_index)
             print("ORF index built")
     except KeyError:
