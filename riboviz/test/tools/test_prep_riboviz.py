@@ -27,7 +27,6 @@ def arguments():
     """
     arguments = (riboviz.test.PY_SCRIPTS,
                  riboviz.test.R_SCRIPTS,
-                 riboviz.test.DATA_DIR,
                  riboviz.test.VIGNETTE_CONFIG)
     yield arguments
 
@@ -47,7 +46,7 @@ def configuration(arguments):
     :return: configuration, path to configuration file
     :rtype: tuple(dict, str or unicode)
     """
-    _, _, _, config_yaml = arguments
+    _, _, config_yaml = arguments
     with open(config_yaml, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
 
@@ -81,10 +80,9 @@ def test_config_error_missing_config_file(arguments):
     :type arguments: tuple(str or unicode, str or unicode,
     str or unicode, str or unicode)
     """
-    py_scripts, r_scripts, data_dir, _ = arguments
+    py_scripts, r_scripts, _ = arguments
     exit_code = prep_riboviz.prep_riboviz(py_scripts,
                                           r_scripts,
-                                          data_dir,
                                           "nosuch.yaml")
     assert exit_code == prep_riboviz.EXIT_CONFIG_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
@@ -104,14 +102,13 @@ def test_index_error_missing_fa(arguments, configuration):
     (pytest fixture defined in conftest.py)
     :type configuration: tuple(dict, str or unicode)
     """
-    py_scripts, r_scripts, data_dir, _ = arguments
+    py_scripts, r_scripts, _ = arguments
     config, path = configuration
     config["rRNA_fasta"] = "nosuch.fa"
     with open(path, 'w') as f:
         yaml.dump(config, f)
     exit_code = prep_riboviz.prep_riboviz(py_scripts,
                                           r_scripts,
-                                          data_dir,
                                           path)
     assert exit_code == prep_riboviz.EXIT_INDEX_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
@@ -132,7 +129,7 @@ def test_no_samples_error(arguments, configuration):
     (pytest fixture defined in conftest.py)
     :type configuration: tuple(dict, str or unicode)
     """
-    py_scripts, r_scripts, data_dir, _ = arguments
+    py_scripts, r_scripts, _ = arguments
     config, path = configuration
     config["build_indices"] = False
     config["fq_files"] = []
@@ -140,7 +137,6 @@ def test_no_samples_error(arguments, configuration):
         yaml.dump(config, f)
     exit_code = prep_riboviz.prep_riboviz(py_scripts,
                                           r_scripts,
-                                          data_dir,
                                           path)
     assert exit_code == prep_riboviz.EXIT_NO_SAMPLES_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
@@ -160,7 +156,7 @@ def test_samples_error_missing_samples(arguments, configuration):
     (pytest fixture defined in conftest.py)
     :type configuration: tuple(dict, str or unicode)
     """
-    py_scripts, r_scripts, data_dir, _ = arguments
+    py_scripts, r_scripts, _ = arguments
     config, path = configuration
     config["build_indices"] = False
     config["fq_files"] = {
@@ -171,7 +167,6 @@ def test_samples_error_missing_samples(arguments, configuration):
         yaml.dump(config, f)
     exit_code = prep_riboviz.prep_riboviz(py_scripts,
                                           r_scripts,
-                                          data_dir,
                                           path)
     assert exit_code == prep_riboviz.EXIT_SAMPLES_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
@@ -192,7 +187,7 @@ def test_config_error_missing_dir_in(arguments, configuration):
     (pytest fixture defined in conftest.py)
     :type configuration: tuple(dict, str or unicode)
     """
-    py_scripts, r_scripts, data_dir, _ = arguments
+    py_scripts, r_scripts, _ = arguments
     config, path = configuration
     config["build_indices"] = False
     del config["dir_in"]
@@ -200,7 +195,6 @@ def test_config_error_missing_dir_in(arguments, configuration):
         yaml.dump(config, f)
     exit_code = prep_riboviz.prep_riboviz(py_scripts,
                                           r_scripts,
-                                          data_dir,
                                           path)
     assert exit_code == prep_riboviz.EXIT_CONFIG_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
