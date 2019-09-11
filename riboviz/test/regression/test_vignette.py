@@ -118,7 +118,6 @@ def riboviz_run(skip_workflow):
         exit_code = prep_riboviz.prep_riboviz(
             riboviz.test.PY_SCRIPTS,
             riboviz.test.R_SCRIPTS,
-            riboviz.test.DATA_DIR,
             riboviz.test.VIGNETTE_CONFIG)
         assert exit_code == 0, \
             "prep_riboviz returned non-zero exit code %d" % exit_code

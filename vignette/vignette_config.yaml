@@ -28,4 +28,6 @@ isTestRun: FALSE # Is this a test run
 rpf: TRUE # Is the dataset an RPF or mRNA dataset?
 ribovizGFF: TRUE # Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3
 features_file: data/yeast_features.tsv # file of features to correlate with ORFs
-do_pos_sp_nt_freq: TRUE # Do calculate position-specific nucleotide frequency
+do_pos_sp_nt_freq: TRUE # Do calculate position-specific nucleotide freqeuency
+t_rna: data/yeast_tRNAs.tsv # tRNA estimates
+codon_pos: data/yeast_codon_pos_i200.RData # Codon positions in each gene
