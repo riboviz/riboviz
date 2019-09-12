@@ -466,33 +466,35 @@ write.table(tpms,file=paste0(out_prefix,"_tpms.tsv"),
 ### Correlations between TPMs of genes with their sequence-based features
 
 if ( !is.null( features_file) ) {
-print("Starting: Correlations between TPMs of genes with their sequence-based features")
-
-features <- read.table(features_file,h=T)
-# features <- features[match(genes,features$ORF),] 
-# features <- features[!is.na(features$ORF),]
-# features <- merge(features,tpms,by="ORF")
-
-
-# Prepare data for plot
-# Consider only genes with at least count_threshold mapped reads
-
-plot_data <- merge(features,tpms,by="ORF") %>%
+  print("Starting: Correlations between TPMs of genes with their sequence-based features")
+  
+  features <- read.table(features_file,h=T)
+  # features <- features[match(genes,features$ORF),] 
+  # features <- features[!is.na(features$ORF),]
+  # features <- merge(features,tpms,by="ORF")
+  
+  
+  # Prepare data for plot
+  # Consider only genes with at least count_threshold mapped reads
+  
+  plot_data <- merge(features,tpms,by="ORF") %>%
     filter(readcount >= count_threshold, !is.na(ORF)) %>%
     select(-readcount,-rpb) %>%
     gather(Feature,Value, -ORF, -tpm)
-
-features_plot <- ggplot(plot_data, aes(x=tpm, y=Value)) +
-  geom_point(alpha=0.3) +
-  facet_wrap(~Feature,scales="free") +
-  scale_x_log10() +
-  geom_smooth(method="lm") +
-  xlab("TPM (transcripts per million)")
-
-# Save plot and file
-ggsave(features_plot, filename = paste0(out_prefix,"_features.pdf"))
-
-print("Completed: Correlations between TPMs of genes with their sequence-based features")
+  
+  features_plot <- ggplot(plot_data, aes(x=tpm, y=Value)) +
+    geom_point(alpha=0.3) +
+    facet_wrap(~Feature,scales="free") +
+    scale_x_log10() +
+    geom_smooth(method="lm") +
+    xlab("TPM (transcripts per million)")
+  
+  # Save plot and file
+  ggsave(features_plot, filename = paste0(out_prefix,"_features.pdf"))
+  
+  print("Completed: Correlations between TPMs of genes with their sequence-based features")
+} else {
+  print("Skipped: Correlations between TPMs of genes with their sequence-based features - features_file.tsv not provided")
 }
 
 #####################################################################################
