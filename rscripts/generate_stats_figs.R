@@ -10,6 +10,11 @@ suppressMessages(library(tidyr, quietly = T))
 suppressMessages(library(dplyr, quietly = T))
 
 # define input options for optparse package
+# Flic: NULLs changed to NA as otherwise length(option_list)= 17 
+  # while `opt <- parse_args(OptionParser(option_list=option_list))` gave length(opt)=14 
+  # this discarded 4 make_option()s (those set default=NULL): 
+  # --t_rna, --codon_pos, --orf_gff_file & --features_file
+  # while OptionParser added help option to the list, bringing length to 14 (still dropping 4 options)
 option_list <- list( 
   make_option("--Ncores", type="integer", default=1,
               help="Number of cores for parallelization"),
@@ -33,13 +38,13 @@ option_list <- list(
               help="Is the dataset an RPF or mRNA dataset?"),
   make_option("--dir_out", type="character", default="./",
               help="Output directory"),
-  make_option("--t_rna", type="character", default=NULL,
+  make_option("--t_rna", type="character", default=NA,
               help="tRNA estimates in .tsv file"),
-  make_option("--codon_pos", type="character", default=NULL,
+  make_option("--codon_pos", type="character", default=NA,
               help="Codon positions in each gene in .Rdata file"),
-  make_option("--orf_gff_file", type="character", default=NULL,
+  make_option("--orf_gff_file", type="character", default=NA,
               help="riboviz generated GFF2/GFF3 annotation file"),
-  make_option("--features_file", type="character", default=NULL,
+  make_option("--features_file", type="character", default=NA,
               help="features file, columns are gene features and rows are genes"),
   make_option("--count_threshold", type="integer", default=64,
               help="threshold for count of reads per gene to be included in plot"),
@@ -48,6 +53,9 @@ option_list <- list(
 )
 
 # Read in commandline arguments
+# Flic: length(opt) = length(option_list) + 1 as OptionParse(add_help_option = TRUE) default is left as-is
+  # this means "a standard help option should be automatically added to the OptionParser instance"
+  # didn't remove that default, so length(opt) still =18
 opt <- parse_args(OptionParser(option_list=option_list))
 attach(opt)
 
