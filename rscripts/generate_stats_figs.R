@@ -485,8 +485,7 @@ write.table(tpms,file=paste0(out_prefix,"_tpms.tsv"),
 #####################################################################################
 #####################################################################################
 ### Correlations between TPMs of genes with their sequence-based features
-
-if ( !is.null( features_file) ) {
+if ( !is.na( features_file) ) {
   print("Starting: Correlations between TPMs of genes with their sequence-based features")
   
   features <- read.table(features_file,h=T)
@@ -521,7 +520,7 @@ if ( !is.null( features_file) ) {
 #####################################################################################
 #####################################################################################
 ### Codon-specific ribosome densities for correlations with tRNAs
-if(!is.null(t_rna) & !is.na(codon_pos)) {
+if(!is.na(t_rna) & !is.na(codon_pos)) {
   print("Starting: Codon-specific ribosome densities for correlations with tRNAs")
   
   # Only for RPF datasets
@@ -533,7 +532,7 @@ if(!is.null(t_rna) & !is.na(codon_pos)) {
     out <- lapply(genes,function(gene){
       # From "Position specific distribution of reads" plot
       get_cod_pos_reads(fid=fid,gene=gene,dataset=dataset,left=(Buffer-15),right=(Buffer+11),MinReadLen = MinReadLen)}) # Get codon-based position-specific reads for each gene
-    names(out) <- genes
+      names(out) <- genes
     
     gene_len <- sapply(out,length)  # Calculate gene length in codons
     out <- out[gene_len>201]  # Ignore genes with <=200 sense codons
