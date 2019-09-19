@@ -57,10 +57,10 @@ def run_pipe_command(cmd1, cmd2, out=sys.stdout, err=sys.stderr):
     Uses pattern suggested by:
     https://docs.python.org/2/library/subprocess.html#replacing-shell-pipeline
 
-    :param cmd: Commnand to run and its arguments
-    :type cmd: list(str or unicode)
-    :param cmd: Commnand to run and its arguments
-    :type cmd: list(str or unicode)
+    :param cmd1: Commnand to run and its arguments
+    :type cmd1: list(str or unicode)
+    :param cmd2: Commnand to run and its arguments
+    :type cmd2: list(str or unicode)
     :param out: Standard output desination (stdout or file)
     :type out: _io.TextIOWrapper
     :param err: Standard error desination (stderr or file)
@@ -134,3 +134,48 @@ def run_logged_pipe_command(cmd1, cmd2, log_file):
     """
     with open(log_file, "a") as f:
         run_pipe_command(cmd1, cmd2, f, f)
+
+
+def log_command(cmd, cmd_file):
+    """
+    Helper function to record a shell command to a file.
+
+    :param cmd: Commnand to run and its arguments
+    :type cmd: list(str or unicode)
+    :param cmd_file: File to log command to
+    :type cmd_file: str or unicode
+    """
+    with open(cmd_file, "a") as f:
+        f.write(" ".join(cmd) + "\n")
+
+
+def log_redirect_command(cmd, out, cmd_file):
+    """
+    Helper function to record to a file a shell command that redirects
+    its output.
+
+    :param cmd: Commnand to run and its arguments
+    :type cmd: list(str or unicode)
+    :param out: Output file name
+    :type out: str or unicode
+    :param cmd_file: File to log command to, if not None
+    :type cmd_file: str or unicode
+    """
+    with open(cmd_file, "a") as f:
+        f.write(("%s > %s\n" % (" ".join(cmd), out)))
+
+
+def log_pipe_command(cmd1, cmd2, cmd_file=None):
+    """
+    Helper function to record to a file a shell command that pipes
+    its output to another shell command.
+
+    :param cmd1: Commnand to run and its arguments
+    :type cmd1: list(str or unicode)
+    :param cmd2: Commnand to run and its arguments
+    :type cmd2: list(str or unicode)
+    :param cmd_file: File to log command to, if not None
+    :type cmd_file: str or unicode
+    """
+    with open(cmd_file, "a") as f:
+        f.write(("%s | %s\n" % (" ".join(cmd1), " ".join(cmd2))))
