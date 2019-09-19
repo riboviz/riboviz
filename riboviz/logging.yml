@@ -1,0 +1,24 @@
+---
+version: 1
+disable_existing_loggers: False
+formatters:
+  standard:
+    format: "%(asctime)s:%(name)s:%(levelname)s: %(message)s"
+  command-line:
+    format: "%(message)s"
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: command-line
+    stream: ext://sys.stdout
+  file_handler:
+    class: riboviz.logging_utils.TimestampedFileHandler
+    level: INFO
+    formatter: standard
+    prefix: riboviz-
+    suffix: .log
+    encoding: utf8
+root:
+  level: INFO
+  handlers: [console, file_handler]
