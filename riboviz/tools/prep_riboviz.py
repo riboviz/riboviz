@@ -93,7 +93,8 @@ logging_utils.configure_logging()
 logger = logging.getLogger(__name__)
 
 
-def build_indices(fasta, ht_prefix, file_type, logs_dir, dry_run=False):
+def build_indices(fasta, ht_prefix, file_type, logs_dir, cmd_file,
+                  dry_run=False):
     """
     Build indices for alignment via invocation of hisat2-build.
     Index files have name <ht_prefix>.<N>.ht2.
@@ -106,6 +107,8 @@ def build_indices(fasta, ht_prefix, file_type, logs_dir, dry_run=False):
     :type logs_dir: str or unicode
     :param file_type: Type of file being indexed, used for logging
     :type file_type: str or unicode
+    :param cmd_file: File to log command to, if not None
+    :type cmd_file: str or unicode
     :param dry_run: Don't execute workflow commands (useful for seeing
     what commands would be executed)
     :type dry_run: bool
@@ -115,6 +118,7 @@ def build_indices(fasta, ht_prefix, file_type, logs_dir, dry_run=False):
     """
     cmd = ["hisat2-build", fasta, ht_prefix]
     logger.info("Running: %s", utils.list_to_str(cmd))
+    process_utils.log_command(cmd, cmd_file)
     if not dry_run:
         process_utils.run_logged_command(
             cmd,
@@ -152,6 +156,7 @@ def process_sample(sample,
                    tmp_dir,
                    out_dir,
                    logs_dir,
+                   cmd_file,
                    dry_run=False):
     """
     Process a single FASTQ sample file.
@@ -176,6 +181,8 @@ def process_sample(sample,
     :type out_dir: str or unicode
     :param logs_dir Log files directory
     :type logs_dir: str or unicode
+    :param cmd_file: File to log command to, if not None
+    :type cmd_file: str or unicode
     :param dry_run: Don't execute workflow commands (useful for seeing
     what commands would be executed)
     :type dry_run: bool
@@ -211,6 +218,7 @@ def process_sample(sample,
         # be requested.
         cmd += ["-j", str(0)]
     logger.info("Running: %s", utils.list_to_str(cmd))
+    process_utils.log_command(cmd, cmd_file)
     if not dry_run:
         process_utils.run_logged_command(
             cmd,
@@ -227,6 +235,7 @@ def process_sample(sample,
            "--un", non_r_rna_trim_fq, "-x", r_rna_index,
            "-S", r_rna_map_sam, "-U", trim_fq]
     logger.info("Running: %s", utils.list_to_str(cmd))
+    process_utils.log_command(cmd, cmd_file)
     if not dry_run:
         process_utils.run_logged_command(
             cmd,
@@ -245,6 +254,7 @@ def process_sample(sample,
            "-x", orf_index, "-S", orf_map_sam,
            "-U", non_r_rna_trim_fq]
     logger.info("Running: %s", utils.list_to_str(cmd))
+    process_utils.log_command(cmd, cmd_file)
     if not dry_run:
         process_utils.run_logged_command(
             cmd,
@@ -261,6 +271,7 @@ def process_sample(sample,
            "-mm", "2", "-in", orf_map_sam,
            "-out", orf_map_sam_clean]
     logger.info("Running: %s", utils.list_to_str(cmd))
+    process_utils.log_command(cmd, cmd_file)
     if not dry_run:
         process_utils.run_logged_command(
             cmd,
@@ -278,6 +289,7 @@ def process_sample(sample,
     logger.info("Running: %s | %s",
                 utils.list_to_str(cmd_view),
                 utils.list_to_str(cmd_sort))
+    process_utils.log_pipe_command(cmd_view, cmd_sort, cmd_file)
     if not dry_run:
         process_utils.run_logged_pipe_command(
             cmd_view,
@@ -288,6 +300,7 @@ def process_sample(sample,
     # Index BAM file.
     cmd = ["samtools", "index", sample_out_bam]
     logger.info("Running: %s", utils.list_to_str(cmd))
+    process_utils.log_command(cmd, cmd_file)
     if not dry_run:
         process_utils.run_logged_command(
             cmd,
@@ -303,6 +316,7 @@ def process_sample(sample,
         logger.info("Running: %s > %s",
                     utils.list_to_str(cmd),
                     plus_bedgraph)
+        process_utils.log_redirect_command(cmd, plus_bedgraph, cmd_file)
         if not dry_run:
             process_utils.run_logged_redirect_command(
                 cmd,
@@ -317,6 +331,7 @@ def process_sample(sample,
         logger.info("Running: %s > %s",
                     utils.list_to_str(cmd),
                     minus_bedgraph)
+        process_utils.log_redirect_command(cmd, minus_bedgraph, cmd_file)
         if not dry_run:
             process_utils.run_logged_redirect_command(
                 cmd,
@@ -347,6 +362,7 @@ def process_sample(sample,
            "--ribovizGFF=" + str(config["ribovizGFF"]),
            "--StopInCDS=" + str(config["StopInCDS"])]
     logger.info("Running: %s", utils.list_to_str(cmd))
+    process_utils.log_command(cmd, cmd_file)
     if not dry_run:
         process_utils.run_logged_command(
             cmd,
@@ -374,6 +390,7 @@ def process_sample(sample,
            "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
     logger.info("Running: %s", utils.list_to_str(cmd))
+    process_utils.log_command(cmd, cmd_file)
     if not dry_run:
         process_utils.run_logged_command(
             cmd,
@@ -381,7 +398,8 @@ def process_sample(sample,
     logger.info("Finished processing sample: %s", fastq)
 
 
-def collate_tpms(out_dir, samples, r_scripts, logs_dir, dry_run=False):
+def collate_tpms(out_dir, samples, r_scripts, logs_dir, cmd_file,
+                 dry_run=False):
     """
     Collate TPMs across sample results.
 
@@ -393,6 +411,8 @@ def collate_tpms(out_dir, samples, r_scripts, logs_dir, dry_run=False):
     :type r_scripts: str or unicode
     :param logs_dir Log files directory
     :type logs_dir: str or unicode
+    :param cmd_file: File to log command to, if not None
+    :type cmd_file: str or unicode
     :param dry_run: Don't execute workflow commands (useful for seeing
     what commands would be executed)
     :type dry_run: bool
@@ -407,6 +427,7 @@ def collate_tpms(out_dir, samples, r_scripts, logs_dir, dry_run=False):
            "--dir_out=" + out_dir]
     cmd += samples
     logger.info("Running: %s", utils.list_to_str(cmd))
+    process_utils.log_command(cmd, cmd_file)
     if not dry_run:
         process_utils.run_logged_command(
             cmd,
@@ -439,6 +460,11 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
     :rtype: int
     """
     logger.info("Running under Python: %s ", sys.version)
+
+    cmd_file = "prep_riboviz.sh"
+    if os.path.exists(cmd_file):
+        os.remove(cmd_file)
+
     # Extract configuration.
     try:
         with open(config_yaml, 'r') as f:
@@ -484,12 +510,14 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
                           r_rna_index,
                           "r_rna",
                           logs_dir,
+                          cmd_file,
                           dry_run)
             logger.info("rRNA index built")
             build_indices(config["orf_fasta"],
                           orf_index,
                           "orf",
                           logs_dir,
+                          cmd_file,
                           dry_run)
             logger.info("ORF index built")
     except KeyError as e:
@@ -535,6 +563,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
                            tmp_dir,
                            out_dir,
                            logs_dir,
+                           cmd_file,
                            dry_run)
             successes.append(sample)
         except FileNotFoundError as e:
@@ -551,7 +580,8 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
 
     # Collate TPMs across sample results.
     try:
-        collate_tpms(out_dir, successes, r_scripts, logs_dir, dry_run)
+        collate_tpms(out_dir, successes, r_scripts, logs_dir, cmd_file,
+                     dry_run)
     except Exception:
         logging.error(("Problem collating TPMs"))
         exc_type, _, _ = sys.exc_info()
