@@ -5,6 +5,7 @@ RiboViz workflow.
 Usage:
 
     PYTHONPATH=. python riboviz/tools/prep_riboviz.py \
+        [--dry-run] \
         <R_SCRIPTS_DIRECTORY>\
         <YAML_CONFIG_FILE>
 
@@ -56,6 +57,10 @@ Exit codes are as follows:
 * EXIT_NO_SAMPLES_ERROR (3): No samples were provided.
 * EXIT_SAMPLES_ERROR (4): No sample was processed successfully.
 * EXIT_COLLATION_ERROR (5): Error occurred during TPMs collation.
+
+If --dry-run is provided then the workflow commands will not be
+executed. This can be useful for seeing what commands will be
+run, in advance of running them.
 """
 
 from datetime import datetime
