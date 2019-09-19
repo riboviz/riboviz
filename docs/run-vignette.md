@@ -221,18 +221,15 @@ Run `prep_riboviz.py`:
 * Python 3:
 
 ```console
-$ python -u -m riboviz.tools.prep_riboviz rscripts/ \
-    vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
+$ python -m riboviz.tools.prep_riboviz rscripts/ vignette/vignette_config.yaml
 ```
 
 * Python 2 or 3:
 
 ```console
-$ PYTHONPATH=. python -u riboviz/tools/prep_riboviz.py rscripts/ \
-    vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
+$ PYTHONPATH=. python riboviz/tools/prep_riboviz.py rscripts/ \
+    vignette/vignette_config.yaml
 ```
-
-The part of the command, `2>&1 | tee vignette-out.txt`, allows for the messages that `prep_riboviz.py` prints to be both printed onto the screen and also printed into the `vignette-out.txt` file so you can inspect it later. This can be useful if any problems arise.
 
 The exit code can be checked by running
 
@@ -242,26 +239,47 @@ $ echo ${PIPESTATUS[0]}
 
 If all went well an exit code of 0 will be returned.
 
+Information on the key steps during processing is displayed. This is also added to a timestamped log file in the current directory e.g. `riboviz-20190919-064919-968064.log`. 
+
+Log files for each processing step will be placed in a timestamped sub-directory of `vignette/logs/` e.g. `vignette/logs/20190919-070625`. After a successful run, the log files would be:
+
+```console
+collate_tpms.log
+hisat2_build_orf.log
+hisat2_build_r_rna.log
+WT3AT_01_cut_adapt.log
+WT3AT_02_hisat2_rrna.log
+WT3AT_03_hisat2_orf.log
+WT3AT_04_trim_5p_mismatch.log
+WT3AT_05_samtools_view_sort.log
+WT3AT_06_samtools_index.log
+WT3AT_07_bedtools_genome_cov_plus.log
+WT3AT_08_bedtools_genome_cov_minus.log
+WT3AT_09_bam_to_h5.log
+WT3AT_10_generate_stats_figs.log
+WTnone_01_cut_adapt.log
+WTnone_02_hisat2_rrna.log
+WTnone_03_hisat2_orf.log
+WTnone_04_trim_5p_mismatch.log
+WTnone_05_samtools_view_sort.log
+WTnone_06_samtools_index.log
+WTnone_07_bedtools_genome_cov_plus.log
+WTnone_08_bedtools_genome_cov_minus.log
+WTnone_09_bam_to_h5.log
+WTnone_10_generate_stats_figs.log
+```
+
+You should regularly delete the log files, to prevent them from using up your disk space.
+
 ### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
 
 If you see:
 
 ```
-File vignette/input/example_missing_file.fastq.gz not found
+File not found: vignette/input/example_missing_file.fastq.gz
 ```
 
 then this is expected and can be ignored. The vignette includes an attempt to analyse a missing input file, for testing, which is expected to fail.
-
-### Troubleshooting: `vignette/output/NotHere_tpms.tsv does not exist, returning empty list`
-
-If you see:
-
-```
-In get_tpms(paste0(ddir, "/", fstem, fend), ORFs) :
-  vignette/output/NotHere_tpms.tsv does not exist, returning empty list
-```
-
-then this is expected and can be ignored. This arises due to the missing input file described above which is used for testing.
 
 ### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
 
@@ -290,7 +308,7 @@ Edit `riboviz/tools/prep_riboviz.py` and change the lines:
 
 ```python
     cmd_sort = ["samtools", "sort", "-@", str(nprocesses),
-                "-O", "bam", "-o", fn_out + ".bam", "-"]
+                "-O", "bam", "-o", sample_out_bam, "-"]
 ```
 
 to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
@@ -298,7 +316,7 @@ to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
 ```python
     cmd_sort = ["samtools", "sort", "-@", str(nprocesses),
                 "-m", "256M",
-                "-O", "bam", "-o", fn_out + ".bam", "-"]
+                "-O", "bam", "-o", sample_out_bam, "-"]
 ```
 
 ### Check the expected output files
