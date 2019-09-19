@@ -88,7 +88,7 @@ logging_utils.configure_logging()
 logger = logging.getLogger(__name__)
 
 
-def build_indices(fasta, ht_prefix, file_type, logs_dir):
+def build_indices(fasta, ht_prefix, file_type, logs_dir, dry_run=False):
     """
     Build indices for alignment via invocation of hisat2-build.
     Index files have name <ht_prefix>.<N>.ht2.
@@ -101,15 +101,19 @@ def build_indices(fasta, ht_prefix, file_type, logs_dir):
     :type logs_dir: str or unicode
     :param file_type: Type of file being indexed, used for logging
     :type file_type: str or unicode
+    :param dry_run: Don't execute workflow commands (useful for seeing
+    what commands would be executed)
+    :type dry_run: bool
     :raise FileNotFoundError: if hisat2-build cannot be found
     :raise AssertionError: if hisat2-build returns non-zero exit
     code
     """
     cmd = ["hisat2-build", fasta, ht_prefix]
     logger.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        os.path.join(logs_dir, "hisat2_build_" + file_type + ".log"))
+    if not dry_run:
+        process_utils.run_logged_command(
+            cmd,
+            os.path.join(logs_dir, "hisat2_build_" + file_type + ".log"))
 
 
 def get_sample_log_file(logs_dir, sample, step, index):
@@ -142,7 +146,8 @@ def process_sample(sample,
                    r_scripts,
                    tmp_dir,
                    out_dir,
-                   logs_dir):
+                   logs_dir,
+                   dry_run=False):
     """
     Process a single FASTQ sample file.
 
@@ -166,6 +171,9 @@ def process_sample(sample,
     :type out_dir: str or unicode
     :param logs_dir Log files directory
     :type logs_dir: str or unicode
+    :param dry_run: Don't execute workflow commands (useful for seeing
+    what commands would be executed)
+    :type dry_run: bool
     :raise FileNotFoundError: if fastq or a third-party tool cannot be
     found
     :raise AssertionError: if invocation of a third-party tool returns
@@ -198,9 +206,10 @@ def process_sample(sample,
         # be requested.
         cmd += ["-j", str(0)]
     logger.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "cut_adapt", step))
+    if not dry_run:
+        process_utils.run_logged_command(
+            cmd,
+            get_sample_log_file(logs_dir, sample, "cut_adapt", step))
     step += 1
 
     # Map reads to rRNA.
@@ -213,9 +222,10 @@ def process_sample(sample,
            "--un", non_r_rna_trim_fq, "-x", r_rna_index,
            "-S", r_rna_map_sam, "-U", trim_fq]
     logger.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "hisat2_rrna", step))
+    if not dry_run:
+        process_utils.run_logged_command(
+            cmd,
+            get_sample_log_file(logs_dir, sample, "hisat2_rrna", step))
     step += 1
 
     # Map to ORFs with (mostly) default settings, up to 2 alignments.
@@ -230,9 +240,10 @@ def process_sample(sample,
            "-x", orf_index, "-S", orf_map_sam,
            "-U", non_r_rna_trim_fq]
     logger.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "hisat2_orf", step))
+    if not dry_run:
+        process_utils.run_logged_command(
+            cmd,
+            get_sample_log_file(logs_dir, sample, "hisat2_orf", step))
     step += 1
 
     # Trim 5' mismatched nt and remove reads with >1 mismatch.
@@ -245,9 +256,10 @@ def process_sample(sample,
            "-mm", "2", "-in", orf_map_sam,
            "-out", orf_map_sam_clean]
     logger.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "trim_5p_mismatch", step))
+    if not dry_run:
+        process_utils.run_logged_command(
+            cmd,
+            get_sample_log_file(logs_dir, sample, "trim_5p_mismatch", step))
     step += 1
 
     # Convert SAM (text) output to BAM (compressed binary) and sort on
@@ -261,18 +273,20 @@ def process_sample(sample,
     logger.info("Running: %s | %s",
                 utils.list_to_str(cmd_view),
                 utils.list_to_str(cmd_sort))
-    process_utils.run_logged_pipe_command(
-        cmd_view,
-        cmd_sort,
-        get_sample_log_file(logs_dir, sample, "samtools_view_sort", step))
+    if not dry_run:
+        process_utils.run_logged_pipe_command(
+            cmd_view,
+            cmd_sort,
+            get_sample_log_file(logs_dir, sample, "samtools_view_sort", step))
     step += 1
 
     # Index BAM file.
     cmd = ["samtools", "index", sample_out_bam]
     logger.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "samtools_index", step))
+    if not dry_run:
+        process_utils.run_logged_command(
+            cmd,
+            get_sample_log_file(logs_dir, sample, "samtools_index", step))
     step += 1
 
     if config["make_bedgraph"]:
@@ -284,11 +298,12 @@ def process_sample(sample,
         logger.info("Running: %s > %s",
                     utils.list_to_str(cmd),
                     plus_bedgraph)
-        process_utils.run_logged_redirect_command(
-            cmd,
-            plus_bedgraph,
-            get_sample_log_file(
-                logs_dir, sample, "bedtools_genome_cov_plus", step))
+        if not dry_run:
+            process_utils.run_logged_redirect_command(
+                cmd,
+                plus_bedgraph,
+                get_sample_log_file(
+                    logs_dir, sample, "bedtools_genome_cov_plus", step))
         step += 1
         # Calculate transcriptome coverage for minus strand.
         cmd = ["bedtools", "genomecov", "-ibam", sample_out_bam,
@@ -297,11 +312,12 @@ def process_sample(sample,
         logger.info("Running: %s > %s",
                     utils.list_to_str(cmd),
                     minus_bedgraph)
-        process_utils.run_logged_redirect_command(
-            cmd,
-            minus_bedgraph,
-            get_sample_log_file(
-                logs_dir, sample, "bedtools_genome_cov_minus", step))
+        if not dry_run:
+            process_utils.run_logged_redirect_command(
+                cmd,
+                minus_bedgraph,
+                get_sample_log_file(
+                    logs_dir, sample, "bedtools_genome_cov_minus", step))
         step += 1
         logger.info("bedgraphs made on plus and minus strands")
 
@@ -326,9 +342,10 @@ def process_sample(sample,
            "--ribovizGFF=" + str(config["ribovizGFF"]),
            "--StopInCDS=" + str(config["StopInCDS"])]
     logger.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "bam_to_h5", step))
+    if not dry_run:
+        process_utils.run_logged_command(
+            cmd,
+            get_sample_log_file(logs_dir, sample, "bam_to_h5", step))
     step += 1
 
     # Create summary statistics and analyses plots.
@@ -352,13 +369,14 @@ def process_sample(sample,
            "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
     logger.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "generate_stats_figs", step))
+    if not dry_run:
+        process_utils.run_logged_command(
+            cmd,
+            get_sample_log_file(logs_dir, sample, "generate_stats_figs", step))
     logger.info("Finished processing sample: %s", fastq)
 
 
-def collate_tpms(out_dir, samples, r_scripts, logs_dir):
+def collate_tpms(out_dir, samples, r_scripts, logs_dir, dry_run=False):
     """
     Collate TPMs across sample results.
 
@@ -370,6 +388,9 @@ def collate_tpms(out_dir, samples, r_scripts, logs_dir):
     :type r_scripts: str or unicode
     :param logs_dir Log files directory
     :type logs_dir: str or unicode
+    :param dry_run: Don't execute workflow commands (useful for seeing
+    what commands would be executed)
+    :type dry_run: bool
     :raise FileNotFoundError: if Rscript cannot be found
     :raise AssertionError: if collate_tpms.R returns non-zero exit
     code
@@ -381,12 +402,13 @@ def collate_tpms(out_dir, samples, r_scripts, logs_dir):
            "--dir_out=" + out_dir]
     cmd += samples
     logger.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        os.path.join(logs_dir, "collate_tpms.log"))
+    if not dry_run:
+        process_utils.run_logged_command(
+            cmd,
+            os.path.join(logs_dir, "collate_tpms.log"))
 
 
-def prep_riboviz(py_scripts, r_scripts, config_yaml):
+def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
     """
     Run the RiboViz workflow.
 
@@ -405,6 +427,9 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml):
     :type r_scripts: str or unicode
     :param config_yaml: YAML configuration file path
     :type config_yaml: str or unicode
+    :param dry_run: Don't execute workflow commands (useful for seeing
+    what commands would be executed)
+    :type dry_run: bool
     :return: exit code
     :rtype: int
     """
@@ -424,12 +449,13 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml):
 
     try:
         base_logs_dir = config["dir_logs"]
-        if not os.path.exists(base_logs_dir):
-            os.makedirs(base_logs_dir)
         logs_dir = os.path.join(base_logs_dir,
                                 datetime.now().strftime('%Y%m%d-%H%M%S'))
-        if not os.path.exists(logs_dir):
-            os.makedirs(logs_dir)
+        if not dry_run:
+            if not os.path.exists(base_logs_dir):
+                os.makedirs(base_logs_dir)
+            if not os.path.exists(logs_dir):
+                os.makedirs(logs_dir)
     except KeyError as e:
         logging.error("Missing configuration parameter: %s", e.args[0])
         return EXIT_CONFIG_ERROR
@@ -447,17 +473,19 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml):
         orf_index = os.path.join(index_dir,
                                  config["orf_index"])
         if config["build_indices"]:
-            if not os.path.exists(index_dir):
+            if not os.path.exists(index_dir) and not dry_run:
                 os.makedirs(index_dir)
             build_indices(config["rRNA_fasta"],
                           r_rna_index,
                           "r_rna",
-                          logs_dir)
+                          logs_dir,
+                          dry_run)
             logger.info("rRNA index built")
             build_indices(config["orf_fasta"],
                           orf_index,
                           "orf",
-                          logs_dir)
+                          logs_dir,
+                          dry_run)
             logger.info("ORF index built")
     except KeyError as e:
         logging.error("Missing configuration parameter: %s", e.args[0])
@@ -477,9 +505,9 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml):
     except KeyError as e:
         logging.error("Missing configuration parameter: %s", e.args[0])
         return EXIT_CONFIG_ERROR
-    if not os.path.exists(tmp_dir):
+    if not os.path.exists(tmp_dir) and not dry_run:
         os.makedirs(tmp_dir)
-    if not os.path.exists(out_dir):
+    if not os.path.exists(out_dir) and not dry_run:
         os.makedirs(out_dir)
     if ("fq_files" not in config) or \
        (config["fq_files"] is None) or \
@@ -501,7 +529,8 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml):
                            r_scripts,
                            tmp_dir,
                            out_dir,
-                           logs_dir)
+                           logs_dir,
+                           dry_run)
             successes.append(sample)
         except FileNotFoundError as e:
             logging.error("File not found: %s", e.filename)
@@ -517,7 +546,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml):
 
     # Collate TPMs across sample results.
     try:
-        collate_tpms(out_dir, successes, r_scripts, logs_dir)
+        collate_tpms(out_dir, successes, r_scripts, logs_dir, dry_run)
     except Exception:
         logging.error(("Problem collating TPMs"))
         exc_type, _, _ = sys.exc_info()
@@ -531,9 +560,14 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml):
 if __name__ == "__main__":
     # Assume RiboViz Python scripts are peers in same directory.
     py_scripts_arg = os.path.dirname(os.path.realpath(__file__))
-    r_scripts_arg = sys.argv[1]
-    config_yaml_arg = sys.argv[2]
+    sys.argv.pop(0)  # Remove program.
+    dry_run = (sys.argv[0] == "--dry-run")
+    if dry_run:
+        sys.argv.pop(0)
+    r_scripts_arg = sys.argv[0]
+    config_yaml_arg = sys.argv[1]
     exit_code = prep_riboviz(py_scripts_arg,
                              r_scripts_arg,
-                             config_yaml_arg)
+                             config_yaml_arg,
+                             dry_run)
     sys.exit(exit_code)
