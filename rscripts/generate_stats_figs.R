@@ -109,6 +109,7 @@ get_gene_datamat_3end <- function(gene,dataset,fid,gfff,n_buffer=25,n_gene=50) {
   # get data matrix of read counts from n_gene before stop codon to n_buffer after
   # for gene and dataset from hd5 file fid, using UTR3 annotations in gfff
   # if n_buffer bigger than length n_utr3, pad with zeros.
+  # CHECK startpos/off-by-one 
   data_mat_all <- get_gene_datamat(gene,dataset,fid)
   n_all  <- ncol(data_mat_all)
   n_utr3 <- width(gfff[gfff$type=="UTR3" & gfff$Name==gene])
@@ -131,6 +132,7 @@ get_gene_datamat_3end <- function(gene,dataset,fid,gfff,n_buffer=25,n_gene=50) {
 }
 
 tidy_datamat <- function(data_mat,startpos=1,startlen=1) {
+  # CHECK startpos/off-by-one 
   positions <- startpos:(startpos+ncol(data_mat)-1)
   readlengths <- startlen:(startlen+nrow(data_mat)-1)
   data_mat %>%
@@ -140,55 +142,33 @@ tidy_datamat <- function(data_mat,startpos=1,startlen=1) {
     gather(-ReadLen,key = "Pos", value="Counts",convert=FALSE) %>%
     mutate(Pos=as.integer(Pos),Counts=as.integer(Counts))
 }
-tidy_datamat(gene_poslen_counts_5start,startpos=-25,startlen=10)
 
 plot_ribogrid <- function(tidymat) {
+  ggplot(data=tidymat,aes(x=Pos,y=ReadLen,fill=Counts)) +
+    geom_tile() +
+    scale_fill_gradient(low = "white",high="darkblue") +
+    theme_bw() +
+    theme(panel.grid=element_blank()) +
+    labs(x="position of read 5' end", y="read length")
 }
 
-get_gene_datamat_5start(gene="YAL003W",dataset="vignette",fid,gfff=gff) %>%
-tidy_datamat(startpos=-25,startlen=MinReadLen)
+# get_gene_datamat_5start(gene="YAL003W",dataset="vignette",fid,gfff=gff) %>%
+# tidy_datamat(startpos=-25,startlen=MinReadLen) %>%
+#   plot_ribogrid
 # get_gene_datamat_3end(gene="YAL003W",dataset="vignette",fid,gfff=gff) 
 
 
 get_nt_period <- function(fid,gene,dataset,left,right){
+  # previous version; not currently used
   data_mat <- get_gene_datamat(gene,dataset,fid) 
   pos_sum <- colSums(data_mat)  # Position-specific sum of reads of all lengths
   pos_sum <- pos_sum[left:(ncol(data_mat)-right)] # Ignore reads in parts of the buffer region defined by left/right
   return(pos_sum)
 }
 
-n_buffer <- 25  # Number of nts in buffer to be included in the summary table/plot
-n_gene <- 50  # Number of nts in CDS to be included in the summary table/plot
-n_total <- n_buffer+n_gene
-
 # NOTE: Do not use mclapply when accessing H5 data
 
-# Get gene and position specific total counts of all lengths
-
-### OLD code for a fixed BUFFER size
-# gene_sp_pos_counts <- lapply(genes,function(gene){
-#   get_nt_period(fid=fid,
-#                 gene=gene,
-#                 dataset=dataset,
-#                 left=(Buffer-n_buffer),
-#                 right=(Buffer-n_buffer))
-#   })
-
-gene_sp_pos_counts <- lapply(genes,function(gene){
-  utr5 <- width(gff[gff$type=="UTR5" & gff$Name==gene])
-  n_buffer_utr5 <- ifelse(utr5 >= n_buffer,n_buffer,0)
-  utr3 <- width(gff[gff$type=="UTR3" & gff$Name==gene])
-  n_buffer_utr3 <- ifelse(utr3 >= n_buffer,n_buffer,0)
-  nt_period <- get_nt_period(fid=fid,
-                             gene=gene,
-                             dataset=dataset,
-                             left=(utr5-n_buffer_utr5)+1,
-                             right=utr3-n_buffer_utr3)
-  
-  c(rep(0,n_buffer-n_buffer_utr5),
-    nt_period,
-    rep(0,n_buffer-n_buffer_utr3))
-})
+# Get gene and position specific total counts for all read lengths
 
 gene_poslen_counts_5start <- 
   lapply(genes,
@@ -200,6 +180,13 @@ gene_poslen_counts_5start <-
          n_gene=50) %>%
   Reduce("+", .) # Reduce is a BiocGenerics, there is a purrr alternative
 
+ribogrid_5start <- 
+  gene_poslen_counts_5start %>%
+  tidy_datamat(startpos=-24,startlen=10) %>%
+  plot_ribogrid %>%
+  ggsave(filename = paste0(out_prefix,"_startcodon_ribogrid.pdf"),
+      width=6,height=3)
+
 gene_poslen_counts_3end <- 
   lapply(genes,
          get_gene_datamat_3end,
@@ -210,33 +197,32 @@ gene_poslen_counts_3end <-
          n_gene=50) %>%
   Reduce("+", .) # Reduce is a BiocGenerics, there is a purrr alternative
 
-x <- lapply(gene_sp_pos_counts,head,n=n_total) # Subset reads mapping to a fixed region across genes (5')
-y <- lapply(gene_sp_pos_counts,tail,n=n_total) # Subset reads mapping to a fixed region across genes (3')
-a <- sapply(x,length)
-x <- x[a==n_total]
-y <- y[a==n_total]
+# summarize by adding different read lengths
+gene_pos_counts_5start <- gene_poslen_counts_5start %>%
+  tidy_datamat(startpos=-24,startlen=10) %>%
+  group_by(Pos) %>%
+  summarize(Counts=sum(Counts))
 
-lsum <- colSums(matrix(unlist(x),byrow=T,nrow=length(x))) # Position-specific sums of reads (5')
-rsum <- colSums(matrix(unlist(y),byrow=T,nrow=length(x))) # Position-specific sums of reads (3')
+gene_pos_counts_3end <- gene_poslen_counts_3end %>%
+  tidy_datamat(startpos=-49,startlen=10) %>%
+  group_by(Pos) %>%
+  summarize(Counts=sum(Counts))
 
-# Create a dataframe to store the output for plots/analyses
-out_data <- data.frame(
-  Pos = c(seq(-n_buffer+1,n_gene,1),seq(-n_gene+1,n_buffer,1)),
-  Counts = c(lsum,rsum),
-  End = factor(rep(c("5'","3'"),each=n_total),levels=c("5'","3'"))
-)
+gene_pos_counts_bothends <- bind_rows(
+  gene_pos_counts_5start %>% mutate(End="5'"),
+  gene_pos_counts_3end %>% mutate(End="3'") 
+) %>%
+  mutate(End = factor(End, levels = c("5'", "3'")) )
 
 # Plot
-out_data$End <- factor(out_data$End, levels = c("5'", "3'"))
-nt_period_plot <- ggplot(out_data, aes(x=Pos, y=Counts)) + 
+nt_period_plot <- ggplot(gene_pos_counts_bothends, aes(x=Pos, y=Counts)) + 
   geom_line() + 
   facet_wrap(~End, scales="free") + 
   labs(x = "Nucleotide Position", y = "Read counts")
 
-
 # Save plot and file
 ggsave(nt_period_plot, filename = paste0(out_prefix,"_3nt_periodicity.pdf"))
-write.table(out_data,file=paste0(out_prefix,"_3nt_periodicity.tsv"),sep="\t",row=F,col=T,quote=F)
+write.table(gene_pos_counts_bothends,file=paste0(out_prefix,"_3nt_periodicity.tsv"),sep="\t",row=F,col=T,quote=F)
 
 print("Completed: Check for 3nt periodicity")
 
