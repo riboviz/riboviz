@@ -8,6 +8,7 @@ suppressMessages(library(RcppRoll, quietly = T))
 suppressMessages(library(ggplot2, quietly = T))
 suppressMessages(library(tidyr, quietly = T))
 suppressMessages(library(dplyr, quietly = T))
+suppressMessages(library(magrittr, quietly = T))
 
 # define input options for optparse package
 option_list <- list( 
@@ -129,14 +130,25 @@ get_gene_datamat_3end <- function(gene,dataset,fid,gfff,n_buffer=25,n_gene=50) {
   return(  cbind(data_mat_3end, zeropad3_mat) )
 }
 
-tidy_datamat <- function(data_mat,startpos=1) {
+tidy_datamat <- function(data_mat,startpos=1,startlen=1) {
+  positions <- startpos:(startpos+ncol(data_mat)-1)
+  readlengths <- startlen:(startlen+nrow(data_mat)-1)
+  data_mat %>%
+    set_colnames(positions) %>%
+    as_tibble %>%
+    mutate(ReadLen=readlengths) %>%
+    gather(-ReadLen,key = "Pos", value="Counts",convert=FALSE) %>%
+    mutate(Pos=as.integer(Pos),Counts=as.integer(Counts))
 }
+tidy_datamat(gene_poslen_counts_5start,startpos=-25,startlen=10)
 
 plot_ribogrid <- function(tidymat) {
 }
 
-# get_gene_datamat_5start(gene="YAL003W",dataset="vignette",fid,gfff=gff)
-# get_gene_datamat_3end(gene="YAL003W",dataset="vignette",fid,gfff=gff)
+get_gene_datamat_5start(gene="YAL003W",dataset="vignette",fid,gfff=gff) %>%
+tidy_datamat(startpos=-25,startlen=MinReadLen)
+# get_gene_datamat_3end(gene="YAL003W",dataset="vignette",fid,gfff=gff) 
+
 
 get_nt_period <- function(fid,gene,dataset,left,right){
   data_mat <- get_gene_datamat(gene,dataset,fid) 
@@ -177,6 +189,26 @@ gene_sp_pos_counts <- lapply(genes,function(gene){
     nt_period,
     rep(0,n_buffer-n_buffer_utr3))
 })
+
+gene_poslen_counts_5start <- 
+  lapply(genes,
+         get_gene_datamat_5start,
+         dataset=dataset,
+         fid=fid,
+         gfff=gff,
+         n_buffer=25,
+         n_gene=50) %>%
+  Reduce("+", .) # Reduce is a BiocGenerics, there is a purrr alternative
+
+gene_poslen_counts_3end <- 
+  lapply(genes,
+         get_gene_datamat_3end,
+         dataset=dataset,
+         fid=fid,
+         gfff=gff,
+         n_buffer=25,
+         n_gene=50) %>%
+  Reduce("+", .) # Reduce is a BiocGenerics, there is a purrr alternative
 
 x <- lapply(gene_sp_pos_counts,head,n=n_total) # Subset reads mapping to a fixed region across genes (5')
 y <- lapply(gene_sp_pos_counts,tail,n=n_total) # Subset reads mapping to a fixed region across genes (3')
