@@ -91,6 +91,7 @@ EXIT_COLLATION_ERROR = 5
 
 logging_utils.configure_logging()
 LOGGER = logging.getLogger(__name__)
+""" Logger """
 
 
 def build_indices(fasta, ht_prefix, file_type, logs_dir, cmd_file,
@@ -118,11 +119,9 @@ def build_indices(fasta, ht_prefix, file_type, logs_dir, cmd_file,
     """
     cmd = ["hisat2-build", fasta, ht_prefix]
     LOGGER.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        os.path.join(logs_dir, "hisat2_build_" + file_type + ".log"),
-        cmd_file,
-        dry_run)
+    log_file = os.path.join(logs_dir, "hisat2_build_%s.log" % file_type)
+    LOGGER.info("Log file: %s", log_file)
+    process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
 
 
 def get_sample_log_file(logs_dir, sample, step, index):
@@ -141,9 +140,7 @@ def get_sample_log_file(logs_dir, sample, step, index):
     :return: file name
     :rtype: str or unicode
     """
-    return os.path.join(
-        logs_dir,
-        sample + ("_%02d_" % index) + step + ".log")
+    return os.path.join(logs_dir, "%s_%02d_%s.log" % (sample, index, step))
 
 
 def process_sample(sample,
@@ -218,11 +215,9 @@ def process_sample(sample,
         # be requested.
         cmd += ["-j", str(0)]
     LOGGER.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "cut_adapt", step),
-        cmd_file,
-        dry_run)
+    log_file = get_sample_log_file(logs_dir, sample, "cutadapt", step)
+    LOGGER.info("Log file: %s", log_file)
+    process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
     # Map reads to rRNA.
@@ -235,11 +230,9 @@ def process_sample(sample,
            "--un", non_r_rna_trim_fq, "-x", r_rna_index,
            "-S", r_rna_map_sam, "-U", trim_fq]
     LOGGER.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "hisat2_rrna", step),
-        cmd_file,
-        dry_run)
+    log_file = get_sample_log_file(logs_dir, sample, "hisat2_rrna", step)
+    LOGGER.info("Log file: %s", log_file)
+    process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
     # Map to ORFs with (mostly) default settings, up to 2 alignments.
@@ -254,11 +247,9 @@ def process_sample(sample,
            "-x", orf_index, "-S", orf_map_sam,
            "-U", non_r_rna_trim_fq]
     LOGGER.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "hisat2_orf", step),
-        cmd_file,
-        dry_run)
+    log_file = get_sample_log_file(logs_dir, sample, "hisat2_orf", step)
+    LOGGER.info("Log file: %s", log_file)
+    process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
     # Trim 5' mismatched nt and remove reads with >1 mismatch.
@@ -271,11 +262,9 @@ def process_sample(sample,
            "-mm", "2", "-in", orf_map_sam,
            "-out", orf_map_sam_clean]
     LOGGER.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "trim_5p_mismatch", step),
-        cmd_file,
-        dry_run)
+    log_file = get_sample_log_file(logs_dir, sample, "trim_5p_mismatch", step)
+    LOGGER.info("Log file: %s", log_file)
+    process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
     # Convert SAM (text) output to BAM (compressed binary) and sort on
@@ -289,10 +278,15 @@ def process_sample(sample,
     LOGGER.info("Running: %s | %s",
                 utils.list_to_str(cmd_view),
                 utils.list_to_str(cmd_sort))
+    log_file = get_sample_log_file(logs_dir,
+                                   sample,
+                                   "samtools_view_sort",
+                                   step)
+    LOGGER.info("Log file: %s", log_file)
     process_utils.run_logged_pipe_command(
         cmd_view,
         cmd_sort,
-        get_sample_log_file(logs_dir, sample, "samtools_view_sort", step),
+        log_file,
         cmd_file,
         dry_run)
     step += 1
@@ -300,11 +294,9 @@ def process_sample(sample,
     # Index BAM file.
     cmd = ["samtools", "index", sample_out_bam]
     LOGGER.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "samtools_index", step),
-        cmd_file,
-        dry_run)
+    log_file = get_sample_log_file(logs_dir, sample, "samtools_index", step)
+    LOGGER.info("Log file: %s", log_file)
+    process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
     if config["make_bedgraph"]:
@@ -316,11 +308,13 @@ def process_sample(sample,
         LOGGER.info("Running: %s > %s",
                     utils.list_to_str(cmd),
                     plus_bedgraph)
+        log_file = get_sample_log_file(
+            logs_dir, sample, "bedtools_genome_cov_plus", step)
+        LOGGER.info("Log file: %s", log_file)
         process_utils.run_logged_redirect_command(
             cmd,
             plus_bedgraph,
-            get_sample_log_file(
-                logs_dir, sample, "bedtools_genome_cov_plus", step),
+            log_file,
             cmd_file,
             dry_run)
         step += 1
@@ -331,11 +325,13 @@ def process_sample(sample,
         LOGGER.info("Running: %s > %s",
                     utils.list_to_str(cmd),
                     minus_bedgraph)
+        log_file = get_sample_log_file(
+            logs_dir, sample, "bedtools_genome_cov_minus", step)
+        LOGGER.info("Log file: %s", log_file)
         process_utils.run_logged_redirect_command(
             cmd,
             minus_bedgraph,
-            get_sample_log_file(
-                logs_dir, sample, "bedtools_genome_cov_minus", step),
+            log_file,
             cmd_file,
             dry_run)
         step += 1
@@ -362,11 +358,9 @@ def process_sample(sample,
            "--ribovizGFF=" + str(config["ribovizGFF"]),
            "--StopInCDS=" + str(config["StopInCDS"])]
     LOGGER.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "bam_to_h5", step),
-        cmd_file,
-        dry_run)
+    log_file = get_sample_log_file(logs_dir, sample, "bam_to_h5", step)
+    LOGGER.info("Log file: %s", log_file)
+    process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
     # Create summary statistics and analyses plots.
@@ -390,11 +384,12 @@ def process_sample(sample,
            "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
     LOGGER.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        get_sample_log_file(logs_dir, sample, "generate_stats_figs", step),
-        cmd_file,
-        dry_run)
+    log_file = get_sample_log_file(logs_dir,
+                                   sample,
+                                   "generate_stats_figs",
+                                   step)
+    LOGGER.info("Log file: %s", log_file)
+    process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     LOGGER.info("Finished processing sample: %s", fastq)
 
 
@@ -427,11 +422,8 @@ def collate_tpms(out_dir, samples, r_scripts, logs_dir, cmd_file,
            "--dir_out=" + out_dir]
     cmd += samples
     LOGGER.info("Running: %s", utils.list_to_str(cmd))
-    process_utils.run_logged_command(
-        cmd,
-        os.path.join(logs_dir, "collate_tpms.log"),
-        cmd_file,
-        dry_run)
+    log_file = os.path.join(logs_dir, "collate_tpms.log")
+    process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
 
 
 def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):

@@ -247,7 +247,7 @@ Log files for each processing step will be placed in a timestamped sub-directory
 collate_tpms.log
 hisat2_build_orf.log
 hisat2_build_r_rna.log
-WT3AT_01_cut_adapt.log
+WT3AT_01_cutadapt.log
 WT3AT_02_hisat2_rrna.log
 WT3AT_03_hisat2_orf.log
 WT3AT_04_trim_5p_mismatch.log
@@ -257,7 +257,7 @@ WT3AT_07_bedtools_genome_cov_plus.log
 WT3AT_08_bedtools_genome_cov_minus.log
 WT3AT_09_bam_to_h5.log
 WT3AT_10_generate_stats_figs.log
-WTnone_01_cut_adapt.log
+WTnone_01_cutadapt.log
 WTnone_02_hisat2_rrna.log
 WTnone_03_hisat2_orf.log
 WTnone_04_trim_5p_mismatch.log
