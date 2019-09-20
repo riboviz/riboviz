@@ -239,7 +239,7 @@ $ echo ${PIPESTATUS[0]}
 
 If all went well an exit code of 0 will be returned.
 
-Information on the key steps during processing is displayed. This is also added to a log file in the current directory e.g. `riboviz.log`. 
+Information on the key steps during processing is displayed. More detailed information, including the causes of any errors, is also added to a log file in the current directory e.g. `riboviz.log`. 
 
 Log files for each processing step will be placed in a timestamped sub-directory of `vignette/logs/` e.g. `vignette/logs/20190919-070625`. After a successful run, the log files would be:
 
