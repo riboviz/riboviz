@@ -239,7 +239,7 @@ $ echo ${PIPESTATUS[0]}
 
 If all went well an exit code of 0 will be returned.
 
-Information on the key steps during processing is displayed. This is also added to a timestamped log file in the current directory e.g. `riboviz-20190919-064919-968064.log`. 
+Information on the key steps during processing is displayed. This is also added to a log file in the current directory e.g. `riboviz.log`. 
 
 Log files for each processing step will be placed in a timestamped sub-directory of `vignette/logs/` e.g. `vignette/logs/20190919-070625`. After a successful run, the log files would be:
 
@@ -442,6 +442,24 @@ You might also want to do this if you have run the vignette with a missing R pac
 ## Using generated hisat2 indices
 
 If you have already generated hisat2 indices for the same organism and annotation, set `build_indices` in the configuration file to `FALSE` and use the same index directory (`dir_index`) that you built in to.
+
+---
+
+## Customising logging
+
+You can customise logging by editing the file `riboviz/logging.yml`
+
+If you want `riboviz.log` to include a timestamp (e.g. `riboviz.20190920-005529-644421.log`) then edit this file and replace:
+
+```yaml
+  handlers: [console, file_handler]
+```
+
+with:
+
+```yaml  
+  handlers: [console, timestamp_file_handler]
+```
 
 ---
 
