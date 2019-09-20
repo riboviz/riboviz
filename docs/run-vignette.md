@@ -445,6 +445,45 @@ If you have already generated hisat2 indices for the same organism and annotatio
 
 ---
 
+## View commands submitted to bash
+
+`prep_riboviz.py` extracts configuration information from its configuration file and uses this information to execute the RiboViz operations, which are invocations of RiboViz-specific and third-party tools. These operations are invoked as bash commands submitted by `prep_riboviz.py`. To help with debugging, these commands are output into a command file (default name `prep_riboviz.sh`).
+
+The name and location of this command file can be changed by editing the `cmd_file` parameter within the configuration file (e.g. within `vignette/vignette_config.yaml`):
+
+```yaml
+cmd_file: prep_riboviz.sh # File to log	bash commands
+```
+
+The command file can be run standalone, for example:
+
+```yaml
+bash prep_riboviz.sh
+```
+
+---
+
+## See what commands would be executed
+
+`prep_riboviz.py` supports a `--dry-run` command-line parameter. If present, the configuration will be parsed and the commands to execute RiboViz-specific and third-party tools via bash will be created, and logged into the command file ((described above), but they will not be executed.
+
+This feature be useful for seeing what commands will be run without actually running them.
+
+* Python 3:
+
+```console
+$ python -m riboviz.tools.prep_riboviz --dry-run rscripts/ vignette/vignette_config.yaml
+```
+
+* Python 2 or 3:
+
+```console
+$ PYTHONPATH=. python riboviz/tools/prep_riboviz.py --dry-run rscripts/ \
+    vignette/vignette_config.yaml
+```
+
+---
+
 ## Customising logging
 
 You can customise logging by editing the file `riboviz/logging.yml`
