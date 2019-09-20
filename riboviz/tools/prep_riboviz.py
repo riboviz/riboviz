@@ -117,7 +117,8 @@ def build_indices(fasta, ht_prefix, file_type, logs_dir, cmd_file,
     :param dry_run: Don't execute workflow commands (useful for seeing
     what commands would be executed)
     :type dry_run: bool
-    :raise FileNotFoundError: if hisat2-build cannot be found
+    :raise OSError: if hisat2-build cannot be found (Python 2)
+    :raise FileNotFoundError: if hisat2-build cannot be found (Python 3)
     :raise AssertionError: if hisat2-build returns non-zero exit
     code
     """
@@ -187,8 +188,10 @@ def process_sample(sample,
     :param dry_run: Don't execute workflow commands (useful for seeing
     what commands would be executed)
     :type dry_run: bool
+    :raise IOError: if fastq cannot be found (Python 2)
+    :raise OSError: if a third-party tool cannot be found (Python 2)
     :raise FileNotFoundError: if fastq or a third-party tool cannot be
-    found
+    found (Python 3)
     :raise AssertionError: if invocation of a third-party tool returns
     non-zero exit code
     :raise KeyError: if config is missing required configuration
@@ -197,9 +200,9 @@ def process_sample(sample,
     step = 1
 
     if not os.path.exists(fastq):
-        raise FileNotFoundError(errno.ENOENT,
-                                os.strerror(errno.ENOENT),
-                                fastq)
+        raise IOError(errno.ENOENT,
+                      os.strerror(errno.ENOENT),
+                      fastq)
     LOGGER.info("Processing file: %s", fastq)
 
     if "nprocesses" not in config:
@@ -415,7 +418,8 @@ def collate_tpms(out_dir, samples, r_scripts, logs_dir, cmd_file,
     :param dry_run: Don't execute workflow commands (useful for seeing
     what commands would be executed)
     :type dry_run: bool
-    :raise FileNotFoundError: if Rscript cannot be found
+    :raise OSError: if Rscript cannot be found (Python 2)
+    :raise FileNotFoundError: if Rscript cannot be found (Python 3)
     :raise AssertionError: if collate_tpms.R returns non-zero exit
     code
     """
@@ -462,7 +466,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
     try:
         with open(config_yaml, 'r') as f:
             config = yaml.load(f, yaml.SafeLoader)
-    except FileNotFoundError as e:
+    except IOError as e:
         logging.error("File not found: %s", e.filename)
         return EXIT_CONFIG_ERROR
     except Exception:
@@ -567,7 +571,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
                            cmd_file,
                            dry_run)
             successes.append(sample)
-        except FileNotFoundError as e:
+        except IOError as e:
             logging.error("File not found: %s", e.filename)
         except Exception:
             logging.error("Problem processing sample: %s", sample)

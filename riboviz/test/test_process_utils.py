@@ -102,7 +102,9 @@ def test_run_command_log_out_err(log_out, log_err):
     lines = [line.rstrip('\n') for line in open(log_err)]
     assert len(lines) == 1
     assert lines[0] == \
-        "ls: cannot access 'no-such-file.txt': No such file or directory"
+        "ls: cannot access 'no-such-file.txt': No such file or directory" \
+        or lines[0] == \
+        "ls: cannot access no-such-file.txt: No such file or directory"
 
 
 def test_run_command_log_out_error_one_file(log_out):
@@ -122,7 +124,9 @@ def test_run_command_log_out_error_one_file(log_out):
     lines = [line.rstrip('\n') for line in open(log_out)]
     assert len(lines) == 3
     assert lines[0] == \
-        "ls: cannot access 'no-such-file.txt': No such file or directory"
+        "ls: cannot access 'no-such-file.txt': No such file or directory" \
+        or lines[0] == \
+        "ls: cannot access no-such-file.txt: No such file or directory"
     assert lines[1] == path  # Output from ls
     assert lines[2] == path  # Output from ls
 
@@ -373,7 +377,9 @@ def test_run_logged_command(log_out):
     lines = [line.rstrip('\n') for line in open(log_out)]
     assert len(lines) == 3
     assert lines[0] == \
-        "ls: cannot access 'no-such-file.txt': No such file or directory"
+        "ls: cannot access 'no-such-file.txt': No such file or directory" \
+        or lines[0] == \
+        "ls: cannot access no-such-file.txt: No such file or directory"
     assert lines[1] == path  # Output from ls
     assert lines[2] == path  # Output from ls
 
@@ -397,7 +403,9 @@ def test_run_logged_command_cmd_file(log_out, cmd_file):
     lines = [line.rstrip('\n') for line in open(log_out)]
     assert len(lines) == 3
     assert lines[0] == \
-        "ls: cannot access 'no-such-file.txt': No such file or directory"
+        "ls: cannot access 'no-such-file.txt': No such file or directory" \
+        or lines[0] == \
+        "ls: cannot access no-such-file.txt: No such file or directory"
     assert lines[1] == path  # Output from ls
     assert lines[2] == path  # Output from ls
     with open(cmd_file) as f:
