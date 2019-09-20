@@ -3,6 +3,7 @@ subprocess-related utilities.
 """
 import subprocess
 import sys
+from riboviz import utils
 
 
 def run_command(cmd, out=sys.stdout, err=sys.stderr):
@@ -84,26 +85,42 @@ def run_pipe_command(cmd1, cmd2, out=sys.stdout, err=sys.stderr):
                             % (cmd1, cmd2, exit_code))
 
 
-def run_logged_command(cmd, log_file):
+def run_logged_command(cmd, log_file, cmd_file=None, dry_run=False):
     """
     Helper function to run shell command and capture stdout and stderr
-    in a log file.
+    in a log file. The command submitted to the shell is also
+    recorded, if cmd_file is not None.
 
     :param cmd: Commnand to run and its arguments
     :type cmd: list(str or unicode)
     :param log_file: File to log stdout and stderr.
     :type log_file: str or unicode
+    :param cmd_file: File to log command to
+    :type cmd_file: str or unicode
+    :param dry_run: Do not submit command to shell - use with cmd_file
+    to log commands that would be run
+    :type dry_run: bool
     :raise FileNotFoundError: if the command being run cannot be found
     :raise AssertionError: if the command returns a non-zero exit code
     """
+    if cmd_file is not None:
+        with open(cmd_file, "a") as f:
+            f.write(utils.list_to_str(cmd) + "\n")
+    if dry_run:
+        return
     with open(log_file, "a") as f:
         run_command(cmd, f, f)
 
 
-def run_logged_redirect_command(cmd, out, log_file):
+def run_logged_redirect_command(cmd,
+                                out,
+                                log_file,
+                                cmd_file=None,
+                                dry_run=False):
     """
     Helper function to run shell command and redirect output to a file
-    and capture stderr in a log file.
+    and capture stderr in a log file. The command submitted to the
+    shell is also recorded, if cmd_file is not None.
 
     :param cmd: Commnand to run and its arguments
     :type cmd: list(str or unicode)
@@ -111,17 +128,32 @@ def run_logged_redirect_command(cmd, out, log_file):
     :type out: str or unicode
     :param log_file: File to log stdout and stderr.
     :type log_file: str or unicode
+    :param cmd_file: File to log command to
+    :type cmd_file: str or unicode
+    :param dry_run: Do not submit command to shell - use with cmd_file
+    to log commands that would be run
+    :type dry_run: bool
     :raise FileNotFoundError: if the command being run cannot be found
     :raise AssertionError: if the command returns a non-zero exit code
     """
+    if cmd_file is not None:
+        with open(cmd_file, "a") as f:
+            f.write(("%s > %s\n" % (utils.list_to_str(cmd), out)))
+    if dry_run:
+        return
     with open(log_file, "a") as f:
         run_redirect_command(cmd, out, f)
 
 
-def run_logged_pipe_command(cmd1, cmd2, log_file):
+def run_logged_pipe_command(cmd1,
+                            cmd2,
+                            log_file,
+                            cmd_file=None,
+                            dry_run=False):
     """
     Helper function to run shell command and pipe output into another
-    and capture stdout and stderr in a log file.
+    and capture stdout and stderr in a log file. The command submitted
+    to the shell is also recorded, if cmd_file is not None.
 
     :param cmd: Commnand to run and its arguments
     :type cmd: list(str or unicode)
@@ -129,53 +161,19 @@ def run_logged_pipe_command(cmd1, cmd2, log_file):
     :type cmd: list(str or unicode)
     :param log_file: File to log stdout and stderr.
     :type log_file: str or unicode
+    :param cmd_file: File to log command to
+    :type cmd_file: str or unicode
+    :param dry_run: Do not submit command to shell - use with cmd_file
+    to log commands that would be run
+    :type dry_run: bool
     :raise FileNotFoundError: if the commands being run cannot be found
     :raise AssertionError: if the commands returns a non-zero exit code
     """
+    if cmd_file is not None:
+        with open(cmd_file, "a") as f:
+            f.write(("%s | %s\n" % (utils.list_to_str(cmd1),
+                                    utils.list_to_str(cmd2))))
+    if dry_run:
+        return
     with open(log_file, "a") as f:
         run_pipe_command(cmd1, cmd2, f, f)
-
-
-def log_command(cmd, cmd_file):
-    """
-    Helper function to record a shell command to a file.
-
-    :param cmd: Commnand to run and its arguments
-    :type cmd: list(str or unicode)
-    :param cmd_file: File to log command to
-    :type cmd_file: str or unicode
-    """
-    with open(cmd_file, "a") as f:
-        f.write(" ".join(cmd) + "\n")
-
-
-def log_redirect_command(cmd, out, cmd_file):
-    """
-    Helper function to record to a file a shell command that redirects
-    its output.
-
-    :param cmd: Commnand to run and its arguments
-    :type cmd: list(str or unicode)
-    :param out: Output file name
-    :type out: str or unicode
-    :param cmd_file: File to log command to, if not None
-    :type cmd_file: str or unicode
-    """
-    with open(cmd_file, "a") as f:
-        f.write(("%s > %s\n" % (" ".join(cmd), out)))
-
-
-def log_pipe_command(cmd1, cmd2, cmd_file=None):
-    """
-    Helper function to record to a file a shell command that pipes
-    its output to another shell command.
-
-    :param cmd1: Commnand to run and its arguments
-    :type cmd1: list(str or unicode)
-    :param cmd2: Commnand to run and its arguments
-    :type cmd2: list(str or unicode)
-    :param cmd_file: File to log command to, if not None
-    :type cmd_file: str or unicode
-    """
-    with open(cmd_file, "a") as f:
-        f.write(("%s | %s\n" % (" ".join(cmd1), " ".join(cmd2))))
