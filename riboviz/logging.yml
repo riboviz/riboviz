@@ -29,4 +29,4 @@ handlers:
     delay: True
 root:
   level: INFO
-  handlers: [console, file_handler]
+  handlers: [file_handler]
