@@ -19,6 +19,7 @@ handlers:
     filename: riboviz.log
     encoding: utf8
     delay: True
+    mode: w
   timestamp_file_handler:
     class: riboviz.logging_utils.TimestampedFileHandler
     level: INFO
