@@ -221,18 +221,15 @@ Run `prep_riboviz.py`:
 * Python 3:
 
 ```console
-$ python -u -m riboviz.tools.prep_riboviz rscripts/ \
-    vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
+$ python -m riboviz.tools.prep_riboviz rscripts/ vignette/vignette_config.yaml
 ```
 
 * Python 2 or 3:
 
 ```console
-$ PYTHONPATH=. python -u riboviz/tools/prep_riboviz.py rscripts/ \
-    vignette/vignette_config.yaml 2>&1 | tee vignette-out.txt
+$ PYTHONPATH=. python riboviz/tools/prep_riboviz.py rscripts/ \
+    vignette/vignette_config.yaml
 ```
-
-The part of the command, `2>&1 | tee vignette-out.txt`, allows for the messages that `prep_riboviz.py` prints to be both printed onto the screen and also printed into the `vignette-out.txt` file so you can inspect it later. This can be useful if any problems arise.
 
 The exit code can be checked by running
 
@@ -242,26 +239,47 @@ $ echo ${PIPESTATUS[0]}
 
 If all went well an exit code of 0 will be returned.
 
+Information on the key steps during processing is displayed. More detailed information, including the causes of any errors, is also added to a log file in the current directory e.g. `riboviz.log`. 
+
+Log files for each processing step will be placed in a timestamped sub-directory of `vignette/logs/` e.g. `vignette/logs/20190919-070625`. After a successful run, the log files would be:
+
+```console
+collate_tpms.log
+hisat2_build_orf.log
+hisat2_build_r_rna.log
+WT3AT_01_cutadapt.log
+WT3AT_02_hisat2_rrna.log
+WT3AT_03_hisat2_orf.log
+WT3AT_04_trim_5p_mismatch.log
+WT3AT_05_samtools_view_sort.log
+WT3AT_06_samtools_index.log
+WT3AT_07_bedtools_genome_cov_plus.log
+WT3AT_08_bedtools_genome_cov_minus.log
+WT3AT_09_bam_to_h5.log
+WT3AT_10_generate_stats_figs.log
+WTnone_01_cutadapt.log
+WTnone_02_hisat2_rrna.log
+WTnone_03_hisat2_orf.log
+WTnone_04_trim_5p_mismatch.log
+WTnone_05_samtools_view_sort.log
+WTnone_06_samtools_index.log
+WTnone_07_bedtools_genome_cov_plus.log
+WTnone_08_bedtools_genome_cov_minus.log
+WTnone_09_bam_to_h5.log
+WTnone_10_generate_stats_figs.log
+```
+
+You should regularly delete the log files, to prevent them from using up your disk space.
+
 ### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
 
 If you see:
 
 ```
-File vignette/input/example_missing_file.fastq.gz not found
+File not found: vignette/input/example_missing_file.fastq.gz
 ```
 
 then this is expected and can be ignored. The vignette includes an attempt to analyse a missing input file, for testing, which is expected to fail.
-
-### Troubleshooting: `vignette/output/NotHere_tpms.tsv does not exist, returning empty list`
-
-If you see:
-
-```
-In get_tpms(paste0(ddir, "/", fstem, fend), ORFs) :
-  vignette/output/NotHere_tpms.tsv does not exist, returning empty list
-```
-
-then this is expected and can be ignored. This arises due to the missing input file described above which is used for testing.
 
 ### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
 
@@ -290,7 +308,7 @@ Edit `riboviz/tools/prep_riboviz.py` and change the lines:
 
 ```python
     cmd_sort = ["samtools", "sort", "-@", str(nprocesses),
-                "-O", "bam", "-o", fn_out + ".bam", "-"]
+                "-O", "bam", "-o", sample_out_bam, "-"]
 ```
 
 to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
@@ -298,7 +316,7 @@ to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
 ```python
     cmd_sort = ["samtools", "sort", "-@", str(nprocesses),
                 "-m", "256M",
-                "-O", "bam", "-o", fn_out + ".bam", "-"]
+                "-O", "bam", "-o", sample_out_bam, "-"]
 ```
 
 ### Check the expected output files
@@ -424,6 +442,63 @@ You might also want to do this if you have run the vignette with a missing R pac
 ## Using generated hisat2 indices
 
 If you have already generated hisat2 indices for the same organism and annotation, set `build_indices` in the configuration file to `FALSE` and use the same index directory (`dir_index`) that you built in to.
+
+---
+
+## View commands submitted to bash
+
+`prep_riboviz.py` extracts configuration information from its configuration file and uses this information to execute the RiboViz operations, which are invocations of RiboViz-specific and third-party tools. These operations are invoked as bash commands submitted by `prep_riboviz.py`. To help with debugging, these commands are output into a command file (default name `prep_riboviz.sh`).
+
+The name and location of this command file can be changed by editing the `cmd_file` parameter within the configuration file (e.g. within `vignette/vignette_config.yaml`):
+
+```yaml
+cmd_file: prep_riboviz.sh # File to log	bash commands
+```
+
+The command file can be run standalone, for example:
+
+```yaml
+bash prep_riboviz.sh
+```
+
+---
+
+## See what commands would be executed
+
+`prep_riboviz.py` supports a `--dry-run` command-line parameter. If present, the configuration will be parsed and the commands to execute RiboViz-specific and third-party tools via bash will be created, and logged into the command file ((described above), but they will not be executed.
+
+This feature be useful for seeing what commands will be run without actually running them.
+
+* Python 3:
+
+```console
+$ python -m riboviz.tools.prep_riboviz --dry-run rscripts/ vignette/vignette_config.yaml
+```
+
+* Python 2 or 3:
+
+```console
+$ PYTHONPATH=. python riboviz/tools/prep_riboviz.py --dry-run rscripts/ \
+    vignette/vignette_config.yaml
+```
+
+---
+
+## Customising logging
+
+You can customise logging by editing the file `riboviz/logging.yaml`
+
+If you want `riboviz.log` to include a timestamp (e.g. `riboviz.20190920-005529-644421.log`) then edit this file and replace:
+
+```yaml
+  handlers: [console, file_handler]
+```
+
+with:
+
+```yaml  
+  handlers: [console, timestamp_file_handler]
+```
 
 ---
 
