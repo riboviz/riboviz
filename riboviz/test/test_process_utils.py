@@ -5,6 +5,7 @@ import os.path
 import tempfile
 import pytest
 from riboviz import process_utils
+from riboviz import utils
 
 
 @pytest.fixture(scope="function")
@@ -50,6 +51,21 @@ def redirect():
         os.remove(redirect_file)
 
 
+@pytest.fixture(scope="function")
+def cmd_file():
+    """
+    Create a temporary file for commands submitted to the shell and
+    delete when done.
+
+    :return: file
+    :rtype: str or unicdo(dict, str or unicode)
+    """
+    _, cmd_file = tempfile.mkstemp(prefix="cmd_", suffix=".txt")
+    yield cmd_file
+    if os.path.exists(cmd_file):
+        os.remove(cmd_file)
+
+
 def test_run_command_stdout_stderr():
     """
     Test writing output and errors to stdout and stderr. This
@@ -86,7 +102,9 @@ def test_run_command_log_out_err(log_out, log_err):
     lines = [line.rstrip('\n') for line in open(log_err)]
     assert len(lines) == 1
     assert lines[0] == \
-        "ls: cannot access 'no-such-file.txt': No such file or directory"
+        "ls: cannot access 'no-such-file.txt': No such file or directory" \
+        or lines[0] == \
+        "ls: cannot access no-such-file.txt: No such file or directory"
 
 
 def test_run_command_log_out_error_one_file(log_out):
@@ -106,7 +124,9 @@ def test_run_command_log_out_error_one_file(log_out):
     lines = [line.rstrip('\n') for line in open(log_out)]
     assert len(lines) == 3
     assert lines[0] == \
-        "ls: cannot access 'no-such-file.txt': No such file or directory"
+        "ls: cannot access 'no-such-file.txt': No such file or directory" \
+        or lines[0] == \
+        "ls: cannot access no-such-file.txt: No such file or directory"
     assert lines[1] == path  # Output from ls
     assert lines[2] == path  # Output from ls
 
@@ -357,9 +377,63 @@ def test_run_logged_command(log_out):
     lines = [line.rstrip('\n') for line in open(log_out)]
     assert len(lines) == 3
     assert lines[0] == \
-        "ls: cannot access 'no-such-file.txt': No such file or directory"
+        "ls: cannot access 'no-such-file.txt': No such file or directory" \
+        or lines[0] == \
+        "ls: cannot access no-such-file.txt: No such file or directory"
     assert lines[1] == path  # Output from ls
     assert lines[2] == path  # Output from ls
+
+
+def test_run_logged_command_cmd_file(log_out, cmd_file):
+    """
+    Test writing output and errors to a single log file with shell
+    commands written to a command file.
+
+    :param log_out: Output log file (via test fixture)
+    :type log_out: str or unicode
+    :param cmd_file: Command file (via test fixture)
+    :type cmd_file: str or unicode
+    """
+    path = os.path.realpath(__file__)
+    cmd = ["ls", path, "no-such-file.txt", path]
+    try:
+        process_utils.run_logged_command(cmd, log_out, cmd_file)
+    except AssertionError:
+        pass
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 3
+    assert lines[0] == \
+        "ls: cannot access 'no-such-file.txt': No such file or directory" \
+        or lines[0] == \
+        "ls: cannot access no-such-file.txt: No such file or directory"
+    assert lines[1] == path  # Output from ls
+    assert lines[2] == path  # Output from ls
+    with open(cmd_file) as f:
+        actual_cmds = f.readlines()
+    assert len(actual_cmds) == 1
+    assert actual_cmds[0].rstrip('\n') == utils.list_to_str(cmd)
+
+
+def test_run_logged_command_cmd_file_dry_run(log_out, cmd_file):
+    """
+    Test dry run of command, ensuring it is not run but that
+    it is written to a command file.
+
+    :param log_out: Output log file (via test fixture)
+    :type log_out: str or unicode
+    :param cmd_file: Command file (via test fixture)
+    :type cmd_file: str or unicode
+    """
+    path = os.path.realpath(__file__)
+    cmd = ["ls", path, "no-such-file.txt", path]
+    process_utils.run_logged_command(cmd, log_out, cmd_file, True)
+    with open(log_out) as f:
+        lines = f.readlines()
+    assert len(lines) == 0
+    with open(cmd_file) as f:
+        actual_cmds = f.readlines()
+    assert len(actual_cmds) == 1
+    assert actual_cmds[0].rstrip('\n') == utils.list_to_str(cmd)
 
 
 def test_run_logged_redirect_command(log_err, redirect):
@@ -387,6 +461,75 @@ def test_run_logged_redirect_command(log_err, redirect):
         "cat: no-such-file.txt: No such file or directory"
 
 
+def test_run_logged_redirect_command_cmd_file(log_err, redirect, cmd_file):
+    """
+    Test writing errors to a log file with shell commands written to a
+    command file.
+
+    :param log_err: Error log file (via test fixture)
+    :type log_err: str or unicode
+    :param redirect: File for redirected output (via test fixture)
+    :type redirect: str or unicode
+    :param cmd_file: Command file (via test fixture)
+    :type cmd_file: str or unicode
+    """
+    path = os.path.realpath(__file__)
+    cmd = ["cat", path, "no-such-file.txt", path]
+    try:
+        process_utils.run_logged_redirect_command(cmd,
+                                                  redirect,
+                                                  log_err,
+                                                  cmd_file)
+    except AssertionError:
+        pass
+    # Compare path to captured redirect.
+    with open(path) as expected, open(redirect) as actual:
+        for line1, line2 in zip(expected, actual):
+            assert line1 == line2
+    lines = [line.rstrip('\n') for line in open(log_err)]
+    assert len(lines) == 1
+    assert lines[0] == \
+        "cat: no-such-file.txt: No such file or directory"
+    with open(cmd_file) as f:
+        actual_cmds = f.readlines()
+    assert len(actual_cmds) == 1
+    expected_cmd = "%s > %s" % (utils.list_to_str(cmd), redirect)
+    assert actual_cmds[0].rstrip('\n') == expected_cmd
+
+
+def test_run_logged_redirect_command_cmd_file_dry_run(
+        log_err, redirect, cmd_file):
+    """
+    Test dry run of a command that redirects its output to a file,
+    ensuring it is not run but that it is written to a command file.
+
+    :param log_err: Error log file (via test fixture)
+    :type log_err: str or unicode
+    :param redirect: File for redirected output (via test fixture)
+    :type redirect: str or unicode
+    :param cmd_file: Command file (via test fixture)
+    :type cmd_file: str or unicode
+    """
+    path = os.path.realpath(__file__)
+    cmd = ["cat", path, "no-such-file.txt", path]
+    process_utils.run_logged_redirect_command(cmd,
+                                              redirect,
+                                              log_err,
+                                              cmd_file,
+                                              True)
+    with open(redirect) as f:
+        lines = f.readlines()
+    assert len(lines) == 0
+    with open(log_err) as f:
+        lines = f.readlines()
+    assert len(lines) == 0
+    with open(cmd_file) as f:
+        actual_cmds = f.readlines()
+    assert len(actual_cmds) == 1
+    expected_cmd = "%s > %s" % (utils.list_to_str(cmd), redirect)
+    assert actual_cmds[0].rstrip('\n') == expected_cmd
+
+
 def test_run_logged_pipe_command_log(log_out):
     """
     Test writing output and errors to a single log file where
@@ -407,6 +550,69 @@ def test_run_logged_pipe_command_log(log_out):
     assert len(lines) == 2
     assert lines[0] == "cat: no-such-file: No such file or directory"
     assert str(num_lines * 2) == lines[1]  # Output from wc
+
+
+def test_run_logged_pipe_command_log_cmd_file(log_out, cmd_file):
+    """
+    Test writing output and errors to a single log file where
+    the first command in the pipeline logs some error and with shell
+    commands written to a command file.
+
+    :param log_out: Output log file (via test fixture)
+    :type log_out: str or unicode
+    :param cmd_file: Command file (via test fixture)
+    :type cmd_file: str or unicode
+    """
+    path = os.path.realpath(__file__)
+    num_lines = len([line for line in open(path)])
+    cmd1 = ["cat", path, "no-such-file", path]
+    cmd2 = ["wc", "-l"]
+    try:
+        process_utils.run_logged_pipe_command(cmd1,
+                                              cmd2,
+                                              log_out,
+                                              cmd_file)
+    except AssertionError:
+        pass
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 2
+    assert lines[0] == "cat: no-such-file: No such file or directory"
+    assert str(num_lines * 2) == lines[1]  # Output from wc
+    with open(cmd_file) as f:
+        actual_cmds = f.readlines()
+    assert len(actual_cmds) == 1
+    expected_cmd = "%s | %s" % (utils.list_to_str(cmd1),
+                                utils.list_to_str(cmd2))
+    assert actual_cmds[0].rstrip('\n') == expected_cmd
+
+
+def test_run_logged_pipe_command_log_cmd_file_dry_run(log_out, cmd_file):
+    """
+    Test dry run of a command that pipes its output to another command
+    ensuring it is not run but that it is written to a command file.
+
+    :param log_out: Output log file (via test fixture)
+    :type log_out: str or unicode
+    :param cmd_file: Command file (via test fixture)
+    :type cmd_file: str or unicode
+    """
+    path = os.path.realpath(__file__)
+    cmd1 = ["cat", path, "no-such-file", path]
+    cmd2 = ["wc", "-l"]
+    process_utils.run_logged_pipe_command(cmd1,
+                                          cmd2,
+                                          log_out,
+                                          cmd_file,
+                                          True)
+    with open(log_out) as f:
+        lines = f.readlines()
+    assert len(lines) == 0
+    with open(cmd_file) as f:
+        actual_cmds = f.readlines()
+    assert len(actual_cmds) == 1
+    expected_cmd = "%s | %s" % (utils.list_to_str(cmd1),
+                                utils.list_to_str(cmd2))
+    assert actual_cmds[0].rstrip('\n') == expected_cmd
 
 
 def test_run_logged_pipe_command2(log_out):
