@@ -475,6 +475,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
         logging.exception(exc_type.__name__)
         return EXIT_CONFIG_ERROR
 
+    # Set up command file.
     if "cmd_file" in config:
         cmd_file = config["cmd_file"]
     else:
@@ -483,15 +484,23 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
     if os.path.exists(cmd_file):
         os.remove(cmd_file)
 
+    # Set up directories
     try:
+        in_dir = config["dir_in"]
+        index_dir = config["dir_index"]
+        tmp_dir = config["dir_tmp"]
+        out_dir = config["dir_out"]
         base_logs_dir = config["dir_logs"]
         logs_dir = os.path.join(base_logs_dir,
                                 datetime.now().strftime('%Y%m%d-%H%M%S'))
+        dirs = [index_dir, tmp_dir, out_dir, base_logs_dir, logs_dir]
+        for d in dirs:
+            with open(cmd_file, "a") as f:
+                f.write("mkdir -p %s\n" % d)
         if not dry_run:
-            if not os.path.exists(base_logs_dir):
-                os.makedirs(base_logs_dir)
-            if not os.path.exists(logs_dir):
-                os.makedirs(logs_dir)
+            for d in dirs:
+                if not os.path.exists(d):
+                    os.makedirs(d)
     except KeyError as e:
         logging.error("Missing configuration parameter: %s", e.args[0])
         return EXIT_CONFIG_ERROR
@@ -503,14 +512,11 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
 
     # Build indices for alignment, if necessary/requested.
     try:
-        index_dir = config["dir_index"]
         r_rna_index = os.path.join(index_dir,
                                    config["rRNA_index"])
         orf_index = os.path.join(index_dir,
                                  config["orf_index"])
         if config["build_indices"]:
-            if not os.path.exists(index_dir) and not dry_run:
-                os.makedirs(index_dir)
             build_indices(config["rRNA_fasta"],
                           r_rna_index,
                           "r_rna",
@@ -536,17 +542,6 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
 
     # Loop over sample fastq.gz files.
     LOGGER.info("Processing samples")
-    try:
-        in_dir = config["dir_in"]
-        tmp_dir = config["dir_tmp"]
-        out_dir = config["dir_out"]
-    except KeyError as e:
-        logging.error("Missing configuration parameter: %s", e.args[0])
-        return EXIT_CONFIG_ERROR
-    if not os.path.exists(tmp_dir) and not dry_run:
-        os.makedirs(tmp_dir)
-    if not os.path.exists(out_dir) and not dry_run:
-        os.makedirs(out_dir)
     if ("fq_files" not in config) or \
        (config["fq_files"] is None) or \
        (not config["fq_files"]):
