@@ -13,12 +13,20 @@ handlers:
     formatter: command-line
     stream: ext://sys.stdout
   file_handler:
+    class: logging.FileHandler
+    level: INFO
+    formatter: standard
+    filename: riboviz.log
+    encoding: utf8
+    delay: True
+  timestamp_file_handler:
     class: riboviz.logging_utils.TimestampedFileHandler
     level: INFO
     formatter: standard
-    prefix: riboviz-
+    prefix: riboviz.
     suffix: .log
     encoding: utf8
+    delay: True
 root:
   level: INFO
   handlers: [console, file_handler]
