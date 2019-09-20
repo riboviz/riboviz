@@ -486,7 +486,7 @@ $ PYTHONPATH=. python riboviz/tools/prep_riboviz.py --dry-run rscripts/ \
 
 ## Customising logging
 
-You can customise logging by editing the file `riboviz/logging.yml`
+You can customise logging by editing the file `riboviz/logging.yaml`
 
 If you want `riboviz.log` to include a timestamp (e.g. `riboviz.20190920-005529-644421.log`) then edit this file and replace:
 
