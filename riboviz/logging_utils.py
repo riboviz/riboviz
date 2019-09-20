@@ -9,7 +9,7 @@ import os
 import yaml
 
 
-DEFAULT_CONFIG = os.path.join(os.path.dirname(__file__), "logging.yml")
+DEFAULT_CONFIG = os.path.join(os.path.dirname(__file__), "logging.yaml")
 """ Default logging configuration file. """
 LOG_CONFIG_ENV = "RIBOVIZ_LOG_CONFIG"
 """ Logging environment variable. """
