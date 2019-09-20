@@ -10,6 +10,8 @@ suppressMessages(library(tidyr, quietly = T))
 suppressMessages(library(dplyr, quietly = T))
 suppressMessages(library(magrittr, quietly = T))
 
+theme_set( theme_bw() )
+
 # define input options for optparse package
 option_list <- list( 
   make_option("--Ncores", type="integer", default=1,
@@ -45,7 +47,11 @@ option_list <- list(
   make_option("--count_threshold", type="integer", default=64,
               help="threshold for count of reads per gene to be included in plot"),
   make_option("--do_pos_sp_nt_freq", type="logical", default=TRUE,
-              help="do calculate the position-specific nucleotide frequency")
+              help="do calculate the position-specific nucleotide frequency"),
+  make_option("--nnt_buffer", type="integer", default=TRUE,
+              help="n nucleotides of UTR buffer to include in metagene plots"),
+  make_option("--nnt_gene", type="logical", default=TRUE,
+              help="nnucleotides of gene to include in metagene plots")
 )
 
 # Read in commandline arguments
@@ -147,7 +153,6 @@ plot_ribogrid <- function(tidymat) {
   ggplot(data=tidymat,aes(x=Pos,y=ReadLen,fill=Counts)) +
     geom_tile() +
     scale_fill_gradient(low = "white",high="darkblue") +
-    theme_bw() +
     theme(panel.grid=element_blank()) +
     labs(x="position of read 5' end", y="read length")
 }
@@ -159,7 +164,7 @@ plot_ribogrid <- function(tidymat) {
 
 
 get_nt_period <- function(fid,gene,dataset,left,right){
-  # previous version; not currently used
+  # previous version of script; not currently used
   data_mat <- get_gene_datamat(gene,dataset,fid) 
   pos_sum <- colSums(data_mat)  # Position-specific sum of reads of all lengths
   pos_sum <- pos_sum[left:(ncol(data_mat)-right)] # Ignore reads in parts of the buffer region defined by left/right
@@ -176,13 +181,13 @@ gene_poslen_counts_5start <-
          dataset=dataset,
          fid=fid,
          gfff=gff,
-         n_buffer=25,
-         n_gene=50) %>%
+         n_buffer=nnt_buffer,
+         n_gene=nnt_gene) %>%
   Reduce("+", .) # Reduce is a BiocGenerics, there is a purrr alternative
 
-ribogrid_5start <- 
-  gene_poslen_counts_5start %>%
-  tidy_datamat(startpos=-24,startlen=10) %>%
+# ribogrid_5start 
+gene_poslen_counts_5start %>%
+  tidy_datamat(startpos=-nnt_buffer+1,startlen=MinReadLen) %>%
   plot_ribogrid %>%
   ggsave(filename = paste0(out_prefix,"_startcodon_ribogrid.pdf"),
       width=6,height=3)
@@ -193,25 +198,25 @@ gene_poslen_counts_3end <-
          dataset=dataset,
          fid=fid,
          gfff=gff,
-         n_buffer=25,
-         n_gene=50) %>%
+         n_buffer=nnt_buffer,
+         n_gene=nnt_gene) %>%
   Reduce("+", .) # Reduce is a BiocGenerics, there is a purrr alternative
 
 # summarize by adding different read lengths
 gene_pos_counts_5start <- gene_poslen_counts_5start %>%
-  tidy_datamat(startpos=-24,startlen=10) %>%
+  tidy_datamat(startpos=-nnt_buffer+1,startlen=MinReadLen) %>%
   group_by(Pos) %>%
   summarize(Counts=sum(Counts))
 
 gene_pos_counts_3end <- gene_poslen_counts_3end %>%
-  tidy_datamat(startpos=-49,startlen=10) %>%
+  tidy_datamat(startpos=-nnt_gene+1,startlen=MinReadLen) %>%
   group_by(Pos) %>%
   summarize(Counts=sum(Counts))
 
 gene_pos_counts_bothends <- bind_rows(
   gene_pos_counts_5start %>% mutate(End="5'"),
   gene_pos_counts_3end %>% mutate(End="3'") 
-) %>%
+  ) %>%
   mutate(End = factor(End, levels = c("5'", "3'")) )
 
 # Plot
