@@ -74,7 +74,6 @@ import os
 import os.path
 import sys
 import yaml
-from riboviz import utils
 from riboviz import process_utils
 from riboviz import logging_utils
 
@@ -96,6 +95,17 @@ EXIT_COLLATION_ERROR = 5
 logging_utils.configure_logging()
 LOGGER = logging.getLogger(__name__)
 """ Logger """
+
+
+def print_and_log(msg):
+    """
+    Print message to console and log.
+
+    :param msg: message
+    :type msg: str or unicode
+    """
+    print(msg)
+    LOGGER.info(msg)
 
 
 def build_indices(fasta, ht_prefix, file_type, logs_dir, cmd_file,
@@ -122,10 +132,10 @@ def build_indices(fasta, ht_prefix, file_type, logs_dir, cmd_file,
     :raise AssertionError: if hisat2-build returns non-zero exit
     code
     """
-    cmd = ["hisat2-build", fasta, ht_prefix]
-    LOGGER.info("Running: %s", utils.list_to_str(cmd))
+    print_and_log("Create indices: %s" % file_type)
     log_file = os.path.join(logs_dir, "hisat2_build_%s.log" % file_type)
     LOGGER.info("Log file: %s", log_file)
+    cmd = ["hisat2-build", fasta, ht_prefix]
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
 
 
@@ -196,22 +206,21 @@ def process_sample(sample,
     non-zero exit code
     :raise KeyError: if config is missing required configuration
     """
-    LOGGER.info("Processing sample: %s", sample)
+    print_and_log("Processing sample: %s" % sample)
     step = 1
 
     if not os.path.exists(fastq):
         raise IOError(errno.ENOENT,
                       os.strerror(errno.ENOENT),
                       fastq)
-    LOGGER.info("Processing file: %s", fastq)
+    print_and_log("Processing file: %s" % fastq)
 
     if "nprocesses" not in config:
         nprocesses = 1
     else:
         nprocesses = config["nprocesses"]
 
-    # Cut illumina adapters.
-
+    print_and_log("Cut Illumina adapters")
     # Trimmed reads.
     trim_fq = os.path.join(tmp_dir, sample + "_trim.fq")
     cmd = ["cutadapt", "--trim-n", "-O", "1", "-m", "5",
@@ -221,14 +230,12 @@ def process_sample(sample,
         # cutadapt and Python 3 allows all available processors to
         # be requested.
         cmd += ["-j", str(0)]
-    LOGGER.info("Running: %s", utils.list_to_str(cmd))
     log_file = get_sample_log_file(logs_dir, sample, "cutadapt", step)
     LOGGER.info("Log file: %s", log_file)
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
-    # Map reads to rRNA.
-
+    print_and_log("Map reads to rRNA")
     # Trimmed non-rRNA reads.
     non_r_rna_trim_fq = os.path.join(tmp_dir, sample + "_nonrRNA.fq")
     # rRNA-mapped reads.
@@ -236,14 +243,12 @@ def process_sample(sample,
     cmd = ["hisat2", "-p", str(nprocesses), "-N", "1",
            "--un", non_r_rna_trim_fq, "-x", r_rna_index,
            "-S", r_rna_map_sam, "-U", trim_fq]
-    LOGGER.info("Running: %s", utils.list_to_str(cmd))
     log_file = get_sample_log_file(logs_dir, sample, "hisat2_rrna", step)
     LOGGER.info("Log file: %s", log_file)
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
-    # Map to ORFs with (mostly) default settings, up to 2 alignments.
-
+    print_and_log("Map to ORFs with up to 2 alignments")
     # ORF-mapped reads.
     orf_map_sam = os.path.join(tmp_dir, sample + "_orf_map.sam")
     # Unaligned reads.
@@ -253,14 +258,12 @@ def process_sample(sample,
            "F", "--no-unal", "--un", unaligned_fq,
            "-x", orf_index, "-S", orf_map_sam,
            "-U", non_r_rna_trim_fq]
-    LOGGER.info("Running: %s", utils.list_to_str(cmd))
     log_file = get_sample_log_file(logs_dir, sample, "hisat2_orf", step)
     LOGGER.info("Log file: %s", log_file)
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
-    # Trim 5' mismatched nt and remove reads with >1 mismatch.
-
+    print_and_log("Trim 5' mismatched nt and remove reads with >1 mismatch")
     # ORF-mapped reads.
     orf_map_sam_clean = os.path.join(tmp_dir,
                                      sample +
@@ -268,23 +271,17 @@ def process_sample(sample,
     cmd = ["python", os.path.join(py_scripts, "trim_5p_mismatch.py"),
            "-mm", "2", "-in", orf_map_sam,
            "-out", orf_map_sam_clean]
-    LOGGER.info("Running: %s", utils.list_to_str(cmd))
     log_file = get_sample_log_file(logs_dir, sample, "trim_5p_mismatch", step)
     LOGGER.info("Log file: %s", log_file)
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
-    # Convert SAM (text) output to BAM (compressed binary) and sort on
-    # genome.
-
+    print_and_log("Convert SAM to BAM and sort on genome")
     sample_out_prefix = os.path.join(out_dir, sample)
     sample_out_bam = sample_out_prefix + ".bam"
     cmd_view = ["samtools", "view", "-b", orf_map_sam_clean]
     cmd_sort = ["samtools", "sort", "-@", str(nprocesses),
                 "-O", "bam", "-o", sample_out_bam, "-"]
-    LOGGER.info("Running: %s | %s",
-                utils.list_to_str(cmd_view),
-                utils.list_to_str(cmd_sort))
     log_file = get_sample_log_file(logs_dir,
                                    sample,
                                    "samtools_view_sort",
@@ -298,23 +295,19 @@ def process_sample(sample,
         dry_run)
     step += 1
 
-    # Index BAM file.
+    print_and_log("Index BAM file")
     cmd = ["samtools", "index", sample_out_bam]
-    LOGGER.info("Running: %s", utils.list_to_str(cmd))
     log_file = get_sample_log_file(logs_dir, sample, "samtools_index", step)
     LOGGER.info("Log file: %s", log_file)
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
+    print_and_log("Record transcriptome coverage as a bedgraph")
     if config["make_bedgraph"]:
-        # Record transcriptome coverage as a bedgraph.
-        # Calculate transcriptome coverage for plus strand.
+        print_and_log("Calculate transcriptome coverage for plus strand")
         cmd = ["bedtools", "genomecov", "-ibam", sample_out_bam,
                "-trackline", "-bga", "-5", "-strand", "+"]
         plus_bedgraph = sample_out_prefix + "_plus.bedgraph"
-        LOGGER.info("Running: %s > %s",
-                    utils.list_to_str(cmd),
-                    plus_bedgraph)
         log_file = get_sample_log_file(
             logs_dir, sample, "bedtools_genome_cov_plus", step)
         LOGGER.info("Log file: %s", log_file)
@@ -325,13 +318,10 @@ def process_sample(sample,
             cmd_file,
             dry_run)
         step += 1
-        # Calculate transcriptome coverage for minus strand.
+        print_and_log("Calculate transcriptome coverage for minus strand")
         cmd = ["bedtools", "genomecov", "-ibam", sample_out_bam,
                "-trackline", "-bga", "-5", "-strand", "-"]
         minus_bedgraph = sample_out_prefix + "_minus.bedgraph"
-        LOGGER.info("Running: %s > %s",
-                    utils.list_to_str(cmd),
-                    minus_bedgraph)
         log_file = get_sample_log_file(
             logs_dir, sample, "bedtools_genome_cov_minus", step)
         LOGGER.info("Log file: %s", log_file)
@@ -342,10 +332,8 @@ def process_sample(sample,
             cmd_file,
             dry_run)
         step += 1
-        LOGGER.info("bedgraphs made on plus and minus strands")
 
-    # Make length-sensitive alignments in H5 format.
-
+    print_and_log("Make length-sensitive alignments in H5 format")
     sample_out_h5 = sample_out_prefix + ".h5"
     second_id = config["SecondID"]
     if second_id is None:
@@ -364,14 +352,12 @@ def process_sample(sample,
            "--orf_gff_file=" + config["orf_gff_file"],
            "--ribovizGFF=" + str(config["ribovizGFF"]),
            "--StopInCDS=" + str(config["StopInCDS"])]
-    LOGGER.info("Running: %s", utils.list_to_str(cmd))
     log_file = get_sample_log_file(logs_dir, sample, "bam_to_h5", step)
     LOGGER.info("Log file: %s", log_file)
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
-    # Create summary statistics and analyses plots.
-
+    print_and_log("Create summary statistics and analyses plots")
     cmd = ["Rscript", "--vanilla",
            os.path.join(r_scripts, "generate_stats_figs.R"),
            "--Ncores=" + str(nprocesses),
@@ -390,14 +376,13 @@ def process_sample(sample,
            "--codon_pos=" + config["codon_pos"],
            "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
-    LOGGER.info("Running: %s", utils.list_to_str(cmd))
     log_file = get_sample_log_file(logs_dir,
                                    sample,
                                    "generate_stats_figs",
                                    step)
     LOGGER.info("Log file: %s", log_file)
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
-    LOGGER.info("Finished processing sample: %s", fastq)
+    print_and_log("Finished processing sample: %s" % fastq)
 
 
 def collate_tpms(out_dir, samples, r_scripts, logs_dir, cmd_file,
@@ -423,13 +408,12 @@ def collate_tpms(out_dir, samples, r_scripts, logs_dir, cmd_file,
     :raise AssertionError: if collate_tpms.R returns non-zero exit
     code
     """
-    LOGGER.info("Collating TPMs across all processed samples")
+    print_and_log("Collate TPMs across all processed samples")
     cmd = ["Rscript",
            "--vanilla",
            os.path.join(r_scripts, "collate_tpms.R"),
            "--dir_out=" + out_dir]
     cmd += samples
-    LOGGER.info("Running: %s", utils.list_to_str(cmd))
     log_file = os.path.join(logs_dir, "collate_tpms.log")
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
 
@@ -459,8 +443,8 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
     :return: exit code
     :rtype: int
     """
-    LOGGER.info("Running under Python: %s ", sys.version)
-    LOGGER.info("Configuration file: %s", config_yaml)
+    print_and_log("Running under Python: %s" % sys.version)
+    print_and_log("Configuration file: %s" % config_yaml)
 
     # Extract configuration.
     try:
@@ -510,7 +494,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
         logging.exception(exc_type.__name__)
         return EXIT_CONFIG_ERROR
 
-    # Build indices for alignment, if necessary/requested.
+    print_and_log("Build indices for alignment, if necessary/requested")
     try:
         r_rna_index = os.path.join(index_dir,
                                    config["rRNA_index"])
@@ -523,14 +507,12 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
                           logs_dir,
                           cmd_file,
                           dry_run)
-            LOGGER.info("rRNA index built")
             build_indices(config["orf_fasta"],
                           orf_index,
                           "orf",
                           logs_dir,
                           cmd_file,
                           dry_run)
-            LOGGER.info("ORF index built")
     except KeyError as e:
         logging.error("Missing configuration parameter: %s", e.args[0])
         return EXIT_CONFIG_ERROR
@@ -541,7 +523,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
         return EXIT_INDEX_ERROR
 
     # Loop over sample fastq.gz files.
-    LOGGER.info("Processing samples")
+    print_and_log("Processing samples")
     if ("fq_files" not in config) or \
        (config["fq_files"] is None) or \
        (not config["fq_files"]):
@@ -572,9 +554,8 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
             logging.error("Problem processing sample: %s", sample)
             exc_type, _, _ = sys.exc_info()
             logging.exception(exc_type.__name__)
-    LOGGER.info("Finished processing %d samples, %d failed",
-                num_samples,
-                num_samples - len(successes))
+    print_and_log("Finished processing %d samples, %d failed"
+                  % (num_samples, num_samples - len(successes)))
     if not successes:
         return EXIT_SAMPLES_ERROR
 
@@ -588,7 +569,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
         logging.exception(exc_type.__name__)
         return EXIT_COLLATION_ERROR
 
-    LOGGER.info("Completed")
+    print_and_log("Completed")
     return EXIT_OK
 
 
