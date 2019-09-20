@@ -58,9 +58,13 @@ Exit codes are as follows:
 * EXIT_SAMPLES_ERROR (4): No sample was processed successfully.
 * EXIT_COLLATION_ERROR (5): Error occurred during TPMs collation.
 
-If --dry-run is provided then the workflow commands will not be
-executed. This can be useful for seeing what commands will be
-run, in advance of running them.
+Commands that are submitted to bash are recorded within a
+file specified by a cmd_file configuration parameter, default
+prep_riboviz.sh.
+
+If --dry-run is provided then the commands submitted to bash will not
+be executed. This can be useful for seeing what commands will be run
+without actually running them.
 """
 
 from datetime import datetime
@@ -452,10 +456,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
     :rtype: int
     """
     LOGGER.info("Running under Python: %s ", sys.version)
-
-    cmd_file = "prep_riboviz.sh"
-    if os.path.exists(cmd_file):
-        os.remove(cmd_file)
+    LOGGER.info("Configuration file: %s", config_yaml)
 
     # Extract configuration.
     try:
@@ -469,6 +470,14 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
         exc_type, _, _ = sys.exc_info()
         logging.exception(exc_type.__name__)
         return EXIT_CONFIG_ERROR
+
+    if "cmd_file" in config:
+        cmd_file = config["cmd_file"]
+    else:
+        cmd_file = "prep_riboviz.sh"
+    LOGGER.info("Command file: %s", cmd_file)
+    if os.path.exists(cmd_file):
+        os.remove(cmd_file)
 
     try:
         base_logs_dir = config["dir_logs"]
