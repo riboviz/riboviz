@@ -48,9 +48,9 @@ option_list <- list(
               help="threshold for count of reads per gene to be included in plot"),
   make_option("--do_pos_sp_nt_freq", type="logical", default=TRUE,
               help="do calculate the position-specific nucleotide frequency"),
-  make_option("--nnt_buffer", type="integer", default=TRUE,
+  make_option("--nnt_buffer", type="integer", default=25,
               help="n nucleotides of UTR buffer to include in metagene plots"),
-  make_option("--nnt_gene", type="logical", default=TRUE,
+  make_option("--nnt_gene", type="integer", default=50,
               help="nnucleotides of gene to include in metagene plots")
 )
 
@@ -174,7 +174,7 @@ get_nt_period <- function(fid,gene,dataset,left,right){
 # NOTE: Do not use mclapply when accessing H5 data
 
 # Get gene and position specific total counts for all read lengths
-
+browser()
 gene_poslen_counts_5start <- 
   lapply(genes,
          get_gene_datamat_5start,
