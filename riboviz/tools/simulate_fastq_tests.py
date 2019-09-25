@@ -1,109 +1,229 @@
 #! python
+"""
+simulate_fastq_tests.py
 
-## simulate_fastq_tests.py
-## creates simple simulated fastq files to test UMI/deduplication, adapter trimming
-## later we can adapt it to test demultiplexing 
+Creates simple simulated fastq files to test UMI/deduplication,
+adaptor trimming, and demultiplexing.
 
+To-do:
 
-# To-do!!
-# - Matched functions to make fastq records from a read and quality score plus UMI at 3' end
-# -- one places the UMI in-line in the read (raw data, i.e. input for extract; this is done already)
-# -- function to places the UMI in the header (i.e. desired output for extract)
-# -- these should have the same quality score so we can check quality is preserved by extract
-# - Add barcodes for demultiplexing
+- Matched functions to make fastq records from a read and quality
+  score plus UMI at 3' end:
+  - One places the UMI in-line in the read (raw data, i.e. input for
+    extract; this is done already)
+  - Function to place the UMI in the header (i.e. desired output for
+    extract)
+  - These should have the same quality score so we can check quality
+    is preserved by extract.
+- Add barcodes for demultiplexing.
+"""
 
+import os
+import os.path
+from random import choices, seed
+import sys
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
-from random import choices, seed
 
-QualityMed  = list(range(30,41))
-QualityHigh = list(range(39,41))
 
-def simulate_qual(k,QualityVals=QualityMed,weights=None) :
-    """
-    simulate quality scores; this is a thin wrapper around choices
-    whose default values represent medium Phred quality values
-    """
-    return choices(QualityVals,k=k,weights=weights)
+QUALITY_MEDIUM = list(range(30, 41))
+""" List of medium quality scores. """
+QUALITY_HIGH = list(range(39, 41))
+""" List of high quality scores. """
+FASTQ_FORMAT = "fastq"
+""" Format string for use with Bio.SeqIO.write. """
 
-def make_fastq_record(name,readall,qualall=None,QualityVals=QualityMed) :
+
+def simulate_quality(k, qualities=QUALITY_MEDIUM, weights=None):
     """
-    make a fastq record with sequence readall and name
+    Simulate quality scores. This is a thin wrapper around
+    random.choices whose default values represent medium Phred quality
+    values.
+
+    See https://docs.python.org/3/library/random.html#random.choices
+
+    :param k: Number of quality scores requested
+    :type k: int
+    :param qualities: Available quality scores
+    :type qualities: list(int)
+    :param weights: Optional weightings for qualities
+    :type weights: list(ints)
+    :return k quality scores, selected at random from qualities
+    :rtype: list(int)
     """
-    if qualall is None :
-        qualall = simulate_qual( len(readall), QualityVals=QualityVals )
-    record = SeqRecord(Seq(readall,IUPAC.ambiguous_dna),
-               id=name, name=name,
-               description=name)
-    record.letter_annotations["phred_quality"] = qualall
+    return choices(qualities, k=k, weights=weights)
+
+
+def make_fastq_record(name, reads, scores=None, qualities=QUALITY_MEDIUM):
+    """
+    Make a fastq record with sequence readall and name.
+
+    :param name: Name
+    :type name: str or unicode
+    :param reads: Reads
+    :type reads: str or unicode
+    :param scores: Quality scores
+    :type scores: list(int)
+    :param qualities: Available quality scores, used if scores is
+    None, in conjunction with simulate_quality to calculate quality
+    scores
+    :type qualities: list(int)
+    :return: fastq record
+    :rtype: Bio.SeqRecord.SeqRecord
+    """
+    if scores is None:
+        scores = simulate_quality(len(reads), qualities=qualities)
+    record = SeqRecord(Seq(reads, IUPAC.ambiguous_dna),
+                       id=name,
+                       name=name,
+                       description=name)
+    record.letter_annotations["phred_quality"] = scores
     return record
 
-if __name__=="__main__" :  
-    make_fastq_record("SRR","AAAA")
-    seed(42) # fix random seed so test results are the same
-    
-    ## Components for simulated reads compatible with the vignette files yeast_YAL_CDS_w_250utrs.fa
-    ## These are aimed at the Duncan & Mata format with 4nt UMI at each end of read
-    ReadA = "ATGGCATCCACCGATTTCTCCAAGATTGAA" # 30nt starting ORF of YAL003W
-    ReadAe = "ATGGCATCCACCGATGTCTCCAAGATTGAA" # 1 error in read A
-    ReadB = "TCTAGATTAGAAAGATTGACCTCATTAA" # 28nt immediately following start of ORF of YAL038W
-    
-    UMIX = "CGTA"
-    UMIY = "ATAT"
-    UMIYe = "ATAA" # 1 error in UMIY
-    UMIZ = "CGGC"
-    UMIZe = "CTGC" # 1 error in UMIX
-    UMI5 = "AAAA"
-    UMI5C = "CCCC"
-    
-    Adaptseq = "CTGTAGGCACC" # adaptor sequence used in vignette data
-    
-    ### simulate raw data with only 3' UMI, i.e. desired input after adapter trimming
-    ### UMI-tools Keeps the highest-quality read, so we use QualityHigh for reads we wish to keep
-    sim_records_UMI3_4nt = [ 
-    make_fastq_record( "EWSim1ReadAUmiX.Keep",  ReadA + UMIX, QualityVals=QualityHigh), 
-    make_fastq_record( "EWSim2ReadAUmiX.Drop",  ReadA + UMIX ), 
-    make_fastq_record( "EWSim3ReadAeUmiX.Drop", ReadAe + UMIX ), 
-    make_fastq_record( "EWSim4ReadAUmiY.Keep",  ReadA + UMIY ), 
-    make_fastq_record( "EWSim5ReadBUmiX.Keep",  ReadB + UMIX ), 
-    make_fastq_record( "EWSim6ReadBUmiZ.Keep",  ReadB + UMIZ, QualityVals=QualityHigh), 
-    make_fastq_record( "EWSim7ReadBUmiZ.Drop",  ReadB + UMIZ ), 
-    make_fastq_record( "EWSim8ReadBUmiZe.Drop", ReadB + UMIZe ) 
+
+def trim_fastq_record_trim_3prime(record, trim):
+    """
+    Copy fastq record, but trim sequence and quality scores at 3' end
+    by given length.
+
+    :param record: fastq record
+    :type record: Bio.SeqRecord.SeqRecord
+    :param trim: Number of nts to trim by
+    :type trim: int
+    :return: fastq record
+    :rtype: Bio.SeqRecord.SeqRecord
+    """
+    quality = record.letter_annotations["phred_quality"]
+    sequence = str(record.seq)
+    return make_fastq_record(record.id,
+                             sequence[0:-trim],
+                             quality[0:-trim])
+
+
+def trim_fastq_record_trim_5prime(record, trim):
+    """
+    Copy fastq record, but trim sequence and quality scores at 5' end
+    by given length.
+
+    :param record: fastq record
+    :type record: Bio.SeqRecord.SeqRecord
+    :param trim: Number of nts to trim by
+    :type trim: int
+    :return: fastq record
+    :rtype: Bio.SeqRecord.SeqRecord
+    """
+    quality = record.letter_annotations["phred_quality"]
+    sequence = str(record.seq)
+    return make_fastq_record(record.id,
+                             sequence[trim:],
+                             quality[trim:])
+
+
+def create_simulated_fastq_files(output_dir):
+    """
+    Create simulated fastq files.
+
+    :param output_dir: Output directory
+    :type output_dir: str or unicode
+    """
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
+    make_fastq_record("SRR", "AAAA")
+    seed(42)  # Fix random seed so can repeatedly create same files
+
+    # Components for simulated reads compatible with the vignette
+    # files yeast_yAL_CDS_w_250utrs.fa.
+    # These are aimed at the Duncan & Mata format with 4nt UMI at
+    # each end of read.
+    read_a = "ATGGCATCCACCGATTTCTCCAAGATTGAA"  # 30nt starting ORF of YAL003W
+    read_ae = "ATGGCATCCACCGATGTCTCCAAGATTGAA"  # 1 error in read A
+    read_b = "TCTAGATTAGAAAGATTGACCTCATTAA"  # 28nt immediately following start of ORF of YAL038W
+
+    # UMIs
+    umi_x = "CGTA"
+    umi_y = "ATAT"
+    umi_ye = "ATAA"  # 1 error in umi_y
+    umi_z = "CGGC"
+    umi_ze = "CTGC"  # 1 error in umi_x
+    umi_5 = "AAAA"
+    umi_5c = "CCCC"
+
+    adaptor = "CTGTAGGCACC"  # Adaptor sequence used in vignette data
+
+    # Simulate raw data with 3' and 5' umi_s, i.e. desired input before
+    # adaptor trimming.
+    # umi_tools keeps the highest-quality read, so we use QUALITY_HIGH
+    # for reads we wish to keep.
+    umi_5and3_4nt_adaptor_records = [
+        make_fastq_record("EWSim1Umi5read_aUmiX.Keep",
+                          umi_5 + read_a + umi_x + adaptor,
+                          qualities=QUALITY_HIGH),
+        make_fastq_record("EWSim2Umi5read_aUmiX.Drop",
+                          umi_5 + read_a + umi_x + adaptor),
+        make_fastq_record("EWSim3Umi5read_aeUmiX.Drop",
+                          umi_5 + read_ae + umi_x + adaptor),
+        make_fastq_record("EWSim4Umi5read_aUmiY.Keep",
+                          umi_5 + read_a + umi_y + adaptor)
     ]
-    
-    with open("../data/simdata_UMI3_4nt.fastq", "w") as output_handle:
-        SeqIO.write(sim_records_UMI3_4nt, output_handle, "fastq")
-    
-    ### simulate raw data with 3' and 5' UMIs, i.e. desired input after adapter trimming
-    sim_records_UMI5and3_4nt = [ 
-    make_fastq_record( "EWSim1Umi5ReadAUmiX.Keep",  UMI5 + ReadA + UMIX, QualityVals=QualityHigh), 
-    make_fastq_record( "EWSim2Umi5ReadAUmiX.Drop",  UMI5 + ReadA + UMIX ), 
-    make_fastq_record( "EWSim3Umi5ReadAeUmiX.Drop", UMI5 + ReadAe + UMIX ), 
-    make_fastq_record( "EWSim4Umi5ReadAUmiY.Keep",  UMI5 + ReadA + UMIY ), 
-    make_fastq_record( "EWSim5Umi5ReadBUmiX.Keep",  UMI5 + ReadB + UMIX ), 
-    make_fastq_record( "EWSim6Umi5ReadBUmiZ.Keep",  UMI5 + ReadB + UMIZ ), 
-    make_fastq_record( "EWSim7Umi5ReadBUmiZ.Drop",  UMI5 + ReadB + UMIZ, QualityVals=QualityHigh), 
-    make_fastq_record( "EWSim8Umi5ReadBUmiZe.Drop", UMI5 + ReadB + UMIZe ),
-    make_fastq_record( "EWSim9Umi5CReadBUmiZ.Keep", UMI5C + ReadB + UMIZe ) 
+    # Extra nt past the adaptor for the shorter read.
+    umi_5and3_4nt_adaptor_extra_nt_records = [
+        make_fastq_record("EWSim5Umi5read_bUmiX.Keep",
+                          umi_5 + read_b + umi_x + adaptor + "AC"),
+        make_fastq_record("EWSim6Umi5read_bUmiZ.Keep",
+                          umi_5 + read_b + umi_z + adaptor + "AC",
+                          qualities=QUALITY_HIGH),
+        make_fastq_record("EWSim7Umi5read_bUmiZ.Drop",
+                          umi_5 + read_b + umi_z + adaptor + "AC"),
+        make_fastq_record("EWSim8Umi5read_bUmiZe.Drop",
+                          umi_5 + read_b + umi_ze + adaptor + "AC"),
+        make_fastq_record("EWSim9Umi5Cread_bUmiX.Keep",
+                          umi_5c + read_b + umi_x + adaptor + "AC")
     ]
-    
-    with open("../data/simdata_UMI5and3_4nt.fastq", "w") as output_handle:
-        SeqIO.write(sim_records_UMI5and3_4nt, output_handle, "fastq")
-    
-    ### simulate raw data with 3' and 5' UMIs, i.e. desired input after adapter trimming
-    sim_records_UMI5and3_4nt_adaptor = [ 
-    make_fastq_record( "EWSim1Umi5ReadAUmiX.Keep",  UMI5 + ReadA + UMIX + Adaptseq, QualityVals=QualityHigh ), 
-    make_fastq_record( "EWSim2Umi5ReadAUmiX.Drop",  UMI5 + ReadA + UMIX + Adaptseq ), 
-    make_fastq_record( "EWSim3Umi5ReadAeUmiX.Drop", UMI5 + ReadAe + UMIX + Adaptseq ), 
-    make_fastq_record( "EWSim4Umi5ReadAUmiY.Keep",  UMI5 + ReadA + UMIY + Adaptseq ), 
-    make_fastq_record( "EWSim5Umi5ReadBUmiX.Keep",  UMI5 + ReadB + UMIX + Adaptseq + "AC"), # extra nt past the adaptor for the shorter read
-    make_fastq_record( "EWSim6Umi5ReadBUmiZ.Keep",  UMI5 + ReadB + UMIZ + Adaptseq + "AC", QualityVals=QualityHigh), 
-    make_fastq_record( "EWSim7Umi5ReadBUmiZ.Drop",  UMI5 + ReadB + UMIZ + Adaptseq + "AC" ), 
-    make_fastq_record( "EWSim8Umi5ReadBUmiZe.Drop", UMI5 + ReadB + UMIZe + Adaptseq + "AC" ),
-    make_fastq_record( "EWSim9Umi5CReadBUmiX.Keep", UMI5C + ReadB + UMIX + Adaptseq + "AC" ) 
+    with open(os.path.join(output_dir, "simdata_UMI5and3_4nt_adaptor.fastq"),
+              "w") as f:
+        SeqIO.write(umi_5and3_4nt_adaptor_records, f, FASTQ_FORMAT)
+        SeqIO.write(umi_5and3_4nt_adaptor_extra_nt_records, f, FASTQ_FORMAT)
+
+    # Simulate raw data with 3' and 5' umi_s, i.e. desired input after
+    # adaptor trimming.
+    # Reuse the records above but trim the sequences and quality
+    # scores at the 3' end by the length of the adaptor.
+    umi_5and3_4nt_records = [
+        trim_fastq_record_trim_3prime(record, len(adaptor))
+        for record in umi_5and3_4nt_adaptor_records
     ]
-    
-    with open("../data/simdata_UMI5and3_4nt_adaptor.fastq", "w") as output_handle:
-        SeqIO.write(sim_records_UMI5and3_4nt_adaptor, output_handle, "fastq")
+    umi_5and3_4nt_extra_nt_records = [
+        trim_fastq_record_trim_3prime(record, len(adaptor) + 2)
+        for record in umi_5and3_4nt_adaptor_extra_nt_records
+    ]
+    with open(os.path.join(output_dir, "simdata_UMI5and3_4nt.fastq"),
+              "w") as f:
+        SeqIO.write(umi_5and3_4nt_records, f, FASTQ_FORMAT)
+        SeqIO.write(umi_5and3_4nt_extra_nt_records, f, FASTQ_FORMAT)
+
+    # Simulate raw data with only 3' umi_, i.e. desired input after
+    # adaptor trimming.
+    umi_3_4nt_records = [
+        make_fastq_record("EWSim1ReadAUmiX.Keep",
+                          read_a + umi_x,
+                          qualities=QUALITY_HIGH),
+        make_fastq_record("EWSim2ReadAUmiX.Drop", read_a + umi_x),
+        make_fastq_record("EWSim3ReadAeUmiX.Drop", read_ae + umi_x),
+        make_fastq_record("EWSim4ReadAUmiY.Keep", read_a + umi_y),
+        make_fastq_record("EWSim5ReadBUmiX.Keep", read_b + umi_x),
+        make_fastq_record("EWSim6ReadBUmiZ.Keep",
+                          read_b + umi_z,
+                          qualities=QUALITY_HIGH),
+        make_fastq_record("EWSim7ReadBUmiZ.Drop", read_b + umi_z),
+        make_fastq_record("EWSim8ReadBUmiZe.Drop", read_b + umi_ze)
+    ]
+    with open(os.path.join(output_dir, "simdata_UMI3_4nt.fastq"),
+              "w") as f:
+        SeqIO.write(umi_3_4nt_records, f, FASTQ_FORMAT)
+
+
+if __name__ == "__main__":
+    create_simulated_fastq_files(sys.argv[1])
