@@ -447,18 +447,18 @@ If you have already generated hisat2 indices for the same organism and annotatio
 
 ## View commands submitted to bash
 
-`prep_riboviz.py` extracts configuration information from its configuration file and uses this information to execute the RiboViz operations, which are invocations of RiboViz-specific and third-party tools. These operations are invoked as bash commands submitted by `prep_riboviz.py`. To help with debugging, these commands are output into a command file (default name `prep_riboviz.sh`).
+`prep_riboviz.py` extracts configuration information from its configuration file and uses this information to execute the RiboViz operations, which are invocations of RiboViz-specific and third-party tools. These operations are invoked as bash commands submitted by `prep_riboviz.py`. To help with debugging, these commands are output into a command file (default name `run_riboviz_vignette.sh`).
 
 The name and location of this command file can be changed by editing the `cmd_file` parameter within the configuration file (e.g. within `vignette/vignette_config.yaml`):
 
 ```yaml
-cmd_file: prep_riboviz.sh # File to log	bash commands
+cmd_file: run_riboviz_vignette.sh # File to log	bash commands
 ```
 
 The command file can be run standalone, for example:
 
 ```yaml
-bash prep_riboviz.sh
+bash run_riboviz_vignette.sh
 ```
 
 ---

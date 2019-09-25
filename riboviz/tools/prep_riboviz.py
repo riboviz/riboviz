@@ -59,8 +59,7 @@ Exit codes are as follows:
 * EXIT_COLLATION_ERROR (5): Error occurred during TPMs collation.
 
 Commands that are submitted to bash are recorded within a
-file specified by a cmd_file configuration parameter, default
-prep_riboviz.sh.
+file specified by a cmd_file configuration parameter.
 
 If --dry-run is provided then the commands submitted to bash will not
 be executed. This can be useful for seeing what commands will be run
@@ -448,7 +447,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
     if "cmd_file" in config:
         cmd_file = config["cmd_file"]
     else:
-        cmd_file = "prep_riboviz.sh"
+        cmd_file = "run_riboviz_vignette.sh"
     LOGGER.info("Command file: %s", cmd_file)
     if os.path.exists(cmd_file):
         os.remove(cmd_file)
