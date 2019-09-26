@@ -18,7 +18,7 @@ LOG_CONFIG_ENV = "RIBOVIZ_LOG_CONFIG"
 class TimestampedFileHandler(logging.FileHandler):
     """
     Subclass of FileHandler which creates a log file of form
-    prefixYYYYMMWW-HHMMSS-SSSSSSsuffix.
+    prefixYYYYMMWW-HHMMSSsuffix.
     """
     def __init__(self, prefix, suffix, mode='a', encoding=None, delay=False):
         """
@@ -35,7 +35,7 @@ class TimestampedFileHandler(logging.FileHandler):
         :param delay: defer opening file until first output
         :type delay: bool
         """
-        timestamp = str(datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f"))
+        timestamp = str(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
         log_file = prefix + timestamp + suffix
         super(TimestampedFileHandler, self).__init__(
             log_file, mode, encoding, delay)
