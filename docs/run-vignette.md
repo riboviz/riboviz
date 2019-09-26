@@ -239,7 +239,7 @@ $ echo ${PIPESTATUS[0]}
 
 If all went well an exit code of 0 will be returned.
 
-Information on the key steps during processing is displayed. More detailed information, including the causes of any errors, is also added to a log file in the current directory e.g. `riboviz.log`. 
+Information on the key steps during processing is displayed. More detailed information, including the causes of any errors, is also added to a timestamped log file in the current directory e.g. `riboviz.20190926-002455.log`.
 
 Log files for each processing step will be placed in a timestamped sub-directory of `vignette/logs/` e.g. `vignette/logs/20190919-070625`. After a successful run, the log files would be:
 
@@ -488,16 +488,16 @@ $ PYTHONPATH=. python riboviz/tools/prep_riboviz.py --dry-run rscripts/ \
 
 You can customise logging by editing the file `riboviz/logging.yaml`
 
-If you want `riboviz.log` to include a timestamp (e.g. `riboviz.20190920-005529-644421.log`) then edit this file and replace:
+If you do not want `riboviz.log` to include a timestamp (i.e. you want `riboviz.log`) then edit this file and replace:
 
 ```yaml
-  handlers: [console, file_handler]
+  handlers: [console, timestamp_file_handler]
 ```
 
 with:
 
 ```yaml  
-  handlers: [console, timestamp_file_handler]
+  handlers: [console, file_handler]
 ```
 
 ---
