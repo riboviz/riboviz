@@ -284,6 +284,112 @@ $ 2to3 riboviz/validation.py
 
 ---
 
+## Handling missing configuration values
+
+### YAML `NULL` and Python `None`
+
+If a parameter in a YAML file has value `null`, `NULL` or no value at all then, after reading the file into Python (using the `yaml` library), it will have value `None`. For example, given a YAML file with:
+
+```yaml
+a: null
+b: NULL
+c:
+```
+
+Loading this with
+
+```python
+with open("config.yml") as f:
+    config = yaml.load(f, Loader=yaml.SafeLoader)
+```
+
+would result in the following all having value `None`:
+
+```python
+config['a']
+config['b']
+config['c']
+```
+
+### Check for missing or `None` values in Python dictionaries
+
+A common pattern to check for missing or `None` values is:
+
+```python
+if 'some_key' not in config or config['some_key'] is None:
+    # Some action if configuration is missing
+    # e.g. set a default value, for optional configuration
+    # e.g. raise an error, for mandatory configuration
+```
+
+### `NULL` vs. `NA` in R command-line parsing
+
+When defining command-line parameters for R scripts using `make_option`, one can specify a default value of `NULL` or `NA` for optional parameters. Each of these behaves in a different way.
+
+Consider a script which defines the following command-line options, all of which declare `default=NULL`:
+
+```R
+make_option("--t_rna", type="character", default=NULL),
+make_option("--codon_pos", type="character", default=NULL),
+make_option("--orf_gff_file", type="character", default=NULL),
+make_option("--features_file", type="character", default=NULL),
+```
+
+and which then reads in the options into an `opt` variable and prints this variable:
+
+```R
+opt <- parse_args(OptionParser(option_list=option_list))
+attach(opt)
+print("Running with parameters:")
+opt
+```
+
+If we run this script with one of these arguments, we see that only that argument is present in `opt`:
+
+```console
+$ Rscript script.R --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3
+
+Running with parameters:
+
+$orf_gff_file
+[1] "vignette/input/yeast_YAL_CDS_w_250utrs.gff3"
+```
+
+Suppose, however, we declare `default=NA`:
+
+```R
+  make_option("--t_rna", type="character", default=NA),
+  make_option("--codon_pos", type="character", default=NA),
+  make_option("--orf_gff_file", type="character", default=NA),
+  make_option("--features_file", type="character", default=NA),
+```
+
+If we now run the script, we see that all the arguments are present in `opt`:
+
+```console
+$ Rscript script.R --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3
+
+Running with parameters:
+
+$t_rna
+[1] NA
+
+$codon_pos
+[1] NA
+
+$orf_gff_file
+[1] "vignette/input/yeast_YAL_CDS_w_250utrs.gff3"
+
+$features_file
+[1] NA
+```
+
+i.e. the options are present but with value `NA`. When defining optional command-line parameters in R, we recommend the use of `default=NA`, and not `default=NULL`, so the option is in the variable holding the parsed options.
+
+If refactoring existing code then calls to `is.null` can be replaced by calls to `is.na`.
+
+---
+
 ## Repository structure
 
 ```
