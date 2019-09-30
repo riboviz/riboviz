@@ -364,6 +364,8 @@ def process_sample(sample,
            "--codon_pos=" + config["codon_pos"],
            "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
+    if "count_threshold" in config and config["count_threshold"] is not None:
+        cmd.append("--count_threshold=" + str(config["count_threshold"]))
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     LOGGER.info("Finished processing sample: %s", fastq)
 
