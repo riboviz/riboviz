@@ -148,10 +148,14 @@ def create_simulated_fastq_files(output_dir):
     umi_ye = "ATAA"  # 1 error in umi_y
     umi_z = "CGGC"
     umi_ze = "CTGC"  # 1 error in umi_x
+    umi_3_length = 4
     umi_5 = "AAAA"
     umi_5c = "CCCC"
+    umi_5_length = 4
 
     adaptor = "CTGTAGGCACC"  # Adaptor sequence used in vignette data
+
+    post_adaptor_nt = "AC"
 
     # Simulate raw data with 3' and 5' umi_s, i.e. desired input before
     # adaptor trimming.
@@ -171,16 +175,16 @@ def create_simulated_fastq_files(output_dir):
     # Extra nt past the adaptor for the shorter read.
     umi_5and3_4nt_adaptor_extra_nt_records = [
         make_fastq_record("EWSim5Umi5read_bUmiX.Keep",
-                          umi_5 + read_b + umi_x + adaptor + "AC"),
+                          umi_5 + read_b + umi_x + adaptor + post_adaptor_nt),
         make_fastq_record("EWSim6Umi5read_bUmiZ.Keep",
-                          umi_5 + read_b + umi_z + adaptor + "AC",
+                          umi_5 + read_b + umi_z + adaptor + post_adaptor_nt,
                           qualities=QUALITY_HIGH),
         make_fastq_record("EWSim7Umi5read_bUmiZ.Drop",
-                          umi_5 + read_b + umi_z + adaptor + "AC"),
+                          umi_5 + read_b + umi_z + adaptor + post_adaptor_nt),
         make_fastq_record("EWSim8Umi5read_bUmiZe.Drop",
-                          umi_5 + read_b + umi_ze + adaptor + "AC"),
+                          umi_5 + read_b + umi_ze + adaptor + post_adaptor_nt),
         make_fastq_record("EWSim9Umi5Cread_bUmiX.Keep",
-                          umi_5c + read_b + umi_x + adaptor + "AC")
+                          umi_5c + read_b + umi_x + adaptor + post_adaptor_nt)
     ]
     with open(os.path.join(output_dir, "simdata_UMI5and3_4nt_adaptor.fastq"),
               "w") as f:
@@ -196,7 +200,9 @@ def create_simulated_fastq_files(output_dir):
         for record in umi_5and3_4nt_adaptor_records
     ]
     umi_5and3_4nt_extra_nt_records = [
-        trim_fastq_record_trim_3prime(record, len(adaptor) + 2)
+        trim_fastq_record_trim_3prime(record,
+                                      len(adaptor) +
+                                      len(post_adaptor_nt))
         for record in umi_5and3_4nt_adaptor_extra_nt_records
     ]
     with open(os.path.join(output_dir, "simdata_UMI5and3_4nt.fastq"),
@@ -204,8 +210,7 @@ def create_simulated_fastq_files(output_dir):
         SeqIO.write(umi_5and3_4nt_records, f, FASTQ_FORMAT)
         SeqIO.write(umi_5and3_4nt_extra_nt_records, f, FASTQ_FORMAT)
 
-    # Simulate raw data with only 3' umi_, i.e. desired input after
-    # adaptor trimming.
+    # Simulate raw data with only 3' umi_.
     umi_3_4nt_records = [
         make_fastq_record("EWSim1ReadAUmiX.Keep",
                           read_a + umi_x,
@@ -223,6 +228,30 @@ def create_simulated_fastq_files(output_dir):
     with open(os.path.join(output_dir, "simdata_UMI3_4nt.fastq"),
               "w") as f:
         SeqIO.write(umi_3_4nt_records, f, FASTQ_FORMAT)
+
+    # Simulate raw data with no UMIs i.e. desired input after
+    # adaptor trimming and UMI extraction.
+    all_umi_5and3_4nt_records = umi_5and3_4nt_records \
+        + umi_5and3_4nt_extra_nt_records
+    extracted_umi_5and3_4nt_records = [
+        trim_fastq_record_trim_5prime(record, umi_5_length)
+        for record in all_umi_5and3_4nt_records
+    ]
+    extracted_umi_5and3_4nt_records = [
+        trim_fastq_record_trim_3prime(record, umi_3_length)
+        for record in extracted_umi_5and3_4nt_records
+    ]
+    with open(os.path.join(output_dir, "simdata_extracted_UMI5and3_4nt.fastq"),
+              "w") as f:
+        SeqIO.write(extracted_umi_5and3_4nt_records, f, FASTQ_FORMAT)
+
+    extracted_umi_3_4nt_records = [
+        trim_fastq_record_trim_3prime(record, umi_3_length)
+        for record in umi_3_4nt_records
+    ]
+    with open(os.path.join(output_dir, "simdata_extracted_UMI3_4nt.fastq"),
+              "w") as f:
+        SeqIO.write(extracted_umi_3_4nt_records, f, FASTQ_FORMAT)
 
 
 if __name__ == "__main__":
