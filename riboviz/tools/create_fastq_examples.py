@@ -83,7 +83,7 @@ def make_fastq_record(name, reads, scores=None, qualities=QUALITY_MEDIUM):
     return record
 
 
-def trim_fastq_record_trim_3prime(record, trim):
+def trim_fastq_record_trim_3prime(record, trim, add_trim=False, delimiter="_"):
     """
     Copy fastq record, but trim sequence and quality scores at 3' end
     by given length.
@@ -92,17 +92,24 @@ def trim_fastq_record_trim_3prime(record, trim):
     :type record: Bio.SeqRecord.SeqRecord
     :param trim: Number of nts to trim by
     :type trim: int
+    :param add_trim: Add subsequence that was removed to record ID
+    :type add_trim: bool
+    :param delimiter: Delimiter to use, if add_trim is True
+    :type delimiter: str or unicode
     :return: fastq record
     :rtype: Bio.SeqRecord.SeqRecord
     """
     quality = record.letter_annotations["phred_quality"]
     sequence = str(record.seq)
-    return make_fastq_record(record.id,
+    record_extension = ""
+    if add_trim:
+        record_extension = delimiter + sequence[-trim:]
+    return make_fastq_record(record.id + record_extension,
                              sequence[0:-trim],
                              quality[0:-trim])
 
 
-def trim_fastq_record_trim_5prime(record, trim):
+def trim_fastq_record_trim_5prime(record, trim, add_trim=False, delimiter="_"):
     """
     Copy fastq record, but trim sequence and quality scores at 5' end
     by given length.
@@ -111,12 +118,19 @@ def trim_fastq_record_trim_5prime(record, trim):
     :type record: Bio.SeqRecord.SeqRecord
     :param trim: Number of nts to trim by
     :type trim: int
+    :param add_trim: Add subsequence that was removed to record ID
+    :type add_trim: bool
+    :param delimiter: Delimiter to use, if add_trim is True
+    :type delimiter: str or unicode
     :return: fastq record
     :rtype: Bio.SeqRecord.SeqRecord
     """
     quality = record.letter_annotations["phred_quality"]
     sequence = str(record.seq)
-    return make_fastq_record(record.id,
+    record_extension = ""
+    if add_trim:
+        record_extension = delimiter + sequence[0:trim]
+    return make_fastq_record(record.id + record_extension,
                              sequence[trim:],
                              quality[trim:])
 
@@ -233,12 +247,16 @@ def create_simulated_fastq_files(output_dir):
     # adaptor trimming and UMI extraction.
     all_umi_5and3_4nt_records = umi_5and3_4nt_records \
         + umi_5and3_4nt_extra_nt_records
+    # Add UMI to record ID, using "_" delimiter for consistency with
+    # UMI-tools.
     extracted_umi_5and3_4nt_records = [
-        trim_fastq_record_trim_5prime(record, umi_5_length)
+        trim_fastq_record_trim_5prime(record, umi_5_length, True)
         for record in all_umi_5and3_4nt_records
     ]
+    # Add UMI to record ID, using "" delimiter for consistency with
+    # UMI-tools, which concatenates 5' and 3' UMIs.
     extracted_umi_5and3_4nt_records = [
-        trim_fastq_record_trim_3prime(record, umi_3_length)
+        trim_fastq_record_trim_3prime(record, umi_3_length, True, "")
         for record in extracted_umi_5and3_4nt_records
     ]
     with open(os.path.join(output_dir, "simdata_extracted_UMI5and3_4nt.fastq"),
@@ -246,7 +264,7 @@ def create_simulated_fastq_files(output_dir):
         SeqIO.write(extracted_umi_5and3_4nt_records, f, FASTQ_FORMAT)
 
     extracted_umi_3_4nt_records = [
-        trim_fastq_record_trim_3prime(record, umi_3_length)
+        trim_fastq_record_trim_3prime(record, umi_3_length, True)
         for record in umi_3_4nt_records
     ]
     with open(os.path.join(output_dir, "simdata_extracted_UMI3_4nt.fastq"),
