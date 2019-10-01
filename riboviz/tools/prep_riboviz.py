@@ -360,9 +360,9 @@ def process_sample(sample,
            "--rpf=" + str(config["rpf"]),
            "--dir_out=" + out_dir,
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
-    for flag in ["t_rna", "codon_pos", "features_file", "orf_gff_file"]:
+    for flag in ["t_rna", "codon_pos", "features_file", "orf_gff_file", "count_threshold"]:
         if flag in config and config[flag] is not None:
-            cmd.append("--" + flag + "=" + config[flag])
+            cmd.append("--" + flag + "=" + str(config[flag]))
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     LOGGER.info("Finished processing sample: %s", fastq)
 
