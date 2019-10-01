@@ -54,10 +54,12 @@ def configuration(arguments):
     index_dir = tempfile.mkdtemp("tmp_test_prep_riboviz_index")
     tmp_dir = tempfile.mkdtemp("tmp_test_prep_riboviz_tmp")
     out_dir = tempfile.mkdtemp("tmp_test_prep_riboviz_out")
+    logs_dir = tempfile.mkdtemp("tmp_test_prep_riboviz_logs")
 
     config["dir_index"] = index_dir
     config["dir_tmp"] = tmp_dir
     config["dir_out"] = out_dir
+    config["dir_logs"] = logs_dir
 
     with open(path, 'w') as f:
         yaml.dump(config, f)
@@ -67,6 +69,7 @@ def configuration(arguments):
     shutil.rmtree(index_dir)
     shutil.rmtree(tmp_dir)
     shutil.rmtree(out_dir)
+    shutil.rmtree(logs_dir)
 
 
 def test_config_error_missing_config_file(arguments):
