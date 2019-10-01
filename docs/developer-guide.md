@@ -261,6 +261,17 @@ riboviz/test/tools/test_prep_riboviz.py::test_config_error_missing_dir_in PASSED
 
 ---
 
+## Logging
+
+`prep_riboviz.py` logging is handled via Python's `logging` module. The configuration file is in `riboviz/logging.yaml`.
+
+A custom configuration file can be provided by defining a `RIBOVIZ_LOG_CONFIG` environment variable, for example:
+
+```console
+$ RIBOVIZ_LOG_CONFIG=custom_logging.yaml
+
+---
+
 ## Coding style
 
 Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible. For example, to run these on `validation.py`:
