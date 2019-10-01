@@ -358,14 +358,11 @@ def process_sample(sample,
            "--out_prefix=" + sample_out_prefix,
            "--orf_fasta=" + config["orf_fasta"],
            "--rpf=" + str(config["rpf"]),
-           "--orf_gff_file=" + config["orf_gff_file"],
            "--dir_out=" + out_dir,
-           "--t_rna=" + config["t_rna"],
-           "--codon_pos=" + config["codon_pos"],
-           "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
-    if "count_threshold" in config and config["count_threshold"] is not None:
-        cmd.append("--count_threshold=" + str(config["count_threshold"]))
+    for flag in ["t_rna", "codon_pos", "features_file", "orf_gff_file", "count_threshold"]:
+        if flag in config and config[flag] is not None:
+            cmd.append("--" + flag + "=" + str(config[flag]))
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     LOGGER.info("Finished processing sample: %s", fastq)
 
