@@ -152,9 +152,18 @@ tidy_datamat <- function(data_mat,startpos=1,startlen=1) {
 plot_ribogrid <- function(tidymat) {
   ggplot(data=tidymat,aes(x=Pos,y=ReadLen,fill=Counts)) +
     geom_tile() +
-    scale_fill_gradient(low = "white",high="darkblue") +
+    scale_fill_gradient("count",low = "white",high="darkblue") +
     theme(panel.grid=element_blank()) +
     labs(x="position of read 5' end", y="read length")
+}
+
+barplot_ribogrid <- function(tidymat,small_read_range=26:32) {
+  ggplot(data=filter(tidymat,ReadLen %in% small_read_range),
+  aes(x=Pos,y=Counts)) +
+    geom_col() +
+    facet_grid(ReadLen~.,scales="free_y") +
+    scale_y_continuous(expand=c(0,0)) + 
+    labs(x="position of read 5' end", y="count")
 }
 
 # get_gene_datamat_5start(gene="YAL003W",dataset="vignette",fid,gfff=gff) %>%
@@ -174,7 +183,6 @@ get_nt_period <- function(fid,gene,dataset,left,right){
 # NOTE: Do not use mclapply when accessing H5 data
 
 # Get gene and position specific total counts for all read lengths
-browser()
 gene_poslen_counts_5start <- 
   lapply(genes,
          get_gene_datamat_5start,
@@ -191,6 +199,12 @@ gene_poslen_counts_5start %>%
   plot_ribogrid %>%
   ggsave(filename = paste0(out_prefix,"_startcodon_ribogrid.pdf"),
       width=6,height=3)
+
+gene_poslen_counts_5start %>%
+  tidy_datamat(startpos=-nnt_buffer+1,startlen=MinReadLen) %>%
+  barplot_ribogrid %>%
+  ggsave(filename = paste0(out_prefix,"_startcodon_ribogridbar.pdf"),
+      width=6,height=5)
 
 gene_poslen_counts_3end <- 
   lapply(genes,
