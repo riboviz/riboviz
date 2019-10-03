@@ -13,6 +13,11 @@ suppressMessages(library(magrittr, quietly = T))
 theme_set( theme_bw() )
 
 # define input options for optparse package
+# Flic: NULLs changed to NA as otherwise length(option_list)= 17 
+  # while `opt <- parse_args(OptionParser(option_list=option_list))` gave length(opt)=14 
+  # this discarded 4 make_option()s (those set default=NULL): 
+  # --t_rna, --codon_pos, --orf_gff_file & --features_file
+  # while OptionParser added help option to the list, bringing length to 14 (still dropping 4 options)
 option_list <- list( 
   make_option("--Ncores", type="integer", default=1,
               help="Number of cores for parallelization"),
@@ -36,13 +41,13 @@ option_list <- list(
               help="Is the dataset an RPF or mRNA dataset?"),
   make_option("--dir_out", type="character", default="./",
               help="Output directory"),
-  make_option("--t_rna", type="character", default=NULL,
+  make_option("--t_rna", type="character", default=NA,
               help="tRNA estimates in .tsv file"),
-  make_option("--codon_pos", type="character", default=NULL,
+  make_option("--codon_pos", type="character", default=NA,
               help="Codon positions in each gene in .Rdata file"),
-  make_option("--orf_gff_file", type="character", default=NULL,
+  make_option("--orf_gff_file", type="character", default=NA,
               help="riboviz generated GFF2/GFF3 annotation file"),
-  make_option("--features_file", type="character", default=NULL,
+  make_option("--features_file", type="character", default=NA,
               help="features file, columns are gene features and rows are genes"),
   make_option("--count_threshold", type="integer", default=64,
               help="threshold for count of reads per gene to be included in plot"),
@@ -55,11 +60,35 @@ option_list <- list(
 )
 
 # Read in commandline arguments
+# Flic: length(opt) = length(option_list) + 1 as OptionParse(add_help_option = TRUE) default is left as-is
+  # this means "a standard help option should be automatically added to the OptionParser instance"
+  # didn't remove that default, so length(opt) still =18
 opt <- parse_args(OptionParser(option_list=option_list))
 attach(opt)
 
 print("generate_stats_figs.R running with parameters:")
 opt
+
+# Flic: checking for any NULLs passed in from other scripts wouldn't work due to NULL behaviour as this test shows:
+  # length(opt) # 18, including the extra help
+  # opt$features_file <- NULL
+  # length(opt) # 17, setting it to NULL has dropped opt$features
+# Instead need to check for any missing options.
+
+# How best to check ^? Simple but not clever test: 
+  # if(length(opt)==18){print("no dropped options")} 
+# This isn't ideal for example if we then edit out the extra help test; 
+# we'd be looking for 17 parameters & test would show FALSE despite script working as intended
+# check by name
+  # opt$features_file 
+  # opt$t_rna
+  # opt$codon_pos
+
+# THOUGHT: 
+# If the arguments were passed into script as NULL, they'd be immediately dropped
+# Therefore if they were missing, they'd be created and set to the default?
+# Therefore if they were brought in as NULL, they'd be set to NA
+# So they should end up here anyway and work as expected as NA values?
 
 ### Prepare files
 fid <- H5Fopen(hdFile) # Filehandle for the h5 file
@@ -557,89 +586,93 @@ write.table(tpms,file=paste0(out_prefix,"_tpms.tsv"),
 #####################################################################################
 #####################################################################################
 ### Correlations between TPMs of genes with their sequence-based features
-
-if ( !is.null( features_file) ) {
-print("Starting: Correlations between TPMs of genes with their sequence-based features")
-
-features <- read.table(features_file,h=T)
-# features <- features[match(genes,features$ORF),] 
-# features <- features[!is.na(features$ORF),]
-# features <- merge(features,tpms,by="ORF")
-
-
-# Prepare data for plot
-# Consider only genes with at least count_threshold mapped reads
-
-plot_data <- merge(features,tpms,by="ORF") %>%
+if ( !is.na( features_file) ) {
+  print("Starting: Correlations between TPMs of genes with their sequence-based features")
+  
+  features <- read.table(features_file,h=T)
+  # features <- features[match(genes,features$ORF),] 
+  # features <- features[!is.na(features$ORF),]
+  # features <- merge(features,tpms,by="ORF")
+  
+  
+  # Prepare data for plot
+  # Consider only genes with at least count_threshold mapped reads
+  
+  plot_data <- merge(features,tpms,by="ORF") %>%
     filter(readcount >= count_threshold, !is.na(ORF)) %>%
     select(-readcount,-rpb) %>%
     gather(Feature,Value, -ORF, -tpm)
-
-features_plot <- ggplot(plot_data, aes(x=tpm, y=Value)) +
-  geom_point(alpha=0.3) +
-  facet_wrap(~Feature,scales="free") +
-  scale_x_log10() +
-  geom_smooth(method="lm") +
-  xlab("TPM (transcripts per million)")
-
-# Save plot and file
-ggsave(features_plot, filename = paste0(out_prefix,"_features.pdf"))
-
-print("Completed: Correlations between TPMs of genes with their sequence-based features")
+  
+  features_plot <- ggplot(plot_data, aes(x=tpm, y=Value)) +
+    geom_point(alpha=0.3) +
+    facet_wrap(~Feature,scales="free") +
+    scale_x_log10() +
+    geom_smooth(method="lm") +
+    xlab("TPM (transcripts per million)")
+  
+  # Save plot and file
+  ggsave(features_plot, filename = paste0(out_prefix,"_features.pdf"))
+  
+  print("Completed: Correlations between TPMs of genes with their sequence-based features")
+} else {
+  print("Skipped: Correlations between TPMs of genes with their sequence-based features - features_file.tsv not provided")
 }
 
 #####################################################################################
 #####################################################################################
 ### Codon-specific ribosome densities for correlations with tRNAs
-
-print("Starting: Codon-specific ribosome densities for correlations with tRNAs")
-
-# Only for RPF datasets
-if(rpf){ 
-  # This still depends on yeast-specific arguments and should be edited.
-  yeast_tRNAs <- read.table(t_rna,h=T) # Read in yeast tRNA estimates
-  load(codon_pos) # Position of codons in each gene (numbering ignores first 200 codons)
-                  # Reads in an object named "codon_pos"
-  out <- lapply(genes,function(gene){
-    # From "Position specific distribution of reads" plot
-    get_cod_pos_reads(fid=fid,gene=gene,dataset=dataset,left=(Buffer-15),right=(Buffer+11),MinReadLen = MinReadLen)}) # Get codon-based position-specific reads for each gene
-  names(out) <- genes
-
-  gene_len <- sapply(out,length)  # Calculate gene length in codons
-  out <- out[gene_len>201]  # Ignore genes with <=200 sense codons
+if(!is.na(t_rna) & !is.na(codon_pos)) {
+  print("Starting: Codon-specific ribosome densities for correlations with tRNAs")
   
-  trim_out <- lapply(out,function(x){x[201:(length(x)-1)]}) # Trim first 200 codons and stop codon from each gene
-  read_counts_trim <- sapply(trim_out,sum)  # Calculate read counts in trimmed genes
-  trim_out <- trim_out[read_counts_trim>=64]  # Ignore genes with fewer than 64 mapped reads
-
-  norm_out <- lapply(trim_out,function(x){x/mean(x)}) # Normalize reads in each gene by their mean
-
-  # Calculate codon-specific mean ribosome-densities at A/P/E sites of the mapped reads
-  a_mn <- sapply(names(codon_pos),function(codon){mean(unlist(apply(codon_pos[[codon]],1,function(a){pos <- as.numeric(a[2]);norm_out[[a[1]]][pos]})),na.rm=T)})
-  p_mn <- sapply(names(codon_pos),function(codon){mean(unlist(apply(codon_pos[[codon]],1,function(a){pos <- as.numeric(a[2])+1;norm_out[[a[1]]][pos]})),na.rm=T)})
-  e_mn <- sapply(names(codon_pos),function(codon){mean(unlist(apply(codon_pos[[codon]],1,function(a){pos <- as.numeric(a[2])+2;norm_out[[a[1]]][pos]})),na.rm=T)})
-
-  # Sort the values
-  A <- a_mn[order(names(codon_pos))]
-  P <- p_mn[order(names(codon_pos))]
-  E <- e_mn[order(names(codon_pos))]
-
-  out_df <- cbind(yeast_tRNAs,A,P,E)
+  # Only for RPF datasets
+  if(rpf){ 
+    # This still depends on yeast-specific arguments and should be edited.
+    yeast_tRNAs <- read.table(t_rna,h=T) # Read in yeast tRNA estimates
+    load(codon_pos) # Position of codons in each gene (numbering ignores first 200 codons)
+    # Reads in an object named "codon_pos"
+    out <- lapply(genes,function(gene){
+      # From "Position specific distribution of reads" plot
+      get_cod_pos_reads(fid=fid,gene=gene,dataset=dataset,left=(Buffer-15),right=(Buffer+11),MinReadLen = MinReadLen)}) # Get codon-based position-specific reads for each gene
+      names(out) <- genes
+    
+    gene_len <- sapply(out,length)  # Calculate gene length in codons
+    out <- out[gene_len>201]  # Ignore genes with <=200 sense codons
+    
+    trim_out <- lapply(out,function(x){x[201:(length(x)-1)]}) # Trim first 200 codons and stop codon from each gene
+    read_counts_trim <- sapply(trim_out,sum)  # Calculate read counts in trimmed genes
+    trim_out <- trim_out[read_counts_trim>=64]  # Ignore genes with fewer than 64 mapped reads
+    
+    norm_out <- lapply(trim_out,function(x){x/mean(x)}) # Normalize reads in each gene by their mean
+    
+    # Calculate codon-specific mean ribosome-densities at A/P/E sites of the mapped reads
+    a_mn <- sapply(names(codon_pos),function(codon){mean(unlist(apply(codon_pos[[codon]],1,function(a){pos <- as.numeric(a[2]);norm_out[[a[1]]][pos]})),na.rm=T)})
+    p_mn <- sapply(names(codon_pos),function(codon){mean(unlist(apply(codon_pos[[codon]],1,function(a){pos <- as.numeric(a[2])+1;norm_out[[a[1]]][pos]})),na.rm=T)})
+    e_mn <- sapply(names(codon_pos),function(codon){mean(unlist(apply(codon_pos[[codon]],1,function(a){pos <- as.numeric(a[2])+2;norm_out[[a[1]]][pos]})),na.rm=T)})
+    
+    # Sort the values
+    A <- a_mn[order(names(codon_pos))]
+    P <- p_mn[order(names(codon_pos))]
+    E <- e_mn[order(names(codon_pos))]
+    
+    out_df <- cbind(yeast_tRNAs,A,P,E)
+    
+    # Prepare data for plot
+    plot_data <- out_df %>% 
+      gather(tRNA_type,tRNA_value,3:6) %>% 
+      gather(Site,Ribodens,3:5)
+    
+    cod_dens_tRNA_plot <- ggplot(plot_data, aes(x=tRNA_value, y=Ribodens)) +
+      geom_point(alpha=0.3) +
+      facet_grid(Site~tRNA_type,scales="free_x") +
+      geom_smooth(method = "lm") +
+      theme(axis.text.x=element_text(angle=45, hjust=1))
+    
+    # Save plot and file
+    ggsave(cod_dens_tRNA_plot, filename = paste0(out_prefix,"_codon_ribodens.pdf"))
+    write.table(out_df,file=paste0(out_prefix,"_codon_ribodens.tsv"),sep="\t",row=F,col=T,quote=F)
+  }
   
-  # Prepare data for plot
-  plot_data <- out_df %>% 
-    gather(tRNA_type,tRNA_value,3:6) %>% 
-    gather(Site,Ribodens,3:5)
-  
-  cod_dens_tRNA_plot <- ggplot(plot_data, aes(x=tRNA_value, y=Ribodens)) +
-    geom_point(alpha=0.3) +
-    facet_grid(Site~tRNA_type,scales="free_x") +
-    geom_smooth(method = "lm") +
-    theme(axis.text.x=element_text(angle=45, hjust=1))
-  
-  # Save plot and file
-  ggsave(cod_dens_tRNA_plot, filename = paste0(out_prefix,"_codon_ribodens.pdf"))
-  write.table(out_df,file=paste0(out_prefix,"_codon_ribodens.tsv"),sep="\t",row=F,col=T,quote=F)
+  print("Completed: Codon-specific ribosome densities for correlations with tRNAs")
+} else {
+  print("Skipped: Codon-specific ribosome densities for correlations with tRNAs - t_rna file and/or codon_pos file not provided")
 }
-
-print("Completed: Codon-specific ribosome densities for correlations with tRNAs")
