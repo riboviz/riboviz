@@ -59,8 +59,7 @@ Exit codes are as follows:
 * EXIT_COLLATION_ERROR (5): Error occurred during TPMs collation.
 
 Commands that are submitted to bash are recorded within a
-file specified by a cmd_file configuration parameter, default
-prep_riboviz.sh.
+file specified by a cmd_file configuration parameter.
 
 If --dry-run is provided then the commands submitted to bash will not
 be executed. This can be useful for seeing what commands will be run
@@ -359,12 +358,11 @@ def process_sample(sample,
            "--out_prefix=" + sample_out_prefix,
            "--orf_fasta=" + config["orf_fasta"],
            "--rpf=" + str(config["rpf"]),
-           "--orf_gff_file=" + config["orf_gff_file"],
            "--dir_out=" + out_dir,
-           "--t_rna=" + config["t_rna"],
-           "--codon_pos=" + config["codon_pos"],
-           "--features_file=" + config["features_file"],
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
+    for flag in ["t_rna", "codon_pos", "features_file", "orf_gff_file", "count_threshold"]:
+        if flag in config and config[flag] is not None:
+            cmd.append("--" + flag + "=" + str(config[flag]))
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     LOGGER.info("Finished processing sample: %s", fastq)
 
@@ -448,7 +446,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
     if "cmd_file" in config:
         cmd_file = config["cmd_file"]
     else:
-        cmd_file = "prep_riboviz.sh"
+        cmd_file = "run_riboviz_vignette.sh"
     LOGGER.info("Command file: %s", cmd_file)
     if os.path.exists(cmd_file):
         os.remove(cmd_file)
