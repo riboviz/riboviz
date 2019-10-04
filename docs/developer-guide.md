@@ -78,13 +78,13 @@ To request that a branch be merged into the `develop` branch create a new pull r
 
 It can be run as follows:
 
-* Python 3:
+* Either:
 
 ```console
 $ python -m riboviz.tools.compare_files <FILE1> <FILE2>
 ```
 
-* Python 2 or 3:
+* Or:
 
 ```console
 $ PYTHONPATH=. python riboviz/tools/compare_files.py <FILE1> <FILE2>
@@ -245,10 +245,7 @@ Run tests of error conditions and exit codes:
 ```console
 $ pytest -v riboviz/test/tools/test_prep_riboviz.py 
 ============================= test session starts ==============================
-platform linux2 -- Python 2.7.16, pytest-4.6.2, py-1.8.0, pluggy-0.12.0 -- /home/centos/miniconda2/bin/python
-cachedir: .pytest_cache
-rootdir: /home/centos/RiboViz
-collected 5 items                                                              
+...
 
 riboviz/test/tools/test_prep_riboviz.py::test_config_error_missing_config_file PASSED [ 20%]
 riboviz/test/tools/test_prep_riboviz.py::test_index_error_missing_fa PASSED    [ 40%]

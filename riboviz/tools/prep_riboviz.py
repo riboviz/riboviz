@@ -32,10 +32,8 @@ Prepare ribosome profiling data for RiboViz or other analysis:
 * - Parallelize over many processes (config["nprocesses"]):
 *   - This value is used to configure hisat2, samtools sort,
 *     bam_to_h5.R and generate_stats_figs.R.
-*   - For cutadapt and Python 3, the number of available processors
+*   - For cutadapt the number of available processors
 *     on the host will be used.
-*   - For cutadapt and Python 2, its default of 1 processor will be
-*     used as cutadapt cannot run in parallel under Python 2.
 * - Make length-sensitive alignments in compressed h5 format by
 *   running "bam_to_h5.R".
 * - Generate summary statistics, and analyses and QC plots for both
@@ -115,8 +113,7 @@ def build_indices(fasta, ht_prefix, file_type, logs_dir, cmd_file,
     :param dry_run: Don't execute workflow commands (useful for seeing
     what commands would be executed)
     :type dry_run: bool
-    :raise OSError: if hisat2-build cannot be found (Python 2)
-    :raise FileNotFoundError: if hisat2-build cannot be found (Python 3)
+    :raise FileNotFoundError: if hisat2-build cannot be found
     :raise AssertionError: if hisat2-build returns non-zero exit
     code
     """
@@ -185,10 +182,9 @@ def process_sample(sample,
     :param dry_run: Don't execute workflow commands (useful for seeing
     what commands would be executed)
     :type dry_run: bool
-    :raise IOError: if fastq cannot be found (Python 2)
-    :raise OSError: if a third-party tool cannot be found (Python 2)
+    :raise OSError: if a third-party tool cannot be found
     :raise FileNotFoundError: if fastq or a third-party tool cannot be
-    found (Python 3)
+    found
     :raise AssertionError: if invocation of a third-party tool returns
     non-zero exit code
     :raise KeyError: if config is missing required configuration
@@ -213,11 +209,8 @@ def process_sample(sample,
     trim_fq = os.path.join(tmp_dir, sample + "_trim.fq")
     cmd = ["cutadapt", "--trim-n", "-O", "1", "-m", "5",
            "-a", config["adapters"], "-o", trim_fq, fastq]
-    py_major = sys.version_info.major
-    if py_major == 3:
-        # cutadapt and Python 3 allows all available processors to
-        # be requested.
-        cmd += ["-j", str(0)]
+    # cutadapt allows all available processors to be requested.
+    cmd += ["-j", str(0)]
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
@@ -385,8 +378,7 @@ def collate_tpms(out_dir, samples, r_scripts, logs_dir, cmd_file,
     :param dry_run: Don't execute workflow commands (useful for seeing
     what commands would be executed)
     :type dry_run: bool
-    :raise OSError: if Rscript cannot be found (Python 2)
-    :raise FileNotFoundError: if Rscript cannot be found (Python 3)
+    :raise FileNotFoundError: if Rscript cannot be found
     :raise AssertionError: if collate_tpms.R returns non-zero exit
     code
     """

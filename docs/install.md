@@ -157,46 +157,13 @@ $ sudo yum install -y pigz
 
 Web site: [python](https://www.python.org/)
 
-It is strongly recommended that you use [Miniconda](https://conda.io/miniconda.html) Python 2.7+ or 3.6+. Alternatively, use the [Anaconda Distribution](https://www.anaconda.com/distribution/) of Python 2.7+ or 3.6+.
+It is strongly recommended that you use [Miniconda](https://conda.io/miniconda.html) Python 3.6+. Alternatively, use the [Anaconda Distribution](https://www.anaconda.com/distribution/) of Python 3.6+.
 
 The instructions which follow have been written under the assumption that you are using Miniconda Python. If using Anaconda then, when installing some packages, you will be told that they are already available. This is because Anaconda comes with a wide range of common Python packages.
 
 If you are using other distributions of Python you will need to consult the relevant documentation for each package for installation information.
 
-### Miniconda Python 2.7+
-
-Install:
-
-```console
-$ wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda2.sh
-$ bash miniconda2.sh -b -p $HOME/miniconda2
-```
-
-**Note:** make sure you use `-O`, which provides a name for the downloaded file, and not `-o`, which provides the name of a file for messages about the download.
-
-Activate environment and check:
-
-```console
-$ source $HOME/miniconda2/bin/activate
-$ python -V
-Python 2.7.16 :: Anaconda, Inc.
-```
-
-Your version of Python may differ from that shown.
-
-**Troubleshooting: `...command not found...`**
-
-If you see:
-
-```
-$ bash miniconda2.sh -b -p $HOME/miniconda2
-
-miniconda2.sh: line 1: --2019-07-31: command not found
-miniconda2.sh: line 2: syntax error near unexpected token `('
-miniconda2.sh: line 2: `Resolving repo.continuum.io (repo.continuum.io)... 104.18.200.79, 104.18.201.79, 2606:4700::6812:c94f, ...'
-```
-
-then rerun `wget` and use `-O`, not `-o`.
+**Note:** RiboViz is **not** compatible with Python 2. Python 2 comes to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
 
 ### Miniconda Python 3.6+
 
@@ -268,8 +235,6 @@ Check package has installed `cutadapt` tool:
 $ cutadapt --v
 2.3
 ```
-
-**Note:** for Python 2.7 the version could be 1.18. It is OK to use this version.
 
 ### pysam
 
