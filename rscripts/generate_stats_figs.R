@@ -97,7 +97,7 @@ option_list <- list(
 
 # read in commandline arguments
   # Flic: OptionParse(add_help_option = TRUE) default - remove?
-opt <- parse_args(OptionParser(option_list = option_list))
+opt <- optparse::parse_args(OptionParser(option_list = option_list))
 attach(opt)
 
 print("generate_stats_figs.R running with parameters:")
@@ -568,24 +568,24 @@ print("Completed: Position specific distribution of reads")
 print("Starting: Calculate TPMs of genes")
 
 # Read length-specific total counts stored as attributes of 'reads_total' in H5 file
-get_gene_len <- function(gene,ffid=hdf5file) {
-    start_codon_pos <- H5Aread(H5Aopen(H5Gopen(ffid,paste0("/",gene,"/",dataset,"/reads")),"start_codon_pos"))[1]
-    stop_codon_pos <- H5Aread(H5Aopen(H5Gopen(ffid,paste0("/",gene,"/",dataset,"/reads")),"stop_codon_pos"))[1]
+get_gene_len <- function(gene,hdf5file=hdf5file) {
+    start_codon_pos <- H5Aread(H5Aopen(H5Gopen(hdf5file,paste0("/",gene,"/",dataset,"/reads")),"start_codon_pos"))[1]
+    stop_codon_pos <- H5Aread(H5Aopen(H5Gopen(hdf5file,paste0("/",gene,"/",dataset,"/reads")),"stop_codon_pos"))[1]
     return(stop_codon_pos - start_codon_pos)
 }
 
-get_gene_reads_total <- function(gene,ffid=hdf5file) {
-    H5Aread(H5Aopen(H5Gopen(ffid,paste0("/",gene,"/",dataset,"/reads")),"reads_total"))
+get_gene_reads_total <- function(gene,hdf5file=hdf5file) {
+    H5Aread(H5Aopen(H5Gopen(hdf5file,paste0("/",gene,"/",dataset,"/reads")),"reads_total"))
 }
 
-get_gene_readdensity <- function(gene,ffid=hdf5file,buffer=50) {
+get_gene_readdensity <- function(gene,hdf5file=hdf5file,buffer=50) {
     # buffer
-    get_gene_reads_total(gene,ffid) / ( get_gene_len(gene,ffid) + 50 )
+    get_gene_reads_total(gene,hdf5file) / ( get_gene_len(gene,hdf5file) + 50 )
 }
 
 # Calculate transcripts per million (TPM)
-gene_sp_reads <- sapply(genes, get_gene_reads_total, ffid=hdf5file)
-reads_per_b <- sapply(genes, get_gene_readdensity, ffid=hdf5file)
+gene_sp_reads <- sapply(genes, get_gene_reads_total, hdf5file=hdf5file)
+reads_per_b <- sapply(genes, get_gene_readdensity, hdf5file=hdf5file)
 
 tpms <- data.frame(ORF=genes,
                    readcount=gene_sp_reads,
