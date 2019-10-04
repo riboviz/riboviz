@@ -106,21 +106,22 @@ opt
 # prepare files
 hdf5file <- rhdf5::H5Fopen(hdFile) # filehandle for the h5 file
 
-# # Read in the positions of all exons/genes in GFF format and subset CDS locations
+# read in positions of all exons/genes in GFF format and subset CDS locations
+# Flic: rhdf5::h5ls() # reads content of HDF5 file; 
+# Flic: h5ls(recursive=1) indicates max level of hierarchy shown
 genes <- h5ls(hdf5file,recursive = 1)$name
 
-# Read in coding sequences
-cod_seq <- readDNAStringSet(orf_fasta)
+# read in coding sequences
+# Flic: Biostrings::readDNAStringSet()
+codingSeqs <- readDNAStringSet(orf_fasta)
 
-# Range of read lengths 
+# range of read lengths between parameters set in config file
 read_range <- MinReadLen:MaxReadLen
 
-# Read in the positions of all exons/genes in GFF format and subset CDS locations
+# read in positions of all exons/genes in GFF format and subset CDS locations
 gff <- readGFFAsGRanges(orf_gff_file)
 
-#####################################################################################
-#####################################################################################
-### Check for 3nt periodicity
+## check for 3nt periodicity
 print("Starting: Check for 3nt periodicity")
 
 get_gene_datamat <- function(gene,dataset,hdf5file) {
@@ -331,7 +332,7 @@ get_nt_read_pos <- function(hdf5file,gene,dataset,lid,MinReadLen){
 cons_mat <- function(gene,pos_IR,type="count",cframe=0,lid){
   pos_IR_frame <- pos_IR[start(pos_IR)%%3==cframe]  # Get position-specific reads of a particular length and ORF frame
   if(length(pos_IR_frame)){   
-    pos_nt <- consensusMatrix(extractAt(cod_seq[[gene]],pos_IR_frame))[1:4,] # Get position-specific nucleotide counts
+    pos_nt <- consensusMatrix(extractAt(codingSeqs[[gene]],pos_IR_frame))[1:4,] # Get position-specific nucleotide counts
     if(type=="freq"){   
       pos_nt <- pos_nt/colSums(pos_nt)  # Select frequencies instead of counts
     }
