@@ -91,7 +91,7 @@ option_list <- list(
   ),
   make_option("--nnt_gene",
     type = "integer", default = 50,
-    help = "nnucleotides of gene to include in metagene plots"
+    help = "n nucleotides of gene to include in metagene plots"
   )
 )
 
@@ -104,12 +104,13 @@ print("generate_stats_figs.R running with parameters:")
 opt
 
 # prepare files
-hdf5file <- rhdf5::H5Fopen(hdFile) # filehandle for the h5 file
+# Flic: rhdf5::H5Fopen() # opens hdf5 file connection
+hdf5file <- H5Fopen(hdFile) # filehandle for the h5 file
 
 # read in positions of all exons/genes in GFF format and subset CDS locations
 # Flic: rhdf5::h5ls() # reads content of HDF5 file; 
 # Flic: h5ls(recursive=1) indicates max level of hierarchy shown
-gene_names <- h5ls(hdf5file,recursive = 1)$name
+gene_names <- h5ls(hdf5file, recursive = 1)$name
 
 # read in coding sequences
 # Flic: Biostrings::readDNAStringSet()
@@ -119,40 +120,37 @@ coding_seqs <- readDNAStringSet(orf_fasta)
 read_range <- MinReadLen:MaxReadLen
 
 # read in positions of all exons/genes in GFF format and subset CDS locations
-# Flic: which package(s) does this come from? Explain 'subset CDS locations'
+# Flic: which package does this come from? Explain 'subset CDS locations' more
 gff <- readGFFAsGRanges(orf_gff_file)
 
 # check for 3nt periodicity
 print("Starting: Check for 3nt periodicity")
 
-get_gene_datamat <- function(gene,dataset,hdf5file) {
-  # get data matrix of read counts for gene and dataset from hd5 file hdf5file
-  data_mat <- H5Dread(H5Dopen(hdf5file,paste0("/",gene,"/",dataset,"/reads/data"))) 
+# function to get data matrix of read counts for gene and dataset from hdf5file
+GetGeneDatamatrix <- function(gene, dataset, hdf5file) {
+  data_mat <- H5Dread(H5Dopen(hdf5file, paste0("/", gene, "/", dataset, "/reads/data")))
   return(data_mat)
 }
 
-get_gene_datamat_5start <- function(gene,dataset,hdf5file,gfff,n_buffer=25,n_gene=50) {
-  # get data matrix of read counts from n_buffer before start codon to n_gene after
-  # for gene and dataset from hd5 file hdf5file, using UTR5 annotations in gfff
-  # if n_buffer bigger than length n_utr5, pad with zeros.
-  data_mat_all <- get_gene_datamat(gene,dataset,hdf5file)  
-  n_utr5 <- width(gfff[gfff$type=="UTR5" & gfff$Name==gene])
-  if(n_utr5 >= n_buffer) {
-    # length n_utr5 bigger than n_buffer
+# function to get matrix of read counts from n_buffer before start codon to n_gene after
+# for gene and dataset from hd5 file hdf5file, using UTR5 annotations in gfff
+# Flic: sort out the comment, gfff, nnt_buffer etc
+GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, gfff, n_buffer = 25, n_gene = 50) {
+  data_mat_all <- GetGeneDatamatrix(gene, dataset, hdf5file)  
+  n_utr5 <- width(gfff[gfff$type == "UTR5" & gfff$Name == gene])
+  # if n_buffer bigger than length n_utr5, pad with zeros:
+  if (n_utr5 >= n_buffer) {
+    # if length n_utr5 bigger than n_buffer
     n_left5  <- n_utr5 - n_buffer + 1 # column to start from (5'end)
-    zeropad5_mat <- matrix(0, 
-                           nrow=nrow(data_mat_all),
-                           ncol=0)
+    zeropad5_mat <- matrix(0, nrow=nrow(data_mat_all), ncol=0)
   } else {
-    # length n_utr5 less than n_buffer
+    # if length n_utr5 less than n_buffer
     n_left5  <- 1 # column to start from (5'end)
-    zeropad5_mat <- matrix(0, 
-                           nrow=nrow(data_mat_all),
-                           ncol=n_buffer - n_utr5 )
+    zeropad5_mat <- matrix(0, nrow = nrow(data_mat_all), ncol = (n_buffer - n_utr5))
   }
   n_right3 <- n_utr5 + n_gene # column to end with (3'end)
-  data_mat_5start <- data_mat_all[,n_left5:n_right3] 
-  return(  cbind(zeropad5_mat, data_mat_5start) )
+  data_mat_5start <- data_mat_all[, n_left5:n_right3] 
+  return(cbind(zeropad5_mat, data_mat_5start))
 }
 
 get_gene_datamat_3end <- function(gene,dataset,hdf5file,gfff,n_buffer=25,n_gene=50) {
@@ -160,7 +158,7 @@ get_gene_datamat_3end <- function(gene,dataset,hdf5file,gfff,n_buffer=25,n_gene=
   # for gene and dataset from hd5 file hdf5file, using UTR3 annotations in gfff
   # if n_buffer bigger than length n_utr3, pad with zeros.
   # CHECK startpos/off-by-one 
-  data_mat_all <- get_gene_datamat(gene,dataset,hdf5file)
+  data_mat_all <- GetGeneDatamatrix(gene,dataset,hdf5file)
   n_all  <- ncol(data_mat_all)
   n_utr3 <- width(gfff[gfff$type=="UTR3" & gfff$Name==gene])
   n_left5  <- n_all - n_utr3 - n_gene + 1 # column to start from (5'end)
@@ -210,7 +208,7 @@ barplot_ribogrid <- function(tidymat,small_read_range=26:32) {
     labs(x="position of read 5' end", y="count")
 }
 
-# get_gene_datamat_5start(gene="YAL003W",dataset="vignette",hdf5file,gfff=gff) %>%
+# GetGeneDatamatrix5start(gene="YAL003W",dataset="vignette",hdf5file,gfff=gff) %>%
 # tidy_datamat(startpos=-25,startlen=MinReadLen) %>%
 #   plot_ribogrid
 # get_gene_datamat_3end(gene="YAL003W",dataset="vignette",hdf5file,gfff=gff) 
@@ -218,7 +216,7 @@ barplot_ribogrid <- function(tidymat,small_read_range=26:32) {
 
 get_nt_period <- function(hdf5file,gene,dataset,left,right){
   # previous version of script; not currently used
-  data_mat <- get_gene_datamat(gene,dataset,hdf5file) 
+  data_mat <- GetGeneDatamatrix(gene,dataset,hdf5file) 
   pos_sum <- colSums(data_mat)  # Position-specific sum of reads of all lengths
   pos_sum <- pos_sum[left:(ncol(data_mat)-right)] # Ignore reads in parts of the buffer region defined by left/right
   return(pos_sum)
@@ -229,7 +227,7 @@ get_nt_period <- function(hdf5file,gene,dataset,left,right){
 # Get gene and position specific total counts for all read lengths
 gene_poslen_counts_5start <- 
   lapply(gene_names,
-         get_gene_datamat_5start,
+         GetGeneDatamatrix5start,
          dataset=dataset,
          hdf5file=hdf5file,
          gfff=gff,
