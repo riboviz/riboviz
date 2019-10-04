@@ -14,6 +14,8 @@ suppressMessages(library(magrittr))
 ggplot2::theme_set(theme_bw())
 
 # define input options for optparse package
+  # Flic: adjust option names to match config.yaml ones
+  # Flic: then adjust prep_riboviz.py line which calls generate_stats_figs.R
 option_list <- list(
   make_option("--Ncores",
     type = "integer", default = 1,
@@ -93,42 +95,19 @@ option_list <- list(
   )
 )
 
-# Read in commandline arguments
-# Flic: length(opt) = length(option_list) + 1 as OptionParse(add_help_option = TRUE) default is left as-is
-  # this means "a standard help option should be automatically added to the OptionParser instance"
-  # didn't remove that default, so length(opt) still =18
-opt <- parse_args(OptionParser(option_list=option_list))
+# read in commandline arguments
+  # Flic: OptionParse(add_help_option = TRUE) default - remove?
+opt <- parse_args(OptionParser(option_list = option_list))
 attach(opt)
 
 print("generate_stats_figs.R running with parameters:")
 opt
 
-# Flic: checking for any NULLs passed in from other scripts wouldn't work due to NULL behaviour as this test shows:
-  # length(opt) # 18, including the extra help
-  # opt$features_file <- NULL
-  # length(opt) # 17, setting it to NULL has dropped opt$features
-# Instead need to check for any missing options.
-
-# How best to check ^? Simple but not clever test: 
-  # if(length(opt)==18){print("no dropped options")} 
-# This isn't ideal for example if we then edit out the extra help test; 
-# we'd be looking for 17 parameters & test would show FALSE despite script working as intended
-# check by name
-  # opt$features_file 
-  # opt$t_rna
-  # opt$codon_pos
-
-# THOUGHT: 
-# If the arguments were passed into script as NULL, they'd be immediately dropped
-# Therefore if they were missing, they'd be created and set to the default?
-# Therefore if they were brought in as NULL, they'd be set to NA
-# So they should end up here anyway and work as expected as NA values?
-
-### Prepare files
-fid <- H5Fopen(hdFile) # Filehandle for the h5 file
+# prepare files
+hdf5file <- rhdf5::H5Fopen(hdFile) # filehandle for the h5 file
 
 # # Read in the positions of all exons/genes in GFF format and subset CDS locations
-genes <- h5ls(fid,recursive = 1)$name
+genes <- h5ls(hdf5file,recursive = 1)$name
 
 # Read in coding sequences
 cod_seq <- readDNAStringSet(orf_fasta)
@@ -144,17 +123,17 @@ gff <- readGFFAsGRanges(orf_gff_file)
 ### Check for 3nt periodicity
 print("Starting: Check for 3nt periodicity")
 
-get_gene_datamat <- function(gene,dataset,fid) {
-  # Get data matrix of read counts for gene and dataset from hd5 file fid
-  data_mat <- H5Dread(H5Dopen(fid,paste0("/",gene,"/",dataset,"/reads/data"))) 
+get_gene_datamat <- function(gene,dataset,hdf5file) {
+  # Get data matrix of read counts for gene and dataset from hd5 file hdf5file
+  data_mat <- H5Dread(H5Dopen(hdf5file,paste0("/",gene,"/",dataset,"/reads/data"))) 
   return(data_mat)
 }
 
-get_gene_datamat_5start <- function(gene,dataset,fid,gfff,n_buffer=25,n_gene=50) {
+get_gene_datamat_5start <- function(gene,dataset,hdf5file,gfff,n_buffer=25,n_gene=50) {
   # get data matrix of read counts from n_buffer before start codon to n_gene after
-  # for gene and dataset from hd5 file fid, using UTR5 annotations in gfff
+  # for gene and dataset from hd5 file hdf5file, using UTR5 annotations in gfff
   # if n_buffer bigger than length n_utr5, pad with zeros.
-  data_mat_all <- get_gene_datamat(gene,dataset,fid)  
+  data_mat_all <- get_gene_datamat(gene,dataset,hdf5file)  
   n_utr5 <- width(gfff[gfff$type=="UTR5" & gfff$Name==gene])
   if(n_utr5 >= n_buffer) {
     # length n_utr5 bigger than n_buffer
@@ -174,12 +153,12 @@ get_gene_datamat_5start <- function(gene,dataset,fid,gfff,n_buffer=25,n_gene=50)
   return(  cbind(zeropad5_mat, data_mat_5start) )
 }
 
-get_gene_datamat_3end <- function(gene,dataset,fid,gfff,n_buffer=25,n_gene=50) {
+get_gene_datamat_3end <- function(gene,dataset,hdf5file,gfff,n_buffer=25,n_gene=50) {
   # get data matrix of read counts from n_gene before stop codon to n_buffer after
-  # for gene and dataset from hd5 file fid, using UTR3 annotations in gfff
+  # for gene and dataset from hd5 file hdf5file, using UTR3 annotations in gfff
   # if n_buffer bigger than length n_utr3, pad with zeros.
   # CHECK startpos/off-by-one 
-  data_mat_all <- get_gene_datamat(gene,dataset,fid)
+  data_mat_all <- get_gene_datamat(gene,dataset,hdf5file)
   n_all  <- ncol(data_mat_all)
   n_utr3 <- width(gfff[gfff$type=="UTR3" & gfff$Name==gene])
   n_left5  <- n_all - n_utr3 - n_gene + 1 # column to start from (5'end)
@@ -229,15 +208,15 @@ barplot_ribogrid <- function(tidymat,small_read_range=26:32) {
     labs(x="position of read 5' end", y="count")
 }
 
-# get_gene_datamat_5start(gene="YAL003W",dataset="vignette",fid,gfff=gff) %>%
+# get_gene_datamat_5start(gene="YAL003W",dataset="vignette",hdf5file,gfff=gff) %>%
 # tidy_datamat(startpos=-25,startlen=MinReadLen) %>%
 #   plot_ribogrid
-# get_gene_datamat_3end(gene="YAL003W",dataset="vignette",fid,gfff=gff) 
+# get_gene_datamat_3end(gene="YAL003W",dataset="vignette",hdf5file,gfff=gff) 
 
 
-get_nt_period <- function(fid,gene,dataset,left,right){
+get_nt_period <- function(hdf5file,gene,dataset,left,right){
   # previous version of script; not currently used
-  data_mat <- get_gene_datamat(gene,dataset,fid) 
+  data_mat <- get_gene_datamat(gene,dataset,hdf5file) 
   pos_sum <- colSums(data_mat)  # Position-specific sum of reads of all lengths
   pos_sum <- pos_sum[left:(ncol(data_mat)-right)] # Ignore reads in parts of the buffer region defined by left/right
   return(pos_sum)
@@ -250,7 +229,7 @@ gene_poslen_counts_5start <-
   lapply(genes,
          get_gene_datamat_5start,
          dataset=dataset,
-         fid=fid,
+         hdf5file=hdf5file,
          gfff=gff,
          n_buffer=nnt_buffer,
          n_gene=nnt_gene) %>%
@@ -273,7 +252,7 @@ gene_poslen_counts_3end <-
   lapply(genes,
          get_gene_datamat_3end,
          dataset=dataset,
-         fid=fid,
+         hdf5file=hdf5file,
          gfff=gff,
          n_buffer=nnt_buffer,
          n_gene=nnt_gene) %>%
@@ -314,7 +293,7 @@ print("Completed: Check for 3nt periodicity")
 print("Starting: Distribution of lengths of all mapped reads")
 
 # Read length-specific read counts stored as attributes of 'reads' in H5 file
-gene_sp_read_len <- lapply(genes, function(x){H5Aread(H5Aopen(H5Gopen(fid,paste0("/",x,"/",dataset,"/reads")),"reads_by_len"))})
+gene_sp_read_len <- lapply(genes, function(x){H5Aread(H5Aopen(H5Gopen(hdf5file,paste0("/",x,"/",dataset,"/reads")),"reads_by_len"))})
 
 # Sum reads of each length across all genes
 Counts <- colSums(matrix(unlist(gene_sp_read_len),ncol=length(read_range),byrow=T))
@@ -341,8 +320,8 @@ print("Completed: Distribution of lengths of all mapped reads")
 
 print("Starting: Biases in nucleotide composition along mapped read lengths")
 
-get_nt_read_pos <- function(fid,gene,dataset,lid,MinReadLen){
-  reads_pos_len <- H5Dread(H5Dopen(fid,paste0("/",gene,"/",dataset,"/reads/data")))[lid,] # Get reads of a particular length
+get_nt_read_pos <- function(hdf5file,gene,dataset,lid,MinReadLen){
+  reads_pos_len <- H5Dread(H5Dopen(hdf5file,paste0("/",gene,"/",dataset,"/reads/data")))[lid,] # Get reads of a particular length
   reads_pos_len <- reads_pos_len[1:(length(reads_pos_len)-(lid+MinReadLen-1))]  # Ignore reads whose 5' ends map close to the end of the 3' buffer
   pos <- rep(1:length(reads_pos_len),reads_pos_len) # nt positions weighted by number of reads mapping to it
   pos_IR <- IRanges(start=pos,width=(lid+MinReadLen-1)) # Create an IRanges object for position-specific reads of a particular length
@@ -379,7 +358,7 @@ if(do_pos_sp_nt_freq) {
     all_out <- c()
     for(lid in 1:length(read_range)){
         out <- lapply(genes,function(x){
-            get_nt_read_pos(fid=fid,gene=as.character(x),dataset=dataset,lid=lid,MinReadLen = MinReadLen) # For each read length convert reads to IRanges
+            get_nt_read_pos(hdf5file=hdf5file,gene=as.character(x),dataset=dataset,lid=lid,MinReadLen = MinReadLen) # For each read length convert reads to IRanges
         })
         names(out) <- genes
         
@@ -421,9 +400,9 @@ if(do_pos_sp_nt_freq) {
 print("Starting: Position specific distribution of reads")
 
 # Codon-specific reads for RPF datasets
-get_cod_pos_reads <- function(fid,gene,dataset,left,right,MinReadLen){	
+get_cod_pos_reads <- function(hdf5file,gene,dataset,left,right,MinReadLen){	
   lid <- 28-MinReadLen+1
-  reads_pos <- H5Dread(H5Dopen(fid,paste0("/",gene,"/",dataset,"/reads/data"))) # Get the matrix of read counts
+  reads_pos <- H5Dread(H5Dopen(hdf5file,paste0("/",gene,"/",dataset,"/reads/data"))) # Get the matrix of read counts
   reads_pos_subset <- reads_pos[,left:(dim(reads_pos)[2]-right)]  # Subset positions such that only CDS codon-mapped reads are considered
   end_reads_pos_subset <- ncol(reads_pos_subset)  # Number of columns of the subset
   
@@ -437,8 +416,8 @@ get_cod_pos_reads <- function(fid,gene,dataset,left,right,MinReadLen){
 }
 
 # Nt-specific coverage for mRNA datasets
-get_mrna_coverage <- function(fid,gene,dataset,left,right,read_range,MinReadLen,Buffer){	
-  reads_pos <- H5Dread(H5Dopen(fid,paste0("/",gene,"/",dataset,"/reads/data"))) # Get the matrix of read counts
+get_mrna_coverage <- function(hdf5file,gene,dataset,left,right,read_range,MinReadLen,Buffer){	
+  reads_pos <- H5Dread(H5Dopen(hdf5file,paste0("/",gene,"/",dataset,"/reads/data"))) # Get the matrix of read counts
   reads_pos_subset <- reads_pos[,left:(dim(reads_pos)[2]-right)]   # Subset positions such that only CDS mapped reads are considered
   
   nt_IR_list <- lapply(read_range,function(w){IRanges(start=rep(1:ncol(reads_pos_subset),reads_pos_subset[(w-MinReadLen+1),]),width=w)})  # Create list of IRanges for position-specific reads of all length 
@@ -472,7 +451,7 @@ if(rpf){
   out3p <- matrix(NA,nrow=length(genes),ncol=500) # Empty matrix to store position-specific read counts (3')
 
   out <- lapply(genes,function(gene){
-    get_cod_pos_reads(fid=fid,gene=gene,dataset=dataset,left=(Buffer-15),right=(Buffer+11),MinReadLen = MinReadLen)}) # Get codon-based position-specific reads for each gene
+    get_cod_pos_reads(hdf5file=hdf5file,gene=gene,dataset=dataset,left=(Buffer-15),right=(Buffer+11),MinReadLen = MinReadLen)}) # Get codon-based position-specific reads for each gene
   names(out) <- genes
   
   cc <- 1
@@ -530,7 +509,7 @@ if(!rpf){
   out5p <- matrix(NA,nrow=length(genes),ncol=1500)  # Empty matrix to store position-specific read counts (5')
   out3p <- matrix(NA,nrow=length(genes),ncol=1500)  # Empty matrix to store position-specific read counts (3')
   
-  out <- lapply(genes,function(gene){get_mrna_coverage(fid=fid,gene=gene,dataset=dataset,left=(Buffer-49),right=(Buffer-3),MinReadLen=MinReadLen, read_range=read_range, Buffer=Buffer)})
+  out <- lapply(genes,function(gene){get_mrna_coverage(hdf5file=hdf5file,gene=gene,dataset=dataset,left=(Buffer-49),right=(Buffer-3),MinReadLen=MinReadLen, read_range=read_range, Buffer=Buffer)})
   names(out) <- genes
   
   cc <- 1
@@ -589,24 +568,24 @@ print("Completed: Position specific distribution of reads")
 print("Starting: Calculate TPMs of genes")
 
 # Read length-specific total counts stored as attributes of 'reads_total' in H5 file
-get_gene_len <- function(gene,ffid=fid) {
+get_gene_len <- function(gene,ffid=hdf5file) {
     start_codon_pos <- H5Aread(H5Aopen(H5Gopen(ffid,paste0("/",gene,"/",dataset,"/reads")),"start_codon_pos"))[1]
     stop_codon_pos <- H5Aread(H5Aopen(H5Gopen(ffid,paste0("/",gene,"/",dataset,"/reads")),"stop_codon_pos"))[1]
     return(stop_codon_pos - start_codon_pos)
 }
 
-get_gene_reads_total <- function(gene,ffid=fid) {
+get_gene_reads_total <- function(gene,ffid=hdf5file) {
     H5Aread(H5Aopen(H5Gopen(ffid,paste0("/",gene,"/",dataset,"/reads")),"reads_total"))
 }
 
-get_gene_readdensity <- function(gene,ffid=fid,buffer=50) {
+get_gene_readdensity <- function(gene,ffid=hdf5file,buffer=50) {
     # buffer
     get_gene_reads_total(gene,ffid) / ( get_gene_len(gene,ffid) + 50 )
 }
 
 # Calculate transcripts per million (TPM)
-gene_sp_reads <- sapply(genes, get_gene_reads_total, ffid=fid)
-reads_per_b <- sapply(genes, get_gene_readdensity, ffid=fid)
+gene_sp_reads <- sapply(genes, get_gene_reads_total, ffid=hdf5file)
+reads_per_b <- sapply(genes, get_gene_readdensity, ffid=hdf5file)
 
 tpms <- data.frame(ORF=genes,
                    readcount=gene_sp_reads,
@@ -666,7 +645,7 @@ if(!is.na(t_rna) & !is.na(codon_pos)) {
     # Reads in an object named "codon_pos"
     out <- lapply(genes,function(gene){
       # From "Position specific distribution of reads" plot
-      get_cod_pos_reads(fid=fid,gene=gene,dataset=dataset,left=(Buffer-15),right=(Buffer+11),MinReadLen = MinReadLen)}) # Get codon-based position-specific reads for each gene
+      get_cod_pos_reads(hdf5file=hdf5file,gene=gene,dataset=dataset,left=(Buffer-15),right=(Buffer+11),MinReadLen = MinReadLen)}) # Get codon-based position-specific reads for each gene
       names(out) <- genes
     
     gene_len <- sapply(out,length)  # Calculate gene length in codons
