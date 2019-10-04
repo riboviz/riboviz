@@ -109,23 +109,24 @@ hdf5file <- rhdf5::H5Fopen(hdFile) # filehandle for the h5 file
 # read in positions of all exons/genes in GFF format and subset CDS locations
 # Flic: rhdf5::h5ls() # reads content of HDF5 file; 
 # Flic: h5ls(recursive=1) indicates max level of hierarchy shown
-genes <- h5ls(hdf5file,recursive = 1)$name
+gene_names <- h5ls(hdf5file,recursive = 1)$name
 
 # read in coding sequences
 # Flic: Biostrings::readDNAStringSet()
-codingSeqs <- readDNAStringSet(orf_fasta)
+coding_seqs <- readDNAStringSet(orf_fasta)
 
 # range of read lengths between parameters set in config file
 read_range <- MinReadLen:MaxReadLen
 
 # read in positions of all exons/genes in GFF format and subset CDS locations
+# Flic: which package(s) does this come from? Explain 'subset CDS locations'
 gff <- readGFFAsGRanges(orf_gff_file)
 
-## check for 3nt periodicity
+# check for 3nt periodicity
 print("Starting: Check for 3nt periodicity")
 
 get_gene_datamat <- function(gene,dataset,hdf5file) {
-  # Get data matrix of read counts for gene and dataset from hd5 file hdf5file
+  # get data matrix of read counts for gene and dataset from hd5 file hdf5file
   data_mat <- H5Dread(H5Dopen(hdf5file,paste0("/",gene,"/",dataset,"/reads/data"))) 
   return(data_mat)
 }
@@ -227,7 +228,7 @@ get_nt_period <- function(hdf5file,gene,dataset,left,right){
 
 # Get gene and position specific total counts for all read lengths
 gene_poslen_counts_5start <- 
-  lapply(genes,
+  lapply(gene_names,
          get_gene_datamat_5start,
          dataset=dataset,
          hdf5file=hdf5file,
@@ -250,7 +251,7 @@ gene_poslen_counts_5start %>%
       width=6,height=5)
 
 gene_poslen_counts_3end <- 
-  lapply(genes,
+  lapply(gene_names,
          get_gene_datamat_3end,
          dataset=dataset,
          hdf5file=hdf5file,
@@ -294,7 +295,7 @@ print("Completed: Check for 3nt periodicity")
 print("Starting: Distribution of lengths of all mapped reads")
 
 # Read length-specific read counts stored as attributes of 'reads' in H5 file
-gene_sp_read_len <- lapply(genes, function(x){H5Aread(H5Aopen(H5Gopen(hdf5file,paste0("/",x,"/",dataset,"/reads")),"reads_by_len"))})
+gene_sp_read_len <- lapply(gene_names, function(x){H5Aread(H5Aopen(H5Gopen(hdf5file,paste0("/",x,"/",dataset,"/reads")),"reads_by_len"))})
 
 # Sum reads of each length across all genes
 Counts <- colSums(matrix(unlist(gene_sp_read_len),ncol=length(read_range),byrow=T))
@@ -332,7 +333,7 @@ get_nt_read_pos <- function(hdf5file,gene,dataset,lid,MinReadLen){
 cons_mat <- function(gene,pos_IR,type="count",cframe=0,lid){
   pos_IR_frame <- pos_IR[start(pos_IR)%%3==cframe]  # Get position-specific reads of a particular length and ORF frame
   if(length(pos_IR_frame)){   
-    pos_nt <- consensusMatrix(extractAt(codingSeqs[[gene]],pos_IR_frame))[1:4,] # Get position-specific nucleotide counts
+    pos_nt <- consensusMatrix(extractAt(coding_seqs[[gene]],pos_IR_frame))[1:4,] # Get position-specific nucleotide counts
     if(type=="freq"){   
       pos_nt <- pos_nt/colSums(pos_nt)  # Select frequencies instead of counts
     }
@@ -358,17 +359,17 @@ if(do_pos_sp_nt_freq) {
     # and has not been debugged.
     all_out <- c()
     for(lid in 1:length(read_range)){
-        out <- lapply(genes,function(x){
+        out <- lapply(gene_names,function(x){
             get_nt_read_pos(hdf5file=hdf5file,gene=as.character(x),dataset=dataset,lid=lid,MinReadLen = MinReadLen) # For each read length convert reads to IRanges
         })
-        names(out) <- genes
+        names(out) <- gene_names
         
         # Get position-specific nucleotide counts for reads in each frame
-        fr0 <- mclapply(genes,function(gene){cons_mat(gene=gene,pos_IR=out[[gene]],cframe=0,lid=lid)},mc.cores=Ncores)
+        fr0 <- mclapply(gene_names,function(gene){cons_mat(gene=gene,pos_IR=out[[gene]],cframe=0,lid=lid)},mc.cores=Ncores)
         allfr0 <- do.call(rbind,fr0)
-        fr1 <- mclapply(genes,function(gene){cons_mat(gene=gene,pos_IR=out[[gene]],cframe=1,lid=lid)},mc.cores=Ncores)
+        fr1 <- mclapply(gene_names,function(gene){cons_mat(gene=gene,pos_IR=out[[gene]],cframe=1,lid=lid)},mc.cores=Ncores)
         allfr1 <- do.call(rbind,fr1)
-        fr2 <- mclapply(genes,function(gene){cons_mat(gene=gene,pos_IR=out[[gene]],cframe=2,lid=lid)},mc.cores=Ncores)
+        fr2 <- mclapply(gene_names,function(gene){cons_mat(gene=gene,pos_IR=out[[gene]],cframe=2,lid=lid)},mc.cores=Ncores)
         allfr2 <- do.call(rbind,fr2)
         
         # Get position-specific freq for all nts
@@ -448,15 +449,15 @@ get_mrna_coverage <- function(hdf5file,gene,dataset,left,right,read_range,MinRea
 
 # For RPF datasets, generate codon-based position-specific reads
 if(rpf){
-  out5p <- matrix(NA,nrow=length(genes),ncol=500) # Empty matrix to store position-specific read counts (5')
-  out3p <- matrix(NA,nrow=length(genes),ncol=500) # Empty matrix to store position-specific read counts (3')
+  out5p <- matrix(NA,nrow=length(gene_names),ncol=500) # Empty matrix to store position-specific read counts (5')
+  out3p <- matrix(NA,nrow=length(gene_names),ncol=500) # Empty matrix to store position-specific read counts (3')
 
-  out <- lapply(genes,function(gene){
+  out <- lapply(gene_names,function(gene){
     get_cod_pos_reads(hdf5file=hdf5file,gene=gene,dataset=dataset,left=(Buffer-15),right=(Buffer+11),MinReadLen = MinReadLen)}) # Get codon-based position-specific reads for each gene
-  names(out) <- genes
+  names(out) <- gene_names
   
   cc <- 1
-  for(gene in genes){
+  for(gene in gene_names){
     tmp <- out[[gene]]
     if(sum(tmp)>=64){	# Only consider genes with at least 64 mapped reads along its CDS
       tmp <- tmp/mean(tmp)
@@ -507,14 +508,14 @@ if(rpf){
 
 # For mRNA datasets, generate nt-based position-specific reads
 if(!rpf){
-  out5p <- matrix(NA,nrow=length(genes),ncol=1500)  # Empty matrix to store position-specific read counts (5')
-  out3p <- matrix(NA,nrow=length(genes),ncol=1500)  # Empty matrix to store position-specific read counts (3')
+  out5p <- matrix(NA,nrow=length(gene_names),ncol=1500)  # Empty matrix to store position-specific read counts (5')
+  out3p <- matrix(NA,nrow=length(gene_names),ncol=1500)  # Empty matrix to store position-specific read counts (3')
   
-  out <- lapply(genes,function(gene){get_mrna_coverage(hdf5file=hdf5file,gene=gene,dataset=dataset,left=(Buffer-49),right=(Buffer-3),MinReadLen=MinReadLen, read_range=read_range, Buffer=Buffer)})
-  names(out) <- genes
+  out <- lapply(gene_names,function(gene){get_mrna_coverage(hdf5file=hdf5file,gene=gene,dataset=dataset,left=(Buffer-49),right=(Buffer-3),MinReadLen=MinReadLen, read_range=read_range, Buffer=Buffer)})
+  names(out) <- gene_names
   
   cc <- 1
-  for(gene in genes){
+  for(gene in gene_names){
     tmp <- out[[gene]]
     if(sum(tmp)>0){	# Only consider genes with at least 1 mapped read along its CDS
       tmp <- tmp/mean(tmp)
@@ -585,10 +586,10 @@ get_gene_readdensity <- function(gene,hdf5file=hdf5file,buffer=50) {
 }
 
 # Calculate transcripts per million (TPM)
-gene_sp_reads <- sapply(genes, get_gene_reads_total, hdf5file=hdf5file)
-reads_per_b <- sapply(genes, get_gene_readdensity, hdf5file=hdf5file)
+gene_sp_reads <- sapply(gene_names, get_gene_reads_total, hdf5file=hdf5file)
+reads_per_b <- sapply(gene_names, get_gene_readdensity, hdf5file=hdf5file)
 
-tpms <- data.frame(ORF=genes,
+tpms <- data.frame(ORF=gene_names,
                    readcount=gene_sp_reads,
                    rpb=reads_per_b,
                    tpm=reads_per_b*1e6/sum(reads_per_b) )
@@ -604,7 +605,7 @@ if ( !is.na( features_file) ) {
   print("Starting: Correlations between TPMs of genes with their sequence-based features")
   
   features <- read.table(features_file,h=T)
-  # features <- features[match(genes,features$ORF),] 
+  # features <- features[match(gene_names,features$ORF),] 
   # features <- features[!is.na(features$ORF),]
   # features <- merge(features,tpms,by="ORF")
   
@@ -644,10 +645,10 @@ if(!is.na(t_rna) & !is.na(codon_pos)) {
     yeast_tRNAs <- read.table(t_rna,h=T) # Read in yeast tRNA estimates
     load(codon_pos) # Position of codons in each gene (numbering ignores first 200 codons)
     # Reads in an object named "codon_pos"
-    out <- lapply(genes,function(gene){
+    out <- lapply(gene_names,function(gene){
       # From "Position specific distribution of reads" plot
       get_cod_pos_reads(hdf5file=hdf5file,gene=gene,dataset=dataset,left=(Buffer-15),right=(Buffer+11),MinReadLen = MinReadLen)}) # Get codon-based position-specific reads for each gene
-      names(out) <- genes
+      names(out) <- gene_names
     
     gene_len <- sapply(out,length)  # Calculate gene length in codons
     out <- out[gene_len>201]  # Ignore genes with <=200 sense codons
