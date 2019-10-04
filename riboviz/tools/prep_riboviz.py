@@ -182,7 +182,6 @@ def process_sample(sample,
     :param dry_run: Don't execute workflow commands (useful for seeing
     what commands would be executed)
     :type dry_run: bool
-    :raise OSError: if a third-party tool cannot be found
     :raise FileNotFoundError: if fastq or a third-party tool cannot be
     found
     :raise AssertionError: if invocation of a third-party tool returns
@@ -193,9 +192,9 @@ def process_sample(sample,
     step = 1
 
     if not os.path.exists(fastq):
-        raise IOError(errno.ENOENT,
-                      os.strerror(errno.ENOENT),
-                      fastq)
+        raise FileNotFoundError(errno.ENOENT,
+                                os.strerror(errno.ENOENT),
+                                fastq)
     LOGGER.info("Processing file: %s", fastq)
 
     if "nprocesses" not in config:
@@ -425,7 +424,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
     try:
         with open(config_yaml, 'r') as f:
             config = yaml.load(f, yaml.SafeLoader)
-    except IOError as e:
+    except FileNotFoundError as e:
         logging.error("File not found: %s", e.filename)
         return EXIT_CONFIG_ERROR
     except Exception:
@@ -523,7 +522,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
                            cmd_file,
                            dry_run)
             successes.append(sample)
-        except IOError as e:
+        except FileNotFoundError as e:
             logging.error("File not found: %s", e.filename)
         except Exception:
             logging.error("Problem processing sample: %s", sample)
