@@ -16,6 +16,8 @@ fq_files: # fastq files to be processed, relative to dir_in
   simdata5and3: simdata_extracted_UMI5and3_4nt.fastq
   simdata3: simdata_extracted_UMI3_4nt.fastq
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
+deduplicate: TRUE # Extract UMIs and deduplicate reads if TRUE
+umi: ^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$	# UMI-tools-compliant regular expression to extract UMIs
 nprocesses: 1 # number of processes to parallelize over
 MinReadLen: 10 # Minimum read length in H5 output
 MaxReadLen: 50 # Maximum read length in H5 output
