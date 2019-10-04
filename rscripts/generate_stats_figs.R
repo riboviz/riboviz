@@ -1,62 +1,96 @@
-# Read in dependent packages
-suppressMessages(library(Rsamtools, quietly = T))
-suppressMessages(library(rtracklayer, quietly = T))
-suppressMessages(library(rhdf5, quietly = T))
-suppressMessages(library(parallel, quietly = T))
-suppressMessages(library(optparse,quietly = T))
-suppressMessages(library(RcppRoll, quietly = T))
-suppressMessages(library(ggplot2, quietly = T))
-suppressMessages(library(tidyr, quietly = T))
-suppressMessages(library(dplyr, quietly = T))
-suppressMessages(library(magrittr, quietly = T))
+# read in dependent packages
+suppressMessages(library(Rsamtools))
+suppressMessages(library(rtracklayer))
+suppressMessages(library(rhdf5))
+suppressMessages(library(parallel))
+suppressMessages(library(optparse))
+suppressMessages(library(RcppRoll))
+suppressMessages(library(ggplot2))
+suppressMessages(library(tidyr))
+suppressMessages(library(dplyr))
+suppressMessages(library(magrittr))
 
-theme_set( theme_bw() )
+# set ggplot2 theme for plots drawn after this; use dark on light theme
+ggplot2::theme_set(theme_bw())
 
 # define input options for optparse package
-# Flic: NULLs changed to NA as otherwise length(option_list)= 17 
-  # while `opt <- parse_args(OptionParser(option_list=option_list))` gave length(opt)=14 
-  # this discarded 4 make_option()s (those set default=NULL): 
-  # --t_rna, --codon_pos, --orf_gff_file & --features_file
-  # while OptionParser added help option to the list, bringing length to 14 (still dropping 4 options)
-option_list <- list( 
-  make_option("--Ncores", type="integer", default=1,
-              help="Number of cores for parallelization"),
-  make_option("--MinReadLen", type="integer", default=10,
-              help="Minimum read length in H5 output"),
-  make_option("--MaxReadLen", type="integer", default=50,
-              help="Maximum read length in H5 output"),
-  make_option("--Buffer", type="integer", default=250,
-              help="Length of flanking region around the CDS"),
-  make_option("--PrimaryID", type="character", default="gene_id",
-              help="Primary gene IDs to access the data (YAL001C, YAL003W, etc.)"),
-  make_option("--hdFile", type="character", default="output.h5",
-              help="Location of H5 output file"),
-  make_option("--dataset", type="character", default="data",
-              help="Name of the dataset"),
-  make_option("--out_prefix", type="character", default="out",
-              help="Prefix for output files"),
-  make_option("--orf_fasta", type="character", default=FALSE,
-              help="FASTA file with nt seq"),
-  make_option("--rpf", type="logical", default=TRUE,
-              help="Is the dataset an RPF or mRNA dataset?"),
-  make_option("--dir_out", type="character", default="./",
-              help="Output directory"),
-  make_option("--t_rna", type="character", default=NA,
-              help="tRNA estimates in .tsv file"),
-  make_option("--codon_pos", type="character", default=NA,
-              help="Codon positions in each gene in .Rdata file"),
-  make_option("--orf_gff_file", type="character", default=NA,
-              help="riboviz generated GFF2/GFF3 annotation file"),
-  make_option("--features_file", type="character", default=NA,
-              help="features file, columns are gene features and rows are genes"),
-  make_option("--count_threshold", type="integer", default=64,
-              help="threshold for count of reads per gene to be included in plot"),
-  make_option("--do_pos_sp_nt_freq", type="logical", default=TRUE,
-              help="do calculate the position-specific nucleotide frequency"),
-  make_option("--nnt_buffer", type="integer", default=25,
-              help="n nucleotides of UTR buffer to include in metagene plots"),
-  make_option("--nnt_gene", type="integer", default=50,
-              help="nnucleotides of gene to include in metagene plots")
+option_list <- list(
+  make_option("--Ncores",
+    type = "integer", default = 1,
+    help = "Number of cores for parallelization"
+  ),
+  make_option("--MinReadLen",
+    type = "integer", default = 10,
+    help = "Minimum read length in H5 output"
+  ),
+  make_option("--MaxReadLen",
+    type = "integer", default = 50,
+    help = "Maximum read length in H5 output"
+  ),
+  make_option("--Buffer",
+    type = "integer", default = 250,
+    help = "Length of flanking region around the CDS"
+  ),
+  make_option("--PrimaryID",
+    type = "character", default = "gene_id",
+    help = "Primary gene IDs to access the data (YAL001C, YAL003W, etc.)"
+  ),
+  make_option("--hdFile",
+    type = "character", default = "output.h5",
+    help = "Location of H5 output file"
+  ),
+  make_option("--dataset",
+    type = "character", default = "data",
+    help = "Name of the dataset"
+  ),
+  make_option("--out_prefix",
+    type = "character", default = "out",
+    help = "Prefix for output files"
+  ),
+  make_option("--orf_fasta",
+    type = "character", default = FALSE,
+    help = "FASTA file with nt seq"
+  ),
+  make_option("--rpf",
+    type = "logical", default = TRUE,
+    help = "Is the dataset an RPF or mRNA dataset?"
+  ),
+  make_option("--dir_out",
+    type = "character", default = "./",
+    help = "Output directory"
+  ),
+  make_option("--t_rna",
+    type = "character", default = NA,
+    help = "tRNA estimates in .tsv file"
+  ),
+  make_option("--codon_pos",
+    type = "character", default = NA,
+    help = "Codon positions in each gene in .Rdata file"
+  ),
+  make_option("--orf_gff_file",
+    type = "character", default = NA,
+    help = "riboviz generated GFF2/GFF3 annotation file"
+  ),
+  make_option("--features_file",
+    type = "character", default = NA,
+    help = "features file, columns are gene features and rows are genes"
+  ),
+  make_option("--count_threshold",
+    type = "integer", default = 64,
+    help = "threshold for count of reads per gene to be included in plot"
+  ),
+  make_option("--do_pos_sp_nt_freq",
+    type = "logical", default = TRUE,
+    help = "do calculate the position-specific nucleotide frequency"
+  ),
+  make_option("--nnt_buffer",
+    type = "integer", default = 25,
+    help = "n nucleotides of UTR buffer to include in metagene plots"
+  ),
+  make_option("--nnt_gene",
+    type = "integer", default = 50,
+    help = "nnucleotides of gene to include in metagene plots"
+  )
 )
 
 # Read in commandline arguments
