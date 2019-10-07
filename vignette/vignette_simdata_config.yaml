@@ -13,8 +13,7 @@ dir_index: vignette/index # directory to put built indices in
 rRNA_index: yeast_rRNA # rRNA index file prefix, relative to dir_index
 orf_index: YAL_CDS_w_250 # ORF index file prefix, relative to dir_index
 fq_files: # fastq files to be processed, relative to dir_in
-  simdata5and3: simdata_extracted_UMI5and3_4nt.fastq
-  simdata3: simdata_extracted_UMI3_4nt.fastq
+  simdata5and3: simdata_UMI5and3_4nt_adaptor.fastq
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
 deduplicate: TRUE # Extract UMIs and deduplicate reads if TRUE
 umi_regexp: ^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$ # UMI-tools-compliant regular expression to extract UMIs
