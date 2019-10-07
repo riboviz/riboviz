@@ -23,6 +23,9 @@ Prepare ribosome profiling data for RiboViz or other analysis:
 * - Process all fastq.gz files (config["dir_in"]).
 * - Cut out sequencing library adapters ("CTGTAGGCACC" or
 *   config["adapters").
+* - Extract UMIs using UMI-tools if requested (config["deduplicate"])
+*   == True) using UMI-tools-compliant regular expression pattern
+*   (config["umi_regexp"]).
 * - Remove rRNA or other contaminating reads by hisat2 alignment to
 *   rRNA index file (config["rRNA_index"])
 * - Align remaining reads to ORFs or other hisat2 index file
@@ -220,6 +223,51 @@ def process_sample(sample,
         cmd += ["-j", str(0)]
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
+
+    if "deduplicate" in config and config["deduplicate"]:
+        extract_trim_fq = os.path.join(tmp_dir, sample + "_extract_trim.fq")
+        log_file = get_sample_log_file(logs_dir,
+                                       sample,
+                                       "umi_tools_extract",
+                                       step)
+        LOGGER.info("Extract UMIs. Log: %s", log_file)
+        pattern_parameter = "--bc-pattern=" + config["umi_regexp"]
+        # Command to be run from within Python differs subtly from the
+        # command logged for the following reason:
+        # Assume config["umi_regexp"] is, for example
+        #     ^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$
+        # If cmd is configured to include:
+        #     "--bc-pattern=" + "^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$"
+        # then "umi_tools extract" is invoked successfuly from within
+        # Python. However the command logged (for rerunning as a bash
+        # script) includes:
+        #     --bc-pattern=^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$
+        # which does not run in bash. It fails with, for
+        # example:
+        #     syntax error near unexpected token ('
+        # If cmd is configured to include:
+        #     "--bc-pattern=" + "\"^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$\""
+        # then "umi_tools extract" fails as the escaped quotes are
+        # treated as part of the regular expression. However the
+        # command logged (for rerunning as a bash script) includes:
+        #     --bc-pattern="^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$"
+        # which does run in bash.
+        # Hence, the command run from within Python differs
+        # from that logged by the abscence of the quotes round the
+        # regular expression.
+        cmd = ["umi_tools", "extract", "-I", trim_fq,
+               pattern_parameter,
+               "--extract-method=regex",
+               "-S", extract_trim_fq]
+        cmd_to_log = ["--bc-pattern=" + "\"" + config["umi_regexp"] + "\""
+                      if c == pattern_parameter else c for c in cmd]
+        process_utils.run_logged_command(cmd,
+                                         log_file,
+                                         cmd_file,
+                                         dry_run,
+                                         cmd_to_log)
+        trim_fq = extract_trim_fq
+        step += 1
 
     log_file = get_sample_log_file(logs_dir, sample, "hisat2_rrna", step)
     LOGGER.info("Map reads to rRNA. Log: %s", log_file)
