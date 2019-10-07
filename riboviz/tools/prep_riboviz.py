@@ -23,7 +23,7 @@ Prepare ribosome profiling data for RiboViz or other analysis:
 * - Process all fastq.gz files (config["dir_in"]).
 * - Cut out sequencing library adapters ("CTGTAGGCACC" or
 *   config["adapters").
-* - Extract UMIs using UMI-tools if requested (config["deduplicate"])
+* - Extract UMIs using UMI-tools if requested (config["deduplicate"]
 *   == True) using UMI-tools-compliant regular expression pattern
 *   (config["umi_regexp"]).
 * - Remove rRNA or other contaminating reads by hisat2 alignment to
@@ -32,6 +32,8 @@ Prepare ribosome profiling data for RiboViz or other analysis:
 *   (config["orf_index"]).
 * - Trim 5' mismatches from reads and remove reads with more than 2
 *   mismatches.
+* - Deduplicate UMIs using UMI-tools if requested
+*   (config["deduplicate"] == True)
 * - Parallelize over many processes (config["nprocesses"]):
 *   - This value is used to configure hisat2, samtools sort,
 *     bam_to_h5.R and generate_stats_figs.R.
@@ -331,6 +333,30 @@ def process_sample(sample,
     cmd = ["samtools", "index", sample_out_bam]
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
+
+    if "deduplicate" in config and config["deduplicate"]:
+        sample_dedup_bam = sample_out_prefix + "_dedup.bam"
+        log_file = get_sample_log_file(logs_dir,
+                                       sample,
+                                       "umi_tools_dedup",
+                                       step)
+        LOGGER.info("Deduplicate using UMIs. Log: %s", log_file)
+        cmd = ["umi_tools", "dedup", "-I", sample_out_bam,
+               "-S", sample_dedup_bam]
+        process_utils.run_logged_command(cmd,
+                                         log_file,
+                                         cmd_file,
+                                         dry_run)
+        step += 1
+        log_file = get_sample_log_file(logs_dir,
+                                       sample,
+                                       "samtools_index",
+                                       step)
+        LOGGER.info("Index BAM file. Log: %s", log_file)
+        cmd = ["samtools", "index", sample_dedup_bam]
+        process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
+        sample_out_bam = sample_dedup_bam
+        step += 1
 
     if config["make_bedgraph"]:
         LOGGER.info("Record transcriptome coverage as a bedgraph")
