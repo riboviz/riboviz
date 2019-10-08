@@ -108,7 +108,7 @@ opt
 hdf5file <- H5Fopen(hdFile) # filehandle for the h5 file
 
 # read in positions of all exons/genes in GFF format and subset CDS locations
-# Flic: rhdf5::h5ls() # reads content of HDF5 file; 
+# Flic: rhdf5::h5ls() # reads content of HDF5 file;
 # Flic: h5ls(recursive=1) indicates max level of hierarchy shown
 gene_names <- h5ls(hdf5file, recursive = 1)$name
 
@@ -211,7 +211,7 @@ barplot_ribogrid <- function(tidymat, small_read_range = 26:32) {
 # GetGeneDatamatrix5start(gene="YAL003W",dataset="vignette",hdf5file,gfff=gff) %>%
 # TidyDatamatrix(startpos=-25,startlen=MinReadLen) %>%
 #   plot_ribogrid
-# GetGeneDatamatrix3end(gene="YAL003W",dataset="vignette",hdf5file,gfff=gff) 
+# GetGeneDatamatrix3end(gene="YAL003W",dataset="vignette",hdf5file,gfff=gff)
 
 GetNTPeriod <- function(hdf5file, gene, dataset, left, right) {
   # previous version of script; not currently used
@@ -282,7 +282,7 @@ gene_pos_counts_bothends <- bind_rows(
 
 # Plot
 nt_period_plot <- ggplot(
-  gene_pos_counts_bothends, 
+  gene_pos_counts_bothends,
   aes(x = Pos, y = Counts)) +
   geom_line() +
   facet_wrap(~End, scales = "free") +
@@ -291,11 +291,11 @@ nt_period_plot <- ggplot(
 # Save plot and file
 ggsave(nt_period_plot, filename = paste0(out_prefix, "_3nt_periodicity.pdf"))
 write.table(
-  gene_pos_counts_bothends, 
-  file = paste0(out_prefix, "_3nt_periodicity.tsv"), 
-  sep = "\t", 
-  row = F, 
-  col = T, 
+  gene_pos_counts_bothends,
+  file = paste0(out_prefix, "_3nt_periodicity.tsv"),
+  sep = "\t",
+  row = F,
+  col = T,
   quote = F)
 print("Completed: Check for 3nt periodicity")
 
@@ -483,11 +483,11 @@ if (rpf) {
 
   out <- lapply(gene_names, function(gene) {
     GetCodonPositionReads(
-      hdf5file = hdf5file, 
-      gene = gene, 
-      dataset = dataset, 
-      left = (Buffer - 15), 
-      right = (Buffer + 11), 
+      hdf5file = hdf5file,
+      gene = gene,
+      dataset = dataset,
+      left = (Buffer - 15),
+      right = (Buffer + 11),
       MinReadLen = MinReadLen
       )
   }) # Get codon-based position-specific reads for each gene
@@ -556,13 +556,13 @@ if (!rpf) {
 
   out <- lapply(gene_names, function(gene) {
     GetMRNACoverage(
-      hdf5file = hdf5file, 
-      gene = gene, 
-      dataset = dataset, 
-      left = (Buffer - 49), 
-      right = (Buffer - 3), 
-      MinReadLen = MinReadLen, 
-      read_range = read_range, 
+      hdf5file = hdf5file,
+      gene = gene,
+      dataset = dataset,
+      left = (Buffer - 49),
+      right = (Buffer - 3),
+      MinReadLen = MinReadLen,
+      read_range = read_range,
       Buffer = Buffer
       )
   })
@@ -698,12 +698,13 @@ if (!is.na(features_file)) {
   print("Skipped: Correlations between TPMs of genes with their sequence-based features - features_file.tsv not provided")
 }
 
-## Codon-specific ribosome densities for correlations with tRNAs 
+## Codon-specific ribosome densities for correlations with tRNAs
 
 # Codon-specific ribosome density for tRNA correlation; skip if missing t_rna & codon_pos
 # Flic: outer loop (!is.na t_rna & codon_pos) is skin for the main RPF calc loop
   # Flic: should 'starting codon-spc ribodensities' be inside that?
   # Flic: nothing happens if rpf=false, but it'd say starting, complete even w/o content
+# Flic: sort out variable vs function naming
 if (!is.na(t_rna) & !is.na(codon_pos)) {
   print("Starting: Codon-specific ribosome densities for correlations with tRNAs")
 
