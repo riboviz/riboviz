@@ -131,11 +131,11 @@ GetGeneDatamatrix <- function(gene, dataset, hdf5file) {
 }
 
 # function to get matrix of read counts from n_buffer before start codon to n_gene after
-# for gene and dataset from hd5 file hdf5file, using UTR5 annotations in gfff
-# Flic: sort out the comment, gfff, nnt_buffer etc
-GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, gfff, n_buffer = 25, n_gene = 50) {
+# for gene and dataset from hd5 file hdf5file, using UTR5 annotations in gff
+# Flic: sort out the comment, gff, nnt_buffer etc
+GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, gff, n_buffer = 25, n_gene = 50) {
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hdf5file)
-  n_utr5 <- BiocGenerics::width(gfff[gfff$type == "UTR5" & gfff$Name == gene])
+  n_utr5 <- BiocGenerics::width(gff[gff$type == "UTR5" & gff$Name == gene])
   # if n_buffer bigger than length n_utr5, pad with zeros:
   if (n_utr5 >= n_buffer) {
     # if length n_utr5 bigger than n_buffer
@@ -151,14 +151,14 @@ GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, gfff, n_buffer = 25
   return(cbind(zeropad5_mat, data_mat_5start))
 }
 
-GetGeneDatamatrix3end <- function(gene, dataset, hdf5file, gfff, n_buffer = 25, n_gene = 50) {
+GetGeneDatamatrix3end <- function(gene, dataset, hdf5file, gff, n_buffer = 25, n_gene = 50) {
   # get data matrix of read counts from n_gene before stop codon to n_buffer after
-  # for gene and dataset from hd5 file hdf5file, using UTR3 annotations in gfff
+  # for gene and dataset from hd5 file hdf5file, using UTR3 annotations in gff
   # if n_buffer bigger than length n_utr3, pad with zeros.
   # CHECK startpos/off-by-one
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hdf5file)
   n_all <- ncol(data_mat_all)
-  n_utr3 <- BiocGenerics::width(gfff[gfff$type == "UTR3" & gfff$Name == gene])
+  n_utr3 <- BiocGenerics::width(gff[gff$type == "UTR3" & gff$Name == gene])
   n_left5 <- n_all - n_utr3 - n_gene + 1 # column to start from (5'end)
   if (n_utr3 >= n_buffer) {
     # length n_utr3 bigger than n_buffer
@@ -206,10 +206,10 @@ barplot_ribogrid <- function(tidymat, small_read_range = 26:32) {
     labs(x = "position of read 5' end", y = "count")
 }
 
-# GetGeneDatamatrix5start(gene="YAL003W",dataset="vignette",hdf5file,gfff=gff) %>%
+# GetGeneDatamatrix5start(gene="YAL003W",dataset="vignette",hdf5file,gff=gff) %>%
 # TidyDatamatrix(startpos=-25,startlen=MinReadLen) %>%
 #   plot_ribogrid
-# GetGeneDatamatrix3end(gene="YAL003W",dataset="vignette",hdf5file,gfff=gff)
+# GetGeneDatamatrix3end(gene="YAL003W",dataset="vignette",hdf5file,gff=gff)
 
 GetNTPeriod <- function(hdf5file, gene, dataset, left, right) {
   # previous version of script; not currently used
@@ -227,7 +227,7 @@ gene_poslen_counts_5start <-
     GetGeneDatamatrix5start,
     dataset = dataset,
     hdf5file = hdf5file,
-    gfff = gff,
+    gff = gff,
     n_buffer = nnt_buffer,
     n_gene = nnt_gene
   ) %>%
@@ -255,7 +255,7 @@ gene_poslen_counts_3end <-
     GetGeneDatamatrix3end,
     dataset = dataset,
     hdf5file = hdf5file,
-    gfff = gff,
+    gff = gff,
     n_buffer = nnt_buffer,
     n_gene = nnt_gene
   ) %>%
