@@ -17,8 +17,6 @@ fq_files: # fastq files to be processed, relative to dir_in
   WT3AT: SRR1042864_s1mi.fastq.gz
   NotHere: example_missing_file.fastq.gz # prepRiboviz should give error message for missing files
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
-deduplicate: FALSE # Extract UMIs and deduplicate reads if TRUE
-umi_regexp: ^(?P<umi_1>.{2}).+(?P<umi_2>.{5})$ # UMI-tools-compliant regular expression to extract UMIs
 nprocesses: 1 # number of processes to parallelize over
 MinReadLen: 10 # Minimum read length in H5 output
 MaxReadLen: 50 # Maximum read length in H5 output
