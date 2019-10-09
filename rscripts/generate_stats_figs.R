@@ -130,10 +130,10 @@ GetGeneDatamatrix <- function(gene, dataset, hdf5file) {
   return(data_mat)
 }
 
-# function to get matrix of read counts from n_buffer before start codon to n_gene after
+# function to get matrix of read counts from n_buffer before start codon to nnt_gene after
 # for gene and dataset from hd5 file hdf5file, using UTR5 annotations in gff
-# Flic: sort out the comment, gff, nnt_buffer etc
-GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, gff, n_buffer = 25, n_gene = 50) {
+# Flic: sort out the comment, nnt_buffer etc
+GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, gff, n_buffer = nnt_buffer, nnt_gene = nnt_gene) {
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hdf5file)
   n_utr5 <- BiocGenerics::width(gff[gff$type == "UTR5" & gff$Name == gene])
   # if n_buffer bigger than length n_utr5, pad with zeros:
@@ -146,20 +146,20 @@ GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, gff, n_buffer = 25,
     n_left5 <- 1 # column to start from (5'end)
     zeropad5_mat <- matrix(0, nrow = nrow(data_mat_all), ncol = (n_buffer - n_utr5))
   }
-  n_right3 <- n_utr5 + n_gene # column to end with (3'end)
+  n_right3 <- n_utr5 + nnt_gene # column to end with (3'end)
   data_mat_5start <- data_mat_all[, n_left5:n_right3]
   return(cbind(zeropad5_mat, data_mat_5start))
 }
 
-GetGeneDatamatrix3end <- function(gene, dataset, hdf5file, gff, n_buffer = 25, n_gene = 50) {
-  # get data matrix of read counts from n_gene before stop codon to n_buffer after
+GetGeneDatamatrix3end <- function(gene, dataset, hdf5file, gff, n_buffer = nnt_buffer, nnt_gene = nnt_gene) {
+  # get data matrix of read counts from nnt_gene before stop codon to n_buffer after
   # for gene and dataset from hd5 file hdf5file, using UTR3 annotations in gff
   # if n_buffer bigger than length n_utr3, pad with zeros.
   # CHECK startpos/off-by-one
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hdf5file)
   n_all <- ncol(data_mat_all)
   n_utr3 <- BiocGenerics::width(gff[gff$type == "UTR3" & gff$Name == gene])
-  n_left5 <- n_all - n_utr3 - n_gene + 1 # column to start from (5'end)
+  n_left5 <- n_all - n_utr3 - nnt_gene + 1 # column to start from (5'end)
   if (n_utr3 >= n_buffer) {
     # length n_utr3 bigger than n_buffer
     n_right3 <- n_all - n_utr3 + n_buffer # column to end with (3'end)
@@ -207,7 +207,7 @@ barplot_ribogrid <- function(tidymat, small_read_range = 26:32) {
 }
 
 # GetGeneDatamatrix5start(gene="YAL003W",dataset="vignette",hdf5file,gff=gff) %>%
-# TidyDatamatrix(startpos=-25,startlen=MinReadLen) %>%
+# TidyDatamatrix(startpos=-nnt_buffer,startlen=MinReadLen) %>%
 #   plot_ribogrid
 # GetGeneDatamatrix3end(gene="YAL003W",dataset="vignette",hdf5file,gff=gff)
 
@@ -225,11 +225,11 @@ GetNTPeriod <- function(hdf5file, gene, dataset, left, right) {
 gene_poslen_counts_5start <-
   lapply(gene_names,
     GetGeneDatamatrix5start,
-    dataset = dataset,
-    hdf5file = hdf5file,
-    gff = gff,
+    dataset,
+    hdf5file,
+    gff,
     n_buffer = nnt_buffer,
-    n_gene = nnt_gene
+    nnt_gene
   ) %>%
   Reduce("+", .) # Reduce is a BiocGenerics, there is a purrr alternative
 
@@ -253,11 +253,11 @@ gene_poslen_counts_5start %>%
 gene_poslen_counts_3end <-
   lapply(gene_names,
     GetGeneDatamatrix3end,
-    dataset = dataset,
-    hdf5file = hdf5file,
-    gff = gff,
+    dataset,
+    hdf5file,
+    gff,
     n_buffer = nnt_buffer,
-    n_gene = nnt_gene
+    nnt_gene
   ) %>%
   Reduce("+", .) # Reduce is a BiocGenerics, there is a purrr alternative
 
@@ -379,7 +379,7 @@ if (do_pos_sp_nt_freq) {
   all_out <- c()
   for (lid in 1:length(read_range)) {
     out <- lapply(gene_names, function(x) {
-      GetNTReadPosition(hdf5file = hdf5file, gene = as.character(x), dataset = dataset, lid = lid, MinReadLen = MinReadLen) # For each read length convert reads to IRanges
+      GetNTReadPosition(hdf5file, gene = as.character(x), dataset, lid = lid, MinReadLen = MinReadLen) # For each read length convert reads to IRanges
     })
     names(out) <- gene_names
 
@@ -458,7 +458,7 @@ GetMRNACoverage <- function(hdf5file, gene, dataset, left, right, read_range, Mi
     IRanges::IRanges(start = rep(1:ncol(reads_pos_subset), reads_pos_subset[(w - MinReadLen + 1), ]), width = w)
   }) # Create list of IRanges for position-specific reads of all length
   nt_IR <- unlist(as(nt_IR_list, "IRangesList")) # Combine IRanges from different read lengths
-  nt_cov <- coverage(nt_IR) # Estimate nt-specific coverage of mRNA reads
+  nt_cov <- IRanges::coverage(nt_IR) # Estimate nt-specific coverage of mRNA reads
 
   # Subset coverage to only CDS
   nt_counts <- rep.int(S4Vectors::runValue(nt_cov), S4Vectors::runLength(nt_cov))
@@ -489,9 +489,9 @@ if (rpf) {
 
   out <- lapply(gene_names, function(gene) {
     GetCodonPositionReads(
-      hdf5file = hdf5file,
-      gene = gene,
-      dataset = dataset,
+      hdf5file,
+      gene,
+      dataset,
       left = (Buffer - 15),
       right = (Buffer + 11),
       MinReadLen = MinReadLen
@@ -503,7 +503,7 @@ if (rpf) {
   for (gene in gene_names) {
     tmp <- out[[gene]]
     # Only consider genes with at least count_threshold mapped reads along its CDS
-    if (sum(tmp) >= 64) {
+    if (sum(tmp) >= count_threshold) {
       tmp <- tmp / mean(tmp)
       if (length(tmp) > 500) {
         out5p[cc, ] <- tmp[1:500]
@@ -528,6 +528,7 @@ if (rpf) {
 
   # Normalize reads to last 50 codons of the 500-codon window.
   # This allows easy comparison between datasets
+  # Flic: tweak this to something more parameter-friendly
   s5p <- s5p / mean(m5p[450:500])
   s3p <- s3p / mean(m3p[450:500])
   m5p <- m5p / mean(m5p[450:500])
@@ -570,14 +571,14 @@ if (!rpf) {
 
   out <- lapply(gene_names, function(gene) {
     GetMRNACoverage(
-      hdf5file = hdf5file,
-      gene = gene,
-      dataset = dataset,
+      hdf5file,
+      gene,
+      dataset,
       left = (Buffer - 49),
       right = (Buffer - 3),
       MinReadLen = MinReadLen,
-      read_range = read_range,
-      Buffer = Buffer
+      read_range,
+      Buffer
       )
   })
   names(out) <- gene_names
@@ -649,24 +650,26 @@ print("Completed: Position specific distribution of reads")
 print("Starting: Calculate TPMs of genes")
 
 # read length-specific total counts stored as attributes of 'reads_total' in H5 file
-GetGeneLength <- function(gene, hdf5file = hdf5file) {
+GetGeneLength <- function(gene, hdf5file) {
   start_codon_pos <- rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", gene, "/", dataset, "/reads")), "start_codon_pos"))[1]
   stop_codon_pos <- rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", gene, "/", dataset, "/reads")), "stop_codon_pos"))[1]
   return(stop_codon_pos - start_codon_pos)
 }
 
-GetGeneReadsTotal <- function(gene, hdf5file = hdf5file) {
+GetGeneReadsTotal <- function(gene, hdf5file) {
   rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", gene, "/", dataset, "/reads")), "reads_total"))
 }
 
-GetGeneReadDensity <- function(gene, hdf5file = hdf5file, buffer = 50) {
+# Flic: what is `buffer` arg here: 50 is default of nnt_gene, but what kind of buffer is it? 
+GetGeneReadDensity <- function(gene, hdf5file, buffer = 50) {
   # buffer
+  # Flic: Why `50`? Change to nnt_gene? Some other variable? MaxReadLen also default 50... ?
   GetGeneReadsTotal(gene, hdf5file) / (GetGeneLength(gene, hdf5file) + 50)
 }
 
 # calculate transcripts per million (TPM)
-gene_sp_reads <- sapply(gene_names, GetGeneReadsTotal, hdf5file = hdf5file)
-reads_per_b <- sapply(gene_names, GetGeneReadDensity, hdf5file = hdf5file)
+gene_sp_reads <- sapply(gene_names, GetGeneReadsTotal, hdf5file)
+reads_per_b <- sapply(gene_names, GetGeneReadDensity, hdf5file)
 
 tpms <- data.frame(
   ORF = gene_names,
@@ -734,7 +737,8 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
     # Reads in an object named "codon_pos"
     out <- lapply(gene_names, function(gene) {
       # From "Position specific distribution of reads" plot
-      GetCodonPositionReads(hdf5file = hdf5file, gene = gene, dataset = dataset, left = (Buffer - 15), right = (Buffer + 11), MinReadLen = MinReadLen)
+      # Flic: why these values 15, 11? Can these be variable-ized?
+      GetCodonPositionReads(hdf5file, gene, dataset, left = (Buffer - 15), right = (Buffer + 11), MinReadLen = MinReadLen)
     }) # Get codon-based position-specific reads for each gene
     names(out) <- gene_names
 
@@ -745,7 +749,7 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
       x[201:(length(x) - 1)]
     }) # Trim first 200 codons and stop codon from each gene
     read_counts_trim <- sapply(trim_out, sum) # Calculate read counts in trimmed genes
-    trim_out <- trim_out[read_counts_trim >= 64] # Ignore genes with fewer than 64 mapped reads
+    trim_out <- trim_out[read_counts_trim >= count_threshold] # Ignore genes with fewer than count_threshold mapped reads
 
     norm_out <- lapply(trim_out, function(x) {
       x / mean(x)
