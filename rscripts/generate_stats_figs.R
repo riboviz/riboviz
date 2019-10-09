@@ -17,6 +17,18 @@ ggplot2::theme_set(theme_bw())
   # Flic: adjust option names to match config.yaml ones
   # Flic: then adjust prep_riboviz.py line which calls generate_stats_figs.R
 option_list <- list(
+  make_option("--dir_out",
+    type = "character", default = "./",
+    help = "Output directory"
+  ),
+  make_option("--orf_fasta",
+    type = "character", default = FALSE,
+    help = "FASTA file with nt seq"
+  ),
+  make_option("--orf_gff_file",
+    type = "character", default = NA,
+    help = "riboviz generated GFF2/GFF3 annotation file"
+  ),
   make_option("--Ncores",
     type = "integer", default = 1,
     help = "Number of cores for parallelization"
@@ -37,29 +49,21 @@ option_list <- list(
     type = "character", default = "gene_id",
     help = "Primary gene IDs to access the data (YAL001C, YAL003W, etc.)"
   ),
-  make_option("--hdFile",
-    type = "character", default = "output.h5",
-    help = "Location of H5 output file"
-  ),
   make_option("--dataset",
-    type = "character", default = "data",
+    type = "character", default = "vignette",
     help = "Name of the dataset"
-  ),
-  make_option("--out_prefix",
-    type = "character", default = "out",
-    help = "Prefix for output files"
-  ),
-  make_option("--orf_fasta",
-    type = "character", default = FALSE,
-    help = "FASTA file with nt seq"
   ),
   make_option("--rpf",
     type = "logical", default = TRUE,
     help = "Is the dataset an RPF or mRNA dataset?"
   ),
-  make_option("--dir_out",
-    type = "character", default = "./",
-    help = "Output directory"
+  make_option("--features_file",
+    type = "character", default = NA,
+    help = "features file, columns are gene features and rows are genes"
+  ),
+  make_option("--do_pos_sp_nt_freq",
+    type = "logical", default = TRUE,
+    help = "do calculate the position-specific nucleotide frequency"
   ),
   make_option("--t_rna",
     type = "character", default = NA,
@@ -69,21 +73,17 @@ option_list <- list(
     type = "character", default = NA,
     help = "Codon positions in each gene in .Rdata file"
   ),
-  make_option("--orf_gff_file",
-    type = "character", default = NA,
-    help = "riboviz generated GFF2/GFF3 annotation file"
-  ),
-  make_option("--features_file",
-    type = "character", default = NA,
-    help = "features file, columns are gene features and rows are genes"
-  ),
   make_option("--count_threshold",
     type = "integer", default = 64,
     help = "threshold for count of reads per gene to be included in plot"
   ),
-  make_option("--do_pos_sp_nt_freq",
-    type = "logical", default = TRUE,
-    help = "do calculate the position-specific nucleotide frequency"
+  make_option("--out_prefix",
+    type = "character", default = "out",
+    help = "Prefix for output files"
+  ),
+  make_option("--hdFile",
+    type = "character", default = "output.h5",
+    help = "Location of H5 output file"
   ),
   make_option("--nnt_buffer",
     type = "integer", default = 25,
@@ -323,7 +323,14 @@ read_len_plot <- ggplot(out_data, aes(x = Length, y = Counts)) +
 
 # save read lengths plot and file
 ggsave(read_len_plot, filename = paste0(out_prefix, "_read_lengths.pdf"))
-write.table(out_data, file = paste0(out_prefix, "_read_lengths.tsv"), sep = "\t", row = F, col = T, quote = F)
+write.table(
+  out_data,
+  file = paste0(out_prefix, "_read_lengths.tsv"),
+  sep = "\t",
+  row = F,
+  col = T,
+  quote = F
+)
 
 print("Completed: Distribution of lengths of all mapped reads")
 
@@ -432,6 +439,7 @@ GetCodonPositionReads <- function(hdf5file, gene, dataset, left, right, MinReadL
   reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
   end_reads_pos_subset <- ncol(reads_pos_subset) # Number of columns of the subset
 
+  # Flic: Refactor these functions
   l28 <- RcppRoll::roll_suml(reads_pos_subset[lid, 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[14, 2:end_reads_pos_subset]), 3)] # Map reads of length 28 to codons
   l29 <- RcppRoll::roll_suml(reads_pos_subset[(lid + 1), 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[15, 2:end_reads_pos_subset]), 3)] # Map reads of length 29 to codons
   l30 <- RcppRoll::roll_suml(reads_pos_subset[(lid + 2), 1:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[16, 1:end_reads_pos_subset]), 3)] # Map reads of length 30 to codons
@@ -494,7 +502,8 @@ if (rpf) {
   cc <- 1
   for (gene in gene_names) {
     tmp <- out[[gene]]
-    if (sum(tmp) >= 64) { # Only consider genes with at least 64 mapped reads along its CDS
+    # Only consider genes with at least count_threshold mapped reads along its CDS
+    if (sum(tmp) >= 64) {
       tmp <- tmp / mean(tmp)
       if (length(tmp) > 500) {
         out5p[cc, ] <- tmp[1:500]
@@ -543,7 +552,14 @@ if (rpf) {
 
   # Save plot and file
   ggsave(pos_sp_rpf_norm_reads, filename = paste0(out_prefix, "_pos_sp_rpf_norm_reads.pdf"))
-  write.table(out_df, file = paste0(out_prefix, "_pos_sp_rpf_norm_reads.tsv"), sep = "\t", row = F, col = T, quote = F)
+  write.table(
+    out_df,
+    file = paste0(out_prefix, "_pos_sp_rpf_norm_reads.tsv"),
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
 }
 
 # for mRNA datasets, generate nt-based position-specific reads
@@ -569,7 +585,8 @@ if (!rpf) {
   cc <- 1
   for (gene in gene_names) {
     tmp <- out[[gene]]
-    if (sum(tmp) > 0) { # only consider genes with at least 1 mapped read along its CDS
+    # only consider genes with at least 1 mapped read along its CDS
+    if (sum(tmp) > 0) {
       tmp <- tmp / mean(tmp)
       if (length(tmp) > 1500) {
         out5p[cc, ] <- tmp[1:1500]
@@ -615,7 +632,14 @@ if (!rpf) {
 
   # Save plot and file
   ggsave(pos_sp_mrna_norm_coverage, filename = paste0(out_prefix, "_pos_sp_mrna_norm_coverage.pdf"))
-  write.table(out_df, file = paste0(out_prefix, "_pos_sp_mrna_norm_coverage.tsv"), sep = "\t", row = F, col = T, quote = F)
+  write.table(
+    out_df,
+    file = paste0(out_prefix, "_pos_sp_mrna_norm_coverage.tsv"),
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
 }
 
 print("Completed: Position specific distribution of reads")
@@ -668,11 +692,7 @@ write.table(
 if (!is.na(features_file)) {
   print("Starting: Correlations between TPMs of genes with their sequence-based features")
 
-  # Flic: remove additional '##' commented assignments for features as not used
   features <- read.table(features_file, h = T)
-  ## features <- features[match(gene_names,features$ORF),]
-  ## features <- features[!is.na(features$ORF),]
-  ## features <- merge(features,tpms,by="ORF")
 
   # Prepare data for plot
   # Consider only genes with at least count_threshold mapped reads
@@ -771,7 +791,14 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
 
     # Save plot and file
     ggsave(cod_dens_tRNA_plot, filename = paste0(out_prefix, "_codon_ribodens.pdf"))
-    write.table(out_df, file = paste0(out_prefix, "_codon_ribodens.tsv"), sep = "\t", row = F, col = T, quote = F)
+    write.table(
+      out_df,
+      file = paste0(out_prefix, "_codon_ribodens.tsv"),
+      sep = "\t",
+      row = F,
+      col = T,
+      quote = F
+    )
   }
 
   print("Completed: Codon-specific ribosome densities for correlations with tRNAs")
