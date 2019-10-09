@@ -14,8 +14,6 @@ suppressMessages(library(magrittr))
 ggplot2::theme_set(theme_bw())
 
 # define input options for optparse package
-  # Flic: adjust option names to match config.yaml ones
-  # Flic: then adjust prep_riboviz.py line which calls generate_stats_figs.R
 option_list <- list(
   make_option("--dir_out",
     type = "character", default = "./",
@@ -96,7 +94,6 @@ option_list <- list(
 )
 
 # read in commandline arguments
-  # Flic: OptionParse(add_help_option = TRUE) default - remove?
 opt <- optparse::parse_args(OptionParser(option_list = option_list))
 attach(opt)
 
@@ -107,8 +104,6 @@ opt
 hdf5file <- rhdf5::H5Fopen(hdFile) # filehandle for the h5 file
 
 # read in positions of all exons/genes in GFF format and subset CDS locations
-# Flic: h5ls() reads content of HDF5 file;
-# Flic: h5ls(recursive=1) indicates max level of hierarchy shown
 gene_names <- rhdf5::h5ls(hdf5file, recursive = 1)$name
 
 # read in coding sequences
@@ -118,7 +113,6 @@ coding_seqs <- readDNAStringSet(orf_fasta)
 read_range <- MinReadLen:MaxReadLen
 
 # read in positions of all exons/genes in GFF format and subset CDS locations
-# Flic: which package does this come from? Explain 'subset CDS locations' more
 gff <- readGFFAsGRanges(orf_gff_file)
 
 # check for 3nt periodicity
@@ -132,7 +126,6 @@ GetGeneDatamatrix <- function(gene, dataset, hdf5file) {
 
 # function to get matrix of read counts from n_buffer before start codon to nnt_gene after
 # for gene and dataset from hd5 file hdf5file, using UTR5 annotations in gff
-# Flic: sort out the comment, nnt_buffer etc
 GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, gff, n_buffer = nnt_buffer, nnt_gene = nnt_gene) {
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hdf5file)
   n_utr5 <- BiocGenerics::width(gff[gff$type == "UTR5" & gff$Name == gene])
@@ -173,8 +166,6 @@ GetGeneDatamatrix3end <- function(gene, dataset, hdf5file, gff, n_buffer = nnt_b
   return(cbind(data_mat_3end, zeropad3_mat))
 }
 
-# Flic: explain why this function is needed/how it's used
-# Flic: address capitals on Counts, ReadLen: variables so ought to be lowercase
 TidyDatamatrix <- function(data_mat, startpos = 1, startlen = 1) {
   # CHECK startpos/off-by-one
   positions <- startpos:(startpos + ncol(data_mat) - 1)
@@ -301,14 +292,11 @@ print("Completed: Check for 3nt periodicity")
 print("Starting: Distribution of lengths of all mapped reads")
 
 # read length-specific read counts stored as attributes of 'reads' in H5 file
-# Flic: fix length of H5Aread() function & structure of all
 gene_sp_read_len <- lapply(gene_names, function(x) {
   rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", x, "/", dataset, "/reads")), "reads_by_len"))
 })
 
 # sum reads of each length across all genes
-# Flic: duplicate Counts - should this be called something else?
-# Flic: length
 Counts <- colSums(matrix(unlist(gene_sp_read_len), ncol = length(read_range), byrow = T))
 
 # create a dataframe to store the output for plots/analyses
@@ -338,7 +326,6 @@ print("Completed: Distribution of lengths of all mapped reads")
 
 print("Starting: Biases in nucleotide composition along mapped read lengths")
 
-# Flic: explain this function /rename for better understanding?
 GetNTReadPosition <- function(hdf5file, gene, dataset, lid, MinReadLen) {
   reads_pos_len <- rhdf5::H5Dread(rhdf5::H5Dopen(hdf5file, paste0("/", gene, "/", dataset, "/reads/data")))[lid, ] # Get reads of a particular length
   reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (lid + MinReadLen - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
@@ -347,7 +334,6 @@ GetNTReadPosition <- function(hdf5file, gene, dataset, lid, MinReadLen) {
   return(pos_IR)
 }
 
-# Flic: rename/capitalise & explain this function
 cons_mat <- function(gene, pos_IR, type = "count", cframe = 0, lid) {
   pos_IR_frame <- pos_IR[start(pos_IR) %% 3 == cframe] # Get position-specific reads of a particular length and ORF frame
   if (length(pos_IR_frame)) {
@@ -361,7 +347,6 @@ cons_mat <- function(gene, pos_IR, type = "count", cframe = 0, lid) {
   return(pos_nt)
 }
 
-# Flic: capitalise & explain this function
 comb_freq <- function(allfr) {
   alph <- c("A", "C", "G", "T")
   nt_sp_freq <- c()
@@ -384,7 +369,6 @@ if (do_pos_sp_nt_freq) {
     names(out) <- gene_names
 
     # Get position-specific nucleotide counts for reads in each frame
-    # Flic: split anonymous function out into named function, avoid repetition
     fr0 <- mclapply(gene_names, function(gene) {
       cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 0, lid = lid)
     }, mc.cores = Ncores)
@@ -408,7 +392,6 @@ if (do_pos_sp_nt_freq) {
   }
 
   # Prepare variables for output file
-  # Flic: de-capitalise the variables, consider their names? Any overlap/exist?
   Length <- unlist(lapply(read_range, function(x) {
     rep(x, x * 3)
   }))
@@ -439,7 +422,6 @@ GetCodonPositionReads <- function(hdf5file, gene, dataset, left, right, MinReadL
   reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
   end_reads_pos_subset <- ncol(reads_pos_subset) # Number of columns of the subset
 
-  # Flic: Refactor these functions
   l28 <- RcppRoll::roll_suml(reads_pos_subset[lid, 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[14, 2:end_reads_pos_subset]), 3)] # Map reads of length 28 to codons
   l29 <- RcppRoll::roll_suml(reads_pos_subset[(lid + 1), 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[15, 2:end_reads_pos_subset]), 3)] # Map reads of length 29 to codons
   l30 <- RcppRoll::roll_suml(reads_pos_subset[(lid + 2), 1:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[16, 1:end_reads_pos_subset]), 3)] # Map reads of length 30 to codons
@@ -528,7 +510,6 @@ if (rpf) {
 
   # Normalize reads to last 50 codons of the 500-codon window.
   # This allows easy comparison between datasets
-  # Flic: tweak this to something more parameter-friendly
   s5p <- s5p / mean(m5p[450:500])
   s3p <- s3p / mean(m3p[450:500])
   m5p <- m5p / mean(m5p[450:500])
@@ -660,10 +641,8 @@ GetGeneReadsTotal <- function(gene, hdf5file) {
   rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", gene, "/", dataset, "/reads")), "reads_total"))
 }
 
-# Flic: what is `buffer` arg here: 50 is default of nnt_gene, but what kind of buffer is it? 
 GetGeneReadDensity <- function(gene, hdf5file, buffer = 50) {
   # buffer
-  # Flic: Why `50`? Change to nnt_gene? Some other variable? MaxReadLen also default 50... ?
   GetGeneReadsTotal(gene, hdf5file) / (GetGeneLength(gene, hdf5file) + 50)
 }
 
@@ -722,10 +701,6 @@ if (!is.na(features_file)) {
 ## Codon-specific ribosome densities for correlations with tRNAs
 
 # Codon-specific ribosome density for tRNA correlation; skip if missing t_rna & codon_pos
-# Flic: outer loop (!is.na t_rna & codon_pos) is skin for the main RPF calc loop
-  # Flic: should 'starting codon-spc ribodensities' be inside that?
-  # Flic: nothing happens if rpf=false, but it'd say starting, complete even w/o content
-# Flic: sort out variable vs function naming
 if (!is.na(t_rna) & !is.na(codon_pos)) {
   print("Starting: Codon-specific ribosome densities for correlations with tRNAs")
 
@@ -737,7 +712,6 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
     # Reads in an object named "codon_pos"
     out <- lapply(gene_names, function(gene) {
       # From "Position specific distribution of reads" plot
-      # Flic: why these values 15, 11? Can these be variable-ized?
       GetCodonPositionReads(hdf5file, gene, dataset, left = (Buffer - 15), right = (Buffer + 11), MinReadLen = MinReadLen)
     }) # Get codon-based position-specific reads for each gene
     names(out) <- gene_names
