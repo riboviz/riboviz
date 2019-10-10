@@ -65,13 +65,32 @@ The read data files are downsampled ribosome profiling data from *Saccharomyces 
 
 The data is from the paper Guydosh N.R. and Green R. "[Dom34 rescues ribosomes in 3' untranslated regions](https://www.ncbi.nlm.nih.gov/pubmed/24581494)", Cell. 2014 Feb 27;156(5):950-62. doi: [10.1016/j.cell.2014.02.006](https://doi.org/10.1016/j.cell.2014.02.006). The NCBI accession for the whole dataset is #GSE52968.
 
-* SRX386986: GSM1279570: wild-type no additive, [SRR1042855](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042855).
-* SRX386995: GSM1279579: wild-type plus 3-AT, [SRR1042864](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042864).
+* SRX386986: GSM1279570: wild-type no additive, [SRR1042855](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042855) (1.5GB)
+* SRX386995: GSM1279579: wild-type plus 3-AT, [SRR1042864](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042864) (2.2GB)
 
 In July 2017, these files were imported using NCBI's [fastq-dump](https://ncbi.github.io/sra-tools/fastq-dump.html) and gzipped to produce:
 
 * `SRR1042855.fastq.gz`
 * `SRR1042864.fastq.gz`
+
+If you wish the original files (this is optional), they can alternatively be accessed via [SRA Explorer](https://ewels.github.io/sra-explorer/#):
+
+* Search for: SRR1042855
+* Select GSM1279570: wild-type no additive; Saccharomyces cerevisiae; OTHER
+* Click Add 1 to collection
+* Search for: SRR1042864
+* Select GSM1279579: wild-type 3-AT; Saccharomyces cerevisiae; OTHER	
+* Click Add 1 to collection
+* Click 2 saved datasets
+* Click Bash script for downloading FastQ files
+* Click Download
+* Run the bash script, e.g.
+
+```console
+$ source sra_explorer_fastq_download.sh
+```
+
+* **Warning:** the total download time may take ~40 minutes or more. The files are  1.5GB and 2.2GB respectively.
 
 The data was sampled uniformly at random 1/50 reads from each file, producing about 1 million reads total, to produce the read data files:
 
