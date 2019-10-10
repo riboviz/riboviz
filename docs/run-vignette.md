@@ -719,14 +719,16 @@ Generate summary statistics, analyses plots and QC plots for both RPF and mRNA d
 ```
 Rscript --vanilla rscripts/generate_stats_figs.R --Ncores=4 \
     --MinReadLen=10 --MaxReadLen=50 --Buffer=250 --PrimaryID=Name \
-    --dataset=vignette --hdFile=vignette/output/WT3AT.h5 \
-    --out_prefix=vignette/output/WT3AT \
+    --dataset=vignette --hdFile=vignette/output/WTnone.h5 \
+    --out_prefix=vignette/output/WTnone \
     --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True \
-    --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
     --dir_out=vignette/output \
+    --do_pos_sp_nt_freq=True \
     --t_rna=data/yeast_tRNAs.tsv \
     --codon_pos=data/yeast_codon_pos_i200.RData \
-    --features_file=data/yeast_features.tsv --do_pos_sp_nt_freq=True
+    --features_file=data/yeast_features.tsv \
+    --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
+    --count_threshold=64
 ```
 
 Outputs files to `vignette/output/`:
