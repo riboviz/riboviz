@@ -19,7 +19,7 @@ to be written. The following files are created:
 * `simdata_extracted_UMI5and3_4nt.fastq`: FASTQ file identical to the
   above but with the UMIs extracted and concatenated to the header.
 * `simdata_extracted_UMI3_4nt.fastq`: FASTQ file with 8 reads, each
-  with a 4nt UMI at the 3' end. Reads can be grouped by UMI unto 4
+  with a 4nt UMI at the 3' end. Reads can be grouped by UMI into 4
   groups.
 * `simdata_UMI3_4nt.fastq`: FASTQ file identical to the above but with
    the UMI extracted and concatenated to the header.
