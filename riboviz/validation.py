@@ -11,6 +11,28 @@ import pandas as pd
 import pysam
 
 
+def equal_names(file1, file2):
+    """
+    Compare local names of two files each of which must exist
+    and be a file.
+
+    :param file1: File name
+    :type file1: str or unicode
+    :param file2: File name
+    :type file2: str or unicode
+    :raise AssertionError: if file names differ
+    :raise Exception: if problems arise when loading the files
+    """
+    local_file1 = os.path.split(file1)[1]
+    local_file2 = os.path.split(file2)[1]
+    assert os.path.exists(file1) and os.path.isfile(file1),\
+        "File %s does not exist or is not a file"
+    assert os.path.exists(file2) and os.path.isfile(file2),\
+        "File %s does not exist or is not a file"
+    assert local_file1 == local_file2,\
+        "Unequal file names: %s, %s" % (local_file1, local_file2)
+
+
 def equal_sizes(file1, file2):
     """
     Compare sizes of two files.
@@ -26,23 +48,6 @@ def equal_sizes(file1, file2):
     stat2 = os.stat(file2)
     assert stat1.st_size == stat2.st_size,\
         "Unequal file sizes: %s, %s" % (file1, file2)
-
-
-def equal_names(file1, file2):
-    """
-    Compare local names of two files.
-
-    :param file1: File name
-    :type file1: str or unicode
-    :param file2: File name
-    :type file2: str or unicode
-    :raise AssertionError: if file names differ
-    :raise Exception: if problems arise when loading the files
-    """
-    local_file1 = os.path.split(file1)[1]
-    local_file2 = os.path.split(file2)[1]
-    assert local_file1 == local_file2,\
-        "Unequal file names: %s, %s" % (local_file1, local_file2)
 
 
 def equal_h5(file1, file2):
@@ -542,7 +547,17 @@ def equal_fastq(file1, file2):
 
 def compare(file1, file2, compare_names=True):
     """
-    Compare two files for equality.
+    Compare two files for equality. The following functions are used
+    to compare each type of file:
+
+    * .pdf: equal_names(file1, file2)
+    * .ht2, .bai: equal_sizes(file1, file2)
+    * .h5: equal_h5(file1, file2)
+    * .bedgraph: equal_bedgraph(file1, file2)
+    * .bam: equal_bam(file1, file2)
+    * .sam: equal_sam(file1, file2)
+    * .tsv: equal_tsv(file1, file2)
+    * .fq: equal_fastq(file1, file2)
 
     :param file1: File name
     :type file1: str or unicode
@@ -559,7 +574,9 @@ def compare(file1, file2, compare_names=True):
     if compare_names:
         equal_names(file1, file2)
     ext = os.path.splitext(file1)[1]
-    if ext in [".pdf", ".ht2", ".bai"]:
+    if ext in [".pdf"]:
+        equal_names(file1, file2)
+    if ext in [".ht2", ".bai"]:
         equal_sizes(file1, file2)
     if ext in [".h5"]:
         equal_h5(file1, file2)
