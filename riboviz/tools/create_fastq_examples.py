@@ -1,11 +1,28 @@
 #! python
 """
-Creates simple simulated fastq files to test UMI/deduplication,
+Creates simple simulated FASTQ files to test UMI/deduplication,
 adaptor trimming, and demultiplexing.
 
 Usage:
 
     python -m riboviz.tools.create_fastq_examples DIRECTORY
+
+where `DIRECTORY` is the directory into	which the simulated files are
+to be written. The following files are created:
+
+* `simdata_UMI5and3_4nt_adaptor.fastq`: FASTQ file with 9 reads,
+  each with a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a
+  11nt adaptor at the 3' end. Reads can be grouped by UMI into 5
+  groups.
+* `simdata_UMI5and3_4nt.fastq`: FASTQ file identical to the above but
+  with the adaptor trimmed.
+* `simdata_extracted_UMI5and3_4nt.fastq`: FASTQ file identical to the
+  above but with the UMIs extracted and concatenated to the header.
+* `simdata_extracted_UMI3_4nt.fastq`: FASTQ file with 8 reads, each
+  with a 4nt UMI at the 3' end. Reads can be grouped by UMI unto 4
+  groups.
+* `simdata_UMI3_4nt.fastq`: FASTQ file identical to the above but with
+   the UMI extracted and concatenated to the header.
 
 TODO:
 
