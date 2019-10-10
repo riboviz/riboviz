@@ -272,6 +272,34 @@ $ RIBOVIZ_LOG_CONFIG=custom_logging.yaml
 
 ---
 
+## Create simulated FASTQ files
+
+`riboviz/tools/create_fastq_examples.py` creates simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication.
+
+To run:
+
+```console
+$ python -m riboviz.tools.create_fastq_examples DIRECTORY
+```
+
+Or:
+
+```console
+$ python -m riboviz/tools/create_fastq_examples.py DIRECTORY
+```
+
+where `DIRECTORY` is the directory into which the simulated files are to be written. The following files are created:                                 
+
+* `simdata_UMI5and3_4nt_adaptor.fastq`: FASTQ file with 9 reads, each with a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a 11nt adaptor at the 3' end. Reads can be grouped by UMI into 5 groups.
+* `simdata_UMI5and3_4nt.fastq`: FASTQ file identical to the above but with the adaptor trimmed.
+* `simdata_extracted_UMI5and3_4nt.fastq`: FASTQ file identical to the above but with the UMIs extracted and concatenated to the header.
+* `simdata_extracted_UMI3_4nt.fastq`: FASTQ file with 8 reads, each with a 4nt UMI at the 3' end. Reads can be grouped by UMI into 4 groups.
+* `simdata_UMI3_4nt.fastq`: FASTQ file identical to the above but with the UMI extracted and concatenated to the header.
+
+The files with these names in `data/` were created using this script.
+
+---
+
 ## Coding style
 
 Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible. For example, to run these on `validation.py`:
