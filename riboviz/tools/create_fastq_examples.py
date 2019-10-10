@@ -1,9 +1,11 @@
 #! python
 """
-simulate_fastq_tests.py
-
 Creates simple simulated fastq files to test UMI/deduplication,
 adaptor trimming, and demultiplexing.
+
+Usage:
+
+    python -m riboviz.tools.create_fastq_examples DIRECTORY
 
 TODO:
 
