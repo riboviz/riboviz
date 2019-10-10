@@ -269,6 +269,7 @@ A custom configuration file can be provided by defining a `RIBOVIZ_LOG_CONFIG` e
 
 ```console
 $ RIBOVIZ_LOG_CONFIG=custom_logging.yaml
+```
 
 ---
 
