@@ -18,21 +18,31 @@ For an organism, the following data is required by RiboViz:
 
 * Transcript sequences in a FASTA file. The transcript sequences need to contain both coding regions and flanking regions (which could be fixed, or coincident with measured UTRs).
 * Locations of coding sequences within the transcripts in a GTF/GFF3 file.
-* Ribosomal rRNA and other contaminant sequences in a FASTA file.
 
 The following files hold downsampled genome and annotation data for *Saccharomyces cerevisiae* (yeast):
 
 * `vignette/input/yeast_YAL_CDS_w_250utrs.fa`: transcript sequences to align to, from just the left arm of chromosome 1 (`orf_fasta` configuration parameter)
 * `vignette/input/yeast_YAL_CDS_w_250utrs.gff3`: matched genome feature file, specifying coding sequences locations (start and stop coordinates) (`orf_gff_file` configuration parameter)
-* `data/yeast_codon_pos_i200.RData`: position of codons within each gene (the numbering ignores the first 200 codons) (`codon_pos` configuration parameter)
 
 For information on the provenance of these files see [Saccharomyces cerevisiae (yeast) genome and annotation data](./data.md#saccharomyces-cerevisiae-yeast-genome-and-annotation-data) and [Downsampled Saccharomyces cerevisiae (yeast) genome and annotation data](./data.md#downsampled-saccharomyces-cerevisiae-yeast-genome-and-annotation-data).
 
 ### Ribosomal RNA (rRNA) contaminants to remove
 
+For an organism, RiboViz also requires ribosomal rRNA and other contaminant sequences in a FASTA file.
+
 `vignette/input/yeast_rRNA_R64-1-1.fa` specifies the rRNA sequences to avoid aligning to (`rRNA_fasta` configuration parameter).
 
 For information on the provenance of this file see [Ribosomal RNA (rRNA) contaminants to remove](./data.md#ribosomal-rna-rrna-contaminants-to-remove)
+
+### Additional organism-specific data
+
+RiboViz also requires the following data for creating statistics and figures (within a component [generate_stats_figs.R](../rscripts/generate_stats_figs.R)):
+
+* `data/yeast_codon_pos_i200.RData`: position of codons within each gene (the numbering ignores the first 200 codons) (`codon_pos` configuration parameter)
+* `data/yeast_features.tsv # file of features to correlate with ORFs (`features_file` configuration parameter)
+* `data/yeast_tRNAs.tsv`: tRNA estimates (`t_rna` configuration parameter)
+
+For information on the provenance of these files see [Additional yeast-specific data](./data.md#additional-yeast-specific-data).
 
 ### Ribosome profiling data
 
