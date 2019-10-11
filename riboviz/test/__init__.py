@@ -22,3 +22,9 @@ DATA_DIR = os.path.join(BASE_PATH, "data")
 
 VIGNETTE_CONFIG = os.path.join(VIGNETTE_DIR, "vignette_config.yaml")
 """ Path of vignette/vignette_config.yaml derived from VIGNETTE_DIR. """
+
+SIMDATA_CONFIG = os.path.join(VIGNETTE_DIR, "vignette_simdata_config.yaml")
+"""
+Path of vignette/vignette_simdata_config.yaml derived from
+VIGNETTE_DIR.
+"""
