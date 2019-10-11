@@ -87,6 +87,9 @@ The directories are assumed to hold the following content:
       WTnone_read_lengths.pdf
       WTnone_read_lengths.tsv
       WTnone_tpms.tsv
+
+See riboviz.validation.compare and riboviz.validation functions for
+information on the nature of the comparisons for each type of file.
 """
 import os
 import shutil
@@ -383,6 +386,38 @@ def test_output_tpms_collated_tsv(expected, riboviz_run):
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
     file_name = "TPMs_collated.tsv"
+    riboviz.validation.compare(
+        os.path.join(expected_output, file_name),
+        os.path.join(actual_output, file_name))
+
+
+@pytest.mark.parametrize("content",
+                         ["3nt_periodicity",
+                          "codon_ribodens",
+                          "features",
+                          "pos_sp_rpf_norm_reads",
+                          "read_lengths"])
+@pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
+def test_output_pdf(expected, riboviz_run, prefix, content):
+    """
+    Test output/*pdf files for equality.
+
+    :param expected: expected directory
+    (pytest fixture defined in conftest.py)
+    :type expected: str or unicode
+    :param riboviz_run: vignette directory
+    (pytest fixture defined in this module)
+    :type riboviz_run: str or unicode
+    :param prefix: file name prefix e.g. WT3AT
+    :type prefix: str or unicode
+    :param content: content e.g. 3nt_periodicity
+    :type content: str or unicode
+    """
+    actual = riboviz_run
+    expected_output = os.path.join(expected, "output")
+    actual_output = os.path.join(actual, "output")
+    file_name = "%s_%s.pdf" % (prefix, content)
+    print(file_name)
     riboviz.validation.compare(
         os.path.join(expected_output, file_name),
         os.path.join(actual_output, file_name))
