@@ -2,19 +2,23 @@
 
 This page documents the content and provenance of the data files within the repository.
 
+---
+
 ## *Saccharomyces cerevisiae* (yeast) genome and annotation data
+
+Transcript sequences:
 
 ```
 data/yeast_CDS_w_250utrs.fa
-data/yeast_CDS_w_250utrs.gff3
-data/yeast_codon_pos_i200.RData
 ```
 
-These files hold S288c annotations and ORF sequences:
+Coding sequence locations:
 
-* `data/yeast_CDS_w_250utrs.fa`: transcript sequences.
-* `data/yeast_CDS_w_250utrs.gff3`: coding sequences locations.
-* `data/yeast_codon_pos_i200.RData`: position of codons within each gene (the numbering ignores the first 200 codons).
+```
+data/yeast_CDS_w_250utrs.gff3
+```
+
+These files hold S288c annotations and ORF sequences.
 
 These files were created as follows:
 
@@ -22,23 +26,25 @@ These files were created as follows:
 * The files `saccharomyces_cerevisiae_R64-2-1_20150113.gff` and `S288C_reference_sequence_R64-2-1_20150113.fsa` were extracted from the `.tgz` file.
 * The sequence and annotation files for the whole approximate *Saccharomyces cerevisiae* transcriptome were prepared using [script_for_transcript_annotation.Rmd](../rmarkdown/script_for_transcript_annotation.Rmd). 
 
-`yeast_codon_pos_i200.RData` is read by [generate_stats_figs.R](../rscripts/generate_stats_figs.R) to help with generating plots and tables of results data.
-
 The files can be used as inputs to RiboViz. However, `yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were downsampled to provide a manageable data set for demonstration purposes, as described in the next section.
 
 ---
 
 ## Downsampled *Saccharomyces cerevisiae* (yeast) genome and annotation data
 
+Transcript sequences to align to, from just the left arm of chromosome 1:
+
 ```
 vignette/input/yeast_YAL_CDS_w_250utrs.fa
+```
+
+Matched genome feature file, specifying coding sequences locations (start and stop coordinates):
+
+```
 vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 ```
 
-As the yeast data files described in the previous section are very large, these files were downsampled for demonstration processes. The data files `yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were processed by filtering only ORFs in the left arm of chromosome 1, for which the ORF names start with `YALnnnx`. This produced the yeast genome and annotation data files:
-
-* `vignette/input/yeast_YAL_CDS_w_250utrs.fa`: transcript sequences to align to, from just the left arm of chromosome 1.
-* `vignette/input/yeast_YAL_CDS_w_250utrs.gff3`: matched genome feature file, specifying coding sequences locations (start and stop coordinates).
+As the yeast data files described in the previous section are very large, these files were downsampled for demonstration processes. The data files `yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were processed by filtering only ORFs in the left arm of chromosome 1, for which the ORF names start with `YALnnnx`. This produced the above yeast genome and annotation data files.
 
 The document [Appendix A1: Yeast Nomenclature Systematic Open Reading Frame (ORF) and Other Genetic Designations](https://onlinelibrary.wiley.com/doi/pdf/10.1002/9783527636778.app1) describes the ORF naming convention.
 
@@ -48,11 +54,11 @@ The files can be used as inputs to RiboViz.
 
 ## Ribosomal RNA (rRNA) contaminants to remove
 
+rRNA sequences to avoid aligning to:
+
 ```
 vignette/input/yeast_rRNA_R64-1-1.fa
 ```
-
-This file holds rRNA sequences to avoid aligning to.
 
 This files was created as follows:
 
@@ -64,10 +70,53 @@ The file can be used as an input to RiboViz.
 
 ---
 
+## Additional yeast-specific data
+
+Position of codons within each gene (the numbering ignores the first 200 codons):
+
+```
+data/yeast_codon_pos_i200.RData
+```
+
+This file was produced using [script_for_transcript_annotation.Rmd](../rmarkdown/script_for_transcript_annotation.Rmd) as part of the preparation described in [Saccharomyces cerevisiae (yeast) genome and annotation data](#saccharomyces-cerevisiae-yeast-genome-and-annotation-data) above.
+
+Features to correlate with ORFs:
+
+```
+data/yeast_features.tsv
+```
+
+Data within this file was derived as follows:
+
+1. Length: [genome release R64-2-1](https://downloads.yeastgenome.org/sequence/S288C_reference/) (GFF) from the [Saccharomyces Genome Database](https://www.yeastgenome.org/).
+2. 5' UTR Length: Arribere, J.A. and Wendy V. Gilbert, W.V. "Roles for transcript leaders in translation and mRNA decay revealed by transcript leader sequencing", Genome Res. 2013. 23: 977-987 doi:[10.1101/gr.150342.112](http://doi.org/10.1101/gr.150342.112)
+3. polyA Length: Subtelny, A.O. et al. "Poly(A)-tail profiling reveals an embryonic switch in translational control", Nature, 508(66), 29/01/2019 doi:[10.1038/nature13007](http://doi.org/10.1038/nature13007)
+4. uATG: Estimated from 2 by counting the upstream ATGs in the annotated 5'UTR
+5. UTR_GC: Estimated from 2 by calculating proportion of G/C in the annotated 5' UTR.
+6. FE_cap: Estimated from 2.
+7. FE_atg: Etimated from 30 bp near ATG.
+
+tRNA estimates:
+
+```
+data/yeast_tRNAs.tsv
+```
+
+These files are all read by [generate_stats_figs.R](../rscripts/generate_stats_figs.R) to help with generating plots and tables of results data.
+
+---
+
 ## Downsampled ribosome profiling data from *Saccharomyces cerevisiae*
+
+~1mi-sampled RPFs wild-type no additive:
 
 ```
 vignette/input/SRR1042855_s1mi.fastq.gz
+```
+
+~1mi-sampled RPFs wild-type + 3-AT:
+
+```
 vignette/input/SRR1042864_s1mi.fastq.gz
 ```
 
@@ -106,10 +155,7 @@ $ source sra_explorer_fastq_download.sh
 
 * **Warning:** the total download time may take ~40 minutes or more. The files are  1.5GB and 2.2GB respectively.
 
-The data was sampled uniformly at random 1/50 reads from each file, producing about 1 million reads total, to produce the downsampled read data files:
-
-* `vignette/input/SRR1042855_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type no additive.
-* `vignette/input/SRR1042864_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type + 3-AT.
+The data was sampled uniformly at random 1/50 reads from each file, producing about 1 million reads total, to produce the downsampled read data files.
 
 ---
 
