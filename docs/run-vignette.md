@@ -694,8 +694,8 @@ Generate summary statistics, analyses plots and QC plots for both RPF and mRNA d
 ```
 Rscript --vanilla rscripts/generate_stats_figs.R --Ncores=4 \
     --MinReadLen=10 --MaxReadLen=50 --Buffer=250 --PrimaryID=Name \
-    --dataset=vignette --hdFile=vignette/output/WTnone.h5 \
-    --out_prefix=vignette/output/WTnone \
+    --dataset=vignette --hdFile=vignette/output/WT3AT.h5 \
+    --out_prefix=vignette/output/WT3AT \
     --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True \
     --dir_out=vignette/output \
     --do_pos_sp_nt_freq=True \
