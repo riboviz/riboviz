@@ -39,7 +39,7 @@ For information on the provenance of this file see [Ribosomal RNA (rRNA) contami
 RiboViz also requires the following data for creating statistics and figures (within a component [generate_stats_figs.R](../rscripts/generate_stats_figs.R)):
 
 * `data/yeast_codon_pos_i200.RData`: position of codons within each gene (the numbering ignores the first 200 codons) (`codon_pos` configuration parameter)
-* `data/yeast_features.tsv # file of features to correlate with ORFs (`features_file` configuration parameter)
+* `data/yeast_features.tsv`: features to correlate with ORFs (`features_file` configuration parameter)
 * `data/yeast_tRNAs.tsv`: tRNA estimates (`t_rna` configuration parameter)
 
 For information on the provenance of these files see [Additional yeast-specific data](./data.md#additional-yeast-specific-data).
