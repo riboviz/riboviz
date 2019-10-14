@@ -12,3 +12,4 @@ scripts/script_for_transcript_annotation.nb.html
 *~
 *.pyc
 __pycache__
+.idea/
