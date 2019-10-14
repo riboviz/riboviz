@@ -70,6 +70,8 @@ The directories are assumed to hold the following content:
       WT3AT_pos_sp_rpf_norm_reads.tsv
       WT3AT_read_lengths.pdf
       WT3AT_read_lengths.tsv
+      WT3AT_startcodon_ribogridbar.pdf
+      WT3AT_startcodon_ribogrid.pdf
       WT3AT_tpms.tsv
       WTnone_3nt_periodicity.pdf
       WTnone_3nt_periodicity.tsv
@@ -86,6 +88,8 @@ The directories are assumed to hold the following content:
       WTnone_pos_sp_rpf_norm_reads.tsv
       WTnone_read_lengths.pdf
       WTnone_read_lengths.tsv
+      WTnone_startcodon_ribogridbar.pdf
+      WTnone_startcodon_ribogrid.pdf
       WTnone_tpms.tsv
 
 See riboviz.validation.compare and riboviz.validation functions for
@@ -396,7 +400,9 @@ def test_output_tpms_collated_tsv(expected, riboviz_run):
                           "codon_ribodens",
                           "features",
                           "pos_sp_rpf_norm_reads",
-                          "read_lengths"])
+                          "read_lengths,"
+                          "startcodon_ribogridbar",
+                          "startcodon_ribogrid"])
 @pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
 def test_output_pdf(expected, riboviz_run, prefix, content):
     """
