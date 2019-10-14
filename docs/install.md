@@ -293,6 +293,12 @@ Using htslib 1.9
 Copyright (C) 2018 Genome Research Ltd.
 ```
 
+If `samtools` was not installed, then install it explicitly:
+
+```console
+$ conda install -c bioconda samtools
+```
+
 ### BioPython
 
 Web site:
@@ -686,6 +692,8 @@ h5py                      2.9.0
 pysam                     0.15.2
 
 pyyaml                    5.1
+
+samtools                  1.9
 ```
 
 Your versions may differ from those shown.

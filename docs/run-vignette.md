@@ -12,71 +12,46 @@ Using this script, you can run a "vignette" of the workflow on a sample data set
 
 ## Inputs
 
-### Organism-specific data
-
-`data/` holds genome and annotation data for *Saccharomyces cerevisiae* (yeast).
-
-Sequence and annotation files for the whole approximate *Saccharomyces cerevisiae* transcriptome were prepared using [script_for_transcript_annotation.Rmd](../rmarkdown/script_for_transcript_annotation.Rmd). 
-
-This script processes the files `saccharomyces_cerevisiae_R64-2-1_20150113.gff` and `S288C_reference_sequence_R64-2-1_20150113.fsa` from the file [genome release R64-2-1](https://downloads.yeastgenome.org/sequence/S288C_reference/genome_releases/S288C_reference_genome_R64-2-1_20150113.tgz) downloaded from the [Saccharomyces Genome Database](https://www.yeastgenome.org/). The script was used to produce the following files holding S288c annotations and ORF sequences:
-
-* `data/yeast_CDS_w_250utrs.fa`: transcript sequences.
-* `data/yeast_CDS_w_250utrs.gff3`: coding sequences locations.
-* `data/yeast_codon_pos_i200.RData`: position of codons within each gene (the numbering ignores the first 200 codons).
-
-`yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were downsampled to provide a manageable data set for demonstration purposes. See [User data for analyses within the context of an organism](#user-data-for-analyses-within-the-context-of-an-organism) below.
-
-When running RiboViz, `yeast_codon_pos_i200.RData` is read by [generate_stats_figs.R](../rscripts/generate_stats_figs.R) to help with generating plots and tables of results data.
-
-### User data for analyses within the context of an organism
+### Organism data
 
 For an organism, the following data is required by RiboViz:
 
 * Transcript sequences in a FASTA file. The transcript sequences need to contain both coding regions and flanking regions (which could be fixed, or coincident with measured UTRs).
 * Locations of coding sequences within the transcripts in a GTF/GFF3 file.
-* Ribosomal rRNA and other contaminant sequences in a FASTA file.
 
-`vignette/input` holds sample data for *Saccharomyces cerevisiae*-related analyses.
+The following files hold downsampled genome and annotation data for *Saccharomyces cerevisiae* (yeast):
 
-**Downsampled yeast transcriptome**
+* `vignette/input/yeast_YAL_CDS_w_250utrs.fa`: transcript sequences to align to, from just the left arm of chromosome 1 (`orf_fasta` configuration parameter)
+* `vignette/input/yeast_YAL_CDS_w_250utrs.gff3`: matched genome feature file, specifying coding sequences locations (start and stop coordinates) (`orf_gff_file` configuration parameter)
 
-As the yeast data files are very large, these were downsampled. The data files `yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were processed by filtering only ORFs in the left arm of chromosome 1, for which the ORF names start with `YALnnnx`. This produced the yeast genome and annotation data files:
+For information on the provenance of these files see [Saccharomyces cerevisiae (yeast) genome and annotation data](./data.md#saccharomyces-cerevisiae-yeast-genome-and-annotation-data) and [Downsampled Saccharomyces cerevisiae (yeast) genome and annotation data](./data.md#downsampled-saccharomyces-cerevisiae-yeast-genome-and-annotation-data).
 
-* `vignette/input/yeast_YAL_CDS_w_250utrs.fa`: transcript sequences to align to, from just the left arm of chromosome 1.
-* `vignette/input/yeast_YAL_CDS_w_250utrs.gff3`: matched genome feature file, specifying coding sequences locations (start and stop coordinates).
+### Ribosomal RNA (rRNA) contaminants to remove
 
-`yeast_YAL_CDS_w_250utrs.fa` is an input specified within the `vignette/vignette_config.yaml` file's `orf_fasta` parameter.
+For an organism, RiboViz also requires ribosomal rRNA and other contaminant sequences in a FASTA file.
 
-`yeast_YAL_CDS_w_250utrs.gff3` is an input specified within the `vignette/vignette_config.yaml` file's `orf_gff_file` parameter.
+`vignette/input/yeast_rRNA_R64-1-1.fa` specifies the rRNA sequences to avoid aligning to (`rRNA_fasta` configuration parameter).
 
-The document [Appendix A1: Yeast Nomenclature Systematic Open Reading Frame (ORF) and Other Genetic Designations](https://onlinelibrary.wiley.com/doi/pdf/10.1002/9783527636778.app1) describes the ORF naming convention.
+For information on the provenance of this file see [Ribosomal RNA (rRNA) contaminants to remove](./data.md#ribosomal-rna-rrna-contaminants-to-remove)
 
-**Ribosomal RNA (rRNA) contaminants to remove**
+### Additional organism-specific data
 
-Selected `RDN-n-n` sequences were copied and pasted from the file `rna_coding_R64-1-1_20110203.fasta` found in the file [genome release R64-1-1](https://downloads.yeastgenome.org/sequence/S288C_reference/genome_releases/S288C_reference_genome_R64-1-1_20110203.tgz) from the [Saccharomyces Genome Database](https://www.yeastgenome.org/) (note that this is one release earlier from that cited in [Organism-specific data](#organism-specific-data) above). The resulting file was:
+RiboViz also requires the following data for creating statistics and figures (within a component [generate_stats_figs.R](../rscripts/generate_stats_figs.R)):
 
-* `vignette/input/yeast_rRNA_R64-1-1.fa`: rRNA sequences to avoid aligning to.
+* `data/yeast_codon_pos_i200.RData`: position of codons within each gene (the numbering ignores the first 200 codons) (`codon_pos` configuration parameter)
+* `data/yeast_features.tsv`: features to correlate with ORFs (`features_file` configuration parameter)
+* `data/yeast_tRNAs.tsv`: tRNA estimates (`t_rna` configuration parameter)
 
-This file is an input specified within the `vignette/vignette_config.yaml` file's `rRNA_fasta` parameter.
+For information on the provenance of these files see [Additional yeast-specific data](./data.md#additional-yeast-specific-data).
 
-**Vignette read data**
+### Ribosome profiling data
 
-The read data files are downsampled ribosome profiling data from *Saccharomyces cerevisiae*. The data was downsampled to provide a dataset that was realistic, but small enough to run quickly.
-
-The data is from the paper Guydosh N.R. and Green R. "[Dom34 rescues ribosomes in 3' untranslated regions](https://www.ncbi.nlm.nih.gov/pubmed/24581494)", Cell. 2014 Feb 27;156(5):950-62. doi: [10.1016/j.cell.2014.02.006](https://doi.org/10.1016/j.cell.2014.02.006). The NCBI accession for the whole dataset is #GSE52968.
-
-* SRX386986: GSM1279570: wild-type no additive, [SRR1042855](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042855).
-* SRX386995: GSM1279579: wild-type plus 3-AT, [SRR1042864](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042864).
-
-In July 2017, these files were imported using NCBI's [fastq-dump](https://ncbi.github.io/sra-tools/fastq-dump.html) and gzipped to produce:
-
-* `SRR1042855.fastq.gz`
-* `SRR1042864.fastq.gz`
-
-The data was sampled uniformly at random 1/50 reads from each file, producing about 1 million reads total, to produce the read data files:
+The following files hold downsampled ribosome profiling data for *Saccharomyces cerevisiae* (yeast):
 
 * `vignette/input/SRR1042855_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type no additive.
 * `vignette/input/SRR1042864_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type + 3-AT.
+
+For information on the provenance of these files see [Downsampled ribosome profiling data from Saccharomyces cerevisiae](./data.md#downsampled-ribosome-profiling-data-from-saccharomyces-cerevisiae)
 
 The data files are inputs specified within the `vignette/vignette_config.yaml` file's `fq_files` parameter:
 
@@ -87,7 +62,7 @@ fq_files: # fastq files to be processed
   NotHere: example_missing_file.fastq.gz # prep_riboviz should give error message for missing files
 ```
 
-Note that the file specifies an additional, non-existent, file. This is used to test that the workflow processes valid files and ignores non-existent ones.
+Note that the configuration file specifies an additional, non-existent, file. This is used to test that the workflow processes valid files and ignores non-existent ones.
 
 ---
 
@@ -722,11 +697,13 @@ Rscript --vanilla rscripts/generate_stats_figs.R --Ncores=4 \
     --dataset=vignette --hdFile=vignette/output/WT3AT.h5 \
     --out_prefix=vignette/output/WT3AT \
     --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True \
-    --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
     --dir_out=vignette/output \
+    --do_pos_sp_nt_freq=True \
     --t_rna=data/yeast_tRNAs.tsv \
     --codon_pos=data/yeast_codon_pos_i200.RData \
-    --features_file=data/yeast_features.tsv --do_pos_sp_nt_freq=True
+    --features_file=data/yeast_features.tsv \
+    --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
+    --count_threshold=64
 ```
 
 Outputs files to `vignette/output/`:

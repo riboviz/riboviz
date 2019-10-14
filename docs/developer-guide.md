@@ -269,6 +269,35 @@ A custom configuration file can be provided by defining a `RIBOVIZ_LOG_CONFIG` e
 
 ```console
 $ RIBOVIZ_LOG_CONFIG=custom_logging.yaml
+```
+
+---
+
+## Create simulated FASTQ files
+
+`riboviz/tools/create_fastq_examples.py` creates simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication.
+
+To run:
+
+```console
+$ python -m riboviz.tools.create_fastq_examples DIRECTORY
+```
+
+Or:
+
+```console
+$ python -m riboviz/tools/create_fastq_examples.py DIRECTORY
+```
+
+where `DIRECTORY` is the directory into which the simulated files are to be written. The following files are created:                                 
+
+* `simdata_UMI5and3_4nt_adaptor.fastq`: FASTQ file with 9 reads, each with a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a 11nt adaptor at the 3' end. Reads can be grouped by UMI into 5 groups.
+* `simdata_UMI5and3_4nt.fastq`: FASTQ file identical to the above but with the adaptor trimmed.
+* `simdata_extracted_UMI5and3_4nt.fastq`: FASTQ file identical to the above but with the UMIs extracted and concatenated to the header.
+* `simdata_extracted_UMI3_4nt.fastq`: FASTQ file with 8 reads, each with a 4nt UMI at the 3' end. Reads can be grouped by UMI into 4 groups.
+* `simdata_UMI3_4nt.fastq`: FASTQ file identical to the above but with the UMI extracted and concatenated to the header.
+
+The files with these names in `data/` were created using this script.
 
 ---
 
@@ -394,42 +423,14 @@ If refactoring existing code then calls to `is.null` can be replaced by calls to
 
 ```
 data/            # Data files used by scripts and vignette
+docs/            # Documentation
+install/         # Bash scripts to install dependencies
 riboviz/         # Python package code
   tools/         # End-user scripts, including prep_riboviz.py
   test/          # pytest-compliant tests
     regression/  # prep_riboviz.py and vignette regression test
-rscripts/        # R scripts invoked by vignette
 rmarkdown/       # Rmarkdown scripts for data preprocessing
-website/          # RiboViz Shiny server code and data
+rscripts/        # R scripts invoked by vignette
+vignette/        # Vignette configuration and input data
+website/         # RiboViz Shiny server code and data
 ```
-
----
-
-## Data file origins
-
-The following data files were created either manually or via the use of scripts outwith or within the repository.
-
-```
-data/yeast_CDS_w_250utrs.fa
-data/yeast_CDS_w_250utrs.gff3
-data/yeast_codon_pos_i200.RData
-```
-
-Created by a run of [script_for_transcript_annotation.Rmd](../rmarkdown/script_for_transcript_annotation.Rmd) on third-party data. See [Inputs](./run-vignette.md#inputs) in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md) for details. These files are used as inputs to RiboViz.
-
-```
-vignette/input/yeast_YAL_CDS_w_250utrs.fa
-vignette/input/yeast_YAL_CDS_w_250utrs.gff3
-vignette/input/yeast_rRNA_R64-1-1.fa
-vignette/input/SRR1042855_s1mi.fastq.gz
-vignette/input/SRR1042864_s1mi.fastq.gz
-```
-
-Created manually from third-party data or the foregoing `data/` FILES. See [Inputs](./run-vignette.md#inputs) in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md) for details. These files are used as inputs to RiboViz.
-
-```
-data/testdata_trim_5p_mismatch.sam
-data/testdata_trim_5pos5neg.sam
-```
-
-Created by running RiboViz on the data in `vignette/`, copying and pasting lines from SAM files produced, then manually editing the lines to produce the desired range of outcomes. These files are used for testing [trim_5p_mismatch.py](../riboviz/tools/trim_5p_mismatch.py).
