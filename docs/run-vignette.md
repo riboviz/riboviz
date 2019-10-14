@@ -92,7 +92,7 @@ For each sample or condition you want to compare (which should be placed into a 
 
 ```yaml
 fq_files:
-  WTnone: SRR1042855_s1mi.fastq.gz 
+  WTnone: SRR1042855_s1mi.fastq.gz
   WT3AT: SRR1042864_s1mi.fastq.gz
   Example: data.fastq.gz
 ```
@@ -115,10 +115,12 @@ For each of these names (e.g. `Example`), many output files are produced in the 
 * `Example_tpms.tsv`
 * `Example_codon_ribodens.tsv`
 * `Example_codon_ribodens.pdf`
+* `Example_startcodon_ribogridbar.pdf`
+* `Example_startcodon_ribogrid.pdf`
 
 A summary file is also put in the output directory:
 
-* `TPMs_collated.tsv`, tab-separated test file with the transcripts per million (tpm) for all samples 
+* `TPMs_collated.tsv`, tab-separated test file with the transcripts per million (tpm) for all samples
 
 For each of these names (e.g. `Example`), the intermediate files produced in the temporary directory (`dir_tmp`) are:
 
@@ -186,7 +188,7 @@ $ source $HOME/setenv.sh
 
 * Otherwise, run the following (your directory names may be different, depending on the versions of Hisat2 and Bowtie you have):
 
-```console 
+```console
 export PATH=~/hisat2-2.1.0:$PATH
 export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 ```
@@ -371,6 +373,8 @@ WT3AT_pos_sp_rpf_norm_reads.pdf
 WT3AT_pos_sp_rpf_norm_reads.tsv
 WT3AT_read_lengths.pdf
 WT3AT_read_lengths.tsv
+WT3AT_startcodon_ribogridbar.pdf
+WT3AT_startcodon_ribogrid.pdf
 WT3AT_tpms.tsv
 
 WTnone_3nt_periodicity.pdf
@@ -388,6 +392,8 @@ WTnone_pos_sp_rpf_norm_reads.pdf
 WTnone_pos_sp_rpf_norm_reads.tsv
 WTnone_read_lengths.pdf
 WTnone_read_lengths.tsv
+WTnone_startcodon_ribogridbar.pdf
+WTnone_startcodon_ribogrid.pdf
 WTnone_tpms.tsv
 ```
 
@@ -515,7 +521,7 @@ yeast_tRNAs.tsv
 
 ### Build indices for alignment
 
-Build rRNA index: 
+Build rRNA index:
 
 ```
 hisat2-build vignette/input/yeast_rRNA_R64-1-1.fa \
@@ -719,6 +725,8 @@ WT3AT_pos_sp_rpf_norm_reads.pdf
 WT3AT_pos_sp_rpf_norm_reads.tsv
 WT3AT_read_lengths.pdf
 WT3AT_read_lengths.tsv
+WT3AT_startcodon_ribogridbar.pdf
+WT3AT_startcodon_ribogrid.pdf
 WT3AT_tpms.tsv
 ```
 
