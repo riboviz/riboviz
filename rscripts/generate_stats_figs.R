@@ -327,7 +327,7 @@ print("Completed: Distribution of lengths of all mapped reads")
 print("Starting: Biases in nucleotide composition along mapped read lengths")
 
 GetNTReadPosition <- function(hdf5file, gene, dataset, lid, MinReadLen) {
-  reads_pos_len <- rhdf5::H5Dread(rhdf5::H5Dopen(hdf5file, paste0("/", gene, "/", dataset, "/reads/data")))[lid, ] # Get reads of a particular length
+  reads_pos_len <- GetGeneDatamatrix(gene, dataset, hdf5file)[lid, ] # Get reads of a particular length
   reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (lid + MinReadLen - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
   pos <- rep(1:length(reads_pos_len), reads_pos_len) # nt positions weighted by number of reads mapping to it
   pos_IR <- IRanges::IRanges(start = pos, width = (lid + MinReadLen - 1)) # Create an IRanges object for position-specific reads of a particular length
@@ -417,8 +417,9 @@ print("Starting: Position specific distribution of reads")
 
 # codon-specific reads for RPF datasets
 GetCodonPositionReads <- function(hdf5file, gene, dataset, left, right, MinReadLen) {
+  # @ewallace: this needs documentation of inputs and outputs
   lid <- 28 - MinReadLen + 1
-  reads_pos <- rhdf5::H5Dread(rhdf5::H5Dopen(hdf5file, paste0("/", gene, "/", dataset, "/reads/data"))) # Get the matrix of read counts
+  reads_pos <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
   reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
   end_reads_pos_subset <- ncol(reads_pos_subset) # Number of columns of the subset
 
@@ -433,7 +434,7 @@ GetCodonPositionReads <- function(hdf5file, gene, dataset, left, right, MinReadL
 
 # Nt-specific coverage for mRNA datasets
 GetMRNACoverage <- function(hdf5file, gene, dataset, left, right, read_range, MinReadLen, Buffer) {
-  reads_pos <- rhdf5::H5Dread(rhdf5::H5Dopen(hdf5file, paste0("/", gene, "/", dataset, "/reads/data"))) # Get the matrix of read counts
+  reads_pos <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
   reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS mapped reads are considered
 
   nt_IR_list <- lapply(read_range, function(w) {
