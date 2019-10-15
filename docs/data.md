@@ -88,13 +88,13 @@ data/yeast_features.tsv
 
 Data within this file was derived as follows:
 
-1. Length: [genome release R64-2-1](https://downloads.yeastgenome.org/sequence/S288C_reference/) (GFF) from the [Saccharomyces Genome Database](https://www.yeastgenome.org/).
-2. 5' UTR Length: Arribere, J.A. and Wendy V. Gilbert, W.V. "Roles for transcript leaders in translation and mRNA decay revealed by transcript leader sequencing", Genome Res. 2013. 23: 977-987 doi:[10.1101/gr.150342.112](http://doi.org/10.1101/gr.150342.112)
-3. polyA Length: Subtelny, A.O. et al. "Poly(A)-tail profiling reveals an embryonic switch in translational control", Nature, 508(66), 29/01/2019 doi:[10.1038/nature13007](http://doi.org/10.1038/nature13007)
-4. uATG: Estimated from 2 by counting the upstream ATGs in the annotated 5'UTR
-5. UTR_GC: Estimated from 2 by calculating proportion of G/C in the annotated 5' UTR.
-6. FE_cap: Estimated from 2.
-7. FE_atg: Etimated from 30 bp near ATG.
+1. `Length_log10`: [genome release R64-2-1](https://downloads.yeastgenome.org/sequence/S288C_reference/) (GFF) from the [Saccharomyces Genome Database](https://www.yeastgenome.org/).
+2. `utr`, 5' UTR length: Arribere, J.A. and Wendy V. Gilbert, W.V. "Roles for transcript leaders in translation and mRNA decay revealed by transcript leader sequencing", Genome Res. 2013. 23: 977-987 doi:[10.1101/gr.150342.112](http://doi.org/10.1101/gr.150342.112)
+3. `polyA` length: Subtelny, A.O. et al. "Poly(A)-tail profiling reveals an embryonic switch in translational control", Nature, 508(66), 29/01/2019 doi:[10.1038/nature13007](http://doi.org/10.1038/nature13007)
+4. `uATGs`: Estimated from 2 by counting the upstream ATGs in the annotated 5'UTR
+5. `utr_gc`: Estimated from 2 by calculating proportion of G/C in the annotated 5' UTR.
+6. `FE_cap`: Estimated from 2. using sequences of length 70 nts from the 5' end of the mRNA transcript with folding energies calculated at 37 degress Centigrade following [Supplementary Methods](https://www.cell.com/cms/10.1016/j.celrep.2016.01.043/attachment/257faf34-ff8f-4071-a642-bfdb531c75b8/mmc1) for Weinberg et al. 2016 "Improved Ribosome-Footprint and mRNA Measurements Provide Insights into Dynamics and Regulation of Yeast Translation", Cell Reports, 14(7), 23 February 2016, 1787-1799 doi: [10.1016/j.celrep.2016.01.043](https://doi.org/10.1016/j.celrep.2016.01.043). Calculations were done using [RNAfold](https://www.tbi.univie.ac.at/RNA/RNAfold.1.html) in the [ViennaRNA](https://www.tbi.univie.ac.at/RNA/) package.
+7. `FE_atg`: Estimated from 30 nt upstream from ATG.
 
 tRNA estimates:
 
