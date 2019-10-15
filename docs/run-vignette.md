@@ -70,23 +70,25 @@ Note that the configuration file specifies an additional, non-existent, file. Th
 
 The script prepares ribosome profiling data for RiboViz or other analyses. It does the following (`names` in brackets correspond to variables in the YAML configuration file):
 
-* Reads configuration information from the YAML configuration file.
-* Builds hisat2 indices if requested (`build_indices=TRUE`, by default), in an index directory (`dir_index`).
-* Processes all `fastq.gz` files (`fq_files`) within the input directory  (`dir_in`).
-* Cuts out sequencing library adapters (`adapters=CTGTAGGCACC`, by default) with `cutadapt`.
-* Removes rRNA or other contaminating reads by hisat2 alignment to the rRNA index file (`rRNA_index`).
-* Aligns remaining reads to ORFs or another hisat2 index file (`orf_index`).
-* Trims 5' mismatches from reads and removes reads with more than 2 mismatches via a call to `riboviz/tools/trim5pmismatch.py`.
-* Parallelizes over many processes (`nprocesses`):
-  - This value is used to configure hisat2, samtools sort, bam_to_h5.R and generate_stats_figs.R.
-  - For cutadapt and Python 3, the number of available processors on the host will be used.
-  - For cutadapt and Python 2, its default of 1 processor will be used as cutadapt cannot run in parallel under Python 2.
-* Makes length-sensitive alignments in compressed h5 format by running `rscripts/bam_to_h5.R`.
-* Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets, by running `rscripts/generate_stats_figs.R`.
-* Estimates read counts, reads per base, and transcripts per million for each ORF in each sample.
-* Puts all intermediate files into a temporary directory (`dir_tmp`) which will be **large**.
-* When finished, puts useful output files into an output directory (`dir_out`).
-* Optionally exports bedgraph files for plus and minus strands (`make_bedgraph=TRUE`, by default).
+* Reads configuration information from YAML configuration file.
+* Builds hisat2 indices if requested (`build_indices: TRUE`) using "hisat2 build" and saves these into an index directory (`dir_index`).
+* Processes all fastq.gz files (`dir_in`). For each fastq.gz file:
+  - Cuts out sequencing library adapters (`adapters`, default "CTGTAGGCACC") using "cutadapt".
+  - Extracts UMIs using "umi_tools extract", if requested (`deduplicate: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`). For information on regular expression patterns, see the UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction). An example of a regular expression, which extracts 4nt UMIs at both the 5' and 3' ends of a read is `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$`.
+- Removes rRNA or other contaminating reads by alignment to rRNA index file (`rRNA_index`) using "hisat2".
+  - Aligns remaining reads to ORFs index file (`orf_index`). using "hisat2".
+  - Trims 5' mismatches from reads and remove reads with more than 2 mismatches using trim_5p_mismatch.py.
+  - Deduplicates UMIs using "umi_tools dedup", if requested (`deduplicate: TRUE`).
+  - Exports bedgraph files for plus and minus strands, if requested (`make_bedgraph: TRUE`) using "bedtools genomecov".
+  - Makes length-sensitive alignments in compressed h5 format using "bam_to_h5.R".
+  - Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets using "generate_stats_figs.R". This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
+* Collates TPMs across all processed fastq.gz files, using "collate_tpms.R".
+* The workflow can parallelize partos of its operation over many processes (`nprocesses`):
+  - This value is used to configure "hisat2", "samtools sort", "bam_to_h5.R" and "generate_stats_figs.R".
+  - For "cutadapt" and Python 3, the number of available processors on the host will be used.
+  - For "cutadapt" and Python 2, its default of 1 processor will be used as "cutadapt" cannot run in parallel under Python 2.
+* Writes all intermediate files into a temporary directory (`dir_tmp`).
+* Writes all output files into an output directory (`dir_out`).
 
 For each sample or condition you want to compare (which should be placed into a single `.fastq.gz` file in the input directory (`dir_in`)), the configuration file needs a sub-variable of `fq_files`, whose name will be used in the output files. For example:
 
@@ -97,12 +99,26 @@ fq_files:
   Example: data.fastq.gz
 ```
 
+For each of these names (e.g. `Example`), the intermediate files produced in the temporary directory (`dir_tmp`) are:
+
+* `Example_trim.fq`, trimmed reads.
+* `Example_extract_trim.fq`, trimmed reads with UMIs extracted (optional, only if `deduplicate: TRUE` in configuration)
+* `Example_nonrRNA.fq`, trimmed non-rRNA reads.
+* `Example_rRNA_map.sam`, rRNA-mapped reads.
+* `Example_orf_map.sam`, ORF-mapped reads.
+* `Example_orf_map_clean.sam`, ORF-mapped reads with mismatched nt trimmed.
+* `Example_unaligned.sam`, unaligned reads.
+
+The `_unaligned.sam` files could be used to find common contaminants or translated sequences not in your orf annotation.
+
 For each of these names (e.g. `Example`), many output files are produced in the output directory (`dir_out`):
 
 * `Example.bam`, bamfile of reads mapped to transcripts, can be directly used in genome browsers.
 * `Example.bam.bai`, bam index file for `Example.bam`.
-* `Example_minus.bedgraph`, (optional), bedgraph of reads from minus strand.
-* `Example_plus.bedgraph`, (optional), bedgraph of reads from minus strand.
+* `Example_dedup.bam`, `Example.bam` after deduplication of read (optional, only if `deduplicate: True` in configuration).
+* `Example_dedup.bam.bai`, bam index file for `Example_dedup.bam`.
+* `Example_minus.bedgraph`, bedgraph of reads from minus strand (optional, only if `make_bedgraph: TRUE` in configuration).
+* `Example_plus.bedgraph`, bedgraph of reads from plus strand (optional, only if `make_bedgraph: TRUE` in configuration).
 * `Example.h5`, length-sensitive alignments in compressed h5 format.
 * `Example_3nt_periodicity.tsv`
 * `Example_3nt_periodicity.pdf`
@@ -121,17 +137,6 @@ For each of these names (e.g. `Example`), many output files are produced in the 
 A summary file is also put in the output directory:
 
 * `TPMs_collated.tsv`, tab-separated test file with the transcripts per million (tpm) for all samples
-
-For each of these names (e.g. `Example`), the intermediate files produced in the temporary directory (`dir_tmp`) are:
-
-* `Example_trim.fq`, trimmed reads.
-* `Example_nonrRNA.fq`, trimmed non-rRNA reads.
-* `Example_rRNA_map.sam`, rRNA-mapped reads.
-* `Example_orf_map.sam`, orf-mapped reads.
-* `Example_orf_map_clean.sam`, orf-mapped reads with mismatched nt trimmed.
-* `Example_unaligned.sam`, unaligned reads.
-
-The `_unaligned.sam` files could be used to find common contaminants or translated sequences not in your orf annotation.
 
 ---
 
@@ -332,8 +337,8 @@ Intermediate outputs in `vignette/tmp`. For example:
 
 ```
 WT3AT_nonrRNA.fq         # trimmed non-rRNA reads
-WT3AT_orf_map_clean.sam  # orf-mapped reads with mismatched nt trimmed
-WT3AT_orf_map.sam        # orf-mapped reads
+WT3AT_orf_map_clean.sam  # ORF-mapped reads with mismatched nt trimmed
+WT3AT_orf_map.sam        # ORF-mapped reads
 WT3AT_rRNA_map.sam       # rRNA-mapped reads
 WT3AT_trim.fq            # trimmed reads
 WT3AT_unaligned.sam      # unaligned reads

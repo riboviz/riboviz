@@ -17,42 +17,47 @@ Example:
 
 Prepare ribosome profiling data for RiboViz or other analysis:
 
-* - Read configuration info from YAML file.
-* - Build hisat2 indices if requested (config["build_indices"] ==
-*   True), in index directory (config["dir_index"]).
-* - Process all fastq.gz files (config["dir_in"]).
-* - Cut out sequencing library adapters ("CTGTAGGCACC" or
-*   config["adapters").
-* - Extract UMIs using UMI-tools if requested (config["deduplicate"]
-*   == True) using UMI-tools-compliant regular expression pattern
-*   (config["umi_regexp"]).
-* - Remove rRNA or other contaminating reads by hisat2 alignment to
-*   rRNA index file (config["rRNA_index"])
-* - Align remaining reads to ORFs or other hisat2 index file
-*   (config["orf_index"]).
-* - Trim 5' mismatches from reads and remove reads with more than 2
-*   mismatches.
-* - Deduplicate UMIs using UMI-tools if requested
-*   (config["deduplicate"] == True)
-* - Parallelize over many processes (config["nprocesses"]):
-*   - This value is used to configure hisat2, samtools sort,
-*     bam_to_h5.R and generate_stats_figs.R.
-*   - For cutadapt and Python 3, the number of available processors
+* - Reads configuration information from YAML configuration file.
+* - Builds hisat2 indices if requested (config["build_indices"] ==
+*   True) using "hisat2 build" and saves these into an index directory
+    (config["dir_index"]).
+* - Processes all fastq.gz files (config["dir_in"]). For each fastq.gz
+    file:
+*   - Cuts out sequencing library adapters (config["adapters"],
+*     default "CTGTAGGCACC") using "cutadapt".
+*   - Extracts UMIs using "umi_tools extract", if requested
+*     (config["deduplicate"] == True), using a UMI-tools-compliant
+*     regular expression pattern (config["umi_regexp"]).
+*   - Removes rRNA or other contaminating reads by alignment to
+      rRNA index file (config["rRNA_index"]) using "hisat2".
+*   - Aligns remaining reads to ORFs index file
+      (config["orf_index"]). using "hisat2".
+*   - Trims 5' mismatches from reads and remove reads with more than 2
+*     mismatches using trim_5p_mismatch.py.
+*   - Deduplicates UMIs using "umi_tools dedup", if requested
+*     (config["deduplicate"] == True).
+*   - Exports bedgraph files for plus and minus strands, if requested
+*     (config["make_bedgraph"] == True) using "bedtools genomecov".
+*   - Makes length-sensitive alignments in compressed h5 format using 
+*     "bam_to_h5.R".
+*   - Generates summary statistics, and analyses and QC plots for both
+*     RPF and mRNA datasets using "generate_stats_figs.R". This
+*     includes estimated read counts, reads per base, and transcripts
+*     per million for each ORF in each sample. 
+* - Collates TPMs across all processed fastq.gz files, using
+     "collate_tpms.R".
+* - The workflow can parallelize partos of its operation over many
+*   processes (config["nprocesses"]):
+*   - This value is used to configure "hisat2", "samtools sort",
+*     "bam_to_h5.R" and "generate_stats_figs.R".
+*   - For "cutadapt" and Python 3, the number of available processors
 *     on the host will be used.
-*   - For cutadapt and Python 2, its default of 1 processor will be
-*     used as cutadapt cannot run in parallel under Python 2.
-* - Make length-sensitive alignments in compressed h5 format by
-*   running "bam_to_h5.R".
-* - Generate summary statistics, and analyses and QC plots for both
-*   RPF and mRNA datasets, by running "generate_stats_figs.R".
-* - Put all intermediate files into a temporary directory
+*   - For "cutadapt" and Python 2, its default of 1 processor will be
+*     used as "cutadapt" cannot run in parallel under Python 2.
+* - Writes all intermediate files into a temporary directory
 *   (config["dir_tmp"]).
-* - When finished, put useful output files into output directory
+* - Writes all output files into an output directory
 *   (config["dir_out"]).
-* Optionally export bedgraph files for plus and minus strands, if
-*   requested (config["make_bedgraph"] == True).
-*  - bamfiles (config["dir_out"]/*.bam) are directly usable in genome
-*  - browsers, etc.
 
 Exit codes are as follows:
 
