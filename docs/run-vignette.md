@@ -119,7 +119,7 @@ For each of these names (e.g. `Example`), many output files are produced in the 
 
 * `Example.bam`, bamfile of reads mapped to transcripts, can be directly used in genome browsers.
 * `Example.bam.bai`, bam index file for `Example.bam`.
-* `Example_dedup.bam`, `Example.bam` after deduplication of read (optional, only if `deduplicate: True` in configuration).
+* `Example_dedup.bam`, `Example.bam` after deduplication of read (optional, only if `deduplicate: TRUE` in configuration).
 * `Example_dedup.bam.bai`, bam index file for `Example_dedup.bam`.
 * `Example_minus.bedgraph`, bedgraph of reads from minus strand (optional, only if `make_bedgraph: TRUE` in configuration).
 * `Example_plus.bedgraph`, bedgraph of reads from plus strand (optional, only if `make_bedgraph: TRUE` in configuration).
