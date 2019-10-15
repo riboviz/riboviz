@@ -53,6 +53,38 @@ Install:
 $ conda install -y pytest
 ```
 
+## Install R packages for developers
+
+### lintr
+
+Web sites:
+* [lintr package on CRAN](https://cran.r-project.org/package=lintr)
+* [GitHub](https://github.com/jimhester/lintr)
+
+Install:
+
+```console
+$ R
+> install.packages("lintr")
+# load the package before use with:
+ # library("lintr")
+```
+
+### styleR
+
+Web sites:
+* [StyleR package documentation](https://styler.r-lib.org/)
+* [GitHub](https://github.com/r-lib/styler)
+
+Install:
+
+```console
+$ R
+> install.packages("styler")
+# load the package before use with:
+ # library("styler")
+```
+
 ---
 
 ## Branching model
@@ -243,7 +275,7 @@ riboviz/test/regression/test_vignette.py::test_output_tpms_collated_tsv PASSED  
 Run tests of error conditions and exit codes:
 
 ```console
-$ pytest -v riboviz/test/tools/test_prep_riboviz.py 
+$ pytest -v riboviz/test/tools/test_prep_riboviz.py
 ============================= test session starts ==============================
 platform linux2 -- Python 2.7.16, pytest-4.6.2, py-1.8.0, pluggy-0.12.0 -- /home/centos/miniconda2/bin/python
 cachedir: .pytest_cache
@@ -303,6 +335,8 @@ The files with these names in `data/` were created using this script.
 
 ## Coding style
 
+For Python code:
+
 Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible. For example, to run these on `validation.py`:
 
 ```console
@@ -310,6 +344,23 @@ $ pylint riboviz/validation.py
 $ pycodestyle riboviz/validation.py
 $ 2to3 riboviz/validation.py
 ```
+
+For R code:
+
+Follow [Google fork](https://google.github.io/styleguide/Rguide.html) of [Tidyverse R Style guide](https://style.tidyverse.org/) where possible - the Google fork is largely the same but differentiates more between functions (BigCamelCase) and variable names (snake_case) and does not assign to the right, for example. The Tidyverse R Style guide is implemented in `lintr` and `styleR` packages, so please bear in mind the small number of changes needed to follow the Google style.  
+
+`Lintr` package can be used to produce programmatic output of style issues but does not edit the code, whilst the `styleR` package makes automatic adjustments to selections or files by default.
+
+Lintr can be used within an IDE such as RStudio via an add-in once installed if preferred and run on the current file. It can also be run within the R terminal (for example on `generate_stats_figs.R`) with the command: `lint("$HOME/RiboViz/rscripts/generate_stats_figs.R")`, but if there is considerable output or you wish to work through the output bit by bit, it's possible to send it to an output file using `sink()` as below:
+
+```R
+$ R
+> sink('lintR-output.txt')
+> lint("$HOME/RiboViz/rscripts/generate_stats_figs.R")
+> sink()
+```
+
+`StyleR` also has an add-in for RStudio IDE, which allows selected code, current file or current package to be styled automatically according to the Tidyverse style guide. It can also be run from command line (see package information for more details). There are a considerable number of options for setting 'strictness' of adherence to the style guide, which may be useful.
 
 ---
 
