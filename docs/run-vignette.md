@@ -75,7 +75,7 @@ The script prepares ribosome profiling data for RiboViz or other analyses. It do
 * Processes all fastq.gz files (`dir_in`). For each fastq.gz file:
   - Cuts out sequencing library adapters (`adapters`, default `CTGTAGGCACC`) using `cutadapt`.
   - Outputs UMI groups pre-deduplication using `umi_tools group` if requested (`deduplicate: TRUE` and `group_umis: TRUE`).
-- Extracts UMIs using `umi_tools extract`, if requested (`deduplicate: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`). For information on regular expression patterns, see the UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction). An example of a regular expression, which extracts 4nt UMIs at both the 5' and 3' ends of a read is `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$`.
+  - Extracts UMIs using `umi_tools extract`, if requested (`deduplicate: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`). For information on regular expression patterns, see the UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction). An example of a regular expression, which extracts 4nt UMIs at both the 5' and 3' ends of a read is `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$`.
   - Outputs UMI groups post-deduplication using `umi_tools group` if requested (`deduplicate: TRUE` and `group_umis: TRUE`).
   - Removes rRNA or other contaminating reads by alignment to rRNA index file (`rRNA_index`) using `hisat2`.
   - Aligns remaining reads to ORFs index file (`orf_index`). using `hisat2`.
