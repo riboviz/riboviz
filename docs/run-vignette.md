@@ -71,22 +71,24 @@ Note that the configuration file specifies an additional, non-existent, file. Th
 The script prepares ribosome profiling data for RiboViz or other analyses. It does the following (`names` in brackets correspond to variables in the YAML configuration file):
 
 * Reads configuration information from YAML configuration file.
-* Builds hisat2 indices if requested (`build_indices: TRUE`) using "hisat2 build" and saves these into an index directory (`dir_index`).
+* Builds hisat2 indices if requested (`build_indices: TRUE`) using `hisat2 build` and saves these into an index directory (`dir_index`).
 * Processes all fastq.gz files (`dir_in`). For each fastq.gz file:
-  - Cuts out sequencing library adapters (`adapters`, default "CTGTAGGCACC") using "cutadapt".
-  - Extracts UMIs using "umi_tools extract", if requested (`deduplicate: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`). For information on regular expression patterns, see the UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction). An example of a regular expression, which extracts 4nt UMIs at both the 5' and 3' ends of a read is `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$`.
-- Removes rRNA or other contaminating reads by alignment to rRNA index file (`rRNA_index`) using "hisat2".
-  - Aligns remaining reads to ORFs index file (`orf_index`). using "hisat2".
+  - Cuts out sequencing library adapters (`adapters`, default `CTGTAGGCACC`) using `cutadapt`.
+  - Outputs UMI groups pre-deduplication using `umi_tools group` if requested (`deduplicate: TRUE` and `group_umis: TRUE`).
+- Extracts UMIs using `umi_tools extract`, if requested (`deduplicate: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`). For information on regular expression patterns, see the UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction). An example of a regular expression, which extracts 4nt UMIs at both the 5' and 3' ends of a read is `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$`.
+  - Outputs UMI groups post-deduplication using `umi_tools group` if requested (`deduplicate: TRUE` and `group_umis: TRUE`).
+  - Removes rRNA or other contaminating reads by alignment to rRNA index file (`rRNA_index`) using `hisat2`.
+  - Aligns remaining reads to ORFs index file (`orf_index`). using `hisat2`.
   - Trims 5' mismatches from reads and remove reads with more than 2 mismatches using trim_5p_mismatch.py.
-  - Deduplicates UMIs using "umi_tools dedup", if requested (`deduplicate: TRUE`).
-  - Exports bedgraph files for plus and minus strands, if requested (`make_bedgraph: TRUE`) using "bedtools genomecov".
-  - Makes length-sensitive alignments in compressed h5 format using "bam_to_h5.R".
-  - Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets using "generate_stats_figs.R". This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
-* Collates TPMs across all processed fastq.gz files, using "collate_tpms.R".
+  - Deduplicates UMIs using `umi_tools dedup`, if requested (`deduplicate: TRUE`).
+  - Exports bedgraph files for plus and minus strands, if requested (`make_bedgraph: TRUE`) using `bedtools genomecov`.
+  - Makes length-sensitive alignments in compressed h5 format using `bam_to_h5.R`.
+  - Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
+* Collates TPMs across all processed fastq.gz files, using `collate_tpms.R`.
 * The workflow can parallelize partos of its operation over many processes (`nprocesses`):
-  - This value is used to configure "hisat2", "samtools sort", "bam_to_h5.R" and "generate_stats_figs.R".
-  - For "cutadapt" and Python 3, the number of available processors on the host will be used.
-  - For "cutadapt" and Python 2, its default of 1 processor will be used as "cutadapt" cannot run in parallel under Python 2.
+  - This value is used to configure `hisat2`, `samtools sort`, `bam_to_h5.R` and `generate_stats_figs.R`.
+  - For `cutadapt` and Python 3, the number of available processors on the host will be used.
+  - For `cutadapt` and Python 2, its default of 1 processor will be used as `cutadapt` cannot run in parallel under Python 2.
 * Writes all intermediate files into a temporary directory (`dir_tmp`).
 * Writes all output files into an output directory (`dir_out`).
 
@@ -108,6 +110,8 @@ For each of these names (e.g. `Example`), the intermediate files produced in the
 * `Example_orf_map.sam`, ORF-mapped reads.
 * `Example_orf_map_clean.sam`, ORF-mapped reads with mismatched nt trimmed.
 * `Example_unaligned.sam`, unaligned reads.
+* `Example_pre_dedup_groups.tsv`: UMI groups before deduplication (optional, inly if `deduplicate: TRUE` and `group_umis: TRUE` in configuration).
+* `Example_post_dedup_groups.tsv`: UMI groups after deduplication (optional, inly if `deduplicate: TRUE` and `group_umis: TRUE` in configuration).
 
 The `_unaligned.sam` files could be used to find common contaminants or translated sequences not in your orf annotation.
 
@@ -251,7 +255,7 @@ WTnone_09_bam_to_h5.log
 WTnone_10_generate_stats_figs.log
 ```
 
-Note: if running `prep_riboviz.py` on examples with UMI extraction and deduplication (`deduplication: TRUE`) then additional log files will be present for invocations of `umi_tools extract`, `umi_tools dedup` and `samtools index` and the numbering of log files for successive steps will be different.
+Note: if running `prep_riboviz.py` on examples with UMI extraction and deduplication (`deduplication: TRUE`) then additional log files will be present for invocations of `umi_tools extract`, `umi_tools group`, `umi_tools dedup` and `samtools index` and the numbering of log files for successive steps will be different.
 
 You should regularly delete the log files, to prevent them from using up your disk space.
 

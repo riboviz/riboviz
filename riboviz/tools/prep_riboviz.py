@@ -17,47 +17,53 @@ Example:
 
 Prepare ribosome profiling data for RiboViz or other analysis:
 
-* - Reads configuration information from YAML configuration file.
-* - Builds hisat2 indices if requested (config["build_indices"] ==
-*   True) using "hisat2 build" and saves these into an index directory
-    (config["dir_index"]).
-* - Processes all fastq.gz files (config["dir_in"]). For each fastq.gz
-    file:
-*   - Cuts out sequencing library adapters (config["adapters"],
-*     default "CTGTAGGCACC") using "cutadapt".
-*   - Extracts UMIs using "umi_tools extract", if requested
-*     (config["deduplicate"] == True), using a UMI-tools-compliant
-*     regular expression pattern (config["umi_regexp"]).
-*   - Removes rRNA or other contaminating reads by alignment to
-      rRNA index file (config["rRNA_index"]) using "hisat2".
-*   - Aligns remaining reads to ORFs index file
-      (config["orf_index"]). using "hisat2".
-*   - Trims 5' mismatches from reads and remove reads with more than 2
-*     mismatches using trim_5p_mismatch.py.
-*   - Deduplicates UMIs using "umi_tools dedup", if requested
-*     (config["deduplicate"] == True).
-*   - Exports bedgraph files for plus and minus strands, if requested
-*     (config["make_bedgraph"] == True) using "bedtools genomecov".
-*   - Makes length-sensitive alignments in compressed h5 format using
-*     "bam_to_h5.R".
-*   - Generates summary statistics, and analyses and QC plots for both
-*     RPF and mRNA datasets using "generate_stats_figs.R". This
-*     includes estimated read counts, reads per base, and transcripts
-*     per million for each ORF in each sample.
-* - Collates TPMs across all processed fastq.gz files, using
-     "collate_tpms.R".
-* - The workflow can parallelize partos of its operation over many
-*   processes (config["nprocesses"]):
-*   - This value is used to configure "hisat2", "samtools sort",
-*     "bam_to_h5.R" and "generate_stats_figs.R".
-*   - For "cutadapt" and Python 3, the number of available processors
-*     on the host will be used.
-*   - For "cutadapt" and Python 2, its default of 1 processor will be
-*     used as "cutadapt" cannot run in parallel under Python 2.
-* - Writes all intermediate files into a temporary directory
-*   (config["dir_tmp"]).
-* - Writes all output files into an output directory
-*   (config["dir_out"]).
+* Reads configuration information from YAML configuration file.
+* Builds hisat2 indices if requested (config["build_indices"] ==
+  True) using "hisat2 build" and saves these into an index directory
+  (config["dir_index"]).
+* Processes all fastq.gz files (config["dir_in"]). For each fastq.gz
+  file:
+  - Cuts out sequencing library adapters (config["adapters"],
+    default "CTGTAGGCACC") using "cutadapt".
+  - Extracts UMIs using "umi_tools extract", if requested
+    (config["deduplicate"] == True), using a UMI-tools-compliant
+    regular expression pattern (config["umi_regexp"]).
+  - Removes rRNA or other contaminating reads by alignment to
+    rRNA index file (config["rRNA_index"]) using "hisat2".
+  - Aligns remaining reads to ORFs index file
+    (config["orf_index"]). using "hisat2".
+  - Trims 5' mismatches from reads and remove reads with more than 2
+    mismatches using trim_5p_mismatch.py.
+  - Outputs UMI groups pre-deduplication using "umi_tools group" if
+    requested (config["deduplicate"] == True and
+    config["group_umis"] == TRUE)
+  - Deduplicates UMIs using "umi_tools dedup", if requested
+    (config["deduplicate"] == True).
+  - Outputs UMI groups post-deduplication using "umi_tools group" if
+    requested (config["deduplicate"] == True and
+    config["group_umis"] == TRUE)
+  - Exports bedgraph files for plus and minus strands, if requested
+    (config["make_bedgraph"] == True) using "bedtools genomecov".
+  - Makes length-sensitive alignments in compressed h5 format using
+    "bam_to_h5.R".
+  - Generates summary statistics, and analyses and QC plots for both
+    RPF and mRNA datasets using "generate_stats_figs.R". This
+    includes estimated read counts, reads per base, and transcripts
+    per million for each ORF in each sample.
+* Collates TPMs across all processed fastq.gz files, using
+  "collate_tpms.R".
+* The workflow can parallelize partos of its operation over many
+  processes (config["nprocesses"]):
+  - This value is used to configure "hisat2", "samtools sort",
+    "bam_to_h5.R" and "generate_stats_figs.R".
+  - For "cutadapt" and Python 3, the number of available processors
+    on the host will be used.
+  - For "cutadapt" and Python 2, its default of 1 processor will be
+    used as "cutadapt" cannot run in parallel under Python 2.
+* Writes all intermediate files into a temporary directory
+  (config["dir_tmp"]).
+* Writes all output files into an output directory
+  (config["dir_out"]).
 
 Exit codes are as follows:
 
@@ -153,6 +159,57 @@ def get_sample_log_file(logs_dir, sample, step, index):
     :rtype: str or unicode
     """
     return os.path.join(logs_dir, "%s_%02d_%s.log" % (sample, index, step))
+
+
+def group_umis(sample_bam,
+               tmp_dir,
+               sample,
+               tag,
+               step,
+               logs_dir,
+               cmd_file,
+               dry_run):
+    """
+    Run "umi_tools group" on a BAM file for a sample.
+
+    :param sample_bam: Sample BAM file
+    :type sample_bam: str or unicode
+    :param tmp_dir Temporary files directory
+    :type tmp_dir: str or unicode
+    :param sample_prefix: Sample name.
+    :type sample: str or unicode
+    :param tag: Tag used as part of groups file name to distinguish it
+    from other groups files for the sample.
+    :type tag: str or unicode
+    :param step: Current step in workflow
+    :type step: str or unicode
+    :param logs_dir Log files directory
+    :type logs_dir: str or unicode
+    :param cmd_file: File to log command to, if not None
+    :type cmd_file: str or unicode
+    :param dry_run: Don't execute workflow commands (useful for seeing
+    what commands would be executed)
+    :type dry_run: bool
+    :raise IOError: if umi_tools cannot be found (Python 2)
+    :raise OSError: if a third-party tool cannot be found (Python 2)
+    :raise FileNotFoundError: if umi_tools or a third-party tool
+    cannot be found (Python 3)
+    :raise AssertionError: if invocation of a third-party tool returns
+    non-zero exit code
+    """
+    sample_umi_groups = os.path.join(
+        tmp_dir, sample + "_" + tag + "_groups.tsv")
+    log_file = get_sample_log_file(logs_dir,
+                                   sample,
+                                   "umi_tools_group",
+                                   step)
+    LOGGER.info("Identify UMI groups. Log: %s", log_file)
+    cmd = ["umi_tools", "group", "-I", sample_bam,
+           "--group-out", sample_umi_groups]
+    process_utils.run_logged_command(cmd,
+                                     log_file,
+                                     cmd_file,
+                                     dry_run)
 
 
 def process_sample(sample,
@@ -340,6 +397,16 @@ def process_sample(sample,
     step += 1
 
     if "deduplicate" in config and config["deduplicate"]:
+        if "group_umis" in config and config["group_umis"]:
+            group_umis(sample_out_bam,
+                       tmp_dir,
+                       sample,
+                       "pre_dedup",
+                       step,
+                       logs_dir,
+                       cmd_file,
+                       dry_run)
+            step += 1
         sample_dedup_bam = sample_out_prefix + "_dedup.bam"
         log_file = get_sample_log_file(logs_dir,
                                        sample,
@@ -362,6 +429,16 @@ def process_sample(sample,
         process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
         sample_out_bam = sample_dedup_bam
         step += 1
+        if "group_umis" in config and config["group_umis"]:
+            group_umis(sample_dedup_bam,
+                       tmp_dir,
+                       sample,
+                       "post_dedup",
+                       step,
+                       logs_dir,
+                       cmd_file,
+                       dry_run)
+            step += 1
 
     if config["make_bedgraph"]:
         LOGGER.info("Record transcriptome coverage as a bedgraph")
