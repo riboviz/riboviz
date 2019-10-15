@@ -38,12 +38,12 @@ Prepare ribosome profiling data for RiboViz or other analysis:
 *     (config["deduplicate"] == True).
 *   - Exports bedgraph files for plus and minus strands, if requested
 *     (config["make_bedgraph"] == True) using "bedtools genomecov".
-*   - Makes length-sensitive alignments in compressed h5 format using 
+*   - Makes length-sensitive alignments in compressed h5 format using
 *     "bam_to_h5.R".
 *   - Generates summary statistics, and analyses and QC plots for both
 *     RPF and mRNA datasets using "generate_stats_figs.R". This
 *     includes estimated read counts, reads per base, and transcripts
-*     per million for each ORF in each sample. 
+*     per million for each ORF in each sample.
 * - Collates TPMs across all processed fastq.gz files, using
      "collate_tpms.R".
 * - The workflow can parallelize partos of its operation over many
