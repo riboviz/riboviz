@@ -251,6 +251,8 @@ WTnone_09_bam_to_h5.log
 WTnone_10_generate_stats_figs.log
 ```
 
+Note: if running `prep_riboviz.py` on examples with UMI extraction and deduplication (`deduplication: TRUE`) then additional log files will be present for invocations of `umi_tools extract`, `umi_tools dedup` and `samtools index` and the numbering of log files for successive steps will be different.
+
 You should regularly delete the log files, to prevent them from using up your disk space.
 
 ### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
