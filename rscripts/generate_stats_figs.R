@@ -292,27 +292,25 @@ print("Completed: Check for 3nt periodicity")
 print("Starting: Distribution of lengths of all mapped reads")
 
 # read length-specific read counts stored as attributes of 'reads' in H5 file
-gene_sp_read_len <- lapply(gene_names, function(x) {
+gene_sp_read_length <- lapply(gene_names, function(x) {
   rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", x, "/", dataset, "/reads")), "reads_by_len"))
 })
 
-# sum reads of each length across all genes
-Counts <- colSums(matrix(unlist(gene_sp_read_len), ncol = length(read_range), byrow = T))
 
-# create a dataframe to store the output for plots/analyses
-out_data <- data.frame(
+# sum reads of each length across all genes
+read_length_data <- data.frame(
   Length = read_range,
-  Counts = Counts
+  Counts = colSums(matrix(unlist(gene_sp_read_length), ncol = length(read_range), byrow = T))
 )
 
 # plot read lengths with counts
-read_len_plot <- ggplot(out_data, aes(x = Length, y = Counts)) +
+read_len_plot <- ggplot(read_length_data, aes(x = Length, y = Counts)) +
   geom_bar(stat = "identity")
 
 # save read lengths plot and file
 ggsave(read_len_plot, filename = paste0(out_prefix, "_read_lengths.pdf"))
 write.table(
-  out_data,
+  read_length_data,
   file = paste0(out_prefix, "_read_lengths.tsv"),
   sep = "\t",
   row = F,
@@ -517,7 +515,7 @@ if (rpf) {
   m3p <- m3p / mean(m3p[450:500])
 
   # Create a dataframe to store the output for plots/analyses
-  out_df <- data.frame(
+  pos_sp_rpf_norm_reads <- data.frame(
     Position = c(1:500, 0:-499),
     Mean = c(m5p, m3p),
     SD = c(s5p, s3p),
@@ -525,8 +523,8 @@ if (rpf) {
   )
 
   # Plot
-  pos_sp_rpf_norm_reads <- ggplot(
-    out_df,
+  pos_sp_rpf_norm_reads_plot <- ggplot(
+    pos_sp_rpf_norm_reads,
     aes(Position, Mean, col = End)
   ) +
     geom_line() +
@@ -534,9 +532,9 @@ if (rpf) {
     guides(col = FALSE)
 
   # Save plot and file
-  ggsave(pos_sp_rpf_norm_reads, filename = paste0(out_prefix, "_pos_sp_rpf_norm_reads.pdf"))
+  ggsave(pos_sp_rpf_norm_reads_plot, filename = paste0(out_prefix, "_pos_sp_rpf_norm_reads.pdf"))
   write.table(
-    out_df,
+    pos_sp_rpf_norm_reads,
     file = paste0(out_prefix, "_pos_sp_rpf_norm_reads.tsv"),
     sep = "\t",
     row = F,
@@ -600,7 +598,7 @@ if (!rpf) {
   m3p <- m3p / mean(m3p[1350:1500])
 
   # create a dataframe to store the output for plots/analyses
-  out_df <- data.frame(
+  pos_sp_mrna_norm_coverage <- data.frame(
     Position = c(1:1500, 0:-1499),
     Mean = c(m5p, m3p),
     SD = c(s5p, s3p),
@@ -608,15 +606,15 @@ if (!rpf) {
   )
 
   # plot
-  pos_sp_mrna_norm_coverage <- ggplot(out_df, aes(Position, Mean, col = End)) +
+  pos_sp_mrna_norm_coverage_plot <- ggplot(pos_sp_mrna_norm_coverage, aes(Position, Mean, col = End)) +
     geom_line() +
     facet_grid(~End, scales = "free") +
     guides(col = FALSE)
 
   # Save plot and file
-  ggsave(pos_sp_mrna_norm_coverage, filename = paste0(out_prefix, "_pos_sp_mrna_norm_coverage.pdf"))
+  ggsave(pos_sp_mrna_norm_coverage_plot, filename = paste0(out_prefix, "_pos_sp_mrna_norm_coverage.pdf"))
   write.table(
-    out_df,
+    pos_sp_mrna_norm_coverage,
     file = paste0(out_prefix, "_pos_sp_mrna_norm_coverage.tsv"),
     sep = "\t",
     row = F,
@@ -679,12 +677,12 @@ if (!is.na(features_file)) {
 
   # Prepare data for plot
   # Consider only genes with at least count_threshold mapped reads
-  plot_data <- merge(features, tpms, by = "ORF") %>%
+  features_plot_data <- merge(features, tpms, by = "ORF") %>%
     filter(readcount >= count_threshold, !is.na(ORF)) %>%
     select(-readcount, -rpb) %>%
     gather(Feature, Value, -ORF, -tpm)
 
-  features_plot <- ggplot(plot_data, aes(x = tpm, y = Value)) +
+  features_plot <- ggplot(features_plot_data, aes(x = tpm, y = Value)) +
     geom_point(alpha = 0.3) +
     facet_wrap(~Feature, scales = "free") +
     scale_x_log10() +
@@ -755,14 +753,14 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
     P <- p_mn[order(names(codon_pos))]
     E <- e_mn[order(names(codon_pos))]
 
-    out_df <- cbind(yeast_tRNAs, A, P, E)
+    cod_dens_tRNA <- cbind(yeast_tRNAs, A, P, E)
 
     # Prepare data for plot
-    plot_data <- out_df %>%
+    cod_dens_tRNA_wide <- cod_dens_tRNA %>%
       gather(tRNA_type, tRNA_value, 3:6) %>%
       gather(Site, Ribodens, 3:5)
 
-    cod_dens_tRNA_plot <- ggplot(plot_data, aes(x = tRNA_value, y = Ribodens)) +
+    cod_dens_tRNA_plot <- ggplot(cod_dens_tRNA_wide, aes(x = tRNA_value, y = Ribodens)) +
       geom_point(alpha = 0.3) +
       facet_grid(Site ~ tRNA_type, scales = "free_x") +
       geom_smooth(method = "lm") +
@@ -771,7 +769,7 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
     # Save plot and file
     ggsave(cod_dens_tRNA_plot, filename = paste0(out_prefix, "_codon_ribodens.pdf"))
     write.table(
-      out_df,
+      cod_dens_tRNA,
       file = paste0(out_prefix, "_codon_ribodens.tsv"),
       sep = "\t",
       row = F,
