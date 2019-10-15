@@ -400,7 +400,7 @@ def test_output_tpms_collated_tsv(expected, riboviz_run):
                           "codon_ribodens",
                           "features",
                           "pos_sp_rpf_norm_reads",
-                          "read_lengths,"
+                          "read_lengths",
                           "startcodon_ribogridbar",
                           "startcodon_ribogrid"])
 @pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
