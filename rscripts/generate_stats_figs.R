@@ -91,6 +91,10 @@ option_list <- list(
   make_option("--nnt_gene",
     type = "integer", default = 50,
     help = "n nucleotides of gene to include in metagene plots"
+  ),
+  make_option("--asite_disp_file",
+    type = "character", default = NA,
+    help = "asite displacement file, table with one displacement per read length"
   )
 )
 
@@ -415,8 +419,6 @@ if (do_pos_sp_nt_freq) {
 
 ## calculate read frame for every annotated ORF
 
-print("Starting: Check for 3nt periodicity (frame) by Gene")
-
 CalcAsiteFixedOneLength <- function(reads_pos_length, MinReadLen, read_length, asite_disp) {
   # Calculate read A-site using a fixed displacement for a single read length
   length_row_choose <- read_length - MinReadLen + 1
@@ -472,23 +474,28 @@ GetGeneReadFrame <- function(hdf5file, gene, dataset, left, right, MinReadLen,
           )
 }
 
-gene_read_frames <- gff_df %>%
-  dplyr::filter(type=="CDS") %>%
-  dplyr::select(gene=seqnames,left=start,right=end) %>%
-  purrr::pmap_dfr( GetGeneReadFrame, 
-               hdf5file=fid, 
-               dataset=dataset, 
-               MinReadLen=MinReadLen,
-               asite_disp_length=asite_disp_length)
-write.table(
-  gene_read_frames,
-  file = paste0(out_prefix, "_3ntframe_bygene.tsv"),
-  sep = "\t",
-  row = F,
-  col = T,
-  quote = F)
-
-print("Completed: Check for 3nt periodicity (frame) by Gene")
+if(!is.na(asite_disp_length_file)) {
+  print("Starting: Check for 3nt periodicity (frame) by Gene")
+  asite_disp_length <- readr::read_tsv(asite_disp_length_file,
+                                       comment = "#")
+  gene_read_frames <- gff_df %>%
+    dplyr::filter(type=="CDS") %>%
+    dplyr::select(gene=seqnames,left=start,right=end) %>%
+    purrr::pmap_dfr( GetGeneReadFrame, 
+                     hdf5file=fid, 
+                     dataset=dataset, 
+                     MinReadLen=MinReadLen,
+                     asite_disp_length=asite_disp_length)
+  write.table(
+    gene_read_frames,
+    file = paste0(out_prefix, "_3ntframe_bygene.tsv"),
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F)
+  
+  print("Completed: Check for 3nt periodicity (frame) by Gene")
+}
 
 ## position specific distribution of reads
 
