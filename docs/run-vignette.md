@@ -88,6 +88,8 @@ The script prepares ribosome profiling data for RiboViz or other analyses. It do
 * When finished, puts useful output files into an output directory (`dir_out`).
 * Optionally exports bedgraph files for plus and minus strands (`make_bedgraph=TRUE`, by default).
 
+A visualisation of the key steps, inputs and outputs can be viewed in the [RiboViz workflow](./workflow.pdf) (PDF).
+
 For each sample or condition you want to compare (which should be placed into a single `.fastq.gz` file in the input directory (`dir_in`)), the configuration file needs a sub-variable of `fq_files`, whose name will be used in the output files. For example:
 
 ```yaml
