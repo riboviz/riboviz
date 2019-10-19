@@ -92,7 +92,7 @@ option_list <- list(
     type = "integer", default = 50,
     help = "n nucleotides of gene to include in metagene plots"
   ),
-  make_option("--asite_disp_file",
+  make_option("--asite_disp_length_file",
     type = "character", default = NA,
     help = "asite displacement file, table with one displacement per read length"
   )
@@ -294,7 +294,7 @@ write.table(
   row = F,
   col = T,
   quote = F)
-print("Completed: Check for 3nt periodicity")
+print("Completed: Check for 3nt periodicity globally")
 
 ## distribution of lengths of all mapped reads
 print("Starting: Distribution of lengths of all mapped reads")
@@ -463,7 +463,7 @@ SumByFrame <- function(x,left,right) {
 GetGeneReadFrame <- function(hdf5file, gene, dataset, left, right, MinReadLen,
                              asite_disp_length=data.frame(read_length=c(28,29,30),
                                                           asite_disp=c(12,12,12))) {
-  # example from vignette: GetGeneReadFrame(fid, "YAL003W", dataset, 251, 871, MinReadLen)
+  # example from vignette: GetGeneReadFrame(hdf5file, "YAL003W", dataset, 251, 871, MinReadLen)
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hdf5file)
   reads_asitepos   <- CalcAsiteFixed(reads_pos_length, MinReadLen, asite_disp_length)
   sum_by_frame <- SumByFrame(reads_asitepos,left,right)
@@ -482,7 +482,7 @@ if(!is.na(asite_disp_length_file)) {
     dplyr::filter(type=="CDS") %>%
     dplyr::select(gene=seqnames,left=start,right=end) %>%
     purrr::pmap_dfr( GetGeneReadFrame, 
-                     hdf5file=fid, 
+                     hdf5file=hdf5file, 
                      dataset=dataset, 
                      MinReadLen=MinReadLen,
                      asite_disp_length=asite_disp_length)
