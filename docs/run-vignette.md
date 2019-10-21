@@ -62,7 +62,7 @@ fq_files: # fastq files to be processed
   NotHere: example_missing_file.fastq.gz # prep_riboviz should give error message for missing files
 ```
 
-Note that the configuration file specifies an additional, non-existent, file. This is used to test that the workflow processes valid files and ignores non-existent ones.
+Note that the configuration file specifies an additional, non-existent, file. This is used to test that the workflow processes valid files and ignores non-existent ones. This can be safely removed if you are customising the vignette for your own dataset.
 
 ---
 
@@ -423,6 +423,7 @@ Before rerunning the vignette, delete the auto-generated index, temporary and ou
 
 ```console
 $ rm -rf vignette/index
+$ rm -rf vignette/logs
 $ rm -rf vignette/tmp
 $ rm -rf vignette/output
 ```
