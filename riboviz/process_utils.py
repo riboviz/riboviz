@@ -35,10 +35,7 @@ def run_redirect_command(cmd, out, err=sys.stderr):
     :type out: str or unicode
     :param err: Standard error desination (stderr or file)
     :type err: _io.TextIOWrapper
-    :raise OSError: if the command being run cannot be found
-    (Python 2)
     :raise FileNotFoundError: if the command being run cannot be found
-    (Python 3)
     :raise AssertionError: if the command returns a non-zero exit code
     """
     p = subprocess.Popen(cmd,
@@ -68,10 +65,7 @@ def run_pipe_command(cmd1, cmd2, out=sys.stdout, err=sys.stderr):
     :type out: _io.TextIOWrapper
     :param err: Standard error desination (stderr or file)
     :type err: _io.TextIOWrapper
-    :raise OSError: if the command being run cannot be found
-    (Python 2)
     :raise FileNotFoundError: if the command being run cannot be found
-    (Python 3)
     :raise AssertionError: if the commands returns a non-zero exit code
     """
     process1 = subprocess.Popen(cmd1,
@@ -114,10 +108,7 @@ def run_logged_command(cmd,
     via Python may differ subtly from that which would be used if
     running via bash directly
     :type cmd_to_log: list(str or unicode)
-    :raise OSError: if the command being run cannot be found
-    (Python 2)
     :raise FileNotFoundError: if the command being run cannot be found
-    (Python 3)
     :raise AssertionError: if the command returns a non-zero exit code
     """
     if cmd_file is not None:
@@ -154,10 +145,7 @@ def run_logged_redirect_command(cmd,
     :param dry_run: Do not submit command to shell - use with cmd_file
     to log commands that would be run
     :type dry_run: bool
-    :raise OSError: if the command being run cannot be found
-    (Python 2)
     :raise FileNotFoundError: if the command being run cannot be found
-    (Python 3)
     :raise AssertionError: if the command returns a non-zero exit code
     """
     if cmd_file is not None:
@@ -190,10 +178,7 @@ def run_logged_pipe_command(cmd1,
     :param dry_run: Do not submit command to shell - use with cmd_file
     to log commands that would be run
     :type dry_run: bool
-    :raise OSError: if the command being run cannot be found
-    (Python 2)
     :raise FileNotFoundError: if the command being run cannot be found
-    (Python 3)
     :raise AssertionError: if the commands returns a non-zero exit code
     """
     if cmd_file is not None:
