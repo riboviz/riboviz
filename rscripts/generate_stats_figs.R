@@ -522,7 +522,10 @@ if(!is.na(asite_disp_length_file)) {
     col = T,
     quote = F)
   
-  gene_read_frame_plot <- BoxplotReadFrameProportion( gene_read_frames )
+  gene_read_frame_plot <- gene_read_frames %>%
+    filter( Ct_fr0 + Ct_fr1 + Ct_fr2 > count_threshold ) %>%
+    BoxplotReadFrameProportion
+  
   # save read lengths plot and file
   ggsave(gene_read_frame_plot, 
          filename = paste0(out_prefix, "_3ntframe_propbygene.pdf"),
