@@ -62,7 +62,7 @@ fq_files: # fastq files to be processed
   NotHere: example_missing_file.fastq.gz # prep_riboviz should give error message for missing files
 ```
 
-Note that the configuration file specifies an additional, non-existent, file. This is used to test that the workflow processes valid files and ignores non-existent ones.
+Note that the configuration file specifies an additional, non-existent, file. This is used to test that the workflow processes valid files and ignores non-existent ones. This can be safely removed if you are customising the vignette for your own dataset.
 
 ---
 
@@ -85,7 +85,7 @@ The script prepares ribosome profiling data for RiboViz or other analyses. It do
   - Makes length-sensitive alignments in compressed h5 format using `bam_to_h5.R`.
   - Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
 * Collates TPMs across all processed fastq.gz files, using `collate_tpms.R`.
-* The workflow can parallelize partos of its operation over many processes (`nprocesses`):
+* The workflow can parallelize part of of its operation over many processes (`nprocesses`):
   - This value is used to configure `hisat2`, `samtools sort`, `bam_to_h5.R` and `generate_stats_figs.R`.
   - For `cutadapt` the number of available processors on the host will be used.
 * Writes all intermediate files into a temporary directory (`dir_tmp`).
@@ -111,8 +111,8 @@ For each of these names (e.g. `Example`), the intermediate files produced in the
 * `Example_orf_map.sam`, ORF-mapped reads.
 * `Example_orf_map_clean.sam`, ORF-mapped reads with mismatched nt trimmed.
 * `Example_unaligned.sam`, unaligned reads.
-* `Example_pre_dedup_groups.tsv`: UMI groups before deduplication (optional, inly if `deduplicate: TRUE` and `group_umis: TRUE` in configuration).
-* `Example_post_dedup_groups.tsv`: UMI groups after deduplication (optional, inly if `deduplicate: TRUE` and `group_umis: TRUE` in configuration).
+* `Example_pre_dedup_groups.tsv`: UMI groups before deduplication (optional, only if `deduplicate: TRUE` and `group_umis: TRUE` in configuration).
+* `Example_post_dedup_groups.tsv`: UMI groups after deduplication (optional, only if `deduplicate: TRUE` and `group_umis: TRUE` in configuration).
 
 The `_unaligned.sam` files could be used to find common contaminants or translated sequences not in your orf annotation.
 
@@ -416,6 +416,7 @@ Before rerunning the vignette, delete the auto-generated index, temporary and ou
 
 ```console
 $ rm -rf vignette/index
+$ rm -rf vignette/logs
 $ rm -rf vignette/tmp
 $ rm -rf vignette/output
 ```
