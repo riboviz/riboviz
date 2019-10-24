@@ -70,6 +70,8 @@ The directories are assumed to hold the following content:
       WT3AT_pos_sp_rpf_norm_reads.tsv
       WT3AT_read_lengths.pdf
       WT3AT_read_lengths.tsv
+      WT3AT_startcodon_ribogridbar.pdf
+      WT3AT_startcodon_ribogrid.pdf
       WT3AT_tpms.tsv
       WTnone_3nt_periodicity.pdf
       WTnone_3nt_periodicity.tsv
@@ -86,7 +88,12 @@ The directories are assumed to hold the following content:
       WTnone_pos_sp_rpf_norm_reads.tsv
       WTnone_read_lengths.pdf
       WTnone_read_lengths.tsv
+      WTnone_startcodon_ribogridbar.pdf
+      WTnone_startcodon_ribogrid.pdf
       WTnone_tpms.tsv
+
+See riboviz.validation.compare and riboviz.validation functions for
+information on the nature of the comparisons for each type of file.
 """
 import os
 import shutil
@@ -383,6 +390,40 @@ def test_output_tpms_collated_tsv(expected, riboviz_run):
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(actual, "output")
     file_name = "TPMs_collated.tsv"
+    riboviz.validation.compare(
+        os.path.join(expected_output, file_name),
+        os.path.join(actual_output, file_name))
+
+
+@pytest.mark.parametrize("content",
+                         ["3nt_periodicity",
+                          "codon_ribodens",
+                          "features",
+                          "pos_sp_rpf_norm_reads",
+                          "read_lengths",
+                          "startcodon_ribogridbar",
+                          "startcodon_ribogrid"])
+@pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
+def test_output_pdf(expected, riboviz_run, prefix, content):
+    """
+    Test output/*pdf files for equality.
+
+    :param expected: expected directory
+    (pytest fixture defined in conftest.py)
+    :type expected: str or unicode
+    :param riboviz_run: vignette directory
+    (pytest fixture defined in this module)
+    :type riboviz_run: str or unicode
+    :param prefix: file name prefix e.g. WT3AT
+    :type prefix: str or unicode
+    :param content: content e.g. 3nt_periodicity
+    :type content: str or unicode
+    """
+    actual = riboviz_run
+    expected_output = os.path.join(expected, "output")
+    actual_output = os.path.join(actual, "output")
+    file_name = "%s_%s.pdf" % (prefix, content)
+    print(file_name)
     riboviz.validation.compare(
         os.path.join(expected_output, file_name),
         os.path.join(actual_output, file_name))

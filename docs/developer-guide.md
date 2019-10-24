@@ -53,6 +53,38 @@ Install:
 $ conda install -y pytest
 ```
 
+## Install R packages for developers
+
+### lintr
+
+Web sites:
+* [lintr package on CRAN](https://cran.r-project.org/package=lintr)
+* [GitHub](https://github.com/jimhester/lintr)
+
+Install:
+
+```console
+$ R
+> install.packages("lintr")
+# load the package before use with:
+ # library("lintr")
+```
+
+### styleR
+
+Web sites:
+* [StyleR package documentation](https://styler.r-lib.org/)
+* [GitHub](https://github.com/r-lib/styler)
+
+Install:
+
+```console
+$ R
+> install.packages("styler")
+# load the package before use with:
+ # library("styler")
+```
+
 ---
 
 ## Branching model
@@ -243,7 +275,7 @@ riboviz/test/regression/test_vignette.py::test_output_tpms_collated_tsv PASSED  
 Run tests of error conditions and exit codes:
 
 ```console
-$ pytest -v riboviz/test/tools/test_prep_riboviz.py 
+$ pytest -v riboviz/test/tools/test_prep_riboviz.py
 ============================= test session starts ==============================
 ...
 
@@ -266,10 +298,41 @@ A custom configuration file can be provided by defining a `RIBOVIZ_LOG_CONFIG` e
 
 ```console
 $ RIBOVIZ_LOG_CONFIG=custom_logging.yaml
+```
+
+---
+
+## Create simulated FASTQ files
+
+`riboviz/tools/create_fastq_examples.py` creates simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication.
+
+To run:
+
+```console
+$ python -m riboviz.tools.create_fastq_examples DIRECTORY
+```
+
+Or:
+
+```console
+$ python -m riboviz/tools/create_fastq_examples.py DIRECTORY
+```
+
+where `DIRECTORY` is the directory into which the simulated files are to be written. The following files are created:                                 
+
+* `simdata_UMI5and3_4nt_adaptor.fastq`: FASTQ file with 9 reads, each with a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a 11nt adaptor at the 3' end. Reads can be grouped by UMI into 5 groups.
+* `simdata_UMI5and3_4nt.fastq`: FASTQ file identical to the above but with the adaptor trimmed.
+* `simdata_extracted_UMI5and3_4nt.fastq`: FASTQ file identical to the above but with the UMIs extracted and concatenated to the header.
+* `simdata_extracted_UMI3_4nt.fastq`: FASTQ file with 8 reads, each with a 4nt UMI at the 3' end. Reads can be grouped by UMI into 4 groups.
+* `simdata_UMI3_4nt.fastq`: FASTQ file identical to the above but with the UMI extracted and concatenated to the header.
+
+The files with these names in `data/` were created using this script.
 
 ---
 
 ## Coding style
+
+For Python code:
 
 Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible. For example, to run these on `validation.py`:
 
@@ -278,6 +341,23 @@ $ pylint riboviz/validation.py
 $ pycodestyle riboviz/validation.py
 $ 2to3 riboviz/validation.py
 ```
+
+For R code:
+
+Follow [Google fork](https://google.github.io/styleguide/Rguide.html) of [Tidyverse R Style guide](https://style.tidyverse.org/) where possible - the Google fork is largely the same but differentiates more between functions (BigCamelCase) and variable names (snake_case) and does not assign to the right, for example. The Tidyverse R Style guide is implemented in `lintr` and `styleR` packages, so please bear in mind the small number of changes needed to follow the Google style.  
+
+`Lintr` package can be used to produce programmatic output of style issues but does not edit the code, whilst the `styleR` package makes automatic adjustments to selections or files by default.
+
+Lintr can be used within an IDE such as RStudio via an add-in once installed if preferred and run on the current file. It can also be run within the R terminal (for example on `generate_stats_figs.R`) with the command: `lint("$HOME/RiboViz/rscripts/generate_stats_figs.R")`, but if there is considerable output or you wish to work through the output bit by bit, it's possible to send it to an output file using `sink()` as below:
+
+```R
+$ R
+> sink('lintR-output.txt')
+> lint("$HOME/RiboViz/rscripts/generate_stats_figs.R")
+> sink()
+```
+
+`StyleR` also has an add-in for RStudio IDE, which allows selected code, current file or current package to be styled automatically according to the Tidyverse style guide. It can also be run from command line (see package information for more details). There are a considerable number of options for setting 'strictness' of adherence to the style guide, which may be useful.
 
 ---
 
@@ -391,42 +471,14 @@ If refactoring existing code then calls to `is.null` can be replaced by calls to
 
 ```
 data/            # Data files used by scripts and vignette
+docs/            # Documentation
+install/         # Bash scripts to install dependencies
 riboviz/         # Python package code
   tools/         # End-user scripts, including prep_riboviz.py
   test/          # pytest-compliant tests
     regression/  # prep_riboviz.py and vignette regression test
-rscripts/        # R scripts invoked by vignette
 rmarkdown/       # Rmarkdown scripts for data preprocessing
-website/          # RiboViz Shiny server code and data
+rscripts/        # R scripts invoked by vignette
+vignette/        # Vignette configuration and input data
+website/         # RiboViz Shiny server code and data
 ```
-
----
-
-## Data file origins
-
-The following data files were created either manually or via the use of scripts outwith or within the repository.
-
-```
-data/yeast_CDS_w_250utrs.fa
-data/yeast_CDS_w_250utrs.gff3
-data/yeast_codon_pos_i200.RData
-```
-
-Created by a run of [script_for_transcript_annotation.Rmd](../rmarkdown/script_for_transcript_annotation.Rmd) on third-party data. See [Inputs](./run-vignette.md#inputs) in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md) for details. These files are used as inputs to RiboViz.
-
-```
-vignette/input/yeast_YAL_CDS_w_250utrs.fa
-vignette/input/yeast_YAL_CDS_w_250utrs.gff3
-vignette/input/yeast_rRNA_R64-1-1.fa
-vignette/input/SRR1042855_s1mi.fastq.gz
-vignette/input/SRR1042864_s1mi.fastq.gz
-```
-
-Created manually from third-party data or the foregoing `data/` FILES. See [Inputs](./run-vignette.md#inputs) in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md) for details. These files are used as inputs to RiboViz.
-
-```
-data/testdata_trim_5p_mismatch.sam
-data/testdata_trim_5pos5neg.sam
-```
-
-Created by running RiboViz on the data in `vignette/`, copying and pasting lines from SAM files produced, then manually editing the lines to produce the desired range of outcomes. These files are used for testing [trim_5p_mismatch.py](../riboviz/tools/trim_5p_mismatch.py).

@@ -16,6 +16,16 @@ In addition to the metagenomic analyses, an [R](https://www.r-project.org/)\/[Sh
 * [Install prerequisites](./docs/install.md)
 * [Quick install scripts](./docs/quick-install.md) (Ubuntu and CentOS only)
 * [Map mRNA and ribosome protected reads to transcriptome and collect data intoan HDF5 file](./docs/run-vignette.md). This page describes how you can run a "vignette" of the back-end analysis pipeline, to demostrate RiboViz's capabilities.
+* [Content and provenance of repository data files](./docs/data.md)
 * [Prepare data](./docs/prepare-data.md)
 * [Structure of HDF5 data](./docs/hdf5-data.md)
 * [Developer guide](./docs/developer-guide.md)
+
+## Releases
+
+| Release | Description |
+| ------- | ----------- |
+| [1.1.0](https://github.com/riboviz/RiboViz/releases/tag/1.1.0) | Most recent version prior to commencement of BBSRC/NSF Riboviz project |
+| [1.0.0](https://github.com/riboviz/RiboViz/releases/tag/1.0.0) | Associated with Carja et al. (2017) "riboviz: analysis and visualization of ribosome profiling datasets", BMC Bioinformatics, volume 18, article 461 (2017), 25 October 2017, doi: [10.1186/s12859-017-1873-8](https://doi.org/10.1186/s12859-017-1873-8) |
+| [0.9.0](https://github.com/riboviz/RiboViz/releases/tag/0.9.0) | Additional code/data associated with the paper below |
+| [0.8.0](https://github.com/riboviz/RiboViz/releases/tag/0.8.0) | Associated with Carja et al. (2017) "riboviz: analysis and visualization of ribosome profiling datasets", bioRXiv, 12 January 2017,doi: [10.1101/100032](https://doi.org/10.1101/100032) |
