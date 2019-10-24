@@ -29,9 +29,7 @@ $ source install-ubuntu.sh
 $ source install-centos.sh
 ```
 
-Install Python:
-
-* **Note**: This script installs both Python 2 and 3. If you only want to install one or the other then edit the file and comment out the code that installs the version you do not want.
+Install Miniconda Python 3 and Python packages:
 
 ```console
 $ source install-py.sh
