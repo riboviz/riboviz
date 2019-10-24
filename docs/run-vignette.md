@@ -80,13 +80,14 @@ The script prepares ribosome profiling data for RiboViz or other analyses. It do
 * Parallelizes over many processes (`nprocesses`):
   - This value is used to configure hisat2, samtools sort, bam_to_h5.R and generate_stats_figs.R.
   - For cutadapt and Python 3, the number of available processors on the host will be used.
-  - For cutadapt and Python 2, its default of 1 processor will be used as cutadapt cannot run in parallel under Python 2.
 * Makes length-sensitive alignments in compressed h5 format by running `rscripts/bam_to_h5.R`.
 * Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets, by running `rscripts/generate_stats_figs.R`.
 * Estimates read counts, reads per base, and transcripts per million for each ORF in each sample.
 * Puts all intermediate files into a temporary directory (`dir_tmp`) which will be **large**.
 * When finished, puts useful output files into an output directory (`dir_out`).
 * Optionally exports bedgraph files for plus and minus strands (`make_bedgraph=TRUE`, by default).
+
+A visualisation of the key steps, inputs and outputs can be viewed in the [RiboViz workflow](./workflow.pdf) (PDF).
 
 For each sample or condition you want to compare (which should be placed into a single `.fastq.gz` file in the input directory (`dir_in`)), the configuration file needs a sub-variable of `fq_files`, whose name will be used in the output files. For example:
 
@@ -160,17 +161,9 @@ nprocesses: 1 # number of processes to parallelize over
 nprocesses: 4 # number of processes to parallelize over
 ```
 
-* **Note:** `cutadapt` and `samtools`, which are invoked during the run, can only run under 1 process with Python 2.
-
 ### Run `prep_riboviz.py`
 
 If you have not already done so, activate your Python environment:
-
-* Miniconda Python 2.7+:
-
-```console
-$ source $HOME/miniconda2/bin/activate
-```
 
 * Miniconda Python 3.6+:
 
@@ -195,13 +188,13 @@ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 
 Run `prep_riboviz.py`:
 
-* Python 3:
+* Either:
 
 ```console
 $ python -m riboviz.tools.prep_riboviz rscripts/ vignette/vignette_config.yaml
 ```
 
-* Python 2 or 3:
+* Or:
 
 ```console
 $ PYTHONPATH=. python riboviz/tools/prep_riboviz.py rscripts/ \
@@ -450,13 +443,13 @@ bash run_riboviz_vignette.sh
 
 This feature be useful for seeing what commands will be run without actually running them.
 
-* Python 3:
+* Either:
 
 ```console
 $ python -m riboviz.tools.prep_riboviz --dry-run rscripts/ vignette/vignette_config.yaml
 ```
 
-* Python 2 or 3:
+* Or:
 
 ```console
 $ PYTHONPATH=. python riboviz/tools/prep_riboviz.py --dry-run rscripts/ \
