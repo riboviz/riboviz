@@ -474,6 +474,34 @@ GetGeneReadFrame <- function(hdf5file, gene, dataset, left, right, MinReadLen,
           )
 }
 
+CalcReadFrameProportion <- function(read_frame_df) {
+  # given a data frame with read frame counts, calculate read frame proportions.
+  stopifnot(all( c("Ct_fr0","Ct_fr1","Ct_fr2") %in% names(read_frame_df) ) )
+  read_frame_df %>%
+    mutate(Ct_all = Ct_fr0 + Ct_fr1 + Ct_fr2,
+           p_fr0 = Ct_fr0 / Ct_all ,
+           p_fr1 = Ct_fr1 / Ct_all ,
+           p_fr2 = Ct_fr2 / Ct_all ) %>%
+    return()
+}
+
+BoxplotReadFrameProportion <- function(read_frame_df,feat_names="gene") {
+  # Plot proportion of read frames as boxplot.
+  rf_prop_long <- read_frame_df %>% 
+    CalcReadFrameProportion %>%
+    select(c(feat_names,"p_fr0","p_fr1","p_fr2")) %>%
+    gather(-feat_names,key="Frame",value="Proportion") %>%
+    mutate(Frame = factor(Frame, 
+                          levels = c("p_fr0","p_fr1","p_fr2"), 
+                          labels = 0:2) )
+  ggplot(data=rf_prop_long, aes(x=Frame,colour=Frame,y=Proportion)) +
+    geom_boxplot() +
+    scale_y_continuous("Proportion, by feature",limits=c(0,1),expand=c(0,0)) +
+    theme(legend.position="none", 
+          panel.grid.minor = element_blank(),
+          panel.grid.major.x = element_blank() )
+}
+
 if(!is.na(asite_disp_length_file)) {
   print("Starting: Check for 3nt periodicity (frame) by Gene")
   asite_disp_length <- readr::read_tsv(asite_disp_length_file,
@@ -493,6 +521,12 @@ if(!is.na(asite_disp_length_file)) {
     row = F,
     col = T,
     quote = F)
+  
+  gene_read_frame_plot <- BoxplotReadFrameProportion( gene_read_frames )
+  # save read lengths plot and file
+  ggsave(gene_read_frame_plot, 
+         filename = paste0(out_prefix, "_3ntframe_propbygene.pdf"),
+         width=3, height=3)
   
   print("Completed: Check for 3nt periodicity (frame) by Gene")
 }
