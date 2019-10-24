@@ -96,11 +96,8 @@ def test_umi_group(configuration_module):
     """
     config, _ = configuration_module
     tmp_dir = config["dir_tmp"]
-
-    tmp_dir = "vignette/tmp"
     groups_tsv = os.path.join(tmp_dir, "simdata5and3_post_dedup_groups.tsv")
     groups = pd.read_csv(groups_tsv, sep="\t")
-
     num_groups = 5
     assert groups.shape[0] == num_groups, \
         ("Expected %d unique groups but found %d"
