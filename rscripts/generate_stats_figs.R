@@ -492,11 +492,11 @@ WilcoxTestFrame <- function(x,left,right) {
   wtresults_fr0vs1 <- 
     wilcox.test(x=gathered_by_frame$Ct_fr0,
                 y=gathered_by_frame$Ct_fr1, 
-                alternative="greater", paired=TRUE)
+                alternative="greater", paired=TRUE, exact=FALSE)
   wtresults_fr0vs2 <- 
     wilcox.test(x=gathered_by_frame$Ct_fr0,
                 y=gathered_by_frame$Ct_fr2, 
-                alternative="greater", paired=TRUE)
+                alternative="greater", paired=TRUE, exact=FALSE)
   
   return(c(pval_fr0vs1 = wtresults_fr0vs1$p.value,
          pval_fr0vs2 = wtresults_fr0vs2$p.value,
@@ -518,9 +518,9 @@ GetGeneReadFrame <- function(hdf5file, gene, dataset, left, right, MinReadLen,
           Ct_fr0=sum_by_frame[1],
           Ct_fr1=sum_by_frame[2],
           Ct_fr2=sum_by_frame[3],
-          pval_fr0vs1= wt_frame$pval_fr0vs1,
-          pval_fr0vs2= wt_frame$pval_fr0vs2,
-          pval_fr0vsboth = wt_frame$pval_fr0vsboth
+          pval_fr0vs1= wt_frame[1],
+          pval_fr0vs2= wt_frame[2],
+          pval_fr0vsboth = wt_frame[3]
           )
 }
 
