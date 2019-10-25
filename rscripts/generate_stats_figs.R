@@ -460,6 +460,52 @@ SumByFrame <- function(x,left,right) {
   return(sums_byframe)
 }
 
+GatherByFrameCodon <- function(x,left,right) {
+  # gather vector by 3nt frames 0,1,2 for each position
+  #   x:     vector
+  #   left:  integer for starting position, frame 0
+  #   right: integer for ending position
+  positions_frame0 <- seq(left,right,3) # positions used to pick out frame 0 reads
+  tibble(CodonPos = 1:length(positions_frame0),
+         Ct_fr0 = x[ positions_frame0 ],
+         Ct_fr1 = x[ positions_frame0 + 1 ] ,
+         Ct_fr2 = x[ positions_frame0 + 2 ] )
+}
+
+combine_pvalues_fisher <- function(p) {
+    # Fisher's method (1-sided) to combine p-values
+    pchisq( -2 * sum ( log(p) ) , 2 * length(p), lower.tail = FALSE )
+}
+
+combine_pvalues_stoufer <- function(p) {
+    # Stouffer's “inverse normal” method (1-sided) to combine p-values
+    pnorm (sum( qnorm( p) ) / sqrt(length(p)) )
+}
+
+WilcoxTestFrame <- function(x,left,right) {
+  # Wilcoxon rank-sum test tha
+  #   x:     vector
+  #   left:  integer for starting position, frame 0
+  #   right: integer for ending position
+  gathered_by_frame <- GatherByFrameCodon(x,left,right)
+  
+  wtresults_fr0vs1 <- 
+    wilcox.test(x=gathered_by_frame$Ct_fr0,
+                y=gathered_by_frame$Ct_fr1, 
+                alternative="greater", paired=TRUE)
+  wtresults_fr0vs2 <- 
+    wilcox.test(x=gathered_by_frame$Ct_fr0,
+                y=gathered_by_frame$Ct_fr2, 
+                alternative="greater", paired=TRUE)
+  
+  return(c(pval_fr0vs1 = wtresults_fr0vs1$p.value,
+         pval_fr0vs2 = wtresults_fr0vs2$p.value,
+         pval_fr0vsboth = 
+             combine_pvalues_stoufer(c(wtresults_fr0vs1$p.value,
+                                       wtresults_fr0vs2$p.value) )) 
+         )
+}
+
 GetGeneReadFrame <- function(hdf5file, gene, dataset, left, right, MinReadLen,
                              asite_disp_length=data.frame(read_length=c(28,29,30),
                                                           asite_disp=c(12,12,12))) {
@@ -467,10 +513,14 @@ GetGeneReadFrame <- function(hdf5file, gene, dataset, left, right, MinReadLen,
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hdf5file)
   reads_asitepos   <- CalcAsiteFixed(reads_pos_length, MinReadLen, asite_disp_length)
   sum_by_frame <- SumByFrame(reads_asitepos,left,right)
+  wt_frame <- WilcoxTestFrame(reads_asitepos,left,right)
   tibble( gene=gene, 
           Ct_fr0=sum_by_frame[1],
           Ct_fr1=sum_by_frame[2],
-          Ct_fr2=sum_by_frame[3]
+          Ct_fr2=sum_by_frame[3],
+          pval_fr0vs1= wt_frame$pval_fr0vs1,
+          pval_fr0vs2= wt_frame$pval_fr0vs2,
+          pval_fr0vsboth = wt_frame$pval_fr0vsboth
           )
 }
 
