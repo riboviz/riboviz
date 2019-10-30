@@ -144,24 +144,7 @@ For the vignette the total size of the temporary files is ~1141 MB, and the tota
 
 ---
 
-## Run the "vignette"
-
-By default, RiboViz is configured to use 1 process. If using Python 3.x then you can configure RiboViz to use additional processes:
-
-* Open `vignette/vignette_config.yaml` in an editor.
-* Change:
-
-```yaml
-nprocesses: 1 # number of processes to parallelize over
-```
-
-* to:
-
-```yaml
-nprocesses: 4 # number of processes to parallelize over
-```
-
-### Run `prep_riboviz.py`
+## Set up your environment
 
 If you have not already done so, activate your Python environment:
 
@@ -185,6 +168,62 @@ $ source $HOME/setenv.sh
 export PATH=~/hisat2-2.1.0:$PATH
 export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 ```
+
+---
+
+## Configure number of processes
+
+By default, RiboViz is configured to use 1 process. If using Python 3.x then you can configure RiboViz to use additional processes:
+
+* Open `vignette/vignette_config.yaml` in an editor.
+* Change:
+
+```yaml
+nprocesses: 1 # number of processes to parallelize over
+```
+
+* to:
+
+```yaml
+nprocesses: 4 # number of processes to parallelize over
+```
+
+----
+
+## Do a dry run
+
+`prep_riboviz.py` supports a `--dry-run` command-line parameter. If present, the configuration will be parsed and the commands to execute RiboViz-specific and third-party tools via bash will be created, and logged into the command file ((described above), but they will not be executed.
+
+This feature is useful for seeing what commands will be run without actually running them and we strongly recommend trying a dry-run before a live run on data you have not used before.
+
+Run `prep_riboviz.py` with `--dry-run` enabled:
+
+* Either:
+
+```console
+$ python -m riboviz.tools.prep_riboviz --dry-run rscripts/ vignette/vignette_config.yaml
+```
+
+* Or:
+
+```console
+$ PYTHONPATH=. python riboviz/tools/prep_riboviz.py --dry-run rscripts/ \
+    vignette/vignette_config.yaml
+```
+
+### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
+
+If you see:
+
+```
+File not found: vignette/input/example_missing_file.fastq.gz
+```
+
+then this is expected and can be ignored. The vignette includes an attempt to analyse a missing input file, for testing, which is expected to fail.
+
+---
+
+## Run `prep_riboviz.py`
 
 Run `prep_riboviz.py`:
 
@@ -240,16 +279,6 @@ WTnone_10_generate_stats_figs.log
 ```
 
 You should regularly delete the log files, to prevent them from using up your disk space.
-
-### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
-
-If you see:
-
-```
-File not found: vignette/input/example_missing_file.fastq.gz
-```
-
-then this is expected and can be ignored. The vignette includes an attempt to analyse a missing input file, for testing, which is expected to fail.
 
 ### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
 
@@ -433,27 +462,6 @@ The command file can be run standalone, for example:
 
 ```yaml
 bash run_riboviz_vignette.sh
-```
-
----
-
-## See what commands would be executed
-
-`prep_riboviz.py` supports a `--dry-run` command-line parameter. If present, the configuration will be parsed and the commands to execute RiboViz-specific and third-party tools via bash will be created, and logged into the command file ((described above), but they will not be executed.
-
-This feature be useful for seeing what commands will be run without actually running them.
-
-* Either:
-
-```console
-$ python -m riboviz.tools.prep_riboviz --dry-run rscripts/ vignette/vignette_config.yaml
-```
-
-* Or:
-
-```console
-$ PYTHONPATH=. python riboviz/tools/prep_riboviz.py --dry-run rscripts/ \
-    vignette/vignette_config.yaml
 ```
 
 ---
