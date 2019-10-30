@@ -26,7 +26,7 @@ Prepare ribosome profiling data for RiboViz or other analysis:
   - Cuts out sequencing library adapters (config["adapters"],
     default "CTGTAGGCACC") using "cutadapt".
   - Extracts UMIs using "umi_tools extract", if requested
-    (config["deduplicate"] == True), using a UMI-tools-compliant
+    (config["extract_umis"] == True), using a UMI-tools-compliant
     regular expression pattern (config["umi_regexp"]).
   - Removes rRNA or other contaminating reads by alignment to
     rRNA index file (config["rRNA_index"]) using "hisat2".
@@ -36,12 +36,12 @@ Prepare ribosome profiling data for RiboViz or other analysis:
     mismatches using trim_5p_mismatch.py.
   - Outputs UMI groups pre-deduplication using "umi_tools group" if
     requested (config["deduplicate"] == True and
-    config["group_umis"] == TRUE)
+    config["group_umis"] == True)
   - Deduplicates UMIs using "umi_tools dedup", if requested
     (config["deduplicate"] == True).
   - Outputs UMI groups post-deduplication using "umi_tools group" if
     requested (config["deduplicate"] == True and
-    config["group_umis"] == TRUE)
+    config["group_umis"] == True)
   - Exports bedgraph files for plus and minus strands, if requested
     (config["make_bedgraph"] == True) using "bedtools genomecov".
   - Makes length-sensitive alignments in compressed h5 format using
@@ -279,7 +279,8 @@ def process_sample(sample,
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
-    if "deduplicate" in config and config["deduplicate"]:
+    extract_umis = "extract_umis" in config and config["extract_umis"]
+    if extract_umis:
         extract_trim_fq = os.path.join(tmp_dir, sample + "_extract_trim.fq")
         log_file = get_sample_log_file(logs_dir,
                                        sample,
@@ -388,6 +389,9 @@ def process_sample(sample,
     step += 1
 
     if "deduplicate" in config and config["deduplicate"]:
+        LOGGER.info("Deduplicate using UMIs. Log: %s", log_file)
+        if not extract_umis:
+            LOGGER.warning("WARNING: deduplicate was TRUE but extract_umis was FALSE.")
         if "group_umis" in config and config["group_umis"]:
             group_umis(sample_out_bam,
                        tmp_dir,
@@ -403,7 +407,7 @@ def process_sample(sample,
                                        sample,
                                        "umi_tools_dedup",
                                        step)
-        LOGGER.info("Deduplicate using UMIs. Log: %s", log_file)
+        LOGGER.info("Deduplicate. Log: %s", log_file)
         cmd = ["umi_tools", "dedup", "-I", sample_out_bam,
                "-S", sample_dedup_bam]
         process_utils.run_logged_command(cmd,
