@@ -74,13 +74,13 @@ The script prepares ribosome profiling data for RiboViz or other analyses. It do
 * Builds hisat2 indices if requested (`build_indices: TRUE`) using `hisat2 build` and saves these into an index directory (`dir_index`).
 * Processes all fastq.gz files (`dir_in`). For each fastq.gz file:
   - Cuts out sequencing library adapters (`adapters`, default `CTGTAGGCACC`) using `cutadapt`.
-  - Outputs UMI groups pre-deduplication using `umi_tools group` if requested (`deduplicate: TRUE` and `group_umis: TRUE`).
-  - Extracts UMIs using `umi_tools extract`, if requested (`deduplicate: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`). For information on regular expression patterns, see the UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction). An example of a regular expression, which extracts 4nt UMIs at both the 5' and 3' ends of a read is `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$`.
-  - Outputs UMI groups post-deduplication using `umi_tools group` if requested (`deduplicate: TRUE` and `group_umis: TRUE`).
+  - Extracts UMIs using `umi_tools extract`, if requested (`extract_umis: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`). For information on regular expression patterns, see the UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction). An example of a regular expression, which extracts 4nt UMIs at both the 5' and 3' ends of a read is `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$`.
   - Removes rRNA or other contaminating reads by alignment to rRNA index file (`rRNA_index`) using `hisat2`.
   - Aligns remaining reads to ORFs index file (`orf_index`). using `hisat2`.
   - Trims 5' mismatches from reads and remove reads with more than 2 mismatches using trim_5p_mismatch.py.
+  - Outputs UMI groups pre-deduplication using `umi_tools group` if requested (`deduplicate: TRUE` and `group_umis: TRUE`).
   - Deduplicates UMIs using `umi_tools dedup`, if requested (`deduplicate: TRUE`).
+  - Outputs UMI groups post-deduplication using `umi_tools group` if requested (`deduplicate: TRUE` and `group_umis: TRUE`).
   - Exports bedgraph files for plus and minus strands, if requested (`make_bedgraph: TRUE`) using `bedtools genomecov`.
   - Makes length-sensitive alignments in compressed h5 format using `bam_to_h5.R`.
   - Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
@@ -105,7 +105,7 @@ fq_files:
 For each of these names (e.g. `Example`), the intermediate files produced in the temporary directory (`dir_tmp`) are:
 
 * `Example_trim.fq`, trimmed reads.
-* `Example_extract_trim.fq`, trimmed reads with UMIs extracted (optional, only if `deduplicate: TRUE` in configuration)
+* `Example_extract_trim.fq`, trimmed reads with UMIs extracted (optional, only if `extract_umis: TRUE` in configuration)
 * `Example_nonrRNA.fq`, trimmed non-rRNA reads.
 * `Example_rRNA_map.sam`, rRNA-mapped reads.
 * `Example_orf_map.sam`, ORF-mapped reads.
