@@ -248,8 +248,8 @@ def process_sample(sample,
     :param dry_run: Don't execute workflow commands (useful for seeing
     what commands would be executed)
     :type dry_run: bool
-    :raise FileNotFoundError: if fastq or a third-party tool cannot be
-    found
+    :raise FileNotFoundError: if fastq, other files or a third-party
+    tool cannot be found
     :raise AssertionError: if invocation of a third-party tool returns
     non-zero exit code
     :raise KeyError: if config is missing required configuration
@@ -470,6 +470,11 @@ def process_sample(sample,
     second_id = config["SecondID"]
     if second_id is None:
         second_id = "NULL"
+    orf_gff_file = config["orf_gff_file"]
+    if not os.path.exists(orf_gff_file):
+        raise FileNotFoundError(errno.ENOENT,
+                                os.strerror(errno.ENOENT),
+                                orf_gff_file)
     cmd = ["Rscript", "--vanilla",
            os.path.join(r_scripts, "bam_to_h5.R"),
            "--Ncores=" + str(nprocesses),
@@ -481,7 +486,7 @@ def process_sample(sample,
            "--dataset=" + config["dataset"],
            "--bamFile=" + sample_out_bam,
            "--hdFile=" + sample_out_h5,
-           "--orf_gff_file=" + config["orf_gff_file"],
+           "--orf_gff_file=" + orf_gff_file,
            "--ribovizGFF=" + str(config["ribovizGFF"]),
            "--StopInCDS=" + str(config["StopInCDS"])]
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
@@ -507,7 +512,15 @@ def process_sample(sample,
            "--rpf=" + str(config["rpf"]),
            "--dir_out=" + out_dir,
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
-    for flag in ["t_rna", "codon_pos", "features_file", "orf_gff_file", "count_threshold"]:
+    for flag in ["t_rna", "codon_pos", "features_file"]:
+        if flag in config and config[flag] is not None:
+            flag_file = config[flag]
+            if not os.path.exists(flag_file):
+                raise FileNotFoundError(errno.ENOENT,
+                                        os.strerror(errno.ENOENT),
+                                        flag_file)
+            cmd.append("--" + flag + "=" + flag_file)
+    for flag in ["orf_gff_file", "count_threshold"]:
         if flag in config and config[flag] is not None:
             cmd.append("--" + flag + "=" + str(config[flag]))
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
@@ -625,18 +638,28 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
 
     LOGGER.info("Build indices for alignment, if necessary/requested")
     try:
+        r_rna_fasta = config["rRNA_fasta"]
+        if not os.path.exists(r_rna_fasta):
+            raise FileNotFoundError(errno.ENOENT,
+                                    os.strerror(errno.ENOENT),
+                                    r_rna_fasta)
+        orf_fasta = config["orf_fasta"]
+        if not os.path.exists(orf_fasta):
+            raise FileNotFoundError(errno.ENOENT,
+                                    os.strerror(errno.ENOENT),
+                                    orf_fasta)
         r_rna_index = os.path.join(index_dir,
                                    config["rRNA_index"])
         orf_index = os.path.join(index_dir,
                                  config["orf_index"])
         if config["build_indices"]:
-            build_indices(config["rRNA_fasta"],
+            build_indices(r_rna_fasta,
                           r_rna_index,
                           "r_rna",
                           logs_dir,
                           cmd_file,
                           dry_run)
-            build_indices(config["orf_fasta"],
+            build_indices(orf_fasta,
                           orf_index,
                           "orf",
                           logs_dir,
@@ -645,6 +668,9 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, dry_run=False):
     except KeyError as e:
         logging.error("Missing configuration parameter: %s", e.args[0])
         return EXIT_CONFIG_ERROR
+    except FileNotFoundError as e:
+        logging.error("File not found: %s", e.filename)
+        return EXIT_INDEX_ERROR
     except Exception:
         logging.error("Problem creating indices")
         exc_type, _, _ = sys.exc_info()
