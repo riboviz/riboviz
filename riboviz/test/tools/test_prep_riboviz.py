@@ -1,5 +1,6 @@
 """
-prep_riboviz.py test suite to test error handling and exit codes.
+prep_riboviz.py test suite to test error handling and exit
+codes. prep_riboviz.py is run in "dry-run" mode.
 """
 import os
 import shutil
@@ -86,15 +87,17 @@ def test_config_error_missing_config_file(arguments):
     py_scripts, r_scripts, _ = arguments
     exit_code = prep_riboviz.prep_riboviz(py_scripts,
                                           r_scripts,
-                                          "nosuch.yaml")
+                                          "nosuch.yaml",
+                                          True)
     assert exit_code == prep_riboviz.EXIT_CONFIG_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
-def test_index_error_missing_fa(arguments, configuration):
+@pytest.mark.parametrize("index", ["rRNA_fasta", "orf_fasta"])
+def test_index_error_missing_index_files(arguments, configuration, index):
     """
-    Test that the rRNA_fasta configuration value being a non-existent
-    file causes EXIT_INDEX_ERROR to be returned.
+    Test that the rRNA_fasta and orf_fasta configuration value being
+    non-existent files causes EXIT_INDEX_ERROR to be returned.
 
     :param arguments: Python scripts directory, R scripts directory,
     data directory, vignette configuration file
@@ -104,15 +107,18 @@ def test_index_error_missing_fa(arguments, configuration):
     :param configuration: configuration and path to configuration file
     (pytest fixture defined in conftest.py)
     :type configuration: tuple(dict, str or unicode)
+    :param index: index file name configuration parameter
+    :type index: str or unicode
     """
     py_scripts, r_scripts, _ = arguments
     config, path = configuration
-    config["rRNA_fasta"] = "nosuch.fa"
+    config[index] = "nosuch.fa"
     with open(path, 'w') as f:
         yaml.dump(config, f)
     exit_code = prep_riboviz.prep_riboviz(py_scripts,
                                           r_scripts,
-                                          path)
+                                          path,
+                                          True)
     assert exit_code == prep_riboviz.EXIT_INDEX_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
@@ -120,8 +126,7 @@ def test_index_error_missing_fa(arguments, configuration):
 def test_no_samples_error(arguments, configuration):
     """
     Test that no samples being specified causes
-    EXIT_NO_SAMPLES_ERROR to be returned. Indexing is skipped to save
-    time.
+    EXIT_NO_SAMPLES_ERROR to be returned.
 
     :param arguments: Python scripts directory, R scripts directory,
     data directory, vignette configuration file
@@ -134,21 +139,21 @@ def test_no_samples_error(arguments, configuration):
     """
     py_scripts, r_scripts, _ = arguments
     config, path = configuration
-    config["build_indices"] = False
     config["fq_files"] = []
     with open(path, 'w') as f:
         yaml.dump(config, f)
     exit_code = prep_riboviz.prep_riboviz(py_scripts,
                                           r_scripts,
-                                          path)
+                                          path,
+                                          True)
     assert exit_code == prep_riboviz.EXIT_NO_SAMPLES_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
 def test_samples_error_missing_samples(arguments, configuration):
     """
-    Test that if all samples are non-existet files then
-    EXIT_SAMPLES_ERROR is returned. Indexing is skipped to save time.
+    Test that if all samples are non-existent files then
+    EXIT_SAMPLES_ERROR is returned.
 
     :param arguments: Python scripts directory, R scripts directory,
     data directory, vignette configuration file
@@ -161,7 +166,6 @@ def test_samples_error_missing_samples(arguments, configuration):
     """
     py_scripts, r_scripts, _ = arguments
     config, path = configuration
-    config["build_indices"] = False
     config["fq_files"] = {
         "WT3AT": "nosuch.fastq.gz",
         "WTnone": "nosuch.fastq.gz"
@@ -170,7 +174,42 @@ def test_samples_error_missing_samples(arguments, configuration):
         yaml.dump(config, f)
     exit_code = prep_riboviz.prep_riboviz(py_scripts,
                                           r_scripts,
-                                          path)
+                                          path,
+                                          True)
+    assert exit_code == prep_riboviz.EXIT_SAMPLES_ERROR, \
+        "prep_riboviz returned with unexpected exit code %d" % exit_code
+
+
+@pytest.mark.parametrize("file_config", ["orf_gff_file",
+                                         "features_file",
+                                         "t_rna",
+                                         "codon_pos"])
+def test_missing_files_error(arguments, configuration, file_config):
+    """
+    Test that non-existent files being specified for org_gff_file,
+    features_file, t_rna and codon_pos then EXIT_SAMPLES_ERROR is
+    returned.
+
+    :param arguments: Python scripts directory, R scripts directory,
+    data directory, vignette configuration file
+    (pytest fixture defined in this module)
+    :type arguments: tuple(str or unicode, str or unicode,
+    str or unicode, str or unicode)
+    :param configuration: configuration and path to configuration file
+    (pytest fixture defined in conftest.py)
+    :type configuration: tuple(dict, str or unicode)
+    :param file_config: file name configuration parameter
+    :type file_config: str or unicode
+    """
+    py_scripts, r_scripts, _ = arguments
+    config, path = configuration
+    config[file_config] = "noSuchFile.txt"
+    with open(path, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = prep_riboviz.prep_riboviz(py_scripts,
+                                          r_scripts,
+                                          path,
+                                          True)
     assert exit_code == prep_riboviz.EXIT_SAMPLES_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
@@ -178,8 +217,7 @@ def test_samples_error_missing_samples(arguments, configuration):
 def test_config_error_missing_dir_in(arguments, configuration):
     """
     Test that a missing "dir_in" configuration value causes
-    EXIT_CONFIG_ERROR to be returned. Indexing is skipped to save
-    time.
+    EXIT_CONFIG_ERROR to be returned.
 
     :param arguments: Python scripts directory, R scripts directory,
     data directory, vignette configuration file
@@ -192,12 +230,12 @@ def test_config_error_missing_dir_in(arguments, configuration):
     """
     py_scripts, r_scripts, _ = arguments
     config, path = configuration
-    config["build_indices"] = False
     del config["dir_in"]
     with open(path, 'w') as f:
         yaml.dump(config, f)
     exit_code = prep_riboviz.prep_riboviz(py_scripts,
                                           r_scripts,
-                                          path)
+                                          path,
+                                          True)
     assert exit_code == prep_riboviz.EXIT_CONFIG_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
