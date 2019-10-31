@@ -78,9 +78,9 @@ The script prepares ribosome profiling data for RiboViz or other analyses. It do
   - Removes rRNA or other contaminating reads by alignment to rRNA index file (`rRNA_index`) using `hisat2`.
   - Aligns remaining reads to ORFs index file (`orf_index`). using `hisat2`.
   - Trims 5' mismatches from reads and remove reads with more than 2 mismatches using trim_5p_mismatch.py.
-  - Outputs UMI groups pre-deduplication using `umi_tools group` if requested (`deduplicate: TRUE` and `group_umis: TRUE`).
-  - Deduplicates UMIs using `umi_tools dedup`, if requested (`deduplicate: TRUE`).
-  - Outputs UMI groups post-deduplication using `umi_tools group` if requested (`deduplicate: TRUE` and `group_umis: TRUE`).
+  - Outputs UMI groups pre-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis: TRUE`).
+  - Deduplicates UMIs using `umi_tools dedup`, if requested (`dedup_umis: TRUE`).
+  - Outputs UMI groups post-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis: TRUE`).
   - Exports bedgraph files for plus and minus strands, if requested (`make_bedgraph: TRUE`) using `bedtools genomecov`.
   - Makes length-sensitive alignments in compressed h5 format using `bam_to_h5.R`.
   - Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
@@ -111,10 +111,10 @@ For each of these names (e.g. `Example`), the intermediate files produced in the
 * `Example_orf_map.sam`, ORF-mapped reads.
 * `Example_orf_map_clean.sam`, ORF-mapped reads with mismatched nt trimmed.
 * `Example_unaligned.sam`, unaligned reads.
-* UMI groups pre- and post-deduplication (optional, only if `deduplicate: TRUE` and `group_umis: TRUE` in configuration):
+* UMI groups pre- and post-deduplication (optional, only if `dedup_umis: TRUE` and `group_umis: TRUE` in configuration):
   - `Example_pre_dedup_groups.tsv`: UMI groups before deduplication
   - `Example_post_dedup_groups.tsv`: UMI groups after deduplication
-* UMI deduplication statistics (optional, only if `deduplicate: TRUE` in configuration):
+* UMI deduplication statistics (optional, only if `dedup_umis: TRUE` in configuration):
   - `Example_dedup_stats_edit_distance.tsv`: edit distance between UMIs at each position.
   - `Example_dedup_stats_per_umi_per_position.tsv`: histogram of counts per position per UMI pre- and post-deduplication.
   - `Example_dedup_stats_per_umi.tsv`: number of times each UMI was observed, total counts and median counts, pre- and post-deduplication
@@ -126,7 +126,7 @@ For each of these names (e.g. `Example`), many output files are produced in the 
 
 * `Example.bam`, bamfile of reads mapped to transcripts, can be directly used in genome browsers.
 * `Example.bam.bai`, bam index file for `Example.bam`.
-* `Example_dedup.bam`, `Example.bam` after deduplication of read (optional, only if `deduplicate: TRUE` in configuration).
+* `Example_dedup.bam`, `Example.bam` after deduplication of read (optional, only if `dedup_umis: TRUE` in configuration).
 * `Example_dedup.bam.bai`, bam index file for `Example_dedup.bam`.
 * `Example_minus.bedgraph`, bedgraph of reads from minus strand (optional, only if `make_bedgraph: TRUE` in configuration).
 * `Example_plus.bedgraph`, bedgraph of reads from plus strand (optional, only if `make_bedgraph: TRUE` in configuration).
@@ -236,6 +236,20 @@ File not found: vignette/input/example_missing_file.fastq.gz
 
 then this is expected and can be ignored. The vignette includes an attempt to analyse a missing input file, for testing, which is expected to fail.
 
+### Troubleshooting: `WARNING: dedup_umis was TRUE but extract_umis was FALSE`
+
+This error in the log file means that in your YAML configuration file you have defined:
+
+```yaml
+extract_umis: FALSE
+dedup_umis: TRUE
+```
+
+Unless you explicitly want this you should:
+
+* Either, set `extract_umis` to `TRUE`, if you want UMI deduplication to occur.
+* Or, set `dedup_umis` to `FALSE`, if you do not want UMI deduplication to occur.
+
 ---
 
 ## Run `prep_riboviz.py`
@@ -293,7 +307,7 @@ WTnone_09_bam_to_h5.log
 WTnone_10_generate_stats_figs.log
 ```
 
-Note: if running `prep_riboviz.py` on examples with UMI extraction and deduplication (`deduplication: TRUE`) then additional log files will be present for invocations of `umi_tools extract`, `umi_tools group`, `umi_tools dedup` and `samtools index` and the numbering of log files for successive steps will be different.
+Note: if running `prep_riboviz.py` on examples with UMI extraction and deduplication (`dedup_umis: TRUE`) then additional log files will be present for invocations of `umi_tools extract`, `umi_tools group`, `umi_tools dedup` and `samtools index` and the numbering of log files for successive steps will be different.
 
 You should regularly delete the log files, to prevent them from using up your disk space.
 
