@@ -116,7 +116,7 @@ For each of these names (e.g. `Example`), the intermediate files produced in the
   - `Example_post_dedup_groups.tsv`: UMI groups after deduplication
 * UMI deduplication statistics (optional, only if `deduplicate: TRUE` in configuration):
   - `Example_dedup_stats_edit_distance.tsv`: edit distance between UMIs at each position.
- - `Example_dedup_stats_per_umi_per_position.tsv`: histogram of counts per position per UMI pre- and post-deduplication.
+  - `Example_dedup_stats_per_umi_per_position.tsv`: histogram of counts per position per UMI pre- and post-deduplication.
   - `Example_dedup_stats_per_umi.tsv`: number of times each UMI was observed, total counts and median counts, pre- and post-deduplication
   - For more information see UMI-tools [Dedup-specific options](https://umi-tools.readthedocs.io/en/latest/reference/dedup.html) and [documentation on stats file #250](https://github.com/CGATOxford/UMI-tools/issues/250)
 
