@@ -35,12 +35,12 @@ Prepare ribosome profiling data for RiboViz or other analysis:
   - Trims 5' mismatches from reads and remove reads with more than 2
     mismatches using trim_5p_mismatch.py.
   - Outputs UMI groups pre-deduplication using "umi_tools group" if
-    requested (config["deduplicate"] == True and
+    requested (config["dedup_umis"] == True and
     config["group_umis"] == True)
   - Deduplicates UMIs using "umi_tools dedup", if requested
-    (config["deduplicate"] == True)
+    (config["dedup_umis"] == True)
   - Outputs UMI groups post-deduplication using "umi_tools group" if
-    requested (config["deduplicate"] == True and
+    requested (config["dedup_umis"] == True and
     config["group_umis"] == True)
   - Exports bedgraph files for plus and minus strands, if requested
     (config["make_bedgraph"] == True) using "bedtools genomecov".
@@ -388,10 +388,10 @@ def process_sample(sample,
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
     step += 1
 
-    if "deduplicate" in config and config["deduplicate"]:
+    if "dedup_umis" in config and config["dedup_umis"]:
         LOGGER.info("Deduplicate using UMIs. Log: %s", log_file)
         if not extract_umis:
-            LOGGER.warning("WARNING: deduplicate was TRUE but extract_umis was FALSE.")
+            LOGGER.warning("WARNING: dedup_umis was TRUE but extract_umis was FALSE.")
         if "group_umis" in config and config["group_umis"]:
             group_umis(sample_out_bam,
                        tmp_dir,
