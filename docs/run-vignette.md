@@ -111,8 +111,14 @@ For each of these names (e.g. `Example`), the intermediate files produced in the
 * `Example_orf_map.sam`, ORF-mapped reads.
 * `Example_orf_map_clean.sam`, ORF-mapped reads with mismatched nt trimmed.
 * `Example_unaligned.sam`, unaligned reads.
-* `Example_pre_dedup_groups.tsv`: UMI groups before deduplication (optional, only if `deduplicate: TRUE` and `group_umis: TRUE` in configuration).
-* `Example_post_dedup_groups.tsv`: UMI groups after deduplication (optional, only if `deduplicate: TRUE` and `group_umis: TRUE` in configuration).
+* UMI groups pre- and post-deduplication (optional, only if `deduplicate: TRUE` and `group_umis: TRUE` in configuration):
+  - `Example_pre_dedup_groups.tsv`: UMI groups before deduplication
+  - `Example_post_dedup_groups.tsv`: UMI groups after deduplication
+* UMI deduplication statistics (optional, only if `deduplicate: TRUE` in configuration):
+  - `Example_dedup_stats_edit_distance.tsv`: edit distance between UMIs at each position.
+ - `Example_dedup_stats_per_umi_per_position.tsv`: histogram of counts per position per UMI pre- and post-deduplication.
+  - `Example_dedup_stats_per_umi.tsv`: number of times each UMI was observed, total counts and median counts, pre- and post-deduplication
+  - For more information see UMI-tools [Dedup-specific options](https://umi-tools.readthedocs.io/en/latest/reference/dedup.html) and [documentation on stats file #250](https://github.com/CGATOxford/UMI-tools/issues/250)
 
 The `_unaligned.sam` files could be used to find common contaminants or translated sequences not in your orf annotation.
 

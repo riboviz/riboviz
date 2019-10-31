@@ -38,7 +38,7 @@ Prepare ribosome profiling data for RiboViz or other analysis:
     requested (config["deduplicate"] == True and
     config["group_umis"] == True)
   - Deduplicates UMIs using "umi_tools dedup", if requested
-    (config["deduplicate"] == True).
+    (config["deduplicate"] == True)
   - Outputs UMI groups post-deduplication using "umi_tools group" if
     requested (config["deduplicate"] == True and
     config["group_umis"] == True)
@@ -407,9 +407,11 @@ def process_sample(sample,
                                        sample,
                                        "umi_tools_dedup",
                                        step)
+        dedup_stats_prefix = os.path.join(tmp_dir, sample + "_dedup_stats")
         LOGGER.info("Deduplicate. Log: %s", log_file)
         cmd = ["umi_tools", "dedup", "-I", sample_out_bam,
-               "-S", sample_dedup_bam]
+               "-S", sample_dedup_bam,
+               "--output-stats=" + dedup_stats_prefix]
         process_utils.run_logged_command(cmd,
                                          log_file,
                                          cmd_file,
