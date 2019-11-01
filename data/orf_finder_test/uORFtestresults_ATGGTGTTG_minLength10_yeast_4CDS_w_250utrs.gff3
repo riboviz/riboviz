@@ -1,0 +1,16 @@
+##gff-version 3
+##source-ew-manual Edward Wallace made this by hand
+##to test upstream ORF finders with ATG,GTG,TTG starts and 10-codon minimum
+## find_uORFs --start_codons ATG,GTG,TTG --min_length 10 --Ntermexts TRUE --fasta uORFtest_yeast_4CDS_w_250utrs.fa --gff uORFtest_yeast_4CDS_w_250utrs.gff3
+##date 2019-31-10
+YAL005C	ew-manual	uORF	100	132	.	+	.	Name=YAL005C_uORF_100;start_codon=TTG;
+YAL005C	ew-manual	uORF	122	181	.	+	.	Name=YAL005C_uORF_122;start_codon=TTG;
+YAL038W	ew-manual	uORF	64	183	.	+	.	Name=YAL038W_uORF_64;start_codon=TTG;
+YAL038W	ew-manual	uORF	185	238	.	+	.	Name=YAL038W_uORF_185;start_codon=TTG;
+YAL038W	ew-manual	overlap_uORF	202	258	.	+	.	Name=YAL038W_uORF_202;start_codon=TTG;
+YOR303W	ew-manual	uORF	35	124	.	+	.	Name=YOR303W_uORF_35;start_codon=TTG;
+YOR303W	ew-manual	uORF	117	194	.	+	.	Name=YOR303W_uORF_117;start_codon=ATG;
+YOR303W	ew-manual	CDS_NTE	200	250	.	+	.	Name=YOR303W_NTE_200;start_codon=TTG;
+YOR335C	ew-manual	uORF	41	169	.	+	.	Name=YOR335C_uORF_41;start_codon=ATG;
+YOR335C	ew-manual	uORF	145	243	.	+	.	Name=YOR335C_uORF_145;start_codon=GTG;
+YOR335C	ew-manual	CDS_NTE	203	250	.	+	.	Name=YOR335C_NTE_145;start_codon=TTG;

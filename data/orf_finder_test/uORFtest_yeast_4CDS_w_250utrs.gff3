@@ -1,0 +1,17 @@
+##gff-version 3
+##source-version rtracklayer 1.38.3
+##date 2018-02-10
+##subsetted by Edward Wallace from yeast_CDS_w_250utrs.gff3
+##date 2019-31-10
+YAL005C	rtracklayer	UTR5	1	250	.	+	.	Name=YAL005C
+YAL005C	rtracklayer	CDS	251	2179	.	+	.	Name=YAL005C
+YAL005C	rtracklayer	UTR3	2180	2429	.	+	.	Name=YAL005C
+YAL038W	rtracklayer	UTR5	1	250	.	+	.	Name=YAL038W
+YAL038W	rtracklayer	CDS	251	1753	.	+	.	Name=YAL038W
+YAL038W	rtracklayer	UTR3	1754	2003	.	+	.	Name=YAL038W
+YOR303W	rtracklayer	UTR5	1	250	.	+	.	Name=YOR303W
+YOR303W	rtracklayer	CDS	251	1486	.	+	.	Name=YOR303W
+YOR303W	rtracklayer	UTR3	1487	1736	.	+	.	Name=YOR303W
+YOR335C	rtracklayer	UTR5	1	250	.	+	.	Name=YOR335C
+YOR335C	rtracklayer	CDS	251	3127	.	+	.	Name=YOR335C
+YOR335C	rtracklayer	UTR3	3128	3377	.	+	.	Name=YOR335C

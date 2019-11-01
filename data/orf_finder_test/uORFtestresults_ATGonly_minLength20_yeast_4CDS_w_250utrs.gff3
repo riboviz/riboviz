@@ -1,0 +1,8 @@
+##gff-version 3
+##source-ew-manual Edward Wallace made this by hand
+##to test upstream ORF finders with ATG starts and 20-codon minimum
+## find_uORFs --start_codons ATG --min_length 20 --fasta uORFtest_yeast_4CDS_w_250utrs.fa --gff uORFtest_yeast_4CDS_w_250utrs.gff3
+##date 2019-31-10
+YAL038W	ew-manual	uORF	109	183	.	+	.	Name=YAL038W_uORF_109;start_codon=ATG;
+YOR303W	ew-manual	uORF	117	194	.	+	.	Name=YOR303W_uORF_117;start_codon=ATG;
+YOR335C	ew-manual	uORF	41	169	.	+	.	Name=YOR335C_uORF_41;start_codon=ATG;
