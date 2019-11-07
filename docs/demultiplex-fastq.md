@@ -1,0 +1,110 @@
+# demultiplex-fastq.py fastq demultiplexer
+
+`riboviz/tools/demultiplex-fastq.py` is a command-line tool to demultiplex fastq files using UMI-tools-compliant barcodes present within the fastq headers. These headers are assumed to be of form:
+
+```
+@..._<BARCODE>_...
+```
+
+where the barcode is the first section delimited by underscores. If another delimiter was used then that can be specified.
+
+---
+
+## Usage
+
+```
+$ python riboviz/tools/demultiplex_fastq.py  -h
+usage: demultiplex_fastq.py [-h] [-ss [SAMPLE_SHEET_FILE]] [-r1 [READ1_FILE]]
+                            [-r2 [READ2_FILE]] [-m MISMATCHES] [-o [OUT_DIR]]
+                            [-d [DELIMITER]]
+
+Demultiplex reads from fastq.gz by inline barcodes
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -ss [SAMPLE_SHEET_FILE], --samplesheet [SAMPLE_SHEET_FILE]
+                        Sample sheet filename, tab-delimited text format with
+                        SampleID and TagRead columns
+  -r1 [READ1_FILE], --read1 [READ1_FILE]
+                        Read 1 filename, fastq.gz format
+  -r2 [READ2_FILE], --read2 [READ2_FILE]
+                        Read 2 pair filename, fastq.gz format
+  -m MISMATCHES, --mismatches MISMATCHES
+                        Number of mismatches permitted in barcode
+  -o [OUT_DIR], --outdir [OUT_DIR]
+                        Output directory
+  -d [DELIMITER], --delimiter [DELIMITER]
+                        Barcode delimiter
+```
+
+Inputs:
+
+* `-ss|--samplesheet`: Sample sheet filename, tab-delimited text format with SampleID and TagRead (barcode) columns
+* `-r1|--read1`: Read 1 filename, fastq.gz format
+* `-r2|--read2`: Read 2 pair filename, fastq.gz format (optional). If provided then the read files should have read pairs in corresponding positions.
+* `-m|--mismatches`: Number of mismatches permitted in barcode (optional, default 1)
+* `-o|--outdir`: Output directory (optional, default output)
+* `-d|--delimiter`: Barcode delimiter (optional, default "_")
+
+Outputs:
+
+* If `r1` only was provided:
+  - A file SampleID.fastq.gz with assigned reads.
+  - A file, Unassigned.fastq.gz, with information on unassigned reads.
+* If `r1` and `r2` were provided:
+  - Files SampleID_R1.fastq.gz and SampleID_R2.fastq.gz with assigned reads.
+  - Files, Unassigned_R1.fastq.gz and Unassigned_R2.fastq.gz with information on unassigned reads.
+* A file, nreads.txt, with SampleID, TagRead and nreads columns, specifying the number of reads for each SampleID and TagRead in the original sample sheet.
+
+---
+
+## Example:
+
+Run UMI-tools on sample data and extract barcodes:
+
+```console
+$ mkdir extracts/
+$ umi_tools extract --bc-pattern="^(?P<cell_1>.{9})(?P<umi_1>.{0}).+$" \
+  --extract-method=regex -I data/demultiplex/Sample_4reads_R1.fastq.gz \
+  -S extracts/Sample_4reads_R1.fastq.gz
+$ umi_tools extract --bc-pattern="^(?P<cell_1>.{9})(?P<umi_1>.{0}).+$" \
+  --extract-method=regex -I data/demultiplex/Sample_4reads_R2.fastq.gz \
+  -S extracts/Sample_4reads_R2.fastq.gz
+$ umi_tools extract --bc-pattern="^(?P<cell_1>.{9})(?P<umi_1>.{0}).+$" \
+  --extract-method=regex -I data/demultiplex/Sample_init10000_R1.fastq.gz \
+  -S extracts/Sample_init10000_R1.fastq.gz
+$ umi_tools extract --bc-pattern="^(?P<cell_1>.{9})(?P<umi_1>.{0}).+$" \
+  --extract-method=regex -I data/demultiplex/Sample_init10000_R2.fastq.gz \
+  -S extracts/Sample_init10000_R2.fastq.gz
+```
+
+(note that the regular expression to extract the barcodes intentionally includes a zero-length UMI - we are assuming that this data has no UMIs)
+
+Demultiplex single-end data:
+
+```console
+$ mkdir extracts-deplexed/
+$ python riboviz/tools/demultiplex_fastq.py \
+  -r1 extracts/Sample_4reads_R1.fastq.gz \
+  -ss data/demultiplex/TagSeqBarcodedOligos2015.txt \
+  -o extracts-deplexed/TestSingleSplit4reads
+$ python riboviz/tools/demultiplex_fastq.py \
+  -r1 extracts/Sample_init10000_R1.fastq.gz \
+  -ss data/demultiplex/TagSeqBarcodedOligos2015.txt \
+  -o extracts-deplexed/TestSingleSplit10000
+```
+
+Demultiplex paired-end data:
+
+```console
+$ python riboviz/tools/demultiplex_fastq.py \
+  -r1 extracts/Sample_4reads_R1.fastq.gz \
+  -r2 extracts/Sample_4reads_R2.fastq.gz \
+  -ss data/demultiplex/TagSeqBarcodedOligos2015.txt \
+  -o extracts-deplexed/TestPairSplit4reads
+$ python riboviz/tools/demultiplex_fastq.py \
+  -r1 extracts/Sample_init10000_R1.fastq.gz \
+  -r2 extracts/Sample_init10000_R2.fastq.gz \
+  -ss data/demultiplex/TagSeqBarcodedOligos2015.txt \
+  -o extracts-deplexed/TestPairSplit10000
+```
