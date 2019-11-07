@@ -1,21 +1,25 @@
 #! python
 """
-Demultiplex fastq files using barcodes.
+Demultiplex fastq files using UMI-tools-compliant barcodes present
+within the fastq headers. These headers are assumed to be of form:
+
+    @..._<BARCODE>_...
+
+where the barcode is the first section delimited by underscores. If
+another delimiter was used then that can be specified.
 
 Inputs:
 
 * `-ss|--samplesheet`: Sample sheet filename, tab-delimited text
-    format with SampleID and TagRead columns
+    format with SampleID and TagRead (barcode) columns
 * `-r1|--read1`: Read 1 filename, fastq.gz format
 * `-r2|--read2`: Read 2 pair filename, fastq.gz format (optional)
   If provided then the read files should have read pairs in
-  corresponding positions. Reads should have TagRead values at the
-  5'/left end.
-* `-to|--trimout`: Trim initial TagRead from read 1? (optional,
-    default True)
+  corresponding positions.
 * `-m|--mismatches`: Number of mismatches permitted in barcode
     (optional, default 1)
 * `-o|--outdir`: Output directory (optional, default output)
+* `-d|--delimiter`: Barcode delimiter (optional, default "_")
 
 Outputs:
 
@@ -31,49 +35,28 @@ Outputs:
   specifying the number of reads for each SampleID and TagRead in the
   original sample sheet.
 
-Usage examples:
+Usage:
 
-    python demultiplex_fastq.py -r1 Sample_4reads_R1.fastq.gz \
-        -ss TagSeqBarcodedOligos2015.txt -o TestSingleSplit4reads
-    python demultiplex_fastq.py -r1 Sample_init10000_R1.fastq.gz \
-        -ss TagSeqBarcodedOligos2015.txt -o TestSingleSplit10000
-    python demultiplex_fastq.py -r1 Sample_4reads_R1.fastq.gz \
-        -r2 Sample_4reads_R2.fastq.gz \
-        -ss TagSeqBarcodedOligos2015.txt -o TestPairSplit4reads
-    python demultiplex_fastq.py -r1 Sample_init10000_R1.fastq.gz \
-        -r2 Sample_init10000_R2.fastq.gz \
-        -ss TagSeqBarcodedOligos2015.txt -o TestPairSplit10000
+    python demultiplex_fastq.py -h
 """
 
 import argparse
 import gzip
 import os
-import re
 from itertools import islice
 import pandas as pd
 
 
-def trim_fastq_record(record, n=9):
+DELIMITER = "_"
+""" Default barcode delmiter in fastq header """
+
+
+def barcode_mismatch(record, barcode, mismatches=0, delimiter=DELIMITER):
     """
-    Trim initial n letters from fastq record.
+    Returns True if fastq record header includes barcode, up to a given
+    number of mismatches. The header is assumed to be of form:
 
-    :param record: Record
-    :type record: str or unicode
-    :param n: Number of letters
-    :type n: str or unicode
-    :returns: Trimmed record
-    :rtype: str or unicode
-    """
-    return [record[0], record[1][n:], record[2], record[3][n:]]
-
-
-def startswith_mismatch_regex(record, barcode, mismatches=0):
-    """
-    Returns True if fastq record starts with barcode, up to a given
-    number of mismatches.
-
-    This function has the same behaviour as startswith_mismatch, but
-    uses regex, and is slower.
+        @...<DELIMITER><BARCODE><DELIMITER>...
 
     :param record: Record
     :type record: str or unicode
@@ -81,28 +64,16 @@ def startswith_mismatch_regex(record, barcode, mismatches=0):
     :type barcode: str or unicode
     :param mismatches: Number of mismatches
     :type mismatches: int
+    :param delimiter: Barcode delimiter
+    :type delimiter: str or unicode
     :returns: True or False
     :rtype: bool
     """
-    barcode_regex = "\G(" + barcode + "){s<=" + str(mismatches) + "}"
-    return re.findall(barcode_regex, record)
-
-
-def startswith_mismatch(record, barcode, mismatches=0):
-    """
-    Returns True if fastq record starts with barcode, up to a given
-    number of mismatches.
-
-    :param record: Record
-    :type record: str or unicode
-    :param barcode: Barcode
-    :type barcode: str or unicode
-    :param mismatches: Number of mismatches
-    :type mismatches: int
-    :returns: True or False
-    :rtype: bool
-    """
-    mismatch = sum([record[i] != barcode[i] for i in range(len(barcode))])
+    chunks = record.split(delimiter)
+    if len(chunks) == 1:
+        return False
+    candidate = chunks[1]
+    mismatch = sum([candidate[i] != barcode[i] for i in range(len(barcode))])
     return mismatch <= mismatches
 
 
@@ -110,8 +81,8 @@ def demultiplex(sample_sheet_file,
                 read1_file,
                 read2_file=None,
                 mismatches=1,
-                is_trim_out=True,
-                out_dir="output"):
+                out_dir="output",
+                delimiter=DELIMITER):
     """
     Demultiplex reads from fastq.gz by inline barcodes.
 
@@ -124,10 +95,10 @@ def demultiplex(sample_sheet_file,
     :type read2_file: str or unicode
     :param mismatches: Number of mismatches permitted in barcode
     :type mismatches: int
-    :param is_trim_out: Trim initial TagRead from read 1?
-    :type is_trim_out: bool
     :param out_dir: Output directory
     :type out_dir: str or unicode
+    :param delimiter: Barcode delimiter
+    :type delimiter: str or unicode
     """
     print(("Demultiplexing reads for file: " + read1_file))
     print(("Using sample sheet: " + sample_sheet_file))
@@ -150,6 +121,7 @@ def demultiplex(sample_sheet_file,
     print(("Number of samples: {}".format(num_samples)))
     print(("Allowed mismatches: {}".format(mismatches)))
     print(("Tag length: {}".format(length_tag)))
+    print(("Barcode delimiter: {}".format(delimiter)))
 
     if not os.path.isfile(read1_file):
         raise FileNotFoundError(
@@ -207,17 +179,12 @@ def demultiplex(sample_sheet_file,
 
         for sample in range(num_samples):
             # Check if initial segment of read matches sample barcode.
-            if startswith_mismatch(fastq_record1[1],
-                                   tag_reads[sample],
-                                   mismatches):
+            if barcode_mismatch(fastq_record1[0],
+                                tag_reads[sample],
+                                mismatches,
+                                delimiter):
                 is_assigned = True
-                if is_trim_out:
-                    # Write trimmed record to file.
-                    read1_split_fhs[sample].writelines(
-                        trim_fastq_record(fastq_record1, n=length_tag))
-                else:
-                    # Write full record to file.
-                    read1_split_fhs[sample].writelines(fastq_record1)
+                read1_split_fhs[sample].writelines(fastq_record1)
                 if is_paired_end:
                     read2_split_fhs[sample].writelines(fastq_record2)
                 num_reads[sample] += 1
@@ -253,7 +220,7 @@ def demultiplex(sample_sheet_file,
         nrf.write("Unassd\tNNNNNNNNN\t{}\n".format(num_unassigned_reads))
         nrf.write("TOTAL\t\t{}".format(total_reads))
 
-    print("Done")
+    print(("Done"))
 
 
 def parse_command_line_options():
@@ -281,12 +248,6 @@ def parse_command_line_options():
                         default=None,
                         nargs='?',
                         help="Read 2 pair filename, fastq.gz format")
-    parser.add_argument("-to",
-                        "--trimout",
-                        dest="is_trim_out",
-                        default=True,
-                        nargs='?',
-                        help="Trim initial TagRead from read 1")
     parser.add_argument("-m",
                         "--mismatches",
                         dest="mismatches",
@@ -299,27 +260,33 @@ def parse_command_line_options():
                         nargs='?',
                         default="output",
                         help="Output directory")
+    parser.add_argument("-d",
+                        "--delimiter",
+                        dest="delimiter",
+                        nargs='?',
+                        default=DELIMITER,
+                        help="Barcode delimiter")
     options = parser.parse_args()
     return options
 
 
 def main():
     """
-    Parse command-line options then invoke "split".
+    Parse command-line options then invoke "demultiplex".
     """
     options = parse_command_line_options()
     sample_sheet_file = options.sample_sheet_file
     read1_file = options.read1_file
     read2_file = options.read2_file
     mismatches = options.mismatches
-    is_trim_out = options.is_trim_out
     out_dir = options.out_dir
+    delimiter = options.delimiter
     demultiplex(sample_sheet_file,
                 read1_file,
                 read2_file,
                 mismatches,
-                is_trim_out,
-                out_dir)
+                out_dir,
+                delimiter)
 
 
 if __name__ == "__main__":
