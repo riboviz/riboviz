@@ -108,3 +108,22 @@ $ python riboviz/tools/demultiplex_fastq.py \
   -ss data/demultiplex/TagSeqBarcodedOligos2015.txt \
   -o extracts-deplexed/TestPairSplit10000
 ```
+
+---
+
+## Known issue - mismatches and barcode Hamming distances
+
+If the number of mismatches (`-m|--mismatches`) is less than the Hamming distance between the barcodes (`TagReads` within the sample sheet) then a read will be assigned to the first barcode that matches even if this is not the closest barcode in terms of Hamming distance.
+
+For example, imagine we had a barcode in a read, AGA, and our barcodes in our samplesheet are AAA, CCC, GGG, TTT. The Hamming distances between the barcode and the sample barcodes are as follows:
+
+* d(AGA, AAA) = 1
+* d(AGA, GGG) = 2
+* d(AGA, TTT) = 3
+* d(AGA, CCC) = 3
+
+If mismatches is 2 then AGA could be assigned to AAA or GGG, depending on the ordering of barcodes in the sample sheet, even though AAA is closest in terms of Hamming distance.
+
+If mismatches is 3 then AGA could be assigned to AAA, GGG, TTT depending on the ordering of barcodes in the sample sheet.
+
+Caution should be taken if the Hamming distance of the barcodes in the sample sheet is less than the number of mismatches times 2. In the above two examples, the Hamming distance between each of the sample barcodes is 3 is less than the number of mismatches times 2, which is 4 and 6 respectively.
