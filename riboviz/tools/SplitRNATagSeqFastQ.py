@@ -54,8 +54,8 @@ if __name__=="__main__" :
     parser.add_argument("-m", "--mismatches", dest="mismatches", default=1, type=int, help="number of mismatches permitted in barcode")
     options = parser.parse_args()
     
-    print "Demultiplexing reads for file:\n" + options.r1_fn + \
-        "\nusing sample sheet:\n" + options.samplesheet_fn
+    print(("Demultiplexing reads for file:\n" + options.r1_fn + \
+        "\nusing sample sheet:\n" + options.samplesheet_fn))
     
     if not os.path.isfile(options.samplesheet_fn):
         raise IOError("# Error: sample sheet file {} does not exist".format(options.samplesheet_fn))
@@ -69,7 +69,7 @@ if __name__=="__main__" :
     SampleIDs = list(samplesheet.SampleID)
     TagReads  = list(samplesheet.TagRead)
     lengthTag = len(TagReads[1])
-    print "allowed mismatches = {}".format(options.mismatches)
+    print(("allowed mismatches = {}".format(options.mismatches)))
     
     # check read 1 fastq is present, if so open it
     if not os.path.isfile(options.r1_fn):
@@ -115,7 +115,7 @@ if __name__=="__main__" :
         # count number of processed reads, output every millionth
         ntotreads += 1
         if (ntotreads % 1000000) == 0:
-            print "{} reads processed".format(ntotreads)
+            print(("{} reads processed".format(ntotreads)))
         
         # assign read to a SampleID
         # TagRead is 1st read with less than threshold mismatches.
@@ -157,7 +157,7 @@ if __name__=="__main__" :
         r2_out_unassigned_h.close()
         r2_fgf.close()
     
-    print "All {} reads processed".format(ntotreads)
+    print(("All {} reads processed".format(ntotreads)))
     
     # output number of reads by sample to file
     samplesheet["nreads"] = nreads
@@ -169,6 +169,6 @@ if __name__=="__main__" :
     
     # missing: function call/comments in output
     
-    print "Done"
+    print("Done")
 
 
