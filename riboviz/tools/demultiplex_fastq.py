@@ -1,174 +1,326 @@
 #! python
+"""
+Demultiplex fastq files using barcodes.
 
-## demultiplex_fastq.py
-## Assigns RNATagSeq reads to samples based on initial 8-nt barcode (TagRead)
-## Inputs:
-##  - One .fastq.gz file with sequencing reads, 
-##  OR - Two paired .fastq.gz files with read pairs in corresponding positions
-##  - r1 file should have TagReads at beginning (5'/left)
-##  - tab delimited .txt file with columns (at least) SampleID, TagRead
-##  - in principle this should harvest the P7 read information from fastq header; but it doesn't
-##
-## Outputs:
-##  - for each SampleID, two paired .fastq.gz files containing assigned reads, ending R1 and R2
-## 
-## Edward Wallace ewjwallace@gmail.com, 2017
+Inputs:
 
-import sys, os, csv, gzip, shutil, argparse
+* `-ss|--samplesheet`: Sample sheet filename, tab-delimited text
+    format with SampleID and TagRead columns
+* `-r1|--read1`: Read 1 filename, fastq.gz format
+* `-r2|--read2`: Read 2 pair filename, fastq.gz format (optional)
+  If provided then the read files should have read pairs in
+  corresponding positions. Reads should have TagRead values at the
+  5'/left end.
+* `-to|--trimout`: Trim initial TagRead from read 1? (optional,
+    default True)
+* `-m|--mismatches`: Number of mismatches permitted in barcode
+    (optional, default 1)
+* `-o|--outdir`: Output directory (optional, default output)
+
+Outputs:
+
+* If `r1` only was provided:
+  - A file SampleID.fastq.gz with assigned reads.
+  - A file, Unassigned.fastq.gz, with information on unassigned reads.
+* If `r1` and `r2` were provided:
+  - Files SampleID_R1.fastq.gz and SampleID_R2.fastq.gz with assigned
+    reads.
+  - Files, Unassigned_R1.fastq.gz and Unassigned_R2.fastq.gz with
+    information on unassigned reads.
+* A file, nreads.txt, with SampleID, TagRead and nreads columns,
+  specifying the number of reads for each SampleID and TagRead in the
+  original sample sheet.
+
+Usage examples:
+
+    python demultiplex_fastq.py -r1 Sample_4reads_R1.fastq.gz \
+        -ss TagSeqBarcodedOligos2015.txt -o TestSingleSplit4reads
+    python demultiplex_fastq.py -r1 Sample_init10000_R1.fastq.gz \
+        -ss TagSeqBarcodedOligos2015.txt -o TestSingleSplit10000
+    python demultiplex_fastq.py -r1 Sample_4reads_R1.fastq.gz \
+        -r2 Sample_4reads_R2.fastq.gz \
+        -ss TagSeqBarcodedOligos2015.txt -o TestPairSplit4reads
+    python demultiplex_fastq.py -r1 Sample_init10000_R1.fastq.gz \
+        -r2 Sample_init10000_R2.fastq.gz \
+        -ss TagSeqBarcodedOligos2015.txt -o TestPairSplit10000
+"""
+
+import argparse
+import gzip
+import os
+import re
 from itertools import islice
 import pandas as pd
-import re 
-
-def trim_fastq_record(fqr,n=9):
-    """trim initial n letters from fastq record"""
-    return [ fqr[0], fqr[1][n:], fqr[2], fqr[3][n:] ]
-
-def startswith_mismatch_regex(string,barcode,mm=0):
-    """return true if fastq record starts with barcode, up to mm mismatches"""
-    # same input-output as startswith_mismatch, but uses regex. slower.
-    teststring = "\G(" + barcode + "){s<=" + str(mm) + "}"
-    if re.findall(teststring, string) :
-        return True
-    else :
-        return False
-
-def startswith_mismatch(string,barcode,mm=0):
-    """return true if string record starts with barcode, up to mm mismatches"""
-    m = sum([string[i] != barcode[i] for i in range(len(barcode))])
-    return m <= mm
 
 
-if __name__=="__main__" :    
-    # test1sing: python demultiplex_fastq.py -r1 data/Sample_4reads_R1.fastq.gz -ss data/TagSeqBarcodedOligos2015.txt -o TestSingleSplit4reads
-    # test2sing: python demultiplex_fastq.py -r1 data/Sample_init10000_R1.fastq.gz -ss data/TagSeqBarcodedOligos2015.txt -o TestSingleSplit10000
-    # test1pair: python demultiplex_fastq.py -r1 data/Sample_4reads_R1.fastq.gz -r2 data/Sample_4reads_R2.fastq.gz -ss data/TagSeqBarcodedOligos2015.txt -o TestPairSplit4reads
-    # test2pair: python demultiplex_fastq.py -r1 data/Sample_init10000_R1.fastq.gz -r2 data/Sample_init10000_R2.fastq.gz -ss data/TagSeqBarcodedOligos2015.txt -o TestPairSplit10000
-        
-    # define input options
-    parser = argparse.ArgumentParser(description="Demultiplex reads from fastq.gz by inline barcodes")
-    parser.add_argument("-r1", "--read1",dest="r1_fn",nargs='?',help="read 1 filename in fastq.gz format")
-    parser.add_argument("-r2", "--read2",dest="r2_fn",default=False,nargs='?',help="read 2 pair filename in fastq.gz format")
-    parser.add_argument("-to", "--trimout",dest="trimout",default=True,nargs='?',help="trim initial TagRead from read 1")
-    parser.add_argument("-ss", "--samplesheet", dest="samplesheet_fn",nargs='?',help="samplesheet filename, tab-delim text format with SampleID and TagRead columns")
-    parser.add_argument("-o", "--outdir", dest="outdir",nargs='?',default="TestSplitRNATagSeq",help="output directory")
-    parser.add_argument("-m", "--mismatches", dest="mismatches", default=1, type=int, help="number of mismatches permitted in barcode")
-    options = parser.parse_args()
-    
-    print(("Demultiplexing reads for file:\n" + options.r1_fn + \
-        "\nusing sample sheet:\n" + options.samplesheet_fn))
-    
-    if not os.path.isfile(options.samplesheet_fn):
-        raise IOError("# Error: sample sheet file {} does not exist".format(options.samplesheet_fn))
-    # read sample sheet in using pandas package
-    samplesheet = pd.read_csv(options.samplesheet_fn,comment="#",delimiter="\t")
-    # read sample info from sample sheet
-    nsample = samplesheet.shape[0]
-    nreads = [0] * nsample
-    nunassignedreads = 0
-    ntotreads = 0
-    SampleIDs = list(samplesheet.SampleID)
-    TagReads  = list(samplesheet.TagRead)
-    lengthTag = len(TagReads[1])
-    print(("allowed mismatches = {}".format(options.mismatches)))
-    
-    # check read 1 fastq is present, if so open it
-    if not os.path.isfile(options.r1_fn):
-        raise IOError("# Error: read 1 file {} does not exist".format(options.r1_fn))
-    r1_fgf = gzip.open(options.r1_fn, 'rt')
-    
-    # check read 2 fastq is supplied and present, if so open it
-    is_paired_end = bool(options.r2_fn)
-    if (is_paired_end) :
-        if not os.path.isfile(options.r2_fn):
-            raise IOError("# Error: read 2 file {} does not exist".format(options.r2_fn))
-        r2_fgf = gzip.open(options.r2_fn, 'rt')
-        
-    # make output directory and then file handle for each sample and read end
+def trim_fastq_record(record, n=9):
+    """
+    Trim initial n letters from fastq record.
+
+    :param record: Record
+    :type record: str or unicode
+    :param n: Number of letters
+    :type n: str or unicode
+    :returns: Trimmed record
+    :rtype: str or unicode
+    """
+    return [record[0], record[1][n:], record[2], record[3][n:]]
+
+
+def startswith_mismatch_regex(record, barcode, mismatches=0):
+    """
+    Returns True if fastq record starts with barcode, up to a given
+    number of mismatches.
+
+    This function has the same behaviour as startswith_mismatch, but
+    uses regex, and is slower.
+
+    :param record: Record
+    :type record: str or unicode
+    :param barcode: Barcode
+    :type barcode: str or unicode
+    :param mismatches: Number of mismatches
+    :type mismatches: int
+    :returns: True or False
+    :rtype: bool
+    """
+    barcode_regex = "\G(" + barcode + "){s<=" + str(mismatches) + "}"
+    return re.findall(barcode_regex, record)
+
+
+def startswith_mismatch(record, barcode, mismatches=0):
+    """
+    Returns True if fastq record starts with barcode, up to a given
+    number of mismatches.
+
+    :param record: Record
+    :type record: str or unicode
+    :param barcode: Barcode
+    :type barcode: str or unicode
+    :param mismatches: Number of mismatches
+    :type mismatches: int
+    :returns: True or False
+    :rtype: bool
+    """
+    mismatch = sum([record[i] != barcode[i] for i in range(len(barcode))])
+    return mismatch <= mismatches
+
+
+def demultiplex(sample_sheet_file,
+                read1_file,
+                read2_file=None,
+                mismatches=1,
+                is_trim_out=True,
+                out_dir="output"):
+    """
+    Demultiplex reads from fastq.gz by inline barcodes.
+
+    :param sample_sheet_file: Sample sheet filename, tab-delimited
+    text format with SampleID and TagRead columns
+    :type sample_sheet_file: str or unicode
+    :param read1_file: Read 1 filename (fastq.gz format)
+    :type read1_file: str or unicode
+    :param read2_file: Read 2 pair filename (fastq.gz format)
+    :type read2_file: str or unicode
+    :param mismatches: Number of mismatches permitted in barcode
+    :type mismatches: int
+    :param is_trim_out: Trim initial TagRead from read 1?
+    :type is_trim_out: bool
+    :param out_dir: Output directory
+    :type out_dir: str or unicode
+    """
+    print(("Demultiplexing reads for file: " + read1_file))
+    print(("Using sample sheet: " + sample_sheet_file))
+
+    if not os.path.isfile(sample_sheet_file):
+        raise FileNotFoundError(
+            "Error: sample sheet file {} does not exist".format(
+                sample_sheet_file))
+
+    sample_sheet = pd.read_csv(sample_sheet_file,
+                               comment="#",
+                               delimiter="\t")
+    num_samples = sample_sheet.shape[0]
+    num_reads = [0] * num_samples
+    num_unassigned_reads = 0
+    total_reads = 0
+    sample_ids = list(sample_sheet.SampleID)
+    tag_reads = list(sample_sheet.TagRead)
+    length_tag = len(tag_reads[1])
+    print(("Number of samples: {}".format(num_samples)))
+    print(("Allowed mismatches: {}".format(mismatches)))
+    print(("Tag length: {}".format(length_tag)))
+
+    if not os.path.isfile(read1_file):
+        raise FileNotFoundError(
+            "Error: read 1 file {} does not exist".format(read1_file))
+    read1_fh = gzip.open(read1_file, 'rt')
+
+    is_paired_end = read2_file is not None
+    if is_paired_end:
+        if not os.path.isfile(read2_file):
+            raise FileNotFoundError(
+                "Error: read 2 file {} does not exist".format(
+                    read2_file))
+        read2_fh = gzip.open(read2_file, 'rt')
+
     try:
-        os.mkdir(options.outdir)
+        os.mkdir(out_dir)
     except Exception:
-        raise IOError("# Error: output directory {} cannot be created".format(options.outdir))
-    nreads_fn = options.outdir + "/nreads.txt"
-    if (is_paired_end) :
-        # make an output file for each tag and paired read
-        r1_out_split_hs = [ gzip.open(options.outdir + "/" + SampleID + "_R1.fastq.gz","wt") \
-                for SampleID in SampleIDs]
-        r1_out_unassigned_h = gzip.open(options.outdir + "/Unassigned_R1.fastq.gz","wt")
-        r2_out_split_hs = [ gzip.open(options.outdir + "/" + SampleID + "_R2.fastq.gz","wt") \
-                for SampleID in SampleIDs]
-        r2_out_unassigned_h = gzip.open(options.outdir + "/Unassigned_R2.fastq.gz","wt")
-    else :
-        # make one output file for each tag
-        r1_out_split_hs = [ gzip.open(options.outdir + "/" + SampleID + ".fastq.gz","wt") \
-            for SampleID in SampleIDs]
-        r1_out_unassigned_h = gzip.open(options.outdir + "/Unassigned.fastq.gz","wt")
-    
-    ## This loop is the heart of the program
+        raise IOError(
+            "Error: output directory {} cannot be created".format(out_dir))
+
+    num_reads_file = os.path.join(out_dir, "nreads.txt")
+    if is_paired_end:
+        read1_split_fhs = [
+            gzip.open(os.path.join(out_dir, sample_id + "_R1.fastq.gz"), "wt")
+            for sample_id in sample_ids]
+        read1_unassigned_fh = gzip.open(
+            os.path.join(out_dir, "Unassigned_R1.fastq.gz"), "wt")
+        read2_split_fhs = [
+            gzip.open(os.path.join(out_dir, sample_id + "_R2.fastq.gz"), "wt")
+            for sample_id in sample_ids]
+        read2_unassigned_fh = gzip.open(
+            os.path.join(out_dir, "Unassigned_R2.fastq.gz"), "wt")
+    else:
+        read1_split_fhs = [
+            gzip.open(os.path.join(out_dir, sample_id + ".fastq.gz"), "wt")
+            for sample_id in sample_ids]
+        read1_unassigned_fh = gzip.open(
+            os.path.join(out_dir, "Unassigned.fastq.gz"), "wt")
+
     while True:
-        # get fastq record/read (4 lines)
-        fqrec1 = list(islice(r1_fgf, 4))
-        if not fqrec1 :
+        # Get fastq record/read (4 lines)
+        fastq_record1 = list(islice(read1_fh, 4))
+        if not fastq_record1:
             break
-        if (is_paired_end) :
-            fqrec2 = list(islice(r2_fgf, 4))
-        
-        # count number of processed reads, output every millionth
-        ntotreads += 1
-        if (ntotreads % 1000000) == 0:
-            print(("{} reads processed".format(ntotreads)))
-        
-        # assign read to a SampleID
+        if is_paired_end:
+            fastq_record2 = list(islice(read2_fh, 4))
+        # Count number of processed reads, output every millionth.
+        total_reads += 1
+        if (total_reads % 1000000) == 0:
+            print(("{} reads processed".format(total_reads)))
+        # Assign read to a SampleID,
         # TagRead is 1st read with less than threshold mismatches.
-        # could cause problems if many mismatches.
-        assigned = False
-        for sample in range(nsample) :
-            # test if initial segment of read matches sample barcode
-            if startswith_mismatch(fqrec1[1],TagReads[sample],options.mismatches) :
-                assigned = True
-                if (options.trimout) :
-                    # write trimmed record to file
-                    r1_out_split_hs[sample].writelines( trim_fastq_record(fqrec1,n=lengthTag) )
-                else : 
-                    # write full record to file
-                    r1_out_split_hs[sample].writelines( fqrec1 )
-                if (is_paired_end) :
-                    r2_out_split_hs[sample].writelines( fqrec2 )
-                # count it
-                nreads[sample] += 1
-                # stop testing against other barcodes
+        # Beware: this could cause problems if many mismatches.
+        is_assigned = False
+
+        for sample in range(num_samples):
+            # Check if initial segment of read matches sample barcode.
+            if startswith_mismatch(fastq_record1[1],
+                                   tag_reads[sample],
+                                   mismatches):
+                is_assigned = True
+                if is_trim_out:
+                    # Write trimmed record to file.
+                    read1_split_fhs[sample].writelines(
+                        trim_fastq_record(fastq_record1, n=length_tag))
+                else:
+                    # Write full record to file.
+                    read1_split_fhs[sample].writelines(fastq_record1)
+                if is_paired_end:
+                    read2_split_fhs[sample].writelines(fastq_record2)
+                num_reads[sample] += 1
+                # Stop testing against other barcodes
                 break
-        if not assigned: 
-            # write unassigned read to file
-            # note unassigned reads are not trimmed
-            r1_out_unassigned_h.writelines( fqrec1 )
-            if (is_paired_end) :
-                r2_out_unassigned_h.writelines( fqrec2 )
-            # count it
-            nunassignedreads += 1
-    
-    # close output handles and fasta file
-    for fh in r1_out_split_hs :
+        if not is_assigned:
+            # Write unassigned read to file.
+            # Note: unassigned reads are not trimmed.
+            read1_unassigned_fh.writelines(fastq_record1)
+            if is_paired_end:
+                read2_unassigned_fh.writelines(fastq_record2)
+            num_unassigned_reads += 1
+
+    # Close output handles and fastq file.
+    for fh in read1_split_fhs:
         fh.close()
-    r1_out_unassigned_h.close()
-    r1_fgf.close()
-    if (is_paired_end) :
-        for fh in r2_out_split_hs :
+    read1_unassigned_fh.close()
+    read1_fh.close()
+    if is_paired_end:
+        for fh in read2_split_fhs:
             fh.close()
-        r2_out_unassigned_h.close()
-        r2_fgf.close()
-    
-    print(("All {} reads processed".format(ntotreads)))
-    
-    # output number of reads by sample to file
-    samplesheet["nreads"] = nreads
-    samplesheet[['SampleID','TagRead','nreads']].to_csv(nreads_fn,sep="\t",index=False)
-    # append unassigned reads to samplesheet
-    with open(nreads_fn,"a") as nrf :
-        nrf.write("Unassd\tNNNNNNNNN\t{}\n".format(nunassignedreads))
-        nrf.write("TOTAL\t\t{}".format(ntotreads))
-    
-    # missing: function call/comments in output
-    
+        read2_unassigned_fh.close()
+        read2_fh.close()
+
+    print(("All {} reads processed".format(total_reads)))
+
+    # Output number of reads by sample to file.
+    sample_sheet["nreads"] = num_reads
+    sample_sheet[['SampleID', 'TagRead', 'nreads']].to_csv(
+        num_reads_file, sep="\t", index=False)
+    # Append unassigned reads to file.
+    with open(num_reads_file, "a") as nrf:
+        nrf.write("Unassd\tNNNNNNNNN\t{}\n".format(num_unassigned_reads))
+        nrf.write("TOTAL\t\t{}".format(total_reads))
+
     print("Done")
 
 
+def parse_command_line_options():
+    """
+    Parse command-line options.
+
+    :returns: command-line options
+    :rtype: argparse.Namespace
+    """
+    parser = argparse.ArgumentParser(
+        description="Demultiplex reads from fastq.gz by inline barcodes")
+    parser.add_argument("-ss",
+                        "--samplesheet",
+                        dest="sample_sheet_file",
+                        nargs='?',
+                        help="Sample sheet filename, tab-delimited text format with SampleID and TagRead columns")
+    parser.add_argument("-r1",
+                        "--read1",
+                        dest="read1_file",
+                        nargs='?',
+                        help="Read 1 filename, fastq.gz format")
+    parser.add_argument("-r2",
+                        "--read2",
+                        dest="read2_file",
+                        default=None,
+                        nargs='?',
+                        help="Read 2 pair filename, fastq.gz format")
+    parser.add_argument("-to",
+                        "--trimout",
+                        dest="is_trim_out",
+                        default=True,
+                        nargs='?',
+                        help="Trim initial TagRead from read 1")
+    parser.add_argument("-m",
+                        "--mismatches",
+                        dest="mismatches",
+                        default=1,
+                        type=int,
+                        help="Number of mismatches permitted in barcode")
+    parser.add_argument("-o",
+                        "--outdir",
+                        dest="out_dir",
+                        nargs='?',
+                        default="output",
+                        help="Output directory")
+    options = parser.parse_args()
+    return options
+
+
+def main():
+    """
+    Parse command-line options then invoke "split".
+    """
+    options = parse_command_line_options()
+    sample_sheet_file = options.sample_sheet_file
+    read1_file = options.read1_file
+    read2_file = options.read2_file
+    mismatches = options.mismatches
+    is_trim_out = options.is_trim_out
+    out_dir = options.out_dir
+    demultiplex(sample_sheet_file,
+                read1_file,
+                read2_file,
+                mismatches,
+                is_trim_out,
+                out_dir)
+
+
+if __name__ == "__main__":
+    main()
