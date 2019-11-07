@@ -179,6 +179,22 @@ The files can be used as inputs to RiboViz.
 
 ---
 
+## Demultiplexing test files
+
+```
+data/demultiplex/
+```
+
+Test data for `riboviz/tools/SplitRNATagSeqFastQ.py`, imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb0a80d2134bad9d2147c877c3b363720 (Thu May 11 23:44:13 2017).
+
+* `Sample_4reads_R1.fastq.gz`: artificial sample with 4 read 1s.
+* `Sample_4reads_R2.fastq.gz`: 4 read 2s corresponding to `Sample_4reads_R1.fastq.gz`.
+* `Sample_init10000_R1.fastq.gz`: Initial 10000 read 1s from a paired-end S. cerevisiae dataset.
+* `Sample_init10000_R2.fastq.gz`: 10000 read 2s corresponding to `Sample_init10000_R1.fastq.gz`.
+* `TagSeqBarcodedOligos2015.txt`: TagSeq barcoded oligos used in Shishkin, et al. (2015). "Simultaneous generation of many RNA-seq libraries in a single reaction", Nature Methods, 12(4), 323–325. doi: [10.1038/nmeth.3313](http://doi.org/10.1038/nmeth.3313)
+
+---
+
 ## `trim_5p_mismatch.py` test files
 
 ```
