@@ -185,7 +185,9 @@ The files can be used as inputs to RiboViz.
 data/demultiplex/
 ```
 
-Test data for `riboviz/tools/SplitRNATagSeqFastQ.py`, imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb0a80d2134bad9d2147c877c3b363720 (Thu May 11 23:44:13 2017).
+Test data for `riboviz/tools/demultiplex_fastq.py`.
+
+Data was imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb0a80d2134bad9d2147c877c3b363720 (Thu May 11 23:44:13 2017).
 
 * `Sample_4reads_R1.fastq.gz`: artificial sample with 4 read 1s.
 * `Sample_4reads_R2.fastq.gz`: 4 read 2s corresponding to `Sample_4reads_R1.fastq.gz`.

@@ -1,6 +1,6 @@
 #! python
 
-## SplitRNATagSeqFastQ.py
+## demultiplex_fastq.py
 ## Assigns RNATagSeq reads to samples based on initial 8-nt barcode (TagRead)
 ## Inputs:
 ##  - One .fastq.gz file with sequencing reads, 
@@ -39,10 +39,10 @@ def startswith_mismatch(string,barcode,mm=0):
 
 
 if __name__=="__main__" :    
-    # test1sing: python SplitRNATagSeqFastQ.py -r1 data/Sample_4reads_R1.fastq.gz -ss data/TagSeqBarcodedOligos2015.txt -o TestSingleSplit4reads
-    # test2sing: python SplitRNATagSeqFastQ.py -r1 data/Sample_init10000_R1.fastq.gz -ss data/TagSeqBarcodedOligos2015.txt -o TestSingleSplit10000
-    # test1pair: python SplitRNATagSeqFastQ.py -r1 data/Sample_4reads_R1.fastq.gz -r2 data/Sample_4reads_R2.fastq.gz -ss data/TagSeqBarcodedOligos2015.txt -o TestPairSplit4reads
-    # test2pair: python SplitRNATagSeqFastQ.py -r1 data/Sample_init10000_R1.fastq.gz -r2 data/Sample_init10000_R2.fastq.gz -ss data/TagSeqBarcodedOligos2015.txt -o TestPairSplit10000
+    # test1sing: python demultiplex_fastq.py -r1 data/Sample_4reads_R1.fastq.gz -ss data/TagSeqBarcodedOligos2015.txt -o TestSingleSplit4reads
+    # test2sing: python demultiplex_fastq.py -r1 data/Sample_init10000_R1.fastq.gz -ss data/TagSeqBarcodedOligos2015.txt -o TestSingleSplit10000
+    # test1pair: python demultiplex_fastq.py -r1 data/Sample_4reads_R1.fastq.gz -r2 data/Sample_4reads_R2.fastq.gz -ss data/TagSeqBarcodedOligos2015.txt -o TestPairSplit4reads
+    # test2pair: python demultiplex_fastq.py -r1 data/Sample_init10000_R1.fastq.gz -r2 data/Sample_init10000_R2.fastq.gz -ss data/TagSeqBarcodedOligos2015.txt -o TestPairSplit10000
         
     # define input options
     parser = argparse.ArgumentParser(description="Demultiplex reads from fastq.gz by inline barcodes")
