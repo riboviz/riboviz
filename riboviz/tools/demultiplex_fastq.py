@@ -80,12 +80,30 @@ DELIMITER = "_"
 """ Default barcode delmiter in fastq header """
 
 
+def hamming_distance(str1, str2):
+    """
+    Returns the hamming distance between two strings.
+
+    :param str1: String
+    :type str1: str or unicode
+    :param str2: String
+    :type str2: str or unicode
+    :return: hamming distance
+    :rtype: int
+    """
+    return sum(1 for (a, b) in zip(str1, str2) if a != b)
+
+
 def barcode_mismatch(record, barcode, mismatches=0, delimiter=DELIMITER):
     """
     Returns True if fastq record header includes barcode, up to a given
     number of mismatches. The header is assumed to be of form:
 
         @...<DELIMITER><BARCODE><DELIMITER>...
+
+    If <BARCODE> differs from barcode by greater than mismatches, o
+    there is no <BARCODE> or <BARCODE> has a different length than
+    barcode then False is returned.
 
     :param record: Record
     :type record: str or unicode
@@ -102,8 +120,9 @@ def barcode_mismatch(record, barcode, mismatches=0, delimiter=DELIMITER):
     if len(chunks) == 1:
         return False
     candidate = chunks[1]
-    mismatch = sum([candidate[i] != barcode[i] for i in range(len(barcode))])
-    return mismatch <= mismatches
+    if len(candidate) != len(barcode):
+        return False
+    return hamming_distance(candidate, barcode) <= mismatches
 
 
 def demultiplex(sample_sheet_file,

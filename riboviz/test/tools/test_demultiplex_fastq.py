@@ -2,6 +2,49 @@
 demultiplex_fastq.py test suite.
 """
 from riboviz.tools.demultiplex_fastq import barcode_mismatch
+from riboviz.tools.demultiplex_fastq import hamming_distance
+
+
+def test_hamming_distance_empty():
+    """
+    Test hamming_distance with empty strings.
+    """
+    assert hamming_distance("", "") == 0
+
+
+def test_hamming_distance_equal_characters():
+    """
+    Test hamming_distance with equal characters.
+    """
+    assert hamming_distance("A", "A") == 0
+
+
+def test_hamming_distance_nonequal_characters():
+    """
+    Test hamming_distance with non-equal characters.
+    """
+    assert hamming_distance("A", "T") == 1
+
+
+def test_hamming_distance_equal_strings():
+    """
+    Test hamming_distance with equal strings.
+    """
+    assert hamming_distance("GATTACCA", "GATTACCA") == 0
+
+
+def test_hamming_distance_one():
+    """
+    Test hamming_distance with strings 1 apart.
+    """
+    assert hamming_distance("GATTACCA", "GATTGCCA") == 1
+
+
+def test_hamming_distance_eight():
+    """
+    Test hamming_distance with strings 8 apart.
+    """
+    assert hamming_distance("GATTACCA", "CTAATGGT") == 8
 
 
 def test_barcode_mismatch():
