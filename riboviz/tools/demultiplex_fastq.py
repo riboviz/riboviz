@@ -94,7 +94,7 @@ def hamming_distance(str1, str2):
     return sum(1 for (a, b) in zip(str1, str2) if a != b)
 
 
-def barcode_mismatch(record, barcode, mismatches=0, delimiter=DELIMITER):
+def barcode_matches(record, barcode, mismatches=0, delimiter=DELIMITER):
     """
     Returns True if fastq record header includes barcode, up to a given
     number of mismatches. The header is assumed to be of form:
@@ -227,10 +227,10 @@ def demultiplex(sample_sheet_file,
 
         for sample in range(num_samples):
             # Check if initial segment of read matches sample barcode.
-            if barcode_mismatch(fastq_record1[0],
-                                tag_reads[sample],
-                                mismatches,
-                                delimiter):
+            if barcode_matches(fastq_record1[0],
+                               tag_reads[sample],
+                               mismatches,
+                               delimiter):
                 is_assigned = True
                 read1_split_fhs[sample].writelines(fastq_record1)
                 if is_paired_end:
