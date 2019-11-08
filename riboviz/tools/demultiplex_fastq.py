@@ -125,6 +125,112 @@ def barcode_matches(record, barcode, mismatches=0, delimiter=DELIMITER):
     return hamming_distance(candidate, barcode) <= mismatches
 
 
+def assign_sample(fastq_record1,
+                  fastq_record2,
+                  barcode,
+                  read1_split_fh,
+                  read2_split_fh,
+                  is_paired_end,
+                  mismatches,
+                  delimiter):
+    """
+    Check if fastq record matches barcode for a sample and, if so, add
+    the record to the fastq output file(s) for that sample.
+
+    :param fastq_record1: fastq record
+    :type fastq_record1: list(str or unicode)
+    :param fastq_record2: fastq record for paired read (or None if
+    none)
+    :type fastq_record2: list(str or unicode)
+    :param barcode: Barcode to match fastq record against
+    :type barcode: str or unicode
+    :param read1_split_fh: Read 1 output file handle
+    :type read1_split_fh: io.IOBase
+    :param read2_split_fh: Read 2 output file handle (None if none)
+    :type read2_split_fh: io.IOBase
+    :param is_paired_end: Are paired reads being used? (if True then
+    fastq_record2 is assumed to have a fastq record and read2_split_fh
+    is assumed to have an output file handle)
+    :type is_paired_end: bool
+    :param mismatches: Number of mismatches permitted in barcode
+    :type mismatches: int
+    :param delimiter: Barcode delimiter
+    :type delimiter: str or unicode
+    :returns: True if fastq record matches barcode
+    :rtype: Bool
+    """
+    is_assigned = False
+    if barcode_matches(fastq_record1[0], barcode, mismatches, delimiter):
+        is_assigned = True
+        read1_split_fh.writelines(fastq_record1)
+        if is_paired_end:
+            read2_split_fh.writelines(fastq_record2)
+    return is_assigned
+
+
+def assign_samples(fastq_record1,
+                   fastq_record2,
+                   barcodes,
+                   read1_split_fhs,
+                   read2_split_fhs,
+                   is_paired_end,
+                   num_samples,
+                   num_reads,
+                   mismatches,
+                   delimiter):
+    """
+    Iterate through each sample and check if fastq record matches
+    barcode for a sample and, if so, add the record to the fastq
+    output file(s) for that barcode, and update the count in num_reads
+    for the sample.
+
+    :param fastq_record1: fastq record
+    :type fastq_record1: list(str or unicode)
+    :param fastq_record2: fastq record for paired read (or None)
+    :type fastq_record2: list(str or unicode)
+    :param barcodes: Barcodes to match fastq record against
+    :type barcodes: list(str or unicode)
+    :param read1_split_fhs: Read 1 output file handles (assumed to be
+    of the same length as barcodes)
+    :type read1_split_fhs: list(io.IOBase)
+    :param read2_split_fhs: Read 2 output file handles (None if none)
+    :type read2_split_fhs: list(io.IOBase)
+    :param is_paired_end: Are paired reads being used? (if True then
+    fastq_record2 is assumed to have a fastq record and
+    read2_split_fhs is assumed to have output file handles and be of
+    the same length as read1_split_fhs)
+    :type is_paired_end: bool
+    :param num_samples: Number of samples
+    :type num_samples: int
+    :param num_reads: Number of reads matching barcodes for each
+    sample
+    :type num_reads: list(int)
+    :param mismatches: Number of mismatches permitted in barcode
+    :type mismatches: int
+    :param delimiter: Barcode delimiter
+    :type delimiter: str or unicode
+    :returns: True if fastq record matches barcode for a sample
+    :rtype: Bool
+    """
+    is_assigned = False
+    for sample in range(num_samples):
+        read2_split_fh = None
+        if is_paired_end:
+            read2_split_fh = read2_split_fhs[sample]
+        is_assigned = assign_sample(fastq_record1,
+                                    fastq_record2,
+                                    barcodes[sample],
+                                    read1_split_fhs[sample],
+                                    read2_split_fh,
+                                    is_paired_end,
+                                    mismatches,
+                                    delimiter)
+        if is_assigned:
+            num_reads[sample] += 1
+            break
+    return is_assigned
+
+
 def demultiplex(sample_sheet_file,
                 read1_file,
                 read2_file=None,
@@ -164,8 +270,8 @@ def demultiplex(sample_sheet_file,
     num_unassigned_reads = 0
     total_reads = 0
     sample_ids = list(sample_sheet.SampleID)
-    tag_reads = list(sample_sheet.TagRead)
-    length_tag = len(tag_reads[1])
+    barcodes = list(sample_sheet.TagRead)
+    length_tag = len(barcodes[1])
     print(("Number of samples: {}".format(num_samples)))
     print(("Allowed mismatches: {}".format(mismatches)))
     print(("Tag length: {}".format(length_tag)))
@@ -208,6 +314,7 @@ def demultiplex(sample_sheet_file,
             for sample_id in sample_ids]
         read1_unassigned_fh = gzip.open(
             os.path.join(out_dir, "Unassigned.fastq.gz"), "wt")
+        read2_split_fhs = None
 
     while True:
         # Get fastq record/read (4 lines)
@@ -216,6 +323,8 @@ def demultiplex(sample_sheet_file,
             break
         if is_paired_end:
             fastq_record2 = list(islice(read2_fh, 4))
+        else:
+            fastq_record2 = None
         # Count number of processed reads, output every millionth.
         total_reads += 1
         if (total_reads % 1000000) == 0:
@@ -223,21 +332,16 @@ def demultiplex(sample_sheet_file,
         # Assign read to a SampleID,
         # TagRead is 1st read with less than threshold mismatches.
         # Beware: this could cause problems if many mismatches.
-        is_assigned = False
-
-        for sample in range(num_samples):
-            # Check if initial segment of read matches sample barcode.
-            if barcode_matches(fastq_record1[0],
-                               tag_reads[sample],
-                               mismatches,
-                               delimiter):
-                is_assigned = True
-                read1_split_fhs[sample].writelines(fastq_record1)
-                if is_paired_end:
-                    read2_split_fhs[sample].writelines(fastq_record2)
-                num_reads[sample] += 1
-                # Stop testing against other barcodes
-                break
+        is_assigned = assign_samples(fastq_record1,
+                                     fastq_record2,
+                                     barcodes,
+                                     read1_split_fhs,
+                                     read2_split_fhs,
+                                     is_paired_end,
+                                     num_samples,
+                                     num_reads,
+                                     mismatches,
+                                     delimiter)
         if not is_assigned:
             # Write unassigned read to file.
             # Note: unassigned reads are not trimmed.
