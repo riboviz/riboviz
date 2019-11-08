@@ -37,7 +37,7 @@ Outputs:
 
 Usage:
 
-    python demultiplex_fastq.py -h
+    python -m riboviz.tools.demultiplex_fastq -h
 
 Known issue:
 
@@ -74,55 +74,8 @@ import gzip
 import os
 from itertools import islice
 import pandas as pd
-
-
-DELIMITER = "_"
-""" Default barcode delmiter in fastq header """
-
-
-def hamming_distance(str1, str2):
-    """
-    Returns the hamming distance between two strings.
-
-    :param str1: String
-    :type str1: str or unicode
-    :param str2: String
-    :type str2: str or unicode
-    :return: hamming distance
-    :rtype: int
-    """
-    return sum(1 for (a, b) in zip(str1, str2) if a != b)
-
-
-def barcode_matches(record, barcode, mismatches=0, delimiter=DELIMITER):
-    """
-    Returns True if fastq record header includes barcode, up to a given
-    number of mismatches. The header is assumed to be of form:
-
-        @...<DELIMITER><BARCODE><DELIMITER>...
-
-    If <BARCODE> differs from barcode by greater than mismatches, o
-    there is no <BARCODE> or <BARCODE> has a different length than
-    barcode then False is returned.
-
-    :param record: Record
-    :type record: str or unicode
-    :param barcode: Barcode
-    :type barcode: str or unicode
-    :param mismatches: Number of mismatches
-    :type mismatches: int
-    :param delimiter: Barcode delimiter
-    :type delimiter: str or unicode
-    :returns: True or False
-    :rtype: bool
-    """
-    chunks = record.split(delimiter)
-    if len(chunks) == 1:
-        return False
-    candidate = chunks[1]
-    if len(candidate) != len(barcode):
-        return False
-    return hamming_distance(candidate, barcode) <= mismatches
+from riboviz.utils import barcode_matches
+from riboviz.utils import BARCODE_DELIMITER
 
 
 def assign_sample(fastq_record1,
@@ -236,7 +189,7 @@ def demultiplex(sample_sheet_file,
                 read2_file=None,
                 mismatches=1,
                 out_dir="output",
-                delimiter=DELIMITER):
+                delimiter=BARCODE_DELIMITER):
     """
     Demultiplex reads from fastq.gz by inline barcodes.
 
@@ -416,7 +369,7 @@ def parse_command_line_options():
                         "--delimiter",
                         dest="delimiter",
                         nargs='?',
-                        default=DELIMITER,
+                        default=BARCODE_DELIMITER,
                         help="Barcode delimiter")
     options = parser.parse_args()
     return options

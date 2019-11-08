@@ -13,7 +13,7 @@ where the barcode is the first section delimited by underscores. If another deli
 ## Usage
 
 ```
-$ python riboviz/tools/demultiplex_fastq.py  -h
+$ python -m riboviz.tools.demultiplex_fastq  -h
 usage: demultiplex_fastq.py [-h] [-ss [SAMPLE_SHEET_FILE]] [-r1 [READ1_FILE]]
                             [-r2 [READ2_FILE]] [-m MISMATCHES] [-o [OUT_DIR]]
                             [-d [DELIMITER]]
@@ -84,11 +84,11 @@ Demultiplex single-end data:
 
 ```console
 $ mkdir extracts-deplexed/
-$ python riboviz/tools/demultiplex_fastq.py \
+$ python -m riboviz.tools.demultiplex_fastq \
   -r1 extracts/Sample_4reads_R1.fastq.gz \
   -ss data/demultiplex/TagSeqBarcodedOligos2015.txt \
   -o extracts-deplexed/TestSingleSplit4reads
-$ python riboviz/tools/demultiplex_fastq.py \
+$ python -m riboviz.tools.demultiplex_fastq \
   -r1 extracts/Sample_init10000_R1.fastq.gz \
   -ss data/demultiplex/TagSeqBarcodedOligos2015.txt \
   -o extracts-deplexed/TestSingleSplit10000
@@ -97,12 +97,12 @@ $ python riboviz/tools/demultiplex_fastq.py \
 Demultiplex paired-end data:
 
 ```console
-$ python riboviz/tools/demultiplex_fastq.py \
+$ python -m riboviz.tools.demultiplex_fastq \
   -r1 extracts/Sample_4reads_R1.fastq.gz \
   -r2 extracts/Sample_4reads_R2.fastq.gz \
   -ss data/demultiplex/TagSeqBarcodedOligos2015.txt \
   -o extracts-deplexed/TestPairSplit4reads
-$ python riboviz/tools/demultiplex_fastq.py \
+$ python -m riboviz.tools.demultiplex_fastq \
   -r1 extracts/Sample_init10000_R1.fastq.gz \
   -r2 extracts/Sample_init10000_R2.fastq.gz \
   -ss data/demultiplex/TagSeqBarcodedOligos2015.txt \
