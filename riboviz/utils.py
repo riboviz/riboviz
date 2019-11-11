@@ -13,6 +13,10 @@ BARCODE_DELIMITER = "_"
 """ Default barcode delmiter in fastq header """
 
 
+UMI_DELIMITER = "_"
+""" Default UMI delmiter in fastq header """
+
+
 def list_to_str(lst):
     """
     Convert list to space-delimited string.
