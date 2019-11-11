@@ -341,7 +341,7 @@ def create_fastq_examples(output_dir):
     # Barcodes (keys) each with list of barcodes with 1-nt and 2-nt
     # mismatches.
     barcodes = {'ACG': ['ACT', 'TAG'],
-                'GAC': ['GTC', 'TGA'],
+                'GAC': ['GTC', 'GTA'],
                 'CGA': ['TGA', 'CTT']}
     barcode_names = list(barcodes.keys())
     # Barcode that will be unassigned during demultiplexing.
