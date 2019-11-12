@@ -387,21 +387,30 @@ def create_fastq_examples(output_dir):
         writer.writerow(["SampleID", "TagRead"])
         for index, barcode in enumerate(barcode_names):
             writer.writerow(["Tag{:01d}".format(index), barcode])
-    for barcode_index, barcode in enumerate(barcodes):
-        matches = [barcode] + barcodes[barcode]
-        for index, match in enumerate(matches):
+
+    # Iterate over mismatches then barcodes so can interleave reads
+    # for each barcode i.e. reads for each barcodes will be created
+    # first then the reads for the 1nt mismatches then those for 2nt
+    # mismatches.
+    barcode_sets = [['ACG', 'GAC', 'CGA'],  # Barcodes
+                    ['ACT', 'GTC', 'TGA'],  # 1nt mismatches
+                    ['TAG', 'GTA', 'CTT']]  # 2nt mismatches
+    for mismatch_index, barcode in enumerate(barcode_sets):
+        for barcode_index, barcode in enumerate(barcodes):
             records = [
                 make_fastq_records(tag +
-                                   barcode_format.format(barcode_index, index),
+                                   barcode_format.format(barcode_index,
+                                                         mismatch_index),
                                    read, qualities,
-                                   umi5, umi3, match,
+                                   umi5, umi3, barcode,
                                    adaptor, "")
                 for [tag, umi5, read, umi3, qualities] in config_5_3_adaptor]
             records_post_adaptor_nt = [
                 make_fastq_records(tag +
-                                   barcode_format.format(barcode_index, index),
+                                   barcode_format.format(barcode_index,
+                                                         mismatch_index),
                                    read, qualities,
-                                   umi5, umi3, match,
+                                   umi5, umi3, barcode,
                                    adaptor, post_adaptor_nt)
                 for [tag, umi5, read, umi3, qualities] in config_5_3_post_adaptor_nt]
             records.extend(records_post_adaptor_nt)
