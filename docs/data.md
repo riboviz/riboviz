@@ -166,6 +166,9 @@ The data was sampled uniformly at random 1/50 reads from each file, producing ab
 ```
 example_multiplex_barcodes.tsv
 example_multiplex.fastq
+example_multiplex_tag0.fastq
+example_multiplex_tag1.fastq
+example_multiplex_tag2.fastq
 example_multiplex_umi_barcode_adaptor.fastq
 example_multiplex_umi_barcode.fastq
 example_umi3.fastq
