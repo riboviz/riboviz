@@ -382,10 +382,11 @@ def create_fastq_examples(output_dir):
                   "example_multiplex_umi_barcode.fastq",
                   "example_multiplex.fastq",
                   "example_multiplex_barcodes.tsv"]
-    tag_file_names = [tag_format.format(i)
+    tag_file_names = [tag_filename.format(i)
                       for i in range(len(barcode_names))]
     file_names.extend(tag_file_names)
     for file_name in file_names:
+        print(file_name)
         file_path = os.path.join(output_dir, file_name)
         if os.path.exists(file_path):
             os.remove(file_path)
