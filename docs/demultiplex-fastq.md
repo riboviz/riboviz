@@ -49,12 +49,12 @@ Inputs:
 Outputs:
 
 * If `r1` only was provided:
-  - A file SampleID.fastq.gz with assigned reads.
-  - A file, Unassigned.fastq.gz, with information on unassigned reads.
+  - A file `SampleID.fastq.gz` with assigned reads.
+  - A file, `Unassigned.fastq.gz`, with information on unassigned reads.
 * If `r1` and `r2` were provided:
-  - Files SampleID_R1.fastq.gz and SampleID_R2.fastq.gz with assigned reads.
-  - Files, Unassigned_R1.fastq.gz and Unassigned_R2.fastq.gz with information on unassigned reads.
-* A file, nreads.txt, with SampleID, TagRead and nreads columns, specifying the number of reads for each SampleID and TagRead in the original sample sheet.
+  - Files `SampleID_R1.fastq.gz` and `SampleID_R2.fastq.gz` with assigned reads.
+  - Files, `Unassigned_R1.fastq.gz` and `Unassigned_R2.fastq.gz` with information on unassigned reads.
+* A file, `num_reads.tsv`, with `SampleID`, `TagRead` and `NumReads` columns, specifying the number of reads for each `SampleID` and `TagRead` in the original sample sheet.
 
 ---
 

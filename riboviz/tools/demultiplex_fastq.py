@@ -31,7 +31,7 @@ Outputs:
     reads.
   - Files, Unassigned_R1.fastq.gz and Unassigned_R2.fastq.gz with
     information on unassigned reads.
-* A file, nreads.txt, with SampleID, TagRead and nreads columns,
+* A file, num_reads.tsv, with SampleID, TagRead and NumReads columns,
   specifying the number of reads for each SampleID and TagRead in the
   original sample sheet.
 
@@ -243,13 +243,14 @@ def demultiplex(sample_sheet_file,
                     read2_file))
         read2_fh = gzip.open(read2_file, 'rt')
 
-    try:
-        os.mkdir(out_dir)
-    except Exception:
-        raise IOError(
-            "Error: output directory {} cannot be created".format(out_dir))
+    if not os.path.exists(out_dir):
+        try:
+            os.mkdir(out_dir)
+        except Exception:
+            raise IOError(
+                "Error: output directory {} cannot be created".format(out_dir))
 
-    num_reads_file = os.path.join(out_dir, "nreads.txt")
+    num_reads_file = os.path.join(out_dir, "num_reads.tsv")
     if is_paired_end:
         read1_split_fhs = [
             gzip.open(os.path.join(out_dir, sample_id + "_R1.fastq.gz"), "wt")
@@ -317,8 +318,8 @@ def demultiplex(sample_sheet_file,
     print(("All {} reads processed".format(total_reads)))
 
     # Output number of reads by sample to file.
-    sample_sheet["nreads"] = num_reads
-    sample_sheet[['SampleID', 'TagRead', 'nreads']].to_csv(
+    sample_sheet["NumReads"] = num_reads
+    sample_sheet[['SampleID', 'TagRead', 'NumReads']].to_csv(
         num_reads_file, sep="\t", index=False)
     # Append unassigned reads to file.
     with open(num_reads_file, "a") as nrf:
