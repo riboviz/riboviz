@@ -10,19 +10,23 @@ Usage:
 where `DIRECTORY` is the directory into	which the simulated files are
 to be written. The following files are created:
 
-* `simdata_UMI5and3_4nt_adaptor.fastq`: FASTQ file with 9 reads,
+* `example_umi5_umi3_umi_adaptor.fastq`: FASTQ file with 9 reads,
   each with a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a
   11nt adaptor at the 3' end. Reads can be grouped by UMI into 5
   groups.
-* `simdata_UMI5and3_4nt.fastq`: FASTQ file identical to the above but
+* `example_umi5_umi3_umi.fastq`: FASTQ file identical to the above but
   with the adaptor trimmed.
-* `simdata_extracted_UMI5and3_4nt.fastq`: FASTQ file identical to the
-  above but with the UMIs extracted and concatenated to the header.
-* `simdata_extracted_UMI3_4nt.fastq`: FASTQ file with 8 reads, each
-  with a 4nt UMI at the 3' end. Reads can be grouped by UMI into 4
-  groups.
-* `simdata_UMI3_4nt.fastq`: FASTQ file identical to the above but with
-   the UMI extracted and concatenated to the header.
+* `example_umi5_umi3.fastq`: FASTQ file identical to the
+  above but with the UMIs extracted and concatenated to the header,
+  with a "_" delimiter.
+* `example_umi3_umi_adaptor.fastq`: FASTQ file with 8 reads, each
+  with a 4nt UMI at the 3' end and a 11nt adaptor at the 3' end. Reads
+  can be grouped by UMI into 4 groups.
+* `example_umi3_umi.fastq`: FASTQ file identical to the above but
+  with the adaptor trimmed.
+* `example_umi3.fastq`: FASTQ file identical to the above but with
+   the UMI extracted and concatenated to the header, with a "_"
+   delimiter.
 
 TODO:
 
@@ -307,9 +311,9 @@ def create_fastq_examples(output_dir):
                            adaptor, post_adaptor_nt)
         for [tag, umi5, read, umi3, qualities] in config_5_3_post_adaptor_nt]
     records.extend(records_post_adaptor_nt)
-    file_names = ["simdata_UMI5and3_4nt_adaptor.fastq",
-                  "simdata_UMI5and3_4nt.fastq",
-                  "simdata_extracted_UMI5and3_4nt.fastq"]
+    file_names = ["example_umi5_umi3_umi_adaptor.fastq",
+                  "example_umi5_umi3_umi.fastq",
+                  "example_umi5_umi3.fastq"]
     for file_name, fastq_records in zip(file_names, zip(*records)):
         with open(os.path.join(output_dir, file_name), "w") as f:
             SeqIO.write(fastq_records, f, FASTQ_FORMAT)
@@ -328,9 +332,9 @@ def create_fastq_examples(output_dir):
     records = [
         make_fastq_records(tag, read, qualities, "", umi3, "", adaptor)
         for [tag, read, umi3, qualities] in config_3]
-    file_names = ["simdata_UMI3_4nt_adaptor.fastq",
-                  "simdata_UMI3_4nt.fastq",
-                  "simdata_extracted_UMI3_4nt.fastq"]
+    file_names = ["example_umi3_umi_adaptor.fastq",
+                  "example_umi3_umi.fastq",
+                  "example_umi3.fastq"]
     for file_name, fastq_records in zip(file_names, zip(*records)):
         with open(os.path.join(output_dir, file_name), "w") as f:
             SeqIO.write(fastq_records, f, FASTQ_FORMAT)
@@ -349,15 +353,15 @@ def create_fastq_examples(output_dir):
 
     barcode_format = "-bar{:01d}.{:01d}"
 
-    for file_name in ["simdata_multiplex.fastq",
-                      "simdata_multiplex_trim.fastq",
-                      "simdata_multiplex_trim_ext.fastq",
-                      "simdata_multiplex_barcodes.tsv"]:
+    for file_name in ["example_multiplex_umi_barcode_adaptor.fastq",
+                      "example_multiplex_umi_barcode.fastq",
+                      "example_multiplex.fastq",
+                      "example_multiplex_barcodes.tsv"]:
         file_path = os.path.join(output_dir, file_name)
         if os.path.exists(file_path):
             os.remove(file_path)
     with open(os.path.join(output_dir,
-                           "simdata_multiplex_barcodes.tsv"), "w") as f:
+                           "example_multiplex_barcodes.tsv"), "w") as f:
         writer = csv.writer(f, delimiter="\t")
         writer.writerow(["SampleID", "TagRead"])
         for index, barcode in enumerate(barcode_names):
@@ -380,9 +384,9 @@ def create_fastq_examples(output_dir):
                                    adaptor, post_adaptor_nt)
                 for [tag, umi5, read, umi3, qualities] in config_5_3_post_adaptor_nt]
             records.extend(records_post_adaptor_nt)
-            file_names = ["simdata_multiplex.fastq",
-                          "simdata_multiplex_trim.fastq",
-                          "simdata_multiplex_trim_ext.fastq"]
+            file_names = ["example_multiplex_umi_barcode_adaptor.fastq",
+                          "example_multiplex_umi_barcode.fastq",
+                          "example_multiplex.fastq"]
             for file_name, fastq_records in zip(file_names, zip(*records)):
                 with open(os.path.join(output_dir, file_name), "a") as f:
                     SeqIO.write(fastq_records, f, FASTQ_FORMAT)

@@ -320,13 +320,14 @@ $ python -m riboviz/tools/create_fastq_examples.py DIRECTORY
 
 where `DIRECTORY` is the directory into which the simulated files are to be written. The following files are created:                                 
 
-* `simdata_UMI5and3_4nt_adaptor.fastq`: FASTQ file with 9 reads, each with a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a 11nt adaptor at the 3' end. Reads can be grouped by UMI into 5 groups.
-* `simdata_UMI5and3_4nt.fastq`: FASTQ file identical to the above but with the adaptor trimmed.
-* `simdata_extracted_UMI5and3_4nt.fastq`: FASTQ file identical to the above but with the UMIs extracted and concatenated to the header.
-* `simdata_extracted_UMI3_4nt.fastq`: FASTQ file with 8 reads, each with a 4nt UMI at the 3' end. Reads can be grouped by UMI into 4 groups.
-* `simdata_UMI3_4nt.fastq`: FASTQ file identical to the above but with the UMI extracted and concatenated to the header.
+* `example_umi5_umi3_umi_adaptor.fastq`: FASTQ file with 9 reads, each with a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a 11nt adaptor at the 3' end. Reads can be grouped by UMI into 5 groups.
+* `example_umi5_umi3_umi.fastq`: FASTQ file identical to the above but with the adaptor trimmed.                                                     
+* `example_umi5_umi3.fastq`: FASTQ file identical to the above but with the UMIs extracted and concatenated to the header, with a "_" delimiter.
+* `example_umi3_umi_adaptor.fastq`: FASTQ file with 8 reads, each with a 4nt UMI at the 3' end and a 11nt adaptor at the 3' end. Reads can be grouped by UMI into 4 groups.
+* `example_umi3_umi.fastq`: FASTQ file identical to the above but with the adaptor trimmed.
+* `example_umi3.fastq`: FASTQ file identical to the above but with the UMI extracted and concatenated to the header, with a "_" delimiter.
 
-The files with these names in `data/` were created using this script.
+The files with these names in `data/example/` were created using this script.
 
 ---
 

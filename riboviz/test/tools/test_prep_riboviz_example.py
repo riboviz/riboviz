@@ -3,9 +3,10 @@ prep_riboviz.py test suite to test adatpor trimming, UMI extraction
 and deduplication.
 
 The test suite runs prep_riboviz.py using a copy of
-`vignette/vignette_simdata_config.yaml` and the simulated data in
-`data/`. It then validates the outputs of the UMI-tools-specific
-phases against the expected outputs, also in `data/`.
+`vignette/vignette_example_config.yaml` and the simulated data in
+`data/example/`. It then validates the outputs of the
+UMI-tools-specific phases against the expected outputs, also in
+`data/`.
 
 The simulated data in `data/` is expected to have been created using
 `create_fastq_examples.py`.
@@ -22,7 +23,7 @@ from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration_module  # Test fixture
 
 
-TEST_CONFIG_FILE = riboviz.test.SIMDATA_CONFIG
+TEST_CONFIG_FILE = riboviz.test.EXAMPLE_DATA_CONFIG
 """
 YAML configuration used as a template configuration by these tests -
 required by configuration test fixture
@@ -58,10 +59,10 @@ def test_adaptor_trimming(configuration_module):
     :type configuration_module: tuple(dict, str or unicode)
     """
     config, _ = configuration_module
-    expected_output = os.path.join(riboviz.test.DATA_DIR,
-                                   "simdata_UMI5and3_4nt.fastq")
+    expected_output = os.path.join(riboviz.test.EXAMPLE_DATA_DIR,
+                                   "example_umi5_umi3_umi.fastq")
     actual_output = os.path.join(config["dir_tmp"],
-                                 "simdata5and3_trim.fq")
+                                 "example_umi5_umi3_trim.fq")
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
 
@@ -77,10 +78,10 @@ def test_umi_extract(configuration_module):
     :type configuration_module: tuple(dict, str or unicode)
     """
     config, _ = configuration_module
-    expected_output = os.path.join(riboviz.test.DATA_DIR,
-                                   "simdata_extracted_UMI5and3_4nt.fastq")
+    expected_output = os.path.join(riboviz.test.EXAMPLE_DATA_DIR,
+                                   "example_umi5_umi3.fastq")
     actual_output = os.path.join(config["dir_tmp"],
-                                 "simdata5and3_extract_trim.fq")
+                                 "example_umi5_umi3_extract_trim.fq")
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
 
@@ -96,7 +97,8 @@ def test_umi_group(configuration_module):
     """
     config, _ = configuration_module
     tmp_dir = config["dir_tmp"]
-    groups_tsv = os.path.join(tmp_dir, "simdata5and3_post_dedup_groups.tsv")
+    groups_tsv = os.path.join(tmp_dir,
+                              "example_umi5_umi3_post_dedup_groups.tsv")
     groups = pd.read_csv(groups_tsv, sep="\t")
     num_groups = 5
     assert groups.shape[0] == num_groups, \
