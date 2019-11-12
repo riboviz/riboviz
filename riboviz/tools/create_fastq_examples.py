@@ -27,10 +27,31 @@ to be written. The following files are created:
 * `example_umi3.fastq`: FASTQ file identical to the above but with
    the UMI extracted and concatenated to the header, with a "_"
    delimiter.
-
-TODO:
-
-- Add barcodes for demultiplexing.
+* `example_multiplex_umi_barcode_adaptor.fastq`: FASTQ file with 90
+  reads:
+  - Each read has a 4nt UMI at the 5' end, a 4nt UMI at the 3' end, a
+    3nt barcode at the 3' end and a 11nt adaptor at the 3' end.
+  - There are 9 reads for each of the following barcodes:
+    - `ACG`, `ACT`, `TAG`
+    - `GAC`, `GTC`, `GTA`
+    - `CGA`, `TGA`, `CTT`
+  - The second and third barcodes in each list have a mismatch of 1nt
+    and 2nt respectively with the first barcode in each list.
+  - When the file is demultiplexed, assuming up to 2 mismatches are
+    allowed, then 3 sets of 27 reads will be produced, grouped by
+    the 1st barcode in each list.
+  - There are 9 reads with barcode `TTT`, which has a mismatch of 3nts
+    to `ACG`, `GAC`, `CGA`. When the file is demultiplexed, assuming
+    up to 2 mismatches are allowed, then these 9 reads will be
+    unassigned.
+* `example_multiplex_umi_barcode.fastq`: FASTQ file identical to the
+  above but with the adaptor trimmed.
+* `example_multiplex.fastq`: FASTQ file identical to the above but
+  with the barcode and UMIs extracted into the header and delimited by
+  "_".
+* `example_multiplex_barcodes.tsv`: tab-separated values file with
+  `SampleID` column (with values `Tag0|1|2`) and `TagRead` column
+  (with values `ACG`, `GAC`, `CGA`)
 """
 
 import csv
