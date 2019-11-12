@@ -1,4 +1,4 @@
 SampleID	TagRead
-Tag0	ACG
-Tag1	GAC
-Tag2	CGA
+example_multiplex_tag0	ACG
+example_multiplex_tag1	GAC
+example_multiplex_tag2	CGA
