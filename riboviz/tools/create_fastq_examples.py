@@ -365,12 +365,9 @@ def create_fastq_examples(output_dir):
     # barcodes.
     # Barcodes (keys) each with list of barcodes with 1-nt and 2-nt
     # mismatches.
-    barcodes = {'ACG': ['ACT', 'TAG'],
-                'GAC': ['GTC', 'GTA'],
-                'CGA': ['TGA', 'CTT']}
-    barcode_names = list(barcodes.keys())
-    # Barcode that will be unassigned during demultiplexing.
-    barcodes['TTT'] = []
+    barcode_sets = [['ACG', 'GAC', 'CGA'],  # Barcodes
+                    ['ACT', 'GTC', 'TGA'],  # 1nt mismatches
+                    ['TAG', 'GTA', 'CTT']]  # 2nt mismatches
 
     barcode_format = "-bar{:01d}.{:01d}"
 
@@ -385,17 +382,16 @@ def create_fastq_examples(output_dir):
                            "example_multiplex_barcodes.tsv"), "w") as f:
         writer = csv.writer(f, delimiter="\t")
         writer.writerow(["SampleID", "TagRead"])
-        for index, barcode in enumerate(barcode_names):
+        for index, barcode in enumerate(barcode_sets[0]):
             writer.writerow(["Tag{:01d}".format(index), barcode])
 
+    # Barcode that will be unassigned during demultiplexing.
+    barcode_sets[0].append('TTT')
     # Iterate over mismatches then barcodes so can interleave reads
     # for each barcode i.e. reads for each barcodes will be created
     # first then the reads for the 1nt mismatches then those for 2nt
     # mismatches.
-    barcode_sets = [['ACG', 'GAC', 'CGA'],  # Barcodes
-                    ['ACT', 'GTC', 'TGA'],  # 1nt mismatches
-                    ['TAG', 'GTA', 'CTT']]  # 2nt mismatches
-    for mismatch_index, barcode in enumerate(barcode_sets):
+    for mismatch_index, barcodes in enumerate(barcode_sets):
         for barcode_index, barcode in enumerate(barcodes):
             records = [
                 make_fastq_records(tag +
