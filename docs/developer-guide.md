@@ -337,6 +337,7 @@ where `DIRECTORY` is the directory into which the simulated files are to be writ
   - There are 9 reads with barcode `TTT`, which has a mismatch of 3nts to `ACG`, `GAC`, `CGA`. When the file is demultiplexed, assuming up to 2 mismatches are allowed, then these 9 reads will be unassigned.
 * `example_multiplex_umi_barcode.fastq`: FASTQ file identical to the above but with the adaptor trimmed.
 * `example_multiplex.fastq`: FASTQ file identical to the above but  with the barcode and UMIs extracted into the header and delimited by "_".
+* `example_multiplex_tag0|1|2.fastq`: FASTQ files each with 27 reads representing the above file, demultiplexed according to the barcodes `ACG`, `GAC`, `CGA`.
 * `example_multiplex_barcodes.tsv`: tab-separated values file with  `SampleID` column (with values `Tag0|1|2`) and `TagRead` column (with values `ACG`, `GAC`, `CGA`)
 
 The files with these names in `data/example/` were created using this script.
