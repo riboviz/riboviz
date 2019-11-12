@@ -20,11 +20,15 @@ R_SCRIPTS = os.path.join(BASE_PATH, "rscripts")
 DATA_DIR = os.path.join(BASE_PATH, "data")
 """ Path of data/ derived from BASE_PATH. """
 
+EXAMPLE_DATA_DIR = os.path.join(DATA_DIR, "example")
+""" Path of data/example/ derived from DATA_DIR. """
+
 VIGNETTE_CONFIG = os.path.join(VIGNETTE_DIR, "vignette_config.yaml")
 """ Path of vignette/vignette_config.yaml derived from VIGNETTE_DIR. """
 
-SIMDATA_CONFIG = os.path.join(VIGNETTE_DIR, "vignette_simdata_config.yaml")
+EXAMPLE_DATA_CONFIG = os.path.join(VIGNETTE_DIR,
+                                   "vignette_example_config.yaml")
 """
-Path of vignette/vignette_simdata_config.yaml derived from
+Path of vignette/vignette_example_config.yaml derived from
 VIGNETTE_DIR.
 """

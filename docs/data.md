@@ -162,11 +162,12 @@ The data was sampled uniformly at random 1/50 reads from each file, producing ab
 ## Simulated FASTQ test files
 
 ```
-data/simdata_UMI5and3_4nt_adaptor.fastq
-data/simdata_UMI5and3_4nt.fastq
-data/simdata_extracted_UMI5and3_4nt.fastq
-data/simdata_extracted_UMI3_4nt.fastq
-data/simdata_UMI3_4nt.fastq
+data/example_umi5_umi3_umi_adaptor.fastq
+data/example_umi5_umi3_umi.fastq
+data/example_umi5_umi3.fastq
+data/example_umi3_umi_adaptor.fastq
+data/example_umi3_umi.fastq
+data/example_umi3.fastq
 ```
 
 These files are simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication using UMI-tools when invoked from within the RiboViz workflow.
