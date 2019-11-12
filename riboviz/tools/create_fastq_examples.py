@@ -49,6 +49,9 @@ to be written. The following files are created:
 * `example_multiplex.fastq`: FASTQ file identical to the above but
   with the barcode and UMIs extracted into the header and delimited by
   "_".
+* `example_multiplex_tag0|1|2.fastq`: FASTQ files each with 27 reads
+  representing the above file, demultiplexed according to the barcodes
+  `ACG`, `GAC`, `CGA`.
 * `example_multiplex_barcodes.tsv`: tab-separated values file with
   `SampleID` column (with values `Tag0|1|2`) and `TagRead` column
   (with values `ACG`, `GAC`, `CGA`)
@@ -368,25 +371,36 @@ def create_fastq_examples(output_dir):
     barcode_sets = [['ACG', 'GAC', 'CGA'],  # Barcodes
                     ['ACT', 'GTC', 'TGA'],  # 1nt mismatches
                     ['TAG', 'GTA', 'CTT']]  # 2nt mismatches
-
+    barcode_names = barcode_sets[0]
     barcode_format = "-bar{:01d}.{:01d}"
+    tag_format = "example_multiplex_tag{:01d}"
+    tag_filename = tag_format + ".fastq"
 
-    for file_name in ["example_multiplex_umi_barcode_adaptor.fastq",
-                      "example_multiplex_umi_barcode.fastq",
-                      "example_multiplex.fastq",
-                      "example_multiplex_barcodes.tsv"]:
+    # Purge existing files as we append to files in subsequent
+    # processing.
+    file_names = ["example_multiplex_umi_barcode_adaptor.fastq",
+                  "example_multiplex_umi_barcode.fastq",
+                  "example_multiplex.fastq",
+                  "example_multiplex_barcodes.tsv"]
+    tag_file_names = [tag_format.format(i)
+                      for i in range(len(barcode_names))]
+    file_names.extend(tag_file_names)
+    for file_name in file_names:
         file_path = os.path.join(output_dir, file_name)
         if os.path.exists(file_path):
             os.remove(file_path)
+
+    # Create sample-sheet.
     with open(os.path.join(output_dir,
                            "example_multiplex_barcodes.tsv"), "w") as f:
         writer = csv.writer(f, delimiter="\t")
         writer.writerow(["SampleID", "TagRead"])
         for index, barcode in enumerate(barcode_sets[0]):
-            writer.writerow(["Tag{:01d}".format(index), barcode])
+            writer.writerow([tag_format.format(index), barcode])
 
     # Barcode that will be unassigned during demultiplexing.
     barcode_sets[0].append('TTT')
+
     # Iterate over mismatches then barcodes so can interleave reads
     # for each barcode i.e. reads for each barcodes will be created
     # first then the reads for the 1nt mismatches then those for 2nt
@@ -410,12 +424,22 @@ def create_fastq_examples(output_dir):
                                    adaptor, post_adaptor_nt)
                 for [tag, umi5, read, umi3, qualities] in config_5_3_post_adaptor_nt]
             records.extend(records_post_adaptor_nt)
+            # ZIP records into three lists: UMI+barcode+adaptor
+            # records, UMI+barcode records, records with UMI+barcode
+            # extracted
+            records_by_type = list(zip(*records))
             file_names = ["example_multiplex_umi_barcode_adaptor.fastq",
                           "example_multiplex_umi_barcode.fastq",
                           "example_multiplex.fastq"]
-            for file_name, fastq_records in zip(file_names, zip(*records)):
+            for file_name, fastq_records in zip(file_names, records_by_type):
                 with open(os.path.join(output_dir, file_name), "a") as f:
                     SeqIO.write(fastq_records, f, FASTQ_FORMAT)
+            # Save records with UMI+barcode extracted in
+            # barcode-specific files.
+            _, _, extracted_records = records_by_type
+            file_name = tag_filename.format(barcode_index)
+            with open(os.path.join(output_dir, file_name), "a") as f:
+                SeqIO.write(extracted_records, f, FASTQ_FORMAT)
 
     # TODO GZIP
 
