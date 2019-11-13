@@ -18,7 +18,7 @@ usage: demultiplex_fastq.py [-h] [-ss [SAMPLE_SHEET_FILE]] [-r1 [READ1_FILE]]
                             [-r2 [READ2_FILE]] [-m MISMATCHES] [-o [OUT_DIR]]
                             [-d [DELIMITER]]
 
-Demultiplex reads from fastq.gz by inline barcodes
+Demultiplex reads from fastq[.gz] by inline barcodes
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -26,9 +26,9 @@ optional arguments:
                         Sample sheet filename, tab-delimited text format with
                         SampleID and TagRead columns
   -r1 [READ1_FILE], --read1 [READ1_FILE]
-                        Read 1 filename, fastq.gz format
+                        Read 1 filename, fastq[.gz] format
   -r2 [READ2_FILE], --read2 [READ2_FILE]
-                        Read 2 pair filename, fastq.gz format
+                        Read 2 pair filename, fastq[.gz] format
   -m MISMATCHES, --mismatches MISMATCHES
                         Number of mismatches permitted in barcode
   -o [OUT_DIR], --outdir [OUT_DIR]
@@ -40,8 +40,8 @@ optional arguments:
 Inputs:
 
 * `-ss|--samplesheet`: Sample sheet filename, tab-delimited text format with SampleID and TagRead (barcode) columns
-* `-r1|--read1`: Read 1 filename, fastq.gz format
-* `-r2|--read2`: Read 2 pair filename, fastq.gz format (optional). If provided then the read files should have read pairs in corresponding positions.
+* `-r1|--read1`: Read 1 filename, fastq[.gz] format
+* `-r2|--read2`: Read 2 pair filename, fastq[.gz] format (must be consistent with Read 1 filename) (optional) . If provided then the read files should have read pairs in corresponding positions.
 * `-m|--mismatches`: Number of mismatches permitted in barcode (optional, default 1)
 * `-o|--outdir`: Output directory (optional, default output)
 * `-d|--delimiter`: Barcode delimiter (optional, default "_")
@@ -49,11 +49,12 @@ Inputs:
 Outputs:
 
 * If `r1` only was provided:
-  - A file `SampleID.fastq.gz` with assigned reads.
-  - A file, `Unassigned.fastq.gz`, with information on unassigned reads.
+  - A file `SampleID.fastq[.gz]` with assigned reads.
+  - A file, `Unassigned.fastq[.gz]`, with information on unassigned reads.
 * If `r1` and `r2` were provided:
-  - Files `SampleID_R1.fastq.gz` and `SampleID_R2.fastq.gz` with assigned reads.
-  - Files, `Unassigned_R1.fastq.gz` and `Unassigned_R2.fastq.gz` with information on unassigned reads.
+  - Files `SampleID_R1.fastq[.gz]` and `SampleID_R2.fastq[.gz]` with assigned reads.
+  - Files, `Unassigned_R1.fastq[.gz]` and `Unassigned_R2.fastq[.gz]` with information on unassigned reads.
+* If the input file(s) had were of type fastq.gz then the output files will be of type fastq.gz.
 * A file, `num_reads.tsv`, with `SampleID`, `TagRead` and `NumReads` columns, specifying the number of reads for each `SampleID` and `TagRead` in the original sample sheet, plus the number of unassigned reads and the total number of reads.
 
 ---
