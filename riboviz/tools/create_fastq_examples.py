@@ -377,6 +377,7 @@ def create_fastq_examples(output_dir):
                     ['ACT', 'GTC', 'TGA'],  # 1nt mismatches
                     ['TAG', 'GTA', 'CTT']]  # 2nt mismatches
     barcode_names = barcode_sets[0]
+    num_barcodes = len(barcode_names)
     barcode_format = "-bar{:01d}.{:01d}"
     tag_format = "example_multiplex_tag{:01d}"
     tag_filename = tag_format + ".fastq"
@@ -389,7 +390,7 @@ def create_fastq_examples(output_dir):
                   "example_multiplex_barcodes.tsv",
                   "example_multiplex_nassigned.fastq"]
     tag_file_names = [tag_filename.format(i)
-                      for i in range(len(barcode_names))]
+                      for i in range(num_barcodes)]
     file_names.extend(tag_file_names)
     for file_name in file_names:
         file_path = os.path.join(output_dir, file_name)
@@ -406,7 +407,7 @@ def create_fastq_examples(output_dir):
 
     # Barcode that will be unassigned during demultiplexing.
     barcode_sets[0].append('TTT')
-    unassigned_index = len(barcode_sets[0]) - 1
+    unassigned_index = num_barcodes
 
     # Iterate over mismatches then barcodes so can interleave reads
     # for each barcode i.e. reads for each barcodes will be created
@@ -453,7 +454,7 @@ def create_fastq_examples(output_dir):
     unassigned_tag_filename = tag_filename.format(unassigned_index)
     shutil.move(os.path.join(output_dir, unassigned_tag_filename),
                 os.path.join(output_dir, "example_multiplex_unassigned.fastq"))
-
+    
     # TODO GZIP
 
 
