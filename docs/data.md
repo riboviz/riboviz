@@ -164,8 +164,9 @@ The data was sampled uniformly at random 1/50 reads from each file, producing ab
 `data/example/` folder:
 
 ```
-example_multiplex_barcodes.tsv
 example_multiplex.fastq
+example_multiplex_barcodes.tsv
+example_multiplex_num_reads.tsv
 example_multiplex_tag0.fastq
 example_multiplex_tag1.fastq
 example_multiplex_tag2.fastq
