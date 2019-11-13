@@ -122,11 +122,16 @@ def save_deplexed_sample_sheet(sample_sheet, num_unassigned_reads, file_name):
     :param file_name: File name
     :type file_name: str or unicode
     """
+    save_sample_sheet = sample_sheet[[
+        SAMPLE_SHEET_SAMPLE_ID,
+        SAMPLE_SHEET_TAG_READ,
+        SAMPLE_SHEET_NUM_READS
+    ]]
     rows = pd.DataFrame([[SAMPLE_SHEET_UNASSIGNED_TAG,
                           SAMPLE_SHEET_UNASSIGNED_READ,
                           num_unassigned_reads]],
-                        columns=sample_sheet.columns)
-    save_sample_sheet = sample_sheet.append(rows, ignore_index=True)
+                        columns=save_sample_sheet.columns)
+    save_sample_sheet = save_sample_sheet.append(rows, ignore_index=True)
     total_reads = save_sample_sheet[SAMPLE_SHEET_NUM_READS].sum()
     rows = pd.DataFrame([[SAMPLE_SHEET_TOTAL_READS, "", total_reads]],
                         columns=save_sample_sheet.columns)
