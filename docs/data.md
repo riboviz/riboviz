@@ -171,6 +171,7 @@ example_multiplex_tag1.fastq
 example_multiplex_tag2.fastq
 example_multiplex_umi_barcode_adaptor.fastq
 example_multiplex_umi_barcode.fastq
+example_multiplex_unassigned.fastq
 example_umi3.fastq
 example_umi3_umi_adaptor.fastq
 example_umi3_umi.fastq
