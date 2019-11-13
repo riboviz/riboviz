@@ -360,15 +360,22 @@ where `DIRECTORY` is the directory into which the simulated files are to be writ
   with the barcode and UMIs extracted into the header and delimited by
   "_".
 * `example_multiplex_tag0|1|2.fastq`: FASTQ files each with 27 reads
-  representing the results expected when demultiplexing the above file
-  using the barcodes `ACG`, `GAC`, `CGA`.
+  representing the results expected when demultiplexing
+  `example_multiplex.fastq` using `riboviz.tools.demultiplex_fastq`
+  and `example_multiplex_barcodes.tsv`.
 * `example_multiplex_unassigned.fastq`: FASTQ files with 9 reads
   representing the unassigned reads (those with barcode `TTT`)
-  expected when demultiplexing `example_multiplex.fastq` using the
-  barcodes `ACG`, `GAC`, `CGA`.
+  expected when demultiplexing `example_multiplex.fastq` using
+  `riboviz.tools.demultiplex_fastq` and `example_multiplex_barcodes.tsv`.
 * `example_multiplex_barcodes.tsv`: tab-separated values file with
   `SampleID` column (with values `Tag0|1|2`) and `TagRead` column
-  (with values `ACG`, `GAC`, `CGA`)
+  (with values `ACG`, `GAC`, `CGA`). This is consistent with the file
+  format expected by `riboviz.tools.demultiplex_fastq`.
+* `example_multiplex_num_reads.tsv`: tab-separated values with
+  expected counts of reads for each barcode expected when
+  demultiplexing `example_multiplex.fastq` using
+  `riboviz.tools.demultiplex_fastq` and
+  `example_multiplex_barcodes.tsv`.
 
 The files with these names in `data/example/` were created using this script.
 

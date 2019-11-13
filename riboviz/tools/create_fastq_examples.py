@@ -50,29 +50,39 @@ to be written. The following files are created:
   with the barcode and UMIs extracted into the header and delimited by
   "_".
 * `example_multiplex_tag0|1|2.fastq`: FASTQ files each with 27 reads
-  representing the results expected when demultiplexing the above file
-  using the barcodes `ACG`, `GAC`, `CGA`.
+  representing the results expected when demultiplexing
+  `example_multiplex.fastq` using `riboviz.tools.demultiplex_fastq`
+  and `example_multiplex_barcodes.tsv`.
 * `example_multiplex_unassigned.fastq`: FASTQ files with 9 reads
   representing the unassigned reads (those with barcode `TTT`)
-  expected when demultiplexing `example_multiplex.fastq` using the
-  barcodes `ACG`, `GAC`, `CGA`.
+  expected when demultiplexing `example_multiplex.fastq` using
+  `riboviz.tools.demultiplex_fastq` and `example_multiplex_barcodes.tsv`.
 * `example_multiplex_barcodes.tsv`: tab-separated values file with
   `SampleID` column (with values `Tag0|1|2`) and `TagRead` column
-  (with values `ACG`, `GAC`, `CGA`)
+  (with values `ACG`, `GAC`, `CGA`). This is consistent with the file
+  format expected by `riboviz.tools.demultiplex_fastq`.
+* `example_multiplex_num_reads.tsv`: tab-separated values with
+  expected counts of reads for each barcode expected when
+  demultiplexing `example_multiplex.fastq` using
+  `riboviz.tools.demultiplex_fastq` and
+  `example_multiplex_barcodes.tsv`.
 """
-
-import csv
 import os
 import os.path
 from random import choices, seed
 import shutil
 import sys
+import pandas as pd
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
 from riboviz.utils import BARCODE_DELIMITER
 from riboviz.utils import UMI_DELIMITER
+from riboviz.utils import save_deplexed_sample_sheet
+from riboviz.utils import SAMPLE_SHEET_SAMPLE_ID
+from riboviz.utils import SAMPLE_SHEET_TAG_READ
+from riboviz.utils import SAMPLE_SHEET_NUM_READS
 
 
 QUALITY_MEDIUM = list(range(30, 41))
@@ -398,17 +408,21 @@ def create_fastq_examples(output_dir):
             os.remove(file_path)
 
     # Create sample-sheet.
-    with open(os.path.join(output_dir,
-                           "example_multiplex_barcodes.tsv"), "w") as f:
-        writer = csv.writer(f, delimiter="\t")
-        writer.writerow(["SampleID", "TagRead"])
-        for index, barcode in enumerate(barcode_sets[0]):
-            writer.writerow([tag_format.format(index), barcode])
+    sample_sheet = pd.DataFrame(
+        columns=[SAMPLE_SHEET_SAMPLE_ID, SAMPLE_SHEET_TAG_READ])
+    sample_rows = []
+    for index, barcode in enumerate(barcode_sets[0]):
+        sample_rows.append([tag_format.format(index), barcode])
+    sample_rows_df = pd.DataFrame(sample_rows, columns=sample_sheet.columns)
+    sample_sheet = sample_sheet.append(sample_rows_df, ignore_index=True)
+    sample_sheet[list(sample_sheet.columns)].to_csv(
+        os.path.join(output_dir, "example_multiplex_barcodes.tsv"),
+        sep="\t", index=False)
 
     # Barcode that will be unassigned during demultiplexing.
     barcode_sets[0].append('TTT')
     unassigned_index = num_barcodes
-
+    num_reads_per_barcode = [0] * (num_barcodes + 1)
     # Iterate over mismatches then barcodes so can interleave reads
     # for each barcode i.e. reads for each barcodes will be created
     # first then the reads for the 1nt mismatches then those for 2nt
@@ -432,6 +446,7 @@ def create_fastq_examples(output_dir):
                                    adaptor, post_adaptor_nt)
                 for [tag, umi5, read, umi3, qualities] in config_5_3_post_adaptor_nt]
             records.extend(records_post_adaptor_nt)
+            num_reads_per_barcode[barcode_index] += len(records)
             # ZIP records into three lists: UMI+barcode+adaptor
             # records, UMI+barcode records, records with UMI+barcode
             # extracted
@@ -450,12 +465,19 @@ def create_fastq_examples(output_dir):
                 SeqIO.write(extracted_records, f, FASTQ_FORMAT)
 
     # The last file of barcode-specific reads will be that for the
-    # unassigned reads so move rename this file.
+    # unassigned reads so rename that file.
     unassigned_tag_filename = tag_filename.format(unassigned_index)
     shutil.move(os.path.join(output_dir, unassigned_tag_filename),
                 os.path.join(output_dir, "example_multiplex_unassigned.fastq"))
-    
-    # TODO GZIP
+
+    # Save expected demultiplexing data on counts of reads per-barcode.
+    num_unassigned_reads = num_reads_per_barcode[unassigned_index]
+    del num_reads_per_barcode[unassigned_index]
+    sample_sheet[SAMPLE_SHEET_NUM_READS] = num_reads_per_barcode
+    save_deplexed_sample_sheet(
+        sample_sheet,
+        num_unassigned_reads,
+        os.path.join(output_dir, "example_multiplex_num_reads.tsv"))
 
 
 if __name__ == "__main__":
