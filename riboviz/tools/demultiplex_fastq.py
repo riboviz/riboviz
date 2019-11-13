@@ -75,7 +75,11 @@ import os
 from itertools import islice
 import pandas as pd
 from riboviz.utils import barcode_matches
+from riboviz.utils import save_deplexed_sample_sheet
 from riboviz.utils import BARCODE_DELIMITER
+from riboviz.utils import SAMPLE_SHEET_SAMPLE_ID
+from riboviz.utils import SAMPLE_SHEET_TAG_READ
+from riboviz.utils import SAMPLE_SHEET_NUM_READS
 
 
 def assign_sample(fastq_record1,
@@ -222,8 +226,8 @@ def demultiplex(sample_sheet_file,
     num_reads = [0] * num_samples
     num_unassigned_reads = 0
     total_reads = 0
-    sample_ids = list(sample_sheet.SampleID)
-    barcodes = list(sample_sheet.TagRead)
+    sample_ids = list(sample_sheet[SAMPLE_SHEET_SAMPLE_ID])
+    barcodes = list(sample_sheet[SAMPLE_SHEET_TAG_READ])
     length_tag = len(barcodes[1])
     print(("Number of samples: {}".format(num_samples)))
     print(("Allowed mismatches: {}".format(mismatches)))
@@ -318,14 +322,10 @@ def demultiplex(sample_sheet_file,
     print(("All {} reads processed".format(total_reads)))
 
     # Output number of reads by sample to file.
-    sample_sheet["NumReads"] = num_reads
-    sample_sheet[['SampleID', 'TagRead', 'NumReads']].to_csv(
-        num_reads_file, sep="\t", index=False)
-    # Append unassigned reads to file.
-    with open(num_reads_file, "a") as nrf:
-        nrf.write("Unassd\tNNNNNNNNN\t{}\n".format(num_unassigned_reads))
-        nrf.write("TOTAL\t\t{}".format(total_reads))
-
+    sample_sheet[SAMPLE_SHEET_NUM_READS] = num_reads
+    save_deplexed_sample_sheet(sample_sheet,
+                               num_unassigned_reads,
+                               num_reads_file)
     print(("Done"))
 
 

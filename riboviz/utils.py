@@ -3,18 +3,27 @@ Utilities.
 """
 import csv
 import itertools
+import pandas as pd
 
 
 NUCLEOTIDES = "ACGT"
 """ Nucleotide letters """
-
-
 BARCODE_DELIMITER = "_"
 """ Default barcode delmiter in fastq header """
-
-
 UMI_DELIMITER = "_"
 """ Default UMI delmiter in fastq header """
+SAMPLE_SHEET_SAMPLE_ID = "SampleID"
+""" Sample sheet SampleID column name """
+SAMPLE_SHEET_TAG_READ = "TagRead"
+""" Sample sheet TagRead column name """
+SAMPLE_SHEET_NUM_READS = "NumReads"
+""" Sample sheet NumReads column name """
+SAMPLE_SHEET_TOTAL_READS = "Total"
+""" Sample sheet total reads tag """
+SAMPLE_SHEET_UNASSIGNED_TAG = "Unassigned"
+""" Sample sheet unassigned reads tag """
+SAMPLE_SHEET_UNASSIGNED_READ = "NNNNNNNNN"
+""" Sample sheet unassigned read marker """
 
 
 def list_to_str(lst):
@@ -94,3 +103,33 @@ def generate_barcode_pairs(filename, length=1):
         for (a, b) in itertools.product(barcodes, repeat=2):
             distance = hamming_distance(a, b)
             writer.writerow([a, b, distance])
+
+
+def save_deplexed_sample_sheet(sample_sheet, num_unassigned_reads, file_name):
+    """
+    Save sample sheet with data on demultiplexed reads as a
+    tab-separated values file. The sample sheet is assumed to have
+    columns, "SampleID", "TagRead" and "NumReads". Two rows are
+    appended to the sample sheet before saving:
+
+        Unassigned NNNNNNNNN <num_unassigned_reads>
+        Total                <total_reads>
+
+    :param sample_sheet: Sample sheet
+    :type sample_sheet: pandas.core.frame.DataFrame
+    :param num_unassigned_reads: Number of unassigned reads
+    :type num_unassigned_reads: int
+    :param file_name: File name
+    :type file_name: str or unicode
+    """
+    rows = pd.DataFrame([[SAMPLE_SHEET_UNASSIGNED_TAG,
+                          SAMPLE_SHEET_UNASSIGNED_READ,
+                          num_unassigned_reads]],
+                        columns=sample_sheet.columns)
+    save_sample_sheet = sample_sheet.append(rows, ignore_index=True)
+    total_reads = save_sample_sheet[SAMPLE_SHEET_NUM_READS].sum()
+    rows = pd.DataFrame([[SAMPLE_SHEET_TOTAL_READS, "", total_reads]],
+                        columns=save_sample_sheet.columns)
+    save_sample_sheet = save_sample_sheet.append(rows, ignore_index=True)
+    save_sample_sheet[list(save_sample_sheet.columns)].to_csv(
+        file_name, sep="\t", index=False)
