@@ -50,8 +50,12 @@ to be written. The following files are created:
   with the barcode and UMIs extracted into the header and delimited by
   "_".
 * `example_multiplex_tag0|1|2.fastq`: FASTQ files each with 27 reads
-  representing the above file, demultiplexed according to the barcodes
-  `ACG`, `GAC`, `CGA`.
+  representing the results expected when demultiplexing the above file
+  using the barcodes `ACG`, `GAC`, `CGA`.
+* `example_multiplex_unassigned.fastq`: FASTQ files with 9 reads
+  representing the unassigned reads (those with barcode `TTT`)
+  expected when demultiplexing `example_multiplex.fastq` using the
+  barcodes `ACG`, `GAC`, `CGA`.
 * `example_multiplex_barcodes.tsv`: tab-separated values file with
   `SampleID` column (with values `Tag0|1|2`) and `TagRead` column
   (with values `ACG`, `GAC`, `CGA`)
@@ -61,6 +65,7 @@ import csv
 import os
 import os.path
 from random import choices, seed
+import shutil
 import sys
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -381,12 +386,12 @@ def create_fastq_examples(output_dir):
     file_names = ["example_multiplex_umi_barcode_adaptor.fastq",
                   "example_multiplex_umi_barcode.fastq",
                   "example_multiplex.fastq",
-                  "example_multiplex_barcodes.tsv"]
+                  "example_multiplex_barcodes.tsv",
+                  "example_multiplex_nassigned.fastq"]
     tag_file_names = [tag_filename.format(i)
                       for i in range(len(barcode_names))]
     file_names.extend(tag_file_names)
     for file_name in file_names:
-        print(file_name)
         file_path = os.path.join(output_dir, file_name)
         if os.path.exists(file_path):
             os.remove(file_path)
@@ -401,6 +406,7 @@ def create_fastq_examples(output_dir):
 
     # Barcode that will be unassigned during demultiplexing.
     barcode_sets[0].append('TTT')
+    unassigned_index = len(barcode_sets[0]) - 1
 
     # Iterate over mismatches then barcodes so can interleave reads
     # for each barcode i.e. reads for each barcodes will be created
@@ -441,6 +447,12 @@ def create_fastq_examples(output_dir):
             file_name = tag_filename.format(barcode_index)
             with open(os.path.join(output_dir, file_name), "a") as f:
                 SeqIO.write(extracted_records, f, FASTQ_FORMAT)
+
+    # The last file of barcode-specific reads will be that for the
+    # unassigned reads so move rename this file.
+    unassigned_tag_filename = tag_filename.format(unassigned_index)
+    shutil.move(os.path.join(output_dir, unassigned_tag_filename),
+                os.path.join(output_dir, "example_multiplex_unassigned.fastq"))
 
     # TODO GZIP
 
