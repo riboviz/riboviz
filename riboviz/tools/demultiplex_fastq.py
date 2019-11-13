@@ -12,8 +12,9 @@ Inputs:
 
 * `-ss|--samplesheet`: Sample sheet filename, tab-delimited text
     format with SampleID and TagRead (barcode) columns
-* `-r1|--read1`: Read 1 filename, fastq.gz format
-* `-r2|--read2`: Read 2 pair filename, fastq.gz format (optional)
+* `-r1|--read1`: Read 1 filename, fastq[.gz] format
+* `-r2|--read2`: Read 2 pair filename, fastq[.gz] format
+  (must be consistent with Read 1 filename) (optional)
   If provided then the read files should have read pairs in
   corresponding positions.
 * `-m|--mismatches`: Number of mismatches permitted in barcode
@@ -24,13 +25,15 @@ Inputs:
 Outputs:
 
 * If `r1` only was provided:
-  - A file SampleID.fastq.gz with assigned reads.
-  - A file, Unassigned.fastq.gz, with information on unassigned reads.
+  - A file SampleID.fastq[.gz] with assigned reads.
+  - A file, Unassigned.fastq[.gz], with information on unassigned reads.
 * If `r1` and `r2` were provided:
-  - Files SampleID_R1.fastq.gz and SampleID_R2.fastq.gz with assigned
+  - Files SampleID_R1.fastq[.gz] and SampleID_R2.fastq[.gz] with assigned
     reads.
-  - Files, Unassigned_R1.fastq.gz and Unassigned_R2.fastq.gz with
+  - Files, Unassigned_R1.fastq[.gz] and Unassigned_R2.fastq[.gz] with
     information on unassigned reads.
+* If the input file(s) had were of type fastq.gz then the output files
+  will be of type fastq.gz.
 * A file, num_reads.tsv, with SampleID, TagRead and NumReads columns,
   specifying the number of reads for each SampleID and TagRead in the
   original sample sheet.
@@ -195,14 +198,15 @@ def demultiplex(sample_sheet_file,
                 out_dir="output",
                 delimiter=BARCODE_DELIMITER):
     """
-    Demultiplex reads from fastq.gz by inline barcodes.
+    Demultiplex reads from fastq[.gz] by inline barcodes.
 
     :param sample_sheet_file: Sample sheet filename, tab-delimited
     text format with SampleID and TagRead columns
     :type sample_sheet_file: str or unicode
-    :param read1_file: Read 1 filename (fastq.gz format)
+    :param read1_file: Read 1 filename (fastq[.gz] format)
     :type read1_file: str or unicode
-    :param read2_file: Read 2 pair filename (fastq.gz format)
+    :param read2_file: Read 2 pair filename (fastq[.gz] format,
+    must be the same as read1_file format)
     :type read2_file: str or unicode
     :param mismatches: Number of mismatches permitted in barcode
     :type mismatches: int
@@ -237,15 +241,26 @@ def demultiplex(sample_sheet_file,
     if not os.path.isfile(read1_file):
         raise FileNotFoundError(
             "Error: read 1 file {} does not exist".format(read1_file))
-    read1_fh = gzip.open(read1_file, 'rt')
 
+    file_type = os.path.splitext(read1_file)[1]
+    is_gz = file_type.lower().endswith(".gz")
+    if is_gz:
+        file_type = ".fastq.gz"
+        open_file = gzip.open
+    else:
+        file_type = ".fastq"
+        open_file = open
+    sample_format = "{}" + file_type
+    unassigned_format = "Unassigned{}" + file_type
+
+    read1_fh = open_file(read1_file, 'rt')
     is_paired_end = read2_file is not None
     if is_paired_end:
         if not os.path.isfile(read2_file):
             raise FileNotFoundError(
                 "Error: read 2 file {} does not exist".format(
                     read2_file))
-        read2_fh = gzip.open(read2_file, 'rt')
+        read2_fh = open_file(read2_file, 'rt')
 
     if not os.path.exists(out_dir):
         try:
@@ -257,21 +272,27 @@ def demultiplex(sample_sheet_file,
     num_reads_file = os.path.join(out_dir, "num_reads.tsv")
     if is_paired_end:
         read1_split_fhs = [
-            gzip.open(os.path.join(out_dir, sample_id + "_R1.fastq.gz"), "wt")
+            open_file(os.path.join(out_dir,
+                                   sample_format.format(sample_id + "_R1")),
+                      "wt")
             for sample_id in sample_ids]
-        read1_unassigned_fh = gzip.open(
-            os.path.join(out_dir, "Unassigned_R1.fastq.gz"), "wt")
+        read1_unassigned_fh = open_file(
+            os.path.join(out_dir, unassigned_format.format("_R1")), "wt")
         read2_split_fhs = [
-            gzip.open(os.path.join(out_dir, sample_id + "_R2.fastq.gz"), "wt")
+            open_file(os.path.join(out_dir,
+                                   sample_format.format(sample_id + "_R2")),
+                      "wt")
             for sample_id in sample_ids]
-        read2_unassigned_fh = gzip.open(
-            os.path.join(out_dir, "Unassigned_R2.fastq.gz"), "wt")
+        read2_unassigned_fh = open_file(
+            os.path.join(out_dir, unassigned_format.format("_R2")), "wt")
     else:
         read1_split_fhs = [
-            gzip.open(os.path.join(out_dir, sample_id + ".fastq.gz"), "wt")
+            open_file(os.path.join(out_dir,
+                                   sample_format.format(sample_id)),
+                      "wt")
             for sample_id in sample_ids]
-        read1_unassigned_fh = gzip.open(
-            os.path.join(out_dir, "Unassigned.fastq.gz"), "wt")
+        read1_unassigned_fh = open_file(
+            os.path.join(out_dir, unassigned_format.format("")), "wt")
         read2_split_fhs = None
 
     while True:
@@ -337,7 +358,7 @@ def parse_command_line_options():
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
-        description="Demultiplex reads from fastq.gz by inline barcodes")
+        description="Demultiplex reads from fastq[.gz] by inline barcodes")
     parser.add_argument("-ss",
                         "--samplesheet",
                         dest="sample_sheet_file",
@@ -347,13 +368,13 @@ def parse_command_line_options():
                         "--read1",
                         dest="read1_file",
                         nargs='?',
-                        help="Read 1 filename, fastq.gz format")
+                        help="Read 1 filename, fastq[.gz] format")
     parser.add_argument("-r2",
                         "--read2",
                         dest="read2_file",
                         default=None,
                         nargs='?',
-                        help="Read 2 pair filename, fastq.gz format")
+                        help="Read 2 pair filename, fastq[.gz] format")
     parser.add_argument("-m",
                         "--mismatches",
                         dest="mismatches",
