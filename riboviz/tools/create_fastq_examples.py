@@ -10,24 +10,28 @@ Usage:
 where `DIRECTORY` is the directory into	which the simulated files are
 to be written. The following files are created:
 
-* `example_umi5_umi3_umi_adaptor.fastq`: FASTQ file with 9 reads,
+* `umi5_umi3_umi_adaptor.fastq`: FASTQ file with 9 reads,
   each with a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a
   11nt adaptor at the 3' end. Reads can be grouped by UMI into 5
   groups.
-* `example_umi5_umi3_umi.fastq`: FASTQ file identical to the above but
+* `umi5_umi3_umi.fastq`: FASTQ file identical to the above but
   with the adaptor trimmed.
-* `example_umi5_umi3.fastq`: FASTQ file identical to the
+* `umi5_umi3.fastq`: FASTQ file identical to the
   above but with the UMIs extracted and concatenated to the header,
   with a "_" delimiter.
-* `example_umi3_umi_adaptor.fastq`: FASTQ file with 8 reads, each
+* `umi3_umi_adaptor.fastq`: FASTQ file with 8 reads, each
   with a 4nt UMI at the 3' end and a 11nt adaptor at the 3' end. Reads
   can be grouped by UMI into 4 groups.
-* `example_umi3_umi.fastq`: FASTQ file identical to the above but
+* `umi3_umi.fastq`: FASTQ file identical to the above but
   with the adaptor trimmed.
-* `example_umi3.fastq`: FASTQ file identical to the above but with
+* `umi3.fastq`: FASTQ file identical to the above but with
    the UMI extracted and concatenated to the header, with a "_"
    delimiter.
-* `example_multiplex_umi_barcode_adaptor.fastq`: FASTQ file with 90
+* `multiplex_barcodes.tsv`: tab-separated values file with
+  `SampleID` column (with values `Tag0|1|2`) and `TagRead` column
+  (with values `ACG`, `GAC`, `CGA`). This is consistent with the file
+  format expected by `riboviz.tools.demultiplex_fastq`.
+* `multiplex_umi_barcode_adaptor.fastq`: FASTQ file with 90
   reads:
   - Each read has a 4nt UMI at the 5' end, a 4nt UMI at the 3' end, a
     3nt barcode at the 3' end and a 11nt adaptor at the 3' end.
@@ -44,28 +48,23 @@ to be written. The following files are created:
     to `ACG`, `GAC`, `CGA`. When the file is demultiplexed, assuming
     up to 2 mismatches are allowed, then these 9 reads will be
     unassigned.
-* `example_multiplex_umi_barcode.fastq`: FASTQ file identical to the
+* `multiplex_umi_barcode.fastq`: FASTQ file identical to the
   above but with the adaptor trimmed.
-* `example_multiplex.fastq`: FASTQ file identical to the above but
+* `multiplex.fastq`: FASTQ file identical to the above but
   with the barcode and UMIs extracted into the header and delimited by
   "_".
-* `example_multiplex_tag0|1|2.fastq`: FASTQ files each with 27 reads
-  representing the results expected when demultiplexing
-  `example_multiplex.fastq` using `riboviz.tools.demultiplex_fastq`
-  and `example_multiplex_barcodes.tsv`.
-* `example_multiplex_unassigned.fastq`: FASTQ files with 9 reads
-  representing the unassigned reads (those with barcode `TTT`)
-  expected when demultiplexing `example_multiplex.fastq` using
-  `riboviz.tools.demultiplex_fastq` and `example_multiplex_barcodes.tsv`.
-* `example_multiplex_barcodes.tsv`: tab-separated values file with
-  `SampleID` column (with values `Tag0|1|2`) and `TagRead` column
-  (with values `ACG`, `GAC`, `CGA`). This is consistent with the file
-  format expected by `riboviz.tools.demultiplex_fastq`.
-* `example_multiplex_num_reads.tsv`: tab-separated values with
-  expected counts of reads for each barcode expected when
-  demultiplexing `example_multiplex.fastq` using
-  `riboviz.tools.demultiplex_fastq` and
-  `example_multiplex_barcodes.tsv`.
+* `deplex/tag0|1|2.fastq`: FASTQ files each with 27 reads representing
+  the results expected when demultiplexing `multiplex.fastq`
+  using `riboviz.tools.demultiplex_fastq` and
+  `multiplex_barcodes.tsv`.
+* `deplex/Unassigned.fastq`: FASTQ files with 9 reads representing the
+  unassigned reads (those with barcode `TTT`) expected when
+  demultiplexing `multiplex.fastq` using
+  `riboviz.tools.demultiplex_fastq` and `multiplex_barcodes.tsv`.
+* `deplex/num_reads.tsv`: tab-separated values with expected counts of
+  reads for each barcode expected when demultiplexing
+  `multiplex.fastq` using `riboviz.tools.demultiplex_fastq`
+  and `multiplex_barcodes.tsv`.
 """
 import os
 import os.path
@@ -81,11 +80,13 @@ from riboviz import utils
 from riboviz.utils import BARCODE_DELIMITER
 from riboviz.utils import UMI_DELIMITER
 from riboviz.utils import FASTQ_FORMAT
+from riboviz.utils import FASTQ_NAME
 from riboviz.utils import SAMPLE_ID
 from riboviz.utils import TAG_READ
 from riboviz.utils import NUM_READS
+from riboviz.utils import UNASSIGNED_TAG
 from riboviz.utils import save_deplexed_sample_sheet
-
+from riboviz.tools.demultiplex_fastq import NUM_READS_FILE
 
 QUALITY_MEDIUM = list(range(30, 41))
 """ List of medium quality scores. """
@@ -295,8 +296,9 @@ def create_fastq_examples(output_dir):
     :param output_dir: Output directory
     :type output_dir: str or unicode
     """
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
+    os.mkdir(output_dir)
 
     make_fastq_record("SRR", "AAAA")
     seed(42)  # Fix random seed so can repeatedly create same files
@@ -350,9 +352,9 @@ def create_fastq_examples(output_dir):
                            adaptor, post_adaptor_nt)
         for [tag, umi5, read, umi3, qualities] in config_5_3_post_adaptor_nt]
     records.extend(records_post_adaptor_nt)
-    file_names = ["example_umi5_umi3_umi_adaptor.fastq",
-                  "example_umi5_umi3_umi.fastq",
-                  "example_umi5_umi3.fastq"]
+    file_names = ["umi5_umi3_umi_adaptor.fastq",
+                  "umi5_umi3_umi.fastq",
+                  "umi5_umi3.fastq"]
     for file_name, fastq_records in zip(file_names, zip(*records)):
         with open(os.path.join(output_dir, file_name), "w") as f:
             SeqIO.write(fastq_records, f, FASTQ_FORMAT)
@@ -371,9 +373,9 @@ def create_fastq_examples(output_dir):
     records = [
         make_fastq_records(tag, read, qualities, "", umi3, "", adaptor)
         for [tag, read, umi3, qualities] in config_3]
-    file_names = ["example_umi3_umi_adaptor.fastq",
-                  "example_umi3_umi.fastq",
-                  "example_umi3.fastq"]
+    file_names = ["umi3_umi_adaptor.fastq",
+                  "umi3_umi.fastq",
+                  "umi3.fastq"]
     for file_name, fastq_records in zip(file_names, zip(*records)):
         with open(os.path.join(output_dir, file_name), "w") as f:
             SeqIO.write(fastq_records, f, FASTQ_FORMAT)
@@ -389,22 +391,9 @@ def create_fastq_examples(output_dir):
     barcode_names = barcode_sets[0]
     num_barcodes = len(barcode_names)
     barcode_format = "-bar{:01d}.{:01d}"
-    tag_format = "example_multiplex_tag{:01d}"
-
-    # Purge existing files as we append to files in subsequent
-    # processing.
-    file_names = ["example_multiplex_umi_barcode_adaptor.fastq",
-                  "example_multiplex_umi_barcode.fastq",
-                  "example_multiplex.fastq",
-                  "example_multiplex_barcodes.tsv",
-                  "example_multiplex_nassigned.fastq"]
-    tag_file_names = [utils.get_fastq_filename(tag_format.format(i))
-                      for i in range(num_barcodes)]
-    file_names.extend(tag_file_names)
-    for file_name in file_names:
-        file_path = os.path.join(output_dir, file_name)
-        if os.path.exists(file_path):
-            os.remove(file_path)
+    tag_format = "tag{:01d}"
+    deplex_dir = os.path.join(output_dir, "deplex")
+    os.mkdir(deplex_dir)
 
     # Create sample-sheet.
     sample_sheet = pd.DataFrame(columns=[SAMPLE_ID, TAG_READ])
@@ -414,7 +403,7 @@ def create_fastq_examples(output_dir):
     sample_rows_df = pd.DataFrame(sample_rows, columns=sample_sheet.columns)
     sample_sheet = sample_sheet.append(sample_rows_df, ignore_index=True)
     sample_sheet[list(sample_sheet.columns)].to_csv(
-        os.path.join(output_dir, "example_multiplex_barcodes.tsv"),
+        os.path.join(output_dir, "multiplex_barcodes.tsv"),
         sep="\t", index=False)
 
     # Barcode that will be unassigned during demultiplexing.
@@ -449,9 +438,9 @@ def create_fastq_examples(output_dir):
             # records, UMI+barcode records, records with UMI+barcode
             # extracted
             records_by_type = list(zip(*records))
-            file_names = ["example_multiplex_umi_barcode_adaptor.fastq",
-                          "example_multiplex_umi_barcode.fastq",
-                          "example_multiplex.fastq"]
+            file_names = ["multiplex_umi_barcode_adaptor.fastq",
+                          "multiplex_umi_barcode.fastq",
+                          "multiplex.fastq"]
             for file_name, fastq_records in zip(file_names, records_by_type):
                 with open(os.path.join(output_dir, file_name), "a") as f:
                     SeqIO.write(fastq_records, f, FASTQ_FORMAT)
@@ -460,15 +449,15 @@ def create_fastq_examples(output_dir):
             _, _, extracted_records = records_by_type
             file_name = utils.get_fastq_filename(
                 tag_format.format(barcode_index))
-            with open(os.path.join(output_dir, file_name), "a") as f:
+            with open(os.path.join(deplex_dir, file_name), "a") as f:
                 SeqIO.write(extracted_records, f, FASTQ_FORMAT)
 
     # The last file of barcode-specific reads will be that for the
     # unassigned reads so rename that file.
     unassigned_tag_filename = utils.get_fastq_filename(
         tag_format.format(unassigned_index))
-    shutil.move(os.path.join(output_dir, unassigned_tag_filename),
-                os.path.join(output_dir, "example_multiplex_unassigned.fastq"))
+    shutil.move(os.path.join(deplex_dir, unassigned_tag_filename),
+                os.path.join(deplex_dir, FASTQ_NAME.format(UNASSIGNED_TAG)))
 
     # Save expected demultiplexing data on counts of reads per-barcode.
     num_unassigned_reads = num_reads_per_barcode[unassigned_index]
@@ -477,7 +466,7 @@ def create_fastq_examples(output_dir):
     save_deplexed_sample_sheet(
         sample_sheet,
         num_unassigned_reads,
-        os.path.join(output_dir, "example_multiplex_num_reads.tsv"))
+        os.path.join(deplex_dir, NUM_READS_FILE))
 
 
 if __name__ == "__main__":

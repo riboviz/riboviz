@@ -60,9 +60,9 @@ def test_adaptor_trimming(configuration_module):
     """
     config, _ = configuration_module
     expected_output = os.path.join(riboviz.test.EXAMPLE_DATA_DIR,
-                                   "example_umi5_umi3_umi.fastq")
+                                   "umi5_umi3_umi.fastq")
     actual_output = os.path.join(config["dir_tmp"],
-                                 "example_umi5_umi3_trim.fq")
+                                 "umi5_umi3_trim.fq")
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
 
@@ -79,9 +79,9 @@ def test_umi_extract(configuration_module):
     """
     config, _ = configuration_module
     expected_output = os.path.join(riboviz.test.EXAMPLE_DATA_DIR,
-                                   "example_umi5_umi3.fastq")
+                                   "umi5_umi3.fastq")
     actual_output = os.path.join(config["dir_tmp"],
-                                 "example_umi5_umi3_extract_trim.fq")
+                                 "umi5_umi3_extract_trim.fq")
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
 
@@ -98,7 +98,7 @@ def test_umi_group(configuration_module):
     config, _ = configuration_module
     tmp_dir = config["dir_tmp"]
     groups_tsv = os.path.join(tmp_dir,
-                              "example_umi5_umi3_post_dedup_groups.tsv")
+                              "umi5_umi3_post_dedup_groups.tsv")
     groups = pd.read_csv(groups_tsv, sep="\t")
     num_groups = 5
     assert groups.shape[0] == num_groups, \

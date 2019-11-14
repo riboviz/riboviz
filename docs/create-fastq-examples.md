@@ -33,19 +33,19 @@ The files with these names in `data/example/` were created using this script.
 These files can be used to test adaptor trimming and deduplication.
 
 ```
-example_umi5_umi3_umi_adaptor.fastq
+umi5_umi3_umi_adaptor.fastq
 ```
 
 FASTQ file with 9 reads, each with a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a 11nt adaptor at the 3' end. Reads can be grouped by UMI into 5 groups.
 
 ```
-example_umi5_umi3_umi.fastq
+umi5_umi3_umi.fastq
 ````
 
 FASTQ file identical to the above but with the adaptor trimmed.
 
 ```
-example_umi5_umi3.fastq
+umi5_umi3.fastq
 ```
 
 FASTQ file identical to the above but with the UMIs extracted and concatenated to the header, with a "_" delimiter.
@@ -55,19 +55,19 @@ FASTQ file identical to the above but with the UMIs extracted and concatenated t
 These files can be used to test adaptor trimming and deduplication.
 
 ```
-example_umi3_umi_adaptor.fastq
+umi3_umi_adaptor.fastq
 ```
 
 FASTQ file with 8 reads, each with a 4nt UMI at the 3' end and a 11nt adaptor at the 3' end. Reads can be grouped by UMI into 4 groups.
 
 ```
-example_umi3_umi.fastq
+umi3_umi.fastq
 ```
 
 FASTQ file identical to the above but with the adaptor trimmed.
 
 ```
-example_umi3.fastq`
+umi3.fastq`
 ```
 
 FASTQ file identical to the above but with the UMI extracted and concatenated to the header, with a "_" delimiter.
@@ -77,7 +77,13 @@ FASTQ file identical to the above but with the UMI extracted and concatenated to
 These files can be used to test adaptor trimming, demultiplexing and deduplication.
 
 ```
-example_multiplex_umi_barcode_adaptor.fastq
+multiplex_barcodes.tsv
+```
+
+Tab-separated values file with `SampleID` column (with values `Tag0|1|2`) and `TagRead` column (with values `ACG`, `GAC`, `CGA`). This is consistent with the file format expected by `riboviz.tools.demultiplex_fastq`.
+
+```
+multiplex_umi_barcode_adaptor.fastq
 ```
 
 FASTQ file with 90 reads:
@@ -92,37 +98,31 @@ FASTQ file with 90 reads:
 * There are 9 reads with barcode `TTT`, which has a mismatch of 3nts to `ACG`, `GAC`, `CGA`. When the file is demultiplexed, assuming up to 2 mismatches are allowed, then these 9 reads will be unassigned.
 
 ```
-example_multiplex_umi_barcode.fastq
+multiplex_umi_barcode.fastq
 ```
 
 FASTQ file identical to the above but with the adaptor trimmed.
 
 ```
-example_multiplex.fastq
+multiplex.fastq
 ```
 
 FASTQ file identical to the above but with the barcode and UMIs extracted into the header and delimited by "_".
 
 ```
-example_multiplex_tag0|1|2.fastq
+deplex/multiplex_tag0|1|2.fastq
 ```
 
-FASTQ files each with 27 reads representing the results expected when demultiplexing `example_multiplex.fastq` using `riboviz.tools.demultiplex_fastq` and `example_multiplex_barcodes.tsv`.
+FASTQ files each with 27 reads representing the results expected when demultiplexing `multiplex.fastq` using `riboviz.tools.demultiplex_fastq` and `multiplex_barcodes.tsv`.
 
 ```
-example_multiplex_unassigned.fastq
+deplex/Unassigned.fastq
 ```
 
-FASTQ files with 9 reads representing the unassigned reads (those with barcode `TTT`) expected when demultiplexing `example_multiplex.fastq` using `riboviz.tools.demultiplex_fastq` and `example_multiplex_barcodes.tsv`.
+FASTQ files with 9 reads representing the unassigned reads (those with barcode `TTT`) expected when demultiplexing `multiplex.fastq` using `riboviz.tools.demultiplex_fastq` and `multiplex_barcodes.tsv`.
 
 ```
-example_multiplex_barcodes.tsv
+deplex/num_reads.tsv
 ```
 
-Tab-separated values file with `SampleID` column (with values `Tag0|1|2`) and `TagRead` column (with values `ACG`, `GAC`, `CGA`). This is consistent with the file format expected by `riboviz.tools.demultiplex_fastq`.
-
-```
-example_multiplex_num_reads.tsv
-```
-
-Tab-separated values with expected counts of reads for each barcode expected when demultiplexing `example_multiplex.fastq` using `riboviz.tools.demultiplex_fastq` and `example_multiplex_barcodes.tsv`.
+Tab-separated values with expected counts of reads for each barcode expected when demultiplexing `multiplex.fastq` using `riboviz.tools.demultiplex_fastq` and `multiplex_barcodes.tsv`.
