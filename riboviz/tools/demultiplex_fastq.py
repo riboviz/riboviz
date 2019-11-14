@@ -83,6 +83,10 @@ from riboviz.utils import TAG_READ
 from riboviz.utils import NUM_READS
 
 
+NUM_READS_FILE = "num_reads.tsv"
+""" Number of reads summary file name """
+
+
 def assign_sample(fastq_record1,
                   fastq_record2,
                   barcode,
@@ -260,7 +264,7 @@ def demultiplex(sample_sheet_file,
             raise IOError(
                 "Error: output directory {} cannot be created".format(out_dir))
 
-    num_reads_file = os.path.join(out_dir, "num_reads.tsv")
+    num_reads_file = os.path.join(out_dir, NUM_READS_FILE)
     if is_paired_end:
         read1_split_fhs = [
             open_file(os.path.join(out_dir,

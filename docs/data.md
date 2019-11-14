@@ -164,21 +164,21 @@ The data was sampled uniformly at random 1/50 reads from each file, producing ab
 `data/example/` folder:
 
 ```
-example_multiplex.fastq
-example_multiplex_barcodes.tsv
-example_multiplex_num_reads.tsv
-example_multiplex_tag0.fastq
-example_multiplex_tag1.fastq
-example_multiplex_tag2.fastq
-example_multiplex_umi_barcode_adaptor.fastq
-example_multiplex_umi_barcode.fastq
-example_multiplex_unassigned.fastq
-example_umi3.fastq
-example_umi3_umi_adaptor.fastq
-example_umi3_umi.fastq
-example_umi5_umi3.fastq
-example_umi5_umi3_umi_adaptor.fastq
-example_umi5_umi3_umi.fastq
+multiplex_barcodes.tsv
+multiplex.fastq
+multiplex_umi_barcode_adaptor.fastq
+multiplex_umi_barcode.fastq
+umi3.fastq
+umi3_umi_adaptor.fastq
+umi3_umi.fastq
+umi5_umi3.fastq
+umi5_umi3_umi_adaptor.fastq
+umi5_umi3_umi.fastq
+deplex/num_reads.tsv
+deplex/tag0.fastq
+deplex/tag1.fastq
+deplex/tag2.fastq
+deplex/Unassigned.fastq
 ```
 
 These files are simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication using UMI-tools when invoked from within the RiboViz workflow.

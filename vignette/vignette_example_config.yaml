@@ -13,7 +13,7 @@ dir_index: vignette/index # directory to put built indices in
 rRNA_index: yeast_rRNA # rRNA index file prefix, relative to dir_index
 orf_index: YAL_CDS_w_250 # ORF index file prefix, relative to dir_index
 fq_files: # fastq files to be processed, relative to dir_in
-  example_umi5_umi3: example_umi5_umi3_umi_adaptor.fastq
+  umi5_umi3: umi5_umi3_umi_adaptor.fastq
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
 extract_umis: TRUE # Extract UMIs if TRUE
 dedup_umis: TRUE # Extract UMIs and deduplicate reads if TRUE
