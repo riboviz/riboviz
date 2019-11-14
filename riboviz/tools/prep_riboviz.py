@@ -139,6 +139,105 @@ def build_indices(fasta, ht_prefix, file_type, logs_dir, cmd_file,
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
 
 
+def cut_adapters(adapter,
+                 original_fq,
+                 trimmed_fq,
+                 log_file,
+                 cmd_file,
+                 dry_run):
+    """
+    Trim adapters using cutadapt.
+
+    :param adapter: Adapter to trim
+    :type adapter: str or unicode
+    :param original_fq: FASTQ file to have adapters trimmed
+    :type original_fq: str or unicode
+    :param trimmed_fq: FASTQ file with trimmed adapters
+    :type trimmed_fq: str or unicode
+    :param logs_dir Log files directory
+    :type logs_dir: str or unicode
+    :param cmd_file: File to log command to, if not None
+    :type cmd_file: str or unicode
+    :param dry_run: Don't execute workflow commands (useful for seeing
+    what commands would be executed)
+    :type dry_run: bool
+    :raise FileNotFoundError: if cutadapt cannot be found
+    :raise AssertionError: if cutadapt returns non-zero exit
+    code
+    """
+    LOGGER.info("Cut Illumina adapters. Log: %s", log_file)
+    cmd = ["cutadapt", "--trim-n", "-O", "1", "-m", "5",
+           "-a", adapter, "-o", trimmed_fq, original_fq]
+    # cutadapt allows all available processors to be requested.
+    cmd += ["-j", str(0)]
+    process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
+
+
+def extract_barcodes_umis(original_fq,
+                          extract_fq,
+                          regexp,
+                          log_file,
+                          cmd_file,
+                          dry_run):
+    """
+    Extract barcodes and UMIs using "umi_tools extract".
+
+    :param original_fq: FASTQ file to have UMIs and barcodes extracted
+    :type original_fq: str or unicode
+    :param extract_fq: FASTQ file with UMIs and barcodes extracted
+    :type extract_fq: str or unicode
+    :param regexp: umi_tools-compliant regular expression to extract
+    barcodes and UMIs
+    :type regexp: str or unicode
+    :param logs_dir Log files directory
+    :type logs_dir: str or unicode
+    :param cmd_file: File to log command to, if not None
+    :type cmd_file: str or unicode
+    :param dry_run: Don't execute workflow commands (useful for seeing
+    what commands would be executed)
+    :type dry_run: bool
+    :raise FileNotFoundError: if umi_tools cannot be found
+    :raise AssertionError: if umi_tooles returns non-zero exit
+    code
+    """
+    LOGGER.info("Extract barcodes and UMIs. Log: %s", log_file)
+    # Command to be run from within Python differs subtly from the
+    # command logged for the following reason:
+    # Assume config["umi_regexp"] is, for example
+    #     ^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$
+    # If cmd is configured to include:
+    #     "--bc-pattern=" + "^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$"
+    # then "umi_tools extract" is invoked successfuly from within
+    # Python. However the command logged (for rerunning as a bash
+    # script) includes:
+    #     --bc-pattern=^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$
+    # which does not run in bash. It fails with, for
+    # example:
+    #     syntax error near unexpected token ('
+    # If cmd is configured to include:
+    #     "--bc-pattern=" + "\"^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$\""
+    # then "umi_tools extract" fails as the escaped quotes are
+    # treated as part of the regular expression. However the
+    # command logged (for rerunning as a bash script) includes:
+    #     --bc-pattern="^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$"
+    # which does run in bash.
+    # Hence, the command run from within Python differs
+    # from that logged by the abscence of the quotes round the
+    # regular expression.
+    pattern_parameter = "--bc-pattern=" + regexp
+    cmd = ["umi_tools", "extract", "-I", original_fq,
+           pattern_parameter,
+           "--extract-method=regex",
+           "-S", extract_fq]
+    cmd_to_log = ["--bc-pattern=" + "\"" + regexp + "\""
+                  if c == pattern_parameter else c for c in cmd]
+    process_utils.run_logged_command(cmd,
+                                     log_file,
+                                     cmd_file,
+                                     dry_run,
+                                     cmd_to_log)
+
+
 def get_sample_log_file(logs_dir, sample, step, index):
     """
     Get name of log file for a specific processing step applied to a
@@ -268,15 +367,10 @@ def process_sample(sample,
     else:
         nprocesses = config["nprocesses"]
 
-    # Trimmed reads.
     log_file = get_sample_log_file(logs_dir, sample, "cutadapt", step)
-    LOGGER.info("Cut Illumina adapters. Log: %s", log_file)
     trim_fq = os.path.join(tmp_dir, sample + "_trim.fq")
-    cmd = ["cutadapt", "--trim-n", "-O", "1", "-m", "5",
-           "-a", config["adapters"], "-o", trim_fq, fastq]
-    # cutadapt allows all available processors to be requested.
-    cmd += ["-j", str(0)]
-    process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
+    cut_adapters(config["adapters"], fastq, trim_fq,
+                 log_file, cmd_file, dry_run)
     step += 1
 
     extract_umis = "extract_umis" in config and config["extract_umis"]
@@ -286,42 +380,12 @@ def process_sample(sample,
                                        sample,
                                        "umi_tools_extract",
                                        step)
-        LOGGER.info("Extract UMIs. Log: %s", log_file)
-        pattern_parameter = "--bc-pattern=" + config["umi_regexp"]
-        # Command to be run from within Python differs subtly from the
-        # command logged for the following reason:
-        # Assume config["umi_regexp"] is, for example
-        #     ^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$
-        # If cmd is configured to include:
-        #     "--bc-pattern=" + "^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$"
-        # then "umi_tools extract" is invoked successfuly from within
-        # Python. However the command logged (for rerunning as a bash
-        # script) includes:
-        #     --bc-pattern=^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$
-        # which does not run in bash. It fails with, for
-        # example:
-        #     syntax error near unexpected token ('
-        # If cmd is configured to include:
-        #     "--bc-pattern=" + "\"^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$\""
-        # then "umi_tools extract" fails as the escaped quotes are
-        # treated as part of the regular expression. However the
-        # command logged (for rerunning as a bash script) includes:
-        #     --bc-pattern="^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$"
-        # which does run in bash.
-        # Hence, the command run from within Python differs
-        # from that logged by the abscence of the quotes round the
-        # regular expression.
-        cmd = ["umi_tools", "extract", "-I", trim_fq,
-               pattern_parameter,
-               "--extract-method=regex",
-               "-S", extract_trim_fq]
-        cmd_to_log = ["--bc-pattern=" + "\"" + config["umi_regexp"] + "\""
-                      if c == pattern_parameter else c for c in cmd]
-        process_utils.run_logged_command(cmd,
-                                         log_file,
-                                         cmd_file,
-                                         dry_run,
-                                         cmd_to_log)
+        extract_barcodes_umis(trim_fq,
+                              extract_trim_fq,
+                              config["umi_regexp"],
+                              log_file,
+                              cmd_file,
+                              dry_run)
         trim_fq = extract_trim_fq
         step += 1
 
@@ -352,8 +416,9 @@ def process_sample(sample,
     step += 1
 
     log_file = get_sample_log_file(logs_dir, sample, "trim_5p_mismatch", step)
-    LOGGER.info("Trim 5' mismatched nt and remove reads with >1 mismatch. Log: %s",
-                log_file)
+    LOGGER.info(
+        "Trim 5' mismatched nt and remove reads with >1 mismatch. Log: %s",
+        log_file)
     # ORF-mapped reads.
     orf_map_sam_clean = os.path.join(tmp_dir,
                                      sample +
@@ -391,7 +456,8 @@ def process_sample(sample,
     if "dedup_umis" in config and config["dedup_umis"]:
         LOGGER.info("Deduplicate using UMIs. Log: %s", log_file)
         if not extract_umis:
-            LOGGER.warning("WARNING: dedup_umis was TRUE but extract_umis was FALSE.")
+            LOGGER.warning(
+                "WARNING: dedup_umis was TRUE but extract_umis was FALSE.")
         if "group_umis" in config and config["group_umis"]:
             group_umis(sample_out_bam,
                        tmp_dir,
