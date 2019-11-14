@@ -8,21 +8,27 @@ import pandas as pd
 
 NUCLEOTIDES = "ACGT"
 """ Nucleotide letters """
+FASTQ_NAME = "{}.fastq"
+""" .fastq file name format string """
+FASTQ_GZ_NAME = FASTQ_NAME + ".gz"
+""" .fastq.gz file name format string """
+FASTQ_FORMAT = "fastq"
+""" Format string for use with Bio.SeqIO.write. """
 BARCODE_DELIMITER = "_"
 """ Default barcode delmiter in fastq header """
 UMI_DELIMITER = "_"
 """ Default UMI delmiter in fastq header """
-SAMPLE_SHEET_SAMPLE_ID = "SampleID"
+SAMPLE_ID = "SampleID"
 """ Sample sheet SampleID column name """
-SAMPLE_SHEET_TAG_READ = "TagRead"
+TAG_READ = "TagRead"
 """ Sample sheet TagRead column name """
-SAMPLE_SHEET_NUM_READS = "NumReads"
+NUM_READS = "NumReads"
 """ Sample sheet NumReads column name """
-SAMPLE_SHEET_TOTAL_READS = "Total"
+TOTAL_READS = "Total"
 """ Sample sheet total reads tag """
-SAMPLE_SHEET_UNASSIGNED_TAG = "Unassigned"
+UNASSIGNED_TAG = "Unassigned"
 """ Sample sheet unassigned reads tag """
-SAMPLE_SHEET_UNASSIGNED_READ = "NNNNNNNNN"
+UNASSIGNED_READ = "NNNNNNNNN"
 """ Sample sheet unassigned read marker """
 
 
@@ -105,7 +111,42 @@ def generate_barcode_pairs(filename, length=1):
             writer.writerow([a, b, distance])
 
 
-def save_deplexed_sample_sheet(sample_sheet, num_unassigned_reads, file_name):
+def get_fastq_filename(tag, is_gz=False):
+    """
+    Given a tag return a fastq[.gz] file name e.g. given "tag01"
+    return "tag01.fastq".
+
+    :param tag: Tag
+    :type tag: str or unicode
+    :param is_gz: If True, add .fastq.gz extension, else add .fastq
+    extension
+    :type is_gz: bool
+    :return: filename
+    :rtype: str or unicode
+    """
+    if is_gz:
+        return FASTQ_GZ_NAME.format(tag.lower())
+    return FASTQ_NAME.format(tag.lower())
+
+
+def get_fastq_filenames(tags, is_gz=False):
+    """
+    Given a list of tags return fastq[.gz] file names.
+
+    :param tags: Tags
+    :type tags: list(str or unicode)
+    :param is_gz: If True, add .fastq.gz extension, else add .fastq
+    extension
+    :type is_gz: bool
+    :return: filenames
+    :rtype: list(str or unicode)
+    """
+    return [get_fastq_filename(tag, is_gz) for tag in tags]
+
+
+def save_deplexed_sample_sheet(sample_sheet,
+                               num_unassigned_reads,
+                               file_name):
     """
     Save sample sheet with data on demultiplexed reads as a
     tab-separated values file. The sample sheet is assumed to have
@@ -123,17 +164,17 @@ def save_deplexed_sample_sheet(sample_sheet, num_unassigned_reads, file_name):
     :type file_name: str or unicode
     """
     save_sample_sheet = sample_sheet[[
-        SAMPLE_SHEET_SAMPLE_ID,
-        SAMPLE_SHEET_TAG_READ,
-        SAMPLE_SHEET_NUM_READS
+        SAMPLE_ID,
+        TAG_READ,
+        NUM_READS
     ]]
-    rows = pd.DataFrame([[SAMPLE_SHEET_UNASSIGNED_TAG,
-                          SAMPLE_SHEET_UNASSIGNED_READ,
+    rows = pd.DataFrame([[UNASSIGNED_TAG,
+                          UNASSIGNED_READ,
                           num_unassigned_reads]],
                         columns=save_sample_sheet.columns)
     save_sample_sheet = save_sample_sheet.append(rows, ignore_index=True)
-    total_reads = save_sample_sheet[SAMPLE_SHEET_NUM_READS].sum()
-    rows = pd.DataFrame([[SAMPLE_SHEET_TOTAL_READS, "", total_reads]],
+    total_reads = save_sample_sheet[NUM_READS].sum()
+    rows = pd.DataFrame([[TOTAL_READS, "", total_reads]],
                         columns=save_sample_sheet.columns)
     save_sample_sheet = save_sample_sheet.append(rows, ignore_index=True)
     save_sample_sheet[list(save_sample_sheet.columns)].to_csv(
