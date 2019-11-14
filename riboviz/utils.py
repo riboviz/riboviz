@@ -2,7 +2,9 @@
 Utilities.
 """
 import csv
+import errno
 import itertools
+import os
 import pandas as pd
 
 
@@ -144,9 +146,41 @@ def get_fastq_filenames(tags, is_gz=False):
     return [get_fastq_filename(tag, is_gz) for tag in tags]
 
 
+def load_sample_sheet(filename, delimiter="\t", comment="#"):
+    """
+    Load sample sheet from a tab-separated values file. The sample
+    sheet is assumed to have columns, "SampleID" and "TagRead".
+
+    :param filename: File name
+    :type filename: str or unicode
+    :param delimiter: Delimiter
+    :type delimiter: str or unicode
+    :param comment: Comment prefix
+    :type comment: str or unicode
+    :return: Sample sheet
+    :rtype: pandas.core.frame.DataFrame
+    :raise FileNotFoundError: if filename cannot be found or is not a
+    file
+    :raise AssertionError: if the sample-sheet does not contain
+    "SampleID" or "TagRead" columns
+    """
+    if not os.path.exists(filename) or not os.path.isfile(filename):
+        raise FileNotFoundError(errno.ENOENT,
+                                os.strerror(errno.ENOENT),
+                                filename)
+    sample_sheet = pd.read_csv(filename,
+                               comment=comment,
+                               delimiter=delimiter)
+    for column in [SAMPLE_ID, TAG_READ]:
+        assert column in sample_sheet.columns,\
+            "Missing column {} in {}".format(column, filename)
+    return sample_sheet
+
+
 def save_deplexed_sample_sheet(sample_sheet,
                                num_unassigned_reads,
-                               file_name):
+                               filename,
+                               delimiter="\t"):
     """
     Save sample sheet with data on demultiplexed reads as a
     tab-separated values file. The sample sheet is assumed to have
@@ -160,22 +194,26 @@ def save_deplexed_sample_sheet(sample_sheet,
     :type sample_sheet: pandas.core.frame.DataFrame
     :param num_unassigned_reads: Number of unassigned reads
     :type num_unassigned_reads: int
-    :param file_name: File name
-    :type file_name: str or unicode
+    :param filename: File name
+    :type filename: str or unicode
+    :param delimiter: Delimiter
+    :type delimiter: str or unicode
     """
-    save_sample_sheet = sample_sheet[[
+    deplexed_sample_sheet = sample_sheet[[
         SAMPLE_ID,
         TAG_READ,
         NUM_READS
     ]]
-    rows = pd.DataFrame([[UNASSIGNED_TAG,
-                          UNASSIGNED_READ,
-                          num_unassigned_reads]],
-                        columns=save_sample_sheet.columns)
-    save_sample_sheet = save_sample_sheet.append(rows, ignore_index=True)
-    total_reads = save_sample_sheet[NUM_READS].sum()
-    rows = pd.DataFrame([[TOTAL_READS, "", total_reads]],
-                        columns=save_sample_sheet.columns)
-    save_sample_sheet = save_sample_sheet.append(rows, ignore_index=True)
-    save_sample_sheet[list(save_sample_sheet.columns)].to_csv(
-        file_name, sep="\t", index=False)
+    unassigned_row = pd.DataFrame([[UNASSIGNED_TAG,
+                                    UNASSIGNED_READ,
+                                    num_unassigned_reads]],
+                                  columns=deplexed_sample_sheet.columns)
+    deplexed_sample_sheet = deplexed_sample_sheet.append(unassigned_row,
+                                                         ignore_index=True)
+    total_reads = deplexed_sample_sheet[NUM_READS].sum()
+    total_row = pd.DataFrame([[TOTAL_READS, "", total_reads]],
+                             columns=deplexed_sample_sheet.columns)
+    deplexed_sample_sheet = deplexed_sample_sheet.append(total_row,
+                                                         ignore_index=True)
+    deplexed_sample_sheet[list(deplexed_sample_sheet.columns)].to_csv(
+        filename, sep=delimiter, index=False)

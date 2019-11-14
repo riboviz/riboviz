@@ -76,9 +76,7 @@ import argparse
 import gzip
 import os
 from itertools import islice
-import pandas as pd
-from riboviz.utils import barcode_matches
-from riboviz.utils import save_deplexed_sample_sheet
+from riboviz import utils
 from riboviz.utils import BARCODE_DELIMITER
 from riboviz.utils import SAMPLE_ID
 from riboviz.utils import TAG_READ
@@ -120,7 +118,7 @@ def assign_sample(fastq_record1,
     :rtype: Bool
     """
     is_assigned = False
-    if barcode_matches(fastq_record1[0], barcode, mismatches, delimiter):
+    if utils.barcode_matches(fastq_record1[0], barcode, mismatches, delimiter):
         is_assigned = True
         read1_split_fh.writelines(fastq_record1)
         if is_paired_end:
@@ -218,14 +216,7 @@ def demultiplex(sample_sheet_file,
     print(("Demultiplexing reads for file: " + read1_file))
     print(("Using sample sheet: " + sample_sheet_file))
 
-    if not os.path.isfile(sample_sheet_file):
-        raise FileNotFoundError(
-            "Error: sample sheet file {} does not exist".format(
-                sample_sheet_file))
-
-    sample_sheet = pd.read_csv(sample_sheet_file,
-                               comment="#",
-                               delimiter="\t")
+    sample_sheet = utils.load_sample_sheet(sample_sheet_file)
     num_samples = sample_sheet.shape[0]
     num_reads = [0] * num_samples
     num_unassigned_reads = 0
@@ -344,9 +335,9 @@ def demultiplex(sample_sheet_file,
 
     # Output number of reads by sample to file.
     sample_sheet[NUM_READS] = num_reads
-    save_deplexed_sample_sheet(sample_sheet,
-                               num_unassigned_reads,
-                               num_reads_file)
+    utils.save_deplexed_sample_sheet(sample_sheet,
+                                     num_unassigned_reads,
+                                     num_reads_file)
     print(("Done"))
 
 
