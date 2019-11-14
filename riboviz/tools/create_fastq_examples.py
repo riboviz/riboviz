@@ -77,20 +77,20 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
+from riboviz import utils
 from riboviz.utils import BARCODE_DELIMITER
 from riboviz.utils import UMI_DELIMITER
+from riboviz.utils import FASTQ_FORMAT
+from riboviz.utils import SAMPLE_ID
+from riboviz.utils import TAG_READ
+from riboviz.utils import NUM_READS
 from riboviz.utils import save_deplexed_sample_sheet
-from riboviz.utils import SAMPLE_SHEET_SAMPLE_ID
-from riboviz.utils import SAMPLE_SHEET_TAG_READ
-from riboviz.utils import SAMPLE_SHEET_NUM_READS
 
 
 QUALITY_MEDIUM = list(range(30, 41))
 """ List of medium quality scores. """
 QUALITY_HIGH = list(range(39, 41))
 """ List of high quality scores. """
-FASTQ_FORMAT = "fastq"
-""" Format string for use with Bio.SeqIO.write. """
 
 
 def simulate_quality(k, qualities=QUALITY_MEDIUM, weights=None):
@@ -390,7 +390,6 @@ def create_fastq_examples(output_dir):
     num_barcodes = len(barcode_names)
     barcode_format = "-bar{:01d}.{:01d}"
     tag_format = "example_multiplex_tag{:01d}"
-    tag_filename = tag_format + ".fastq"
 
     # Purge existing files as we append to files in subsequent
     # processing.
@@ -399,7 +398,7 @@ def create_fastq_examples(output_dir):
                   "example_multiplex.fastq",
                   "example_multiplex_barcodes.tsv",
                   "example_multiplex_nassigned.fastq"]
-    tag_file_names = [tag_filename.format(i)
+    tag_file_names = [utils.get_fastq_filename(tag_format.format(i))
                       for i in range(num_barcodes)]
     file_names.extend(tag_file_names)
     for file_name in file_names:
@@ -408,8 +407,7 @@ def create_fastq_examples(output_dir):
             os.remove(file_path)
 
     # Create sample-sheet.
-    sample_sheet = pd.DataFrame(
-        columns=[SAMPLE_SHEET_SAMPLE_ID, SAMPLE_SHEET_TAG_READ])
+    sample_sheet = pd.DataFrame(columns=[SAMPLE_ID, TAG_READ])
     sample_rows = []
     for index, barcode in enumerate(barcode_sets[0]):
         sample_rows.append([tag_format.format(index), barcode])
@@ -460,20 +458,22 @@ def create_fastq_examples(output_dir):
             # Save records with UMI+barcode extracted in
             # barcode-specific files.
             _, _, extracted_records = records_by_type
-            file_name = tag_filename.format(barcode_index)
+            file_name = utils.get_fastq_filename(
+                tag_format.format(barcode_index))
             with open(os.path.join(output_dir, file_name), "a") as f:
                 SeqIO.write(extracted_records, f, FASTQ_FORMAT)
 
     # The last file of barcode-specific reads will be that for the
     # unassigned reads so rename that file.
-    unassigned_tag_filename = tag_filename.format(unassigned_index)
+    unassigned_tag_filename = utils.get_fastq_filename(
+        tag_format.format(unassigned_index))
     shutil.move(os.path.join(output_dir, unassigned_tag_filename),
                 os.path.join(output_dir, "example_multiplex_unassigned.fastq"))
 
     # Save expected demultiplexing data on counts of reads per-barcode.
     num_unassigned_reads = num_reads_per_barcode[unassigned_index]
     del num_reads_per_barcode[unassigned_index]
-    sample_sheet[SAMPLE_SHEET_NUM_READS] = num_reads_per_barcode
+    sample_sheet[NUM_READS] = num_reads_per_barcode
     save_deplexed_sample_sheet(
         sample_sheet,
         num_unassigned_reads,
