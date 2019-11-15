@@ -259,3 +259,56 @@ def save_deplexed_sample_sheet(sample_sheet,
                                                          ignore_index=True)
     deplexed_sample_sheet[list(deplexed_sample_sheet.columns)].to_csv(
         filename, sep=delimiter, index=False)
+
+
+def load_deplexed_sample_sheet(filename, delimiter="\t", comment="#"):
+    """
+    Load demultiplexed sample sheet from a tab-separated values
+    file. The sample sheet is assumed to have columns, "SampleID" and
+    "TagRead" and "NumReads".
+
+    :param filename: File name
+    :type filename: str or unicode
+    :param delimiter: Delimiter
+    :type delimiter: str or unicode
+    :param comment: Comment prefix
+    :type comment: str or unicode
+    :return: Sample sheet
+    :rtype: pandas.core.frame.DataFrame
+    :raise FileNotFoundError: if filename cannot be found or is not a
+    file
+    :raise AssertionError: if the sample-sheet does not contain
+    "SampleID" or "TagRead" columns
+    """
+    if not os.path.exists(filename) or not os.path.isfile(filename):
+        raise FileNotFoundError(errno.ENOENT,
+                                os.strerror(errno.ENOENT),
+                                filename)
+    sample_sheet = pd.read_csv(filename,
+                               comment=comment,
+                               delimiter=delimiter)
+    for column in [SAMPLE_ID, TAG_READ, NUM_READS]:
+        assert column in sample_sheet.columns,\
+            "Missing column {} in {}".format(column, filename)
+    return sample_sheet
+
+
+def get_non_zero_deplexed_samples(sample_sheet):
+    """
+    Given a sample sheet with data on demultiplexed reads as a
+    tab-separated values file return the names of the samples for
+    which one or more reads were found.
+
+    The sample sheet is assumed to have columns, "SampleID", "TagRead"
+    and "NumReads". Rows whose "SampleID" values are "Unassigned" and
+    "Total" are ignored.
+
+    :param sample_sheet: Sample sheet
+    :type sample_sheet: pandas.core.frame.DataFrame
+    :return samples: Samples
+    :rtype samples: list(str or unicode)
+    """
+    non_zero_samples = sample_sheet[
+        ~sample_sheet[SAMPLE_ID].isin([UNASSIGNED_TAG, TOTAL_READS])
+        & sample_sheet[NUM_READS] != 0]
+    return list(non_zero_samples[SAMPLE_ID])
