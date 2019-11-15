@@ -56,10 +56,10 @@ def test_index_error_missing_index_files(configuration, index):
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
-def test_no_samples_error(configuration):
+def test_no_data_error(configuration):
     """
     Test that no samples being specified causes
-    EXIT_NO_SAMPLES_ERROR to be returned.
+    EXIT_NO_DATA_ERROR to be returned.
 
     :param configuration: configuration and path to configuration file
     (pytest fixture)
@@ -73,14 +73,14 @@ def test_no_samples_error(configuration):
                                           riboviz.test.R_SCRIPTS,
                                           config_path,
                                           True)
-    assert exit_code == prep_riboviz.EXIT_NO_SAMPLES_ERROR, \
+    assert exit_code == prep_riboviz.EXIT_NO_DATA_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
 def test_samples_error_missing_samples(configuration):
     """
     Test that if all samples are non-existent files then
-    EXIT_SAMPLES_ERROR is returned.
+    EXIT_DATA_ERROR is returned.
 
     :param configuration: configuration and path to configuration file
     (pytest fixture)
@@ -97,7 +97,7 @@ def test_samples_error_missing_samples(configuration):
                                           riboviz.test.R_SCRIPTS,
                                           config_path,
                                           True)
-    assert exit_code == prep_riboviz.EXIT_SAMPLES_ERROR, \
+    assert exit_code == prep_riboviz.EXIT_DATA_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
@@ -108,7 +108,7 @@ def test_samples_error_missing_samples(configuration):
 def test_missing_files_error(configuration, file_config):
     """
     Test that non-existent files being specified for org_gff_file,
-    features_file, t_rna and codon_pos then EXIT_SAMPLES_ERROR is
+    features_file, t_rna and codon_pos then EXIT_DATA_ERROR is
     returned.
 
     :param configuration: configuration and path to configuration file
@@ -125,7 +125,7 @@ def test_missing_files_error(configuration, file_config):
                                           riboviz.test.R_SCRIPTS,
                                           config_path,
                                           True)
-    assert exit_code == prep_riboviz.EXIT_SAMPLES_ERROR, \
+    assert exit_code == prep_riboviz.EXIT_DATA_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
