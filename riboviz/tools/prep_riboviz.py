@@ -68,9 +68,14 @@ Exit codes are as follows:
 * EXIT_OK (0): Processing successfully completed.
 * EXIT_CONFIG_ERROR (1): Errors occurred loading configuration.
 * EXIT_INDEX_ERROR (2): Error occurred during indexing.
-* EXIT_NO_SAMPLES_ERROR (3): No samples were provided.
-* EXIT_SAMPLES_ERROR (4): No sample was processed successfully.
-* EXIT_COLLATION_ERROR (5): Error occurred during TPMs collation.
+* EXIT_NO_DATA_ERROR (3): No sample files or multiplexed data files
+  were provided.
+* EXIT_DATA_CONFLICT_ERROR (4): Both sample files and multiplexed data
+  files were provided.
+* EXIT_NO_BARCODES_ERROR (5): Multiplexed data files were provided but
+  no barcodes file.
+* EXIT_DATA_ERROR (6): No data file was processed successfully.
+* EXIT_COLLATION_ERROR (7): Error occurred during TPMs collation.
 
 Commands that are submitted to bash are recorded within a
 file specified by a cmd_file configuration parameter.
@@ -90,6 +95,7 @@ import sys
 import yaml
 from riboviz import process_utils
 from riboviz import logging_utils
+from riboviz.utils import value_in_dict
 
 
 EXIT_OK = 0
@@ -98,11 +104,15 @@ EXIT_CONFIG_ERROR = 1
 """ Errors occurred loading configuration. """
 EXIT_INDEX_ERROR = 2
 """ Error occurred during indexing. """
-EXIT_NO_SAMPLES_ERROR = 3
-""" No samples were provided. """
-EXIT_SAMPLES_ERROR = 4
-""" No sample was processed successfully. """
-EXIT_COLLATION_ERROR = 5
+EXIT_NO_DATA_ERROR = 3
+""" No sample files or multiplexed data files were provided. """
+EXIT_DATA_CONFLICT_ERROR = 4
+""" Both sample files and multiplexed data files were provided. """
+EXIT_NO_BARCODES_ERROR = 5
+""" Multiplexed data files were provided but no barcodes file. """
+EXIT_DATA_ERROR = 6
+""" No data file was processed successfully. """
+EXIT_COLLATION_ERROR = 7
 """ Error occurred during TPMs collation. """
 
 
@@ -572,7 +582,7 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, nprocesses,
            "--dir_out=" + out_dir,
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
     for flag in ["t_rna", "codon_pos", "features_file"]:
-        if flag in config and config[flag] is not None:
+        if value_in_dict(flag, config):
             flag_file = config[flag]
             if not os.path.exists(flag_file):
                 raise FileNotFoundError(errno.ENOENT,
@@ -580,7 +590,7 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, nprocesses,
                                         flag_file)
             cmd.append("--" + flag + "=" + flag_file)
     for flag in ["orf_gff_file", "count_threshold"]:
-        if flag in config and config[flag] is not None:
+        if value_in_dict(flag, config):
             cmd.append("--" + flag + "=" + str(config[flag]))
     process_utils.run_logged_command(
         cmd, log_file, cmd_config.cmd_file, cmd_config.is_dry_run)
@@ -672,10 +682,10 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
                                 fastq)
     LOGGER.info("Processing file: %s", fastq)
 
-    if "nprocesses" not in config:
-        nprocesses = 1
+    if value_in_dict("nprocesses", config):
+        nprocesses = int(config["nprocesses"])
     else:
-        nprocesses = config["nprocesses"]
+        nprocesses = 1
 
     if is_trimmed:
         LOGGER.info("Skipping adaptor trimming and barcode/UMI extraction")
@@ -688,7 +698,7 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
                      cmd_config)
         step += 1
 
-        is_extract_umis = "extract_umis" in config and config["extract_umis"]
+        is_extract_umis = value_in_dict("extract_umis", config)
         if is_extract_umis:
             extract_trim_fq = os.path.join(
                 output_config.tmp_dir, sample + "_extract_trim.fq")
@@ -742,12 +752,12 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
     index_bam(sample_out_bam, log_file, cmd_config)
     step += 1
 
-    is_dedup_umis = "dedup_umis" in config and config["dedup_umis"]
+    is_dedup_umis = value_in_dict("dedup_umis", config)
     if is_dedup_umis:
         if not is_extract_umis:
             LOGGER.warning(
                 "WARNING: dedup_umis was TRUE but extract_umis was FALSE.")
-        is_group_umis = "group_umis" in config and config["group_umis"]
+        is_group_umis = value_in_dict("group_umis", config)
         if is_group_umis:
             umi_groups = os.path.join(
                 output_config.tmp_dir, sample + "_pre_dedup_groups.tsv")
@@ -781,7 +791,7 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
             group_umis(sample_out_bam, umi_groups, log_file, cmd_config)
             step += 1
 
-    is_make_bedgraph = "make_bedgraph" in config and config["make_bedgraph"]
+    is_make_bedgraph = value_in_dict("make_bedgraph", config)
     if is_make_bedgraph:
         log_file = get_sample_log_file(
             output_config.logs_dir, sample, "bedtools_genome_cov_plus", step)
@@ -827,9 +837,14 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     * EXIT_OK (0): Processing successfully completed.
     * EXIT_CONFIG_ERROR (1): Errors occurred loading configuration.
     * EXIT_INDEX_ERROR (2): Error occurred during indexing.
-    * EXIT_NO_SAMPLES_ERROR (3): No samples were provided.
-    * EXIT_SAMPLES_ERROR (4): No sample was processed successfully.
-    * EXIT_COLLATION_ERROR (5): Error occurred during TPMs collation.
+    * EXIT_NO_DATA_ERROR (3): No sample files or multiplexed data
+      files were provided.
+    * EXIT_DATA_CONFLICT_ERROR (4): Both sample files and multiplexed
+      data files were provided.
+    * EXIT_NO_BARCODES_ERROR (5): Multiplexed data files were provided
+      but no barcodes file.
+    * EXIT_DATA_ERROR (6): No data file was processed successfully.
+    * EXIT_COLLATION_ERROR (7): Error occurred during TPMs collation.
 
     :param py_scripts: Python scripts directory
     :type py_scripts: str or unicode
@@ -859,7 +874,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         logging.exception(exc_type.__name__)
         return EXIT_CONFIG_ERROR
 
-    if "cmd_file" in config:
+    if value_in_dict("cmd_file", config):
         cmd_file = config["cmd_file"]
     else:
         cmd_file = "run_riboviz_vignette.sh"
@@ -888,7 +903,9 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
             output_config.index_dir, config["rRNA_index"])
         orf_index = os.path.join(
             output_config.index_dir, config["orf_index"])
-        if config["build_indices"]:
+
+        is_build_indices = value_in_dict("build_indices", config)
+        if is_build_indices:
             log_file = os.path.join(
                 output_config.logs_dir, "hisat2_build_r_rna.log")
             build_indices(r_rna_fasta, r_rna_index, log_file,
@@ -908,51 +925,63 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         logging.exception(exc_type.__name__)
         return EXIT_INDEX_ERROR
 
-    # Loop over sample fastq.gz files.
-    LOGGER.info("Processing samples")
-    if ("fq_files" not in config) or \
-       (config["fq_files"] is None) or \
-       (not config["fq_files"]):
-        LOGGER.error("No samples are defined")
-        return EXIT_NO_SAMPLES_ERROR
-    samples = config["fq_files"]
-    num_samples = len(config["fq_files"])
-    successes = []
-    for sample in list(samples.keys()):
+    is_sample_files = value_in_dict("fq_files", config)
+    is_multiplex_files = value_in_dict("multiplex_fq_files", config)
+    is_barcodes = value_in_dict("barcodes", config)
+    if not is_sample_files and not is_multiplex_files:
+        LOGGER.error("No sample files (fq_files) or multiplexed files (multiplex_fq_files) are specified.")
+        return EXIT_NO_DATA_ERROR
+    elif is_sample_files and is_multiplex_files:
+        LOGGER.error("Both sample files (fq_files) and multiplexed files (multiplex_fq_files) were specified.")
+        return EXIT_DATA_CONFLICT_ERROR
+    elif is_multiplex_files and not is_barcodes:
+        LOGGER.error("Multiplexed files (multiplex_fq_files) are specified but no barcodes (barcodes) file.")
+        return EXIT_NO_BARCODES_ERROR
+
+    if is_sample_files:
+        # Demultiplexed sample files
+        LOGGER.info("Processing samples")
+        samples = config["fq_files"]
+        num_samples = len(config["fq_files"])
+        successes = []
+        for sample in list(samples.keys()):
+            try:
+                fastq = os.path.join(in_dir, samples[sample])
+                process_sample(sample,
+                               fastq,
+                               r_rna_index,
+                               orf_index,
+                               False,
+                               config,
+                               py_scripts,
+                               r_scripts,
+                               output_config,
+                               cmd_config)
+                successes.append(sample)
+            except FileNotFoundError as e:
+                logging.error("File not found: %s", e.filename)
+            except Exception:
+                logging.error("Problem processing sample: %s", sample)
+                exc_type, _, _ = sys.exc_info()
+                logging.exception(exc_type.__name__)
+            LOGGER.info("Finished processing %d samples, %d failed",
+                        num_samples,
+                        num_samples - len(successes))
+        if not successes:
+            return EXIT_DATA_ERROR
         try:
-            fastq = os.path.join(in_dir, samples[sample])
-            process_sample(sample,
-                           fastq,
-                           r_rna_index,
-                           orf_index,
-                           False,
-                           config,
-                           py_scripts,
-                           r_scripts,
-                           output_config,
-                           cmd_config)
-            successes.append(sample)
-        except FileNotFoundError as e:
-            logging.error("File not found: %s", e.filename)
+            log_file = os.path.join(
+                output_config.logs_dir, "collate_tpms.log")
+            collate_tpms(output_config.out_dir, successes, r_scripts,
+                         log_file, cmd_config)
         except Exception:
-            logging.error("Problem processing sample: %s", sample)
+            logging.error(("Problem collating TPMs"))
             exc_type, _, _ = sys.exc_info()
             logging.exception(exc_type.__name__)
-    LOGGER.info("Finished processing %d samples, %d failed",
-                num_samples,
-                num_samples - len(successes))
-    if not successes:
-        return EXIT_SAMPLES_ERROR
-
-    try:
-        log_file = os.path.join(output_config.logs_dir, "collate_tpms.log")
-        collate_tpms(output_config.out_dir, successes, r_scripts,
-                     log_file, cmd_config)
-    except Exception:
-        logging.error(("Problem collating TPMs"))
-        exc_type, _, _ = sys.exc_info()
-        logging.exception(exc_type.__name__)
-        return EXIT_COLLATION_ERROR
+            return EXIT_COLLATION_ERROR
+    else:
+        # Multiplexed file
+        LOGGER.info("TODO multiplexed file processing")
 
     LOGGER.info("Completed")
     return EXIT_OK
