@@ -623,6 +623,34 @@ def collate_tpms(out_dir, samples, r_scripts, log_file, cmd_config):
         cmd, log_file, cmd_config.cmd_file, cmd_config.is_dry_run)
 
 
+def demultiplex_fastq(fastq, barcodes, deplex_dir, log_file,
+                      cmd_config):
+    """
+    Demultiplex reads.
+
+    :param fastq: FASTQ file to demultiplex
+    :type fastq: str or unicode
+    :param barcodes: Sample sheet filename, tab-delimited
+    text format with SampleID and TagRead columns, where TagReads are
+    the barcodes to use to demultiplex fastq
+    :type barcodes: str or unicode
+    :param deplex_dir: Directory to write demultiplexed files
+    :type deplex_dir: str or unicode
+    :param log_file: Log file
+    :type log_file: str or unicode
+    :param cmd_config: Command-related configuration
+    :type cmd_config: CmdConfigTuple
+    :raise FileNotFoundError: if python cannot be found
+    :raise AssertionError: if python returns non-zero exit code
+    """
+    LOGGER.info("Demultiplex reads. Log: %s", log_file)
+    cmd = ["python", "-m", "riboviz.tools.demultiplex_fastq",
+           "-r1", fastq, "-ss", barcodes, "-o", deplex_dir,
+           "-m", "2"]
+    process_utils.run_logged_command(
+        cmd, log_file, cmd_config.cmd_file, cmd_config.is_dry_run)
+
+
 def get_sample_log_file(logs_dir, sample, step, index):
     """
     Get name of log file for a specific processing step applied to a
@@ -1014,8 +1042,65 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
             logging.exception(exc_type.__name__)
             return EXIT_COLLATION_ERROR
     else:
-        # Process multiplexed file
-        LOGGER.info("TODO multiplexed file processing")
+        # Process multiplexed files
+        LOGGER.info("WIP: multiplexed file processing")
+
+        try:
+            barcodes = os.path.join(in_dir, config["barcodes"])
+            if not os.path.exists(barcodes):
+                raise FileNotFoundError(errno.ENOENT,
+                                        os.strerror(errno.ENOENT),
+                                        barcodes)
+        except FileNotFoundError as e:
+            logging.error("File not found: %s", e.filename)
+            return EXIT_CONFIG_ERROR
+        except Exception:
+            logging.error("Problem processing: %s", barcodes)
+            exc_type, _, _ = sys.exc_info()
+            logging.exception(exc_type.__name__)
+            return EXIT_CONFIG_ERROR
+
+        multiplex_files = config["multiplex_fq_files"]
+        # WIP: take first file only
+        multiplex_file = multiplex_files[0]
+        multiplex_name = os.path.splitext(os.path.basename(multiplex_file))[0]
+        multiplex_file = os.path.join(in_dir, multiplex_file)
+        LOGGER.info("Processing file: %s", multiplex_file)
+        try:
+            if not os.path.exists(multiplex_file):
+                raise FileNotFoundError(errno.ENOENT,
+                                        os.strerror(errno.ENOENT),
+                                        multiplex_file)
+            trim_fq = os.path.join(
+                output_config.tmp_dir, multiplex_name + "_trim.fq")
+            log_file = os.path.join(
+                output_config.logs_dir, "cutadapt.log")
+            cut_adapters(config["adapters"], multiplex_file, trim_fq,
+                         log_file, cmd_config)
+
+            extract_trim_fq = os.path.join(
+                output_config.tmp_dir, multiplex_name + "_extract_trim.fq")
+            log_file = os.path.join(
+                output_config.logs_dir, "umi_tools_extract.log")
+            extract_barcodes_umis(
+                trim_fq, extract_trim_fq, config["umi_regexp"], log_file,
+                cmd_config)
+
+            deplex_dir = os.path.join(
+                output_config.tmp_dir, multiplex_name + "_deplex")
+            log_file = os.path.join(
+                output_config.logs_dir, "demultiplex_fastq.log")
+            demultiplex_fastq(extract_trim_fq, barcodes, deplex_dir,
+                              log_file, cmd_config)
+
+        except FileNotFoundError as e:
+            logging.error("File not found: %s", e.filename)
+            return EXIT_DATA_ERROR
+        except Exception:
+            logging.error("Problem processing: %s", multiplex_file)
+            exc_type, _, _ = sys.exc_info()
+            logging.exception(exc_type.__name__)
+            return EXIT_DATA_ERROR
 
     LOGGER.info("Completed")
     return EXIT_OK
