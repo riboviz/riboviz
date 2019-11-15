@@ -828,6 +828,63 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
     LOGGER.info("Finished processing sample: %s", fastq)
 
 
+def process_samples(samples, in_dir, r_rna_index, orf_index, config,
+                    py_scripts, r_scripts, output_config,
+                    cmd_config):
+    """
+    Process FASTQ sample files. Any exceptions in the processing of
+    any sample are logged but are not thrown from this function.
+
+    :param samples: Sample names and files
+    :type samples: dict
+    :param in_dir: Directory with sample files
+    :type in_dir: str or unicode
+    :param r_rna_index: Prefix of rRNA HT2 index files
+    :type r_rna_index: str or unicode
+    :param orf_index: Prefix of ORF HT2 index files
+    :type orf_index: str or unicode
+    :param config: RiboViz configuration
+    :type config: dict
+    :param output_config: Output directories
+    :type output_config: OutputConfigTuple
+    :param cmd_config: Command-related configuration
+    :type cmd_config: CmdConfigTuple
+    :param py_scripts: Python scripts directory
+    :type py_scripts: str or unicode
+    :param r_scripts: R scripts directory
+    :type r_scripts: str or unicode
+    :return: names of successfully-processed samples
+    :rtype: list(str or unicode)
+    """
+    LOGGER.info("Processing samples")
+    successes = []
+    num_samples = len(samples)
+    for sample in list(samples.keys()):
+        try:
+            fastq = os.path.join(in_dir, samples[sample])
+            process_sample(sample,
+                           fastq,
+                           r_rna_index,
+                           orf_index,
+                           False,
+                           config,
+                           py_scripts,
+                           r_scripts,
+                           output_config,
+                           cmd_config)
+            successes.append(sample)
+        except FileNotFoundError as e:
+            logging.error("File not found: %s", e.filename)
+        except Exception:
+            logging.error("Problem processing sample: %s", sample)
+            exc_type, _, _ = sys.exc_info()
+            logging.exception(exc_type.__name__)
+        LOGGER.info("Finished processing %d samples, %d failed",
+                    num_samples,
+                    num_samples - len(successes))
+    return successes
+
+
 def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     """
     Run the RiboViz workflow.
@@ -939,48 +996,25 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         return EXIT_NO_BARCODES_ERROR
 
     if is_sample_files:
-        # Demultiplexed sample files
-        LOGGER.info("Processing samples")
+        # Process sample files
         samples = config["fq_files"]
-        num_samples = len(config["fq_files"])
-        successes = []
-        for sample in list(samples.keys()):
-            try:
-                fastq = os.path.join(in_dir, samples[sample])
-                process_sample(sample,
-                               fastq,
-                               r_rna_index,
-                               orf_index,
-                               False,
-                               config,
-                               py_scripts,
-                               r_scripts,
-                               output_config,
-                               cmd_config)
-                successes.append(sample)
-            except FileNotFoundError as e:
-                logging.error("File not found: %s", e.filename)
-            except Exception:
-                logging.error("Problem processing sample: %s", sample)
-                exc_type, _, _ = sys.exc_info()
-                logging.exception(exc_type.__name__)
-            LOGGER.info("Finished processing %d samples, %d failed",
-                        num_samples,
-                        num_samples - len(successes))
-        if not successes:
+        processed_samples = process_samples(
+            samples, in_dir, r_rna_index, orf_index, config,
+            py_scripts, r_scripts, output_config, cmd_config)
+        if not processed_samples:
             return EXIT_DATA_ERROR
         try:
             log_file = os.path.join(
                 output_config.logs_dir, "collate_tpms.log")
-            collate_tpms(output_config.out_dir, successes, r_scripts,
-                         log_file, cmd_config)
+            collate_tpms(output_config.out_dir, processed_samples,
+                         r_scripts, log_file, cmd_config)
         except Exception:
             logging.error(("Problem collating TPMs"))
             exc_type, _, _ = sys.exc_info()
             logging.exception(exc_type.__name__)
             return EXIT_COLLATION_ERROR
     else:
-        # Multiplexed file
+        # Process multiplexed file
         LOGGER.info("TODO multiplexed file processing")
 
     LOGGER.info("Completed")
