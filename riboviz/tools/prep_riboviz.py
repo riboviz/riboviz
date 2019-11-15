@@ -586,6 +586,33 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, nprocesses,
         cmd, log_file, cmd_config.cmd_file, cmd_config.is_dry_run)
 
 
+def collate_tpms(out_dir, samples, r_scripts, log_file, cmd_config):
+    """
+    Collate TPMs across sample results.
+
+    :param out_dir Output files directory
+    :type out_dir: str or unicode
+    :param samples: Sample names
+    :type samples: list(str or unicode)
+    :param r_scripts: R scripts directory
+    :type r_scripts: str or unicode
+    :param log_file: Log file
+    :type log_file: str or unicode
+    :param cmd_config: Command-related configuration
+    :type cmd_config: CmdConfigTuple
+    :raise FileNotFoundError: if Rscript cannot be found
+    :raise AssertionError: if Rscript returns non-zero exit code
+    """
+    LOGGER.info("Collate TPMs across all processed samples. Log: %s",
+                log_file)
+    cmd = ["Rscript", "--vanilla",
+           os.path.join(r_scripts, "collate_tpms.R"),
+           "--dir_out=" + out_dir]
+    cmd += samples
+    process_utils.run_logged_command(
+        cmd, log_file, cmd_config.cmd_file, cmd_config.is_dry_run)
+
+
 def get_sample_log_file(logs_dir, sample, step, index):
     """
     Get name of log file for a specific processing step applied to a
@@ -780,33 +807,6 @@ def process_sample(sample, fastq, r_rna_index, orf_index, config,
                         r_scripts, log_file, cmd_config)
 
     LOGGER.info("Finished processing sample: %s", fastq)
-
-
-def collate_tpms(out_dir, samples, r_scripts, log_file, cmd_config):
-    """
-    Collate TPMs across sample results.
-
-    :param out_dir Output files directory
-    :type out_dir: str or unicode
-    :param samples: Sample names
-    :type samples: list(str or unicode)
-    :param r_scripts: R scripts directory
-    :type r_scripts: str or unicode
-    :param log_file: Log file
-    :type log_file: str or unicode
-    :param cmd_config: Command-related configuration
-    :type cmd_config: CmdConfigTuple
-    :raise FileNotFoundError: if Rscript cannot be found
-    :raise AssertionError: if Rscript returns non-zero exit code
-    """
-    LOGGER.info("Collate TPMs across all processed samples. Log: %s",
-                log_file)
-    cmd = ["Rscript", "--vanilla",
-           os.path.join(r_scripts, "collate_tpms.R"),
-           "--dir_out=" + out_dir]
-    cmd += samples
-    process_utils.run_logged_command(
-        cmd, log_file, cmd_config.cmd_file, cmd_config.is_dry_run)
 
 
 def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
