@@ -632,8 +632,9 @@ def get_sample_log_file(logs_dir, sample, step, index):
     return os.path.join(logs_dir, "%s_%02d_%s.log" % (sample, index, step))
 
 
-def process_sample(sample, fastq, r_rna_index, orf_index, config,
-                   py_scripts, r_scripts, output_config, cmd_config):
+def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
+                   config, py_scripts, r_scripts, output_config,
+                   cmd_config):
     """
     Process a single FASTQ sample file.
 
@@ -645,6 +646,9 @@ def process_sample(sample, fastq, r_rna_index, orf_index, config,
     :type r_rna_index: str or unicode
     :param orf_index: Prefix of ORF HT2 index files
     :type orf_index: str or unicode
+    :param is_trimmed: Have adapters been cut and barcodes and UMIs
+    extracted already?
+    :type are_trimmed: bool
     :param config: RiboViz configuration
     :type config: dict
     :param output_config: Output directories
@@ -673,24 +677,29 @@ def process_sample(sample, fastq, r_rna_index, orf_index, config,
     else:
         nprocesses = config["nprocesses"]
 
-    log_file = get_sample_log_file(
-        output_config.logs_dir, sample, "cutadapt", step)
-    trim_fq = os.path.join(output_config.tmp_dir, sample + "_trim.fq")
-    cut_adapters(config["adapters"], fastq, trim_fq, log_file,
-                 cmd_config)
-    step += 1
-
-    is_extract_umis = "extract_umis" in config and config["extract_umis"]
-    if is_extract_umis:
-        extract_trim_fq = os.path.join(
-            output_config.tmp_dir, sample + "_extract_trim.fq")
+    if is_trimmed:
+        LOGGER.info("Skipping adaptor trimming and barcode/UMI extraction")
+        trim_fq = fastq
+    else:
         log_file = get_sample_log_file(
-            output_config.logs_dir, sample, "umi_tools_extract", step)
-        extract_barcodes_umis(
-            trim_fq, extract_trim_fq, config["umi_regexp"], log_file,
-            cmd_config)
-        trim_fq = extract_trim_fq
+            output_config.logs_dir, sample, "cutadapt", step)
+        trim_fq = os.path.join(output_config.tmp_dir, sample + "_trim.fq")
+        cut_adapters(config["adapters"], fastq, trim_fq, log_file,
+                     cmd_config)
         step += 1
+
+        is_extract_umis = "extract_umis" in config and config["extract_umis"]
+        if is_extract_umis:
+            extract_trim_fq = os.path.join(
+                output_config.tmp_dir, sample + "_extract_trim.fq")
+            log_file = get_sample_log_file(
+                output_config.logs_dir, sample, "umi_tools_extract",
+                step)
+            extract_barcodes_umis(
+                trim_fq, extract_trim_fq, config["umi_regexp"],
+                log_file, cmd_config)
+            trim_fq = extract_trim_fq
+            step += 1
 
     non_r_rna_trim_fq = os.path.join(
         output_config.tmp_dir, sample + "_nonrRNA.fq")
@@ -916,6 +925,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
                            fastq,
                            r_rna_index,
                            orf_index,
+                           False,
                            config,
                            py_scripts,
                            r_scripts,
