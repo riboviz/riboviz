@@ -95,7 +95,11 @@ import sys
 import yaml
 from riboviz import process_utils
 from riboviz import logging_utils
+from riboviz.tools.demultiplex_fastq import NUM_READS_FILE
 from riboviz.utils import value_in_dict
+from riboviz.utils import get_fastq_filename
+from riboviz.utils import load_deplexed_sample_sheet
+from riboviz.utils import get_non_zero_deplexed_samples
 
 
 EXIT_OK = 0
@@ -623,17 +627,17 @@ def collate_tpms(out_dir, samples, r_scripts, log_file, cmd_config):
         cmd, log_file, cmd_config.cmd_file, cmd_config.is_dry_run)
 
 
-def demultiplex_fastq(fastq, barcodes, deplex_dir, log_file,
+def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
                       cmd_config):
     """
     Demultiplex reads.
 
     :param fastq: FASTQ file to demultiplex
     :type fastq: str or unicode
-    :param barcodes: Sample sheet filename, tab-delimited
+    :param barcodes_file: Sample sheet filename, tab-delimited
     text format with SampleID and TagRead columns, where TagReads are
     the barcodes to use to demultiplex fastq
-    :type barcodes: str or unicode
+    :type barcodes_file: str or unicode
     :param deplex_dir: Directory to write demultiplexed files
     :type deplex_dir: str or unicode
     :param log_file: Log file
@@ -645,7 +649,7 @@ def demultiplex_fastq(fastq, barcodes, deplex_dir, log_file,
     """
     LOGGER.info("Demultiplex reads. Log: %s", log_file)
     cmd = ["python", "-m", "riboviz.tools.demultiplex_fastq",
-           "-r1", fastq, "-ss", barcodes, "-o", deplex_dir,
+           "-r1", fastq, "-ss", barcodes_file, "-o", deplex_dir,
            "-m", "2"]
     process_utils.run_logged_command(
         cmd, log_file, cmd_config.cmd_file, cmd_config.is_dry_run)
@@ -715,6 +719,7 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
     else:
         nprocesses = 1
 
+    is_extract_umis = value_in_dict("extract_umis", config)
     if is_trimmed:
         LOGGER.info("Skipping adaptor trimming and barcode/UMI extraction")
         trim_fq = fastq
@@ -726,7 +731,6 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
                      cmd_config)
         step += 1
 
-        is_extract_umis = value_in_dict("extract_umis", config)
         if is_extract_umis:
             extract_trim_fq = os.path.join(
                 output_config.tmp_dir, sample + "_extract_trim.fq")
@@ -856,9 +860,9 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
     LOGGER.info("Finished processing sample: %s", fastq)
 
 
-def process_samples(samples, in_dir, r_rna_index, orf_index, config,
-                    py_scripts, r_scripts, output_config,
-                    cmd_config):
+def process_samples(samples, in_dir, r_rna_index, orf_index,
+                    is_trimmed, config, py_scripts, r_scripts,
+                    output_config, cmd_config):
     """
     Process FASTQ sample files. Any exceptions in the processing of
     any sample are logged but are not thrown from this function.
@@ -871,6 +875,9 @@ def process_samples(samples, in_dir, r_rna_index, orf_index, config,
     :type r_rna_index: str or unicode
     :param orf_index: Prefix of ORF HT2 index files
     :type orf_index: str or unicode
+    :param is_trimmed: Have adapters been cut and barcodes and UMIs
+    extracted already?
+    :type are_trimmed: bool
     :param config: RiboViz configuration
     :type config: dict
     :param output_config: Output directories
@@ -894,7 +901,7 @@ def process_samples(samples, in_dir, r_rna_index, orf_index, config,
                            fastq,
                            r_rna_index,
                            orf_index,
-                           False,
+                           is_trimmed,
                            config,
                            py_scripts,
                            r_scripts,
@@ -907,9 +914,9 @@ def process_samples(samples, in_dir, r_rna_index, orf_index, config,
             logging.error("Problem processing sample: %s", sample)
             exc_type, _, _ = sys.exc_info()
             logging.exception(exc_type.__name__)
-        LOGGER.info("Finished processing %d samples, %d failed",
-                    num_samples,
-                    num_samples - len(successes))
+    LOGGER.info("Finished processing %d samples, %d failed",
+                num_samples,
+                num_samples - len(successes))
     return successes
 
 
@@ -945,7 +952,6 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     """
     LOGGER.info("Running under Python: %s", sys.version)
     LOGGER.info("Configuration file: %s", config_yaml)
-
     LOGGER.info("Load configuration: %s", config_yaml)
     try:
         with open(config_yaml, 'r') as f:
@@ -1027,7 +1033,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         # Process sample files
         samples = config["fq_files"]
         processed_samples = process_samples(
-            samples, in_dir, r_rna_index, orf_index, config,
+            samples, in_dir, r_rna_index, orf_index, False, config,
             py_scripts, r_scripts, output_config, cmd_config)
         if not processed_samples:
             return EXIT_DATA_ERROR
@@ -1046,16 +1052,16 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         LOGGER.info("WIP: multiplexed file processing")
 
         try:
-            barcodes = os.path.join(in_dir, config["barcodes"])
-            if not os.path.exists(barcodes):
+            barcodes_file = os.path.join(in_dir, config["barcodes"])
+            if not os.path.exists(barcodes_file):
                 raise FileNotFoundError(errno.ENOENT,
                                         os.strerror(errno.ENOENT),
-                                        barcodes)
+                                        barcodes_file)
         except FileNotFoundError as e:
             logging.error("File not found: %s", e.filename)
             return EXIT_CONFIG_ERROR
         except Exception:
-            logging.error("Problem processing: %s", barcodes)
+            logging.error("Problem processing: %s", barcodes_file)
             exc_type, _, _ = sys.exc_info()
             logging.exception(exc_type.__name__)
             return EXIT_CONFIG_ERROR
@@ -1090,9 +1096,30 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
                 output_config.tmp_dir, multiplex_name + "_deplex")
             log_file = os.path.join(
                 output_config.logs_dir, "demultiplex_fastq.log")
-            demultiplex_fastq(extract_trim_fq, barcodes, deplex_dir,
-                              log_file, cmd_config)
+            demultiplex_fastq(extract_trim_fq, barcodes_file,
+                              deplex_dir, log_file, cmd_config)
 
+            # TODO this won't work for dry run as it does not exist!
+            num_reads_file = os.path.join(deplex_dir, NUM_READS_FILE)
+            num_reads = load_deplexed_sample_sheet(num_reads_file)
+            samples = get_non_zero_deplexed_samples(num_reads)
+            print(samples)  # TODO remove
+            if not samples:
+                LOGGER.error("No sample files with any reads resulted from demultiplexing.")
+                return EXIT_NO_DATA_ERROR
+
+            # Use get_fastq_filename to deduce sample-specific files
+            # output by demultiplex_fastq.py - demultiplex_fastq.py
+            # uses this function too.
+            sample_files = {sample: get_fastq_filename(sample)
+                            for sample in samples}
+            print(sample_files)  # TODO remove
+            processed_samples = process_samples(
+                sample_files, deplex_dir, r_rna_index, orf_index,
+                True, config, py_scripts, r_scripts, output_config,
+                cmd_config)
+            if not processed_samples:
+                return EXIT_DATA_ERROR
         except FileNotFoundError as e:
             logging.error("File not found: %s", e.filename)
             return EXIT_DATA_ERROR
