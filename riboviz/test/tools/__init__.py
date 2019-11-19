@@ -11,6 +11,7 @@ import riboviz.test
 import riboviz.process_utils
 import riboviz.validation
 import riboviz.tools
+from riboviz import params
 from riboviz.tools import prep_riboviz
 
 
@@ -37,26 +38,26 @@ def configuration_fixture(request):
     with open(config_yaml, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
     _, config_path = tempfile.mkstemp(prefix="tmp", suffix=".yaml")
-    index_dir = tempfile.mkdtemp("tmp_test_prep_riboviz_index")
-    tmp_dir = tempfile.mkdtemp("tmp_test_prep_riboviz_tmp")
-    out_dir = tempfile.mkdtemp("tmp_test_prep_riboviz_out")
-    logs_dir = tempfile.mkdtemp("tmp_test_prep_riboviz_logs")
+    index_dir = tempfile.mkdtemp("tmp_riboviz_test_tools_index")
+    tmp_dir = tempfile.mkdtemp("tmp_riboviz_test_tools_tmp")
+    out_dir = tempfile.mkdtemp("tmp_riboviz_test_tools_out")
+    logs_dir = tempfile.mkdtemp("tmp_riboviz_test_tools_logs")
     _, cmd_file = tempfile.mkstemp(prefix="tmp", suffix=".sh")
-    config["dir_index"] = index_dir
-    config["dir_tmp"] = tmp_dir
-    config["dir_out"] = out_dir
-    config["dir_logs"] = logs_dir
-    config["cmd_file"] = cmd_file
+    config[params.INDEX_DIR] = index_dir
+    config[params.TMP_DIR] = tmp_dir
+    config[params.OUTPUT_DIR] = out_dir
+    config[params.LOGS_DIR] = logs_dir
+    config[params.CMD_FILE] = cmd_file
     with open(config_path, 'w') as f:
         yaml.dump(config, f)
 
     yield (config, config_path)
 
-    index_dir = config["dir_index"]
-    tmp_dir = config["dir_tmp"]
-    out_dir = config["dir_out"]
-    logs_dir = config["dir_logs"]
-    cmd_file = config["cmd_file"]
+    index_dir = config[params.INDEX_DIR]
+    tmp_dir = config[params.TMP_DIR]
+    out_dir = config[params.OUTPUT_DIR]
+    logs_dir = config[params.LOGS_DIR]
+    cmd_file = config[params.CMD_FILE]
     shutil.rmtree(index_dir)
     shutil.rmtree(tmp_dir)
     shutil.rmtree(out_dir)
