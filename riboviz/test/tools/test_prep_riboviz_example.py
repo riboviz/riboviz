@@ -19,6 +19,7 @@ import riboviz.process_utils
 import riboviz.test
 import riboviz.tools
 import riboviz.validation
+from riboviz import params
 from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration_module  # Test fixture
 
@@ -61,7 +62,7 @@ def test_adaptor_trimming(configuration_module):
     config, _ = configuration_module
     expected_output = os.path.join(riboviz.test.EXAMPLE_DATA_DIR,
                                    "umi5_umi3_umi.fastq")
-    actual_output = os.path.join(config["dir_tmp"],
+    actual_output = os.path.join(config[params.TMP_DIR],
                                  "umi5_umi3_trim.fq")
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
@@ -80,7 +81,7 @@ def test_umi_extract(configuration_module):
     config, _ = configuration_module
     expected_output = os.path.join(riboviz.test.EXAMPLE_DATA_DIR,
                                    "umi5_umi3.fastq")
-    actual_output = os.path.join(config["dir_tmp"],
+    actual_output = os.path.join(config[params.TMP_DIR],
                                  "umi5_umi3_extract_trim.fq")
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
@@ -96,7 +97,7 @@ def test_umi_group(configuration_module):
     :type configuration_module: tuple(dict, str or unicode)
     """
     config, _ = configuration_module
-    tmp_dir = config["dir_tmp"]
+    tmp_dir = config[params.TMP_DIR]
     groups_tsv = os.path.join(tmp_dir,
                               "umi5_umi3_post_dedup_groups.tsv")
     groups = pd.read_csv(groups_tsv, sep="\t")

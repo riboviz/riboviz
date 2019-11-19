@@ -92,6 +92,7 @@ import os.path
 import sys
 import yaml
 from riboviz import logging_utils
+from riboviz import params
 from riboviz import workflow
 from riboviz.tools.demultiplex_fastq import NUM_READS_FILE
 from riboviz.utils import value_in_dict
@@ -163,12 +164,12 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
                                 fastq)
     LOGGER.info("Processing file: %s", fastq)
 
-    if value_in_dict("nprocesses", config):
-        nprocesses = int(config["nprocesses"])
+    if value_in_dict(params.NPROCESSES, config):
+        nprocesses = int(config[params.NPROCESSES])
     else:
         nprocesses = 1
 
-    is_extract_umis = value_in_dict("extract_umis", config)
+    is_extract_umis = value_in_dict(params.EXTRACT_UMIS, config)
     if is_trimmed:
         LOGGER.info("Skipping adaptor trimming and barcode/UMI extraction")
         trim_fq = fastq
@@ -177,7 +178,7 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
             output_config.logs_dir, sample, "cutadapt", step)
         trim_fq = os.path.join(output_config.tmp_dir, sample + "_trim.fq")
         workflow.cut_adapters(
-            config["adapters"], fastq, trim_fq, log_file, cmd_config)
+            config[params.ADAPTERS], fastq, trim_fq, log_file, cmd_config)
         step += 1
 
         if is_extract_umis:
@@ -187,7 +188,7 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
                 output_config.logs_dir, sample, "umi_tools_extract",
                 step)
             workflow.extract_barcodes_umis(
-                trim_fq, extract_trim_fq, config["umi_regexp"],
+                trim_fq, extract_trim_fq, config[params.UMI_REGEXP],
                 log_file, cmd_config)
             trim_fq = extract_trim_fq
             step += 1
@@ -237,12 +238,12 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
     workflow.index_bam(sample_out_bam, log_file, cmd_config)
     step += 1
 
-    is_dedup_umis = value_in_dict("dedup_umis", config)
+    is_dedup_umis = value_in_dict(params.DEDUP_UMIS, config)
     if is_dedup_umis:
         if not is_extract_umis:
             LOGGER.warning(
                 "WARNING: dedup_umis was TRUE but extract_umis was FALSE.")
-        is_group_umis = value_in_dict("group_umis", config)
+        is_group_umis = value_in_dict(params.GROUP_UMIS, config)
         if is_group_umis:
             umi_groups = os.path.join(
                 output_config.tmp_dir, sample + "_pre_dedup_groups.tsv")
@@ -279,7 +280,7 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
                 sample_out_bam, umi_groups, log_file, cmd_config)
             step += 1
 
-    is_make_bedgraph = value_in_dict("make_bedgraph", config)
+    is_make_bedgraph = value_in_dict(params.MAKE_BEDGRAPH, config)
     if is_make_bedgraph:
         log_file = workflow.get_sample_log_file(
             output_config.logs_dir, sample, "bedtools_genome_cov_plus", step)
@@ -295,7 +296,7 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
             sample_out_bam, minus_bedgraph, False, log_file, cmd_config)
         step += 1
 
-    orf_gff_file = config["orf_gff_file"]
+    orf_gff_file = config[params.ORF_GFF_FILE]
     if not os.path.exists(orf_gff_file):
         raise FileNotFoundError(errno.ENOENT,
                                 os.strerror(errno.ENOENT),
@@ -422,8 +423,8 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         logging.exception(exc_type.__name__)
         return EXIT_CONFIG_ERROR
 
-    if value_in_dict("cmd_file", config):
-        cmd_file = config["cmd_file"]
+    if value_in_dict(params.CMD_FILE, config):
+        cmd_file = config[params.CMD_FILE]
     else:
         cmd_file = "run_riboviz_vignette.sh"
     LOGGER.info("Command file: %s", cmd_file)
@@ -432,7 +433,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     cmd_config = workflow.CmdConfigTuple(cmd_file, is_dry_run)
 
     try:
-        in_dir = config["dir_in"]
+        in_dir = config[params.INPUT_DIR]
         output_config = workflow.setup_output_directories(config, cmd_config)
     except KeyError as e:
         logging.error("Missing configuration parameter: %s", e.args[0])
@@ -445,14 +446,14 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
 
     LOGGER.info("Build indices for alignment, if necessary/requested")
     try:
-        r_rna_fasta = config["rRNA_fasta"]
-        orf_fasta = config["orf_fasta"]
+        r_rna_fasta = config[params.R_RNA_FASTA_FILE]
+        orf_fasta = config[params.ORF_FASTA_FILE]
         r_rna_index = os.path.join(
-            output_config.index_dir, config["rRNA_index"])
+            output_config.index_dir, config[params.R_RNA_INDEX_PREFIX])
         orf_index = os.path.join(
-            output_config.index_dir, config["orf_index"])
+            output_config.index_dir, config[params.ORF_INDEX_PREFIX])
 
-        is_build_indices = value_in_dict("build_indices", config)
+        is_build_indices = value_in_dict(params.BUILD_INDICES, config)
         if is_build_indices:
             log_file = os.path.join(
                 output_config.logs_dir, "hisat2_build_r_rna.log")
@@ -474,9 +475,9 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         logging.exception(exc_type.__name__)
         return EXIT_INDEX_ERROR
 
-    is_sample_files = value_in_dict("fq_files", config)
-    is_multiplex_files = value_in_dict("multiplex_fq_files", config)
-    is_barcodes = value_in_dict("barcodes", config)
+    is_sample_files = value_in_dict(params.FQ_FILES, config)
+    is_multiplex_files = value_in_dict(params.MULTIPLEX_FQ_FILES, config)
+    is_barcodes = value_in_dict(params.BARCODES_FILE, config)
     if not is_sample_files and not is_multiplex_files:
         LOGGER.error("No sample files (fq_files) or multiplexed files (multiplex_fq_files) are specified.")
         return EXIT_NO_DATA_ERROR
@@ -489,7 +490,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
 
     if is_sample_files:
         # Process sample files
-        samples = config["fq_files"]
+        samples = config[params.FQ_FILES]
         processed_samples = process_samples(
             samples, in_dir, r_rna_index, orf_index, False, config,
             py_scripts, r_scripts, output_config, cmd_config)
@@ -511,7 +512,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         LOGGER.info("WIP: multiplexed file processing")
 
         try:
-            barcodes_file = os.path.join(in_dir, config["barcodes"])
+            barcodes_file = os.path.join(in_dir, config[params.BARCODES_FILE])
             if not os.path.exists(barcodes_file):
                 raise FileNotFoundError(errno.ENOENT,
                                         os.strerror(errno.ENOENT),
@@ -525,7 +526,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
             logging.exception(exc_type.__name__)
             return EXIT_CONFIG_ERROR
 
-        multiplex_files = config["multiplex_fq_files"]
+        multiplex_files = config[params.MULTIPLEX_FQ_FILES]
         # WIP: take first file only
         multiplex_file = multiplex_files[0]
         multiplex_name = os.path.splitext(os.path.basename(multiplex_file))[0]
@@ -541,7 +542,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
             log_file = os.path.join(
                 output_config.logs_dir, "cutadapt.log")
             workflow.cut_adapters(
-                config["adapters"], multiplex_file, trim_fq, log_file,
+                config[params.ADAPTERS], multiplex_file, trim_fq, log_file,
                 cmd_config)
 
             extract_trim_fq = os.path.join(
@@ -549,7 +550,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
             log_file = os.path.join(
                 output_config.logs_dir, "umi_tools_extract.log")
             workflow.extract_barcodes_umis(
-                trim_fq, extract_trim_fq, config["umi_regexp"], log_file,
+                trim_fq, extract_trim_fq, config[params.UMI_REGEXP], log_file,
                 cmd_config)
 
             deplex_dir = os.path.join(

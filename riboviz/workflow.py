@@ -9,6 +9,7 @@ import errno
 import logging
 import os
 import os.path
+from riboviz import params
 from riboviz import process_utils
 from riboviz import logging_utils
 from riboviz.utils import value_in_dict
@@ -44,10 +45,10 @@ def setup_output_directories(config, cmd_config):
     :raise AssertionError: if there is a problem configuring a
     directory
     """
-    index_dir = config["dir_index"]
-    tmp_dir = config["dir_tmp"]
-    out_dir = config["dir_out"]
-    base_logs_dir = config["dir_logs"]
+    index_dir = config[params.INDEX_DIR]
+    tmp_dir = config[params.TMP_DIR]
+    out_dir = config[params.OUTPUT_DIR]
+    base_logs_dir = config[params.LOGS_DIR]
     logs_dir = os.path.join(
         base_logs_dir, datetime.now().strftime('%Y%m%d-%H%M%S'))
     dirs = [index_dir, tmp_dir, out_dir, base_logs_dir, logs_dir]
@@ -415,23 +416,23 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config, nprocesses,
     """
     LOGGER.info("Make length-sensitive alignments in H5 format. Log: %s",
                 log_file)
-    second_id = config["SecondID"]
+    second_id = config[params.SECOND_ID]
     if second_id is None:
         second_id = "NULL"
     cmd = ["Rscript", "--vanilla",
            os.path.join(r_scripts, "bam_to_h5.R"),
            "--Ncores=" + str(nprocesses),
-           "--MinReadLen=" + str(config["MinReadLen"]),
-           "--MaxReadLen=" + str(config["MaxReadLen"]),
-           "--Buffer=" + str(config["Buffer"]),
-           "--PrimaryID=" + config["PrimaryID"],
+           "--MinReadLen=" + str(config[params.MIN_READ_LEN]),
+           "--MaxReadLen=" + str(config[params.MAX_READ_LEN]),
+           "--Buffer=" + str(config[params.BUFFER]),
+           "--PrimaryID=" + config[params.PRIMARY_ID],
            "--SecondID=" + second_id,
-           "--dataset=" + config["dataset"],
+           "--dataset=" + config[params.DATASET],
            "--bamFile=" + bam_file,
            "--hdFile=" + h5_file,
            "--orf_gff_file=" + orf_gff_file,
-           "--ribovizGFF=" + str(config["ribovizGFF"]),
-           "--StopInCDS=" + str(config["StopInCDS"])]
+           "--ribovizGFF=" + str(config[params.RIBOVIZ_GFF]),
+           "--StopInCDS=" + str(config[params.STOP_IN_CDS])]
     process_utils.run_logged_command(
         cmd, log_file, cmd_config.cmd_file, cmd_config.is_dry_run)
 
@@ -468,18 +469,18 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, nprocesses,
     cmd = ["Rscript", "--vanilla",
            os.path.join(r_scripts, "generate_stats_figs.R"),
            "--Ncores=" + str(nprocesses),
-           "--MinReadLen=" + str(config["MinReadLen"]),
-           "--MaxReadLen=" + str(config["MaxReadLen"]),
-           "--Buffer=" + str(config["Buffer"]),
-           "--PrimaryID=" + config["PrimaryID"],
-           "--dataset=" + config["dataset"],
+           "--MinReadLen=" + str(config[params.MIN_READ_LEN]),
+           "--MaxReadLen=" + str(config[params.MAX_READ_LEN]),
+           "--Buffer=" + str(config[params.BUFFER]),
+           "--PrimaryID=" + config[params.PRIMARY_ID],
+           "--dataset=" + config[params.DATASET],
            "--hdFile=" + h5_file,
            "--out_prefix=" + prefix,
-           "--orf_fasta=" + config["orf_fasta"],
-           "--rpf=" + str(config["rpf"]),
+           "--orf_fasta=" + config[params.ORF_FASTA_FILE],
+           "--rpf=" + str(config[params.RPF]),
            "--dir_out=" + out_dir,
-           "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
-    for flag in ["t_rna", "codon_pos", "features_file"]:
+           "--do_pos_sp_nt_freq=" + str(config[params.DO_POS_SP_NT_FREQ])]
+    for flag in [params.T_RNA, params.CODON_POS, params.FEATURES_FILE]:
         if value_in_dict(flag, config):
             flag_file = config[flag]
             if not os.path.exists(flag_file):
@@ -487,7 +488,7 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, nprocesses,
                                         os.strerror(errno.ENOENT),
                                         flag_file)
             cmd.append("--" + flag + "=" + flag_file)
-    for flag in ["orf_gff_file", "count_threshold"]:
+    for flag in [params.ORF_GFF_FILE, params.COUNT_THRESHOLD]:
         if value_in_dict(flag, config):
             cmd.append("--" + flag + "=" + str(config[flag]))
     process_utils.run_logged_command(
