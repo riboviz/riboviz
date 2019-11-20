@@ -508,7 +508,6 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         workflow.collate_tpms(
             out_dir, processed_samples, log_file, run_config)
     else:
-        LOGGER.info("WIP: multiplexed file processing")
         sample_sheet_file = os.path.join(in_dir,
                                          config[params.SAMPLE_SHEET_FILE])
         if not os.path.exists(sample_sheet_file):
