@@ -11,7 +11,7 @@ The `data/example/` folder contains simple simulated FASTQ files that, in conjun
 Configuration parameters pertinent to UMI extraction and deduplication are as follows:
 
 * `extract_umis`: If `TRUE` then UMIs will be extracted. The UMIs are extracted using `umi_tools extract` on the trimmed FASTQ file, using the regular expression specified in `umi_regexp` below. The extracted UMIs are inserted into the read headers of the FASTQ records.
-* `umi_regexp`: A UMI-tools-compliant regular expression to extract UMIs. For example `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$` extracts a 4nt UMI from the 5' end of a read and a 4nt UMI from the 3' end. For details on the regular expression format, see UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction].
+* `umi_regexp`: A UMI-tools-compliant regular expression to extract UMIs. For example `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$` extracts a 4nt UMI from the 5' end of a read and a 4nt UMI from the 3' end. For details on the regular expression format, see UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction).
 * `dedup_umis`: If `TRUE` then the reads will be deduplicated using `umi_tools dedup`.
 * `group_umis`: If `TRUE` then the UMI groups are summarised both pre- and post-deduplication, using `umi_tools group`. This is provided for debugging purposes.
 
@@ -85,7 +85,7 @@ Note: if  both `fq_files` and `multiplex_fq_files` parameters are provided then 
 
 * Cutting out of sequencing library adapters is done on the multiplexed file.
 * Post-cutting out of sequencing library adapters, barcodes and UMIs are extracted using `umi_tools extract` if requested (`extract_umis: TRUE`), using the UMI-tools-compliant regular expression pattern (`umi_regexp`).
-* The file is demultiplexed using `demultiplex_fastq.py` and information in the sample sheet (`sample_sheet`).
+* The file is demultiplexed using `demultiplex_fastq.py` and information in the sample sheet (`sample_sheet`). For more information, see [demultiplex-fastq.py fastq demultiplexer](./demultiplex-fastq.md).
 * Each demultiplexed file (sample) is then processed in turn:
   - Processing is as for non-demultiplexed files, except that there is no need to cut out sequencing library adapters or extract UMIs, as these have already been done. TPMs are also collated per-sample as described below.
   - Post-trimming of 5' mismatches from reads and removal of reads with more than 2 mismatches:
