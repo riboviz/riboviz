@@ -472,7 +472,7 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 
 
-def collate_tpms(out_dir, samples, log_file, run_config):
+def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
     """
     Collate TPMs across sample results.
 
@@ -484,6 +484,9 @@ def collate_tpms(out_dir, samples, log_file, run_config):
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
+    :param tpms_file: TPMS file relative to out_dir, if omitted then
+    default, chosen by collate_tpms.R, is used
+    :type tpms_file: str or unicode
     :raise FileNotFoundError: if Rscript cannot be found
     :raise AssertionError: if Rscript returns non-zero exit code
     """
@@ -491,6 +494,8 @@ def collate_tpms(out_dir, samples, log_file, run_config):
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts, "collate_tpms.R"),
            "--dir_out=" + out_dir]
+    if tpms_file is not None:
+        cmd.append("--file_out=" + tpms_file)
     cmd += samples
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)

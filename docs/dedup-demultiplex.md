@@ -113,7 +113,7 @@ After the run, the following barcode and UMI extraction, demultiplexing, and ded
 * Sample-specific output files (in `vignette/tmp/<SAMPLE_ID>`):
   - There will be one directory per file that had one or more reads.
   - This contains the output files specific to processing this sample, including those arising from deduplication described above.
-  - This will also contain a `TPMs_collated.tsv` file for the sample.
+  - This will also contain a `<SAMPLE_ID>_TPMs_collated.tsv` file for the sample.
 * Log files (in `vignette/logs/YYYYMMNN-HHMMSS/`):
 
 ```

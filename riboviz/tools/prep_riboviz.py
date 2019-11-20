@@ -293,7 +293,9 @@ def process_sample(sample, fastq, r_rna_index, orf_index,
         step += 1
         log_file = workflow.get_sample_log_file(
             run_config.logs_dir, sample, "collate_tpms", step)
-        workflow.collate_tpms(out_dir, [sample], log_file, run_config)
+        tpms_file = sample + "_TPMs_collated.tsv"
+        workflow.collate_tpms(
+            out_dir, [sample], log_file, run_config, tpms_file)
 
     LOGGER.info("Finished processing sample: %s", fastq)
 
