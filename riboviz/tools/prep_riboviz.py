@@ -90,8 +90,10 @@ from riboviz import logging_utils
 from riboviz import params
 from riboviz import workflow
 from riboviz.tools.demultiplex_fastq import NUM_READS_FILE
+from riboviz.utils import SAMPLE_ID
 from riboviz.utils import value_in_dict
 from riboviz.utils import get_fastq_filename
+from riboviz.utils import load_sample_sheet
 from riboviz.utils import load_deplexed_sample_sheet
 from riboviz.utils import get_non_zero_deplexed_samples
 
@@ -153,9 +155,6 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
     """
     LOGGER.info("Processing sample: %s", sample)
     step = 1
-    if not os.path.exists(fastq):
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
-                                fastq)
     LOGGER.info("Processing file: %s", fastq)
 
     if value_in_dict(params.NPROCESSES, config):
@@ -313,7 +312,7 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
 
 
 def process_samples(samples, in_dir, r_rna_index, orf_index,
-                    is_trimmed, config, py_scripts, r_scripts,
+                    config, py_scripts, r_scripts,
                     output_config, cmd_config):
     """
     Process FASTQ sample files. Any exceptions in the processing of
@@ -327,9 +326,6 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
     :type r_rna_index: str or unicode
     :param orf_index: Prefix of ORF HT2 index files
     :type orf_index: str or unicode
-    :param is_trimmed: Have adapters been cut and barcodes and UMIs
-    extracted already?
-    :type are_trimmed: bool
     :param config: RiboViz configuration
     :type config: dict
     :param output_config: Output directories
@@ -349,11 +345,14 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
     for sample in list(samples.keys()):
         try:
             fastq = os.path.join(in_dir, samples[sample])
+            if not os.path.exists(fastq):
+                raise FileNotFoundError(
+                    errno.ENOENT, os.strerror(errno.ENOENT), fastq)
             process_sample(sample,
                            fastq,
                            r_rna_index,
                            orf_index,
-                           is_trimmed,
+                           False,
                            config,
                            py_scripts,
                            r_scripts,
@@ -364,6 +363,67 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
             logging.error("File not found: %s", e.filename)
         except Exception:
             logging.error("Problem processing sample: %s", sample)
+            exc_type, _, _ = sys.exc_info()
+            logging.exception(exc_type.__name__)
+    LOGGER.info("Finished processing %d samples, %d failed",
+                num_samples,
+                num_samples - len(successes))
+    return successes
+
+
+def process_multiplexed_samples(samples, in_dir, r_rna_index, orf_index,
+                                config, py_scripts, r_scripts,
+                                output_config, cmd_config):
+    """
+    Process FASTQ sample files. Any exceptions in the processing of
+    any sample are logged but are not thrown from this function.
+
+    :param samples: Sample names and files
+    :type samples: dict
+    :param in_dir: Directory with sample files
+    :type in_dir: str or unicode
+    :param r_rna_index: Prefix of rRNA HT2 index files
+    :type r_rna_index: str or unicode
+    :param orf_index: Prefix of ORF HT2 index files
+    :type orf_index: str or unicode
+    :param config: RiboViz configuration
+    :type config: dict
+    :param output_config: Output directories
+    :type output_config: OutputConfigTuple
+    :param cmd_config: Command-related configuration
+    :type cmd_config: CmdConfigTuple
+    :param py_scripts: Python scripts directory
+    :type py_scripts: str or unicode
+    :param r_scripts: R scripts directory
+    :type r_scripts: str or unicode
+    :return: names of successfully-processed samples
+    :rtype: list(str or unicode)
+    """
+    LOGGER.info("Processing multiplexed samples")
+    successes = []
+    num_samples = len(samples)
+    for sample in list(samples.keys()):
+        try:
+            fastq = os.path.join(in_dir, samples[sample])
+            if not cmd_config.is_dry_run:
+                if not os.path.exists(fastq):
+                    raise FileNotFoundError(
+                        errno.ENOENT, os.strerror(errno.ENOENT), fastq)
+            process_sample(sample,
+                           fastq,
+                           r_rna_index,
+                           orf_index,
+                           True,
+                           config,
+                           py_scripts,
+                           r_scripts,
+                           output_config,
+                           cmd_config)
+            successes.append(sample)
+        except FileNotFoundError as e:
+            logging.error("File not found: %s", e.filename)
+        except Exception:
+            logging.error("Problem multiplexed processing sample: %s", sample)
             exc_type, _, _ = sys.exc_info()
             logging.exception(exc_type.__name__)
     LOGGER.info("Finished processing %d samples, %d failed",
@@ -479,7 +539,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     if is_sample_files:
         samples = config[params.FQ_FILES]
         processed_samples = process_samples(
-            samples, in_dir, r_rna_index, orf_index, False, config,
+            samples, in_dir, r_rna_index, orf_index, config,
             py_scripts, r_scripts, output_config, cmd_config)
         if not processed_samples:
             return EXIT_PROCESSING_ERROR
@@ -545,24 +605,26 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
             workflow.demultiplex_fastq(extract_trim_fq, sample_sheet_file,
                                        deplex_dir, log_file, cmd_config)
 
-            # TODO this won't work for dry run as it does not exist!
-            num_reads_file = os.path.join(deplex_dir, NUM_READS_FILE)
-            num_reads = load_deplexed_sample_sheet(num_reads_file)
-            samples = get_non_zero_deplexed_samples(num_reads)
-            print(samples)  # TODO remove
+            if not is_dry_run:
+                num_reads_file = os.path.join(deplex_dir, NUM_READS_FILE)
+                num_reads = load_deplexed_sample_sheet(num_reads_file)
+                samples = get_non_zero_deplexed_samples(num_reads)
+            else:
+                # If doing a dry run, use the sample_sheet_file to get
+                # the names of the samples.
+                sample_sheet = load_sample_sheet(sample_sheet_file)
+                samples = list(sample_sheet[SAMPLE_ID])
             if not samples:
                 LOGGER.error("No sample files with any reads resulted from demultiplexing.")
                 return EXIT_PROCESSING_ERROR
-
             # Use get_fastq_filename to deduce sample-specific files
             # output by demultiplex_fastq.py - demultiplex_fastq.py
             # uses this function too.
             sample_files = {sample: get_fastq_filename(sample)
                             for sample in samples}
-            print(sample_files)  # TODO remove
-            processed_samples = process_samples(
+            processed_samples = process_multiplexed_samples(
                 sample_files, deplex_dir, r_rna_index, orf_index,
-                True, config, py_scripts, r_scripts, output_config,
+                config, py_scripts, r_scripts, output_config,
                 cmd_config)
             if not processed_samples:
                 return EXIT_PROCESSING_ERROR
