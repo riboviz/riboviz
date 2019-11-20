@@ -432,18 +432,9 @@ def process_multiplexed_samples(samples, in_dir, r_rna_index, orf_index,
     return successes
 
 
-def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
+def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     """
     Run the RiboViz workflow.
-
-    Exit codes are as follows:
-
-    * EXIT_OK (0): Processing successfully completed.
-    * EXIT_FILE_NOT_FOUND_ERROR (1): A file does not seem to exist.
-    * EXIT_CONFIG_ERROR (2): Errors occurred loading or accessing
-      configuration e.g. missing configuration parameters,
-      inconsistent configuration parameters.
-    * EXIT_PROCESSING_ERROR (3): Error occurred during processing.
 
     :param py_scripts: Python scripts directory
     :type py_scripts: str or unicode
@@ -454,23 +445,18 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     :param is_dry_run: Don't execute workflow commands (useful for
     seeing what commands would be executed)
     :type is_dry_run: bool
-    :return: exit code
-    :rtype: int
+    :raise FileNotFoundError: if a file cannot be found
+    :raise KeyError: if a configuration parameter is missing
+    :raise ValueError: if a configuration parameter has an invalid
+    value
+    :raise TypeError: if a configuration parameter has an invalid type
+    :raise Exception: if any other error arises
     """
     LOGGER.info("Running under Python: %s", sys.version)
     LOGGER.info("Configuration file: %s", config_yaml)
-    LOGGER.info("Load configuration: %s", config_yaml)
-    try:
-        with open(config_yaml, 'r') as f:
-            config = yaml.load(f, yaml.SafeLoader)
-    except FileNotFoundError as e:
-        logging.error("File not found: %s", e.filename)
-        return EXIT_FILE_NOT_FOUND_ERROR
-    except Exception:
-        logging.error("Problem reading: %s", config_yaml)
-        exc_type, _, _ = sys.exc_info()
-        logging.exception(exc_type.__name__)
-        return EXIT_CONFIG_ERROR
+
+    with open(config_yaml, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
 
     if value_in_dict(params.CMD_FILE, config):
         cmd_file = config[params.CMD_FILE]
@@ -481,60 +467,42 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         os.remove(cmd_file)
     cmd_config = workflow.CmdConfigTuple(cmd_file, is_dry_run)
 
-    try:
-        in_dir = config[params.INPUT_DIR]
-        output_config = workflow.setup_output_directories(config, cmd_config)
-    except KeyError as e:
-        logging.error("Missing configuration parameter: %s", e.args[0])
-        return EXIT_CONFIG_ERROR
-    except Exception:
-        logging.error(("Problem configuring directories"))
-        exc_type, _, _ = sys.exc_info()
-        logging.exception(exc_type.__name__)
-        return EXIT_CONFIG_ERROR
+    in_dir = config[params.INPUT_DIR]
+    output_config = workflow.setup_output_directories(config, cmd_config)
 
     LOGGER.info("Build indices for alignment, if necessary/requested")
-    try:
-        r_rna_index = os.path.join(
-            output_config.index_dir, config[params.R_RNA_INDEX_PREFIX])
-        orf_index = os.path.join(
-            output_config.index_dir, config[params.ORF_INDEX_PREFIX])
-        is_build_indices = value_in_dict(params.BUILD_INDICES, config)
-        if is_build_indices:
-            r_rna_fasta = config[params.R_RNA_FASTA_FILE]
-            log_file = os.path.join(
-                output_config.logs_dir, "hisat2_build_r_rna.log")
-            workflow.build_indices(r_rna_fasta, r_rna_index, log_file,
-                                   cmd_config)
-            orf_fasta = config[params.ORF_FASTA_FILE]
-            log_file = os.path.join(
-                output_config.logs_dir, "hisat2_build_orf.log")
-            workflow.build_indices(orf_fasta, orf_index, log_file,
-                                   cmd_config)
-    except KeyError as e:
-        logging.error("Missing configuration parameter: %s", e.args[0])
-        return EXIT_CONFIG_ERROR
-    except FileNotFoundError as e:
-        logging.error("File not found: %s", e.filename)
-        return EXIT_FILE_NOT_FOUND_ERROR
-    except Exception:
-        logging.error("Problem creating indices")
-        exc_type, _, _ = sys.exc_info()
-        logging.exception(exc_type.__name__)
-        return EXIT_PROCESSING_ERROR
+    r_rna_index = os.path.join(
+        output_config.index_dir, config[params.R_RNA_INDEX_PREFIX])
+    orf_index = os.path.join(
+        output_config.index_dir, config[params.ORF_INDEX_PREFIX])
+    is_build_indices = value_in_dict(params.BUILD_INDICES, config)
+    if is_build_indices:
+        r_rna_fasta = config[params.R_RNA_FASTA_FILE]
+        log_file = os.path.join(
+            output_config.logs_dir, "hisat2_build_r_rna.log")
+        workflow.build_indices(r_rna_fasta, r_rna_index, log_file,
+                               cmd_config)
+        orf_fasta = config[params.ORF_FASTA_FILE]
+        log_file = os.path.join(
+            output_config.logs_dir, "hisat2_build_orf.log")
+        workflow.build_indices(orf_fasta, orf_index, log_file,
+                               cmd_config)
 
     is_sample_files = value_in_dict(params.FQ_FILES, config)
     is_multiplex_files = value_in_dict(params.MULTIPLEX_FQ_FILES, config)
     is_sample_sheet_file = value_in_dict(params.SAMPLE_SHEET_FILE, config)
     if not is_sample_files and not is_multiplex_files:
-        LOGGER.error("No sample files (fq_files) or multiplexed files (multiplex_fq_files) are specified.")
-        return EXIT_CONFIG_ERROR
+        raise ValueError(
+            "No sample files ({}) or multiplexed files ({}) are specified".format(
+                params.FQ_FILES, params.MULTIPLEX_FQ_FILES))
     elif is_sample_files and is_multiplex_files:
-        LOGGER.error("Both sample files (fq_files) and multiplexed files (multiplex_fq_files) were specified.")
-        return EXIT_CONFIG_ERROR
+        raise ValueError(
+            "Both sample files ({}) and multiplexed files ({}) are specified".format(
+                params.FQ_FILES, params.MULTIPLEX_FQ_FILES))
     elif is_multiplex_files and not is_sample_sheet_file:
-        LOGGER.error("Multiplexed files (multiplex_fq_files) are specified but no sample sheet (sample_sheet) file.")
-        return EXIT_CONFIG_ERROR
+        raise ValueError(
+            "Multiplexed files ({}) are specified but no sample sheet ({})".format(
+                params.MULTIPLEX_FQ_FILES, params.SAMPLE_SHEET_FILE))
 
     if is_sample_files:
         samples = config[params.FQ_FILES]
@@ -542,102 +510,128 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
             samples, in_dir, r_rna_index, orf_index, config,
             py_scripts, r_scripts, output_config, cmd_config)
         if not processed_samples:
-            return EXIT_PROCESSING_ERROR
-        try:
-            log_file = os.path.join(
-                output_config.logs_dir, "collate_tpms.log")
-            workflow.collate_tpms(
-                output_config.out_dir, processed_samples, r_scripts,
-                log_file, cmd_config)
-        except Exception:
-            logging.error(("Problem collating TPMs"))
-            exc_type, _, _ = sys.exc_info()
-            logging.exception(exc_type.__name__)
-            return EXIT_PROCESSING_ERROR
+            raise Exception("No samples were processed successfully")
+
+        log_file = os.path.join(
+            output_config.logs_dir, "collate_tpms.log")
+        workflow.collate_tpms(
+            output_config.out_dir, processed_samples, r_scripts,
+            log_file, cmd_config)
     else:
         LOGGER.info("WIP: multiplexed file processing")
-        try:
-            sample_sheet_file = os.path.join(in_dir,
-                                             config[params.SAMPLE_SHEET_FILE])
-            if not os.path.exists(sample_sheet_file):
-                raise FileNotFoundError(errno.ENOENT,
-                                        os.strerror(errno.ENOENT),
-                                        sample_sheet_file)
-        except FileNotFoundError as e:
-            logging.error("File not found: %s", e.filename)
-            return EXIT_FILE_NOT_FOUND_ERROR
-        except Exception:
-            logging.error("Problem processing: %s", sample_sheet_file)
-            exc_type, _, _ = sys.exc_info()
-            logging.exception(exc_type.__name__)
-            return EXIT_PROCESSING_ERROR
-
+        sample_sheet_file = os.path.join(in_dir,
+                                         config[params.SAMPLE_SHEET_FILE])
+        if not os.path.exists(sample_sheet_file):
+            raise FileNotFoundError(errno.ENOENT,
+                                    os.strerror(errno.ENOENT),
+                                    sample_sheet_file)
         multiplex_files = config[params.MULTIPLEX_FQ_FILES]
         multiplex_file = multiplex_files[0]
         multiplex_name = os.path.splitext(os.path.basename(multiplex_file))[0]
         multiplex_file = os.path.join(in_dir, multiplex_file)
         LOGGER.info("Processing file: %s", multiplex_file)
-        try:
-            if not os.path.exists(multiplex_file):
-                raise FileNotFoundError(errno.ENOENT,
-                                        os.strerror(errno.ENOENT),
-                                        multiplex_file)
-            trim_fq = os.path.join(
-                output_config.tmp_dir, multiplex_name + "_trim.fq")
-            log_file = os.path.join(
-                output_config.logs_dir, "cutadapt.log")
-            workflow.cut_adapters(
-                config[params.ADAPTERS], multiplex_file, trim_fq, log_file,
-                cmd_config)
+        if not os.path.exists(multiplex_file):
+            raise FileNotFoundError(errno.ENOENT,
+                                    os.strerror(errno.ENOENT),
+                                    multiplex_file)
+        trim_fq = os.path.join(
+            output_config.tmp_dir, multiplex_name + "_trim.fq")
+        log_file = os.path.join(
+            output_config.logs_dir, "cutadapt.log")
+        workflow.cut_adapters(
+            config[params.ADAPTERS], multiplex_file, trim_fq, log_file,
+            cmd_config)
 
-            extract_trim_fq = os.path.join(
-                output_config.tmp_dir, multiplex_name + "_extract_trim.fq")
-            log_file = os.path.join(
-                output_config.logs_dir, "umi_tools_extract.log")
-            workflow.extract_barcodes_umis(
-                trim_fq, extract_trim_fq, config[params.UMI_REGEXP], log_file,
-                cmd_config)
+        extract_trim_fq = os.path.join(
+            output_config.tmp_dir, multiplex_name + "_extract_trim.fq")
+        log_file = os.path.join(
+            output_config.logs_dir, "umi_tools_extract.log")
+        workflow.extract_barcodes_umis(
+            trim_fq, extract_trim_fq, config[params.UMI_REGEXP], log_file,
+            cmd_config)
 
-            deplex_dir = os.path.join(
-                output_config.tmp_dir, multiplex_name + "_deplex")
-            log_file = os.path.join(
-                output_config.logs_dir, "demultiplex_fastq.log")
-            workflow.demultiplex_fastq(extract_trim_fq, sample_sheet_file,
-                                       deplex_dir, log_file, cmd_config)
+        deplex_dir = os.path.join(
+            output_config.tmp_dir, multiplex_name + "_deplex")
+        log_file = os.path.join(
+            output_config.logs_dir, "demultiplex_fastq.log")
+        workflow.demultiplex_fastq(extract_trim_fq, sample_sheet_file,
+                                   deplex_dir, log_file, cmd_config)
 
-            if not is_dry_run:
-                num_reads_file = os.path.join(deplex_dir, NUM_READS_FILE)
-                num_reads = load_deplexed_sample_sheet(num_reads_file)
-                samples = get_non_zero_deplexed_samples(num_reads)
-            else:
-                # If doing a dry run, use the sample_sheet_file to get
-                # the names of the samples.
-                sample_sheet = load_sample_sheet(sample_sheet_file)
-                samples = list(sample_sheet[SAMPLE_ID])
+        if not is_dry_run:
+            num_reads_file = os.path.join(deplex_dir, NUM_READS_FILE)
+            num_reads = load_deplexed_sample_sheet(num_reads_file)
+            samples = get_non_zero_deplexed_samples(num_reads)
             if not samples:
-                LOGGER.error("No sample files with any reads resulted from demultiplexing.")
-                return EXIT_PROCESSING_ERROR
-            # Use get_fastq_filename to deduce sample-specific files
-            # output by demultiplex_fastq.py - demultiplex_fastq.py
-            # uses this function too.
-            sample_files = {sample: get_fastq_filename(sample)
-                            for sample in samples}
-            processed_samples = process_multiplexed_samples(
-                sample_files, deplex_dir, r_rna_index, orf_index,
-                config, py_scripts, r_scripts, output_config,
-                cmd_config)
-            if not processed_samples:
-                return EXIT_PROCESSING_ERROR
-        except FileNotFoundError as e:
-            logging.error("File not found: %s", e.filename)
-            return EXIT_FILE_NOT_FOUND_ERROR
-        except Exception:
-            logging.error("Problem processing: %s", multiplex_file)
-            exc_type, _, _ = sys.exc_info()
-            logging.exception(exc_type.__name__)
-            return EXIT_PROCESSING_ERROR
+                raise Exception(
+                    "No non-empty sample files were produced by demultiplexing")
+        else:
+            # If doing a dry run, use the sample_sheet_file to get
+            # the names of the samples.
+            sample_sheet = load_sample_sheet(sample_sheet_file)
+            samples = list(sample_sheet[SAMPLE_ID])
+            if not samples:
+                raise Exception(
+                    "No samples are specified in {}".format(sample_sheet_file))
+        # Use get_fastq_filename to deduce sample-specific files
+        # output by demultiplex_fastq.py - demultiplex_fastq.py
+        # uses this function too.
+        sample_files = {sample: get_fastq_filename(sample)
+                        for sample in samples}
+        processed_samples = process_multiplexed_samples(
+            sample_files, deplex_dir, r_rna_index, orf_index,
+            config, py_scripts, r_scripts, output_config,
+            cmd_config)
+        if not processed_samples:
+            raise Exception("No samples were processed successfully")
 
     LOGGER.info("Completed")
+
+
+def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
+    """
+    Run the RiboViz workflow. This function invokes run_workflow,
+    catchesand logs any exceptions and maps these to exit codes.
+
+    Exit codes are as follows:
+
+    * EXIT_OK (0): Processing successfully completed.
+    * EXIT_FILE_NOT_FOUND_ERROR (1): A file does not seem to exist.
+    * EXIT_CONFIG_ERROR (2): Errors occurred loading or accessing
+      configuration e.g. missing configuration parameters,
+      inconsistent configuration parameters.e
+    * EXIT_PROCESSING_ERROR (3): Error occurred during processing.
+
+    :param py_scripts: Python scripts directory
+    :type py_scripts: str or unicode
+    :param r_scripts: R scripts direectory
+    :type r_scripts: str or unicode
+    :param config_yaml: YAML configuration file path
+    :type config_yaml: str or unicodee
+    :param is_dry_run: Don't execute weorkflow commands (useful for
+    seeing what commands would be execueted)
+    :type is_dry_run: boole
+    :return: exit code
+    :rtype: int
+    """
+    try:
+        run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run)
+    except FileNotFoundError as e:
+        logging.error("File not found: %s", e.filename)
+        return EXIT_FILE_NOT_FOUND_ERROR
+    except KeyError as e:
+        logging.error("Missing configuration parameter: %s", e.args[0])
+        return EXIT_CONFIG_ERROR
+    except ValueError as e:
+        logging.error("Configuration parameter error: %s", e.args[0])
+        return EXIT_CONFIG_ERROR
+    except TypeError as e:
+        logging.error("Configuration parameter error: %s", e.args[0])
+        return EXIT_CONFIG_ERROR
+    except Exception:
+        logging.error("Processing error: %s", config_yaml)
+        exc_type, _, _ = sys.exc_info()
+        logging.exception(exc_type.__name__)
+        return EXIT_PROCESSING_ERROR
     return EXIT_OK
 
 
