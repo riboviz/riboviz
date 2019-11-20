@@ -20,7 +20,7 @@ required by configuration test fixture
 """
 
 
-def test_config_error_missing_config_file():
+def test_missing_config_file():
     """
     Test that a non-existent configuration file causes
     EXIT_FILE_NOT_FOUND_ERROR to be returned.
@@ -35,7 +35,7 @@ def test_config_error_missing_config_file():
 
 @pytest.mark.parametrize("index", [params.R_RNA_FASTA_FILE,
                                    params.ORF_FASTA_FILE])
-def test_index_error_missing_index_files(configuration, index):
+def test_missing_index_files(configuration, index):
     """
     Test that the rRNA_fasta and orf_fasta configuration value being
     non-existent files causes EXIT_FILE_NOT_FOUND_ERROR to be
@@ -59,7 +59,7 @@ def test_index_error_missing_index_files(configuration, index):
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
-def test_no_data_error(configuration):
+def test_no_fq_files_error(configuration):
     """
     Test that no samples being specified causes
     EXIT_CONFIG_ERROR to be returned.
@@ -80,7 +80,51 @@ def test_no_data_error(configuration):
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
-def test_samples_error_missing_samples(configuration):
+def test_fq_files_multiplex_fq_files_error(configuration):
+    """
+    Test that both samples and multiplexed samples being specified
+    causes EXIT_CONFIG_ERROR to be returned.
+
+    :param configuration: configuration and path to configuration file
+    (pytest fixture)
+    :type configuration: tuple(dict, str or unicode)
+    """
+    config, config_path = configuration
+    config[params.MULTIPLEX_FQ_FILES] = ["somefile.fastq"]
+    with open(config_path, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = prep_riboviz.prep_riboviz(riboviz.test.PY_SCRIPTS,
+                                          riboviz.test.R_SCRIPTS,
+                                          config_path,
+                                          True)
+    assert exit_code == prep_riboviz.EXIT_CONFIG_ERROR, \
+        "prep_riboviz returned with unexpected exit code %d" % exit_code
+
+
+def test_multiplex_fq_files_missing_sample_sheet_error(configuration):
+    """
+    Test that multiplexed samples with a missing sample sheet being
+    specified causes EXIT_CONFIG_ERROR to be returned.
+
+    :param configuration: configuration and path to configuration file
+    (pytest fixture)
+    :type configuration: tuple(dict, str or unicode)
+    """
+    config, config_path = configuration
+    del config[params.FQ_FILES]
+    config[params.MULTIPLEX_FQ_FILES] = ["somefile.fastq"]
+    config[params.SAMPLE_SHEET_FILE] = "noSuchFile.tsv"
+    with open(config_path, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = prep_riboviz.prep_riboviz(riboviz.test.PY_SCRIPTS,
+                                          riboviz.test.R_SCRIPTS,
+                                          config_path,
+                                          True)
+    assert exit_code == prep_riboviz.EXIT_FILE_NOT_FOUND_ERROR, \
+        "prep_riboviz returned with unexpected exit code %d" % exit_code
+
+
+def test_missing_fq_files(configuration):
     """
     Test that if all samples are non-existent files then
     EXIT_PROCESSING_ERROR is returned.
