@@ -80,6 +80,7 @@ be executed. This can be useful for seeing what commands will be run
 without actually running them.
 """
 
+from datetime import datetime
 import errno
 import logging
 import os
@@ -120,10 +121,9 @@ LOGGER = logging.getLogger(__name__)
 """ Logger """
 
 
-def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
-                   is_collate_tpms,
-                   config, py_scripts, r_scripts, output_config,
-                   cmd_config):
+def process_sample(sample, fastq, r_rna_index, orf_index,
+                   is_trimmed, is_collate_tpms,
+                   config, tmp_dir, out_dir, run_config):
     """
     Process a single FASTQ sample file.
 
@@ -142,14 +142,12 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
     :type is_collate_tpms: bool
     :param config: RiboViz configuration
     :type config: dict
-    :param output_config: Output directories
-    :type output_config: OutputConfigTuple
-    :param cmd_config: Command-related configuration
-    :type cmd_config: CmdConfigTuple
-    :param py_scripts: Python scripts directory
-    :type py_scripts: str or unicode
-    :param r_scripts: R scripts directory
-    :type r_scripts: str or unicode
+    :param tmp_dir: Temporary directory
+    :type tmp_dir: str or unicode
+    :param out_dir: Output directory
+    :type out_dir: str or unicode
+    :param run_config: Run-related configuration
+    :type run_config: RunConfigTuple
     :raise FileNotFoundError: if fastq, other files or a third-party
     tool cannot be found
     :raise AssertionError: if invocation of a third-party tool returns
@@ -159,79 +157,66 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
     LOGGER.info("Processing sample: %s", sample)
     step = 1
     LOGGER.info("Processing file: %s", fastq)
-
-    if value_in_dict(params.NPROCESSES, config):
-        nprocesses = int(config[params.NPROCESSES])
-    else:
-        nprocesses = 1
-
     is_extract_umis = value_in_dict(params.EXTRACT_UMIS, config)
     if is_trimmed:
         LOGGER.info("Skipping adaptor trimming and barcode/UMI extraction")
         trim_fq = fastq
     else:
         log_file = workflow.get_sample_log_file(
-            output_config.logs_dir, sample, "cutadapt", step)
-        trim_fq = os.path.join(output_config.tmp_dir, sample + "_trim.fq")
+            run_config.logs_dir, sample, "cutadapt", step)
+        trim_fq = os.path.join(tmp_dir, sample + "_trim.fq")
         workflow.cut_adapters(
-            config[params.ADAPTERS], fastq, trim_fq, log_file, cmd_config)
+            config[params.ADAPTERS], fastq, trim_fq, log_file, run_config)
         step += 1
 
         if is_extract_umis:
             extract_trim_fq = os.path.join(
-                output_config.tmp_dir, sample + "_extract_trim.fq")
+                tmp_dir, sample + "_extract_trim.fq")
             log_file = workflow.get_sample_log_file(
-                output_config.logs_dir, sample, "umi_tools_extract",
-                step)
+                run_config.logs_dir, sample, "umi_tools_extract", step)
             workflow.extract_barcodes_umis(
                 trim_fq, extract_trim_fq, config[params.UMI_REGEXP],
-                log_file, cmd_config)
+                log_file, run_config)
             trim_fq = extract_trim_fq
             step += 1
 
-    non_r_rna_trim_fq = os.path.join(
-        output_config.tmp_dir, sample + "_nonrRNA.fq")
-    r_rna_map_sam = os.path.join(
-        output_config.tmp_dir, sample + "_rRNA_map.sam")
+    non_r_rna_trim_fq = os.path.join(tmp_dir, sample + "_nonrRNA.fq")
+    r_rna_map_sam = os.path.join(tmp_dir, sample + "_rRNA_map.sam")
     log_file = workflow.get_sample_log_file(
-        output_config.logs_dir, sample, "hisat2_rrna", step)
+        run_config.logs_dir, sample, "hisat2_rrna", step)
     workflow.map_to_r_rna(
         trim_fq, r_rna_index, r_rna_map_sam, non_r_rna_trim_fq,
-        nprocesses, log_file, cmd_config)
+        log_file, run_config)
     step += 1
 
-    orf_map_sam = os.path.join(
-        output_config.tmp_dir, sample + "_orf_map.sam")
-    unaligned_fq = os.path.join(
-        output_config.tmp_dir, sample + "_unaligned.fq")
+    orf_map_sam = os.path.join(tmp_dir, sample + "_orf_map.sam")
+    unaligned_fq = os.path.join(tmp_dir, sample + "_unaligned.fq")
     log_file = workflow.get_sample_log_file(
-        output_config.logs_dir, sample, "hisat2_orf", step)
+        run_config.logs_dir, sample, "hisat2_orf", step)
     workflow.map_to_orf(
         non_r_rna_trim_fq, orf_index, orf_map_sam, unaligned_fq,
-        nprocesses, log_file, cmd_config)
+        log_file, run_config)
     step += 1
 
     orf_map_sam_clean = os.path.join(
-        output_config.tmp_dir, sample + "_orf_map_clean.sam")
+        tmp_dir, sample + "_orf_map_clean.sam")
     log_file = workflow.get_sample_log_file(
-        output_config.logs_dir, sample, "trim_5p_mismatch", step)
+        run_config.logs_dir, sample, "trim_5p_mismatch", step)
     workflow.trim_5p_mismatches(
-        orf_map_sam, orf_map_sam_clean, py_scripts, log_file,
-        cmd_config)
+        orf_map_sam, orf_map_sam_clean, log_file, run_config)
     step += 1
 
     log_file = workflow.get_sample_log_file(
-        output_config.logs_dir, sample, "samtools_view_sort", step)
-    sample_out_prefix = os.path.join(output_config.out_dir, sample)
+        run_config.logs_dir, sample, "samtools_view_sort", step)
+    sample_out_prefix = os.path.join(out_dir, sample)
     sample_out_bam = sample_out_prefix + ".bam"
     workflow.sort_bam(
-        orf_map_sam_clean, sample_out_bam, nprocesses, log_file,
-        cmd_config)
+        orf_map_sam_clean, sample_out_bam, log_file, run_config)
     step += 1
 
     log_file = workflow.get_sample_log_file(
-        output_config.logs_dir, sample, "samtools_index", step)
-    workflow.index_bam(sample_out_bam, log_file, cmd_config)
+        run_config.logs_dir, sample, "samtools_index", step)
+    workflow.index_bam(sample_out_bam, log_file, run_config)
     step += 1
 
     is_dedup_umis = value_in_dict(params.DEDUP_UMIS, config)
@@ -242,89 +227,79 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
         is_group_umis = value_in_dict(params.GROUP_UMIS, config)
         if is_group_umis:
             umi_groups = os.path.join(
-                output_config.tmp_dir, sample + "_pre_dedup_groups.tsv")
+                tmp_dir, sample + "_pre_dedup_groups.tsv")
             log_file = workflow.get_sample_log_file(
-                output_config.logs_dir, sample, "umi_tools_group",
-                step)
+                run_config.logs_dir, sample, "umi_tools_group", step)
             workflow.group_umis(
-                sample_out_bam, umi_groups, log_file, cmd_config)
+                sample_out_bam, umi_groups, log_file, run_config)
             step += 1
 
         sample_dedup_bam = sample_out_prefix + "_dedup.bam"
         log_file = workflow.get_sample_log_file(
-            output_config.logs_dir, sample, "umi_tools_dedup", step)
+            run_config.logs_dir, sample, "umi_tools_dedup", step)
         dedup_stats_prefix = os.path.join(
-            output_config.tmp_dir, sample + "_dedup_stats")
+            tmp_dir, sample + "_dedup_stats")
         workflow.deduplicate_umis(
             sample_out_bam, sample_dedup_bam, dedup_stats_prefix,
-            log_file, cmd_config)
+            log_file, run_config)
         step += 1
 
         log_file = workflow.get_sample_log_file(
-            output_config.logs_dir, sample, "samtools_index", step)
-        workflow.index_bam(sample_dedup_bam, log_file, cmd_config)
+            run_config.logs_dir, sample, "samtools_index", step)
+        workflow.index_bam(sample_dedup_bam, log_file, run_config)
         sample_out_bam = sample_dedup_bam
         step += 1
 
         if is_group_umis:
             umi_groups = os.path.join(
-                output_config.tmp_dir, sample + "_post_dedup_groups.tsv")
+                tmp_dir, sample + "_post_dedup_groups.tsv")
             log_file = workflow.get_sample_log_file(
-                output_config.logs_dir, sample, "umi_tools_group",
-                step)
+                run_config.logs_dir, sample, "umi_tools_group", step)
             workflow.group_umis(
-                sample_out_bam, umi_groups, log_file, cmd_config)
+                sample_out_bam, umi_groups, log_file, run_config)
             step += 1
 
     is_make_bedgraph = value_in_dict(params.MAKE_BEDGRAPH, config)
     if is_make_bedgraph:
         log_file = workflow.get_sample_log_file(
-            output_config.logs_dir, sample, "bedtools_genome_cov_plus", step)
+            run_config.logs_dir, sample, "bedtools_genome_cov_plus", step)
         plus_bedgraph = sample_out_prefix + "_plus.bedgraph"
         workflow.make_bedgraph(
-            sample_out_bam, plus_bedgraph, True, log_file, cmd_config)
+            sample_out_bam, plus_bedgraph, True, log_file, run_config)
         step += 1
 
         log_file = workflow.get_sample_log_file(
-            output_config.logs_dir, sample, "bedtools_genome_cov_minus", step)
+            run_config.logs_dir, sample, "bedtools_genome_cov_minus", step)
         minus_bedgraph = sample_out_prefix + "_minus.bedgraph"
         workflow.make_bedgraph(
-            sample_out_bam, minus_bedgraph, False, log_file, cmd_config)
+            sample_out_bam, minus_bedgraph, False, log_file, run_config)
         step += 1
 
     orf_gff_file = config[params.ORF_GFF_FILE]
-    if not os.path.exists(orf_gff_file):
-        raise FileNotFoundError(errno.ENOENT,
-                                os.strerror(errno.ENOENT),
-                                orf_gff_file)
     log_file = workflow.get_sample_log_file(
-        output_config.logs_dir, sample, "bam_to_h5", step)
+        run_config.logs_dir, sample, "bam_to_h5", step)
     sample_out_h5 = sample_out_prefix + ".h5"
-    workflow.bam_to_h5(
-        sample_out_bam, sample_out_h5, orf_gff_file, config,
-        nprocesses, r_scripts, log_file, cmd_config)
+    workflow.bam_to_h5(sample_out_bam, sample_out_h5, orf_gff_file,
+                       config, log_file, run_config)
     step += 1
 
     log_file = workflow.get_sample_log_file(
-        output_config.logs_dir, sample, "generate_stats_figs", step)
+        run_config.logs_dir, sample, "generate_stats_figs", step)
     workflow.generate_stats_figs(
-        sample_out_h5, output_config.out_dir, sample_out_prefix,
-        config, nprocesses, r_scripts, log_file, cmd_config)
+        sample_out_h5, out_dir, sample_out_prefix, config, log_file,
+        run_config)
 
     if is_collate_tpms:
         step += 1
         log_file = workflow.get_sample_log_file(
-            output_config.logs_dir, sample, "collate_tpms", step)
-        workflow.collate_tpms(
-            output_config.out_dir, [sample], r_scripts,
-            log_file, cmd_config)
+            run_config.logs_dir, sample, "collate_tpms", step)
+        workflow.collate_tpms(out_dir, [sample], log_file, run_config)
 
     LOGGER.info("Finished processing sample: %s", fastq)
 
 
 def process_samples(samples, in_dir, r_rna_index, orf_index,
-                    config, py_scripts, r_scripts,
-                    output_config, cmd_config):
+                    config, tmp_dir, out_dir, run_config):
     """
     Process FASTQ sample files. Any exceptions in the processing of
     any sample are logged but are not thrown from this function.
@@ -339,14 +314,12 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
     :type orf_index: str or unicode
     :param config: RiboViz configuration
     :type config: dict
-    :param output_config: Output directories
-    :type output_config: OutputConfigTuple
-    :param cmd_config: Command-related configuration
-    :type cmd_config: CmdConfigTuple
-    :param py_scripts: Python scripts directory
-    :type py_scripts: str or unicode
-    :param r_scripts: R scripts directory
-    :type r_scripts: str or unicode
+    :param tmp_dir: Temporary directory
+    :type tmp_dir: str or unicode
+    :param out_dir: Output directory
+    :type out_dir: str or unicode
+    :param run_config: Run-related configuration
+    :type run_config: RunConfigTuple
     :return: names of successfully-processed samples
     :rtype: list(str or unicode)
     """
@@ -359,17 +332,9 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
             if not os.path.exists(fastq):
                 raise FileNotFoundError(
                     errno.ENOENT, os.strerror(errno.ENOENT), fastq)
-            process_sample(sample,
-                           fastq,
-                           r_rna_index,
-                           orf_index,
-                           False,
-                           False,
-                           config,
-                           py_scripts,
-                           r_scripts,
-                           output_config,
-                           cmd_config)
+            process_sample(
+                sample, fastq, r_rna_index, orf_index, False, False,
+                config, tmp_dir, out_dir, run_config)
             successes.append(sample)
         except FileNotFoundError as e:
             logging.error("File not found: %s", e.filename)
@@ -377,18 +342,19 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
             logging.error("Problem processing sample: %s", sample)
             exc_type, _, _ = sys.exc_info()
             logging.exception(exc_type.__name__)
+    num_failed = num_samples - len(successes)
     LOGGER.info("Finished processing %d samples, %d failed",
-                num_samples,
-                num_samples - len(successes))
+                num_samples, num_failed)
     return successes
 
 
-def process_multiplexed_samples(samples, in_dir, r_rna_index, orf_index,
-                                config, py_scripts, r_scripts,
-                                output_config, cmd_config):
+def process_demultiplexed_samples(samples, in_dir, r_rna_index,
+                                  orf_index, config, tmp_dir, out_dir,
+                                  run_config):
     """
-    Process FASTQ sample files. Any exceptions in the processing of
-    any sample are logged but are not thrown from this function.
+    Process demultiplexed FASTQ sample files. Any exceptions in the
+    processing of any sample are logged but are not thrown from this
+    function.
 
     :param samples: Sample names and files
     :type samples: dict
@@ -400,51 +366,34 @@ def process_multiplexed_samples(samples, in_dir, r_rna_index, orf_index,
     :type orf_index: str or unicode
     :param config: RiboViz configuration
     :type config: dict
-    :param output_config: Output directories
-    :type output_config: OutputConfigTuple
-    :param cmd_config: Command-related configuration
-    :type cmd_config: CmdConfigTuple
-    :param py_scripts: Python scripts directory
-    :type py_scripts: str or unicode
-    :param r_scripts: R scripts directory
-    :type r_scripts: str or unicode
+    :param tmp_dir: Temporary directory
+    :type tmp_dir: str or unicode
+    :param out_dir: Output directory
+    :type out_dir: str or unicode
+    :param run_config: Run-related configuration
+    :type run_config: RunConfigTuple
     :return: names of successfully-processed samples
     :rtype: list(str or unicode)
     """
-    LOGGER.info("Processing multiplexed samples")
+    LOGGER.info("Processing demultiplexed samples")
     successes = []
     num_samples = len(samples)
     for sample in list(samples.keys()):
         try:
             fastq = os.path.join(in_dir, samples[sample])
-            if not cmd_config.is_dry_run:
+            if not run_config.is_dry_run:
                 if not os.path.exists(fastq):
                     raise FileNotFoundError(
                         errno.ENOENT, os.strerror(errno.ENOENT), fastq)
-            tmp_dir = os.path.join(output_config.tmp_dir, sample)
-            out_dir = os.path.join(output_config.out_dir, sample)
-            for d in [tmp_dir, out_dir]:
-                with open(cmd_config.cmd_file, "a") as f:
-                    f.write("mkdir -p %s\n" % d)
-                if not cmd_config.is_dry_run:
-                    if not os.path.exists(d):
-                        os.makedirs(d)
-            sample_output_config = workflow.OutputConfigTuple(
-                output_config.index_dir,
-                tmp_dir,
-                out_dir,
-                output_config.logs_dir)
-            process_sample(sample,
-                           fastq,
-                           r_rna_index,
-                           orf_index,
-                           True,
-                           True,
-                           config,
-                           py_scripts,
-                           r_scripts,
-                           sample_output_config,
-                           cmd_config)
+            sample_tmp_dir = os.path.join(tmp_dir, sample)
+            sample_out_dir = os.path.join(out_dir, sample)
+            for directory in [sample_tmp_dir, sample_out_dir]:
+                workflow.create_directory(directory,
+                                          run_config.cmd_file,
+                                          run_config.is_dry_run)
+            process_sample(
+                sample, fastq, r_rna_index, orf_index, True, True,
+                config, sample_tmp_dir, sample_out_dir, run_config)
             successes.append(sample)
         except FileNotFoundError as e:
             logging.error("File not found: %s", e.filename)
@@ -452,9 +401,9 @@ def process_multiplexed_samples(samples, in_dir, r_rna_index, orf_index,
             logging.error("Problem multiplexed processing sample: %s", sample)
             exc_type, _, _ = sys.exc_info()
             logging.exception(exc_type.__name__)
+    num_failed = num_samples - len(successes)
     LOGGER.info("Finished processing %d samples, %d failed",
-                num_samples,
-                num_samples - len(successes))
+                num_samples, num_failed)
     return successes
 
 
@@ -488,31 +437,46 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         cmd_file = config[params.CMD_FILE]
     else:
         cmd_file = "run_riboviz_vignette.sh"
-    LOGGER.info("Command file: %s", cmd_file)
     if os.path.exists(cmd_file):
         os.remove(cmd_file)
-    cmd_config = workflow.CmdConfigTuple(cmd_file, is_dry_run)
+    LOGGER.info("Command file: %s", cmd_file)
+
+    if value_in_dict(params.NPROCESSES, config):
+        nprocesses = int(config[params.NPROCESSES])
+    else:
+        nprocesses = 1
+    LOGGER.info("Number of processes: %d", nprocesses)
+
+    index_dir = config[params.INDEX_DIR]
+    tmp_dir = config[params.TMP_DIR]
+    out_dir = config[params.OUTPUT_DIR]
+    base_logs_dir = config[params.LOGS_DIR]
+    logs_dir = os.path.join(
+        base_logs_dir, datetime.now().strftime('%Y%m%d-%H%M%S'))
+    dirs = [index_dir, tmp_dir, out_dir, logs_dir]
+    for directory in dirs:
+        workflow.create_directory(directory, cmd_file, is_dry_run)
+
+    run_config = workflow.RunConfigTuple(
+        py_scripts, r_scripts, cmd_file, is_dry_run, logs_dir,
+        nprocesses)
 
     in_dir = config[params.INPUT_DIR]
-    output_config = workflow.setup_output_directories(config, cmd_config)
-
     LOGGER.info("Build indices for alignment, if necessary/requested")
     r_rna_index = os.path.join(
-        output_config.index_dir, config[params.R_RNA_INDEX_PREFIX])
+        index_dir, config[params.R_RNA_INDEX_PREFIX])
     orf_index = os.path.join(
-        output_config.index_dir, config[params.ORF_INDEX_PREFIX])
+        index_dir, config[params.ORF_INDEX_PREFIX])
     is_build_indices = value_in_dict(params.BUILD_INDICES, config)
     if is_build_indices:
         r_rna_fasta = config[params.R_RNA_FASTA_FILE]
-        log_file = os.path.join(
-            output_config.logs_dir, "hisat2_build_r_rna.log")
+        log_file = os.path.join(logs_dir, "hisat2_build_r_rna.log")
         workflow.build_indices(r_rna_fasta, r_rna_index, log_file,
-                               cmd_config)
+                               run_config)
         orf_fasta = config[params.ORF_FASTA_FILE]
-        log_file = os.path.join(
-            output_config.logs_dir, "hisat2_build_orf.log")
+        log_file = os.path.join(logs_dir, "hisat2_build_orf.log")
         workflow.build_indices(orf_fasta, orf_index, log_file,
-                               cmd_config)
+                               run_config)
 
     is_sample_files = value_in_dict(params.FQ_FILES, config)
     is_multiplex_files = value_in_dict(params.MULTIPLEX_FQ_FILES, config)
@@ -534,15 +498,13 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         samples = config[params.FQ_FILES]
         processed_samples = process_samples(
             samples, in_dir, r_rna_index, orf_index, config,
-            py_scripts, r_scripts, output_config, cmd_config)
+            tmp_dir, out_dir, run_config)
         if not processed_samples:
             raise Exception("No samples were processed successfully")
 
-        log_file = os.path.join(
-            output_config.logs_dir, "collate_tpms.log")
+        log_file = os.path.join(logs_dir, "collate_tpms.log")
         workflow.collate_tpms(
-            output_config.out_dir, processed_samples, r_scripts,
-            log_file, cmd_config)
+            out_dir, processed_samples, log_file, run_config)
     else:
         LOGGER.info("WIP: multiplexed file processing")
         sample_sheet_file = os.path.join(in_dir,
@@ -561,27 +523,23 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
                                     os.strerror(errno.ENOENT),
                                     multiplex_file)
         trim_fq = os.path.join(
-            output_config.tmp_dir, multiplex_name + "_trim.fq")
-        log_file = os.path.join(
-            output_config.logs_dir, "cutadapt.log")
+            tmp_dir, multiplex_name + "_trim.fq")
+        log_file = os.path.join(logs_dir, "cutadapt.log")
         workflow.cut_adapters(
             config[params.ADAPTERS], multiplex_file, trim_fq, log_file,
-            cmd_config)
+            run_config)
 
         extract_trim_fq = os.path.join(
-            output_config.tmp_dir, multiplex_name + "_extract_trim.fq")
-        log_file = os.path.join(
-            output_config.logs_dir, "umi_tools_extract.log")
+            tmp_dir, multiplex_name + "_extract_trim.fq")
+        log_file = os.path.join(logs_dir, "umi_tools_extract.log")
         workflow.extract_barcodes_umis(
             trim_fq, extract_trim_fq, config[params.UMI_REGEXP], log_file,
-            cmd_config)
+            run_config)
 
-        deplex_dir = os.path.join(
-            output_config.tmp_dir, multiplex_name + "_deplex")
-        log_file = os.path.join(
-            output_config.logs_dir, "demultiplex_fastq.log")
+        deplex_dir = os.path.join(tmp_dir, multiplex_name + "_deplex")
+        log_file = os.path.join(logs_dir, "demultiplex_fastq.log")
         workflow.demultiplex_fastq(extract_trim_fq, sample_sheet_file,
-                                   deplex_dir, log_file, cmd_config)
+                                   deplex_dir, log_file, run_config)
 
         if not is_dry_run:
             num_reads_file = os.path.join(deplex_dir, NUM_READS_FILE)
@@ -603,10 +561,9 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         # uses this function too.
         sample_files = {sample: get_fastq_filename(sample)
                         for sample in samples}
-        processed_samples = process_multiplexed_samples(
+        processed_samples = process_demultiplexed_samples(
             sample_files, deplex_dir, r_rna_index, orf_index,
-            config, py_scripts, r_scripts, output_config,
-            cmd_config)
+            config, tmp_dir, out_dir, run_config)
         if not processed_samples:
             raise Exception("No samples were processed successfully")
 
