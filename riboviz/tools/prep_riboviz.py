@@ -465,15 +465,15 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
 
     is_sample_files = value_in_dict(params.FQ_FILES, config)
     is_multiplex_files = value_in_dict(params.MULTIPLEX_FQ_FILES, config)
-    is_barcodes = value_in_dict(params.BARCODES_FILE, config)
+    is_sample_sheet_file = value_in_dict(params.SAMPLE_SHEET_FILE, config)
     if not is_sample_files and not is_multiplex_files:
         LOGGER.error("No sample files (fq_files) or multiplexed files (multiplex_fq_files) are specified.")
         return EXIT_CONFIG_ERROR
     elif is_sample_files and is_multiplex_files:
         LOGGER.error("Both sample files (fq_files) and multiplexed files (multiplex_fq_files) were specified.")
         return EXIT_CONFIG_ERROR
-    elif is_multiplex_files and not is_barcodes:
-        LOGGER.error("Multiplexed files (multiplex_fq_files) are specified but no barcodes (barcodes) file.")
+    elif is_multiplex_files and not is_sample_sheet_file:
+        LOGGER.error("Multiplexed files (multiplex_fq_files) are specified but no sample sheet (sample_sheet) file.")
         return EXIT_CONFIG_ERROR
 
     if is_sample_files:
@@ -497,16 +497,17 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     else:
         LOGGER.info("WIP: multiplexed file processing")
         try:
-            barcodes_file = os.path.join(in_dir, config[params.BARCODES_FILE])
-            if not os.path.exists(barcodes_file):
+            sample_sheet_file = os.path.join(in_dir,
+                                             config[params.SAMPLE_SHEET_FILE])
+            if not os.path.exists(sample_sheet_file):
                 raise FileNotFoundError(errno.ENOENT,
                                         os.strerror(errno.ENOENT),
-                                        barcodes_file)
+                                        sample_sheet_file)
         except FileNotFoundError as e:
             logging.error("File not found: %s", e.filename)
             return EXIT_FILE_NOT_FOUND_ERROR
         except Exception:
-            logging.error("Problem processing: %s", barcodes_file)
+            logging.error("Problem processing: %s", sample_sheet_file)
             exc_type, _, _ = sys.exc_info()
             logging.exception(exc_type.__name__)
             return EXIT_PROCESSING_ERROR
@@ -541,7 +542,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
                 output_config.tmp_dir, multiplex_name + "_deplex")
             log_file = os.path.join(
                 output_config.logs_dir, "demultiplex_fastq.log")
-            workflow.demultiplex_fastq(extract_trim_fq, barcodes_file,
+            workflow.demultiplex_fastq(extract_trim_fq, sample_sheet_file,
                                        deplex_dir, log_file, cmd_config)
 
             # TODO this won't work for dry run as it does not exist!

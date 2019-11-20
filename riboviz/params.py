@@ -28,7 +28,7 @@ ADAPTERS = "adapters"
 FQ_FILES = "fq_files"
 
 # Demultiplexing and deduplication.
-BARCODES_FILE = "barcodes"
+SAMPLE_SHEET_FILE = "sample_sheet"
 DEDUP_UMIS = "dedup_umis"
 GROUP_UMIS = "group_umis"
 EXTRACT_UMIS = "extract_umis"
