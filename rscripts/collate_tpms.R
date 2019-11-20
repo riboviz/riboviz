@@ -7,6 +7,8 @@ library(optparse)
 option_list <- list( 
   make_option("--dir_out", type="character", default="./",
               help="Output directory"),
+  make_option("--file_out", type="character", default="TPMs_collated.tsv",
+              help="Output file, relative to output directory"),
   make_option("--orf_fasta", type="character", default=NULL,
               help="ORF file that was aligned to")
 )
@@ -15,6 +17,7 @@ parser <- OptionParser(option_list=option_list)
 opts <- parse_args(parser, positional_arguments=TRUE)
 
 dir_out <- opts$options$dir_out
+file_out <- opts$options$file_out
 samples <- opts$args
 orf_fasta  <- opts$options$orf_fasta
 
@@ -66,4 +69,4 @@ round1 <- function(x) round(x,digits=1)
 
 make_tpm_table(dir_out, samples, orf_fasta) %>%
     mutate_if(is.numeric, round1) %>%
-    write_tsv(paste0(dir_out, "/", "TPMs_collated.tsv"))
+    write_tsv(paste0(dir_out, "/", file_out))
