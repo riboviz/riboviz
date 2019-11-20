@@ -791,8 +791,6 @@ TPMs_collated.tsv
 `prep_riboviz.py` returns the following exit codes:
 
 * 0: Processing successfully completed.
-* 1: Errors occurred loading configuration.
-* 2: Error occurred during indexing.
-* 3: No samples were provided.
-* 4: No sample was processed successfully.
-* 5: Error occurred during TPMs collation.
+* 1: A file does not seem to exist.
+* 2: Errors occurred loading or accessing configuration e.g. missing configuration parameters, inconsistent configuration parameters.
+* 3: Error occurred during processing.

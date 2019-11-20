@@ -66,16 +66,11 @@ Prepare ribosome profiling data for RiboViz or other analysis:
 Exit codes are as follows:
 
 * EXIT_OK (0): Processing successfully completed.
-* EXIT_CONFIG_ERROR (1): Errors occurred loading configuration.
-* EXIT_INDEX_ERROR (2): Error occurred during indexing.
-* EXIT_NO_DATA_ERROR (3): No sample files or multiplexed data files
-  were provided.
-* EXIT_DATA_CONFLICT_ERROR (4): Both sample files and multiplexed data
-  files were provided.
-* EXIT_NO_BARCODES_ERROR (5): Multiplexed data files were provided but
-  no barcodes file.
-* EXIT_DATA_ERROR (6): No data file was processed successfully.
-* EXIT_COLLATION_ERROR (7): Error occurred during TPMs collation.
+* EXIT_FILE_NOT_FOUND_ERROR (1): A file does not seem to exist.
+* EXIT_CONFIG_ERROR (2): Errors occurred loading or accessing
+  configuration e.g. missing configuration parameters, inconsistent
+  configuration parameters.
+* EXIT_PROCESSING_ERROR (3): Error occurred during processing.
 
 Commands that are submitted to bash are recorded within a
 file specified by a cmd_file configuration parameter.
@@ -102,21 +97,20 @@ from riboviz.utils import get_non_zero_deplexed_samples
 
 
 EXIT_OK = 0
-""" Processing successfully completed. """
-EXIT_CONFIG_ERROR = 1
-""" Errors occurred loading configuration. """
-EXIT_INDEX_ERROR = 2
-""" Error occurred during indexing. """
-EXIT_NO_DATA_ERROR = 3
-""" No sample files or multiplexed data files were provided. """
-EXIT_DATA_CONFLICT_ERROR = 4
-""" Both sample files and multiplexed data files were provided. """
-EXIT_NO_BARCODES_ERROR = 5
-""" Multiplexed data files were provided but no barcodes file. """
-EXIT_DATA_ERROR = 6
-""" No data file was processed successfully. """
-EXIT_COLLATION_ERROR = 7
-""" Error occurred during TPMs collation. """
+"""Processing successfully completed. """
+EXIT_FILE_NOT_FOUND_ERROR = 1
+"""
+A file does not seem to exist.
+"""
+EXIT_CONFIG_ERROR = 2
+"""
+Errors occurred loading or accessing configuration e.g. missing
+configuration parameters, inconsistent configuration parameters.
+"""
+EXIT_PROCESSING_ERROR = 3
+"""
+Error occurred during processing.
+"""
 
 
 logging_utils.configure_logging()
@@ -385,16 +379,11 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     Exit codes are as follows:
 
     * EXIT_OK (0): Processing successfully completed.
-    * EXIT_CONFIG_ERROR (1): Errors occurred loading configuration.
-    * EXIT_INDEX_ERROR (2): Error occurred during indexing.
-    * EXIT_NO_DATA_ERROR (3): No sample files or multiplexed data
-      files were provided.
-    * EXIT_DATA_CONFLICT_ERROR (4): Both sample files and multiplexed
-      data files were provided.
-    * EXIT_NO_BARCODES_ERROR (5): Multiplexed data files were provided
-      but no barcodes file.
-    * EXIT_DATA_ERROR (6): No data file was processed successfully.
-    * EXIT_COLLATION_ERROR (7): Error occurred during TPMs collation.
+    * EXIT_FILE_NOT_FOUND_ERROR (1): A file does not seem to exist.
+    * EXIT_CONFIG_ERROR (2): Errors occurred loading or accessing
+      configuration e.g. missing configuration parameters,
+      inconsistent configuration parameters.
+    * EXIT_PROCESSING_ERROR (3): Error occurred during processing.
 
     :param py_scripts: Python scripts directory
     :type py_scripts: str or unicode
@@ -416,7 +405,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
             config = yaml.load(f, yaml.SafeLoader)
     except FileNotFoundError as e:
         logging.error("File not found: %s", e.filename)
-        return EXIT_CONFIG_ERROR
+        return EXIT_FILE_NOT_FOUND_ERROR
     except Exception:
         logging.error("Problem reading: %s", config_yaml)
         exc_type, _, _ = sys.exc_info()
@@ -446,19 +435,18 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
 
     LOGGER.info("Build indices for alignment, if necessary/requested")
     try:
-        r_rna_fasta = config[params.R_RNA_FASTA_FILE]
-        orf_fasta = config[params.ORF_FASTA_FILE]
         r_rna_index = os.path.join(
             output_config.index_dir, config[params.R_RNA_INDEX_PREFIX])
         orf_index = os.path.join(
             output_config.index_dir, config[params.ORF_INDEX_PREFIX])
-
         is_build_indices = value_in_dict(params.BUILD_INDICES, config)
         if is_build_indices:
+            r_rna_fasta = config[params.R_RNA_FASTA_FILE]
             log_file = os.path.join(
                 output_config.logs_dir, "hisat2_build_r_rna.log")
             workflow.build_indices(r_rna_fasta, r_rna_index, log_file,
                                    cmd_config)
+            orf_fasta = config[params.ORF_FASTA_FILE]
             log_file = os.path.join(
                 output_config.logs_dir, "hisat2_build_orf.log")
             workflow.build_indices(orf_fasta, orf_index, log_file,
@@ -468,34 +456,33 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         return EXIT_CONFIG_ERROR
     except FileNotFoundError as e:
         logging.error("File not found: %s", e.filename)
-        return EXIT_INDEX_ERROR
+        return EXIT_FILE_NOT_FOUND_ERROR
     except Exception:
         logging.error("Problem creating indices")
         exc_type, _, _ = sys.exc_info()
         logging.exception(exc_type.__name__)
-        return EXIT_INDEX_ERROR
+        return EXIT_PROCESSING_ERROR
 
     is_sample_files = value_in_dict(params.FQ_FILES, config)
     is_multiplex_files = value_in_dict(params.MULTIPLEX_FQ_FILES, config)
     is_barcodes = value_in_dict(params.BARCODES_FILE, config)
     if not is_sample_files and not is_multiplex_files:
         LOGGER.error("No sample files (fq_files) or multiplexed files (multiplex_fq_files) are specified.")
-        return EXIT_NO_DATA_ERROR
+        return EXIT_CONFIG_ERROR
     elif is_sample_files and is_multiplex_files:
         LOGGER.error("Both sample files (fq_files) and multiplexed files (multiplex_fq_files) were specified.")
-        return EXIT_DATA_CONFLICT_ERROR
+        return EXIT_CONFIG_ERROR
     elif is_multiplex_files and not is_barcodes:
         LOGGER.error("Multiplexed files (multiplex_fq_files) are specified but no barcodes (barcodes) file.")
-        return EXIT_NO_BARCODES_ERROR
+        return EXIT_CONFIG_ERROR
 
     if is_sample_files:
-        # Process sample files
         samples = config[params.FQ_FILES]
         processed_samples = process_samples(
             samples, in_dir, r_rna_index, orf_index, False, config,
             py_scripts, r_scripts, output_config, cmd_config)
         if not processed_samples:
-            return EXIT_DATA_ERROR
+            return EXIT_PROCESSING_ERROR
         try:
             log_file = os.path.join(
                 output_config.logs_dir, "collate_tpms.log")
@@ -506,11 +493,9 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
             logging.error(("Problem collating TPMs"))
             exc_type, _, _ = sys.exc_info()
             logging.exception(exc_type.__name__)
-            return EXIT_COLLATION_ERROR
+            return EXIT_PROCESSING_ERROR
     else:
-        # Process multiplexed files
         LOGGER.info("WIP: multiplexed file processing")
-
         try:
             barcodes_file = os.path.join(in_dir, config[params.BARCODES_FILE])
             if not os.path.exists(barcodes_file):
@@ -519,15 +504,14 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
                                         barcodes_file)
         except FileNotFoundError as e:
             logging.error("File not found: %s", e.filename)
-            return EXIT_CONFIG_ERROR
+            return EXIT_FILE_NOT_FOUND_ERROR
         except Exception:
             logging.error("Problem processing: %s", barcodes_file)
             exc_type, _, _ = sys.exc_info()
             logging.exception(exc_type.__name__)
-            return EXIT_CONFIG_ERROR
+            return EXIT_PROCESSING_ERROR
 
         multiplex_files = config[params.MULTIPLEX_FQ_FILES]
-        # WIP: take first file only
         multiplex_file = multiplex_files[0]
         multiplex_name = os.path.splitext(os.path.basename(multiplex_file))[0]
         multiplex_file = os.path.join(in_dir, multiplex_file)
@@ -567,7 +551,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
             print(samples)  # TODO remove
             if not samples:
                 LOGGER.error("No sample files with any reads resulted from demultiplexing.")
-                return EXIT_NO_DATA_ERROR
+                return EXIT_PROCESSING_ERROR
 
             # Use get_fastq_filename to deduce sample-specific files
             # output by demultiplex_fastq.py - demultiplex_fastq.py
@@ -580,15 +564,15 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
                 True, config, py_scripts, r_scripts, output_config,
                 cmd_config)
             if not processed_samples:
-                return EXIT_DATA_ERROR
+                return EXIT_PROCESSING_ERROR
         except FileNotFoundError as e:
             logging.error("File not found: %s", e.filename)
-            return EXIT_DATA_ERROR
+            return EXIT_FILE_NOT_FOUND_ERROR
         except Exception:
             logging.error("Problem processing: %s", multiplex_file)
             exc_type, _, _ = sys.exc_info()
             logging.exception(exc_type.__name__)
-            return EXIT_DATA_ERROR
+            return EXIT_PROCESSING_ERROR
 
     LOGGER.info("Completed")
     return EXIT_OK

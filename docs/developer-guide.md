@@ -276,16 +276,6 @@ Run tests of error conditions and exit codes:
 
 ```console
 $ pytest -v riboviz/test/tools/test_prep_riboviz.py
-============================= test session starts ==============================
-...
-
-riboviz/test/tools/test_prep_riboviz.py::test_config_error_missing_config_file PASSED [ 20%]
-riboviz/test/tools/test_prep_riboviz.py::test_index_error_missing_fa PASSED    [ 40%]
-riboviz/test/tools/test_prep_riboviz.py::test_no_samples_error PASSED          [ 60%]
-riboviz/test/tools/test_prep_riboviz.py::test_samples_error_missing_samples PASSED [ 80%]
-riboviz/test/tools/test_prep_riboviz.py::test_config_error_missing_dir_in PASSED [100%]
-
-=========================== 5 passed in 0.71 seconds ===========================
 ```
 
 ---
