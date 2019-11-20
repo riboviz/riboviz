@@ -14,7 +14,7 @@ rRNA_index: yeast_rRNA # rRNA index file prefix, relative to dir_index
 orf_index: YAL_CDS_w_250 # ORF index file prefix, relative to dir_index
 multiplex_fq_files:
 - multiplex_umi_barcode_adaptor.fastq
-barcodes: multiplex_barcodes.tsv
+sample_sheet: multiplex_barcodes.tsv # Sample sheet, tab-separated values file with, at least, SampleID and TagRead (barcode) columns
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
 extract_umis: TRUE # Extract UMIs if TRUE
 dedup_umis: TRUE # Extract UMIs and deduplicate reads if TRUE
