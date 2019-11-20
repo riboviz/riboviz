@@ -121,6 +121,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
+                   is_collate_tpms,
                    config, py_scripts, r_scripts, output_config,
                    cmd_config):
     """
@@ -137,6 +138,8 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
     :param is_trimmed: Have adapters been cut and barcodes and UMIs
     extracted already?
     :type are_trimmed: bool
+    :param is_collate_tpms: Collate TPMS for a specific sample?
+    :type is_collate_tpms: bool
     :param config: RiboViz configuration
     :type config: dict
     :param output_config: Output directories
@@ -308,6 +311,14 @@ def process_sample(sample, fastq, r_rna_index, orf_index, is_trimmed,
         sample_out_h5, output_config.out_dir, sample_out_prefix,
         config, nprocesses, r_scripts, log_file, cmd_config)
 
+    if is_collate_tpms:
+        step += 1
+        log_file = workflow.get_sample_log_file(
+            output_config.logs_dir, sample, "collate_tpms", step)
+        workflow.collate_tpms(
+            output_config.out_dir, [sample], r_scripts,
+            log_file, cmd_config)
+
     LOGGER.info("Finished processing sample: %s", fastq)
 
 
@@ -352,6 +363,7 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
                            fastq,
                            r_rna_index,
                            orf_index,
+                           False,
                            False,
                            config,
                            py_scripts,
@@ -409,15 +421,29 @@ def process_multiplexed_samples(samples, in_dir, r_rna_index, orf_index,
                 if not os.path.exists(fastq):
                     raise FileNotFoundError(
                         errno.ENOENT, os.strerror(errno.ENOENT), fastq)
+            tmp_dir = os.path.join(output_config.tmp_dir, sample)
+            out_dir = os.path.join(output_config.out_dir, sample)
+            for d in [tmp_dir, out_dir]:
+                with open(cmd_config.cmd_file, "a") as f:
+                    f.write("mkdir -p %s\n" % d)
+                if not cmd_config.is_dry_run:
+                    if not os.path.exists(d):
+                        os.makedirs(d)
+            sample_output_config = workflow.OutputConfigTuple(
+                output_config.index_dir,
+                tmp_dir,
+                out_dir,
+                output_config.logs_dir)
             process_sample(sample,
                            fastq,
                            r_rna_index,
                            orf_index,
                            True,
+                           True,
                            config,
                            py_scripts,
                            r_scripts,
-                           output_config,
+                           sample_output_config,
                            cmd_config)
             successes.append(sample)
         except FileNotFoundError as e:
