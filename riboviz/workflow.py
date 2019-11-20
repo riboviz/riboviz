@@ -512,8 +512,7 @@ def collate_tpms(out_dir, samples, r_scripts, log_file, cmd_config):
     :raise FileNotFoundError: if Rscript cannot be found
     :raise AssertionError: if Rscript returns non-zero exit code
     """
-    LOGGER.info("Collate TPMs across all processed samples. Log: %s",
-                log_file)
+    LOGGER.info("Collate TPMs. Log: %s", log_file)
     cmd = ["Rscript", "--vanilla",
            os.path.join(r_scripts, "collate_tpms.R"),
            "--dir_out=" + out_dir]
