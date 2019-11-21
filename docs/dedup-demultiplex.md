@@ -1,6 +1,6 @@
 # Deduplication and demultiplexing
 
-`prep_riboviz.py` can be configured to do barcode and UMI extraction, using [UMI-tools](https://umi-tools.readthedocs.io/), demultiplexing, using a custom script, `demultiplex_fastq.py`, and deduplication, using [UMI-tools](https://umi-tools.readthedocs.io/).
+As described in [Map mRNA and ribosome protected reads to transcriptome and collect data intoan HDF5 file](./run-vignette.md), `prep_riboviz.py` can be configured to do barcode and UMI extraction, using [UMI-tools](https://umi-tools.readthedocs.io/), demultiplexing, using the custom [demultiplex-fastq.py fastq demultiplexer](./demultiplex-fastq.md), and deduplication, using [UMI-tools](https://umi-tools.readthedocs.io/). This page describes deduplication and demultiplexing in more detail.
 
 The `data/example/` folder contains simple simulated FASTQ files that, in conjunction with configuration files in `vignette/`, demonstrate these features. For more details on the contents on `data/example/`, see [Simulated FASTQ test files](./data.md#simulated-fastq-test-files).
 
@@ -17,15 +17,7 @@ Configuration parameters pertinent to UMI extraction and deduplication are as fo
 
 Note: if `dedup_umis` is `TRUE` but `extract_umis` is `FALSE` then a warning will be displayed, but processing will continue.
 
-`prep_riboviz.py` behaves as follows when UMI extraction and deduplication is enabled:
-
-* Post-cutting out of sequencing library adapters, UMIs are extracted using `umi_tools extract` if requested (`extract_umis: TRUE`), using the UMI-tools-compliant regular expression pattern (`umi_regexp`).
-* Post-trimming of 5' mismatches from reads and removal of reads with more than 2 mismatches:
-  - UMI groups are calculated pre-deduplication using `umi_tools group` if requested (if `dedup_umis: TRUE` and `group_umis: TRUE`).
-  - Reads are deduplicated using `umi_tools dedup`, if requested (`dedup_umis: TRUE`)
-  - UMI groups are calculated post-deduplication using `umi_tools group` if requested (if `dedup_umis: TRUE` and `group_umis: TRUE`).
-
-After the run, the following UMI extraction and deduplication-specific files will exist, in addition to the other files output during a run of `prep_riboviz.py`:
+After a run, the following UMI extraction and deduplication-specific files will exist, in addition to the other files output during a run of `prep_riboviz.py`:
 
 * UMI groups pre- and post-deduplication (in `vignette/tmp/`):
   - `<SAMPLE>_pre_dedup_groups.tsv`: UMI groups before deduplication
@@ -43,6 +35,8 @@ After the run, the following UMI extraction and deduplication-specific files wil
 <SAMPLE>_09_umi_tools_dedup.log
 <SAMPLE>_11_umi_tools_group.log
 ```
+
+### Example configuration
 
 [vignette/vignette_example_config.yaml](../vignette/vignette_example_config.yaml) has a sample configuration file which runs an analysis of `data/example/umi5_umi3_umi_adaptor.fastq` with UMI extraction and deduplication enabled.
 
@@ -83,18 +77,7 @@ Note: if  both `fq_files` and `multiplex_fq_files` parameters are provided then 
 
 `prep_riboviz.py` behaves as follows when barcode and UMI extraction, demultiplexing and deduplication is enabled:
 
-* Cutting out of sequencing library adapters is done on the multiplexed file.
-* Post-cutting out of sequencing library adapters, barcodes and UMIs are extracted using `umi_tools extract` if requested (`extract_umis: TRUE`), using the UMI-tools-compliant regular expression pattern (`umi_regexp`).
-* The file is demultiplexed using `demultiplex_fastq.py` and information in the sample sheet (`sample_sheet`). For more information, see [demultiplex-fastq.py fastq demultiplexer](./demultiplex-fastq.md).
-* Each demultiplexed file (sample) is then processed in turn:
-  - Processing is as for non-demultiplexed files, except that there is no need to cut out sequencing library adapters or extract UMIs, as these have already been done. TPMs are also collated per-sample as described below.
-  - Post-trimming of 5' mismatches from reads and removal of reads with more than 2 mismatches:
-    - UMI groups are calculated pre-deduplication using `umi_tools group` if requested (if `dedup_umis: TRUE` and `group_umis: TRUE`).
-    - Reads are deduplicated using `umi_tools dedup`, if requested (`dedup_umis: TRUE`)
-    - UMI groups are calculated post-deduplication using `umi_tools group` if requested (if `dedup_umis: TRUE` and `group_umis: TRUE`).
-  - After the generation of summary statistics and files, using `generate_stats_figs.R`, TPMs are collated for the results for the sample using `collate_tpms.R`. This differs from how non-multiplexed samples, specified via the `fq_files` configuration parameter, are processed, where collation of TPMs is done across the results of processing all the samples.
-
-After the run, the following barcode and UMI extraction, demultiplexing, and deduplication-specific files will exist, in addition to the other files output during a run of `prep_riboviz.py`:
+After a run, the following barcode and UMI extraction, demultiplexing, and deduplication-specific files will exist, in addition to the other files output during a run of `prep_riboviz.py`:
 
 * FASTQ file post-barcode and UMI extraction (in `vignette/tmp/`):
   - `<FASTQ_FILE_NAME_PREFIX>_extract_trim.fq` where `<FASTQ_FILE_NAME_PREFIX>` is the name of the file (without path or extension) in `multiplex_fq_files`.
@@ -125,6 +108,8 @@ demultiplex_fastq.log
 <SAMPLE_ID>_09_umi_tools_group.log
 <SAMPLE_ID>_14_collate_tpms.log
 ```
+
+### Example configuration
 
 [vignette/vignette_example_multiplex_config.yaml](../vignette/vignette_example_multiplex_config.yaml) has a sample configuration file which runs an analysis of `data/example/multiplex.fastq` with barcode and UMI extraction, demultiplexing and deduplication enabled.
 

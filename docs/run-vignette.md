@@ -70,22 +70,57 @@ Note that the configuration file specifies an additional, non-existent, file. Th
 
 The script prepares ribosome profiling data for RiboViz or other analyses. It does the following (`names` in brackets correspond to variables in the YAML configuration file):
 
+The script can process sample data or multiplexed sample data
+(relevant configuration parameters are shown in brackets).
+
+Process ribosome profiling data:
+
 * Reads configuration information from YAML configuration file.
 * Builds hisat2 indices if requested (`build_indices: TRUE`) using `hisat2 build` and saves these into an index directory (`dir_index`).
-* Processes all fastq.gz files (`dir_in`). For each fastq.gz file:
+* Processes each sample fastq[.gz] file (sample IDs and files are listed in `fq_files` and are assumed to be relative to `dir_in`) in turn:         
   - Cuts out sequencing library adapters (`adapters`, default `CTGTAGGCACC`) using `cutadapt`.
+  - Extracts UMIs using `umi_tools extract`, if requested (`extract_umis: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`).
   - Removes rRNA or other contaminating reads by alignment to rRNA index file (`rRNA_index`) using `hisat2`.
   - Aligns remaining reads to ORFs index file (`orf_index`). using `hisat2`.
-  - Trims 5' mismatches from reads and remove reads with more than 2 mismatches using trim_5p_mismatch.py.
+  - Trims 5' mismatches from reads and remove reads with more than 2 mismatches using `trim_5p_mismatch.py`.
+  - Outputs UMI groups pre-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis: TRUE`)
+  - Deduplicates UMIs using `umi_tools dedup`, if requested (`dedup_umis: TRUE`)
+  - Outputs UMI groups post-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis:TRUE`)
   - Exports bedgraph files for plus and minus strands, if requested (`make_bedgraph: TRUE`) using `bedtools genomecov`.
+  - Writes intermediate files produced above into a temporary directory  (`dir_tmp`).
   - Makes length-sensitive alignments in compressed h5 format using `bam_to_h5.R`.
   - Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
-* Collates TPMs across all processed fastq.gz files, using `collate_tpms.R`.
-* The workflow can parallelize part of of its operation over many processes (`nprocesses`):
-  - This value is used to configure `hisat2`, `samtools sort`, `bam_to_h5.R` and `generate_stats_figs.R`.
-  - For `cutadapt` the number of available processors on the host will be used.
-* Writes all intermediate files into a temporary directory (`dir_tmp`).
-* Writes all output files into an output directory (`dir_out`).
+  - Writes output files produced above into an output directory (`dir_out`).
+* Collates TPMs across all processed fastq[.gz] files, using `collate_tpms.R` and writes into output directory (`dir_out`).
+
+Process multiplexed ribosome profiling data:
+
+* Reads configuration information from YAML configuration file.
+* Builds hisat2 indices if requested (`build_indices: TRUE`) using `hisat2 build` and saves these into an index directory (`dir_index`).
+* Reads fastq[.gz] file (the file is listed in `multiplex_fq_files` and is assumed to be relative to `dir_in`). 
+* Cuts out sequencing library adapters (`adapters`, default `CTGTAGGCACC`) using `cutadapt`.
+* Extracts barcodes and UMIs using `umi_tools extract`, if requested (`extract_umis: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`).
+* Demultiplexes fastq[.gz] file with reference to a sample sheet (`sample_sheet`), using `demultiplex_fastq.py`.
+* Processes each demultiplexed fastq[.gz], which has one or more reads, in turn:
+  - Removes rRNA or other contaminating reads by alignment to rRNA index file (`rRNA_index`) using `hisat2`.
+  - Aligns remaining reads to ORFs index file (`orf_index`). using `hisat2`.
+  - Trims 5' mismatches from reads and remove reads with more than 2 mismatches using `trim_5p_mismatch.py`.
+  - Outputs UMI groups pre-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis: TRUE`).
+  - Deduplicates UMIs using `umi_tools dedup`, if requested (`dedup_umis: TRUE`).
+  - Outputs UMI groups post-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis: TRUE`)
+  - Exports bedgraph files for plus and minus strands, if requested (`make_bedgraph: TRUE`) using `bedtools genomecov`.
+  - Writes intermediate files produced above into a temporary directory  (`dir_tmp`).
+  - Makes length-sensitive alignments in compressed h5 format using `bam_to_h5.R`.
+  - Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
+  - Collates TPMs across the demultiplexed fastq[.gz] file, usin `collate_tpms.R` and writes into output directory (`dir_out`).
+  - Writes output files produced above into an output directory (`dir_out`).
+
+Deduplication and demultiplexing won't be discussed further on this page. For more information, see [Deduplication and demultiplexing](./dedup-demultiplex.md).
+
+The script can parallelize parts of its operation over many processes (`nprocesses`):
+
+* This value is used to configure `hisat2`, `samtools sort`, `bam_to_h5.R` and `generate_stats_figs.R`.
+* For `cutadapt`, the number of available processors on the host will be used.
 
 A visualisation of the key steps, inputs and outputs can be viewed in the [RiboViz workflow](./workflow.pdf) (PDF).
 
@@ -303,19 +338,19 @@ Swap:           969         619         350
 
 Divide the free memory by the number of processes, `nprocesses` e.g. 1024/4 = 256 MB.
 
-Edit `riboviz/tools/prep_riboviz.py` and change the lines:
+Edit `riboviz/workflow.py` and change the lines:
 
 ```python
-    cmd_sort = ["samtools", "sort", "-@", str(nprocesses),
-                "-O", "bam", "-o", sample_out_bam, "-"]
+cmd_sort = ["samtools", "sort", "-@", str(run_config.nprocesses),
+            "-O", "bam", "-o", bam_file, "-"]
 ```
 
 to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
 
 ```python
-    cmd_sort = ["samtools", "sort", "-@", str(nprocesses),
-                "-m", "256M",
-                "-O", "bam", "-o", sample_out_bam, "-"]
+cmd_sort = ["samtools", "sort", "-@", str(run_config.nprocesses),
+            "-m", "256M",
+            "-O", "bam", "-o", bam_file, "-"]
 ```
 
 ### Check the expected output files
