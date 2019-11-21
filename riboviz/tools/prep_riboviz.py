@@ -15,69 +15,116 @@ Example:
         rscripts/ \
         vignette/vignette_config.yaml
 
-Prepare ribosome profiling data for RiboViz or other analysis:
+The script can process sample data or multiplexed sample data
+(relevant configuration parameters are shown in brackets).
+
+Process ribosome profiling data:
 
 * Reads configuration information from YAML configuration file.
-* Builds hisat2 indices if requested (config["build_indices"] ==
-  True) using "hisat2 build" and saves these into an index directory
-  (config["dir_index"]).
-* Processes all fastq.gz files (config["dir_in"]). For each fastq.gz
-  file:
-  - Cuts out sequencing library adapters (config["adapters"],
-    default "CTGTAGGCACC") using "cutadapt".
+* Builds hisat2 indices if requested ("build_indices: TRUE") using
+  "hisat2 build" and saves these into an index directory
+  ("dir_index").
+* Processes each sample fastq[.gz] file (sample IDs and files are
+  listed in "fq_files" and are assumed to be relative to "dir_in") in
+  turn:
+  - Cuts out sequencing library adapters ("adapters", default
+    "CTGTAGGCACC") using "cutadapt".
   - Extracts UMIs using "umi_tools extract", if requested
-    (config["extract_umis"] == True), using a UMI-tools-compliant
-    regular expression pattern (config["umi_regexp"]).
+    ("extract_umis: TRUE"), using a UMI-tools-compliant
+    regular expression pattern ("umi_regexp").
   - Removes rRNA or other contaminating reads by alignment to
-    rRNA index file (config["rRNA_index"]) using "hisat2".
+    rRNA index file ("rRNA_index") using "hisat2".
   - Aligns remaining reads to ORFs index file
-    (config["orf_index"]). using "hisat2".
+    ("orf_index"). using "hisat2".
   - Trims 5' mismatches from reads and remove reads with more than 2
-    mismatches using trim_5p_mismatch.py.
+    mismatches using "trim_5p_mismatch.py".
   - Outputs UMI groups pre-deduplication using "umi_tools group" if
-    requested (config["dedup_umis"] == True and
-    config["group_umis"] == True)
+    requested ("dedup_umis: TRUE" and "group_umis: TRUE")
   - Deduplicates UMIs using "umi_tools dedup", if requested
-    (config["dedup_umis"] == True)
+    ("dedup_umis: TRUE")
   - Outputs UMI groups post-deduplication using "umi_tools group" if
-    requested (config["dedup_umis"] == True and
-    config["group_umis"] == True)
+    requested ("dedup_umis: TRUE" and "group_umis:TRUE")
   - Exports bedgraph files for plus and minus strands, if requested
-    (config["make_bedgraph"] == True) using "bedtools genomecov".
+    ("make_bedgraph: TRUE") using "bedtools genomecov".
+  - Writes intermediate files produced above into a temporary
+    directory  ("dir_tmp").
   - Makes length-sensitive alignments in compressed h5 format using
     "bam_to_h5.R".
   - Generates summary statistics, and analyses and QC plots for both
     RPF and mRNA datasets using "generate_stats_figs.R". This
     includes estimated read counts, reads per base, and transcripts
     per million for each ORF in each sample.
-* Collates TPMs across all processed fastq.gz files, using
-  "collate_tpms.R".
-* The workflow can parallelize partos of its operation over many
-  processes (config["nprocesses"]):
-  - This value is used to configure "hisat2", "samtools sort",
-    "bam_to_h5.R" and "generate_stats_figs.R".
-  - For "cutadapt", the number of available processors
-    on the host will be used.
-* Writes all intermediate files into a temporary directory
-  (config["dir_tmp"]).
-* Writes all output files into an output directory
-  (config["dir_out"]).
+  - Writes output files produced above into an output directory
+    ("dir_out").
+* Collates TPMs across all processed fastq[.gz] files, using
+  "collate_tpms.R" and writes into output directory ("dir_out").
 
-Exit codes are as follows:
+Process multiplexed ribosome profiling data:
 
-* EXIT_OK (0): Processing successfully completed.
-* EXIT_FILE_NOT_FOUND_ERROR (1): A file does not seem to exist.
-* EXIT_CONFIG_ERROR (2): Errors occurred loading or accessing
-  configuration e.g. missing configuration parameters, inconsistent
-  configuration parameters.
-* EXIT_PROCESSING_ERROR (3): Error occurred during processing.
+* Reads configuration information from YAML configuration file.
+* Builds hisat2 indices if requested ("build_indices: TRUE") using
+  "hisat2 build" and saves these into an index directory
+  ("dir_index").
+* Reads fastq[.gz] file (the file is listed in "multiplex_fq_files"
+  and is assumed to be relative to "dir_in").
+* Cuts out sequencing library adapters ("adapters", default
+  "CTGTAGGCACC") using "cutadapt".
+* Extracts barcodes and UMIs using "umi_tools extract", if requested
+  ("extract_umis: TRUE"), using a UMI-tools-compliant
+  regular expression pattern ("umi_regexp").
+* Demultiplexes fastq[.gz] file with reference to a sample sheet
+  ("sample_sheet"), using "demultiplex_fastq.py".
+* Processes each demultiplexed fastq[.gz], which has one or more
+  reads, in turn:
+  - Removes rRNA or other contaminating reads by alignment to rRNA
+    index file ("rRNA_index") using "hisat2".
+  - Aligns remaining reads to ORFs index file ("orf_index"). using
+    "hisat2".
+  - Trims 5' mismatches from reads and remove reads with more than 2
+    mismatches using "trim_5p_mismatch.py".
+  - Outputs UMI groups pre-deduplication using "umi_tools group" if
+    requested ("dedup_umis: TRUE" and "group_umis: TRUE").
+  - Deduplicates UMIs using "umi_tools dedup", if requested
+    ("dedup_umis: TRUE").
+  - Outputs UMI groups post-deduplication using "umi_tools group" if
+    requested ("dedup_umis: TRUE" and "group_umis: TRUE")
+  - Exports bedgraph files for plus and minus strands, if requested
+    ("make_bedgraph: TRUE") using "bedtools genomecov".
+  - Writes intermediate files produced above into a temporary
+    directory  ("dir_tmp").
+  - Makes length-sensitive alignments in compressed h5 format using
+    "bam_to_h5.R".
+  - Generates summary statistics, and analyses and QC plots for both
+    RPF and mRNA datasets using "generate_stats_figs.R". This
+    includes estimated read counts, reads per base, and transcripts
+    per million for each ORF in each sample.
+  - Collates TPMs across the demultiplexed fastq[.gz] file, using
+    "collate_tpms.R" and writes into output directory ("dir_out").
+  - Writes output files produced above into an output directory
+    ("dir_out").
 
-Commands that are submitted to bash are recorded within a
-file specified by a cmd_file configuration parameter.
+The script can parallelize parts of its operation over many
+processes ("nprocesses"):
 
-If --dry-run is provided then the commands submitted to bash will not
-be executed. This can be useful for seeing what commands will be run
-without actually running them.
+* This value is used to configure "hisat2", "samtools sort",
+  "bam_to_h5.R" and "generate_stats_figs.R".
+* For "cutadapt", the number of available processors on the host will
+  be used.
+
+`prep_riboviz.py` returns the following exit codes:
+
+* 0: Processing successfully completed.
+* 1: A file does not seem to exist.
+* 2: Errors occurred loading or accessing configuration e.g. missing configuration parameters, inconsistent configuration parameters.
+* 3: Error occurred during processing.
+
+Commands that are submitted to bash are recorded within a file
+specified by a "cmd_file" configuration parameter.
+
+If "--dry-run" is provided then the commands submitted to bash will
+not be executed. This can be useful for both seeing what commands will
+be run, and validating the configuration, without actually running
+the commands.
 """
 
 from datetime import datetime
