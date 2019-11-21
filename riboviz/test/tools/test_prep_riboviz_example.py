@@ -52,8 +52,7 @@ def run_prep_riboviz(configuration_module):
 def test_adaptor_trimming(configuration_module):
     """
     Validate that adaptor trimming, performed by "cutadapt" produces
-    the expected results, by comparing the FASTQ file output to a
-    pre-calculated one in "data/".
+    the expected results.
 
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
@@ -71,8 +70,7 @@ def test_adaptor_trimming(configuration_module):
 def test_umi_extract(configuration_module):
     """
     Validate that UMI extraction, performed by "umi_tools extract"
-    produces the expected results, by comparing the FASTQ file output
-    to a pre-calculated one in "data/".
+    produces the expected results.
 
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
