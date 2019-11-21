@@ -9,7 +9,7 @@ trimming, UMI extraction and deduplication steps against the expected
 outputs, also in "data/example/".
 
 The simulated data in "data/example/" is expected to have been created
-using "riboviz.tools.create_fastq_examples".
+using riboviz.tools.create_fastq_examples.
 """
 import os
 import pytest
