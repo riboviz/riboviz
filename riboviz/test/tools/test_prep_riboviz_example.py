@@ -1,15 +1,15 @@
 """
-prep_riboviz.py test suite to test adaptor trimming, UMI extraction
-and deduplication.
+riboviz.tools.prep_riboviz test suite to test adaptor trimming, UMI
+extraction and deduplication.
 
-The test suite runs prep_riboviz.py using a copy of
-`vignette/example_config.yaml` and the simulated data in
-`data/example/`. It then validates the outputs of the
-UMI-tools-specific phases against the expected outputs, also in
-`data/`.
+The test suite runs riboviz.tools.prep_riboviz using a copy of
+"vignette/example_config.yaml" and the simulated data in
+"data/example/". It then validates the outputs of the adaptor
+trimming, UMI extraction and deduplication steps against the expected
+outputs, also in "data/example/".
 
-The simulated data in `data/` is expected to have been created using
-`create_fastq_examples.py`.
+The simulated data in "data/example/" is expected to have been created
+using "riboviz.tools.create_fastq_examples".
 """
 import os
 import pytest
@@ -51,9 +51,9 @@ def run_prep_riboviz(configuration_module):
 @pytest.mark.usefixtures("run_prep_riboviz")
 def test_adaptor_trimming(configuration_module):
     """
-    Validate that adaptor trimming, performed by `cutadapt` produces
+    Validate that adaptor trimming, performed by "cutadapt" produces
     the expected results, by comparing the FASTQ file output to a
-    pre-calculated one in `data/`.
+    pre-calculated one in "data/".
 
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
@@ -70,9 +70,9 @@ def test_adaptor_trimming(configuration_module):
 @pytest.mark.usefixtures("run_prep_riboviz")
 def test_umi_extract(configuration_module):
     """
-    Validate that UMI extraction, performed by `umi_tools extract`
+    Validate that UMI extraction, performed by "umi_tools extract"
     produces the expected results, by comparing the FASTQ file output
-    to a pre-calculated one in `data/`.
+    to a pre-calculated one in "data/".
 
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
@@ -89,8 +89,8 @@ def test_umi_extract(configuration_module):
 @pytest.mark.usefixtures("run_prep_riboviz")
 def test_umi_group(configuration_module):
     """
-    Validate the information on UMI groups post-`umi_tools extract`,
-    by parsing the `.tsv` file output by `umi_tools group`.
+    Validate the information on UMI groups post-"umi_tools extract",
+    by parsing the ".tsv" file output by "umi_tools group".
 
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
