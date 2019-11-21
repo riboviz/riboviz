@@ -270,12 +270,12 @@ riboviz/test/regression/test_vignette.py::test_output_tpms_collated_tsv PASSED  
 
 ---
 
-## Run `prep_riboviz.py` tests
+## Run tests
 
-Run tests of error conditions and exit codes:
+Run all tests (excluding regression tests):
 
 ```console
-$ pytest -v riboviz/test/tools/test_prep_riboviz.py
+$ pytest -v --ignore-glob="*regression*"
 ```
 
 ---
