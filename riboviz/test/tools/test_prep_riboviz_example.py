@@ -1,5 +1,5 @@
 """
-prep_riboviz.py test suite to test adatpor trimming, UMI extraction
+prep_riboviz.py test suite to test adaptor trimming, UMI extraction
 and deduplication.
 
 The test suite runs prep_riboviz.py using a copy of
