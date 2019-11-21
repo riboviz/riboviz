@@ -24,7 +24,7 @@ from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration_module  # Test fixture
 
 
-TEST_CONFIG_FILE = riboviz.test.EXAMPLE_DATA_CONFIG
+TEST_CONFIG_FILE = riboviz.test.EXAMPLE_CONFIG
 """
 YAML configuration used as a template configuration by these tests -
 required by configuration test fixture

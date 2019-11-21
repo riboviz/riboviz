@@ -26,7 +26,7 @@ EXAMPLE_DATA_DIR = os.path.join(DATA_DIR, "example")
 VIGNETTE_CONFIG = os.path.join(VIGNETTE_DIR, "vignette_config.yaml")
 """ Path of vignette/vignette_config.yaml derived from VIGNETTE_DIR. """
 
-EXAMPLE_DATA_CONFIG = os.path.join(VIGNETTE_DIR, "example_config.yaml")
+EXAMPLE_CONFIG = os.path.join(VIGNETTE_DIR, "example_config.yaml")
 """
 Path of vignette/example_config.yaml derived from VIGNETTE_DIR.
 """
