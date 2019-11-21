@@ -38,12 +38,12 @@ After a run, the following UMI extraction and deduplication-specific files will 
 
 ### Run example
 
-[vignette/vignette_example_config.yaml](../vignette/vignette_example_config.yaml) has a sample configuration file which runs an analysis of `data/example/umi5_umi3_umi_adaptor.fastq` with UMI extraction and deduplication enabled.
+[vignette/example_config.yaml](../vignette/example_config.yaml) has a sample configuration file which runs an analysis of `data/example/umi5_umi3_umi_adaptor.fastq` with UMI extraction and deduplication enabled.
 
 The example can be run as follows:
 
 ```console
-$ python -m riboviz.tools.prep_riboviz rscripts/ vignette/vignette_example_config.yaml 
+$ python -m riboviz.tools.prep_riboviz rscripts/ vignette/example_config.yaml 
 ```
 
 ### Troubleshooting: `WARNING: dedup_umis was TRUE but extract_umis was FALSE`
@@ -111,12 +111,12 @@ demultiplex_fastq.log
 
 ### Run example
 
-[vignette/vignette_example_multiplex_config.yaml](../vignette/vignette_example_multiplex_config.yaml) has a sample configuration file which runs an analysis of `data/example/multiplex.fastq` with barcode and UMI extraction, demultiplexing and deduplication enabled.
+[vignette/example_multiplex_config.yaml](../vignette/example_multiplex_config.yaml) has a sample configuration file which runs an analysis of `data/example/multiplex.fastq` with barcode and UMI extraction, demultiplexing and deduplication enabled.
 
 The example can be run as follows:
 
 ```console
-$ python -m riboviz.tools.prep_riboviz rscripts/ vignette/vignette_example_multiplex_config.yaml 
+$ python -m riboviz.tools.prep_riboviz rscripts/ vignette/example_multiplex_config.yaml 
 ```
 
 ### Demultiplexing and dry runs

@@ -3,7 +3,7 @@ prep_riboviz.py test suite to test adatpor trimming, UMI extraction
 and deduplication.
 
 The test suite runs prep_riboviz.py using a copy of
-`vignette/vignette_example_config.yaml` and the simulated data in
+`vignette/example_config.yaml` and the simulated data in
 `data/example/`. It then validates the outputs of the
 UMI-tools-specific phases against the expected outputs, also in
 `data/`.
