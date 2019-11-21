@@ -563,7 +563,11 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
                                     sample_sheet_file)
         multiplex_files = config[params.MULTIPLEX_FQ_FILES]
         multiplex_file = multiplex_files[0]
-        multiplex_name = os.path.splitext(os.path.basename(multiplex_file))[0]
+        multiplex_name, ext = os.path.splitext(
+            os.path.basename(multiplex_file))
+        if ext.lower() == ".gz":
+            # Trim off .fastq
+            multiplex_name = os.path.splitext(os.path.basename(multiplex_name))[0]
         multiplex_file = os.path.join(in_dir, multiplex_file)
         LOGGER.info("Processing file: %s", multiplex_file)
         if not os.path.exists(multiplex_file):
