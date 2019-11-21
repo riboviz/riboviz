@@ -1,6 +1,6 @@
 # Deduplication and demultiplexing
 
-As described in [Map mRNA and ribosome protected reads to transcriptome and collect data intoan HDF5 file](./run-vignette.md), `prep_riboviz.py` can be configured to do barcode and UMI extraction, using [UMI-tools](https://umi-tools.readthedocs.io/), demultiplexing, using the custom [demultiplex-fastq.py fastq demultiplexer](./demultiplex-fastq.md), and deduplication, using [UMI-tools](https://umi-tools.readthedocs.io/). This page describes deduplication and demultiplexing in more detail.
+As described in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md), `prep_riboviz.py` can be configured to do barcode and UMI extraction, using [UMI-tools](https://umi-tools.readthedocs.io/), demultiplexing, using the custom [demultiplex-fastq.py fastq demultiplexer](./demultiplex-fastq.md), and deduplication, using [UMI-tools](https://umi-tools.readthedocs.io/). This page describes deduplication and demultiplexing in more detail.
 
 The `data/example/` folder contains simple simulated FASTQ files that, in conjunction with configuration files in `vignette/`, demonstrate these features. For more details on the contents on `data/example/`, see [Simulated FASTQ test files](./data.md#simulated-fastq-test-files).
 
@@ -36,7 +36,7 @@ After a run, the following UMI extraction and deduplication-specific files will 
 <SAMPLE>_11_umi_tools_group.log
 ```
 
-### Example configuration
+### Run example
 
 [vignette/vignette_example_config.yaml](../vignette/vignette_example_config.yaml) has a sample configuration file which runs an analysis of `data/example/umi5_umi3_umi_adaptor.fastq` with UMI extraction and deduplication enabled.
 
@@ -109,7 +109,7 @@ demultiplex_fastq.log
 <SAMPLE_ID>_14_collate_tpms.log
 ```
 
-### Example configuration
+### Run example
 
 [vignette/vignette_example_multiplex_config.yaml](../vignette/vignette_example_multiplex_config.yaml) has a sample configuration file which runs an analysis of `data/example/multiplex.fastq` with barcode and UMI extraction, demultiplexing and deduplication enabled.
 
