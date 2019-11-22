@@ -14,5 +14,6 @@ conda install -y -c bioconda pysam
 conda install -y -c anaconda biopython
 pip install gffutils
 conda install -y -c anaconda h5py
+conda install -y -c bioconda umi_tools
 conda list
 source $HOME/miniconda3/bin/deactivate

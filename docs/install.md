@@ -327,6 +327,26 @@ OK (skipped=16, expected failures=6)
 
 The test report should be `OK` as above. Your number of `skipped` and `expected failures` may differ, depending upon the version of h5py installed.
 
+### UMI-tools
+
+Web sites:
+
+* [GitHub](https://github.com/CGATOxford/UMI-tools)
+* [readthedocs](https://readthedocs.org/projects/umi-tools/)
+
+Install:
+
+```console
+$ conda install -y -c bioconda umi_tools
+```
+
+Check package has installed `umi_tools` tool:
+
+```console
+$ umi_tools -v
+UMI-tools version: 1.0.0
+```
+
 ---
 
 ## Hisat2
@@ -659,6 +679,8 @@ pysam                     0.15.2
 pyyaml                    5.1
 
 samtools                  1.9
+
+umi_tools                 1.0.0
 ```
 
 Your versions may differ from those shown.
