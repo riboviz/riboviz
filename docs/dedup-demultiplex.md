@@ -10,6 +10,7 @@ In the following, `<dir_in>`, `<dir_tmp>`, `<dir_out>` and `<dir_logs>` denote t
 
 Configuration parameters pertinent to UMI extraction and deduplication are as follows:
 
+* `fq_files`: A dictionary with pairs of sample IDs and FASTQ (`.fastq[.gz]`) files (assumed to be in `<dir_in>`).
 * `extract_umis`: If `TRUE` then UMIs will be extracted. The UMIs are extracted using `umi_tools extract` on the trimmed FASTQ file, using the regular expression specified in `umi_regexp` below. The extracted UMIs are inserted into the read headers of the FASTQ records.
 * `umi_regexp`: A UMI-tools-compliant regular expression to extract UMIs. For example `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$` extracts a 4nt UMI from the 5' end of a read and a 4nt UMI from the 3' end. For details on the regular expression format, see UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction).
 * `dedup_umis`: If `TRUE` then the reads will be deduplicated using `umi_tools dedup`.
@@ -66,7 +67,7 @@ $ python -m riboviz.tools.prep_riboviz rscripts/ vignette/example_config.yaml
 
 Configuration parameters pertinent to barcode and UMI extraction, demultiplexing and deduplication are as follows:
 
-* `multiplex_fq_files`: A list with a single multiplexed FASTQ file (assumed to be in `<dir_in>`).
+* `multiplex_fq_files`: A list with a single multiplexed FASTQ (`fastq[.gz]`) file (assumed to be in `<dir_in>`).
 * `sample_sheet`: A sample sheet (assumed to be in `<dir_in>)`. This must be a tab-separated values file with, at least, `SampleID` and `TagRead` (barcode) columns.
 * `extract_umis`: as described above.
 * `umi_regexp`: as described above, but specifying a regular expression that extracts barcodes too (via the use of `<cell_<N>>` patterns. For example `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})(?P<cell_1>.{3})$` extracts a 3nt barcode from the 3' end of a read then extracts a 4nt UMI from the 5' end and a 4nt UMI from the 3' end.
