@@ -330,6 +330,7 @@ def process_sample(sample, fastq, r_rna_index, orf_index,
                        config, log_file, run_config)
     step += 1
 
+
     log_file = workflow.get_sample_log_file(
         run_config.logs_dir, sample, "generate_stats_figs", step)
     workflow.generate_stats_figs(
