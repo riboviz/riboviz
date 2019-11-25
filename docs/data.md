@@ -24,7 +24,7 @@ These files were created as follows:
 
 * The file [genome release R64-2-1](https://downloads.yeastgenome.org/sequence/S288C_reference/genome_releases/S288C_reference_genome_R64-2-1_20150113.tgz) (file name `S288C_reference_genome_R64-2-1_20150113.tgz`) was downloaded from the [Saccharomyces Genome Database](https://www.yeastgenome.org/).
 * The files `saccharomyces_cerevisiae_R64-2-1_20150113.gff` and `S288C_reference_sequence_R64-2-1_20150113.fsa` were extracted from the `.tgz` file.
-* The sequence and annotation files for the whole approximate *Saccharomyces cerevisiae* transcriptome were prepared using [script_for_transcript_annotation.Rmd](../rmarkdown/script_for_transcript_annotation.Rmd). 
+* The sequence and annotation files for the whole approximate *Saccharomyces cerevisiae* transcriptome were prepared using [script_for_transcript_annotation.Rmd](../rmarkdown/script_for_transcript_annotation.Rmd).
 
 The files can be used as inputs to RiboViz. However, `yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were downsampled to provide a manageable data set for demonstration purposes, as described in the next section.
 
@@ -102,6 +102,12 @@ tRNA estimates:
 data/yeast_tRNAs.tsv
 ```
 
+A-site displacement values (based on standard yeast data from Ingolia 2009, Weinberg & Shah 2016):
+
+```
+data/yeast_standard_asite_disp_length.txt
+```
+
 These files are all read by [generate_stats_figs.R](../rscripts/generate_stats_figs.R) to help with generating plots and tables of results data.
 
 ---
@@ -142,7 +148,7 @@ These files can alternatively be accessed via [SRA Explorer](https://ewels.githu
 * Select GSM1279570: wild-type no additive; Saccharomyces cerevisiae; OTHER
 * Click Add 1 to collection
 * Search for: SRR1042864
-* Select GSM1279579: wild-type 3-AT; Saccharomyces cerevisiae; OTHER	
+* Select GSM1279579: wild-type 3-AT; Saccharomyces cerevisiae; OTHER
 * Click Add 1 to collection
 * Click 2 saved datasets
 * Click Bash script for downloading FastQ files

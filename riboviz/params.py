@@ -52,6 +52,7 @@ RPF = "rpf"
 SECOND_ID = "SecondID"
 STOP_IN_CDS = "StopInCDS"
 T_RNA = "t_rna"
+ASITE_DISP_LENGTH_FILE = "asite_disp_length_file"
 
 # General.
 NPROCESSES = "nprocesses"

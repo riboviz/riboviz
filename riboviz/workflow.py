@@ -457,7 +457,10 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
            "--rpf=" + str(config[params.RPF]),
            "--dir_out=" + out_dir,
            "--do_pos_sp_nt_freq=" + str(config[params.DO_POS_SP_NT_FREQ])]
-    for flag in [params.T_RNA, params.CODON_POS, params.FEATURES_FILE]:
+    for flag in [params.T_RNA,
+                 params.CODON_POS,
+                 params.FEATURES_FILE,
+                 params.ORF_GFF_FILE,]:
         if value_in_dict(flag, config):
             flag_file = config[flag]
             if not os.path.exists(flag_file):
@@ -465,7 +468,8 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
                                         os.strerror(errno.ENOENT),
                                         flag_file)
             cmd.append("--" + flag + "=" + flag_file)
-    for flag in [params.ORF_GFF_FILE, params.COUNT_THRESHOLD]:
+    for flag in [params.COUNT_THRESHOLD,
+                 params.ASITE_DISP_LENGTH_FILE]:
         if value_in_dict(flag, config):
             cmd.append("--" + flag + "=" + str(config[flag]))
     process_utils.run_logged_command(

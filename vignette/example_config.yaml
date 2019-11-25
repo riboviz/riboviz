@@ -35,3 +35,4 @@ do_pos_sp_nt_freq: TRUE # Do calculate position-specific nucleotide freqeuency
 t_rna: data/yeast_tRNAs.tsv # tRNA estimates
 codon_pos: data/yeast_codon_pos_i200.RData # Codon positions in each gene
 count_threshold: 1 # Remove genes with a read count below this threshold, when generating statistics and figures
+asite_disp_length_file: data/yeast_standard_asite_disp_length.txt # table of fixed A-site positions by read length

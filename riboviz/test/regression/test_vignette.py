@@ -59,6 +59,8 @@ The directories are assumed to hold the following content:
       WT3AT_3nt_periodicity.tsv
       WT3AT.bam
       WT3AT.bam.bai
+      WT3AT_3ntframe_bygene.tsv
+      WT3AT_3ntframe_propbygene.pdf
       WT3AT_codon_ribodens.pdf
       WT3AT_codon_ribodens.tsv
       WT3AT_features.pdf
@@ -77,6 +79,8 @@ The directories are assumed to hold the following content:
       WTnone_3nt_periodicity.tsv
       WTnone.bam
       WTnone.bam.bai
+      WTnone_3ntframe_bygene.tsv
+      WTnone_3ntframe_propbygene.pdf
       WTnone_codon_ribodens.pdf
       WTnone_codon_ribodens.tsv
       WTnone_features.pdf
@@ -325,6 +329,7 @@ def test_output_h5(expected, prefix):
                           "pos_sp_nt_freq",
                           "pos_sp_rpf_norm_reads",
                           "read_lengths",
+                          "3ntframe_bygene",
                           "tpms"])
 @pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
 def test_output_tsv(expected, prefix, content):
@@ -373,7 +378,8 @@ def test_output_tpms_collated_tsv(expected):
                           "pos_sp_rpf_norm_reads",
                           "read_lengths",
                           "startcodon_ribogridbar",
-                          "startcodon_ribogrid"])
+                          "startcodon_ribogrid",
+                          "3ntframe_propbygene"])
 @pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
 def test_output_pdf(expected, prefix, content):
     """
