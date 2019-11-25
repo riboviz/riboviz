@@ -414,6 +414,42 @@ def test_run_logged_command_cmd_file(log_out, cmd_file):
     assert actual_cmds[0].rstrip('\n') == utils.list_to_str(cmd)
 
 
+def test_run_logged_command_cmd_file_cmd_to_log(log_out, cmd_file):
+    """
+    Test writing output and errors to a single log file with shell
+    commands written to a command file, where the shell command
+    submitted via Python differs from that to be logged, due to
+    the presence of quotes.
+
+    :param log_out: Output log file (via test fixture)
+    :type log_out: str or unicode
+    :param cmd_file: Command file (via test fixture)
+    :type cmd_file: str or unicode
+    """
+    path = os.path.realpath(__file__)
+    cmd = ["ls", path, "no-such-file.txt", path]
+    cmd_to_log = ["ls", path, "'no-such-file.txt'", path]
+    try:
+        process_utils.run_logged_command(cmd,
+                                         log_out,
+                                         cmd_file,
+                                         cmd_to_log=cmd_to_log)
+    except AssertionError:
+        pass
+    lines = [line.rstrip('\n') for line in open(log_out)]
+    assert len(lines) == 3
+    assert lines[0] == \
+        "ls: cannot access 'no-such-file.txt': No such file or directory" \
+        or lines[0] == \
+        "ls: cannot access no-such-file.txt: No such file or directory"
+    assert lines[1] == path  # Output from ls
+    assert lines[2] == path  # Output from ls
+    with open(cmd_file) as f:
+        actual_cmds = f.readlines()
+    assert len(actual_cmds) == 1
+    assert actual_cmds[0].rstrip('\n') == utils.list_to_str(cmd_to_log)
+
+
 def test_run_logged_command_cmd_file_dry_run(log_out, cmd_file):
     """
     Test dry run of command, ensuring it is not run but that

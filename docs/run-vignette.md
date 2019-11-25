@@ -63,7 +63,7 @@ fq_files: # fastq files to be processed
   NotHere: example_missing_file.fastq.gz # prep_riboviz should give error message for missing files
 ```
 
-Note that the configuration file specifies an additional, non-existent, file. This is used to test that the workflow processes valid files and ignores non-existent ones.
+Note that the configuration file specifies an additional, non-existent, file. This is used to test that the workflow processes valid files and ignores non-existent ones. This can be safely removed if you are customising the vignette for your own dataset.
 
 ---
 
@@ -71,22 +71,26 @@ Note that the configuration file specifies an additional, non-existent, file. Th
 
 The script prepares ribosome profiling data for RiboViz or other analyses. It does the following (`names` in brackets correspond to variables in the YAML configuration file):
 
-* Reads configuration information from the YAML configuration file.
-* Builds hisat2 indices if requested (`build_indices=TRUE`, by default), in an index directory (`dir_index`).
-* Processes all `fastq.gz` files (`fq_files`) within the input directory  (`dir_in`).
-* Cuts out sequencing library adapters (`adapters=CTGTAGGCACC`, by default) with `cutadapt`.
-* Removes rRNA or other contaminating reads by hisat2 alignment to the rRNA index file (`rRNA_index`).
-* Aligns remaining reads to ORFs or another hisat2 index file (`orf_index`).
-* Trims 5' mismatches from reads and removes reads with more than 2 mismatches via a call to `riboviz/tools/trim5pmismatch.py`.
-* Parallelizes over many processes (`nprocesses`):
-  - This value is used to configure hisat2, samtools sort, bam_to_h5.R and generate_stats_figs.R.
-  - For cutadapt and Python 3, the number of available processors on the host will be used.
-* Makes length-sensitive alignments in compressed h5 format by running `rscripts/bam_to_h5.R`.
-* Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets, by running `rscripts/generate_stats_figs.R`.
-* Estimates read counts, reads per base, and transcripts per million for each ORF in each sample.
-* Puts all intermediate files into a temporary directory (`dir_tmp`) which will be **large**.
-* When finished, puts useful output files into an output directory (`dir_out`).
-* Optionally exports bedgraph files for plus and minus strands (`make_bedgraph=TRUE`, by default).
+* Reads configuration information from YAML configuration file.
+* Builds hisat2 indices if requested (`build_indices: TRUE`) using `hisat2 build` and saves these into an index directory (`dir_index`).
+* Processes all fastq.gz files (`dir_in`). For each fastq.gz file:
+  - Cuts out sequencing library adapters (`adapters`, default `CTGTAGGCACC`) using `cutadapt`.
+  - Extracts UMIs using `umi_tools extract`, if requested (`extract_umis: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`). For information on regular expression patterns, see the UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction). An example of a regular expression, which extracts 4nt UMIs at both the 5' and 3' ends of a read is `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$`.
+  - Removes rRNA or other contaminating reads by alignment to rRNA index file (`rRNA_index`) using `hisat2`.
+  - Aligns remaining reads to ORFs index file (`orf_index`). using `hisat2`.
+  - Trims 5' mismatches from reads and remove reads with more than 2 mismatches using trim_5p_mismatch.py.
+  - Outputs UMI groups pre-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis: TRUE`).
+  - Deduplicates UMIs using `umi_tools dedup`, if requested (`dedup_umis: TRUE`).
+  - Outputs UMI groups post-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis: TRUE`).
+  - Exports bedgraph files for plus and minus strands, if requested (`make_bedgraph: TRUE`) using `bedtools genomecov`.
+  - Makes length-sensitive alignments in compressed h5 format using `bam_to_h5.R`.
+  - Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
+* Collates TPMs across all processed fastq.gz files, using `collate_tpms.R`.
+* The workflow can parallelize part of of its operation over many processes (`nprocesses`):
+  - This value is used to configure `hisat2`, `samtools sort`, `bam_to_h5.R` and `generate_stats_figs.R`.
+  - For `cutadapt` the number of available processors on the host will be used.
+* Writes all intermediate files into a temporary directory (`dir_tmp`).
+* Writes all output files into an output directory (`dir_out`).
 
 A visualisation of the key steps, inputs and outputs can be viewed in the [RiboViz workflow](./workflow.pdf) (PDF).
 
@@ -99,12 +103,34 @@ fq_files:
   Example: data.fastq.gz
 ```
 
+For each of these names (e.g. `Example`), the intermediate files produced in the temporary directory (`dir_tmp`) are:
+
+* `Example_trim.fq`, trimmed reads.
+* `Example_extract_trim.fq`, trimmed reads with UMIs extracted (optional, only if `extract_umis: TRUE` in configuration)
+* `Example_nonrRNA.fq`, trimmed non-rRNA reads.
+* `Example_rRNA_map.sam`, rRNA-mapped reads.
+* `Example_orf_map.sam`, ORF-mapped reads.
+* `Example_orf_map_clean.sam`, ORF-mapped reads with mismatched nt trimmed.
+* `Example_unaligned.sam`, unaligned reads.
+* UMI groups pre- and post-deduplication (optional, only if `dedup_umis: TRUE` and `group_umis: TRUE` in configuration):
+  - `Example_pre_dedup_groups.tsv`: UMI groups before deduplication
+  - `Example_post_dedup_groups.tsv`: UMI groups after deduplication
+* UMI deduplication statistics (optional, only if `dedup_umis: TRUE` in configuration):
+  - `Example_dedup_stats_edit_distance.tsv`: edit distance between UMIs at each position.
+  - `Example_dedup_stats_per_umi_per_position.tsv`: histogram of counts per position per UMI pre- and post-deduplication.
+  - `Example_dedup_stats_per_umi.tsv`: number of times each UMI was observed, total counts and median counts, pre- and post-deduplication
+  - For more information see UMI-tools [Dedup-specific options](https://umi-tools.readthedocs.io/en/latest/reference/dedup.html) and [documentation on stats file #250](https://github.com/CGATOxford/UMI-tools/issues/250)
+
+The `_unaligned.sam` files could be used to find common contaminants or translated sequences not in your orf annotation.
+
 For each of these names (e.g. `Example`), many output files are produced in the output directory (`dir_out`):
 
 * `Example.bam`, bamfile of reads mapped to transcripts, can be directly used in genome browsers.
 * `Example.bam.bai`, bam index file for `Example.bam`.
-* `Example_minus.bedgraph`, (optional), bedgraph of reads from minus strand.
-* `Example_plus.bedgraph`, (optional), bedgraph of reads from minus strand.
+* `Example_dedup.bam`, `Example.bam` after deduplication of read (optional, only if `dedup_umis: TRUE` in configuration).
+* `Example_dedup.bam.bai`, bam index file for `Example_dedup.bam`.
+* `Example_minus.bedgraph`, bedgraph of reads from minus strand (optional, only if `make_bedgraph: TRUE` in configuration).
+* `Example_plus.bedgraph`, bedgraph of reads from plus strand (optional, only if `make_bedgraph: TRUE` in configuration).
 * `Example.h5`, length-sensitive alignments in compressed h5 format.
 * `Example_3nt_periodicity.tsv`
 * `Example_3nt_periodicity.pdf`
@@ -126,17 +152,6 @@ A summary file is also put in the output directory:
 
 * `TPMs_collated.tsv`, tab-separated test file with the transcripts per million (tpm) for all samples
 
-For each of these names (e.g. `Example`), the intermediate files produced in the temporary directory (`dir_tmp`) are:
-
-* `Example_trim.fq`, trimmed reads.
-* `Example_nonrRNA.fq`, trimmed non-rRNA reads.
-* `Example_rRNA_map.sam`, rRNA-mapped reads.
-* `Example_orf_map.sam`, orf-mapped reads.
-* `Example_orf_map_clean.sam`, orf-mapped reads with mismatched nt trimmed.
-* `Example_unaligned.sam`, unaligned reads.
-
-The `_unaligned.sam` files could be used to find common contaminants or translated sequences not in your orf annotation.
-
 ---
 
 ## Warning: a temporary directory is created which could be very large!
@@ -147,24 +162,7 @@ For the vignette the total size of the temporary files is ~1141 MB, and the tota
 
 ---
 
-## Run the "vignette"
-
-By default, RiboViz is configured to use 1 process. If using Python 3.x then you can configure RiboViz to use additional processes:
-
-* Open `vignette/vignette_config.yaml` in an editor.
-* Change:
-
-```yaml
-nprocesses: 1 # number of processes to parallelize over
-```
-
-* to:
-
-```yaml
-nprocesses: 4 # number of processes to parallelize over
-```
-
-### Run `prep_riboviz.py`
+## Set up your environment
 
 If you have not already done so, activate your Python environment:
 
@@ -188,6 +186,76 @@ $ source $HOME/setenv.sh
 export PATH=~/hisat2-2.1.0:$PATH
 export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 ```
+
+---
+
+## Configure number of processes
+
+By default, RiboViz is configured to use 1 process. You can configure RiboViz to use additional processes:
+
+* Open `vignette/vignette_config.yaml` in an editor.
+* Change:
+
+```yaml
+nprocesses: 1 # number of processes to parallelize over
+```
+
+* to:
+
+```yaml
+nprocesses: 4 # number of processes to parallelize over
+```
+
+----
+
+## Do a dry run
+
+`prep_riboviz.py` supports a `--dry-run` command-line parameter. If present, the configuration will be parsed and the commands to execute RiboViz-specific and third-party tools via bash will be created, and logged into the command file ((described above), but they will not be executed.
+
+This feature is useful for seeing what commands will be run without actually running them and we strongly recommend trying a dry-run before a live run on data you have not used before.
+
+Run `prep_riboviz.py` with `--dry-run` enabled:
+
+* Either:
+
+```console
+$ python -m riboviz.tools.prep_riboviz --dry-run rscripts/ vignette/vignette_config.yaml
+```
+
+* Or:
+
+```console
+$ PYTHONPATH=. python riboviz/tools/prep_riboviz.py --dry-run rscripts/ \
+    vignette/vignette_config.yaml
+```
+
+### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
+
+If you see:
+
+```
+File not found: vignette/input/example_missing_file.fastq.gz
+```
+
+then this is expected and can be ignored. The vignette includes an attempt to analyse a missing input file, for testing, which is expected to fail.
+
+### Troubleshooting: `WARNING: dedup_umis was TRUE but extract_umis was FALSE`
+
+This error in the log file means that in your YAML configuration file you have defined:
+
+```yaml
+extract_umis: FALSE
+dedup_umis: TRUE
+```
+
+Unless you explicitly want this you should:
+
+* Either, set `extract_umis` to `TRUE`, if you want UMI deduplication to occur.
+* Or, set `dedup_umis` to `FALSE`, if you do not want UMI deduplication to occur.
+
+---
+
+## Run `prep_riboviz.py`
 
 Run `prep_riboviz.py`:
 
@@ -242,17 +310,9 @@ WTnone_09_bam_to_h5.log
 WTnone_10_generate_stats_figs.log
 ```
 
+Note: if running `prep_riboviz.py` on examples with UMI extraction and deduplication (`dedup_umis: TRUE`) then additional log files will be present for invocations of `umi_tools extract`, `umi_tools group`, `umi_tools dedup` and `samtools index` and the numbering of log files for successive steps will be different.
+
 You should regularly delete the log files, to prevent them from using up your disk space.
-
-### Troubleshooting: `File vignette/input/example_missing_file.fastq.gz not found`
-
-If you see:
-
-```
-File not found: vignette/input/example_missing_file.fastq.gz
-```
-
-then this is expected and can be ignored. The vignette includes an attempt to analyse a missing input file, for testing, which is expected to fail.
 
 ### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
 
@@ -328,8 +388,8 @@ Intermediate outputs in `vignette/tmp`. For example:
 
 ```
 WT3AT_nonrRNA.fq         # trimmed non-rRNA reads
-WT3AT_orf_map_clean.sam  # orf-mapped reads with mismatched nt trimmed
-WT3AT_orf_map.sam        # orf-mapped reads
+WT3AT_orf_map_clean.sam  # ORF-mapped reads with mismatched nt trimmed
+WT3AT_orf_map.sam        # ORF-mapped reads
 WT3AT_rRNA_map.sam       # rRNA-mapped reads
 WT3AT_trim.fq            # trimmed reads
 WT3AT_unaligned.sam      # unaligned reads
@@ -412,6 +472,7 @@ Before rerunning the vignette, delete the auto-generated index, temporary, logs 
 
 ```console
 $ rm -rf vignette/index
+$ rm -rf vignette/logs
 $ rm -rf vignette/tmp
 $ rm -rf vignette/output
 $ rm -rf vignette/logs
@@ -441,27 +502,6 @@ The command file can be run standalone, for example:
 
 ```yaml
 bash run_riboviz_vignette.sh
-```
-
----
-
-## See what commands would be executed
-
-`prep_riboviz.py` supports a `--dry-run` command-line parameter. If present, the configuration will be parsed and the commands to execute RiboViz-specific and third-party tools via bash will be created, and logged into the command file ((described above), but they will not be executed.
-
-This feature be useful for seeing what commands will be run without actually running them.
-
-* Either:
-
-```console
-$ python -m riboviz.tools.prep_riboviz --dry-run rscripts/ vignette/vignette_config.yaml
-```
-
-* Or:
-
-```console
-$ PYTHONPATH=. python riboviz/tools/prep_riboviz.py --dry-run rscripts/ \
-    vignette/vignette_config.yaml
 ```
 
 ---
