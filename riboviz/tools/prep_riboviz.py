@@ -528,7 +528,6 @@ def process_sample(sample,
                                         flag_file)
             cmd.append("--" + flag + "=" + flag_file)
     for flag in ["count_threshold", "asite_disp_length_file"]:
-
         if flag in config and config[flag] is not None:
             cmd.append("--" + flag + "=" + str(config[flag]))
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)
