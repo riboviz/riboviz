@@ -1,6 +1,6 @@
 # create_fastq_examples.py example FASTQ file generator
 
-`riboviz/tools/create_fastq_examples.py` creates simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication.
+`riboviz/tools/create_fastq_examples.py` creates simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication. The files in `data/example/` were created using this script.
 
 ---
 
@@ -9,24 +9,22 @@
 To run:
 
 ```console
-$ python -m riboviz.tools.create_fastq_examples DIRECTORY
+$ python -m riboviz.tools.create_fastq_examples <DIRECTORY>
 ```
 
 Or:
 
 ```console
-$ python -m riboviz/tools/create_fastq_examples.py DIRECTORY
+$ python -m riboviz/tools/create_fastq_examples.py <DIRECTORY>
 ```
 
-where `DIRECTORY` is the directory into which the simulated files are to be written.
+where `<DIRECTORY>` is the directory into which the simulated files are to be written.
 
 ---
 
 ## Example files
 
 The following files are created.
-
-The files with these names in `data/example/` were created using this script.
 
 ### Reads with 5' UMI, 3' UMI and adaptor
 
