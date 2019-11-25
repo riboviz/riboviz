@@ -84,7 +84,11 @@ def run_pipe_command(cmd1, cmd2, out=sys.stdout, err=sys.stderr):
                             % (cmd1, cmd2, exit_code))
 
 
-def run_logged_command(cmd, log_file, cmd_file=None, dry_run=False):
+def run_logged_command(cmd,
+                       log_file,
+                       cmd_file=None,
+                       dry_run=False,
+                       cmd_to_log=None):
     """
     Helper function to run shell command and capture stdout and stderr
     in a log file. The command submitted to the shell is also
@@ -99,12 +103,21 @@ def run_logged_command(cmd, log_file, cmd_file=None, dry_run=False):
     :param dry_run: Do not submit command to shell - use with cmd_file
     to log commands that would be run
     :type dry_run: bool
+    :param cmd_to_log: Commnand to log, provided for cases where
+    command-line arguments may have quotes and the command submitted
+    via Python may differ subtly from that which would be used if
+    running via bash directly
+    :type cmd_to_log: list(str or unicode)
     :raise FileNotFoundError: if the command being run cannot be found
     :raise AssertionError: if the command returns a non-zero exit code
     """
     if cmd_file is not None:
+        if cmd_to_log is not None:
+            cmd_to_log_str = utils.list_to_str(cmd_to_log)
+        else:
+            cmd_to_log_str = utils.list_to_str(cmd)
         with open(cmd_file, "a") as f:
-            f.write(utils.list_to_str(cmd) + "\n")
+            f.write(cmd_to_log_str + "\n")
     if dry_run:
         return
     with open(log_file, "a") as f:
