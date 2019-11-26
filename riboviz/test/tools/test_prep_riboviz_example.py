@@ -47,9 +47,9 @@ def run_prep_riboviz(configuration_module):
     assert exit_code == 0, \
         "prep_riboviz returned non-zero exit code %d" % exit_code
 
-
+@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
 @pytest.mark.usefixtures("run_prep_riboviz")
-def test_adaptor_trimming(configuration_module):
+def test_adaptor_trimming(configuration_module, sample_id):
     """
     Validate that adaptor trimming, performed by "cutadapt" produces
     the expected results.
@@ -57,17 +57,21 @@ def test_adaptor_trimming(configuration_module):
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
+    :param sample_id: sample ID
+    :type sample_id: str or unicode
     """
     config, _ = configuration_module
     expected_output = os.path.join(riboviz.test.EXAMPLE_DATA_DIR,
-                                   "umi5_umi3_umi.fastq")
+                                   sample_id + "_umi.fastq")
     actual_output = os.path.join(config[params.TMP_DIR],
-                                 "umi5_umi3_trim.fq")
+                                 sample_id,
+                                 sample_id + "_trim.fq")
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
 
+@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
 @pytest.mark.usefixtures("run_prep_riboviz")
-def test_umi_extract(configuration_module):
+def test_umi_extract(configuration_module, sample_id):
     """
     Validate that UMI extraction, performed by "umi_tools extract"
     produces the expected results.
@@ -75,17 +79,21 @@ def test_umi_extract(configuration_module):
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
+    :param sample_id: sample ID
+    :type sample_id: str or unicode
     """
     config, _ = configuration_module
     expected_output = os.path.join(riboviz.test.EXAMPLE_DATA_DIR,
-                                   "umi5_umi3.fastq")
+                                   sample_id + ".fastq")
     actual_output = os.path.join(config[params.TMP_DIR],
-                                 "umi5_umi3_extract_trim.fq")
+                                 sample_id,
+                                 sample_id + "_extract_trim.fq")
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
 
+@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
 @pytest.mark.usefixtures("run_prep_riboviz")
-def test_umi_group(configuration_module):
+def test_umi_group(configuration_module, sample_id):
     """
     Validate the information on UMI groups post-"umi_tools extract",
     by parsing the ".tsv" file output by "umi_tools group".
@@ -93,11 +101,14 @@ def test_umi_group(configuration_module):
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
+    :param sample_id: sample ID
+    :type sample_id: str or unicode
     """
     config, _ = configuration_module
     tmp_dir = config[params.TMP_DIR]
     groups_tsv = os.path.join(tmp_dir,
-                              "umi5_umi3_post_dedup_groups.tsv")
+                              sample_id,
+                              sample_id + "_post_dedup_groups.tsv")
     groups = pd.read_csv(groups_tsv, sep="\t")
     num_groups = 5
     assert groups.shape[0] == num_groups, \
@@ -130,8 +141,9 @@ def test_umi_group(configuration_module):
          (str(list(groups["read_id"]))))
 
 
+@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
 @pytest.mark.usefixtures("run_prep_riboviz")
-def test_tpms_collated_tsv(configuration_module):
+def test_tpms_collated_tsv(configuration_module, sample_id):
     """
     Validate the "TPMs_collated.tsv" file produced from running the
     workflow.
@@ -139,6 +151,8 @@ def test_tpms_collated_tsv(configuration_module):
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
+    :param sample_id: sample ID
+    :type sample_id: str or unicode
     """
     config, _ = configuration_module
     output_dir = config[params.OUTPUT_DIR]
