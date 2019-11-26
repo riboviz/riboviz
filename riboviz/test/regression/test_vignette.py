@@ -41,60 +41,64 @@ The directories are assumed to hold the following content:
       yeast_rRNA.7.ht2
       yeast_rRNA.8.ht2
     tmp/
-      WT3AT_nonrRNA.fq
-      WT3AT_orf_map_clean.sam
-      WT3AT_orf_map.sam
-      WT3AT_rRNA_map.sam
-      WT3AT_trim.fq
-      WT3AT_unaligned.fq
-      WTnone_nonrRNA.fq
-      WTnone_orf_map_clean.sam
-      WTnone_orf_map.sam
-      WTnone_rRNA_map.sam
-      WTnone_trim.fq
-      WTnone_unaligned.fq
+      WT3AT/
+        WT3AT_nonrRNA.fq
+        WT3AT_orf_map_clean.sam
+        WT3AT_orf_map.sam
+        WT3AT_rRNA_map.sam
+        WT3AT_trim.fq
+        WT3AT_unaligned.fq
+      WTnone/
+        WTnone_nonrRNA.fq
+        WTnone_orf_map_clean.sam
+        WTnone_orf_map.sam
+        WTnone_rRNA_map.sam
+        WTnone_trim.fq
+        WTnone_unaligned.fq
     output/
       TPMs_collated.tsv
-      WT3AT_3nt_periodicity.pdf
-      WT3AT_3nt_periodicity.tsv
-      WT3AT.bam
-      WT3AT.bam.bai
-      WT3AT_3ntframe_bygene.tsv
-      WT3AT_3ntframe_propbygene.pdf
-      WT3AT_codon_ribodens.pdf
-      WT3AT_codon_ribodens.tsv
-      WT3AT_features.pdf
-      WT3AT.h5
-      WT3AT_minus.bedgraph
-      WT3AT_plus.bedgraph
-      WT3AT_pos_sp_nt_freq.tsv
-      WT3AT_pos_sp_rpf_norm_reads.pdf
-      WT3AT_pos_sp_rpf_norm_reads.tsv
-      WT3AT_read_lengths.pdf
-      WT3AT_read_lengths.tsv
-      WT3AT_startcodon_ribogridbar.pdf
-      WT3AT_startcodon_ribogrid.pdf
-      WT3AT_tpms.tsv
-      WTnone_3nt_periodicity.pdf
-      WTnone_3nt_periodicity.tsv
-      WTnone.bam
-      WTnone.bam.bai
-      WTnone_3ntframe_bygene.tsv
-      WTnone_3ntframe_propbygene.pdf
-      WTnone_codon_ribodens.pdf
-      WTnone_codon_ribodens.tsv
-      WTnone_features.pdf
-      WTnone.h5
-      WTnone_minus.bedgraph
-      WTnone_plus.bedgraph
-      WTnone_pos_sp_nt_freq.tsv
-      WTnone_pos_sp_rpf_norm_reads.pdf
-      WTnone_pos_sp_rpf_norm_reads.tsv
-      WTnone_read_lengths.pdf
-      WTnone_read_lengths.tsv
-      WTnone_startcodon_ribogridbar.pdf
-      WTnone_startcodon_ribogrid.pdf
-      WTnone_tpms.tsv
+      WT3AT/
+        WT3AT_3nt_periodicity.pdf
+        WT3AT_3nt_periodicity.tsv
+        WT3AT.bam
+        WT3AT.bam.bai
+        WT3AT_3ntframe_bygene.tsv
+        WT3AT_3ntframe_propbygene.pdf
+        WT3AT_codon_ribodens.pdf
+        WT3AT_codon_ribodens.tsv
+        WT3AT_features.pdf
+        WT3AT.h5
+        WT3AT_minus.bedgraph
+        WT3AT_plus.bedgraph
+        WT3AT_pos_sp_nt_freq.tsv
+        WT3AT_pos_sp_rpf_norm_reads.pdf
+        WT3AT_pos_sp_rpf_norm_reads.tsv
+        WT3AT_read_lengths.pdf
+        WT3AT_read_lengths.tsv
+        WT3AT_startcodon_ribogridbar.pdf
+        WT3AT_startcodon_ribogrid.pdf
+        WT3AT_tpms.tsv
+      WTnone/
+        WTnone_3nt_periodicity.pdf
+        WTnone_3nt_periodicity.tsv
+        WTnone.bam
+        WTnone.bam.bai
+        WTnone_3ntframe_bygene.tsv
+        WTnone_3ntframe_propbygene.pdf
+        WTnone_codon_ribodens.pdf
+        WTnone_codon_ribodens.tsv
+        WTnone_features.pdf
+        WTnone.h5
+        WTnone_minus.bedgraph
+        WTnone_plus.bedgraph
+        WTnone_pos_sp_nt_freq.tsv
+        WTnone_pos_sp_rpf_norm_reads.pdf
+        WTnone_pos_sp_rpf_norm_reads.tsv
+        WTnone_read_lengths.pdf
+        WTnone_read_lengths.tsv
+        WTnone_startcodon_ribogridbar.pdf
+        WTnone_startcodon_ribogrid.pdf
+        WTnone_tpms.tsv
 
 See riboviz.validation.compare and riboviz.validation functions for
 information on the nature of the comparisons for each type of file.
@@ -190,8 +194,8 @@ def test_tmp_fq(expected, prefix, content):
     file_name = "%s_%s.fq" % (prefix, content)
     print(file_name)
     riboviz.validation.compare(
-        os.path.join(expected_tmp, file_name),
-        os.path.join(actual_tmp, file_name))
+        os.path.join(expected_tmp, prefix, file_name),
+        os.path.join(actual_tmp, prefix, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
@@ -213,8 +217,8 @@ def test_tmp_sam(expected, tmp_directory, prefix, content):
     :param content: content e.g. orf_map_clean
     :type content: str or unicode
     """
-    expected_tmp = os.path.join(expected, "tmp")
-    actual_tmp = os.path.join(riboviz.test.VIGNETTE_DIR, "tmp")
+    expected_tmp = os.path.join(expected, "tmp", prefix)
+    actual_tmp = os.path.join(riboviz.test.VIGNETTE_DIR, "tmp", prefix)
     expected_tmp_copy = os.path.join(tmp_directory, "expected")
     os.mkdir(expected_tmp_copy)
     actual_tmp_copy = os.path.join(tmp_directory, "actual")
@@ -251,8 +255,8 @@ def test_output_bai(expected, prefix):
     file_name = "%s.bam.bai" % prefix
     print(file_name)
     riboviz.validation.compare(
-        os.path.join(expected_output, file_name),
-        os.path.join(actual_output, file_name))
+        os.path.join(expected_output, prefix, file_name),
+        os.path.join(actual_output, prefix, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
@@ -273,8 +277,8 @@ def test_output_bam(expected, prefix):
     file_name = "%s.bam" % prefix
     print(file_name)
     riboviz.validation.compare(
-        os.path.join(expected_output, file_name),
-        os.path.join(actual_output, file_name))
+        os.path.join(expected_output, prefix, file_name),
+        os.path.join(actual_output, prefix, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
@@ -297,8 +301,8 @@ def test_output_bedgraph(expected, prefix, content):
     file_name = "%s_%s.bedgraph" % (prefix, content)
     print(file_name)
     riboviz.validation.compare(
-        os.path.join(expected_output, file_name),
-        os.path.join(actual_output, file_name))
+        os.path.join(expected_output, prefix, file_name),
+        os.path.join(actual_output, prefix, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
@@ -318,8 +322,8 @@ def test_output_h5(expected, prefix):
     file_name = "%s.h5" % prefix
     print(file_name)
     riboviz.validation.compare(
-        os.path.join(expected_output, file_name),
-        os.path.join(actual_output, file_name))
+        os.path.join(expected_output, prefix, file_name),
+        os.path.join(actual_output, prefix, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
@@ -349,25 +353,8 @@ def test_output_tsv(expected, prefix, content):
     file_name = "%s_%s.tsv" % (prefix, content)
     print(file_name)
     riboviz.validation.compare(
-        os.path.join(expected_output, file_name),
-        os.path.join(actual_output, file_name))
-
-
-@pytest.mark.usefixtures("run_prep_riboviz")
-def test_output_tpms_collated_tsv(expected):
-    """
-    Test output/TPMs_collated.tsv files for equality.
-
-    :param expected: expected directory
-    (pytest fixture defined in conftest.py)
-    :type expected: str or unicode
-    """
-    expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
-    file_name = "TPMs_collated.tsv"
-    riboviz.validation.compare(
-        os.path.join(expected_output, file_name),
-        os.path.join(actual_output, file_name))
+        os.path.join(expected_output, prefix, file_name),
+        os.path.join(actual_output, prefix, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
@@ -397,6 +384,23 @@ def test_output_pdf(expected, prefix, content):
     actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
     file_name = "%s_%s.pdf" % (prefix, content)
     print(file_name)
+    riboviz.validation.compare(
+        os.path.join(expected_output, prefix, file_name),
+        os.path.join(actual_output, prefix, file_name))
+
+
+@pytest.mark.usefixtures("run_prep_riboviz")
+def test_output_tpms_collated_tsv(expected):
+    """
+    Test output/TPMs_collated.tsv files for equality.
+
+    :param expected: expected directory
+    (pytest fixture defined in conftest.py)
+    :type expected: str or unicode
+    """
+    expected_output = os.path.join(expected, "output")
+    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
+    file_name = "TPMs_collated.tsv"
     riboviz.validation.compare(
         os.path.join(expected_output, file_name),
         os.path.join(actual_output, file_name))

@@ -20,24 +20,24 @@ Note: if `dedup_umis` is `TRUE` but `extract_umis` is `FALSE` then a warning wil
 
 After a run, the following UMI extraction and deduplication-specific files will exist, in addition to the other files output during a run of `prep_riboviz.py`:
 
-* UMI groups pre- and post-deduplication (in `<dir_tmp>`):
-  - `<SAMPLE>_pre_dedup_groups.tsv`: UMI groups before deduplication
-  - `<SAMPLE>_post_dedup_groups.tsv`: UMI groups after deduplication
-* UMI deduplication statistics (in `<dir_tmp>`):
- - `<SAMPLE>_dedup_stats_edit_distance.tsv`: edit distance between UMIs at each position.
-  - `<SAMPLE>_dedup_stats_per_umi_per_position.tsv`: histogram of counts per position per UMI pre- and post-deduplication.
- - `<SAMPLE>_dedup_stats_per_umi.tsv`: number of times each UMI was observed, total counts and median counts, pre- and post-deduplication
+* UMI groups pre- and post-deduplication (in `<dir_tmp>/<SAMPLE_ID>`):
+  - `<SAMPLE_ID>_pre_dedup_groups.tsv`: UMI groups before deduplication
+  - `<SAMPLE_ID>_post_dedup_groups.tsv`: UMI groups after deduplication
+* UMI deduplication statistics (in `<dir_tmp>/<SAMPLE_ID>`):
+ - `<SAMPLE_ID>_dedup_stats_edit_distance.tsv`: edit distance between UMIs at each position.
+  - `<SAMPLE_ID>_dedup_stats_per_umi_per_position.tsv`: histogram of counts per position per UMI pre- and post-deduplication.
+ - `<SAMPLE_ID>_dedup_stats_per_umi.tsv`: number of times each UMI was observed, total counts and median counts, pre- and post-deduplication
  - For more information see UMI-tools [Dedup-specific options](https://umi-tools.readthedocs.io/en/latest/reference/dedup.html) and [documentation on stats file #250](https://github.com/CGATOxford/UMI-tools/issues/250)
-* Deduplicated BAM files (in `<dir_out>`):
-  - `<SAMPLE>_dedup.bam`
-  - `<SAMPLE>_dedup.bam.bai`
-* Log files (in `<dir_logs>/YYYYMMNN-HHMMSS/`):
+* Deduplicated BAM files (in `<dir_out>/<SAMPLE_ID>`):
+  - `<SAMPLE_ID>_dedup.bam`
+  - `<SAMPLE_ID>_dedup.bam.bai`
+* Log files (in `<dir_logs>/YYYYMMNN-HHMMSS/<SAMPLE_ID>`):
 
 ```
-<SAMPLE>_02_umi_tools_extract.log
-<SAMPLE>_08_umi_tools_group.log
-<SAMPLE>_09_umi_tools_dedup.log
-<SAMPLE>_11_umi_tools_group.log
+<SAMPLE_ID>_02_umi_tools_extract.log
+<SAMPLE_ID>_08_umi_tools_group.log
+<SAMPLE_ID>_09_umi_tools_dedup.log
+<SAMPLE_ID>_11_umi_tools_group.log
 ```
 
 ### Troubleshooting: `WARNING: dedup_umis was TRUE but extract_umis was FALSE`
@@ -103,7 +103,11 @@ After a run, the following barcode and UMI extraction, demultiplexing, and dedup
 ```
 umi_tools_extract.log
 demultiplex_fastq.log
+```
 
+* Log files (in `<dir_logs>/YYYYMMNN-HHMMSS/<SAMPLE_ID>`):
+
+```
 <SAMPLE_ID>_06_umi_tools_group.log
 <SAMPLE_ID>_07_umi_tools_dedup.log
 <SAMPLE_ID>_09_umi_tools_group.log

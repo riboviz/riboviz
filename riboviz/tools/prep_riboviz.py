@@ -46,16 +46,16 @@ Process ribosome profiling data:
     requested ("dedup_umis: TRUE" and "group_umis:TRUE")
   - Exports bedgraph files for plus and minus strands, if requested
     ("make_bedgraph: TRUE") using "bedtools genomecov".
-  - Writes intermediate files produced above into a temporary
-    directory  ("dir_tmp").
+  - Writes intermediate files produced above into a sample-specific
+    directory under the temporary directory  ("dir_tmp").
   - Makes length-sensitive alignments in compressed h5 format using
     "bam_to_h5.R".
   - Generates summary statistics, and analyses and QC plots for both
     RPF and mRNA datasets using "generate_stats_figs.R". This
     includes estimated read counts, reads per base, and transcripts
     per million for each ORF in each sample.
-  - Writes output files produced above into an output directory
-    ("dir_out").
+  - Writes output files produced above into an sample-specific
+    directory under the output directory ("dir_out").
 * Collates TPMs across all processed fastq[.gz] files, using
   "collate_tpms.R" and writes into output directory ("dir_out").
 
@@ -90,16 +90,16 @@ Process multiplexed ribosome profiling data:
     requested ("dedup_umis: TRUE" and "group_umis: TRUE")
   - Exports bedgraph files for plus and minus strands, if requested
     ("make_bedgraph: TRUE") using "bedtools genomecov".
-  - Writes intermediate files produced above into a temporary
-    directory  ("dir_tmp").
+  - Writes intermediate files produced above into a sample-specific
+    directory under the temporary directory  ("dir_tmp").
   - Makes length-sensitive alignments in compressed h5 format using
     "bam_to_h5.R".
   - Generates summary statistics, and analyses and QC plots for both
     RPF and mRNA datasets using "generate_stats_figs.R". This
     includes estimated read counts, reads per base, and transcripts
     per million for each ORF in each sample.
-  - Writes output files produced above into an output directory
-    ("dir_out").
+  - Writes output files produced above into an sample-specific
+    directory under the output directory ("dir_out").
 * Collates TPMs across all demultiplexed fastq[.gz] files, using
   "collate_tpms.R" and writes into output directory ("dir_out").
 
@@ -338,7 +338,8 @@ def process_sample(sample, fastq, r_rna_index, orf_index,
 
 
 def process_samples(samples, in_dir, r_rna_index, orf_index,
-                    config, tmp_dir, out_dir, run_config):
+                    is_trimmed, config, tmp_dir, out_dir, run_config,
+                    check_samples_exist=True):
     """
     Process FASTQ sample files. Any exceptions in the processing of
     any sample are logged but are not thrown from this function.
@@ -351,6 +352,9 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
     :type r_rna_index: str or unicode
     :param orf_index: Prefix of ORF HT2 index files
     :type orf_index: str or unicode
+    :param is_trimmed: Have adapters been cut and barcodes and UMIs
+    extracted already?
+    :type are_trimmed: bool
     :param config: RiboViz configuration
     :type config: dict
     :param tmp_dir: Temporary directory
@@ -359,6 +363,10 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
     :type out_dir: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
+    :param check_samples_exist: If run_config.is_dry_run then should a
+    check be made for the existence of sample files?
+    :type check_samples_exist: bool
+    :type are_trimmed: bool
     :return: names of successfully-processed samples
     :rtype: list(str or unicode)
     """
@@ -368,76 +376,32 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
     for sample in list(samples.keys()):
         try:
             fastq = os.path.join(in_dir, samples[sample])
-            if not os.path.exists(fastq):
-                raise FileNotFoundError(
-                    errno.ENOENT, os.strerror(errno.ENOENT), fastq)
-            process_sample(
-                sample, fastq, r_rna_index, orf_index, False,
-                config, tmp_dir, out_dir, run_config)
-            successes.append(sample)
-        except FileNotFoundError as e:
-            logging.error("File not found: %s", e.filename)
-        except Exception:
-            logging.error("Problem processing sample: %s", sample)
-            exc_type, _, _ = sys.exc_info()
-            logging.exception(exc_type.__name__)
-    num_failed = num_samples - len(successes)
-    LOGGER.info("Finished processing %d samples, %d failed",
-                num_samples, num_failed)
-    return successes
-
-
-def process_demultiplexed_samples(samples, in_dir, r_rna_index,
-                                  orf_index, config, tmp_dir, out_dir,
-                                  run_config):
-    """
-    Process demultiplexed FASTQ sample files. Any exceptions in the
-    processing of any sample are logged but are not thrown from this
-    function.
-
-    :param samples: Sample names and files
-    :type samples: dict
-    :param in_dir: Directory with sample files
-    :type in_dir: str or unicode
-    :param r_rna_index: Prefix of rRNA HT2 index files
-    :type r_rna_index: str or unicode
-    :param orf_index: Prefix of ORF HT2 index files
-    :type orf_index: str or unicode
-    :param config: RiboViz configuration
-    :type config: dict
-    :param tmp_dir: Temporary directory
-    :type tmp_dir: str or unicode
-    :param out_dir: Output directory
-    :type out_dir: str or unicode
-    :param run_config: Run-related configuration
-    :type run_config: RunConfigTuple
-    :return: names of successfully-processed samples
-    :rtype: list(str or unicode)
-    """
-    LOGGER.info("Processing demultiplexed samples")
-    successes = []
-    num_samples = len(samples)
-    for sample in list(samples.keys()):
-        try:
-            fastq = os.path.join(in_dir, samples[sample])
-            if not run_config.is_dry_run:
+            if check_samples_exist:
                 if not os.path.exists(fastq):
                     raise FileNotFoundError(
                         errno.ENOENT, os.strerror(errno.ENOENT), fastq)
             sample_tmp_dir = os.path.join(tmp_dir, sample)
             sample_out_dir = os.path.join(out_dir, sample)
-            for directory in [sample_tmp_dir, sample_out_dir]:
+            sample_logs_dir = os.path.join(run_config.logs_dir, sample)
+            sample_run_config = workflow.RunConfigTuple(
+                run_config.py_scripts,
+                run_config.r_scripts,
+                run_config.cmd_file,
+                run_config.is_dry_run,
+                sample_logs_dir,
+                run_config.nprocesses)
+            for directory in [sample_tmp_dir, sample_out_dir, sample_logs_dir]:
                 workflow.create_directory(directory,
                                           run_config.cmd_file,
                                           run_config.is_dry_run)
             process_sample(
-                sample, fastq, r_rna_index, orf_index, True,
-                config, sample_tmp_dir, sample_out_dir, run_config)
+                sample, fastq, r_rna_index, orf_index, is_trimmed,
+                config, sample_tmp_dir, sample_out_dir, sample_run_config)
             successes.append(sample)
         except FileNotFoundError as e:
             logging.error("File not found: %s", e.filename)
         except Exception:
-            logging.error("Problem multiplexed processing sample: %s", sample)
+            logging.error("Problem processing sample: %s", sample)
             exc_type, _, _ = sys.exc_info()
             logging.exception(exc_type.__name__)
     num_failed = num_samples - len(successes)
@@ -536,8 +500,8 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     if is_sample_files:
         samples = config[params.FQ_FILES]
         processed_samples = process_samples(
-            samples, in_dir, r_rna_index, orf_index, config,
-            tmp_dir, out_dir, run_config)
+            samples, in_dir, r_rna_index, orf_index,
+            False, config, tmp_dir, out_dir, run_config)
         if not processed_samples:
             raise Exception("No samples were processed successfully")
 
@@ -600,15 +564,15 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         # uses this function too.
         sample_files = {sample: get_fastq_filename(sample)
                         for sample in samples}
-        processed_samples = process_demultiplexed_samples(
+        processed_samples = process_samples(
             sample_files, deplex_dir, r_rna_index, orf_index,
-            config, tmp_dir, out_dir, run_config)
+            True, config, tmp_dir, out_dir, run_config, False)
         if not processed_samples:
             raise Exception("No samples were processed successfully")
 
     log_file = os.path.join(logs_dir, "collate_tpms.log")
     workflow.collate_tpms(
-        out_dir, processed_samples, is_multiplex_files, log_file, run_config)
+        out_dir, processed_samples, True, log_file, run_config)
 
     LOGGER.info("Completed")
 
