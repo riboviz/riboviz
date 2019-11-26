@@ -98,10 +98,10 @@ Process multiplexed ribosome profiling data:
     RPF and mRNA datasets using "generate_stats_figs.R". This
     includes estimated read counts, reads per base, and transcripts
     per million for each ORF in each sample.
-  - Collates TPMs across the demultiplexed fastq[.gz] file, using
-    "collate_tpms.R" and writes into output directory ("dir_out").
   - Writes output files produced above into an output directory
     ("dir_out").
+* Collates TPMs across all demultiplexed fastq[.gz] files, using
+  "collate_tpms.R" and writes into output directory ("dir_out").
 
 The script can parallelize parts of its operation over many
 processes ("nprocesses"):
@@ -169,8 +169,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def process_sample(sample, fastq, r_rna_index, orf_index,
-                   is_trimmed, is_collate_tpms,
-                   config, tmp_dir, out_dir, run_config):
+                   is_trimmed, config, tmp_dir, out_dir, run_config):
     """
     Process a single FASTQ sample file.
 
@@ -185,8 +184,6 @@ def process_sample(sample, fastq, r_rna_index, orf_index,
     :param is_trimmed: Have adapters been cut and barcodes and UMIs
     extracted already?
     :type are_trimmed: bool
-    :param is_collate_tpms: Collate TPMS for a specific sample?
-    :type is_collate_tpms: bool
     :param config: RiboViz configuration
     :type config: dict
     :param tmp_dir: Temporary directory
@@ -337,14 +334,6 @@ def process_sample(sample, fastq, r_rna_index, orf_index,
         sample_out_h5, out_dir, sample_out_prefix, config, log_file,
         run_config)
 
-    if is_collate_tpms:
-        step += 1
-        log_file = workflow.get_sample_log_file(
-            run_config.logs_dir, sample, "collate_tpms", step)
-        tpms_file = sample + "_TPMs_collated.tsv"
-        workflow.collate_tpms(
-            out_dir, [sample], log_file, run_config, tpms_file)
-
     LOGGER.info("Finished processing sample: %s", fastq)
 
 
@@ -383,7 +372,7 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
                 raise FileNotFoundError(
                     errno.ENOENT, os.strerror(errno.ENOENT), fastq)
             process_sample(
-                sample, fastq, r_rna_index, orf_index, False, False,
+                sample, fastq, r_rna_index, orf_index, False,
                 config, tmp_dir, out_dir, run_config)
             successes.append(sample)
         except FileNotFoundError as e:
@@ -442,7 +431,7 @@ def process_demultiplexed_samples(samples, in_dir, r_rna_index,
                                           run_config.cmd_file,
                                           run_config.is_dry_run)
             process_sample(
-                sample, fastq, r_rna_index, orf_index, True, True,
+                sample, fastq, r_rna_index, orf_index, True,
                 config, sample_tmp_dir, sample_out_dir, run_config)
             successes.append(sample)
         except FileNotFoundError as e:
@@ -552,9 +541,6 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         if not processed_samples:
             raise Exception("No samples were processed successfully")
 
-        log_file = os.path.join(logs_dir, "collate_tpms.log")
-        workflow.collate_tpms(
-            out_dir, processed_samples, log_file, run_config)
     else:
         sample_sheet_file = os.path.join(in_dir,
                                          config[params.SAMPLE_SHEET_FILE])
@@ -619,6 +605,10 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
             config, tmp_dir, out_dir, run_config)
         if not processed_samples:
             raise Exception("No samples were processed successfully")
+
+    log_file = os.path.join(logs_dir, "collate_tpms.log")
+    workflow.collate_tpms(
+        out_dir, processed_samples, is_multiplex_files, log_file, run_config)
 
     LOGGER.info("Completed")
 

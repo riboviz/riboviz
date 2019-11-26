@@ -113,8 +113,8 @@ Process multiplexed ribosome profiling data:
   - Writes intermediate files produced above into a temporary directory  (`dir_tmp`).
   - Makes length-sensitive alignments in compressed h5 format using `bam_to_h5.R`.
   - Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
-  - Collates TPMs across the demultiplexed fastq[.gz] file, usin `collate_tpms.R` and writes into output directory (`dir_out`).
   - Writes output files produced above into an output directory (`dir_out`).
+* Collates TPMs across the demultiplexed fastq[.gz] files, using `collate_tpms.R` and writes into output directory (`dir_out`).
 
 Deduplication and demultiplexing won't be discussed further on this page. For more information, see [Deduplication and demultiplexing](./dedup-demultiplex.md).
 
