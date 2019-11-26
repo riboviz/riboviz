@@ -98,7 +98,6 @@ After a run, the following barcode and UMI extraction, demultiplexing, and dedup
 * Sample-specific output files (in `<dir_out>/<SAMPLE_ID>`):
   - There will be one directory per file that had one or more reads.
   - This contains the output files specific to processing this sample, including those arising from deduplication described above.
-  - This will also contain a `<SAMPLE_ID>_TPMs_collated.tsv` file for the sample.
 * Log files (in `<dir_logs>/YYYYMMNN-HHMMSS/`):
 
 ```
@@ -108,7 +107,6 @@ demultiplex_fastq.log
 <SAMPLE_ID>_06_umi_tools_group.log
 <SAMPLE_ID>_07_umi_tools_dedup.log
 <SAMPLE_ID>_09_umi_tools_group.log
-<SAMPLE_ID>_14_collate_tpms.log
 ```
 
 ### Run example

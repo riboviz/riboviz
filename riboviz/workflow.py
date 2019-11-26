@@ -476,7 +476,8 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 
 
-def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
+def collate_tpms(out_dir, samples, are_samples_in_sub_dirs, log_file,
+                 run_config, tpms_file=None):
     """
     Collate TPMs across sample results.
 
@@ -484,6 +485,9 @@ def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
     :type out_dir: str or unicode
     :param samples: Sample names
     :type samples: list(str or unicode)
+    :param are_samples_in_sub_dirs: Are samples in sample-specific
+    subdirectories of output directory?
+    :type are_samples_in_sub_dirs: bool
     :param log_file: Log file
     :type log_file: str or unicode
     :param run_config: Run-related configuration
@@ -497,6 +501,7 @@ def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
     LOGGER.info("Collate TPMs. Log: %s", log_file)
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts, "collate_tpms.R"),
+           "--samples_in_sub_dirs=" + str(are_samples_in_sub_dirs),
            "--dir_out=" + out_dir]
     if tpms_file is not None:
         cmd.append("--file_out=" + tpms_file)

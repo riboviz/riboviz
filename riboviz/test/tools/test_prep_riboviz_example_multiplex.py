@@ -187,8 +187,7 @@ def test_deplex_umi_groups(configuration_module, sample_id):
 @pytest.mark.usefixtures("run_prep_riboviz")
 def test_deplex_tpms_collated_tsv(configuration_module, sample_id):
     """
-    Validate the "TPMs_collated.tsv" file produced by the workflow for
-    each demultiplexed file.
+    Validate the "TPMs_collated.tsv" file produced by the workflow.
 
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
@@ -198,12 +197,10 @@ def test_deplex_tpms_collated_tsv(configuration_module, sample_id):
     """
     config, _ = configuration_module
     output_dir = config[params.OUTPUT_DIR]
-    tpms_tsv = os.path.join(output_dir,
-                            sample_id,
-                            sample_id + "_" + "TPMs_collated.tsv")
+    tpms_tsv = os.path.join(output_dir, "TPMs_collated.tsv")
     tpms = pd.read_csv(tpms_tsv, sep="\t")
     num_rows, num_columns = tpms.shape
-    assert num_columns == 2, "Unexpected number of columns"
+    assert num_columns == 4, "Unexpected number of columns"
     assert num_rows == 68, "Unexpected number of rows"
     columns = list(tpms.columns)
     assert "ORF" in columns, "Missing 'ORF' column"
