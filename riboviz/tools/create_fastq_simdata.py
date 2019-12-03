@@ -5,7 +5,7 @@ adaptor trimming, and demultiplexing.
 
 Usage:
 
-    python -m riboviz.tools.create_fastq_examples DIRECTORY
+    python -m riboviz.tools.create_fastq_simdata DIRECTORY
 
 where `DIRECTORY` is the directory into	which the simulated files are
 to be written. The following files are created:
