@@ -167,7 +167,7 @@ The data was sampled uniformly at random 1/50 reads from each file, producing ab
 
 ## Simulated FASTQ test files
 
-`data/example/` folder:
+`data/simdata/` folder:
 
 ```
 multiplex_barcodes.tsv
