@@ -56,12 +56,12 @@ Unless you explicitly want this you should:
 
 ### Run example
 
-[vignette/example_config.yaml](../vignette/example_config.yaml) has a sample configuration file which runs an analysis of `data/example/umi5_umi3_umi_adaptor.fastq` with UMI extraction and deduplication enabled. For more details on the contents on `data/example/`, see [Simulated FASTQ test files](./data.md#simulated-fastq-test-files).
+[vignette/simdata_umi_config.yaml](../vignette/simdata_umi_config.yaml) has a sample configuration file which runs an analysis of `data/simdata/umi5_umi3_umi_adaptor.fastq` with UMI extraction and deduplication enabled. For more details on the contents on `data/simdata/`, see [Simulated FASTQ test files](./data.md#simulated-fastq-test-files).
 
 The example can be run as follows:
 
 ```console
-$ python -m riboviz.tools.prep_riboviz rscripts/ vignette/example_config.yaml 
+$ python -m riboviz.tools.prep_riboviz rscripts/ vignette/simdata_umi_config.yaml 
 ```
 
 ---
@@ -115,12 +115,12 @@ demultiplex_fastq.log
 
 ### Run example
 
-[vignette/example_multiplex_config.yaml](../vignette/example_multiplex_config.yaml) has a sample configuration file which runs an analysis of `data/example/multiplex.fastq` with barcode and UMI extraction, demultiplexing and deduplication enabled. For more details on the contents on `data/example/`, see [Simulated FASTQ test files](./data.md#simulated-fastq-test-files).
+[vignette/simdata_multiplex_config.yaml](../vignette/simdata_multiplex_config.yaml) has a sample configuration file which runs an analysis of `data/simdata/multiplex.fastq` with barcode and UMI extraction, demultiplexing and deduplication enabled. For more details on the contents on `data/simdata/`, see [Simulated FASTQ test files](./data.md#simulated-fastq-test-files).
 
 The example can be run as follows:
 
 ```console
-$ python -m riboviz.tools.prep_riboviz rscripts/ vignette/example_multiplex_config.yaml 
+$ python -m riboviz.tools.prep_riboviz rscripts/ vignette/simdata_multiplex_config.yaml 
 ```
 
 ### Demultiplexing and dry runs

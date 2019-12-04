@@ -1,15 +1,15 @@
 """
-riboviz.tools.prep_riboviz test suite to test adaptor trimming, UMI
-extraction and deduplication.
+riboviz.tools.prep_riboviz test suite to test adaptor trimming,
+barcode and UMI extraction, demultpliexing and deduplication.
 
 The test suite runs riboviz.tools.prep_riboviz using a copy of
-"vignette/example_config.yaml" and the simulated data in
-"data/example/". It then validates the outputs of the adaptor
-trimming, UMI extraction and deduplication steps against the expected
-outputs, also in "data/example/".
+"vignette/simdata_multiplex_config.yaml" and the simulated data in
+"data/simdata/". It then validates the outputs of the adaptor
+trimming, barcode and UMI extraction, demultiplexing and deduplication
+steps against the expected outputs, also in "data/simdata/".
 
-The simulated data in "data/example/" is expected to have been created
-using riboviz.tools.create_fastq_examples.
+The simulated data in "data/simdata/" is expected to have been created
+using riboviz.tools.create_fastq_simdata.
 """
 import os
 import pytest
@@ -21,10 +21,11 @@ import riboviz.tools
 import riboviz.validation
 from riboviz import params
 from riboviz.tools import prep_riboviz
+from riboviz.tools.demultiplex_fastq import NUM_READS_FILE
 from riboviz.test.tools import configuration_module  # Test fixture
 
 
-TEST_CONFIG_FILE = riboviz.test.EXAMPLE_CONFIG
+TEST_CONFIG_FILE = riboviz.test.SIMDATA_MULTIPLEX_CONFIG
 """
 YAML configuration used as a template configuration by these tests -
 required by configuration test fixture
@@ -47,9 +48,9 @@ def run_prep_riboviz(configuration_module):
     assert exit_code == 0, \
         "prep_riboviz returned non-zero exit code %d" % exit_code
 
-@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
+
 @pytest.mark.usefixtures("run_prep_riboviz")
-def test_adaptor_trimming(configuration_module, sample_id):
+def test_adaptor_trimming(configuration_module):
     """
     Validate that adaptor trimming, performed by "cutadapt" produces
     the expected results.
@@ -57,58 +58,99 @@ def test_adaptor_trimming(configuration_module, sample_id):
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
-    :param sample_id: sample ID
-    :type sample_id: str or unicode
     """
     config, _ = configuration_module
-    expected_output = os.path.join(riboviz.test.EXAMPLE_DATA_DIR,
-                                   sample_id + "_umi.fastq")
-    actual_output = os.path.join(config[params.TMP_DIR],
-                                 sample_id,
-                                 sample_id + "_trim.fq")
+    expected_output = os.path.join(
+        riboviz.test.SIMDATA_DIR,
+        "multiplex_umi_barcode.fastq")
+    actual_output = os.path.join(
+        config[params.TMP_DIR],
+        "multiplex_umi_barcode_adaptor_trim.fq")
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
 
-@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
 @pytest.mark.usefixtures("run_prep_riboviz")
-def test_umi_extract(configuration_module, sample_id):
+def test_barcode_umi_extract(configuration_module):
     """
-    Validate that UMI extraction, performed by "umi_tools extract"
-    produces the expected results.
+    Validate that barcode and UMI extraction, performed by "umi_tools
+    extract" produces the expected results.
 
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
-    :param sample_id: sample ID
-    :type sample_id: str or unicode
     """
     config, _ = configuration_module
-    expected_output = os.path.join(riboviz.test.EXAMPLE_DATA_DIR,
-                                   sample_id + ".fastq")
-    actual_output = os.path.join(config[params.TMP_DIR],
-                                 sample_id,
-                                 sample_id + "_extract_trim.fq")
+    expected_output = os.path.join(riboviz.test.SIMDATA_DIR,
+                                   "multiplex.fastq")
+    actual_output = os.path.join(
+        config[params.TMP_DIR],
+        "multiplex_umi_barcode_adaptor_extract_trim.fq")
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
 
-@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
 @pytest.mark.usefixtures("run_prep_riboviz")
-def test_umi_group(configuration_module, sample_id):
+def test_deplex_num_reads(configuration_module):
+    """
+    Validate that "num_reads.tsv", produced by
+    riboviz.tools.demultiplex_fastq has the expected content.
+
+    :param configuration_module: configuration and path to
+    configuration file (pytest fixture)
+    :type configuration_module: tuple(dict, str or unicode)
+    """
+    config, _ = configuration_module
+    actual_dir = os.path.join(
+        config[params.TMP_DIR],
+        "multiplex_umi_barcode_adaptor_deplex")
+    actual_output = os.path.join(actual_dir, NUM_READS_FILE)
+    expected_output = os.path.join(
+        riboviz.test.SIMDATA_DIR, "deplex", NUM_READS_FILE)
+    riboviz.validation.compare(expected_output, actual_output)
+
+
+@pytest.mark.parametrize(
+    "fastq", ["tag0.fastq", "tag1.fastq", "tag2.fastq", "Unassigned.fastq"])
+@pytest.mark.usefixtures("run_prep_riboviz")
+def test_deplex_reads(configuration_module, fastq):
+    """
+    Validate that ".fastq", produced by
+    riboviz.tools.demultiplex_fastq have the expected content.
+
+    :param configuration_module: configuration and path to
+    configuration file (pytest fixture)
+    :type configuration_module: tuple(dict, str or unicode)
+    :param fastq: FASTQ file
+    :type fastq: str or unicode
+    """
+    config, _ = configuration_module
+    actual_dir = os.path.join(
+        config[params.TMP_DIR],
+        "multiplex_umi_barcode_adaptor_deplex")
+    actual_output = os.path.join(actual_dir, fastq)
+    expected_output = os.path.join(
+        riboviz.test.SIMDATA_DIR, "deplex", fastq)
+    riboviz.validation.compare(expected_output, actual_output)
+
+
+@pytest.mark.parametrize("sample_id", ["tag0", "tag1", "tag2"])
+@pytest.mark.usefixtures("run_prep_riboviz")
+def test_deplex_umi_groups(configuration_module, sample_id):
     """
     Validate the information on UMI groups post-"umi_tools extract",
-    by parsing the ".tsv" file output by "umi_tools group".
+    for each demultiplexed file, by parsing the ".tsv" file output by
+    "umi_tools group".
 
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
-    :param sample_id: sample ID
+    :param sample_id: sample ID for demultiplexed reads
     :type sample_id: str or unicode
     """
     config, _ = configuration_module
     tmp_dir = config[params.TMP_DIR]
     groups_tsv = os.path.join(tmp_dir,
                               sample_id,
-                              sample_id + "_post_dedup_groups.tsv")
+                              sample_id + "_" + "post_dedup_groups.tsv")
     groups = pd.read_csv(groups_tsv, sep="\t")
     num_groups = 5
     assert groups.shape[0] == num_groups, \
@@ -127,7 +169,7 @@ def test_umi_group(configuration_module, sample_id):
         ("Expected group_ids %s but found %s" % (str(expected_group_ids),
                                                  str(group_ids)))
     # Check each representative read does indeed come from a unique
-    # UMI group by parsing the read ID. create_fastq_examples.py
+    # UMI group by parsing the read ID. create_fastq_simdata.py
     # creates read IDs of form:
     # "EWSim-<GROUP>.<MEMBER>-umi<5PRIME>-read<READ>-umi<3PRIME>"
     # where <GROUP> is 1-indexed.
@@ -141,17 +183,16 @@ def test_umi_group(configuration_module, sample_id):
          (str(list(groups["read_id"]))))
 
 
-@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
+@pytest.mark.parametrize("sample_id", ["tag0", "tag1", "tag2"])
 @pytest.mark.usefixtures("run_prep_riboviz")
-def test_tpms_collated_tsv(configuration_module, sample_id):
+def test_deplex_tpms_collated_tsv(configuration_module, sample_id):
     """
-    Validate the "TPMs_collated.tsv" file produced from running the
-    workflow.
+    Validate the "TPMs_collated.tsv" file produced by the workflow.
 
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
-    :param sample_id: sample ID
+    :param sample_id: sample ID for demultiplexed reads
     :type sample_id: str or unicode
     """
     config, _ = configuration_module
@@ -159,17 +200,17 @@ def test_tpms_collated_tsv(configuration_module, sample_id):
     tpms_tsv = os.path.join(output_dir, "TPMs_collated.tsv")
     tpms = pd.read_csv(tpms_tsv, sep="\t")
     num_rows, num_columns = tpms.shape
-    assert num_columns == 2, "Unexpected number of columns"
+    assert num_columns == 4, "Unexpected number of columns"
     assert num_rows == 68, "Unexpected number of rows"
     columns = list(tpms.columns)
     assert "ORF" in columns, "Missing 'ORF' column"
-    assert "umi5_umi3" in columns, "Missing 'umi5_umi3' column"
-    yal003w = tpms.loc[tpms["ORF"] == "YAL003W", "umi5_umi3"]
+    assert sample_id in columns, "Missing {} column".format(sample_id)
+    yal003w = tpms.loc[tpms["ORF"] == "YAL003W", sample_id]
     assert (yal003w == 607366.8).all(), \
-        "umi5_umi3 value for ORF YAL003W is not 607366.8"
-    yal038w = tpms.loc[tpms["ORF"] == "YAL038W", "umi5_umi3"]
+        "{} value for ORF YAL003W is not 607366.8".format(sample_id)
+    yal038w = tpms.loc[tpms["ORF"] == "YAL038W", sample_id]
     assert (yal038w == 392633.2).all(), \
-        "umi5_umi3 value for ORF YAL038W is not 392633.2"
+        "{} value for ORF YAL038W is not 392633.2".format(sample_id)
     others = tpms[~tpms["ORF"].isin(["YAL003W", "YAL038W"])]
-    assert (others["umi5_umi3"] == 0).all(), \
-        "umi5_umi3 value for non-YAL003W and YAL038W ORFs are not 0"
+    assert (others[sample_id] == 0).all(), \
+        "{} value for non-YAL003W and YAL038W ORFs are not 0".format(sample_id)
