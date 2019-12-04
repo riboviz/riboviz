@@ -518,7 +518,8 @@ def process_sample(sample,
            "--rpf=" + str(config["rpf"]),
            "--dir_out=" + out_dir,
            "--do_pos_sp_nt_freq=" + str(config["do_pos_sp_nt_freq"])]
-    for flag in ["t_rna", "codon_pos", "features_file"]:
+
+    for flag in ["t_rna", "codon_pos", "features_file", "orf_gff_file"]:
         if flag in config and config[flag] is not None:
             flag_file = config[flag]
             if not os.path.exists(flag_file):
@@ -526,7 +527,7 @@ def process_sample(sample,
                                         os.strerror(errno.ENOENT),
                                         flag_file)
             cmd.append("--" + flag + "=" + flag_file)
-    for flag in ["orf_gff_file", "count_threshold"]:
+    for flag in ["count_threshold", "asite_disp_length_file"]:
         if flag in config and config[flag] is not None:
             cmd.append("--" + flag + "=" + str(config[flag]))
     process_utils.run_logged_command(cmd, log_file, cmd_file, dry_run)

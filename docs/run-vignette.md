@@ -41,6 +41,7 @@ RiboViz also requires the following data for creating statistics and figures (wi
 * `data/yeast_codon_pos_i200.RData`: position of codons within each gene (the numbering ignores the first 200 codons) (`codon_pos` configuration parameter)
 * `data/yeast_features.tsv`: features to correlate with ORFs (`features_file` configuration parameter)
 * `data/yeast_tRNAs.tsv`: tRNA estimates (`t_rna` configuration parameter)
+* `data/yeast_standard_asite_disp_length.txt`: summarizes read frame displacement from 5' end to A-site for each read length based on "standard" yeast data from early ribosome profiling papers (`asite_disp_length_file` configuration parameter)
 
 For information on the provenance of these files see [Additional yeast-specific data](./data.md#additional-yeast-specific-data).
 
@@ -144,6 +145,8 @@ For each of these names (e.g. `Example`), many output files are produced in the 
 * `Example_codon_ribodens.pdf`
 * `Example_startcodon_ribogridbar.pdf`
 * `Example_startcodon_ribogrid.pdf`
+* `Example_3ntframe_bygene.tsv`
+* `Example_3ntframe_propbygene.pdf`
 
 A summary file is also put in the output directory:
 
@@ -415,6 +418,8 @@ WT3AT_3nt_periodicity.pdf
 WT3AT_3nt_periodicity.tsv
 WT3AT.bam
 WT3AT.bam.bai
+WT3AT_3ntframe_bygene.tsv
+WT3AT_3ntframe_propbygene.pdf
 WT3AT_codon_ribodens.pdf
 WT3AT_codon_ribodens.tsv
 WT3AT_features.pdf
@@ -434,6 +439,8 @@ WTnone_3nt_periodicity.pdf
 WTnone_3nt_periodicity.tsv
 WTnone.bam
 WTnone.bam.bai
+WTnone_3ntframe_bygene.tsv
+WTnone_3ntframe_propbygene.pdf
 WTnone_codon_ribodens.pdf
 WTnone_codon_ribodens.tsv
 WTnone_features.pdf
@@ -461,13 +468,14 @@ $ du -sm vignette/output/
 
 ## Cleaning up to run again
 
-Before rerunning the vignette, delete the auto-generated index, temporary and output directories:
+Before rerunning the vignette, delete the auto-generated index, temporary, logs and output directories:
 
 ```console
 $ rm -rf vignette/index
 $ rm -rf vignette/logs
 $ rm -rf vignette/tmp
 $ rm -rf vignette/output
+$ rm -rf vignette/logs
 ```
 
 You might also want to do this if you have run the vignette with a missing R package, and then want to run it again from scratch. Alternatively, you might have edited the vignette and committed your changes, and be submitting a pull request.
@@ -550,6 +558,7 @@ Organism data files in `data/`:
 yeast_codon_pos_i200.RData
 yeast_features.tsv
 yeast_tRNAs.tsv
+yeast_standard_asite_disp_length.txt
 ```
 
 ### Build indices for alignment
@@ -732,17 +741,18 @@ Generate summary statistics, analyses plots and QC plots for both RPF and mRNA d
 
 ```
 Rscript --vanilla rscripts/generate_stats_figs.R --Ncores=4 \
-    --MinReadLen=10 --MaxReadLen=50 --Buffer=250 --PrimaryID=Name \
-    --dataset=vignette --hdFile=vignette/output/WT3AT.h5 \
-    --out_prefix=vignette/output/WT3AT \
-    --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True \
-    --dir_out=vignette/output \
-    --do_pos_sp_nt_freq=True \
-    --t_rna=data/yeast_tRNAs.tsv \
-    --codon_pos=data/yeast_codon_pos_i200.RData \
-    --features_file=data/yeast_features.tsv \
-    --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
-    --count_threshold=64
+     --MinReadLen=10 --MaxReadLen=50 --Buffer=250 --PrimaryID=Name \
+     --dataset=vignette --hdFile=vignette/output/WT3AT.h5 \
+     --out_prefix=vignette/output/WT3AT \
+     --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True \
+     --dir_out=vignette/output \
+     --do_pos_sp_nt_freq=True \
+     --t_rna=data/yeast_tRNAs.tsv \
+     --codon_pos=data/yeast_codon_pos_i200.RData \
+     --features_file=data/yeast_features.tsv \
+     --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
+     --count_threshold=64 \
+     --asite_disp_length_file=data/yeast_standard_asite_disp_length.txt
 ```
 
 Outputs files to `vignette/output/`:
@@ -750,6 +760,8 @@ Outputs files to `vignette/output/`:
 ```
 WT3AT_3nt_periodicity.pdf
 WT3AT_3nt_periodicity.tsv
+WT3AT_3ntframe_bygene.tsv
+WT3AT_3ntframe_propbygene.pdf
 WT3AT_codon_ribodens.pdf
 WT3AT_codon_ribodens.tsv
 WT3AT_features.pdf
