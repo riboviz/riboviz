@@ -9,6 +9,7 @@ suppressMessages(library(ggplot2))
 suppressMessages(library(tidyr))
 suppressMessages(library(dplyr))
 suppressMessages(library(magrittr))
+suppressMessages(library(purrr))
 
 # set ggplot2 theme for plots drawn after this; use dark on light theme
 ggplot2::theme_set(theme_bw())
@@ -90,6 +91,11 @@ option_list <- list(
   make_option("--nnt_gene",
     type = "integer", default = 50,
     help = "n nucleotides of gene to include in metagene plots"
+  ),
+  make_option("--asite_disp_length_file",
+    type = "character", default = NA,
+    help = "asite displacement file
+    table with one displacement per read length"
   )
 )
 
@@ -114,20 +120,28 @@ read_range <- MinReadLen:MaxReadLen
 
 # read in positions of all exons/genes in GFF format and subset CDS locations
 gff <- readGFFAsGRanges(orf_gff_file)
+gff_df <- gff %>% data.frame %>% as_tibble # @ewallace: tidy tibble version
 
 # check for 3nt periodicity
-print("Starting: Check for 3nt periodicity")
+print("Starting: Check for 3nt periodicity globally")
 
 # function to get data matrix of read counts for gene and dataset from hdf5file
 GetGeneDatamatrix <- function(gene, dataset, hdf5file) {
-  data_mat <- rhdf5::H5Dread(rhdf5::H5Dopen(hdf5file, paste0("/", gene, "/", dataset, "/reads/data")))
-  return(data_mat)
+  hdf5file %>%
+    rhdf5::H5Dopen(
+      name = paste0("/", gene, "/", dataset, "/reads/data")
+    ) %>%
+    rhdf5::H5Dread() %>%
+    return()
 }
 
 # function to get matrix of read counts from n_buffer before start codon to nnt_gene after
 # for gene and dataset from hd5 file hdf5file, using UTR5 annotations in gff
-GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, gff, n_buffer = nnt_buffer, nnt_gene = nnt_gene) {
+GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, gff,
+                                    n_buffer = nnt_buffer,
+                                    nnt_gene = nnt_gene) {
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hdf5file)
+  # @ewallace: replace this by gff_df?
   n_utr5 <- BiocGenerics::width(gff[gff$type == "UTR5" & gff$Name == gene])
   # if n_buffer bigger than length n_utr5, pad with zeros:
   if (n_utr5 >= n_buffer) {
@@ -144,13 +158,15 @@ GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, gff, n_buffer = nnt
   return(cbind(zeropad5_mat, data_mat_5start))
 }
 
-GetGeneDatamatrix3end <- function(gene, dataset, hdf5file, gff, n_buffer = nnt_buffer, nnt_gene = nnt_gene) {
+GetGeneDatamatrix3end <- function(gene, dataset, hdf5file, gff,
+                                  n_buffer = nnt_buffer, nnt_gene = nnt_gene) {
   # get data matrix of read counts from nnt_gene before stop codon to n_buffer after
   # for gene and dataset from hd5 file hdf5file, using UTR3 annotations in gff
   # if n_buffer bigger than length n_utr3, pad with zeros.
   # CHECK startpos/off-by-one
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hdf5file)
   n_all <- ncol(data_mat_all)
+  # @ewallace: replace this by gff_df?
   n_utr3 <- BiocGenerics::width(gff[gff$type == "UTR3" & gff$Name == gene])
   n_left5 <- n_all - n_utr3 - nnt_gene + 1 # column to start from (5'end)
   if (n_utr3 >= n_buffer) {
@@ -286,33 +302,31 @@ write.table(
   row = F,
   col = T,
   quote = F)
-print("Completed: Check for 3nt periodicity")
+print("Completed: Check for 3nt periodicity globally")
 
 ## distribution of lengths of all mapped reads
 print("Starting: Distribution of lengths of all mapped reads")
 
 # read length-specific read counts stored as attributes of 'reads' in H5 file
-gene_sp_read_len <- lapply(gene_names, function(x) {
+gene_sp_read_length <- lapply(gene_names, function(x) {
   rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", x, "/", dataset, "/reads")), "reads_by_len"))
 })
 
-# sum reads of each length across all genes
-Counts <- colSums(matrix(unlist(gene_sp_read_len), ncol = length(read_range), byrow = T))
 
-# create a dataframe to store the output for plots/analyses
-out_data <- data.frame(
+# sum reads of each length across all genes
+read_length_data <- data.frame(
   Length = read_range,
-  Counts = Counts
+  Counts = colSums(matrix(unlist(gene_sp_read_length), ncol = length(read_range), byrow = T))
 )
 
 # plot read lengths with counts
-read_len_plot <- ggplot(out_data, aes(x = Length, y = Counts)) +
+read_len_plot <- ggplot(read_length_data, aes(x = Length, y = Counts)) +
   geom_bar(stat = "identity")
 
 # save read lengths plot and file
 ggsave(read_len_plot, filename = paste0(out_prefix, "_read_lengths.pdf"))
 write.table(
-  out_data,
+  read_length_data,
   file = paste0(out_prefix, "_read_lengths.tsv"),
   sep = "\t",
   row = F,
@@ -327,7 +341,7 @@ print("Completed: Distribution of lengths of all mapped reads")
 print("Starting: Biases in nucleotide composition along mapped read lengths")
 
 GetNTReadPosition <- function(hdf5file, gene, dataset, lid, MinReadLen) {
-  reads_pos_len <- rhdf5::H5Dread(rhdf5::H5Dopen(hdf5file, paste0("/", gene, "/", dataset, "/reads/data")))[lid, ] # Get reads of a particular length
+  reads_pos_len <- GetGeneDatamatrix(gene, dataset, hdf5file)[lid, ] # Get reads of a particular length
   reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (lid + MinReadLen - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
   pos <- rep(1:length(reads_pos_len), reads_pos_len) # nt positions weighted by number of reads mapping to it
   pos_IR <- IRanges::IRanges(start = pos, width = (lid + MinReadLen - 1)) # Create an IRanges object for position-specific reads of a particular length
@@ -411,14 +425,220 @@ if (do_pos_sp_nt_freq) {
   print("Completed nucleotide composition bias table")
 }
 
+## calculate read frame for every annotated ORF
+
+CalcAsiteFixedOneLength <- function(reads_pos_length, MinReadLen, 
+                                    read_length, asite_disp) {
+  # Calculate read A-site using a fixed displacement for a single read length
+  length_row_choose <- read_length - MinReadLen + 1
+  reads_pos_length[length_row_choose, ] %>%
+    dplyr::lag(n = asite_disp, default = 0)
+}
+
+CalcAsiteFixed <- function(reads_pos_length, MinReadLen,
+                           asite_disp_length = data.frame(
+                             read_length = c(28, 29, 30),
+                             asite_disp = c(12, 12, 12)
+                           ),
+                           colsum_out = TRUE) {
+  # Calculate read A-site using a fixed displacement for fixed read lengths
+  npos <- ncol(reads_pos_length)
+  Asite_counts_bylength <-
+    purrr::map2(
+      asite_disp_length$read_length, asite_disp_length$asite_disp,
+      function(read_length, asite_disp) {
+        CalcAsiteFixedOneLength(
+          reads_pos_length,
+          MinReadLen,
+          read_length,
+          asite_disp
+        )
+      }
+    )
+  if (colsum_out) {
+    Asite_counts <- purrr::reduce(Asite_counts_bylength, `+`)
+    return(Asite_counts)
+  } else {
+    # this has only as many columns as asite_disp_length,
+    # probably LESS than data_mat
+    Asite_counts_bylengthmat <- unlist(Asite_counts_bylength) %>%
+      matrix(ncol = npos, byrow = TRUE)
+    return(Asite_counts_bylengthmat)
+  }
+}
+
+SumByFrame <- function(x, left, right) {
+  # sum vector by 3nt frames 0,1,2
+  #   x:     vector
+  #   left:  integer for starting position, frame 0
+  #   right: integer for ending position
+  positions_frame0 <- seq(left, right, 3) # positions used to pick out frame 0 reads
+  sums_byframe <- c(
+    x[ positions_frame0 ] %>% sum(),
+    x[ positions_frame0 + 1 ] %>% sum(),
+    x[ positions_frame0 + 2 ] %>% sum()
+  )
+  return(sums_byframe)
+}
+
+GatherByFrameCodon <- function(x, left, right) {
+  # gather vector by 3nt frames 0,1,2 for each position
+  #   x:     vector
+  #   left:  integer for starting position, frame 0
+  #   right: integer for ending position
+  positions_frame0 <- seq(left, right, 3) # positions to pick out frame 0 reads
+  tibble(
+    CodonPos = 1:length(positions_frame0),
+    Ct_fr0 = x[ positions_frame0 ],
+    Ct_fr1 = x[ positions_frame0 + 1 ],
+    Ct_fr2 = x[ positions_frame0 + 2 ]
+  )
+}
+
+combinePValuesFisher <- function(p) {
+  # Fisher's method (1-sided) to combine p-values
+  pchisq(-2 * sum(log(p)), 2 * length(p), lower.tail = FALSE)
+}
+
+combinePValuesStouffer <- function(p) {
+  # Stouffer's “inverse normal” method (1-sided) to combine p-values
+  pnorm(sum(qnorm(p)) / sqrt(length(p)))
+}
+
+WilcoxTestFrame <- function(x, left, right) {
+  # Wilcoxon rank-sum paired test that frame 0 has more reads
+  #   x:     vector
+  #   left:  integer for starting position, frame 0
+  #   right: integer for ending position
+  gathered_by_frame <- GatherByFrameCodon(x, left, right)
+
+  wtresults_fr0vs1 <-
+    wilcox.test(
+      x = gathered_by_frame$Ct_fr0,
+      y = gathered_by_frame$Ct_fr1,
+      alternative = "greater", paired = TRUE, exact = FALSE
+    )
+  wtresults_fr0vs2 <-
+    wilcox.test(
+      x = gathered_by_frame$Ct_fr0,
+      y = gathered_by_frame$Ct_fr2,
+      alternative = "greater", paired = TRUE, exact = FALSE
+    )
+
+  return(c(
+    pval_fr0vs1 = wtresults_fr0vs1$p.value,
+    pval_fr0vs2 = wtresults_fr0vs2$p.value,
+    pval_fr0vsboth =
+      combinePValuesStouffer(c(
+        wtresults_fr0vs1$p.value,
+        wtresults_fr0vs2$p.value
+      ))
+  ))
+}
+
+GetGeneReadFrame <- function(hdf5file, gene, dataset, left, right, MinReadLen,
+                             asite_disp_length = data.frame(
+                               read_length = c(28, 29, 30),
+                               asite_disp = c(12, 12, 12)
+                             )) {
+  # example from vignette:
+  #   GetGeneReadFrame(hdf5file, "YAL003W", dataset, 251, 871, MinReadLen)
+  reads_pos_length <- GetGeneDatamatrix(gene, dataset, hdf5file)
+  reads_asitepos <- CalcAsiteFixed(
+    reads_pos_length, MinReadLen,
+    asite_disp_length
+  )
+  sum_by_frame <- SumByFrame(reads_asitepos, left, right)
+  wt_frame <- WilcoxTestFrame(reads_asitepos, left, right)
+  tibble(
+    gene = gene,
+    Ct_fr0 = sum_by_frame[1],
+    Ct_fr1 = sum_by_frame[2],
+    Ct_fr2 = sum_by_frame[3],
+    pval_fr0vs1 = wt_frame[1],
+    pval_fr0vs2 = wt_frame[2],
+    pval_fr0vsboth = wt_frame[3]
+  )
+}
+
+CalcReadFrameProportion <- function(read_frame_df) {
+  # calculate read frame proportions from data frame with read frame counts, 
+  stopifnot(all(c("Ct_fr0", "Ct_fr1", "Ct_fr2") %in% names(read_frame_df)))
+  read_frame_df %>%
+    mutate(
+      Ct_all = Ct_fr0 + Ct_fr1 + Ct_fr2,
+      p_fr0 = Ct_fr0 / Ct_all,
+      p_fr1 = Ct_fr1 / Ct_all,
+      p_fr2 = Ct_fr2 / Ct_all
+    ) %>%
+    return()
+}
+
+BoxplotReadFrameProportion <- function(read_frame_df, feat_names = "gene") {
+  # Plot proportion of read frames as boxplot.
+  rf_prop_long <- read_frame_df %>%
+    CalcReadFrameProportion() %>%
+    select(c(feat_names, "p_fr0", "p_fr1", "p_fr2")) %>%
+    gather(-feat_names, key = "Frame", value = "Proportion") %>%
+    mutate(Frame = factor(Frame,
+      levels = c("p_fr0", "p_fr1", "p_fr2"),
+      labels = 0:2
+    ))
+  ggplot(data = rf_prop_long, aes(x = Frame, colour = Frame, y = Proportion)) +
+    geom_boxplot() +
+    scale_y_continuous("Proportion, by feature", limits = c(0, 1), expand = c(0, 0)) +
+    theme(
+      legend.position = "none",
+      panel.grid.minor = element_blank(),
+      panel.grid.major.x = element_blank()
+    )
+}
+
+if (!is.na(asite_disp_length_file)) {
+  print("Starting: Check for 3nt periodicity (frame) by Gene")
+  asite_disp_length <- readr::read_tsv(asite_disp_length_file,
+    comment = "#"
+  )
+  gene_read_frames <- gff_df %>%
+    dplyr::filter(type == "CDS") %>%
+    dplyr::select(gene = seqnames, left = start, right = end) %>%
+    purrr::pmap_dfr(GetGeneReadFrame,
+      hdf5file = hdf5file,
+      dataset = dataset,
+      MinReadLen = MinReadLen,
+      asite_disp_length = asite_disp_length
+    )
+  write.table(
+    gene_read_frames,
+    file = paste0(out_prefix, "_3ntframe_bygene.tsv"),
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+
+  gene_read_frame_plot <- gene_read_frames %>%
+    filter(Ct_fr0 + Ct_fr1 + Ct_fr2 > count_threshold) %>%
+    BoxplotReadFrameProportion()
+
+  # save read lengths plot and file
+  ggsave(gene_read_frame_plot,
+    filename = paste0(out_prefix, "_3ntframe_propbygene.pdf"),
+    width = 3, height = 3
+  )
+
+  print("Completed: Check for 3nt periodicity (frame) by Gene")
+}
+
 ## position specific distribution of reads
 
 print("Starting: Position specific distribution of reads")
 
 # codon-specific reads for RPF datasets
 GetCodonPositionReads <- function(hdf5file, gene, dataset, left, right, MinReadLen) {
+  # @ewallace: this needs documentation of inputs and outputs
   lid <- 28 - MinReadLen + 1
-  reads_pos <- rhdf5::H5Dread(rhdf5::H5Dopen(hdf5file, paste0("/", gene, "/", dataset, "/reads/data"))) # Get the matrix of read counts
+  reads_pos <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
   reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
   end_reads_pos_subset <- ncol(reads_pos_subset) # Number of columns of the subset
 
@@ -433,7 +653,7 @@ GetCodonPositionReads <- function(hdf5file, gene, dataset, left, right, MinReadL
 
 # Nt-specific coverage for mRNA datasets
 GetMRNACoverage <- function(hdf5file, gene, dataset, left, right, read_range, MinReadLen, Buffer) {
-  reads_pos <- rhdf5::H5Dread(rhdf5::H5Dopen(hdf5file, paste0("/", gene, "/", dataset, "/reads/data"))) # Get the matrix of read counts
+  reads_pos <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
   reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS mapped reads are considered
 
   nt_IR_list <- lapply(read_range, function(w) {
@@ -516,7 +736,7 @@ if (rpf) {
   m3p <- m3p / mean(m3p[450:500])
 
   # Create a dataframe to store the output for plots/analyses
-  out_df <- data.frame(
+  pos_sp_rpf_norm_reads <- data.frame(
     Position = c(1:500, 0:-499),
     Mean = c(m5p, m3p),
     SD = c(s5p, s3p),
@@ -524,8 +744,8 @@ if (rpf) {
   )
 
   # Plot
-  pos_sp_rpf_norm_reads <- ggplot(
-    out_df,
+  pos_sp_rpf_norm_reads_plot <- ggplot(
+    pos_sp_rpf_norm_reads,
     aes(Position, Mean, col = End)
   ) +
     geom_line() +
@@ -533,9 +753,9 @@ if (rpf) {
     guides(col = FALSE)
 
   # Save plot and file
-  ggsave(pos_sp_rpf_norm_reads, filename = paste0(out_prefix, "_pos_sp_rpf_norm_reads.pdf"))
+  ggsave(pos_sp_rpf_norm_reads_plot, filename = paste0(out_prefix, "_pos_sp_rpf_norm_reads.pdf"))
   write.table(
-    out_df,
+    pos_sp_rpf_norm_reads,
     file = paste0(out_prefix, "_pos_sp_rpf_norm_reads.tsv"),
     sep = "\t",
     row = F,
@@ -599,7 +819,7 @@ if (!rpf) {
   m3p <- m3p / mean(m3p[1350:1500])
 
   # create a dataframe to store the output for plots/analyses
-  out_df <- data.frame(
+  pos_sp_mrna_norm_coverage <- data.frame(
     Position = c(1:1500, 0:-1499),
     Mean = c(m5p, m3p),
     SD = c(s5p, s3p),
@@ -607,15 +827,15 @@ if (!rpf) {
   )
 
   # plot
-  pos_sp_mrna_norm_coverage <- ggplot(out_df, aes(Position, Mean, col = End)) +
+  pos_sp_mrna_norm_coverage_plot <- ggplot(pos_sp_mrna_norm_coverage, aes(Position, Mean, col = End)) +
     geom_line() +
     facet_grid(~End, scales = "free") +
     guides(col = FALSE)
 
   # Save plot and file
-  ggsave(pos_sp_mrna_norm_coverage, filename = paste0(out_prefix, "_pos_sp_mrna_norm_coverage.pdf"))
+  ggsave(pos_sp_mrna_norm_coverage_plot, filename = paste0(out_prefix, "_pos_sp_mrna_norm_coverage.pdf"))
   write.table(
-    out_df,
+    pos_sp_mrna_norm_coverage,
     file = paste0(out_prefix, "_pos_sp_mrna_norm_coverage.tsv"),
     sep = "\t",
     row = F,
@@ -678,12 +898,12 @@ if (!is.na(features_file)) {
 
   # Prepare data for plot
   # Consider only genes with at least count_threshold mapped reads
-  plot_data <- merge(features, tpms, by = "ORF") %>%
+  features_plot_data <- merge(features, tpms, by = "ORF") %>%
     filter(readcount >= count_threshold, !is.na(ORF)) %>%
     select(-readcount, -rpb) %>%
     gather(Feature, Value, -ORF, -tpm)
 
-  features_plot <- ggplot(plot_data, aes(x = tpm, y = Value)) +
+  features_plot <- ggplot(features_plot_data, aes(x = tpm, y = Value)) +
     geom_point(alpha = 0.3) +
     facet_wrap(~Feature, scales = "free") +
     scale_x_log10() +
@@ -754,14 +974,14 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
     P <- p_mn[order(names(codon_pos))]
     E <- e_mn[order(names(codon_pos))]
 
-    out_df <- cbind(yeast_tRNAs, A, P, E)
+    cod_dens_tRNA <- cbind(yeast_tRNAs, A, P, E)
 
     # Prepare data for plot
-    plot_data <- out_df %>%
+    cod_dens_tRNA_wide <- cod_dens_tRNA %>%
       gather(tRNA_type, tRNA_value, 3:6) %>%
       gather(Site, Ribodens, 3:5)
 
-    cod_dens_tRNA_plot <- ggplot(plot_data, aes(x = tRNA_value, y = Ribodens)) +
+    cod_dens_tRNA_plot <- ggplot(cod_dens_tRNA_wide, aes(x = tRNA_value, y = Ribodens)) +
       geom_point(alpha = 0.3) +
       facet_grid(Site ~ tRNA_type, scales = "free_x") +
       geom_smooth(method = "lm") +
@@ -770,7 +990,7 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
     # Save plot and file
     ggsave(cod_dens_tRNA_plot, filename = paste0(out_prefix, "_codon_ribodens.pdf"))
     write.table(
-      out_df,
+      cod_dens_tRNA,
       file = paste0(out_prefix, "_codon_ribodens.tsv"),
       sep = "\t",
       row = F,
