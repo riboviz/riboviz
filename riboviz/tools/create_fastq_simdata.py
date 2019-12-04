@@ -289,7 +289,7 @@ def make_fastq_records(tag,
     return (record, trim_record, umi3_ext_record)
 
 
-def create_fastq_examples(output_dir):
+def create_fastq_simdata(output_dir):
     """
     Create simulated fastq files.
 
@@ -470,4 +470,4 @@ def create_fastq_examples(output_dir):
 
 
 if __name__ == "__main__":
-    create_fastq_examples(sys.argv[1])
+    create_fastq_simdata(sys.argv[1])

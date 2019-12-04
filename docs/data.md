@@ -189,7 +189,7 @@ deplex/Unassigned.fastq
 
 These files are simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication using UMI-tools when invoked from within the RiboViz workflow.
 
-These files were created by running `riboviz/tools/create_fastq_examples.py`.
+These files were created by running `riboviz/tools/create_fastq_simdata.py`.
 
 See [Create simulated FASTQ files](developer-guide.md#create-simulated-fastq-files).
 

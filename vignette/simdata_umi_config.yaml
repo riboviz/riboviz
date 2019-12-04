@@ -7,7 +7,7 @@ rRNA_fasta: vignette/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning t
 orf_fasta: vignette/input/yeast_YAL_CDS_w_250utrs.fa # orf file to align to
 orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3 # GFF2/GFF3 file for ORFs
 aligner: hisat2 # short read aligner to use. Currently only hisat2 works
-build_indices: FALSE # build indices for aligner? if TRUE, remake indices from fasta files
+build_indices: TRUE # build indices for aligner? if TRUE, remake indices from fasta files
 make_bedgraph: TRUE # output bedgraph.gzs of data, in addition to h5?
 dir_index: vignette/index # directory to put built indices in
 rRNA_index: yeast_rRNA # rRNA index file prefix, relative to dir_index
