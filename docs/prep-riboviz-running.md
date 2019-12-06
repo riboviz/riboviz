@@ -2,6 +2,25 @@
 
 This page describes how to run `prep_riboviz.py`. It is assumed you are familiar with [Configuring the RiboViz workflow](./prep-riboviz-config.md).
 
+Contents:
+
+* [Prepare input data](#prepare-input-data)
+* [Set up your environment](#set-up-your-environment)
+* [Configure number of processes (optional)](#configure-number-of-processes-optional)
+* [Dry run `prep_riboviz.py`](#dry-run-prep_ribovizpy)
+* [Run `prep_riboviz.py`](#run-prep_ribovizpy)
+  - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
+  - [Troubleshooting: `WARNING: dedup_umis was TRUE but extract_umis was FALSE`](#troubleshooting-warning-dedup-umis-was-true-but-extract_umis-was-false)
+  - [Troubleshooting: `Configuration parameter error: No sample files or multiplexed files are specified`](#troubleshooting-configuration-parameter-error-no-sample-files-or-multiplexed-files-are-specified)
+  - [Troubleshooting: `Configuration parameter error: Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are specified](#troubleshooting-configuration-parameter-error:-both-sample-files-and-multiplexed-files-are-specified)
+  - [Troubleshooting: `Configuration parameter error: Multiplexed files ... are specified but no sample sheet`](#troubleshooting-configuration-parameter-error-multiplexed-files-are-specified-but-no-sample-sheet`)
+* [Watch your disk space](#watch-your-disk-space)
+* [Using-pre-generated hisat2 indices](#using-pre-generated-hisat2-indices)
+* [Capturing commands submitted to bash](#capturing-commands-submitted-to-bash)
+  - [Capturing bash commands and demultiplexing](#capturing-bash-commands-and-demultiplexing)
+* [Customising logging](#customising-logging)
+* [Exit codes](#exit-codes)
+
 ---
 
 ## Prepare input data
@@ -215,17 +234,38 @@ Unless you explicitly want this to occur you should:
 * Either, set `extract_umis` to `TRUE`, if you want UMI extraction to occur.
 * Or, set `dedup_umis` to `FALSE`, if you do not want deduplication to occur.
 
-### Troubleshooting: `Configuration parameter error: No sample files (fq_files) or multiplexed files (multiplex_fq_files) are specified`
+### Troubleshooting: `Configuration parameter error: No sample files or multiplexed files are specified`
 
-This warning means you provided neither `fq_files` nor `multiplex_fq_files` parameters in your configuration. Add the missing configuration parameter.
+If you see:
 
-### Troubleshooting: `Configuration parameter error: Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are specified`
+```
+Configuration parameter error: No sample files (fq_files) or
+multiplexed files (multiplex_fq_files) are specified
+```
 
-This warning means you provided both `fq_files` and `multiplex_fq_files` parameters in your configuration. Only a group of non-multiplexed files or a single multiplexed file can be provided. Delete one of these configuration parameters.
+then this means you provided neither `fq_files` nor `multiplex_fq_files` parameters in your configuration. Add the missing configuration parameter.
 
-### Troubleshooting: `Configuration parameter error: Multiplexed files (multiplex_fq_files) are specified but no sample sheet (sample_sheet`
+### Troubleshooting: `Configuration parameter error: Both sample files and multiplexed files are specified`
 
-This warning means you provided a `multiplex_fq_files` parameter in your configuration but not a complementary `sample_sheet` parameter. Add the missing configuration parameter.
+If you see:
+
+```
+Configuration parameter error: Both sample files (fq_files) and
+multiplexed files (multiplex_fq_files) are specified 
+```
+
+then this means you provided both `fq_files` and `multiplex_fq_files` parameters in your configuration. Only a group of non-multiplexed files or a single multiplexed file can be provided. Delete one of these configuration parameters.
+
+### Troubleshooting: `Configuration parameter error: Multiplexed files are specified but no sample sheet`
+
+If you see:
+
+```
+Configuration parameter error: Multiplexed files (multiplex_fq_files)
+are specified but no sample sheet (sample_sheet)
+```
+
+then this means you provided a `multiplex_fq_files` parameter in your configuration but not a complementary `sample_sheet` parameter. Add the missing configuration parameter.
 
 ---
 
