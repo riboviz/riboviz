@@ -36,7 +36,7 @@ Downsampled ribosome profiling data for *Saccharomyces cerevisiae* (yeast):
 * `vignette/input/SRR1042864_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type + 3-AT.
 * For information on the provenance of these files see [Downsampled ribosome profiling data from Saccharomyces cerevisiae](./data.md#downsampled-ribosome-profiling-data-from-saccharomyces-cerevisiae)
 
-For full information on how to configure `prep_riboviz.py` and its inputs, see [Configuring the RiboViz workflow](./docs/prep-riboviz-config.md).
+For full information on how to configure `prep_riboviz.py` and its inputs, see [Configuring the RiboViz workflow](./prep-riboviz-config.md).
 
 ---
 
@@ -136,7 +136,7 @@ $ PYTHONPATH=. python riboviz/tools/prep_riboviz.py rscripts/ \
     vignette/vignette_config.yaml
 ```
 
-For full information on how to run `prep_riboviz.py` and the options available, see [Running the RiboViz workflow](./docs/prep-riboviz-running.md)
+For full information on how to run `prep_riboviz.py` and the options available, see [Running the RiboViz workflow](./prep-riboviz-running.md)
 
 ---
 
@@ -232,7 +232,7 @@ WTnone/
 TPMs_collated.tsv
 ```
 
-For full information on what `prep_riboviz.py` does and the files it outputs, see [What the RiboViz workflow does](./docs/prep-riboviz-operation.md).
+For full information on what `prep_riboviz.py` does and the files it outputs, see [What the RiboViz workflow does](./prep-riboviz-operation.md).
 
 ---
 
