@@ -4,6 +4,51 @@ This page describes how to run `prep_riboviz.py`. It is assumed you are familiar
 
 ---
 
+## Prepare input data
+
+For each condition/sample in your experiment, merge all the FASTQ files with the ribosome profiling data for each condition/sample into a single FASTQ file. It is recommended that the files are also gzip-compressed to save space.
+
+Multiple FASTQ files can be merged and compressed as follows:
+
+```console
+$ cat <SAMPLE_1_A>.fastq <SAMPLE_1_B>.fastq ... | gzip >> <SAMPLE_1>.fastq.gz
+$ cat <SAMPLE_2_Y>.fastq <SAMPLE_2_Z>.fastq ... | gzip >> <SAMPLE_2>.fastq.gz
+...etc...
+```
+
+Multiple gzipped FASTQ files can be merged as follows:
+
+```console
+$ cat <SAMPLE_1_A>.fastq.gz <SAMPLE_1_B>.fastq.gz ... | gzip >> <SAMPLE_1>.fastq.gz
+```
+
+Input files files should then be placed into a single input directory (`dir_in`). If this is not possible, then create an input directory and provide symbolic links to the actual files. For example, given:
+
+```
+samples/
+  sample1/
+    sample1.fastq.gz
+  sample2/
+    sample2.fastq.gz
+```
+
+These can be symlinked into a single directory, `data`, a sibling of `samples`, as follows:
+
+```console
+$ mkdir data
+$ cd data/
+$ ln -s ../samples/sample1/sample1.fastq.gz
+$ ln -s ../samples/sample2/sample2.fastq.gz
+$ ls -l
+``
+```
+total 0
+lrwxrwxrwx 1 user user 41 Aug 22 02:55 sample1.fastq.gz -> ../samples/sample1/sample1.fastq.gz
+lrwxrwxrwx 1 user user 41 Aug 22 02:55 sample2.fastq.gz -> ../samples/sample2/sample2.fastq.gz
+```
+
+---
+
 ## Set up your environment
 
 If you have not already done so, activate your Python environment:
