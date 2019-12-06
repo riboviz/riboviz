@@ -40,7 +40,7 @@ $ cd data/
 $ ln -s ../samples/sample1/sample1.fastq.gz
 $ ln -s ../samples/sample2/sample2.fastq.gz
 $ ls -l
-``
+```
 ```
 total 0
 lrwxrwxrwx 1 user user 41 Aug 22 02:55 sample1.fastq.gz -> ../samples/sample1/sample1.fastq.gz
