@@ -30,7 +30,6 @@ Usage:
 * [What the RiboViz workflow does](./docs/prep-riboviz-operation.md)
 * [Configuring the RiboViz workflow](./docs/prep-riboviz-config.md)
 * [Running the RiboViz workflow](./docs/prep-riboviz-running.md)
-* [How to prepare organism data](./docs/prepare-data.md)
 
 Reference:
 
