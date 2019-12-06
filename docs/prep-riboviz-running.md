@@ -10,11 +10,11 @@ Contents:
 * [Dry run `prep_riboviz.py`](#dry-run-prep_ribovizpy)
 * [Run `prep_riboviz.py`](#run-prep_ribovizpy)
   - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
-  - [Troubleshooting: `WARNING: dedup_umis was TRUE but extract_umis was FALSE`](#troubleshooting-warning-dedup-umis-was-true-but-extract_umis-was-false)
+  - [Troubleshooting: `WARNING: dedup_umis was TRUE but extract_umis was FALSE`](#troubleshooting-warning-dedup-umis-was-true-but-extract-umis-was-false)
   - [Troubleshooting: `Configuration parameter error: No sample files or multiplexed files are specified`](#troubleshooting-configuration-parameter-error-no-sample-files-or-multiplexed-files-are-specified)
-  - [Troubleshooting: `Configuration parameter error: Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are specified](#troubleshooting-configuration-parameter-error:-both-sample-files-and-multiplexed-files-are-specified)
-  - [Troubleshooting: `Configuration parameter error: Multiplexed files ... are specified but no sample sheet`](#troubleshooting-configuration-parameter-error-multiplexed-files-are-specified-but-no-sample-sheet`)
-* [Watch your disk space](#watch-your-disk-space)
+  - [Troubleshooting: `Configuration parameter error: Both sample files and multiplexed files are specified`](#troubleshooting-configuration-parameter-error:-both-sample-files-and-multiplexed-files-are-specified)
+  - [Troubleshooting: `Configuration parameter error: Multiplexed files are specified but no sample sheet`](#troubleshooting-configuration-parameter-error-multiplexed-files-are-specified-but-no-sample-sheet)
+* [Managing your disk usage](#managing-your-disk-usage)
 * [Using-pre-generated hisat2 indices](#using-pre-generated-hisat2-indices)
 * [Capturing commands submitted to bash](#capturing-commands-submitted-to-bash)
   - [Capturing bash commands and demultiplexing](#capturing-bash-commands-and-demultiplexing)
@@ -269,7 +269,7 @@ then this means you provided a `multiplex_fq_files` parameter in your configurat
 
 ---
 
-## Watch your disk space
+## Managing your disk usage
 
 `prep_riboviz.py` generates many intermediate files and some of these may be unompressed and **large**, i.e. about the same size as the input files. All these files are placed in a temporary directory (`dir_tmp`). The temporary directory's contents can be inspected for troubleshooting, if necessary.
 
