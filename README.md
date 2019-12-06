@@ -30,11 +30,11 @@ Usage:
 * [What the RiboViz workflow does](./docs/prep-riboviz-operation.md)
 * [Configuring the RiboViz workflow](./docs/prep-riboviz-config.md)
 * [Running the RiboViz workflow](./docs/prep-riboviz-running.md)
-* [Prepare data](./docs/prepare-data.md)
+* [How to prepare organism data](./docs/prepare-data.md)
 
 Reference:
 
-* [create_fastq_simdata.py example FASTQ file generator](./docs/create-fastq-examples.md)
+* [create_fastq_simdata.py example FASTQ file generator](./docs/create-fastq-simdata.md)
 * [demultiplex-fastq.py fastq demultiplexer](./docs/demultiplex-fastq.md)
 * [Content and provenance of repository data files](./docs/data.md)
 * [Structure of HDF5 data](./docs/hdf5-data.md)
