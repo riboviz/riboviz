@@ -37,7 +37,7 @@ For processing multiplexed FASTQ files, a sample sheet (tab-separated values wit
 
 ## Configuration parameters
 
-`prep_riboviz.py` supports the following configuration parameters. All directory and file paths can be relative or absolute. If relative then they are relative to RiboViz home directory.
+`prep_riboviz.py` supports the following configuration parameters. All directory and file paths can be relative or absolute. If relative then they are relative to the directory `prep_riboviz.py` is invoked from.
 
 | Parameter | Description |
 | --------- | ----------- |
