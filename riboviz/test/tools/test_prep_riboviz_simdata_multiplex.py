@@ -109,7 +109,7 @@ def test_deplex_num_reads(configuration_module):
 
 
 @pytest.mark.parametrize(
-    "fastq", ["tag0.fastq", "tag1.fastq", "tag2.fastq", "Unassigned.fastq"])
+    "fastq", ["Tag0.fastq", "Tag1.fastq", "Tag2.fastq", "Unassigned.fastq"])
 @pytest.mark.usefixtures("run_prep_riboviz")
 def test_deplex_reads(configuration_module, fastq):
     """
@@ -132,7 +132,7 @@ def test_deplex_reads(configuration_module, fastq):
     riboviz.validation.compare(expected_output, actual_output)
 
 
-@pytest.mark.parametrize("sample_id", ["tag0", "tag1", "tag2"])
+@pytest.mark.parametrize("sample_id", ["Tag0", "Tag1", "Tag2"])
 @pytest.mark.usefixtures("run_prep_riboviz")
 def test_deplex_umi_groups(configuration_module, sample_id):
     """
@@ -183,7 +183,7 @@ def test_deplex_umi_groups(configuration_module, sample_id):
          (str(list(groups["read_id"]))))
 
 
-@pytest.mark.parametrize("sample_id", ["tag0", "tag1", "tag2"])
+@pytest.mark.parametrize("sample_id", ["Tag0", "Tag1", "Tag2"])
 @pytest.mark.usefixtures("run_prep_riboviz")
 def test_deplex_tpms_collated_tsv(configuration_module, sample_id):
     """
