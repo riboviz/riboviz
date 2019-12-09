@@ -14,7 +14,7 @@ Contents:
   - [Troubleshooting: `Configuration parameter error: No sample files or multiplexed files are specified`](#troubleshooting-configuration-parameter-error-no-sample-files-or-multiplexed-files-are-specified)
   - [Troubleshooting: `Configuration parameter error: Both sample files and multiplexed files are specified`](#troubleshooting-configuration-parameter-error-both-sample-files-and-multiplexed-files-are-specified)
   - [Troubleshooting: `Configuration parameter error: Multiplexed files are specified but no sample sheet`](#troubleshooting-configuration-parameter-error-multiplexed-files-are-specified-but-no-sample-sheet)
-* [Invoking `prep_riboviz.py` from outwith the RiboViz home directory](invoking-prep_ribovizpy-from-outwith-the-riboviz-home-directory)
+* [Invoking `prep_riboviz.py` from outwith the RiboViz home directory](#invoking-prep_ribovizpy-from-outwith-the-riboviz-home-directory)
 * [Managing your disk usage](#managing-your-disk-usage)
 * [Using-pre-generated hisat2 indices](#using-pre-generated-hisat2-indices)
 * [Capturing commands submitted to bash](#capturing-commands-submitted-to-bash)
