@@ -14,6 +14,7 @@ Contents:
   - [Troubleshooting: `Configuration parameter error: No sample files or multiplexed files are specified`](#troubleshooting-configuration-parameter-error-no-sample-files-or-multiplexed-files-are-specified)
   - [Troubleshooting: `Configuration parameter error: Both sample files and multiplexed files are specified`](#troubleshooting-configuration-parameter-error-both-sample-files-and-multiplexed-files-are-specified)
   - [Troubleshooting: `Configuration parameter error: Multiplexed files are specified but no sample sheet`](#troubleshooting-configuration-parameter-error-multiplexed-files-are-specified-but-no-sample-sheet)
+* [Invoking `prep_riboviz.py` from outwith the RiboViz home directory](invoking-prep_ribovizpy-from-outwith-the-riboviz-home-directory)
 * [Managing your disk usage](#managing-your-disk-usage)
 * [Using-pre-generated hisat2 indices](#using-pre-generated-hisat2-indices)
 * [Capturing commands submitted to bash](#capturing-commands-submitted-to-bash)
@@ -266,6 +267,101 @@ are specified but no sample sheet (sample_sheet)
 ```
 
 then this means you provided a `multiplex_fq_files` parameter in your configuration but not a complementary `sample_sheet` parameter. Add the missing configuration parameter.
+
+---
+
+## Invoking `prep_riboviz.py` from outwith the RiboViz home directory
+
+To invoke `prep_riboviz.py` from outwith the RiboViz home directory:
+
+* Ensure that all the input paths in the YAML configuration file are correctly configured:
+  - `dir_in`
+  - `rRNA_fasta`
+  - `orf_fasta`
+  - `orf_gff_file`
+* Ensure that all the output paths in the YAML configuration file are correctly configured:
+  - `dir_index`
+  - `dir_tmp`
+  - `dir_out`
+  - `dir_logs`
+* Ensure that all the data paths in the YAML configuration file are correctly configured:
+  - `features_file`
+  - `codon_pos`
+  - `t_rna`
+  - `asite_disp_length_file`
+
+* Run:
+
+```console
+$ PYTHONPATH=<RIBOVIZ> python <RIBOVIZ>/riboviz/tools/prep_riboviz.py \
+    <PATH>/rscripts/ <CONFIG>
+```
+
+where:
+
+* `<RIBOVIZ>`: path to RiboViz home directory, which can be relative to the current directory or absolute.
+* `riboviz/tools/prep_riboviz.py`: path to `prep_riboviz.py`, relative to `<RIBOVIZ>`.
+* `<RIBOVIZ>/rscripts/`: path to the directory with RiboViz's R scripts.
+* `<CONFIG>`: path to a YAML configuration file, which can be relative to the current directory or absolute.
+
+For example, given an `analysis/` directory with contents:
+
+```
+sample_config.yaml
+sample_input/
+  sample.fastq
+  yeast_rRNA_R64-1-1.fa
+  yeast_YAL_CDS_w_250utrs.fa
+  yeast_YAL_CDS_w_250utrs.gff3
+```
+
+and assuming that `analysis/` is a sibling of `riboviz/`, then file paths in `sample_config.yaml` can be configured as follows:
+
+```yaml
+dir_in: analysis/sample_input
+dir_out: analysis/sample_output
+dir_tmp: analysis/sample_tmp
+dir_logs: analysis/sample_logs
+rRNA_fasta: analysis/sample_input/yeast_rRNA_R64-1-1.fa
+orf_fasta: analysis/sample_input/yeast_YAL_CDS_w_250utrs.fa
+orf_gff_file: analysis/sample_input/yeast_YAL_CDS_w_250utrs.gff3
+dir_index: analysis/index
+features_file: riboviz/data/yeast_features.tsv
+t_rna: riboviz/data/yeast_tRNAs.tsv
+codon_pos: riboviz/data/yeast_codon_pos_i200.RData
+asite_disp_length_file: riboviz/data/yeast_standard_asite_disp_length.txt
+```
+
+`prep_riboviz.py` can then be run in the parent directory of `analysis/` and `riboviz/` as follows:
+
+```console
+$ PYTHONPATH=riboviz/ python riboviz/riboviz/tools/prep_riboviz.py \
+  riboviz/rscripts/ analysis/sample_config.yaml 
+```
+
+Absolute paths can also be used. For example, if the file paths were as follows:
+
+```yaml
+dir_in: /home/user/analysis/sample_input
+dir_out: /home/user/analysis/sample_output
+dir_tmp: /home/user/analysis/sample_tmp
+dir_logs: /home/user/analysis/sample_logs
+rRNA_fasta: /home/user/analysis/sample_input/yeast_rRNA_R64-1-1.fa
+orf_fasta: /home/user/analysis/sample_input/yeast_YAL_CDS_w_250utrs.fa
+orf_gff_file: /home/user/analysis/sample_input/yeast_YAL_CDS_w_250utrs.gff3
+dir_index: /home/user/analysis/index
+features_file: /home/user/riboviz/data/yeast_features.tsv
+t_rna: /home/user/riboviz/data/yeast_tRNAs.tsv
+codon_pos: /home/user/riboviz/data/yeast_codon_pos_i200.RData
+asite_disp_length_file: /home/user/riboviz/data/yeast_standard_asite_disp_length.txt
+```
+
+`prep_riboviz.py` can then be run from any directory as follows:
+
+```console
+$ PYTHONPATH=/home/user/riboviz/ python /home/user/riboviz/riboviz/tools/prep_riboviz.py \
+    /home/user/riboviz/rscripts/ /home/user/analysis/sample_config.yaml 
+```
 
 ---
 
