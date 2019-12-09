@@ -181,9 +181,9 @@ umi5_umi3.fastq
 umi5_umi3_umi_adaptor.fastq
 umi5_umi3_umi.fastq
 deplex/num_reads.tsv
-deplex/tag0.fastq
-deplex/tag1.fastq
-deplex/tag2.fastq
+deplex/Tag0.fastq
+deplex/Tag1.fastq
+deplex/Tag2.fastq
 deplex/Unassigned.fastq
 ```
 
