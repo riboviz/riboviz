@@ -53,9 +53,9 @@ to be written. The following files are created:
 * `multiplex.fastq`: FASTQ file identical to the above but
   with the barcode and UMIs extracted into the header and delimited by
   "_".
-* `deplex/tag0|1|2.fastq`: FASTQ files each with 27 reads representing
-  the results expected when demultiplexing `multiplex.fastq`
-  using `riboviz.tools.demultiplex_fastq` and
+* `deplex/Tag0|1|2.fastq`: FASTQ files each with 27 reads
+  representing the results expected when demultiplexing
+  `multiplex.fastq` using `riboviz.tools.demultiplex_fastq` and
   `multiplex_barcodes.tsv`.
 * `deplex/Unassigned.fastq`: FASTQ files with 9 reads representing the
   unassigned reads (those with barcode `TTT`) expected when
@@ -391,7 +391,7 @@ def create_fastq_simdata(output_dir):
     barcode_names = barcode_sets[0]
     num_barcodes = len(barcode_names)
     barcode_format = "-bar{:01d}.{:01d}"
-    tag_format = "tag{:01d}"
+    tag_format = "Tag{:01d}"
     deplex_dir = os.path.join(output_dir, "deplex")
     os.mkdir(deplex_dir)
 
