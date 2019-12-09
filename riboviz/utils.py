@@ -169,8 +169,8 @@ def get_fastq_filename(tag, is_gz=False):
     :rtype: str or unicode
     """
     if is_gz:
-        return FASTQ_GZ_NAME.format(tag.lower())
-    return FASTQ_NAME.format(tag.lower())
+        return FASTQ_GZ_NAME.format(tag)
+    return FASTQ_NAME.format(tag)
 
 
 def get_fastq_filenames(tags, is_gz=False):
