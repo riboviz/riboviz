@@ -54,11 +54,14 @@ Install:
 $ conda install -y pytest
 ```
 
+---
+
 ## Install R packages for developers
 
 ### lintr
 
 Web sites:
+
 * [lintr package on CRAN](https://cran.r-project.org/package=lintr)
 * [GitHub](https://github.com/jimhester/lintr)
 
@@ -90,6 +93,42 @@ $ R
 # load the package before use with:
 # library("styler")
 ```
+
+---
+
+## Install other packages for developers
+
+### GraphViz
+
+Web site: [GraphViz](https://www.graphviz.org/)
+
+Install GraphViz:
+
+**Ubuntu**
+
+```console
+$ sudo apt-get install graphviz
+```
+
+**CentOS**
+
+```console
+$ sudo apt-get install graphviz
+```
+
+Check install:
+
+```console
+$ dot -V
+dot - graphviz version 2.40.1 (20161225.0304)
+```
+
+### Editor supporting live preview of GraphViz images (optional)
+
+The following free editors supporting live preview of GraphViz images when editing dot documents:
+
+* [Graphviz Support](https://marketplace.visualstudio.com/items?itemName=joaompinto.vscode-graphviz) extension for Microsoft [Visual Studio Code](https://code.visualstudio.com/)
+* [GraphViz preview+](https://atom.io/packages/graphviz-preview-plus) for GitHub's [Atom](https://atom.io/).
 
 ---
 
@@ -495,3 +534,17 @@ then
 ```
 
 For example, to debug a specific line of code, you could add a `browser()` statement in the source first. Alternatively, you could copy and paste the parts of the code you wanted to run, as long as earlier dependencies are run first (packages, importing command args, function definitions).
+
+---
+
+## Editing workflow images
+
+Workflow images in `images/` are written in the open source [dot](https://graphviz.org/doc/info/lang.html) language from [GraphViz](https://www.graphviz.org/). For an overview, see [Drawing graphs with dot](https://www.graphviz.org/pdf/dotguide.pdf). GraphViz includes a command-line tool, `dot`, for converting dot files into image in various formats.
+
+Convert `.dot` file to `.svg` file:
+
+```console
+$ dot -Tsvg workflow.dot > workflow.svg
+```
+
+When `.dot` files are updated, the corresponding `.svg` images should be updated also.
