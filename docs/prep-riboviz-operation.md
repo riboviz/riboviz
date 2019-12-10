@@ -46,7 +46,7 @@ If sample files (`fq_files`) are specified, then `prep_riboviz.py` processes the
    13. Write output files produced above into an sample-specific directory, named using the sample ID, within the output directory (`dir_out`). 
 4. Collate TPMs across results, using `collate_tpms.R` and write into output directory (`dir_out`). Only the results from successfully-processed samples are collated.
 
-A visualisation of the key steps, inputs and outputs can be viewed in the [RiboViz workflow](./workflow.pdf) (PDF).
+A visualisation of the key steps, inputs and outputs can be viewed in the [RiboViz workflow](./images/workflow.svg) (SVG).
 
 ---
 
