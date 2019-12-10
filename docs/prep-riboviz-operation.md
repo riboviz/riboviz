@@ -46,7 +46,10 @@ If sample files (`fq_files`) are specified, then `prep_riboviz.py` processes the
    13. Write output files produced above into an sample-specific directory, named using the sample ID, within the output directory (`dir_out`). 
 4. Collate TPMs across results, using `collate_tpms.R` and write into output directory (`dir_out`). Only the results from successfully-processed samples are collated.
 
-A visualisation of the key steps, inputs and outputs can be viewed in the [RiboViz workflow](./images/workflow.svg) (SVG).
+Images of the workflow with the key steps, inputs and outputs are available:
+
+* [Workflow](./images/workflow.svg) (SVG).
+* [Workflow with deduplication](./images/workflow-dedup.svg) (SVG), if `dedup_umis: TRUE`.
 
 ---
 
@@ -86,6 +89,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 
 If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specific files are also produced:
 
+* `<SAMPLE_ID>_extract_trim.fq`: trimmed reads with UMIs extracted.
 * UMI groups pre- and post-deduplication (if `group_umis: TRUE`):
   - `<SAMPLE_ID>_pre_dedup_groups.tsv`: UMI groups before deduplication.
   - `<SAMPLE_ID>_post_dedup_groups.tsv`: UMI groups after deduplication.
