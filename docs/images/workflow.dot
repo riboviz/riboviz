@@ -1,0 +1,154 @@
+digraph G {
+  graph [ fontname=Helvetica, fontsize=10, compound=true ]
+  node [ fontname=Helvetica, fontsize=10 ]
+  edge [ fontname=Helvetica, fontsize=10 ]
+
+  subgraph cluster_data {
+    label = "Data"
+    labeljust = "l"
+    style = dashed
+
+    subgraph cluster_organism {
+      label = "Organism data"
+      labeljust = "l"
+      style = dashed
+
+      "input/CDS.fa"  [shape=plaintext]
+      "input/CDS.gff3" [shape=plaintext]
+    }
+
+    subgraph cluster_contaminants {
+      label = "Contaminants"
+      labeljust = "l"
+      style = dashed
+     "input/rRNA.fa"  [shape=plaintext, fontsize=9]
+    }
+
+    subgraph cluster_additional_organism {
+      label = "Additional organism-specific data"
+      labeljust = "l"
+      style = dashed
+
+      data [label="data/codon_pos_i200.RData\n
+data/features.tsv\n
+data/tRNAs.tsv\n
+data/standard_asite_disp_length.txt"] [shape=box, style=dashed]
+    }
+
+    subgraph cluster_ribosome {
+      label = "Ribosome profiling data"
+      labeljust = "l"
+      style = dashed
+
+      ribosome_data0toI [label="..."] [shape=plaintext]
+      "input/SAMPLE<I>.fastq.gz" [shape=plaintext]
+      ribosome_dataItoN [label="..."] [shape=plaintext]
+    }
+  }
+  
+  subgraph cluster_indexing {
+    label = "Indexing"
+    labeljust = "l"
+
+    h2build1 [label="hisat2-build"] [shape=box]
+    h2build2 [label="hisat2-build"] [shape=box]
+
+    "index/rRNA.1|...|8.ht2" [shape=plaintext]
+    "index/CDS.1|...|8.ht2" [shape=plaintext]
+
+    "input/rRNA.fa" -> h2build1 -> "index/rRNA.1|...|8.ht2"
+    "input/CDS.fa" -> h2build2 -> "index/CDS.1|...|8.ht2"
+  }
+
+  subgraph cluster_per_sample_processing {
+    label = "Process SAMPLE<I>"
+    labeljust = "l"
+
+    cut [label="cutadapt"] [shape=box]
+    h21 [label="hisat2"] [shape=box]
+    h22 [label="hisat2"] [shape=box]
+    samindex [label="samtools index"] [shape=box]
+    samview [label="samtools view | samtools sort"] [shape=box]
+    trim [label="trim_5p_mismatch.py"] [shape=box]
+    bedplus [label="bedtools genomecov (+)"] [shape=box]
+    bedminus [label="bedtools genomecov (-)"] [shape=box]
+    bam2h5 [label="bam_to_h5.R"] [shape=box]
+    statsfigs [label="generate_stats_figs.R"] [shape=box]
+
+    "tmp/SAMPLE<I>_trim.fq" [shape=plaintext]
+    "tmp/SAMPLE<I>_rRNA_map.sam" [shape=plaintext]
+    "tmp/SAMPLE<I>_nonrRNA.fq" [shape=plaintext]
+    "tmp/SAMPLE<I>_unaligned.fq" [shape=plaintext]
+    "tmp/SAMPLE<I>_orf_map.sam" [shape=plaintext]
+    "tmp/SAMPLE<I>_orf_map_clean.sam" [shape=plaintext]
+    "output/SAMPLE<I>.bam" [shape=plaintext]
+    "output/SAMPLE<I>.bam+.bai" [shape=plaintext]
+    "output/SAMPLE<I>_plus.bedgraph" [shape=plaintext]
+    "output/SAMPLE<I>_minus.bedgraph" [shape=plaintext]
+    "output/SAMPLE<I>.h5" [shape=plaintext]
+
+    pdfs [label="output/SAMPLE<I>_3nt_periodicity.pdf\n
+output/SAMPLE<I>_codon_ribodens.pdf\n
+output/SAMPLE<I>_read_lengths.pdf\n
+output/SAMPLE<I>_pos_sp_rpf_norm_reads.pdf\n
+output/SAMPLE<I>_features.pdf\n
+output/SAMPLE<I>_startcodon_ribogridbar.pdf\n
+output/SAMPLE<I>_startcodon_ribogrid.pdf\n
+output/SAMPLE<I>_3ntframe_propbygene.pdf
+"] [shape=box, style=dashed]
+
+    tsvs [label="output/SAMPLE<I>_3nt_periodicity.tsv\n
+output/SAMPLE<I>_codon_ribodens.tsv\n
+output/SAMPLE<I>_read_lengths.tsv\n
+output/SAMPLE<I>_pos_sp_rpf_norm_reads.tsv\n
+output/SAMPLE<I>_pos_sp_nt_freq.tsv\n
+output/SAMPLE<I>_3ntframe_bygene.tsv
+"] [shape=box, style=dashed]
+
+    "output/SAMPLE<I>_tpms.tsv" [shape=plaintext]
+    "input/SAMPLE<I>.fastq.gz" -> cut -> "tmp/SAMPLE<I>_trim.fq"
+
+    "tmp/SAMPLE<I>_trim.fq" -> h21
+    "index/rRNA.1|...|8.ht2" -> h21
+    h21 -> "tmp/SAMPLE<I>_rRNA_map.sam"
+    h21 -> "tmp/SAMPLE<I>_nonrRNA.fq"
+
+    "index/CDS.1|...|8.ht2" -> h22
+    "tmp/SAMPLE<I>_nonrRNA.fq" -> h22
+    h22 -> "tmp/SAMPLE<I>_unaligned.fq"
+    h22 -> "tmp/SAMPLE<I>_orf_map.sam"
+
+    "tmp/SAMPLE<I>_orf_map.sam" -> trim -> "tmp/SAMPLE<I>_orf_map_clean.sam"
+    "tmp/SAMPLE<I>_orf_map_clean.sam" -> samview -> "output/SAMPLE<I>.bam"
+    "output/SAMPLE<I>.bam" -> samindex
+    samindex -> "output/SAMPLE<I>.bam+.bai"
+
+    "output/SAMPLE<I>.bam+.bai" -> bedplus -> "output/SAMPLE<I>_plus.bedgraph"
+    "output/SAMPLE<I>.bam+.bai" -> bedminus -> "output/SAMPLE<I>_minus.bedgraph"
+
+    "output/SAMPLE<I>.bam+.bai" -> bam2h5
+    "input/CDS.gff3" -> bam2h5
+    bam2h5 -> "output/SAMPLE<I>.h5"
+
+    "output/SAMPLE<I>.h5" -> statsfigs
+    "input/CDS.fa" -> statsfigs
+    "input/CDS.gff3" -> statsfigs
+    data -> statsfigs
+
+    statsfigs -> pdfs
+    statsfigs -> tsvs
+    statsfigs -> "output/SAMPLE<I>_tpms.tsv"
+  }
+
+  subgraph cluster_tpms_collation {
+    label = "TPMs collation"
+    labeljust = "l"
+
+    collate [label="collate_tpms.R"] [shape=box]
+
+    "output/TPMs_collated.tsv" [shape=plaintext]
+
+    "output/SAMPLE<I>_tpms.tsv" -> collate
+    collate -> "output/TPMs_collated.tsv"
+  }
+}
