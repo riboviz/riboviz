@@ -41,9 +41,8 @@ data/standard_asite_disp_length.txt"] [shape=box, style=dashed]
       labeljust = "l"
       style = dashed
 
-      ribosome_data0toI [label="..."] [shape=plaintext]
-      "input/<SAMPLE_ID>.fastq.gz" [shape=plaintext]
-      ribosome_dataItoN [label="..."] [shape=plaintext]
+      "input/<FASTQ_FILE_NAME_PREFIX>.fastq.gz" [shape=plaintext]
+      "input/<BARCODES>.tsv" [shape=plaintext]
     }
   }
   
@@ -61,12 +60,30 @@ data/standard_asite_disp_length.txt"] [shape=box, style=dashed]
     "input/CDS.fa" -> h2build2 -> "index/CDS.1|...|8.ht2"
   }
 
-  subgraph cluster_per_sample_processing {
-    label = "Process <SAMPLE_ID>"
+  subgraph cluster_demultiplexing {
+    label = "Demultiplexing"
     labeljust = "l"
 
     cut [label="cutadapt"] [shape=box]
     umi_extract [label="umi_tools extract"] [shape=box]
+    demultiplex [labal="demultiplex_fastq.py"] [shape=box]
+
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_trim.fastq.gz" [shape=plaintext]
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_extract_trim.fastq.gz" [shape=plaintext]
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_deplex/num_reads.tsv" [shape=plaintext]
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_deplex/<SAMPLE_ID>.fastq" [shape=plaintext]
+
+    "input/<FASTQ_FILE_NAME_PREFIX>.fastq.gz" -> cut -> "tmp/<FASTQ_FILE_NAME_PREFIX>_trim.fastq.gz"
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_trim.fastq.gz" -> umi_extract -> "tmp/<FASTQ_FILE_NAME_PREFIX>_extract_trim.fastq.gz"
+    "input/<BARCODES>.tsv" -> demultiplex -> "tmp/<FASTQ_FILE_NAME_PREFIX>_deplex/num_reads.tsv"
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_extract_trim.fastq.gz" -> demultiplex
+    demultiplex -> "tmp/<FASTQ_FILE_NAME_PREFIX>_deplex/<SAMPLE_ID>.fastq"
+  }
+
+  subgraph cluster_per_sample_processing {
+    label = "Process <SAMPLE_ID>"
+    labeljust = "l"
+
     h21 [label="hisat2"] [shape=box]
     h22 [label="hisat2"] [shape=box]
     samindex [label="samtools index"] [shape=box]
@@ -81,8 +98,6 @@ data/standard_asite_disp_length.txt"] [shape=box, style=dashed]
     bam2h5 [label="bam_to_h5.R"] [shape=box]
     statsfigs [label="generate_stats_figs.R"] [shape=box]
 
-    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_trim.fq" [shape=plaintext]
-    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_extract_trim.fq" [shape=plaintext]
     "tmp/<SAMPLE_ID>/<SAMPLE_ID>_rRNA_map.sam" [shape=plaintext]
     "tmp/<SAMPLE_ID>/<SAMPLE_ID>_nonrRNA.fq" [shape=plaintext]
     "tmp/<SAMPLE_ID>/<SAMPLE_ID>_unaligned.fq" [shape=plaintext]
@@ -118,9 +133,7 @@ output/<SAMPLE_ID>/<SAMPLE_ID>_3ntframe_bygene.tsv
 
     "output/<SAMPLE_ID>/<SAMPLE_ID>_tpms.tsv" [shape=plaintext]
 
-    "input/<SAMPLE_ID>.fastq.gz" -> cut -> "tmp/<SAMPLE_ID>/<SAMPLE_ID>_trim.fq"
-    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_trim.fq" -> umi_extract -> "tmp/<SAMPLE_ID>/<SAMPLE_ID>_extract_trim.fq"
-    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_extract_trim.fq" -> h21
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_deplex/<SAMPLE_ID>.fastq" -> h21
     "index/rRNA.1|...|8.ht2" -> h21
     h21 -> "tmp/<SAMPLE_ID>/<SAMPLE_ID>_rRNA_map.sam"
     h21 -> "tmp/<SAMPLE_ID>/<SAMPLE_ID>_nonrRNA.fq"
