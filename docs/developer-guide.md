@@ -10,6 +10,7 @@ Web sites:
 * [BitBucket](https://bitbucket.org/logilab/pylint.org)
 
 Install:
+
 ```console
 $ conda install -y pylint
 ```
@@ -53,11 +54,14 @@ Install:
 $ conda install -y pytest
 ```
 
+---
+
 ## Install R packages for developers
 
 ### lintr
 
 Web sites:
+
 * [lintr package on CRAN](https://cran.r-project.org/package=lintr)
 * [GitHub](https://github.com/jimhester/lintr)
 
@@ -65,14 +69,17 @@ Install:
 
 ```console
 $ R
+```
+```R
 > install.packages("lintr")
 # load the package before use with:
- # library("lintr")
+# library("lintr")
 ```
 
 ### styleR
 
 Web sites:
+
 * [StyleR package documentation](https://styler.r-lib.org/)
 * [GitHub](https://github.com/r-lib/styler)
 
@@ -80,10 +87,48 @@ Install:
 
 ```console
 $ R
+```
+```R
 > install.packages("styler")
 # load the package before use with:
- # library("styler")
+# library("styler")
 ```
+
+---
+
+## Install other packages for developers
+
+### GraphViz
+
+Web site: [GraphViz](https://www.graphviz.org/)
+
+Install GraphViz:
+
+**Ubuntu**
+
+```console
+$ sudo apt-get install graphviz
+```
+
+**CentOS**
+
+```console
+$ sudo apt-get install graphviz
+```
+
+Check install:
+
+```console
+$ dot -V
+dot - graphviz version 2.40.1 (20161225.0304)
+```
+
+### Editor supporting live preview of GraphViz images (optional)
+
+The following free editors supporting live preview of GraphViz images when editing dot documents:
+
+* [Graphviz Support](https://marketplace.visualstudio.com/items?itemName=joaompinto.vscode-graphviz) extension for Microsoft [Visual Studio Code](https://code.visualstudio.com/)
+* [GraphViz preview+](https://atom.io/packages/graphviz-preview-plus) for GitHub's [Atom](https://atom.io/).
 
 ---
 
@@ -267,7 +312,6 @@ riboviz/test/regression/test_vignette.py::test_output_tpms_collated_tsv PASSED  
 ========================= 51 passed in 614.86 seconds ==========================
 ```
 
-
 ---
 
 ## Run tests
@@ -312,8 +356,10 @@ Follow [Google fork](https://google.github.io/styleguide/Rguide.html) of [Tidyve
 
 Lintr can be used within an IDE such as RStudio via an add-in once installed if preferred and run on the current file. It can also be run within the R terminal (for example on `generate_stats_figs.R`) with the command: `lint("$HOME/RiboViz/rscripts/generate_stats_figs.R")`, but if there is considerable output or you wish to work through the output bit by bit, it's possible to send it to an output file using `sink()` as below:
 
-```R
+```console
 $ R
+```
+```R
 > sink('lintR-output.txt')
 > lint("$HOME/RiboViz/rscripts/generate_stats_figs.R")
 > sink()
@@ -450,29 +496,55 @@ website/         # RiboViz Shiny server code and data
 ## Debugging R scripts with appropriate command-line arguments
 
 To debug R scripts such as `generate_stats_figs.R` and `bam_to_h5.R`, they need to be run with the correct command-line arguments to discover the bug. R has good tools for interactive debugging, [explained in Hadley Wickham's chapter on debugging in R](https://adv-r.hadley.nz/debugging.html). However, interactive debugging tools such as `browser()` don't interrupt a call to `Rscript`. Instead you need to modify the call from
-```
+
+```console
 Rscript code_to_debug.R --myarg1 value1
 ```
+
 to
-```
+
+```console
 R --args --myarg1 value1
 ```
+
 then, from the R prompt run
-```
+
+```R
 > source('code_to_debug.R')
 ```
+
 this will accept `debug()` and `browser()` statements run from the interactive R prompt.
 
 For example, in the vignette we call:
-```
+
+```console
 Rscript --vanilla rscripts/generate_stats_figs.R --Ncores=1 --MinReadLen=10 --MaxReadLen=50 --Buffer=250 --PrimaryID=Name --dataset=vignette --hdFile=vignette/output/WTnone.h5 --out_prefix=vignette/output/WTnone --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --dir_out=vignette/output --do_pos_sp_nt_freq=True --t_rna=data/yeast_tRNAs.tsv --codon_pos=data/yeast_codon_pos_i200.RData --features_file=data/yeast_features.tsv --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --count_threshold=64 --asite_disp_length_file=vignette/input/asite_disp_length_yeast_standard.txt
 ```
+
 But to debug a new feature, instead run:
-```
+
+```console
 R --vanilla --args --Ncores=1 --MinReadLen=10 --MaxReadLen=50 --Buffer=250 --PrimaryID=Name --dataset=vignette --hdFile=vignette/output/WTnone.h5 --out_prefix=vignette/output/WTnone --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --dir_out=vignette/output --do_pos_sp_nt_freq=True --t_rna=data/yeast_tRNAs.tsv --codon_pos=data/yeast_codon_pos_i200.RData --features_file=data/yeast_features.tsv --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --count_threshold=64 --asite_disp_length_file=vignette/input/asite_disp_length_yeast_standard.txt
 ```
+
 then 
-```
+
+```R
 > source('rscripts/generate_stats_figs.R')
 ```
+
 For example, to debug a specific line of code, you could add a `browser()` statement in the source first. Alternatively, you could copy and paste the parts of the code you wanted to run, as long as earlier dependencies are run first (packages, importing command args, function definitions).
+
+---
+
+## Editing workflow images
+
+Workflow images in `images/` are written in the open source [dot](https://graphviz.org/doc/info/lang.html) language from [GraphViz](https://www.graphviz.org/). For an overview, see [Drawing graphs with dot](https://www.graphviz.org/pdf/dotguide.pdf). GraphViz includes a command-line tool, `dot`, for converting dot files into image in various formats.
+
+Convert `.dot` file to `.svg` file:
+
+```console
+$ dot -Tsvg workflow.dot > workflow.svg
+```
+
+When `.dot` files are updated, the corresponding `.svg` images should be updated also.

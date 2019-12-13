@@ -1,0 +1,184 @@
+digraph G {
+  graph [ fontname=Helvetica, fontsize=10, compound=true ]
+  node [ fontname=Helvetica, fontsize=10 ]
+  edge [ fontname=Helvetica, fontsize=10 ]
+
+  subgraph cluster_data {
+    label = "Data"
+    labeljust = "l"
+    style = dashed
+
+    subgraph cluster_organism {
+      label = "Organism data"
+      labeljust = "l"
+      style = dashed
+
+      "input/CDS.fa"  [shape=plaintext]
+      "input/CDS.gff3" [shape=plaintext]
+    }
+
+    subgraph cluster_contaminants {
+      label = "Contaminants"
+      labeljust = "l"
+      style = dashed
+
+      "input/rRNA.fa"  [shape=plaintext, fontsize=9]
+    }
+
+    subgraph cluster_additional_organism {
+      label = "Additional organism-specific data"
+      labeljust = "l"
+      style = dashed
+
+      data [label="data/codon_pos_i200.RData\n
+data/features.tsv\n
+data/tRNAs.tsv\n
+data/standard_asite_disp_length.txt"] [shape=box, style=dashed]
+    }
+
+    subgraph cluster_ribosome {
+      label = "Ribosome profiling data"
+      labeljust = "l"
+      style = dashed
+
+      "input/<FASTQ_FILE_NAME_PREFIX>.fastq.gz" [shape=plaintext]
+      "input/<BARCODES>.tsv" [shape=plaintext]
+    }
+  }
+  
+  subgraph cluster_indexing {
+    label = "Indexing"
+    labeljust = "l"
+
+    h2build1 [label="hisat2-build"] [shape=box]
+    h2build2 [label="hisat2-build"] [shape=box]
+
+    "index/rRNA.1|...|8.ht2" [shape=plaintext]
+    "index/CDS.1|...|8.ht2" [shape=plaintext]
+
+    "input/rRNA.fa" -> h2build1 -> "index/rRNA.1|...|8.ht2"
+    "input/CDS.fa" -> h2build2 -> "index/CDS.1|...|8.ht2"
+  }
+
+  subgraph cluster_demultiplexing {
+    label = "Demultiplexing"
+    labeljust = "l"
+
+    cut [label="cutadapt"] [shape=box]
+    umi_extract [label="umi_tools extract"] [shape=box]
+    demultiplex [labal="demultiplex_fastq.py"] [shape=box]
+
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_trim.fastq.gz" [shape=plaintext]
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_extract_trim.fastq.gz" [shape=plaintext]
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_deplex/num_reads.tsv" [shape=plaintext]
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_deplex/<SAMPLE_ID>.fastq" [shape=plaintext]
+
+    "input/<FASTQ_FILE_NAME_PREFIX>.fastq.gz" -> cut -> "tmp/<FASTQ_FILE_NAME_PREFIX>_trim.fastq.gz"
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_trim.fastq.gz" -> umi_extract -> "tmp/<FASTQ_FILE_NAME_PREFIX>_extract_trim.fastq.gz"
+    "input/<BARCODES>.tsv" -> demultiplex -> "tmp/<FASTQ_FILE_NAME_PREFIX>_deplex/num_reads.tsv"
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_extract_trim.fastq.gz" -> demultiplex
+    demultiplex -> "tmp/<FASTQ_FILE_NAME_PREFIX>_deplex/<SAMPLE_ID>.fastq"
+  }
+
+  subgraph cluster_per_sample_processing {
+    label = "Process <SAMPLE_ID>"
+    labeljust = "l"
+
+    h21 [label="hisat2"] [shape=box]
+    h22 [label="hisat2"] [shape=box]
+    samindex [label="samtools index"] [shape=box]
+    samview [label="samtools view | samtools sort"] [shape=box]
+    umi_pre_group [label="umi_tools group"] [shape=box]
+    umi_dedup [label="umi_tools dedup"] [shape=box]
+    umi_post_group [label="umi_tools group"] [shape=box]
+    samindex_dedup [label="samtools index"] [shape=box]
+    trim [label="trim_5p_mismatch.py"] [shape=box]
+    bedplus [label="bedtools genomecov (+)"] [shape=box]
+    bedminus [label="bedtools genomecov (-)"] [shape=box]
+    bam2h5 [label="bam_to_h5.R"] [shape=box]
+    statsfigs [label="generate_stats_figs.R"] [shape=box]
+
+    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_rRNA_map.sam" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_nonrRNA.fq" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_unaligned.fq" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_orf_map.sam" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_orf_map_clean.sam" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_pre_dedup_groups.tsv" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_post_dedup_groups.tsv" [shape=plaintext]
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam" [shape=plaintext]
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" [shape=plaintext]
+    "output/<SAMPLE_ID>/<SAMPLE_ID>_plus.bedgraph" [shape=plaintext]
+    "output/<SAMPLE_ID>/<SAMPLE_ID>_minus.bedgraph" [shape=plaintext]
+    "output/<SAMPLE_ID>/<SAMPLE_ID>_dedup.bam" [shape=plaintext]
+    "output/<SAMPLE_ID>/<SAMPLE_ID>_dedup.bam+.bai" [shape=plaintext]
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.h5" [shape=plaintext]
+
+    pdfs [label="output/<SAMPLE_ID>/<SAMPLE_ID>_3nt_periodicity.pdf\n
+output/<SAMPLE_ID>/<SAMPLE_ID>_codon_ribodens.pdf\n
+output/<SAMPLE_ID>/<SAMPLE_ID>_read_lengths.pdf\n
+output/<SAMPLE_ID>/<SAMPLE_ID>_pos_sp_rpf_norm_reads.pdf\n
+output/<SAMPLE_ID>/<SAMPLE_ID>_features.pdf\n
+output/<SAMPLE_ID>/<SAMPLE_ID>_startcodon_ribogridbar.pdf\n
+output/<SAMPLE_ID>/<SAMPLE_ID>_startcodon_ribogrid.pdf\n
+output/<SAMPLE_ID>/<SAMPLE_ID>_3ntframe_propbygene.pdf
+"] [shape=box, style=dashed]
+
+    tsvs [label="output/<SAMPLE_ID>/<SAMPLE_ID>_3nt_periodicity.tsv\n
+output/<SAMPLE_ID>/<SAMPLE_ID>_codon_ribodens.tsv\n
+output/<SAMPLE_ID>/<SAMPLE_ID>_read_lengths.tsv\n
+output/<SAMPLE_ID>/<SAMPLE_ID>_pos_sp_rpf_norm_reads.tsv\n
+output/<SAMPLE_ID>/<SAMPLE_ID>_pos_sp_nt_freq.tsv\n
+output/<SAMPLE_ID>/<SAMPLE_ID>_3ntframe_bygene.tsv
+"] [shape=box, style=dashed]
+
+    "output/<SAMPLE_ID>/<SAMPLE_ID>_tpms.tsv" [shape=plaintext]
+
+    "tmp/<FASTQ_FILE_NAME_PREFIX>_deplex/<SAMPLE_ID>.fastq" -> h21
+    "index/rRNA.1|...|8.ht2" -> h21
+    h21 -> "tmp/<SAMPLE_ID>/<SAMPLE_ID>_rRNA_map.sam"
+    h21 -> "tmp/<SAMPLE_ID>/<SAMPLE_ID>_nonrRNA.fq"
+
+    "index/CDS.1|...|8.ht2" -> h22
+    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_nonrRNA.fq" -> h22
+    h22 -> "tmp/<SAMPLE_ID>/<SAMPLE_ID>_unaligned.fq"
+    h22 -> "tmp/<SAMPLE_ID>/<SAMPLE_ID>_orf_map.sam"
+
+    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_orf_map.sam" -> trim -> "tmp/<SAMPLE_ID>/<SAMPLE_ID>_orf_map_clean.sam"
+    "tmp/<SAMPLE_ID>/<SAMPLE_ID>_orf_map_clean.sam" -> samview -> "output/<SAMPLE_ID>/<SAMPLE_ID>.bam"
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam" -> samindex
+    samindex -> "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai"
+
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" -> bedplus -> "output/<SAMPLE_ID>/<SAMPLE_ID>_plus.bedgraph"
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" -> bedminus -> "output/<SAMPLE_ID>/<SAMPLE_ID>_minus.bedgraph"
+
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" -> umi_pre_group -> "tmp/<SAMPLE_ID>/<SAMPLE_ID>_pre_dedup_groups.tsv"
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" -> umi_dedup -> "output/<SAMPLE_ID>/<SAMPLE_ID>_dedup.bam"
+    "output/<SAMPLE_ID>/<SAMPLE_ID>_dedup.bam" -> umi_post_group -> "tmp/<SAMPLE_ID>/<SAMPLE_ID>_post_dedup_groups.tsv"
+
+    "output/<SAMPLE_ID>/<SAMPLE_ID>_dedup.bam" -> samindex_dedup -> "output/<SAMPLE_ID>/<SAMPLE_ID>_dedup.bam+.bai"  
+    "output/<SAMPLE_ID>/<SAMPLE_ID>_dedup.bam+.bai" -> bam2h5
+    "input/CDS.gff3" -> bam2h5
+    bam2h5 -> "output/<SAMPLE_ID>/<SAMPLE_ID>.h5"
+
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.h5" -> statsfigs
+    "input/CDS.fa" -> statsfigs
+    "input/CDS.gff3" -> statsfigs
+    data -> statsfigs
+
+    statsfigs -> pdfs
+    statsfigs -> tsvs
+    statsfigs -> "output/<SAMPLE_ID>/<SAMPLE_ID>_tpms.tsv"
+  }
+
+  subgraph cluster_tpms_collation {
+    label = "TPMs collation"
+    labeljust = "l"
+
+    collate [label="collate_tpms.R"] [shape=box]
+
+    "output/TPMs_collated.tsv" [shape=plaintext]
+
+    "output/<SAMPLE_ID>/<SAMPLE_ID>_tpms.tsv" -> collate
+    collate -> "output/TPMs_collated.tsv"
+  }
+}
