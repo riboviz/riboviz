@@ -270,22 +270,12 @@ riboviz/test/regression/test_vignette.py::test_output_tpms_collated_tsv PASSED  
 
 ---
 
-## Run `prep_riboviz.py` tests
+## Run tests
 
-Run tests of error conditions and exit codes:
+Run all tests (excluding regression tests):
 
 ```console
-$ pytest -v riboviz/test/tools/test_prep_riboviz.py
-============================= test session starts ==============================
-...
-
-riboviz/test/tools/test_prep_riboviz.py::test_config_error_missing_config_file PASSED [ 20%]
-riboviz/test/tools/test_prep_riboviz.py::test_index_error_missing_fa PASSED    [ 40%]
-riboviz/test/tools/test_prep_riboviz.py::test_no_samples_error PASSED          [ 60%]
-riboviz/test/tools/test_prep_riboviz.py::test_samples_error_missing_samples PASSED [ 80%]
-riboviz/test/tools/test_prep_riboviz.py::test_config_error_missing_dir_in PASSED [100%]
-
-=========================== 5 passed in 0.71 seconds ===========================
+$ pytest -v --ignore-glob="*regression*"
 ```
 
 ---
@@ -299,34 +289,6 @@ A custom configuration file can be provided by defining a `RIBOVIZ_LOG_CONFIG` e
 ```console
 $ RIBOVIZ_LOG_CONFIG=custom_logging.yaml
 ```
-
----
-
-## Create simulated FASTQ files
-
-`riboviz/tools/create_fastq_examples.py` creates simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication.
-
-To run:
-
-```console
-$ python -m riboviz.tools.create_fastq_examples DIRECTORY
-```
-
-Or:
-
-```console
-$ python -m riboviz/tools/create_fastq_examples.py DIRECTORY
-```
-
-where `DIRECTORY` is the directory into which the simulated files are to be written. The following files are created:                                 
-
-* `simdata_UMI5and3_4nt_adaptor.fastq`: FASTQ file with 9 reads, each with a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a 11nt adaptor at the 3' end. Reads can be grouped by UMI into 5 groups.
-* `simdata_UMI5and3_4nt.fastq`: FASTQ file identical to the above but with the adaptor trimmed.
-* `simdata_extracted_UMI5and3_4nt.fastq`: FASTQ file identical to the above but with the UMIs extracted and concatenated to the header.
-* `simdata_extracted_UMI3_4nt.fastq`: FASTQ file with 8 reads, each with a 4nt UMI at the 3' end. Reads can be grouped by UMI into 4 groups.
-* `simdata_UMI3_4nt.fastq`: FASTQ file identical to the above but with the UMI extracted and concatenated to the header.
-
-The files with these names in `data/` were created using this script.
 
 ---
 
