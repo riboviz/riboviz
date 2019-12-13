@@ -438,7 +438,7 @@ CalcAsiteFixedOneLength <- function(reads_pos_length, MinReadLen,
 CalcAsiteFixed <- function(reads_pos_length, MinReadLen,
                            asite_disp_length = data.frame(
                              read_length = c(28, 29, 30),
-                             asite_disp = c(12, 12, 12)
+                             asite_disp = c(15, 15, 15)
                            ),
                            colsum_out = TRUE) {
   # Calculate read A-site using a fixed displacement for fixed read lengths
@@ -539,7 +539,7 @@ WilcoxTestFrame <- function(x, left, right) {
 GetGeneReadFrame <- function(hdf5file, gene, dataset, left, right, MinReadLen,
                              asite_disp_length = data.frame(
                                read_length = c(28, 29, 30),
-                               asite_disp = c(12, 12, 12)
+                               asite_disp = c(15, 15, 15)
                              )) {
   # example from vignette:
   #   GetGeneReadFrame(hdf5file, "YAL003W", dataset, 251, 871, MinReadLen)
