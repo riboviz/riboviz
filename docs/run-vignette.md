@@ -71,26 +71,56 @@ Note that the configuration file specifies an additional, non-existent, file. Th
 
 The script prepares ribosome profiling data for RiboViz or other analyses. It does the following (`names` in brackets correspond to variables in the YAML configuration file):
 
+The script can process sample data or multiplexed sample data (relevant configuration parameters are shown in brackets).
+
+Process ribosome profiling data:
+
 * Reads configuration information from YAML configuration file.
 * Builds hisat2 indices if requested (`build_indices: TRUE`) using `hisat2 build` and saves these into an index directory (`dir_index`).
-* Processes all fastq.gz files (`dir_in`). For each fastq.gz file:
+* Processes each sample fastq[.gz] file (sample IDs and files are listed in `fq_files` and are assumed to be relative to `dir_in`) in turn:         
   - Cuts out sequencing library adapters (`adapters`, default `CTGTAGGCACC`) using `cutadapt`.
-  - Extracts UMIs using `umi_tools extract`, if requested (`extract_umis: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`). For information on regular expression patterns, see the UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction). An example of a regular expression, which extracts 4nt UMIs at both the 5' and 3' ends of a read is `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$`.
+  - Extracts UMIs using `umi_tools extract`, if requested (`extract_umis: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`).
   - Removes rRNA or other contaminating reads by alignment to rRNA index file (`rRNA_index`) using `hisat2`.
   - Aligns remaining reads to ORFs index file (`orf_index`). using `hisat2`.
-  - Trims 5' mismatches from reads and remove reads with more than 2 mismatches using trim_5p_mismatch.py.
-  - Outputs UMI groups pre-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis: TRUE`).
-  - Deduplicates UMIs using `umi_tools dedup`, if requested (`dedup_umis: TRUE`).
-  - Outputs UMI groups post-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis: TRUE`).
+  - Trims 5' mismatches from reads and remove reads with more than 2 mismatches using `trim_5p_mismatch.py`.
+  - Outputs UMI groups pre-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis: TRUE`)
+  - Deduplicates UMIs using `umi_tools dedup`, if requested (`dedup_umis: TRUE`)
+  - Outputs UMI groups post-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis:TRUE`)
   - Exports bedgraph files for plus and minus strands, if requested (`make_bedgraph: TRUE`) using `bedtools genomecov`.
+  - Writes intermediate files produced above into a sample-specific directory under the temporary directory  ("dir_tmp").
   - Makes length-sensitive alignments in compressed h5 format using `bam_to_h5.R`.
   - Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
-* Collates TPMs across all processed fastq.gz files, using `collate_tpms.R`.
-* The workflow can parallelize part of of its operation over many processes (`nprocesses`):
-  - This value is used to configure `hisat2`, `samtools sort`, `bam_to_h5.R` and `generate_stats_figs.R`.
-  - For `cutadapt` the number of available processors on the host will be used.
-* Writes all intermediate files into a temporary directory (`dir_tmp`).
-* Writes all output files into an output directory (`dir_out`).
+  - Writes output files produced above into an sample-specific directory under the output directory ("dir_out"). 
+* Collates TPMs across all processed fastq[.gz] files, using `collate_tpms.R` and writes into output directory (`dir_out`).
+
+Process multiplexed ribosome profiling data:
+
+* Reads configuration information from YAML configuration file.
+* Builds hisat2 indices if requested (`build_indices: TRUE`) using `hisat2 build` and saves these into an index directory (`dir_index`).
+* Reads fastq[.gz] file (the file is listed in `multiplex_fq_files` and is assumed to be relative to `dir_in`). 
+* Cuts out sequencing library adapters (`adapters`, default `CTGTAGGCACC`) using `cutadapt`.
+* Extracts barcodes and UMIs using `umi_tools extract`, if requested (`extract_umis: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`).
+* Demultiplexes fastq[.gz] file with reference to a sample sheet (`sample_sheet`), using `demultiplex_fastq.py`.
+* Processes each demultiplexed fastq[.gz], which has one or more reads, in turn:
+  - Removes rRNA or other contaminating reads by alignment to rRNA index file (`rRNA_index`) using `hisat2`.
+  - Aligns remaining reads to ORFs index file (`orf_index`). using `hisat2`.
+  - Trims 5' mismatches from reads and remove reads with more than 2 mismatches using `trim_5p_mismatch.py`.
+  - Outputs UMI groups pre-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis: TRUE`).
+  - Deduplicates UMIs using `umi_tools dedup`, if requested (`dedup_umis: TRUE`).
+  - Outputs UMI groups post-deduplication using `umi_tools group` if requested (`dedup_umis: TRUE` and `group_umis: TRUE`)
+  - Exports bedgraph files for plus and minus strands, if requested (`make_bedgraph: TRUE`) using `bedtools genomecov`.
+  - Writes intermediate files produced above into a sample-specific directory under the temporary directory  ("dir_tmp").
+  - Makes length-sensitive alignments in compressed h5 format using `bam_to_h5.R`.
+  - Generates summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
+  - Writes output files produced above into an sample-specific directory under the output directory ("dir_out"). 
+* Collates TPMs across the demultiplexed fastq[.gz] files, using `collate_tpms.R` and writes into output directory (`dir_out`).
+
+Deduplication and demultiplexing won't be discussed further on this page. For more information, see [Deduplication and demultiplexing](./dedup-demultiplex.md).
+
+The script can parallelize parts of its operation over many processes (`nprocesses`):
+
+* This value is used to configure `hisat2`, `samtools sort`, `bam_to_h5.R` and `generate_stats_figs.R`.
+* For `cutadapt`, the number of available processors on the host will be used.
 
 A visualisation of the key steps, inputs and outputs can be viewed in the [RiboViz workflow](./workflow.pdf) (PDF).
 
@@ -103,52 +133,41 @@ fq_files:
   Example: data.fastq.gz
 ```
 
-For each of these names (e.g. `Example`), the intermediate files produced in the temporary directory (`dir_tmp`) are:
+For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-specific directory (`<SAMPLE_ID>`) under the temporary directory (`dir_tmp`):
 
-* `Example_trim.fq`, trimmed reads.
-* `Example_extract_trim.fq`, trimmed reads with UMIs extracted (optional, only if `extract_umis: TRUE` in configuration)
-* `Example_nonrRNA.fq`, trimmed non-rRNA reads.
-* `Example_rRNA_map.sam`, rRNA-mapped reads.
-* `Example_orf_map.sam`, ORF-mapped reads.
-* `Example_orf_map_clean.sam`, ORF-mapped reads with mismatched nt trimmed.
-* `Example_unaligned.sam`, unaligned reads.
-* UMI groups pre- and post-deduplication (optional, only if `dedup_umis: TRUE` and `group_umis: TRUE` in configuration):
-  - `Example_pre_dedup_groups.tsv`: UMI groups before deduplication
-  - `Example_post_dedup_groups.tsv`: UMI groups after deduplication
-* UMI deduplication statistics (optional, only if `dedup_umis: TRUE` in configuration):
-  - `Example_dedup_stats_edit_distance.tsv`: edit distance between UMIs at each position.
-  - `Example_dedup_stats_per_umi_per_position.tsv`: histogram of counts per position per UMI pre- and post-deduplication.
-  - `Example_dedup_stats_per_umi.tsv`: number of times each UMI was observed, total counts and median counts, pre- and post-deduplication
-  - For more information see UMI-tools [Dedup-specific options](https://umi-tools.readthedocs.io/en/latest/reference/dedup.html) and [documentation on stats file #250](https://github.com/CGATOxford/UMI-tools/issues/250)
+* `<SAMPLE_ID>_trim.fq`, trimmed reads.
+* `<SAMPLE_ID>_nonrRNA.fq`, trimmed non-rRNA reads.
+* `<SAMPLE_ID>_rRNA_map.sam`, rRNA-mapped reads.
+* `<SAMPLE_ID>_orf_map.sam`, ORF-mapped reads.
+* `<SAMPLE_ID>_orf_map_clean.sam`, ORF-mapped reads with mismatched nt trimmed.
+* `<SAMPLE_ID>_unaligned.sam`, unaligned reads.
 
-The `_unaligned.sam` files could be used to find common contaminants or translated sequences not in your orf annotation.
+The `unaligned.sam` files can be used to find common contaminants or translated sequences not in your ORF annotation.
 
-For each of these names (e.g. `Example`), many output files are produced in the output directory (`dir_out`):
+For each sample (`<SAMPLE_ID>`), output files are produced in a sample-specific directory (`<SAMPLE_ID>`) under the temporary directory (`dir_out`):
 
-* `Example.bam`, bamfile of reads mapped to transcripts, can be directly used in genome browsers.
-* `Example.bam.bai`, bam index file for `Example.bam`.
-* `Example_dedup.bam`, `Example.bam` after deduplication of read (optional, only if `dedup_umis: TRUE` in configuration).
-* `Example_dedup.bam.bai`, bam index file for `Example_dedup.bam`.
-* `Example_minus.bedgraph`, bedgraph of reads from minus strand (optional, only if `make_bedgraph: TRUE` in configuration).
-* `Example_plus.bedgraph`, bedgraph of reads from plus strand (optional, only if `make_bedgraph: TRUE` in configuration).
-* `Example.h5`, length-sensitive alignments in compressed h5 format.
-* `Example_3nt_periodicity.tsv`
-* `Example_3nt_periodicity.pdf`
-* `Example_read_lengths.tsv`
-* `Example_read_lengths.pdf`
-* `Example_pos_sp_nt_freq.tsv`
-* `Example_pos_sp_rpf_norm_reads.pdf`
-* `Example_pos_sp_rpf_norm_reads.tsv`
-* `Example_features.pdf`
-* `Example_tpms.tsv`
-* `Example_codon_ribodens.tsv`
-* `Example_codon_ribodens.pdf`
-* `Example_startcodon_ribogridbar.pdf`
-* `Example_startcodon_ribogrid.pdf`
-* `Example_3ntframe_bygene.tsv`
-* `Example_3ntframe_propbygene.pdf`
+* `<SAMPLE_ID>.bam`, bamfile of reads mapped to transcripts, can be directly used in genome browsers.
+* `<SAMPLE_ID>.bam.bai`, bam index file for `<SAMPLE_ID>.bam`.
+* `<SAMPLE_ID>_minus.bedgraph`, bedgraph of reads from minus strand (optional, only if `make_bedgraph: TRUE` in configuration).
+* `<SAMPLE_ID>_plus.bedgraph`, bedgraph of reads from plus strand (optional, only if `make_bedgraph: TRUE` in configuration).
+* `<SAMPLE_ID>.h5`, length-sensitive alignments in compressed h5 format.
+* `<SAMPLE_ID>_3nt_periodicity.tsv`
+* `<SAMPLE_ID>_3nt_periodicity.pdf`
+* `<SAMPLE_ID>_read_lengths.tsv`
+* `<SAMPLE_ID>_read_lengths.pdf`
+* `<SAMPLE_ID>_pos_sp_nt_freq.tsv`
+* `<SAMPLE_ID>_pos_sp_rpf_norm_reads.pdf`
+* `<SAMPLE_ID>_pos_sp_rpf_norm_reads.tsv`
+* `<SAMPLE_ID>_features.pdf`
+* `<SAMPLE_ID>_tpms.tsv`
+* `<SAMPLE_ID>_codon_ribodens.tsv`
+* `<SAMPLE_ID>_codon_ribodens.pdf`
+* `<SAMPLE_ID>_startcodon_ribogridbar.pdf`
+* `<SAMPLE_ID>_startcodon_ribogrid.pdf`
+* `<SAMPLE_ID>_3ntframe_bygene.tsv`
+* `<SAMPLE_ID>_3ntframe_propbygene.pdf`
 
-A summary file is also put in the output directory:
+A summary file is also put in the output directory (`dir_out`):
 
 * `TPMs_collated.tsv`, tab-separated test file with the transcripts per million (tpm) for all samples
 
@@ -156,7 +175,7 @@ A summary file is also put in the output directory:
 
 ## Warning: a temporary directory is created which could be very large!
 
-Riboviz generates many intermediate files that could be large, i.e. about the same size as your input fasta files. All these files are placed in a temporary directory defined by a `dir_tmp` property in `vignette_config.yaml`, which, by default, is `vignette/tmp/`. Its contents can be inspected for troubleshooting if necessary. You should probably delete these temporary directories when you have completed your analysis.
+Riboviz generates many intermediate files that could be large, i.e. about the same size as your input fasta files. All these files are placed in a temporary directory defined by the `dir_tmp` parameter in `vignette_config.yaml`, which, by default, is `vignette/tmp/`. Its contents can be inspected for troubleshooting if necessary. You should probably delete these temporary directories when you have completed your analysis.
 
 For the vignette the total size of the temporary files is ~1141 MB, and the total size of all the files in the `vignette/` post-run is ~1152 MB.
 
@@ -239,20 +258,6 @@ File not found: vignette/input/example_missing_file.fastq.gz
 
 then this is expected and can be ignored. The vignette includes an attempt to analyse a missing input file, for testing, which is expected to fail.
 
-### Troubleshooting: `WARNING: dedup_umis was TRUE but extract_umis was FALSE`
-
-This error in the log file means that in your YAML configuration file you have defined:
-
-```yaml
-extract_umis: FALSE
-dedup_umis: TRUE
-```
-
-Unless you explicitly want this you should:
-
-* Either, set `extract_umis` to `TRUE`, if you want UMI deduplication to occur.
-* Or, set `dedup_umis` to `FALSE`, if you do not want UMI deduplication to occur.
-
 ---
 
 ## Run `prep_riboviz.py`
@@ -282,35 +287,35 @@ If all went well an exit code of 0 will be returned.
 
 Information on the key steps during processing is displayed. More detailed information, including the causes of any errors, is also added to a timestamped log file in the current directory e.g. `riboviz.20190926-002455.log`.
 
-Log files for each processing step will be placed in a timestamped sub-directory of `vignette/logs/` e.g. `vignette/logs/20190919-070625`. After a successful run, the log files would be:
+Log files for each processing step will be placed in a timestamped sub-directory of `vignette/logs/` e.g. `vignette/logs/20190919-070625`. Sample-specific logs are put in sample-specific sub-directories. After a successful run, the log files would be:
 
 ```console
 collate_tpms.log
 hisat2_build_orf.log
 hisat2_build_r_rna.log
-WT3AT_01_cutadapt.log
-WT3AT_02_hisat2_rrna.log
-WT3AT_03_hisat2_orf.log
-WT3AT_04_trim_5p_mismatch.log
-WT3AT_05_samtools_view_sort.log
-WT3AT_06_samtools_index.log
-WT3AT_07_bedtools_genome_cov_plus.log
-WT3AT_08_bedtools_genome_cov_minus.log
-WT3AT_09_bam_to_h5.log
-WT3AT_10_generate_stats_figs.log
-WTnone_01_cutadapt.log
-WTnone_02_hisat2_rrna.log
-WTnone_03_hisat2_orf.log
-WTnone_04_trim_5p_mismatch.log
-WTnone_05_samtools_view_sort.log
-WTnone_06_samtools_index.log
-WTnone_07_bedtools_genome_cov_plus.log
-WTnone_08_bedtools_genome_cov_minus.log
-WTnone_09_bam_to_h5.log
-WTnone_10_generate_stats_figs.log
+WT3AT/
+  WT3AT_01_cutadapt.log
+  WT3AT_02_hisat2_rrna.log
+  WT3AT_03_hisat2_orf.log
+  WT3AT_04_trim_5p_mismatch.log
+  WT3AT_05_samtools_view_sort.log
+  WT3AT_06_samtools_index.log
+  WT3AT_07_bedtools_genome_cov_plus.log
+  WT3AT_08_bedtools_genome_cov_minus.log
+  WT3AT_09_bam_to_h5.log
+  WT3AT_10_generate_stats_figs.log
+WTnone/
+  WTnone_01_cutadapt.log
+  WTnone_02_hisat2_rrna.log
+  WTnone_03_hisat2_orf.log
+  WTnone_04_trim_5p_mismatch.log
+  WTnone_05_samtools_view_sort.log
+  WTnone_06_samtools_index.log
+  WTnone_07_bedtools_genome_cov_plus.log
+  WTnone_08_bedtools_genome_cov_minus.log
+  WTnone_09_bam_to_h5.log
+  WTnone_10_generate_stats_figs.log
 ```
-
-Note: if running `prep_riboviz.py` on examples with UMI extraction and deduplication (`dedup_umis: TRUE`) then additional log files will be present for invocations of `umi_tools extract`, `umi_tools group`, `umi_tools dedup` and `samtools index` and the numbering of log files for successive steps will be different.
 
 You should regularly delete the log files, to prevent them from using up your disk space.
 
@@ -322,7 +327,7 @@ If using more than one process (`nprocesses` in `vignette/vignette_config.yaml` 
 samtools sort: couldn't allocate memory for bam_mem
 ```
 
-This leads to a failure to create `.bam` and `.bam.bai` files are not in `vignette/output/`.
+This leads to a failure to create `.bam` and `.bam.bai` files.
 
 You may need to explicitly set the amount of memory per thread in calls to `samtools sort`.
 
@@ -337,19 +342,19 @@ Swap:           969         619         350
 
 Divide the free memory by the number of processes, `nprocesses` e.g. 1024/4 = 256 MB.
 
-Edit `riboviz/tools/prep_riboviz.py` and change the lines:
+Edit `riboviz/workflow.py` and change the lines:
 
 ```python
-    cmd_sort = ["samtools", "sort", "-@", str(nprocesses),
-                "-O", "bam", "-o", sample_out_bam, "-"]
+cmd_sort = ["samtools", "sort", "-@", str(run_config.nprocesses),
+            "-O", "bam", "-o", bam_file, "-"]
 ```
 
 to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
 
 ```python
-    cmd_sort = ["samtools", "sort", "-@", str(nprocesses),
-                "-m", "256M",
-                "-O", "bam", "-o", sample_out_bam, "-"]
+cmd_sort = ["samtools", "sort", "-@", str(run_config.nprocesses),
+            "-m", "256M",
+            "-O", "bam", "-o", bam_file, "-"]
 ```
 
 ### Check the expected output files
@@ -387,19 +392,20 @@ $ du -sm vignette/index/
 Intermediate outputs in `vignette/tmp`. For example:
 
 ```
-WT3AT_nonrRNA.fq         # trimmed non-rRNA reads
-WT3AT_orf_map_clean.sam  # ORF-mapped reads with mismatched nt trimmed
-WT3AT_orf_map.sam        # ORF-mapped reads
-WT3AT_rRNA_map.sam       # rRNA-mapped reads
-WT3AT_trim.fq            # trimmed reads
-WT3AT_unaligned.sam      # unaligned reads
-
-WTnone_nonrRNA.fq
-WTnone_orf_map_clean.sam
-WTnone_orf_map.sam
-WTnone_rRNA_map.sam
-WTnone_trim.fq
-WTnone_unaligned.sam
+WT3AT/
+  WT3AT_nonrRNA.fq         # trimmed non-rRNA reads
+  WT3AT_orf_map_clean.sam  # ORF-mapped reads with mismatched nt trimmed
+  WT3AT_orf_map.sam        # ORF-mapped reads
+  WT3AT_rRNA_map.sam       # rRNA-mapped reads
+  WT3AT_trim.fq            # trimmed reads
+  WT3AT_unaligned.sam      # unaligned reads
+WTnone/
+  WTnone_nonrRNA.fq
+  WTnone_orf_map_clean.sam
+  WTnone_orf_map.sam
+  WTnone_rRNA_map.sam
+  WTnone_trim.fq
+  WTnone_unaligned.sam
 ```
 
 **Note:** these are uncompressed and large. For this example, the intermediate files will occupy ~1040 MB:
@@ -413,48 +419,52 @@ Outputs in `vignette/output`. For example:
 
 ```
 TPMs_collated.tsv
-
-WT3AT_3nt_periodicity.pdf
-WT3AT_3nt_periodicity.tsv
-WT3AT.bam
-WT3AT.bam.bai
-WT3AT_3ntframe_bygene.tsv
-WT3AT_3ntframe_propbygene.pdf
-WT3AT_codon_ribodens.pdf
-WT3AT_codon_ribodens.tsv
-WT3AT_features.pdf
-WT3AT.h5
-WT3AT_minus.bedgraph
-WT3AT_plus.bedgraph
-WT3AT_pos_sp_nt_freq.tsv
-WT3AT_pos_sp_rpf_norm_reads.pdf
-WT3AT_pos_sp_rpf_norm_reads.tsv
-WT3AT_read_lengths.pdf
-WT3AT_read_lengths.tsv
-WT3AT_startcodon_ribogridbar.pdf
-WT3AT_startcodon_ribogrid.pdf
-WT3AT_tpms.tsv
-
-WTnone_3nt_periodicity.pdf
-WTnone_3nt_periodicity.tsv
-WTnone.bam
-WTnone.bam.bai
-WTnone_3ntframe_bygene.tsv
-WTnone_3ntframe_propbygene.pdf
-WTnone_codon_ribodens.pdf
-WTnone_codon_ribodens.tsv
-WTnone_features.pdf
-WTnone.h5
-WTnone_minus.bedgraph
-WTnone_plus.bedgraph
-WTnone_pos_sp_nt_freq.tsv
-WTnone_pos_sp_rpf_norm_reads.pdf
-WTnone_pos_sp_rpf_norm_reads.tsv
-WTnone_read_lengths.pdf
-WTnone_read_lengths.tsv
-WTnone_startcodon_ribogridbar.pdf
-WTnone_startcodon_ribogrid.pdf
-WTnone_tpms.tsv
+WT3AT/
+  WT3AT_3ntframe_bygene.tsv
+  WT3AT_3ntframe_propbygene.pdf
+  WT3AT_3nt_periodicity.pdf
+  WT3AT_3nt_periodicity.tsv
+  WT3AT.bam
+  WT3AT.bam.bai
+  WT3AT_3ntframe_bygene.tsv
+  WT3AT_3ntframe_propbygene.pdf
+  WT3AT_codon_ribodens.pdf
+  WT3AT_codon_ribodens.tsv
+  WT3AT_features.pdf
+  WT3AT.h5
+  WT3AT_minus.bedgraph
+  WT3AT_plus.bedgraph
+  WT3AT_pos_sp_nt_freq.tsv
+  WT3AT_pos_sp_rpf_norm_reads.pdf
+  WT3AT_pos_sp_rpf_norm_reads.tsv
+  WT3AT_read_lengths.pdf
+  WT3AT_read_lengths.tsv
+  WT3AT_startcodon_ribogridbar.pdf
+  WT3AT_startcodon_ribogrid.pdf
+  WT3AT_tpms.tsv
+WTnone/
+  WTnone_3ntframe_bygene.tsv
+  WTnone_3ntframe_propbygene.pdf
+  WTnone_3nt_periodicity.pdf
+  WTnone_3nt_periodicity.tsv
+  WTnone.bam
+  WTnone.bam.bai
+  WTnone_3ntframe_bygene.tsv
+  WTnone_3ntframe_propbygene.pdf
+  WTnone_codon_ribodens.pdf
+  WTnone_codon_ribodens.tsv
+  WTnone_features.pdf
+  WTnone.h5
+  WTnone_minus.bedgraph
+  WTnone_plus.bedgraph
+  WTnone_pos_sp_nt_freq.tsv
+  WTnone_pos_sp_rpf_norm_reads.pdf
+  WTnone_pos_sp_rpf_norm_reads.tsv
+  WTnone_read_lengths.pdf
+  WTnone_read_lengths.tsv
+  WTnone_startcodon_ribogridbar.pdf
+  WTnone_startcodon_ribogrid.pdf
+  WTnone_tpms.tsv
 ```
 
 For this example, the output files occupy ~3 MB:
@@ -500,15 +510,15 @@ cmd_file: run_riboviz_vignette.sh # File to log	bash commands
 
 The command file can be run standalone, for example:
 
-```yaml
-bash run_riboviz_vignette.sh
+```console
+$ bash run_riboviz_vignette.sh
 ```
 
 ---
 
 ## Customising logging
 
-You can customise logging by editing the file `riboviz/logging.yaml`
+You can customise logging by editing the file `riboviz/logging.yaml`.
 
 If you do not want `riboviz.log` to include a timestamp (i.e. you want `riboviz.log`) then edit this file and replace:
 
@@ -608,11 +618,12 @@ YAL_CDS_w_250.8.ht2
 Cut illumina adapters i.e. cut out sequencing library adapters (CTGTAGGCACC or adapters):
 
 ```
-cutadapt --trim-n -O 1 -m 5 -a CTGTAGGCACC -o vignette/tmp/WT3AT_trim.fq \
-    vignette/input/SRR1042864_s1mi.fastq.gz -j 4
+cutadapt --trim-n -O 1 -m 5 -a CTGTAGGCACC \
+    -o vignette/tmp/WT3AT/WT3AT_trim.fq \
+    vignette/input/SRR1042864_s1mi.fastq.gz -j 0
 ```
 
-Outputs files to `vignette/tmp/`:
+Outputs files to `vignette/tmp/WT3AT`:
 
 ```
 WT3AT_trim.fq
@@ -621,12 +632,12 @@ WT3AT_trim.fq
 Map reads to RNA i.e. remove rRNA or other contaminating reads by HISAT2 alignment to rRNA index file:
 
 ```
-hisat2 -p 4 -N 1 --un vignette/tmp/WT3AT_nonrRNA.fq \
-    -x vignette/index/yeast_rRNA -S vignette/tmp/WT3AT_rRNA_map.sam \
-    -U vignette/tmp/WT3AT_trim.fq
+hisat2 -p 1 -N 1 --un vignette/tmp/WT3AT/WT3AT_nonrRNA.fq \
+    -x vignette/index/yeast_rRNA -S vignette/tmp/WT3AT/WT3AT_rRNA_map.sam \
+    -U vignette/tmp/WT3AT/WT3AT_trim.fq
 ```
 
-Outputs files to `vignette/tmp/`:
+Outputs files to `vignette/tmp/WT3AT`:
 
 ```
 WT3AT_nonrRNA.fq
@@ -636,12 +647,14 @@ WT3AT_rRNA_map.sam
 Map to ORFs with (mostly) default settings, up to 2 alignments i.e. align remaining reads to ORFs or other HISAT2 index file:
 
 ```
-hisat2 -p 4 -k 2 --no-spliced-alignment --rna-strandness F --no-unal \
-    --un vignette/tmp/WT3AT_unaligned.fq -x vignette/index/YAL_CDS_w_250 \
-    -S vignette/tmp/WT3AT_orf_map.sam -U vignette/tmp/WT3AT_nonrRNA.fq
+hisat2 -p 1 -k 2 --no-spliced-alignment --rna-strandness F \
+    --no-unal --un vignette/tmp/WT3AT/WT3AT_unaligned.fq \
+    -x vignette/index/YAL_CDS_w_250 \
+    -S vignette/tmp/WT3AT/WT3AT_orf_map.sam \
+    -U vignette/tmp/WT3AT/WT3AT_nonrRNA.fq
 ```
 
-Outputs files to `vignette/tmp/`:
+Outputs files to `vignette/tmp/WT3AT`:
 
 ```
 WT3AT_orf_map.sam
@@ -651,12 +664,12 @@ WT3AT_unaligned.fq
 Trim 5' mismatched nt from reads and remove reads with more than 2 mismatches:
 
 ```
-python riboviz/tools/trim_5p_mismatch.py -mm 2 \
-    -in vignette/tmp/WT3AT_orf_map.sam \
-    -out vignette/tmp/WT3AT_orf_map_clean.sam
+python /home/ubuntu/riboviz/riboviz/tools/trim_5p_mismatch.py -mm 2 \
+    -in vignette/tmp/WT3AT/WT3AT_orf_map.sam \
+    -out vignette/tmp/WT3AT/WT3AT_orf_map_clean.sam
 ```
 
-Outputs files to `vignette/tmp/`:
+Outputs files to `vignette/tmp/WT3AT`:
 
 ```
 WT3AT_orf_map_clean.sam
@@ -665,16 +678,17 @@ WT3AT_orf_map_clean.sam
 Convert sam (text) file to bam (compressed binary) file:
 
 ```
-samtools view -b vignette/tmp/WT3AT_orf_map_clean.sam
+samtools view -b vignette/tmp/WT3AT/WT3AT_orf_map_clean.sam
 ```
+
 
 Capture output piped from the above and sort bam file on genome:
 
 ```
-samtools sort -@ 4 -O bam -o vignette/output/WT3AT.bam -
+samtools sort -@ 1 -O bam -o vignette/output/WT3AT/WT3AT.bam -
 ```
 
-Outputs files to `vignette/output/`:
+Outputs files to `vignette/output/WT3AT`:
 
 ```
 WT3AT.bam
@@ -683,10 +697,10 @@ WT3AT.bam
 Index bam file to create bai file:
 
 ```
-samtools index vignette/output/WT3AT.bam
+samtools index vignette/output/WT3AT/WT3AT.bam
 ```
 
-Outputs files to `vignette/output/`:
+Outputs files to `vignette/output/WT3AT`:
 
 ```
 WT3AT.bam.bai
@@ -695,12 +709,13 @@ WT3AT.bam.bai
 Calculate transcriptome coverage for plus strand and export as a bedgraph:
 
 ```
-bedtools genomecov -ibam vignette/output/WT3AT.bam -bga -5 -strand +
+bedtools genomecov -ibam vignette/output/WT3AT/WT3AT.bam \
+    -trackline -bga -5 -strand +
 ```
 
 streaming output into output file.
 
-Outputs files to `vignette/output/`:
+Outputs files to `vignette/output/WT3AT`:
 
 ```
 WT3AT_plus.bedgraph
@@ -709,12 +724,13 @@ WT3AT_plus.bedgraph
 Calculate transcriptome coverage for minus strand and export as a bedgraph:
 
 ```
-bedtools genomecov -ibam vignette/output/WT3AT.bam -bga -5 -strand -
+bedtools genomecov -ibam vignette/output/WT3AT/WT3AT.bam \
+    -trackline -bga -5 -strand -
 ```
 
 streaming output into output file.
 
-Outputs files to `vignette/output/`:
+Outputs files to `vignette/output/WT3AT`:
 
 ```
 WT3AT_minus.bedgraph
@@ -723,15 +739,16 @@ WT3AT_minus.bedgraph
 Make length-sensitive alignments in compressed h5 format:
 
 ```
-Rscript --vanilla rscripts/bam_to_h5.R --Ncores=4 --MinReadLen=10 \
-    --MaxReadLen=50 --Buffer=250 --PrimaryID=Name --SecondID=NULL \
-    --dataset=vignette --bamFile=vignette/output/WT3AT.bam \
-    --hdFile=vignette/output/WT3AT.h5 \
+Rscript --vanilla rscripts/bam_to_h5.R --Ncores=1 \
+    --MinReadLen=10 --MaxReadLen=50 --Buffer=250 \
+    --PrimaryID=Name --SecondID=NULL --dataset=vignette \
+    --bamFile=vignette/output/WT3AT/WT3AT.bam \
+    --hdFile=vignette/output/WT3AT/WT3AT.h5 \
     --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
     --ribovizGFF=True --StopInCDS=False
 ```
 
-Outputs files to `vignette/output/`:
+Outputs files to `vignette/output/WT3AT`:
 
 ```
 WT3AT.h5
@@ -740,22 +757,21 @@ WT3AT.h5
 Generate summary statistics, analyses plots and QC plots for both RPF and mRNA datasets:
 
 ```
-Rscript --vanilla rscripts/generate_stats_figs.R --Ncores=4 \
-     --MinReadLen=10 --MaxReadLen=50 --Buffer=250 --PrimaryID=Name \
-     --dataset=vignette --hdFile=vignette/output/WT3AT.h5 \
-     --out_prefix=vignette/output/WT3AT \
-     --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True \
-     --dir_out=vignette/output \
-     --do_pos_sp_nt_freq=True \
-     --t_rna=data/yeast_tRNAs.tsv \
-     --codon_pos=data/yeast_codon_pos_i200.RData \
-     --features_file=data/yeast_features.tsv \
-     --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
-     --count_threshold=64 \
-     --asite_disp_length_file=data/yeast_standard_asite_disp_length.txt
+Rscript --vanilla rscripts/generate_stats_figs.R --Ncores=1 \
+    --MinReadLen=10 --MaxReadLen=50 --Buffer=250 --PrimaryID=Name \
+    --dataset=vignette --hdFile=vignette/output/WT3AT/WT3AT.h5 \
+    --out_prefix=vignette/output/WT3AT/WT3AT \
+    --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa \
+    --rpf=True --dir_out=vignette/output/WT3AT \
+    --do_pos_sp_nt_freq=True --t_rna=data/yeast_tRNAs.tsv \
+    --codon_pos=data/yeast_codon_pos_i200.RData \
+    --features_file=data/yeast_features.tsv \
+    --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
+    --count_threshold=64 \
+    --asite_disp_length_file=data/yeast_standard_asite_disp_length.txt
 ```
 
-Outputs files to `vignette/output/`:
+Outputs files to `vignette/output/WT3AT`:
 
 ```
 WT3AT_3nt_periodicity.pdf
@@ -787,9 +803,7 @@ Only successfully processed samples are collated.
 
 ```
 Rscript --vanilla rscripts/collate_tpms.R \
-    --dir_out=vignette/output \
-    WTnone \
-    WT3AT
+  --samples_in_sub_dirs=True --dir_out=vignette/output WTnone WT3AT
 ```
 
 Outputs files to `vignette/output/`:
@@ -803,8 +817,6 @@ TPMs_collated.tsv
 `prep_riboviz.py` returns the following exit codes:
 
 * 0: Processing successfully completed.
-* 1: Errors occurred loading configuration.
-* 2: Error occurred during indexing.
-* 3: No samples were provided.
-* 4: No sample was processed successfully.
-* 5: Error occurred during TPMs collation.
+* 1: A file does not seem to exist.
+* 2: Errors occurred loading or accessing configuration e.g. missing configuration parameters, inconsistent configuration parameters.
+* 3: Error occurred during processing.

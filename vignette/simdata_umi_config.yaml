@@ -1,7 +1,7 @@
-dir_in: data/ # input directory
-dir_out: vignette/output # output directory
-dir_tmp: vignette/tmp # tmp directory for intermediate files
-dir_logs: vignette/logs # log files directory
+dir_in: data/simdata/ # input directory
+dir_out: vignette/simdata_umi_output # output directory
+dir_tmp: vignette/simdata_umi_tmp # tmp directory for intermediate files
+dir_logs: vignette/simdata_umi_logs # log files directory
 cmd_file: run_riboviz_vignette.sh # File to log bash commands
 rRNA_fasta: vignette/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning to
 orf_fasta: vignette/input/yeast_YAL_CDS_w_250utrs.fa # orf file to align to
@@ -13,7 +13,7 @@ dir_index: vignette/index # directory to put built indices in
 rRNA_index: yeast_rRNA # rRNA index file prefix, relative to dir_index
 orf_index: YAL_CDS_w_250 # ORF index file prefix, relative to dir_index
 fq_files: # fastq files to be processed, relative to dir_in
-  simdata5and3: simdata_UMI5and3_4nt_adaptor.fastq
+  umi5_umi3: umi5_umi3_umi_adaptor.fastq
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
 extract_umis: TRUE # Extract UMIs if TRUE
 dedup_umis: TRUE # Extract UMIs and deduplicate reads if TRUE

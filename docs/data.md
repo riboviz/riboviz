@@ -102,8 +102,7 @@ tRNA estimates:
 data/yeast_tRNAs.tsv
 ```
 
-A-site displacement values:
-(based on standard yeast data from Ingolia 2009, Weinberg & Shah 2016)
+A-site displacement values (based on standard yeast data from Ingolia 2009, Weinberg & Shah 2016):
 
 ```
 data/yeast_standard_asite_disp_length.txt
@@ -168,21 +167,51 @@ The data was sampled uniformly at random 1/50 reads from each file, producing ab
 
 ## Simulated FASTQ test files
 
+`data/simdata/` folder:
+
 ```
-data/simdata_UMI5and3_4nt_adaptor.fastq
-data/simdata_UMI5and3_4nt.fastq
-data/simdata_extracted_UMI5and3_4nt.fastq
-data/simdata_extracted_UMI3_4nt.fastq
-data/simdata_UMI3_4nt.fastq
+multiplex_barcodes.tsv
+multiplex.fastq
+multiplex_umi_barcode_adaptor.fastq
+multiplex_umi_barcode.fastq
+umi3.fastq
+umi3_umi_adaptor.fastq
+umi3_umi.fastq
+umi5_umi3.fastq
+umi5_umi3_umi_adaptor.fastq
+umi5_umi3_umi.fastq
+deplex/num_reads.tsv
+deplex/Tag0.fastq
+deplex/Tag1.fastq
+deplex/Tag2.fastq
+deplex/Unassigned.fastq
 ```
 
 These files are simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication using UMI-tools when invoked from within the RiboViz workflow.
 
-These files were created by running `riboviz/tools/create_fastq_examples.py`.
+These files were created by running `riboviz/tools/create_fastq_simdata.py`.
 
 See [Create simulated FASTQ files](developer-guide.md#create-simulated-fastq-files).
 
 The files can be used as inputs to RiboViz.
+
+---
+
+## Demultiplexing test files
+
+```
+data/demultiplex/
+```
+
+Test data for `riboviz/tools/demultiplex_fastq.py`.
+
+Data was imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb0a80d2134bad9d2147c877c3b363720 (Thu May 11 23:44:13 2017).
+
+* `Sample_4reads_R1.fastq.gz`: artificial sample with 4 read 1s.
+* `Sample_4reads_R2.fastq.gz`: 4 read 2s corresponding to `Sample_4reads_R1.fastq.gz`.
+* `Sample_init10000_R1.fastq.gz`: Initial 10000 read 1s from a paired-end S. cerevisiae dataset.
+* `Sample_init10000_R2.fastq.gz`: 10000 read 2s corresponding to `Sample_init10000_R1.fastq.gz`.
+* `TagSeqBarcodedOligos2015.txt`: TagSeq barcoded oligos used in Shishkin, et al. (2015). "Simultaneous generation of many RNA-seq libraries in a single reaction", Nature Methods, 12(4), 323–325. doi: [10.1038/nmeth.3313](http://doi.org/10.1038/nmeth.3313)
 
 ---
 
