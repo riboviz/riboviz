@@ -5,7 +5,7 @@
 ## whose reads are randomly sampled from of the input with a fixed probability
 ## 
 ## example:
-##   python pyscripts/subsample_bioseqfile.py -in vignette/input/SRR1042855_s1mi.fastq.gz -prob 0.001 -out vignette/tmp/SRR1042855_s1000.fastq.gz -ftype fastq
+##   python pyscripts/subsample_bioseqfile.py -i vignette/input/SRR1042855_s1mi.fastq.gz -p 0.001 -o vignette/tmp/SRR1042855_s1000.fastq.gz -t fastq
 
 import argparse, gzip, os
 from Bio import SeqIO
@@ -43,7 +43,7 @@ def subsample_bioseqfile_gz(seqfilein, prob, seqfileout, filetype, verbose=False
     :param seqfileout: string
     :return: Bio.SeqIO
     """
-    with gzip.open(seqfilein, "r") as in_handle, gzip.open(seqfileout,"w") as out_handle:
+    with gzip.open(seqfilein, "rt") as in_handle, gzip.open(seqfileout,"wt") as out_handle:
         for record in SeqIO.parse(in_handle, filetype) :
             if random() < prob :
                 if verbose : 
@@ -65,16 +65,16 @@ prob = 0.00001,
 seqfileout= "vignette/tmp/SRR1042855_s10.fastq.gz",
 filetype="fastq",
 verbose=True)
-""""
+"""
 
 if __name__=="__main__" :
     # take input options
     parser = argparse.ArgumentParser(description="Subsample reads from an input fastq file")
-    parser.add_argument("-in", dest="filein", nargs='?', help="SeqIO file input")
-    parser.add_argument("-out", dest="fileout", nargs='?', help="SeqIO file output")
-    parser.add_argument("-ftype", dest="filetype", nargs='?', default="fastq", help="SeqIO filetype (default is fastq)")
-    parser.add_argument("-prob", dest="prob", type=float, nargs='?', default=0.01, help="proportion to sample (default 0.01)")
-    parser.add_argument("-verb", dest="verbose", type=bool, nargs='?', default=False, help="print progress statements")
+    parser.add_argument("-i", "--input", dest="filein", nargs='?', help="SeqIO file input")
+    parser.add_argument("-o", "--output", dest="fileout", nargs='?', help="SeqIO file output")
+    parser.add_argument("-t", "--type", dest="filetype", nargs='?', default="fastq", help="SeqIO filetype (default is fastq)")
+    parser.add_argument("-p", "--probability", dest="prob", type=float, nargs='?', default=0.01, help="proportion to sample (default 0.01)")
+    parser.add_argument("-v", "--verbose", dest="verbose", type=bool, nargs='?', default=False, help="print progress statements")
     options = parser.parse_args()
     
     # Tests we should have: files exist, all arguments present, overwrite output?
