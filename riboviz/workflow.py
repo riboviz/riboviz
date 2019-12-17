@@ -532,7 +532,7 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
     """
     LOGGER.info("Demultiplex reads. Log: %s", log_file)
     cmd = ["python", "-m", "riboviz.tools.demultiplex_fastq",
-           "-r1", fastq, "-ss", barcodes_file, "-o", deplex_dir,
+           "-1", fastq, "-s", barcodes_file, "-o", deplex_dir,
            "-m", "2"]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
