@@ -501,10 +501,10 @@ def collate_tpms(out_dir, samples, are_samples_in_sub_dirs, log_file,
     LOGGER.info("Collate TPMs. Log: %s", log_file)
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts, "collate_tpms.R"),
-           "--samples_in_sub_dirs=" + str(are_samples_in_sub_dirs),
-           "--dir_out=" + out_dir]
+           "--sample-subdirs=" + str(are_samples_in_sub_dirs),
+           "--output-dir=" + out_dir]
     if tpms_file is not None:
-        cmd.append("--file_out=" + tpms_file)
+        cmd.append("--tpms-file=" + tpms_file)
     cmd += samples
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
