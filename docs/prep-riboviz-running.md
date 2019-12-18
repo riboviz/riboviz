@@ -103,13 +103,13 @@ $ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 To configure `prep_riboviz.py` to use additional processes, in the configuration file, change:
 
 ```yaml
-nprocesses: 1
+num_processes: 1
 ```
 
 * to the desired number of processes:
 
 ```yaml
-nprocesses: 4
+num_processes: 4
 ```
 
 This parameter is currently used by `hisat2`, `samtools sort`, `bam_to_h5.R` and `generate_stats_figs.R`.
@@ -183,7 +183,7 @@ See [Exit codes](#exit-codes), below, for a complete list of exit codes.
 
 ### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
 
-If using more than one process (`nprocesses` > 1) you might get the error:
+If using more than one process (`num_processes` > 1) you might get the error:
 
 ```
 samtools sort: couldn't allocate memory for bam_mem
@@ -202,7 +202,7 @@ Mem:           2017         684        1028           2         303        1181
 Swap:           969         619         350
 ```
 
-Divide the free memory by the number of processes, `nprocesses` e.g. 1024/4 = 256 MB.
+Divide the free memory by the number of processes, `num_processes` e.g. 1024/4 = 256 MB.
 
 Edit `riboviz/workflow.py` and change the lines:
 
@@ -276,8 +276,8 @@ To invoke `prep_riboviz.py` from outwith the RiboViz home directory:
 
 * Ensure that all the input paths in the YAML configuration file are correctly configured:
   - `dir_in`
-  - `rRNA_fasta`
-  - `orf_fasta`
+  - `rrna_fasta_file`
+  - `orf_fasta_file`
   - `orf_gff_file`
 * Ensure that all the output paths in the YAML configuration file are correctly configured:
   - `dir_index`
@@ -286,8 +286,8 @@ To invoke `prep_riboviz.py` from outwith the RiboViz home directory:
   - `dir_logs`
 * Ensure that all the data paths in the YAML configuration file are correctly configured:
   - `features_file`
-  - `codon_pos`
-  - `t_rna`
+  - `codon_positions_file`
+  - `t_rna_file`
   - `asite_disp_length_file`
 
 * Run:
@@ -322,13 +322,13 @@ dir_in: analysis/sample_input
 dir_out: analysis/sample_output
 dir_tmp: analysis/sample_tmp
 dir_logs: analysis/sample_logs
-rRNA_fasta: analysis/sample_input/yeast_rRNA_R64-1-1.fa
-orf_fasta: analysis/sample_input/yeast_YAL_CDS_w_250utrs.fa
+rrna_fasta_file: analysis/sample_input/yeast_rRNA_R64-1-1.fa
+orf_fasta_file: analysis/sample_input/yeast_YAL_CDS_w_250utrs.fa
 orf_gff_file: analysis/sample_input/yeast_YAL_CDS_w_250utrs.gff3
 dir_index: analysis/index
 features_file: riboviz/data/yeast_features.tsv
-t_rna: riboviz/data/yeast_tRNAs.tsv
-codon_pos: riboviz/data/yeast_codon_pos_i200.RData
+t_rna_file: riboviz/data/yeast_tRNAs.tsv
+codon_positions_file: riboviz/data/yeast_codon_pos_i200.RData
 asite_disp_length_file: riboviz/data/yeast_standard_asite_disp_length.txt
 ```
 
@@ -346,13 +346,13 @@ dir_in: /home/user/analysis/sample_input
 dir_out: /home/user/analysis/sample_output
 dir_tmp: /home/user/analysis/sample_tmp
 dir_logs: /home/user/analysis/sample_logs
-rRNA_fasta: /home/user/analysis/sample_input/yeast_rRNA_R64-1-1.fa
-orf_fasta: /home/user/analysis/sample_input/yeast_YAL_CDS_w_250utrs.fa
+rrna_fasta_file: /home/user/analysis/sample_input/yeast_rRNA_R64-1-1.fa
+orf_fasta_file: /home/user/analysis/sample_input/yeast_YAL_CDS_w_250utrs.fa
 orf_gff_file: /home/user/analysis/sample_input/yeast_YAL_CDS_w_250utrs.gff3
 dir_index: /home/user/analysis/index
 features_file: /home/user/riboviz/data/yeast_features.tsv
-t_rna: /home/user/riboviz/data/yeast_tRNAs.tsv
-codon_pos: /home/user/riboviz/data/yeast_codon_pos_i200.RData
+t_rna_file: /home/user/riboviz/data/yeast_tRNAs.tsv
+codon_positions_file: /home/user/riboviz/data/yeast_codon_pos_i200.RData
 asite_disp_length_file: /home/user/riboviz/data/yeast_standard_asite_disp_length.txt
 ```
 
