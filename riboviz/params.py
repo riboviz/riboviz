@@ -56,5 +56,5 @@ ASITE_DISP_LENGTH_FILE = "asite_disp_length_file"
 
 # General.
 NUM_PROCESSES = "num_processes"
-IS_TEST_RUN = "isTestRun"
+IS_TEST_RUN = "is_test_run"
 ALIGNER = "aligner"
