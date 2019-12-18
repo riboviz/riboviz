@@ -374,7 +374,7 @@ $ R
 For consistency with bash and other command-line tools, command-line parameters should be implemented one, or both, of:
 
 * A single alphanumeric character prefixed by a hyphen e.g. `-v`, `-c 123`, `-s GATC`.
-* A sequence of alphanumeric characters, prefixed by two hypens and delimited by hyphens e.g. `--verbose`, `--control=123`, `--match-sequence=GATC`.
+* A sequence of lower-case alphanumeric characters, prefixed by two hyphens and delimited by hyphens e.g. `--verbose`, `--control=123`, `--match-sequence=GATC`.
 
 If using Python's [argparse](https://docs.python.org/3/library/argparse.html) package, the `dest` parameter of `ArgumentParser.add_argument` can be use to explicitly define the Python variables into which a command-line is to be placed. For example:
 
