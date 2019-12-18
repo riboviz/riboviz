@@ -22,7 +22,6 @@ import sys
 import yaml
 from riboviz import params
 
-
 UPGRADES = {"rRNA_fasta": params.RRNA_FASTA_FILE,
             "orf_fasta": params.ORF_FASTA_FILE,
             "rRNA_index": params.RRNA_INDEX_PREFIX,
@@ -43,7 +42,6 @@ Mapping from parameter names pre-commit 8da8071, 18 Dec 2019, to
 current configuration parameter names
 """
 
-
 UPDATES_10_11 = {
     params.DO_POS_SP_NT_FREQ: True,
     params.FEATURES_FILE:  "data/yeast_features.tsv"
@@ -52,7 +50,6 @@ UPDATES_10_11 = {
 Parameters added between release 1.0.0, 9 Oct 2017, 83027ef and 1.1.0,
 31 Jan 2019, 340b9b5
 """
-
 
 UPDATES_11_DEVELOP = {
     params.LOGS_DIR: "vignette/logs",
@@ -89,38 +86,38 @@ def upgrade_config_file(input_file, output_file=None):
         config = yaml.load(f, yaml.SafeLoader)
 
     # Upgrade existing keys
-    print("=== UPGRADE EXISTING KEYS ===")
     for (old_key, new_key) in list(UPGRADES.items()):
         if old_key in config:
             value = config[old_key]
             del config[old_key]
             config[new_key] = value
-    print((yaml.dump(config)))
 
     # Parameters added between release 1.0.0, 9 Oct 2017, 83027ef and
-    print("=== ADD 1.0 => 1.1 PARAMETERS ===")
     # 1.1.0, 31 Jan 2019, 340b9b5.
     for (key, value) in list(UPDATES_10_11.items()):
         if key not in config:
             config[key] = value
-    print((yaml.dump(config)))
 
     # Parameters added between release 1.1.0, 31 Jan 2019, 340b9b5 to
     # pre-commit 8da8071, 18 Dec 2019
-    print("=== ADD 1.1 => DEVELOP PARAMETERS ===")
     for (key, value) in list(UPDATES_11_DEVELOP.items()):
         if key not in config:
             config[key] = value
-    print((yaml.dump(config)))
 
-    # TODO update values of existing keys 1.1.0 => develop
-    # rRNA_index: vignette/index/yeast_rRNA
-    # rRNA_index: yeast_rRNA
-    # orf_index: vignette/index/YAL_CDS_w_250
-    # orf_index: YAL_CDS_w_250
-    # features_file: scripts/yeast_features.tsv
-    # features_file: data/yeast_features.tsv
-    print("=== ... ===")
+    # Parameters changed between release 1.1.0, 31 Jan 2019, 340b9b5
+    # to pre-commit 8da8071, 18 Dec 2019
+    for key in [params.RRNA_INDEX_PREFIX, params.ORF_INDEX_PREFIX]:
+        # Index prefixes are now relative to params.DIR_INDEX
+        prefix = os.path.split(config[key])[1]
+        config[key] = prefix
+
+    # Replace <PATH>/scripts/yeast_features.tsv with
+    # <PATH>/data/yeast_features.tsv
+    features_file = config[params.FEATURES_FILE]
+    features_dir_file = os.path.split(features_file)
+    features_super_dir = os.path.split(features_dir_file[0])[0]
+    config[params.FEATURES_FILE] = os.path.join(
+        features_super_dir, "data", features_dir_file[1])
 
     if output_file is not None:
         with open(output_file, 'w') as f:
