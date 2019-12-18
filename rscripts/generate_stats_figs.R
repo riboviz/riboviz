@@ -16,35 +16,35 @@ ggplot2::theme_set(theme_bw())
 
 # define input options for optparse package
 option_list <- list(
-  make_option("--dir_out",
+  make_option("--output-dir",
     type = "character", default = "./",
     help = "Output directory"
   ),
-  make_option("--orf_fasta",
+  make_option("--orf-fasta-file",
     type = "character", default = FALSE,
     help = "FASTA file with nt seq"
   ),
-  make_option("--orf_gff_file",
+  make_option("--orf-gff-file",
     type = "character", default = NA,
     help = "riboviz generated GFF2/GFF3 annotation file"
   ),
-  make_option("--Ncores",
+  make_option("--num-processes",
     type = "integer", default = 1,
     help = "Number of cores for parallelization"
   ),
-  make_option("--MinReadLen",
+  make_option("--min-read-length",
     type = "integer", default = 10,
     help = "Minimum read length in H5 output"
   ),
-  make_option("--MaxReadLen",
+  make_option("--max-read-length",
     type = "integer", default = 50,
     help = "Maximum read length in H5 output"
   ),
-  make_option("--Buffer",
+  make_option("--buffer",
     type = "integer", default = 250,
     help = "Length of flanking region around the CDS"
   ),
-  make_option("--PrimaryID",
+  make_option("--primary-id",
     type = "character", default = "gene_id",
     help = "Primary gene IDs to access the data (YAL001C, YAL003W, etc.)"
   ),
@@ -56,43 +56,43 @@ option_list <- list(
     type = "logical", default = TRUE,
     help = "Is the dataset an RPF or mRNA dataset?"
   ),
-  make_option("--features_file",
+  make_option("--features-file",
     type = "character", default = NA,
     help = "features file, columns are gene features and rows are genes"
   ),
-  make_option("--do_pos_sp_nt_freq",
+  make_option("--do-pos-sp-nt-freq",
     type = "logical", default = TRUE,
     help = "do calculate the position-specific nucleotide frequency"
   ),
-  make_option("--t_rna",
+  make_option("--t-rna-file",
     type = "character", default = NA,
     help = "tRNA estimates in .tsv file"
   ),
-  make_option("--codon_pos",
+  make_option("--codon-positions-file",
     type = "character", default = NA,
     help = "Codon positions in each gene in .Rdata file"
   ),
-  make_option("--count_threshold",
+  make_option("--count-threshold",
     type = "integer", default = 64,
     help = "threshold for count of reads per gene to be included in plot"
   ),
-  make_option("--out_prefix",
+  make_option("--output-prefix",
     type = "character", default = "out",
     help = "Prefix for output files"
   ),
-  make_option("--hdFile",
+  make_option("--hd-file",
     type = "character", default = "output.h5",
     help = "Location of H5 output file"
   ),
-  make_option("--nnt_buffer",
+  make_option("--nnt-buffer",
     type = "integer", default = 25,
     help = "n nucleotides of UTR buffer to include in metagene plots"
   ),
-  make_option("--nnt_gene",
+  make_option("--nnt-gene",
     type = "integer", default = 50,
     help = "n nucleotides of gene to include in metagene plots"
   ),
-  make_option("--asite_disp_length_file",
+  make_option("--asite-disp-length-file",
     type = "character", default = NA,
     help = "asite displacement file
     table with one displacement per read length"
@@ -100,23 +100,25 @@ option_list <- list(
 )
 
 # read in commandline arguments
-opt <- optparse::parse_args(OptionParser(option_list = option_list))
+opt <- optparse::parse_args(OptionParser(option_list = option_list),
+                            convert_hyphens_to_underscores=TRUE)
+
 attach(opt)
 
 print("generate_stats_figs.R running with parameters:")
 opt
 
 # prepare files, opens hdf5 file connection
-hdf5file <- rhdf5::H5Fopen(hdFile) # filehandle for the h5 file
+hdf5file <- rhdf5::H5Fopen(hd_file) # filehandle for the h5 file
 
 # read in positions of all exons/genes in GFF format and subset CDS locations
 gene_names <- rhdf5::h5ls(hdf5file, recursive = 1)$name
 
 # read in coding sequences
-coding_seqs <- readDNAStringSet(orf_fasta)
+coding_seqs <- readDNAStringSet(orf_fasta_file)
 
 # range of read lengths between parameters set in config file
-read_range <- MinReadLen:MaxReadLen
+read_range <- min_read_length:max_read_length
 
 # read in positions of all exons/genes in GFF format and subset CDS locations
 gff <- readGFFAsGRanges(orf_gff_file)
@@ -214,7 +216,7 @@ barplot_ribogrid <- function(tidymat, small_read_range = 26:32) {
 }
 
 # GetGeneDatamatrix5start(gene="YAL003W",dataset="vignette",hdf5file,gff=gff) %>%
-# TidyDatamatrix(startpos=-nnt_buffer,startlen=MinReadLen) %>%
+# TidyDatamatrix(startpos=-nnt_buffer,startlen=min_read_length) %>%
 #   plot_ribogrid
 # GetGeneDatamatrix3end(gene="YAL003W",dataset="vignette",hdf5file,gff=gff)
 
@@ -242,18 +244,18 @@ gene_poslen_counts_5start <-
 
 # ribogrid_5start
 gene_poslen_counts_5start %>%
-  TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = MinReadLen) %>%
+  TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = min_read_length) %>%
   plot_ribogrid() %>%
   ggsave(
-    filename = paste0(out_prefix, "_startcodon_ribogrid.pdf"),
+    filename = paste0(output_prefix, "_startcodon_ribogrid.pdf"),
     width = 6, height = 3
   )
 
 gene_poslen_counts_5start %>%
-  TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = MinReadLen) %>%
+  TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = min_read_length) %>%
   barplot_ribogrid() %>%
   ggsave(
-    filename = paste0(out_prefix, "_startcodon_ribogridbar.pdf"),
+    filename = paste0(output_prefix, "_startcodon_ribogridbar.pdf"),
     width = 6, height = 5
   )
 
@@ -270,12 +272,12 @@ gene_poslen_counts_3end <-
 
 # summarize by adding different read lengths
 gene_pos_counts_5start <- gene_poslen_counts_5start %>%
-  TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = MinReadLen) %>%
+  TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = min_read_length) %>%
   group_by(Pos) %>%
   summarize(Counts = sum(Counts))
 
 gene_pos_counts_3end <- gene_poslen_counts_3end %>%
-  TidyDatamatrix(startpos = -nnt_gene + 1, startlen = MinReadLen) %>%
+  TidyDatamatrix(startpos = -nnt_gene + 1, startlen = min_read_length) %>%
   group_by(Pos) %>%
   summarize(Counts = sum(Counts))
 
@@ -294,10 +296,10 @@ nt_period_plot <- ggplot(
   labs(x = "Nucleotide Position", y = "Read counts")
 
 # Save plot and file
-ggsave(nt_period_plot, filename = paste0(out_prefix, "_3nt_periodicity.pdf"))
+ggsave(nt_period_plot, filename = paste0(output_prefix, "_3nt_periodicity.pdf"))
 write.table(
   gene_pos_counts_bothends,
-  file = paste0(out_prefix, "_3nt_periodicity.tsv"),
+  file = paste0(output_prefix, "_3nt_periodicity.tsv"),
   sep = "\t",
   row = F,
   col = T,
@@ -324,10 +326,10 @@ read_len_plot <- ggplot(read_length_data, aes(x = Length, y = Counts)) +
   geom_bar(stat = "identity")
 
 # save read lengths plot and file
-ggsave(read_len_plot, filename = paste0(out_prefix, "_read_lengths.pdf"))
+ggsave(read_len_plot, filename = paste0(output_prefix, "_read_lengths.pdf"))
 write.table(
   read_length_data,
-  file = paste0(out_prefix, "_read_lengths.tsv"),
+  file = paste0(output_prefix, "_read_lengths.tsv"),
   sep = "\t",
   row = F,
   col = T,
@@ -340,11 +342,11 @@ print("Completed: Distribution of lengths of all mapped reads")
 
 print("Starting: Biases in nucleotide composition along mapped read lengths")
 
-GetNTReadPosition <- function(hdf5file, gene, dataset, lid, MinReadLen) {
+GetNTReadPosition <- function(hdf5file, gene, dataset, lid, min_read_length) {
   reads_pos_len <- GetGeneDatamatrix(gene, dataset, hdf5file)[lid, ] # Get reads of a particular length
-  reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (lid + MinReadLen - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
+  reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (lid + min_read_length - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
   pos <- rep(1:length(reads_pos_len), reads_pos_len) # nt positions weighted by number of reads mapping to it
-  pos_IR <- IRanges::IRanges(start = pos, width = (lid + MinReadLen - 1)) # Create an IRanges object for position-specific reads of a particular length
+  pos_IR <- IRanges::IRanges(start = pos, width = (lid + min_read_length - 1)) # Create an IRanges object for position-specific reads of a particular length
   return(pos_IR)
 }
 
@@ -378,22 +380,22 @@ if (do_pos_sp_nt_freq) {
   all_out <- c()
   for (lid in 1:length(read_range)) {
     out <- lapply(gene_names, function(x) {
-      GetNTReadPosition(hdf5file, gene = as.character(x), dataset, lid = lid, MinReadLen = MinReadLen) # For each read length convert reads to IRanges
+      GetNTReadPosition(hdf5file, gene = as.character(x), dataset, lid = lid, min_read_length = min_read_length) # For each read length convert reads to IRanges
     })
     names(out) <- gene_names
 
     # Get position-specific nucleotide counts for reads in each frame
     fr0 <- mclapply(gene_names, function(gene) {
       cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 0, lid = lid)
-    }, mc.cores = Ncores)
+    }, mc.cores = num_processes)
     allfr0 <- do.call(rbind, fr0)
     fr1 <- mclapply(gene_names, function(gene) {
       cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 1, lid = lid)
-    }, mc.cores = Ncores)
+    }, mc.cores = num_processes)
     allfr1 <- do.call(rbind, fr1)
     fr2 <- mclapply(gene_names, function(gene) {
       cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 2, lid = lid)
-    }, mc.cores = Ncores)
+    }, mc.cores = num_processes)
     allfr2 <- do.call(rbind, fr2)
 
     # Get position-specific freq for all nts
@@ -420,22 +422,22 @@ if (do_pos_sp_nt_freq) {
   all_out[is.na(all_out)] <- 0
 
   # save file
-  write.table(all_out, file = paste0(out_prefix, "_pos_sp_nt_freq.tsv"), sep = "\t", row = F, col = T, quote = F)
+  write.table(all_out, file = paste0(output_prefix, "_pos_sp_nt_freq.tsv"), sep = "\t", row = F, col = T, quote = F)
 
   print("Completed nucleotide composition bias table")
 }
 
 ## calculate read frame for every annotated ORF
 
-CalcAsiteFixedOneLength <- function(reads_pos_length, MinReadLen, 
+CalcAsiteFixedOneLength <- function(reads_pos_length, min_read_length, 
                                     read_length, asite_disp) {
   # Calculate read A-site using a fixed displacement for a single read length
-  length_row_choose <- read_length - MinReadLen + 1
+  length_row_choose <- read_length - min_read_length + 1
   reads_pos_length[length_row_choose, ] %>%
     dplyr::lag(n = asite_disp, default = 0)
 }
 
-CalcAsiteFixed <- function(reads_pos_length, MinReadLen,
+CalcAsiteFixed <- function(reads_pos_length, min_read_length,
                            asite_disp_length = data.frame(
                              read_length = c(28, 29, 30),
                              asite_disp = c(15, 15, 15)
@@ -449,7 +451,7 @@ CalcAsiteFixed <- function(reads_pos_length, MinReadLen,
       function(read_length, asite_disp) {
         CalcAsiteFixedOneLength(
           reads_pos_length,
-          MinReadLen,
+          min_read_length,
           read_length,
           asite_disp
         )
@@ -536,16 +538,16 @@ WilcoxTestFrame <- function(x, left, right) {
   ))
 }
 
-GetGeneReadFrame <- function(hdf5file, gene, dataset, left, right, MinReadLen,
+GetGeneReadFrame <- function(hdf5file, gene, dataset, left, right, min_read_length,
                              asite_disp_length = data.frame(
                                read_length = c(28, 29, 30),
                                asite_disp = c(15, 15, 15)
                              )) {
   # example from vignette:
-  #   GetGeneReadFrame(hdf5file, "YAL003W", dataset, 251, 871, MinReadLen)
+  #   GetGeneReadFrame(hdf5file, "YAL003W", dataset, 251, 871, min_read_length)
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hdf5file)
   reads_asitepos <- CalcAsiteFixed(
-    reads_pos_length, MinReadLen,
+    reads_pos_length, min_read_length,
     asite_disp_length
   )
   sum_by_frame <- SumByFrame(reads_asitepos, left, right)
@@ -605,12 +607,12 @@ if (!is.na(asite_disp_length_file)) {
     purrr::pmap_dfr(GetGeneReadFrame,
       hdf5file = hdf5file,
       dataset = dataset,
-      MinReadLen = MinReadLen,
+      min_read_length = min_read_length,
       asite_disp_length = asite_disp_length
     )
   write.table(
     gene_read_frames,
-    file = paste0(out_prefix, "_3ntframe_bygene.tsv"),
+    file = paste0(output_prefix, "_3ntframe_bygene.tsv"),
     sep = "\t",
     row = F,
     col = T,
@@ -623,7 +625,7 @@ if (!is.na(asite_disp_length_file)) {
 
   # save read lengths plot and file
   ggsave(gene_read_frame_plot,
-    filename = paste0(out_prefix, "_3ntframe_propbygene.pdf"),
+    filename = paste0(output_prefix, "_3ntframe_propbygene.pdf"),
     width = 3, height = 3
   )
 
@@ -635,9 +637,9 @@ if (!is.na(asite_disp_length_file)) {
 print("Starting: Position specific distribution of reads")
 
 # codon-specific reads for RPF datasets
-GetCodonPositionReads <- function(hdf5file, gene, dataset, left, right, MinReadLen) {
+GetCodonPositionReads <- function(hdf5file, gene, dataset, left, right, min_read_length) {
   # @ewallace: this needs documentation of inputs and outputs
-  lid <- 28 - MinReadLen + 1
+  lid <- 28 - min_read_length + 1
   reads_pos <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
   reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
   end_reads_pos_subset <- ncol(reads_pos_subset) # Number of columns of the subset
@@ -652,25 +654,25 @@ GetCodonPositionReads <- function(hdf5file, gene, dataset, left, right, MinReadL
 }
 
 # Nt-specific coverage for mRNA datasets
-GetMRNACoverage <- function(hdf5file, gene, dataset, left, right, read_range, MinReadLen, Buffer) {
+GetMRNACoverage <- function(hdf5file, gene, dataset, left, right, read_range, min_read_length, buffer) {
   reads_pos <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
   reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS mapped reads are considered
 
   nt_IR_list <- lapply(read_range, function(w) {
-    IRanges::IRanges(start = rep(1:ncol(reads_pos_subset), reads_pos_subset[(w - MinReadLen + 1), ]), width = w)
+    IRanges::IRanges(start = rep(1:ncol(reads_pos_subset), reads_pos_subset[(w - min_read_length + 1), ]), width = w)
   }) # Create list of IRanges for position-specific reads of all length
   nt_IR <- unlist(as(nt_IR_list, "IRangesList")) # Combine IRanges from different read lengths
   nt_cov <- IRanges::coverage(nt_IR) # Estimate nt-specific coverage of mRNA reads
 
   # Subset coverage to only CDS
   nt_counts <- rep.int(S4Vectors::runValue(nt_cov), S4Vectors::runLength(nt_cov))
-  if (length(nt_counts) >= (Buffer - left)) {
-    nt_counts <- nt_counts[(Buffer - left):length(nt_counts)]
+  if (length(nt_counts) >= (buffer - left)) {
+    nt_counts <- nt_counts[(buffer - left):length(nt_counts)]
   } else {
     nt_counts <- 0
   }
 
-  cds_length <- ncol(reads_pos_subset) - (Buffer - left - 1) # Length of CDS
+  cds_length <- ncol(reads_pos_subset) - (buffer - left - 1) # Length of CDS
   nt_sp_counts <- rep(0, cds_length)
 
   if (length(nt_counts) < cds_length) {
@@ -694,9 +696,9 @@ if (rpf) {
       hdf5file,
       gene,
       dataset,
-      left = (Buffer - 15),
-      right = (Buffer + 11),
-      MinReadLen = MinReadLen
+      left = (buffer - 15),
+      right = (buffer + 11),
+      min_read_length = min_read_length
       )
   }) # Get codon-based position-specific reads for each gene
   names(out) <- gene_names
@@ -753,10 +755,10 @@ if (rpf) {
     guides(col = FALSE)
 
   # Save plot and file
-  ggsave(pos_sp_rpf_norm_reads_plot, filename = paste0(out_prefix, "_pos_sp_rpf_norm_reads.pdf"))
+  ggsave(pos_sp_rpf_norm_reads_plot, filename = paste0(output_prefix, "_pos_sp_rpf_norm_reads.pdf"))
   write.table(
     pos_sp_rpf_norm_reads,
-    file = paste0(out_prefix, "_pos_sp_rpf_norm_reads.tsv"),
+    file = paste0(output_prefix, "_pos_sp_rpf_norm_reads.tsv"),
     sep = "\t",
     row = F,
     col = T,
@@ -775,11 +777,11 @@ if (!rpf) {
       hdf5file,
       gene,
       dataset,
-      left = (Buffer - 49),
-      right = (Buffer - 3),
-      MinReadLen = MinReadLen,
+      left = (buffer - 49),
+      right = (buffer - 3),
+      min_read_length = min_read_length,
       read_range,
-      Buffer
+      buffer
       )
   })
   names(out) <- gene_names
@@ -833,10 +835,10 @@ if (!rpf) {
     guides(col = FALSE)
 
   # Save plot and file
-  ggsave(pos_sp_mrna_norm_coverage_plot, filename = paste0(out_prefix, "_pos_sp_mrna_norm_coverage.pdf"))
+  ggsave(pos_sp_mrna_norm_coverage_plot, filename = paste0(output_prefix, "_pos_sp_mrna_norm_coverage.pdf"))
   write.table(
     pos_sp_mrna_norm_coverage,
-    file = paste0(out_prefix, "_pos_sp_mrna_norm_coverage.tsv"),
+    file = paste0(output_prefix, "_pos_sp_mrna_norm_coverage.tsv"),
     sep = "\t",
     row = F,
     col = T,
@@ -880,7 +882,7 @@ tpms <- data.frame(
 # write out to *_tpms.tsv
 write.table(
   tpms,
-  file = paste0(out_prefix, "_tpms.tsv"),
+  file = paste0(output_prefix, "_tpms.tsv"),
   sep = "\t",
   row = F,
   col = T,
@@ -911,7 +913,7 @@ if (!is.na(features_file)) {
     xlab("TPM (transcripts per million)")
 
   # Save plot and file
-  ggsave(features_plot, filename = paste0(out_prefix, "_features.pdf"))
+  ggsave(features_plot, filename = paste0(output_prefix, "_features.pdf"))
 
   print("Completed: Correlations between TPMs of genes with their sequence-based features")
 } else {
@@ -920,19 +922,19 @@ if (!is.na(features_file)) {
 
 ## Codon-specific ribosome densities for correlations with tRNAs
 
-# Codon-specific ribosome density for tRNA correlation; skip if missing t_rna & codon_pos
-if (!is.na(t_rna) & !is.na(codon_pos)) {
+# Codon-specific ribosome density for tRNA correlation; skip if missing t_rna_file & codon_positions_file
+if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
   print("Starting: Codon-specific ribosome densities for correlations with tRNAs")
 
   # Only for RPF datasets
   if (rpf) {
     # This still depends on yeast-specific arguments and should be edited.
-    yeast_tRNAs <- read.table(t_rna, h = T) # Read in yeast tRNA estimates
-    load(codon_pos) # Position of codons in each gene (numbering ignores first 200 codons)
+    yeast_tRNAs <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
+    load(codon_positions_file) # Position of codons in each gene (numbering ignores first 200 codons)
     # Reads in an object named "codon_pos"
     out <- lapply(gene_names, function(gene) {
       # From "Position specific distribution of reads" plot
-      GetCodonPositionReads(hdf5file, gene, dataset, left = (Buffer - 15), right = (Buffer + 11), MinReadLen = MinReadLen)
+      GetCodonPositionReads(hdf5file, gene, dataset, left = (buffer - 15), right = (buffer + 11), min_read_length = min_read_length)
     }) # Get codon-based position-specific reads for each gene
     names(out) <- gene_names
 
@@ -988,10 +990,10 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
     # Save plot and file
-    ggsave(cod_dens_tRNA_plot, filename = paste0(out_prefix, "_codon_ribodens.pdf"))
+    ggsave(cod_dens_tRNA_plot, filename = paste0(output_prefix, "_codon_ribodens.pdf"))
     write.table(
       cod_dens_tRNA,
-      file = paste0(out_prefix, "_codon_ribodens.tsv"),
+      file = paste0(output_prefix, "_codon_ribodens.tsv"),
       sep = "\t",
       row = F,
       col = T,
@@ -1001,5 +1003,5 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
 
   print("Completed: Codon-specific ribosome densities for correlations with tRNAs")
 } else {
-  print("Skipped: Codon-specific ribosome densities for correlations with tRNAs - t_rna file and/or codon_pos file not provided")
+  print("Skipped: Codon-specific ribosome densities for correlations with tRNAs - t-rna-file and/or codon-positions-file not provided")
 }
