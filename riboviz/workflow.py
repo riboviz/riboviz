@@ -387,7 +387,7 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config, log_file, run_config):
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
     :raise KeyError: if a configuration parameter is mssing
-    :raise FileNotFoundError: if org_gff_file or Rscript cannot be
+    :raise FileNotFoundError: if orf_gff_file or Rscript cannot be
     found
     :raise AssertionError: if Rscript returns non-zero exit code
     """
@@ -397,22 +397,22 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config, log_file, run_config):
         raise FileNotFoundError(errno.ENOENT,
                                 os.strerror(errno.ENOENT),
                                 orf_gff_file)
-    second_id = config[params.SECOND_ID]
-    if second_id is None:
-        second_id = "NULL"
+    secondary_id = config[params.SECONDARY_ID]
+    if secondary_id is None:
+        secondary_id = "NULL"
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts, "bam_to_h5.R"),
            "--num-processes=" + str(run_config.nprocesses),
-           "--min-read-length=" + str(config[params.MIN_READ_LEN]),
-           "--max-read-length=" + str(config[params.MAX_READ_LEN]),
+           "--min-read-length=" + str(config[params.MIN_READ_LENGTH]),
+           "--max-read-length=" + str(config[params.MAX_READ_LENGTH]),
            "--buffer=" + str(config[params.BUFFER]),
            "--primary-id=" + config[params.PRIMARY_ID],
-           "--secondary-id=" + second_id,
+           "--secondary-id=" + secondary_id,
            "--dataset=" + config[params.DATASET],
            "--bam-file=" + bam_file,
            "--hd-file=" + h5_file,
            "--orf-gff-file=" + orf_gff_file,
-           "--is-riboviz-gff=" + str(config[params.RIBOVIZ_GFF]),
+           "--is-riboviz-gff=" + str(config[params.IS_RIBOVIZ_GFF]),
            "--stop-in-cds=" + str(config[params.STOP_IN_CDS])]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
@@ -446,8 +446,8 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts, "generate_stats_figs.R"),
            "--num-processes=" + str(run_config.nprocesses),
-           "--min-read-length=" + str(config[params.MIN_READ_LEN]),
-           "--max-read-length=" + str(config[params.MAX_READ_LEN]),
+           "--min-read-length=" + str(config[params.MIN_READ_LENGTH]),
+           "--max-read-length=" + str(config[params.MAX_READ_LENGTH]),
            "--buffer=" + str(config[params.BUFFER]),
            "--primary-id=" + config[params.PRIMARY_ID],
            "--dataset=" + config[params.DATASET],
@@ -457,7 +457,7 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
            "--rpf=" + str(config[params.RPF]),
            "--output-dir=" + out_dir,
            "--do-pos-sp-nt-freq=" + str(config[params.DO_POS_SP_NT_FREQ])]
-    flags = zip([params.T_RNA, params.CODON_POS,
+    flags = zip([params.T_RNA_FILE, params.CODON_POSITIONS_FILE,
                  params.FEATURES_FILE, params.ORF_GFF_FILE,
                  params.ASITE_DISP_LENGTH_FILE],
                 ["t-rna-file", "codon-positions-file",
@@ -472,8 +472,8 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
                                         flag_file)
             cmd.append("--" + parameter + "=" + flag_file)
     if value_in_dict(params.COUNT_THRESHOLD, config):
-            cmd.append("--count-threshold=" +
-                       str(config[params.COUNT_THRESHOLD]))
+        cmd.append("--count-threshold=" +
+                   str(config[params.COUNT_THRESHOLD]))
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 

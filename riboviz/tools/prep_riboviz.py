@@ -33,9 +33,9 @@ Process ribosome profiling data:
     ("extract_umis: TRUE"), using a UMI-tools-compliant
     regular expression pattern ("umi_regexp").
   - Removes rRNA or other contaminating reads by alignment to
-    rRNA index file ("rRNA_index") using "hisat2".
-  - Aligns remaining reads to ORFs index file
-    ("orf_index"). using "hisat2".
+    rRNA index files ("rrna_index_prefix") using "hisat2".
+  - Aligns remaining reads to ORFs index files
+    ("orf_index_prefix"). using "hisat2".
   - Trims 5' mismatches from reads and remove reads with more than 2
     mismatches using "trim_5p_mismatch.py".
   - Outputs UMI groups pre-deduplication using "umi_tools group" if
@@ -77,9 +77,9 @@ Process multiplexed ribosome profiling data:
 * Processes each demultiplexed fastq[.gz], which has one or more
   reads, in turn:
   - Removes rRNA or other contaminating reads by alignment to rRNA
-    index file ("rRNA_index") using "hisat2".
-  - Aligns remaining reads to ORFs index file ("orf_index"). using
-    "hisat2".
+    index files ("rrna_index_prefix") using "hisat2".
+  - Aligns remaining reads to ORFs index files ("orf_index_prefix")
+    using "hisat2".
   - Trims 5' mismatches from reads and remove reads with more than 2
     mismatches using "trim_5p_mismatch.py".
   - Outputs UMI groups pre-deduplication using "umi_tools group" if
@@ -104,7 +104,7 @@ Process multiplexed ribosome profiling data:
   "collate_tpms.R" and writes into output directory ("dir_out").
 
 The script can parallelize parts of its operation over many
-processes ("nprocesses"):
+processes ("num_processes"):
 
 * This value is used to configure "hisat2", "samtools sort",
   "bam_to_h5.R" and "generate_stats_figs.R".
@@ -444,8 +444,8 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         os.remove(cmd_file)
     LOGGER.info("Command file: %s", cmd_file)
 
-    if value_in_dict(params.NPROCESSES, config):
-        nprocesses = int(config[params.NPROCESSES])
+    if value_in_dict(params.NUM_PROCESSES, config):
+        nprocesses = int(config[params.NUM_PROCESSES])
     else:
         nprocesses = 1
     LOGGER.info("Number of processes: %d", nprocesses)
@@ -483,7 +483,7 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
 
     is_sample_files = value_in_dict(params.FQ_FILES, config)
     is_multiplex_files = value_in_dict(params.MULTIPLEX_FQ_FILES, config)
-    is_sample_sheet_file = value_in_dict(params.SAMPLE_SHEET_FILE, config)
+    is_sample_sheet_file = value_in_dict(params.SAMPLE_SHEET, config)
     if not is_sample_files and not is_multiplex_files:
         raise ValueError(
             "No sample files ({}) or multiplexed files ({}) are specified".format(
@@ -495,7 +495,7 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     elif is_multiplex_files and not is_sample_sheet_file:
         raise ValueError(
             "Multiplexed files ({}) are specified but no sample sheet ({})".format(
-                params.MULTIPLEX_FQ_FILES, params.SAMPLE_SHEET_FILE))
+                params.MULTIPLEX_FQ_FILES, params.SAMPLE_SHEET))
 
     if is_sample_files:
         samples = config[params.FQ_FILES]
@@ -507,7 +507,7 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
 
     else:
         sample_sheet_file = os.path.join(in_dir,
-                                         config[params.SAMPLE_SHEET_FILE])
+                                         config[params.SAMPLE_SHEET])
         if not os.path.exists(sample_sheet_file):
             raise FileNotFoundError(errno.ENOENT,
                                     os.strerror(errno.ENOENT),

@@ -33,8 +33,8 @@ If sample files (`fq_files`) are specified, then `prep_riboviz.py` processes the
 3. Process each sample ID-sample file pair (`fq_files`) in turn:
    1. Cut out sequencing library adapters (`adapters`) using `cutadapt`.
    2. Extract UMIs using `umi_tools extract`, if requested (if `extract_umis: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`). The extracted UMIs are inserted into the read headers of the FASTQ records.
-   3. Remove rRNA or other contaminating reads by alignment to rRNA index file (`rRNA_index`) using `hisat2`.
-   4. Align remaining reads to ORFs index file (`orf_index`). using `hisat2`.
+   3. Remove rRNA or other contaminating reads by alignment to rRNA index files (`rrna_index_prefix`) using `hisat2`.
+   4. Align remaining reads to ORFs index files (`orf_index_prefix`). using `hisat2`.
    5. Trim 5' mismatches from reads and remove reads with more than 2 mismatches using `trim_5p_mismatch.py`.
    6. Output UMI groups pre-deduplication using `umi_tools group` if requested (if `dedup_umis: TRUE` and `group_umis: TRUE`)
    7. Deduplicate reads using `umi_tools dedup`, if requested (if `dedup_umis: TRUE`)
@@ -45,7 +45,6 @@ If sample files (`fq_files`) are specified, then `prep_riboviz.py` processes the
    12. Generate summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
    13. Write output files produced above into an sample-specific directory, named using the sample ID, within the output directory (`dir_out`). 
 4. Collate TPMs across results, using `collate_tpms.R` and write into output directory (`dir_out`). Only the results from successfully-processed samples are collated.
-
 
 [Workflow](./images/workflow.svg) (SVG) shows an images of the workflow with the key steps, inputs and outputs.
 
@@ -230,4 +229,3 @@ demultiplex_fastq.log
   <SAMPLE_ID>_13_generate_stats_figs.log
 collate_tpms.log
 ```
-
