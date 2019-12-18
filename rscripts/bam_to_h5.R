@@ -8,14 +8,14 @@ suppressMessages(library(RcppRoll, quietly = T))
 suppressMessages(library(ggplot2, quietly = T))
 suppressMessages(library(tidyr, quietly = T))
 
-reads_to_list <- function(gene_location, bamFile, read_range, left_flank,right_flank, mult_exon=TRUE)
+reads_to_list <- function(gene_location, bam_file, read_range, left_flank,right_flank, mult_exon=TRUE)
 {
   # Computes matrix of read counts with starting position and read length
   # on a signle gene whose co-ordinates are supplied as arguments
   #  
   # Args:
   #   gene_location: (list) gff line containing gene co-ordinates
-  #   bamFile: (string) name of bamFile with reads in it
+  #   bam_file: (string) name of bam_file with reads in it
   #   read_range: (int) vector of integer read lengths, e.g. 15:50 
   #   flank: (int) width of flanking region to include outside gene body/CDS
   #   mult_exon: If TRUE, uses only the first supplied exon for gene co-ordinates
@@ -62,7 +62,7 @@ reads_to_list <- function(gene_location, bamFile, read_range, left_flank,right_f
   bam_param <- ScanBamParam(which = gene_location, what = bam_what)
   
   # Read in bam data
-  bam_data <- scanBam(bamFile, param=bam_param)
+  bam_data <- scanBam(bam_file, param=bam_param)
   
   # Subset reads that are on the same strand at the genomic location
   read_strand <- unlist(lapply(bam_data,function(x) x$strand ))
@@ -108,39 +108,41 @@ reads_to_list <- function(gene_location, bamFile, read_range, left_flank,right_f
 
 # define input options for optparse package
 option_list <- list( 
-    make_option("--Ncores", type="integer", default=1,
+    make_option("--num-processes", type="integer", default=1,
         help="Number of cores for parallelization"),
-    make_option("--MinReadLen", type="integer", default=10,
+    make_option("--min-read-length", type="integer", default=10,
         help="Minimum read length in H5 output"),
-    make_option("--MaxReadLen", type="integer", default=50,
+    make_option("--max-read-length", type="integer", default=50,
         help="Maximum read length in H5 output"),
-    make_option("--Buffer", type="integer", default=250,
+    make_option("--buffer", type="integer", default=250,
         help="Length of flanking region around the CDS"),
-    make_option("--PrimaryID", type="character", default="gene_id",
+    make_option("--primary-id", type="character", default="gene_id",
         help="Primary gene IDs to access the data (YAL001C, YAL003W, etc.)"),
-    make_option("--SecondID", type="character", default=NULL,
+    make_option("--secondary-id", type="character", default=NULL,
         help="Secondary gene IDs to access the data (COX1, EFB1, etc.)"),
-    make_option("--bamFile", type="character", default="input.bam",
+    make_option("--bam-file", type="character", default="input.bam",
         help="Location of BAM input file"),
-    make_option("--hdFile", type="character", default="output.h5",
+    make_option("--hd-file", type="character", default="output.h5",
         help="Location of H5 output file"),
-    make_option("--orf_gff_file", type="character", default=NULL,
+    make_option("--orf-gff-file", type="character", default=NULL,
         help="GFF2/GFF3 annotation file"),
     make_option("--dataset", type="character", default="data",
         help="Name of the dataset"),
-    make_option("--StopInCDS", type="logical", default=FALSE,
+    make_option("--stop-in-cds", type="logical", default=FALSE,
         help="Are stop codons part of the CDS annotations in GFF?"),
-    make_option("--ribovizGFF", type="logical", default=TRUE,
+    make_option("--is-riboviz-gff", type="logical", default=TRUE,
                 help="Is the GFF file with UTR5, CDS, and UTR3 elements per gene?"),
-    make_option("--isTestRun", type="logical", default=FALSE,
+    make_option("--is-test-run", type="logical", default=FALSE,
         help="Is this a test run?")
     )
 
 # Read in commandline arguments
-opt <- parse_args(OptionParser(option_list=option_list))
-if (opt$SecondID == "NULL") {
-  # unquote NULL option in SecondID
-  SecondID <- NULL
+opt <- parse_args(OptionParser(option_list=option_list),
+                  convert_hyphens_to_underscores=TRUE)
+
+if (opt$secondary_id == "NULL") {
+  # unquote NULL option in secondary_id
+  secondary_id <- NULL
 }
 attach(opt)
 
@@ -171,46 +173,46 @@ debugVignette <- FALSE
 if (debugVignette) {
     # to debug bam_to_h5.R in Riboviz vignette
     # supplies non-default options needed.
-    bamFile <- 'vignette/output/SRR1042855_s1mi.bam'
-    hdFile <- 'vignette/output/SRR1042855_s1mi.h5'
+    bam_file <- 'vignette/output/SRR1042855_s1mi.bam'
+    hd_file <- 'vignette/output/SRR1042855_s1mi.h5'
     orf_gff_file <- 'vignette/input/yeast_YAL_CDS_w_250utrs.gff3'
-    Ncores <- 4
-    isTestRun <- TRUE
-    PrimaryID <- "Name"
-    SecondID <- NULL
+    num_processes <- 4
+    is_test_run <- TRUE
+    primary_id <- "Name"
+    secondary_id <- NULL
     # gene <- "YAL038W" # use this to debug single gene for reads_to_list
 }
 
 
 
 # Range of read lengths 
-read_range <- MinReadLen:MaxReadLen
+read_range <- min_read_length:max_read_length
 
 # Read in the positions of all exons/genes in GFF format and subset CDS locations
 gff <- readGFFAsGRanges(orf_gff_file)
 
-if(!ribovizGFF){
+if(!is_riboviz_gff){
   gff <- gff[gff$type=="CDS"]
 }
 
 # Read in the list of genes
-genes <- unique(mcols(gff)[PrimaryID][,1])
-if(!is.null(SecondID)){
-  alt_genes <- as.list(unique(mcols(gff)[SecondID][,1]))
+genes <- unique(mcols(gff)[primary_id][,1])
+if(!is.null(secondary_id)){
+  alt_genes <- as.list(unique(mcols(gff)[secondary_id][,1]))
   names(alt_genes) <- genes
 }
-gff_pid <- mcols(gff)[PrimaryID][,1]
+gff_pid <- mcols(gff)[primary_id][,1]
 
 print("Mapping reads to CDS")
 
-if(isTestRun){
+if(is_test_run){
   genes <- genes[1:50]
   gff <- gff[ gff_pid %in% genes]
 }
 
 ## desirable to check seqlevels here rather than wait for later error
-# get seqinfo from bamFile
-# bamFileSeqInfo <- seqinfo(scanBamHeader(bamFile))
+# get seqinfo from bam_file
+# bam_fileSeqInfo <- seqinfo(scanBamHeader(bam_file))
 
 # Map the reads to individual nucleotide position for each gene
 outputList <- 
@@ -224,17 +226,17 @@ outputList <-
                                as.character(seqnames(gene_location)[1])
                            seqlevels(gene_location) <- geneseqname
                            # if GFF contains UTR5, CDS, and UTR3 elements
-                           if(ribovizGFF){
+                           if(is_riboviz_gff){
                              Buffer_l <- width(gene_location[gene_location$type=="UTR5"])
                              Buffer_r <- width(gene_location[gene_location$type=="UTR3"])
                              gene_location <- gene_location[gene_location$type=="CDS"]
                            }else{
-                             Buffer_l <- Buffer
-                             Buffer_r <- Buffer
+                             Buffer_l <- buffer
+                             Buffer_r <- buffer
                            }
                            # get reads to list
                          reads_to_list(gene_location=gene_location, 
-                                       bamFile=bamFile, 
+                                       bam_file=bam_file, 
                                        read_range=read_range, 
                                        left_flank=Buffer_l,
                                        right_flank=Buffer_r, 
@@ -242,29 +244,29 @@ outputList <-
                          }
                     # )
  , 
-                        mc.cores=Ncores)
+                        mc.cores=num_processes)
 
 names(outputList) <- genes
 
 # HDF5 section
 print("Saving mapped reads in a H5 file")
 
-h5createFile(hdFile) # Create the output h5 file
-fid <- H5Fopen(hdFile) # Filehandle for the h5 file
+h5createFile(hd_file) # Create the output h5 file
+fid <- H5Fopen(hd_file) # Filehandle for the h5 file
 
 # Start codon position
-if(!ribovizGFF){
-  start_cod <- (Buffer+1):(Buffer+3)
+if(!is_riboviz_gff){
+  start_cod <- (buffer+1):(buffer+3)
 }
 # Stop codon offset
-if(StopInCDS){
+if(stop_in_cds){
   offset <- 2
 }else{
   offset <- -1
 }
 
 # To create symbolic links for alternate gene ids
-if(!is.null(SecondID)){
+if(!is.null(secondary_id)){
   base_gid <- H5Gopen(fid,"/")
 }
 
@@ -274,12 +276,12 @@ for(gene in genes){
   
   # Location of start and stop codon nucleotides in output matrix
   gene_location=gff[gff_pid==gene]
-  if(ribovizGFF){
+  if(is_riboviz_gff){
     start_codon_loc <- start(gene_location[gene_location$type=="CDS"])
     start_cod <- start_codon_loc:(start_codon_loc+2)
     stop_codon_loc <- start(gene_location[gene_location$type=="UTR3"])-3
   }else{
-    stop_codon_loc <- ncol(output)-Buffer-offset
+    stop_codon_loc <- ncol(output)-buffer-offset
   }
   
   stop_cod <- stop_codon_loc:(stop_codon_loc+2)
@@ -292,9 +294,9 @@ for(gene in genes){
   mapped_reads <- paste(gene,dataset,"reads",sep="/")
   
   # Symbolic link with alternate ids
-  if(!is.null(SecondID)){ 
+  if(!is.null(secondary_id)){ 
     if(alt_genes[[gene]]!=gene){
-      H5Lcreate_external(hdFile, gene, base_gid, alt_genes[[gene]])
+      H5Lcreate_external(hd_file, gene, base_gid, alt_genes[[gene]])
     }
   }
   
@@ -337,7 +339,7 @@ for(gene in genes){
   H5Gclose(gid)
 }
 
-if(!is.null(SecondID)){
+if(!is.null(secondary_id)){
   H5Gclose(base_gid)
 }
 
