@@ -14,12 +14,12 @@ TMP_DIR = "dir_tmp"
 FEATURES_FILE = "features_file"
 ORF_FASTA_FILE = "orf_fasta_file"
 ORF_GFF_FILE = "orf_gff_file"
-R_RNA_FASTA_FILE = "rrna_fasta_file"
+RRNA_FASTA_FILE = "rrna_fasta_file"
 
 # Indexing.
 BUILD_INDICES = "build_indices"
 ORF_INDEX_PREFIX = "orf_index_prefix"
-R_RNA_INDEX_PREFIX = "rrna_index_prefix"
+RRNA_INDEX_PREFIX = "rrna_index_prefix"
 
 # Adapter trimming.
 ADAPTERS = "adapters"

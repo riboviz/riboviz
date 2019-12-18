@@ -33,7 +33,7 @@ def test_missing_config_file():
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
-@pytest.mark.parametrize("index", [params.R_RNA_FASTA_FILE,
+@pytest.mark.parametrize("index", [params.RRNA_FASTA_FILE,
                                    params.ORF_FASTA_FILE])
 def test_missing_index_files(configuration, index):
     """
