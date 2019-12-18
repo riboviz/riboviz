@@ -2,7 +2,7 @@ dir_in: data/simdata/ # input directory
 dir_out: vignette/simdata_multiplex_output # output directory
 dir_tmp: vignette/simdata_multiplex_tmp # tmp directory for intermediate files
 dir_logs: vignette/simdata_multiplex_logs # log files directory
-cmd_file: run_riboviz_vignette.sh # File to log bash commands
+cmd_file: run_riboviz_simdata_multiplex.sh # File to log bash commands
 rRNA_fasta: vignette/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning to
 orf_fasta: vignette/input/yeast_YAL_CDS_w_250utrs.fa # orf file to align to
 orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3 # GFF2/GFF3 file for ORFs
@@ -26,7 +26,7 @@ MaxReadLen: 50 # Maximum read length in H5 output
 Buffer: 250 # Length of flanking region around the CDS
 PrimaryID: Name # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
 SecondID: NULL # Secondary gene IDs to access the data (COX1, EFB1, etc.)
-dataset: vignette # Name of the dataset
+dataset: simdata_multiplex # Name of the dataset
 StopInCDS: FALSE # Are stop codons part of the CDS annotations in GFF?
 isTestRun: FALSE # Is this a test run
 rpf: TRUE # Is the dataset an RPF or mRNA dataset?
