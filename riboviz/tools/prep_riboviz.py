@@ -467,12 +467,12 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     in_dir = config[params.INPUT_DIR]
     LOGGER.info("Build indices for alignment, if necessary/requested")
     r_rna_index = os.path.join(
-        index_dir, config[params.R_RNA_INDEX_PREFIX])
+        index_dir, config[params.RRNA_INDEX_PREFIX])
     orf_index = os.path.join(
         index_dir, config[params.ORF_INDEX_PREFIX])
     is_build_indices = value_in_dict(params.BUILD_INDICES, config)
     if is_build_indices:
-        r_rna_fasta = config[params.R_RNA_FASTA_FILE]
+        r_rna_fasta = config[params.RRNA_FASTA_FILE]
         log_file = os.path.join(logs_dir, "hisat2_build_r_rna.log")
         workflow.build_indices(r_rna_fasta, r_rna_index, log_file,
                                run_config)
