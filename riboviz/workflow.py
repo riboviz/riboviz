@@ -71,6 +71,10 @@ def build_indices(fasta, ht_prefix, log_file, run_config):
     if not os.path.exists(fasta):
         raise FileNotFoundError(
             errno.ENOENT, os.strerror(errno.ENOENT), fasta)
+    # Run --version as hisat2-build does not log its own version.
+    cmd = ["hisat2-build", "--version"]
+    process_utils.run_logged_command(
+        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     cmd = ["hisat2-build", fasta, ht_prefix]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
@@ -179,6 +183,10 @@ def map_to_r_rna(fastq, index, mapped_sam, unmapped_fastq, log_file,
     code
     """
     LOGGER.info("Map reads to rRNA. Log: %s", log_file)
+    # Run --version as hisat2 does not log its own version.
+    cmd = ["hisat2", "--version"]
+    process_utils.run_logged_command(
+        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     cmd = ["hisat2", "-p", str(run_config.nprocesses), "-N", "1",
            "--un", unmapped_fastq, "-x", index,
            "-S", mapped_sam, "-U", fastq]
@@ -209,6 +217,10 @@ def map_to_orf(fastq, index, mapped_sam, unmapped_fastq, log_file,
     """
     LOGGER.info(
         "Map to ORFs with up to 2 alignments. Log: %s", log_file)
+    # Run --version as hisat2 does not log its own version.
+    cmd = ["hisat2", "--version"]
+    process_utils.run_logged_command(
+        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     cmd = ["hisat2", "-p", str(run_config.nprocesses), "-k", "2",
            "--no-spliced-alignment", "--rna-strandness",
            "F", "--no-unal", "--un", unmapped_fastq,
@@ -261,6 +273,10 @@ def sort_bam(sam_file, bam_file, log_file, run_config):
     """
     LOGGER.info(
         "Convert SAM to BAM and sort on genome. Log: %s", log_file)
+    # Run --version as samtools does not log its own version.
+    cmd = ["samtools", "--version"]
+    process_utils.run_logged_command(
+        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     cmd_view = ["samtools", "view", "-b", sam_file]
     cmd_sort = ["samtools", "sort", "-@", str(run_config.nprocesses),
                 "-O", "bam", "-o", bam_file, "-"]
@@ -283,6 +299,10 @@ def index_bam(bam_file, log_file, run_config):
     :raise AssertionError: if samtools returns non-zero exit code
     """
     LOGGER.info("Index BAM file. Log: %s", log_file)
+    # Run --version as samtools does not log its own version.
+    cmd = ["samtools", "--version"]
+    process_utils.run_logged_command(
+        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     cmd = ["samtools", "index", bam_file]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
@@ -363,6 +383,10 @@ def make_bedgraph(bam_file, bedgraph_file, is_plus, log_file, run_config):
     LOGGER.info(
         "Calculate transcriptome coverage for %s strand and save as a bedgraph. Log: %s",
         strand, log_file)
+    # Run --version as bedtools does not log its own version.
+    cmd = ["bedtools", "--version"]
+    process_utils.run_logged_command(
+        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     cmd = ["bedtools", "genomecov", "-ibam", bam_file,
            "-trackline", "-bga", "-5", "-strand", strand]
     process_utils.run_logged_redirect_command(
