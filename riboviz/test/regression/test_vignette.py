@@ -42,63 +42,63 @@ The directories are assumed to hold the following content:
       yeast_rRNA.8.ht2
     tmp/
       WT3AT/
-        WT3AT_nonrRNA.fq
-        WT3AT_orf_map_clean.sam
-        WT3AT_orf_map.sam
-        WT3AT_rRNA_map.sam
-        WT3AT_trim.fq
-        WT3AT_unaligned.fq
+        nonrRNA.fq
+        orf_map_clean.sam
+        orf_map.sam
+        rRNA_map.sam
+        trim.fq
+        unaligned.fq
       WTnone/
-        WTnone_nonrRNA.fq
-        WTnone_orf_map_clean.sam
-        WTnone_orf_map.sam
-        WTnone_rRNA_map.sam
-        WTnone_trim.fq
-        WTnone_unaligned.fq
+        nonrRNA.fq
+        orf_map_clean.sam
+        orf_map.sam
+        rRNA_map.sam
+        trim.fq
+        unaligned.fq
     output/
       TPMs_collated.tsv
       WT3AT/
-        WT3AT_3nt_periodicity.pdf
-        WT3AT_3nt_periodicity.tsv
+        3nt_periodicity.pdf
+        3nt_periodicity.tsv
         WT3AT.bam
         WT3AT.bam.bai
-        WT3AT_3ntframe_bygene.tsv
-        WT3AT_3ntframe_propbygene.pdf
-        WT3AT_codon_ribodens.pdf
-        WT3AT_codon_ribodens.tsv
-        WT3AT_features.pdf
+        3ntframe_bygene.tsv
+        3ntframe_propbygene.pdf
+        codon_ribodens.pdf
+        codon_ribodens.tsv
+        features.pdf
         WT3AT.h5
-        WT3AT_minus.bedgraph
-        WT3AT_plus.bedgraph
-        WT3AT_pos_sp_nt_freq.tsv
-        WT3AT_pos_sp_rpf_norm_reads.pdf
-        WT3AT_pos_sp_rpf_norm_reads.tsv
-        WT3AT_read_lengths.pdf
-        WT3AT_read_lengths.tsv
-        WT3AT_startcodon_ribogridbar.pdf
-        WT3AT_startcodon_ribogrid.pdf
-        WT3AT_tpms.tsv
+        minus.bedgraph
+        plus.bedgraph
+        pos_sp_nt_freq.tsv
+        pos_sp_rpf_norm_reads.pdf
+        pos_sp_rpf_norm_reads.tsv
+        read_lengths.pdf
+        read_lengths.tsv
+        startcodon_ribogridbar.pdf
+        startcodon_ribogrid.pdf
+        tpms.tsv
       WTnone/
-        WTnone_3nt_periodicity.pdf
-        WTnone_3nt_periodicity.tsv
+        3nt_periodicity.pdf
+        3nt_periodicity.tsv
         WTnone.bam
         WTnone.bam.bai
-        WTnone_3ntframe_bygene.tsv
-        WTnone_3ntframe_propbygene.pdf
-        WTnone_codon_ribodens.pdf
-        WTnone_codon_ribodens.tsv
-        WTnone_features.pdf
+        3ntframe_bygene.tsv
+        3ntframe_propbygene.pdf
+        codon_ribodens.pdf
+        codon_ribodens.tsv
+        features.pdf
         WTnone.h5
-        WTnone_minus.bedgraph
-        WTnone_plus.bedgraph
-        WTnone_pos_sp_nt_freq.tsv
-        WTnone_pos_sp_rpf_norm_reads.pdf
-        WTnone_pos_sp_rpf_norm_reads.tsv
-        WTnone_read_lengths.pdf
-        WTnone_read_lengths.tsv
-        WTnone_startcodon_ribogridbar.pdf
-        WTnone_startcodon_ribogrid.pdf
-        WTnone_tpms.tsv
+        minus.bedgraph
+        plus.bedgraph
+        pos_sp_nt_freq.tsv
+        pos_sp_rpf_norm_reads.pdf
+        pos_sp_rpf_norm_reads.tsv
+        read_lengths.pdf
+        read_lengths.tsv
+        startcodon_ribogridbar.pdf
+        startcodon_ribogrid.pdf
+        tpms.tsv
 
 See riboviz.validation.compare and riboviz.validation functions for
 information on the nature of the comparisons for each type of file.
@@ -191,7 +191,7 @@ def test_tmp_fq(expected, prefix, content):
     """
     expected_tmp = os.path.join(expected, "tmp")
     actual_tmp = os.path.join(riboviz.test.VIGNETTE_DIR, "tmp")
-    file_name = "%s_%s.fq" % (prefix, content)
+    file_name = "%s.fq" % content
     print(file_name)
     riboviz.validation.compare(
         os.path.join(expected_tmp, prefix, file_name),
@@ -223,7 +223,7 @@ def test_tmp_sam(expected, tmp_directory, prefix, content):
     os.mkdir(expected_tmp_copy)
     actual_tmp_copy = os.path.join(tmp_directory, "actual")
     os.mkdir(actual_tmp_copy)
-    file_name = "%s_%s.sam" % (prefix, content)
+    file_name = "%s.sam" % content
     print(file_name)
     expected_tmp_file = os.path.join(expected_tmp_copy, file_name)
     actual_tmp_file = os.path.join(actual_tmp_copy, file_name)
@@ -298,7 +298,7 @@ def test_output_bedgraph(expected, prefix, content):
     """
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
-    file_name = "%s_%s.bedgraph" % (prefix, content)
+    file_name = "%s.bedgraph" % content
     print(file_name)
     riboviz.validation.compare(
         os.path.join(expected_output, prefix, file_name),
@@ -350,7 +350,7 @@ def test_output_tsv(expected, prefix, content):
     """
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
-    file_name = "%s_%s.tsv" % (prefix, content)
+    file_name = "%s.tsv" % content
     print(file_name)
     riboviz.validation.compare(
         os.path.join(expected_output, prefix, file_name),
@@ -382,7 +382,7 @@ def test_output_pdf(expected, prefix, content):
     """
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
-    file_name = "%s_%s.pdf" % (prefix, content)
+    file_name = "%s.pdf" % content
     print(file_name)
     riboviz.validation.compare(
         os.path.join(expected_output, prefix, file_name),
