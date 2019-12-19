@@ -16,7 +16,8 @@
 # - duplicate generate_stats_figs.R as .Rmd file
 # - replace Reduce, lapply, sapply by purrr functions?
 #
-source("read_count_functions.R")
+## Should use relative path for rscripts??
+source("rscripts/read_count_functions.R")
 
 # set ggplot2 theme for plots drawn after this; use dark on light theme
 ggplot2::theme_set(theme_bw())
@@ -219,7 +220,7 @@ print("Starting: Distribution of lengths of all mapped reads")
 # read length-specific read counts stored as attributes of 'reads' in H5 file
 gene_sp_read_length <- lapply(gene_names, function(gene) {
   # TODO: GetGeneReadLength(gene,dataset,hdf5file)
-  rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", x, "/", dataset, "/reads")), "reads_by_len"))
+  rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", gene, "/", dataset, "/reads")), "reads_by_len"))
 })
 
 
@@ -593,7 +594,7 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
     # Reads in an object named "codon_pos"
     out <- lapply(gene_names, function(gene) {
       # From "Position specific distribution of reads" plot
-      GetCodonPositionReads(hdf5file, gene, dataset, left = (Buffer - 15), right = (Buffer + 11), MinReadLen = MinReadLen)
+      GetCodonPositionReads(gene, dataset, hdf5file, left = (Buffer - 15), right = (Buffer + 11), MinReadLen = MinReadLen)
     }) # Get codon-based position-specific reads for each gene
     names(out) <- gene_names
 
