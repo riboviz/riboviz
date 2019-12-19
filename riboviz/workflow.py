@@ -418,8 +418,7 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config, log_file, run_config):
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 
 
-def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
-                        run_config):
+def generate_stats_figs(h5_file, out_dir, config, log_file, run_config):
     """
     Create summary statistics and analyses plots.
 
@@ -427,8 +426,6 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
     :type h5_file: str or unicode
     :param out_dir: Directory for output files
     :type out_dir: str or unicode
-    :param prefix: Output file name prefix
-    :type prefix: str or unicode
     :param config: RiboViz configuration
     :type config: dict
     :param log_file: Log file
@@ -452,7 +449,6 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
            "--primary-id=" + config[params.PRIMARY_ID],
            "--dataset=" + config[params.DATASET],
            "--hd-file=" + h5_file,
-           "--output-prefix=" + prefix,
            "--orf-fasta-file=" + config[params.ORF_FASTA_FILE],
            "--rpf=" + str(config[params.RPF]),
            "--output-dir=" + out_dir,
@@ -540,15 +536,12 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 
 
-def get_sample_log_file(logs_dir, sample, step, index):
+def get_log_file(logs_dir, step, index):
     """
-    Get name of log file for a specific processing step applied to a
-    specific sample.
+    Get name of log file for a specific processing step.
 
     :param logs_dir Log files directory
     :type logs_dir: str or unicode
-    :param sample: Sample name
-    :type sample: str or unicode
     :param step: Name of processing step
     :type step: str or unicode
     :param index: Index of processing step, 1..N
@@ -556,4 +549,4 @@ def get_sample_log_file(logs_dir, sample, step, index):
     :return: file name
     :rtype: str or unicode
     """
-    return os.path.join(logs_dir, "%s_%02d_%s.log" % (sample, index, step))
+    return os.path.join(logs_dir, "%02d_%s.log" % (index, step))
