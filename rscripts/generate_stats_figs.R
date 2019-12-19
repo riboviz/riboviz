@@ -3,7 +3,7 @@
 # TODO:
 # - tidy get_cod_pos
 # - functionalize gene_poslen_counts, wrapper functions
-# - tidy gene_sp_read_length to GetGeneReadLength
+# - tidy gene_sp_read_length to GetGeneReadLength DONE
 # - tidy do_pos_sp_nt_freq
 # - functionalize gene_read_frames
 # - tidy GetCodonPositionReads wrapper
@@ -14,9 +14,11 @@
 # - refactor Codon-specific ribosome densities
 # - replace write.table with write_tsv
 # - duplicate generate_stats_figs.R as .Rmd file
-# - replace Reduce, lapply, sapply by purrr functions?
+# - replace Reduce, lapply, sapply by purrr functions??
+# - replace gff IRanges call with gff_df tidy
 #
-source("read_count_functions.R")
+## Should use relative path for rscripts??
+source("rscripts/read_count_functions.R")
 
 # set ggplot2 theme for plots drawn after this; use dark on light theme
 ggplot2::theme_set(theme_bw())
@@ -218,17 +220,14 @@ print("Starting: Distribution of lengths of all mapped reads")
 
 # read length-specific read counts stored as attributes of 'reads' in H5 file
 gene_sp_read_length <- lapply(gene_names, function(gene) {
-  # TODO: GetGeneReadLength(gene,dataset,hdf5file)
-  rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", x, "/", dataset, "/reads")), "reads_by_len"))
+  GetGeneReadLength(gene,dataset,hdf5file)
 })
-
 
 # sum reads of each length across all genes
 read_length_data <- data.frame(
   Length = read_range,
-  # make this tidy
-  Counts = colSums(matrix(unlist(gene_sp_read_length), 
-                          ncol = length(read_range), byrow = T))
+  Counts = gene_sp_read_length %>% 
+    Reduce("+", .)
 )
 
 # plot read lengths with counts
@@ -593,7 +592,7 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
     # Reads in an object named "codon_pos"
     out <- lapply(gene_names, function(gene) {
       # From "Position specific distribution of reads" plot
-      GetCodonPositionReads(hdf5file, gene, dataset, left = (Buffer - 15), right = (Buffer + 11), MinReadLen = MinReadLen)
+      GetCodonPositionReads(gene, dataset, hdf5file, left = (Buffer - 15), right = (Buffer + 11), MinReadLen = MinReadLen)
     }) # Get codon-based position-specific reads for each gene
     names(out) <- gene_names
 
