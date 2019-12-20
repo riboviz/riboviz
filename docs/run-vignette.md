@@ -169,66 +169,66 @@ Intermediate outputs in `vignette/tmp`:
 
 ```
 WT3AT/
-  WT3AT_nonrRNA.fq
-  WT3AT_orf_map_clean.sam
-  WT3AT_orf_map.sam
-  WT3AT_rRNA_map.sam
-  WT3AT_trim.fq
-  WT3AT_unaligned.sam
+  nonrRNA.fq
+  orf_map_clean.sam
+  orf_map.sam
+  rRNA_map.sam
+  trim.fq
+  unaligned.sam
 WTnone/
-  WTnone_nonrRNA.fq
-  WTnone_orf_map_clean.sam
-  WTnone_orf_map.sam
-  WTnone_rRNA_map.sam
-  WTnone_trim.fq
-  WTnone_unaligned.sam
+  nonrRNA.fq
+  orf_map_clean.sam
+  orf_map.sam
+  rRNA_map.sam
+  trim.fq
+  unaligned.sam
 ```
 
 Outputs in `vignette/output`:
 
 ```
 WT3AT/
-  WT3AT_3ntframe_bygene.tsv
-  WT3AT_3ntframe_propbygene.pdf
-  WT3AT_3nt_periodicity.pdf
-  WT3AT_3nt_periodicity.tsv
+  3ntframe_bygene.tsv
+  3ntframe_propbygene.pdf
+  3nt_periodicity.pdf
+  3nt_periodicity.tsv
   WT3AT.bam
   WT3AT.bam.bai
-  WT3AT_codon_ribodens.pdf
-  WT3AT_codon_ribodens.tsv
-  WT3AT_features.pdf
+  codon_ribodens.pdf
+  codon_ribodens.tsv
+  features.pdf
   WT3AT.h5
-  WT3AT_minus.bedgraph
-  WT3AT_plus.bedgraph
-  WT3AT_pos_sp_nt_freq.tsv
-  WT3AT_pos_sp_rpf_norm_reads.pdf
-  WT3AT_pos_sp_rpf_norm_reads.tsv
-  WT3AT_read_lengths.pdf
-  WT3AT_read_lengths.tsv
-  WT3AT_startcodon_ribogridbar.pdf
-  WT3AT_startcodon_ribogrid.pdf
-  WT3AT_tpms.tsv
+  minus.bedgraph
+  plus.bedgraph
+  pos_sp_nt_freq.tsv
+  pos_sp_rpf_norm_reads.pdf
+  pos_sp_rpf_norm_reads.tsv
+  read_lengths.pdf
+  read_lengths.tsv
+  startcodon_ribogridbar.pdf
+  startcodon_ribogrid.pdf
+  tpms.tsv
 WTnone/
-  WTnone_3ntframe_bygene.tsv
-  WTnone_3ntframe_propbygene.pdf
-  WTnone_3nt_periodicity.pdf
-  WTnone_3nt_periodicity.tsv
+  3ntframe_bygene.tsv
+  3ntframe_propbygene.pdf
+  3nt_periodicity.pdf
+  3nt_periodicity.tsv
   WTnone.bam
   WTnone.bam.bai
-  WTnone_codon_ribodens.pdf
-  WTnone_codon_ribodens.tsv
-  WTnone_features.pdf
+  codon_ribodens.pdf
+  codon_ribodens.tsv
+  features.pdf
   WTnone.h5
-  WTnone_minus.bedgraph
-  WTnone_plus.bedgraph
-  WTnone_pos_sp_nt_freq.tsv
-  WTnone_pos_sp_rpf_norm_reads.pdf
-  WTnone_pos_sp_rpf_norm_reads.tsv
-  WTnone_read_lengths.pdf
-  WTnone_read_lengths.tsv
-  WTnone_startcodon_ribogridbar.pdf
-  WTnone_startcodon_ribogrid.pdf
-  WTnone_tpms.tsv
+  minus.bedgraph
+  plus.bedgraph
+  pos_sp_nt_freq.tsv
+  pos_sp_rpf_norm_reads.pdf
+  pos_sp_rpf_norm_reads.tsv
+  read_lengths.pdf
+  read_lengths.tsv
+  startcodon_ribogridbar.pdf
+  startcodon_ribogrid.pdf
+  tpms.tsv
 TPMs_collated.tsv
 ```
 
