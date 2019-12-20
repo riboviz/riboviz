@@ -73,6 +73,7 @@ barcodes is 3 is less than the number of mismatches times 2, which is
 """
 
 import argparse
+from datetime import datetime
 import gzip
 import os
 from itertools import islice
@@ -339,10 +340,17 @@ def demultiplex(sample_sheet_file,
     print(("All {} reads processed".format(total_reads)))
 
     # Output number of reads by sample to file.
+    comments = []
+    comments.append("Created by: RiboViz")
+    comments.append("Date: {}".format(datetime.today()))
+    comments.append("Component/version: {}".format(provenance.get_version(__file__)))
+
     sample_sheet[NUM_READS] = num_reads
     utils.save_deplexed_sample_sheet(sample_sheet,
                                      num_unassigned_reads,
-                                     num_reads_file)
+                                     num_reads_file,
+                                     "\t",
+                                     comments)
     print(("Done"))
 
 
