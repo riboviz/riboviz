@@ -223,6 +223,8 @@ Web sites:
 * [gitpython](https://gitpython.readthedocs.io/en/stable/)
 * [GitHub](https://github.com/gitpython-developers/GitPython)
 
+Install:
+
 ```console
 $ conda install -y gitpython
 ```
@@ -573,6 +575,19 @@ Install in R:
 
 ```r
 > install.packages("readr")
+```
+
+### git2r
+
+Web sites:
+
+* [git2R](https://docs.ropensci.org/git2r)
+* [GitHub](https://github.com/ropensci/git2r)
+
+Install in R:
+
+```r
+> install.packages("git2r")
 ```
 
 ### Bioconductor Rsamtools, rdf5, rtracklayer, Biostrings, ShortRead
