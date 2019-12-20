@@ -3,8 +3,6 @@
 library(git2r)
 library(getopt)
 
-provenance_file_path <- get_Rscript_filename()
-
 #' Get RiboViz version information.
 #'
 #' If the file is within the scope of a Git repository then a message
