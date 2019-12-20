@@ -581,7 +581,7 @@ Install in R:
 
 Web sites:
 
-* [git2R](https://docs.ropensci.org/git2r)
+* [git2r](https://docs.ropensci.org/git2r)
 * [GitHub](https://github.com/ropensci/git2r)
 
 Install in R:
