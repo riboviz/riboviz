@@ -6,23 +6,24 @@ import git
 import git.exc
 
 
-def get_version(tool=os.path.basename(__file__)):
+def get_version(file_path=__file__):
     """
     Get RiboViz version information.
 
-    If this file is within the scope of a Git repository then a
-    message including the given tool name, Git commit hash and date of
+    If the file is within the scope of a Git repository then a
+    message including the given file name, Git commit hash and date of
     HEAD is returned.
 
-    If this file is not within the scope of a Git repository then an
+    If the file is not within the scope of a Git repository then an
     "unknown" message is returned.
 
-    :param tool: Tool name
-    :type tool: str or unicode
+    :param file_path: Python file path
+    :type file_path: str or unicode
     :return: message
     :rtype: str or unicode
     """
-    location = os.path.dirname(os.path.abspath(__file__))
+    file_name = os.path.basename(file_path)
+    location = os.path.dirname(os.path.abspath(file_path))
     try:
         repository = git.Repo(location, search_parent_directories=True)
         sha = repository.head.object.hexsha
@@ -30,4 +31,4 @@ def get_version(tool=os.path.basename(__file__)):
         version = "commit {} date {}".format(sha, str(time))
     except git.exc.InvalidGitRepositoryError:  # pylint: disable=E1101
         version = "unknown"
-    return "{} version {}".format(tool, version)
+    return "{} version {}".format(file_name, version)
