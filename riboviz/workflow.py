@@ -249,8 +249,7 @@ def trim_5p_mismatches(orf_map_sam, orf_map_sam_clean, log_file,
     LOGGER.info(
         "Trim 5' mismatched nt and remove reads with >1 mismatch. Log: %s",
         log_file)
-    cmd = ["python",
-           os.path.join(run_config.py_scripts, "trim_5p_mismatch.py"),
+    cmd = ["python", "-m", "riboviz.tools.trim_5p_mismatch",
            "-m", "2", "-i", orf_map_sam, "-o", orf_map_sam_clean]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
