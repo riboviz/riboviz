@@ -1,21 +1,21 @@
 # generate_stats_figs.R
-# currently (17 December 2019) undergoing refactoring by EW
+# currently (22 December 2019) undergoing refactoring by EW
 # TODO:
+# - tidy gene_sp_read_length to GetGeneReadLength DONE
+# - replace gff IRanges call with gff_df tidy DONE
 # - tidy get_cod_pos
 # - functionalize gene_poslen_counts, wrapper functions
-# - tidy gene_sp_read_length to GetGeneReadLength DONE
 # - tidy do_pos_sp_nt_freq
 # - functionalize gene_read_frames
-# - tidy GetCodonPositionReads wrapper
-# - functionalize pos_sp_rpf_norm_reads
+# - replace GetCodonPositionReads call by GetGeneCodonPosReads1dsnap
+# - functionalize pos_sp_rpf_norm_reads wrapper
 # - tidy GetMRNACoverage wrapper
 # - functionalize pos_sp_mrna_norm_coverage
 # - functionalize GetTPMs into *_tpms.tsv
-# - refactor Codon-specific ribosome densities WAITING
+# - refactor Codon-specific ribosome densities 
 # - replace write.table with write_tsv
+# - replace Reduce, lapply, sapply by purrr functions?? Maybe using nested data frames
 # - duplicate generate_stats_figs.R as .Rmd file
-# - replace Reduce, lapply, sapply by purrr functions??
-# - replace gff IRanges call with gff_df tidy DONE
 #
 ## Should use relative path for rscripts??
 source("rscripts/read_count_functions.R")
@@ -84,6 +84,10 @@ option_list <- list(
   make_option("--count_threshold",
     type = "integer", default = 64,
     help = "threshold for count of reads per gene to be included in plot"
+  ),
+  make_option("--length_threshold",
+    type = "integer", default = 500,
+    help = "threshold for length of genes to be included in metagene plots"
   ),
   make_option("--out_prefix",
     type = "character", default = "out",
@@ -317,7 +321,7 @@ if (!is.na(asite_disp_length_file)) {
   asite_disp_length <- readr::read_tsv(asite_disp_length_file,
     comment = "#"
   )
-  # TODO
+  # TODO: wrap in function
   gene_read_frames <- gff_df %>%
     dplyr::filter(type == "CDS") %>%
     dplyr::select(gene = seqnames, left = start, right = end) %>%
@@ -355,68 +359,64 @@ if (!is.na(asite_disp_length_file)) {
 print("Starting: Position specific distribution of reads")
 
 # For RPF datasets, generate codon-based position-specific reads
-if (rpf) {
-  # create empty matrix to store position-specific read counts
-  out5p <- matrix(NA, nrow = length(gene_names), ncol = 500) # 5'
-  out3p <- matrix(NA, nrow = length(gene_names), ncol = 500) # 3'
+if (rpf & !is.na(asite_disp_length_file)) {
+  # Get codon-based position-specific reads for each gene, in a tibble
+  reads_per_codon_etc <- tibble(gene=gene_names) %>%
+	mutate(CountPerCodon = map(gene, ~GetGeneCodonPosReads1dsnap(
+		.,
+		dataset,
+		hdf5file,
+		left = getCDS5start(., gff_df),
+		right = getCDS3end(., gff_df),
+		MinReadLen = MinReadLen,
+		asite_disp_length = asite_disp_length,
+		) ),
+		NormCtperCodon = map(CountPerCodon, ~NormByMean(.) ),
+		SumAsiteCt = map(CountPerCodon,~sum(.)) %>% unlist,
+		LengthCodons = map(CountPerCodon,~length(.)) %>% unlist
+	)
   
-  # TODO: map this over gff_df for gene-specific "buffer" values.
-  out <- lapply(gene_names, function(gene) {
-    GetCodonPositionReads(
-      gene,
-      dataset,
-      hdf5file,
-      left = (Buffer - 15),
-      right = (Buffer + 11),
-      MinReadLen = MinReadLen
-      )
-  }) # Get codon-based position-specific reads for each gene
-  names(out) <- gene_names
-
-  cc <- 1
-  for (gene in gene_names) {
-    tmp <- out[[gene]]
-    # Only consider genes with at least count_threshold mapped reads along its CDS
-    # Here we should have a function taking the count_threshold and the length (500)
-    if (sum(tmp) >= count_threshold) {
-      tmp <- tmp / mean(tmp)
-      if (length(tmp) > 500) {
-        out5p[cc, ] <- tmp[1:500]
-        out3p[cc, ] <- rev(tmp)[1:500]
-      } else {
-        out5p[cc, 1:length(tmp)] <- tmp
-        out3p[cc, 1:length(tmp)] <- rev(tmp)
-      }
-    }
-    cc <- cc + 1
-  }
-
-  # Estimate position-specific mean and std error of mapped read counts
-  m5p <- signif(apply(out5p, 2, mean, na.rm = T), 4)
-  m3p <- signif(apply(out3p, 2, mean, na.rm = T), 4)
-  s5p <- signif(apply(out5p, 2, function(x) {
-    sd(x, na.rm = T) / sqrt(sum(!is.na(x)))
-  }), 4)
-  s3p <- signif(apply(out3p, 2, function(x) {
-    sd(x, na.rm = T) / sqrt(sum(!is.na(x)))
-  }), 4)
-
-  # Normalize reads to last 50 codons of the 500-codon window.
-  # This allows easy comparison between datasets
-  # TODO: 50 should be a parameter
-  s5p <- s5p / mean(m5p[450:500])
-  s3p <- s3p / mean(m3p[450:500])
-  m5p <- m5p / mean(m5p[450:500])
-  m3p <- m3p / mean(m3p[450:500])
-
-  # Create a dataframe to store the output for plots/analyses
-  pos_sp_rpf_norm_reads <- data.frame(
-    Position = c(1:500, 0:-499),
-    Mean = c(m5p, m3p),
-    SD = c(s5p, s3p),
-    End = factor(rep(c("5'", "3'"), each = 500), levels = c("5'", "3'"))
-  )
-
+  # metagene mean normalized read counts for 5' end positions 1 to length_threshold
+  pos_sp_rpf_norm_reads_5end <- 
+    reads_per_codon_etc %>%
+    # select genes over count_threshold and length_threshold
+    filter(SumAsiteCt > count_threshold, LengthCodons > length_threshold) %>%
+    # Extract from codon positions 1 to length_threshold
+    transmute(NormCtperCodon5end = 
+                map(CountPerCodon,
+                    ~extract(.,seq_len(length_threshold)))) %>%
+    # remove NormCts as vector and (3 lines later) make these rows of a matrix
+    pull(NormCtperCodon5end) %>%
+    unlist %>% 
+    matrix(byrow=T,ncol=length_threshold) %>%
+    # calculate column means and standard deviations in tidy data frame
+    {tibble(Position = seq_len(length_threshold),
+            Mean = colMeans(.) %>% as.numeric,
+            SD   = apply(.,2,sd),
+            End  = "5'")}
+  
+  # metagene mean normalized read counts for 3' end stop-length_threshold to stop
+  pos_sp_rpf_norm_reads_3end <- 
+    reads_per_codon_etc %>%
+        # select genes over count_threshold and length_threshold
+    filter(SumAsiteCt > count_threshold, LengthCodons > length_threshold) %>%
+    # Extract from last length_threshold codon positions
+    transmute(NormCtperCodon3end = 
+              map2(CountPerCodon,LengthCodons,
+                   ~extract(.x, .y + 1 - seq_len(length_threshold)))) %>%              
+    # remove NormCts as vector and (3 lines later) make these rows of a matrix
+    pull(NormCtperCodon3end) %>%
+    unlist %>% 
+    matrix(byrow=T,ncol=length_threshold)  %>% 
+    # calculate column means and standard deviations in tidy data frame
+    {tibble(Position = seq_len(length_threshold),
+            Mean = colMeans(.),
+            SD   = apply(.,2,sd),
+            End  = "3'")}
+  
+  pos_sp_rpf_norm_reads <- bind_rows(pos_sp_rpf_norm_reads_5end,
+                                     pos_sp_rpf_norm_reads_3end)
+  
   # Plot
   pos_sp_rpf_norm_reads_plot <- ggplot(
     pos_sp_rpf_norm_reads,
@@ -429,7 +429,8 @@ if (rpf) {
   # Save plot and file
   ggsave(pos_sp_rpf_norm_reads_plot, filename = paste0(out_prefix, "_pos_sp_rpf_norm_reads.pdf"))
   write.table(
-    pos_sp_rpf_norm_reads,
+    pos_sp_rpf_norm_reads %>%
+      mutate_if(is.numeric, signif, digits=4),
     file = paste0(out_prefix, "_pos_sp_rpf_norm_reads.tsv"),
     sep = "\t",
     row = F,
@@ -440,6 +441,8 @@ if (rpf) {
 
 # for mRNA datasets, generate nt-based position-specific reads
 if (!rpf) {
+  # TODO: rewrite along the lines of rpf above
+  warning("Warning: nt-based position-specific reads for non-RPF datasets not tested")
   # create empty matrix to store position-specific read counts
   out5p <- matrix(NA, nrow = length(gene_names), ncol = 1500) # 5'
   out3p <- matrix(NA, nrow = length(gene_names), ncol = 1500) # 3'
@@ -593,6 +596,7 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
     # Reads in an object named "codon_pos"
     out <- lapply(gene_names, function(gene) {
       # From "Position specific distribution of reads" plot
+      # TODO: replace by GetGeneCodonPosReads1dsnap
       GetCodonPositionReads(gene, dataset, hdf5file, left = (Buffer - 15), right = (Buffer + 11), MinReadLen = MinReadLen)
     }) # Get codon-based position-specific reads for each gene
     names(out) <- gene_names

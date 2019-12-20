@@ -260,6 +260,34 @@ SumByFrame <- function(x, left, right) {
   return(sums_byframe)
 }
 
+SnapToCodon <- function(x, left, right, snapdisp=0L) {
+  # snap nucleotide-aligned reads to codon position
+  #   x:     vector
+  #   left:  integer for starting position, frame 0
+  #   right: integer for ending position
+  #   snapdisp: integer any additional displacement in the snapping
+  RcppRoll::roll_suml(x[(left:right) + snapdisp], n=3L, by=3L, fill = NULL)
+}
+
+NormByMean <- function(x,...) {
+  x / mean(x,...)
+}
+
+GetGeneCodonPosReads1dsnap <- function(gene, dataset, hdf5file, left, right, 
+                         MinReadLen, 
+                         asite_disp_length = data.frame(
+                             read_length = c(28, 29, 30),
+                             asite_disp = c(15, 15, 15)
+                           ), 
+                         snapdisp=0L) {
+  reads_pos_length <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
+  reads_asitepos <- CalcAsiteFixed(
+    reads_pos_length, MinReadLen,
+    asite_disp_length
+  )
+  SnapToCodon(reads_asitepos,left,right,snapdisp)
+}
+
 GatherByFrameCodon <- function(x, left, right) {
   # gather vector by 3nt frames 0,1,2 for each position
   #   x:     vector
