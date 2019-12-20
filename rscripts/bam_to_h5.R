@@ -1,4 +1,6 @@
-# Read in dependent packages
+suppressMessages(library(getopt, quietly = T))
+# Determine location of provenance.R relative to current file
+source(file.path(dirname(getopt::get_Rscript_filename()), "provenance.R"))
 suppressMessages(library(Rsamtools, quietly = T))
 suppressMessages(library(rtracklayer, quietly = T))
 suppressMessages(library(rhdf5, quietly = T))
@@ -136,6 +138,7 @@ option_list <- list(
         help="Is this a test run?")
     )
 
+print(get_version(get_Rscript_filename()))
 # Read in commandline arguments
 opt <- parse_args(OptionParser(option_list=option_list),
                   convert_hyphens_to_underscores=TRUE)
