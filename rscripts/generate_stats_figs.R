@@ -300,9 +300,13 @@ nt_period_plot <- ggplot(
 
 # Save plot and file
 ggsave(nt_period_plot, filename = file.path(output_dir, paste0(output_prefix, "3nt_periodicity.pdf")))
+
+tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3nt_periodicity.tsv"))
+write_metadata_header(get_Rscript_filename(), tsv_file_path)
 write.table(
   gene_pos_counts_bothends,
-  file = file.path(output_dir, paste0(output_prefix, "3nt_periodicity.tsv")),
+  file = tsv_file_path,
+  append = T,
   sep = "\t",
   row = F,
   col = T,
@@ -330,9 +334,12 @@ read_len_plot <- ggplot(read_length_data, aes(x = Length, y = Counts)) +
 
 # save read lengths plot and file
 ggsave(read_len_plot, filename = file.path(output_dir, paste0(output_prefix, "read_lengths.pdf")))
+tsv_file_path <- file.path(output_dir, paste0(output_prefix, "read_lengths.tsv"))
+write_metadata_header(get_Rscript_filename(), tsv_file_path)
 write.table(
   read_length_data,
-  file = file.path(output_dir, paste0(output_prefix, "read_lengths.tsv")),
+  file = tsv_file_path,
+  append = T,
   sep = "\t",
   row = F,
   col = T,
@@ -425,7 +432,9 @@ if (do_pos_sp_nt_freq) {
   all_out[is.na(all_out)] <- 0
 
   # save file
-  write.table(all_out, file = file.path(output_dir, paste0(output_prefix, "pos_sp_nt_freq.tsv")), sep = "\t", row = F, col = T, quote = F)
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_nt_freq.tsv"))
+  write_metadata_header(get_Rscript_filename(), tsv_file_path)
+  write.table(all_out, file = tsv_file_path, append = T, sep = "\t", row = F, col = T, quote = F)
 
   print("Completed nucleotide composition bias table")
 }
@@ -613,9 +622,12 @@ if (!is.na(asite_disp_length_file)) {
       min_read_length = min_read_length,
       asite_disp_length = asite_disp_length
     )
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3ntframe_bygene.tsv"))
+  write_metadata_header(get_Rscript_filename(), tsv_file_path)
   write.table(
     gene_read_frames,
-    file = file.path(output_dir, paste0(output_prefix, "3ntframe_bygene.tsv")),
+    file = tsv_file_path,
+    append = T,
     sep = "\t",
     row = F,
     col = T,
@@ -759,9 +771,12 @@ if (rpf) {
 
   # Save plot and file
   ggsave(pos_sp_rpf_norm_reads_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.pdf")))
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.tsv"))
+  write_metadata_header(get_Rscript_filename(), tsv_file_path)
   write.table(
     pos_sp_rpf_norm_reads,
-    file = file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.tsv")),
+    file = tsv_file_path,
+    append = T,
     sep = "\t",
     row = F,
     col = T,
@@ -839,9 +854,12 @@ if (!rpf) {
 
   # Save plot and file
   ggsave(pos_sp_mrna_norm_coverage_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_mrna_norm_coverage.pdf")))
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_mrns_norm_coverage.tsv"))
+  write_metadata_header(get_Rscript_filename(), tsv_file_path)
   write.table(
     pos_sp_mrna_norm_coverage,
-    file = file.path(output_dir, paste0(output_prefix, "pos_sp_mrna_norm_coverage.tsv")),
+    file = tsv_file_path,
+    append = T,
     sep = "\t",
     row = F,
     col = T,
@@ -883,9 +901,12 @@ tpms <- data.frame(
 )
 
 # write out to *_tpms.tsv
+tsv_file_path <- file.path(output_dir, paste0(output_prefix, "tpms.tsv"))
+write_metadata_header(get_Rscript_filename(), tsv_file_path)
 write.table(
   tpms,
-  file = file.path(output_dir, paste0(output_prefix, "tpms.tsv")),
+  file = tsv_file_path,
+  append = T,
   sep = "\t",
   row = F,
   col = T,
@@ -994,9 +1015,12 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
 
     # Save plot and file
     ggsave(cod_dens_tRNA_plot, filename = file.path(output_dir, paste0(output_prefix, "codon_ribodens.pdf")))
+    tsv_file_path <- file.path(output_dir, paste0(output_prefix, "codon_ribodens.tsv"))
+    write_metadata_header(get_Rscript_filename(), tsv_file_path)
     write.table(
       cod_dens_tRNA,
-      file = file.path(output_dir, paste0(output_prefix, "codon_ribodens.tsv")),
+      file = tsv_file_path,
+      append = T,
       sep = "\t",
       row = F,
       col = T,
