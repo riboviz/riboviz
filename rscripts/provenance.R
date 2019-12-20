@@ -32,16 +32,15 @@ get_version <- function(file_path = getopt::get_Rscript_filename()) {
 }
 
 
-#' Write a comment header to a file.
+#' Write a metadata header to a file with RiboViz date and
+#' version information.
 #'
 #' @param file_path Path to R file creating the data file.
 #' @param data_file Path to file into which header is to be written.
-write_comment_header <- function(file_path, data_file) {
+write_metadata_header <- function(file_path, data_file) {
   conx <- file(data_file, open = "w")
   writeLines("# Created by: RiboViz", conx)
-  writeLines(paste("# Date: RiboViz", toString(Sys.time())), conx)
-  writeLines(paste("# Component/version:",
-                  get_version(get_Rscript_filename())),
-            conx)
+  writeLines(paste("# Date:", toString(Sys.time())), conx)
+  writeLines(paste("# Component/version:", get_version(file_path)), conx)
   close(conx)
 }

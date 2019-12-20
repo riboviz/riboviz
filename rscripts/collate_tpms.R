@@ -1,11 +1,11 @@
-suppressMessages(library(getopt, quietly=T))
+suppressMessages(library(getopt, quietly = T))
 # Determine location of	provenance.R relative to current file
 source(file.path(dirname(getopt::get_Rscript_filename()), "provenance.R"))
-suppressMessages(library(tidyr, quietly=T))
-suppressMessages(library(dplyr, quietly=T))
-suppressMessages(library(readr, quietly=T))
-suppressMessages(library(purrr, quietly=T))
-suppressMessages(library(optparse, quietly=T))
+suppressMessages(library(tidyr, quietly = T))
+suppressMessages(library(dplyr, quietly = T))
+suppressMessages(library(readr, quietly = T))
+suppressMessages(library(purrr, quietly = T))
+suppressMessages(library(optparse, quietly = T))
 
 option_list <- list(
   make_option("--output-dir",
@@ -50,7 +50,7 @@ load_tpms <- function(ffile, orfs) {
         warning(paste(ffile, "does not exist, returning empty list"))
         return(NULL)
     }
-    features <- read_tsv(ffile)
+    features <- read_tsv(ffile, comment = "#")
     if (!all.equal(features$ORF, orfs)) {
         warning(paste("ORF names are not right in ", ffile))
     }
@@ -83,7 +83,7 @@ make_tpm_table <- function(output_dir,
                                         fend,
                                         sample_subdirs)
         print(paste("Loading ORFs from:", orf_file))
-        orfs <- orf_file %>% read_tsv() %>% .$ORF
+        orfs <- orf_file %>% read_tsv(comment = "#") %>% .$ORF
     } else {
         print(paste("Loading ORFs from:", orf_fasta))
         # TODO untested
@@ -103,6 +103,8 @@ make_tpm_table <- function(output_dir,
 
 round1 <- function(x) round(x, digits = 1)
 
+tpms_file_path <- file.path(output_dir, tpms_file)
+write_metadata_header(get_Rscript_filename(), tpms_file_path)
 make_tpm_table(output_dir, sample_subdirs, samples, orf_fasta) %>%
     mutate_if(is.numeric, round1) %>%
-    write_tsv(file.path(output_dir, tpms_file))
+    write_tsv(tpms_file_path, col_names = TRUE, append = TRUE)
