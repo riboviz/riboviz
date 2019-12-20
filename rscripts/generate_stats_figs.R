@@ -11,11 +11,11 @@
 # - tidy GetMRNACoverage wrapper
 # - functionalize pos_sp_mrna_norm_coverage
 # - functionalize GetTPMs into *_tpms.tsv
-# - refactor Codon-specific ribosome densities
+# - refactor Codon-specific ribosome densities WAITING
 # - replace write.table with write_tsv
 # - duplicate generate_stats_figs.R as .Rmd file
 # - replace Reduce, lapply, sapply by purrr functions??
-# - replace gff IRanges call with gff_df tidy
+# - replace gff IRanges call with gff_df tidy DONE
 #
 ## Should use relative path for rscripts??
 source("rscripts/read_count_functions.R")
@@ -119,7 +119,7 @@ opt
 # prepare files, opens hdf5 file connection
 hdf5file <- rhdf5::H5Fopen(hdFile) # filehandle for the h5 file
 
-# read in positions of all exons/genes in GFF format and subset CDS locations
+# list of gene names taken from h5 file
 gene_names <- rhdf5::h5ls(hdf5file, recursive = 1)$name
 
 # read in coding sequences
@@ -128,9 +128,8 @@ coding_seqs <- readDNAStringSet(orf_fasta)
 # range of read lengths between parameters set in config file
 read_range <- MinReadLen:MaxReadLen
 
-# read in positions of all exons/genes in GFF format and subset CDS locations
-gff <- readGFFAsGRanges(orf_gff_file)
-gff_df <- gff %>% data.frame %>% as_tibble # @ewallace: tidy tibble version
+# read in positions of all exons/genes in GFF format and convert to tibble data frame 
+gff_df <- readGFFAsDf(orf_gff_file)
 
 #####
 # check for 3nt periodicity
@@ -139,53 +138,54 @@ print("Starting: Check for 3nt periodicity globally")
 # NOTE: Do not use mclapply when accessing H5 data
 
 # get gene and position specific total counts for all read lengths
-gene_poslen_counts_5start <-
+gene_poslen_counts_5start_df <-
   lapply(gene_names,
-    GetGeneDatamatrix5start,
+  function(gene) 
+    GetGeneDatamatrix5start(gene,
     dataset,
     hdf5file,
-    gff,
+    posn_5start = getCDS5start(gene, gff_df),
     n_buffer = nnt_buffer,
-    nnt_gene
+    nnt_gene = nnt_gene)
   ) %>%
-  Reduce("+", .) # Reduce is a BiocGenerics, there is a purrr alternative
+  Reduce("+", .) %>% # sums the list of data matrices
+  TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = MinReadLen) 
 
 # ribogrid_5start
-gene_poslen_counts_5start %>%
-  TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = MinReadLen) %>%
+gene_poslen_counts_5start_df %>%
   plot_ribogrid() %>%
   ggsave(
     filename = paste0(out_prefix, "_startcodon_ribogrid.pdf"),
     width = 6, height = 3
   )
 
-gene_poslen_counts_5start %>%
-  TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = MinReadLen) %>%
+gene_poslen_counts_5start_df %>%
   barplot_ribogrid() %>%
   ggsave(
     filename = paste0(out_prefix, "_startcodon_ribogridbar.pdf"),
     width = 6, height = 5
   )
 
-gene_poslen_counts_3end <-
+gene_poslen_counts_3end_df <-
   lapply(gene_names,
-    GetGeneDatamatrix3end,
+  function(gene)
+  GetGeneDatamatrix3end(
+    gene,
     dataset,
     hdf5file,
-    gff,
+    posn_3end = getCDS3end(gene, gff_df),
     n_buffer = nnt_buffer,
-    nnt_gene
-  ) %>%
-  Reduce("+", .) # Reduce is a BiocGenerics, there is a purrr alternative
+    nnt_gene = nnt_gene
+  )) %>%
+  Reduce("+", .) %>% # sums the list of data matrices
+  TidyDatamatrix(startpos = -nnt_gene + 1, startlen = MinReadLen)
 
 # summarize by adding different read lengths
-gene_pos_counts_5start <- gene_poslen_counts_5start %>%
-  TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = MinReadLen) %>%
+gene_pos_counts_5start <- gene_poslen_counts_5start_df %>%
   group_by(Pos) %>%
   summarize(Counts = sum(Counts))
 
-gene_pos_counts_3end <- gene_poslen_counts_3end %>%
-  TidyDatamatrix(startpos = -nnt_gene + 1, startlen = MinReadLen) %>%
+gene_pos_counts_3end <- gene_poslen_counts_3end_df  %>%
   group_by(Pos) %>%
   summarize(Counts = sum(Counts))
 
@@ -360,7 +360,7 @@ if (rpf) {
   out5p <- matrix(NA, nrow = length(gene_names), ncol = 500) # 5'
   out3p <- matrix(NA, nrow = length(gene_names), ncol = 500) # 3'
   
-  # TODO
+  # TODO: map this over gff_df for gene-specific "buffer" values.
   out <- lapply(gene_names, function(gene) {
     GetCodonPositionReads(
       gene,
@@ -587,6 +587,7 @@ if (!is.na(t_rna) & !is.na(codon_pos)) {
   # Only for RPF datasets
   if (rpf) {
     # TODO: This still depends on yeast-specific arguments and should be edited.
+    # WAITING: we want new format of codon_pos from @john-s-f before editing this chunk
     yeast_tRNAs <- read.table(t_rna, h = T) # Read in yeast tRNA estimates
     load(codon_pos) # Position of codons in each gene (numbering ignores first 200 codons)
     # Reads in an object named "codon_pos"

@@ -16,7 +16,27 @@ suppressMessages(library(magrittr))
 suppressMessages(library(purrr))
 
 
-##### 
+#####
+# Functions to read data from gff
+
+readGFFAsDf <- purrr::compose(rtracklayer::readGFFAsGRanges, data.frame, as_tibble,
+  .dir = "forward")
+
+getCDS5start <- function(name, gffdf, ftype="CDS", fstrand="+") {
+  gffdf %>% 
+    filter(type==ftype, Name == name, strand == fstrand) %>% 
+    pull(start) %>% 
+    min 
+}
+
+getCDS3end <- function(name, gffdf, ftype="CDS", fstrand="+") {
+  gffdf %>% 
+    filter(type==ftype, Name == name, strand == fstrand) %>% 
+    pull(end) %>% 
+    max 
+}
+
+#####
 # Functions to read data from h5 file
 
 # function to get data matrix of read counts for gene and dataset from hdf5file
@@ -41,29 +61,30 @@ GetGeneReadLength <- function(gene, dataset, hdf5file) {
 
 # function to get matrix of read counts from n_buffer before start codon to nnt_gene after
 # for gene and dataset from hd5 file hdf5file, using UTR5 annotations in gff
-GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, gff,
-                                    n_buffer = nnt_buffer,
-                                    nnt_gene = nnt_gene) {
+GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, 
+                                    posn_5start,
+                                    n_buffer, nnt_gene) {
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hdf5file)
   # @ewallace: replace this by gff_df?
-  n_utr5 <- BiocGenerics::width(gff[gff$type == "UTR5" & gff$Name == gene])
+  # n_utr5 <- BiocGenerics::width(gff[gff$type == "UTR5" & gff$Name == gene])
   # if n_buffer bigger than length n_utr5, pad with zeros:
-  if (n_utr5 >= n_buffer) {
-    # if length n_utr5 bigger than n_buffer
-    n_left5 <- n_utr5 - n_buffer + 1 # column to start from (5'end)
+  if (posn_5start > n_buffer) {
+    # if posn_5start bigger than n_buffer
+    n_left5 <- posn_5start - n_buffer # column to start from (5'end)
     zeropad5_mat <- matrix(0, nrow = nrow(data_mat_all), ncol = 0)
   } else {
     # if length n_utr5 less than n_buffer
     n_left5 <- 1 # column to start from (5'end)
-    zeropad5_mat <- matrix(0, nrow = nrow(data_mat_all), ncol = (n_buffer - n_utr5))
+    zeropad5_mat <- matrix(0, nrow = nrow(data_mat_all), ncol = (n_buffer - posn_5start + 1 ))
   }
-  n_right3 <- n_utr5 + nnt_gene # column to end with (3'end)
+  n_right3 <- posn_5start + nnt_gene - 1 # column to end with (3'end)
   data_mat_5start <- data_mat_all[, n_left5:n_right3]
   return(cbind(zeropad5_mat, data_mat_5start))
 }
 
-GetGeneDatamatrix3end <- function(gene, dataset, hdf5file, gff,
-                                  n_buffer = nnt_buffer, nnt_gene = nnt_gene) {
+GetGeneDatamatrix3end <- function(gene, dataset, hdf5file, 
+                                  posn_3end,
+                                  n_buffer, nnt_gene) {
   # get data matrix of read counts from nnt_gene before stop codon to n_buffer after
   # for gene and dataset from hd5 file hdf5file, using UTR3 annotations in gff
   # if n_buffer bigger than length n_utr3, pad with zeros.
@@ -71,11 +92,12 @@ GetGeneDatamatrix3end <- function(gene, dataset, hdf5file, gff,
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hdf5file)
   n_all <- ncol(data_mat_all)
   # @ewallace: replace this by gff_df?
-  n_utr3 <- BiocGenerics::width(gff[gff$type == "UTR3" & gff$Name == gene])
-  n_left5 <- n_all - n_utr3 - nnt_gene + 1 # column to start from (5'end)
+  # n_utr3 <- BiocGenerics::width(gff[gff$type == "UTR3" & gff$Name == gene])
+  n_left5 <- posn_3end - nnt_gene + 1 # column to start from (5'end)
+  n_utr3  <- n_all - posn_3end
   if (n_utr3 >= n_buffer) {
     # length n_utr3 bigger than n_buffer
-    n_right3 <- n_all - n_utr3 + n_buffer # column to end with (3'end)
+    n_right3 <- posn_3end + n_buffer # column to end with (3'end)
     zeropad3_mat <- matrix(0, nrow = nrow(data_mat_all), ncol = 0)
   } else {
     # length n_utr3 less than n_buffer
