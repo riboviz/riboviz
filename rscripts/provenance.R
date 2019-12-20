@@ -1,7 +1,7 @@
 # Provenance-related utilities.
 
-library(git2r)
 library(getopt)
+library(git2r)
 
 #' Get RiboViz version information.
 #'
@@ -14,12 +14,12 @@ library(getopt)
 #'
 #' @param file_path R file path.
 #' @return: message.
-get_version <- function(file_path = get_Rscript_filename()) {
+get_version <- function(file_path = getopt::get_Rscript_filename()) {
   file_name <- basename(file_path)
   location <- dirname(normalizePath(file_path))
   version <- tryCatch({
-    repo <- repository(location)
-    commit <- commits(repo, n = 1)[[1]]
+    repo <- git2r::repository(location)
+    commit <- git2r::commits(repo, n = 1)[[1]]
     sha <- commit$sha
     time <- commit$author$when
     paste("commit", sha, "date", time)
