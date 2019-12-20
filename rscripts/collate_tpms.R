@@ -1,8 +1,11 @@
-library(tidyr)
-library(dplyr)
-library(readr)
-library(purrr)
-library(optparse)
+suppressMessages(library(getopt, quietly=T))
+# Determine location of	provenance.R relative to current file
+source(file.path(dirname(getopt::get_Rscript_filename()), "provenance.R"))
+suppressMessages(library(tidyr, quietly=T))
+suppressMessages(library(dplyr, quietly=T))
+suppressMessages(library(readr, quietly=T))
+suppressMessages(library(purrr, quietly=T))
+suppressMessages(library(optparse, quietly=T))
 
 option_list <- list(
   make_option("--output-dir",
@@ -23,6 +26,7 @@ option_list <- list(
               help = "ORF file that was aligned to")
 )
 
+print(get_version(get_Rscript_filename()))
 parser <- OptionParser(option_list = option_list)
 
 opts <- parse_args(parser,
