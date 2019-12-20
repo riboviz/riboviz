@@ -30,3 +30,18 @@ get_version <- function(file_path = getopt::get_Rscript_filename()) {
   })
   return(paste(file_name, "version", version))
 }
+
+
+#' Write a comment header to a file.
+#'
+#' @param file_path Path to R file creating the data file.
+#' @param data_file Path to file into which header is to be written.
+write_comment_header <- function(file_path, data_file) {
+  conx <- file(data_file, open = "w")
+  writeLines("# Created by: RiboViz", conx)
+  writeLines(paste("# Date: RiboViz", toString(Sys.time())), conx)
+  writeLines(paste("# Component/version:",
+                  get_version(get_Rscript_filename())),
+            conx)
+  close(conx)
+}
