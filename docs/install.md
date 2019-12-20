@@ -216,6 +216,17 @@ Install:
 $ conda install -y pyyaml
 ```
 
+### gitpython
+
+Web sites:
+
+* [gitpython](https://gitpython.readthedocs.io/en/stable/)
+* [GitHub](https://github.com/gitpython-developers/GitPython)
+
+```console
+$ conda install -y gitpython
+```
+
 ### Cutadapt
 
 Web sites:
