@@ -14,20 +14,20 @@ where the barcode is the first section delimited by underscores. If another deli
 
 ```
 $ python -m riboviz.tools.demultiplex_fastq  -h
-usage: demultiplex_fastq.py [-h] [-ss [SAMPLE_SHEET_FILE]] [-r1 [READ1_FILE]]
-                            [-r2 [READ2_FILE]] [-m MISMATCHES] [-o [OUT_DIR]]
+usage: demultiplex_fastq.py [-h] [-s [SAMPLE_SHEET_FILE]] [-1 [READ1_FILE]]
+                            [-2 [READ2_FILE]] [-m MISMATCHES] [-o [OUT_DIR]]
                             [-d [DELIMITER]]
 
 Demultiplex reads from fastq[.gz] by inline barcodes
 
 optional arguments:
   -h, --help            show this help message and exit
-  -ss [SAMPLE_SHEET_FILE], --samplesheet [SAMPLE_SHEET_FILE]
+  -s [SAMPLE_SHEET_FILE], --sample-sheet [SAMPLE_SHEET_FILE]
                         Sample sheet filename, tab-delimited text format with
                         SampleID and TagRead columns
-  -r1 [READ1_FILE], --read1 [READ1_FILE]
+  -1 [READ1_FILE], --read1 [READ1_FILE]
                         Read 1 filename, fastq[.gz] format
-  -r2 [READ2_FILE], --read2 [READ2_FILE]
+  -2 [READ2_FILE], --read2 [READ2_FILE]
                         Read 2 pair filename, fastq[.gz] format
   -m MISMATCHES, --mismatches MISMATCHES
                         Number of mismatches permitted in barcode
@@ -39,19 +39,19 @@ optional arguments:
 
 Inputs:
 
-* `-ss|--samplesheet`: Sample sheet filename, tab-delimited text format with SampleID and TagRead (barcode) columns
-* `-r1|--read1`: Read 1 filename, fastq[.gz] format
-* `-r2|--read2`: Read 2 pair filename, fastq[.gz] format (must be consistent with Read 1 filename) (optional) . If provided then the read files should have read pairs in corresponding positions.
+* `-s|--sample-sheet`: Sample sheet filename, tab-delimited text format with SampleID and TagRead (barcode) columns
+* `-1|--read1`: Read 1 filename, fastq[.gz] format
+* `-2|--read2`: Read 2 pair filename, fastq[.gz] format (must be consistent with Read 1 filename) (optional) . If provided then the read files should have read pairs in corresponding positions.
 * `-m|--mismatches`: Number of mismatches permitted in barcode (optional, default 1)
 * `-o|--outdir`: Output directory (optional, default output)
 * `-d|--delimiter`: Barcode delimiter (optional, default "_")
 
 Outputs:
 
-* If `r1` only was provided:
+* If `1` only was provided:
   - A file `SampleID.fastq[.gz]` with assigned reads.
   - A file, `Unassigned.fastq[.gz]`, with information on unassigned reads.
-* If `r1` and `r2` were provided:
+* If `1` and `2` were provided:
   - Files `SampleID_R1.fastq[.gz]` and `SampleID_R2.fastq[.gz]` with assigned reads.
   - Files, `Unassigned_R1.fastq[.gz]` and `Unassigned_R2.fastq[.gz]` with information on unassigned reads.
 * If the input file(s) had were of type fastq.gz then the output files will be of type fastq.gz.
@@ -86,12 +86,12 @@ Demultiplex single-end data:
 ```console
 $ mkdir extracts-deplexed/
 $ python -m riboviz.tools.demultiplex_fastq \
-  -r1 extracts/Sample_4reads_R1.fastq.gz \
-  -ss data/demultiplex/TagSeqBarcodedOligos2015.txt \
+  -1 extracts/Sample_4reads_R1.fastq.gz \
+  -s data/demultiplex/TagSeqBarcodedOligos2015.txt \
   -o extracts-deplexed/TestSingleSplit4reads
 $ python -m riboviz.tools.demultiplex_fastq \
-  -r1 extracts/Sample_init10000_R1.fastq.gz \
-  -ss data/demultiplex/TagSeqBarcodedOligos2015.txt \
+  -1 extracts/Sample_init10000_R1.fastq.gz \
+  -s data/demultiplex/TagSeqBarcodedOligos2015.txt \
   -o extracts-deplexed/TestSingleSplit10000
 ```
 
@@ -99,14 +99,14 @@ Demultiplex paired-end data:
 
 ```console
 $ python -m riboviz.tools.demultiplex_fastq \
-  -r1 extracts/Sample_4reads_R1.fastq.gz \
-  -r2 extracts/Sample_4reads_R2.fastq.gz \
-  -ss data/demultiplex/TagSeqBarcodedOligos2015.txt \
+  -1 extracts/Sample_4reads_R1.fastq.gz \
+  -2 extracts/Sample_4reads_R2.fastq.gz \
+  -s data/demultiplex/TagSeqBarcodedOligos2015.txt \
   -o extracts-deplexed/TestPairSplit4reads
 $ python -m riboviz.tools.demultiplex_fastq \
-  -r1 extracts/Sample_init10000_R1.fastq.gz \
-  -r2 extracts/Sample_init10000_R2.fastq.gz \
-  -ss data/demultiplex/TagSeqBarcodedOligos2015.txt \
+  -1 extracts/Sample_init10000_R1.fastq.gz \
+  -2 extracts/Sample_init10000_R2.fastq.gz \
+  -s data/demultiplex/TagSeqBarcodedOligos2015.txt \
   -o extracts-deplexed/TestPairSplit10000
 ```
 

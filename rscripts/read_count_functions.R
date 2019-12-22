@@ -140,7 +140,7 @@ barplot_ribogrid <- function(tidymat, small_read_range = 26:32) {
 }
 
 # GetGeneDatamatrix5start(gene="YAL003W",dataset="vignette",hdf5file,gff=gff) %>%
-# TidyDatamatrix(startpos=-nnt_buffer,startlen=MinReadLen) %>%
+# TidyDatamatrix(startpos=-nnt_buffer,startlen=min_read_length) %>%
 #   plot_ribogrid
 # GetGeneDatamatrix3end(gene="YAL003W",dataset="vignette",hdf5file,gff=gff)
 
@@ -155,9 +155,9 @@ GetNTPeriod <- function(gene, dataset, hdf5file, left, right) {
 #####
 ## functions for position specific distribution of reads
 # codon-specific reads for RPF datasets
-GetCodonPositionReads <- function(gene, dataset, hdf5file, left, right, MinReadLen) {
+GetCodonPositionReads <- function(gene, dataset, hdf5file, left, right, min_read_length) {
   # @ewallace: this needs documentation of inputs and outputs
-  lid <- 28 - MinReadLen + 1
+  lid <- 28 - min_read_length + 1
   reads_pos <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
   reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
   end_reads_pos_subset <- ncol(reads_pos_subset) # Number of columns of the subset
@@ -172,12 +172,12 @@ GetCodonPositionReads <- function(gene, dataset, hdf5file, left, right, MinReadL
 }
 
 # Nt-specific coverage for mRNA datasets
-GetMRNACoverage <- function(gene, dataset, hdf5file, left, right, read_range, MinReadLen, Buffer) {
+GetMRNACoverage <- function(gene, dataset, hdf5file, left, right, read_range, min_read_length, Buffer) {
   reads_pos <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
   reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS mapped reads are considered
 
   nt_IR_list <- lapply(read_range, function(w) {
-    IRanges::IRanges(start = rep(1:ncol(reads_pos_subset), reads_pos_subset[(w - MinReadLen + 1), ]), width = w)
+    IRanges::IRanges(start = rep(1:ncol(reads_pos_subset), reads_pos_subset[(w - min_read_length + 1), ]), width = w)
   }) # Create list of IRanges for position-specific reads of all length
   nt_IR <- unlist(as(nt_IR_list, "IRangesList")) # Combine IRanges from different read lengths
   nt_cov <- IRanges::coverage(nt_IR) # Estimate nt-specific coverage of mRNA reads
@@ -206,15 +206,15 @@ GetMRNACoverage <- function(gene, dataset, hdf5file, left, right, read_range, Mi
 #####
 ## functions to calculate read frame etc.
 
-CalcAsiteFixedOneLength <- function(reads_pos_length, MinReadLen,
+CalcAsiteFixedOneLength <- function(reads_pos_length, min_read_length,
                                     read_length, asite_disp) {
   # Calculate read A-site using a fixed displacement for a single read length
-  length_row_choose <- read_length - MinReadLen + 1
+  length_row_choose <- read_length - min_read_length + 1
   reads_pos_length[length_row_choose, ] %>%
     dplyr::lag(n = asite_disp, default = 0)
 }
 
-CalcAsiteFixed <- function(reads_pos_length, MinReadLen,
+CalcAsiteFixed <- function(reads_pos_length, min_read_length,
                            asite_disp_length = data.frame(
                              read_length = c(28, 29, 30),
                              asite_disp = c(15, 15, 15)
@@ -228,7 +228,7 @@ CalcAsiteFixed <- function(reads_pos_length, MinReadLen,
       function(read_length, asite_disp) {
         CalcAsiteFixedOneLength(
           reads_pos_length,
-          MinReadLen,
+          min_read_length,
           read_length,
           asite_disp
         )
@@ -274,7 +274,7 @@ NormByMean <- function(x,...) {
 }
 
 GetGeneCodonPosReads1dsnap <- function(gene, dataset, hdf5file, left, right, 
-                         MinReadLen, 
+                         min_read_length, 
                          asite_disp_length = data.frame(
                              read_length = c(28, 29, 30),
                              asite_disp = c(15, 15, 15)
@@ -282,7 +282,7 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hdf5file, left, right,
                          snapdisp=0L) {
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
   reads_asitepos <- CalcAsiteFixed(
-    reads_pos_length, MinReadLen,
+    reads_pos_length, min_read_length,
     asite_disp_length
   )
   SnapToCodon(reads_asitepos,left,right,snapdisp)
@@ -343,16 +343,16 @@ WilcoxTestFrame <- function(x, left, right) {
   ))
 }
 
-GetGeneReadFrame <- function(gene, dataset, hdf5file, left, right, MinReadLen,
+GetGeneReadFrame <- function(gene, dataset, hdf5file, left, right, min_read_length,
                              asite_disp_length = data.frame(
                                read_length = c(28, 29, 30),
                                asite_disp = c(15, 15, 15)
                              )) {
   # example from vignette:
-  #   GetGeneReadFrame(hdf5file, "YAL003W", dataset, 251, 871, MinReadLen)
+  #   GetGeneReadFrame(hdf5file, "YAL003W", dataset, 251, 871, min_read_length)
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hdf5file)
   reads_asitepos <- CalcAsiteFixed(
-    reads_pos_length, MinReadLen,
+    reads_pos_length, min_read_length,
     asite_disp_length
   )
   sum_by_frame <- SumByFrame(reads_asitepos, left, right)
@@ -405,11 +405,11 @@ BoxplotReadFrameProportion <- function(read_frame_df, feat_names = "gene") {
 #####
 ## biases in nucleotide composition along mapped read lengths
 
-GetNTReadPosition <- function(gene, dataset, hdf5file, lid, MinReadLen) {
+GetNTReadPosition <- function(gene, dataset, hdf5file, lid, min_read_length) {
   reads_pos_len <- GetGeneDatamatrix(gene, dataset, hdf5file)[lid, ] # Get reads of a particular length
-  reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (lid + MinReadLen - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
+  reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (lid + min_read_length - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
   pos <- rep(1:length(reads_pos_len), reads_pos_len) # nt positions weighted by number of reads mapping to it
-  pos_IR <- IRanges::IRanges(start = pos, width = (lid + MinReadLen - 1)) # Create an IRanges object for position-specific reads of a particular length
+  pos_IR <- IRanges::IRanges(start = pos, width = (lid + min_read_length - 1)) # Create an IRanges object for position-specific reads of a particular length
   return(pos_IR)
 }
 

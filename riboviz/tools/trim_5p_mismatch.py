@@ -2,20 +2,22 @@
 
 ## Remove a single 5' mismatched nt AND filter reads with more than specified mismatches from sam file
 ## example:
-##   python trim_5p_mismatch.py -in testdata_trim_5p_mismatch.sam -out testdata_trim_5p_mismatch_clean.sam
-##   python trim_5p_mismatch.py -in testdata_trim_5pos5neg.sam -out testdata_trim_5pos5neg_clean.sam
-##   python trim_5p_mismatch.py -in data_map1.sam -out data_map1_clean.sam
+##   python trim_5p_mismatch.py -i testdata_trim_5p_mismatch.sam -o testdata_trim_5p_mismatch_clean.sam
+##   python trim_5p_mismatch.py -i testdata_trim_5pos5neg.sam -o testdata_trim_5pos5neg_clean.sam
+##   python trim_5p_mismatch.py -i data_map1.sam -o data_map1_clean.sam
 
 import pysam, argparse, re
+from riboviz import provenance
 
-if __name__=="__main__" :  
+if __name__=="__main__" :
+    print(provenance.get_version(__file__))
     parser = argparse.ArgumentParser(description="Remove a single 5' mismatched nt AND filter reads with more than specified mismatches from sam file")
-    parser.add_argument("-in","--samfilein",dest="samfilein",nargs='?',help="sam file input")
-    parser.add_argument("-out","--samfileout",dest="samfileout",nargs='?',help="sam file output")
-    parser.add_argument("-mm","--mismatches",dest="mismatches",nargs='?',default=1,type=int,help="number of mismatches to allow")
+    parser.add_argument("-i","--input",dest="samfilein",required=True,help="sam file input")
+    parser.add_argument("-o","--output",dest="samfileout",required=True,help="sam file output")
+    parser.add_argument("-m","--mismatches",dest="mismatches",nargs='?',default=1,type=int,help="number of mismatches to allow")
     fivep_parser = parser.add_mutually_exclusive_group(required=False)
-    fivep_parser.add_argument("-5p","--fivepremove", dest='fivepremove', action='store_true')
-    fivep_parser.add_argument("-no5p","--nofivepremove", dest='fivepremove', action='store_false')
+    fivep_parser.add_argument("-5","--5p-remove", dest='fivepremove', action='store_true')
+    fivep_parser.add_argument("-k","--5p-keep", dest='fivepremove', action='store_false')
     parser.set_defaults(fivepremove=True)
     options = parser.parse_args()
     print(options)

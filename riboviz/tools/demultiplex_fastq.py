@@ -10,10 +10,10 @@ another delimiter was used then that can be specified.
 
 Inputs:
 
-* `-ss|--samplesheet`: Sample sheet filename, tab-delimited text
+* `-s|--sample-sheet`: Sample sheet filename, tab-delimited text
     format with SampleID and TagRead (barcode) columns
-* `-r1|--read1`: Read 1 filename, fastq[.gz] format
-* `-r2|--read2`: Read 2 pair filename, fastq[.gz] format
+* `-1|--read1`: Read 1 filename, fastq[.gz] format
+* `-2|--read2`: Read 2 pair filename, fastq[.gz] format
   (must be consistent with Read 1 filename) (optional)
   If provided then the read files should have read pairs in
   corresponding positions.
@@ -24,10 +24,10 @@ Inputs:
 
 Outputs:
 
-* If `r1` only was provided:
+* If `1` only was provided:
   - A file SampleID.fastq[.gz] with assigned reads.
   - A file, Unassigned.fastq[.gz], with information on unassigned reads.
-* If `r1` and `r2` were provided:
+* If `1` and `2` were provided:
   - Files SampleID_R1.fastq[.gz] and SampleID_R2.fastq[.gz] with assigned
     reads.
   - Files, Unassigned_R1.fastq[.gz] and Unassigned_R2.fastq[.gz] with
@@ -76,6 +76,7 @@ import argparse
 import gzip
 import os
 from itertools import islice
+from riboviz import provenance
 from riboviz import utils
 from riboviz.utils import BARCODE_DELIMITER
 from riboviz.utils import SAMPLE_ID
@@ -341,7 +342,8 @@ def demultiplex(sample_sheet_file,
     sample_sheet[NUM_READS] = num_reads
     utils.save_deplexed_sample_sheet(sample_sheet,
                                      num_unassigned_reads,
-                                     num_reads_file)
+                                     num_reads_file,
+                                     client=__file__)
     print(("Done"))
 
 
@@ -354,17 +356,17 @@ def parse_command_line_options():
     """
     parser = argparse.ArgumentParser(
         description="Demultiplex reads from fastq[.gz] by inline barcodes")
-    parser.add_argument("-ss",
-                        "--samplesheet",
+    parser.add_argument("-s",
+                        "--sample-sheet",
                         dest="sample_sheet_file",
-                        nargs='?',
+                        required=True,
                         help="Sample sheet filename, tab-delimited text format with SampleID and TagRead columns")
-    parser.add_argument("-r1",
+    parser.add_argument("-1",
                         "--read1",
                         dest="read1_file",
-                        nargs='?',
+                        required=True,
                         help="Read 1 filename, fastq[.gz] format")
-    parser.add_argument("-r2",
+    parser.add_argument("-2",
                         "--read2",
                         dest="read2_file",
                         default=None,
@@ -396,6 +398,7 @@ def main():
     """
     Parse command-line options then invoke "demultiplex".
     """
+    print(provenance.get_version(__file__))
     options = parse_command_line_options()
     sample_sheet_file = options.sample_sheet_file
     read1_file = options.read1_file

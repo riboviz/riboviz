@@ -150,7 +150,7 @@ def test_deplex_umi_groups(configuration_module, sample_id):
     tmp_dir = config[params.TMP_DIR]
     groups_tsv = os.path.join(tmp_dir,
                               sample_id,
-                              sample_id + "_" + "post_dedup_groups.tsv")
+                              "post_dedup_groups.tsv")
     groups = pd.read_csv(groups_tsv, sep="\t")
     num_groups = 5
     assert groups.shape[0] == num_groups, \
@@ -198,7 +198,7 @@ def test_deplex_tpms_collated_tsv(configuration_module, sample_id):
     config, _ = configuration_module
     output_dir = config[params.OUTPUT_DIR]
     tpms_tsv = os.path.join(output_dir, "TPMs_collated.tsv")
-    tpms = pd.read_csv(tpms_tsv, sep="\t")
+    tpms = pd.read_csv(tpms_tsv, sep="\t", comment="#")
     num_rows, num_columns = tpms.shape
     assert num_columns == 4, "Unexpected number of columns"
     assert num_rows == 68, "Unexpected number of rows"

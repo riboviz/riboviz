@@ -33,8 +33,8 @@ If sample files (`fq_files`) are specified, then `prep_riboviz.py` processes the
 3. Process each sample ID-sample file pair (`fq_files`) in turn:
    1. Cut out sequencing library adapters (`adapters`) using `cutadapt`.
    2. Extract UMIs using `umi_tools extract`, if requested (if `extract_umis: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`). The extracted UMIs are inserted into the read headers of the FASTQ records.
-   3. Remove rRNA or other contaminating reads by alignment to rRNA index file (`rRNA_index`) using `hisat2`.
-   4. Align remaining reads to ORFs index file (`orf_index`). using `hisat2`.
+   3. Remove rRNA or other contaminating reads by alignment to rRNA index files (`rrna_index_prefix`) using `hisat2`.
+   4. Align remaining reads to ORFs index files (`orf_index_prefix`). using `hisat2`.
    5. Trim 5' mismatches from reads and remove reads with more than 2 mismatches using `trim_5p_mismatch.py`.
    6. Output UMI groups pre-deduplication using `umi_tools group` if requested (if `dedup_umis: TRUE` and `group_umis: TRUE`)
    7. Deduplicate reads using `umi_tools dedup`, if requested (if `dedup_umis: TRUE`)
@@ -45,7 +45,6 @@ If sample files (`fq_files`) are specified, then `prep_riboviz.py` processes the
    12. Generate summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
    13. Write output files produced above into an sample-specific directory, named using the sample ID, within the output directory (`dir_out`). 
 4. Collate TPMs across results, using `collate_tpms.R` and write into output directory (`dir_out`). Only the results from successfully-processed samples are collated.
-
 
 [Workflow](./images/workflow.svg) (SVG) shows an images of the workflow with the key steps, inputs and outputs.
 
@@ -82,24 +81,26 @@ Intermediate files are produced within the temporary directory (`dir_tmp`).
 
 For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-specific subdirectory (`<SAMPLE_ID>`):
 
-* `<SAMPLE_ID>_trim.fq`: trimmed reads.
-* `<SAMPLE_ID>_nonrRNA.fq`: trimmed non-rRNA reads.
-* `<SAMPLE_ID>_rRNA_map.sam`: rRNA-mapped reads.
-* `<SAMPLE_ID>_orf_map.sam`: ORF-mapped reads.
-* `<SAMPLE_ID>_orf_map_clean.sam`: ORF-mapped reads with mismatched nt trimmed.
-* `<SAMPLE_ID>_unaligned.sam`: unaligned reads. These files can be used to find common contaminants or translated sequences not in your ORF annotation.
+* `trim.fq`: trimmed reads. This is not present if a multiplexed file (`multiplex_fq_files`) is specified.
+* `nonrRNA.fq`: trimmed non-rRNA reads.
+* `rRNA_map.sam`: rRNA-mapped reads.
+* `orf_map.sam`: ORF-mapped reads.
+* `orf_map_clean.sam`: ORF-mapped reads with mismatched nt trimmed.
+* `unaligned.sam`: unaligned reads. These files can be used to find common contaminants or translated sequences not in your ORF annotation.
 
 If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specific files are also produced:
 
-* `<SAMPLE_ID>_extract_trim.fq`: trimmed reads with UMIs extracted.
+* `extract_trim.fq`: trimmed reads with UMIs extracted. This is not present if a multiplexed file (`multiplex_fq_files`) is specified.
+* `pre_dedup.bam`: BAM file prior to deduplication.
+* `pre_dedup.bam.bai`: BAM index file for `pre_dedup.bam`.
 * UMI groups pre- and post-deduplication (if `group_umis: TRUE`):
-  - `<SAMPLE_ID>_pre_dedup_groups.tsv`: UMI groups before deduplication.
-  - `<SAMPLE_ID>_post_dedup_groups.tsv`: UMI groups after deduplication.
+  - `pre_dedup_groups.tsv`: UMI groups before deduplication.
+  - `post_dedup_groups.tsv`: UMI groups after deduplication.
 * UMI deduplication statistics:
-  - `<SAMPLE_ID>_dedup_stats_edit_distance.tsv`: edit distance between UMIs at each position.
-  - `<SAMPLE_ID>_dedup_stats_per_umi_per_position.tsv`: histogram of counts per position per UMI pre- and post-deduplication.
-  - `<SAMPLE_ID>_dedup_stats_per_umi.tsv`: number of times each UMI was observed, total counts and median counts, pre- and post-deduplication
-* For more information on the `stats` files, see see UMI-tools [Dedup-specific options](https://umi-tools.readthedocs.io/en/latest/reference/dedup.html) and [documentation on stats file #250](https://github.com/CGATOxford/UMI-tools/issues/250)
+  - `dedup_stats_edit_distance.tsv`: edit distance between UMIs at each position.
+  - `dedup_stats_per_umi_per_position.tsv`: histogram of counts per position per UMI pre- and post-deduplication.
+  - `dedup_stats_per_umi.tsv`: number of times each UMI was observed, total counts and median counts, pre- and post-deduplication
+  - For more information on the `stats` files, see see UMI-tools [Dedup-specific options](https://umi-tools.readthedocs.io/en/latest/reference/dedup.html) and [documentation on stats file #250](https://github.com/CGATOxford/UMI-tools/issues/250)
 
 If a multiplexed file (`multiplex_fq_files`) is specified, then the following files and directories are also written into the temporary directory:
 
@@ -125,29 +126,24 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 
 * `<SAMPLE_ID>.bam`: BAM file of reads mapped to transcripts, which can be directly used in genome browsers.
 * `<SAMPLE_ID>.bam.bai`: BAM index file for `<SAMPLE_ID>.bam`.
-* `<SAMPLE_ID>_minus.bedgraph`: bedgraph of reads from minus strand (if `make_bedgraph: TRUE`).
-* `<SAMPLE_ID>_plus.bedgraph`: bedgraph of reads from plus strand (if `make_bedgraph: TRUE`).
+* `minus.bedgraph`: bedgraph of reads from minus strand (if `make_bedgraph: TRUE`).
+* `plus.bedgraph`: bedgraph of reads from plus strand (if `make_bedgraph: TRUE`).
 * `<SAMPLE_ID>.h5`: length-sensitive alignments in compressed h5 format.
-* `<SAMPLE_ID>_3nt_periodicity.tsv`
-* `<SAMPLE_ID>_3nt_periodicity.pdf`
-* `<SAMPLE_ID>_read_lengths.tsv`
-* `<SAMPLE_ID>_read_lengths.pdf`
-* `<SAMPLE_ID>_pos_sp_nt_freq.tsv`
-* `<SAMPLE_ID>_pos_sp_rpf_norm_reads.pdf`
-* `<SAMPLE_ID>_pos_sp_rpf_norm_reads.tsv`
-* `<SAMPLE_ID>_features.pdf`
-* `<SAMPLE_ID>_tpms.tsv`
-* `<SAMPLE_ID>_codon_ribodens.tsv`
-* `<SAMPLE_ID>_codon_ribodens.pdf`
-* `<SAMPLE_ID>_startcodon_ribogridbar.pdf`
-* `<SAMPLE_ID>_startcodon_ribogrid.pdf`
-* `<SAMPLE_ID>_3ntframe_bygene.tsv`
-* `<SAMPLE_ID>_3ntframe_propbygene.pdf`
-
-If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specific files are also produced:
-
-* `<SAMPLE_ID>_dedup.bam`: deduplicated BAM file.
-* `<SAMPLE_ID>_dedup.bam.bai`: BAM index file for `<SAMPLE_ID>_dedup.bam`.
+* `3nt_periodicity.tsv`
+* `3nt_periodicity.pdf`
+* `read_lengths.tsv`
+* `read_lengths.pdf`
+* `pos_sp_nt_freq.tsv`
+* `pos_sp_rpf_norm_reads.pdf`
+* `pos_sp_rpf_norm_reads.tsv`
+* `features.pdf`
+* `tpms.tsv`
+* `codon_ribodens.tsv`
+* `codon_ribodens.pdf`
+* `startcodon_ribogridbar.pdf`
+* `startcodon_ribogrid.pdf`
+* `3ntframe_bygene.tsv`
+* `3ntframe_propbygene.pdf`
 
 A summary file is also put in the output directory (`dir_out`):
 
@@ -169,16 +165,16 @@ The following log files are produced:
 hisat2_build_r_rna.log
 hisat2_build_orf.log
 <SAMPLE_ID>/
-  <SAMPLE_ID>_01_cutadapt.log
-  <SAMPLE_ID>_02_hisat2_rrna.log
-  <SAMPLE_ID>_03_hisat2_orf.log
-  <SAMPLE_ID>_04_trim_5p_mismatch.log
-  <SAMPLE_ID>_05_samtools_view_sort.log
-  <SAMPLE_ID>_06_samtools_index.log
-  <SAMPLE_ID>_07_bedtools_genome_cov_plus.log
-  <SAMPLE_ID>_08_bedtools_genome_cov_minus.log
-  <SAMPLE_ID>_09_bam_to_h5.log
-  <SAMPLE_ID>_10_generate_stats_figs.log
+  01_cutadapt.log
+  02_hisat2_rrna.log
+  03_hisat2_orf.log
+  04_trim_5p_mismatch.log
+  05_samtools_view_sort.log
+  06_samtools_index.log
+  07_bedtools_genome_cov_plus.log
+  08_bedtools_genome_cov_minus.log
+  09_bam_to_h5.log
+  10_generate_stats_figs.log
 collate_tpms.log
 ```
 
@@ -188,21 +184,21 @@ If deduplication is enabled (if `dedup_umis: TRUE`), then the following log file
 hisat2_build_r_rna.log
 hisat2_build_orf.log
 <SAMPLE_ID>/
-  <SAMPLE_ID>_01_cutadapt.log
-  <SAMPLE_ID>_02_umi_tools_extract.log
-  <SAMPLE_ID>_03_hisat2_rrna.log
-  <SAMPLE_ID>_04_hisat2_orf.log
-  <SAMPLE_ID>_05_trim_5p_mismatch.log
-  <SAMPLE_ID>_06_samtools_view_sort.log
-  <SAMPLE_ID>_07_samtools_index.log
-  <SAMPLE_ID>_08_umi_tools_group.log
-  <SAMPLE_ID>_09_umi_tools_dedup.log
-  <SAMPLE_ID>_10_samtools_index.log
-  <SAMPLE_ID>_11_umi_tools_group.log
-  <SAMPLE_ID>_12_bedtools_genome_cov_plus.log
-  <SAMPLE_ID>_13_bedtools_genome_cov_minus.log
-  <SAMPLE_ID>_14_bam_to_h5.log
-  <SAMPLE_ID>_15_generate_stats_figs.log
+  01_cutadapt.log
+  02_umi_tools_extract.log
+  03_hisat2_rrna.log
+  04_hisat2_orf.log
+  05_trim_5p_mismatch.log
+  06_samtools_view_sort.log
+  07_samtools_index.log
+  08_umi_tools_group.log
+  09_umi_tools_dedup.log
+  10_samtools_index.log
+  11_umi_tools_group.log
+  12_bedtools_genome_cov_plus.log
+  13_bedtools_genome_cov_minus.log
+  14_bam_to_h5.log
+  15_generate_stats_figs.log
 collate_tpms.log
 ```
 
@@ -215,19 +211,18 @@ cutadapt.log
 umi_tools_extract.log
 demultiplex_fastq.log
 <SAMPLE_ID>/
-  <SAMPLE_ID>_01_hisat2_rrna.log
-  <SAMPLE_ID>_02_hisat2_orf.log
-  <SAMPLE_ID>_03_trim_5p_mismatch.log
-  <SAMPLE_ID>_04_samtools_view_sort.log
-  <SAMPLE_ID>_05_samtools_index.log
-  <SAMPLE_ID>_06_umi_tools_group.log
-  <SAMPLE_ID>_07_umi_tools_dedup.log
-  <SAMPLE_ID>_08_samtools_index.log
-  <SAMPLE_ID>_09_umi_tools_group.log
-  <SAMPLE_ID>_10_bedtools_genome_cov_plus.log
-  <SAMPLE_ID>_11_bedtools_genome_cov_minus.log
-  <SAMPLE_ID>_12_bam_to_h5.log
-  <SAMPLE_ID>_13_generate_stats_figs.log
+  01_hisat2_rrna.log
+  02_hisat2_orf.log
+  03_trim_5p_mismatch.log
+  04_samtools_view_sort.log
+  05_samtools_index.log
+  06_umi_tools_group.log
+  07_umi_tools_dedup.log
+  08_samtools_index.log
+  09_umi_tools_group.log
+  10_bedtools_genome_cov_plus.log
+  11_bedtools_genome_cov_minus.log
+  12_bam_to_h5.log
+  13_generate_stats_figs.log
 collate_tpms.log
 ```
-

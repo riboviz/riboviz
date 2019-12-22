@@ -71,6 +71,10 @@ def build_indices(fasta, ht_prefix, log_file, run_config):
     if not os.path.exists(fasta):
         raise FileNotFoundError(
             errno.ENOENT, os.strerror(errno.ENOENT), fasta)
+    # Run --version as hisat2-build does not log its own version.
+    cmd = ["hisat2-build", "--version"]
+    process_utils.run_logged_command(
+        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     cmd = ["hisat2-build", fasta, ht_prefix]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
@@ -179,6 +183,10 @@ def map_to_r_rna(fastq, index, mapped_sam, unmapped_fastq, log_file,
     code
     """
     LOGGER.info("Map reads to rRNA. Log: %s", log_file)
+    # Run --version as hisat2 does not log its own version.
+    cmd = ["hisat2", "--version"]
+    process_utils.run_logged_command(
+        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     cmd = ["hisat2", "-p", str(run_config.nprocesses), "-N", "1",
            "--un", unmapped_fastq, "-x", index,
            "-S", mapped_sam, "-U", fastq]
@@ -209,6 +217,10 @@ def map_to_orf(fastq, index, mapped_sam, unmapped_fastq, log_file,
     """
     LOGGER.info(
         "Map to ORFs with up to 2 alignments. Log: %s", log_file)
+    # Run --version as hisat2 does not log its own version.
+    cmd = ["hisat2", "--version"]
+    process_utils.run_logged_command(
+        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     cmd = ["hisat2", "-p", str(run_config.nprocesses), "-k", "2",
            "--no-spliced-alignment", "--rna-strandness",
            "F", "--no-unal", "--un", unmapped_fastq,
@@ -237,9 +249,8 @@ def trim_5p_mismatches(orf_map_sam, orf_map_sam_clean, log_file,
     LOGGER.info(
         "Trim 5' mismatched nt and remove reads with >1 mismatch. Log: %s",
         log_file)
-    cmd = ["python",
-           os.path.join(run_config.py_scripts, "trim_5p_mismatch.py"),
-           "-mm", "2", "-in", orf_map_sam, "-out", orf_map_sam_clean]
+    cmd = ["python", "-m", "riboviz.tools.trim_5p_mismatch",
+           "-m", "2", "-i", orf_map_sam, "-o", orf_map_sam_clean]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 
@@ -261,6 +272,10 @@ def sort_bam(sam_file, bam_file, log_file, run_config):
     """
     LOGGER.info(
         "Convert SAM to BAM and sort on genome. Log: %s", log_file)
+    # Run --version as samtools does not log its own version.
+    cmd = ["samtools", "--version"]
+    process_utils.run_logged_command(
+        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     cmd_view = ["samtools", "view", "-b", sam_file]
     cmd_sort = ["samtools", "sort", "-@", str(run_config.nprocesses),
                 "-O", "bam", "-o", bam_file, "-"]
@@ -283,6 +298,10 @@ def index_bam(bam_file, log_file, run_config):
     :raise AssertionError: if samtools returns non-zero exit code
     """
     LOGGER.info("Index BAM file. Log: %s", log_file)
+    # Run --version as samtools does not log its own version.
+    cmd = ["samtools", "--version"]
+    process_utils.run_logged_command(
+        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     cmd = ["samtools", "index", bam_file]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
@@ -363,6 +382,10 @@ def make_bedgraph(bam_file, bedgraph_file, is_plus, log_file, run_config):
     LOGGER.info(
         "Calculate transcriptome coverage for %s strand and save as a bedgraph. Log: %s",
         strand, log_file)
+    # Run --version as bedtools does not log its own version.
+    cmd = ["bedtools", "--version"]
+    process_utils.run_logged_command(
+        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     cmd = ["bedtools", "genomecov", "-ibam", bam_file,
            "-trackline", "-bga", "-5", "-strand", strand]
     process_utils.run_logged_redirect_command(
@@ -387,7 +410,7 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config, log_file, run_config):
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
     :raise KeyError: if a configuration parameter is mssing
-    :raise FileNotFoundError: if org_gff_file or Rscript cannot be
+    :raise FileNotFoundError: if orf_gff_file or Rscript cannot be
     found
     :raise AssertionError: if Rscript returns non-zero exit code
     """
@@ -397,29 +420,28 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config, log_file, run_config):
         raise FileNotFoundError(errno.ENOENT,
                                 os.strerror(errno.ENOENT),
                                 orf_gff_file)
-    second_id = config[params.SECOND_ID]
-    if second_id is None:
-        second_id = "NULL"
+    secondary_id = config[params.SECONDARY_ID]
+    if secondary_id is None:
+        secondary_id = "NULL"
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts, "bam_to_h5.R"),
-           "--Ncores=" + str(run_config.nprocesses),
-           "--MinReadLen=" + str(config[params.MIN_READ_LEN]),
-           "--MaxReadLen=" + str(config[params.MAX_READ_LEN]),
-           "--Buffer=" + str(config[params.BUFFER]),
-           "--PrimaryID=" + config[params.PRIMARY_ID],
-           "--SecondID=" + second_id,
+           "--num-processes=" + str(run_config.nprocesses),
+           "--min-read-length=" + str(config[params.MIN_READ_LENGTH]),
+           "--max-read-length=" + str(config[params.MAX_READ_LENGTH]),
+           "--buffer=" + str(config[params.BUFFER]),
+           "--primary-id=" + config[params.PRIMARY_ID],
+           "--secondary-id=" + secondary_id,
            "--dataset=" + config[params.DATASET],
-           "--bamFile=" + bam_file,
-           "--hdFile=" + h5_file,
-           "--orf_gff_file=" + orf_gff_file,
-           "--ribovizGFF=" + str(config[params.RIBOVIZ_GFF]),
-           "--StopInCDS=" + str(config[params.STOP_IN_CDS])]
+           "--bam-file=" + bam_file,
+           "--hd-file=" + h5_file,
+           "--orf-gff-file=" + orf_gff_file,
+           "--is-riboviz-gff=" + str(config[params.IS_RIBOVIZ_GFF]),
+           "--stop-in-cds=" + str(config[params.STOP_IN_CDS])]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 
 
-def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
-                        run_config):
+def generate_stats_figs(h5_file, out_dir, config, log_file, run_config):
     """
     Create summary statistics and analyses plots.
 
@@ -427,8 +449,6 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
     :type h5_file: str or unicode
     :param out_dir: Directory for output files
     :type out_dir: str or unicode
-    :param prefix: Output file name prefix
-    :type prefix: str or unicode
     :param config: RiboViz configuration
     :type config: dict
     :param log_file: Log file
@@ -445,33 +465,34 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
                 log_file)
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts, "generate_stats_figs.R"),
-           "--Ncores=" + str(run_config.nprocesses),
-           "--MinReadLen=" + str(config[params.MIN_READ_LEN]),
-           "--MaxReadLen=" + str(config[params.MAX_READ_LEN]),
-           "--Buffer=" + str(config[params.BUFFER]),
-           "--PrimaryID=" + config[params.PRIMARY_ID],
+           "--num-processes=" + str(run_config.nprocesses),
+           "--min-read-length=" + str(config[params.MIN_READ_LENGTH]),
+           "--max-read-length=" + str(config[params.MAX_READ_LENGTH]),
+           "--buffer=" + str(config[params.BUFFER]),
+           "--primary-id=" + config[params.PRIMARY_ID],
            "--dataset=" + config[params.DATASET],
-           "--hdFile=" + h5_file,
-           "--out_prefix=" + prefix,
-           "--orf_fasta=" + config[params.ORF_FASTA_FILE],
+           "--hd-file=" + h5_file,
+           "--orf-fasta-file=" + config[params.ORF_FASTA_FILE],
            "--rpf=" + str(config[params.RPF]),
-           "--dir_out=" + out_dir,
-           "--do_pos_sp_nt_freq=" + str(config[params.DO_POS_SP_NT_FREQ])]
-    for flag in [params.T_RNA,
-                 params.CODON_POS,
-                 params.FEATURES_FILE,
-                 params.ORF_GFF_FILE,]:
+           "--output-dir=" + out_dir,
+           "--do-pos-sp-nt-freq=" + str(config[params.DO_POS_SP_NT_FREQ])]
+    flags = zip([params.T_RNA_FILE, params.CODON_POSITIONS_FILE,
+                 params.FEATURES_FILE, params.ORF_GFF_FILE,
+                 params.ASITE_DISP_LENGTH_FILE],
+                ["t-rna-file", "codon-positions-file",
+                 "features-file", "orf-gff-file",
+                 "asite-disp-length-file"])
+    for (flag, parameter) in flags:
         if value_in_dict(flag, config):
             flag_file = config[flag]
             if not os.path.exists(flag_file):
                 raise FileNotFoundError(errno.ENOENT,
                                         os.strerror(errno.ENOENT),
                                         flag_file)
-            cmd.append("--" + flag + "=" + flag_file)
-    for flag in [params.COUNT_THRESHOLD,
-                 params.ASITE_DISP_LENGTH_FILE]:
-        if value_in_dict(flag, config):
-            cmd.append("--" + flag + "=" + str(config[flag]))
+            cmd.append("--" + parameter + "=" + flag_file)
+    if value_in_dict(params.COUNT_THRESHOLD, config):
+        cmd.append("--count-threshold=" +
+                   str(config[params.COUNT_THRESHOLD]))
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 
@@ -501,10 +522,10 @@ def collate_tpms(out_dir, samples, are_samples_in_sub_dirs, log_file,
     LOGGER.info("Collate TPMs. Log: %s", log_file)
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts, "collate_tpms.R"),
-           "--samples_in_sub_dirs=" + str(are_samples_in_sub_dirs),
-           "--dir_out=" + out_dir]
+           "--sample-subdirs=" + str(are_samples_in_sub_dirs),
+           "--output-dir=" + out_dir]
     if tpms_file is not None:
-        cmd.append("--file_out=" + tpms_file)
+        cmd.append("--tpms-file=" + tpms_file)
     cmd += samples
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
@@ -532,21 +553,18 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
     """
     LOGGER.info("Demultiplex reads. Log: %s", log_file)
     cmd = ["python", "-m", "riboviz.tools.demultiplex_fastq",
-           "-r1", fastq, "-ss", barcodes_file, "-o", deplex_dir,
+           "-1", fastq, "-s", barcodes_file, "-o", deplex_dir,
            "-m", "2"]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 
 
-def get_sample_log_file(logs_dir, sample, step, index):
+def get_log_file(logs_dir, step, index):
     """
-    Get name of log file for a specific processing step applied to a
-    specific sample.
+    Get name of log file for a specific processing step.
 
     :param logs_dir Log files directory
     :type logs_dir: str or unicode
-    :param sample: Sample name
-    :type sample: str or unicode
     :param step: Name of processing step
     :type step: str or unicode
     :param index: Index of processing step, 1..N
@@ -554,4 +572,4 @@ def get_sample_log_file(logs_dir, sample, step, index):
     :return: file name
     :rtype: str or unicode
     """
-    return os.path.join(logs_dir, "%s_%02d_%s.log" % (sample, index, step))
+    return os.path.join(logs_dir, "%02d_%s.log" % (index, step))

@@ -33,7 +33,7 @@ def test_missing_config_file():
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
-@pytest.mark.parametrize("index", [params.R_RNA_FASTA_FILE,
+@pytest.mark.parametrize("index", [params.RRNA_FASTA_FILE,
                                    params.ORF_FASTA_FILE])
 def test_missing_index_files(configuration, index):
     """
@@ -113,7 +113,7 @@ def test_multiplex_fq_files_missing_sample_sheet_error(configuration):
     config, config_path = configuration
     del config[params.FQ_FILES]
     config[params.MULTIPLEX_FQ_FILES] = ["somefile.fastq"]
-    config[params.SAMPLE_SHEET_FILE] = "noSuchFile.tsv"
+    config[params.SAMPLE_SHEET] = "noSuchFile.tsv"
     with open(config_path, 'w') as f:
         yaml.dump(config, f)
     exit_code = prep_riboviz.prep_riboviz(riboviz.test.PY_SCRIPTS,
@@ -150,8 +150,8 @@ def test_missing_fq_files(configuration):
 
 @pytest.mark.parametrize("file_config", [params.ORF_GFF_FILE,
                                          params.FEATURES_FILE,
-                                         params.T_RNA,
-                                         params.CODON_POS])
+                                         params.T_RNA_FILE,
+                                         params.CODON_POSITIONS_FILE])
 def test_missing_files_error(configuration, file_config):
     """
     Test that non-existent files being specified for org_gff_file,
