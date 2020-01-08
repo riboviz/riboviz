@@ -77,7 +77,7 @@ option_list <- list(
     help = "threshold for count of reads per gene to be included in plot"
   ),
   make_option("--output-prefix",
-    type = "character", default = "out",
+    type = "character", default = "",
     help = "Prefix for output files"
   ),
   make_option("--hd-file",
@@ -247,7 +247,7 @@ gene_poslen_counts_5start %>%
   TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = min_read_length) %>%
   plot_ribogrid() %>%
   ggsave(
-    filename = paste0(output_prefix, "_startcodon_ribogrid.pdf"),
+    filename = file.path(output_dir, paste0(output_prefix, "startcodon_ribogrid.pdf")),
     width = 6, height = 3
   )
 
@@ -255,7 +255,7 @@ gene_poslen_counts_5start %>%
   TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = min_read_length) %>%
   barplot_ribogrid() %>%
   ggsave(
-    filename = paste0(output_prefix, "_startcodon_ribogridbar.pdf"),
+    filename = file.path(output_dir, paste0(output_prefix, "startcodon_ribogridbar.pdf")),
     width = 6, height = 5
   )
 
@@ -296,10 +296,10 @@ nt_period_plot <- ggplot(
   labs(x = "Nucleotide Position", y = "Read counts")
 
 # Save plot and file
-ggsave(nt_period_plot, filename = paste0(output_prefix, "_3nt_periodicity.pdf"))
+ggsave(nt_period_plot, filename = file.path(output_dir, paste0(output_prefix, "3nt_periodicity.pdf")))
 write.table(
   gene_pos_counts_bothends,
-  file = paste0(output_prefix, "_3nt_periodicity.tsv"),
+  file = file.path(output_dir, paste0(output_prefix, "3nt_periodicity.tsv")),
   sep = "\t",
   row = F,
   col = T,
@@ -326,10 +326,10 @@ read_len_plot <- ggplot(read_length_data, aes(x = Length, y = Counts)) +
   geom_bar(stat = "identity")
 
 # save read lengths plot and file
-ggsave(read_len_plot, filename = paste0(output_prefix, "_read_lengths.pdf"))
+ggsave(read_len_plot, filename = file.path(output_dir, paste0(output_prefix, "read_lengths.pdf")))
 write.table(
   read_length_data,
-  file = paste0(output_prefix, "_read_lengths.tsv"),
+  file = file.path(output_dir, paste0(output_prefix, "read_lengths.tsv")),
   sep = "\t",
   row = F,
   col = T,
@@ -422,7 +422,7 @@ if (do_pos_sp_nt_freq) {
   all_out[is.na(all_out)] <- 0
 
   # save file
-  write.table(all_out, file = paste0(output_prefix, "_pos_sp_nt_freq.tsv"), sep = "\t", row = F, col = T, quote = F)
+  write.table(all_out, file = file.path(output_dir, paste0(output_prefix, "pos_sp_nt_freq.tsv")), sep = "\t", row = F, col = T, quote = F)
 
   print("Completed nucleotide composition bias table")
 }
@@ -612,7 +612,7 @@ if (!is.na(asite_disp_length_file)) {
     )
   write.table(
     gene_read_frames,
-    file = paste0(output_prefix, "_3ntframe_bygene.tsv"),
+    file = file.path(output_dir, paste0(output_prefix, "3ntframe_bygene.tsv")),
     sep = "\t",
     row = F,
     col = T,
@@ -625,7 +625,7 @@ if (!is.na(asite_disp_length_file)) {
 
   # save read lengths plot and file
   ggsave(gene_read_frame_plot,
-    filename = paste0(output_prefix, "_3ntframe_propbygene.pdf"),
+    filename = file.path(output_dir, paste0(output_prefix, "3ntframe_propbygene.pdf")),
     width = 3, height = 3
   )
 
@@ -755,10 +755,10 @@ if (rpf) {
     guides(col = FALSE)
 
   # Save plot and file
-  ggsave(pos_sp_rpf_norm_reads_plot, filename = paste0(output_prefix, "_pos_sp_rpf_norm_reads.pdf"))
+  ggsave(pos_sp_rpf_norm_reads_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.pdf")))
   write.table(
     pos_sp_rpf_norm_reads,
-    file = paste0(output_prefix, "_pos_sp_rpf_norm_reads.tsv"),
+    file = file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.tsv")),
     sep = "\t",
     row = F,
     col = T,
@@ -835,10 +835,10 @@ if (!rpf) {
     guides(col = FALSE)
 
   # Save plot and file
-  ggsave(pos_sp_mrna_norm_coverage_plot, filename = paste0(output_prefix, "_pos_sp_mrna_norm_coverage.pdf"))
+  ggsave(pos_sp_mrna_norm_coverage_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_mrna_norm_coverage.pdf")))
   write.table(
     pos_sp_mrna_norm_coverage,
-    file = paste0(output_prefix, "_pos_sp_mrna_norm_coverage.tsv"),
+    file = file.path(output_dir, paste0(output_prefix, "pos_sp_mrna_norm_coverage.tsv")),
     sep = "\t",
     row = F,
     col = T,
@@ -882,7 +882,7 @@ tpms <- data.frame(
 # write out to *_tpms.tsv
 write.table(
   tpms,
-  file = paste0(output_prefix, "_tpms.tsv"),
+  file = file.path(output_dir, paste0(output_prefix, "tpms.tsv")),
   sep = "\t",
   row = F,
   col = T,
@@ -913,7 +913,7 @@ if (!is.na(features_file)) {
     xlab("TPM (transcripts per million)")
 
   # Save plot and file
-  ggsave(features_plot, filename = paste0(output_prefix, "_features.pdf"))
+  ggsave(features_plot, filename = file.path(output_dir, paste0(output_prefix, "features.pdf")))
 
   print("Completed: Correlations between TPMs of genes with their sequence-based features")
 } else {
@@ -990,10 +990,10 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
     # Save plot and file
-    ggsave(cod_dens_tRNA_plot, filename = paste0(output_prefix, "_codon_ribodens.pdf"))
+    ggsave(cod_dens_tRNA_plot, filename = file.path(output_dir, paste0(output_prefix, "codon_ribodens.pdf")))
     write.table(
       cod_dens_tRNA,
-      file = paste0(output_prefix, "_codon_ribodens.tsv"),
+      file = file.path(output_dir, paste0(output_prefix, "codon_ribodens.tsv")),
       sep = "\t",
       row = F,
       col = T,
