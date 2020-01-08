@@ -150,7 +150,7 @@ def test_deplex_umi_groups(configuration_module, sample_id):
     tmp_dir = config[params.TMP_DIR]
     groups_tsv = os.path.join(tmp_dir,
                               sample_id,
-                              sample_id + "_" + "post_dedup_groups.tsv")
+                              "post_dedup_groups.tsv")
     groups = pd.read_csv(groups_tsv, sep="\t")
     num_groups = 5
     assert groups.shape[0] == num_groups, \
