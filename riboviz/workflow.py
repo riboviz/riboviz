@@ -239,7 +239,7 @@ def trim_5p_mismatches(orf_map_sam, orf_map_sam_clean, log_file,
         log_file)
     cmd = ["python",
            os.path.join(run_config.py_scripts, "trim_5p_mismatch.py"),
-           "-mm", "2", "-in", orf_map_sam, "-out", orf_map_sam_clean]
+           "-m", "2", "-i", orf_map_sam, "-o", orf_map_sam_clean]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 
@@ -387,7 +387,7 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config, log_file, run_config):
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
     :raise KeyError: if a configuration parameter is mssing
-    :raise FileNotFoundError: if org_gff_file or Rscript cannot be
+    :raise FileNotFoundError: if orf_gff_file or Rscript cannot be
     found
     :raise AssertionError: if Rscript returns non-zero exit code
     """
@@ -397,23 +397,23 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config, log_file, run_config):
         raise FileNotFoundError(errno.ENOENT,
                                 os.strerror(errno.ENOENT),
                                 orf_gff_file)
-    second_id = config[params.SECOND_ID]
-    if second_id is None:
-        second_id = "NULL"
+    secondary_id = config[params.SECONDARY_ID]
+    if secondary_id is None:
+        secondary_id = "NULL"
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts, "bam_to_h5.R"),
-           "--Ncores=" + str(run_config.nprocesses),
-           "--MinReadLen=" + str(config[params.MIN_READ_LEN]),
-           "--MaxReadLen=" + str(config[params.MAX_READ_LEN]),
-           "--Buffer=" + str(config[params.BUFFER]),
-           "--PrimaryID=" + config[params.PRIMARY_ID],
-           "--SecondID=" + second_id,
+           "--num-processes=" + str(run_config.nprocesses),
+           "--min-read-length=" + str(config[params.MIN_READ_LENGTH]),
+           "--max-read-length=" + str(config[params.MAX_READ_LENGTH]),
+           "--buffer=" + str(config[params.BUFFER]),
+           "--primary-id=" + config[params.PRIMARY_ID],
+           "--secondary-id=" + secondary_id,
            "--dataset=" + config[params.DATASET],
-           "--bamFile=" + bam_file,
-           "--hdFile=" + h5_file,
-           "--orf_gff_file=" + orf_gff_file,
-           "--ribovizGFF=" + str(config[params.RIBOVIZ_GFF]),
-           "--StopInCDS=" + str(config[params.STOP_IN_CDS])]
+           "--bam-file=" + bam_file,
+           "--hd-file=" + h5_file,
+           "--orf-gff-file=" + orf_gff_file,
+           "--is-riboviz-gff=" + str(config[params.IS_RIBOVIZ_GFF]),
+           "--stop-in-cds=" + str(config[params.STOP_IN_CDS])]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 
@@ -445,33 +445,35 @@ def generate_stats_figs(h5_file, out_dir, prefix, config, log_file,
                 log_file)
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts, "generate_stats_figs.R"),
-           "--Ncores=" + str(run_config.nprocesses),
-           "--MinReadLen=" + str(config[params.MIN_READ_LEN]),
-           "--MaxReadLen=" + str(config[params.MAX_READ_LEN]),
-           "--Buffer=" + str(config[params.BUFFER]),
-           "--PrimaryID=" + config[params.PRIMARY_ID],
+           "--num-processes=" + str(run_config.nprocesses),
+           "--min-read-length=" + str(config[params.MIN_READ_LENGTH]),
+           "--max-read-length=" + str(config[params.MAX_READ_LENGTH]),
+           "--buffer=" + str(config[params.BUFFER]),
+           "--primary-id=" + config[params.PRIMARY_ID],
            "--dataset=" + config[params.DATASET],
-           "--hdFile=" + h5_file,
-           "--out_prefix=" + prefix,
-           "--orf_fasta=" + config[params.ORF_FASTA_FILE],
+           "--hd-file=" + h5_file,
+           "--output-prefix=" + prefix,
+           "--orf-fasta-file=" + config[params.ORF_FASTA_FILE],
            "--rpf=" + str(config[params.RPF]),
-           "--dir_out=" + out_dir,
-           "--do_pos_sp_nt_freq=" + str(config[params.DO_POS_SP_NT_FREQ])]
-    for flag in [params.T_RNA,
-                 params.CODON_POS,
-                 params.FEATURES_FILE,
-                 params.ORF_GFF_FILE,]:
+           "--output-dir=" + out_dir,
+           "--do-pos-sp-nt-freq=" + str(config[params.DO_POS_SP_NT_FREQ])]
+    flags = zip([params.T_RNA_FILE, params.CODON_POSITIONS_FILE,
+                 params.FEATURES_FILE, params.ORF_GFF_FILE,
+                 params.ASITE_DISP_LENGTH_FILE],
+                ["t-rna-file", "codon-positions-file",
+                 "features-file", "orf-gff-file",
+                 "asite-disp-length-file"])
+    for (flag, parameter) in flags:
         if value_in_dict(flag, config):
             flag_file = config[flag]
             if not os.path.exists(flag_file):
                 raise FileNotFoundError(errno.ENOENT,
                                         os.strerror(errno.ENOENT),
                                         flag_file)
-            cmd.append("--" + flag + "=" + flag_file)
-    for flag in [params.COUNT_THRESHOLD,
-                 params.ASITE_DISP_LENGTH_FILE]:
-        if value_in_dict(flag, config):
-            cmd.append("--" + flag + "=" + str(config[flag]))
+            cmd.append("--" + parameter + "=" + flag_file)
+    if value_in_dict(params.COUNT_THRESHOLD, config):
+        cmd.append("--count-threshold=" +
+                   str(config[params.COUNT_THRESHOLD]))
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 
@@ -501,10 +503,10 @@ def collate_tpms(out_dir, samples, are_samples_in_sub_dirs, log_file,
     LOGGER.info("Collate TPMs. Log: %s", log_file)
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts, "collate_tpms.R"),
-           "--samples_in_sub_dirs=" + str(are_samples_in_sub_dirs),
-           "--dir_out=" + out_dir]
+           "--sample-subdirs=" + str(are_samples_in_sub_dirs),
+           "--output-dir=" + out_dir]
     if tpms_file is not None:
-        cmd.append("--file_out=" + tpms_file)
+        cmd.append("--tpms-file=" + tpms_file)
     cmd += samples
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
@@ -532,7 +534,7 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
     """
     LOGGER.info("Demultiplex reads. Log: %s", log_file)
     cmd = ["python", "-m", "riboviz.tools.demultiplex_fastq",
-           "-r1", fastq, "-ss", barcodes_file, "-o", deplex_dir,
+           "-1", fastq, "-s", barcodes_file, "-o", deplex_dir,
            "-m", "2"]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)

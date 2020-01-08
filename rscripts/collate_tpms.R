@@ -5,24 +5,25 @@ library(purrr)
 library(optparse)
 
 option_list <- list( 
-  make_option("--dir_out", type="character", default="./",
+  make_option("--output-dir", type="character", default="./",
               help="Output directory"),
-  make_option("--file_out", type="character", default="TPMs_collated.tsv",
+  make_option("--tpms-file", type="character", default="TPMs_collated.tsv",
               help="Output file, relative to output directory"),
-  make_option("--samples_in_sub_dirs", type="logical", default=FALSE,
+  make_option("--sample-subdirs", type="logical", default=FALSE,
               help="Are samples in sample-specific subdirectories of output directory?"),
-  make_option("--orf_fasta", type="character", default=NULL,
+  make_option("--orf-fasta", type="character", default=NULL,
               help="ORF file that was aligned to")
 )
 
 parser <- OptionParser(option_list=option_list)
-opts <- parse_args(parser, positional_arguments=TRUE)
 
-dir_out <- opts$options$dir_out
-file_out <- opts$options$file_out
-samples_in_sub_dirs <- opts$options$samples_in_sub_dirs
+opts <- parse_args(parser, positional_arguments=TRUE, convert_hyphens_to_underscores=TRUE)
+
+output_dir <- opts$options$output_dir
+tpms_file <- opts$options$tpms_file
+sample_subdirs <- opts$options$sample_subdirs
+orf_fasta <- opts$options$orf_fasta
 samples <- opts$args
-orf_fasta  <- opts$options$orf_fasta
 
 get_tpms <- function(ffile, ORFs) {
     # get tpm column from ffile
@@ -38,9 +39,9 @@ get_tpms <- function(ffile, ORFs) {
     return(features_tab$tpm)
 }
 
-get_tpms_file_name <- function(ddir, fstem, fend, samples_in_sub_dirs) {
-    print(paste0("samples_in_sub_dirs: ", samples_in_sub_dirs))
-    if (samples_in_sub_dirs)
+get_tpms_file_name <- function(ddir, fstem, fend, sample_subdirs) {
+    print(paste0("sample_subdirs: ", sample_subdirs))
+    if (sample_subdirs)
     {
         file_name = paste0(ddir, "/", fstem, "/", fstem, fend)
     }
@@ -52,22 +53,22 @@ get_tpms_file_name <- function(ddir, fstem, fend, samples_in_sub_dirs) {
     return(file_name)
 }
 
-get_tpms_bits <- function(fstem, ddir, fend, samples_in_sub_dirs, ORFs) {
+get_tpms_bits <- function(fstem, ddir, fend, sample_subdirs, ORFs) {
     # get_tpms but putting the filename together
-    get_tpms(get_tpms_file_name(ddir, fstem, fend, samples_in_sub_dirs),
+    get_tpms(get_tpms_file_name(ddir, fstem, fend, sample_subdirs),
              ORFs)
 }
 
 # collate
-make_tpm_table <- function(dir_out, samples_in_sub_dirs,
+make_tpm_table <- function(output_dir, sample_subdirs,
                            samples, orf_fasta,
                            fend="_tpms.tsv") {
     if(is.null(orf_fasta))
     {
-         ORFs <- get_tpms_file_name(dir_out,
+         ORFs <- get_tpms_file_name(output_dir,
                                     samples[1],
                                     fend,
-                                    samples_in_sub_dirs) %>%
+                                    sample_subdirs) %>%
             read_tsv() %>%
             .$ORF
     }
@@ -80,9 +81,9 @@ make_tpm_table <- function(dir_out, samples_in_sub_dirs,
     }
     tpm_list <- lapply(samples,
                        get_tpms_bits,
-                       ddir=dir_out,
+                       ddir=output_dir,
                        fend=fend,
-                       samples_in_sub_dirs=samples_in_sub_dirs,
+                       sample_subdirs=sample_subdirs,
                        ORFs=ORFs)
     non_null_elts <- sapply(tpm_list,function(elt) !is.null(elt))
     names(tpm_list) <- samples
@@ -91,6 +92,6 @@ make_tpm_table <- function(dir_out, samples_in_sub_dirs,
 
 round1 <- function(x) round(x,digits=1)
 
-make_tpm_table(dir_out, samples_in_sub_dirs, samples, orf_fasta) %>%
+make_tpm_table(output_dir, sample_subdirs, samples, orf_fasta) %>%
     mutate_if(is.numeric, round1) %>%
-    write_tsv(paste0(dir_out, "/", file_out))
+    write_tsv(paste0(output_dir, "/", tpms_file))

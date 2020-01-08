@@ -369,6 +369,38 @@ $ R
 
 ---
 
+## Command-line parameters
+
+For consistency with bash and other command-line tools, command-line parameters should be implemented one, or both, of:
+
+* A single alphanumeric character prefixed by a hyphen e.g. `-v`, `-c 123`, `-s GATC`.
+* A sequence of lower-case alphanumeric characters, prefixed by two hyphens and delimited by hyphens e.g. `--verbose`, `--control=123`, `--match-sequence=GATC`.
+
+If using Python's [argparse](https://docs.python.org/3/library/argparse.html) package, the `dest` parameter of `ArgumentParser.add_argument` can be use to explicitly define the Python variables into which a command-line is to be placed. For example:
+
+```python
+parser = argparse.ArgumentParser(description="Program")
+parser.add_argument("-o", "--output-dir", dest="output_dir", nargs='?',
+                    help="Output directory")
+options = parser.parse_args()
+output_dir = options.output_dir
+```    
+
+If using R's [optparse](https://cran.r-project.org/web/packages/optparse/index.html) package, call `parse_args` with `convert_hyphens_to_underscores=TRUE` to automatically convert hyphens in command-line parameters to underscores. For example, the following shows how an option with a hyphen is accessed within R as a variable with an underscore:
+
+```R
+option_list <- list( 
+  make_option("--output-dir", type="character", default="./",
+              help="Output directory"))
+parser <- OptionParser(option_list=option_list)
+opts <- parse_args(parser,
+                   convert_hyphens_to_underscores=TRUE)
+
+output_dir <- opts$options$output_dir
+```
+
+---
+
 ## Handling missing configuration values
 
 ### YAML `NULL` and Python `None`
@@ -414,16 +446,17 @@ When defining command-line parameters for R scripts using `make_option`, one can
 Consider a script which defines the following command-line options, all of which declare `default=NULL`:
 
 ```R
-make_option("--t_rna", type="character", default=NULL),
-make_option("--codon_pos", type="character", default=NULL),
-make_option("--orf_gff_file", type="character", default=NULL),
-make_option("--features_file", type="character", default=NULL),
+make_option("--t-rna-file", type="character", default=NULL),
+make_option("--codon-positions-file", type="character", default=NULL),
+make_option("--orf-gff-file", type="character", default=NULL),
+make_option("--features-file", type="character", default=NULL),
 ```
 
 and which then reads in the options into an `opt` variable and prints this variable:
 
 ```R
-opt <- parse_args(OptionParser(option_list=option_list))
+opt <- parse_args(OptionParser(option_list=option_list),
+                  convert_hyphens_to_underscores=TRUE)
 attach(opt)
 print("Running with parameters:")
 opt
@@ -432,7 +465,7 @@ opt
 If we run this script with one of these arguments, we see that only that argument is present in `opt`:
 
 ```console
-$ Rscript script.R --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3
+$ Rscript script.R --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 
 Running with parameters:
 
@@ -443,10 +476,10 @@ $orf_gff_file
 Suppose, however, we declare `default=NA`:
 
 ```R
-  make_option("--t_rna", type="character", default=NA),
-  make_option("--codon_pos", type="character", default=NA),
-  make_option("--orf_gff_file", type="character", default=NA),
-  make_option("--features_file", type="character", default=NA),
+make_option("--t-rna-file", type="character", default=NA),
+make_option("--codon-positions-file", type="character", default=NA),
+make_option("--orf-gff-file", type="character", default=NA),
+make_option("--features-file", type="character", default=NA),
 ```
 
 If we now run the script, we see that all the arguments are present in `opt`:
@@ -456,10 +489,10 @@ $ Rscript script.R --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 
 Running with parameters:
 
-$t_rna
+$t_rna_file
 [1] NA
 
-$codon_pos
+$codon_positions_file
 [1] NA
 
 $orf_gff_file
