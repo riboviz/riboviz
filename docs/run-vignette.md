@@ -74,13 +74,13 @@ $ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 To configure `prep_riboviz.py` to use additional processes, in `vignette/vignette_config.yaml` change:
 
 ```yaml
-nprocesses: 1
+num_processes: 1
 ```
 
 * to the desired number of processes:
 
 ```yaml
-nprocesses: 4
+num_processes: 4
 ```
 
 ---

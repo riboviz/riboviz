@@ -24,6 +24,7 @@ Quick start:
 * [Quick install scripts](./docs/quick-install.md) (Ubuntu and CentOS only)
 * [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./docs/run-vignette.md). Run a "vignette" of the RiboViz workflow to see RiboViz's capabilities.
 * [Run UMI extraction, deduplication and demultiplexing examples](./docs/run-dedup-demultiplex-examples.md). Run RiboViz on simulated data, to see how RiboViz handles duplicated and multiplexed data.
+* [Upgrade configuration files from RiboViz 1.x](./docs/upgrade-1x.md)
 
 Usage:
 
