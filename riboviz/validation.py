@@ -466,7 +466,7 @@ def equal_dataframes(data1, data2, tolerance=0.0001):
                 "Unequal column values: %s" % column
 
 
-def equal_tsv(file1, file2, tolerance=0.0001):
+def equal_tsv(file1, file2, tolerance=0.0001, comment="#"):
     """
     Compare two tab-separated (TSV) files for equality.
 
@@ -478,11 +478,13 @@ def equal_tsv(file1, file2, tolerance=0.0001):
     :type file2: str or unicode
     :param tolerance: tolerance for floating point comparisons
     :type tolerance: float
+    :param comment: Comment prefix
+    :type comment: str or unicode
     :raise AssertionError: if files differ in their data
     :raise Exception: if problems arise when loading the files
     """
-    data1 = pd.read_csv(file1, sep="\t")
-    data2 = pd.read_csv(file2, sep="\t")
+    data1 = pd.read_csv(file1, sep="\t", comment=comment)
+    data2 = pd.read_csv(file2, sep="\t", comment=comment)
     try:
         equal_dataframes(data1, data2, tolerance)
     except AssertionError as e:

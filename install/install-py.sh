@@ -8,6 +8,7 @@ conda install -y pyyaml
 conda install -y pytest
 conda install -y pylint
 conda install -y pycodestyle
+conda install -y gitpython
 conda install -y pandas
 conda install -y -c bioconda cutadapt
 conda install -y -c bioconda pysam

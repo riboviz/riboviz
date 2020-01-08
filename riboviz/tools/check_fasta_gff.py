@@ -15,12 +15,14 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 # from warnings import warn
+from riboviz import provenance
 
 if __name__=="__main__" :
+    print(provenance.get_version(__file__))
     # take input options
     parser = argparse.ArgumentParser(description="Check fasta and gff files have start and stop codons as expected")
-    parser.add_argument("-f","--fasta",dest="fastain",nargs='?',help="fasta file input")
-    parser.add_argument("-g","--gff",dest="gffin",nargs='?',help="gff3 file input")
+    parser.add_argument("-f","--fasta",dest="fastain",required=True,help="fasta file input")
+    parser.add_argument("-g","--gff",dest="gffin",required=True,help="gff3 file input")
     options = parser.parse_args()
     
     gffin   = options.gffin
