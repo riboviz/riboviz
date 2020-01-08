@@ -136,6 +136,7 @@ import sys
 import yaml
 from riboviz import logging_utils
 from riboviz import params
+from riboviz import provenance
 from riboviz import workflow
 from riboviz.tools.demultiplex_fastq import NUM_READS_FILE
 from riboviz.utils import SAMPLE_ID
@@ -398,11 +399,11 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
                 config, sample_tmp_dir, sample_out_dir, sample_run_config)
             successes.append(sample)
         except FileNotFoundError as e:
-            logging.error("File not found: %s", e.filename)
+            LOGGER.error("File not found: %s", e.filename)
         except Exception:
-            logging.error("Problem processing sample: %s", sample)
+            LOGGER.error("Problem processing sample: %s", sample)
             exc_type, _, _ = sys.exc_info()
-            logging.exception(exc_type.__name__)
+            LOGGER.exception(exc_type.__name__)
     num_failed = num_samples - len(successes)
     LOGGER.info("Finished processing %d samples, %d failed",
                 num_samples, num_failed)
@@ -602,24 +603,25 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     :return: exit code
     :rtype: int
     """
+    LOGGER.info(provenance.get_version(__file__))
     try:
         run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run)
     except FileNotFoundError as e:
-        logging.error("File not found: %s", e.filename)
+        LOGGER.error("File not found: %s", e.filename)
         return EXIT_FILE_NOT_FOUND_ERROR
     except KeyError as e:
-        logging.error("Missing configuration parameter: %s", e.args[0])
+        LOGGER.error("Missing configuration parameter: %s", e.args[0])
         return EXIT_CONFIG_ERROR
     except ValueError as e:
-        logging.error("Configuration parameter error: %s", e.args[0])
+        LOGGER.error("Configuration parameter error: %s", e.args[0])
         return EXIT_CONFIG_ERROR
     except TypeError as e:
-        logging.error("Configuration parameter error: %s", e.args[0])
+        LOGGER.error("Configuration parameter error: %s", e.args[0])
         return EXIT_CONFIG_ERROR
     except Exception:
-        logging.error("Processing error: %s", config_yaml)
+        LOGGER.error("Processing error: %s", config_yaml)
         exc_type, _, _ = sys.exc_info()
-        logging.exception(exc_type.__name__)
+        LOGGER.exception(exc_type.__name__)
         return EXIT_PROCESSING_ERROR
     return EXIT_OK
 

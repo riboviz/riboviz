@@ -466,7 +466,8 @@ def create_fastq_simdata(output_dir):
     save_deplexed_sample_sheet(
         sample_sheet,
         num_unassigned_reads,
-        os.path.join(deplex_dir, NUM_READS_FILE))
+        os.path.join(deplex_dir, NUM_READS_FILE),
+        client=__file__)
 
 
 if __name__ == "__main__":

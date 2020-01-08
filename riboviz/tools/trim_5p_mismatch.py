@@ -7,11 +7,13 @@
 ##   python trim_5p_mismatch.py -i data_map1.sam -o data_map1_clean.sam
 
 import pysam, argparse, re
+from riboviz import provenance
 
-if __name__=="__main__" :  
+if __name__=="__main__" :
+    print(provenance.get_version(__file__))
     parser = argparse.ArgumentParser(description="Remove a single 5' mismatched nt AND filter reads with more than specified mismatches from sam file")
-    parser.add_argument("-i","--input",dest="samfilein",nargs='?',help="sam file input")
-    parser.add_argument("-o","--output",dest="samfileout",nargs='?',help="sam file output")
+    parser.add_argument("-i","--input",dest="samfilein",required=True,help="sam file input")
+    parser.add_argument("-o","--output",dest="samfileout",required=True,help="sam file output")
     parser.add_argument("-m","--mismatches",dest="mismatches",nargs='?',default=1,type=int,help="number of mismatches to allow")
     fivep_parser = parser.add_mutually_exclusive_group(required=False)
     fivep_parser.add_argument("-5","--5p-remove", dest='fivepremove', action='store_true')

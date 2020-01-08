@@ -76,6 +76,7 @@ import argparse
 import gzip
 import os
 from itertools import islice
+from riboviz import provenance
 from riboviz import utils
 from riboviz.utils import BARCODE_DELIMITER
 from riboviz.utils import SAMPLE_ID
@@ -341,7 +342,8 @@ def demultiplex(sample_sheet_file,
     sample_sheet[NUM_READS] = num_reads
     utils.save_deplexed_sample_sheet(sample_sheet,
                                      num_unassigned_reads,
-                                     num_reads_file)
+                                     num_reads_file,
+                                     client=__file__)
     print(("Done"))
 
 
@@ -357,12 +359,12 @@ def parse_command_line_options():
     parser.add_argument("-s",
                         "--sample-sheet",
                         dest="sample_sheet_file",
-                        nargs='?',
+                        required=True,
                         help="Sample sheet filename, tab-delimited text format with SampleID and TagRead columns")
     parser.add_argument("-1",
                         "--read1",
                         dest="read1_file",
-                        nargs='?',
+                        required=True,
                         help="Read 1 filename, fastq[.gz] format")
     parser.add_argument("-2",
                         "--read2",
@@ -396,6 +398,7 @@ def main():
     """
     Parse command-line options then invoke "demultiplex".
     """
+    print(provenance.get_version(__file__))
     options = parse_command_line_options()
     sample_sheet_file = options.sample_sheet_file
     read1_file = options.read1_file
