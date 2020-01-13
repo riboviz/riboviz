@@ -54,6 +54,18 @@ Install:
 $ conda install -y pytest
 ```
 
+### pytest-cov
+
+Web site:
+
+* [GitHub](https://github.com/pytest-dev/pytest-cov)
+
+Install:
+
+```console
+$ conda install -y pytest-cov
+```
+
 ---
 
 ## Install R packages for developers
