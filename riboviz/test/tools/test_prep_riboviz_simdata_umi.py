@@ -47,6 +47,7 @@ def run_prep_riboviz(configuration_module):
     assert exit_code == 0, \
         "prep_riboviz returned non-zero exit code %d" % exit_code
 
+
 @pytest.mark.parametrize("sample_id", ["umi5_umi3"])
 @pytest.mark.usefixtures("run_prep_riboviz")
 def test_adaptor_trimming(configuration_module, sample_id):

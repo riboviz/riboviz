@@ -77,11 +77,8 @@ import gzip
 import os
 from itertools import islice
 from riboviz import provenance
-from riboviz import utils
-from riboviz.utils import BARCODE_DELIMITER
-from riboviz.utils import SAMPLE_ID
-from riboviz.utils import TAG_READ
-from riboviz.utils import NUM_READS
+from riboviz import barcodes_umis
+from riboviz import sample_sheets
 
 
 NUM_READS_FILE = "num_reads.tsv"
@@ -123,7 +120,8 @@ def assign_sample(fastq_record1,
     :rtype: Bool
     """
     is_assigned = False
-    if utils.barcode_matches(fastq_record1[0], barcode, mismatches, delimiter):
+    if barcodes_umis.barcode_matches(
+            fastq_record1[0], barcode, mismatches, delimiter):
         is_assigned = True
         read1_split_fh.writelines(fastq_record1)
         if is_paired_end:
@@ -199,7 +197,7 @@ def demultiplex(sample_sheet_file,
                 read2_file=None,
                 mismatches=1,
                 out_dir="output",
-                delimiter=BARCODE_DELIMITER):
+                delimiter=sample_sheets.BARCODE_DELIMITER):
     """
     Demultiplex reads from fastq[.gz] by inline barcodes.
 
@@ -221,13 +219,13 @@ def demultiplex(sample_sheet_file,
     print(("Demultiplexing reads for file: " + read1_file))
     print(("Using sample sheet: " + sample_sheet_file))
 
-    sample_sheet = utils.load_sample_sheet(sample_sheet_file)
+    sample_sheet = sample_sheets.load_sample_sheet(sample_sheet_file)
     num_samples = sample_sheet.shape[0]
     num_reads = [0] * num_samples
     num_unassigned_reads = 0
     total_reads = 0
-    sample_ids = list(sample_sheet[SAMPLE_ID])
-    barcodes = list(sample_sheet[TAG_READ])
+    sample_ids = list(sample_sheet[sample_sheets.SAMPLE_ID])
+    barcodes = list(sample_sheet[sample_sheets.TAG_READ])
     length_tag = len(barcodes[1])
     print(("Number of samples: {}".format(num_samples)))
     print(("Allowed mismatches: {}".format(mismatches)))
@@ -339,11 +337,11 @@ def demultiplex(sample_sheet_file,
     print(("All {} reads processed".format(total_reads)))
 
     # Output number of reads by sample to file.
-    sample_sheet[NUM_READS] = num_reads
-    utils.save_deplexed_sample_sheet(sample_sheet,
-                                     num_unassigned_reads,
-                                     num_reads_file,
-                                     client=__file__)
+    sample_sheet[sample_sheets.NUM_READS] = num_reads
+    sample_sheets.save_deplexed_sample_sheet(sample_sheet,
+                                             num_unassigned_reads,
+                                             num_reads_file,
+                                             client=__file__)
     print(("Done"))
 
 
@@ -388,7 +386,7 @@ def parse_command_line_options():
                         "--delimiter",
                         dest="delimiter",
                         nargs='?',
-                        default=BARCODE_DELIMITER,
+                        default=sample_sheets.BARCODE_DELIMITER,
                         help="Barcode delimiter")
     options = parser.parse_args()
     return options

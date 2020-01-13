@@ -1,8 +1,8 @@
 """
-utils.py test suite.
+barcodes_umis.py test suite.
 """
-from riboviz.utils import barcode_matches
-from riboviz.utils import hamming_distance
+from riboviz.barcodes_umis import barcode_matches
+from riboviz.barcodes_umis import hamming_distance
 
 
 def test_hamming_distance_empty():
