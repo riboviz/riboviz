@@ -197,7 +197,7 @@ def demultiplex(sample_sheet_file,
                 read2_file=None,
                 mismatches=1,
                 out_dir="output",
-                delimiter=sample_sheets.BARCODE_DELIMITER):
+                delimiter=barcodes_umis.BARCODE_DELIMITER):
     """
     Demultiplex reads from fastq[.gz] by inline barcodes.
 
@@ -386,7 +386,7 @@ def parse_command_line_options():
                         "--delimiter",
                         dest="delimiter",
                         nargs='?',
-                        default=sample_sheets.BARCODE_DELIMITER,
+                        default=barcodes_umis.BARCODE_DELIMITER,
                         help="Barcode delimiter")
     options = parser.parse_args()
     return options
