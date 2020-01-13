@@ -134,17 +134,14 @@ import os
 import os.path
 import sys
 import yaml
+from riboviz import fastq_files
 from riboviz import logging_utils
 from riboviz import params
 from riboviz import provenance
+from riboviz import sample_sheets
 from riboviz import workflow
-from riboviz.tools.demultiplex_fastq import NUM_READS_FILE
-from riboviz.utils import SAMPLE_ID
+from riboviz.tools import demultiplex_fastq
 from riboviz.utils import value_in_dict
-from riboviz.utils import get_fastq_filename
-from riboviz.utils import load_sample_sheet
-from riboviz.utils import load_deplexed_sample_sheet
-from riboviz.utils import get_non_zero_deplexed_samples
 
 
 EXIT_OK = 0
@@ -327,7 +324,6 @@ def process_sample(sample, fastq, r_rna_index, orf_index,
     workflow.bam_to_h5(sample_out_bam, sample_out_h5, orf_gff_file,
                        config, log_file, run_config)
     step += 1
-
 
     log_file = workflow.get_log_file(
         run_config.logs_dir, "generate_stats_figs", step)
@@ -545,24 +541,25 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
                                    deplex_dir, log_file, run_config)
 
         if not is_dry_run:
-            num_reads_file = os.path.join(deplex_dir, NUM_READS_FILE)
-            num_reads = load_deplexed_sample_sheet(num_reads_file)
-            samples = get_non_zero_deplexed_samples(num_reads)
+            num_reads_file = os.path.join(deplex_dir,
+                                          demultiplex_fastq.NUM_READS_FILE)
+            num_reads = sample_sheets.load_deplexed_sample_sheet(num_reads_file)
+            samples = sample_sheets.get_non_zero_deplexed_samples(num_reads)
             if not samples:
                 raise Exception(
                     "No non-empty sample files were produced by demultiplexing")
         else:
             # If doing a dry run, use the sample_sheet_file to get
             # the names of the samples.
-            sample_sheet = load_sample_sheet(sample_sheet_file)
-            samples = list(sample_sheet[SAMPLE_ID])
+            sample_sheet = sample_sheets.load_sample_sheet(sample_sheet_file)
+            samples = list(sample_sheet[sample_sheets.SAMPLE_ID])
             if not samples:
                 raise Exception(
                     "No samples are specified in {}".format(sample_sheet_file))
         # Use get_fastq_filename to deduce sample-specific files
         # output by demultiplex_fastq.py - demultiplex_fastq.py
         # uses this function too.
-        sample_files = {sample: get_fastq_filename(sample)
+        sample_files = {sample: fastq_files.get_fastq_filename(sample)
                         for sample in samples}
         processed_samples = process_samples(
             sample_files, deplex_dir, r_rna_index, orf_index,
