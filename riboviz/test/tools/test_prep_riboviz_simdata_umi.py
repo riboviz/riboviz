@@ -46,11 +46,13 @@ def test_adaptor_trimming(configuration_module, sample_id):
     :type sample_id: str or unicode
     """
     config, _ = configuration_module
-    expected_output = os.path.join(riboviz.test.SIMDATA_DIR,
-                                   sample_id + "_umi.fastq")
-    actual_output = os.path.join(config[params.TMP_DIR],
-                                 sample_id,
-                                 "trim.fq")
+    expected_output = os.path.join(
+        riboviz.test.SIMDATA_DIR,
+        sample_id + "_umi.fastq")
+    actual_output = os.path.join(
+        config[params.TMP_DIR],
+        sample_id,
+        "trim.fq")
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
 
@@ -68,34 +70,33 @@ def test_umi_extract(configuration_module, sample_id):
     :type sample_id: str or unicode
     """
     config, _ = configuration_module
-    expected_output = os.path.join(riboviz.test.SIMDATA_DIR,
-                                   sample_id + ".fastq")
-    actual_output = os.path.join(config[params.TMP_DIR],
-                                 sample_id,
-                                 "extract_trim.fq")
+    expected_output = os.path.join(
+        riboviz.test.SIMDATA_DIR,
+        sample_id + ".fastq")
+    actual_output = os.path.join(
+        config[params.TMP_DIR],
+        sample_id,
+        "extract_trim.fq")
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
 
-@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
-@pytest.mark.usefixtures("run_prep_riboviz")
-def test_umi_group(configuration_module, sample_id):
+def check_umi_groups(config, sample_id, num_groups):
     """
     Validate the information on UMI groups post-"umi_tools extract",
     by parsing the ".tsv" file output by "umi_tools group".
 
-    :param configuration_module: configuration and path to
-    configuration file (pytest fixture)
-    :type configuration_module: tuple(dict, str or unicode)
+    :param config: configuration
+    :type config: dict
     :param sample_id: sample ID
     :type sample_id: str or unicode
+    :param num_groups: Expected number of groups
+    :type num_groups: int
     """
-    config, _ = configuration_module
     tmp_dir = config[params.TMP_DIR]
     groups_tsv = os.path.join(tmp_dir,
                               sample_id,
                               "post_dedup_groups.tsv")
     groups = pd.read_csv(groups_tsv, sep="\t")
-    num_groups = 5
     assert groups.shape[0] == num_groups, \
         ("Expected %d unique groups but found %d"
          % (num_groups, groups.shape[0]))
@@ -128,6 +129,55 @@ def test_umi_group(configuration_module, sample_id):
 
 @pytest.mark.parametrize("sample_id", ["umi5_umi3"])
 @pytest.mark.usefixtures("run_prep_riboviz")
+def test_umi_group(configuration_module, sample_id):
+    """
+    Validate the information on UMI groups post-"umi_tools extract",
+    by parsing the ".tsv" file output by "umi_tools group".
+
+    :param configuration_module: configuration and path to
+    configuration file (pytest fixture)
+    :type configuration_module: tuple(dict, str or unicode)
+    :param sample_id: sample ID
+    :type sample_id: str or unicode
+    """
+    config, _ = configuration_module
+    check_umi_groups(config, sample_id, 5)
+
+
+def check_tpms_collated_tsv(config, sample_id, num_columns):
+    """
+    Validate the "TPMs_collated.tsv" file produced from running the
+    workflow.
+
+    :param config: configuration
+    :type config: dict
+    :param sample_id: sample ID
+    :type sample_id: str or unicode
+    :param num_columns: Expected number of columns in TSV file
+    :type num_columns: int
+    """
+    output_dir = config[params.OUTPUT_DIR]
+    tpms_tsv = os.path.join(output_dir, "TPMs_collated.tsv")
+    tpms = pd.read_csv(tpms_tsv, sep="\t", comment="#")
+    num_rows, num_columns = tpms.shape
+    assert num_columns == num_columns, "Unexpected number of columns"
+    assert num_rows == 68, "Unexpected number of rows"
+    columns = list(tpms.columns)
+    assert "ORF" in columns, "Missing 'ORF' column"
+    assert sample_id in columns, "Missing {} column".format(sample_id)
+    yal003w = tpms.loc[tpms["ORF"] == "YAL003W", sample_id]
+    assert (yal003w == 607366.8).all(), \
+        "{} value for ORF YAL003W is not 607366.8".format(sample_id)
+    yal038w = tpms.loc[tpms["ORF"] == "YAL038W", sample_id]
+    assert (yal038w == 392633.2).all(), \
+        "{} value for ORF YAL038W is not 392633.2".format(sample_id)
+    others = tpms[~tpms["ORF"].isin(["YAL003W", "YAL038W"])]
+    assert (others[sample_id] == 0).all(), \
+        "{} value for non-YAL003W and YAL038W ORFs are not 0".format(sample_id)
+
+
+@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
+@pytest.mark.usefixtures("run_prep_riboviz")
 def test_tpms_collated_tsv(configuration_module, sample_id):
     """
     Validate the "TPMs_collated.tsv" file produced from running the
@@ -140,21 +190,4 @@ def test_tpms_collated_tsv(configuration_module, sample_id):
     :type sample_id: str or unicode
     """
     config, _ = configuration_module
-    output_dir = config[params.OUTPUT_DIR]
-    tpms_tsv = os.path.join(output_dir, "TPMs_collated.tsv")
-    tpms = pd.read_csv(tpms_tsv, sep="\t", comment="#")
-    num_rows, num_columns = tpms.shape
-    assert num_columns == 2, "Unexpected number of columns"
-    assert num_rows == 68, "Unexpected number of rows"
-    columns = list(tpms.columns)
-    assert "ORF" in columns, "Missing 'ORF' column"
-    assert "umi5_umi3" in columns, "Missing 'umi5_umi3' column"
-    yal003w = tpms.loc[tpms["ORF"] == "YAL003W", "umi5_umi3"]
-    assert (yal003w == 607366.8).all(), \
-        "umi5_umi3 value for ORF YAL003W is not 607366.8"
-    yal038w = tpms.loc[tpms["ORF"] == "YAL038W", "umi5_umi3"]
-    assert (yal038w == 392633.2).all(), \
-        "umi5_umi3 value for ORF YAL038W is not 392633.2"
-    others = tpms[~tpms["ORF"].isin(["YAL003W", "YAL038W"])]
-    assert (others["umi5_umi3"] == 0).all(), \
-        "umi5_umi3 value for non-YAL003W and YAL038W ORFs are not 0"
+    check_tpms_collated_tsv(config, sample_id, 2)
