@@ -56,8 +56,9 @@ $ conda install -y pytest
 
 ### pytest-cov
 
-Web site:
+Web sites:
 
+* [pytest-cov](https://pytest-cov.readthedocs.io)
 * [GitHub](https://github.com/pytest-dev/pytest-cov)
 
 Install:
