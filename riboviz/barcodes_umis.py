@@ -61,7 +61,7 @@ def barcode_matches(record,
     return hamming_distance(candidate, barcode) <= mismatches
 
 
-def generate_barcode_pairs(filename, length=1):
+def generate_barcode_pairs(filename, length=1, delimiter="\t"):
     """
     Generate barcode pairs and write each pair plus the Hamming
     distance between then to a file of tab-separated values.
@@ -70,11 +70,16 @@ def generate_barcode_pairs(filename, length=1):
     :type filename: str or unicode
     :param length: Barcode length
     :type length: int
+    :param delimiter: Delimiter
+    :type delimiter: str or unicode
     """
+    if length <= 0:
+        open(filename, 'w').close()
+        return
     barcodes = [''.join(i) for i in itertools.product(NUCLEOTIDES,
                                                       repeat=length)]
     with open(filename, "w") as f:
-        writer = csv.writer(f, delimiter="\t")
+        writer = csv.writer(f, delimiter=delimiter)
         for (a, b) in itertools.product(barcodes, repeat=2):
             distance = hamming_distance(a, b)
             writer.writerow([a, b, distance])
