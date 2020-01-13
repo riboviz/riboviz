@@ -335,6 +335,13 @@ Run all tests (excluding regression tests):
 $ pytest -v --ignore-glob="*regression*"
 ```
 
+Run all tests and generate test coverage report (including lines that were not invoked):
+
+```console
+$ pytest --cov-config=.coveragerc --cov-report term-missing \
+    --cov=riboviz --ignore-glob="*regression*"
+```
+
 ---
 
 ## Logging
