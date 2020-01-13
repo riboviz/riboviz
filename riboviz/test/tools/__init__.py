@@ -73,3 +73,20 @@ configuration = pytest.fixture(scope='function')(configuration_fixture)
 
 configuration_module = pytest.fixture(scope='module')(configuration_fixture)
 """ Module-level fixture for configuration_fixture """
+
+
+@pytest.fixture(scope="module")
+def run_prep_riboviz(configuration_module):
+    """
+    Fixture to run prep_riboviz.py.
+
+    :param configuration_module: configuration and path to
+    configuration file  (pytest fixture)
+    :type configuration_module: tuple(dict, str or unicode)
+    """
+    _, config_path = configuration_module
+    exit_code = prep_riboviz.prep_riboviz(riboviz.test.PY_SCRIPTS,
+                                          riboviz.test.R_SCRIPTS,
+                                          config_path)
+    assert exit_code == 0, \
+        "prep_riboviz returned non-zero exit code %d" % exit_code
