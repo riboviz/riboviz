@@ -7,6 +7,16 @@ import re
 import pysam
 
 
+NUM_PROCESSED = "num_processed"
+""" Key for number of reads processed """
+NUM_DISCARDED = "num_discarded"
+""" Key for number of reads discarded """
+NUM_TRIMMED = "num_trimmed"
+""" Key for number of reads trimmed """
+NUM_WRITTEN = "num_written"
+""" Key for number of reads written """
+
+
 def increase_soft_clip_init(read):
     """
     Edit CIGAR string of a read to increase soft clip, reducing
@@ -89,6 +99,9 @@ def trim_5p_mismatch(sam_file_in,
     :type fivep_remove: bool
     :param max_mismatches: Number of mismatches to allow
     :type max_mismatches: int
+    :return dict with keys "processed", "discarded", "trimmed" and
+    "written" and numbers of reads corresponding to each
+    :rtype: dict
     """
     num_processed = 0
     num_discarded = 0
@@ -149,9 +162,12 @@ def trim_5p_mismatch(sam_file_in,
                 sam_out.write(read)
             else:
                 num_discarded += 1
-
     print("Number of reads:")
-    print(("processed:\t" + str(num_processed)))
-    print(("discarded:\t" + str(num_discarded)))
-    print(("trimmed:\t" + str(num_trimmed)))
-    print(("written:\t" + str(num_written)))
+    print(("{}:\t{}".format(NUM_PROCESSED, num_processed)))
+    print(("{}:\t{}".format(NUM_DISCARDED, num_discarded)))
+    print(("{}:\t{}".format(NUM_TRIMMED, num_trimmed)))
+    print(("{}:\t{}".format(NUM_WRITTEN, num_written)))
+    return {NUM_PROCESSED: num_processed,
+            NUM_DISCARDED: num_discarded,
+            NUM_TRIMMED: num_trimmed,
+            NUM_WRITTEN: num_written}
