@@ -36,6 +36,72 @@ import pysam
 from riboviz import provenance
 
 
+def increase_soft_clip_init(read):
+    """
+    Edit CIGAR string of a read to increase soft clip, reducing
+    number of initial matches.
+
+    :param read: Read in SAM file.
+    :type read: pysam.libcalignedsegment.AlignedSegment
+    """
+    cigar_string = read.cigarstring
+    if "S" not in cigar_string[:3]:
+        # Read is not soft-clipped on left.
+        # Find number of initial matches.
+        num_init_match = int(re.findall(r"^([0-9]+)M", cigar_string)[0])
+        # Add initial "1S" and reduce initial match by 1.
+        new_init_bit = "1S" + str(num_init_match - 1) + "M"
+        read.cigarstring = re.sub(r"^([0-9]+)M",
+                                  new_init_bit,
+                                  cigar_string)
+    else:
+        # Read is soft-clipped on left.
+        num_soft_clip = int(re.findall(r"^([0-9]+)S",
+                                       cigar_string)[0])
+        num_init_match = int(re.findall(r"([0-9]+)M",
+                                        cigar_string)[0])
+        # Add 1 to left soft-clip and reduce initial match by 1.
+        new_init_bit = str(num_soft_clip + 1) + \
+            "S" + str(num_init_match - 1) + "M"
+        read.cigarstring = re.sub(r"^([0-9]+)S([0-9]+)M",
+                                  new_init_bit,
+                                  cigar_string)
+
+
+def increase_soft_clip_term(read):
+    """
+    Edit CIGAR string of a read to increase soft clip, reducing
+    number of terminal matches.
+
+    :param read: Read in SAM file.
+    :type read: pysam.libcalignedsegment.AlignedSegment
+    """
+    cigar_string = read.cigarstring
+    if cigar_string[-1] != "S":
+        # Read is not soft-clipped on left (= right along template)
+        # Find number of terminal matches.
+        num_term_match = int(re.findall(r"([0-9]+)M$",
+                                        cigar_string)[0])
+        # Add initial "1S" and reduce initial match by 1.
+        new_term_bit = str(num_term_match - 1) + "M1S"
+        read.cigarstring = re.sub(r"([0-9]+)M$",
+                                  new_term_bit,
+                                  cigar_string)
+    else:
+        # Read is soft-clipped on left (= right along template).
+        # Find number of terminal matches.
+        num_soft_clip = int(re.findall(r"([0-9]+)S$",
+                                       cigar_string)[0])
+        num_term_match = int(re.findall(r"([0-9]+)M",
+                                        cigar_string)[-1])
+        # Add initial "1S" and reduce initial match by 1.
+        new_term_bit = str(num_term_match - 1) + \
+            "M" + str(num_soft_clip + 1) + "S"
+        read.cigarstring = re.sub(r"([0-9]+)M([0-9]+)S$",
+                                  new_term_bit,
+                                  cigar_string)
+
+
 def trim_5p_mismatches(sam_file_in,
                        sam_file_out,
                        fivep_remove=True,
@@ -53,7 +119,6 @@ def trim_5p_mismatches(sam_file_in,
     :param max_mismatches: Number of mismatches to allow
     :type max_mismatches: int
     """
-    # TODO with...open
     num_processed = 0
     num_discarded = 0
     num_trimmed = 0
@@ -72,11 +137,9 @@ def trim_5p_mismatches(sam_file_in,
                 num_discarded += 1
                 continue
             # Count mismatches in read.
-            num_mismatch = read.get_tag('NM')
-
-            if num_mismatch > 0 and fivep_remove:
+            num_mismatches = read.get_tag('NM')
+            if num_mismatches > 0 and fivep_remove:
                 # If there are any mismatches...
-
                 if md_tag[0] == "0" and read.flag == 0:
                     # If the 5' nt is mismatched on a plus-strand read...
                     if md_tag[2] in ["A", "T", "C", "G", "0"]:
@@ -88,34 +151,9 @@ def trim_5p_mismatches(sam_file_in,
                     read.pos += 1
                     # Edit MD tag to remove leading mismatch.
                     read.set_tag('MD', re.sub("^0[ATCG]", "", md_tag))
-                    # Lower the number of mismatches by 1.
-                    num_mismatch -= 1
-                    read.set_tag('NM', num_mismatch)
-                    # Edit CIGAR string to increase soft clip.
-                    cigar_string = read.cigarstring
-                    if "S" not in cigar_string[:3]:
-                        # Read is not soft-clipped on left.
-                        # Find number of initial matches.
-                        num_init_match = int(re.findall(r"^([0-9]+)M",
-                                                        cigar_string)[0])
-                        # Add initial "1S" and reduce initial match by 1.
-                        new_init_bit = "1S" + str(num_init_match - 1) + "M"
-                        read.cigarstring = re.sub(r"^([0-9]+)M",
-                                                  new_init_bit,
-                                                  cigar_string)
-                    else:
-                        # Read is soft-clipped on left.
-                        num_soft_clip = int(re.findall(r"^([0-9]+)S",
-                                                       cigar_string)[0])
-                        num_init_match = int(re.findall(r"([0-9]+)M",
-                                                        cigar_string)[0])
-                        # Add 1 to left soft-clip and reduce initial match by 1.    
-                        new_init_bit = str(num_soft_clip + 1) + \
-                            "S" + str(num_init_match - 1) + "M"
-                        read.cigarstring = re.sub(r"^([0-9]+)S([0-9]+)M",
-                                                  new_init_bit,
-                                                  cigar_string)
-                    # Count the read as trimmed.
+                    num_mismatches -= 1
+                    read.set_tag('NM', num_mismatches)
+                    increase_soft_clip_init(read)
                     num_trimmed += 1
 
                 if bool(re.search("[ATCG]0$", md_tag)) and read.flag == 16:
@@ -130,38 +168,12 @@ def trim_5p_mismatches(sam_file_in,
                     # Don't increment position of alignment!
                     # Edit MD tag to remove trailing mismatch.
                     read.set_tag('MD', re.sub("[ATCG]0$", "", md_tag))
-                    # Lower the number of mismatches by 1.
-                    num_mismatch -= 1
-                    read.set_tag('NM', num_mismatch)
-                    # Edit CIGAR string to increase soft clip.
-                    cigar_string = read.cigarstring
-                    if cigar_string[-1] != "S":
-                        # Read is not soft-clipped on left (= right along template)
-                        # Find number of terminal matches.
-                        num_term_match = int(re.findall(r"([0-9]+)M$",
-                                                        cigar_string)[0])
-                        # Add initial "1S" and reduce initial match by 1.
-                        new_term_bit = str(num_term_match - 1) + "M1S"
-                        read.cigarstring = re.sub(r"([0-9]+)M$",
-                                                  new_term_bit,
-                                                  cigar_string)
-                    else:
-                        # Read is soft-clipped on left (= right along template).
-                        # Find number of terminal matches.
-                        num_soft_clip = int(re.findall(r"([0-9]+)S$",
-                                                       cigar_string)[0])
-                        num_term_match = int(re.findall(r"([0-9]+)M",
-                                                        cigar_string)[-1])
-                        # Add initial "1S" and reduce initial match by 1.
-                        new_term_bit = str(num_term_match - 1) + \
-                                       "M" + str(num_soft_clip + 1) + "S"
-                        read.cigarstring = re.sub(r"([0-9]+)M([0-9]+)S$",
-                                                  new_term_bit,
-                                                  cigar_string)
-                    # Count the read as trimmed.
+                    num_mismatches -= 1
+                    read.set_tag('NM', num_mismatches)
+                    increase_soft_clip_term(read)
                     num_trimmed += 1
 
-            if num_mismatch <= max_mismatches:
+            if num_mismatches <= max_mismatches:
                 num_written += 1
                 sam_out.write(read)
             else:
