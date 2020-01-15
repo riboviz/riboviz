@@ -19,8 +19,8 @@ import riboviz.test
 import riboviz.tools
 import riboviz.validation
 from riboviz import params
+from riboviz.demultiplex_fastq import NUM_READS_FILE
 from riboviz.tools import prep_riboviz
-from riboviz.tools.demultiplex_fastq import NUM_READS_FILE
 from riboviz.test.tools import configuration_module  # Test fixture
 from riboviz.test.tools import run_prep_riboviz  # Test fixture
 from riboviz.test.tools.test_prep_riboviz_simdata_umi import check_umi_groups
@@ -78,7 +78,7 @@ def test_barcode_umi_extract(configuration_module):
 def test_deplex_num_reads(configuration_module):
     """
     Validate that "num_reads.tsv", produced by
-    riboviz.tools.demultiplex_fastq has the expected content.
+    riboviz.demultiplex_fastq has the expected content.
 
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
@@ -100,7 +100,7 @@ def test_deplex_num_reads(configuration_module):
 def test_deplex_reads(configuration_module, fastq):
     """
     Validate that ".fastq", produced by
-    riboviz.tools.demultiplex_fastq have the expected content.
+    riboviz.demultiplex_fastq have the expected content.
 
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)

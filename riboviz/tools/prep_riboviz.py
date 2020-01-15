@@ -134,13 +134,13 @@ import os
 import os.path
 import sys
 import yaml
+from riboviz import demultiplex_fastq
 from riboviz import fastq_files
 from riboviz import logging_utils
 from riboviz import params
 from riboviz import provenance
 from riboviz import sample_sheets
 from riboviz import workflow
-from riboviz.tools import demultiplex_fastq
 from riboviz.utils import value_in_dict
 
 
