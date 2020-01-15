@@ -3,8 +3,8 @@ demultiplex_fastq.py test suite.
 """
 from io import StringIO
 from contextlib import ExitStack
-from riboviz.tools.demultiplex_fastq import assign_sample
-from riboviz.tools.demultiplex_fastq import assign_samples
+from riboviz.demultiplex_fastq import assign_sample
+from riboviz.demultiplex_fastq import assign_samples
 
 
 FASTQ_RECORD1 = ["@X1:Tag_AAC_ 1:N:0:XXXXXXXX\n",
