@@ -1,13 +1,13 @@
 """
-upgrade_config_file.py test suite.
+riboviz.upgrade_config_file test suite.
 """
 import os
 import tempfile
 import pytest
 import yaml
-from riboviz.tools.upgrade_config_file import upgrade_config_file
+from riboviz.upgrade_config_file import upgrade_config_file
 import riboviz.test
-from riboviz.test.tools import config
+from riboviz.test import config
 
 
 @pytest.fixture(scope="function")
