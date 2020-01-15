@@ -125,7 +125,7 @@ def parse_command_line_options():
     return options
 
 
-def main():
+def invoke_demultiplex_fastq():
     """
     Parse command-line options then invoke "demultiplex".
     """
@@ -146,4 +146,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    invoke_demultiplex_fastq()
