@@ -13,6 +13,8 @@ DEFAULT_CONFIG = os.path.join(os.path.dirname(__file__), "logging.yaml")
 """ Default logging configuration file. """
 LOG_CONFIG_ENV = "RIBOVIZ_LOG_CONFIG"
 """ Logging environment variable. """
+LOG_FILE = "riboviz.log"
+""" Default log file. """
 
 
 class TimestampedFileHandler(logging.FileHandler):
@@ -44,7 +46,7 @@ class TimestampedFileHandler(logging.FileHandler):
 def configure_logging(config_path=DEFAULT_CONFIG,
                       env_key=LOG_CONFIG_ENV,
                       level=logging.INFO,
-                      log_file="riboviz.log"):
+                      log_file=LOG_FILE):
     """
     Configure logging.
 
