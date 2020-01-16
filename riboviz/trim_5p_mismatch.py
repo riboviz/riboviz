@@ -5,6 +5,8 @@ specified mismatches from a SAM file.
 """
 import re
 import pysam
+import pandas as pd
+from riboviz import provenance
 
 
 NUM_PROCESSED = "num_processed"
@@ -15,6 +17,8 @@ NUM_TRIMMED = "num_trimmed"
 """ Key for number of reads trimmed """
 NUM_WRITTEN = "num_written"
 """ Key for number of reads written """
+SUMMARY_FILE = "trimmed_5p_mismatches.tsv"
+""" Default summary file name. """
 
 
 def increase_soft_clip_init(read):
@@ -99,8 +103,9 @@ def trim_5p_mismatch(sam_file_in,
     :type fivep_remove: bool
     :param max_mismatches: Number of mismatches to allow
     :type max_mismatches: int
-    :return dict with keys "processed", "discarded", "trimmed" and
-    "written" and numbers of reads corresponding to each
+    :return dict with keys "num_processed", "num_discarded",
+    "num_trimmed" and "num_written" and numbers of reads corresponding
+    to each
     :rtype: dict
     """
     num_processed = 0
@@ -162,12 +167,46 @@ def trim_5p_mismatch(sam_file_in,
                 sam_out.write(read)
             else:
                 num_discarded += 1
-    print("Number of reads:")
-    print(("{}:\t{}".format(NUM_PROCESSED, num_processed)))
-    print(("{}:\t{}".format(NUM_DISCARDED, num_discarded)))
-    print(("{}:\t{}".format(NUM_TRIMMED, num_trimmed)))
-    print(("{}:\t{}".format(NUM_WRITTEN, num_written)))
-    return {NUM_PROCESSED: num_processed,
-            NUM_DISCARDED: num_discarded,
-            NUM_TRIMMED: num_trimmed,
-            NUM_WRITTEN: num_written}
+    print(("processed " + str(num_processed - 1) + " reads"))
+    print("Summary:")
+    summary = {NUM_PROCESSED: num_processed,
+               NUM_DISCARDED: num_discarded,
+               NUM_TRIMMED: num_trimmed,
+               NUM_WRITTEN: num_written}
+    for (name, value) in list(summary.items()):
+        print(("{}:\t{}".format(name, value)))
+    return summary
+
+
+def trim_5p_mismatch_file(sam_file_in,
+                          sam_file_out,
+                          fivep_remove=True,
+                          max_mismatches=1,
+                          summary_file=SUMMARY_FILE):
+    """
+    Remove a single 5' mismatched nt AND filter reads with more than
+    specified mismatches from a SAM file and save results to a
+    summary_file.
+
+    :param sam_file_in: SAM file input
+    :type sam_file_in: str or unicode
+    :param sam_file_out: SAM file output
+    :type sam_file_out: str or unicode
+    :param fivep_remove: Remove mismatched 5' nt?
+    :type fivep_remove: bool
+    :param max_mismatches: Number of mismatches to allow
+    :type max_mismatches: int
+    :param sam_file_in: TSV file output with
+    :type sam_file_in: str or unicode
+    :param summary_file: TSV summary file with "num_processed",
+    "num_discarded", "num_trimmed" and "num_written" columns
+    :type summary_file: str or unicode
+    """
+    summary = trim_5p_mismatch(sam_file_in,
+                               sam_file_out,
+                               fivep_remove,
+                               max_mismatches)
+    provenance.write_metadata_header(__file__, summary_file)
+    summary_df = pd.DataFrame.from_dict([summary])
+    summary_df[list(summary_df.columns)].to_csv(
+        summary_file, mode='a', sep="\t", index=False)
