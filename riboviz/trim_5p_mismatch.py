@@ -17,7 +17,7 @@ NUM_TRIMMED = "num_trimmed"
 """ Key for number of reads trimmed """
 NUM_WRITTEN = "num_written"
 """ Key for number of reads written """
-SUMMARY_FILE = "trimmed_5p_mismatches.tsv"
+TRIM_5P_MISMATCH_FILE = "trim_5p_mismatch.tsv"
 """ Default summary file name. """
 
 
@@ -182,7 +182,7 @@ def trim_5p_mismatch_file(sam_file_in,
                           sam_file_out,
                           fivep_remove=True,
                           max_mismatches=1,
-                          summary_file=SUMMARY_FILE):
+                          summary_file=TRIM_5P_MISMATCH_FILE):
     """
     Remove a single 5' mismatched nt AND filter reads with more than
     specified mismatches from a SAM file and save results to a
