@@ -215,13 +215,13 @@ Data was imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb
 
 ---
 
-## `trim_5p_mismatch.py` test files
+## `riboviz.test.test_trim_5p_mismatch` test files
 
 ```
-data/testdata_trim_5p_mismatch.sam
-data/testdata_trim_5pos5neg.sam
+riboviz/test/data/trim_5p_mismatch.sam
+riboviz/test/data/trim_5pos5neg.sam
 ```
 
-These files are used for testing [trim_5p_mismatch.py](../riboviz/tools/trim_5p_mismatch.py).
+These files are used by `riboviz.test.test_trim_5p_mismatch` for testing `riboviz.trim_5p_mismatch`.
 
-These files were created by running RiboViz using `vignette/vignette_config.yaml` and the data in `vignette/input`. Lines were copied and pasted from the SAM files output then these lines were manually edited to produce a desired range of outcomes.
+These files were created by running RiboViz using `vignette/vignette_config.yaml` and the data in `vignette/input/`. Lines were copied and pasted from the SAM files output then these lines were manually edited to produce a desired range of outcomes.
