@@ -17,7 +17,9 @@ Arguments:
   mismatches to allow (default 1)
 * '-5', '--5p-remove': Remove 5p mismatches (default True)
 * '-k', '--5p-keep': Keep 5p mismatches (default False)
-* '-s SUMMARY_FILE', '--summary-file SUMMARY_FILE': Summary file for TSV summary of reads processed, discarded, trimmed and written (default "trimmed_5p_mismatches.tsv")
+* '-s SUMMARY_FILE', '--summary-file SUMMARY_FILE': Summary file for
+  TSV summary of reads processed, discarded, trimmed and written
+  (default "trim_5p_mismatch.tsv")
 """
 import argparse
 from riboviz import trim_5p_mismatch
@@ -65,7 +67,7 @@ def parse_command_line_options():
     parser.add_argument("-s",
                         "--summary-file",
                         dest="summary_file",
-                        default=trim_5p_mismatch.SUMMARY_FILE,
+                        default=trim_5p_mismatch.TRIM_5P_MISMATCH_FILE,
                         help="Summary file output")
     options = parser.parse_args()
     return options
