@@ -4,6 +4,7 @@ riboviz.trim_5p_mismatch test suite.
 import os
 import tempfile
 import pytest
+import pandas as pd
 from riboviz import trim_5p_mismatch
 from riboviz.test import data
 
@@ -70,11 +71,24 @@ def trimmed_sam_file():
         os.remove(sam_file)
 
 
+@pytest.fixture(scope="function")
+def summary_file():
+    """
+    Create a temporary TSV summary file to write summary data to.
+
+    :return: path to summary file
+    :rtype: str or unicode
+    """
+    _, summary_file = tempfile.mkstemp(prefix="tmp", suffix=".tsv")
+    yield summary_file
+    if os.path.exists(summary_file):
+        os.remove(summary_file)
+
+
 @pytest.mark.parametrize("test_case", TEST_5P_CASES + TEST_5POS5NEG_CASES)
 def test_trim_5p_mismatch(test_case, trimmed_sam_file):
     """
-    Run upgrade_config_file on previous versions of the simulated UMI
-    data configuration file and compare to the current version.
+    Run trim_5p_mismatch and validate summary returned.
 
     :param test_case: Test case with test SAM file name, maximum
     number of mismatches to test and dictionary with expected results
@@ -90,3 +104,30 @@ def test_trim_5p_mismatch(test_case, trimmed_sam_file):
                                                 True,
                                                 max_mismatches)
     assert summary == expected_summary, "Unexpeted summary"
+
+
+@pytest.mark.parametrize("test_case", TEST_5P_CASES + TEST_5POS5NEG_CASES)
+def test_trim_5p_mismatch_file(test_case, trimmed_sam_file, summary_file):
+    """
+    Run trim_5p_mismatch_file and validate summary file created.
+
+    :param test_case: Test case with test SAM file name, maximum
+    number of mismatches to test and dictionary with expected results
+    from trim_5p_mismatch.
+    :type test_case: tuple(str or unicode, tuple(int, dict))
+    :param trimmed_sam_file: path to trimmed SAM file
+    :type trimmed_sam_file: str or unicode
+    :param summary_file: path to TSV summary file
+    :type summary_file: str or unicode
+    """
+    sam_file_name, (max_mismatches, expected_summary) = test_case
+    sam_file = os.path.join(os.path.dirname(data.__file__), sam_file_name)
+    trim_5p_mismatch.trim_5p_mismatch_file(sam_file,
+                                           trimmed_sam_file,
+                                           True,
+                                           max_mismatches,
+                                           summary_file)
+    summary_df = pd.read_csv(summary_file, sep="\t", comment="#")
+    summary = summary_df.to_dict('records')
+    assert len(summary_df) == 1, "Expected 1 summary row only"
+    assert summary[0] == expected_summary, "Unexpeted summary"
