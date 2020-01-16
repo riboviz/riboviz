@@ -163,7 +163,7 @@ For each sample (`<SAMPLE_ID>`), log files are produced in a sample-specific dir
 
 The following log files are produced:
 
-```console
+```
 hisat2_build_r_rna.log
 hisat2_build_orf.log
 <SAMPLE_ID>/
