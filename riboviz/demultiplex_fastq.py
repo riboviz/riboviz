@@ -46,6 +46,8 @@ from riboviz import sample_sheets
 
 NUM_READS_FILE = "num_reads.tsv"
 """ Number of reads summary file name """
+OUTPUT_DIR = "output"
+""" Default directory for demultiplexed files """
 
 
 def assign_sample(fastq_record1,
@@ -159,7 +161,7 @@ def demultiplex(sample_sheet_file,
                 read1_file,
                 read2_file=None,
                 mismatches=1,
-                out_dir="output",
+                out_dir=OUTPUT_DIR,
                 delimiter=barcodes_umis.BARCODE_DELIMITER):
     """
     Demultiplex reads from fastq[.gz] by inline barcodes.
