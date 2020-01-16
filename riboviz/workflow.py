@@ -11,6 +11,8 @@ import os.path
 from riboviz import params
 from riboviz import process_utils
 from riboviz import logging_utils
+from riboviz.tools import demultiplex_fastq as demultiplex_fastq_module
+from riboviz.tools import trim_5p_mismatch as trim_5p_mismatch_module
 from riboviz.utils import value_in_dict
 
 
@@ -255,7 +257,7 @@ def trim_5p_mismatches(orf_map_sam,
     LOGGER.info(
         "Trim 5' mismatched nt and remove reads with >1 mismatch. Log: %s",
         log_file)
-    cmd = ["python", "-m", "riboviz.tools.trim_5p_mismatch",
+    cmd = ["python", "-m", trim_5p_mismatch_module.__name__,
            "-m", "2", "-i", orf_map_sam, "-o", orf_map_sam_clean,
            "-s", summary_file]
     process_utils.run_logged_command(
@@ -559,7 +561,7 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
     :raise AssertionError: if python returns non-zero exit code
     """
     LOGGER.info("Demultiplex reads. Log: %s", log_file)
-    cmd = ["python", "-m", "riboviz.tools.demultiplex_fastq",
+    cmd = ["python", "-m", demultiplex_fastq_module.__name__,
            "-1", fastq, "-s", barcodes_file, "-o", deplex_dir,
            "-m", "2"]
     process_utils.run_logged_command(
