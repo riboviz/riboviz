@@ -230,7 +230,10 @@ def map_to_orf(fastq, index, mapped_sam, unmapped_fastq, log_file,
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 
 
-def trim_5p_mismatches(orf_map_sam, orf_map_sam_clean, log_file,
+def trim_5p_mismatches(orf_map_sam,
+                       orf_map_sam_clean,
+                       summary_file,
+                       log_file,
                        run_config):
     """
     Trim 5' mismatches.
@@ -239,6 +242,9 @@ def trim_5p_mismatches(orf_map_sam, orf_map_sam_clean, log_file,
     :type orf_map_sam: str or unicode
     :param orf_map_sam_clean: Cleaned ORF-mapped reads
     :type orf_map_sam_clean: str or unicode
+    :param summary_file: TSV summary file with "num_processed",
+    "num_discarded", "num_trimmed" and "num_written" columns
+    :type summary_file: str or unicode
     :param log_file: Log file
     :type log_file: str or unicode
     :param run_config: Run-related configuration
@@ -250,7 +256,8 @@ def trim_5p_mismatches(orf_map_sam, orf_map_sam_clean, log_file,
         "Trim 5' mismatched nt and remove reads with >1 mismatch. Log: %s",
         log_file)
     cmd = ["python", "-m", "riboviz.tools.trim_5p_mismatch",
-           "-m", "2", "-i", orf_map_sam, "-o", orf_map_sam_clean]
+           "-m", "2", "-i", orf_map_sam, "-o", orf_map_sam_clean,
+           "-s", summary_file]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 

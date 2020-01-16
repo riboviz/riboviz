@@ -73,7 +73,7 @@
 <text text-anchor="middle" x="613" y="-407" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">generate_stats_figs.R</text>
 </g>
 <!-- input/CDS.fa&#45;&gt;statsfigs -->
-<g id="edge39" class="edge">
+<g id="edge40" class="edge">
 <title>input/CDS.fa&#45;&gt;statsfigs</title>
 <path fill="none" stroke="#000000" d="M914.1792,-1947.7251C922.2964,-1934.3723 934.6568,-1916.4903 949,-1904 954.6979,-1899.0381 959.6853,-1902.2024 964,-1896 994.2234,-1852.5542 980,-1830.9244 980,-1778 980,-1778 980,-1778 980,-554 980,-490.2638 785.7584,-443.0502 679.9,-422.0521"/>
 <polygon fill="#000000" stroke="#000000" points="680.4273,-418.5889 669.9411,-420.1022 679.0822,-425.4585 680.4273,-418.5889"/>
@@ -90,13 +90,13 @@
 <text text-anchor="middle" x="591" y="-551" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">bam_to_h5.R</text>
 </g>
 <!-- input/CDS.gff3&#45;&gt;bam2h5 -->
-<g id="edge36" class="edge">
+<g id="edge37" class="edge">
 <title>input/CDS.gff3&#45;&gt;bam2h5</title>
 <path fill="none" stroke="#000000" d="M1002.0527,-1947.9129C1007.4235,-1914.4697 1018,-1840.6578 1018,-1778 1018,-1778 1018,-1778 1018,-698 1018,-618.8154 751.0072,-574.8205 639.2675,-559.8755"/>
 <polygon fill="#000000" stroke="#000000" points="639.6402,-556.3945 629.2692,-558.5606 638.7274,-563.3347 639.6402,-556.3945"/>
 </g>
 <!-- input/CDS.gff3&#45;&gt;statsfigs -->
-<g id="edge40" class="edge">
+<g id="edge41" class="edge">
 <title>input/CDS.gff3&#45;&gt;statsfigs</title>
 <path fill="none" stroke="#000000" d="M1008.4124,-1947.8772C1024.602,-1914.9716 1056,-1842.8015 1056,-1778 1056,-1778 1056,-1778 1056,-554 1056,-475.9303 804.0214,-433.7119 680.143,-417.6736"/>
 <polygon fill="#000000" stroke="#000000" points="680.3697,-414.1743 670.0076,-416.3828 679.4853,-421.1182 680.3697,-414.1743"/>
@@ -131,7 +131,7 @@
 <text text-anchor="middle" x="1151" y="-1927" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">data/standard_asite_disp_length.txt</text>
 </g>
 <!-- data&#45;&gt;statsfigs -->
-<g id="edge41" class="edge">
+<g id="edge42" class="edge">
 <title>data&#45;&gt;statsfigs</title>
 <path fill="none" stroke="#000000" d="M1140.2545,-1919.9285C1132.3584,-1882.0423 1123,-1826.8384 1123,-1778 1123,-1778 1123,-1778 1123,-554 1123,-463.0086 818.531,-426.6597 680.0929,-414.8352"/>
 <polygon fill="#000000" stroke="#000000" points="680.2758,-411.3384 670.019,-413.9931 679.6926,-418.314 680.2758,-411.3384"/>
@@ -284,121 +284,132 @@
 <!-- samindex -->
 <g id="node16" class="node">
 <title>samindex</title>
-<polygon fill="none" stroke="#000000" points="548.1796,-1004 465.8204,-1004 465.8204,-968 548.1796,-968 548.1796,-1004"/>
-<text text-anchor="middle" x="507" y="-983" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">samtools index</text>
+<polygon fill="none" stroke="#000000" points="580.1796,-1004 497.8204,-1004 497.8204,-968 580.1796,-968 580.1796,-1004"/>
+<text text-anchor="middle" x="539" y="-983" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">samtools index</text>
 </g>
 <!-- tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam+.bai -->
-<g id="node37" class="node">
+<g id="node38" class="node">
 <title>tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam+.bai</title>
-<text text-anchor="middle" x="505" y="-911" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam+.bai</text>
+<text text-anchor="middle" x="525" y="-911" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam+.bai</text>
 </g>
 <!-- samindex&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam+.bai -->
-<g id="edge22" class="edge">
+<g id="edge23" class="edge">
 <title>samindex&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam+.bai</title>
-<path fill="none" stroke="#000000" d="M506.4953,-967.8314C506.2814,-960.131 506.0271,-950.9743 505.7894,-942.4166"/>
-<polygon fill="#000000" stroke="#000000" points="509.2879,-942.3122 505.5115,-932.4133 502.2906,-942.5066 509.2879,-942.3122"/>
+<path fill="none" stroke="#000000" d="M535.4672,-967.8314C533.9699,-960.131 532.1895,-950.9743 530.5255,-942.4166"/>
+<polygon fill="#000000" stroke="#000000" points="533.9248,-941.5614 528.5804,-932.4133 527.0535,-942.8975 533.9248,-941.5614"/>
 </g>
 <!-- samview -->
 <g id="node17" class="node">
 <title>samview</title>
-<polygon fill="none" stroke="#000000" points="585.3875,-1148 438.6125,-1148 438.6125,-1112 585.3875,-1112 585.3875,-1148"/>
-<text text-anchor="middle" x="512" y="-1127" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">samtools view | samtools sort</text>
+<polygon fill="none" stroke="#000000" points="643.3875,-1148 496.6125,-1148 496.6125,-1112 643.3875,-1112 643.3875,-1148"/>
+<text text-anchor="middle" x="570" y="-1127" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">samtools view | samtools sort</text>
 </g>
 <!-- tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam -->
-<g id="node36" class="node">
+<g id="node37" class="node">
 <title>tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam</title>
-<text text-anchor="middle" x="511" y="-1055" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam</text>
+<text text-anchor="middle" x="566" y="-1055" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam</text>
 </g>
 <!-- samview&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam -->
-<g id="edge20" class="edge">
+<g id="edge21" class="edge">
 <title>samview&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam</title>
-<path fill="none" stroke="#000000" d="M511.7477,-1111.8314C511.6407,-1104.131 511.5135,-1094.9743 511.3947,-1086.4166"/>
-<polygon fill="#000000" stroke="#000000" points="514.8944,-1086.3637 511.2557,-1076.4133 507.8951,-1086.4609 514.8944,-1086.3637"/>
+<path fill="none" stroke="#000000" d="M568.9906,-1111.8314C568.5628,-1104.131 568.0541,-1094.9743 567.5787,-1086.4166"/>
+<polygon fill="#000000" stroke="#000000" points="571.0724,-1086.2037 567.023,-1076.4133 564.0831,-1086.592 571.0724,-1086.2037"/>
 </g>
 <!-- umi_pre_group -->
 <g id="node18" class="node">
 <title>umi_pre_group</title>
-<polygon fill="none" stroke="#000000" points="383.6261,-860 296.3739,-860 296.3739,-824 383.6261,-824 383.6261,-860"/>
-<text text-anchor="middle" x="340" y="-839" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">umi_tools group</text>
+<polygon fill="none" stroke="#000000" points="403.6261,-860 316.3739,-860 316.3739,-824 403.6261,-824 403.6261,-860"/>
+<text text-anchor="middle" x="360" y="-839" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">umi_tools group</text>
 </g>
 <!-- tmp/&lt;SAMPLE_ID&gt;/pre_dedup_groups.tsv -->
-<g id="node34" class="node">
+<g id="node35" class="node">
 <title>tmp/&lt;SAMPLE_ID&gt;/pre_dedup_groups.tsv</title>
-<text text-anchor="middle" x="281" y="-767" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">tmp/&lt;SAMPLE_ID&gt;/pre_dedup_groups.tsv</text>
+<text text-anchor="middle" x="301" y="-767" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">tmp/&lt;SAMPLE_ID&gt;/pre_dedup_groups.tsv</text>
 </g>
 <!-- umi_pre_group&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/pre_dedup_groups.tsv -->
-<g id="edge24" class="edge">
+<g id="edge25" class="edge">
 <title>umi_pre_group&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/pre_dedup_groups.tsv</title>
-<path fill="none" stroke="#000000" d="M325.1118,-823.8314C318.247,-815.454 309.9699,-805.3531 302.4489,-796.1749"/>
-<polygon fill="#000000" stroke="#000000" points="305.1341,-793.9297 296.0886,-788.4133 299.7197,-798.3665 305.1341,-793.9297"/>
+<path fill="none" stroke="#000000" d="M345.1118,-823.8314C338.247,-815.454 329.9699,-805.3531 322.4489,-796.1749"/>
+<polygon fill="#000000" stroke="#000000" points="325.1341,-793.9297 316.0886,-788.4133 319.7197,-798.3665 325.1341,-793.9297"/>
 </g>
 <!-- umi_dedup -->
 <g id="node19" class="node">
 <title>umi_dedup</title>
-<polygon fill="none" stroke="#000000" points="549.8567,-860 460.1433,-860 460.1433,-824 549.8567,-824 549.8567,-860"/>
-<text text-anchor="middle" x="505" y="-839" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">umi_tools dedup</text>
+<polygon fill="none" stroke="#000000" points="569.8567,-860 480.1433,-860 480.1433,-824 569.8567,-824 569.8567,-860"/>
+<text text-anchor="middle" x="525" y="-839" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">umi_tools dedup</text>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam -->
-<g id="node38" class="node">
+<g id="node39" class="node">
 <title>output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam</title>
-<text text-anchor="middle" x="505" y="-767" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam</text>
+<text text-anchor="middle" x="525" y="-767" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam</text>
 </g>
 <!-- umi_dedup&#45;&gt;output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam -->
-<g id="edge26" class="edge">
+<g id="edge27" class="edge">
 <title>umi_dedup&#45;&gt;output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam</title>
-<path fill="none" stroke="#000000" d="M505,-823.8314C505,-816.131 505,-806.9743 505,-798.4166"/>
-<polygon fill="#000000" stroke="#000000" points="508.5001,-798.4132 505,-788.4133 501.5001,-798.4133 508.5001,-798.4132"/>
+<path fill="none" stroke="#000000" d="M525,-823.8314C525,-816.131 525,-806.9743 525,-798.4166"/>
+<polygon fill="#000000" stroke="#000000" points="528.5001,-798.4132 525,-788.4133 521.5001,-798.4133 528.5001,-798.4132"/>
 </g>
 <!-- umi_post_group -->
 <g id="node20" class="node">
 <title>umi_post_group</title>
-<polygon fill="none" stroke="#000000" points="377.6261,-716 290.3739,-716 290.3739,-680 377.6261,-680 377.6261,-716"/>
-<text text-anchor="middle" x="334" y="-695" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">umi_tools group</text>
+<polygon fill="none" stroke="#000000" points="397.6261,-716 310.3739,-716 310.3739,-680 397.6261,-680 397.6261,-716"/>
+<text text-anchor="middle" x="354" y="-695" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">umi_tools group</text>
 </g>
 <!-- tmp/&lt;SAMPLE_ID&gt;/post_dedup_groups.tsv -->
-<g id="node35" class="node">
+<g id="node36" class="node">
 <title>tmp/&lt;SAMPLE_ID&gt;/post_dedup_groups.tsv</title>
-<text text-anchor="middle" x="267" y="-623" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">tmp/&lt;SAMPLE_ID&gt;/post_dedup_groups.tsv</text>
+<text text-anchor="middle" x="287" y="-623" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">tmp/&lt;SAMPLE_ID&gt;/post_dedup_groups.tsv</text>
 </g>
 <!-- umi_post_group&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/post_dedup_groups.tsv -->
-<g id="edge28" class="edge">
+<g id="edge29" class="edge">
 <title>umi_post_group&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/post_dedup_groups.tsv</title>
-<path fill="none" stroke="#000000" d="M317.0931,-679.8314C309.2187,-671.3694 299.708,-661.1489 291.0987,-651.8971"/>
-<polygon fill="#000000" stroke="#000000" points="293.5092,-649.3497 284.1346,-644.4133 288.3847,-654.1183 293.5092,-649.3497"/>
+<path fill="none" stroke="#000000" d="M337.0931,-679.8314C329.2187,-671.3694 319.708,-661.1489 311.0987,-651.8971"/>
+<polygon fill="#000000" stroke="#000000" points="313.5092,-649.3497 304.1346,-644.4133 308.3847,-654.1183 313.5092,-649.3497"/>
 </g>
 <!-- samindex_dedup -->
 <g id="node21" class="node">
 <title>samindex_dedup</title>
-<polygon fill="none" stroke="#000000" points="546.1796,-716 463.8204,-716 463.8204,-680 546.1796,-680 546.1796,-716"/>
-<text text-anchor="middle" x="505" y="-695" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">samtools index</text>
+<polygon fill="none" stroke="#000000" points="566.1796,-716 483.8204,-716 483.8204,-680 566.1796,-680 566.1796,-716"/>
+<text text-anchor="middle" x="525" y="-695" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">samtools index</text>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam+.bai -->
-<g id="node39" class="node">
+<g id="node40" class="node">
 <title>output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam+.bai</title>
-<text text-anchor="middle" x="505" y="-623" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam+.bai</text>
+<text text-anchor="middle" x="525" y="-623" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam+.bai</text>
 </g>
 <!-- samindex_dedup&#45;&gt;output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam+.bai -->
-<g id="edge30" class="edge">
+<g id="edge31" class="edge">
 <title>samindex_dedup&#45;&gt;output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam+.bai</title>
-<path fill="none" stroke="#000000" d="M505,-679.8314C505,-672.131 505,-662.9743 505,-654.4166"/>
-<polygon fill="#000000" stroke="#000000" points="508.5001,-654.4132 505,-644.4133 501.5001,-654.4133 508.5001,-654.4132"/>
+<path fill="none" stroke="#000000" d="M525,-679.8314C525,-672.131 525,-662.9743 525,-654.4166"/>
+<polygon fill="#000000" stroke="#000000" points="528.5001,-654.4132 525,-644.4133 521.5001,-654.4133 528.5001,-654.4132"/>
 </g>
 <!-- trim -->
 <g id="node22" class="node">
 <title>trim</title>
-<polygon fill="none" stroke="#000000" points="652.504,-1292 541.496,-1292 541.496,-1256 652.504,-1256 652.504,-1292"/>
-<text text-anchor="middle" x="597" y="-1271" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">trim_5p_mismatch.py</text>
+<polygon fill="none" stroke="#000000" points="639.504,-1292 528.496,-1292 528.496,-1256 639.504,-1256 639.504,-1292"/>
+<text text-anchor="middle" x="584" y="-1271" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">trim_5p_mismatch.py</text>
+</g>
+<!-- tmp/&lt;SAMPLE_ID&gt;/trim_5p_mismatch.tsv -->
+<g id="node33" class="node">
+<title>tmp/&lt;SAMPLE_ID&gt;/trim_5p_mismatch.tsv</title>
+<text text-anchor="middle" x="367" y="-1199" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">tmp/&lt;SAMPLE_ID&gt;/trim_5p_mismatch.tsv</text>
+</g>
+<!-- trim&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/trim_5p_mismatch.tsv -->
+<g id="edge19" class="edge">
+<title>trim&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/trim_5p_mismatch.tsv</title>
+<path fill="none" stroke="#000000" d="M529.5218,-1255.9243C499.5987,-1245.9959 462.3157,-1233.6255 431.0096,-1223.2382"/>
+<polygon fill="#000000" stroke="#000000" points="432.094,-1219.9104 421.5006,-1220.0831 429.8896,-1226.5543 432.094,-1219.9104"/>
 </g>
 <!-- tmp/&lt;SAMPLE_ID&gt;/orf_map_clean.sam -->
-<g id="node33" class="node">
+<g id="node34" class="node">
 <title>tmp/&lt;SAMPLE_ID&gt;/orf_map_clean.sam</title>
-<text text-anchor="middle" x="521" y="-1199" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">tmp/&lt;SAMPLE_ID&gt;/orf_map_clean.sam</text>
+<text text-anchor="middle" x="584" y="-1199" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">tmp/&lt;SAMPLE_ID&gt;/orf_map_clean.sam</text>
 </g>
 <!-- trim&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/orf_map_clean.sam -->
 <g id="edge18" class="edge">
 <title>trim&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/orf_map_clean.sam</title>
-<path fill="none" stroke="#000000" d="M577.822,-1255.8314C568.6412,-1247.1337 557.4994,-1236.5783 547.5224,-1227.1265"/>
-<polygon fill="#000000" stroke="#000000" points="549.8385,-1224.4995 540.1719,-1220.1628 545.0243,-1229.5811 549.8385,-1224.4995"/>
+<path fill="none" stroke="#000000" d="M584,-1255.8314C584,-1248.131 584,-1238.9743 584,-1230.4166"/>
+<polygon fill="#000000" stroke="#000000" points="587.5001,-1230.4132 584,-1220.4133 580.5001,-1230.4133 587.5001,-1230.4132"/>
 </g>
 <!-- bedplus -->
 <g id="node23" class="node">
@@ -407,12 +418,12 @@
 <text text-anchor="middle" x="216" y="-551" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">bedtools genomecov (+)</text>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/plus.bedgraph -->
-<g id="node40" class="node">
+<g id="node41" class="node">
 <title>output/&lt;SAMPLE_ID&gt;/plus.bedgraph</title>
 <text text-anchor="middle" x="176" y="-479" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/plus.bedgraph</text>
 </g>
 <!-- bedplus&#45;&gt;output/&lt;SAMPLE_ID&gt;/plus.bedgraph -->
-<g id="edge32" class="edge">
+<g id="edge33" class="edge">
 <title>bedplus&#45;&gt;output/&lt;SAMPLE_ID&gt;/plus.bedgraph</title>
 <path fill="none" stroke="#000000" d="M205.9063,-535.8314C201.4403,-527.7925 196.0925,-518.1666 191.1621,-509.2918"/>
 <polygon fill="#000000" stroke="#000000" points="194.1456,-507.4551 186.2296,-500.4133 188.0265,-510.8546 194.1456,-507.4551"/>
@@ -424,29 +435,29 @@
 <text text-anchor="middle" x="435" y="-551" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">bedtools genomecov (&#45;)</text>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/minus.bedgraph -->
-<g id="node41" class="node">
+<g id="node42" class="node">
 <title>output/&lt;SAMPLE_ID&gt;/minus.bedgraph</title>
 <text text-anchor="middle" x="379" y="-479" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/minus.bedgraph</text>
 </g>
 <!-- bedminus&#45;&gt;output/&lt;SAMPLE_ID&gt;/minus.bedgraph -->
-<g id="edge34" class="edge">
+<g id="edge35" class="edge">
 <title>bedminus&#45;&gt;output/&lt;SAMPLE_ID&gt;/minus.bedgraph</title>
 <path fill="none" stroke="#000000" d="M420.8688,-535.8314C414.4189,-527.5386 406.6555,-517.557 399.5748,-508.4533"/>
 <polygon fill="#000000" stroke="#000000" points="402.2236,-506.158 393.3214,-500.4133 396.6981,-510.4556 402.2236,-506.158"/>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.h5 -->
-<g id="node42" class="node">
+<g id="node43" class="node">
 <title>output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.h5</title>
 <text text-anchor="middle" x="591" y="-479" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.h5</text>
 </g>
 <!-- bam2h5&#45;&gt;output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.h5 -->
-<g id="edge37" class="edge">
+<g id="edge38" class="edge">
 <title>bam2h5&#45;&gt;output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.h5</title>
 <path fill="none" stroke="#000000" d="M591,-535.8314C591,-528.131 591,-518.9743 591,-510.4166"/>
 <polygon fill="#000000" stroke="#000000" points="594.5001,-510.4132 591,-500.4133 587.5001,-510.4133 594.5001,-510.4132"/>
 </g>
 <!-- pdfs -->
-<g id="node43" class="node">
+<g id="node44" class="node">
 <title>pdfs</title>
 <polygon fill="none" stroke="#000000" stroke-dasharray="5,2" points="258.1891,-356 15.8109,-356 15.8109,-168 258.1891,-168 258.1891,-356"/>
 <text text-anchor="middle" x="137" y="-343" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/3nt_periodicity.pdf</text>
@@ -466,13 +477,13 @@
 <text text-anchor="middle" x="137" y="-175" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/3ntframe_propbygene.pdf&#13;</text>
 </g>
 <!-- statsfigs&#45;&gt;pdfs -->
-<g id="edge42" class="edge">
+<g id="edge43" class="edge">
 <title>statsfigs&#45;&gt;pdfs</title>
 <path fill="none" stroke="#000000" d="M556.1536,-404.387C475.9935,-395.9501 333.0709,-378.8622 267.5852,-355.7232"/>
 <polygon fill="#000000" stroke="#000000" points="268.7219,-352.4108 258.1313,-352.1122 266.2242,-358.95 268.7219,-352.4108"/>
 </g>
 <!-- tsvs -->
-<g id="node44" class="node">
+<g id="node45" class="node">
 <title>tsvs</title>
 <polygon fill="none" stroke="#000000" stroke-dasharray="5,2" points="517.571,-332 276.429,-332 276.429,-192 517.571,-192 517.571,-332"/>
 <text text-anchor="middle" x="397" y="-319" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/3nt_periodicity.tsv</text>
@@ -488,18 +499,18 @@
 <text text-anchor="middle" x="397" y="-199" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/3ntframe_bygene.tsv&#13;</text>
 </g>
 <!-- statsfigs&#45;&gt;tsvs -->
-<g id="edge43" class="edge">
+<g id="edge44" class="edge">
 <title>statsfigs&#45;&gt;tsvs</title>
 <path fill="none" stroke="#000000" d="M583.2396,-391.9763C566.5376,-381.6964 545.4165,-368.4209 527,-356 518.4258,-350.2172 509.6038,-344.1343 500.7864,-337.96"/>
 <polygon fill="#000000" stroke="#000000" points="502.5348,-334.9106 492.3422,-332.0191 498.5069,-340.6357 502.5348,-334.9106"/>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/tpms.tsv -->
-<g id="node45" class="node">
+<g id="node46" class="node">
 <title>output/&lt;SAMPLE_ID&gt;/tpms.tsv</title>
 <text text-anchor="middle" x="613" y="-259" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/tpms.tsv</text>
 </g>
 <!-- statsfigs&#45;&gt;output/&lt;SAMPLE_ID&gt;/tpms.tsv -->
-<g id="edge44" class="edge">
+<g id="edge45" class="edge">
 <title>statsfigs&#45;&gt;output/&lt;SAMPLE_ID&gt;/tpms.tsv</title>
 <path fill="none" stroke="#000000" d="M613,-391.8523C613,-366.5539 613,-320.4342 613,-290.5167"/>
 <polygon fill="#000000" stroke="#000000" points="616.5001,-290.2961 613,-280.2961 609.5001,-290.2962 616.5001,-290.2961"/>
@@ -525,88 +536,88 @@
 <!-- tmp/&lt;SAMPLE_ID&gt;/orf_map.sam&#45;&gt;trim -->
 <g id="edge17" class="edge">
 <title>tmp/&lt;SAMPLE_ID&gt;/orf_map.sam&#45;&gt;trim</title>
-<path fill="none" stroke="#000000" d="M604.4766,-1327.8314C603.4071,-1320.131 602.1353,-1310.9743 600.9468,-1302.4166"/>
-<polygon fill="#000000" stroke="#000000" points="604.3999,-1301.8367 599.5574,-1292.4133 597.4664,-1302.7997 604.3999,-1301.8367"/>
+<path fill="none" stroke="#000000" d="M601.1961,-1327.8314C598.7092,-1320.0463 595.7469,-1310.7729 592.9875,-1302.1347"/>
+<polygon fill="#000000" stroke="#000000" points="596.2591,-1300.874 589.882,-1292.4133 589.591,-1303.0041 596.2591,-1300.874"/>
 </g>
 <!-- tmp/&lt;SAMPLE_ID&gt;/orf_map_clean.sam&#45;&gt;samview -->
-<g id="edge19" class="edge">
+<g id="edge20" class="edge">
 <title>tmp/&lt;SAMPLE_ID&gt;/orf_map_clean.sam&#45;&gt;samview</title>
-<path fill="none" stroke="#000000" d="M518.7289,-1183.8314C517.7664,-1176.131 516.6218,-1166.9743 515.5521,-1158.4166"/>
-<polygon fill="#000000" stroke="#000000" points="519.0151,-1157.9019 514.3017,-1148.4133 512.0691,-1158.7702 519.0151,-1157.9019"/>
+<path fill="none" stroke="#000000" d="M580.4672,-1183.8314C578.9699,-1176.131 577.1895,-1166.9743 575.5255,-1158.4166"/>
+<polygon fill="#000000" stroke="#000000" points="578.9248,-1157.5614 573.5804,-1148.4133 572.0535,-1158.8975 578.9248,-1157.5614"/>
 </g>
 <!-- tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam&#45;&gt;samindex -->
-<g id="edge21" class="edge">
+<g id="edge22" class="edge">
 <title>tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam&#45;&gt;samindex</title>
-<path fill="none" stroke="#000000" d="M509.9906,-1039.8314C509.5628,-1032.131 509.0541,-1022.9743 508.5787,-1014.4166"/>
-<polygon fill="#000000" stroke="#000000" points="512.0724,-1014.2037 508.023,-1004.4133 505.0831,-1014.592 512.0724,-1014.2037"/>
+<path fill="none" stroke="#000000" d="M559.1868,-1039.8314C556.2356,-1031.9617 552.7142,-1022.5712 549.445,-1013.8533"/>
+<polygon fill="#000000" stroke="#000000" points="552.6934,-1012.5476 545.905,-1004.4133 546.1391,-1015.0055 552.6934,-1012.5476"/>
 </g>
 <!-- tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam+.bai&#45;&gt;umi_pre_group -->
-<g id="edge23" class="edge">
+<g id="edge24" class="edge">
 <title>tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam+.bai&#45;&gt;umi_pre_group</title>
-<path fill="none" stroke="#000000" d="M463.3635,-895.8314C441.2958,-886.2018 414.0093,-874.295 390.7143,-864.1299"/>
-<polygon fill="#000000" stroke="#000000" points="391.9023,-860.8296 381.3371,-860.038 389.1026,-867.2454 391.9023,-860.8296"/>
+<path fill="none" stroke="#000000" d="M483.3635,-895.8314C461.2958,-886.2018 434.0093,-874.295 410.7143,-864.1299"/>
+<polygon fill="#000000" stroke="#000000" points="411.9023,-860.8296 401.3371,-860.038 409.1026,-867.2454 411.9023,-860.8296"/>
 </g>
 <!-- tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam+.bai&#45;&gt;umi_dedup -->
-<g id="edge25" class="edge">
+<g id="edge26" class="edge">
 <title>tmp/&lt;SAMPLE_ID&gt;/pre_dedup.bam+.bai&#45;&gt;umi_dedup</title>
-<path fill="none" stroke="#000000" d="M505,-895.8314C505,-888.131 505,-878.9743 505,-870.4166"/>
-<polygon fill="#000000" stroke="#000000" points="508.5001,-870.4132 505,-860.4133 501.5001,-870.4133 508.5001,-870.4132"/>
+<path fill="none" stroke="#000000" d="M525,-895.8314C525,-888.131 525,-878.9743 525,-870.4166"/>
+<polygon fill="#000000" stroke="#000000" points="528.5001,-870.4132 525,-860.4133 521.5001,-870.4133 528.5001,-870.4132"/>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam&#45;&gt;umi_post_group -->
-<g id="edge27" class="edge">
+<g id="edge28" class="edge">
 <title>output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam&#45;&gt;umi_post_group</title>
-<path fill="none" stroke="#000000" d="M461.8495,-751.8314C438.8776,-742.159 410.4491,-730.1891 386.2368,-719.9944"/>
-<polygon fill="#000000" stroke="#000000" points="387.4148,-716.6929 376.8402,-716.038 384.6984,-723.1443 387.4148,-716.6929"/>
+<path fill="none" stroke="#000000" d="M481.8495,-751.8314C458.8776,-742.159 430.4491,-730.1891 406.2368,-719.9944"/>
+<polygon fill="#000000" stroke="#000000" points="407.4148,-716.6929 396.8402,-716.038 404.6984,-723.1443 407.4148,-716.6929"/>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam&#45;&gt;samindex_dedup -->
-<g id="edge29" class="edge">
+<g id="edge30" class="edge">
 <title>output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam&#45;&gt;samindex_dedup</title>
-<path fill="none" stroke="#000000" d="M505,-751.8314C505,-744.131 505,-734.9743 505,-726.4166"/>
-<polygon fill="#000000" stroke="#000000" points="508.5001,-726.4132 505,-716.4133 501.5001,-726.4133 508.5001,-726.4132"/>
+<path fill="none" stroke="#000000" d="M525,-751.8314C525,-744.131 525,-734.9743 525,-726.4166"/>
+<polygon fill="#000000" stroke="#000000" points="528.5001,-726.4132 525,-716.4133 521.5001,-726.4133 528.5001,-726.4132"/>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam+.bai&#45;&gt;bedplus -->
-<g id="edge31" class="edge">
+<g id="edge32" class="edge">
 <title>output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam+.bai&#45;&gt;bedplus</title>
-<path fill="none" stroke="#000000" d="M432.4461,-607.9243C388.1442,-596.8871 331.7288,-582.8321 287.602,-571.8386"/>
-<polygon fill="#000000" stroke="#000000" points="288.361,-568.4207 277.8114,-569.3994 286.6687,-575.2131 288.361,-568.4207"/>
+<path fill="none" stroke="#000000" d="M447.4251,-607.9243C398.3561,-596.4907 335.3885,-581.8187 287.5259,-570.6662"/>
+<polygon fill="#000000" stroke="#000000" points="288.0857,-567.203 277.5523,-568.3423 286.4971,-574.0204 288.0857,-567.203"/>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam+.bai&#45;&gt;bedminus -->
-<g id="edge33" class="edge">
+<g id="edge34" class="edge">
 <title>output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam+.bai&#45;&gt;bedminus</title>
-<path fill="none" stroke="#000000" d="M487.336,-607.8314C479.0268,-599.2848 468.9736,-588.9443 459.9082,-579.6198"/>
-<polygon fill="#000000" stroke="#000000" points="462.3821,-577.1435 452.9018,-572.4133 457.3631,-582.023 462.3821,-577.1435"/>
+<path fill="none" stroke="#000000" d="M502.2892,-607.8314C491.204,-598.9632 477.7046,-588.1637 465.7148,-578.5718"/>
+<polygon fill="#000000" stroke="#000000" points="467.6987,-575.6768 457.7035,-572.1628 463.3258,-581.1429 467.6987,-575.6768"/>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam+.bai&#45;&gt;bam2h5 -->
-<g id="edge35" class="edge">
+<g id="edge36" class="edge">
 <title>output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.bam+.bai&#45;&gt;bam2h5</title>
-<path fill="none" stroke="#000000" d="M526.7014,-607.8314C537.1921,-599.0485 549.9455,-588.3712 561.3194,-578.8489"/>
-<polygon fill="#000000" stroke="#000000" points="563.8847,-581.2659 569.3055,-572.1628 559.3911,-575.8986 563.8847,-581.2659"/>
+<path fill="none" stroke="#000000" d="M541.6546,-607.8314C549.4114,-599.3694 558.7802,-589.1489 567.261,-579.8971"/>
+<polygon fill="#000000" stroke="#000000" points="569.9439,-582.1499 574.1212,-572.4133 564.7838,-577.4198 569.9439,-582.1499"/>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.h5&#45;&gt;statsfigs -->
-<g id="edge38" class="edge">
+<g id="edge39" class="edge">
 <title>output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.h5&#45;&gt;statsfigs</title>
 <path fill="none" stroke="#000000" d="M596.5515,-463.8314C598.9303,-456.0463 601.7638,-446.7729 604.4033,-438.1347"/>
 <polygon fill="#000000" stroke="#000000" points="607.7987,-438.9996 607.3737,-428.4133 601.1042,-436.954 607.7987,-438.9996"/>
 </g>
 <!-- collate -->
-<g id="node46" class="node">
+<g id="node47" class="node">
 <title>collate</title>
 <polygon fill="none" stroke="#000000" points="654.1181,-124 571.8819,-124 571.8819,-88 654.1181,-88 654.1181,-124"/>
 <text text-anchor="middle" x="613" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">collate_tpms.R</text>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/tpms.tsv&#45;&gt;collate -->
-<g id="edge45" class="edge">
+<g id="edge46" class="edge">
 <title>output/&lt;SAMPLE_ID&gt;/tpms.tsv&#45;&gt;collate</title>
 <path fill="none" stroke="#000000" d="M613,-243.7995C613,-216.9103 613,-166.3255 613,-134.4926"/>
 <polygon fill="#000000" stroke="#000000" points="616.5001,-134.0845 613,-124.0846 609.5001,-134.0846 616.5001,-134.0845"/>
 </g>
 <!-- output/TPMs_collated.tsv -->
-<g id="node47" class="node">
+<g id="node48" class="node">
 <title>output/TPMs_collated.tsv</title>
 <text text-anchor="middle" x="613" y="-31" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/TPMs_collated.tsv</text>
 </g>
 <!-- collate&#45;&gt;output/TPMs_collated.tsv -->
-<g id="edge46" class="edge">
+<g id="edge47" class="edge">
 <title>collate&#45;&gt;output/TPMs_collated.tsv</title>
 <path fill="none" stroke="#000000" d="M613,-87.8314C613,-80.131 613,-70.9743 613,-62.4166"/>
 <polygon fill="#000000" stroke="#000000" points="616.5001,-62.4132 613,-52.4133 609.5001,-62.4133 616.5001,-62.4132"/>
