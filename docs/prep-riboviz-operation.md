@@ -13,7 +13,7 @@ Configuration parameters are shown in brackets and are described in [Configuring
 * `hisat2-build`: build rRNA and ORF indices.
 * `cutadapt`: cut adapters.
 * `hisat2`: align reads.
-* `trim_5p_mismatch.py`: trim reads (local script, in `riboviz/tools/`).
+* `trim_5p_mismatch.py`: trim 5' mismatches from reads and remove reads with more than a set number of mismatches (local script, in `riboviz/tools/`).
 * `umi_tools` (`extract`, `dedup`, `group`): extract barcodes and UMIs, deduplicate reads and group reads.
 * `demultiplex_fastq.py`: demultiplex multiplexed files (local script, in `riboviz/tools/`).
 * `samtools` (`view`, `sort`, `index`): convert SAM files to BAM files and index.
@@ -81,16 +81,18 @@ Intermediate files are produced within the temporary directory (`dir_tmp`).
 
 For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-specific subdirectory (`<SAMPLE_ID>`):
 
-* `trim.fq`: trimmed reads. This is not present if a multiplexed file (`multiplex_fq_files`) is specified.
-* `nonrRNA.fq`: trimmed non-rRNA reads.
+* `trim.fq`: adapter trimmed reads. This is not present if a multiplexed file (`multiplex_fq_files`) is specified.
+* `nonrRNA.fq`: non-rRNA reads.
 * `rRNA_map.sam`: rRNA-mapped reads.
 * `orf_map.sam`: ORF-mapped reads.
 * `orf_map_clean.sam`: ORF-mapped reads with mismatched nt trimmed.
+* `trim_5p_mismatch.tsv`: number of reads processed, discarded, trimmed and written when trimming 5' mismatches from reads and removing reads with more than a set number of mismatches.
 * `unaligned.sam`: unaligned reads. These files can be used to find common contaminants or translated sequences not in your ORF annotation.
+
 
 If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specific files are also produced:
 
-* `extract_trim.fq`: trimmed reads with UMIs extracted. This is not present if a multiplexed file (`multiplex_fq_files`) is specified.
+* `extract_trim.fq`: adapter trimmed reads with UMIs extracted. This is not present if a multiplexed file (`multiplex_fq_files`) is specified.
 * `pre_dedup.bam`: BAM file prior to deduplication.
 * `pre_dedup.bam.bai`: BAM index file for `pre_dedup.bam`.
 * UMI groups pre- and post-deduplication (if `group_umis: TRUE`):

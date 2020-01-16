@@ -47,6 +47,7 @@ The directories are assumed to hold the following content:
         orf_map.sam
         rRNA_map.sam
         trim.fq
+        trim_5p_mismatch.tsv
         unaligned.fq
       WTnone/
         nonrRNA.fq
@@ -54,6 +55,7 @@ The directories are assumed to hold the following content:
         orf_map.sam
         rRNA_map.sam
         trim.fq
+        trim_5p_mismatch.tsv
         unaligned.fq
     output/
       TPMs_collated.tsv
@@ -114,6 +116,7 @@ import riboviz.test
 import riboviz.tools
 import riboviz.validation
 from riboviz.tools import prep_riboviz
+from riboviz.trim_5p_mismatch import TRIM_5P_MISMATCH_FILE
 
 
 @pytest.fixture(scope="module")
@@ -236,6 +239,29 @@ def test_tmp_sam(expected, tmp_directory, prefix, content):
     riboviz.validation.compare(
         expected_tmp_file,
         actual_tmp_file)
+
+
+@pytest.mark.usefixtures("run_prep_riboviz")
+@pytest.mark.parametrize("content", [TRIM_5P_MISMATCH_FILE])
+@pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
+def test_tmp_tsv(expected, prefix, content):
+    """
+    Test tmp/*tsv files for equality.
+
+    :param expected: expected directory
+    (pytest fixture defined in conftest.py)
+    :type expected: str or unicode
+    :type prefix: str or unicode
+    :param prefix: file name prefix e.g. WT3AT
+    :param content: content e.g. 3nt_periodicity
+    :type content: str or unicode
+    """
+    expected_tmp = os.path.join(expected, "tmp", prefix, content)
+    actual_tmp = os.path.join(riboviz.test.VIGNETTE_DIR,
+                              "tmp", prefix, content)
+    file_name = "%s" % content
+    print(file_name)
+    riboviz.validation.compare(expected_tmp, actual_tmp)
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")

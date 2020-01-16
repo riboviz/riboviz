@@ -141,8 +141,8 @@ from riboviz import params
 from riboviz import provenance
 from riboviz import sample_sheets
 from riboviz import workflow
+from riboviz.trim_5p_mismatch import TRIM_5P_MISMATCH_FILE
 from riboviz.utils import value_in_dict
-
 
 EXIT_OK = 0
 """Processing successfully completed. """
@@ -240,10 +240,13 @@ def process_sample(sample, fastq, r_rna_index, orf_index,
     step += 1
 
     orf_map_sam_clean = os.path.join(tmp_dir, "orf_map_clean.sam")
+    trim_5p_mismatch_tsv = os.path.join(tmp_dir,
+                                        TRIM_5P_MISMATCH_FILE)
     log_file = workflow.get_log_file(
         run_config.logs_dir, "trim_5p_mismatch", step)
     workflow.trim_5p_mismatches(
-        orf_map_sam, orf_map_sam_clean, log_file, run_config)
+        orf_map_sam, orf_map_sam_clean, trim_5p_mismatch_tsv,
+        log_file, run_config)
     step += 1
 
     log_file = workflow.get_log_file(
