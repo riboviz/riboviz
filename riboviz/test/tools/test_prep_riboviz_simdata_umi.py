@@ -16,7 +16,6 @@ import pytest
 import pandas as pd
 import riboviz
 import riboviz.process_utils
-import riboviz.test
 import riboviz.tools
 import riboviz.validation
 from riboviz import params
@@ -25,7 +24,7 @@ from riboviz.test.tools import configuration_module  # Test fixture
 from riboviz.test.tools import run_prep_riboviz  # Test fixture
 
 
-TEST_CONFIG_FILE = riboviz.test.SIMDATA_UMI_CONFIG
+TEST_CONFIG_FILE = riboviz.SIMDATA_UMI_CONFIG
 """
 YAML configuration used as a template configuration by these tests -
 required by configuration test fixture
@@ -47,7 +46,7 @@ def test_adaptor_trimming(configuration_module, sample_id):
     """
     config, _ = configuration_module
     expected_output = os.path.join(
-        riboviz.test.SIMDATA_DIR,
+        riboviz.SIMDATA_DIR,
         sample_id + "_umi.fastq")
     actual_output = os.path.join(
         config[params.TMP_DIR],
@@ -71,7 +70,7 @@ def test_umi_extract(configuration_module, sample_id):
     """
     config, _ = configuration_module
     expected_output = os.path.join(
-        riboviz.test.SIMDATA_DIR,
+        riboviz.SIMDATA_DIR,
         sample_id + ".fastq")
     actual_output = os.path.join(
         config[params.TMP_DIR],

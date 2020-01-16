@@ -5,8 +5,9 @@ import os
 import tempfile
 import pytest
 import pandas as pd
-from riboviz import trim_5p_mismatch
+import riboviz
 from riboviz.test import data
+from riboviz import trim_5p_mismatch
 
 
 TEST_5P_FILE = "trim_5p_mismatch.sam"
