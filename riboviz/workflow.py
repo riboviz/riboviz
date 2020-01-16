@@ -8,6 +8,7 @@ import errno
 import logging
 import os
 import os.path
+import riboviz
 from riboviz import params
 from riboviz import process_utils
 from riboviz import logging_utils
@@ -433,7 +434,7 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config, log_file, run_config):
     if secondary_id is None:
         secondary_id = "NULL"
     cmd = ["Rscript", "--vanilla",
-           os.path.join(run_config.r_scripts, "bam_to_h5.R"),
+           os.path.join(run_config.r_scripts, riboviz.BAM_TO_H5_R),
            "--num-processes=" + str(run_config.nprocesses),
            "--min-read-length=" + str(config[params.MIN_READ_LENGTH]),
            "--max-read-length=" + str(config[params.MAX_READ_LENGTH]),
@@ -473,7 +474,8 @@ def generate_stats_figs(h5_file, out_dir, config, log_file, run_config):
     LOGGER.info("Create summary statistics and analyses plots. Log: %s",
                 log_file)
     cmd = ["Rscript", "--vanilla",
-           os.path.join(run_config.r_scripts, "generate_stats_figs.R"),
+           os.path.join(run_config.r_scripts,
+                        riboviz.GENERATE_STATS_FIGS_R),
            "--num-processes=" + str(run_config.nprocesses),
            "--min-read-length=" + str(config[params.MIN_READ_LENGTH]),
            "--max-read-length=" + str(config[params.MAX_READ_LENGTH]),
@@ -530,7 +532,7 @@ def collate_tpms(out_dir, samples, are_samples_in_sub_dirs, log_file,
     """
     LOGGER.info("Collate TPMs. Log: %s", log_file)
     cmd = ["Rscript", "--vanilla",
-           os.path.join(run_config.r_scripts, "collate_tpms.R"),
+           os.path.join(run_config.r_scripts, riboviz.COLLATE_TPMS_R),
            "--sample-subdirs=" + str(are_samples_in_sub_dirs),
            "--output-dir=" + out_dir]
     if tpms_file is not None:
