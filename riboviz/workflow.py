@@ -8,7 +8,6 @@ import errno
 import logging
 import os
 import os.path
-import riboviz
 from riboviz import params
 from riboviz import process_utils
 from riboviz import logging_utils
