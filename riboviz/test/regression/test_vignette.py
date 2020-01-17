@@ -179,9 +179,9 @@ def test_index(expected, prefix, index):
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", ["WT3AT", "WTnone"])
 @pytest.mark.parametrize("file_name", [
-    prep_riboviz.TMP_NON_RRNA_FQ,
-    prep_riboviz.TMP_ADAPTER_TRIM_FQ,
-    prep_riboviz.TMP_UNALIGNED_FQ])
+    prep_riboviz.NON_RRNA_FQ,
+    prep_riboviz.ADAPTER_TRIM_FQ,
+    prep_riboviz.UNALIGNED_FQ])
 def test_tmp_fq(expected, sample, file_name):
     """
     Test tmp/*.fq files for equality.
@@ -205,9 +205,9 @@ def test_tmp_fq(expected, sample, file_name):
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", ["WT3AT", "WTnone"])
 @pytest.mark.parametrize("file_name", [
-    prep_riboviz.TMP_ORF_MAP_CLEAN_SAM,
-    prep_riboviz.TMP_ORF_MAP_SAM,
-    prep_riboviz.TMP_RRNA_MAP_SAM])
+    prep_riboviz.ORF_MAP_CLEAN_SAM,
+    prep_riboviz.ORF_MAP_SAM,
+    prep_riboviz.RRNA_MAP_SAM])
 def test_tmp_sam(expected, tmp_directory, sample, file_name):
     """
     Test tmp/*.sam files for equality. The SAM files are sorted into
@@ -280,7 +280,7 @@ def test_output_bai(expected, sample):
     :param sample: sample name e.g. WT3AT
     :type sample: str or unicode
     """
-    file_name = prep_riboviz.OUT_BAM_BAI_FORMAT.format(sample)
+    file_name = prep_riboviz.BAM_BAI_FORMAT.format(sample)
     expected_output = os.path.join(
         expected, "output", sample, file_name)
     actual_output = os.path.join(
@@ -302,7 +302,7 @@ def test_output_bam(expected, sample):
     :param sample: sample name e.g. WT3AT
     :type sample: str or unicode
     """
-    file_name = prep_riboviz.OUT_BAM_FORMAT.format(sample)
+    file_name = prep_riboviz.BAM_FORMAT.format(sample)
     expected_output = os.path.join(
         expected, "output", sample, file_name)
     actual_output = os.path.join(
@@ -314,8 +314,8 @@ def test_output_bam(expected, sample):
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", ["WT3AT", "WTnone"])
 @pytest.mark.parametrize("file_name", [
-    prep_riboviz.OUT_MINUS_BEDGRAPH,
-    prep_riboviz.OUT_PLUS_BEDGRAPH])
+    prep_riboviz.MINUS_BEDGRAPH,
+    prep_riboviz.PLUS_BEDGRAPH])
 def test_output_bedgraph(expected, sample, file_name):
     """
     Test output/*.bedgraph files for equality.
@@ -348,7 +348,7 @@ def test_output_h5(expected, sample):
     :param sample: sample name e.g. WT3AT
     :type sample: str or unicode
     """
-    file_name = prep_riboviz.OUT_H5_FORMAT.format(sample)
+    file_name = prep_riboviz.H5_FORMAT.format(sample)
     expected_output = os.path.join(
         expected, "output", sample, file_name)
     actual_output = os.path.join(
