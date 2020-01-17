@@ -567,19 +567,3 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
            "-m", "2"]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
-
-
-def get_log_file(logs_dir, step, index):
-    """
-    Get name of log file for a specific processing step.
-
-    :param logs_dir Log files directory
-    :type logs_dir: str or unicode
-    :param step: Name of processing step
-    :type step: str or unicode
-    :param index: Index of processing step, 1..N
-    :type index: int
-    :return: file name
-    :rtype: str or unicode
-    """
-    return os.path.join(logs_dir, "%02d_%s.log" % (index, step))
