@@ -4,11 +4,11 @@ Helper methods for comparing and validating files of different types.
 import os
 import os.path
 import subprocess
-
 from Bio import SeqIO
 import numpy as np
 import pandas as pd
 import pysam
+from riboviz import bedgraph
 
 
 def equal_names(file1, file2):
@@ -70,9 +70,6 @@ def equal_h5(file1, file2):
             return_code, ' '.join(map(str, cmd)))
 
 
-BEDGRAPH_COLUMNS = ["Chromosome", "Start", "End", "Data"]
-
-
 def load_bedgraph(bed_file):
     """
     Load bedGraph file. A bedGraph file has format:
@@ -99,14 +96,14 @@ def load_bedgraph(bed_file):
     """
     with open(bed_file) as f:
         track = f.readline()
-    assert track.startswith("track type=bedGraph"),\
+    assert track.startswith(bedgraph.TRACK_PREFIX),\
         "Invalid bedgraph file: %s. Invalid track line: %s"\
         % (bed_file, track)
     data = pd.read_csv(bed_file, sep="\t", header=None, skiprows=1)
-    assert data.shape[1] == len(BEDGRAPH_COLUMNS),\
+    assert data.shape[1] == len(bedgraph.COLUMNS),\
         "Invalid bedgraph file: %s. Expected 4 columns, found %d"\
         % (bed_file, data.shape[1])
-    data.columns = BEDGRAPH_COLUMNS
+    data.columns = bedgraph.COLUMNS
     return (track, data)
 
 
