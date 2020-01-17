@@ -41,6 +41,7 @@ import gzip
 import os
 from itertools import islice
 from riboviz import barcodes_umis
+from riboviz import fastq
 from riboviz import sample_sheets
 
 
@@ -201,16 +202,12 @@ def demultiplex(sample_sheet_file,
         raise FileNotFoundError(
             "Error: read 1 file {} does not exist".format(read1_file))
 
-    file_type = os.path.splitext(read1_file)[1]
-    is_gz = file_type.lower().endswith(".gz")
-    if is_gz:
-        file_type = ".fastq.gz"
+    if fastq.is_fastq_gz(read1_file):
+        file_format = fastq.FASTQ_GZ_FORMAT
         open_file = gzip.open
     else:
-        file_type = ".fastq"
+        file_format = fastq.FASTQ_FORMAT
         open_file = open
-    sample_format = "{}" + file_type
-    unassigned_format = "Unassigned{}" + file_type
 
     read1_fh = open_file(read1_file, 'rt')
     is_paired_end = read2_file is not None
@@ -232,26 +229,32 @@ def demultiplex(sample_sheet_file,
     if is_paired_end:
         read1_split_fhs = [
             open_file(os.path.join(out_dir,
-                                   sample_format.format(sample_id + "_R1")),
+                                   file_format.format(sample_id + "_R1")),
                       "wt")
             for sample_id in sample_ids]
         read1_unassigned_fh = open_file(
-            os.path.join(out_dir, unassigned_format.format("_R1")), "wt")
+            os.path.join(out_dir,
+                         file_format.format(
+                             sample_sheets.UNASSIGNED_TAG + "_R1")), "wt")
         read2_split_fhs = [
             open_file(os.path.join(out_dir,
-                                   sample_format.format(sample_id + "_R2")),
+                                   file_format.format(sample_id + "_R2")),
                       "wt")
             for sample_id in sample_ids]
         read2_unassigned_fh = open_file(
-            os.path.join(out_dir, unassigned_format.format("_R2")), "wt")
+            os.path.join(out_dir,
+                         file_format.format(
+                             sample_sheets.UNASSIGNED_TAG + "_R2")), "wt")
     else:
         read1_split_fhs = [
             open_file(os.path.join(out_dir,
-                                   sample_format.format(sample_id)),
+                                   file_format.format(sample_id)),
                       "wt")
             for sample_id in sample_ids]
         read1_unassigned_fh = open_file(
-            os.path.join(out_dir, unassigned_format.format("")), "wt")
+            os.path.join(out_dir,
+                         file_format.format(
+                             sample_sheets.UNASSIGNED_TAG)), "wt")
         read2_split_fhs = None
 
     while True:
