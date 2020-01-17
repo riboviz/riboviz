@@ -20,6 +20,7 @@ import riboviz.test
 import riboviz.tools
 import riboviz.validation
 from riboviz import params
+from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration_module  # Test fixture
 from riboviz.test.tools import run_prep_riboviz  # Test fixture
@@ -157,7 +158,7 @@ def check_tpms_collated_tsv(config, sample_id, num_columns):
     :type num_columns: int
     """
     output_dir = config[params.OUTPUT_DIR]
-    tpms_tsv = os.path.join(output_dir, "TPMs_collated.tsv")
+    tpms_tsv = os.path.join(output_dir, workflow_r.TPMS_COLLATED_TSV)
     tpms = pd.read_csv(tpms_tsv, sep="\t", comment="#")
     num_rows, num_columns = tpms.shape
     assert num_columns == num_columns, "Unexpected number of columns"

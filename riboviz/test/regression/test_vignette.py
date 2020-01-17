@@ -116,6 +116,7 @@ import riboviz.test
 import riboviz.tools
 import riboviz.validation
 from riboviz import trim_5p_mismatch
+from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
 
 
@@ -360,13 +361,13 @@ def test_output_h5(expected, sample):
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", ["WT3AT", "WTnone"])
 @pytest.mark.parametrize("file_name",
-                         ["3nt_periodicity.tsv",
-                          "codon_ribodens.tsv",
-                          "pos_sp_nt_freq.tsv",
-                          "pos_sp_rpf_norm_reads.tsv",
-                          "read_lengths.tsv",
-                          "3ntframe_bygene.tsv",
-                          "tpms.tsv"])
+                         [workflow_r.THREE_NT_PERIODICITY_TSV,
+                          workflow_r.CODON_RIBODENS_TSV,
+                          workflow_r.POS_SP_NT_FREQ_TSV,
+                          workflow_r.POS_SP_RPF_NORM_READS_TSV,
+                          workflow_r.READ_LENGTHS_TSV,
+                          workflow_r.THREE_NT_FRAME_BY_GENE_TSV,
+                          workflow_r.TPMS_TSV])
 def test_output_tsv(expected, sample, file_name):
     """
     Test output/*tsv files for equality.
@@ -390,14 +391,14 @@ def test_output_tsv(expected, sample, file_name):
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", ["WT3AT", "WTnone"])
 @pytest.mark.parametrize("file_name",
-                         ["3nt_periodicity.pdf",
-                          "codon_ribodens.pdf",
-                          "features.pdf",
-                          "pos_sp_rpf_norm_reads.pdf",
-                          "read_lengths.pdf",
-                          "startcodon_ribogridbar.pdf",
-                          "startcodon_ribogrid.pdf",
-                          "3ntframe_propbygene.pdf"])
+                         [workflow_r.THREE_NT_PERIODICITY_PDF,
+                          workflow_r.CODON_RIBODENS_PDF,
+                          workflow_r.FEATURES_PDF,
+                          workflow_r.POS_SP_RPF_NORM_READS_PDF,
+                          workflow_r.READ_LENGTHS_PDF,
+                          workflow_r.START_CODON_RIBOGRID_BAR_PDF,
+                          workflow_r.START_CODON_RIBOGRID_PDF,
+                          workflow_r.THREE_NT_FRAME_PROP_BY_GENE_PDF])
 def test_output_pdf(expected, sample, file_name):
     """
     Test output/*pdf files for equality.
@@ -427,7 +428,7 @@ def test_output_tpms_collated_tsv(expected):
     (pytest fixture defined in conftest.py)
     :type expected: str or unicode
     """
-    file_name = "TPMs_collated.tsv"
+    file_name = workflow_r.TPMS_COLLATED_TSV
     expected_output = os.path.join(expected, "output")
     actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
     riboviz.validation.compare(
