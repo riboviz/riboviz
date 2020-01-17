@@ -5,7 +5,7 @@ import os
 import tempfile
 import pytest
 import yaml
-import riboviz
+import riboviz.test
 from riboviz.test import config
 from riboviz.upgrade_config_file import upgrade_config_file
 
@@ -70,7 +70,7 @@ def test_upgrade_vignette_config(config_file, upgraded_config_file):
     """
     upgrade_and_validate(config_file,
                          upgraded_config_file,
-                         riboviz.VIGNETTE_CONFIG)
+                         riboviz.test.VIGNETTE_CONFIG)
 
 
 @pytest.mark.parametrize("config_file",
@@ -88,7 +88,7 @@ def test_upgrade_simdata_umi_config(config_file, upgraded_config_file):
     """
     upgrade_and_validate(config_file,
                          upgraded_config_file,
-                         riboviz.SIMDATA_UMI_CONFIG)
+                         riboviz.test.SIMDATA_UMI_CONFIG)
 
 
 @pytest.mark.parametrize("config_file",
@@ -107,4 +107,4 @@ def test_upgrade_simdata_multiplex_config(config_file, upgraded_config_file):
     """
     upgrade_and_validate(config_file,
                          upgraded_config_file,
-                         riboviz.SIMDATA_MULTIPLEX_CONFIG)
+                         riboviz.test.SIMDATA_MULTIPLEX_CONFIG)

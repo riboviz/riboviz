@@ -112,6 +112,7 @@ import pytest
 import pysam
 import riboviz
 import riboviz.process_utils
+import riboviz.test
 import riboviz.tools
 import riboviz.validation
 from riboviz.tools import prep_riboviz
@@ -132,7 +133,7 @@ def run_prep_riboviz(skip_workflow):
     if not skip_workflow:
         exit_code = prep_riboviz.prep_riboviz(
             riboviz.R_SCRIPTS,
-            riboviz.VIGNETTE_CONFIG)
+            riboviz.test.VIGNETTE_CONFIG)
         assert exit_code == 0, \
             "prep_riboviz returned non-zero exit code %d" % exit_code
 
@@ -167,7 +168,7 @@ def test_index(expected, prefix, index):
     :type index: int
     """
     expected_index = os.path.join(expected, "index")
-    actual_index = os.path.join(riboviz.VIGNETTE_DIR, "index")
+    actual_index = os.path.join(riboviz.test.VIGNETTE_DIR, "index")
     file_name = "%s.%d.ht2" % (prefix, index)
     print(file_name)
     riboviz.validation.compare(
@@ -191,7 +192,7 @@ def test_tmp_fq(expected, prefix, content):
     :type content: str or unicode
     """
     expected_tmp = os.path.join(expected, "tmp")
-    actual_tmp = os.path.join(riboviz.VIGNETTE_DIR, "tmp")
+    actual_tmp = os.path.join(riboviz.test.VIGNETTE_DIR, "tmp")
     file_name = "%s.fq" % content
     print(file_name)
     riboviz.validation.compare(
@@ -219,7 +220,7 @@ def test_tmp_sam(expected, tmp_directory, prefix, content):
     :type content: str or unicode
     """
     expected_tmp = os.path.join(expected, "tmp", prefix)
-    actual_tmp = os.path.join(riboviz.VIGNETTE_DIR, "tmp", prefix)
+    actual_tmp = os.path.join(riboviz.test.VIGNETTE_DIR, "tmp", prefix)
     expected_tmp_copy = os.path.join(tmp_directory, "expected")
     os.mkdir(expected_tmp_copy)
     actual_tmp_copy = os.path.join(tmp_directory, "actual")
@@ -255,7 +256,7 @@ def test_tmp_tsv(expected, prefix, content):
     :type content: str or unicode
     """
     expected_tmp = os.path.join(expected, "tmp", prefix, content)
-    actual_tmp = os.path.join(riboviz.VIGNETTE_DIR,
+    actual_tmp = os.path.join(riboviz.test.VIGNETTE_DIR,
                               "tmp", prefix, content)
     file_name = "%s" % content
     print(file_name)
@@ -275,7 +276,7 @@ def test_output_bai(expected, prefix):
     :type prefix: str or unicode
     """
     expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.VIGNETTE_DIR, "output")
+    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
     file_name = "%s.bam.bai" % prefix
     print(file_name)
     riboviz.validation.compare(
@@ -297,7 +298,7 @@ def test_output_bam(expected, prefix):
     :type prefix: str or unicode
     """
     expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.VIGNETTE_DIR, "output")
+    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
     file_name = "%s.bam" % prefix
     print(file_name)
     riboviz.validation.compare(
@@ -321,7 +322,7 @@ def test_output_bedgraph(expected, prefix, content):
     :type content: str or unicode
     """
     expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.VIGNETTE_DIR, "output")
+    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
     file_name = "%s.bedgraph" % content
     print(file_name)
     riboviz.validation.compare(
@@ -342,7 +343,7 @@ def test_output_h5(expected, prefix):
     :type prefix: str or unicode
     """
     expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.VIGNETTE_DIR, "output")
+    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
     file_name = "%s.h5" % prefix
     print(file_name)
     riboviz.validation.compare(
@@ -373,7 +374,7 @@ def test_output_tsv(expected, prefix, content):
     :type content: str or unicode
     """
     expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.VIGNETTE_DIR, "output")
+    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
     file_name = "%s.tsv" % content
     print(file_name)
     riboviz.validation.compare(
@@ -405,7 +406,7 @@ def test_output_pdf(expected, prefix, content):
     :type content: str or unicode
     """
     expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.VIGNETTE_DIR, "output")
+    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
     file_name = "%s.pdf" % content
     print(file_name)
     riboviz.validation.compare(
@@ -423,7 +424,7 @@ def test_output_tpms_collated_tsv(expected):
     :type expected: str or unicode
     """
     expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.VIGNETTE_DIR, "output")
+    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
     file_name = "TPMs_collated.tsv"
     riboviz.validation.compare(
         os.path.join(expected_output, file_name),
