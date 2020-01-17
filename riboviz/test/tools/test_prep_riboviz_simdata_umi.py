@@ -20,6 +20,7 @@ import riboviz.test
 import riboviz.tools
 import riboviz.validation
 from riboviz import params
+from riboviz import umi_tools
 from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration_module  # Test fixture
@@ -101,13 +102,13 @@ def check_umi_groups(config, sample_id, num_groups):
     assert groups.shape[0] == num_groups, \
         ("Expected %d unique groups but found %d"
          % (num_groups, groups.shape[0]))
-    assert (groups["umi_count"] == 1).all(), \
+    assert (groups[umi_tools.UMI_COUNT] == 1).all(), \
         "Expected each umi_count to be 1"
-    assert (groups["final_umi_count"] == 1).all(), \
+    assert (groups[umi_tools.FINAL_UMI_COUNT] == 1).all(), \
         "Expected each final_umi_count to be 1"
     # Check group IDs are unique when compared to 1,...,number of
     # groups.
-    group_ids = list(groups["unique_id"])
+    group_ids = list(groups[umi_tools.UNIQUE_ID])
     group_ids.sort()
     expected_group_ids = list(range(num_groups))
     assert expected_group_ids == group_ids, \
@@ -120,12 +121,12 @@ def check_umi_groups(config, sample_id, num_groups):
     # where <GROUP> is 1-indexed.
     groups_from_read_ids = [
         int(read_id.split("-")[1].split(".")[0]) - 1
-        for read_id in groups["read_id"]
+        for read_id in groups[umi_tools.READ_ID]
     ]
     groups_from_read_ids.sort()
     assert groups_from_read_ids == group_ids, \
         ("Reads in read_ids %s are not from unique groups" %
-         (str(list(groups["read_id"]))))
+         (str(list(groups[umi_tools.READ_ID]))))
 
 
 @pytest.mark.parametrize("sample_id", [riboviz.test.SIMDATA_UMI_SAMPLE])
