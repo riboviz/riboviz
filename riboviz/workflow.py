@@ -11,17 +11,10 @@ import os.path
 from riboviz import params
 from riboviz import process_utils
 from riboviz import logging_utils
+from riboviz import workflow_r
 from riboviz.tools import demultiplex_fastq as demultiplex_fastq_module
 from riboviz.tools import trim_5p_mismatch as trim_5p_mismatch_module
 from riboviz.utils import value_in_dict
-
-
-BAM_TO_H5_R = "bam_to_h5.R"
-""" Name of bam_to_h5.R script """
-GENERATE_STATS_FIGS_R = "generate_stats_figs.R"
-""" Name of generate_stats_figs.R script """
-COLLATE_TPMS_R = "collate_tpms.R"
-""" NAme of collate_tpms.R script """
 
 
 RunConfigTuple = collections.namedtuple(
@@ -440,7 +433,8 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config, log_file, run_config):
     if secondary_id is None:
         secondary_id = "NULL"
     cmd = ["Rscript", "--vanilla",
-           os.path.join(run_config.r_scripts, BAM_TO_H5_R),
+           os.path.join(run_config.r_scripts,
+                        workflow_r.BAM_TO_H5_R),
            "--num-processes=" + str(run_config.nprocesses),
            "--min-read-length=" + str(config[params.MIN_READ_LENGTH]),
            "--max-read-length=" + str(config[params.MAX_READ_LENGTH]),
@@ -480,7 +474,8 @@ def generate_stats_figs(h5_file, out_dir, config, log_file, run_config):
     LOGGER.info("Create summary statistics and analyses plots. Log: %s",
                 log_file)
     cmd = ["Rscript", "--vanilla",
-           os.path.join(run_config.r_scripts, GENERATE_STATS_FIGS_R),
+           os.path.join(run_config.r_scripts,
+                        workflow_r.GENERATE_STATS_FIGS_R),
            "--num-processes=" + str(run_config.nprocesses),
            "--min-read-length=" + str(config[params.MIN_READ_LENGTH]),
            "--max-read-length=" + str(config[params.MAX_READ_LENGTH]),
@@ -537,7 +532,8 @@ def collate_tpms(out_dir, samples, are_samples_in_sub_dirs, log_file,
     """
     LOGGER.info("Collate TPMs. Log: %s", log_file)
     cmd = ["Rscript", "--vanilla",
-           os.path.join(run_config.r_scripts, COLLATE_TPMS_R),
+           os.path.join(run_config.r_scripts,
+                        workflow_r.COLLATE_TPMS_R),
            "--sample-subdirs=" + str(are_samples_in_sub_dirs),
            "--output-dir=" + out_dir]
     if tpms_file is not None:
