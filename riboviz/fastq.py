@@ -1,14 +1,45 @@
 """
 FASTQ file-related utilities.
 """
+import os.path
 
 
-FASTQ_NAME = "{}.fastq"
+EXTENSIONS = [".fq", ".fastq"]
+""" FASTQ file extensions """
+FASTQ_FORMAT = "{}.fastq"
 """ .fastq file name format string """
-FASTQ_GZ_NAME = FASTQ_NAME + ".gz"
+FASTQ_GZ_FORMAT = FASTQ_FORMAT + ".gz"
 """ .fastq.gz file name format string """
-FASTQ_FORMAT = "fastq"
-""" Format string for use with Bio.SeqIO.write. """
+
+
+def is_fastq_gz(file_name):
+    """
+    Does the given file end with .gz or .GZ?
+
+    :param file_name: File name
+    :type file_name: str or unicode
+    :return: True if file_name ends with .gz or .GZ, False
+    otherwise
+    :rtype: bool
+    """
+    _, ext = os.path.splitext(os.path.basename(file_name))
+    return ext.lower() == ".gz"
+
+
+def strip_fastq_gz(file_name):
+    """
+    If the given file ends with .gz or .GZ then remove the .gz or .GZ
+    extension. If the file doesn't end with this extension then the
+    original name is returned.
+
+    :param file_name: File name
+    :type file_name: str or unicode
+    :return: File name without .gz or .GZ extension
+    :rtype: str or unicode
+    """
+    if is_fastq_gz(file_name):
+        return os.path.splitext(file_name)[0]
+    return file_name
 
 
 def get_fastq_filename(tag, is_gz=False):
@@ -25,8 +56,8 @@ def get_fastq_filename(tag, is_gz=False):
     :rtype: str or unicode
     """
     if is_gz:
-        return FASTQ_GZ_NAME.format(tag)
-    return FASTQ_NAME.format(tag)
+        return FASTQ_GZ_FORMAT.format(tag)
+    return FASTQ_FORMAT.format(tag)
 
 
 def get_fastq_filenames(tags, is_gz=False):

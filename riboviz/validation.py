@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import pysam
 from riboviz import bedgraph
+from riboviz import fastq
 from riboviz import sam_bam
 
 
@@ -588,5 +589,5 @@ def compare(file1, file2, compare_names=True):
         equal_sam(file1, file2)
     if ext in [".tsv"]:
         equal_tsv(file1, file2)
-    if ext in [".fq", ".fastq"]:
+    if ext in fastq.EXTENSIONS:
         equal_fastq(file1, file2)
