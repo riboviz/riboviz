@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import pysam
 from riboviz import bedgraph
+from riboviz import sam_bam
 
 
 def equal_names(file1, file2):
@@ -285,7 +286,7 @@ def equal_bam_sam_headers(file1, file2):
     assert keys1 == keys2,\
         "Unequal header keys: %s, %s" % (file1.filename, file2.filename)
     for key in keys1:
-        if key == "PG":
+        if key == sam_bam.PG_TAG:
             continue
         assert file1.header[key] == file2.header[key],\
             "Unequal values for key %s: %s (%s), %s (%s)"\
