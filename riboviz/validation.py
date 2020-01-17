@@ -24,8 +24,8 @@ def equal_names(file1, file2):
     :raise AssertionError: if file names differ
     :raise Exception: if problems arise when loading the files
     """
-    local_file1 = os.path.split(file1)[1]
-    local_file2 = os.path.split(file2)[1]
+    local_file1 = os.path.split(file1)[1].lower()
+    local_file2 = os.path.split(file2)[1].lower()
     assert os.path.exists(file1) and os.path.isfile(file1),\
         "File %s does not exist or is not a file"
     assert os.path.exists(file2) and os.path.isfile(file2),\
@@ -573,7 +573,7 @@ def compare(file1, file2, compare_names=True):
     assert not os.path.isdir(file2), "Directory: %s" % file2
     if compare_names:
         equal_names(file1, file2)
-    ext = os.path.splitext(file1)[1]
+    ext = os.path.splitext(file1)[1].lower()
     if ext in [".pdf"]:
         equal_names(file1, file2)
     if ext in [".ht2", ".bai"]:
@@ -588,5 +588,5 @@ def compare(file1, file2, compare_names=True):
         equal_sam(file1, file2)
     if ext in [".tsv"]:
         equal_tsv(file1, file2)
-    if ext in [".fq"]:
+    if ext in [".fq", ".fastq"]:
         equal_fastq(file1, file2)
