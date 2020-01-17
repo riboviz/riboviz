@@ -343,7 +343,7 @@ def create_fastq_simdata(output_dir):
                   "umi5_umi3.fastq"]
     for file_name, fastq_records in zip(file_names, zip(*records)):
         with open(os.path.join(output_dir, file_name), "w") as f:
-            SeqIO.write(fastq_records, f, fastq.FASTQ_FORMAT)
+            SeqIO.write(fastq_records, f, "fastq")
 
     # Simulate raw data with only 3' umi.
     config_3 = [
@@ -364,7 +364,7 @@ def create_fastq_simdata(output_dir):
                   "umi3.fastq"]
     for file_name, fastq_records in zip(file_names, zip(*records)):
         with open(os.path.join(output_dir, file_name), "w") as f:
-            SeqIO.write(fastq_records, f, fastq.FASTQ_FORMAT)
+            SeqIO.write(fastq_records, f, "fastq")
 
     # Create multiplexed data.
     # Use same data as 5' and 3' UMIs and an adaptor but with
@@ -430,14 +430,14 @@ def create_fastq_simdata(output_dir):
                           "multiplex.fastq"]
             for file_name, fastq_records in zip(file_names, records_by_type):
                 with open(os.path.join(output_dir, file_name), "a") as f:
-                    SeqIO.write(fastq_records, f, fastq.FASTQ_FORMAT)
+                    SeqIO.write(fastq_records, f, "fastq")
             # Save records with UMI+barcode extracted in
             # barcode-specific files.
             _, _, extracted_records = records_by_type
             file_name = fastq.get_fastq_filename(
                 tag_format.format(barcode_index))
             with open(os.path.join(deplex_dir, file_name), "a") as f:
-                SeqIO.write(extracted_records, f, fastq.FASTQ_FORMAT)
+                SeqIO.write(extracted_records, f, "fastq")
 
     # The last file of barcode-specific reads will be that for the
     # unassigned reads so rename that file.
@@ -445,7 +445,7 @@ def create_fastq_simdata(output_dir):
         tag_format.format(unassigned_index))
     shutil.move(os.path.join(deplex_dir, unassigned_tag_filename),
                 os.path.join(deplex_dir,
-                             fastq.FASTQ_NAME.format(
+                             fastq.FASTQ_FORMAT.format(
                                  sample_sheets.UNASSIGNED_TAG)))
 
     # Save expected demultiplexing data on counts of reads per-barcode.
