@@ -15,6 +15,7 @@ import os
 import pytest
 import riboviz
 import riboviz.process_utils
+import riboviz.test
 import riboviz.tools
 import riboviz.validation
 from riboviz import params
@@ -26,7 +27,7 @@ from riboviz.test.tools.test_prep_riboviz_simdata_umi import check_umi_groups
 from riboviz.test.tools.test_prep_riboviz_simdata_umi import check_tpms_collated_tsv
 
 
-TEST_CONFIG_FILE = riboviz.SIMDATA_MULTIPLEX_CONFIG
+TEST_CONFIG_FILE = riboviz.test.SIMDATA_MULTIPLEX_CONFIG
 """
 YAML configuration used as a template configuration by these tests -
 required by configuration test fixture
@@ -45,7 +46,7 @@ def test_adaptor_trimming(configuration_module):
     """
     config, _ = configuration_module
     expected_output = os.path.join(
-        riboviz.SIMDATA_DIR,
+        riboviz.test.SIMDATA_DIR,
         "multiplex_umi_barcode.fastq")
     actual_output = os.path.join(
         config[params.TMP_DIR],
@@ -65,7 +66,7 @@ def test_barcode_umi_extract(configuration_module):
     """
     config, _ = configuration_module
     expected_output = os.path.join(
-        riboviz.SIMDATA_DIR,
+        riboviz.test.SIMDATA_DIR,
         "multiplex.fastq")
     actual_output = os.path.join(
         config[params.TMP_DIR],
@@ -89,7 +90,7 @@ def test_deplex_num_reads(configuration_module):
         "multiplex_umi_barcode_adaptor_deplex")
     actual_output = os.path.join(actual_dir, NUM_READS_FILE)
     expected_output = os.path.join(
-        riboviz.SIMDATA_DIR, "deplex", NUM_READS_FILE)
+        riboviz.test.SIMDATA_DIR, "deplex", NUM_READS_FILE)
     riboviz.validation.compare(expected_output, actual_output)
 
 
@@ -113,7 +114,7 @@ def test_deplex_reads(configuration_module, fastq):
         "multiplex_umi_barcode_adaptor_deplex")
     actual_output = os.path.join(actual_dir, fastq)
     expected_output = os.path.join(
-        riboviz.SIMDATA_DIR, "deplex", fastq)
+        riboviz.test.SIMDATA_DIR, "deplex", fastq)
     riboviz.validation.compare(expected_output, actual_output)
 
 

@@ -6,13 +6,14 @@ import yaml
 import pytest
 import riboviz
 import riboviz.process_utils
-import riboviz.validation
+import riboviz.test
 import riboviz.tools
+import riboviz.validation
 from riboviz import params
 from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration  # Test fixture
 
-TEST_CONFIG_FILE = riboviz.VIGNETTE_CONFIG
+TEST_CONFIG_FILE = riboviz.test.VIGNETTE_CONFIG
 """
 YAML configuration used as a template configuration by these tests -
 required by configuration test fixture
