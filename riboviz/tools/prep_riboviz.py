@@ -136,7 +136,7 @@ import os.path
 import sys
 import yaml
 from riboviz import demultiplex_fastq
-from riboviz import fastq_files
+from riboviz import fastq
 from riboviz import logging_utils
 from riboviz import params
 from riboviz import provenance
@@ -211,15 +211,15 @@ LOGGER = logging.getLogger(__name__)
 """ Logger """
 
 
-def process_sample(sample, fastq, r_rna_index, orf_index,
+def process_sample(sample, sample_fastq, r_rna_index, orf_index,
                    is_trimmed, config, tmp_dir, out_dir, run_config):
     """
     Process a single FASTQ sample file.
 
     :param sample: Sample name
     :type sample: str or unicode
-    :param fastq: Sample FASTQ file
-    :type fastq: str or unicode
+    :param sample_fastq: Sample FASTQ file
+    :type sample_fastq: str or unicode
     :param r_rna_index: Prefix of rRNA HT2 index files
     :type r_rna_index: str or unicode
     :param orf_index: Prefix of ORF HT2 index files
@@ -235,7 +235,7 @@ def process_sample(sample, fastq, r_rna_index, orf_index,
     :type out_dir: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if fastq, other files or a third-party
+    :raise FileNotFoundError: if sample_fastq, other files or a third-party
     tool cannot be found
     :raise AssertionError: if invocation of a third-party tool returns
     non-zero exit code
@@ -243,17 +243,18 @@ def process_sample(sample, fastq, r_rna_index, orf_index,
     """
     LOGGER.info("Processing sample: %s", sample)
     step = 1
-    LOGGER.info("Processing file: %s", fastq)
+    LOGGER.info("Processing file: %s", sample_fastq)
     is_extract_umis = value_in_dict(params.EXTRACT_UMIS, config)
     if is_trimmed:
         LOGGER.info("Skipping adaptor trimming and barcode/UMI extraction")
-        trim_fq = fastq
+        trim_fq = sample_fastq
     else:
         log_file = os.path.join(run_config.logs_dir,
                                 LOG_FORMAT.format(step, "cutadapt.log"))
         trim_fq = os.path.join(tmp_dir, ADAPTER_TRIM_FQ)
         workflow.cut_adapters(
-            config[params.ADAPTERS], fastq, trim_fq, log_file, run_config)
+            config[params.ADAPTERS], sample_fastq, trim_fq,
+            log_file, run_config)
         step += 1
 
         if is_extract_umis:
@@ -386,7 +387,7 @@ def process_sample(sample, fastq, r_rna_index, orf_index,
     workflow.generate_stats_figs(
         sample_out_h5, out_dir, config, log_file, run_config)
 
-    LOGGER.info("Finished processing sample: %s", fastq)
+    LOGGER.info("Finished processing sample: %s", sample_fastq)
 
 
 def process_samples(samples, in_dir, r_rna_index, orf_index,
@@ -427,11 +428,11 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
     num_samples = len(samples)
     for sample in list(samples.keys()):
         try:
-            fastq = os.path.join(in_dir, samples[sample])
+            sample_fastq = os.path.join(in_dir, samples[sample])
             if check_samples_exist:
-                if not os.path.exists(fastq):
+                if not os.path.exists(sample_fastq):
                     raise FileNotFoundError(
-                        errno.ENOENT, os.strerror(errno.ENOENT), fastq)
+                        errno.ENOENT, os.strerror(errno.ENOENT), sample_fastq)
             sample_tmp_dir = os.path.join(tmp_dir, sample)
             sample_out_dir = os.path.join(out_dir, sample)
             sample_logs_dir = os.path.join(run_config.logs_dir, sample)
@@ -446,7 +447,7 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
                                           run_config.cmd_file,
                                           run_config.is_dry_run)
             process_sample(
-                sample, fastq, r_rna_index, orf_index, is_trimmed,
+                sample, sample_fastq, r_rna_index, orf_index, is_trimmed,
                 config, sample_tmp_dir, sample_out_dir, sample_run_config)
             successes.append(sample)
         except FileNotFoundError as e:
@@ -615,7 +616,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
         # Use get_fastq_filename to deduce sample-specific files
         # output by demultiplex_fastq.py - demultiplex_fastq.py
         # uses this function too.
-        sample_files = {sample: fastq_files.get_fastq_filename(sample)
+        sample_files = {sample: fastq.get_fastq_filename(sample)
                         for sample in samples}
         processed_samples = process_samples(
             sample_files, deplex_dir, r_rna_index, orf_index,

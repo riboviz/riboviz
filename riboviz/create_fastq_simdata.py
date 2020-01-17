@@ -70,9 +70,9 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
 from riboviz import barcodes_umis
-from riboviz import fastq_files
+from riboviz import demultiplex_fastq
+from riboviz import fastq
 from riboviz import sample_sheets
-from riboviz.tools import demultiplex_fastq
 
 QUALITY_MEDIUM = list(range(30, 41))
 """ List of medium quality scores. """
@@ -343,7 +343,7 @@ def create_fastq_simdata(output_dir):
                   "umi5_umi3.fastq"]
     for file_name, fastq_records in zip(file_names, zip(*records)):
         with open(os.path.join(output_dir, file_name), "w") as f:
-            SeqIO.write(fastq_records, f, fastq_files.FASTQ_FORMAT)
+            SeqIO.write(fastq_records, f, fastq.FASTQ_FORMAT)
 
     # Simulate raw data with only 3' umi.
     config_3 = [
@@ -364,7 +364,7 @@ def create_fastq_simdata(output_dir):
                   "umi3.fastq"]
     for file_name, fastq_records in zip(file_names, zip(*records)):
         with open(os.path.join(output_dir, file_name), "w") as f:
-            SeqIO.write(fastq_records, f, fastq_files.FASTQ_FORMAT)
+            SeqIO.write(fastq_records, f, fastq.FASTQ_FORMAT)
 
     # Create multiplexed data.
     # Use same data as 5' and 3' UMIs and an adaptor but with
@@ -430,22 +430,22 @@ def create_fastq_simdata(output_dir):
                           "multiplex.fastq"]
             for file_name, fastq_records in zip(file_names, records_by_type):
                 with open(os.path.join(output_dir, file_name), "a") as f:
-                    SeqIO.write(fastq_records, f, fastq_files.FASTQ_FORMAT)
+                    SeqIO.write(fastq_records, f, fastq.FASTQ_FORMAT)
             # Save records with UMI+barcode extracted in
             # barcode-specific files.
             _, _, extracted_records = records_by_type
-            file_name = fastq_files.get_fastq_filename(
+            file_name = fastq.get_fastq_filename(
                 tag_format.format(barcode_index))
             with open(os.path.join(deplex_dir, file_name), "a") as f:
-                SeqIO.write(extracted_records, f, fastq_files.FASTQ_FORMAT)
+                SeqIO.write(extracted_records, f, fastq.FASTQ_FORMAT)
 
     # The last file of barcode-specific reads will be that for the
     # unassigned reads so rename that file.
-    unassigned_tag_filename = fastq_files.get_fastq_filename(
+    unassigned_tag_filename = fastq.get_fastq_filename(
         tag_format.format(unassigned_index))
     shutil.move(os.path.join(deplex_dir, unassigned_tag_filename),
                 os.path.join(deplex_dir,
-                             fastq_files.FASTQ_NAME.format(
+                             fastq.FASTQ_NAME.format(
                                  sample_sheets.UNASSIGNED_TAG)))
 
     # Save expected demultiplexing data on counts of reads per-barcode.
