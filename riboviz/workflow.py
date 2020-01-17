@@ -18,8 +18,7 @@ from riboviz.utils import value_in_dict
 
 
 RunConfigTuple = collections.namedtuple(
-    "RunConfigTuple", ["py_scripts",
-                       "r_scripts",
+    "RunConfigTuple", ["r_scripts",
                        "cmd_file",
                        "is_dry_run",
                        "logs_dir",

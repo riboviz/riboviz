@@ -131,7 +131,6 @@ def run_prep_riboviz(skip_workflow):
     print(("Skip workflow:" + str(skip_workflow)))
     if not skip_workflow:
         exit_code = prep_riboviz.prep_riboviz(
-            riboviz.PY_SCRIPTS,
             riboviz.R_SCRIPTS,
             riboviz.VIGNETTE_CONFIG)
         assert exit_code == 0, \
