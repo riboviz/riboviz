@@ -32,7 +32,7 @@ required by configuration test fixture
 """
 
 
-@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
+@pytest.mark.parametrize("sample_id", [riboviz.test.SIMDATA_UMI_SAMPLE])
 @pytest.mark.usefixtures("run_prep_riboviz")
 def test_adaptor_trimming(configuration_module, sample_id):
     """
@@ -56,7 +56,7 @@ def test_adaptor_trimming(configuration_module, sample_id):
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
 
-@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
+@pytest.mark.parametrize("sample_id", [riboviz.test.SIMDATA_UMI_SAMPLE])
 @pytest.mark.usefixtures("run_prep_riboviz")
 def test_umi_extract(configuration_module, sample_id):
     """
@@ -127,7 +127,7 @@ def check_umi_groups(config, sample_id, num_groups):
          (str(list(groups["read_id"]))))
 
 
-@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
+@pytest.mark.parametrize("sample_id", [riboviz.test.SIMDATA_UMI_SAMPLE])
 @pytest.mark.usefixtures("run_prep_riboviz")
 def test_umi_group(configuration_module, sample_id):
     """
@@ -176,7 +176,7 @@ def check_tpms_collated_tsv(config, sample_id, num_columns):
         "{} value for non-YAL003W and YAL038W ORFs are not 0".format(sample_id)
 
 
-@pytest.mark.parametrize("sample_id", ["umi5_umi3"])
+@pytest.mark.parametrize("sample_id", [riboviz.test.SIMDATA_UMI_SAMPLE])
 @pytest.mark.usefixtures("run_prep_riboviz")
 def test_tpms_collated_tsv(configuration_module, sample_id):
     """

@@ -15,6 +15,9 @@ SIMDATA_UMI_CONFIG = os.path.join(VIGNETTE_DIR, "simdata_umi_config.yaml")
 """
 Path of vignette/simdata_umi_config.yaml derived from VIGNETTE_DIR.
 """
+SIMDATA_UMI_SAMPLE = "umi5_umi3"
+""" Sample name in vignette/simdata_umi_config.yaml. """
+
 SIMDATA_MULTIPLEX_CONFIG = os.path.join(
     VIGNETTE_DIR, "simdata_multiplex_config.yaml")
 """
