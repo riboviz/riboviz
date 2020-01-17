@@ -383,7 +383,6 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
             sample_out_dir = os.path.join(out_dir, sample)
             sample_logs_dir = os.path.join(run_config.logs_dir, sample)
             sample_run_config = workflow.RunConfigTuple(
-                run_config.py_scripts,
                 run_config.r_scripts,
                 run_config.cmd_file,
                 run_config.is_dry_run,
@@ -409,12 +408,10 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
     return successes
 
 
-def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
+def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     """
     Run the RiboViz workflow.
 
-    :param py_scripts: Python scripts directory
-    :type py_scripts: str or unicode
     :param r_scripts: R scripts directory
     :type r_scripts: str or unicode
     :param config_yaml: YAML configuration file path
@@ -460,8 +457,7 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
         workflow.create_directory(directory, cmd_file, is_dry_run)
 
     run_config = workflow.RunConfigTuple(
-        py_scripts, r_scripts, cmd_file, is_dry_run, logs_dir,
-        nprocesses)
+        r_scripts, cmd_file, is_dry_run, logs_dir, nprocesses)
 
     in_dir = config[params.INPUT_DIR]
     LOGGER.info("Build indices for alignment, if necessary/requested")
@@ -577,7 +573,7 @@ def run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     LOGGER.info("Completed")
 
 
-def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
+def prep_riboviz(r_scripts, config_yaml, is_dry_run=False):
     """
     Run the RiboViz workflow. This function invokes run_workflow,
     catchesand logs any exceptions and maps these to exit codes.
@@ -591,8 +587,6 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
       inconsistent configuration parameters.e
     * EXIT_PROCESSING_ERROR (3): Error occurred during processing.
 
-    :param py_scripts: Python scripts directory
-    :type py_scripts: str or unicode
     :param r_scripts: R scripts direectory
     :type r_scripts: str or unicode
     :param config_yaml: YAML configuration file path
@@ -605,7 +599,7 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
     """
     LOGGER.info(provenance.get_version(__file__))
     try:
-        run_workflow(py_scripts, r_scripts, config_yaml, is_dry_run)
+        run_workflow(r_scripts, config_yaml, is_dry_run)
     except FileNotFoundError as e:
         LOGGER.error("File not found: %s", e.filename)
         return EXIT_FILE_NOT_FOUND_ERROR
@@ -627,16 +621,13 @@ def prep_riboviz(py_scripts, r_scripts, config_yaml, is_dry_run=False):
 
 
 if __name__ == "__main__":
-    # Assume RiboViz Python scripts are peers in same directory.
-    py_scripts_arg = os.path.dirname(os.path.realpath(__file__))
     sys.argv.pop(0)  # Remove program.
     is_dry_run_arg = (sys.argv[0] == "--dry-run")
     if is_dry_run_arg:
         sys.argv.pop(0)
     r_scripts_arg = sys.argv[0]
     config_yaml_arg = sys.argv[1]
-    exit_code = prep_riboviz(py_scripts_arg,
-                             r_scripts_arg,
+    exit_code = prep_riboviz(r_scripts_arg,
                              config_yaml_arg,
                              is_dry_run_arg)
     sys.exit(exit_code)
