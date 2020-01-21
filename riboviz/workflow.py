@@ -11,6 +11,7 @@ import os.path
 from riboviz import params
 from riboviz import process_utils
 from riboviz import logging_utils
+from riboviz import sam_bam
 from riboviz import workflow_r
 from riboviz import workflow_record
 from riboviz.tools import demultiplex_fastq as demultiplex_fastq_module
@@ -391,7 +392,7 @@ def index_bam(sample_id, bam_file, log_file, run_config):
                                     "samtools index",
                                     "Index BAM file",
                                     [bam_file],
-                                    [bam_file],  # TODO .bam.bai
+                                    [sam_bam.BAM_BAI_FORMAT.format(bam_file)],
                                     sample_id)
 
 
