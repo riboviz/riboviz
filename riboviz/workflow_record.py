@@ -2,7 +2,7 @@
 """
 RiboViz utilities for recording workflow steps.
 """
-import csv
+import pandas as pd
 from riboviz import provenance
 
 
@@ -35,11 +35,8 @@ def create_record_file(file_name, delimiter="\t"):
     :type delimiter: str or unicode
     """
     provenance.write_provenance_header(__file__, file_name)
-    with open(file_name, 'a', newline='') as csv_file:
-        writer = csv.DictWriter(csv_file,
-                                fieldnames=HEADER,
-                                delimiter=delimiter)
-        writer.writeheader()
+    data = pd.DataFrame(columns=HEADER)
+    data.to_csv(file_name, mode='a', sep=delimiter, index=False)
 
 
 def record_step(file_name,
@@ -50,7 +47,8 @@ def record_step(file_name,
                 sample_name=None,
                 delimiter="\t"):
     """
-    Append a workflow record to the given file.
+    Append a workflow record to the given file. If both files_read and
+    files_written are [] then this is a no-op.
 
     :param file_name: Workflow record file
     :type file_name: str or unicode
@@ -67,18 +65,18 @@ def record_step(file_name,
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
-    with open(file_name, 'a', newline='') as csv_file:
-        writer = csv.DictWriter(csv_file,
-                                fieldnames=HEADER,
-                                delimiter=delimiter)
-        read_rows = [get_record_row(sample_name, description, program,
-                                    read, READ)
-                     for read in files_read]
-        write_rows = [get_record_row(sample_name, description, program,
-                                     write, WRITE)
-                      for write in files_written]
-        writer.writerows(read_rows)
-        writer.writerows(write_rows)
+    data = pd.DataFrame(columns=HEADER)
+    rows = []
+    if len(files_read) == 0 and len(files_written) == 0:
+        return
+    for read in files_read:
+        rows.append(get_record_row(sample_name, description, program,
+                                   read, READ))
+    for write in files_written:
+        rows.append(get_record_row(sample_name, description, program,
+                                   write, WRITE))
+    data = data.append(rows)
+    data.to_csv(file_name, mode='a', sep=delimiter, index=False, header=False)
 
 
 def get_record_row(sample_name,
