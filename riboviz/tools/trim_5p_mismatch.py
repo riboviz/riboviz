@@ -77,7 +77,7 @@ def invoke_trim_5p_mismatch():
     """
     Parse command-line options then invoke "trim_5p_mismatches".
     """
-    print(provenance.get_version(__file__))
+    print(provenance.get_provenance_str(__file__))
     options = parse_command_line_options()
     sam_file_in = options.sam_file_in
     sam_file_out = options.sam_file_out

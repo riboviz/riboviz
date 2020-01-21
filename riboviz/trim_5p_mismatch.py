@@ -206,7 +206,7 @@ def trim_5p_mismatch_file(sam_file_in,
                                sam_file_out,
                                fivep_remove,
                                max_mismatches)
-    provenance.write_metadata_header(__file__, summary_file)
+    provenance.write_provenance_header(__file__, summary_file)
     summary_df = pd.DataFrame.from_dict([summary])
     summary_df[list(summary_df.columns)].to_csv(
         summary_file, mode='a', sep="\t", index=False)
