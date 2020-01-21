@@ -308,6 +308,5 @@ def demultiplex(sample_sheet_file,
     sample_sheet[sample_sheets.NUM_READS] = num_reads
     sample_sheets.save_deplexed_sample_sheet(sample_sheet,
                                              num_unassigned_reads,
-                                             num_reads_file,
-                                             client=__file__)
+                                             num_reads_file)
     print(("Done"))

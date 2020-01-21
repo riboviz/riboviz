@@ -55,8 +55,7 @@ def load_sample_sheet(filename, delimiter="\t", comment="#"):
 def save_deplexed_sample_sheet(sample_sheet,
                                num_unassigned_reads,
                                filename,
-                               delimiter="\t",
-                               client=""):
+                               delimiter="\t"):
     """
     Save sample sheet with data on demultiplexed reads as a
     tab-separated values file. The sample sheet is assumed to have
@@ -74,9 +73,6 @@ def save_deplexed_sample_sheet(sample_sheet,
     :type filename: str or unicode
     :param delimiter: Delimiter
     :type delimiter: str or unicode
-    :param comments: Optional list of comments to write into file, one
-    per line prefixed by "#".
-    :type comments: list(str or unicode)
     """
     deplexed_sample_sheet = sample_sheet[[
         SAMPLE_ID,
@@ -94,7 +90,7 @@ def save_deplexed_sample_sheet(sample_sheet,
                              columns=deplexed_sample_sheet.columns)
     deplexed_sample_sheet = deplexed_sample_sheet.append(total_row,
                                                          ignore_index=True)
-    provenance.write_metadata_header(client, filename)
+    provenance.write_provenance_header(__file__, filename)
     deplexed_sample_sheet[list(deplexed_sample_sheet.columns)].to_csv(
         filename, mode='a', sep=delimiter, index=False)
 

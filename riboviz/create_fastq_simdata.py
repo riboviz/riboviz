@@ -455,5 +455,4 @@ def create_fastq_simdata(output_dir):
     sample_sheets.save_deplexed_sample_sheet(
         sample_sheet,
         num_unassigned_reads,
-        os.path.join(deplex_dir, demultiplex_fastq.NUM_READS_FILE),
-        client=__file__)
+        os.path.join(deplex_dir, demultiplex_fastq.NUM_READS_FILE))
