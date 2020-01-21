@@ -218,8 +218,9 @@ LOGGER = logging.getLogger(__name__)
 """ Logger """
 
 
-def process_sample(sample, sample_fastq, r_rna_index, orf_index,
-                   is_trimmed, config, tmp_dir, out_dir, run_config):
+def process_sample(sample, sample_fastq, index_dir, r_rna_index,
+                   orf_index, is_trimmed, config, tmp_dir, out_dir,
+                   run_config):
     """
     Process a single FASTQ sample file.
 
@@ -227,6 +228,8 @@ def process_sample(sample, sample_fastq, r_rna_index, orf_index,
     :type sample: str or unicode
     :param sample_fastq: Sample FASTQ file
     :type sample_fastq: str or unicode
+    :param index_dir: Index directory
+    :type index_dir: str or unicode
     :param r_rna_index: Prefix of rRNA HT2 index files
     :type r_rna_index: str or unicode
     :param orf_index: Prefix of ORF HT2 index files
@@ -282,17 +285,18 @@ def process_sample(sample, sample_fastq, r_rna_index, orf_index,
     r_rna_map_sam = os.path.join(tmp_dir, RRNA_MAP_SAM)
     log_file = os.path.join(run_config.logs_dir,
                             LOG_FORMAT.format(step, "hisat2_rrna.log"))
-    workflow.map_to_r_rna(sample, trim_fq, r_rna_index, r_rna_map_sam,
-                          non_r_rna_trim_fq, log_file, run_config)
+    workflow.map_to_r_rna(sample, trim_fq, index_dir, r_rna_index,
+                          r_rna_map_sam, non_r_rna_trim_fq, log_file,
+                          run_config)
     step += 1
 
     orf_map_sam = os.path.join(tmp_dir, ORF_MAP_SAM)
     unaligned_fq = os.path.join(tmp_dir, UNALIGNED_FQ)
     log_file = os.path.join(run_config.logs_dir,
                             LOG_FORMAT.format(step, "hisat2_orf.log"))
-    workflow.map_to_orf(sample, non_r_rna_trim_fq, orf_index,
-                        orf_map_sam, unaligned_fq, log_file,
-                        run_config)
+    workflow.map_to_orf(sample, non_r_rna_trim_fq, index_dir,
+                        orf_index, orf_map_sam, unaligned_fq,
+                        log_file, run_config)
     step += 1
 
     orf_map_sam_clean = os.path.join(tmp_dir, ORF_MAP_CLEAN_SAM)
@@ -401,9 +405,9 @@ def process_sample(sample, sample_fastq, r_rna_index, orf_index,
     LOGGER.info("Finished processing sample: %s", sample_fastq)
 
 
-def process_samples(samples, in_dir, r_rna_index, orf_index,
-                    is_trimmed, config, tmp_dir, out_dir, run_config,
-                    check_samples_exist=True):
+def process_samples(samples, in_dir, index_dir, r_rna_index,
+                    orf_index, is_trimmed, config, tmp_dir, out_dir,
+                    run_config, check_samples_exist=True):
     """
     Process FASTQ sample files. Any exceptions in the processing of
     any sample are logged but are not thrown from this function.
@@ -412,6 +416,8 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
     :type samples: dict
     :param in_dir: Directory with sample files
     :type in_dir: str or unicode
+    :param index_dir: Index directory
+    :type index_dir: str or unicode
     :param r_rna_index: Prefix of rRNA HT2 index files
     :type r_rna_index: str or unicode
     :param orf_index: Prefix of ORF HT2 index files
@@ -458,9 +464,10 @@ def process_samples(samples, in_dir, r_rna_index, orf_index,
                 workflow.create_directory(directory,
                                           run_config.cmd_file,
                                           run_config.is_dry_run)
-            process_sample(
-                sample, sample_fastq, r_rna_index, orf_index, is_trimmed,
-                config, sample_tmp_dir, sample_out_dir, sample_run_config)
+            process_sample(sample, sample_fastq, index_dir,
+                           r_rna_index, orf_index, is_trimmed, config,
+                           sample_tmp_dir, sample_out_dir,
+                           sample_run_config)
             successes.append(sample)
         except FileNotFoundError as e:
             LOGGER.error("File not found: %s", e.filename)
@@ -541,20 +548,18 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
 
     in_dir = config[params.INPUT_DIR]
     LOGGER.info("Build indices for alignment, if necessary/requested")
-    r_rna_index = os.path.join(
-        index_dir, config[params.RRNA_INDEX_PREFIX])
-    orf_index = os.path.join(
-        index_dir, config[params.ORF_INDEX_PREFIX])
+    r_rna_index = config[params.RRNA_INDEX_PREFIX]
+    orf_index = config[params.ORF_INDEX_PREFIX]
     is_build_indices = value_in_dict(params.BUILD_INDICES, config)
     if is_build_indices:
         r_rna_fasta = config[params.RRNA_FASTA_FILE]
         log_file = os.path.join(logs_dir, "hisat2_build_r_rna.log")
-        workflow.build_indices(r_rna_fasta, r_rna_index, log_file,
-                               run_config)
+        workflow.build_indices(r_rna_fasta, index_dir, r_rna_index,
+                               log_file, run_config)
         orf_fasta = config[params.ORF_FASTA_FILE]
         log_file = os.path.join(logs_dir, "hisat2_build_orf.log")
-        workflow.build_indices(orf_fasta, orf_index, log_file,
-                               run_config)
+        workflow.build_indices(orf_fasta, index_dir, orf_index,
+                               log_file, run_config)
 
     is_sample_files = value_in_dict(params.FQ_FILES, config)
     is_multiplex_files = value_in_dict(params.MULTIPLEX_FQ_FILES, config)
@@ -575,7 +580,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     if is_sample_files:
         samples = config[params.FQ_FILES]
         processed_samples = process_samples(
-            samples, in_dir, r_rna_index, orf_index,
+            samples, in_dir, index_dir, r_rna_index, orf_index,
             False, config, tmp_dir, out_dir, run_config)
         if not processed_samples:
             raise Exception("No samples were processed successfully")
@@ -642,8 +647,9 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
         sample_files = {sample: fastq.get_fastq_filename(sample)
                         for sample in samples}
         processed_samples = process_samples(
-            sample_files, deplex_dir, r_rna_index, orf_index,
-            True, config, tmp_dir, out_dir, run_config, False)
+            sample_files, deplex_dir, index_dir, r_rna_index,
+            orf_index, True, config, tmp_dir, out_dir, run_config,
+            False)
         if not processed_samples:
             raise Exception("No samples were processed successfully")
 
