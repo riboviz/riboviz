@@ -55,13 +55,15 @@ def create_directory(directory, cmd_file, is_dry_run=False):
             os.makedirs(directory)
 
 
-def build_indices(fasta, ht_prefix, log_file, run_config):
+def build_indices(fasta, index_dir, ht_prefix, log_file, run_config):
     """
     Build indices for alignment using hisat2-build.
     Index files have name <ht_prefix>.<N>.ht2.
 
     :param fasta: FASTA file to be indexed
     :type fasta: str or unicode
+    :param index_dir: Index directory
+    :type index_dir: str or unicode
     :param ht_prefix: Prefix of HT2 index files
     :type ht_prefix: str or unicode
     :param log_file: Log file
@@ -80,7 +82,8 @@ def build_indices(fasta, ht_prefix, log_file, run_config):
     cmd = ["hisat2-build", "--version"]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
-    cmd = ["hisat2-build", fasta, ht_prefix]
+    index_file_path = os.path.join(index_dir, ht_prefix)
+    cmd = ["hisat2-build", fasta, index_file_path]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     if not run_config.is_dry_run:
@@ -88,7 +91,7 @@ def build_indices(fasta, ht_prefix, log_file, run_config):
                                     "hisat2-build",
                                     "Build indices for alignment",
                                     [fasta],
-                                    [ht_prefix])
+                                    [os.path.join(index_file_path + "*")])
 
 
 def cut_adapters(sample_id, adapter, original_fq, trimmed_fq,
@@ -191,8 +194,8 @@ def extract_barcodes_umis(sample_id, original_fq, extract_fq, regexp,
                                     sample_id)
 
 
-def map_to_r_rna(sample_id, fastq, index, mapped_sam, unmapped_fastq,
-                 log_file, run_config):
+def map_to_r_rna(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
+                 unmapped_fastq, log_file, run_config):
     """
     Remove rRNA or other contaminating reads by alignment to rRNA
     index files using hisat2.
@@ -201,8 +204,10 @@ def map_to_r_rna(sample_id, fastq, index, mapped_sam, unmapped_fastq,
     :type sample_id: str or unicode
     :param fastq: FASTQ file
     :type fastq: str or unicode
-    :param index: rRNA index file for alignment
-    :type index: str or unicode
+    :param index_dir: Index directory
+    :type index_dir: str or unicode
+    :param ht_prefix: Prefix of HT2 rRNA index files for alignment
+    :type ht_prefix: str or unicode
     :param mapped_sam: SAM file for mapped reads
     :type mapped_sam: str or unicode
     :param unmapped_fastq: FASTQ file for unmapped reads
@@ -222,8 +227,9 @@ def map_to_r_rna(sample_id, fastq, index, mapped_sam, unmapped_fastq,
     cmd = ["hisat2", "--version"]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    index_file_path = os.path.join(index_dir, ht_prefix)
     cmd = ["hisat2", "-p", str(run_config.nprocesses), "-N", "1",
-           "--un", unmapped_fastq, "-x", index,
+           "--un", unmapped_fastq, "-x", index_file_path,
            "-S", mapped_sam, "-U", fastq]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
@@ -232,13 +238,13 @@ def map_to_r_rna(sample_id, fastq, index, mapped_sam, unmapped_fastq,
             run_config.workflow_record_file,
             "hisat2",
             "Remove rRNA or other contaminating reads by alignment to rRNA index files",
-            [fastq, index],
+            [fastq, os.path.join(index_file_path + "*")],
             [unmapped_fastq, mapped_sam],
             sample_id)
 
 
-def map_to_orf(sample_id, fastq, index, mapped_sam, unmapped_fastq,
-               log_file, run_config):
+def map_to_orf(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
+               unmapped_fastq, log_file, run_config):
     """
     Align remaining reads to ORFs index files using hisat2.
 
@@ -246,8 +252,10 @@ def map_to_orf(sample_id, fastq, index, mapped_sam, unmapped_fastq,
     :type sample_id: str or unicode
     :param fastq: FASTQ file
     :type fastq: str or unicode
-    :param index: ORF index file for alignment
-    :type index: str or unicode
+    :param index_dir: Index directory
+    :type index_dir: str or unicode
+    :param ht_prefix: Prefix of HT2 ORF index files for alignment
+    :type ht_prefix: str or unicode
     :param mapped_sam: SAM file for mapped reads
     :type mapped_sam: str or unicode
     :param unmapped_fastq: FASTQ file for unmapped reads
@@ -267,10 +275,11 @@ def map_to_orf(sample_id, fastq, index, mapped_sam, unmapped_fastq,
     cmd = ["hisat2", "--version"]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    index_file_path = os.path.join(index_dir, ht_prefix)
     cmd = ["hisat2", "-p", str(run_config.nprocesses), "-k", "2",
            "--no-spliced-alignment", "--rna-strandness",
            "F", "--no-unal", "--un", unmapped_fastq,
-           "-x", index, "-S", mapped_sam,
+           "-x", index_file_path, "-S", mapped_sam,
            "-U", fastq]
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
@@ -279,7 +288,7 @@ def map_to_orf(sample_id, fastq, index, mapped_sam, unmapped_fastq,
             run_config.workflow_record_file,
             "hisat2",
             "Align remaining reads to ORFs index files",
-            [fastq, index],
+            [fastq, os.path.join(index_file_path + "*")],
             [unmapped_fastq, mapped_sam],
             sample_id)
 
