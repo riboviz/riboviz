@@ -632,15 +632,18 @@ def generate_stats_figs(sample_id, h5_file, out_dir, config, log_file,
     if value_in_dict(params.COUNT_THRESHOLD, config):
         cmd.append("--count-threshold=" +
                    str(config[params.COUNT_THRESHOLD]))
+    pre_run_files = os.listdir(out_dir)
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     if not run_config.is_dry_run:
+        post_run_files = os.listdir(out_dir)
         workflow_record.record_step(
             run_config.workflow_record_file,
             workflow_r.GENERATE_STATS_FIGS_R,
             "Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets",
             input_files + [h5_file, config[params.ORF_FASTA_FILE]],
-            [out_dir],  # TODO
+            [os.path.join(out_dir, file_name)
+             for file_name in list(set(post_run_files) - set(pre_run_files))],
             sample_id)
 
 
