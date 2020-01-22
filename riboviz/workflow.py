@@ -5,6 +5,7 @@ RiboViz workflow-related constants, types and functions.
 
 import collections
 import errno
+import glob
 import logging
 import os
 import os.path
@@ -78,20 +79,25 @@ def build_indices(fasta, index_dir, ht_prefix, log_file, run_config):
     if not os.path.exists(fasta):
         raise FileNotFoundError(
             errno.ENOENT, os.strerror(errno.ENOENT), fasta)
-    # Run --version as hisat2-build does not log its own version.
+    # Explicitly invoke --version as hisat2-build does not log its own
+    # version during a processing run.
     cmd = ["hisat2-build", "--version"]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     index_file_path = os.path.join(index_dir, ht_prefix)
     cmd = ["hisat2-build", fasta, index_file_path]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     if not run_config.is_dry_run:
+        index_files = glob.glob(index_file_path + "*")
+        index_files.sort()
         workflow_record.record_step(run_config.workflow_record_file,
                                     "hisat2-build",
                                     "Build indices for alignment",
                                     [fasta],
-                                    [os.path.join(index_file_path + "*")])
+                                    index_files)
 
 
 def cut_adapters(sample_id, adapter, original_fq, trimmed_fq,
@@ -118,17 +124,18 @@ def cut_adapters(sample_id, adapter, original_fq, trimmed_fq,
     LOGGER.info("Cut out sequencing library adapters. Log: %s", log_file)
     cmd = ["cutadapt", "--trim-n", "-O", "1", "-m", "5",
            "-a", adapter, "-o", trimmed_fq, original_fq]
-    # cutadapt allows all available processors to be requested.
-    cmd += ["-j", str(0)]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    cmd += ["-j", str(0)]  # Request all available processors
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     if not run_config.is_dry_run:
-        workflow_record.record_step(run_config.workflow_record_file,
-                                    "cutadapt",
-                                    "Cut out sequencing library adapters",
-                                    [original_fq],
-                                    [trimmed_fq],
-                                    sample_id)
+        workflow_record.record_step(
+            run_config.workflow_record_file,
+            "cutadapt",
+            "Cut out sequencing library adapters",
+            [original_fq],
+            [trimmed_fq],
+            sample_id)
 
 
 def extract_barcodes_umis(sample_id, original_fq, extract_fq, regexp,
@@ -182,9 +189,10 @@ def extract_barcodes_umis(sample_id, original_fq, extract_fq, regexp,
            "--extract-method=regex", "-S", extract_fq]
     cmd_to_log = ["--bc-pattern=" + "\"" + regexp + "\""
                   if c == pattern_parameter else c for c in cmd]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run,
-        cmd_to_log)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run,
+                                     cmd_to_log)
     if not run_config.is_dry_run:
         workflow_record.record_step(run_config.workflow_record_file,
                                     "umitools extract",
@@ -223,22 +231,27 @@ def map_to_r_rna(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
     LOGGER.info(
         "Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: %s",
         log_file)
-    # Run --version as hisat2 does not log its own version.
+    # Explicitly invoke --version as hisat2 does not log its own
+    # version during a processing run.
     cmd = ["hisat2", "--version"]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     index_file_path = os.path.join(index_dir, ht_prefix)
     cmd = ["hisat2", "-p", str(run_config.nprocesses), "-N", "1",
            "--un", unmapped_fastq, "-x", index_file_path,
            "-S", mapped_sam, "-U", fastq]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     if not run_config.is_dry_run:
+        index_files = glob.glob(index_file_path + "*")
+        index_files.sort()
         workflow_record.record_step(
             run_config.workflow_record_file,
             "hisat2",
             "Remove rRNA or other contaminating reads by alignment to rRNA index files",
-            [fastq, os.path.join(index_file_path + "*")],
+            [fastq] + index_files,
             [unmapped_fastq, mapped_sam],
             sample_id)
 
@@ -271,24 +284,29 @@ def map_to_orf(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
     LOGGER.info(
         "Align remaining reads to ORFs index files using hisat2. Log: %s",
         log_file)
-    # Run --version as hisat2 does not log its own version.
+    # Explicitly invoke --version as hisat2 does not log its own
+    # version during a processing run.
     cmd = ["hisat2", "--version"]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     index_file_path = os.path.join(index_dir, ht_prefix)
     cmd = ["hisat2", "-p", str(run_config.nprocesses), "-k", "2",
            "--no-spliced-alignment", "--rna-strandness",
            "F", "--no-unal", "--un", unmapped_fastq,
            "-x", index_file_path, "-S", mapped_sam,
            "-U", fastq]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     if not run_config.is_dry_run:
+        index_files = glob.glob(index_file_path + "*")
+        index_files.sort()
         workflow_record.record_step(
             run_config.workflow_record_file,
             "hisat2",
             "Align remaining reads to ORFs index files",
-            [fastq, os.path.join(index_file_path + "*")],
+            [fastq] + index_files,
             [unmapped_fastq, mapped_sam],
             sample_id)
 
@@ -353,16 +371,19 @@ def sort_bam(sample_id, sam_file, bam_file, log_file, run_config):
     """
     LOGGER.info(
         "Convert SAM to BAM and sort on genome. Log: %s", log_file)
-    # Run --version as samtools does not log its own version.
+    # Explicitly invoke --version as samtools does not log its own
+    # version during a processing run.
     cmd = ["samtools", "--version"]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     cmd_view = ["samtools", "view", "-b", sam_file]
     cmd_sort = ["samtools", "sort", "-@", str(run_config.nprocesses),
                 "-O", "bam", "-o", bam_file, "-"]
-    process_utils.run_logged_pipe_command(
-        cmd_view, cmd_sort, log_file, run_config.cmd_file,
-        run_config.is_dry_run)
+    process_utils.run_logged_pipe_command(cmd_view, cmd_sort,
+                                          log_file,
+                                          run_config.cmd_file,
+                                          run_config.is_dry_run)
     if not run_config.is_dry_run:
         workflow_record.record_step(
             run_config.workflow_record_file,
@@ -389,13 +410,16 @@ def index_bam(sample_id, bam_file, log_file, run_config):
     :raise AssertionError: if samtools returns non-zero exit code
     """
     LOGGER.info("Index BAM file. Log: %s", log_file)
-    # Run --version as samtools does not log its own version.
+    # Explicitly invoke --version as samtools does not log its own
+    # version during a processing run.
     cmd = ["samtools", "--version"]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     cmd = ["samtools", "index", bam_file]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     if not run_config.is_dry_run:
         workflow_record.record_step(run_config.workflow_record_file,
                                     "samtools index",
@@ -426,15 +450,17 @@ def group_umis(sample_id, bam_file, groups_file, log_file, run_config):
     LOGGER.info("Idenfity UMI groups. Log: %s", log_file)
     cmd = ["umi_tools", "group", "-I", bam_file,
            "--group-out", groups_file]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     if not run_config.is_dry_run:
-        workflow_record.record_step(run_config.workflow_record_file,
-                                    "umi_tools group",
-                                    "Identify UMI groups",
-                                    [bam_file],
-                                    [groups_file],
-                                    sample_id)
+        workflow_record.record_step(
+            run_config.workflow_record_file,
+            "umi_tools group",
+            "Identify UMI groups",
+            [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file)],
+            [groups_file],
+            sample_id)
 
 
 def deduplicate_umis(sample_id, bam_file, dedup_bam_file,
@@ -461,15 +487,18 @@ def deduplicate_umis(sample_id, bam_file, dedup_bam_file,
     LOGGER.info("Deduplicate UMIs. Log: %s", log_file)
     cmd = ["umi_tools", "dedup", "-I", bam_file, "-S", dedup_bam_file,
            "--output-stats=" + stats_prefix]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     if not run_config.is_dry_run:
-        workflow_record.record_step(run_config.workflow_record_file,
-                                    "umi_tools dedup",
-                                    "Deduplicate UMIs",
-                                    [bam_file],
-                                    [dedup_bam_file, stats_prefix],
-                                    sample_id)
+        stats_files = glob.glob(stats_prefix + "*")
+        workflow_record.record_step(
+            run_config.workflow_record_file,
+            "umi_tools dedup",
+            "Deduplicate UMIs",
+            [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file)],
+            [dedup_bam_file] + stats_files,
+            sample_id)
 
 
 def make_bedgraph(sample_id, bam_file, bedgraph_file, is_plus,
@@ -502,21 +531,24 @@ def make_bedgraph(sample_id, bam_file, bedgraph_file, is_plus,
     LOGGER.info(
         "Calculate transcriptome coverage for %s strand and save as a bedgraph. Log: %s",
         strand, log_file)
-    # Run --version as bedtools does not log its own version.
+    # Explicitly invoke --version as bedtools does not log its own
+    # version during a processing run.
     cmd = ["bedtools", "--version"]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     cmd = ["bedtools", "genomecov", "-ibam", bam_file,
            "-trackline", "-bga", "-5", "-strand", strand]
-    process_utils.run_logged_redirect_command(
-        cmd, bedgraph_file, log_file, run_config.cmd_file,
-        run_config.is_dry_run)
+    process_utils.run_logged_redirect_command(cmd, bedgraph_file,
+                                              log_file,
+                                              run_config.cmd_file,
+                                              run_config.is_dry_run)
     if not run_config.is_dry_run:
         workflow_record.record_step(
             run_config.workflow_record_file,
             "bedtools",
             "Calculate transcriptome coverage and save as a bedgraph",
-            [bam_file],
+            [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file)],
             [bedgraph_file],
             sample_id)
 
@@ -569,14 +601,15 @@ def bam_to_h5(sample_id, bam_file, h5_file, orf_gff_file, config,
            "--orf-gff-file=" + orf_gff_file,
            "--is-riboviz-gff=" + str(config[params.IS_RIBOVIZ_GFF]),
            "--stop-in-cds=" + str(config[params.STOP_IN_CDS])]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     if not run_config.is_dry_run:
         workflow_record.record_step(
             run_config.workflow_record_file,
             workflow_r.BAM_TO_H5_R,
             "Make length-sensitive alignments in H5 format",
-            [bam_file, orf_gff_file],
+            [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file), orf_gff_file],
             [h5_file],
             sample_id)
 
@@ -622,13 +655,14 @@ def generate_stats_figs(sample_id, h5_file, out_dir, config, log_file,
            "--rpf=" + str(config[params.RPF]),
            "--output-dir=" + out_dir,
            "--do-pos-sp-nt-freq=" + str(config[params.DO_POS_SP_NT_FREQ])]
+    # Add optional flags and values.
     flags = zip([params.T_RNA_FILE, params.CODON_POSITIONS_FILE,
                  params.FEATURES_FILE, params.ORF_GFF_FILE,
                  params.ASITE_DISP_LENGTH_FILE],
                 ["t-rna-file", "codon-positions-file",
                  "features-file", "orf-gff-file",
                  "asite-disp-length-file"])
-    input_files = []
+    flag_files = []
     for (flag, parameter) in flags:
         if value_in_dict(flag, config):
             flag_file = config[flag]
@@ -637,27 +671,27 @@ def generate_stats_figs(sample_id, h5_file, out_dir, config, log_file,
                                         os.strerror(errno.ENOENT),
                                         flag_file)
             cmd.append("--" + parameter + "=" + flag_file)
-            input_files.append(flag_file)
+            flag_files.append(flag_file)
     if value_in_dict(params.COUNT_THRESHOLD, config):
         cmd.append("--count-threshold=" +
                    str(config[params.COUNT_THRESHOLD]))
     pre_run_files = os.listdir(out_dir)
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     if not run_config.is_dry_run:
         post_run_files = os.listdir(out_dir)
         workflow_record.record_step(
             run_config.workflow_record_file,
             workflow_r.GENERATE_STATS_FIGS_R,
             "Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets",
-            input_files + [h5_file, config[params.ORF_FASTA_FILE]],
+            [h5_file, config[params.ORF_FASTA_FILE]] + flag_files,
             [os.path.join(out_dir, file_name)
              for file_name in list(set(post_run_files) - set(pre_run_files))],
             sample_id)
 
 
-def collate_tpms(out_dir, samples, are_samples_in_sub_dirs, log_file,
-                 run_config, tpms_file=None):
+def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
     """
     Collate TPMs across sample results using collate_tpms.R.
 
@@ -665,9 +699,6 @@ def collate_tpms(out_dir, samples, are_samples_in_sub_dirs, log_file,
     :type out_dir: str or unicode
     :param samples: Sample names
     :type samples: list(str or unicode)
-    :param are_samples_in_sub_dirs: Are samples in sample-specific
-    subdirectories of output directory?
-    :type are_samples_in_sub_dirs: bool
     :param log_file: Log file
     :type log_file: str or unicode
     :param run_config: Run-related configuration
@@ -682,19 +713,24 @@ def collate_tpms(out_dir, samples, are_samples_in_sub_dirs, log_file,
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts,
                         workflow_r.COLLATE_TPMS_R),
-           "--sample-subdirs=" + str(are_samples_in_sub_dirs),
+           "--sample-subdirs=" + str(True),
            "--output-dir=" + out_dir]
     if tpms_file is not None:
         cmd.append("--tpms-file=" + tpms_file)
     cmd += samples
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     if not run_config.is_dry_run:
-        workflow_record.record_step(run_config.workflow_record_file,
-                                    workflow_r.COLLATE_TPMS_R,
-                                    "Collate TPMs across sample results",
-                                    [out_dir],  # TODO
-                                    [tpms_file])  # TODO what if None?
+        if tpms_file is None:
+            tpms_file = workflow_r.TPMS_COLLATED_TSV
+        tpms_file = os.path.join(out_dir, tpms_file)
+        workflow_record.record_step(
+            run_config.workflow_record_file,
+            workflow_r.COLLATE_TPMS_R,
+            "Collate TPMs across sample results",
+            [os.path.join(out_dir, sample, workflow_r.TPMS_TSV) for sample in samples],
+            [tpms_file])
 
 
 def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
@@ -721,8 +757,9 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
     cmd = ["python", "-m", demultiplex_fastq_module.__name__,
            "-1", fastq, "-s", barcodes_file, "-o", deplex_dir,
            "-m", "2"]
-    process_utils.run_logged_command(
-        cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
+    process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
     if not run_config.is_dry_run:
         workflow_record.record_step(run_config.workflow_record_file,
                                     demultiplex_fastq_module.__name__,
