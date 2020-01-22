@@ -655,8 +655,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
             raise Exception("No samples were processed successfully")
 
     log_file = os.path.join(logs_dir, "collate_tpms.log")
-    workflow.collate_tpms(
-        out_dir, processed_samples, True, log_file, run_config)
+    workflow.collate_tpms(out_dir, processed_samples, log_file, run_config)
 
     LOGGER.info("Completed")
 
