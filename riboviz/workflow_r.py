@@ -40,5 +40,7 @@ THREE_NT_FRAME_BY_GENE_TSV = "3ntframe_bygene.tsv"
 THREE_NT_FRAME_PROP_BY_GENE_PDF = "3ntframe_propbygene.pdf"
 """ File output by generate_stats_figs.R """
 
+TPMS_TSV = "tpms.tsv"
+""" File output by generate_stats_figs.R """
 TPMS_COLLATED_TSV = "TPMs_collated.tsv"
 """ File output by collate_tpms.R """
