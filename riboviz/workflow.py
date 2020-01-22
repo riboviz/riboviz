@@ -675,19 +675,18 @@ def generate_stats_figs(sample_id, h5_file, out_dir, config, log_file,
     if value_in_dict(params.COUNT_THRESHOLD, config):
         cmd.append("--count-threshold=" +
                    str(config[params.COUNT_THRESHOLD]))
-    pre_run_files = os.listdir(out_dir)
     process_utils.run_logged_command(cmd, log_file,
                                      run_config.cmd_file,
                                      run_config.is_dry_run)
     if not run_config.is_dry_run:
-        post_run_files = os.listdir(out_dir)
+        tsv_files = glob.glob(os.path.join(out_dir,"*.tsv"))
+        pdf_files = glob.glob(os.path.join(out_dir,"*.pdf"))
         workflow_record.record_step(
             run_config.workflow_record_file,
             workflow_r.GENERATE_STATS_FIGS_R,
             "Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets",
             [h5_file, config[params.ORF_FASTA_FILE]] + flag_files,
-            [os.path.join(out_dir, file_name)
-             for file_name in list(set(post_run_files) - set(pre_run_files))],
+            tsv_files + pdf_files,
             sample_id)
 
 
@@ -761,8 +760,9 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
                                      run_config.cmd_file,
                                      run_config.is_dry_run)
     if not run_config.is_dry_run:
+        deplex_files = glob.glob(os.path.join(deplex_dir,"*.*"))
         workflow_record.record_step(run_config.workflow_record_file,
                                     demultiplex_fastq_module.__name__,
                                     "Demultiplex reads",
                                     [fastq, barcodes_file],
-                                    [deplex_dir])  # TODO
+                                    deplex_files)
