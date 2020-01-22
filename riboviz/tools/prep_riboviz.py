@@ -517,10 +517,11 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
         workflow_record_file = config[params.WORKFLOW_RECORD_FILE]
     else:
         workflow_record_file = DEFAULT_WORKFLOW_RECORD_FILE
-    if os.path.exists(workflow_record_file):
-        os.remove(workflow_record_file)
-    LOGGER.info("Workflow record file: %s", workflow_record_file)
-    workflow_record.create_record_file(workflow_record_file)
+    if not is_dry_run:
+        if os.path.exists(workflow_record_file):
+            os.remove(workflow_record_file)
+        LOGGER.info("Workflow record file: %s", workflow_record_file)
+        workflow_record.create_record_file(workflow_record_file)
 
     if value_in_dict(params.NUM_PROCESSES, config):
         nprocesses = int(config[params.NUM_PROCESSES])
