@@ -1,112 +1,88 @@
 """
-utils.py test suite.
+utils tests.
 """
-from riboviz.utils import barcode_matches
-from riboviz.utils import hamming_distance
+import pytest
+from riboviz.utils import list_to_str
+from riboviz.utils import value_in_dict
 
 
-def test_hamming_distance_empty():
+def test_list_to_str_empty():
     """
-    Test hamming_distance with empty strings.
+    Test list_to_str with an empty list.
     """
-    assert hamming_distance("", "") == 0
+    list_str = list_to_str([])
+    assert list_str == "", "Unexpected string {}".format(list_str)
 
 
-def test_hamming_distance_equal_characters():
+def test_list_to_str():
     """
-    Test hamming_distance with equal characters.
+    Test list_to_str with a list of str.
     """
-    assert hamming_distance("A", "A") == 0
+    list_str = list_to_str(["ab", "cd", "ef"])
+    assert list_str == "ab cd ef", "Unexpected string {}".format(list_str)
 
 
-def test_hamming_distance_nonequal_characters():
+def test_list_to_str_int():
     """
-    Test hamming_distance with non-equal characters.
+    Test list_to_str with a list of int.
     """
-    assert hamming_distance("A", "T") == 1
+    list_str = list_to_str([1, 2, 3])
+    assert list_str == "1 2 3", "Unexpected string {}".format(list_str)
 
 
-def test_hamming_distance_equal_strings():
+@pytest.mark.parametrize("value", [True, 1, [1], {"a": 1}])
+@pytest.mark.parametrize("allow_false_empty", [False, True])
+def test_value_in_dict(value, allow_false_empty):
     """
-    Test hamming_distance with equal strings.
+    Test value_in_dict returns True if a key is present and has one of
+    the given values regardless of the value of allow_false_empty.
+
+    :param value: value for key
+    :type value: -
+    :param allow_false_empty: Value for allow_false_empty parameter of
+    value_in_dict
+    :type allow_false_empty: bool
     """
-    assert hamming_distance("GATTACCA", "GATTACCA") == 0
+    values = {"A": 1, "B": value, "C": 3}
+    assert value_in_dict("B", values, allow_false_empty)
 
 
-def test_hamming_distance_one():
+def test_value_in_dict_no_key():
     """
-    Test hamming_distance with strings 1 apart.
+    Test value_in_dict with a non-existent key always returns False.
     """
-    assert hamming_distance("GATTACCA", "GATTGCCA") == 1
+    values = {"A": 1, "C": 3}
+    assert not value_in_dict("B", values)
 
 
-def test_hamming_distance_eight():
+@pytest.mark.parametrize("allow_false_empty", [False, True])
+def test_value_in_dict_none(allow_false_empty):
     """
-    Test hamming_distance with strings 8 apart.
+    Test value_in_dict returns False if a key has value None
+    regardless of the value of allow_false_empty.
+
+    :param allow_false_empty: Value for allow_false_empty parameter of
+    value_in_dict
+    :type allow_false_empty: bool
     """
-    assert hamming_distance("GATTACCA", "CTAATGGT") == 8
+    values = {"A": 1, "B": None, "C": 3}
+    assert not value_in_dict("B", values, allow_false_empty)
 
 
-def test_barcode_matches():
+@pytest.mark.parametrize("value", [False, [], {}])
+@pytest.mark.parametrize("allow_false_empty", [False, True])
+def test_value_in_dict_allow_false_empty(value, allow_false_empty):
     """
-    Test barcode_matches with default mismatches and delimiter.
-    """
-    record = "@X1:Tag_AAA_ 1:N:0:XXXXXXXX"
-    barcode = "AAA"
-    assert barcode_matches(record, barcode)
+    Test value_in_dict returns the same value as allow_false_empty if
+    a key is present and has one of the given values.
 
-
-def test_barcode_matches_false():
+    :param value: value for key
+    :type value: -
+    :param allow_false_empty: Value for allow_false_empty parameter of
+    value_in_dict
+    :type allow_false_empty: bool
     """
-    Test barcode_matches with a non-matching record.
-    """
-    record = "@X1:Tag_AAA_ 1:N:0:XXXXXXXX"
-    barcode = "AAC"
-    assert not barcode_matches(record, barcode)
-
-
-def test_barcode_matches_delimiter():
-    """
-    Test barcode_matches with a non-default delimiter.
-    """
-    record = "@X1:Tag.AAA. 1:N:0:XXXXXXXX"
-    barcode = "AAA"
-    assert barcode_matches(record, barcode, delimiter=".")
-
-
-def test_barcode_matches_no_barcode():
-    """
-    Test barcode_matches with a record with no barcode.
-    """
-    record = "@X1:Tag 1:N:0:XXXXXXXX"
-    barcode = "AAA"
-    assert not barcode_matches(record, barcode)
-
-
-def test_barcode_matches_one_mismatch():
-    """
-    Test barcode_matches with 1 allowed mismatch.
-    """
-    record = "@X1:Tag_AAC_ 1:N:0:XXXXXXXX"
-    barcode = "AAA"
-    assert barcode_matches(record, barcode, 1)
-
-
-def test_barcode_matches_one_mismatch_false():
-    """
-    Test barcode_matches with 1 allowed mismatch and a non-matching
-    record.
-    """
-    record = "@X1:Tag_ACC_ 1:N:0:XXXXXXXX"
-    barcode = "AAA"
-    assert not barcode_matches(record, barcode, 1)
-
-
-def test_barcode_matches_two_mismatch():
-    """
-    Test barcode_matches with 1 allowed mismatch and a non-matching
-    record.
-    """
-    record = "@X1:Tag_ACC_ 1:N:0:XXXXXXXX"
-    barcode = "AAA"
-    assert barcode_matches(record, barcode, 2)
+    values = {"A": 1, "B": value, "C": 3}
+    is_value_in_dict = value_in_dict("B", values, allow_false_empty)
+    assert (not is_value_in_dict or allow_false_empty) and\
+           (is_value_in_dict or not allow_false_empty)  # NXOR

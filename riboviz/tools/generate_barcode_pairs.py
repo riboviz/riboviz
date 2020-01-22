@@ -13,7 +13,7 @@ Example:
     python -m riboviz.tools.generate_barcode_pairs pairs.tsv 3
 """
 import sys
-from riboviz.utils import generate_barcode_pairs
+from riboviz.barcodes_umis import generate_barcode_pairs
 
 
 if __name__ == "__main__":

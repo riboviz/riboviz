@@ -54,6 +54,19 @@ Install:
 $ conda install -y pytest
 ```
 
+### pytest-cov
+
+Web sites:
+
+* [pytest-cov](https://pytest-cov.readthedocs.io)
+* [GitHub](https://github.com/pytest-dev/pytest-cov)
+
+Install:
+
+```console
+$ conda install -y pytest-cov
+```
+
 ---
 
 ## Install R packages for developers
@@ -320,6 +333,13 @@ Run all tests (excluding regression tests):
 
 ```console
 $ pytest -v --ignore-glob="*regression*"
+```
+
+Run all tests and generate test coverage report (including lines that were not invoked):
+
+```console
+$ pytest --cov-config=.coveragerc --cov-report term-missing \
+    --cov=riboviz --ignore-glob="*regression*"
 ```
 
 ---

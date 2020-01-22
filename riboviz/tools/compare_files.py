@@ -3,7 +3,7 @@
 """
 Command-line utility to compare two files.
 
-Usage: python -m compare_files <FILE> <FILE>
+Usage: python -m riboviz.tools.compare_files <FILE> <FILE>
 """
 import sys
 import riboviz.validation
