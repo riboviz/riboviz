@@ -663,7 +663,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
             workflow_record.validate_records(
                 workflow_record_file, [index_dir, tmp_dir, out_dir])
         except AssertionError as e:
-            LOGGER.warn(e)
+            LOGGER.warning(e)
 
     LOGGER.info("Completed")
 
