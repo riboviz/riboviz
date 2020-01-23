@@ -228,3 +228,46 @@ demultiplex_fastq.log
   13_generate_stats_figs.log
 collate_tpms.log
 ```
+
+---
+
+## Record of files read and written
+
+`prep_riboviz.py` will capture information about the files read and written at each step of the workflow. The file location is specified via a `workflow_record_file` configuration parameter.
+
+The workflow record file is a tab-separated values (TSV) file with the following columns:
+
+* `SampleName`: Name of the sample to which this file belongs. This is an empty value if the step was not sample-specific (e.g. creating index files or demultiplexing a multiplexed FASTQ file).
+* `Description`: Human-readable description of the step at which this file was read or written.
+* `Program`: Program that read/wrote the file. The special token `input` denotes input files.
+* `File`: Path to file read/written.
+* `Read/Write`: `read` if the file was read, `write` if the file was written.
+
+For example:
+
+```console
+SampleName    Description    Program    File    Read/Write
+...
+    rRNA FASTA file    input    vignette/input/yeast_rRNA_R64-1-1.fa    read
+    Build indices for alignment    hisat2-build    vignette/input/yeast_rRNA_R64-1-1.fa    read
+    Build indices for alignment    hisat2-build    vignette/index/yeast_rRNA.1.ht2    write
+...
+    ORF FASTA file    input    vignette/input/yeast_YAL_CDS_w_250utrs.fa    read
+    Build indices for alignment    hisat2-build    vignette/input/yeast_YAL_CDS_w_250utrs.fa    read
+    Build indices for alignment    hisat2-build    vignette/index/YAL_CDS_w_250.1.ht2    write
+...
+WTnone    Cut out sequencing library adapters    cutadapt    vignette/input/SRR1042855_s1mi.fastq.gz    read
+WTnone    Cut out sequencing library adapters    cutadapt    vignette/tmp/WTnone/trim.fq    write
+WTnone    Remove rRNA or other contaminating reads by alignment to rRNA index files    hisat2    vignette/tmp/WTnone/trim.fq    read
+WTnone    Remove rRNA or other contaminating reads by alignment to rRNA index files    hisat2    vignette/index/yeast_rRNA.1.ht2    read
+WTnone    Remove rRNA or other contaminating reads by alignment to rRNA index files    hisat2    vignette/index/yeast_rRNA.2.ht2    read
+...
+WTnone    Align remaining reads to ORFs index files    hisat2    vignette/tmp/WTnone/nonrRNA.fq    read
+WTnone    Align remaining reads to ORFs index files    hisat2    vignette/index/YAL_CDS_w_250.1.ht2    read
+WTnone    Align remaining reads to ORFs index files    hisat2    vignette/index/YAL_CDS_w_250.2.ht2    read
+...
+WTnone    Trim 5' mismatches from reads and remove reads with more than 2 mismatches    riboviz.tools.trim_5p_mismatch    vignette/tmp/WTnone/orf_map.sam    read
+WTnone    Trim 5' mismatches from reads and remove reads with more than 2 mismatches    riboviz.tools.trim_5p_mismatch    vignette/tmp/WTnone/orf_map_clean.sam    write
+WTnone    Trim 5' mismatches from reads and remove reads with more than 2 mismatches    riboviz.tools.trim_5p_mismatch    vignette/tmp/WTnone/trim_5p_mismatch.tsvwrite
+...
+```
