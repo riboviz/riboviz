@@ -24,6 +24,11 @@ WRITE = "write"
 """ Write file value """
 HEADER = [SAMPLE_NAME, DESCRIPTION, PROGRAM, FILE, READ_WRITE]
 """ Workflow record file header """
+INPUT = "input"
+"""
+Special value for PROGRAM field to denote input files that do not
+originate from any step in a workflow
+"""
 
 
 def create_record_file(file_name, delimiter="\t"):
