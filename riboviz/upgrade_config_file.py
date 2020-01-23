@@ -40,7 +40,7 @@ Parameters added between release 1.0.0, 9 Oct 2017, 83027ef and 1.1.0,
 UPDATES_11_DEVELOP = {
     params.LOGS_DIR: "vignette/logs",
     params.CMD_FILE: "run_riboviz_vignette.sh",
-    params.WORKFLOW_RECORD_FILE: "workflow_record_vignette.tsv",
+    params.WORKFLOW_FILES_LOG_FILE: "workflow_files_vignette.tsv",
     params.T_RNA_FILE: "data/yeast_tRNAs.tsv",
     params.CODON_POSITIONS_FILE: "data/yeast_codon_pos_i200.RData",
     params.COUNT_THRESHOLD: 64,

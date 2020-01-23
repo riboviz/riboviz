@@ -1,9 +1,9 @@
-dir_in: data/simdata/ # Input directory
-dir_out: vignette/simdata_umi_output # Output directory
-dir_tmp: vignette/simdata_umi_tmp # Intermediate files directory
-dir_logs: vignette/simdata_umi_logs # Log files directory
-cmd_file: run_riboviz_simdata_umi.sh # Bash commands file
-workflow_record_file: workflow_record_simdata_umi.tsv # Workflow file log
+dir_in: vignette/input # Input directory
+dir_out: vignette/output # Output directory
+dir_tmp: vignette/tmp # Intermediate files directory
+dir_logs: vignette/logs # Log files directory
+cmd_file: run_riboviz_vignette.sh # Bash commands file
+workflow_files_log_file: workflow_files_vignette.tsv # Workflow file log
 rrna_fasta_file: vignette/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning to
 orf_fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa # ORF file to align to
 orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3 # GFF2/GFF3 file for ORFs
@@ -14,19 +14,17 @@ dir_index: vignette/index # Built indices directory
 rrna_index_prefix: yeast_rRNA # rRNA index file prefix, relative to dir_index
 orf_index_prefix: YAL_CDS_w_250 # ORF index file prefix, relative to dir_index
 fq_files: # fastq files to be processed, relative to dir_in
-  umi5_umi3: umi5_umi3_umi_adaptor.fastq
+  WTnone: SRR1042855_s1mi.fastq.gz
+  WT3AT: SRR1042864_s1mi.fastq.gz
+  NotHere: example_missing_file.fastq.gz # Test case for missing file
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
-extract_umis: TRUE # Extract UMIs if TRUE
-dedup_umis: TRUE # Extract UMIs and deduplicate reads if TRUE
-group_umis: TRUE # Summarise UMI groups before and after deduplication, if TRUE
-umi_regexp: ^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$ # UMI-tools-compliant regular expression to extract UMIs
 num_processes: 1 # Number of processes to parallelize over
 min_read_length: 10 # Minimum read length in H5 output
 max_read_length: 50 # Maximum read length in H5 output
 buffer: 250 # Length of flanking region around the CDS
 primary_id: Name # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
 secondary_id: NULL # Secondary gene IDs to access the data (COX1, EFB1, etc.)
-dataset: simdata_umi # Dataset name
+dataset: vignette # Dataset name
 stop_in_cds: FALSE # Are stop codons part of the CDS annotations in GFF?
 is_test_run: FALSE # Is this a test run
 rpf: TRUE # Is the dataset an RPF or mRNA dataset?
@@ -35,5 +33,5 @@ features_file: data/yeast_features.tsv # Features to correlate with ORFs
 do_pos_sp_nt_freq: TRUE # Calculate position-specific nucleotide frequency?
 t_rna_file: data/yeast_tRNAs.tsv # tRNA estimates
 codon_positions_file: data/yeast_codon_pos_i200.RData # Codon positions in each gene
-count_threshold: 1 # Remove genes with a read count below this threshold, when generating statistics and figures
+count_threshold: 64 # Remove genes with a read count below this threshold, when generating statistics and figures
 asite_disp_length_file: data/yeast_standard_asite_disp_length.txt # Table of fixed A-site positions by read length

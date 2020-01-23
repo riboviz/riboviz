@@ -54,7 +54,7 @@ Expected parameters added between release 1.1.0 and the current release are adde
 
 * `dir_logs: vignette/logs`
 * `cmd_file: run_riboviz_vignette.sh`
-* `workflow_record_file: workflow_record_vignette.tsv`
+* `workflow_files_log_file: workflow_files_vignette.tsv`
 * `t_rna_file: data/yeast_tRNAs.tsv`
 * `codon_positions_file: data/yeast_codon_pos_i200.RData`
 * `count_threshold: 64`
