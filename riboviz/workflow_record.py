@@ -22,7 +22,7 @@ READ = "read"
 """ Read file value """
 WRITE = "write"
 """ Write file value """
-HEADER = [SAMPLE_NAME, DESCRIPTION, PROGRAM, FILE, READ_WRITE]
+HEADER = [SAMPLE_NAME, PROGRAM, FILE, READ_WRITE, DESCRIPTION]
 """ Workflow record file header """
 INPUT = "input"
 """
