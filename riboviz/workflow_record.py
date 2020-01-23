@@ -2,6 +2,8 @@
 """
 RiboViz utilities for recording workflow steps.
 """
+import os
+import numpy as np
 import pandas as pd
 from riboviz import provenance
 
@@ -100,7 +102,7 @@ def get_record_row(sample_name,
     :return: Row with SAMPLE_NAME, DESCRIPTION, PROGRAM, FILE,
     READ_WRITE keys
     :type row: dict
-    :throws AssertionError: if read_or_write is not READ or WRITE
+    :raises AssertionError: if read_or_write is not READ or WRITE
     """
     assert read_or_write in [READ, WRITE]
     row = {SAMPLE_NAME: sample_name,
@@ -109,3 +111,35 @@ def get_record_row(sample_name,
            FILE: file_name,
            READ_WRITE: read_or_write}
     return row
+
+
+def validate_records(workflow_record_file, dirs):
+    """
+    Check each workflow record file exists and check that every file
+    in the given directories is recorded in the workflow record file.
+
+    :param workflow_record_file: Workflow record file
+    :type workflow_record_file: str or unicode
+    :param dirs: Directories
+    :type dirs: list(str or unicode)
+    :raises AssertionError: if any file does not exist or any file
+    in the given directories is not recorded in the workflow record
+    file
+    """
+    workflow_records = pd.read_csv(workflow_record_file,
+                                   comment="#",
+                                   delimiter="\t")
+    recorded_files = list(np.unique(workflow_records[FILE].to_numpy()))
+    actual_files = [
+        os.path.join(dir_path, file_name)
+        for dir in dirs
+        for (dir_path, dir_name, file_names) in
+        os.walk(os.path.expanduser(dir))
+        for file_name in file_names
+    ]
+    for file_name in recorded_files:
+        assert os.path.exists(file_name), \
+            "Workflow record file not found: {}".format(file_name)
+    for file_name in actual_files:
+        assert file_name in recorded_files, \
+            "{} is not in the workflow record".format(file_name)
