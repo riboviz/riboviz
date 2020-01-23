@@ -140,6 +140,6 @@ def validate_records(workflow_record_file, dirs):
     for file_name in recorded_files:
         assert os.path.exists(file_name), \
             "Workflow record file not found: {}".format(file_name)
-    for file_name in actual_files:
-        assert file_name in recorded_files, \
-            "{} is not in the workflow record".format(file_name)
+    additional_files = list(set(actual_files) - set(recorded_files))
+    assert len(additional_files) == 0, \
+        "{} are not in the workflow record".format(additional_files)
