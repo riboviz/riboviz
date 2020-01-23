@@ -14,7 +14,7 @@ from riboviz import process_utils
 from riboviz import logging_utils
 from riboviz import sam_bam
 from riboviz import workflow_r
-from riboviz import workflow_record
+from riboviz import workflow_files_logger
 from riboviz.tools import demultiplex_fastq as demultiplex_fastq_module
 from riboviz.tools import trim_5p_mismatch as trim_5p_mismatch_module
 from riboviz.utils import value_in_dict
@@ -23,7 +23,7 @@ from riboviz.utils import value_in_dict
 RunConfigTuple = collections.namedtuple(
     "RunConfigTuple", ["r_scripts",
                        "cmd_file",
-                       "workflow_record_file",
+                       "workflow_files_log_file",
                        "is_dry_run",
                        "logs_dir",
                        "nprocesses"])
@@ -93,11 +93,12 @@ def build_indices(fasta, index_dir, ht_prefix, log_file, run_config):
     if not run_config.is_dry_run:
         index_files = glob.glob(index_file_path + "*")
         index_files.sort()
-        workflow_record.record_step(run_config.workflow_record_file,
-                                    "hisat2-build",
-                                    "Build indices for alignment",
-                                    [fasta],
-                                    index_files)
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
+            "hisat2-build",
+            "Build indices for alignment",
+            [fasta],
+            index_files)
 
 
 def cut_adapters(sample_id, adapter, original_fq, trimmed_fq,
@@ -129,8 +130,8 @@ def cut_adapters(sample_id, adapter, original_fq, trimmed_fq,
                                      run_config.cmd_file,
                                      run_config.is_dry_run)
     if not run_config.is_dry_run:
-        workflow_record.record_step(
-            run_config.workflow_record_file,
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
             "cutadapt",
             "Cut out sequencing library adapters",
             [original_fq],
@@ -194,12 +195,13 @@ def extract_barcodes_umis(sample_id, original_fq, extract_fq, regexp,
                                      run_config.is_dry_run,
                                      cmd_to_log)
     if not run_config.is_dry_run:
-        workflow_record.record_step(run_config.workflow_record_file,
-                                    "umitools extract",
-                                    "Extract barcodes and UMIs",
-                                    [original_fq],
-                                    [extract_fq],
-                                    sample_id)
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
+            "umitools extract",
+            "Extract barcodes and UMIs",
+            [original_fq],
+            [extract_fq],
+            sample_id)
 
 
 def map_to_r_rna(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
@@ -247,8 +249,8 @@ def map_to_r_rna(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
     if not run_config.is_dry_run:
         index_files = glob.glob(index_file_path + "*")
         index_files.sort()
-        workflow_record.record_step(
-            run_config.workflow_record_file,
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
             "hisat2",
             "Remove rRNA or other contaminating reads by alignment to rRNA index files",
             [fastq] + index_files,
@@ -302,8 +304,8 @@ def map_to_orf(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
     if not run_config.is_dry_run:
         index_files = glob.glob(index_file_path + "*")
         index_files.sort()
-        workflow_record.record_step(
-            run_config.workflow_record_file,
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
             "hisat2",
             "Align remaining reads to ORFs index files",
             [fastq] + index_files,
@@ -342,8 +344,8 @@ def trim_5p_mismatches(sample_id, orf_map_sam, orf_map_sam_clean,
     process_utils.run_logged_command(
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
     if not run_config.is_dry_run:
-        workflow_record.record_step(
-            run_config.workflow_record_file,
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
             trim_5p_mismatch_module.__name__,
             "Trim 5' mismatches from reads and remove reads with more than 2 mismatches",
             [orf_map_sam],
@@ -385,8 +387,8 @@ def sort_bam(sample_id, sam_file, bam_file, log_file, run_config):
                                           run_config.cmd_file,
                                           run_config.is_dry_run)
     if not run_config.is_dry_run:
-        workflow_record.record_step(
-            run_config.workflow_record_file,
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
             "samtools view | samtools sort",
             "Convert SAM files to BAM files and sort on genome",
             [sam_file],
@@ -421,12 +423,13 @@ def index_bam(sample_id, bam_file, log_file, run_config):
                                      run_config.cmd_file,
                                      run_config.is_dry_run)
     if not run_config.is_dry_run:
-        workflow_record.record_step(run_config.workflow_record_file,
-                                    "samtools index",
-                                    "Index BAM file",
-                                    [bam_file],
-                                    [sam_bam.BAM_BAI_FORMAT.format(bam_file)],
-                                    sample_id)
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
+            "samtools index",
+            "Index BAM file",
+            [bam_file],
+            [sam_bam.BAM_BAI_FORMAT.format(bam_file)],
+            sample_id)
 
 
 def group_umis(sample_id, bam_file, groups_file, log_file, run_config):
@@ -454,8 +457,8 @@ def group_umis(sample_id, bam_file, groups_file, log_file, run_config):
                                      run_config.cmd_file,
                                      run_config.is_dry_run)
     if not run_config.is_dry_run:
-        workflow_record.record_step(
-            run_config.workflow_record_file,
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
             "umi_tools group",
             "Identify UMI groups",
             [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file)],
@@ -492,8 +495,8 @@ def deduplicate_umis(sample_id, bam_file, dedup_bam_file,
                                      run_config.is_dry_run)
     if not run_config.is_dry_run:
         stats_files = glob.glob(stats_prefix + "*")
-        workflow_record.record_step(
-            run_config.workflow_record_file,
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
             "umi_tools dedup",
             "Deduplicate UMIs",
             [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file)],
@@ -544,8 +547,8 @@ def make_bedgraph(sample_id, bam_file, bedgraph_file, is_plus,
                                               run_config.cmd_file,
                                               run_config.is_dry_run)
     if not run_config.is_dry_run:
-        workflow_record.record_step(
-            run_config.workflow_record_file,
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
             "bedtools",
             "Calculate transcriptome coverage and save as a bedgraph",
             [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file)],
@@ -605,8 +608,8 @@ def bam_to_h5(sample_id, bam_file, h5_file, orf_gff_file, config,
                                      run_config.cmd_file,
                                      run_config.is_dry_run)
     if not run_config.is_dry_run:
-        workflow_record.record_step(
-            run_config.workflow_record_file,
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
             workflow_r.BAM_TO_H5_R,
             "Make length-sensitive alignments in H5 format",
             [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file), orf_gff_file],
@@ -681,8 +684,8 @@ def generate_stats_figs(sample_id, h5_file, out_dir, config, log_file,
     if not run_config.is_dry_run:
         tsv_files = glob.glob(os.path.join(out_dir,"*.tsv"))
         pdf_files = glob.glob(os.path.join(out_dir,"*.pdf"))
-        workflow_record.record_step(
-            run_config.workflow_record_file,
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
             workflow_r.GENERATE_STATS_FIGS_R,
             "Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets",
             [h5_file, config[params.ORF_FASTA_FILE]] + flag_files,
@@ -724,8 +727,8 @@ def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
         if tpms_file is None:
             tpms_file = workflow_r.TPMS_COLLATED_TSV
         tpms_file = os.path.join(out_dir, tpms_file)
-        workflow_record.record_step(
-            run_config.workflow_record_file,
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
             workflow_r.COLLATE_TPMS_R,
             "Collate TPMs across sample results",
             [os.path.join(out_dir, sample, workflow_r.TPMS_TSV) for sample in samples],
@@ -761,8 +764,9 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
                                      run_config.is_dry_run)
     if not run_config.is_dry_run:
         deplex_files = glob.glob(os.path.join(deplex_dir,"*.*"))
-        workflow_record.record_step(run_config.workflow_record_file,
-                                    demultiplex_fastq_module.__name__,
-                                    "Demultiplex reads",
-                                    [fastq, barcodes_file],
-                                    deplex_files)
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
+            demultiplex_fastq_module.__name__,
+            "Demultiplex reads",
+            [fastq, barcodes_file],
+            deplex_files)

@@ -122,8 +122,8 @@ processes ("num_processes"):
 Commands that are submitted to bash are recorded within a file
 specified by a "cmd_file" configuration parameter.
 
-Information on the tools used, the files read and written are recorded
-within a file specified by a "workflow_record_file" configuration
+Information on the tools used, the files read and written are logged
+within a file specified by a "workflow_file_log_file" configuration
 parameter.
 
 If "--dry-run" is provided then the commands submitted to bash will
@@ -146,15 +146,15 @@ from riboviz import params
 from riboviz import provenance
 from riboviz import sample_sheets
 from riboviz import workflow
-from riboviz import workflow_record
+from riboviz import workflow_files_logger
 from riboviz.trim_5p_mismatch import TRIM_5P_MISMATCH_FILE
 from riboviz.utils import value_in_dict
 
 
 DEFAULT_CMD_FILE = "run_riboviz_vignette.sh"
 """ Default command file """
-DEFAULT_WORKFLOW_RECORD_FILE = "workflow_record.tsv"
-""" Default workflow record file """
+DEFAULT_WORKFLOW_FILES_LOG_FILE = "workflow_files_vignette.tsv"
+""" Default workflow files log file """
 
 ADAPTER_TRIM_FQ = "trim.fq"
 """ Adapter trimmed reads """
@@ -456,7 +456,7 @@ def process_samples(samples, in_dir, index_dir, r_rna_index,
             sample_run_config = workflow.RunConfigTuple(
                 run_config.r_scripts,
                 run_config.cmd_file,
-                run_config.workflow_record_file,
+                run_config.workflow_files_log_file,
                 run_config.is_dry_run,
                 sample_logs_dir,
                 run_config.nprocesses)
@@ -513,15 +513,16 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
         os.remove(cmd_file)
     LOGGER.info("Command file: %s", cmd_file)
 
-    if value_in_dict(params.WORKFLOW_RECORD_FILE, config):
-        workflow_record_file = config[params.WORKFLOW_RECORD_FILE]
+    if value_in_dict(params.WORKFLOW_FILES_LOG_FILE, config):
+        workflow_files_log_file = config[params.WORKFLOW_FILES_LOG_FILE]
     else:
-        workflow_record_file = DEFAULT_WORKFLOW_RECORD_FILE
+        workflow_files_log_file = DEFAULT_WORKFLOW_FILES_LOG_FILE
     if not is_dry_run:
-        if os.path.exists(workflow_record_file):
-            os.remove(workflow_record_file)
-        LOGGER.info("Workflow record file: %s", workflow_record_file)
-        workflow_record.create_record_file(workflow_record_file)
+        if os.path.exists(workflow_files_log_file):
+            os.remove(workflow_files_log_file)
+        LOGGER.info("Workflow files log file: %s",
+                    workflow_files_log_file)
+        workflow_files_logger.create_log_file(workflow_files_log_file)
 
     if value_in_dict(params.NUM_PROCESSES, config):
         nprocesses = int(config[params.NUM_PROCESSES])
@@ -542,7 +543,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     run_config = workflow.RunConfigTuple(
         r_scripts,
         cmd_file,
-        workflow_record_file,
+        workflow_files_log_file,
         is_dry_run,
         logs_dir,
         nprocesses)
@@ -657,11 +658,12 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     log_file = os.path.join(logs_dir, "collate_tpms.log")
     workflow.collate_tpms(out_dir, processed_samples, log_file, run_config)
     if not is_dry_run:
-        LOGGER.info("Validating workflow record file: %s",
-                    workflow_record_file)
+        LOGGER.info("Validating workflow files_log file: %s",
+                    workflow_files_log_file)
         try:
-            workflow_record.validate_records(
-                workflow_record_file, [index_dir, tmp_dir, out_dir])
+            workflow_files_logger.validate_log_file(
+                workflow_files_log_file,
+                [index_dir, tmp_dir, out_dir])
         except AssertionError as e:
             LOGGER.warning(e)
 

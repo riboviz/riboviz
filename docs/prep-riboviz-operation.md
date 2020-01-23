@@ -231,11 +231,11 @@ collate_tpms.log
 
 ---
 
-## Record of files read and written
+## Workflow files log file
 
-`prep_riboviz.py` will capture information about the files read and written at each step of the workflow. The file location is specified via a `workflow_record_file` configuration parameter.
+`prep_riboviz.py` will capture information about the files read and written at each step of the workflow. The file location is specified via a `workflow_files_log_file` configuration parameter.
 
-The workflow record file is a tab-separated values (TSV) file with the following columns:
+The workflow files log file is a tab-separated values (TSV) file with the following columns:
 
 * `SampleName`: Name of the sample to which this file belongs. This is an empty value if the step was not sample-specific (e.g. creating index files or demultiplexing a multiplexed FASTQ file).
 * `Program`: Program that read/wrote the file. The special token `input` denotes input files.
