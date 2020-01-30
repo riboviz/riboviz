@@ -149,8 +149,8 @@ def test_missing_fq_files(configuration):
 def test_missing_files_error(configuration, file_config):
     """
     Test that non-existent files being specified for org_gff_file,
-    features_file, t_rna and codon_pos then EXIT_PROCESSING_ERROR is
-    returned.
+    features_file, t_rna and codon_pos then
+    EXIT_FILE_NOT_FOUND_ERROR is returned.
 
     :param configuration: configuration and path to configuration file
     (pytest fixture defined in conftest.py)
@@ -165,7 +165,7 @@ def test_missing_files_error(configuration, file_config):
     exit_code = prep_riboviz.prep_riboviz(riboviz.R_SCRIPTS,
                                           config_path,
                                           True)
-    assert exit_code == prep_riboviz.EXIT_PROCESSING_ERROR, \
+    assert exit_code == prep_riboviz.EXIT_FILE_NOT_FOUND_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 

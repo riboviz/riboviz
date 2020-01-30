@@ -4,7 +4,6 @@ RiboViz workflow-related constants, types and functions.
 """
 
 import collections
-import errno
 import glob
 import logging
 import os
@@ -71,14 +70,11 @@ def build_indices(fasta, index_dir, ht_prefix, log_file, run_config):
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if fasta or hisat2-build cannot be found
+    :raise FileNotFoundError: if hisat2-build cannot be found
     :raise AssertionError: if hisat2-build returns non-zero exit
     code
     """
     LOGGER.info("Build indices for alignment (%s). Log: %s", fasta, log_file)
-    if not os.path.exists(fasta):
-        raise FileNotFoundError(
-            errno.ENOENT, os.strerror(errno.ENOENT), fasta)
     # Explicitly invoke --version as hisat2-build does not log its own
     # version during a processing run.
     cmd = ["hisat2-build", "--version"]
@@ -226,7 +222,7 @@ def map_to_r_rna(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if fasta or hisat2-build cannot be found
+    :raise FileNotFoundError: if hisat2-build cannot be found
     :raise AssertionError: if hisat2-build returns non-zero exit
     code
     """
@@ -279,7 +275,7 @@ def map_to_orf(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if fasta or hisat2-build cannot be found
+    :raise FileNotFoundError: if hisat2-build cannot be found
     :raise AssertionError: if hisat2-build returns non-zero exit
     code
     """
@@ -576,16 +572,11 @@ def bam_to_h5(sample_id, bam_file, h5_file, orf_gff_file, config,
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
     :raise KeyError: if a configuration parameter is mssing
-    :raise FileNotFoundError: if orf_gff_file or Rscript cannot be
-    found
+    :raise FileNotFoundError: if Rscript cannot be found
     :raise AssertionError: if Rscript returns non-zero exit code
     """
     LOGGER.info("Make length-sensitive alignments in H5 format. Log: %s",
                 log_file)
-    if not os.path.exists(orf_gff_file):
-        raise FileNotFoundError(errno.ENOENT,
-                                os.strerror(errno.ENOENT),
-                                orf_gff_file)
     secondary_id = config[params.SECONDARY_ID]
     if secondary_id is None:
         secondary_id = "NULL"
@@ -636,9 +627,7 @@ def generate_stats_figs(sample_id, h5_file, out_dir, config, log_file,
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
     :raise KeyError: if a configuration parameter is mssing
-    :raise FileNotFoundError: if Rscript cannot be found or any files
-    specified in t_rna, codon_pos, features_file configuration
-    parameters cannot be found
+    :raise FileNotFoundError: if Rscript cannot be found
     :raise AssertionError: if Rscript returns non-zero exit code
     """
     LOGGER.info(
@@ -669,10 +658,6 @@ def generate_stats_figs(sample_id, h5_file, out_dir, config, log_file,
     for (flag, parameter) in flags:
         if value_in_dict(flag, config):
             flag_file = config[flag]
-            if not os.path.exists(flag_file):
-                raise FileNotFoundError(errno.ENOENT,
-                                        os.strerror(errno.ENOENT),
-                                        flag_file)
             cmd.append("--" + parameter + "=" + flag_file)
             flag_files.append(flag_file)
     if value_in_dict(params.COUNT_THRESHOLD, config):
@@ -682,8 +667,8 @@ def generate_stats_figs(sample_id, h5_file, out_dir, config, log_file,
                                      run_config.cmd_file,
                                      run_config.is_dry_run)
     if not run_config.is_dry_run:
-        tsv_files = glob.glob(os.path.join(out_dir,"*.tsv"))
-        pdf_files = glob.glob(os.path.join(out_dir,"*.pdf"))
+        tsv_files = glob.glob(os.path.join(out_dir, "*.tsv"))
+        pdf_files = glob.glob(os.path.join(out_dir, "*.pdf"))
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             workflow_r.GENERATE_STATS_FIGS_R,
@@ -763,7 +748,7 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
                                      run_config.cmd_file,
                                      run_config.is_dry_run)
     if not run_config.is_dry_run:
-        deplex_files = glob.glob(os.path.join(deplex_dir,"*.*"))
+        deplex_files = glob.glob(os.path.join(deplex_dir, "*.*"))
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             demultiplex_fastq_module.__name__,

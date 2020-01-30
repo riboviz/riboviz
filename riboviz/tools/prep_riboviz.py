@@ -245,8 +245,8 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
     :type out_dir: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if sample_fastq, other files or a third-party
-    tool cannot be found
+    :raise FileNotFoundError: if sample_fastq or a third-party tool
+    cannot be found
     :raise AssertionError: if invocation of a third-party tool returns
     non-zero exit code
     :raise KeyError: if config is missing required configuration
@@ -492,7 +492,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     :param is_dry_run: Don't execute workflow commands (useful for
     seeing what commands would be executed)
     :type is_dry_run: bool
-    :raise FileNotFoundError: if a file cannot be found
+    :raise FileNotFoundError: if an input data file cannot be found
     :raise KeyError: if a configuration parameter is missing
     :raise ValueError: if a configuration parameter has an invalid
     value
@@ -504,6 +504,27 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
 
     with open(config_yaml, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
+
+    # Check existence of all non-sample-specific files to avoid having
+    # to recheck them when processing each sample.
+    for input_key in [params.RRNA_FASTA_FILE,
+                      params.ORF_FASTA_FILE,
+                      params.ORF_GFF_FILE]:
+        input_file = config[input_key]
+        if not os.path.exists(input_file):
+            raise FileNotFoundError(
+                errno.ENOENT, os.strerror(errno.ENOENT), input_file)
+    # Optional files.
+    for input_key in [params.FEATURES_FILE,
+                      params.T_RNA_FILE,
+                      params.CODON_POSITIONS_FILE,
+                      params.ASITE_DISP_LENGTH_FILE]:
+        if value_in_dict(input_key, config):
+            input_file = config[input_key]
+            if not os.path.exists(input_file):
+                raise FileNotFoundError(errno.ENOENT,
+                                        os.strerror(errno.ENOENT),
+                                        input_file)
 
     if value_in_dict(params.CMD_FILE, config):
         cmd_file = config[params.CMD_FILE]
