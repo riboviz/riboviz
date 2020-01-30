@@ -101,7 +101,8 @@ def test_create_log_file(tsv_file):
     logs_df = pd.read_csv(tsv_file, sep="\t", comment="#")
     logs = logs_df.to_dict('records')
     assert len(logs) == 0, "Expected 0 logs"
-    assert list(logs_df.columns).sort() == workflow_files_logger.HEADER.sort(), \
+    assert list(logs_df.columns).sort() == \
+        workflow_files_logger.HEADER.sort(), \
         "Headers do not match"
 
 
@@ -207,13 +208,70 @@ def test_log_files(tsv_file, num_reads, num_writes, include_sample):
     for n, log in file_logs:
         assert log[workflow_files_logger.FILE] == \
             FILE_FORMAT.format(tag, n)
-        assert log[workflow_files_logger.READ_WRITE] == workflow_files_logger.READ
+        assert log[workflow_files_logger.READ_WRITE] == \
+            workflow_files_logger.READ
     write_logs = logs[num_reads:num_writes]
     file_logs = list(zip(range(num_writes), write_logs))
     for n, log in file_logs:
         assert log[workflow_files_logger.FILE] == \
             FILE_FORMAT.format(tag, n)
-        assert log[workflow_files_logger.READ_WRITE] == workflow_files_logger.WRITE
+        assert log[workflow_files_logger.READ_WRITE] == \
+            workflow_files_logger.WRITE
+
+
+@pytest.mark.parametrize("num_inputs", [0, NUM_FILES])
+@pytest.mark.parametrize("include_sample", [True, False])
+def test_log_input_files(tsv_file, num_inputs, include_sample):
+    """
+    Test create_log_file then log_input_files and check file contents
+    are as expected.
+
+    :param tsv_file: path to TSV file
+    :type tsv_file: str or unicode
+    :param num_inputs: Number of read files to log
+    :type num_inputs: int
+    :param include_sample: Log a sample ID?
+    :type include_sample: bool
+    """
+    workflow_files_logger.create_log_file(tsv_file, delimiter="\t")
+    tag = "test"
+    input_files = [FILE_FORMAT.format(tag, f)
+                   for f in range(0, num_inputs)]
+    if include_sample:
+        workflow_files_logger.log_input_files(
+            tsv_file,
+            input_files,
+            SAMPLE_FORMAT.format(tag))
+    else:
+        workflow_files_logger.log_input_files(
+            tsv_file,
+            input_files)
+    logs_df = pd.read_csv(tsv_file, sep="\t", comment="#")
+    # Pandas treats missing cells as nan, so convert to ""
+    logs_df.fillna(value={workflow_files_logger.SAMPLE_NAME: ""},
+                   inplace=True)
+    logs_df.fillna(value={workflow_files_logger.DESCRIPTION: ""},
+                   inplace=True)
+    logs = logs_df.to_dict('records')
+
+    assert len(logs) == num_inputs, \
+        "Expected {} logs".format(len(logs))
+    for log in logs:
+        assert log[workflow_files_logger.PROGRAM] == \
+            workflow_files_logger.INPUT
+        assert log[workflow_files_logger.DESCRIPTION] == ""
+        if include_sample:
+            assert log[workflow_files_logger.SAMPLE_NAME] == \
+                SAMPLE_FORMAT.format(tag)
+        else:
+            assert log[workflow_files_logger.SAMPLE_NAME] == ""
+    input_logs = logs[0:num_inputs]
+    file_logs = list(zip(range(num_inputs), input_logs))
+    for n, log in file_logs:
+        assert log[workflow_files_logger.FILE] == \
+            FILE_FORMAT.format(tag, n)
+        assert log[workflow_files_logger.READ_WRITE] == \
+            workflow_files_logger.READ
 
 
 def test_validate_log_file(tsv_file, tmp_test_dir):

@@ -90,6 +90,25 @@ def log_files(log_file,
                 header=False)
 
 
+def log_input_files(log_file,
+                    files,
+                    sample_name=None,
+                    delimiter="\t"):
+    """
+    Wrapper for log_files to log input files.
+
+    :param log_file: Workflow files log file
+    :type log_file: str or unicode
+    :param files: Input files
+    :type files: list(str or unicode)
+    :param sample_name: Sample name (optional)
+    :type sample_name: str or unicode
+    :param delimiter: Delimiter
+    :type delimiter: str or unicode
+    """
+    log_files(log_file, INPUT, "", files, [], sample_name, delimiter)
+
+
 def get_log_entry(sample_name,
                   description,
                   program,
