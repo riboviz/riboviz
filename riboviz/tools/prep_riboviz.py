@@ -450,6 +450,11 @@ def process_samples(samples, in_dir, index_dir, r_rna_index,
                 if not os.path.exists(sample_fastq):
                     raise FileNotFoundError(
                         errno.ENOENT, os.strerror(errno.ENOENT), sample_fastq)
+                if not run_config.is_dry_run:
+                    workflow_files_logger.log_input_files(
+                        run_config.workflow_files_log_file,
+                        [sample_fastq],
+                        sample)
             sample_tmp_dir = os.path.join(tmp_dir, sample)
             sample_out_dir = os.path.join(out_dir, sample)
             sample_logs_dir = os.path.join(run_config.logs_dir, sample)
@@ -505,27 +510,6 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     with open(config_yaml, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
 
-    # Check existence of all non-sample-specific files to avoid having
-    # to recheck them when processing each sample.
-    for input_key in [params.RRNA_FASTA_FILE,
-                      params.ORF_FASTA_FILE,
-                      params.ORF_GFF_FILE]:
-        input_file = config[input_key]
-        if not os.path.exists(input_file):
-            raise FileNotFoundError(
-                errno.ENOENT, os.strerror(errno.ENOENT), input_file)
-    # Optional files.
-    for input_key in [params.FEATURES_FILE,
-                      params.T_RNA_FILE,
-                      params.CODON_POSITIONS_FILE,
-                      params.ASITE_DISP_LENGTH_FILE]:
-        if value_in_dict(input_key, config):
-            input_file = config[input_key]
-            if not os.path.exists(input_file):
-                raise FileNotFoundError(errno.ENOENT,
-                                        os.strerror(errno.ENOENT),
-                                        input_file)
-
     if value_in_dict(params.CMD_FILE, config):
         cmd_file = config[params.CMD_FILE]
     else:
@@ -550,6 +534,33 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     else:
         nprocesses = 1
     LOGGER.info("Number of processes: %d", nprocesses)
+
+    # Check existence of all non-sample-specific files to avoid having
+    # to recheck them when processing each sample.
+    for input_key in [params.RRNA_FASTA_FILE,
+                      params.ORF_FASTA_FILE,
+                      params.ORF_GFF_FILE]:
+        input_file = config[input_key]
+        if not os.path.exists(input_file):
+            raise FileNotFoundError(
+                errno.ENOENT, os.strerror(errno.ENOENT), input_file)
+        if not is_dry_run:
+            workflow_files_logger.log_input_files(
+                workflow_files_log_file, [input_file])
+    # Optional files.
+    for input_key in [params.FEATURES_FILE,
+                      params.T_RNA_FILE,
+                      params.CODON_POSITIONS_FILE,
+                      params.ASITE_DISP_LENGTH_FILE]:
+        if value_in_dict(input_key, config):
+            input_file = config[input_key]
+            if not os.path.exists(input_file):
+                raise FileNotFoundError(errno.ENOENT,
+                                        os.strerror(errno.ENOENT),
+                                        input_file)
+            if not is_dry_run:
+                workflow_files_logger.log_input_files(
+                    workflow_files_log_file, [input_file])
 
     index_dir = config[params.INDEX_DIR]
     tmp_dir = config[params.TMP_DIR]
@@ -615,6 +626,9 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
             raise FileNotFoundError(errno.ENOENT,
                                     os.strerror(errno.ENOENT),
                                     sample_sheet_file)
+        if not is_dry_run:
+            workflow_files_logger.log_input_files(
+                workflow_files_log_file, [sample_sheet_file])
         multiplex_files = config[params.MULTIPLEX_FQ_FILES]
         multiplex_file = multiplex_files[0]
         multiplex_name = os.path.splitext(
@@ -625,6 +639,9 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
             raise FileNotFoundError(errno.ENOENT,
                                     os.strerror(errno.ENOENT),
                                     multiplex_file)
+        if not is_dry_run:
+            workflow_files_logger.log_input_files(
+                workflow_files_log_file, [multiplex_file])
         trim_fq = os.path.join(
             tmp_dir, ADAPTER_TRIM_FQ_FORMAT.format(multiplex_name))
         log_file = os.path.join(logs_dir, "cutadapt.log")
