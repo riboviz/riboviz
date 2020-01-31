@@ -1,7 +1,9 @@
 """
 FASTQ file-related utilities.
 """
+import gzip
 import os.path
+from Bio import SeqIO
 
 
 EXTENSIONS = [".fq", ".fastq"]
@@ -14,7 +16,7 @@ FASTQ_GZ_FORMAT = FASTQ_FORMAT + ".gz"
 
 def is_fastq_gz(file_name):
     """
-    Does the given file end with .gz or .GZ?
+    Does the given file end with .gz or .GZ or .gzip or .GZIP?
 
     :param file_name: File name
     :type file_name: str or unicode
@@ -23,7 +25,7 @@ def is_fastq_gz(file_name):
     :rtype: bool
     """
     _, ext = os.path.splitext(os.path.basename(file_name))
-    return ext.lower() == ".gz"
+    return ext.lower() in [".gz", ".gzip"]
 
 
 def strip_fastq_gz(file_name):
@@ -73,3 +75,25 @@ def get_fastq_filenames(tags, is_gz=False):
     :rtype: list(str or unicode)
     """
     return [get_fastq_filename(tag, is_gz) for tag in tags]
+
+
+def count_records(file_name):
+    """
+    Count number of records in FASTQ file. Both FASTQ and FASTQ.GZ
+    files are handled.
+
+    :param file_name: File name
+    :type file_name: str or unicode
+    :return: number of records
+    :rtype: int
+    """
+
+    num_records = 0
+    if is_fastq_gz(file_name):
+        open_file = gzip.open
+    else:
+        open_file = open
+    with open_file(file_name, "rt") as f:
+        for _ in SeqIO.parse(f, "fastq"):
+            num_records = num_records + 1
+    return num_records
