@@ -77,23 +77,22 @@ def get_fastq_filenames(tags, is_gz=False):
     return [get_fastq_filename(tag, is_gz) for tag in tags]
 
 
-def count_records(file_name):
+def count_sequences(file_name):
     """
-    Count number of records in FASTQ file. Both FASTQ and FASTQ.GZ
+    Count number of sequences in a FASTQ file. Both FASTQ and FASTQ.GZ
     files are handled.
 
     :param file_name: File name
     :type file_name: str or unicode
-    :return: number of records
+    :return: number of sequences
     :rtype: int
     """
-
-    num_records = 0
+    num_sequences = 0
     if is_fastq_gz(file_name):
         open_file = gzip.open
     else:
         open_file = open
     with open_file(file_name, "rt") as f:
         for _ in SeqIO.parse(f, "fastq"):
-            num_records = num_records + 1
-    return num_records
+            num_sequences = num_sequences + 1
+    return num_sequences

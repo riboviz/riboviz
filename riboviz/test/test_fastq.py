@@ -123,15 +123,15 @@ def test_get_fastq_filenames_gz_true():
     assert expected_names == actual_names
 
 
-def get_test_fastq_records(read_length, count):
+def get_test_fastq_sequences(read_length, count):
     """
-    Get FASTQ records for test FASTQ files.
+    Get FASTQ sequences for test FASTQ files.
 
     :param read_length: Read length
     :type read_length: int
-    :param count: Number of records
+    :param count: Number of sequences
     :type count: int
-    :return: List of records, consisting of the first count reads of
+    :return: List of sequences, consisting of the first count reads of
     read_length found by enumerating combinations of
     riboviz.barcodes_umis.NUCLEOTIDES, with quality scores each
     [0,...,read_kength - 1]
@@ -142,44 +142,44 @@ def get_test_fastq_records(read_length, count):
              for i in itertools.product(NUCLEOTIDES,
                                         repeat=read_length)][0:count]
     # Create a list of SeqRecords
-    records = [SeqRecord(Seq(read, IUPAC.ambiguous_dna),
+    sequences = [SeqRecord(Seq(read, IUPAC.ambiguous_dna),
                          id="read{}".format(i),
                          name="read{}".format(i),
                          description="read{}".format(i))
                for read, i in zip(reads, range(0, len(reads)))]
     quality = list(range(0, read_length))
-    for record in records:
-        record.letter_annotations["phred_quality"] = quality
-    return records
+    for sequence in sequences:
+        sequence.letter_annotations["phred_quality"] = quality
+    return sequences
 
 
 @pytest.mark.parametrize("count", [0, 1, 10])
-def test_count_records(fastq_file, count):
+def test_count_sequences(fastq_file, count):
     """
-    Test count_records.
+    Test count_sequences.
 
     :param fastq_file: path to temporary FASTQ file
     :type fastq_file: str or unicode
-    :param count: Number of records
+    :param count: Number of sequences
     :type count: int
     """
-    records = get_test_fastq_records(4, count)
+    sequences = get_test_fastq_sequences(4, count)
     with open(fastq_file, "wt") as f:
-        SeqIO.write(records, f, "fastq")
-    assert fastq.count_records(fastq_file) == count
+        SeqIO.write(sequences, f, "fastq")
+    assert fastq.count_sequences(fastq_file) == count
 
 
 @pytest.mark.parametrize("count", [0, 1, 10])
-def test_count_records_gz(fastq_gz_file, count):
+def test_count_sequences_gz(fastq_gz_file, count):
     """
-    Test count_records with a .FASTQ.GZ file.
+    Test count_sequences with a .FASTQ.GZ file.
 
     :param fastq_gz_file: path to temporary FASTQ.GZ file
     :type fastq_gz_file: str or unicode
-    :param count: Number of records
+    :param count: Number of sequences
     :type count: int
     """
-    records = get_test_fastq_records(4, count)
+    sequences = get_test_fastq_sequences(4, count)
     with gzip.open(fastq_gz_file, "wt") as f:
-        SeqIO.write(records, f, "fastq")
-    assert fastq.count_records(fastq_gz_file) == count
+        SeqIO.write(sequences, f, "fastq")
+    assert fastq.count_sequences(fastq_gz_file) == count
