@@ -38,7 +38,6 @@ The following information is extracted:
 """
 import argparse
 import os
-import sys
 import pandas as pd
 from riboviz import fastq
 from riboviz import provenance
@@ -69,6 +68,11 @@ def parse_command_line_options():
     return options
 
 
+# TODO Move to riboviz.fastq.
+FASTQ_EXTS = ["fastq", "fq", "fastq.gz", "fq.gz", "fastq.gzip", "fq.gzip"]
+
+
+# TODO Move to riboviz.utils and add tests.
 def get_file_ext(file_name):
     """
     Given a file name return full file extension, everything after the
@@ -85,19 +89,6 @@ def get_file_ext(file_name):
     return file_type.lower()
 
 
-FASTQ_EXTS = ["fastq", "fq", "fastq.gz", "fq.gz", "fastq.gzip", "fq.gzip"]
-
-
-def filter_file_type(df):
-    print("XXX " + df)
-    print(type(df))
-    print(df[workflow_files_logger.FILE])
-    file_name = df[workflow_files_logger.FILE]
-    file_type = ".".join(os.path.basename(file_name).split(".")[1:])
-    print(file_type)
-    return file_type in FASTQ_EXTS
-
-
 def get_program_files(df, program, read_write):
     filtered = df[(df[workflow_files_logger.PROGRAM] == program)
                   & (df[workflow_files_logger.READ_WRITE] == read_write)]
@@ -109,86 +100,114 @@ def get_program_files(df, program, read_write):
 def count_reads_sample(df):
     program = "cutadapt"
     print("-------- {} --------".format(program))
-    cutadapt = get_program_files(df, program,
-                                 workflow_files_logger.WRITE)
-    # print(cutadapt)
-    if len(cutadapt) > 0:
+    entries = get_program_files(df, program,
+                                workflow_files_logger.WRITE)
+    if len(entries) > 0:
         # cutadapt outputs one file, the FASTQ file.
-        file_name = cutadapt.iloc[0][workflow_files_logger.FILE]
+        file_name = entries.iloc[0][workflow_files_logger.FILE]
         counts = 0
         # TODO uncomment
-        # counts = fastq.count_sequences(file_name)
+        counts = fastq.count_sequences(file_name)
         print("{}: {}".format(file_name, counts))
     else:
         print("No entries")
 
     program = "umi_tools dedup"
     print("-------- {} --------".format(program))
-    umi_tools_dedup = get_program_files(df, program,
-                                        workflow_files_logger.WRITE)
-    # print(umi_tools_dedup)
-    bams = umi_tools_dedup[umi_tools_dedup[
-        workflow_files_logger.FILE].str.lower().str.endswith("bam")]
-    for _, row in bams.iterrows():
-        file_name = row[workflow_files_logger.FILE]
-        counts = 0
-        # TODO uncomment
-        # counts = sam_bam.count_sequences(file_name)
-        # TODO handle both values - (sequences, primary sequences)
-        print("{}: {}".format(file_name, counts))
+    entries = get_program_files(df, program,
+                                workflow_files_logger.WRITE)
+    if len(entries) > 0:
+        bams = entries[entries[
+            workflow_files_logger.FILE].str.lower().str.endswith("bam")]
+        for _, row in bams.iterrows():
+            file_name = row[workflow_files_logger.FILE]
+            counts = 0
+            # TODO uncomment
+            counts = sam_bam.count_sequences(file_name)
+            # TODO handle both values - (sequences, primary sequences)
+            print("{}: {}".format(file_name, counts))
+    else:
+        print("No entries")
 
     program = "hisat2"
     print("-------- {} --------".format(program))
-    hisat2 = get_program_files(df, program, workflow_files_logger.WRITE)
-    # print(hisat2)
-    sams = hisat2[hisat2[
-        workflow_files_logger.FILE].str.lower().str.endswith("sam")]
-    for _, row in sams.iterrows():
-        file_name = row[workflow_files_logger.FILE]
-        counts = 0
-        # TODO uncomment
-        # counts = sam_bam.count_sequences(file_name)
-        # TODO handle both values - (sequences, primary sequences)
-        print("{}: {}".format(file_name, counts))
-    fqs = hisat2[hisat2[
-        workflow_files_logger.FILE].str.lower().str.endswith(tuple(FASTQ_EXTS))]
-    for _, row in fqs.iterrows():
-        file_name = row[workflow_files_logger.FILE]
-        counts = 0
-        # TODO uncomment
-        # counts = fastq.count_sequences(file_name)
-        print("{}: {}".format(file_name, counts))
+    entries = get_program_files(df, program, workflow_files_logger.WRITE)
+    if len(entries) > 0:
+        sams = entries[entries[
+            workflow_files_logger.FILE].str.lower().str.endswith("sam")]
+        for _, row in sams.iterrows():
+            file_name = row[workflow_files_logger.FILE]
+            counts = 0
+            # TODO uncomment
+            counts = sam_bam.count_sequences(file_name)
+            # TODO handle both values - (sequences, primary sequences)
+            print("{}: {}".format(file_name, counts))
+        fqs = entries[entries[
+            workflow_files_logger.FILE].str.lower().str.endswith(tuple(FASTQ_EXTS))]
+        for _, row in fqs.iterrows():
+            file_name = row[workflow_files_logger.FILE]
+            counts = 0
+            # TODO uncomment
+            counts = fastq.count_sequences(file_name)
+            print("{}: {}".format(file_name, counts))
+    else:
+        print("No entries")
 
     # TODO
-    # * Number of reads in demultiplexed FASTQ files and unassigned reads,
-    #   as recorded in the 'num_reads.tsv' file output. This file is used
-    #   to save having to traverse each of the output FASTQ files.
-    # * Compare to explicit count of reads in .fq files.
+    # Number of reads in demultiplexed FASTQ files and unassigned reads,
+    # as recorded in the 'num_reads.tsv' file output. This file is used
+    # to save having to traverse each of the output FASTQ files.
     program = "riboviz.tools.demultiplex_fastq"
     print("-------- {} --------".format(program))
-    demultiplex_fastq = get_program_files(df, program, workflow_files_logger.WRITE)
-    print(demultiplex_fastq)
+    entries = get_program_files(df, program, workflow_files_logger.WRITE)
+    if len(entries) > 0:
+        fqs = entries[entries[
+            workflow_files_logger.FILE].str.lower().str.endswith(tuple(FASTQ_EXTS))]
+        for _, row in fqs.iterrows():
+            file_name = row[workflow_files_logger.FILE]
+            counts = 0
+            # TODO uncomment
+            counts = fastq.count_sequences(file_name)
+            print("{}: {}".format(file_name, counts))
+    else:
+        print("No entries")
 
     # TODO
-    # * Number of reads in SAM file output as recorded in the TSV summary
-    #   file output..
-    # * Compare to explicit count of reads in .sam file.
+    # Number of reads in SAM file output as recorded in the TSV summary
+    # file output.
     program = "riboviz.tools.trim_5p_mismatch"
     print("-------- {} --------".format(program))
-    trim_5p_mismatch = get_program_files(df, program, workflow_files_logger.WRITE)
-    print(trim_5p_mismatch)
+    entries = get_program_files(df, program, workflow_files_logger.WRITE)
+    if len(entries) > 0:
+        sams = entries[entries[
+            workflow_files_logger.FILE].str.lower().str.endswith("sam")]
+        # trim_5p_mismatch outputs one file, the SAM file.
+        file_name = sams.iloc[0][workflow_files_logger.FILE]
+        counts = 0
+        # TODO uncomment
+        counts = sam_bam.count_sequences(file_name)
+        # TODO handle both values - (sequences, primary sequences)
+        print("{}: {}".format(file_name, counts))
 
-    # TODO
-    # * Number of reads in sample FASTQ files used as inputs (if
-    #   non-multiplexed samples are used).
-    # * Number of reads in multiplexed FASTQ file (if multiplexed
-    #   samples are used).
+    else:
+        print("No entries")
+
     program = "inputs"
     print("-------- {} --------".format(program))
-    inputs = df[df[workflow_files_logger.PROGRAM] ==
-                workflow_files_logger.INPUT][[workflow_files_logger.SAMPLE_NAME,
-                                              workflow_files_logger.FILE]]
-    print(inputs)
+    entries = df[df[workflow_files_logger.PROGRAM] ==
+                 workflow_files_logger.INPUT][[workflow_files_logger.SAMPLE_NAME,
+                                               workflow_files_logger.FILE]]
+    if len(entries) > 0:
+        fqs = entries[entries[
+            workflow_files_logger.FILE].str.lower().str.endswith(tuple(FASTQ_EXTS))]
+        for _, row in fqs.iterrows():
+            file_name = row[workflow_files_logger.FILE]
+            counts = 0
+            # TODO uncomment
+            counts = fastq.count_sequences(file_name)
+            print("{}: {}".format(file_name, counts))
+    else:
+        print("No entries")
 
 
 def count_reads(workflow_file, reads_file):
@@ -204,18 +223,13 @@ def count_reads(workflow_file, reads_file):
         print("========{}========".format(sample))
         print("========{}========".format(sample))
         sample_df = df[df[workflow_files_logger.SAMPLE_NAME] == sample]
-        print(sample_df)
         count_reads_sample(sample_df)
-    # https://cmdlinetips.com/2018/02/how-to-subset-pandas-dataframe-based-on-values-of-a-column/
-    # .fastq, .fastq.gz, .fq, .fq.gz, .fq.gzip, .fastq.gzip
-    # .sam, .bam, .tsv
 
-    # TODO - Output TSV file:
-    #
-    # SampleName | Human summary | Program | File | Count |
-    #
-    # Include a provenance header comment.
-
+# TODO - Output TSV file:
+#
+# SampleName | Human summary | Program | File | Count |
+#
+# Include a provenance header comment.
 
 def invoke_count_reads():
     """
