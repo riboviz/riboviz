@@ -215,7 +215,9 @@ Data was imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb
 
 ---
 
-## `riboviz.test.test_trim_5p_mismatch` test files
+## `riboviz/test/` test data files
+
+### `riboviz.test.test_trim_5p_mismatch` test data files
 
 ```
 riboviz/test/data/trim_5p_mismatch.sam
@@ -225,3 +227,30 @@ riboviz/test/data/trim_5pos5neg.sam
 These files are used by `riboviz.test.test_trim_5p_mismatch` for testing `riboviz.trim_5p_mismatch`.
 
 These files were created by running RiboViz using `vignette/vignette_config.yaml` and the data in `vignette/input/`. Lines were copied and pasted from the SAM files output then these lines were manually edited to produce a desired range of outcomes.
+
+### `riboviz.test.test_sam_bam` test data files
+
+```
+WTnone_rRNA_map_20.sam
+WTnone_rRNA_map_20.bam
+WTnone_rRNA_map_20.bam.bai
+WTnone_rRNA_map_6_primary.sam
+WTnone_rRNA_map_6_primary.bam
+WTnone_rRNA_map_6_primary.bam.bai
+WTnone_rRNA_map_14_secondary.sam
+WTnone_rRNA_map_14_secondary.bam
+WTnone_rRNA_map_14_secondary.bam.bai
+```
+
+The SAM files were created from the file `tmp/WTnone/rRNA_map.sam` from a run of the vignette (using RiboViz version commit 9efaf93, 08/10/2020):
+
+* `WTnone_rRNA_map_20.sam`: the first 20 sequences from `rRNA_map.sam`.
+* `WTnone_rRNA_map_6_primary.sam`: the 6 mapped (primary) sequences from `WTnone_rRNA_map_20.sam`.
+* `WTnone_rRNA_map_14_secondary.sam`: the 14 remaining unmapped, non-primary, sequences from `WTnone_rRNA_map_20.sam`.
+
+The BAM and BAI files were created as follows:
+
+```console
+$ samtools view -b <FILE>.sam  | samtools sort -@1 -O bam -o <FILE>.bam
+$ samtools index <FILE>.bam 
+```
