@@ -109,9 +109,50 @@ def get_program_files(df, program, read_write):
 def count_reads_sample(df):
     program = "cutadapt"
     print("-------- {} --------".format(program))
-    cutadapt = get_program_files(df, program, workflow_files_logger.WRITE)
+    cutadapt = get_program_files(df, program,
+                                 workflow_files_logger.WRITE)
     # print(cutadapt)
-    for _, row in cutadapt.iterrows():
+    if len(cutadapt) > 0:
+        # cutadapt outputs one file, the FASTQ file.
+        file_name = cutadapt.iloc[0][workflow_files_logger.FILE]
+        counts = 0
+        # TODO uncomment
+        # counts = fastq.count_sequences(file_name)
+        print("{}: {}".format(file_name, counts))
+    else:
+        print("No entries")
+
+    program = "umi_tools dedup"
+    print("-------- {} --------".format(program))
+    umi_tools_dedup = get_program_files(df, program,
+                                        workflow_files_logger.WRITE)
+    # print(umi_tools_dedup)
+    bams = umi_tools_dedup[umi_tools_dedup[
+        workflow_files_logger.FILE].str.lower().str.endswith("bam")]
+    for _, row in bams.iterrows():
+        file_name = row[workflow_files_logger.FILE]
+        counts = 0
+        # TODO uncomment
+        # counts = sam_bam.count_sequences(file_name)
+        # TODO handle both values - (sequences, primary sequences)
+        print("{}: {}".format(file_name, counts))
+
+    program = "hisat2"
+    print("-------- {} --------".format(program))
+    hisat2 = get_program_files(df, program, workflow_files_logger.WRITE)
+    # print(hisat2)
+    sams = hisat2[hisat2[
+        workflow_files_logger.FILE].str.lower().str.endswith("sam")]
+    for _, row in sams.iterrows():
+        file_name = row[workflow_files_logger.FILE]
+        counts = 0
+        # TODO uncomment
+        # counts = sam_bam.count_sequences(file_name)
+        # TODO handle both values - (sequences, primary sequences)
+        print("{}: {}".format(file_name, counts))
+    fqs = hisat2[hisat2[
+        workflow_files_logger.FILE].str.lower().str.endswith(tuple(FASTQ_EXTS))]
+    for _, row in fqs.iterrows():
         file_name = row[workflow_files_logger.FILE]
         counts = 0
         # TODO uncomment
@@ -119,39 +160,25 @@ def count_reads_sample(df):
         print("{}: {}".format(file_name, counts))
 
     # TODO
-    # Number of reads in demultiplexed FASTQ files and unassigned reads,
-    # as recorded in the 'num_reads.tsv' file output. This file is used
-    # to save having to traverse each of the output FASTQ files.
+    # * Number of reads in demultiplexed FASTQ files and unassigned reads,
+    #   as recorded in the 'num_reads.tsv' file output. This file is used
+    #   to save having to traverse each of the output FASTQ files.
+    # * Compare to explicit count of reads in .fq files.
     program = "riboviz.tools.demultiplex_fastq"
     print("-------- {} --------".format(program))
-    demultiplex_fastq = get_program_files(df, "riboviz.tools.demultiplex_fastq", workflow_files_logger.WRITE)
+    demultiplex_fastq = get_program_files(df, program, workflow_files_logger.WRITE)
     print(demultiplex_fastq)
 
     # TODO
-    # * Number of reads in SAM file and FASTQ files output.
-    program = "hisat2"
-    print("-------- {} --------".format(program))
-    hisat2 = get_program_files(df, "hisat2", workflow_files_logger.WRITE)
-    print(hisat2)
-
-    # TODO
     # * Number of reads in SAM file output as recorded in the TSV summary
-    #   file output.This file is used to save having to traverse each of
-    #   the output SAM files.
+    #   file output..
+    # * Compare to explicit count of reads in .sam file.
     program = "riboviz.tools.trim_5p_mismatch"
     print("-------- {} --------".format(program))
-    trim_5p_mismatch = get_program_files(df, "riboviz.tools.trim_5p_mismatch", workflow_files_logger.WRITE)
+    trim_5p_mismatch = get_program_files(df, program, workflow_files_logger.WRITE)
     print(trim_5p_mismatch)
 
     # TODO
-    # * Number of reads in output.
-    program = "umi_tools dedup"
-    print("-------- {} --------".format(program))
-    umi_tools_dedup = get_program_files(df, "umi_tools dedup", workflow_files_logger.WRITE)
-    print(umi_tools_dedup)
-
-    # TODO
-    # Input files
     # * Number of reads in sample FASTQ files used as inputs (if
     #   non-multiplexed samples are used).
     # * Number of reads in multiplexed FASTQ file (if multiplexed
