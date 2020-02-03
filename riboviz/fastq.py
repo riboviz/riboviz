@@ -6,6 +6,8 @@ import os.path
 from Bio import SeqIO
 
 
+FASTQ_EXTS = ["fastq", "fq", "fastq.gz", "fq.gz", "fastq.gzip", "fq.gzip"]
+""" FASTQ file extensions """
 EXTENSIONS = [".fq", ".fastq"]
 """ FASTQ file extensions """
 FASTQ_FORMAT = "{}.fastq"
