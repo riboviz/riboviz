@@ -2,6 +2,7 @@
 utils tests.
 """
 import pytest
+from riboviz.utils import get_file_ext
 from riboviz.utils import list_to_str
 from riboviz.utils import value_in_dict
 
@@ -86,3 +87,24 @@ def test_value_in_dict_allow_false_empty(value, allow_false_empty):
     is_value_in_dict = value_in_dict("B", values, allow_false_empty)
     assert (not is_value_in_dict or allow_false_empty) and\
            (is_value_in_dict or not allow_false_empty)  # NXOR
+
+
+def get_file_ext_name_dot_ext_ext():
+    """
+    Test get_file_ext with example.fastq.gz.
+    """
+    assert get_file_ext("example.fastq.gz") == "fastq.gz"
+
+
+def get_file_ext_name_dot_ext():
+    """
+    Test get_file_ext with example.fastq.
+    """
+    assert get_file_ext("example.fastq") == "fastq"
+
+
+def get_file_ext_name():
+    """
+    Test get_file_ext with example.
+     """
+    assert get_file_ext("example") == ""
