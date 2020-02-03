@@ -11,8 +11,6 @@ from riboviz import provenance
 
 SAMPLE_NAME = "SampleName"
 """ Sample name column name """
-DESCRIPTION = "Description"
-""" Description column name """
 PROGRAM = "Program"
 """ Program column name """
 FILE = "File"
@@ -24,7 +22,7 @@ READ = "read"
 WRITE = "write"
 """ Write file value """
 
-HEADER = [SAMPLE_NAME, PROGRAM, FILE, READ_WRITE, DESCRIPTION]
+HEADER = [SAMPLE_NAME, PROGRAM, FILE, READ_WRITE]
 """ Workflow files log file header """
 
 INPUT = "input"
@@ -51,7 +49,6 @@ def create_log_file(log_file, delimiter="\t"):
 
 def log_files(log_file,
               program,
-              description,
               files_read,
               files_written,
               sample_name=None,
@@ -64,8 +61,6 @@ def log_files(log_file,
     :type log_file: str or unicode
     :param program: Program invoked during step
     :type program: str or unicode
-    :param description: Description of step
-    :type description: str or unicode
     :param files_read: Files read by program
     :type files_read: list(str or unicode)
     :param files_written: Files written by program
@@ -80,11 +75,9 @@ def log_files(log_file,
     if len(files_read) == 0 and len(files_written) == 0:
         return
     for read in files_read:
-        rows.append(get_log_entry(sample_name, description, program,
-                                  read, READ))
+        rows.append(get_log_entry(sample_name, program, read, READ))
     for write in files_written:
-        rows.append(get_log_entry(sample_name, description, program,
-                                  write, WRITE))
+        rows.append(get_log_entry(sample_name, program, write, WRITE))
     data = data.append(rows)
     data.to_csv(log_file, mode='a', sep=delimiter, index=False,
                 header=False)
@@ -106,11 +99,10 @@ def log_input_files(log_file,
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
-    log_files(log_file, INPUT, "", files, [], sample_name, delimiter)
+    log_files(log_file, INPUT, files, [], sample_name, delimiter)
 
 
 def get_log_entry(sample_name,
-                  description,
                   program,
                   file_name,
                   read_or_write):
@@ -120,22 +112,18 @@ def get_log_entry(sample_name,
 
     :param sample_name: Sample name
     :type sample_name: str or unicode
-    :param description: Description of step
-    :type description: str or unicode
     :param program: Program invoked during step
     :type program: str or unicode
     :param file_name: File name
     :type file_name: str or unicode
     :param read_or_write: READ or WRITE
     :type read_or_write: str or unicode
-    :return: Row with SAMPLE_NAME, DESCRIPTION, PROGRAM, FILE,
-    READ_WRITE keys
+    :return: Row with SAMPLE_NAME, PROGRAM, FILE, READ_WRITE keys
     :type row: dict
     :raises AssertionError: if read_or_write is not READ or WRITE
     """
     assert read_or_write in [READ, WRITE]
     log = {SAMPLE_NAME: sample_name,
-           DESCRIPTION: description,
            PROGRAM: program,
            FILE: file_name,
            READ_WRITE: read_or_write}
