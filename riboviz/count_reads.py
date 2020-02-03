@@ -93,6 +93,7 @@ def count_reads_inputs(df):
     for _, row in fq_df.iterrows():
         file_name = row[workflow_files_logger.FILE]
         row[NUM_READS] = fastq.count_sequences(file_name)
+        row[DESCRIPTION] = "Original reads"
         count_rows.append(row)
     return count_rows
 
@@ -119,6 +120,7 @@ def count_reads_cutadapt(df):
     row = fq_df.iloc[0]
     file_name = row[workflow_files_logger.FILE]
     row[NUM_READS] = fastq.count_sequences(file_name)
+    row[DESCRIPTION] = "Reads after removal of sequencing library adapters"
     return [row]
 
 
@@ -162,6 +164,7 @@ def count_reads_demultiplex_fastq(df):
             tag_df = deplex_df[
                 deplex_df[sample_sheets.SAMPLE_ID] == tag]
             row[NUM_READS] = tag_df.iloc[0][sample_sheets.NUM_READS]
+            row[DESCRIPTION] = "Demultiplexed reads"
             count_rows.append(row)
     return count_rows
 
@@ -188,9 +191,11 @@ def count_reads_hisat2(df):
         if file_name.lower().endswith("sam"):
             sequences, _ = sam_bam.count_sequences(file_name)
             row[NUM_READS] = sequences
+            row[DESCRIPTION] = "..."  # TODO
             count_rows.append(row)
         elif file_name.lower().endswith(tuple(fastq.FASTQ_EXTS)):
             row[NUM_READS] = fastq.count_sequences(file_name)
+            row[DESCRIPTION] = "..."  # TODO
             count_rows.append(row)
     return count_rows
 
@@ -225,6 +230,7 @@ def count_reads_trim_5p_mismatch(df):
     trim_data_df = pd.read_csv(trim_file_name, delimiter="\t", comment="#")
     trim_row = trim_data_df.iloc[0]
     row[NUM_READS] = trim_row[trim_5p_mismatch.NUM_WRITTEN]
+    row[DESCRIPTION] = "Reads after trimming of 5' mismatches and removal of those with more than 2 mismatches"
     return [row]
 
 
@@ -251,6 +257,7 @@ def count_reads_umi_tools_dedup(df):
     file_name = row[workflow_files_logger.FILE]
     sequences, _ = sam_bam.count_sequences(file_name)
     row[NUM_READS] = sequences
+    row[DESCRIPTION] = "Deduplicated reads"
     return [row]
 
 
