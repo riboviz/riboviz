@@ -12,10 +12,12 @@ from riboviz import params
 from riboviz import process_utils
 from riboviz import logging_utils
 from riboviz import sam_bam
+from riboviz import sample_sheets
 from riboviz import workflow_r
 from riboviz import workflow_files_logger
-from riboviz.tools import demultiplex_fastq as demultiplex_fastq_module
-from riboviz.tools import trim_5p_mismatch as trim_5p_mismatch_module
+from riboviz import demultiplex_fastq as demultiplex_fastq_module
+from riboviz.tools import demultiplex_fastq as demultiplex_fastq_tools_module
+from riboviz.tools import trim_5p_mismatch as trim_5p_mismatch_tools_module
 from riboviz.utils import value_in_dict
 
 
@@ -334,7 +336,7 @@ def trim_5p_mismatches(sample_id, orf_map_sam, orf_map_sam_clean,
     LOGGER.info(
         "Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: %s",
         log_file)
-    cmd = ["python", "-m", trim_5p_mismatch_module.__name__,
+    cmd = ["python", "-m", trim_5p_mismatch_tools_module.__name__,
            "-m", "2", "-i", orf_map_sam, "-o", orf_map_sam_clean,
            "-s", summary_file]
     process_utils.run_logged_command(
@@ -342,7 +344,7 @@ def trim_5p_mismatches(sample_id, orf_map_sam, orf_map_sam_clean,
     if not run_config.is_dry_run:
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
-            trim_5p_mismatch_module.__name__,
+            trim_5p_mismatch_tools_module.__name__,
             "Trim 5' mismatches from reads and remove reads with more than 2 mismatches",
             [orf_map_sam],
             [orf_map_sam_clean, summary_file],
@@ -741,7 +743,7 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
     :raise AssertionError: if python returns non-zero exit code
     """
     LOGGER.info("Demultiplex reads. Log: %s", log_file)
-    cmd = ["python", "-m", demultiplex_fastq_module.__name__,
+    cmd = ["python", "-m", demultiplex_fastq_tools_module.__name__,
            "-1", fastq, "-s", barcodes_file, "-o", deplex_dir,
            "-m", "2"]
     process_utils.run_logged_command(cmd, log_file,
@@ -749,9 +751,29 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
                                      run_config.is_dry_run)
     if not run_config.is_dry_run:
         deplex_files = glob.glob(os.path.join(deplex_dir, "*.*"))
+        num_reads_file = glob.glob(
+            os.path.join(deplex_dir,
+                         demultiplex_fastq_module.NUM_READS_FILE))[0]
+        unassigned_fq_file = glob.glob(
+            os.path.join(deplex_dir,
+                         sample_sheets.UNASSIGNED_TAG + ".*"))[0]
+        # Remove specific files to leave only fastq files.
+        deplex_files.remove(num_reads_file)
+        deplex_files.remove(unassigned_fq_file)
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
-            demultiplex_fastq_module.__name__,
+            demultiplex_fastq_tools_module.__name__,
             "Demultiplex reads",
             [fastq, barcodes_file],
-            deplex_files)
+            [num_reads_file, unassigned_fq_file])
+        deplex_files.sort()
+        for file_name in deplex_files:
+            # Extract sample ID from file name.
+            tag = os.path.basename(file_name).split(".")[0]
+            workflow_files_logger.log_files(
+                run_config.workflow_files_log_file,
+                demultiplex_fastq_tools_module.__name__,
+                "Demultiplex reads",
+                [],
+                [file_name],
+                tag)
