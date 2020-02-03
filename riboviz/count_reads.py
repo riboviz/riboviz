@@ -62,11 +62,13 @@ from riboviz import workflow_files_logger
 
 NUM_READS = "NumReads"
 """ NumReads column name """
+DESCRIPTION = "Description"
+""" Description column name """
 HEADER = [workflow_files_logger.SAMPLE_NAME,
           workflow_files_logger.PROGRAM,
           workflow_files_logger.FILE,
           NUM_READS,
-          workflow_files_logger.DESCRIPTION]
+          DESCRIPTION]
 """ Number of reads file header """
 
 

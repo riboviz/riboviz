@@ -19,8 +19,6 @@ FILE_FORMAT = "file{}_{}.txt"
 """ File name format """
 PROGRAM_FORMAT = "program{}"
 """ Program name format """
-DESCRIPTION_FORMAT = "description{}"
-""" Description format """
 SAMPLE_FORMAT = "sample{}"
 """ Sample name format """
 
@@ -58,7 +56,6 @@ def log_test_files(directory, log_file):
                  for f in range(0, NUM_FILES)]
         workflow_files_logger.log_files(log_file,
                                         PROGRAM_FORMAT.format(d),
-                                        DESCRIPTION_FORMAT.format(d),
                                         files,
                                         files,
                                         SAMPLE_FORMAT.format(d))
@@ -118,14 +115,11 @@ def test_get_log_entry(read_or_write):
     """
     row = workflow_files_logger.get_log_entry(
         "some sample",
-        "some description",
         "some program",
         "some file",
         read_or_write)
     assert row[workflow_files_logger.SAMPLE_NAME] == "some sample", \
         "Unexpected SAMPLE_NAME"
-    assert row[workflow_files_logger.DESCRIPTION] == "some description", \
-        "Unexpected DESCRIPTION"
     assert row[workflow_files_logger.PROGRAM] == "some program", \
         "Unexpected PROGRAM"
     assert row[workflow_files_logger.FILE] == "some file", \
@@ -141,7 +135,6 @@ def test_get_log_entry_invalid_read_or_write():
     """
     with pytest.raises(AssertionError):
         workflow_files_logger.get_log_entry("some sample",
-                                            "some description",
                                             "some program",
                                             "some file",
                                             "invalid")
@@ -174,7 +167,6 @@ def test_log_files(tsv_file, num_reads, num_writes, include_sample):
         workflow_files_logger.log_files(
             tsv_file,
             PROGRAM_FORMAT.format(tag),
-            DESCRIPTION_FORMAT.format(tag),
             read_files,
             write_files,
             SAMPLE_FORMAT.format(tag))
@@ -182,7 +174,6 @@ def test_log_files(tsv_file, num_reads, num_writes, include_sample):
         workflow_files_logger.log_files(
             tsv_file,
             PROGRAM_FORMAT.format(tag),
-            DESCRIPTION_FORMAT.format(tag),
             read_files,
             write_files)
     logs_df = pd.read_csv(tsv_file, sep="\t", comment="#")
@@ -196,8 +187,6 @@ def test_log_files(tsv_file, num_reads, num_writes, include_sample):
     for log in logs:
         assert log[workflow_files_logger.PROGRAM] == \
             PROGRAM_FORMAT.format(tag)
-        assert log[workflow_files_logger.DESCRIPTION] == \
-            DESCRIPTION_FORMAT.format(tag)
         if include_sample:
             assert log[workflow_files_logger.SAMPLE_NAME] == \
                 SAMPLE_FORMAT.format(tag)
@@ -250,8 +239,6 @@ def test_log_input_files(tsv_file, num_inputs, include_sample):
     # Pandas treats missing cells as nan, so convert to ""
     logs_df.fillna(value={workflow_files_logger.SAMPLE_NAME: ""},
                    inplace=True)
-    logs_df.fillna(value={workflow_files_logger.DESCRIPTION: ""},
-                   inplace=True)
     logs = logs_df.to_dict('records')
 
     assert len(logs) == num_inputs, \
@@ -259,7 +246,6 @@ def test_log_input_files(tsv_file, num_inputs, include_sample):
     for log in logs:
         assert log[workflow_files_logger.PROGRAM] == \
             workflow_files_logger.INPUT
-        assert log[workflow_files_logger.DESCRIPTION] == ""
         if include_sample:
             assert log[workflow_files_logger.SAMPLE_NAME] == \
                 SAMPLE_FORMAT.format(tag)
@@ -322,7 +308,6 @@ def test_validate_log_file_missing_file(tsv_file, tmp_test_dir):
     workflow_files_logger.log_files(
         tsv_file,
         PROGRAM_FORMAT.format(123),
-        DESCRIPTION_FORMAT.format(123),
         ["missing_file.txt"],
         [])
     with pytest.raises(AssertionError):

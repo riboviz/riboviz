@@ -39,8 +39,6 @@ The input file is assumed to be a TSV file with
 * `File`: Path to file read/written.
 * `Read/Write`: `read` if the file was read, `write` if the file was
   written.
-* `Description`: Human-readable description of the step at which this
-  file was read or written.
 
 The files logged in the workflow files log file must exist.
 
@@ -69,8 +67,8 @@ The following information is extracted:
 
 The output file is a TSV file with columns:
 
-* SampleName
-* Program
-* File
-* NumReads: Number of reads in the file.
-* Description
+* `SampleName`
+* `Program`
+* `File`
+* `NumReads`: Number of reads in the file.
+* `Description`: Human-readable description of the step.

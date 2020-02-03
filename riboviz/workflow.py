@@ -138,7 +138,6 @@ def build_indices(fasta, index_dir, ht_prefix, log_file, run_config):
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             "hisat2-build",
-            "Build indices for alignment",
             [fasta],
             index_files)
 
@@ -175,7 +174,6 @@ def cut_adapters(sample_id, adapter, original_fq, trimmed_fq,
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             "cutadapt",
-            "Cut out sequencing library adapters",
             [original_fq],
             [trimmed_fq],
             sample_id)
@@ -240,7 +238,6 @@ def extract_barcodes_umis(sample_id, original_fq, extract_fq, regexp,
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             "umitools extract",
-            "Extract barcodes and UMIs",
             [original_fq],
             [extract_fq],
             sample_id)
@@ -294,7 +291,6 @@ def map_to_r_rna(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             "hisat2",
-            "Remove rRNA or other contaminating reads by alignment to rRNA index files",
             [fastq] + index_files,
             [unmapped_fastq, mapped_sam],
             sample_id)
@@ -349,7 +345,6 @@ def map_to_orf(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             "hisat2",
-            "Align remaining reads to ORFs index files",
             [fastq] + index_files,
             [unmapped_fastq, mapped_sam],
             sample_id)
@@ -389,7 +384,6 @@ def trim_5p_mismatches(sample_id, orf_map_sam, orf_map_sam_clean,
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             trim_5p_mismatch_tools_module.__name__,
-            "Trim 5' mismatches from reads and remove reads with more than 2 mismatches",
             [orf_map_sam],
             [orf_map_sam_clean, summary_file],
             sample_id)
@@ -432,7 +426,6 @@ def sort_bam(sample_id, sam_file, bam_file, log_file, run_config):
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             "samtools view | samtools sort",
-            "Convert SAM files to BAM files and sort on genome",
             [sam_file],
             [bam_file],
             sample_id)
@@ -468,7 +461,6 @@ def index_bam(sample_id, bam_file, log_file, run_config):
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             "samtools index",
-            "Index BAM file",
             [bam_file],
             [sam_bam.BAM_BAI_FORMAT.format(bam_file)],
             sample_id)
@@ -502,7 +494,6 @@ def group_umis(sample_id, bam_file, groups_file, log_file, run_config):
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             "umi_tools group",
-            "Identify UMI groups",
             [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file)],
             [groups_file],
             sample_id)
@@ -540,7 +531,6 @@ def deduplicate_umis(sample_id, bam_file, dedup_bam_file,
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             "umi_tools dedup",
-            "Deduplicate UMIs",
             [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file)],
             [dedup_bam_file] + stats_files,
             sample_id)
@@ -592,7 +582,6 @@ def make_bedgraph(sample_id, bam_file, bedgraph_file, is_plus,
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             "bedtools",
-            "Calculate transcriptome coverage and save as a bedgraph",
             [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file)],
             [bedgraph_file],
             sample_id)
@@ -648,7 +637,6 @@ def bam_to_h5(sample_id, bam_file, h5_file, orf_gff_file, config,
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             workflow_r.BAM_TO_H5_R,
-            "Make length-sensitive alignments in H5 format",
             [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file), orf_gff_file],
             [h5_file],
             sample_id)
@@ -718,7 +706,6 @@ def generate_stats_figs(sample_id, h5_file, out_dir, config, log_file,
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             workflow_r.GENERATE_STATS_FIGS_R,
-            "Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets",
             [h5_file, config[params.ORF_FASTA_FILE]] + flag_files,
             tsv_files + pdf_files,
             sample_id)
@@ -761,7 +748,6 @@ def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             workflow_r.COLLATE_TPMS_R,
-            "Collate TPMs across sample results",
             [os.path.join(out_dir, sample, workflow_r.TPMS_TSV) for sample in samples],
             [tpms_file])
 
@@ -807,7 +793,6 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             demultiplex_fastq_tools_module.__name__,
-            "Demultiplex reads",
             [fastq, barcodes_file],
             [num_reads_file, unassigned_fq_file])
         deplex_files.sort()
@@ -817,7 +802,6 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
             workflow_files_logger.log_files(
                 run_config.workflow_files_log_file,
                 demultiplex_fastq_tools_module.__name__,
-                "Demultiplex reads",
                 [],
                 [file_name],
                 tag)

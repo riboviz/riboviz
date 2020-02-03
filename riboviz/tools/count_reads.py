@@ -24,8 +24,6 @@ riboviz.workflow_files_logger-consistent columns:
 * 'File': Path to file read/written.
 * 'Read/Write': 'read' if the file was read, 'write' if the file was
   written.
-* 'Description': Human-readable description of the step at which this
-  file was read or written.
 
 The files logged in the workflow files log file must exist.
 
@@ -54,11 +52,11 @@ Read counts for files produced at the following stages are calculated:
 
 The output file is a TSV file with columns:
 
-* SampleName
-* Program
-* File
-* NumReads: Number of reads in the file.
-* Description
+* 'SampleName'
+* 'Program'
+* 'File'
+* 'NumReads': Number of reads in the file.
+* 'Description': Human-readable description of the step.
 """
 import argparse
 from riboviz import count_reads
