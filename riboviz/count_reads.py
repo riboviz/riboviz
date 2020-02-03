@@ -243,6 +243,18 @@ def count_reads_umi_tools_dedup(df):
     return [row]
 
 
+COUNT_FNS = [count_reads_inputs,
+             count_reads_cutadapt,
+             count_reads_demultiplex_fastq,
+             count_reads_hisat2,
+             count_reads_trim_5p_mismatch,
+             count_reads_umi_tools_dedup]
+"""
+References to functions to handle counting of reads for each workflow
+processing stage
+"""
+
+
 def count_input_write_reads(df):
     """
 
@@ -283,33 +295,22 @@ def count_input_write_reads(df):
         (df[workflow_files_logger.READ_WRITE] == workflow_files_logger.WRITE)
     ]
     reads_df = pd.DataFrame(columns=HEADER)
-    # Replace Read/Write column with NumReads/
+    # Replace Read/Write column with NumReads so rows (Series) from
+    # logs_df can be reused when producing the processed DataFrame.
     index = logs_df.columns.get_loc(workflow_files_logger.READ_WRITE)
     logs_df = logs_df.drop(columns=workflow_files_logger.READ_WRITE)
     logs_df.insert(index, NUM_READS, 0)
-    # Note: steps not corresponding to a sample will have SAMPLE_NAME
+    # Process samples.
+    # Stages not corresponding to a specific sample have SAMPLE_NAME
     # == "".
     samples = logs_df[workflow_files_logger.SAMPLE_NAME].unique()
     for sample in samples:
-        sample_df = logs_df[logs_df[workflow_files_logger.SAMPLE_NAME] == sample]
-        rows = count_reads_inputs(sample_df)
-        if rows:
-            reads_df = reads_df.append(rows, ignore_index=True)
-        rows = count_reads_cutadapt(sample_df)
-        if rows:
-            reads_df = reads_df.append(rows, ignore_index=True)
-        rows = count_reads_demultiplex_fastq(sample_df)
-        if rows:
-            reads_df = reads_df.append(rows, ignore_index=True)
-        rows = count_reads_hisat2(sample_df)
-        if rows:
-            reads_df = reads_df.append(rows, ignore_index=True)
-        rows = count_reads_trim_5p_mismatch(sample_df)
-        if rows:
-            reads_df = reads_df.append(rows, ignore_index=True)
-        rows = count_reads_umi_tools_dedup(sample_df)
-        if rows:
-            reads_df = reads_df.append(rows, ignore_index=True)
+        sample_df = logs_df[logs_df[workflow_files_logger.SAMPLE_NAME]
+                            == sample]
+        for count_fn in COUNT_FNS:
+            rows = count_fn(sample_df)
+            if rows:
+                reads_df = reads_df.append(rows, ignore_index=True)
     return reads_df
 
 
