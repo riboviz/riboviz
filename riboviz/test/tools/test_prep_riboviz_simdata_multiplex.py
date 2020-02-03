@@ -20,6 +20,7 @@ import riboviz.tools
 import riboviz.validation
 from riboviz import demultiplex_fastq
 from riboviz import params
+from riboviz import workflow
 from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration_module  # Test fixture
 from riboviz.test.tools import run_prep_riboviz  # Test fixture
@@ -50,7 +51,7 @@ def test_adaptor_trimming(configuration_module):
         "multiplex_umi_barcode.fastq")
     actual_output = os.path.join(
         config[params.TMP_DIR],
-        prep_riboviz.ADAPTER_TRIM_FQ_FORMAT.format(
+        workflow.ADAPTER_TRIM_FQ_FORMAT.format(
             "multiplex_umi_barcode_adaptor"))
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
@@ -71,7 +72,7 @@ def test_barcode_umi_extract(configuration_module):
         "multiplex.fastq")
     actual_output = os.path.join(
         config[params.TMP_DIR],
-        prep_riboviz.UMI_EXTRACT_FQ_FORMAT.format(
+        workflow.UMI_EXTRACT_FQ_FORMAT.format(
             "multiplex_umi_barcode_adaptor"))
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
@@ -89,7 +90,7 @@ def test_deplex_num_reads(configuration_module):
     config, _ = configuration_module
     actual_dir = os.path.join(
         config[params.TMP_DIR],
-        prep_riboviz.DEPLEX_DIR_FORMAT.format(
+        workflow.DEPLEX_DIR_FORMAT.format(
             "multiplex_umi_barcode_adaptor"))
     actual_output = os.path.join(actual_dir,
                                  demultiplex_fastq.NUM_READS_FILE)
@@ -117,7 +118,7 @@ def test_deplex_reads(configuration_module, fastq):
     config, _ = configuration_module
     actual_dir = os.path.join(
         config[params.TMP_DIR],
-        prep_riboviz.DEPLEX_DIR_FORMAT.format(
+        workflow.DEPLEX_DIR_FORMAT.format(
             "multiplex_umi_barcode_adaptor"))
     actual_output = os.path.join(actual_dir, fastq)
     expected_output = os.path.join(
