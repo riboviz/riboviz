@@ -57,6 +57,7 @@ from riboviz import provenance
 from riboviz import sam_bam
 from riboviz import sample_sheets
 from riboviz import trim_5p_mismatch
+from riboviz import workflow
 from riboviz import workflow_files_logger
 
 
@@ -64,6 +65,13 @@ NUM_READS = "NumReads"
 """ NumReads column name """
 DESCRIPTION = "Description"
 """ Description column name """
+HISAT2_DESCRIPTIONS = {
+    workflow.NON_RRNA_FQ: "rRNA or other contaminating reads removed by alignment to rRNA index files",
+    workflow.RRNA_MAP_SAM: "Reads with rRNA and other contaminating reads removed by alignment to rRNA index files",
+    workflow.ORF_MAP_SAM: "Reads aligned to ORFs index files",
+    workflow.UNALIGNED_FQ: "Unaligned reads removed by alignment of remaining reads to ORFs index files"
+}
+""" Mapping of HISAT2 file names to escriptions """
 HEADER = [workflow_files_logger.SAMPLE_NAME,
           workflow_files_logger.PROGRAM,
           workflow_files_logger.FILE,
@@ -188,14 +196,23 @@ def count_reads_hisat2(df):
     # DataFrame.
     for _, row in program_df.iterrows():
         file_name = row[workflow_files_logger.FILE]
+        local_file_name = os.path.basename(file_name)
+        if local_file_name in HISAT2_DESCRIPTIONS:
+            description = HISAT2_DESCRIPTIONS[local_file_name]
+        else:
+            description = None
         if file_name.lower().endswith("sam"):
             sequences, _ = sam_bam.count_sequences(file_name)
             row[NUM_READS] = sequences
-            row[DESCRIPTION] = "..."  # TODO
+            if description is None:
+                descriptin = "Aligned reads"
+            row[DESCRIPTION] = description
             count_rows.append(row)
         elif file_name.lower().endswith(tuple(fastq.FASTQ_EXTS)):
             row[NUM_READS] = fastq.count_sequences(file_name)
-            row[DESCRIPTION] = "..."  # TODO
+            if description is None:
+                descriptin = "Unaligned reads"
+            row[DESCRIPTION] = description
             count_rows.append(row)
     return count_rows
 
