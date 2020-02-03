@@ -50,6 +50,7 @@ The output file is a TSV file with columns:
 * Description
 """
 import pandas as pd
+from riboviz import demultiplex_fastq
 from riboviz import fastq
 from riboviz import provenance
 from riboviz import sam_bam
@@ -113,7 +114,6 @@ def count_reads_cutadapt(df):
         return []
     # cutadapt outputs one file, the FASTQ file.
     row = list(program_df.iterrows())[0][1]
-#    row = program_df.iloc[0]
     file_name = row[workflow_files_logger.FILE]
     row[NUM_READS] = fastq.count_sequences(file_name)
     return [row]
@@ -170,10 +170,12 @@ def count_reads_hisat2(df):
     count_rows = []
     for _, row in files_df.iterrows():
         file_name = row[workflow_files_logger.FILE]
-        # TODO handle both values - (sequences, primary sequences)
-        counts = sam_bam.count_sequences(file_name)
-        row[NUM_READS] = counts
+        sequences, primary_sequences = sam_bam.count_sequences(file_name)
+        row[NUM_READS] = sequences
         count_rows.append(row)
+        primary_row = row.copy()
+        primary_row[NUM_READS] = primary_sequences
+        count_rows.append(primary_row)
     files_df = program_df[program_df[
         workflow_files_logger.FILE].str.lower().str.endswith(tuple(fastq.FASTQ_EXTS))]
     for _, row in files_df.iterrows():
@@ -210,10 +212,11 @@ def count_reads_trim_5p_mismatch(df):
     # trim_5p_mismatch outputs one SAM file.
     row = list(files_df.iterrows())[0][1]
     file_name = row[workflow_files_logger.FILE]
-    # TODO handle both values - (sequences, primary sequences)
-    counts = sam_bam.count_sequences(file_name)
-    row[NUM_READS] = counts
-    return [row]
+    sequences, primary_sequences = sam_bam.count_sequences(file_name)
+    row[NUM_READS] = sequences
+    primary_row = row.copy()
+    primary_row[NUM_READS] = primary_sequences
+    return [row, primary_row]
 
 
 def count_reads_umi_tools_dedup(df):
@@ -237,10 +240,11 @@ def count_reads_umi_tools_dedup(df):
     # umi_tools dedup outputs one BAM file.
     row = list(files_df.iterrows())[0][1]
     file_name = row[workflow_files_logger.FILE]
-    # TODO handle both values - (sequences, primary sequences)
-    counts = sam_bam.count_sequences(file_name)
-    row[NUM_READS] = counts
-    return [row]
+    sequences, primary_sequences = sam_bam.count_sequences(file_name)
+    row[NUM_READS] = sequences
+    primary_row = row.copy()
+    primary_row[NUM_READS] = primary_sequences
+    return [row, primary_row]
 
 
 COUNT_FNS = [count_reads_inputs,
