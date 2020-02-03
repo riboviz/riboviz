@@ -35,7 +35,8 @@ Usage:
 Reference:
 
 * [create_fastq_simdata.py example FASTQ file generator](./docs/create-fastq-simdata.md)
-* [demultiplex-fastq.py fastq demultiplexer](./docs/demultiplex-fastq.md)
+* [demultiplex_fastq.py fastq demultiplexer](./docs/demultiplex-fastq.md)
+* [count_reads.py reads counter](./docs/count-reads.md)
 * [Content and provenance of repository data files](./docs/data.md)
 * [Structure of HDF5 data](./docs/hdf5-data.md)
 
