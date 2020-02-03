@@ -147,8 +147,6 @@ def count_reads_demultiplex_fastq(df):
     tsv_df = program_df[program_df[
         workflow_files_logger.FILE].str.lower().str.endswith(
             demultiplex_fastq.NUM_READS_FILE)]
-    if tsv_df.empty:
-        return []
     tsv_file_name = tsv_df.iloc[0][workflow_files_logger.FILE]
     deplex_df = pd.read_csv(tsv_file_name, delimiter="\t", comment="#")
     # Iterate through FASTQ entries and lookup counts in TSV summary
@@ -161,8 +159,6 @@ def count_reads_demultiplex_fastq(df):
             # Look up sample ID in summary file data.
             tag_df = deplex_df[
                 deplex_df[sample_sheets.SAMPLE_ID] == tag]
-            if tag_df.empty:
-                continue
             row[NUM_READS] = tag_df.iloc[0][sample_sheets.NUM_READS]
             count_rows.append(row)
     return count_rows
@@ -172,10 +168,7 @@ def count_reads_hisat2(df):
     """
     Extract "hisat2" rows from DataFrame, count number of reads in
     each FASTQ and SAM file output, and return list of Series, one per
-    row, with NumReads set to the number of reads in the files.
-
-    For each SAM file two Series are included, one with the total
-    number of reads and one with the number of primary reads only/
+    file, with NumReads set to the number of reads in the files.
 
     :param df: DataFrame with SampleName, Program, File, Description
     columns
@@ -191,14 +184,9 @@ def count_reads_hisat2(df):
     for _, row in program_df.iterrows():
         file_name = row[workflow_files_logger.FILE]
         if file_name.lower().endswith("sam"):
-            # TODO decide whether to record sequences or
-            # primary_sequences.
-            sequences, primary_sequences = sam_bam.count_sequences(file_name)
+            sequences, _ = sam_bam.count_sequences(file_name)
             row[NUM_READS] = sequences
             count_rows.append(row)
-            primary_row = row.copy()
-            primary_row[NUM_READS] = primary_sequences
-            count_rows.append(primary_row)
         elif file_name.lower().endswith(tuple(fastq.FASTQ_EXTS)):
             row[NUM_READS] = fastq.count_sequences(file_name)
             count_rows.append(row)
@@ -210,13 +198,8 @@ def count_reads_trim_5p_mismatch(df):
     Extract "riboviz.tools.trim_5p_mismatch" rows from DataFrame,
     count number of reads in the SAM file output, as recorded in the
     TSV file output by "trim_5p_mismatch" (to save having to traverse
-    the output SAM file) and return list of Series, for this
+    the output SAM file) and return list of single Series, for this
     file, with NumReads set to the number of reads in the output.
-
-    For each SAM file two Series are included, one with the total
-    number of reads and one with the number of primary reads only,
-    both derived from the SAM file, and one with the number of reads
-    written as recorded in the TSV file output by "trim_5p_mismatch".
 
     :param df: DataFrame with SampleName, Program, File, Description
     columns
@@ -230,38 +213,24 @@ def count_reads_trim_5p_mismatch(df):
         workflow_files_logger.FILE].str.lower().str.endswith("sam")]
     if sam_df.empty:
         return []
-    count_rows = []
     # trim_5p_mismatch outputs one SAM file.
     row = sam_df.iloc[0]
-    file_name = row[workflow_files_logger.FILE]
-    # TODO decide whether to record sequences or primary_sequences
-    sequences, primary_sequences = sam_bam.count_sequences(file_name)
-    row[NUM_READS] = sequences
-    count_rows.append(row)
-    primary_row = row.copy()
-    primary_row[NUM_READS] = primary_sequences
-    count_rows.append(primary_row)
-    # TODO decide whether to retain use of TSV file.
     tsv_df = program_df[program_df[
         workflow_files_logger.FILE].str.lower().str.endswith(
             trim_5p_mismatch.TRIM_5P_MISMATCH_FILE)]
-    if tsv_df.empty:
-        return count_rows
     # trim_5p_mismatch outputs one TSV file.
     trim_file_name = tsv_df.iloc[0][workflow_files_logger.FILE]
     trim_data_df = pd.read_csv(trim_file_name, delimiter="\t", comment="#")
     trim_row = trim_data_df.iloc[0]
-    summary_row = row.copy()
-    summary_row[NUM_READS] = trim_row[trim_5p_mismatch.NUM_WRITTEN]
-    count_rows.append(summary_row)
-    return count_rows
+    row[NUM_READS] = trim_row[trim_5p_mismatch.NUM_WRITTEN]
+    return [row]
 
 
 def count_reads_umi_tools_dedup(df):
     """
-    Extract "umi_tools dedup" program_df from DataFrame, count number of
-    reads in the BAM file output, and return list of Series, one per
-    row, with NumReads set to the number of reads in the files.
+    Extract "umi_tools dedup" program_df from DataFrame, count number
+    of reads in the BAM file output, and return single Series, for
+    this file, with NumReads set to the number of reads in the files.
 
     :param df: DataFrame with SampleName, Program, File, Description
     columns
@@ -269,22 +238,18 @@ def count_reads_umi_tools_dedup(df):
     :return: Filtered rows with NumReads set
     :rtype: list(pandas.core.frame.Series)
     """
-    # TODO decide whether to record sequences or primary_sequences
     bam_df = df[
         (df[workflow_files_logger.PROGRAM] == "umi_tools dedup")
         &
         (df[workflow_files_logger.FILE].str.lower().str.endswith("bam"))]
     if bam_df.empty:
         return []
-    # TODO decide whether to record sequences or primary_sequences
     # umi_tools dedup outputs one BAM file.
     row = bam_df.iloc[0]
     file_name = row[workflow_files_logger.FILE]
-    sequences, primary_sequences = sam_bam.count_sequences(file_name)
+    sequences, _ = sam_bam.count_sequences(file_name)
     row[NUM_READS] = sequences
-    primary_row = row.copy()
-    primary_row[NUM_READS] = primary_sequences
-    return [row, primary_row]
+    return [row]
 
 
 def count_input_write_reads(df):
