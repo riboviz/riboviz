@@ -10,6 +10,7 @@ import riboviz.test
 import riboviz.tools
 import riboviz.validation
 from riboviz import params
+from riboviz import workflow
 from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration  # Test fixture
 

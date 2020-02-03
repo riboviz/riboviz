@@ -21,6 +21,7 @@ import riboviz.tools
 import riboviz.validation
 from riboviz import params
 from riboviz import umi_tools
+from riboviz import workflow
 from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration_module  # Test fixture
@@ -54,7 +55,7 @@ def test_adaptor_trimming(configuration_module, sample_id):
     actual_output = os.path.join(
         config[params.TMP_DIR],
         sample_id,
-        prep_riboviz.ADAPTER_TRIM_FQ)
+        workflow.ADAPTER_TRIM_FQ)
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
 
@@ -78,7 +79,7 @@ def test_umi_extract(configuration_module, sample_id):
     actual_output = os.path.join(
         config[params.TMP_DIR],
         sample_id,
-        prep_riboviz.UMI_EXTRACT_FQ)
+        workflow.UMI_EXTRACT_FQ)
     riboviz.validation.equal_fastq(expected_output, actual_output)
 
 
@@ -97,7 +98,7 @@ def check_umi_groups(config, sample_id, num_groups):
     tmp_dir = config[params.TMP_DIR]
     groups_tsv = os.path.join(tmp_dir,
                               sample_id,
-                              prep_riboviz.POST_DEDUP_GROUPS_TSV)
+                              workflow.POST_DEDUP_GROUPS_TSV)
     groups = pd.read_csv(groups_tsv, sep="\t")
     assert groups.shape[0] == num_groups, \
         ("Expected %d unique groups but found %d"
