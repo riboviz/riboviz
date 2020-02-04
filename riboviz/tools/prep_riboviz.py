@@ -652,16 +652,6 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
 
     log_file = os.path.join(logs_dir, "collate_tpms.log")
     workflow.collate_tpms(out_dir, processed_samples, log_file, run_config)
-    if not is_dry_run:
-        LOGGER.info("Validating workflow files_log file: %s",
-                    workflow_files_log_file)
-        try:
-            workflow_files_logger.validate_log_file(
-                workflow_files_log_file,
-                [index_dir, tmp_dir, out_dir])
-        except AssertionError as e:
-            LOGGER.warning(e)
-
     LOGGER.info("Completed")
 
 
