@@ -4,7 +4,6 @@ RiboViz configuration parameters.
 
 # Input and output directories.
 CMD_FILE = "cmd_file"
-WORKFLOW_FILES_LOG_FILE = "workflow_files_log_file"
 INPUT_DIR = "dir_in"
 INDEX_DIR = "dir_index"
 LOGS_DIR = "dir_logs"

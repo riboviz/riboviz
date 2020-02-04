@@ -3,7 +3,6 @@ dir_out: vignette/simdata_multiplex_output # Output directory
 dir_tmp: vignette/simdata_multiplex_tmp # Intermediate files directory
 dir_logs: vignette/simdata_multiplex_logs # Log files directory
 cmd_file: run_riboviz_simdata_multiplex.sh # Bash commands file
-workflow_files_log_file: workflow_files_simdata_multiplex.tsv # Workflow file log
 rrna_fasta_file: vignette/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning to
 orf_fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa # ORF file to align to
 orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3 # GFF2/GFF3 file for ORFs

@@ -147,9 +147,13 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `3ntframe_bygene.tsv`
 * `3ntframe_propbygene.pdf`
 
-A summary file is also put in the output directory (`dir_out`):
+A summary file is also put in the output directory:
 
 * `TPMs_collated.tsv`: file with the transcripts per million (tpm) for all successfully processed samples.
+
+In addition, a [workflow files log file](#workflow-files-log-file) is also put into the output directory:
+
+* `workflow_files.tsv`.
 
 ---
 
@@ -233,7 +237,7 @@ collate_tpms.log
 
 ## Workflow files log file
 
-`prep_riboviz.py` will capture information about the files read and written at each step of the workflow. The file location is specified via a `workflow_files_log_file` configuration parameter.
+`prep_riboviz.py` will capture information about the files read and written at each step of the workflow. The file file, `workflow_files.tsv`, is written into the output directory.
 
 The workflow files log file is a tab-separated values (TSV) file with the following columns:
 
