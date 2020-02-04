@@ -135,7 +135,6 @@ import os
 import os.path
 import sys
 import yaml
-from riboviz import count_reads
 from riboviz import demultiplex_fastq
 from riboviz import fastq
 from riboviz import file_names
@@ -655,12 +654,12 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     log_file = os.path.join(logs_dir, "collate_tpms.log")
     workflow.collate_tpms(out_dir, processed_samples, log_file, run_config)
 
-    if not is_dry_run and value_in_dict(params.COUNT_READS, config):
+    if value_in_dict(params.COUNT_READS, config):
         log_file = os.path.join(logs_dir, "count_reads.log")
         read_counts_file = os.path.join(out_dir,
                                         file_names.READ_COUNTS_FILE)
-        workflow.count_reads(read_counts_file, log_file, run_config)
-
+        workflow.count_reads(in_dir, tmp_dir, out_dir,
+                             read_counts_file, log_file, run_config)
     LOGGER.info("Completed")
 
 

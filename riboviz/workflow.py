@@ -764,11 +764,19 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
                 tag)
 
 
-def count_reads(read_counts_file, log_file, run_config):
+def count_reads(input_dir, tmp_dir, output_dir, read_counts_file,
+                log_file, run_config):
     """
-    Count reads using count_reads.py. The workflow files logs file in
-    run_config is used as the input file.
+    Count reads using count_reads.py.
 
+    :param input_dir: Input files directory
+    :type input_dir: str or unicode
+    :param tmp_dir: Temporary files directory
+    :type tmp_dir: str or unicode
+    :param output_dir: Output files directory
+    :type output_dir: str or unicode
+    :param reads_file: Reads file output
+    :type reads_file: str or unicode
     :param read_counts_file: File to output read counts to.
     :type read_counts_file: str or unicode
     :param log_file: Log file
@@ -780,13 +788,13 @@ def count_reads(read_counts_file, log_file, run_config):
     """
     LOGGER.info("Count reads. Log: %s", log_file)
     cmd = ["python", "-m", count_reads_module.__name__,
-           "-i", run_config.workflow_files_log_file,
-           "-o", read_counts_file]
-    # Do not log command in bash script as there will be no
-    # workflow files log file for it to run on.
+           "-i", input_dir,
+           "-t", tmp_dir,
+           "-o", output_dir,
+           "-r", read_counts_file]
     process_utils.run_logged_command(cmd,
                                      log_file,
-                                     None,
+                                     run_config.cmd_file,
                                      run_config.is_dry_run)
     if not run_config.is_dry_run:
         workflow_files_logger.log_files(
