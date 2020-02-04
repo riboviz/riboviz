@@ -32,8 +32,6 @@ RunConfigTuple = collections.namedtuple(
 
 DEFAULT_CMD_FILE = "run_riboviz_vignette.sh"
 """ Default command file """
-DEFAULT_WORKFLOW_FILES_LOG_FILE = "workflow_files_vignette.tsv"
-""" Default workflow files log file """
 
 ADAPTER_TRIM_FQ = "trim.fq"
 """ Adapter trimmed reads """
@@ -73,6 +71,8 @@ MINUS_BEDGRAPH = "minus.bedgraph"
 """ bedgraph of reads from minus strand """
 PLUS_BEDGRAPH = "plus.bedgraph"
 """ bedgraph of reads from plus strand """
+WORKFLOW_FILES_LOG_FILE = "workflow_files.tsv"
+""" Workflow files log file """
 
 
 logging_utils.configure_logging()

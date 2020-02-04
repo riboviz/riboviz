@@ -122,10 +122,6 @@ processes ("num_processes"):
 Commands that are submitted to bash are recorded within a file
 specified by a "cmd_file" configuration parameter.
 
-Information on the tools used, the files read and written are logged
-within a file specified by a "workflow_file_log_file" configuration
-parameter.
-
 If "--dry-run" is provided then the commands submitted to bash will
 not be executed. This can be useful for both seeing what commands will
 be run, and validating the configuration, without actually running
@@ -478,22 +474,32 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
         os.remove(cmd_file)
     LOGGER.info("Command file: %s", cmd_file)
 
-    if value_in_dict(params.WORKFLOW_FILES_LOG_FILE, config):
-        workflow_files_log_file = config[params.WORKFLOW_FILES_LOG_FILE]
-    else:
-        workflow_files_log_file = workflow.DEFAULT_WORKFLOW_FILES_LOG_FILE
-    if not is_dry_run:
-        if os.path.exists(workflow_files_log_file):
-            os.remove(workflow_files_log_file)
-        LOGGER.info("Workflow files log file: %s",
-                    workflow_files_log_file)
-        workflow_files_logger.create_log_file(workflow_files_log_file)
-
     if value_in_dict(params.NUM_PROCESSES, config):
         nprocesses = int(config[params.NUM_PROCESSES])
     else:
         nprocesses = 1
     LOGGER.info("Number of processes: %d", nprocesses)
+
+    index_dir = config[params.INDEX_DIR]
+    tmp_dir = config[params.TMP_DIR]
+    out_dir = config[params.OUTPUT_DIR]
+    base_logs_dir = config[params.LOGS_DIR]
+    logs_dir = os.path.join(
+        base_logs_dir, datetime.now().strftime('%Y%m%d-%H%M%S'))
+    dirs = [index_dir, tmp_dir, out_dir, logs_dir]
+    for directory in dirs:
+        workflow.create_directory(directory, cmd_file, is_dry_run)
+
+    if not is_dry_run:
+        workflow_files_log_file = os.path.join(
+            out_dir, workflow.WORKFLOW_FILES_LOG_FILE)
+        if os.path.exists(workflow_files_log_file):
+            os.remove(workflow_files_log_file)
+        LOGGER.info("Workflow files log file: %s",
+                    workflow_files_log_file)
+        workflow_files_logger.create_log_file(workflow_files_log_file)
+    else:
+        workflow_files_log_file = None    
 
     # Check existence of all non-sample-specific files to avoid having
     # to recheck them when processing each sample.
@@ -521,16 +527,6 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
             if not is_dry_run:
                 workflow_files_logger.log_input_files(
                     workflow_files_log_file, [input_file])
-
-    index_dir = config[params.INDEX_DIR]
-    tmp_dir = config[params.TMP_DIR]
-    out_dir = config[params.OUTPUT_DIR]
-    base_logs_dir = config[params.LOGS_DIR]
-    logs_dir = os.path.join(
-        base_logs_dir, datetime.now().strftime('%Y%m%d-%H%M%S'))
-    dirs = [index_dir, tmp_dir, out_dir, logs_dir]
-    for directory in dirs:
-        workflow.create_directory(directory, cmd_file, is_dry_run)
 
     run_config = workflow.RunConfigTuple(
         r_scripts,
