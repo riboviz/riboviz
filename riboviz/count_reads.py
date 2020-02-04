@@ -251,7 +251,7 @@ def trim_5p_mismatch_sam(tmp_dir, sample):
     # Look for trim_5p_mismatch.tsv.
     tsv_files = glob.glob(os.path.join(
         tmp_dir, sample, trim_5p_mismatch.TRIM_5P_MISMATCH_FILE))
-    if not tsv_files:
+    if tsv_files:
         tsv_file = tsv_files[0]
         trim_data = pd.read_csv(tsv_file, delimiter="\t", comment="#")
         trim_row = trim_data.iloc[0]
