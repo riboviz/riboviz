@@ -59,6 +59,7 @@ The directories are assumed to hold the following content:
         unaligned.fq
     output/
       TPMs_collated.tsv
+      read_counts.tsv
       workflow_files.tsv
       WT3AT/
         3nt_periodicity.pdf
@@ -188,7 +189,7 @@ def test_index(expected, prefix, index):
     workflow.NON_RRNA_FQ,
     workflow.ADAPTER_TRIM_FQ,
     workflow.UNALIGNED_FQ])
-def test_tmp_fq(expected, sample, file_name):
+def test_sample_tmp_fq(expected, sample, file_name):
     """
     Test tmp/*.fq files for equality.
 
@@ -211,7 +212,7 @@ def test_tmp_fq(expected, sample, file_name):
     workflow.ORF_MAP_CLEAN_SAM,
     workflow.ORF_MAP_SAM,
     workflow.RRNA_MAP_SAM])
-def test_tmp_sam(expected, scratch_directory, sample, file_name):
+def test_sample_tmp_sam(expected, scratch_directory, sample, file_name):
     """
     Test tmp/*.sam files for equality. The SAM files are sorted into
     temporary SAM files which are then compared for equality.
@@ -246,7 +247,7 @@ def test_tmp_sam(expected, scratch_directory, sample, file_name):
 @pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
 @pytest.mark.parametrize("file_name", [
     trim_5p_mismatch.TRIM_5P_MISMATCH_FILE])
-def test_tmp_tsv(expected, sample, file_name):
+def test_sample_tmp_tsv(expected, sample, file_name):
     """
     Test tmp/*tsv files for equality.
 
@@ -265,7 +266,7 @@ def test_tmp_tsv(expected, sample, file_name):
 
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
-def test_output_bai(expected, sample):
+def test_sample_output_bai(expected, sample):
     """
     Test output/*.bai files for equality.
 
@@ -283,7 +284,7 @@ def test_output_bai(expected, sample):
 
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
-def test_output_bam(expected, sample):
+def test_sample_output_bam(expected, sample):
     """
     Test output/*.bam files for equality. The BAM files are assumed to
     be sorted by leftmost coordinate position.
@@ -305,7 +306,7 @@ def test_output_bam(expected, sample):
 @pytest.mark.parametrize("file_name", [
     workflow.MINUS_BEDGRAPH,
     workflow.PLUS_BEDGRAPH])
-def test_output_bedgraph(expected, sample, file_name):
+def test_sample_output_bedgraph(expected, sample, file_name):
     """
     Test output/*.bedgraph files for equality.
 
@@ -324,7 +325,7 @@ def test_output_bedgraph(expected, sample, file_name):
 
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
-def test_output_h5(expected, sample):
+def test_sample_output_h5(expected, sample):
     """
     Test output/*.h5 files for equality.
 
@@ -350,7 +351,7 @@ def test_output_h5(expected, sample):
                           workflow_r.READ_LENGTHS_TSV,
                           workflow_r.THREE_NT_FRAME_BY_GENE_TSV,
                           workflow_r.TPMS_TSV])
-def test_output_tsv(expected, sample, file_name):
+def test_sample_output_tsv(expected, sample, file_name):
     """
     Test output/*tsv files for equality.
 
@@ -378,7 +379,7 @@ def test_output_tsv(expected, sample, file_name):
                           workflow_r.START_CODON_RIBOGRID_BAR_PDF,
                           workflow_r.START_CODON_RIBOGRID_PDF,
                           workflow_r.THREE_NT_FRAME_PROP_BY_GENE_PDF])
-def test_output_pdf(expected, sample, file_name):
+def test_sample_output_pdf(expected, sample, file_name):
     """
     Test output/*pdf files for equality.
 
@@ -396,30 +397,20 @@ def test_output_pdf(expected, sample, file_name):
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
-def test_output_tpms_collated_tsv(expected):
+@pytest.mark.parametrize("file_name",
+                         [workflow_r.TPMS_COLLATED_TSV,
+                          workflow.READ_COUNTS_FILE,
+                          workflow.WORKFLOW_FILES_LOG_FILE])
+def test_output_tsv(expected, file_name):
     """
-    Test output/TPMs_collated.tsv files for equality.
+    Test output/*.tsv files for equality.
 
     :param expected: expected directory
     (pytest fixture defined in conftest.py)
     :type expected: str or unicode
+    :param file_name: content e.g. TPMs_collated.tsv
+    :type file_name: str or unicode
     """
-    file_name = workflow_r.TPMS_COLLATED_TSV
-    validation.compare(
-        os.path.join(expected, OUTPUT_DIR, file_name),
-        os.path.join(test.VIGNETTE_OUTPUT_DIR, file_name))
-
-
-@pytest.mark.usefixtures("run_prep_riboviz")
-def test_output_workflow_files_tsv(expected):
-    """
-    Test output/workflow_files.tsv files for equality.
-
-    :param expected: expected directory
-    (pytest fixture defined in conftest.py)
-    :type expected: str or unicode
-    """
-    file_name = workflow.WORKFLOW_FILES_LOG_FILE
     validation.compare(
         os.path.join(expected, OUTPUT_DIR, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, file_name))

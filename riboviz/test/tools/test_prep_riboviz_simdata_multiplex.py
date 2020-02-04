@@ -180,4 +180,6 @@ def test_workflow_files_tsv(configuration_module):
         [config[params.INDEX_DIR],
          config[params.TMP_DIR],
          config[params.OUTPUT_DIR]],
-         [workflow_files_log_file])
+         [os.path.join(config[params.OUTPUT_DIR],
+                       workflow.READ_COUNTS_FILE),
+          workflow_files_log_file])
