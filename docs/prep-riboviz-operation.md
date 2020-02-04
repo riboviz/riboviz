@@ -183,6 +183,7 @@ hisat2_build_orf.log
   09_bam_to_h5.log
   10_generate_stats_figs.log
 collate_tpms.log
+count_reads.log
 ```
 
 If deduplication is enabled (if `dedup_umis: TRUE`), then the following log files are produced:
@@ -207,6 +208,7 @@ hisat2_build_orf.log
   14_bam_to_h5.log
   15_generate_stats_figs.log
 collate_tpms.log
+count_reads.log
 ```
 
 If a multiplexed file (`multiplex_fq_files`) specified, then the following log files are produced:
@@ -232,6 +234,7 @@ demultiplex_fastq.log
   12_bam_to_h5.log
   13_generate_stats_figs.log
 collate_tpms.log
+count_reads.log
 ```
 
 ---

@@ -15,13 +15,11 @@ import os
 import pytest
 import pandas as pd
 import riboviz
-import riboviz.process_utils
 import riboviz.test
-import riboviz.tools
-import riboviz.validation
+from riboviz import file_names
 from riboviz import params
 from riboviz import umi_tools
-from riboviz import workflow
+from riboviz import validation
 from riboviz import workflow_files_logger
 from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
@@ -56,8 +54,8 @@ def test_adaptor_trimming(configuration_module, sample_id):
     actual_output = os.path.join(
         config[params.TMP_DIR],
         sample_id,
-        workflow.ADAPTER_TRIM_FQ)
-    riboviz.validation.equal_fastq(expected_output, actual_output)
+        file_names.ADAPTER_TRIM_FQ)
+    validation.equal_fastq(expected_output, actual_output)
 
 
 @pytest.mark.parametrize("sample_id", [riboviz.test.SIMDATA_UMI_SAMPLE])
@@ -80,8 +78,8 @@ def test_umi_extract(configuration_module, sample_id):
     actual_output = os.path.join(
         config[params.TMP_DIR],
         sample_id,
-        workflow.UMI_EXTRACT_FQ)
-    riboviz.validation.equal_fastq(expected_output, actual_output)
+        file_names.UMI_EXTRACT_FQ)
+    validation.equal_fastq(expected_output, actual_output)
 
 
 def check_umi_groups(config, sample_id, num_groups):
@@ -99,7 +97,7 @@ def check_umi_groups(config, sample_id, num_groups):
     tmp_dir = config[params.TMP_DIR]
     groups_tsv = os.path.join(tmp_dir,
                               sample_id,
-                              workflow.POST_DEDUP_GROUPS_TSV)
+                              file_names.POST_DEDUP_GROUPS_TSV)
     groups = pd.read_csv(groups_tsv, sep="\t")
     assert groups.shape[0] == num_groups, \
         ("Expected %d unique groups but found %d"
@@ -210,12 +208,10 @@ def test_workflow_files_tsv(configuration_module):
     config, _ = configuration_module
     workflow_files_log_file = os.path.join(
         config[params.OUTPUT_DIR],
-        workflow.WORKFLOW_FILES_LOG_FILE)
+        file_names.WORKFLOW_FILES_LOG_FILE)
     workflow_files_logger.validate_log_file(
         workflow_files_log_file,
         [config[params.INDEX_DIR],
          config[params.TMP_DIR],
          config[params.OUTPUT_DIR]],
-         [os.path.join(config[params.OUTPUT_DIR],
-                       workflow.READ_COUNTS_FILE),
-          workflow_files_log_file])
+         [workflow_files_log_file])
