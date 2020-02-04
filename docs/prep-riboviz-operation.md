@@ -151,9 +151,10 @@ A summary file is also put in the output directory:
 
 * `TPMs_collated.tsv`: file with the transcripts per million (tpm) for all successfully processed samples.
 
-In addition, a [workflow files log file](#workflow-files-log-file) is also put into the output directory:
+In addition, the following files are also put into the output directory:
 
-* `workflow_files.tsv`.
+* `workflow_files.tsv`: a [workflow files log file](#workflow-files-log-file).
+* `read_counts.tsv`: a [read counts file](#read-counts-file) ((only if `count_reads: TRUE`).
 
 ---
 
@@ -237,7 +238,7 @@ collate_tpms.log
 
 ## Workflow files log file
 
-`prep_riboviz.py` will capture information about the files read and written at each step of the workflow. The file file, `workflow_files.tsv`, is written into the output directory.
+`prep_riboviz.py` will capture information about the files read and written at each step of the workflow. The file, `workflow_files.tsv`, is written into the output directory.
 
 The workflow files log file is a tab-separated values (TSV) file with the following columns:
 
@@ -290,4 +291,47 @@ WT3AT	generate_stats_figs.R	vignette/output/WT3AT/read_lengths.pdf	write
 	collate_tpms.R	vignette/output/WTnone/tpms.tsv	read
 	collate_tpms.R	vignette/output/WT3AT/tpms.tsv	read
 	collate_tpms.R	vignette/output/TPMs_collated.tsv	write
+```
+
+---
+
+## Read counts file
+
+`prep_riboviz.py` will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is derived by processing files in the temporary and output directories, with the aid of the [workflow files log file](#workflow-files-log-file). The read counts file, `read_counts.tsv`, is written into the output directory.
+
+The reads counts file is a tab-separated values (TSV) file with the following columns:
+
+* `SampleName`: Name of the sample to which this file belongs. This is an empty value if the step was not sample-specific (e.g. an input file or a multiplexed FASTQ file).
+* `Program`: Program that wrote the file. The special token `input` denotes input files.
+* `File`: Path to file.
+* `NumReads`: Number of reads in the file.
+* `Description`: Human-readable description of the file contents.
+
+The following information is included:
+
+* Input files: number of reads in the FASTQ files used as inputs.
+* `cutadapt`: number of reads in the FASTQ file output.
+* `riboviz.tools.demultiplex_fastq`: number of reads in the FASTQ files output, as recorded in the `num_reads.tsv` file output.
+* `hisat2`: number of reads in the SAM file and FASTQ file output.
+* `riboviz.tools.trim_5p_mismatch`: number of reads in the SAM file output as recorded in the TSV summary file output.
+* `umi_tools dedup`: number of reads in the BAM file output.
+
+Here is an example of a read counts file produced when running the vignette:
+
+```
+SampleName	Program	File	NumReads	Description
+WTnone	input	vignette/input/SRR1042855_s1mi.fastq.gz	963571	Original reads
+WTnone	cutadapt	vignette/tmp/WTnone/trim.fq	952343	Reads after removal of sequencing library adapters
+WTnone	hisat2	vignette/tmp/WTnone/nonrRNA.fq	466464	rRNA or other contaminating reads removed by alignment to rRNA index files
+WTnone	hisat2	vignette/tmp/WTnone/rRNA_map.sam	1430213	Reads with rRNA and other contaminating reads removed by alignment to rRNA index files
+WTnone	hisat2	vignette/tmp/WTnone/unaligned.fq	452266	Unaligned reads removed by alignment of remaining reads to ORFs index files
+WTnone	hisat2	vignette/tmp/WTnone/orf_map.sam	14516	Reads aligned to ORFs index files
+WTnone	riboviz.tools.trim_5p_mismatch	vignette/tmp/WTnone/orf_map_clean.sam	14516	Reads after trimming of 5' mismatches and removal of those with more than 2 mismatches
+WT3AT	input	vignette/input/SRR1042864_s1mi.fastq.gz	1374448	Original reads
+WT3AT	cutadapt	vignette/tmp/WT3AT/trim.fq	1373362	Reads after removal of sequencing library adapters
+WT3AT	hisat2	vignette/tmp/WT3AT/nonrRNA.fq	485226	rRNA or other contaminating reads removed by alignment to rRNA index files
+WT3AT	hisat2	vignette/tmp/WT3AT/rRNA_map.sam	2254078	Reads with rRNA and other contaminating reads removed by alignment to rRNA index files
+WT3AT	hisat2	vignette/tmp/WT3AT/unaligned.fq	476785	Unaligned reads removed by alignment of remaining reads to ORFs index files
+WT3AT	hisat2	vignette/tmp/WT3AT/orf_map.sam	8698e	Reads aligned to ORFs index files
+WT3AT	riboviz.tools.trim_5p_mismatch	vignette/tmp/WT3AT/orf_map_clean.sam	8698	Reads after trimming of 5' mismatches and removal of those with more than 2 mismatches
 ```

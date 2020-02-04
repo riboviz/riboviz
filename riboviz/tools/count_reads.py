@@ -27,28 +27,16 @@ riboviz.workflow_files_logger-consistent columns:
 
 The files logged in the workflow files log file must exist.
 
-Read counts for files produced at the following stages are calculated:
+The following information is included:
 
-* Input files:
-  - Number of reads in sample FASTQ files used as inputs (if
-    non-multiplexed samples are used).
-  - Number of reads in multiplexed FASTQ file (if multiplexed
-    samples are used).
-* 'cutadapt':
-  - Number of reads in FASTQ file output as recorded in the FASTQ
-    file output.
-* 'riboviz.tools.demultiplex_fastq'
-  - Number of reads in demultiplexed FASTQ files and unassigned reads,
-    as recorded in the 'num_reads.tsv' file output. This file is used
-    to save having to traverse each of the output FASTQ files.
-* 'hisat2':
-  - Number of reads in SAM file and FASTQ files output.
-* 'riboviz.tools.trim_5p_mismatch':
-  - Number of reads in SAM file output as recorded in the TSV summary
-    file output.This file is used to save having to traverse each of
-    the output SAM files.
-* 'umi_tools dedup':
-  - Number of reads in output.
+* Input files: number of reads in the FASTQ files used as inputs.
+* 'cutadapt': number of reads in the FASTQ file output.
+* 'riboviz.tools.demultiplex_fastq': number of reads in the FASTQ
+  files output, as recorded in the 'num_reads.tsv' file output.
+* 'hisat2': number of reads in the SAM file and FASTQ file output.
+* 'riboviz.tools.trim_5p_mismatch': number of reads in the SAM fil
+  output as recorded in the TSV summary file output.
+* 'umi_tools dedup': number of reads in the BAM file output.
 
 The output file is a TSV file with columns:
 
@@ -56,7 +44,7 @@ The output file is a TSV file with columns:
 * 'Program'
 * 'File'
 * 'NumReads': Number of reads in the file.
-* 'Description': Human-readable description of the step.
+* 'Description': Human-readable description of the file contents.
 """
 import argparse
 from riboviz import count_reads

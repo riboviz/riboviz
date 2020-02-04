@@ -135,6 +135,7 @@ import os
 import os.path
 import sys
 import yaml
+from riboviz import count_reads
 from riboviz import demultiplex_fastq
 from riboviz import fastq
 from riboviz import logging_utils
@@ -499,7 +500,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
                     workflow_files_log_file)
         workflow_files_logger.create_log_file(workflow_files_log_file)
     else:
-        workflow_files_log_file = None    
+        workflow_files_log_file = None
 
     # Check existence of all non-sample-specific files to avoid having
     # to recheck them when processing each sample.
@@ -652,6 +653,12 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
 
     log_file = os.path.join(logs_dir, "collate_tpms.log")
     workflow.collate_tpms(out_dir, processed_samples, log_file, run_config)
+
+    if not is_dry_run and value_in_dict(params.COUNT_READS, config):
+        read_counts_file = os.path.join(out_dir, workflow.READ_COUNTS_FILE)
+        LOGGER.info("Producing read counts_file: %s", read_counts_file)
+        count_reads.count_reads(workflow_files_log_file, read_counts_file)
+        
     LOGGER.info("Completed")
 
 

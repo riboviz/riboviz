@@ -73,6 +73,8 @@ PLUS_BEDGRAPH = "plus.bedgraph"
 """ bedgraph of reads from plus strand """
 WORKFLOW_FILES_LOG_FILE = "workflow_files.tsv"
 """ Workflow files log file """
+READ_COUNTS_FILE = "read_counts.tsv"
+""" Read counts file """
 
 
 logging_utils.configure_logging()

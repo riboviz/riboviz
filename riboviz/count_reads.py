@@ -13,41 +13,27 @@ riboviz.workflow_files_logger-consistent columns:
 * 'File': Path to file read/written.
 * 'Read/Write': 'read' if the file was read, 'write' if the file was
   written.
-* 'Description': Human-readable description of the step at which this
-  file was read or written.
 
 The files logged in the workflow files log file must exist.
 
-Read counts for files produced at the following stages are calculated:
+The following information is included:
 
-* Input files
-  - Number of reads in sample FASTQ files used as inputs (if
-    non-multiplexed samples are used).
-  - Number of reads in multiplexed FASTQ file (if multiplexed
-    samples are used).
-* 'cutadapt':
-  - Number of reads in FASTQ file output as recorded in the FASTQ
-    file output.
-* 'riboviz.tools.demultiplex_fastq'
-  - Number of reads in demultiplexed FASTQ files and unassigned reads,
-    as recorded in the 'num_reads.tsv' file output. This file is used
-    to save having to traverse each of the output FASTQ files.
-* 'hisat2':
-  - Number of reads in SAM file and FASTQ files output.
-* 'riboviz.tools.trim_5p_mismatch':
-  - Number of reads in SAM file output as recorded in the TSV summary
-    file output. This file is used to save having to traverse each of
-    the output SAM files.
-* 'umi_tools dedup':
-  - Number of reads in output.
+* Input files: number of reads in the FASTQ files used as inputs.
+* 'cutadapt': number of reads in the FASTQ file output.
+* 'riboviz.tools.demultiplex_fastq': number of reads in the FASTQ
+  files output, as recorded in the 'num_reads.tsv' file output.
+* 'hisat2': number of reads in the SAM file and FASTQ file output.
+* 'riboviz.tools.trim_5p_mismatch': number of reads in the SAM file
+  output as recorded in the TSV summary file output.
+* 'umi_tools dedup': number of reads in the BAM file output.
 
 The output file is a TSV file with columns:
 
-* SampleName
-* Program
-* File
-* NumReads: Number of reads in the file.
-* Description
+* 'SampleName'
+* 'Program'
+* 'File'
+* 'NumReads': Number of reads in the file.
+* 'Description': Human-readable description of the file contents.
 """
 import os
 import pandas as pd
@@ -86,10 +72,9 @@ def count_reads_inputs(df):
     each FASTQ file used as an input, and return list of Series, one
     per file, with NumReads set to the number of reads in the files.
 
-    :param df: DataFrame with SampleName, Program, File, Description
-    columns
+    :param df: DataFrame with SampleName, Program, File columns
     :type df: pandas.core.frame.DataFrame
-    :return: Filtered rows with NumReads set
+    :return: Filtered rows with NumReads and Description set
     :rtype: list(pandas.core.frame.Series)
     """
     fq_df = df[
@@ -112,10 +97,9 @@ def count_reads_cutadapt(df):
     in the FASTQ file output, and return list of single Series, for
     this file, with NumReads set to the number of reads in the files.
 
-    :param df: DataFrame with SampleName, Program, File, Description
-    columns
+    :param df: DataFrame with SampleName, Program, File columns
     :type df: pandas.core.frame.DataFrame
-    :return: Filtered rows with NumReads set
+    :return: Filtered rows with NumReads and Description set
     :rtype: list(pandas.core.frame.Series)
     """
     fq_df = df[
@@ -141,10 +125,9 @@ def count_reads_demultiplex_fastq(df):
     Series, one per file, with NumReads set to the number of reads in
     the files.
 
-    :param df: DataFrame with SampleName, Program, File, Description
-    columns
+    :param df: DataFrame with SampleName, Program, File columns
     :type df: pandas.core.frame.DataFrame
-    :return: Filtered rows with NumReads set
+    :return: Filtered rows with NumReads and Description set
     :rtype: list(pandas.core.frame.Series)
     """
     program_df = df[df[workflow_files_logger.PROGRAM] ==
@@ -183,10 +166,9 @@ def count_reads_hisat2(df):
     each FASTQ and SAM file output, and return list of Series, one per
     file, with NumReads set to the number of reads in the files.
 
-    :param df: DataFrame with SampleName, Program, File, Description
-    columns
+    :param df: DataFrame with SampleName, Program, File columns
     :type df: pandas.core.frame.DataFrame
-    :return: Filtered rows with NumReads set
+    :return: Filtered rows with NumReads and Description set
     :rtype: list(pandas.core.frame.Series)
     """
     program_df = df[df[workflow_files_logger.PROGRAM] == "hisat2"]
@@ -225,10 +207,9 @@ def count_reads_trim_5p_mismatch(df):
     the output SAM file) and return list of single Series, for this
     file, with NumReads set to the number of reads in the output.
 
-    :param df: DataFrame with SampleName, Program, File, Description
-    columns
+    :param df: DataFrame with SampleName, Program, File columns
     :type df: pandas.core.frame.DataFrame
-    :return: Filtered rows with NumReads set
+    :return: Filtered rows with NumReads and Description set
     :rtype: list(pandas.core.frame.Series)
     """
     program_df = df[df[workflow_files_logger.PROGRAM] ==
@@ -257,10 +238,9 @@ def count_reads_umi_tools_dedup(df):
     of reads in the BAM file output, and return single Series, for
     this file, with NumReads set to the number of reads in the files.
 
-    :param df: DataFrame with SampleName, Program, File, Description
-    columns
+    :param df: DataFrame with SampleName, Program, File columns
     :type df: pandas.core.frame.DataFrame
-    :return: Filtered rows with NumReads set
+    :return: Filtered rows with NumReads and Description set
     :rtype: list(pandas.core.frame.Series)
     """
     bam_df = df[
@@ -280,34 +260,20 @@ def count_reads_umi_tools_dedup(df):
 
 def count_input_write_reads(df):
     """
-    df is assumed to be a Pandas DataFrame with
-    riboviz.workflow_files_logger-consistent columns:
+    Process workflow files log file data frame and count reads in
+    FASTQ, SAM and BAM files that were input or written.
 
-    * 'SampleName': Name of the sample to which this file
-      belongs. This is an empty value if the step was not
-      sample-specific (e.g. creating index files or demultiplexing a
-      multiplexed FASTQ file).
-    * 'Program': Program that read/wrote the file. The special token
-      'input' denotes input files.
-    * 'File': Path to file read/written.
-    * 'Read/Write': 'read' if the file was read, 'write' if the file
-      was written.
-    * 'Description': Human-readable description of the step at which
-      this file was read or written.
+    df is assumed to be a DataFrame with
+    riboviz.workflow_files_logger-consistent columns: SampleName,
+    Program, File, Read/Write.
 
-    A DataFrame with the following columns is returned:
-
-    * SampleName
-    * Program
-    * File
-    * NumReads: Number of reads in the file.
-    * Description
+    The DataFrame returned has columns: SampleName, Program, File,
+    NumReads, Description.
 
     :param df: DataFrame with riboviz.workflow_files_logger-consistent
     data
     :type df: pandas.core.frame.DataFrame
-    :return: DataFrame with number of reads in each input file and
-    output file
+    :return: DataFrame
     :rtype: pandas.core.frame.DataFrame
     """
     # Filter to get files recorded as "input" or "write" only.
@@ -359,27 +325,11 @@ def count_reads(workflow_file, reads_file, delimiter="\t", comment="#"):
     BAM files that were input or written and save results.
 
     workflow_file is assumed to be a TSV file with
-    riboviz.workflow_files_logger-consistent columns:
+    riboviz.workflow_files_logger-consistent columns: SampleName,
+    Program, File, Read/Write.
 
-    * 'SampleName': Name of the sample to which this file
-      belongs. This is an empty value if the step was not
-      sample-specific (e.g. creating index files or demultiplexing a
-      multiplexed FASTQ file).
-    * 'Program': Program that read/wrote the file. The special token
-      'input' denotes input files.
-    * 'File': Path to file read/written.
-    * 'Read/Write': 'read' if the file was read, 'write' if the file
-      was written.
-    * 'Description': Human-readable description of the step at which
-      this file was read or written.
-
-    reads_file is a TSV file with columns:
-
-    * SampleName
-    * Program
-    * File
-    * NumReads: Number of reads in the file.
-    * Description
+    reads_file is a TSV file with columns: SampleName, Program, File,
+    NumReads, Description.
 
     :param workflow_file: Workflow files log file input
     :type workflow_file: str or unicode
