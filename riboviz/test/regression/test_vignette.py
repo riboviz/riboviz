@@ -59,6 +59,7 @@ The directories are assumed to hold the following content:
         unaligned.fq
     output/
       TPMs_collated.tsv
+      workflow_files.tsv
       WT3AT/
         3nt_periodicity.pdf
         3nt_periodicity.tsv
@@ -137,7 +138,6 @@ def run_prep_riboviz(skip_workflow):
     :param skip_workflow: Should workflow not be run?
     :type skip_workflow: bool
     """
-    print(("Skip workflow:" + str(skip_workflow)))
     if not skip_workflow:
         exit_code = prep_riboviz.prep_riboviz(
             riboviz.R_SCRIPTS,
@@ -177,7 +177,6 @@ def test_index(expected, prefix, index):
     :type index: int
     """
     file_name = "%s.%d.ht2" % (prefix, index)
-    print(file_name)
     validation.compare(
         os.path.join(expected, INDEX_DIR, file_name),
         os.path.join(test.VIGNETTE_INDEX_DIR, file_name))
@@ -201,7 +200,6 @@ def test_tmp_fq(expected, sample, file_name):
     :param file_name: file name e.g. nonrRNA.fq
     :type file_name: str or unicode
     """
-    print(file_name)
     validation.compare(
         os.path.join(expected, TMP_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_TMP_DIR, sample, file_name))
@@ -229,7 +227,6 @@ def test_tmp_sam(expected, scratch_directory, sample, file_name):
     :param file_name: file name e.g. orf_map_clean.sam
     :type file_name: str or unicode
     """
-    print(file_name)
     expected_file = os.path.join(
         expected, TMP_DIR, sample, file_name)
     actual_file = os.path.join(
@@ -261,7 +258,6 @@ def test_tmp_tsv(expected, sample, file_name):
     :param file_name: file name e.g. trim_5p_mismatch.tsv
     :type file_name: str or unicode
     """
-    print(file_name)
     validation.compare(
         os.path.join(expected, TMP_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_TMP_DIR, sample, file_name))
@@ -280,7 +276,6 @@ def test_output_bai(expected, sample):
     :type sample: str or unicode
     """
     file_name = workflow.BAM_BAI_FORMAT.format(sample)
-    print(file_name)
     validation.compare(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
@@ -300,7 +295,6 @@ def test_output_bam(expected, sample):
     :type sample: str or unicode
     """
     file_name = workflow.BAM_FORMAT.format(sample)
-    print(file_name)
     validation.compare(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
@@ -323,7 +317,6 @@ def test_output_bedgraph(expected, sample, file_name):
     :param content: content e.g. minus
     :type content: str or unicode
     """
-    print(file_name)
     validation.compare(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
@@ -342,7 +335,6 @@ def test_output_h5(expected, sample):
     :type sample: str or unicode
     """
     file_name = workflow.H5_FORMAT.format(sample)
-    print(file_name)
     validation.compare(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
@@ -370,7 +362,6 @@ def test_output_tsv(expected, sample, file_name):
     :param file_name: content e.g. 3nt_periodicity.tsv
     :type file_name: str or unicode
     """
-    print(file_name)
     validation.compare(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
@@ -399,7 +390,6 @@ def test_output_pdf(expected, sample, file_name):
     :param file_name: content e.g. 3nt_periodicity.pdf
     :type file_name: str or unicode
     """
-    print(file_name)
     validation.compare(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
@@ -415,7 +405,21 @@ def test_output_tpms_collated_tsv(expected):
     :type expected: str or unicode
     """
     file_name = workflow_r.TPMS_COLLATED_TSV
-    print(file_name)
+    validation.compare(
+        os.path.join(expected, OUTPUT_DIR, file_name),
+        os.path.join(test.VIGNETTE_OUTPUT_DIR, file_name))
+
+
+@pytest.mark.usefixtures("run_prep_riboviz")
+def test_output_workflow_files_tsv(expected):
+    """
+    Test output/workflow_files.tsv files for equality.
+
+    :param expected: expected directory
+    (pytest fixture defined in conftest.py)
+    :type expected: str or unicode
+    """
+    file_name = workflow.WORKFLOW_FILES_LOG_FILE
     validation.compare(
         os.path.join(expected, OUTPUT_DIR, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, file_name))
