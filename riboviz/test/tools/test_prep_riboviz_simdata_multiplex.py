@@ -21,6 +21,7 @@ import riboviz.validation
 from riboviz import demultiplex_fastq
 from riboviz import params
 from riboviz import workflow
+from riboviz import workflow_files_logger
 from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration_module  # Test fixture
 from riboviz.test.tools import run_prep_riboviz  # Test fixture
@@ -158,3 +159,25 @@ def test_deplex_tpms_collated_tsv(configuration_module, sample_id):
     """
     config, _ = configuration_module
     check_tpms_collated_tsv(config, sample_id, 4)
+
+
+@pytest.mark.usefixtures("run_prep_riboviz")
+def test_workflow_files_tsv(configuration_module):
+    """
+    Validate the workflow files log file produced from running the
+    workflow.
+
+    :param configuration_module: configuration and path to
+    configuration file (pytest fixture)
+    :type configuration_module: tuple(dict, str or unicode)
+    """
+    config, _ = configuration_module
+    workflow_files_log_file = os.path.join(
+        config[params.OUTPUT_DIR],
+        workflow.WORKFLOW_FILES_LOG_FILE)
+    workflow_files_logger.validate_log_file(
+        workflow_files_log_file,
+        [config[params.INDEX_DIR],
+         config[params.TMP_DIR],
+         config[params.OUTPUT_DIR]],
+         [workflow_files_log_file])
