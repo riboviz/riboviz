@@ -8,8 +8,10 @@ The following information is included:
 
 * Input files: number of reads in the FASTQ files used as inputs.
 * 'cutadapt': number of reads in the FASTQ file output.
-* 'riboviz.tools.demultiplex_fastq': number of reads in the FASTQ
-  files output, as recorded in the 'num_reads.tsv' TSV file output.
+* 'riboviz.tools.demultiplex_fastq': FASTQ files output by
+  "demultiplex_fastq", using the information in the associated
+  'num_reads.tsv' summary files, or, if these can't be found, the
+  FASTQ files themselves.
 * 'hisat2': number of reads in the SAM file and FASTQ file output.
 * 'riboviz.tools.trim_5p_mismatch': number of reads in the SAM file
   output as recorded in the 'trim_5p_mismatch.tsv' summary file
@@ -125,7 +127,9 @@ def cutadapt_fq(tmp_dir, sample=""):
 
 def umi_tools_deplex_fq(tmp_dir):
     """
-    Extract reads from FASTQ file output by "cutadapt".
+    Extract reads from FASTQ files output by "demultiplex_fastq",
+    using the information in the associated 'num_reads.tsv' summary
+    files, or, if these can't be found, the FAST files themselves
 
     :param tmp_dir: Directory
     :type tmp_dir: str or unicode
@@ -145,14 +149,8 @@ def umi_tools_deplex_fq(tmp_dir):
     if not deplex_dirs:
         return []
     rows = []
+    description = "Demultiplexed reads"
     for deplex_dir in deplex_dirs:
-        tsv_files = glob.glob(
-            os.path.join(deplex_dir,
-                         demultiplex_fastq.NUM_READS_FILE))
-        if not tsv_files:
-            pass  # TODO: Check if none and handle
-        num_reads_file = tsv_files[0]
-        deplex_df = pd.read_csv(num_reads_file, delimiter="\t", comment="#")
         fq_files = [glob.glob(os.path.join(deplex_dir, "*" + ext))
                     for ext in fastq.FASTQ_EXTS]
         # Flatten
@@ -160,19 +158,36 @@ def umi_tools_deplex_fq(tmp_dir):
         if not fq_files:
             continue
         fq_files.sort()
-        print(fq_files)
-        for fq_file in fq_files:
-            tag = os.path.basename(fq_file).split(".")[0]
-            tag_df = deplex_df[
-                deplex_df[sample_sheets.SAMPLE_ID] == tag]
-            num_reads = tag_df.iloc[0][sample_sheets.NUM_READS]
-            description = "Demultiplexed reads"
-            row = pd.DataFrame(
-                [[tag,
-                  demultiplex_fastq_tools_module.__name__,
-                  fq_file, num_reads, description]],
-                columns=HEADER)
-            rows.append(row)
+        tsv_files = glob.glob(
+            os.path.join(deplex_dir,
+                         demultiplex_fastq.NUM_READS_FILE))
+        if not tsv_files:
+            # Traverse FASTQ files directly.
+            for fq_file in fq_files:
+                tag = os.path.basename(fq_file).split(".")[0]
+                num_reads = fastq.count_sequences(fq_file)
+                row = pd.DataFrame(
+                    [[tag,
+                      demultiplex_fastq_tools_module.__name__,
+                      fq_file, num_reads, description]],
+                    columns=HEADER)
+                rows.append(row)
+        else:
+            num_reads_file = tsv_files[0]
+            deplex_df = pd.read_csv(num_reads_file,
+                                    delimiter="\t",
+                                    comment="#")
+            for fq_file in fq_files:
+                tag = os.path.basename(fq_file).split(".")[0]
+                tag_df = deplex_df[
+                    deplex_df[sample_sheets.SAMPLE_ID] == tag]
+                num_reads = tag_df.iloc[0][sample_sheets.NUM_READS]
+                row = pd.DataFrame(
+                    [[tag,
+                      demultiplex_fastq_tools_module.__name__,
+                      fq_file, num_reads, description]],
+                    columns=HEADER)
+                rows.append(row)
     return rows
 
 
@@ -257,7 +272,7 @@ def trim_5p_mismatch_sam(tmp_dir, sample):
         trim_row = trim_data.iloc[0]
         sequences = trim_row[trim_5p_mismatch.NUM_WRITTEN]
     else:
-        # Traverse SAM file.
+        # Traverse SAM file directly.
         sequences, _ = sam_bam.count_sequences(sam_file)
     description = "Reads after trimming of 5' mismatches and removal of those with more than 2 mismatches"
     row = pd.DataFrame([[sample,
