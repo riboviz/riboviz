@@ -39,11 +39,11 @@ import os
 import pandas as pd
 from riboviz import demultiplex_fastq
 from riboviz import fastq
+from riboviz import file_names
 from riboviz import provenance
 from riboviz import sam_bam
 from riboviz import sample_sheets
 from riboviz import trim_5p_mismatch
-from riboviz import workflow
 from riboviz import workflow_files_logger
 
 
@@ -52,10 +52,10 @@ NUM_READS = "NumReads"
 DESCRIPTION = "Description"
 """ Description column name """
 HISAT2_DESCRIPTIONS = {
-    workflow.NON_RRNA_FQ: "rRNA or other contaminating reads removed by alignment to rRNA index files",
-    workflow.RRNA_MAP_SAM: "Reads with rRNA and other contaminating reads removed by alignment to rRNA index files",
-    workflow.ORF_MAP_SAM: "Reads aligned to ORFs index files",
-    workflow.UNALIGNED_FQ: "Unaligned reads removed by alignment of remaining reads to ORFs index files"
+    file_names.NON_RRNA_FQ: "rRNA or other contaminating reads removed by alignment to rRNA index files",
+    file_names.RRNA_MAP_SAM: "Reads with rRNA and other contaminating reads removed by alignment to rRNA index files",
+    file_names.ORF_MAP_SAM: "Reads aligned to ORFs index files",
+    file_names.UNALIGNED_FQ: "Unaligned reads removed by alignment of remaining reads to ORFs index files"
 }
 """ Mapping of HISAT2 file names to escriptions """
 HEADER = [workflow_files_logger.SAMPLE_NAME,

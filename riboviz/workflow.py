@@ -16,6 +16,7 @@ from riboviz import sample_sheets
 from riboviz import workflow_r
 from riboviz import workflow_files_logger
 from riboviz import demultiplex_fastq as demultiplex_fastq_module
+from riboviz.tools import count_reads as count_reads_module
 from riboviz.tools import demultiplex_fastq as demultiplex_fastq_tools_module
 from riboviz.tools import trim_5p_mismatch as trim_5p_mismatch_tools_module
 from riboviz.utils import value_in_dict
@@ -29,52 +30,6 @@ RunConfigTuple = collections.namedtuple(
                        "logs_dir",
                        "nprocesses"])
 """ Run-related configuration """
-
-DEFAULT_CMD_FILE = "run_riboviz_vignette.sh"
-""" Default command file """
-
-ADAPTER_TRIM_FQ = "trim.fq"
-""" Adapter trimmed reads """
-NON_RRNA_FQ = "nonrRNA.fq"
-""" Non-rRNA reads """
-RRNA_MAP_SAM = "rRNA_map.sam"
-""" rRNA-mapped reads """
-ORF_MAP_SAM = "orf_map.sam"
-""" ORF-mapped reads """
-ORF_MAP_CLEAN_SAM = "orf_map_clean.sam"
-""" ORF-mapped reads with mismatched nts trimmed """
-UNALIGNED_FQ = "unaligned.fq"
-""" Unaligned reads """
-UMI_EXTRACT_FQ = "extract_trim.fq"
-""" Adapter trimmed reads with UMIs extracted """
-PRE_DEDUP_BAM = "pre_dedup.bam"
-""" BAM file prior to deduplication """
-PRE_DEDUP_GROUPS_TSV = "pre_dedup_groups.tsv"
-""" UMI groups before deduplication """
-POST_DEDUP_GROUPS_TSV = "post_dedup_groups.tsv"
-""" UMI groups after deduplication """
-DEDUP_STATS_PREFIX = "dedup_stats"
-""" UMI deduplication statistics file prefix """
-DEPLEX_DIR_FORMAT = "{}_deplex"
-""" Demultiplexed data directory """
-ADAPTER_TRIM_FQ_FORMAT = "{}_trim.fq"
-""" Adapter trimmed multiplexed reads"""
-UMI_EXTRACT_FQ_FORMAT = "{}_extract_trim.fq"
-""" Adapter trimmed multiplexed reads with UMIs extracted """
-BAM_FORMAT = "{}.bam"
-""" Reads mapped to transcripts """
-BAM_BAI_FORMAT = "{}.bam.bai"
-""" Reads mapped to transcripts (index) """
-H5_FORMAT = "{}.h5"
-""" Length-sensitive alignments in compressed h5 format """
-MINUS_BEDGRAPH = "minus.bedgraph"
-""" bedgraph of reads from minus strand """
-PLUS_BEDGRAPH = "plus.bedgraph"
-""" bedgraph of reads from plus strand """
-WORKFLOW_FILES_LOG_FILE = "workflow_files.tsv"
-""" Workflow files log file """
-READ_COUNTS_FILE = "read_counts.tsv"
-""" Read counts file """
 
 
 logging_utils.configure_logging()
@@ -807,3 +762,35 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
                 [],
                 [file_name],
                 tag)
+
+
+def count_reads(read_counts_file, log_file, run_config):
+    """
+    Count reads using count_reads.py. The workflow files logs file in
+    run_config is used as the input file.
+
+    :param read_counts_file: File to output read counts to.
+    :type read_counts_file: str or unicode
+    :param log_file: Log file
+    :type log_file: str or unicode
+    :param run_config: Run-related configuration
+    :type run_config: RunConfigTuple
+    :raise FileNotFoundError: if python cannot be found
+    :raise AssertionError: if python returns non-zero exit code
+    """
+    LOGGER.info("Count reads. Log: %s", log_file)
+    cmd = ["python", "-m", count_reads_module.__name__,
+           "-i", run_config.workflow_files_log_file,
+           "-o", read_counts_file]
+    # Do not log command in bash script as there will be no
+    # workflow files log file for it to run on.
+    process_utils.run_logged_command(cmd,
+                                     log_file,
+                                     None,
+                                     run_config.is_dry_run)
+    if not run_config.is_dry_run:
+        workflow_files_logger.log_files(
+            run_config.workflow_files_log_file,
+            count_reads_module.__name__,
+            [run_config.workflow_files_log_file],
+            [read_counts_file])

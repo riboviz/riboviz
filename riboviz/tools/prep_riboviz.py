@@ -138,6 +138,7 @@ import yaml
 from riboviz import count_reads
 from riboviz import demultiplex_fastq
 from riboviz import fastq
+from riboviz import file_names
 from riboviz import logging_utils
 from riboviz import params
 from riboviz import provenance
@@ -214,7 +215,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
     else:
         log_file = os.path.join(run_config.logs_dir,
                                 LOG_FORMAT.format(step, "cutadapt.log"))
-        trim_fq = os.path.join(tmp_dir, workflow.ADAPTER_TRIM_FQ)
+        trim_fq = os.path.join(tmp_dir, file_names.ADAPTER_TRIM_FQ)
         workflow.cut_adapters(sample, config[params.ADAPTERS],
                               sample_fastq, trim_fq, log_file,
                               run_config)
@@ -222,7 +223,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
 
         if is_extract_umis:
             extract_trim_fq = os.path.join(tmp_dir,
-                                           workflow.UMI_EXTRACT_FQ)
+                                           file_names.UMI_EXTRACT_FQ)
             log_file = os.path.join(
                 run_config.logs_dir,
                 LOG_FORMAT.format(step, "umi_tools_extract.log"))
@@ -235,8 +236,8 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
             trim_fq = extract_trim_fq
             step += 1
 
-    non_r_rna_trim_fq = os.path.join(tmp_dir, workflow.NON_RRNA_FQ)
-    r_rna_map_sam = os.path.join(tmp_dir, workflow.RRNA_MAP_SAM)
+    non_r_rna_trim_fq = os.path.join(tmp_dir, file_names.NON_RRNA_FQ)
+    r_rna_map_sam = os.path.join(tmp_dir, file_names.RRNA_MAP_SAM)
     log_file = os.path.join(run_config.logs_dir,
                             LOG_FORMAT.format(step, "hisat2_rrna.log"))
     workflow.map_to_r_rna(sample, trim_fq, index_dir, r_rna_index,
@@ -244,8 +245,8 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
                           run_config)
     step += 1
 
-    orf_map_sam = os.path.join(tmp_dir, workflow.ORF_MAP_SAM)
-    unaligned_fq = os.path.join(tmp_dir, workflow.UNALIGNED_FQ)
+    orf_map_sam = os.path.join(tmp_dir, file_names.ORF_MAP_SAM)
+    unaligned_fq = os.path.join(tmp_dir, file_names.UNALIGNED_FQ)
     log_file = os.path.join(run_config.logs_dir,
                             LOG_FORMAT.format(step, "hisat2_orf.log"))
     workflow.map_to_orf(sample, non_r_rna_trim_fq, index_dir,
@@ -253,7 +254,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
                         log_file, run_config)
     step += 1
 
-    orf_map_sam_clean = os.path.join(tmp_dir, workflow.ORF_MAP_CLEAN_SAM)
+    orf_map_sam_clean = os.path.join(tmp_dir, file_names.ORF_MAP_CLEAN_SAM)
     trim_5p_mismatch_tsv = os.path.join(
         tmp_dir,
         trim_5p_mismatch.TRIM_5P_MISMATCH_FILE)
@@ -272,9 +273,9 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
     is_dedup_umis = value_in_dict(params.DEDUP_UMIS, config)
     if is_dedup_umis:
         # Create BAM file in temporary directory
-        sample_bam = os.path.join(tmp_dir, workflow.PRE_DEDUP_BAM)
+        sample_bam = os.path.join(tmp_dir, file_names.PRE_DEDUP_BAM)
     else:
-        sample_bam = workflow.BAM_FORMAT.format(sample_out_prefix)
+        sample_bam = file_names.BAM_FORMAT.format(sample_out_prefix)
         sample_out_bam = sample_bam
 
     workflow.sort_bam(sample, orf_map_sam_clean, sample_bam, log_file,
@@ -292,7 +293,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
         is_group_umis = value_in_dict(params.GROUP_UMIS, config)
         if is_group_umis:
             umi_groups = os.path.join(tmp_dir,
-                                      workflow.PRE_DEDUP_GROUPS_TSV)
+                                      file_names.PRE_DEDUP_GROUPS_TSV)
             log_file = os.path.join(
                 run_config.logs_dir,
                 LOG_FORMAT.format(step, "umi_tools_group.log"))
@@ -300,12 +301,12 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
                                 log_file, run_config)
             step += 1
 
-        sample_out_bam = workflow.BAM_FORMAT.format(sample_out_prefix)
+        sample_out_bam = file_names.BAM_FORMAT.format(sample_out_prefix)
         log_file = os.path.join(
             run_config.logs_dir,
             LOG_FORMAT.format(step, "umi_tools_dedup.log"))
         dedup_stats_prefix = os.path.join(tmp_dir,
-                                          workflow.DEDUP_STATS_PREFIX)
+                                          file_names.DEDUP_STATS_PREFIX)
         workflow.deduplicate_umis(
             sample, sample_bam, sample_out_bam, dedup_stats_prefix,
             log_file, run_config)
@@ -319,7 +320,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
         step += 1
 
         if is_group_umis:
-            umi_groups = os.path.join(tmp_dir, workflow.POST_DEDUP_GROUPS_TSV)
+            umi_groups = os.path.join(tmp_dir, file_names.POST_DEDUP_GROUPS_TSV)
             log_file = os.path.join(
                 run_config.logs_dir,
                 LOG_FORMAT.format(step, "umi_tools_group.log"))
@@ -332,7 +333,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
         log_file = os.path.join(
             run_config.logs_dir,
             LOG_FORMAT.format(step, "bedtools_genome_cov_plus.log"))
-        plus_bedgraph = os.path.join(out_dir, workflow.PLUS_BEDGRAPH)
+        plus_bedgraph = os.path.join(out_dir, file_names.PLUS_BEDGRAPH)
         workflow.make_bedgraph(sample, sample_out_bam, plus_bedgraph,
                                True, log_file, run_config)
         step += 1
@@ -340,7 +341,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
         log_file = os.path.join(
             run_config.logs_dir,
             LOG_FORMAT.format(step, "bedtools_genome_cov_minus.log"))
-        minus_bedgraph = os.path.join(out_dir, workflow.MINUS_BEDGRAPH)
+        minus_bedgraph = os.path.join(out_dir, file_names.MINUS_BEDGRAPH)
         workflow.make_bedgraph(sample, sample_out_bam, minus_bedgraph,
                                False, log_file, run_config)
         step += 1
@@ -348,7 +349,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
     orf_gff_file = config[params.ORF_GFF_FILE]
     log_file = os.path.join(run_config.logs_dir,
                             LOG_FORMAT.format(step, "bam_to_h5.log"))
-    sample_out_h5 = workflow.H5_FORMAT.format(sample_out_prefix)
+    sample_out_h5 = file_names.H5_FORMAT.format(sample_out_prefix)
     workflow.bam_to_h5(sample, sample_out_bam, sample_out_h5,
                        orf_gff_file, config, log_file, run_config)
     step += 1
@@ -470,7 +471,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     if value_in_dict(params.CMD_FILE, config):
         cmd_file = config[params.CMD_FILE]
     else:
-        cmd_file = workflow.DEFAULT_CMD_FILE
+        cmd_file = file_names.DEFAULT_CMD_FILE
     if os.path.exists(cmd_file):
         os.remove(cmd_file)
     LOGGER.info("Command file: %s", cmd_file)
@@ -493,7 +494,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
 
     if not is_dry_run:
         workflow_files_log_file = os.path.join(
-            out_dir, workflow.WORKFLOW_FILES_LOG_FILE)
+            out_dir, file_names.WORKFLOW_FILES_LOG_FILE)
         if os.path.exists(workflow_files_log_file):
             os.remove(workflow_files_log_file)
         LOGGER.info("Workflow files log file: %s",
@@ -600,7 +601,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
             workflow_files_logger.log_input_files(
                 workflow_files_log_file, [multiplex_file])
         trim_fq = os.path.join(
-            tmp_dir, workflow.ADAPTER_TRIM_FQ_FORMAT.format(multiplex_name))
+            tmp_dir, file_names.ADAPTER_TRIM_FQ_FORMAT.format(multiplex_name))
         log_file = os.path.join(logs_dir, "cutadapt.log")
         workflow.cut_adapters(None, config[params.ADAPTERS],
                               multiplex_file, trim_fq, log_file,
@@ -608,7 +609,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
 
         extract_trim_fq = os.path.join(
             tmp_dir,
-            workflow.UMI_EXTRACT_FQ_FORMAT.format(multiplex_name))
+            file_names.UMI_EXTRACT_FQ_FORMAT.format(multiplex_name))
         log_file = os.path.join(logs_dir, "umi_tools_extract.log")
         workflow.extract_barcodes_umis(None, trim_fq, extract_trim_fq,
                                        config[params.UMI_REGEXP],
@@ -616,7 +617,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
 
         deplex_dir = os.path.join(
             tmp_dir,
-            workflow.DEPLEX_DIR_FORMAT.format(multiplex_name))
+            file_names.DEPLEX_DIR_FORMAT.format(multiplex_name))
         log_file = os.path.join(logs_dir, "demultiplex_fastq.log")
         workflow.demultiplex_fastq(extract_trim_fq,
                                    sample_sheet_file, deplex_dir,
@@ -655,10 +656,11 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     workflow.collate_tpms(out_dir, processed_samples, log_file, run_config)
 
     if not is_dry_run and value_in_dict(params.COUNT_READS, config):
-        read_counts_file = os.path.join(out_dir, workflow.READ_COUNTS_FILE)
-        LOGGER.info("Producing read counts_file: %s", read_counts_file)
-        count_reads.count_reads(workflow_files_log_file, read_counts_file)
-        
+        log_file = os.path.join(logs_dir, "count_reads.log")
+        read_counts_file = os.path.join(out_dir,
+                                        file_names.READ_COUNTS_FILE)
+        workflow.count_reads(read_counts_file, log_file, run_config)
+
     LOGGER.info("Completed")
 
 
