@@ -130,7 +130,7 @@ def get_log_entry(sample_name,
     return log
 
 
-def validate_log_file(log_file, dirs):
+def validate_log_file(log_file, dirs, excludes=[]):
     """
     Check each file in workflow files log file exists and check that
     every file in the given directories is logged in the workflow
@@ -140,6 +140,9 @@ def validate_log_file(log_file, dirs):
     :type log_file: str or unicode
     :param dirs: Directories
     :type dirs: list(str or unicode)
+    :param excludes: Files that can be in dirs but are not expected to
+    be in log_file
+    :type excludes: list(str or unicode)
     :raises AssertionError: if any file does not exist or any file
     in the given directories is not logged in the workflow files log
     file.
@@ -153,6 +156,8 @@ def validate_log_file(log_file, dirs):
         os.walk(os.path.expanduser(dir))
         for file_name in file_names
     ]
+    actual_files = [file_name for file_name in actual_files
+                    if file_name not in excludes]
     for file_name in logged_files:
         assert os.path.exists(file_name), \
             "File logged in workflow files log file not found: {}".format(

@@ -275,7 +275,7 @@ def test_validate_log_file(tsv_file, tmp_test_dir):
 
 def test_validate_log_file_unlogged_file(tsv_file, tmp_test_dir):
     """
-    Test validate_log where the directory contains an unogged
+    Test validate_log where the directory contains an unlogged
     file and check that an AssertionError is raised.
 
     :param tsv_file: path to TSV file
@@ -291,6 +291,27 @@ def test_validate_log_file_unlogged_file(tsv_file, tmp_test_dir):
     open(file_name, 'w').close()
     with pytest.raises(AssertionError):
         workflow_files_logger.validate_log_file(tsv_file, [tmp_test_dir])
+
+
+def test_validate_log_file_excludes_file(tsv_file, tmp_test_dir):
+    """
+    Test validate_log where the directory contains an unlogged
+    file that can be ignored.
+
+    :param tsv_file: path to TSV file
+    :type tsv_file: str or unicode
+    :param tmp_test_dir: Temporary directory with subdirectories and
+    files
+    :type tmp_test_dir: str or unicode
+    """
+    sub_dir = os.path.join(tmp_test_dir,
+                           DIRECTORY_FORMAT.format(1))
+    file_name = os.path.join(sub_dir,
+                             FILE_FORMAT.format(1, "unlogged"))
+    open(file_name, 'w').close()
+    workflow_files_logger.validate_log_file(tsv_file,
+                                            [tmp_test_dir],
+                                            [file_name])
 
 
 def test_validate_log_file_missing_file(tsv_file, tmp_test_dir):
