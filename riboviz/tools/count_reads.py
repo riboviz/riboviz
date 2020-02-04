@@ -48,6 +48,7 @@ The output file is a TSV file with columns:
 """
 import argparse
 from riboviz import count_reads
+from riboviz import provenance
 
 
 def parse_command_line_options():
@@ -77,6 +78,7 @@ def invoke_count_reads():
     """
     Parse command-line options then invoke "count_reads".
     """
+    print(provenance.get_provenance_str(__file__))
     options = parse_command_line_options()
     workflow_file = options.workflow_file
     reads_file = options.reads_file
