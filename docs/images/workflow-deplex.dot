@@ -102,11 +102,16 @@ data/standard_asite_disp_length.txt"] [shape=box, style=dashed]
     "tmp/<SAMPLE_ID>/nonrRNA.fq" [shape=plaintext]
     "tmp/<SAMPLE_ID>/unaligned.fq" [shape=plaintext]
     "tmp/<SAMPLE_ID>/orf_map.sam" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/trim_5p_mismatch.tsv" [shape=plaintext]
     "tmp/<SAMPLE_ID>/orf_map_clean.sam" [shape=plaintext]
     "tmp/<SAMPLE_ID>/pre_dedup_groups.tsv" [shape=plaintext]
     "tmp/<SAMPLE_ID>/post_dedup_groups.tsv" [shape=plaintext]
     "tmp/<SAMPLE_ID>/pre_dedup.bam" [shape=plaintext]
     "tmp/<SAMPLE_ID>/pre_dedup.bam+.bai" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/dedup_stats_edit_distance.tsv" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/dedup_stats_per_umi.tsv" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/dedup_stats_per_umi_per_position.tsv" [shape=plaintext]
+
     "output/<SAMPLE_ID>/<SAMPLE_ID>.bam" [shape=plaintext]
     "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" [shape=plaintext]
     "output/<SAMPLE_ID>/plus.bedgraph" [shape=plaintext]
@@ -143,16 +148,21 @@ output/<SAMPLE_ID>/3ntframe_bygene.tsv
     h22 -> "tmp/<SAMPLE_ID>/unaligned.fq"
     h22 -> "tmp/<SAMPLE_ID>/orf_map.sam"
 
-    "tmp/<SAMPLE_ID>/orf_map.sam" -> trim -> "tmp/<SAMPLE_ID>/orf_map_clean.sam"
+    "tmp/<SAMPLE_ID>/orf_map.sam" -> trim
+    trim -> "tmp/<SAMPLE_ID>/orf_map_clean.sam"
+    trim -> "tmp/<SAMPLE_ID>/trim_5p_mismatch.tsv"
     "tmp/<SAMPLE_ID>/orf_map_clean.sam" -> samview -> "tmp/<SAMPLE_ID>/pre_dedup.bam"
     "tmp/<SAMPLE_ID>/pre_dedup.bam" -> samindex
     samindex -> "tmp/<SAMPLE_ID>/pre_dedup.bam+.bai"
 
     "tmp/<SAMPLE_ID>/pre_dedup.bam+.bai" -> umi_pre_group -> "tmp/<SAMPLE_ID>/pre_dedup_groups.tsv"
-    "tmp/<SAMPLE_ID>/pre_dedup.bam+.bai" -> umi_dedup -> "output/<SAMPLE_ID>/<SAMPLE_ID>.bam"
-    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam" -> umi_post_group -> "tmp/<SAMPLE_ID>/post_dedup_groups.tsv"
-
+    "tmp/<SAMPLE_ID>/pre_dedup.bam+.bai" -> umi_dedup
+    umi_dedup -> "output/<SAMPLE_ID>/<SAMPLE_ID>.bam"
+    umi_dedup -> "tmp/<SAMPLE_ID>/dedup_stats_edit_distance.tsv"
+    umi_dedup -> "tmp/<SAMPLE_ID>/dedup_stats_per_umi.tsv"
+    umi_dedup -> "tmp/<SAMPLE_ID>/dedup_stats_per_umi_per_position.tsv"
     "output/<SAMPLE_ID>/<SAMPLE_ID>.bam" -> samindex_dedup -> "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai"  
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" -> umi_post_group -> "tmp/<SAMPLE_ID>/post_dedup_groups.tsv"
 
     "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" -> bedplus -> "output/<SAMPLE_ID>/plus.bedgraph"
     "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" -> bedminus -> "output/<SAMPLE_ID>/minus.bedgraph"

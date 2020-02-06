@@ -5,9 +5,9 @@ import os
 import tempfile
 import pytest
 import yaml
-from riboviz.upgrade_config_file import upgrade_config_file
 import riboviz.test
 from riboviz.test import config
+from riboviz.upgrade_config_file import upgrade_config_file
 
 
 @pytest.fixture(scope="function")
@@ -56,7 +56,7 @@ def upgrade_and_validate(config_file,
 @pytest.mark.parametrize("config_file",
                          ["vignette_config_1.0.0.yaml",
                           "vignette_config_1.1.0.yaml",
-                          "vignette_config_develop_95edd56_20191312.yaml"])
+                          "vignette_config_current.yaml"])
 def test_upgrade_vignette_config(config_file, upgraded_config_file):
     """
     Run upgrade_config_file on previous versions of the vignette
@@ -74,7 +74,7 @@ def test_upgrade_vignette_config(config_file, upgraded_config_file):
 
 
 @pytest.mark.parametrize("config_file",
-                         ["simdata_umi_config_develop_95edd56_20191312.yaml"])
+                         ["simdata_umi_config_current.yaml"])
 def test_upgrade_simdata_umi_config(config_file, upgraded_config_file):
     """
     Run upgrade_config_file on previous versions of the simulated UMI
@@ -92,7 +92,7 @@ def test_upgrade_simdata_umi_config(config_file, upgraded_config_file):
 
 
 @pytest.mark.parametrize("config_file",
-                         ["simdata_multiplex_config_develop_95edd56_20191312.yaml"])
+                         ["simdata_multiplex_config_current.yaml"])
 def test_upgrade_simdata_multiplex_config(config_file, upgraded_config_file):
     """
     Run upgrade_config_file on previous versions of the simulated

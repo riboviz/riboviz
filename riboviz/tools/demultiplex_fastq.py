@@ -129,7 +129,7 @@ def invoke_demultiplex_fastq():
     """
     Parse command-line options then invoke "demultiplex".
     """
-    print(provenance.get_version(__file__))
+    print(provenance.get_provenance_str(__file__))
     options = parse_command_line_options()
     sample_sheet_file = options.sample_sheet_file
     read1_file = options.read1_file

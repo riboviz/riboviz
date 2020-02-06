@@ -14,12 +14,12 @@ using riboviz.tools.create_fastq_simdata.
 import os
 import pytest
 import riboviz
-import riboviz.process_utils
 import riboviz.test
-import riboviz.tools
-import riboviz.validation
+from riboviz import demultiplex_fastq
 from riboviz import params
-from riboviz.demultiplex_fastq import NUM_READS_FILE
+from riboviz import file_names
+from riboviz import validation
+from riboviz import workflow
 from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration_module  # Test fixture
 from riboviz.test.tools import run_prep_riboviz  # Test fixture
@@ -50,8 +50,9 @@ def test_adaptor_trimming(configuration_module):
         "multiplex_umi_barcode.fastq")
     actual_output = os.path.join(
         config[params.TMP_DIR],
-        "multiplex_umi_barcode_adaptor_trim.fq")
-    riboviz.validation.equal_fastq(expected_output, actual_output)
+        file_names.ADAPTER_TRIM_FQ_FORMAT.format(
+            "multiplex_umi_barcode_adaptor"))
+    validation.equal_fastq(expected_output, actual_output)
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
@@ -70,8 +71,9 @@ def test_barcode_umi_extract(configuration_module):
         "multiplex.fastq")
     actual_output = os.path.join(
         config[params.TMP_DIR],
-        "multiplex_umi_barcode_adaptor_extract_trim.fq")
-    riboviz.validation.equal_fastq(expected_output, actual_output)
+        file_names.UMI_EXTRACT_FQ_FORMAT.format(
+            "multiplex_umi_barcode_adaptor"))
+    validation.equal_fastq(expected_output, actual_output)
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
@@ -87,11 +89,15 @@ def test_deplex_num_reads(configuration_module):
     config, _ = configuration_module
     actual_dir = os.path.join(
         config[params.TMP_DIR],
-        "multiplex_umi_barcode_adaptor_deplex")
-    actual_output = os.path.join(actual_dir, NUM_READS_FILE)
+        file_names.DEPLEX_DIR_FORMAT.format(
+            "multiplex_umi_barcode_adaptor"))
+    actual_output = os.path.join(actual_dir,
+                                 demultiplex_fastq.NUM_READS_FILE)
     expected_output = os.path.join(
-        riboviz.test.SIMDATA_DIR, "deplex", NUM_READS_FILE)
-    riboviz.validation.compare(expected_output, actual_output)
+        riboviz.test.SIMDATA_DIR,
+        "deplex",
+        demultiplex_fastq.NUM_READS_FILE)
+    validation.compare(expected_output, actual_output)
 
 
 @pytest.mark.parametrize(
@@ -111,11 +117,12 @@ def test_deplex_reads(configuration_module, fastq):
     config, _ = configuration_module
     actual_dir = os.path.join(
         config[params.TMP_DIR],
-        "multiplex_umi_barcode_adaptor_deplex")
+        file_names.DEPLEX_DIR_FORMAT.format(
+            "multiplex_umi_barcode_adaptor"))
     actual_output = os.path.join(actual_dir, fastq)
     expected_output = os.path.join(
         riboviz.test.SIMDATA_DIR, "deplex", fastq)
-    riboviz.validation.compare(expected_output, actual_output)
+    validation.compare(expected_output, actual_output)
 
 
 @pytest.mark.parametrize("sample_id", ["Tag0", "Tag1", "Tag2"])
