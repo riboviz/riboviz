@@ -81,6 +81,7 @@ data/standard_asite_disp_length.txt"] [shape=box, style=dashed]
     "tmp/<SAMPLE_ID>/nonrRNA.fq" [shape=plaintext]
     "tmp/<SAMPLE_ID>/unaligned.fq" [shape=plaintext]
     "tmp/<SAMPLE_ID>/orf_map.sam" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/trim_5p_mismatch.tsv" [shape=plaintext]
     "tmp/<SAMPLE_ID>/orf_map_clean.sam" [shape=plaintext]
     "output/<SAMPLE_ID>/<SAMPLE_ID>.bam" [shape=plaintext]
     "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" [shape=plaintext]
@@ -120,7 +121,10 @@ output/<SAMPLE_ID>/3ntframe_bygene.tsv
     h22 -> "tmp/<SAMPLE_ID>/unaligned.fq"
     h22 -> "tmp/<SAMPLE_ID>/orf_map.sam"
 
-    "tmp/<SAMPLE_ID>/orf_map.sam" -> trim -> "tmp/<SAMPLE_ID>/orf_map_clean.sam"
+    "tmp/<SAMPLE_ID>/orf_map.sam" -> trim 
+    trim -> "tmp/<SAMPLE_ID>/orf_map_clean.sam"
+    trim -> "tmp/<SAMPLE_ID>/trim_5p_mismatch.tsv"
+
     "tmp/<SAMPLE_ID>/orf_map_clean.sam" -> samview -> "output/<SAMPLE_ID>/<SAMPLE_ID>.bam"
     "output/<SAMPLE_ID>/<SAMPLE_ID>.bam" -> samindex
     samindex -> "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai"

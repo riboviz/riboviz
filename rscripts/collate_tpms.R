@@ -26,14 +26,14 @@ option_list <- list(
               help = "ORF file that was aligned to")
 )
 
-print(get_version(get_Rscript_filename()))
+print_provenance(get_Rscript_filename())
 parser <- OptionParser(option_list = option_list)
 
 opts <- parse_args(parser,
                    positional_arguments = TRUE,
                    convert_hyphens_to_underscores = TRUE)
 
-print("collate_tpms.Rrunning with parameters:")
+print("collate_tpms.R running with parameters:")
 opts
 
 output_dir <- opts$options$output_dir
@@ -104,7 +104,7 @@ make_tpm_table <- function(output_dir,
 round1 <- function(x) round(x, digits = 1)
 
 tpms_file_path <- file.path(output_dir, tpms_file)
-write_metadata_header(get_Rscript_filename(), tpms_file_path)
+write_provenance_header(get_Rscript_filename(), tpms_file_path)
 make_tpm_table(output_dir, sample_subdirs, samples, orf_fasta) %>%
     mutate_if(is.numeric, round1) %>%
     write_tsv(tpms_file_path, col_names = TRUE, append = TRUE)

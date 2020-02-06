@@ -14,7 +14,7 @@ The tests can be run using pytest:
 where:
 
 * `--expected=<DIRECTORY>`: directory with expected vignette
-   files. This is assumed to	have `index/` `tmp/` and `output/`
+   files. This is assumed to have `index/` `tmp/` and `output/`
    directories.
 * `--skip-workflow`: request that the `prep_riboviz.py` workflow not
    be run, instead use existing data files in `vignette/` for
@@ -47,6 +47,7 @@ The directories are assumed to hold the following content:
         orf_map.sam
         rRNA_map.sam
         trim.fq
+        trim_5p_mismatch.tsv
         unaligned.fq
       WTnone/
         nonrRNA.fq
@@ -54,6 +55,7 @@ The directories are assumed to hold the following content:
         orf_map.sam
         rRNA_map.sam
         trim.fq
+        trim_5p_mismatch.tsv
         unaligned.fq
     output/
       TPMs_collated.tsv
@@ -109,11 +111,21 @@ import tempfile
 import pytest
 import pysam
 import riboviz
-import riboviz.process_utils
-import riboviz.test
-import riboviz.tools
-import riboviz.validation
+from riboviz import file_names
+from riboviz import test
+from riboviz import trim_5p_mismatch
+from riboviz import validation
+from riboviz import workflow
+from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
+
+
+INDEX_DIR = "index"
+""" Name of index files directory, relative to "expected" directory """
+TMP_DIR = "tmp"
+""" Name of temporary files directory, relative to "expected" directory """
+OUTPUT_DIR = "output"
+""" Name of output files directory, relative to "expected" directory """
 
 
 @pytest.fixture(scope="module")
@@ -126,18 +138,16 @@ def run_prep_riboviz(skip_workflow):
     :param skip_workflow: Should workflow not be run?
     :type skip_workflow: bool
     """
-    print(("Skip workflow:" + str(skip_workflow)))
     if not skip_workflow:
         exit_code = prep_riboviz.prep_riboviz(
-            riboviz.test.PY_SCRIPTS,
-            riboviz.test.R_SCRIPTS,
-            riboviz.test.VIGNETTE_CONFIG)
+            riboviz.R_SCRIPTS,
+            test.VIGNETTE_CONFIG)
         assert exit_code == 0, \
             "prep_riboviz returned non-zero exit code %d" % exit_code
 
 
 @pytest.fixture(scope="function")
-def tmp_directory():
+def scratch_directory():
     """
     Create a temporary directory for any test files, and delete it
     after use.
@@ -145,14 +155,15 @@ def tmp_directory():
     :return: directory
     :rtype: str or unicode
     """
-    tmpdir = tempfile.mkdtemp("tmp_test_vignette")
-    yield tmpdir
-    shutil.rmtree(tmpdir)
+    scratch_dir = tempfile.mkdtemp("scratch_test_vignette")
+    yield scratch_dir
+    shutil.rmtree(scratch_dir)
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
-@pytest.mark.parametrize("index", list(range(1, 9)))
-@pytest.mark.parametrize("prefix", ["YAL_CDS_w_250", "yeast_rRNA"])
+@pytest.mark.parametrize("prefix", test.INDEX_PREFIXES)
+@pytest.mark.parametrize("index",
+                         list(range(1, test.NUM_INDICES)))
 def test_index(expected, prefix, index):
     """
     Test index/*.ht2 files for equality.
@@ -165,43 +176,42 @@ def test_index(expected, prefix, index):
     :param index: file name index e.g. 1
     :type index: int
     """
-    expected_index = os.path.join(expected, "index")
-    actual_index = os.path.join(riboviz.test.VIGNETTE_DIR, "index")
     file_name = "%s.%d.ht2" % (prefix, index)
-    print(file_name)
-    riboviz.validation.compare(
-        os.path.join(expected_index, file_name),
-        os.path.join(actual_index, file_name))
+    validation.compare(
+        os.path.join(expected, INDEX_DIR, file_name),
+        os.path.join(test.VIGNETTE_INDEX_DIR, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
-@pytest.mark.parametrize("content", ["nonrRNA", "trim", "unaligned"])
-@pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_tmp_fq(expected, prefix, content):
+@pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
+@pytest.mark.parametrize("file_name", [
+    file_names.NON_RRNA_FQ,
+    file_names.ADAPTER_TRIM_FQ,
+    file_names.UNALIGNED_FQ])
+def test_sample_tmp_fq(expected, sample, file_name):
     """
     Test tmp/*.fq files for equality.
 
     :param expected: expected directory
     (pytest fixture defined in conftest.py)
     :type expected: str or unicode
-    :param prefix: file name prefix e.g. WT3AT
-    :type prefix: str or unicode
-    :param content: content e.g. nonrRNA
-    :type content: str or unicode
+    :param sample: sample name e.g. WT3AT
+    :type sample: str or unicode
+    :param file_name: file name e.g. nonrRNA.fq
+    :type file_name: str or unicode
     """
-    expected_tmp = os.path.join(expected, "tmp")
-    actual_tmp = os.path.join(riboviz.test.VIGNETTE_DIR, "tmp")
-    file_name = "%s.fq" % content
-    print(file_name)
-    riboviz.validation.compare(
-        os.path.join(expected_tmp, prefix, file_name),
-        os.path.join(actual_tmp, prefix, file_name))
+    validation.compare(
+        os.path.join(expected, TMP_DIR, sample, file_name),
+        os.path.join(test.VIGNETTE_TMP_DIR, sample, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
-@pytest.mark.parametrize("content", ["orf_map_clean", "orf_map", "rRNA_map"])
-@pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_tmp_sam(expected, tmp_directory, prefix, content):
+@pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
+@pytest.mark.parametrize("file_name", [
+    file_names.ORF_MAP_CLEAN_SAM,
+    file_names.ORF_MAP_SAM,
+    file_names.RRNA_MAP_SAM])
+def test_sample_tmp_sam(expected, scratch_directory, sample, file_name):
     """
     Test tmp/*.sam files for equality. The SAM files are sorted into
     temporary SAM files which are then compared for equality.
@@ -209,59 +219,71 @@ def test_tmp_sam(expected, tmp_directory, prefix, content):
     :param expected: expected directory
     (pytest fixture defined in conftest.py)
     :type expected: str or unicode
-    :param tmp_directory: temporary files directory for test files
+    :param scratch_directory: scratch files directory for test files
     (pytest fixture defined in this module)
-    :type tmp_directory: str or unicode
-    :param prefix: file name prefix e.g. WT3AT
-    :type prefix: str or unicode
-    :param content: content e.g. orf_map_clean
-    :type content: str or unicode
+    :type scratch_directory: str or unicode
+    :param sample: sample name e.g. WT3AT
+    :type sample: str or unicode
+    :param file_name: file name e.g. orf_map_clean.sam
+    :type file_name: str or unicode
     """
-    expected_tmp = os.path.join(expected, "tmp", prefix)
-    actual_tmp = os.path.join(riboviz.test.VIGNETTE_DIR, "tmp", prefix)
-    expected_tmp_copy = os.path.join(tmp_directory, "expected")
-    os.mkdir(expected_tmp_copy)
-    actual_tmp_copy = os.path.join(tmp_directory, "actual")
-    os.mkdir(actual_tmp_copy)
-    file_name = "%s.sam" % content
-    print(file_name)
-    expected_tmp_file = os.path.join(expected_tmp_copy, file_name)
-    actual_tmp_file = os.path.join(actual_tmp_copy, file_name)
-    pysam.sort("-o",
-               expected_tmp_file,
-               os.path.join(expected_tmp, file_name))
-    pysam.sort("-o",
-               actual_tmp_file,
-               os.path.join(actual_tmp, file_name))
-    riboviz.validation.compare(
-        expected_tmp_file,
-        actual_tmp_file)
+    expected_file = os.path.join(
+        expected, TMP_DIR, sample, file_name)
+    actual_file = os.path.join(
+        test.VIGNETTE_TMP_DIR, sample, file_name)
+    expected_copy_dir = os.path.join(scratch_directory, "expected")
+    os.mkdir(expected_copy_dir)
+    actual_copy_dir = os.path.join(scratch_directory, "actual")
+    os.mkdir(actual_copy_dir)
+    expected_copy_file = os.path.join(expected_copy_dir, file_name)
+    actual_copy_file = os.path.join(actual_copy_dir, file_name)
+    pysam.sort("-o", expected_copy_file, expected_file)
+    pysam.sort("-o", actual_copy_file, actual_file)
+    validation.compare(expected_copy_file, actual_copy_file)
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
-@pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_output_bai(expected, prefix):
+@pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
+@pytest.mark.parametrize("file_name", [
+    trim_5p_mismatch.TRIM_5P_MISMATCH_FILE])
+def test_sample_tmp_tsv(expected, sample, file_name):
+    """
+    Test tmp/*tsv files for equality.
+
+    :param expected: expected directory
+    (pytest fixture defined in conftest.py)
+    :type expected: str or unicode
+    :param sample: sample name e.g. WT3AT
+    :type sample: str or unicode
+    :param file_name: file name e.g. trim_5p_mismatch.tsv
+    :type file_name: str or unicode
+    """
+    validation.compare(
+        os.path.join(expected, TMP_DIR, sample, file_name),
+        os.path.join(test.VIGNETTE_TMP_DIR, sample, file_name))
+
+
+@pytest.mark.usefixtures("run_prep_riboviz")
+@pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
+def test_sample_output_bai(expected, sample):
     """
     Test output/*.bai files for equality.
 
     :param expected: expected directory
     (pytest fixture defined in conftest.py)
     :type expected: str or unicode
-    :param prefix: file name prefix e.g. WT3AT
-    :type prefix: str or unicode
+    :param sample: sample name e.g. WT3AT
+    :type sample: str or unicode
     """
-    expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
-    file_name = "%s.bam.bai" % prefix
-    print(file_name)
-    riboviz.validation.compare(
-        os.path.join(expected_output, prefix, file_name),
-        os.path.join(actual_output, prefix, file_name))
+    file_name = file_names.BAM_BAI_FORMAT.format(sample)
+    validation.compare(
+        os.path.join(expected, OUTPUT_DIR, sample, file_name),
+        os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
-@pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_output_bam(expected, prefix):
+@pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
+def test_sample_output_bam(expected, sample):
     """
     Test output/*.bam files for equality. The BAM files are assumed to
     be sorted by leftmost coordinate position.
@@ -269,138 +291,123 @@ def test_output_bam(expected, prefix):
     :param expected: expected directory
     (pytest fixture defined in conftest.py)
     :type expected: str or unicode
-    :param prefix: file name prefix e.g. WT3AT
-    :type prefix: str or unicode
+    :param sample: sample name e.g. WT3AT
+    :type sample: str or unicode
     """
-    expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
-    file_name = "%s.bam" % prefix
-    print(file_name)
-    riboviz.validation.compare(
-        os.path.join(expected_output, prefix, file_name),
-        os.path.join(actual_output, prefix, file_name))
+    file_name = file_names.BAM_FORMAT.format(sample)
+    validation.compare(
+        os.path.join(expected, OUTPUT_DIR, sample, file_name),
+        os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
-@pytest.mark.parametrize("content", ["minus", "plus"])
-@pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_output_bedgraph(expected, prefix, content):
+@pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
+@pytest.mark.parametrize("file_name", [
+    file_names.MINUS_BEDGRAPH,
+    file_names.PLUS_BEDGRAPH])
+def test_sample_output_bedgraph(expected, sample, file_name):
     """
-    Test tmp/*.bedgraph files for equality.
+    Test output/*.bedgraph files for equality.
 
     :param expected: expected directory
     (pytest fixture defined in conftest.py)
     :type expected: str or unicode
-    :param prefix: file name prefix e.g. WT3AT
-    :type prefix: str or unicode
+    :param sample: sample name e.g. WT3AT
+    :type sample: str or unicode
     :param content: content e.g. minus
     :type content: str or unicode
     """
-    expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
-    file_name = "%s.bedgraph" % content
-    print(file_name)
-    riboviz.validation.compare(
-        os.path.join(expected_output, prefix, file_name),
-        os.path.join(actual_output, prefix, file_name))
+    validation.compare(
+        os.path.join(expected, OUTPUT_DIR, sample, file_name),
+        os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
-@pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_output_h5(expected, prefix):
+@pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
+def test_sample_output_h5(expected, sample):
     """
     Test output/*.h5 files for equality.
 
     :param expected: expected directory
     (pytest fixture defined in conftest.py)
     :type expected: str or unicode
-    :param prefix: file name prefix e.g. WT3AT
-    :type prefix: str or unicode
+    :param sample: sample name e.g. WT3AT
+    :type sample: str or unicode
     """
-    expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
-    file_name = "%s.h5" % prefix
-    print(file_name)
-    riboviz.validation.compare(
-        os.path.join(expected_output, prefix, file_name),
-        os.path.join(actual_output, prefix, file_name))
+    file_name = file_names.H5_FORMAT.format(sample)
+    validation.compare(
+        os.path.join(expected, OUTPUT_DIR, sample, file_name),
+        os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
-@pytest.mark.parametrize("content",
-                         ["3nt_periodicity",
-                          "codon_ribodens",
-                          "pos_sp_nt_freq",
-                          "pos_sp_rpf_norm_reads",
-                          "read_lengths",
-                          "3ntframe_bygene",
-                          "tpms"])
-@pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_output_tsv(expected, prefix, content):
+@pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
+@pytest.mark.parametrize("file_name",
+                         [workflow_r.THREE_NT_PERIODICITY_TSV,
+                          workflow_r.CODON_RIBODENS_TSV,
+                          workflow_r.POS_SP_NT_FREQ_TSV,
+                          workflow_r.POS_SP_RPF_NORM_READS_TSV,
+                          workflow_r.READ_LENGTHS_TSV,
+                          workflow_r.THREE_NT_FRAME_BY_GENE_TSV,
+                          workflow_r.TPMS_TSV])
+def test_sample_output_tsv(expected, sample, file_name):
     """
     Test output/*tsv files for equality.
 
     :param expected: expected directory
     (pytest fixture defined in conftest.py)
     :type expected: str or unicode
-    :type prefix: str or unicode
-    :param prefix: file name prefix e.g. WT3AT
-    :param content: content e.g. 3nt_periodicity
-    :type content: str or unicode
+    :param sample: sample name e.g. WT3AT
+    :type sample: str or unicode
+    :param file_name: content e.g. 3nt_periodicity.tsv
+    :type file_name: str or unicode
     """
-    expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
-    file_name = "%s.tsv" % content
-    print(file_name)
-    riboviz.validation.compare(
-        os.path.join(expected_output, prefix, file_name),
-        os.path.join(actual_output, prefix, file_name))
+    validation.compare(
+        os.path.join(expected, OUTPUT_DIR, sample, file_name),
+        os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
-@pytest.mark.parametrize("content",
-                         ["3nt_periodicity",
-                          "codon_ribodens",
-                          "features",
-                          "pos_sp_rpf_norm_reads",
-                          "read_lengths",
-                          "startcodon_ribogridbar",
-                          "startcodon_ribogrid",
-                          "3ntframe_propbygene"])
-@pytest.mark.parametrize("prefix", ["WT3AT", "WTnone"])
-def test_output_pdf(expected, prefix, content):
+@pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
+@pytest.mark.parametrize("file_name",
+                         [workflow_r.THREE_NT_PERIODICITY_PDF,
+                          workflow_r.CODON_RIBODENS_PDF,
+                          workflow_r.FEATURES_PDF,
+                          workflow_r.POS_SP_RPF_NORM_READS_PDF,
+                          workflow_r.READ_LENGTHS_PDF,
+                          workflow_r.START_CODON_RIBOGRID_BAR_PDF,
+                          workflow_r.START_CODON_RIBOGRID_PDF,
+                          workflow_r.THREE_NT_FRAME_PROP_BY_GENE_PDF])
+def test_sample_output_pdf(expected, sample, file_name):
     """
     Test output/*pdf files for equality.
 
     :param expected: expected directory
     (pytest fixture defined in conftest.py)
     :type expected: str or unicode
-    :param prefix: file name prefix e.g. WT3AT
-    :type prefix: str or unicode
-    :param content: content e.g. 3nt_periodicity
-    :type content: str or unicode
+    :param sample: sample name e.g. WT3AT
+    :type sample: str or unicode
+    :param file_name: content e.g. 3nt_periodicity.pdf
+    :type file_name: str or unicode
     """
-    expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
-    file_name = "%s.pdf" % content
-    print(file_name)
-    riboviz.validation.compare(
-        os.path.join(expected_output, prefix, file_name),
-        os.path.join(actual_output, prefix, file_name))
+    validation.compare(
+        os.path.join(expected, OUTPUT_DIR, sample, file_name),
+        os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
-def test_output_tpms_collated_tsv(expected):
+@pytest.mark.parametrize("file_name",
+                         [workflow_r.TPMS_COLLATED_TSV])
+def test_output_tsv(expected, file_name):
     """
-    Test output/TPMs_collated.tsv files for equality.
+    Test output/*.tsv files for equality.
 
     :param expected: expected directory
     (pytest fixture defined in conftest.py)
     :type expected: str or unicode
+    :param file_name: content e.g. TPMs_collated.tsv
+    :type file_name: str or unicode
     """
-    expected_output = os.path.join(expected, "output")
-    actual_output = os.path.join(riboviz.test.VIGNETTE_DIR, "output")
-    file_name = "TPMs_collated.tsv"
-    riboviz.validation.compare(
-        os.path.join(expected_output, file_name),
-        os.path.join(actual_output, file_name))
+    validation.compare(
+        os.path.join(expected, OUTPUT_DIR, file_name),
+        os.path.join(test.VIGNETTE_OUTPUT_DIR, file_name))

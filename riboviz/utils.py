@@ -1,6 +1,7 @@
 """
 Utilities.
 """
+import os
 
 
 def value_in_dict(key, dictionary, allow_false_empty=False):
@@ -55,3 +56,19 @@ def list_to_str(lst):
     :rtype: str or unicode
     """
     return ' '.join(map(str, lst))
+
+
+def get_file_ext(file_name):
+    """
+    Given a file name return full file extension, everything after the
+    first "." in the file name. For example, for 'example.fastq.gz'
+    return 'fastq.gz', for 'example.fastq' return 'fastq', for 'example'
+    return ''. The extension is returned in lower-case.
+
+    :param file_name: File name
+    :type file_name: str or unicode
+    :return: extension
+    :rtype: str or unicode
+    """
+    file_type = ".".join(os.path.basename(file_name).split(".")[1:])
+    return file_type.lower()

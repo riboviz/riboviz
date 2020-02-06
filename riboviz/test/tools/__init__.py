@@ -7,7 +7,6 @@ import tempfile
 import pytest
 import yaml
 import riboviz
-import riboviz.test
 import riboviz.process_utils
 import riboviz.validation
 import riboviz.tools
@@ -85,8 +84,7 @@ def run_prep_riboviz(configuration_module):
     :type configuration_module: tuple(dict, str or unicode)
     """
     _, config_path = configuration_module
-    exit_code = prep_riboviz.prep_riboviz(riboviz.test.PY_SCRIPTS,
-                                          riboviz.test.R_SCRIPTS,
+    exit_code = prep_riboviz.prep_riboviz(riboviz.R_SCRIPTS,
                                           config_path)
     assert exit_code == 0, \
         "prep_riboviz returned non-zero exit code %d" % exit_code

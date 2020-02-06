@@ -138,7 +138,7 @@ option_list <- list(
         help="Is this a test run?")
     )
 
-print(get_version(get_Rscript_filename()))
+print_provenance(get_Rscript_filename())
 # Read in commandline arguments
 opt <- parse_args(OptionParser(option_list=option_list),
                   convert_hyphens_to_underscores=TRUE)
