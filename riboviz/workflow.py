@@ -86,9 +86,6 @@ def build_indices(fasta, index_dir, ht_prefix, log_file, run_config):
     process_utils.run_logged_command(cmd, log_file,
                                      run_config.cmd_file,
                                      run_config.is_dry_run)
-    if not run_config.is_dry_run:
-        index_files = glob.glob(index_file_path + "*")
-        index_files.sort()
 
 
 def cut_adapters(sample_id, adapter, original_fq, trimmed_fq,
