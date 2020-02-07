@@ -7,6 +7,8 @@ import pysam
 
 PG_TAG = "PG"
 """ SAM file PG (program) tag """
+BAM_FORMAT = "{}.bam"
+""" Format string for BAM files """
 BAM_BAI_FORMAT = "{}.bai"
 """
 Format string for BAM index file based on default behaviour of

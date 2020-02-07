@@ -141,6 +141,7 @@ from riboviz import file_names
 from riboviz import logging_utils
 from riboviz import params
 from riboviz import provenance
+from riboviz import sam_bam
 from riboviz import sample_sheets
 from riboviz import trim_5p_mismatch
 from riboviz import workflow
@@ -273,7 +274,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
         # Create BAM file in temporary directory
         sample_bam = os.path.join(tmp_dir, file_names.PRE_DEDUP_BAM)
     else:
-        sample_bam = file_names.BAM_FORMAT.format(sample_out_prefix)
+        sample_bam = sam_bam.BAM_FORMAT.format(sample_out_prefix)
         sample_out_bam = sample_bam
 
     workflow.sort_bam(sample, orf_map_sam_clean, sample_bam, log_file,
@@ -299,7 +300,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
                                 log_file, run_config)
             step += 1
 
-        sample_out_bam = file_names.BAM_FORMAT.format(sample_out_prefix)
+        sample_out_bam = sam_bam.BAM_FORMAT.format(sample_out_prefix)
         log_file = os.path.join(
             run_config.logs_dir,
             LOG_FORMAT.format(step, "umi_tools_dedup.log"))
