@@ -138,6 +138,7 @@ import yaml
 from riboviz import demultiplex_fastq
 from riboviz import fastq
 from riboviz import file_names
+from riboviz import h5
 from riboviz import logging_utils
 from riboviz import params
 from riboviz import provenance
@@ -348,7 +349,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
     orf_gff_file = config[params.ORF_GFF_FILE]
     log_file = os.path.join(run_config.logs_dir,
                             LOG_FORMAT.format(step, "bam_to_h5.log"))
-    sample_out_h5 = file_names.H5_FORMAT.format(sample_out_prefix)
+    sample_out_h5 = h5.H5_FORMAT.format(sample_out_prefix)
     workflow.bam_to_h5(sample, sample_out_bam, sample_out_h5,
                        orf_gff_file, config, log_file, run_config)
     step += 1

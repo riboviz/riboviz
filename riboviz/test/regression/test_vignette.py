@@ -112,6 +112,7 @@ import pytest
 import pysam
 import riboviz
 from riboviz import file_names
+from riboviz import h5
 from riboviz import sam_bam
 from riboviz import test
 from riboviz import trim_5p_mismatch
@@ -336,7 +337,7 @@ def test_sample_output_h5(expected, sample):
     :param sample: sample name e.g. WT3AT
     :type sample: str or unicode
     """
-    file_name = file_names.H5_FORMAT.format(sample)
+    file_name = h5.H5_FORMAT.format(sample)
     validation.compare(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
