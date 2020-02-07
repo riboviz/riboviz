@@ -117,7 +117,6 @@ from riboviz import sam_bam
 from riboviz import test
 from riboviz import trim_5p_mismatch
 from riboviz import validation
-from riboviz import workflow
 from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
 
