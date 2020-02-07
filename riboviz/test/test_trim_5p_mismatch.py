@@ -6,6 +6,7 @@ import tempfile
 import pytest
 import pandas as pd
 from riboviz.test import data
+from riboviz import sam_bam
 from riboviz import trim_5p_mismatch
 
 
@@ -65,7 +66,7 @@ def trimmed_sam_file():
     :return: path to SAM file
     :rtype: str or unicode
     """
-    _, sam_file = tempfile.mkstemp(prefix="tmp", suffix=".sam")
+    _, sam_file = tempfile.mkstemp(prefix="tmp", suffix="." + sam_bam.SAM_EXT)
     yield sam_file
     if os.path.exists(sam_file):
         os.remove(sam_file)
