@@ -112,6 +112,7 @@ import pytest
 import pysam
 import riboviz
 from riboviz import file_names
+from riboviz import sam_bam
 from riboviz import test
 from riboviz import trim_5p_mismatch
 from riboviz import validation
@@ -275,7 +276,8 @@ def test_sample_output_bai(expected, sample):
     :param sample: sample name e.g. WT3AT
     :type sample: str or unicode
     """
-    file_name = file_names.BAM_BAI_FORMAT.format(sample)
+    file_name = sam_bam.BAM_BAI_FORMAT.format(
+        sam_bam.BAM_FORMAT.format(sample))
     validation.compare(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
@@ -294,7 +296,7 @@ def test_sample_output_bam(expected, sample):
     :param sample: sample name e.g. WT3AT
     :type sample: str or unicode
     """
-    file_name = file_names.BAM_FORMAT.format(sample)
+    file_name = sam_bam.BAM_FORMAT.format(sample)
     validation.compare(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
