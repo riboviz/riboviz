@@ -3,7 +3,9 @@ H5-related constants and functions.
 """
 import subprocess
 
-H5_FORMAT = "{}.h5"
+H5_EXT = "h5"
+""" H5 file extension """
+H5_FORMAT = "{}." + H5_EXT
 """ Format string for H5 files """
 
 

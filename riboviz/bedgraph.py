@@ -3,6 +3,10 @@ Bedgraph-related constants.
 """
 import pandas as pd
 
+BEDGRAPH_EXT = "bedgraph"
+""" Bedgraph file extension """
+BEDGRAPH_FORMAT = "{}." + BEDGRAPH_EXT
+""" Format string for bedgraph files """
 TRACK_PREFIX = "track type=bedGraph"
 """ Track line prefix """
 COLUMNS = ["Chromosome", "Start", "End", "Data"]
