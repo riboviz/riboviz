@@ -41,7 +41,7 @@ See [read counts file](./prep-riboviz-operation.md#read-counts-file) for a descr
 
 ## Example
 
-Here is an example of running `count_reads.py` on workflow files log file produced when running the vignette:
+Here is an example of running `count_reads.py` on the directories produced when running the vignette:
 
 ```console
 $ python -m riboviz.tools.count_reads \

@@ -153,7 +153,6 @@ A summary file is also put in the output directory:
 
 In addition, the following files are also put into the output directory:
 
-* `workflow_files.tsv`: a [workflow files log file](#workflow-files-log-file).
 * `read_counts.tsv`: a [read counts file](#read-counts-file) ((only if `count_reads: TRUE`).
 
 ---
@@ -235,65 +234,6 @@ demultiplex_fastq.log
   13_generate_stats_figs.log
 collate_tpms.log
 count_reads.log
-```
-
----
-
-## Workflow files log file
-
-`prep_riboviz.py` will capture information about the files read and written at each step of the workflow. The file, `workflow_files.tsv`, is written into the output directory.
-
-The workflow files log file is a tab-separated values (TSV) file with the following columns:
-
-* `SampleName`: Name of the sample to which this file belongs. This is an empty value if the step was not sample-specific (e.g. creating index files or demultiplexing a multiplexed FASTQ file).
-* `Program`: Program that read/wrote the file. The special token `input` denotes input files.
-* `File`: Path to file read/written.
-* `Read/Write`: `read` if the file was read, `write` if the file was written.
-
-For example:
-
-```console
-SampleName	Program	File	Read/Write
-	input	vignette/input/yeast_rRNA_R64-1-1.fa	read
-	input	vignette/input/yeast_YAL_CDS_w_250utrs.fa	read
-	input	vignette/input/yeast_YAL_CDS_w_250utrs.gff3	read
-	input	data/yeast_features.tsv	read
-	input	data/yeast_tRNAs.tsv	read
-	input	data/yeast_codon_pos_i200.RData	read
-	input	data/yeast_standard_asite_disp_length.txt	read
-	hisat2-build	vignette/input/yeast_rRNA_R64-1-1.fa	read
-	hisat2-build	vignette/index/yeast_rRNA.1.ht2	write
-...
-	hisat2-build	vignette/index/yeast_rRNA.8.ht2	write
-	hisat2-build	vignette/input/yeast_YAL_CDS_w_250utrs.fa	read
-	hisat2-build	vignette/index/YAL_CDS_w_250.1.ht2	write
-...
-	hisat2-build	vignette/index/YAL_CDS_w_250.8.ht2	write
-WTnone	input	vignette/input/SRR1042855_s1mi.fastq.gz	read
-WTnone	cutadapt	vignette/input/SRR1042855_s1mi.fastq.gz	read
-WTnone	cutadapt	vignette/tmp/WTnone/trim.fq	write
-WTnone	hisat2	vignette/tmp/WTnone/trim.fq	read
-WTnone	hisat2	vignette/index/yeast_rRNA.1.ht2	read
-...
-WTnone	hisat2	vignette/index/yeast_rRNA.8.ht2	read
-WTnone	hisat2	vignette/tmp/WTnone/nonrRNA.fq	write
-WTnone	hisat2	vignette/tmp/WTnone/rRNA_map.sam	write
-WTnone	hisat2	vignette/tmp/WTnone/nonrRNA.fq	read
-WTnone	hisat2	vignette/index/YAL_CDS_w_250.1.ht2	read
-...
-WTnone	hisat2	vignette/index/YAL_CDS_w_250.8.ht2	read
-WTnone	hisat2	vignette/tmp/WTnone/unaligned.fq	write
-WTnone	hisat2	vignette/tmp/WTnone/orf_map.sam	write
-WTnone	riboviz.tools.trim_5p_mismatch	vignette/tmp/WTnone/orf_map.sam	read
-WTnone	riboviz.tools.trim_5p_mismatch	vignette/tmp/WTnone/orf_map_clean.sam	write
-...
-WTnone	generate_stats_figs.R	vignette/output/WTnone/read_lengths.pdf	write
-WT3AT	input	vignette/input/SRR1042864_s1mi.fastq.gz	read
-...
-WT3AT	generate_stats_figs.R	vignette/output/WT3AT/read_lengths.pdf	write
-	collate_tpms.R	vignette/output/WTnone/tpms.tsv	read
-	collate_tpms.R	vignette/output/WT3AT/tpms.tsv	read
-	collate_tpms.R	vignette/output/TPMs_collated.tsv	write
 ```
 
 ---
