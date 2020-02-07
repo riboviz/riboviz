@@ -147,7 +147,6 @@ from riboviz import trim_5p_mismatch
 from riboviz import utils
 from riboviz import workflow
 from riboviz import workflow_files
-from riboviz import workflow_files_logger
 from riboviz.utils import value_in_dict
 
 
@@ -410,18 +409,12 @@ def process_samples(samples, in_dir, index_dir, r_rna_index,
                 if not os.path.exists(sample_fastq):
                     raise FileNotFoundError(
                         errno.ENOENT, os.strerror(errno.ENOENT), sample_fastq)
-                if not run_config.is_dry_run:
-                    workflow_files_logger.log_input_files(
-                        run_config.workflow_files_log_file,
-                        [sample_fastq],
-                        sample)
             sample_tmp_dir = os.path.join(tmp_dir, sample)
             sample_out_dir = os.path.join(out_dir, sample)
             sample_logs_dir = os.path.join(run_config.logs_dir, sample)
             sample_run_config = workflow.RunConfigTuple(
                 run_config.r_scripts,
                 run_config.cmd_file,
-                run_config.workflow_files_log_file,
                 run_config.is_dry_run,
                 sample_logs_dir,
                 run_config.nprocesses)
@@ -494,17 +487,6 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     for directory in dirs:
         workflow.create_directory(directory, cmd_file, is_dry_run)
 
-    if not is_dry_run:
-        workflow_files_log_file = os.path.join(
-            out_dir, workflow_files.WORKFLOW_FILES_LOG_FILE)
-        if os.path.exists(workflow_files_log_file):
-            os.remove(workflow_files_log_file)
-        LOGGER.info("Workflow files log file: %s",
-                    workflow_files_log_file)
-        workflow_files_logger.create_log_file(workflow_files_log_file)
-    else:
-        workflow_files_log_file = None
-
     # Check existence of all non-sample-specific files to avoid having
     # to recheck them when processing each sample.
     for input_key in [params.RRNA_FASTA_FILE,
@@ -514,9 +496,6 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
         if not os.path.exists(input_file):
             raise FileNotFoundError(
                 errno.ENOENT, os.strerror(errno.ENOENT), input_file)
-        if not is_dry_run:
-            workflow_files_logger.log_input_files(
-                workflow_files_log_file, [input_file])
     # Optional files.
     for input_key in [params.FEATURES_FILE,
                       params.T_RNA_FILE,
@@ -528,14 +507,10 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
                 raise FileNotFoundError(errno.ENOENT,
                                         os.strerror(errno.ENOENT),
                                         input_file)
-            if not is_dry_run:
-                workflow_files_logger.log_input_files(
-                    workflow_files_log_file, [input_file])
 
     run_config = workflow.RunConfigTuple(
         r_scripts,
         cmd_file,
-        workflow_files_log_file,
         is_dry_run,
         logs_dir,
         nprocesses)
@@ -586,9 +561,6 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
             raise FileNotFoundError(errno.ENOENT,
                                     os.strerror(errno.ENOENT),
                                     sample_sheet_file)
-        if not is_dry_run:
-            workflow_files_logger.log_input_files(
-                workflow_files_log_file, [sample_sheet_file])
         multiplex_files = config[params.MULTIPLEX_FQ_FILES]
         multiplex_file = multiplex_files[0]
         multiplex_name = os.path.splitext(
@@ -599,9 +571,6 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
             raise FileNotFoundError(errno.ENOENT,
                                     os.strerror(errno.ENOENT),
                                     multiplex_file)
-        if not is_dry_run:
-            workflow_files_logger.log_input_files(
-                workflow_files_log_file, [multiplex_file])
         trim_fq = os.path.join(
             tmp_dir, workflow_files.ADAPTER_TRIM_FQ_FORMAT.format(multiplex_name))
         log_file = os.path.join(logs_dir, "cutadapt.log")
