@@ -1,4 +1,3 @@
-#! python
 """
 Demultiplex fastq files using UMI-tools-compliant barcodes present
 within the fastq headers. These headers are assumed to be of form:
@@ -43,6 +42,7 @@ from itertools import islice
 from riboviz import barcodes_umis
 from riboviz import fastq
 from riboviz import sample_sheets
+from riboviz import utils
 
 
 NUM_READS_FILE = "num_reads.tsv"
@@ -202,11 +202,10 @@ def demultiplex(sample_sheet_file,
         raise FileNotFoundError(
             "Error: read 1 file {} does not exist".format(read1_file))
 
+    file_format = fastq.FASTQ_FORMATS[utils.get_file_ext(read1_file)]
     if fastq.is_fastq_gz(read1_file):
-        file_format = fastq.FASTQ_GZ_FORMAT
         open_file = gzip.open
     else:
-        file_format = fastq.FASTQ_FORMAT
         open_file = open
 
     read1_fh = open_file(read1_file, 'rt')

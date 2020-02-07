@@ -419,7 +419,7 @@ def index_bam(sample_id, bam_file, log_file, run_config):
             run_config.workflow_files_log_file,
             "samtools index",
             [bam_file],
-            [sam_bam.BAM_BAI_FORMAT.format(bam_file)],
+            [sam_bam.BAI_FORMAT.format(bam_file)],
             sample_id)
 
 
@@ -451,7 +451,7 @@ def group_umis(sample_id, bam_file, groups_file, log_file, run_config):
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             "umi_tools group",
-            [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file)],
+            [bam_file, sam_bam.BAI_FORMAT.format(bam_file)],
             [groups_file],
             sample_id)
 
@@ -488,7 +488,7 @@ def deduplicate_umis(sample_id, bam_file, dedup_bam_file,
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             "umi_tools dedup",
-            [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file)],
+            [bam_file, sam_bam.BAI_FORMAT.format(bam_file)],
             [dedup_bam_file] + stats_files,
             sample_id)
 
@@ -539,7 +539,7 @@ def make_bedgraph(sample_id, bam_file, bedgraph_file, is_plus,
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             "bedtools",
-            [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file)],
+            [bam_file, sam_bam.BAI_FORMAT.format(bam_file)],
             [bedgraph_file],
             sample_id)
 
@@ -594,7 +594,7 @@ def bam_to_h5(sample_id, bam_file, h5_file, orf_gff_file, config,
         workflow_files_logger.log_files(
             run_config.workflow_files_log_file,
             workflow_r.BAM_TO_H5_R,
-            [bam_file, sam_bam.BAM_BAI_FORMAT.format(bam_file), orf_gff_file],
+            [bam_file, sam_bam.BAI_FORMAT.format(bam_file), orf_gff_file],
             [h5_file],
             sample_id)
 

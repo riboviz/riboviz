@@ -34,11 +34,11 @@ import os
 import pandas as pd
 from riboviz import demultiplex_fastq
 from riboviz import fastq
-from riboviz import file_names
 from riboviz import provenance
 from riboviz import sam_bam
 from riboviz import sample_sheets
 from riboviz import trim_5p_mismatch
+from riboviz import workflow_files
 from riboviz.tools import demultiplex_fastq as demultiplex_fastq_tools_module
 from riboviz.tools import trim_5p_mismatch as trim_5p_mismatch_tools_module
 
@@ -73,7 +73,7 @@ def input_fq(input_dir):
     """
     # FASTQ files may differ in their extensions, find all.
     fq_files = [glob.glob(os.path.join(input_dir, "*" + ext))
-                for ext in fastq.FASTQ_EXTS]
+                for ext in fastq.FASTQ_ALL_EXTS]
     # Flatten list of lists
     fq_files = [f for files in fq_files for f in files]
     if not fq_files:
@@ -106,13 +106,13 @@ def cutadapt_fq(tmp_dir, sample=""):
     :rtype: pandas.core.frame.Series
     """
     fq_files = glob.glob(os.path.join(
-        tmp_dir, sample, "*" + file_names.ADAPTER_TRIM_FQ))
+        tmp_dir, sample, "*" + workflow_files.ADAPTER_TRIM_FQ))
     if sample == "":
         # If using with a multiplexed FASTQ file then there may be a
         # file with extension "_extract_trim.fq" which also will be
         # caught by the glob above, so remove this file name.
         umi_files = glob.glob(os.path.join(
-            tmp_dir, sample, "*" + file_names.UMI_EXTRACT_FQ))
+            tmp_dir, sample, "*" + workflow_files.UMI_EXTRACT_FQ))
         fq_files = [file_name for file_name in fq_files
                     if file_name not in umi_files]
     if not fq_files:
@@ -145,7 +145,7 @@ def umi_tools_deplex_fq(tmp_dir):
     :rtype: list(pandas.core.frame.Series)
     """
     deplex_dirs = glob.glob(os.path.join(
-        tmp_dir, file_names.DEPLEX_DIR_FORMAT.format("*")))
+        tmp_dir, workflow_files.DEPLEX_DIR_FORMAT.format("*")))
     if not deplex_dirs:
         return []
     rows = []
@@ -259,7 +259,7 @@ def trim_5p_mismatch_sam(tmp_dir, sample):
     """
     # Look for the SAM file.
     sam_files = glob.glob(os.path.join(
-        tmp_dir, sample, file_names.ORF_MAP_CLEAN_SAM))
+        tmp_dir, sample, workflow_files.ORF_MAP_CLEAN_SAM))
     if not sam_files:
         return None
     sam_file = sam_files[0]  # Only 1 match expected.
@@ -301,13 +301,13 @@ def umi_tools_dedup_bam(tmp_dir, output_dir, sample):
     """
     # Look for pre_dedup.bam
     files = glob.glob(os.path.join(
-        tmp_dir, sample, file_names.PRE_DEDUP_BAM))
+        tmp_dir, sample, workflow_files.PRE_DEDUP_BAM))
     if not files:
         # Deduplication was not done.
         return None
     # Look for the BAM file output.
     files = glob.glob(os.path.join(
-        output_dir, sample, file_names.BAM_FORMAT.format(sample)))
+        output_dir, sample, sam_bam.BAM_FORMAT.format(sample)))
     if not files:
         return None
     file_name = files[0]  # Only 1 match expected.
@@ -347,13 +347,13 @@ def count_reads_df(input_dir, tmp_dir, output_dir):
     tmp_samples.sort()
     for sample in tmp_samples:
         rows.append(cutadapt_fq(tmp_dir, sample))
-        rows.append(hisat2_fq(tmp_dir, sample, file_names.NON_RRNA_FQ,
+        rows.append(hisat2_fq(tmp_dir, sample, workflow_files.NON_RRNA_FQ,
                               "rRNA or other contaminating reads removed by alignment to rRNA index files"))
-        rows.append(hisat2_sam(tmp_dir, sample, file_names.RRNA_MAP_SAM,
+        rows.append(hisat2_sam(tmp_dir, sample, workflow_files.RRNA_MAP_SAM,
                                "Reads with rRNA and other contaminating reads removed by alignment to rRNA index files"))
-        rows.append(hisat2_fq(tmp_dir, sample, file_names.UNALIGNED_FQ,
+        rows.append(hisat2_fq(tmp_dir, sample, workflow_files.UNALIGNED_FQ,
                               "Reads aligned to ORFs index files"))
-        rows.append(hisat2_sam(tmp_dir, sample, file_names.ORF_MAP_SAM,
+        rows.append(hisat2_sam(tmp_dir, sample, workflow_files.ORF_MAP_SAM,
                                "Unaligned reads removed by alignment of remaining reads to ORFs index files"))
         rows.append(trim_5p_mismatch_sam(tmp_dir, sample))
         rows.append(umi_tools_dedup_bam(tmp_dir, output_dir, sample))
