@@ -42,17 +42,17 @@ def compare(file1, file2, compare_names=True):
     ext = utils.get_file_ext(file1)
     if ext in ["pdf"]:
         utils.equal_file_names(file1, file2)
-    if ext in [hisat2.HT2_EXT, sam_bam.BAI_EXT]:
+    elif ext in [hisat2.HT2_EXT, sam_bam.BAI_EXT]:
         utils.equal_file_sizes(file1, file2)
-    if ext in [h5.H5_EXT]:
+    elif ext in [h5.H5_EXT]:
         h5.equal_h5(file1, file2)
-    if ext in [bedgraph.BEDGRAPH_EXT]:
+    elif ext in [bedgraph.BEDGRAPH_EXT]:
         bedgraph.equal_bedgraph(file1, file2)
-    if ext in [sam_bam.BAM_EXT]:
+    elif ext in [sam_bam.BAM_EXT]:
         sam_bam.equal_bam(file1, file2)
-    if ext in [sam_bam.SAM_EXT]:
+    elif ext in [sam_bam.SAM_EXT]:
         sam_bam.equal_sam(file1, file2)
-    if ext in ["tsv"]:
+    elif ext in ["tsv"]:
         utils.equal_tsv_files(file1, file2)
-    if ext in fastq.EXTENSIONS:
+    elif ext in fastq.FASTQ_ALL_EXTS:
         fastq.equal_fastq(file1, file2)
