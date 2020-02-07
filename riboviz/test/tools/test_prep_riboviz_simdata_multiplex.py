@@ -18,7 +18,7 @@ import riboviz.test
 from riboviz import demultiplex_fastq
 from riboviz import fastq
 from riboviz import params
-from riboviz import validation
+from riboviz import utils
 from riboviz import workflow
 from riboviz import workflow_files
 from riboviz.tools import prep_riboviz
@@ -48,7 +48,7 @@ def test_adaptor_trimming(configuration_module):
     config, _ = configuration_module
     expected_output = os.path.join(
         riboviz.test.SIMDATA_DIR,
-        "multiplex_umi_barcode.fastq")
+        fastq.FASTQ_FORMAT.format("multiplex_umi_barcode"))
     actual_output = os.path.join(
         config[params.TMP_DIR],
         workflow_files.ADAPTER_TRIM_FQ_FORMAT.format(
@@ -69,7 +69,7 @@ def test_barcode_umi_extract(configuration_module):
     config, _ = configuration_module
     expected_output = os.path.join(
         riboviz.test.SIMDATA_DIR,
-        "multiplex.fastq")
+        fastq.FASTQ_FORMAT.format("multiplex"))
     actual_output = os.path.join(
         config[params.TMP_DIR],
         workflow_files.UMI_EXTRACT_FQ_FORMAT.format(
@@ -98,13 +98,13 @@ def test_deplex_num_reads(configuration_module):
         riboviz.test.SIMDATA_DIR,
         "deplex",
         demultiplex_fastq.NUM_READS_FILE)
-    validation.compare(expected_output, actual_output)
+    utils.equal_tsv_files(expected_output, actual_output)
 
 
 @pytest.mark.parametrize(
-    "fastq", ["Tag0.fastq", "Tag1.fastq", "Tag2.fastq", "Unassigned.fastq"])
+    "tag", ["Tag0", "Tag1", "Tag2", "Unassigned"])
 @pytest.mark.usefixtures("run_prep_riboviz")
-def test_deplex_reads(configuration_module, fastq):
+def test_deplex_reads(configuration_module, tag):
     """
     Validate that ".fastq", produced by
     riboviz.demultiplex_fastq have the expected content.
@@ -112,18 +112,22 @@ def test_deplex_reads(configuration_module, fastq):
     :param configuration_module: configuration and path to
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
-    :param fastq: FASTQ file
-    :type fastq: str or unicode
+    :param tag: FASTQ fie name tag
+    :type tag: str or unicode
     """
+    # Actual data has a .fq extension.
+    actual_file_name = fastq.FQ_FORMAT.format(tag)
+    # Simulated data has a .fastq extension.
+    expected_file_name = fastq.FASTQ_FORMAT.format(tag)
     config, _ = configuration_module
     actual_dir = os.path.join(
         config[params.TMP_DIR],
         workflow_files.DEPLEX_DIR_FORMAT.format(
             "multiplex_umi_barcode_adaptor"))
-    actual_output = os.path.join(actual_dir, fastq)
+    actual_output = os.path.join(actual_dir, actual_file_name)
     expected_output = os.path.join(
-        riboviz.test.SIMDATA_DIR, "deplex", fastq)
-    validation.compare(expected_output, actual_output)
+        riboviz.test.SIMDATA_DIR, "deplex", expected_file_name)
+    fastq.equal_fastq(expected_output, actual_output)
 
 
 @pytest.mark.parametrize("sample_id", ["Tag0", "Tag1", "Tag2"])

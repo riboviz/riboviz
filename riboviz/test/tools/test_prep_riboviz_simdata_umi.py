@@ -49,7 +49,7 @@ def test_adaptor_trimming(configuration_module, sample_id):
     config, _ = configuration_module
     expected_output = os.path.join(
         riboviz.test.SIMDATA_DIR,
-        sample_id + "_umi.fastq")
+        fastq.FASTQ_FORMAT.format(sample_id + "_umi"))
     actual_output = os.path.join(
         config[params.TMP_DIR],
         sample_id,
@@ -73,7 +73,7 @@ def test_umi_extract(configuration_module, sample_id):
     config, _ = configuration_module
     expected_output = os.path.join(
         riboviz.test.SIMDATA_DIR,
-        sample_id + ".fastq")
+        fastq.FASTQ_FORMAT.format(sample_id))
     actual_output = os.path.join(
         config[params.TMP_DIR],
         sample_id,

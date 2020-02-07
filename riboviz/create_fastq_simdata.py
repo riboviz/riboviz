@@ -338,9 +338,10 @@ def create_fastq_simdata(output_dir):
                            adaptor, post_adaptor_nt)
         for [tag, umi5, read, umi3, qualities] in config_5_3_post_adaptor_nt]
     records.extend(records_post_adaptor_nt)
-    file_names = ["umi5_umi3_umi_adaptor.fastq",
-                  "umi5_umi3_umi.fastq",
-                  "umi5_umi3.fastq"]
+    file_names = ["umi5_umi3_umi_adaptor",
+                  "umi5_umi3_umi",
+                  "umi5_umi3"]
+    file_names = [fastq.FASTQ_FORMAT.format(f) for f in file_names]
     for file_name, fastq_records in zip(file_names, zip(*records)):
         with open(os.path.join(output_dir, file_name), "w") as f:
             SeqIO.write(fastq_records, f, "fastq")
@@ -359,9 +360,10 @@ def create_fastq_simdata(output_dir):
     records = [
         make_fastq_records(tag, read, qualities, "", umi3, "", adaptor)
         for [tag, read, umi3, qualities] in config_3]
-    file_names = ["umi3_umi_adaptor.fastq",
-                  "umi3_umi.fastq",
-                  "umi3.fastq"]
+    file_names = ["umi3_umi_adaptor",
+                  "umi3_umi",
+                  "umi3"]
+    file_names = [fastq.FASTQ_FORMAT.format(f) for f in file_names]
     for file_name, fastq_records in zip(file_names, zip(*records)):
         with open(os.path.join(output_dir, file_name), "w") as f:
             SeqIO.write(fastq_records, f, "fastq")
@@ -425,23 +427,24 @@ def create_fastq_simdata(output_dir):
             # records, UMI+barcode records, records with UMI+barcode
             # extracted
             records_by_type = list(zip(*records))
-            file_names = ["multiplex_umi_barcode_adaptor.fastq",
-                          "multiplex_umi_barcode.fastq",
-                          "multiplex.fastq"]
+            file_names = ["multiplex_umi_barcode_adaptor",
+                          "multiplex_umi_barcode",
+                          "multiplex"]
+            file_names = [fastq.FASTQ_FORMAT.format(f) for f in file_names]
             for file_name, fastq_records in zip(file_names, records_by_type):
                 with open(os.path.join(output_dir, file_name), "a") as f:
                     SeqIO.write(fastq_records, f, "fastq")
             # Save records with UMI+barcode extracted in
             # barcode-specific files.
             _, _, extracted_records = records_by_type
-            file_name = fastq.get_fastq_filename(
+            file_name = fastq.FASTQ_FORMAT.format(
                 tag_format.format(barcode_index))
             with open(os.path.join(deplex_dir, file_name), "a") as f:
                 SeqIO.write(extracted_records, f, "fastq")
 
     # The last file of barcode-specific reads will be that for the
     # unassigned reads so rename that file.
-    unassigned_tag_filename = fastq.get_fastq_filename(
+    unassigned_tag_filename = fastq.FASTQ_FORMAT.format(
         tag_format.format(unassigned_index))
     shutil.move(os.path.join(deplex_dir, unassigned_tag_filename),
                 os.path.join(deplex_dir,
