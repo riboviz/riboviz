@@ -16,10 +16,11 @@ import pytest
 import riboviz
 import riboviz.test
 from riboviz import demultiplex_fastq
+from riboviz import fastq
 from riboviz import params
-from riboviz import file_names
 from riboviz import validation
 from riboviz import workflow
+from riboviz import workflow_files
 from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration_module  # Test fixture
 from riboviz.test.tools import run_prep_riboviz  # Test fixture
@@ -50,9 +51,9 @@ def test_adaptor_trimming(configuration_module):
         "multiplex_umi_barcode.fastq")
     actual_output = os.path.join(
         config[params.TMP_DIR],
-        file_names.ADAPTER_TRIM_FQ_FORMAT.format(
+        workflow_files.ADAPTER_TRIM_FQ_FORMAT.format(
             "multiplex_umi_barcode_adaptor"))
-    validation.equal_fastq(expected_output, actual_output)
+    fastq.equal_fastq(expected_output, actual_output)
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
@@ -71,9 +72,9 @@ def test_barcode_umi_extract(configuration_module):
         "multiplex.fastq")
     actual_output = os.path.join(
         config[params.TMP_DIR],
-        file_names.UMI_EXTRACT_FQ_FORMAT.format(
+        workflow_files.UMI_EXTRACT_FQ_FORMAT.format(
             "multiplex_umi_barcode_adaptor"))
-    validation.equal_fastq(expected_output, actual_output)
+    fastq.equal_fastq(expected_output, actual_output)
 
 
 @pytest.mark.usefixtures("run_prep_riboviz")
@@ -89,7 +90,7 @@ def test_deplex_num_reads(configuration_module):
     config, _ = configuration_module
     actual_dir = os.path.join(
         config[params.TMP_DIR],
-        file_names.DEPLEX_DIR_FORMAT.format(
+        workflow_files.DEPLEX_DIR_FORMAT.format(
             "multiplex_umi_barcode_adaptor"))
     actual_output = os.path.join(actual_dir,
                                  demultiplex_fastq.NUM_READS_FILE)
@@ -117,7 +118,7 @@ def test_deplex_reads(configuration_module, fastq):
     config, _ = configuration_module
     actual_dir = os.path.join(
         config[params.TMP_DIR],
-        file_names.DEPLEX_DIR_FORMAT.format(
+        workflow_files.DEPLEX_DIR_FORMAT.format(
             "multiplex_umi_barcode_adaptor"))
     actual_output = os.path.join(actual_dir, fastq)
     expected_output = os.path.join(

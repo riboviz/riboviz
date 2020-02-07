@@ -111,12 +111,12 @@ import tempfile
 import pytest
 import pysam
 import riboviz
-from riboviz import file_names
 from riboviz import h5
 from riboviz import sam_bam
 from riboviz import test
 from riboviz import trim_5p_mismatch
 from riboviz import validation
+from riboviz import workflow_files
 from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
 
@@ -186,9 +186,9 @@ def test_index(expected, prefix, index):
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
 @pytest.mark.parametrize("file_name", [
-    file_names.NON_RRNA_FQ,
-    file_names.ADAPTER_TRIM_FQ,
-    file_names.UNALIGNED_FQ])
+    workflow_files.NON_RRNA_FQ,
+    workflow_files.ADAPTER_TRIM_FQ,
+    workflow_files.UNALIGNED_FQ])
 def test_sample_tmp_fq(expected, sample, file_name):
     """
     Test tmp/*.fq files for equality.
@@ -209,9 +209,9 @@ def test_sample_tmp_fq(expected, sample, file_name):
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
 @pytest.mark.parametrize("file_name", [
-    file_names.ORF_MAP_CLEAN_SAM,
-    file_names.ORF_MAP_SAM,
-    file_names.RRNA_MAP_SAM])
+    workflow_files.ORF_MAP_CLEAN_SAM,
+    workflow_files.ORF_MAP_SAM,
+    workflow_files.RRNA_MAP_SAM])
 def test_sample_tmp_sam(expected, scratch_directory, sample, file_name):
     """
     Test tmp/*.sam files for equality. The SAM files are sorted into
@@ -305,8 +305,8 @@ def test_sample_output_bam(expected, sample):
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
 @pytest.mark.parametrize("file_name", [
-    file_names.MINUS_BEDGRAPH,
-    file_names.PLUS_BEDGRAPH])
+    workflow_files.MINUS_BEDGRAPH,
+    workflow_files.PLUS_BEDGRAPH])
 def test_sample_output_bedgraph(expected, sample, file_name):
     """
     Test output/*.bedgraph files for equality.
