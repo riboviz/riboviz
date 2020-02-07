@@ -4,12 +4,21 @@ SAM and BAM-related constants and functions.
 import os
 import os.path
 import pysam
+from riboviz import utils
 
 PG_TAG = "PG"
 """ SAM file PG (program) tag """
-BAM_FORMAT = "{}.bam"
+SAM_EXT = "sam"
+""" SAM file extension """
+BAM_EXT = "bam"
+""" BAM file extension """
+BAI_EXT = "bai"
+""" BAI file extension """
+SAM_FORMAT = "{}." + SAM_EXT
+""" Format string for SAM files """
+BAM_FORMAT = "{}." + BAM_EXT
 """ Format string for BAM files """
-BAM_BAI_FORMAT = "{}.bai"
+BAI_FORMAT = "{}." + BAI_EXT
 """
 Format string for BAM index file based on default behaviour of
 "samtools index"
@@ -25,8 +34,8 @@ def is_bam(file_name):
     :return: True if file_name ends with .bam or .BAM, False otherwise
     :rtype: bool
     """
-    _, ext = os.path.splitext(os.path.basename(file_name))
-    return ext.lower() == ".bam"
+    ext = utils.get_file_ext(file_name)
+    return ext.lower() == BAM_EXT
 
 
 def is_sam(file_name):
@@ -38,8 +47,8 @@ def is_sam(file_name):
     :return: True if file_name ends with .sam or .SAM, False otherwise
     :rtype: bool
     """
-    _, ext = os.path.splitext(os.path.basename(file_name))
-    return ext.lower() == ".sam"
+    ext = utils.get_file_ext(file_name)
+    return ext.lower() == SAM_EXT
 
 
 def count_sequences(file_name):

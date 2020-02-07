@@ -6,6 +6,7 @@ import os.path
 from riboviz import bedgraph
 from riboviz import fastq
 from riboviz import h5
+from riboviz import hisat2
 from riboviz import sam_bam
 from riboviz import utils
 
@@ -38,20 +39,20 @@ def compare(file1, file2, compare_names=True):
     assert not os.path.isdir(file2), "Directory: %s" % file2
     if compare_names:
         utils.equal_file_names(file1, file2)
-    ext = os.path.splitext(file1)[1].lower()
-    if ext in [".pdf"]:
+    ext = utils.get_file_ext(file1)
+    if ext in ["pdf"]:
         utils.equal_file_names(file1, file2)
-    if ext in [".ht2", ".bai"]:
+    if ext in [hisat2.HT2_EXT, sam_bam.BAI_EXT]:
         utils.equal_file_sizes(file1, file2)
-    if ext in [".h5"]:
+    if ext in [h5.H5_EXT]:
         h5.equal_h5(file1, file2)
-    if ext in [".bedgraph"]:
+    if ext in [bedgraph.BEDGRAPH_EXT]:
         bedgraph.equal_bedgraph(file1, file2)
-    if ext in [".bam"]:
+    if ext in [sam_bam.BAM_EXT]:
         sam_bam.equal_bam(file1, file2)
-    if ext in [".sam"]:
+    if ext in [sam_bam.SAM_EXT]:
         sam_bam.equal_sam(file1, file2)
-    if ext in [".tsv"]:
+    if ext in ["tsv"]:
         utils.equal_tsv_files(file1, file2)
     if ext in fastq.EXTENSIONS:
         fastq.equal_fastq(file1, file2)

@@ -112,6 +112,7 @@ import pytest
 import pysam
 import riboviz
 from riboviz import h5
+from riboviz import hisat2
 from riboviz import sam_bam
 from riboviz import test
 from riboviz import trim_5p_mismatch
@@ -177,7 +178,7 @@ def test_index(expected, prefix, index):
     :param index: file name index e.g. 1
     :type index: int
     """
-    file_name = "%s.%d.ht2" % (prefix, index)
+    file_name = hisat2.HT2_FORMAT.format(prefix, index)
     validation.compare(
         os.path.join(expected, INDEX_DIR, file_name),
         os.path.join(test.VIGNETTE_INDEX_DIR, file_name))
@@ -276,7 +277,7 @@ def test_sample_output_bai(expected, sample):
     :param sample: sample name e.g. WT3AT
     :type sample: str or unicode
     """
-    file_name = sam_bam.BAM_BAI_FORMAT.format(
+    file_name = sam_bam.BAI_FORMAT.format(
         sam_bam.BAM_FORMAT.format(sample))
     validation.compare(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
