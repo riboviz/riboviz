@@ -98,3 +98,55 @@ def count_sequences(file_name):
         for _ in SeqIO.parse(f, "fastq"):
             num_sequences = num_sequences + 1
     return num_sequences
+
+
+def equal_fastq(file1, file2):
+    """
+    Compare two FASTQ files for equality. The following are compared:
+
+    * Both files have the same number of records.
+    * All records in file1 are also in file2. The order of records is
+      ignored.
+
+    :param file1: File name
+    :type file1: str or unicode
+    :param file2: File name
+    :type file2: str or unicode
+    :raise AssertionError: if files differ in their data
+    :raise Exception: if problems arise when loading the files
+    """
+    seqs1 = {}
+    for seq1 in SeqIO.parse(file1, "fastq"):
+        seqs1[seq1.name] = seq1
+    for seq2 in SeqIO.parse(file2, "fastq"):
+        assert seq2.name in seqs1,\
+            "Missing ID: %s in %s but not in %s"\
+            % (seq2.name, file2, file1)
+        seq1 = seqs1[seq2.name]
+        del seqs1[seq2.name]
+        assert seq1.name == seq2.name,\
+            "Unequal name: %s (%s), %s (%s)"\
+            % (file1, seq1.name, file2, seq2.name)
+        assert seq1.seq == seq2.seq,\
+            "Unequal sequence: %s (%s), %s (%s)"\
+            % (file1, seq1.seq, file2, seq2.seq)
+        assert seq1.annotations == seq2.annotations,\
+            "Unequal annotations: %s (%s), %s (%s)"\
+            % (file1, str(seq1.annotations),
+               file2, str(seq2.annotations))
+        assert seq1.dbxrefs == seq2.dbxrefs,\
+            "Unequal database cross-references: %s (%s), %s (%s)"\
+            % (file1, seq1.dbxrefs, file2, seq2.dbxrefs)
+        assert seq1.features == seq2.features,\
+            "Unequal features: %s (%s), %s (%s)"\
+            % (file1, seq1.features, file2, seq2.features)
+        assert seq1.letter_annotations == seq2.letter_annotations,\
+            "Unequal letter annotations: %s (%s), %s (%s)"\
+            % (file1, seq1.letter_annotations,
+               file2, seq2.letter_annotations)
+        assert seq1.description == seq2.description,\
+            "Unequal description: %s (%s), %s (%s)"\
+            % (file1, seq1.description, file2, seq2.description)
+    assert not seqs1,\
+        "Missing IDs: %s in %s but not in %s"\
+        % (str(seqs1), file1, file2)
