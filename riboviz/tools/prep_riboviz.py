@@ -144,6 +144,7 @@ from riboviz import provenance
 from riboviz import sam_bam
 from riboviz import sample_sheets
 from riboviz import trim_5p_mismatch
+from riboviz import utils
 from riboviz import workflow
 from riboviz import workflow_files
 from riboviz.utils import value_in_dict
@@ -613,7 +614,8 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
         # Use get_fastq_filename to deduce sample-specific files
         # output by demultiplex_fastq.py - demultiplex_fastq.py
         # uses this function too.
-        sample_files = {sample: fastq.get_fastq_filename(sample)
+        file_format = fastq.FASTQ_FORMATS[utils.get_file_ext(extract_trim_fq)]
+        sample_files = {sample: file_format.format(sample)
                         for sample in samples}
         processed_samples = process_samples(
             sample_files, deplex_dir, index_dir, r_rna_index,
