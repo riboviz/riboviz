@@ -19,8 +19,11 @@
 #
 
 suppressMessages(library(getopt))
+
 # Determine location of provenance.R relative to current file
-rscripts_dir <- file.path(dirname(getopt::get_Rscript_filename()))
+rscripts_dir <- "rscripts" # @Flic_Anderson temporary fix
+
+#rscripts_dir <- file.path(dirname(getopt::get_Rscript_filename()))
 source(paste0(rscripts_dir, "/provenance.R"))
 source(paste0(rscripts_dir, "/read_count_functions.R"))
 
@@ -117,7 +120,9 @@ option_list <- list(
 )
 
 #####
-print(get_version(get_Rscript_filename()))
+# @Flic_Anderson line below commented out as temporary fix for: 
+ # fails on interactive running due to "NA" from get_Rscript_filename()
+#print(get_version(get_Rscript_filename()))
 
 # read in commandline arguments
 opt <- optparse::parse_args(OptionParser(option_list = option_list),
