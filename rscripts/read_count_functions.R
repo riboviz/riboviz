@@ -170,6 +170,7 @@ GetNTPeriod <- function(gene, dataset, hdf5file, left, right) {
 # codon-specific reads for RPF datasets
 GetCodonPositionReads <- function(gene, dataset, hdf5file, left, right, min_read_length) {
   # @ewallace: this needs documentation of inputs and outputs
+  # @Flic_Anderson: what does 'lid' stand for? replace with more helpful name?
   lid <- 28 - min_read_length + 1
   reads_pos <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
   reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
