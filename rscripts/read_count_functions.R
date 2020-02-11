@@ -15,29 +15,37 @@ suppressMessages(library(dplyr))
 suppressMessages(library(magrittr))
 suppressMessages(library(purrr))
 
-
 #####
-# Functions to read data from gff
 
-readGFFAsDf <- purrr::compose(rtracklayer::readGFFAsGRanges, data.frame, as_tibble,
-  .dir = "forward")
+### Functions to read data from GFF ###
 
+# convert GFF to tidy dataframe
+readGFFAsDf <- purrr::compose(
+  rtracklayer::readGFFAsGRanges,
+  data.frame, 
+  as_tibble,
+  .dir = "forward" # functions called from left to right
+)
+
+# extract start locations for each gene from GFF tidy dataframe for CDS only
 getCDS5start <- function(name, gffdf, ftype="CDS", fstrand="+") {
   gffdf %>% 
-    filter(type==ftype, Name == name, strand == fstrand) %>% 
-    pull(start) %>% 
+    dplyr::filter(type==ftype, Name == name, strand == fstrand) %>% 
+    dplyr::pull(start) %>%  # pull() pulls out single variable
     min 
 }
 
+# extract end locations for each gene from GFF tidy dataframe for CDS only
 getCDS3end <- function(name, gffdf, ftype="CDS", fstrand="+") {
   gffdf %>% 
-    filter(type==ftype, Name == name, strand == fstrand) %>% 
-    pull(end) %>% 
+    dplyr::filter(type==ftype, Name == name, strand == fstrand) %>% 
+    dplyr::pull(end) %>% 
     max 
 }
 
 #####
-# Functions to read data from h5 file
+
+### Functions to read data from h5 file ###
 
 # function to get data matrix of read counts for gene and dataset from hdf5file
 GetGeneDatamatrix <- function(gene, dataset, hdf5file) {

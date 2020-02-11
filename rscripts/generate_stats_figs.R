@@ -126,6 +126,8 @@ option_list <- list(
 opt <- optparse::parse_args(OptionParser(option_list = option_list),
                             convert_hyphens_to_underscores=TRUE)
 
+# attach opt list to be able to refer to variables in the list by names alone
+ # ie `height` rather than `women$height`
 attach(opt)
 
 print("generate_stats_figs.R running with parameters:")
