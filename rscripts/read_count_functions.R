@@ -187,8 +187,10 @@ GetCodonPositionReads <- function(gene, dataset, hdf5file, left, right, min_read
 
 # Nt-specific coverage for mRNA datasets
 GetMRNACoverage <- function(gene, dataset, hdf5file, left, right, read_range, min_read_length, Buffer) {
-  reads_pos <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
-  reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS mapped reads are considered
+  # Get the matrix of read counts
+  reads_pos <- GetGeneDatamatrix(gene, dataset, hdf5file) 
+  # Subset positions such that only CDS mapped reads are considered
+  reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] 
 
   nt_IR_list <- lapply(read_range, function(w) {
     IRanges::IRanges(start = rep(1:ncol(reads_pos_subset), reads_pos_subset[(w - min_read_length + 1), ]), width = w)
@@ -218,7 +220,8 @@ GetMRNACoverage <- function(gene, dataset, hdf5file, left, right, read_range, mi
 }
 
 #####
-## functions to calculate read frame etc.
+
+### functions to calculate read frame etc. ###
 
 CalcAsiteFixedOneLength <- function(reads_pos_length, min_read_length,
                                     read_length, asite_disp) {
@@ -430,6 +433,8 @@ GetNTReadPosition <- function(gene, dataset, hdf5file, lid, min_read_length) {
 cons_mat <- function(gene, pos_IR, type = "count", cframe = 0, lid) {
   pos_IR_frame <- pos_IR[start(pos_IR) %% 3 == cframe] # Get position-specific reads of a particular length and ORF frame
   if (length(pos_IR_frame)) {
+    # read in coding sequences
+    coding_seqs <- readDNAStringSet(orf_fasta_file)
     pos_nt <- Biostrings::consensusMatrix(Biostrings::extractAt(coding_seqs[[gene]], pos_IR_frame))[1:4, ] # Get position-specific nucleotide counts
     if (type == "freq") {
       pos_nt <- pos_nt / colSums(pos_nt) # Select frequencies instead of counts
