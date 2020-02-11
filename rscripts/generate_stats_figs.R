@@ -18,7 +18,8 @@
 # - duplicate generate_stats_figs.R as .Rmd file
 #
 
-suppressMessages(library(getopt))
+# @Flic_Anderson this line commented out as not required while get_Rscript_filename() removed
+# suppressMessages(library(getopt))
 
 # Determine location of provenance.R relative to current file
 rscripts_dir <- "rscripts" # @Flic_Anderson temporary fix
@@ -26,9 +27,6 @@ rscripts_dir <- "rscripts" # @Flic_Anderson temporary fix
 #rscripts_dir <- file.path(dirname(getopt::get_Rscript_filename()))
 source(paste0(rscripts_dir, "/provenance.R"))
 source(paste0(rscripts_dir, "/read_count_functions.R"))
-
-# set ggplot2 theme for plots drawn after this; use dark on light theme
-ggplot2::theme_set(theme_bw())
 
 # define input options for optparse package
 option_list <- list(
@@ -149,6 +147,13 @@ read_range <- min_read_length:max_read_length
 gff_df <- readGFFAsDf(orf_gff_file)
 
 #####
+
+# set ggplot2 theme for plots drawn after this; use dark on light theme
+ggplot2::theme_set(theme_bw())
+
+#####
+
+
 # check for 3nt periodicity
 print("Starting: Check for 3nt periodicity globally")
 
