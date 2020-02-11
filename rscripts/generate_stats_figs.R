@@ -168,7 +168,7 @@ gene_poslen_counts_5start_df <-
     GetGeneDatamatrix5start(gene,
     dataset,
     hdf5file,
-    posn_5start = getCDS5start(gene, gff_df),
+    posn_5start = GetCDS5start(gene, gff_df),
     n_buffer = nnt_buffer,
     nnt_gene = nnt_gene)
   ) %>%
@@ -197,7 +197,7 @@ gene_poslen_counts_3end_df <-
     gene,
     dataset,
     hdf5file,
-    posn_3end = getCDS3end(gene, gff_df),
+    posn_3end = GetCDS3end(gene, gff_df),
     n_buffer = nnt_buffer,
     nnt_gene = nnt_gene
   )) %>%
@@ -228,10 +228,13 @@ nt_period_plot <- ggplot(
   labs(x = "Nucleotide Position", y = "Read counts")
 
 # Save plot and file
-ggsave(nt_period_plot, filename = file.path(output_dir, paste0(output_prefix, "3nt_periodicity.pdf")))
+ggsave(
+  nt_period_plot, 
+  filename = file.path(output_dir, paste0(output_prefix, "3nt_periodicity.pdf"))
+)
 
 tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3nt_periodicity.tsv"))
-write_metadata_header(get_Rscript_filename(), tsv_file_path)
+write_metadata_header(get_Rscript_filename(), tsv_file_path) # @Flic_Anderson FIX get_Rscript_filename()
 write.table(
   gene_pos_counts_bothends,
   file = tsv_file_path,
@@ -397,8 +400,8 @@ if (rpf & !is.na(asite_disp_length_file)) {
 		.,
 		dataset,
 		hdf5file,
-		left = getCDS5start(., gff_df),
-		right = getCDS3end(., gff_df),
+		left = GetCDS5start(., gff_df),
+		right = GetCDS3end(., gff_df),
 		min_read_length = min_read_length,
 		asite_disp_length = asite_disp_length,
 		) ),

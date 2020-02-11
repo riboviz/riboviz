@@ -28,7 +28,7 @@ readGFFAsDf <- purrr::compose(
 )
 
 # extract start locations for each gene from GFF tidy dataframe for CDS only
-getCDS5start <- function(name, gffdf, ftype="CDS", fstrand="+") {
+GetCDS5start <- function(name, gffdf, ftype="CDS", fstrand="+") {
   gffdf %>% 
     dplyr::filter(type==ftype, Name == name, strand == fstrand) %>% 
     dplyr::pull(start) %>%  # pull() pulls out single variable
@@ -36,7 +36,7 @@ getCDS5start <- function(name, gffdf, ftype="CDS", fstrand="+") {
 }
 
 # extract end locations for each gene from GFF tidy dataframe for CDS only
-getCDS3end <- function(name, gffdf, ftype="CDS", fstrand="+") {
+GetCDS3end <- function(name, gffdf, ftype="CDS", fstrand="+") {
   gffdf %>% 
     dplyr::filter(type==ftype, Name == name, strand == fstrand) %>% 
     dplyr::pull(end) %>% 
@@ -63,18 +63,19 @@ GetGeneReadLength <- function(gene, dataset, hdf5file) {
       name = paste0("/", gene, "/", dataset, "/reads")
     ) %>%
       rhdf5::H5Aopen(name = "reads_by_len") %>%
-    rhdf5::H5Aread() %>%
+    rhdf5::H5Aread() %>% # return array with the read data
     return()
 }
 
-# function to get matrix of read counts from n_buffer before start codon to nnt_gene after
-# for gene and dataset from hd5 file hdf5file, using UTR5 annotations in gff
+# function to get matrix of read counts between specific positions
+ # (from n_buffer before start codon to nnt_gene after start codon)
+ # for gene and dataset from hd5 file hdf5file, using UTR5 annotations in gff
 GetGeneDatamatrix5start <- function(gene, dataset, hdf5file, 
-                                    posn_5start,
-                                    n_buffer, nnt_gene) {
+                                    posn_5start, n_buffer, nnt_gene) {
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hdf5file)
   # @ewallace: replace this by gff_df?
   # n_utr5 <- BiocGenerics::width(gff[gff$type == "UTR5" & gff$Name == gene])
+  
   # if n_buffer bigger than length n_utr5, pad with zeros:
   if (posn_5start > n_buffer) {
     # if posn_5start bigger than n_buffer
@@ -83,7 +84,11 @@ GetGeneDatamatrix5start <- function(gene, dataset, hdf5file,
   } else {
     # if length n_utr5 less than n_buffer
     n_left5 <- 1 # column to start from (5'end)
-    zeropad5_mat <- matrix(0, nrow = nrow(data_mat_all), ncol = (n_buffer - posn_5start + 1 ))
+    zeropad5_mat <- matrix(
+      0, 
+      nrow = nrow(data_mat_all), 
+      ncol = (n_buffer - posn_5start + 1 )
+    )
   }
   n_right3 <- posn_5start + nnt_gene - 1 # column to end with (3'end)
   data_mat_5start <- data_mat_all[, n_left5:n_right3]
