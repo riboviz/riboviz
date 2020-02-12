@@ -162,6 +162,7 @@ def scratch_directory():
     shutil.rmtree(scratch_dir)
 
 
+@pytest.mark.usefixtures("skip_index_tmp")
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("prefix", test.INDEX_PREFIXES)
 @pytest.mark.parametrize("index",
@@ -184,6 +185,7 @@ def test_index(expected, prefix, index):
         os.path.join(test.VIGNETTE_INDEX_DIR, file_name))
 
 
+@pytest.mark.usefixtures("skip_index_tmp")
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
 @pytest.mark.parametrize("file_name", [
@@ -207,6 +209,7 @@ def test_sample_tmp_fq(expected, sample, file_name):
         os.path.join(test.VIGNETTE_TMP_DIR, sample, file_name))
 
 
+@pytest.mark.usefixtures("skip_index_tmp")
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
 @pytest.mark.parametrize("file_name", [
@@ -244,6 +247,7 @@ def test_sample_tmp_sam(expected, scratch_directory, sample, file_name):
     validation.compare(expected_copy_file, actual_copy_file)
 
 
+@pytest.mark.usefixtures("skip_index_tmp")
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
 @pytest.mark.parametrize("file_name", [
