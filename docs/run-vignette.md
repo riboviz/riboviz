@@ -233,6 +233,7 @@ WTnone/
   startcodon_ribogridbar.pdf
   startcodon_ribogrid.pdf
   tpms.tsv
+read_counts.tsv
 TPMs_collated.tsv
 ```
 

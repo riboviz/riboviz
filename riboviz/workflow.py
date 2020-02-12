@@ -4,17 +4,14 @@ RiboViz workflow-related constants, types and functions.
 """
 
 import collections
-import glob
 import logging
 import os
 import os.path
 from riboviz import params
 from riboviz import process_utils
 from riboviz import logging_utils
-from riboviz import sam_bam
-from riboviz import sample_sheets
 from riboviz import workflow_r
-from riboviz import demultiplex_fastq as demultiplex_fastq_module
+from riboviz.tools import count_reads as count_reads_module
 from riboviz.tools import demultiplex_fastq as demultiplex_fastq_tools_module
 from riboviz.tools import trim_5p_mismatch as trim_5p_mismatch_tools_module
 from riboviz.utils import value_in_dict
@@ -88,13 +85,11 @@ def build_indices(fasta, index_dir, ht_prefix, log_file, run_config):
                                      run_config.is_dry_run)
 
 
-def cut_adapters(sample_id, adapter, original_fq, trimmed_fq,
+def cut_adapters(adapter, original_fq, trimmed_fq,
                  log_file, run_config):
     """
     Cut out sequencing library adapters using cutadapt.
 
-    :param sample_id: Sample ID
-    :type sample_id: str or unicode
     :param adapter: Adapter to trim
     :type adapter: str or unicode
     :param original_fq: FASTQ file to have adapters trimmed
@@ -118,13 +113,11 @@ def cut_adapters(sample_id, adapter, original_fq, trimmed_fq,
                                      run_config.is_dry_run)
 
 
-def extract_barcodes_umis(sample_id, original_fq, extract_fq, regexp,
+def extract_barcodes_umis(original_fq, extract_fq, regexp,
                           log_file, run_config):
     """
     Extract barcodes and UMIs using "umi_tools extract".
 
-    :param sample_id: Sample ID
-    :type sample_id: str or unicode
     :param original_fq: FASTQ file to have UMIs and barcodes extracted
     :type original_fq: str or unicode
     :param extract_fq: FASTQ file with UMIs and barcodes extracted
@@ -175,14 +168,12 @@ def extract_barcodes_umis(sample_id, original_fq, extract_fq, regexp,
                                      cmd_to_log)
 
 
-def map_to_r_rna(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
+def map_to_r_rna(fastq, index_dir, ht_prefix, mapped_sam,
                  unmapped_fastq, log_file, run_config):
     """
     Remove rRNA or other contaminating reads by alignment to rRNA
     index files using hisat2.
 
-    :param sample_id: Sample ID
-    :type sample_id: str or unicode
     :param fastq: FASTQ file
     :type fastq: str or unicode
     :param index_dir: Index directory
@@ -220,13 +211,11 @@ def map_to_r_rna(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
                                      run_config.is_dry_run)
 
 
-def map_to_orf(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
+def map_to_orf(fastq, index_dir, ht_prefix, mapped_sam,
                unmapped_fastq, log_file, run_config):
     """
     Align remaining reads to ORFs index files using hisat2.
 
-    :param sample_id: Sample ID
-    :type sample_id: str or unicode
     :param fastq: FASTQ file
     :type fastq: str or unicode
     :param index_dir: Index directory
@@ -265,14 +254,12 @@ def map_to_orf(sample_id, fastq, index_dir, ht_prefix, mapped_sam,
                                      run_config.is_dry_run)
 
 
-def trim_5p_mismatches(sample_id, orf_map_sam, orf_map_sam_clean,
-                       summary_file, log_file, run_config):
+def trim_5p_mismatches(orf_map_sam, orf_map_sam_clean, summary_file,
+                       log_file, run_config):
     """
     Trim 5' mismatches from reads and remove reads with more than 2
     mismatches using trim_5p_mismatches.py
 
-    :param sample_id: Sample ID
-    :type sample_id: str or unicode
     :param orf_map_sam: ORF-mapped reads
     :type orf_map_sam: str or unicode
     :param orf_map_sam_clean: Cleaned ORF-mapped reads
@@ -297,13 +284,11 @@ def trim_5p_mismatches(sample_id, orf_map_sam, orf_map_sam_clean,
         cmd, log_file, run_config.cmd_file, run_config.is_dry_run)
 
 
-def sort_bam(sample_id, sam_file, bam_file, log_file, run_config):
+def sort_bam(sam_file, bam_file, log_file, run_config):
     """
     Convert SAM to BAM and sort on genome using "samtools view" and
     "samtools sort".
 
-    :param sample_id: Sample ID
-    :type sample_id: str or unicode
     :param sam_file: SAM file
     :type sam_file: str or unicode
     :param bam_file: BAM file
@@ -332,12 +317,10 @@ def sort_bam(sample_id, sam_file, bam_file, log_file, run_config):
                                           run_config.is_dry_run)
 
 
-def index_bam(sample_id, bam_file, log_file, run_config):
+def index_bam(bam_file, log_file, run_config):
     """
     Index BAM file using "samtools index".
 
-    :param sample_id: Sample ID
-    :type sample_id: str or unicode
     :param bam_file: BAM file
     :type bam_file: str or unicode
     :param log_file: Log file
@@ -360,12 +343,10 @@ def index_bam(sample_id, bam_file, log_file, run_config):
                                      run_config.is_dry_run)
 
 
-def group_umis(sample_id, bam_file, groups_file, log_file, run_config):
+def group_umis(bam_file, groups_file, log_file, run_config):
     """
     Idenfity UMI groups using "umi_tools group".
 
-    :param sample_id: Sample ID
-    :type sample_id: str or unicode
     :param bam_file: BAM file, input
     :type bam_file: str or unicode
     :param groups_file: Groups file, output
@@ -386,13 +367,11 @@ def group_umis(sample_id, bam_file, groups_file, log_file, run_config):
                                      run_config.is_dry_run)
 
 
-def deduplicate_umis(sample_id, bam_file, dedup_bam_file,
+def deduplicate_umis(bam_file, dedup_bam_file,
                      stats_prefix, log_file, run_config):
     """
     Deduplicate UMIs using "umi_tools dedup".
 
-    :param sample_id: Sample ID
-    :type sample_id: str or unicode
     :param bam_file: BAM file, input
     :type bam_file: str or unicode
     :param dedup_bam_file: Deduplicated BAM file, output
@@ -415,14 +394,12 @@ def deduplicate_umis(sample_id, bam_file, dedup_bam_file,
                                      run_config.is_dry_run)
 
 
-def make_bedgraph(sample_id, bam_file, bedgraph_file, is_plus,
+def make_bedgraph(bam_file, bedgraph_file, is_plus,
                   log_file, run_config):
     """
     Calculate transcriptome coverage and save as a bedgraph using
     "bedtools genomecov".
 
-    :param sample_id: Sample ID
-    :type sample_id: str or unicode
     :param bam_file: BAM file, input
     :type bam_file: str or unicode
     :param bedgraph_file: Bedgraph file, output
@@ -459,13 +436,11 @@ def make_bedgraph(sample_id, bam_file, bedgraph_file, is_plus,
                                               run_config.is_dry_run)
 
 
-def bam_to_h5(sample_id, bam_file, h5_file, orf_gff_file, config,
+def bam_to_h5(bam_file, h5_file, orf_gff_file, config,
               log_file, run_config):
     """
     Make length-sensitive alignments in H5 format using bam_to_h5.R.
 
-    :param sample_id: Sample ID
-    :type sample_id: str or unicode
     :param bam_file: BAM file, input
     :type bam_file: str or unicode
     :param h5_file: H5 file, output
@@ -507,14 +482,12 @@ def bam_to_h5(sample_id, bam_file, h5_file, orf_gff_file, config,
                                      run_config.is_dry_run)
 
 
-def generate_stats_figs(sample_id, h5_file, out_dir, config, log_file,
+def generate_stats_figs(h5_file, out_dir, config, log_file,
                         run_config):
     """
     Create summary statistics, and analyses and QC plots for both RPF
     and mRNA datasets using generate_stats_figs.R.
 
-    :param sample_id: Sample ID
-    :type sample_id: str or unicode
     :param h5_file: H5 file
     :type h5_file: str or unicode
     :param out_dir: Directory for output files
@@ -622,5 +595,42 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
            "-1", fastq, "-s", barcodes_file, "-o", deplex_dir,
            "-m", "2"]
     process_utils.run_logged_command(cmd, log_file,
+                                     run_config.cmd_file,
+                                     run_config.is_dry_run)
+
+
+def count_reads(config_file, input_dir, tmp_dir, output_dir,
+                read_counts_file, log_file, run_config):
+    """
+    Count reads using count_reads.py.
+
+    :param config_file: Configuration file
+    :type config_file: str or unicode
+    :param input_dir: Input files directory
+    :type input_dir: str or unicode
+    :param tmp_dir: Temporary files directory
+    :type tmp_dir: str or unicode
+    :param output_dir: Output files directory
+    :type output_dir: str or unicode
+    :param reads_file: Reads file output
+    :type reads_file: str or unicode
+    :param read_counts_file: File to output read counts to.
+    :type read_counts_file: str or unicode
+    :param log_file: Log file
+    :type log_file: str or unicode
+    :param run_config: Run-related configuration
+    :type run_config: RunConfigTuple
+    :raise FileNotFoundError: if python cannot be found
+    :raise AssertionError: if python returns non-zero exit code
+    """
+    LOGGER.info("Count reads. Log: %s", log_file)
+    cmd = ["python", "-m", count_reads_module.__name__,
+           "-c", config_file,
+           "-i", input_dir,
+           "-t", tmp_dir,
+           "-o", output_dir,
+           "-r", read_counts_file]
+    process_utils.run_logged_command(cmd,
+                                     log_file,
                                      run_config.cmd_file,
                                      run_config.is_dry_run)

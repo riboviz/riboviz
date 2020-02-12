@@ -59,6 +59,8 @@ The directories are assumed to hold the following content:
         unaligned.fq
     output/
       TPMs_collated.tsv
+      read_counts.tsv
+      workflow_files.tsv
       WT3AT/
         3nt_periodicity.pdf
         3nt_periodicity.tsv
@@ -404,7 +406,8 @@ def test_sample_output_pdf(expected, sample, file_name):
 
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("file_name",
-                         [workflow_r.TPMS_COLLATED_TSV])
+                         [workflow_r.TPMS_COLLATED_TSV,
+                          workflow_files.READ_COUNTS_FILE])
 def test_output_tsv(expected, file_name):
     """
     Test output/*.tsv files for equality.

@@ -80,6 +80,7 @@ For processing multiplexed FASTQ files, a sample sheet (tab-separated values wit
 | `codon_positions_file` | Position of codons within each gene (RData file) |
 | `count_threshold` | Remove genes with a read count below this threshold, when generating statistics and figures |
 | `asite_disp_length_file` | Summary of read frame displacement from 5' end to A-site for each read length based on "standard" yeast data from early ribosome profiling papers (tab-separated values file) |
+| `count_reads` | `TRUE|FALSE`, scan input, temporary and output files and produce counts of reads in each FASTQ, SAM, and BAM file processed? |
 
 ### Examples
 
