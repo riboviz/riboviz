@@ -21,6 +21,7 @@ Configuration parameters are shown in brackets and are described in [Configuring
 * `bam_to_h5.R`: convert BAM to compressed H5 format (local script, in `rscripts/`)
 * `generate_stats_figs.R`: generate summary statistics, analyses plots and QC plots (local script, in `rscripts/`)
 * `collate_tpms.R`: collate TPMs across samples (local script, in `rscripts/`)
+* `count_reads.py`: count the number of reads (sequences) processed by specific stages of the workflow (local script, in `riboviz/tools/`).
 
 ---
 
@@ -45,6 +46,7 @@ If sample files (`fq_files`) are specified, then `prep_riboviz.py` processes the
    12. Generate summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
    13. Write output files produced above into an sample-specific directory, named using the sample ID, within the output directory (`dir_out`). 
 4. Collate TPMs across results, using `collate_tpms.R` and write into output directory (`dir_out`). Only the results from successfully-processed samples are collated.
+5. Count the number of reads (sequences) processed by specific stages if requested (if `count_reads: TRUE`).
 
 [Workflow](./images/workflow.svg) (SVG) shows an images of the workflow with the key steps, inputs and outputs.
 
@@ -153,7 +155,7 @@ A summary file is also put in the output directory:
 
 In addition, the following files are also put into the output directory:
 
-* `read_counts.tsv`: a [read counts file](#read-counts-file) ((only if `count_reads: TRUE`).
+* `read_counts.tsv`: a [read counts file](#read-counts-file) (only if `count_reads: TRUE`).
 
 ---
 
