@@ -1,17 +1,18 @@
 """
 Scan input, temporary and output directories and count the number of
 reads (sequences) processed by specific stages of a RiboViz
-workflow. The scan is based on the directory structure and file
-patterns used by RiboViz.
+workflow. The scan is based on the configuration, directory structure
+and file patterns used by RiboViz. 
 
 Usage:
 
-        count_reads.py [-h] -i INPUT_DIR -t TMP_DIR -o OUTPUT_DIR \
-                       -r READS_FILE
+        count_reads.py [-h] -c CONFIG_FILE -i INPUT_DIR \
+                       -t TMP_DIR -o OUTPUT_DIR -r READS_FILE
 
 Arguments:
 
 * '-h', '--help':  show this help message and exit
+* '-c CONFIG_FILE', '--config-file CONFIG_FILE': Configuration file
 * '-i INPUT_DIR', '--input-dir INPUT_DIR': Input files directory
 * '-t TMP_DIR', '--tmp-dir TMP_DIR': Temporary files directory
 * '-o OUTPUT_DIR', '--output OUTPUT_DIR': Output files directory
@@ -56,6 +57,11 @@ def parse_command_line_options():
     """
     parser = argparse.ArgumentParser(
         description="Scan RiboViz input, temporary and output directories and count the number of reads (sequences) processed at specific stages of a RiboViz workflow")
+    parser.add_argument("-c",
+                        "--config-file",
+                        dest="config_file",
+                        required=True,
+                        help="Configuration file")
     parser.add_argument("-i",
                         "--input-dir",
                         dest="input_dir",
@@ -86,11 +92,13 @@ def invoke_count_reads():
     """
     print(provenance.get_provenance_str(__file__))
     options = parse_command_line_options()
+    config_file = options.config_file
     input_dir = options.input_dir
     tmp_dir = options.tmp_dir
     output_dir = options.output_dir
     reads_file = options.reads_file
-    count_reads.count_reads(input_dir, tmp_dir, output_dir, reads_file)
+    count_reads.count_reads(
+        config_file, input_dir, tmp_dir, output_dir, reads_file)
 
 
 if __name__ == "__main__":
