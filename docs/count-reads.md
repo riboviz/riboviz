@@ -49,7 +49,29 @@ See [read counts file](./prep-riboviz-operation.md#read-counts-file) for a descr
 Here is an example of running `count_reads.py` on the directories produced when running the vignette:
 
 ```console
-$ python -m riboviz.tools.count_reads \
-    -i vignette/input -t vignette/tmp -o vignette/output \
-     -r read_counts.tsv
+$ python -m riboviz.tools.count_reads -c vignette/vignette_config.yaml \
+    -i vignette/input/ -t vignette/tmp/ -o vignette/output/ \
+    -r read_counts.tsv
+Created by: RiboViz
+Date: 2020-02-12 03:19:04.175143
+Command-line tool: /home/ubuntu/riboviz/riboviz/tools/count_reads.py
+File: /home/ubuntu/riboviz/riboviz/tools/count_reads.py
+Version: commit c1ef2969cb17dbb190f9bbdd9e513539daf38e9f date 2020-02-12 02:11:42-08:00
+
+vignette/input/SRR1042855_s1mi.fastq.gz
+vignette/input/SRR1042864_s1mi.fastq.gz
+vignette/input/example_missing_file.fastq.gz
+[Errno 2] No such file or directory: 'vignette/input/example_missing_file.fastq.gz'
+vignette/tmp/WT3AT/trim.fq
+vignette/tmp/WT3AT/nonrRNA.fq
+vignette/tmp/WT3AT/rRNA_map.sam
+vignette/tmp/WT3AT/unaligned.fq
+vignette/tmp/WT3AT/orf_map.sam
+vignette/tmp/WT3AT/trim_5p_mismatch.tsv
+vignette/tmp/WTnone/trim.fq
+vignette/tmp/WTnone/nonrRNA.fq
+vignette/tmp/WTnone/rRNA_map.sam
+vignette/tmp/WTnone/unaligned.fq
+vignette/tmp/WTnone/orf_map.sam
+vignette/tmp/WTnone/trim_5p_mismatch.tsv
 ```

@@ -242,7 +242,9 @@ count_reads.log
 
 ## Read counts file
 
-`prep_riboviz.py` will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is derived by processing files in the temporary and output directories. The read counts file, `read_counts.tsv`, is written into the output directory.
+`prep_riboviz.py` will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is produced by scanning input, temporary and output directories and counting the number of reads (sequences) processed by specific stages of a RiboViz workflow.
+
+The read counts file, `read_counts.tsv`, is written into the output directory.
 
 The reads counts file is a tab-separated values (TSV) file with the following columns:
 
@@ -273,18 +275,18 @@ Here is an example of a read counts file produced when running the vignette:
 
 ```
 SampleName	Program	File	NumReads	Description
-	input	vignette/input/SRR1042855_s1mi.fastq.gz	963571	input
-	input	vignette/input/SRR1042864_s1mi.fastq.gz	1374448	input
+WTnone	input	vignette/input/SRR1042855_s1mi.fastq.gz	963571	input
+WT3AT	input	vignette/input/SRR1042864_s1mi.fastq.gz	1374448	input
 WT3AT	cutadapt	vignette/tmp/WT3AT/trim.fq	1373362	Reads after removal of sequencing library adapters
 WT3AT	hisat2	vignette/tmp/WT3AT/nonrRNA.fq	485226	rRNA or other contaminating reads removed by alignment to rRNA index files
 WT3AT	hisat2	vignette/tmp/WT3AT/rRNA_map.sam	2254078	Reads with rRNA and other contaminating reads removed by alignment to rRNA index files
-WT3AT	hisat2	vignette/tmp/WT3AT/unaligned.fq	476785	Reads aligned to ORFs index files
-WT3AT	hisat2	vignette/tmp/WT3AT/orf_map.sam	8698	Unaligned reads removed by alignment of remaining reads to ORFs index files
+WT3AT	hisat2	vignette/tmp/WT3AT/unaligned.fq	476785	Unaligned reads removed by alignment of remaining reads to ORFs index files
+WT3AT	hisat2	vignette/tmp/WT3AT/orf_map.sam	8698	Reads aligned to ORFs index files
 WT3AT	riboviz.tools.trim_5p_mismatch	vignette/tmp/WT3AT/orf_map_clean.sam	8698	Reads after trimming of 5' mismatches and removal of those with more than 2 mismatches
 WTnone	cutadapt	vignette/tmp/WTnone/trim.fq	952343	Reads after removal of sequencing library adapters
 WTnone	hisat2	vignette/tmp/WTnone/nonrRNA.fq	466464	rRNA or other contaminating reads removed by alignment to rRNA index files
 WTnone	hisat2	vignette/tmp/WTnone/rRNA_map.sam	1430213	Reads with rRNA and other contaminating reads removed by alignment to rRNA index files
-WTnone	hisat2	vignette/tmp/WTnone/unaligned.fq	452266	Reads aligned to ORFs index files
-WTnone	hisat2	vignette/tmp/WTnone/orf_map.sam	14516	Unaligned reads removed by alignment of remaining reads to ORFs index files
+WTnone	hisat2	vignette/tmp/WTnone/unaligned.fq	452266	Unaligned reads removed by alignment of remaining reads to ORFs index files
+WTnone	hisat2	vignette/tmp/WTnone/orf_map.sam	14516	Reads aligned to ORFs index files
 WTnone	riboviz.tools.trim_5p_mismatch	vignette/tmp/WTnone/orf_map_clean.sam	14516	Reads after trimming of 5' mismatches and removal of those with more than 2 mismatches
-```
+``
