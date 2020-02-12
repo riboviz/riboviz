@@ -2,7 +2,7 @@
 Scan input, temporary and output directories and count the number of
 reads (sequences) processed by specific stages of a RiboViz
 workflow. The scan is based on the configuration, directory structure
-and file patterns used by RiboViz. 
+and file patterns used by RiboViz.
 
 Usage:
 
