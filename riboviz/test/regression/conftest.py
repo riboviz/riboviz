@@ -10,6 +10,11 @@ EXPECTED = "--expected"
 """ Command-line flag for directory with expected data files """
 SKIP_WORKFLOW = "--skip-workflow"
 """ Command-line flag to specify that workflow should not be run """
+CHECK_INDEX_TMP = "--check-index-tmp"
+"""
+Command-line flag to specify that index and temprary files should be
+checked too (default is that only output files are checked.
+"""
 
 
 def pytest_addoption(parser):
@@ -33,6 +38,12 @@ def pytest_addoption(parser):
         action="store_true",
         required=False,
         help="Workflow should not be run"
+    )
+    parser.addoption(
+        CHECK_INDEX_TMP,
+        action="store_true",
+        required=False,
+        help="Index and temporary files should be checked too"
     )
 
 
@@ -65,3 +76,18 @@ def skip_workflow(request):
     :rtype: bool
     """
     return request.config.getoption(SKIP_WORKFLOW)
+
+
+@pytest.fixture(scope="module")
+def skip_index_tmp(request):
+    """
+    Gets value for "--check-index-tmp" command-line option and, if
+    False, or undefined, invokes "pytest.skip" to skip a test.
+
+    :param request: request
+    :type request: _pytest.fixtures.SubRequest
+    :return: whether temporary files should be checked
+    :rtype: bool
+    """
+    if not request.config.getoption(CHECK_INDEX_TMP):
+        pytest.skip('Checking output files only')
