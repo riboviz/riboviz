@@ -2,10 +2,9 @@
 General constants.
 """
 import os.path
-import riboviz
 
 
-BASE_PATH = os.path.dirname(os.path.dirname(riboviz.__file__))
+BASE_PATH = os.path.dirname(os.path.dirname(__file__))
 """ Path of parent riboviz module. """
 PY_SCRIPTS = os.path.join(BASE_PATH, "riboviz/tools")
 """ Path of riboviz/tools/ derived from BASE_PATH. """

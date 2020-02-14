@@ -18,11 +18,11 @@ def load_bedgraph(bed_file):
     Load bedGraph file. A bedGraph file has format:
 
     * Track definition line.
-      - `track type=bedGraph ...`
+      - 'track type=bedGraph ...'
     * Track data rows, each in 4 column BED format:
-      - Chromosone (string)
-      - Chromosone start coordinate (integer)
-      - Chromosone end coordinate (integer)
+      - Chromosome (string)
+      - Chromosome start coordinate (integer)
+      - Chromosome end coordinate (integer)
       - Data value (integer, as RiboViz uses bedGraphs for counts)
 
     The DataFrame returned has four column names: "Chromosome",
@@ -32,8 +32,8 @@ def load_bedgraph(bed_file):
     :type bed_file: str or unicode
     :return: bedGraph track and data
     :rtype: tuple(str or unicode, pandas.core.frame.DataFrame)
-    :raise AssertionError: if the first line of the file does
-    not start with "track type=bedGraph" or the rest of the file
+    :raise AssertionError: if the first line of the file does \
+    not start with "track type=bedGraph" or the rest of the file \
     does not have 4 columns
     :raise Exception: if problems arise when loading the file
     """
@@ -58,7 +58,7 @@ def equal_bedgraph(file1, file2):
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
-    :raise AssertionError: if files are not bedGraphs or they
+    :raise AssertionError: if files are not bedGraphs or they \
     differ in their data
     :raise Exception: if problems arise when loading the files
     """

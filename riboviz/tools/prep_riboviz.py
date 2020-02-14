@@ -4,16 +4,13 @@ RiboViz workflow.
 
 Usage:
 
-    PYTHONPATH=. python riboviz/tools/prep_riboviz.py \
-        [--dry-run] \
-        <R_SCRIPTS_DIRECTORY>\
-        <YAML_CONFIG_FILE>
+    python -m riboviz.tools.prep_riboviz \
+        [--dry-run] <R_SCRIPTS_DIRECTORY> <YAML_CONFIG_FILE>
 
 Example:
 
-    PYTHONPATH=. python riboviz/tools/prepRiboviz.py \
-        rscripts/ \
-        vignette/vignette_config.yaml
+    python -m riboviz.tools.prep_riboviz \
+        rscripts/ vignette/vignette_config.yaml
 
 The script can process sample data or multiplexed sample data
 (relevant configuration parameters are shown in brackets).
@@ -27,35 +24,35 @@ Process ribosome profiling data:
 * Processes each sample fastq[.gz] file (sample IDs and files are
   listed in "fq_files" and are assumed to be relative to "dir_in") in
   turn:
-  - Cuts out sequencing library adapters ("adapters", default
-    "CTGTAGGCACC") using "cutadapt".
-  - Extracts UMIs using "umi_tools extract", if requested
-    ("extract_umis: TRUE"), using a UMI-tools-compliant
-    regular expression pattern ("umi_regexp").
-  - Removes rRNA or other contaminating reads by alignment to
-    rRNA index files ("rrna_index_prefix") using "hisat2".
-  - Aligns remaining reads to ORFs index files
-    ("orf_index_prefix"). using "hisat2".
-  - Trims 5' mismatches from reads and remove reads with more than 2
-    mismatches using "trim_5p_mismatch.py".
-  - Outputs UMI groups pre-deduplication using "umi_tools group" if
-    requested ("dedup_umis: TRUE" and "group_umis: TRUE")
-  - Deduplicates UMIs using "umi_tools dedup", if requested
-    ("dedup_umis: TRUE")
-  - Outputs UMI groups post-deduplication using "umi_tools group" if
-    requested ("dedup_umis: TRUE" and "group_umis:TRUE")
-  - Exports bedgraph files for plus and minus strands, if requested
-    ("make_bedgraph: TRUE") using "bedtools genomecov".
-  - Writes intermediate files produced above into a sample-specific
-    directory under the temporary directory  ("dir_tmp").
-  - Makes length-sensitive alignments in compressed h5 format using
-    "bam_to_h5.R".
-  - Generates summary statistics, and analyses and QC plots for both
-    RPF and mRNA datasets using "generate_stats_figs.R". This
-    includes estimated read counts, reads per base, and transcripts
-    per million for each ORF in each sample.
-  - Writes output files produced above into an sample-specific
-    directory under the output directory ("dir_out").
+    - Cuts out sequencing library adapters ("adapters", default
+      "CTGTAGGCACC") using "cutadapt".
+    - Extracts UMIs using "umi_tools extract", if requested
+      ("extract_umis: TRUE"), using a UMI-tools-compliant
+      regular expression pattern ("umi_regexp").
+    - Removes rRNA or other contaminating reads by alignment to
+      rRNA index files ("rrna_index_prefix") using "hisat2".
+    - Aligns remaining reads to ORFs index files
+      ("orf_index_prefix"). using "hisat2".
+    - Trims 5' mismatches from reads and remove reads with more than 2
+      mismatches using "riboviz.tools.trim_5p_mismatch".
+    - Outputs UMI groups pre-deduplication using "umi_tools group" if
+      requested ("dedup_umis: TRUE" and "group_umis: TRUE")
+    - Deduplicates UMIs using "umi_tools dedup", if requested
+      ("dedup_umis: TRUE")
+    - Outputs UMI groups post-deduplication using "umi_tools group" if
+      requested ("dedup_umis: TRUE" and "group_umis:TRUE")
+    - Exports bedgraph files for plus and minus strands, if requested
+      ("make_bedgraph: TRUE") using "bedtools genomecov".
+    - Writes intermediate files produced above into a sample-specific
+      directory under the temporary directory  ("dir_tmp").
+    - Makes length-sensitive alignments in compressed h5 format using
+      "bam_to_h5.R".
+    - Generates summary statistics, and analyses and QC plots for both
+      RPF and mRNA datasets using "generate_stats_figs.R". This
+      includes estimated read counts, reads per base, and transcripts
+      per million for each ORF in each sample.
+    - Writes output files produced above into an sample-specific
+      directory under the output directory ("dir_out").
 * Collates TPMs across all processed fastq[.gz] files, using
   "collate_tpms.R" and writes into output directory ("dir_out").
 
@@ -73,33 +70,33 @@ Process multiplexed ribosome profiling data:
   ("extract_umis: TRUE"), using a UMI-tools-compliant
   regular expression pattern ("umi_regexp").
 * Demultiplexes fastq[.gz] file with reference to a sample sheet
-  ("sample_sheet"), using "demultiplex_fastq.py".
+  ("sample_sheet"), using "riboviz.tools.demultiplex_fastq".
 * Processes each demultiplexed fastq[.gz], which has one or more
   reads, in turn:
-  - Removes rRNA or other contaminating reads by alignment to rRNA
-    index files ("rrna_index_prefix") using "hisat2".
-  - Aligns remaining reads to ORFs index files ("orf_index_prefix")
-    using "hisat2".
-  - Trims 5' mismatches from reads and remove reads with more than 2
-    mismatches using "trim_5p_mismatch.py".
-  - Outputs UMI groups pre-deduplication using "umi_tools group" if
-    requested ("dedup_umis: TRUE" and "group_umis: TRUE").
-  - Deduplicates UMIs using "umi_tools dedup", if requested
-    ("dedup_umis: TRUE").
-  - Outputs UMI groups post-deduplication using "umi_tools group" if
-    requested ("dedup_umis: TRUE" and "group_umis: TRUE")
-  - Exports bedgraph files for plus and minus strands, if requested
-    ("make_bedgraph: TRUE") using "bedtools genomecov".
-  - Writes intermediate files produced above into a sample-specific
-    directory under the temporary directory  ("dir_tmp").
-  - Makes length-sensitive alignments in compressed h5 format using
-    "bam_to_h5.R".
-  - Generates summary statistics, and analyses and QC plots for both
-    RPF and mRNA datasets using "generate_stats_figs.R". This
-    includes estimated read counts, reads per base, and transcripts
-    per million for each ORF in each sample.
-  - Writes output files produced above into an sample-specific
-    directory under the output directory ("dir_out").
+    - Removes rRNA or other contaminating reads by alignment to rRNA
+      index files ("rrna_index_prefix") using "hisat2".
+    - Aligns remaining reads to ORFs index files ("orf_index_prefix")
+      using "hisat2".
+    - Trims 5' mismatches from reads and remove reads with more than 2
+      mismatches using "riboviz.tools.trim_5p_mismatch".
+    - Outputs UMI groups pre-deduplication using "umi_tools group" if
+      requested ("dedup_umis: TRUE" and "group_umis: TRUE").
+    - Deduplicates UMIs using "umi_tools dedup", if requested
+      ("dedup_umis: TRUE").
+    - Outputs UMI groups post-deduplication using "umi_tools group" if
+      requested ("dedup_umis: TRUE" and "group_umis: TRUE")
+    - Exports bedgraph files for plus and minus strands, if requested
+      ("make_bedgraph: TRUE") using "bedtools genomecov".
+    - Writes intermediate files produced above into a sample-specific
+      directory under the temporary directory  ("dir_tmp").
+    - Makes length-sensitive alignments in compressed h5 format using
+      "bam_to_h5.R".
+    - Generates summary statistics, and analyses and QC plots for both
+      RPF and mRNA datasets using "generate_stats_figs.R". This
+      includes estimated read counts, reads per base, and transcripts
+      per million for each ORF in each sample.
+    - Writes output files produced above into an sample-specific
+      directory under the output directory ("dir_out").
 * Collates TPMs across all demultiplexed fastq[.gz] files, using
   "collate_tpms.R" and writes into output directory ("dir_out").
 
@@ -111,7 +108,7 @@ processes ("num_processes"):
 * For "cutadapt", the number of available processors on the host will
   be used.
 
-`prep_riboviz.py` returns the following exit codes:
+'riboviz.tools.prep_riboviz' returns the following exit codes:
 
 * 0: Processing successfully completed.
 * 1: A file does not seem to exist.
@@ -193,9 +190,9 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
     :type r_rna_index: str or unicode
     :param orf_index: Prefix of ORF HT2 index files
     :type orf_index: str or unicode
-    :param is_trimmed: Have adapters been cut and barcodes and UMIs
-    extracted already?
-    :type are_trimmed: bool
+    :param is_trimmed: Have adapters been cut and barcodes \
+    and UMIs extracted already?
+    :type is_trimmed: bool
     :param config: RiboViz configuration
     :type config: dict
     :param tmp_dir: Temporary directory
@@ -204,10 +201,10 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
     :type out_dir: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if sample_fastq or a third-party tool
-    cannot be found
-    :raise AssertionError: if invocation of a third-party tool returns
-    non-zero exit code
+    :raise FileNotFoundError: if sample_fastq or a third-party \
+    tool cannot be found
+    :raise AssertionError: if invocation of a third-party tool \
+    returns non-zero exit code
     :raise KeyError: if config is missing required configuration
     """
     LOGGER.info("Processing sample: %s", sample)
@@ -323,7 +320,8 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
         step += 1
 
         if is_group_umis:
-            umi_groups = os.path.join(tmp_dir, workflow_files.POST_DEDUP_GROUPS_TSV)
+            umi_groups = os.path.join(tmp_dir,
+                                      workflow_files.POST_DEDUP_GROUPS_TSV)
             log_file = os.path.join(
                 run_config.logs_dir,
                 LOG_FORMAT.format(step, "umi_tools_group.log"))
@@ -383,9 +381,9 @@ def process_samples(samples, in_dir, index_dir, r_rna_index,
     :type r_rna_index: str or unicode
     :param orf_index: Prefix of ORF HT2 index files
     :type orf_index: str or unicode
-    :param is_trimmed: Have adapters been cut and barcodes and UMIs
-    extracted already?
-    :type are_trimmed: bool
+    :param is_trimmed: Have adapters been cut and barcodes \
+    and UMIs extracted already?
+    :type is_trimmed: bool
     :param config: RiboViz configuration
     :type config: dict
     :param tmp_dir: Temporary directory
@@ -394,8 +392,8 @@ def process_samples(samples, in_dir, index_dir, r_rna_index,
     :type out_dir: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :param check_samples_exist: If run_config.is_dry_run then should a
-    check be made for the existence of sample files?
+    :param check_samples_exist: If run_config.is_dry_run then should \
+    a check be made for the existence of sample files?
     :type check_samples_exist: bool
     :type are_trimmed: bool
     :return: names of successfully-processed samples
@@ -449,13 +447,13 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     :type r_scripts: str or unicode
     :param config_yaml: YAML configuration file path
     :type config_yaml: str or unicode
-    :param is_dry_run: Don't execute workflow commands (useful for
-    seeing what commands would be executed)
+    :param is_dry_run: Don't execute workflow commands (useful \
+    for seeing what commands would be executed)
     :type is_dry_run: bool
     :raise FileNotFoundError: if an input data file cannot be found
     :raise KeyError: if a configuration parameter is missing
-    :raise ValueError: if a configuration parameter has an invalid
-    value
+    :raise ValueError: if a configuration parameter has an \
+    invalid value
     :raise TypeError: if a configuration parameter has an invalid type
     :raise Exception: if any other error arises
     """
@@ -612,7 +610,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
                 raise Exception(
                     "No samples are specified in {}".format(sample_sheet_file))
         # Use get_fastq_filename to deduce sample-specific files
-        # output by demultiplex_fastq.py - demultiplex_fastq.py
+        # output by riboviz.tools.demultiplex_fastq which
         # uses this function too.
         file_format = fastq.FASTQ_FORMATS[utils.get_file_ext(extract_trim_fq)]
         sample_files = {sample: file_format.format(sample)
@@ -655,8 +653,8 @@ def prep_riboviz(r_scripts, config_yaml, is_dry_run=False):
     :type r_scripts: str or unicode
     :param config_yaml: YAML configuration file path
     :type config_yaml: str or unicodee
-    :param is_dry_run: Don't execute weorkflow commands (useful for
-    seeing what commands would be execueted)
+    :param is_dry_run: Don't execute weorkflow commands (useful \
+    for seeing what commands would be execueted)
     :type is_dry_run: boole
     :return: exit code
     :rtype: int

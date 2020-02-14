@@ -100,13 +100,13 @@ def run_logged_command(cmd,
     :type log_file: str or unicode
     :param cmd_file: File to log command to
     :type cmd_file: str or unicode
-    :param dry_run: Do not submit command to shell - use with cmd_file
-    to log commands that would be run
+    :param dry_run: Do not submit command to shell - use with \
+    cmd_file to log commands that would be run
     :type dry_run: bool
-    :param cmd_to_log: Commnand to log, provided for cases where
-    command-line arguments may have quotes and the command submitted
-    via Python may differ subtly from that which would be used if
-    running via bash directly
+    :param cmd_to_log: Commnand to log, provided for cases where \
+    command-line arguments may have quotes and the command \
+    submitted via Python may differ subtly from that which would be \
+    used if running via bash directly
     :type cmd_to_log: list(str or unicode)
     :raise FileNotFoundError: if the command being run cannot be found
     :raise AssertionError: if the command returns a non-zero exit code
@@ -142,8 +142,8 @@ def run_logged_redirect_command(cmd,
     :type log_file: str or unicode
     :param cmd_file: File to log command to
     :type cmd_file: str or unicode
-    :param dry_run: Do not submit command to shell - use with cmd_file
-    to log commands that would be run
+    :param dry_run: Do not submit command to shell - use with \
+    cmd_file to log commands that would be run
     :type dry_run: bool
     :raise FileNotFoundError: if the command being run cannot be found
     :raise AssertionError: if the command returns a non-zero exit code
@@ -175,8 +175,8 @@ def run_logged_pipe_command(cmd1,
     :type log_file: str or unicode
     :param cmd_file: File to log command to
     :type cmd_file: str or unicode
-    :param dry_run: Do not submit command to shell - use with cmd_file
-    to log commands that would be run
+    :param dry_run: Do not submit command to shell - use with \
+    cmd_file to log commands that would be run
     :type dry_run: bool
     :raise FileNotFoundError: if the command being run cannot be found
     :raise AssertionError: if the commands returns a non-zero exit code

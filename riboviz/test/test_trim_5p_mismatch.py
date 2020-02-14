@@ -91,9 +91,9 @@ def test_trim_5p_mismatch(test_case, trimmed_sam_file):
     """
     Run trim_5p_mismatch and validate summary returned.
 
-    :param test_case: Test case with test SAM file name, maximum
-    number of mismatches to test and dictionary with expected results
-    from trim_5p_mismatch.
+    :param test_case: Test case with test SAM file name, maximum \
+    number of mismatches to test and dictionary with expected \
+    results from trim_5p_mismatch.
     :type test_case: tuple(str or unicode, tuple(int, dict))
     :param trimmed_sam_file: path to trimmed SAM file
     :type trimmed_sam_file: str or unicode
@@ -112,9 +112,9 @@ def test_trim_5p_mismatch_file(test_case, trimmed_sam_file, summary_file):
     """
     Run trim_5p_mismatch_file and validate summary file created.
 
-    :param test_case: Test case with test SAM file name, maximum
-    number of mismatches to test and dictionary with expected results
-    from trim_5p_mismatch.
+    :param test_case: Test case with test SAM file name, maximum \
+    number of mismatches to test and dictionary with expected \
+    results from trim_5p_mismatch.
     :type test_case: tuple(str or unicode, tuple(int, dict))
     :param trimmed_sam_file: path to trimmed SAM file
     :type trimmed_sam_file: str or unicode

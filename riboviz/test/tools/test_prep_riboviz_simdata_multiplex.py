@@ -19,13 +19,13 @@ from riboviz import demultiplex_fastq
 from riboviz import fastq
 from riboviz import params
 from riboviz import utils
-from riboviz import workflow
 from riboviz import workflow_files
-from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration_module  # Test fixture
 from riboviz.test.tools import run_prep_riboviz  # Test fixture
-from riboviz.test.tools.test_prep_riboviz_simdata_umi import check_umi_groups
-from riboviz.test.tools.test_prep_riboviz_simdata_umi import check_tpms_collated_tsv
+from riboviz.test.tools.test_prep_riboviz_simdata_umi \
+    import check_umi_groups
+from riboviz.test.tools.test_prep_riboviz_simdata_umi \
+    import check_tpms_collated_tsv
 
 
 TEST_CONFIG_FILE = riboviz.test.SIMDATA_MULTIPLEX_CONFIG
@@ -41,7 +41,7 @@ def test_adaptor_trimming(configuration_module):
     Validate that adaptor trimming, performed by "cutadapt" produces
     the expected results.
 
-    :param configuration_module: configuration and path to
+    :param configuration_module: configuration and path to \
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
     """
@@ -62,7 +62,7 @@ def test_barcode_umi_extract(configuration_module):
     Validate that barcode and UMI extraction, performed by "umi_tools
     extract" produces the expected results.
 
-    :param configuration_module: configuration and path to
+    :param configuration_module: configuration and path to \
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
     """
@@ -83,7 +83,7 @@ def test_deplex_num_reads(configuration_module):
     Validate that "num_reads.tsv", produced by
     riboviz.demultiplex_fastq has the expected content.
 
-    :param configuration_module: configuration and path to
+    :param configuration_module: configuration and path to \
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
     """
@@ -109,7 +109,7 @@ def test_deplex_reads(configuration_module, tag):
     Validate that ".fastq", produced by
     riboviz.demultiplex_fastq have the expected content.
 
-    :param configuration_module: configuration and path to
+    :param configuration_module: configuration and path to \
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
     :param tag: FASTQ fie name tag
@@ -138,7 +138,7 @@ def test_deplex_umi_groups(configuration_module, sample_id):
     for each demultiplexed file, by parsing the ".tsv" file output by
     "umi_tools group".
 
-    :param configuration_module: configuration and path to
+    :param configuration_module: configuration and path to \
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
     :param sample_id: sample ID for demultiplexed reads
@@ -154,7 +154,7 @@ def test_deplex_tpms_collated_tsv(configuration_module, sample_id):
     """
     Validate the "TPMs_collated.tsv" file produced by the workflow.
 
-    :param configuration_module: configuration and path to
+    :param configuration_module: configuration and path to \
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
     :param sample_id: sample ID for demultiplexed reads

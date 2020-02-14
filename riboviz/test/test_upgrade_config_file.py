@@ -33,11 +33,11 @@ def upgrade_and_validate(config_file,
 
     :param config_file: configuration file to upgrade
     :type config_file: str or unicode
-    :param upgraded_config_file: path to write upgraded configuration
-    file into (pytest fixture)
+    :param upgraded_config_file: path to write upgraded \
+    configuration file into (pytest fixture)
     :type upgraded_config_file: str or unicode
-    :param expected_config_file: configuration file with expectec
-    contents
+    :param expected_config_file: configuration file with \
+    expected contents
     :type expected_config_file: str or unicode
     :raises AssertionError: if contents differ
     """
@@ -64,8 +64,8 @@ def test_upgrade_vignette_config(config_file, upgraded_config_file):
 
     :param config_file: configuration file to upgrade
     :type config_file: str or unicode
-    :param upgraded_config_file: path to write upgraded configuration
-    file into (pytest fixture)
+    :param upgraded_config_file: path to write upgraded \
+    configuration file into (pytest fixture)
     :type upgraded_config_file: str or unicode
     """
     upgrade_and_validate(config_file,
@@ -82,8 +82,8 @@ def test_upgrade_simdata_umi_config(config_file, upgraded_config_file):
 
     :param config_file: configuration file to upgrade
     :type config_file: str or unicode
-    :param upgraded_config_file: path to write upgraded configuration
-    file into (pytest fixture)
+    :param upgraded_config_file: path to write upgraded \
+    configuration file into (pytest fixture)
     :type upgraded_config_file: str or unicode
     """
     upgrade_and_validate(config_file,
@@ -101,8 +101,8 @@ def test_upgrade_simdata_multiplex_config(config_file, upgraded_config_file):
 
     :param config_file: configuration file to upgrade
     :type config_file: str or unicode
-    :param upgraded_config_file: path to write upgraded configuration
-    file into (pytest fixture)
+    :param upgraded_config_file: path to write upgraded \
+    configuration file into (pytest fixture)
     :type upgraded_config_file: str or unicode
     """
     upgrade_and_validate(config_file,

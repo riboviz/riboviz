@@ -1,6 +1,6 @@
 # What the RiboViz workflow does
 
-This page describes what `prep_riboviz.py` does. 
+This page describes what `riboviz.tools.prep_riboviz` does. 
 
 Configuration parameters are shown in brackets and are described in [Configuring the RiboViz workflow](./prep-riboviz-config.md).
 
@@ -8,26 +8,26 @@ Configuration parameters are shown in brackets and are described in [Configuring
 
 ## Coordinating local scripts and third-party components
 
-`prep_riboviz.py` prepares ribosome profiling data for by implementing a workflow that uses a combination of local Python and R scripts and third-party components. These are as follows:
+`prep_riboviz` prepares ribosome profiling data for by implementing a workflow that uses a combination of local Python and R scripts and third-party components. These are as follows:
 
 * `hisat2-build`: build rRNA and ORF indices.
 * `cutadapt`: cut adapters.
 * `hisat2`: align reads.
-* `trim_5p_mismatch.py`: trim 5' mismatches from reads and remove reads with more than a set number of mismatches (local script, in `riboviz/tools/`).
+* `riboviz.tools.trim_5p_mismatch`: trim 5' mismatches from reads and remove reads with more than a set number of mismatches (local script, in `riboviz/tools/`).
 * `umi_tools` (`extract`, `dedup`, `group`): extract barcodes and UMIs, deduplicate reads and group reads.
-* `demultiplex_fastq.py`: demultiplex multiplexed files (local script, in `riboviz/tools/`).
+* `riboviz.tools.demultiplex_fastq`: demultiplex multiplexed files (local script, in `riboviz/tools/`).
 * `samtools` (`view`, `sort`, `index`): convert SAM files to BAM files and index.
 * `bedtools` (`genomecov`): export transcriptome coverage as bedgraphs.
 * `bam_to_h5.R`: convert BAM to compressed H5 format (local script, in `rscripts/`)
 * `generate_stats_figs.R`: generate summary statistics, analyses plots and QC plots (local script, in `rscripts/`)
 * `collate_tpms.R`: collate TPMs across samples (local script, in `rscripts/`)
-* `count_reads.py`: count the number of reads (sequences) processed by specific stages of the workflow (local script, in `riboviz/tools/`).
+* `riboviz.tools.count_reads`: count the number of reads (sequences) processed by specific stages of the workflow (local script, in `riboviz/tools/`).
 
 ---
 
 ## Process ribosome profiling sample data
 
-If sample files (`fq_files`) are specified, then `prep_riboviz.py` processes the sample files as follows:
+If sample files (`fq_files`) are specified, then `prep_riboviz` processes the sample files as follows:
 
 1. Read configuration information from YAML configuration file.
 2. Build hisat2 indices if requested (if `build_indices: TRUE`) using `hisat2 build` and save these into the index directory (`dir_index`).
@@ -36,7 +36,7 @@ If sample files (`fq_files`) are specified, then `prep_riboviz.py` processes the
    2. Extract UMIs using `umi_tools extract`, if requested (if `extract_umis: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`). The extracted UMIs are inserted into the read headers of the FASTQ records.
    3. Remove rRNA or other contaminating reads by alignment to rRNA index files (`rrna_index_prefix`) using `hisat2`.
    4. Align remaining reads to ORFs index files (`orf_index_prefix`). using `hisat2`.
-   5. Trim 5' mismatches from reads and remove reads with more than 2 mismatches using `trim_5p_mismatch.py`.
+   5. Trim 5' mismatches from reads and remove reads with more than 2 mismatches using `trim_5p_mismatch`.
    6. Output UMI groups pre-deduplication using `umi_tools group` if requested (if `dedup_umis: TRUE` and `group_umis: TRUE`)
    7. Deduplicate reads using `umi_tools dedup`, if requested (if `dedup_umis: TRUE`)
    8. Output UMI groups post-deduplication using `umi_tools group` if requested (if `dedup_umis: TRUE` and `group_umis: TRUE`)
@@ -56,14 +56,14 @@ If sample files (`fq_files`) are specified, then `prep_riboviz.py` processes the
 
 ## Process multiplexed ribosome profiling sample data
 
-If a multiplexed file (`multiplex_fq_files`) is specified, then `prep_riboviz.py`, the `prep_riboviz.py` processes the multiplexed file as follows:
+If a multiplexed file (`multiplex_fq_files`) is specified, then `prep_riboviz`, the `prep_riboviz` processes the multiplexed file as follows:
 
 1. Read configuration information (as for 1. above).
 2. Build hisat2 indices if requested (as for 2. above).
 3. Read the multiplexed FASTQ file (`multiplex_fq_files`).
 4. Cut out sequencing library adapters (`adapters`) using `cutadapt`.
 5. Extract barcodes and UMIs using `umi_tools extract`, if requested (if `extract_umis: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`).
-6. Demultiplex file with reference to the sample sheet (`sample_sheet`), using `demultiplex_fastq.py`. Sample IDs in the `SampleID` column in the sample sheet are used to name the demultiplexed files.
+6. Demultiplex file with reference to the sample sheet (`sample_sheet`), using `demultiplex_fastq`. Sample IDs in the `SampleID` column in the sample sheet are used to name the demultiplexed files.
 7. Process each demultiplexed FASTQ file which has one or more reads, in turn (as for 3.3 to 3.13 above)
 8. Collate TPMs across results, using `collate_tpms.R` and write into output directory (`dir_out`) (as for 4. above.
 
@@ -158,7 +158,7 @@ In addition, the following files are also put into the output directory:
 
 ## Log files
 
-Information on the execution of `prep_riboviz.py`, including the causes of any errors, is added to a timestamped log file in the current directory, named `riboviz-YYYYMMDD-HHMMSS.log` (for example, `riboviz.20190926-002455.log`).
+Information on the execution of `prep_riboviz`, including the causes of any errors, is added to a timestamped log file in the current directory, named `riboviz-YYYYMMDD-HHMMSS.log` (for example, `riboviz.20190926-002455.log`).
 
 Log files for each processing step are placed in a timestamped subdirectory (`YYYYMMDD-HHMMSS`) within the logs directory (`dir_logs`). 
 
@@ -239,7 +239,7 @@ count_reads.log
 
 ## Read counts file
 
-`prep_riboviz.py` will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is produced by scanning input, temporary and output directories and counting the number of reads (sequences) processed by specific stages of a RiboViz workflow.
+`prep_riboviz` will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is produced by scanning input, temporary and output directories and counting the number of reads (sequences) processed by specific stages of a RiboViz workflow.
 
 The read counts file, `read_counts.tsv`, is written into the output directory.
 

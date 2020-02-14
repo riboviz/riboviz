@@ -33,15 +33,14 @@ LOGGER = logging.getLogger(__name__)
 
 def create_directory(directory, cmd_file, is_dry_run=False):
     """
-    Add bash command to create `directory` to `cmd_file` and, if
-    `is_dry_run` is `True` create the directory.
-     a directory and, optionally,
+    Add bash command to create 'directory' to 'cmd_file' and, if \
+    'is_dry_run' is 'True' create the directory.
 
     :param directory: Directory
     :type directory: str or unicode
     :param cmd_file: Commands file
     :type cmd_file: str or unicode
-    :param is_dry_run: Don't execute workflow commands (useful for
+    :param is_dry_run: Don't execute workflow commands (useful for \
     seeing what commands would be executed)
     :type is_dry_run: bool
     """
@@ -68,7 +67,7 @@ def build_indices(fasta, index_dir, ht_prefix, log_file, run_config):
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
     :raise FileNotFoundError: if hisat2-build cannot be found
-    :raise AssertionError: if hisat2-build returns non-zero exit
+    :raise AssertionError: if hisat2-build returns non-zero exit \
     code
     """
     LOGGER.info("Build indices for alignment (%s). Log: %s", fasta, log_file)
@@ -96,13 +95,12 @@ def cut_adapters(adapter, original_fq, trimmed_fq,
     :type original_fq: str or unicode
     :param trimmed_fq: FASTQ file with trimmed adapters
     :type trimmed_fq: str or unicode
-    :param log_file Log file
+    :param log_file: Log file
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
     :raise FileNotFoundError: if cutadapt cannot be found
-    :raise AssertionError: if cutadapt returns non-zero exit
-    code
+    :raise AssertionError: if cutadapt returns non-zero exit code
     """
     LOGGER.info("Cut out sequencing library adapters. Log: %s", log_file)
     cmd = ["cutadapt", "--trim-n", "-O", "1", "-m", "5",
@@ -122,7 +120,7 @@ def extract_barcodes_umis(original_fq, extract_fq, regexp,
     :type original_fq: str or unicode
     :param extract_fq: FASTQ file with UMIs and barcodes extracted
     :type extract_fq: str or unicode
-    :param regexp: umi_tools-compliant regular expression to extract
+    :param regexp: umi_tools-compliant regular expression to extract \
     barcodes and UMIs
     :type regexp: str or unicode
     :param log_file: Log file
@@ -130,7 +128,7 @@ def extract_barcodes_umis(original_fq, extract_fq, regexp,
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
     :raise FileNotFoundError: if umi_tools cannot be found
-    :raise AssertionError: if umi_tooles returns non-zero exit
+    :raise AssertionError: if umi_tooles returns non-zero exit \
     code
     """
     LOGGER.info("Extract barcodes and UMIs. Log: %s", log_file)
@@ -189,7 +187,7 @@ def map_to_r_rna(fastq, index_dir, ht_prefix, mapped_sam,
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
     :raise FileNotFoundError: if hisat2-build cannot be found
-    :raise AssertionError: if hisat2-build returns non-zero exit
+    :raise AssertionError: if hisat2-build returns non-zero exit \
     code
     """
     LOGGER.info(
@@ -231,7 +229,7 @@ def map_to_orf(fastq, index_dir, ht_prefix, mapped_sam,
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
     :raise FileNotFoundError: if hisat2-build cannot be found
-    :raise AssertionError: if hisat2-build returns non-zero exit
+    :raise AssertionError: if hisat2-build returns non-zero exit \
     code
     """
     LOGGER.info(
@@ -258,13 +256,13 @@ def trim_5p_mismatches(orf_map_sam, orf_map_sam_clean, summary_file,
                        log_file, run_config):
     """
     Trim 5' mismatches from reads and remove reads with more than 2
-    mismatches using trim_5p_mismatches.py
+    mismatches using riboviz.tools.trim_5p_mismatches.
 
     :param orf_map_sam: ORF-mapped reads
     :type orf_map_sam: str or unicode
     :param orf_map_sam_clean: Cleaned ORF-mapped reads
     :type orf_map_sam_clean: str or unicode
-    :param summary_file: TSV summary file with "num_processed",
+    :param summary_file: TSV summary file with "num_processed", \
     "num_discarded", "num_trimmed" and "num_written" columns
     :type summary_file: str or unicode
     :param log_file: Log file
@@ -404,7 +402,7 @@ def make_bedgraph(bam_file, bedgraph_file, is_plus,
     :type bam_file: str or unicode
     :param bedgraph_file: Bedgraph file, output
     :type bedgraph_file: str or unicode
-    :param is_plus: Is bedgraph to be created for plus strand (True)
+    :param is_plus: Is bedgraph to be created for plus strand (True) \
     or minus strand (False)
     :type is_plus: bool
     :param log_file: Log file
@@ -542,7 +540,7 @@ def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
     """
     Collate TPMs across sample results using collate_tpms.R.
 
-    :param out_dir Output files directory
+    :param out_dir: Output files directory
     :type out_dir: str or unicode
     :param samples: Sample names
     :type samples: list(str or unicode)
@@ -550,8 +548,8 @@ def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :param tpms_file: TPMS file relative to out_dir, if omitted then
-    default, chosen by collate_tpms.R, is used
+    :param tpms_file: TPMS file relative to out_dir, if omitted \
+    then default, chosen by collate_tpms.R, is used
     :type tpms_file: str or unicode
     :raise FileNotFoundError: if Rscript cannot be found
     :raise AssertionError: if Rscript returns non-zero exit code
@@ -573,12 +571,12 @@ def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
 def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
                       run_config):
     """
-    Demultiplex reads using demultiplex_fastq.py.
+    Demultiplex reads using riboviz.tools.demultiplex_fastq.
 
     :param fastq: FASTQ file to demultiplex
     :type fastq: str or unicode
-    :param barcodes_file: Sample sheet filename, tab-delimited
-    text format with SampleID and TagRead columns, where TagReads are
+    :param barcodes_file: Sample sheet filename, tab-delimited \
+    text format with SampleID and TagRead columns, where TagReads \
     the barcodes to use to demultiplex fastq
     :type barcodes_file: str or unicode
     :param deplex_dir: Directory to write demultiplexed files
@@ -602,7 +600,7 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
 def count_reads(config_file, input_dir, tmp_dir, output_dir,
                 read_counts_file, log_file, run_config):
     """
-    Count reads using count_reads.py.
+    Count reads using riboviz.tools.count_reads.
 
     :param config_file: Configuration file
     :type config_file: str or unicode

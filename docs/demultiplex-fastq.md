@@ -1,6 +1,6 @@
-# demultiplex_fastq.py fastq demultiplexer
+# `riboviz.tools.demultiplex_fastq` fastq demultiplexer
 
-`riboviz/tools/demultiplex_fastq.py` is a command-line tool to demultiplex fastq files using UMI-tools-compliant barcodes present within the fastq headers. These headers are assumed to be of form:
+`riboviz.tools.demultiplex_fastq` is a command-line tool to demultiplex fastq files using UMI-tools-compliant barcodes present within the fastq headers. These headers are assumed to be of form:
 
 ```
 @..._<BARCODE>_...

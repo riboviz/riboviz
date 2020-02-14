@@ -6,8 +6,9 @@ and file patterns used by RiboViz.
 
 Usage:
 
-        count_reads.py [-h] -c CONFIG_FILE -i INPUT_DIR \
-                       -t TMP_DIR -o OUTPUT_DIR -r READS_FILE
+    python -m riboviz.tools.count_reads [-h] \
+        -c CONFIG_FILE -i INPUT_DIR \
+        -t TMP_DIR -o OUTPUT_DIR -r READS_FILE
 
 Arguments:
 

@@ -103,9 +103,9 @@ def trim_5p_mismatch(sam_file_in,
     :type fivep_remove: bool
     :param max_mismatches: Number of mismatches to allow
     :type max_mismatches: int
-    :return dict with keys "num_processed", "num_discarded",
-    "num_trimmed" and "num_written" and numbers of reads corresponding
-    to each
+    :return: dict with keys "num_processed", "num_discarded", \
+    "num_trimmed" and "num_written" and numbers of reads \
+    corresponding to each
     :rtype: dict
     """
     num_processed = 0
@@ -113,7 +113,7 @@ def trim_5p_mismatch(sam_file_in,
     num_trimmed = 0
     num_written = 0
     with pysam.AlignmentFile(sam_file_in, "r") as sam_in,\
-        pysam.AlignmentFile(sam_file_out, "wh", template=sam_in) as sam_out:
+         pysam.AlignmentFile(sam_file_out, "wh", template=sam_in) as sam_out:
         for read in sam_in.fetch():
             num_processed += 1
             if (num_processed % 1000000) == 1:
@@ -198,7 +198,7 @@ def trim_5p_mismatch_file(sam_file_in,
     :type max_mismatches: int
     :param sam_file_in: TSV file output with
     :type sam_file_in: str or unicode
-    :param summary_file: TSV summary file with "num_processed",
+    :param summary_file: TSV summary file with "num_processed", \
     "num_discarded", "num_trimmed" and "num_written" columns
     :type summary_file: str or unicode
     """

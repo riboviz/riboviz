@@ -1,8 +1,6 @@
 """
 SAM and BAM-related constants and functions.
 """
-import os
-import os.path
 import pysam
 from riboviz import utils
 
@@ -98,10 +96,10 @@ def equal_bam(file1, file2):
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
-    :raise AssertionError: if files differ in their data or they
+    :raise AssertionError: if files differ in their data or they \
     are missing complementary BAI files
-    :raise Exception: if problems arise when loading the files or, if
-    applicable, their complementary BAI files
+    :raise Exception: if problems arise when loading the files or, \
+    if applicable, their complementary BAI files
     """
     with pysam.AlignmentFile(file1, mode="rb") as bam_file1,\
             pysam.AlignmentFile(file2, mode="rb") as bam_file2:

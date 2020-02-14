@@ -1,7 +1,13 @@
 #! python
 """
 Demultiplex fastq files using UMI-tools-compliant barcodes present
-within the fastq headers. These headers are assumed to be of form:
+within the fastq headers.
+
+Usage:
+
+    python -m riboviz.tools.demultiplex_fastq -h
+
+Headers are assumed to be of form:
 
     @..._<BARCODE>_...
 
@@ -10,42 +16,39 @@ another delimiter was used then that can be specified.
 
 Inputs:
 
-* `-s|--sample-sheet`: Sample sheet filename, tab-delimited text
+* '-s|--sample-sheet': Sample sheet filename, tab-delimited text
     format with SampleID and TagRead (barcode) columns
-* `-1|--read1`: Read 1 filename, fastq[.gz] format
-* `-2|--read2`: Read 2 pair filename, fastq[.gz] format
+* '-1|--read1': Read 1 filename, fastq[.gz] format
+* '-2|--read2': Read 2 pair filename, fastq[.gz] format
   (must be consistent with Read 1 filename) (optional)
   If provided then the read files should have read pairs in
   corresponding positions.
-* `-m|--mismatches`: Number of mismatches permitted in barcode
+* '-m|--mismatches': Number of mismatches permitted in barcode
     (optional, default 1)
-* `-o|--outdir`: Output directory (optional, default output)
-* `-d|--delimiter`: Barcode delimiter (optional, default "_")
+* '-o|--outdir': Output directory (optional, default output)
+* '-d|--delimiter': Barcode delimiter (optional, default "_")
 
 Outputs:
 
-* If `1` only was provided:
-  - A file SampleID.fastq[.gz] with assigned reads.
-  - A file, Unassigned.fastq[.gz], with information on unassigned reads.
-* If `1` and `2` were provided:
-  - Files SampleID_R1.fastq[.gz] and SampleID_R2.fastq[.gz] with assigned
-    reads.
-  - Files, Unassigned_R1.fastq[.gz] and Unassigned_R2.fastq[.gz] with
-    information on unassigned reads.
+* If '1' only was provided:
+    - A file SampleID.fastq[.gz] with assigned reads.
+    - A file, Unassigned.fastq[.gz], with information on unassigned
+      reads.
+* If '1' and '2' were provided:
+    - Files SampleID_R1.fastq[.gz] and SampleID_R2.fastq[.gz] with
+      assigned reads.
+    - Files, Unassigned_R1.fastq[.gz] and Unassigned_R2.fastq[.gz]
+      with information on unassigned reads.
 * If the input file(s) had were of type fastq.gz then the output files
   will be of type fastq.gz.
 * A file, num_reads.tsv, with SampleID, TagRead and NumReads columns,
   specifying the number of reads for each SampleID and TagRead in the
   original sample sheet.
 
-Usage:
-
-    python -m riboviz.tools.demultiplex_fastq -h
-
 Known issue:
 
-If the number of mismatches (`-m|--mismatches`) is less than the
-Hamming distance between the barcodes (`TagReads` within the sample
+If the number of mismatches ('-m|--mismatches') is less than the
+Hamming distance between the barcodes ('TagReads' within the sample
 sheet) then a read will be assigned to the first barcode that matches
 even if this is not the closest barcode in terms of Hamming distance.
 

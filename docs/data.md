@@ -189,7 +189,7 @@ deplex/Unassigned.fastq
 
 These files are simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication using UMI-tools when invoked from within the RiboViz workflow.
 
-These files were created by running `riboviz/tools/create_fastq_simdata.py`.
+These files were created by running `riboviz.tools.create_fastq_simdata`.
 
 See [Create simulated FASTQ files](developer-guide.md#create-simulated-fastq-files).
 
@@ -203,7 +203,7 @@ The files can be used as inputs to RiboViz.
 data/demultiplex/
 ```
 
-Test data for `riboviz/tools/demultiplex_fastq.py`.
+Test data for `riboviz.tools.demultiplex_fastq`.
 
 Data was imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb0a80d2134bad9d2147c877c3b363720 (Thu May 11 23:44:13 2017).
 

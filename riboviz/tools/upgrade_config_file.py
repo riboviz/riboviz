@@ -3,16 +3,10 @@
 Upgrade YAML configuration file be compatible with current version of
 RiboViz
 
-    usage: upgrade_config_file.py [-h] -i INPUT [-o [OUTPUT]]
+Usage:
 
-    optional arguments:
-      -h, --help            show this help message and exit
-      -i INPUT, --input INPUT
-                            Input YAML configuration file
-      -o [OUTPUT], --output [OUTPUT]
-                            Output YAML configuration file. If not
-                            provided then upgraded content is printed
-                            to standard out
+    python -m riboviz.tools.upgrade_config_file [-h] \
+        -i INPUT [-o [OUTPUT]]
 """
 import argparse
 import sys

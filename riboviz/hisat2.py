@@ -1,7 +1,6 @@
 """
 HISAT2-related constants and functions.
 """
-import subprocess
 
 HT2_EXT = "ht2"
 """ HT2 file extension """

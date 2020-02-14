@@ -64,8 +64,8 @@ def upgrade_config_file(input_file, output_file=None):
     :type input_file: str or unicode
     :param output_file: Output YAML file or None
     :type output_file: str or unicode
-    :raises AssertionError: if input_file does not exist or is not a
-    file
+    :raises AssertionError: if input_file does not exist or is not \
+    a file
     """
     assert os.path.exists(input_file) and os.path.isfile(input_file),\
         "{} does not exist or is not a file".format(input_file)
