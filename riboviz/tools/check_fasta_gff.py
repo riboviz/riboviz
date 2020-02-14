@@ -4,12 +4,12 @@ Check fasta and gff files are compatible with RiboViz.
 
 Usage:
 
-    python riboviz/tools/check_fasta_gff.py [-h] \
+    python -m riboviz.tools.check_fasta_gff [-h] \
         -f FASTAIN -g GFFIN
 
 Example:
 
-    python riboviz/tools/check_fasta_gff.py \
+    python -m riboviz.tools.check_fasta_gff \
         -f vignette/input/yeast_YAL_CDS_w_250utrs.fa
         -g vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 
