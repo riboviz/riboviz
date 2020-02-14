@@ -19,7 +19,7 @@ checked too (default is that only output files are checked.
 
 def pytest_addoption(parser):
     """
-    pytest configutation hook.
+    pytest configuration hook.
 
     See
     https://docs.pytest.org/en/latest/reference.html#_pytest.hookspec.pytest_addoption
@@ -56,7 +56,7 @@ def expected(request):
     :type request: _pytest.fixtures.SubRequest
     :return: directory with expected data files
     :rtype: str or unicode
-    :raise AssertionError: if the option has a value that is
+    :raise AssertionError: if the option has a value that is \
     not a directory
     """
     expected_dir = request.config.getoption(EXPECTED)

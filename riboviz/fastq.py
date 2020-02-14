@@ -43,8 +43,7 @@ def is_fastq_gz(file_name):
 
     :param file_name: File name
     :type file_name: str or unicode
-    :return: True if file_name ends with .gz or .GZ, False
-    otherwise
+    :return: True if file_name ends with .gz or .GZ
     :rtype: bool
     """
     ext = utils.get_file_ext(file_name)

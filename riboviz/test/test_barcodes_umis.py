@@ -1,5 +1,5 @@
 """
-barcodes_umis.py test suite.
+riboviz.barcodes_umis test suite.
 """
 import csv
 import os
@@ -165,9 +165,9 @@ def test_generate_barcode_pairs_1(temporary_file, delimiter):
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
-    generate_barcode_pairs(temporary_file, length=1)
+    generate_barcode_pairs(temporary_file, length=1, delimiter=delimiter)
     with open(temporary_file) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter="\t")
+        csv_reader = csv.reader(csv_file, delimiter=delimiter)
         rows = [row for row in csv_reader]
     assert len(rows) == 2 ** len(NUCLEOTIDES)
     for row in rows:

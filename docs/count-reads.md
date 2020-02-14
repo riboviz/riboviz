@@ -1,6 +1,6 @@
-# count_reads.py reads counter
+# `riboviz.tools.count_reads` reads counter
 
-`riboviz/tools/count_reads.py` is a command-line tool to scan input, temporary and output directories and count the number of reads (sequences) processed by specific stages of a RiboViz workflow. The scan is based on the configuration, directory structure and file patterns used by RiboViz. It outputs a [read counts file](./prep-riboviz-operation.md#read-counts-file).
+`riboviz.tools.count_reads` is a command-line tool to scan input, temporary and output directories and count the number of reads (sequences) processed by specific stages of a RiboViz workflow. The scan is based on the configuration, directory structure and file patterns used by RiboViz. It outputs a [read counts file](./prep-riboviz-operation.md#read-counts-file).
 
 ---
 
@@ -46,7 +46,7 @@ See [read counts file](./prep-riboviz-operation.md#read-counts-file) for a descr
 
 ## Example
 
-Here is an example of running `count_reads.py` on the directories produced when running the vignette:
+Here is an example of running `count_reads` on the directories produced when running the vignette:
 
 ```console
 $ python -m riboviz.tools.count_reads -c vignette/vignette_config.yaml \

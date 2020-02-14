@@ -1,6 +1,6 @@
 """
-prep_riboviz.py test suite to test error handling and exit
-codes. prep_riboviz.py is run in "dry-run" mode.
+riboviz.tools.prep_riboviz test suite to test error handling and exit
+codes. riboviz.tools.prep_riboviz is run in "dry-run" mode.
 """
 import yaml
 import pytest
@@ -10,7 +10,6 @@ import riboviz.test
 import riboviz.tools
 import riboviz.validation
 from riboviz import params
-from riboviz import workflow
 from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration  # Test fixture
 
@@ -41,8 +40,8 @@ def test_missing_index_files(configuration, index):
     non-existent files causes EXIT_FILE_NOT_FOUND_ERROR to be
     returned.
 
-    :param configuration: configuration and path to configuration file
-    (pytest fixture)
+    :param configuration: configuration and path to configuration \
+    file (pytest fixture)
     :type configuration: tuple(dict, str or unicode)
     :param index: index file name configuration parameter
     :type index: str or unicode
@@ -63,8 +62,8 @@ def test_no_fq_files_error(configuration):
     Test that no samples being specified causes
     EXIT_CONFIG_ERROR to be returned.
 
-    :param configuration: configuration and path to configuration file
-    (pytest fixture)
+    :param configuration: configuration and path to configuration \
+    file (pytest fixture)
     :type configuration: tuple(dict, str or unicode)
     """
     config, config_path = configuration
@@ -83,8 +82,8 @@ def test_fq_files_multiplex_fq_files_error(configuration):
     Test that both samples and multiplexed samples being specified
     causes EXIT_CONFIG_ERROR to be returned.
 
-    :param configuration: configuration and path to configuration file
-    (pytest fixture)
+    :param configuration: configuration and path to configuration \
+    file (pytest fixture)
     :type configuration: tuple(dict, str or unicode)
     """
     config, config_path = configuration
@@ -103,8 +102,8 @@ def test_multiplex_fq_files_missing_sample_sheet_error(configuration):
     Test that multiplexed samples with a missing sample sheet being
     specified causes EXIT_CONFIG_ERROR to be returned.
 
-    :param configuration: configuration and path to configuration file
-    (pytest fixture)
+    :param configuration: configuration and path to configuration \
+    file (pytest fixture)
     :type configuration: tuple(dict, str or unicode)
     """
     config, config_path = configuration
@@ -125,8 +124,8 @@ def test_missing_fq_files(configuration):
     Test that if all samples are non-existent files then
     EXIT_PROCESSING_ERROR is returned.
 
-    :param configuration: configuration and path to configuration file
-    (pytest fixture)
+    :param configuration: configuration and path to configuration \
+    file (pytest fixture)
     :type configuration: tuple(dict, str or unicode
     """
     config, config_path = configuration
@@ -153,8 +152,8 @@ def test_missing_files_error(configuration, file_config):
     features_file, t_rna and codon_pos then
     EXIT_FILE_NOT_FOUND_ERROR is returned.
 
-    :param configuration: configuration and path to configuration file
-    (pytest fixture defined in conftest.py)
+    :param configuration: configuration and path to configuration \
+    file (pytest fixture defined in conftest)
     :type configuration: tuple(dict, str or unicode)
     :param file_config: file name configuration parameter
     :type file_config: str or unicode
@@ -175,8 +174,8 @@ def test_config_error_missing_dir_in(configuration):
     Test that a missing "dir_in" configuration value causes
     EXIT_CONFIG_ERROR to be returned.
 
-    :param configuration: configuration and path to configuration file
-    (pytest fixture)
+    :param configuration: configuration and path to configuration \
+    file (pytest fixture defined in conftest)
     :type configuration: tuple(dict, str or unicode)
     """
     config, config_path = configuration

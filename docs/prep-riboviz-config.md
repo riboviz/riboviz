@@ -1,12 +1,12 @@
 # Configuring the RiboViz workflow
 
-This page describes the inputs that `prep_riboviz.py` requires and how it is configured.
+This page describes the inputs that `riboviz.tools.prep_riboviz` requires and how it is configured.
 
 ---
 
 ## Input files
 
-`prep_riboviz.py` requires the following inputs (file formats are in brackets).
+`prep_riboviz` requires the following inputs (file formats are in brackets).
 
 ### Configuration
 
@@ -37,7 +37,7 @@ For processing multiplexed FASTQ files, a sample sheet (tab-separated values wit
 
 ## Configuration parameters
 
-`prep_riboviz.py` supports the following configuration parameters. All directory and file paths can be relative or absolute. If relative then they are relative to the directory `prep_riboviz.py` is invoked from.
+`prep_riboviz` supports the following configuration parameters. All directory and file paths can be relative or absolute. If relative then they are relative to the directory `prep_riboviz` is invoked from.
 
 | Parameter | Description |
 | --------- | ----------- |
@@ -108,7 +108,7 @@ Example `umi_regexp` are:
 
 If `dedup_umis` is `TRUE` but `extract_umis` is `FALSE` then a warning will be displayed, but processing will continue.
 
-If both `fq_files` and `multiplex_fq_files` parameters are provided then `prep_riboviz.py` will exit. Only a group of non-multiplexed files or a single multiplexed file can be provided.
+If both `fq_files` and `multiplex_fq_files` parameters are provided then `prep_riboviz` will exit. Only a group of non-multiplexed files or a single multiplexed file can be provided.
 
 If `fq_files` are provided then `umi_regexp` should extract only UMIs (i.e. it should contain `<umi>` elements only).
 

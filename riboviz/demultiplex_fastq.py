@@ -10,8 +10,9 @@ another delimiter was used then that can be specified.
 Known issue:
 
 If the number of mismatches is less than the Hamming distance between
-the barcodes (`TagReads` within the sample sheet) then a read will be
-assigned to the first barcode that matches even if this is not the closest barcode in terms of Hamming distance
+the barcodes ('TagReads' within the sample sheet) then a read will be
+assigned to the first barcode that matches even if this is not the
+closest barcode in terms of Hamming distance.
 
 For example, imagine we had a barcode in a read, AGA, and our barcodes
 in our samplesheet are AAA, CCC, GGG, TTT. The Hamming distances
@@ -65,7 +66,7 @@ def assign_sample(fastq_record1,
 
     :param fastq_record1: fastq record
     :type fastq_record1: list(str or unicode)
-    :param fastq_record2: fastq record for paired read (or None if
+    :param fastq_record2: fastq record for paired read (or None if \
     none)
     :type fastq_record2: list(str or unicode)
     :param barcode: Barcode to match fastq record against
@@ -74,9 +75,9 @@ def assign_sample(fastq_record1,
     :type read1_split_fh: io.IOBase
     :param read2_split_fh: Read 2 output file handle (None if none)
     :type read2_split_fh: io.IOBase
-    :param is_paired_end: Are paired reads being used? (if True then
-    fastq_record2 is assumed to have a fastq record and read2_split_fh
-    is assumed to have an output file handle)
+    :param is_paired_end: Are paired reads being used? (if True then \
+    fastq_record2 is assumed to have a fastq record and \
+    read2_split_fh is assumed to have an output file handle)
     :type is_paired_end: bool
     :param mismatches: Number of mismatches permitted in barcode
     :type mismatches: int
@@ -117,19 +118,19 @@ def assign_samples(fastq_record1,
     :type fastq_record2: list(str or unicode)
     :param barcodes: Barcodes to match fastq record against
     :type barcodes: list(str or unicode)
-    :param read1_split_fhs: Read 1 output file handles (assumed to be
-    of the same length as barcodes)
+    :param read1_split_fhs: Read 1 output file handles (assumed to \
+    be of the same length as barcodes)
     :type read1_split_fhs: list(io.IOBase)
     :param read2_split_fhs: Read 2 output file handles (None if none)
     :type read2_split_fhs: list(io.IOBase)
-    :param is_paired_end: Are paired reads being used? (if True then
-    fastq_record2 is assumed to have a fastq record and
-    read2_split_fhs is assumed to have output file handles and be of
-    the same length as read1_split_fhs)
+    :param is_paired_end: Are paired reads being used? (if True \
+    then fastq_record2 is assumed to have a fastq record and \
+    read2_split_fhs is assumed to have output file handles and be \
+    of the same length as read1_split_fhs)
     :type is_paired_end: bool
     :param num_samples: Number of samples
     :type num_samples: int
-    :param num_reads: Number of reads matching barcodes for each
+    :param num_reads: Number of reads matching barcodes for each \
     sample
     :type num_reads: list(int)
     :param mismatches: Number of mismatches permitted in barcode
@@ -167,15 +168,15 @@ def demultiplex(sample_sheet_file,
     """
     Demultiplex reads from fastq[.gz] by inline barcodes.
 
-    :param sample_sheet_file: Sample sheet filename, tab-delimited
+    :param sample_sheet_file: Sample sheet filename, tab-delimited \
     text format with SampleID and TagRead columns
     :type sample_sheet_file: str or unicode
     :param read1_file: Read 1 filename (fastq[.gz] format)
     :type read1_file: str or unicode
-    :param read2_file: Read 2 pair filename (fastq[.gz] format,
+    :param read2_file: Read 2 pair filename (fastq[.gz] format, \
     must be the same as read1_file format)
     :type read2_file: str or unicode
-    :param mismatches: Number of mismatches permitted in barcode
+    :param mismatches: Number of mismatches permitted in barcode \
     :type mismatches: int
     :param out_dir: Output directory
     :type out_dir: str or unicode

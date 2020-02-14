@@ -164,20 +164,12 @@ To request that a branch be merged into the `develop` branch create a new pull r
 
 ## Compare files for equality
 
-`riboviz/tools/compare_files.py` is a script that can compare the files output by any stage of the workflow, `riboviz/tools/prep_riboviz.py`.
+`riboviz.tools.compare_files` is a script that can compare the files output by any stage of the workflow, `riboviz.tools.prep_riboviz`.
 
 It can be run as follows:
 
-* Either:
-
 ```console
 $ python -m riboviz.tools.compare_files <FILE1> <FILE2>
-```
-
-* Or:
-
-```console
-$ PYTHONPATH=. python riboviz/tools/compare_files.py <FILE1> <FILE2>
 ```
 
 If the files are equivalent an exit code of 0 is returned. If the files are not equivalent an error message is displayed and an exit code of 1 is returned.
@@ -185,11 +177,11 @@ If the files are equivalent an exit code of 0 is returned. If the files are not 
 For example:
 
 ```console
-$ PYTHONPATH=. python riboviz/tools/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WT3AT.h5
+$ python -m riboviz.tools.compare_files $DIR1/output/WT3AT.h5 $DIR2/output/WT3AT.h5
 $ echo $?
 0
 
-$ PYTHONPATH=. python riboviz/tools/compare_files.py $DIR1/output/WT3AT.h5 $DIR2/output/WTnone.h5
+$ python -m riboviz.tools.compare_files $DIR1/output/WT3AT.h5 $DIR2/output/WTnone.h5
 Non-zero return code (1) from h5diff -q .../output/WT3AT.h5 .../output/WTnone.h5
 $ echo $?
 1
@@ -229,7 +221,7 @@ The following files can be compared:
 
 ## Run vignette regression test suite
 
-The vignette regression test suite optionally runs `prep_riboviz.py` on the vignette data, in `vignette/`, then compares the results, in `vignette/`, to a directory of pre-calculated results.
+The vignette regression test suite optionally runs `prep_riboviz` on the vignette data, in `vignette/`, then compares the results, in `vignette/`, to a directory of pre-calculated results.
 
 The tests can be run using pytest:
 
@@ -243,10 +235,10 @@ $ pytest riboviz/test/regression/test_vignette.py \
 where:
 
 * `--expected=<DIRECTORY>`: directory with expected vignette files. This is assumed to have `index/` `tmp/` and `output/` directories.
-* `--skip-workflow`: request that the `prep_riboviz.py` workflow **not** be run, instead use existing data files in `vignette/` for testing.
+* `--skip-workflow`: request that the `prep_riboviz` workflow **not** be run, instead use existing data files in `vignette/` for testing.
 * `--check-index-tmp`: request that the index and temporary files be checked also (the default is that only the output files are checked)
 
-For each file output by the vignette, the files are compared using the same comparisons as for `compare_files.py` above.
+For each file output by the vignette, the files are compared using the same comparisons as for `compare_files` above.
 
 If `--check-index-tmp` is not provided then tests for index and temporary files will be skipped. This will appear as follows:
 
@@ -303,7 +295,7 @@ $ pytest --cov-config=.coveragerc --cov-report term-missing \
 
 ## Logging
 
-`prep_riboviz.py` logging is handled via Python's `logging` module. The configuration file is in `riboviz/logging.yaml`.
+`prep_riboviz` logging is handled via Python's `logging` module. The configuration file is in `riboviz/logging.yaml`.
 
 A custom configuration file can be provided by defining a `RIBOVIZ_LOG_CONFIG` environment variable, for example:
 
@@ -317,7 +309,7 @@ $ RIBOVIZ_LOG_CONFIG=custom_logging.yaml
 
 For Python code:
 
-Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible. For example, to run these on `validation.py`:
+Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible. For example, to run these on `riboviz/validation.py`:
 
 ```console
 $ pylint riboviz/validation.py

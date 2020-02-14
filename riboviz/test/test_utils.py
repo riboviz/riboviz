@@ -40,8 +40,8 @@ def test_value_in_dict(value, allow_false_empty):
 
     :param value: value for key
     :type value: -
-    :param allow_false_empty: Value for allow_false_empty parameter of
-    value_in_dict
+    :param allow_false_empty: Value for allow_false_empty parameter \
+    of value_in_dict
     :type allow_false_empty: bool
     """
     values = {"A": 1, "B": value, "C": 3}
@@ -62,8 +62,8 @@ def test_value_in_dict_none(allow_false_empty):
     Test value_in_dict returns False if a key has value None
     regardless of the value of allow_false_empty.
 
-    :param allow_false_empty: Value for allow_false_empty parameter of
-    value_in_dict
+    :param allow_false_empty: Value for allow_false_empty parameter \
+    of value_in_dict
     :type allow_false_empty: bool
     """
     values = {"A": 1, "B": None, "C": 3}
@@ -79,8 +79,8 @@ def test_value_in_dict_allow_false_empty(value, allow_false_empty):
 
     :param value: value for key
     :type value: -
-    :param allow_false_empty: Value for allow_false_empty parameter of
-    value_in_dict
+    :param allow_false_empty: Value for allow_false_empty parameter \
+    of value_in_dict
     :type allow_false_empty: bool
     """
     values = {"A": 1, "B": value, "C": 3}

@@ -1,5 +1,5 @@
 """
-prep_riboviz.py-related test fixtures.
+riboviz.tools.prep_riboviz-related test fixtures.
 """
 import os
 import shutil
@@ -77,9 +77,9 @@ configuration_module = pytest.fixture(scope='module')(configuration_fixture)
 @pytest.fixture(scope="module")
 def run_prep_riboviz(configuration_module):
     """
-    Fixture to run prep_riboviz.py.
+    Fixture to run riboviz.tools.prep_riboviz.
 
-    :param configuration_module: configuration and path to
+    :param configuration_module: configuration and path to \
     configuration file  (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
     """

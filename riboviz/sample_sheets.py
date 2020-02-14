@@ -34,9 +34,9 @@ def load_sample_sheet(filename, delimiter="\t", comment="#"):
     :type comment: str or unicode
     :return: Sample sheet
     :rtype: pandas.core.frame.DataFrame
-    :raise FileNotFoundError: if filename cannot be found or is not a
-    file
-    :raise AssertionError: if the sample-sheet does not contain
+    :raise FileNotFoundError: if filename cannot be found or is not \
+    a file
+    :raise AssertionError: if the sample-sheet does not contain \
     "SampleID" or "TagRead" columns
     """
     if not os.path.exists(filename) or not os.path.isfile(filename):
@@ -109,9 +109,9 @@ def load_deplexed_sample_sheet(filename, delimiter="\t", comment="#"):
     :type comment: str or unicode
     :return: Sample sheet
     :rtype: pandas.core.frame.DataFrame
-    :raise FileNotFoundError: if filename cannot be found or is not a
-    file
-    :raise AssertionError: if the sample-sheet does not contain
+    :raise FileNotFoundError: if filename cannot be found or is not \
+    a file
+    :raise AssertionError: if the sample-sheet does not contain \
     "SampleID" or "TagRead" columns
     """
     if not os.path.exists(filename) or not os.path.isfile(filename):

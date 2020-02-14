@@ -86,7 +86,7 @@ def input_fq(config_file, input_dir):
     :type config_file: str or unicode
     :param input_dir: Directory
     :type input_dir: str or unicode
-    :return: List of Series with fields SampleName, Program, File,
+    :return: List of Series with fields SampleName, Program, File, \
     NumReads, Description or []
     :rtype: list(pandas.core.frame.Series)
     """
@@ -125,14 +125,14 @@ def cutadapt_fq(tmp_dir, sample=""):
 
     :param tmp_dir: Directory
     :type tmp_dir: str or unicode
-    :param sample: Sample name / subdirectory of tmp_dir, or "" if a
-    multiplexed file was processed
+    :param sample: Sample name / subdirectory of tmp_dir, or "" if \
+    a multiplexed file was processed
     :type sample: str or unicode
     :param fq_file_name: FASTQ file name
     :type fq_file_name: str or unicode
     :param description: Description of this step
     :type description: str or unicode
-    :return: Series with fields SampleName, Program, File, NumReads,
+    :return: Series with fields SampleName, Program, File, NumReads, \
     Description or None
     :rtype: pandas.core.frame.Series
     """
@@ -168,14 +168,14 @@ def umi_tools_deplex_fq(tmp_dir):
 
     :param tmp_dir: Directory
     :type tmp_dir: str or unicode
-    :param sample: Sample name / subdirectory of tmp_dir, or "" if a
-    multiplexed file was processed
+    :param sample: Sample name / subdirectory of tmp_dir, or "" if \
+    a multiplexed file was processed
     :type sample: str or unicode
     :param fq_file_name: FASTQ file name
     :type fq_file_name: str or unicode
     :param description: Description of this step
     :type description: str or unicode
-    :return: List of Series with fields SampleName, Program, File,
+    :return: List of Series with fields SampleName, Program, File, \
     NumReads, Description or []
     :rtype: list(pandas.core.frame.Series)
     """
@@ -249,7 +249,7 @@ def hisat2_fq(tmp_dir, sample, fq_file_name, description):
     :type fq_file_name: str or unicode
     :param description: Description of this step
     :type description: str or unicode
-    :return: Series with fields SampleName, Program, File, NumReads,
+    :return: Series with fields SampleName, Program, File, NumReads, \
     Description or None
     :rtype: pandas.core.frame.Series
     """
@@ -280,7 +280,7 @@ def hisat2_sam(tmp_dir, sample, sam_file_name, description):
     :type sam_file_name: str or unicode
     :param description: Description of this step
     :type description: str or unicode
-    :return: Series with fields SampleName, Program, File, NumReads,
+    :return: Series with fields SampleName, Program, File, NumReads, \
     Description or None
     :rtype: pandas.core.frame.Series
     """
@@ -309,7 +309,7 @@ def trim_5p_mismatch_sam(tmp_dir, sample):
     :type tmp_dir: str or unicode
     :param sample: Sample name / subdirectory of tmp_dir
     :type sample: str or unicode
-    :return: Series with fields SampleName, Program, File, NumReads,
+    :return: Series with fields SampleName, Program, File, NumReads, \
     Description or None
     :rtype: pandas.core.frame.Series
     """
@@ -362,7 +362,7 @@ def umi_tools_dedup_bam(tmp_dir, output_dir, sample):
     :type output_dir: str or unicode
     :param sample: Sample name / subdirectory of tmp_dir
     :type sample: str or unicode
-    :return: Series with fields SampleName, Program, File, NumReads,
+    :return: Series with fields SampleName, Program, File, NumReads, \
     Description or None
     :rtype: pandas.core.frame.Series
     """

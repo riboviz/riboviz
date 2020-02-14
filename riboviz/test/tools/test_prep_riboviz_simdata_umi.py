@@ -21,7 +21,6 @@ from riboviz import params
 from riboviz import umi_tools
 from riboviz import workflow_files
 from riboviz import workflow_r
-from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration_module  # Test fixture
 from riboviz.test.tools import run_prep_riboviz  # Test fixture
 
@@ -40,7 +39,7 @@ def test_adaptor_trimming(configuration_module, sample_id):
     Validate that adaptor trimming, performed by "cutadapt" produces
     the expected results.
 
-    :param configuration_module: configuration and path to
+    :param configuration_module: configuration and path to \
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
     :param sample_id: sample ID
@@ -64,7 +63,7 @@ def test_umi_extract(configuration_module, sample_id):
     Validate that UMI extraction, performed by "umi_tools extract"
     produces the expected results.
 
-    :param configuration_module: configuration and path to
+    :param configuration_module: configuration and path to \
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
     :param sample_id: sample ID
@@ -114,8 +113,8 @@ def check_umi_groups(config, sample_id, num_groups):
         ("Expected group_ids %s but found %s" % (str(expected_group_ids),
                                                  str(group_ids)))
     # Check each representative read does indeed come from a unique
-    # UMI group by parsing the read ID. create_fastq_simdata.py
-    # creates read IDs of form:
+    # UMI group by parsing the read ID.
+    # riboviz.create_fastq_simdata creates read IDs of form:
     # "EWSim-<GROUP>.<MEMBER>-umi<5PRIME>-read<READ>-umi<3PRIME>"
     # where <GROUP> is 1-indexed.
     groups_from_read_ids = [
@@ -135,7 +134,7 @@ def test_umi_group(configuration_module, sample_id):
     Validate the information on UMI groups post-"umi_tools extract",
     by parsing the ".tsv" file output by "umi_tools group".
 
-    :param configuration_module: configuration and path to
+    :param configuration_module: configuration and path to \
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
     :param sample_id: sample ID
@@ -145,7 +144,7 @@ def test_umi_group(configuration_module, sample_id):
     check_umi_groups(config, sample_id, 5)
 
 
-def check_tpms_collated_tsv(config, sample_id, num_columns):
+def check_tpms_collated_tsv(config, sample_id, expected_num_columns):
     """
     Validate the "TPMs_collated.tsv" file produced from running the
     workflow.
@@ -154,14 +153,15 @@ def check_tpms_collated_tsv(config, sample_id, num_columns):
     :type config: dict
     :param sample_id: sample ID
     :type sample_id: str or unicode
-    :param num_columns: Expected number of columns in TSV file
-    :type num_columns: int
+    :param expected_num_columns: Expected number of columns in TSV file
+    :type expected_num_columns: int
     """
     output_dir = config[params.OUTPUT_DIR]
     tpms_tsv = os.path.join(output_dir, workflow_r.TPMS_COLLATED_TSV)
     tpms = pd.read_csv(tpms_tsv, sep="\t", comment="#")
     num_rows, num_columns = tpms.shape
-    assert num_columns == num_columns, "Unexpected number of columns"
+    assert num_columns == expected_num_columns, \
+        "Unexpected number of columns"
     assert num_rows == 68, "Unexpected number of rows"
     columns = list(tpms.columns)
     assert "ORF" in columns, "Missing 'ORF' column"
@@ -184,7 +184,7 @@ def test_tpms_collated_tsv(configuration_module, sample_id):
     Validate the "TPMs_collated.tsv" file produced from running the
     workflow.
 
-    :param configuration_module: configuration and path to
+    :param configuration_module: configuration and path to \
     configuration file (pytest fixture)
     :type configuration_module: tuple(dict, str or unicode)
     :param sample_id: sample ID

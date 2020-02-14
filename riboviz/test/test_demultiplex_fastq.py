@@ -1,5 +1,5 @@
 """
-demultiplex_fastq.py test suite.
+riboviz.demultiplex_fastq test suite.
 """
 from io import StringIO
 from contextlib import ExitStack

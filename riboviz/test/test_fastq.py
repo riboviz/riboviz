@@ -18,7 +18,7 @@ def fastq_file(request):
     """
     Create a temporary FASTQ file to write data to.
 
-    :param request: pytest SubRequest with param member which has
+    :param request: pytest SubRequest with param member which has \
     FASTQ file extension
     :type request: _pytest.fixtures.SubRequest
     :return: path to temporary FASTQ file
@@ -36,7 +36,7 @@ def fastq_gz_file(request):
     """
     Create a temporary FASTQ.GZ file to write data to.
 
-    :param request: pytest SubRequest with param member which has
+    :param request: pytest SubRequest with param member which has \
     FASTQ file extension
     :type request: _pytest.fixtures.SubRequest
     :return: path to temporary FASTQ.GZ file
@@ -87,7 +87,7 @@ def test_strip_fastq_gz(extension):
     """
     Test strip_fastq_gz with GZIP extensions.
 
-    :param extension: (GZIP extension file format,
+    :param extension: (GZIP extension file format, \
     corresponding non-GZIP extension file format)
     :type extension: tuple(str or unicode, str or unicode)
     """
@@ -117,9 +117,9 @@ def get_test_fastq_sequences(read_length, count):
     :type read_length: int
     :param count: Number of sequences
     :type count: int
-    :return: List of sequences, consisting of the first count reads of
-    read_length found by enumerating combinations of
-    riboviz.barcodes_umis.NUCLEOTIDES, with quality scores each
+    :return: List of sequences, consisting of the first count reads \
+    of read_length found by enumerating combinations of \
+    riboviz.barcodes_umis.NUCLEOTIDES, with quality scores each \
     [0,...,read_kength - 1]
     :rtype: list(Bio.SeqRecord.SeqRecord)
     """

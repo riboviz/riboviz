@@ -63,8 +63,8 @@ def configure_logging(config_path=DEFAULT_CONFIG,
 
     :param config_path: YAML logging configuration file
     :type config_path: str or unicode
-    :param env_key: environment variable with location of YAML logging
-    configuration file
+    :param env_key: environment variable with location of YAML \
+    logging configuration file
     :type env_key: str or unicode
     :param level: default logging level if no configuration file
     :type level: int

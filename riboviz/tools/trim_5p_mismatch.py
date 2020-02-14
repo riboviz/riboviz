@@ -5,7 +5,8 @@ specified mismatches from a SAM file.
 
 Usage:
 
-    trim_5p_mismatch.py [-h] -i SAM_FILE_IN -o SAM_FILE_OUT
+    python -m riboviz.tools.trim_5p_mismatch [-h] \
+        -i SAM_FILE_IN -o SAM_FILE_OUT \
         [-m [MAX_MISMATCHES]] [-5 | -k] [-s SUMMARY_FILE]
 
 Arguments:

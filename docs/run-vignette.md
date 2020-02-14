@@ -1,6 +1,6 @@
 # Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file
 
-`prep_riboviz.py` is a Python implementation of the RiboViz analysis workflow. This page describes how you can run a "vignette" of the workflow on a sample data set - *Saccharomyces cerevisiae* reads - to output of HDF5 files and generate summary statistics.
+`riboviz.tools.prep_riboviz` is a Python implementation of the RiboViz analysis workflow. This page describes how you can run a "vignette" of the workflow on a sample data set - *Saccharomyces cerevisiae* reads - to output of HDF5 files and generate summary statistics.
 
 ---
 
@@ -36,7 +36,7 @@ Downsampled ribosome profiling data for *Saccharomyces cerevisiae* (yeast):
 * `vignette/input/SRR1042864_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type + 3-AT.
 * For information on the provenance of these files see [Downsampled ribosome profiling data from Saccharomyces cerevisiae](./data.md#downsampled-ribosome-profiling-data-from-saccharomyces-cerevisiae)
 
-For full information on how to configure `prep_riboviz.py` and its inputs, see [Configuring the RiboViz workflow](./prep-riboviz-config.md).
+For full information on how to configure `prep_riboviz` and its inputs, see [Configuring the RiboViz workflow](./prep-riboviz-config.md).
 
 ---
 
@@ -69,9 +69,9 @@ $ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 
 ## Configure number of processes (optional)
 
-`prep_riboviz.py` can instruct the tools it invokes to use a specific number of processes. By default this is 1.
+`prep_riboviz` can instruct the tools it invokes to use a specific number of processes. By default this is 1.
 
-To configure `prep_riboviz.py` to use additional processes, in `vignette/vignette_config.yaml` change:
+To configure `prep_riboviz` to use additional processes, in `vignette/vignette_config.yaml` change:
 
 ```yaml
 num_processes: 1
@@ -85,37 +85,27 @@ num_processes: 4
 
 ---
 
-## Dry run `prep_riboviz.py`
+## Dry run `prep_riboviz`
 
-`prep_riboviz.py` supports a `--dry-run` command-line parameter which can be used to validate the configuration. 
+`prep_riboviz` supports a `--dry-run` command-line parameter which can be used to validate the configuration. 
 
 **Tip:** we strongly recommend doing a dry run before doing a live run on data you have not processed before.
 
-Run `prep_riboviz.py` with `--dry-run` enabled:
-
-* Either:
+Run `prep_riboviz` with `--dry-run` enabled:
 
 ```console
 $ python -m riboviz.tools.prep_riboviz --dry-run rscripts/ vignette/vignette_config.yaml
 ```
 
-* Or:
-
-```console
-$ PYTHONPATH=. python riboviz/tools/prep_riboviz.py --dry-run rscripts/ \
-    vignette/vignette_config.yaml
-```
-
 where:
 
-* `riboviz/tools/prep_riboviz.py`: path to `prep_riboviz.py`, relative to the RiboViz home directory.
 * `--dry-run`: flag to enable the dry run.
 * `rscripts/`: path to the directory with RiboViz's R scripts, relative to the RiboViz home directory.
 * `vignette/vignette_config.yaml`: path to the vignette configuration file.
 
 ### Troubleshooting: `This script needs to be run under Python 3`
 
-This warning arises if you try and run `prep_riboviz.py` under Python 2. You can only run `prep_riboviz.py` with Python 3.
+This warning arises if you try and run `prep_riboviz` under Python 2. You can only run `prep_riboviz` with Python 3.
 
 ### Troubleshooting: `File not found: vignette/input/example_missing_file.fastq.gz`
 
@@ -123,24 +113,15 @@ This warning is expected and can be ignored. The vignette configuration file int
 
 ---
 
-## Run `prep_riboviz.py`
+## Run `prep_riboviz`
 
-Run `prep_riboviz.py`:
-
-* Either:
+Run `prep_riboviz`:
 
 ```console
 $ python -m riboviz.tools.prep_riboviz rscripts/ vignette/vignette_config.yaml
 ```
 
-* Or:
-
-```console
-$ PYTHONPATH=. python riboviz/tools/prep_riboviz.py rscripts/ \
-    vignette/vignette_config.yaml
-```
-
-For full information on how to run `prep_riboviz.py` and the options available, see [Running the RiboViz workflow](./prep-riboviz-running.md)
+For full information on how to run `prep_riboviz` and the options available, see [Running the RiboViz workflow](./prep-riboviz-running.md)
 
 ---
 
@@ -237,7 +218,7 @@ read_counts.tsv
 TPMs_collated.tsv
 ```
 
-For full information on what `prep_riboviz.py` does and the files it outputs, see [What the RiboViz workflow does](./prep-riboviz-operation.md).
+For full information on what `prep_riboviz` does and the files it outputs, see [What the RiboViz workflow does](./prep-riboviz-operation.md).
 
 ---
 
