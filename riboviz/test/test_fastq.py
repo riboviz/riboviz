@@ -14,30 +14,37 @@ from riboviz import fastq
 from riboviz.barcodes_umis import NUCLEOTIDES
 
 
-@pytest.fixture(scope="function")
-def fastq_file():
+@pytest.fixture(scope="function", params=fastq.FASTQ_EXTS)
+def fastq_file(request):
     """
     Create a temporary FASTQ file to write data to.
 
+    :param request: pytest SubRequest with param member which has
+    FASTQ file extension
+    :type request: _pytest.fixtures.SubRequest
     :return: path to temporary FASTQ file
     :rtype: str or unicode
     """
-    _, fastq_file = tempfile.mkstemp(prefix="tmp", suffix=fastq.FASTQ_EXT)
+    _, fastq_file = tempfile.mkstemp(prefix="tmp",
+                                     suffix="." + request.param)
     yield fastq_file
     if os.path.exists(fastq_file):
         os.remove(fastq_file)
 
 
-@pytest.fixture(scope="function")
-def fastq_gz_file():
+@pytest.fixture(scope="function", params=fastq.FASTQ_GZ_EXTS)
+def fastq_gz_file(request):
     """
     Create a temporary FASTQ.GZ file to write data to.
 
+    :param request: pytest SubRequest with param member which has
+    FASTQ file extension
+    :type request: _pytest.fixtures.SubRequest
     :return: path to temporary FASTQ.GZ file
     :rtype: str or unicode
     """
     _, fastq_file = tempfile.mkstemp(prefix="tmp",
-                                     suffix="." + fastq.FASTQ_GZ_EXT)
+                                     suffix="." + request.param)
     yield fastq_file
     if os.path.exists(fastq_file):
         os.remove(fastq_file)
