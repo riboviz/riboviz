@@ -9,6 +9,7 @@ conda install -y pytest
 conda install -y pytest-cov
 conda install -y pylint
 conda install -y pycodestyle
+pip install sphinx
 conda install -y gitpython
 conda install -y pandas
 conda install -y -c bioconda cutadapt
