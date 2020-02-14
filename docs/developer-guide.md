@@ -67,7 +67,7 @@ Install:
 $ conda install -y pytest-cov
 ```
 
-# Sphinx
+### Sphinx
 
 Web site:
 
