@@ -13,7 +13,6 @@
 import argparse, gffutils
 from Bio import SeqIO
 from Bio.Seq import Seq
-from Bio.Alphabet import IUPAC
 # from warnings import warn
 from riboviz import provenance
 
@@ -46,7 +45,7 @@ if __name__=="__main__" :
            CDS_seq += ( "N" * ( 3 - CDS_len_remainder) )
         
         # translate CDS
-        CDS_trans = Seq( CDS_seq, IUPAC.ambiguous_dna ).translate()
+        CDS_trans = Seq( CDS_seq ).translate()
         
         if ( CDS_trans[0] != "M" ) :
             print(( CDS_coord.seqid + " doesn't start with ATG" ))

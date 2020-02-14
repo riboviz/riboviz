@@ -68,7 +68,6 @@ import pandas as pd
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
 from riboviz import barcodes_umis
 from riboviz import demultiplex_fastq
 from riboviz import fastq
@@ -119,7 +118,7 @@ def make_fastq_record(name, reads, scores=None, qualities=QUALITY_MEDIUM):
     """
     if scores is None:
         scores = simulate_quality(len(reads), qualities=qualities)
-    record = SeqRecord(Seq(reads, IUPAC.ambiguous_dna),
+    record = SeqRecord(Seq(reads),
                        id=name,
                        name=name,
                        description=name)

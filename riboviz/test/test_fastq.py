@@ -7,7 +7,6 @@ import os
 import tempfile
 import pytest
 from Bio import SeqIO
-from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from riboviz import fastq
@@ -129,7 +128,7 @@ def get_test_fastq_sequences(read_length, count):
              for i in itertools.product(NUCLEOTIDES,
                                         repeat=read_length)][0:count]
     # Create a list of SeqRecords
-    sequences = [SeqRecord(Seq(read, IUPAC.ambiguous_dna),
+    sequences = [SeqRecord(Seq(read),
                            id="read{}".format(i),
                            name="read{}".format(i),
                            description="read{}".format(i))
