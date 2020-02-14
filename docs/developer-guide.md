@@ -578,7 +578,7 @@ When `.dot` files are updated, the corresponding `.svg` images should be updated
 Create Sphinx pages to reference source code:
 
 ```console
-$ sphinx-apidoc -o code-docs/ riboviz
+$ sphinx-apidoc -f -o code-docs/ riboviz
 ```
 
 Create HTML documentation
