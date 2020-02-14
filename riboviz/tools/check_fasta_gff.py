@@ -1,6 +1,6 @@
 #! python
 """
-Check fasta and gff files are compatible with RiboViz/
+Check fasta and gff files are compatible with RiboViz.
 
 Usage:
 
