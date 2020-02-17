@@ -169,20 +169,26 @@ To request that a branch be merged into the `develop` branch create a new pull r
 It can be run as follows:
 
 ```console
-$ python -m riboviz.tools.compare_files <FILE1> <FILE2>
+$ python -m riboviz.tools.compare_files -i INPUT_FILE -o OUTPUT_FILE [-n]
 ```
+
+where:
+
+* `-i INPUT_FILE`, `--input-file OINPUT_FILE'`: Input file
+* `-o OUTPUT_FILE`, `--output-file OUTPUT_FILE`: Output file
+* `-n`, `--names`: Compare file names
 
 If the files are equivalent an exit code of 0 is returned. If the files are not equivalent an error message is displayed and an exit code of 1 is returned.
 
 For example:
 
 ```console
-$ python -m riboviz.tools.compare_files $DIR1/output/WT3AT.h5 $DIR2/output/WT3AT.h5
+$ python -m riboviz.tools.compare_files -i $DIR1/output/WT3AT.h5 -o $DIR2/output/WT3AT.h5
 $ echo $?
 0
 
-$ python -m riboviz.tools.compare_files $DIR1/output/WT3AT.h5 $DIR2/output/WTnone.h5
-Non-zero return code (1) from h5diff -q .../output/WT3AT.h5 .../output/WTnone.h5
+$ python -m riboviz.tools.compare_files -i $DIR1/output/WT3AT.h5 -o $DIR2/output/WTnone.h5
+AssertionError: Non-zero return code (1) from h5diff -q $DIR1/output/WT3AT/WT3AT.h5 $DIR2/output/WTnone/WTnone.h5
 $ echo $?
 1
 ```
@@ -309,12 +315,12 @@ $ RIBOVIZ_LOG_CONFIG=custom_logging.yaml
 
 For Python code:
 
-Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible. For example, to run these on `riboviz/validation.py`:
+Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible. For example, to run these on `riboviz/compare_files.py`:
 
 ```console
-$ pylint riboviz/validation.py
-$ pycodestyle riboviz/validation.py
-$ 2to3 riboviz/validation.py
+$ pylint riboviz/compare_files.py
+$ pycodestyle riboviz/compare_files.py
+$ 2to3 riboviz/compare_files.py
 ```
 
 For R code:

@@ -8,7 +8,6 @@ import pytest
 import yaml
 import riboviz
 import riboviz.process_utils
-import riboviz.validation
 import riboviz.tools
 from riboviz import params
 from riboviz.tools import prep_riboviz
