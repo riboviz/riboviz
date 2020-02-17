@@ -11,7 +11,7 @@ from riboviz import sam_bam
 from riboviz import utils
 
 
-def compare(file1, file2, compare_names=True):
+def compare_files(file1, file2, compare_names=True):
     """
     Compare two files for equality. The following functions are used
     to compare each type of file:

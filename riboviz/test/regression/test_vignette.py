@@ -21,8 +21,9 @@ where:
    workflow not be run, instead use existing data files in 'vignette/'
    for testing.
 
-See riboviz.validation.compare and riboviz.validation functions for
-information on the nature of the comparisons for each type of file.
+See riboviz.compare_files.compare and riboviz.compare_files functions
+for information on the nature of the comparisons for each type of
+file.
 """
 import os
 import shutil
@@ -35,7 +36,7 @@ from riboviz import hisat2
 from riboviz import sam_bam
 from riboviz import test
 from riboviz import trim_5p_mismatch
-from riboviz import validation
+from riboviz import compare_files
 from riboviz import workflow_files
 from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
@@ -99,7 +100,7 @@ def test_index(expected, prefix, index):
     :type index: int
     """
     file_name = hisat2.HT2_FORMAT.format(prefix, index)
-    validation.compare(
+    compare_files.compare_files(
         os.path.join(expected, INDEX_DIR, file_name),
         os.path.join(test.VIGNETTE_INDEX_DIR, file_name))
 
@@ -123,7 +124,7 @@ def test_sample_tmp_fq(expected, sample, file_name):
     :param file_name: file name e.g. nonrRNA.fq
     :type file_name: str or unicode
     """
-    validation.compare(
+    compare_files.compare_files(
         os.path.join(expected, TMP_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_TMP_DIR, sample, file_name))
 
@@ -163,7 +164,7 @@ def test_sample_tmp_sam(expected, scratch_directory, sample, file_name):
     actual_copy_file = os.path.join(actual_copy_dir, file_name)
     pysam.sort("-o", expected_copy_file, expected_file)
     pysam.sort("-o", actual_copy_file, actual_file)
-    validation.compare(expected_copy_file, actual_copy_file)
+    compare_files.compare_files(expected_copy_file, actual_copy_file)
 
 
 @pytest.mark.usefixtures("skip_index_tmp")
@@ -183,7 +184,7 @@ def test_sample_tmp_tsv(expected, sample, file_name):
     :param file_name: file name e.g. trim_5p_mismatch.tsv
     :type file_name: str or unicode
     """
-    validation.compare(
+    compare_files.compare_files(
         os.path.join(expected, TMP_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_TMP_DIR, sample, file_name))
 
@@ -202,7 +203,7 @@ def test_sample_output_bai(expected, sample):
     """
     file_name = sam_bam.BAI_FORMAT.format(
         sam_bam.BAM_FORMAT.format(sample))
-    validation.compare(
+    compare_files.compare_files(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
 
@@ -221,7 +222,7 @@ def test_sample_output_bam(expected, sample):
     :type sample: str or unicode
     """
     file_name = sam_bam.BAM_FORMAT.format(sample)
-    validation.compare(
+    compare_files.compare_files(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
 
@@ -243,7 +244,7 @@ def test_sample_output_bedgraph(expected, sample, file_name):
     :param content: content e.g. minus
     :type content: str or unicode
     """
-    validation.compare(
+    compare_files.compare_files(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
 
@@ -261,7 +262,7 @@ def test_sample_output_h5(expected, sample):
     :type sample: str or unicode
     """
     file_name = h5.H5_FORMAT.format(sample)
-    validation.compare(
+    compare_files.compare_files(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
 
@@ -288,7 +289,7 @@ def test_sample_output_tsv(expected, sample, file_name):
     :param file_name: content e.g. 3nt_periodicity.tsv
     :type file_name: str or unicode
     """
-    validation.compare(
+    compare_files.compare_files(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
 
@@ -316,7 +317,7 @@ def test_sample_output_pdf(expected, sample, file_name):
     :param file_name: content e.g. 3nt_periodicity.pdf
     :type file_name: str or unicode
     """
-    validation.compare(
+    compare_files.compare_files(
         os.path.join(expected, OUTPUT_DIR, sample, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, sample, file_name))
 
@@ -335,6 +336,6 @@ def test_output_tsv(expected, file_name):
     :param file_name: content e.g. TPMs_collated.tsv
     :type file_name: str or unicode
     """
-    validation.compare(
+    compare_files.compare_files(
         os.path.join(expected, OUTPUT_DIR, file_name),
         os.path.join(test.VIGNETTE_OUTPUT_DIR, file_name))
