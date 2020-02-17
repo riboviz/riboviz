@@ -8,11 +8,13 @@
 
 To run:
 
-```console
-$ python -m riboviz.tools.create_fastq_simdata <DIRECTORY>
+```python
+$ python -m riboviz.tools.create_fastq_simdata [-h] -o OUTPUT_DIR
 ```
 
-where `<DIRECTORY>` is the directory into which the simulated files are to be written.
+where:
+
+* `-o OUTPUT_DIR`, `--output-dir OUTPUT_DIR`: Output directory
 
 ---
 
