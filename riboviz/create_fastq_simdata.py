@@ -49,7 +49,7 @@ The following files are created:
 * 'deplex/Tag0|1|2.fastq': FASTQ files each with 27 reads
   representing the results expected when demultiplexing
   'multiplex.fastq' using 'riboviz.tools.demultiplex_fastq' and
-  'multiplex_barcodes.tsv'.
+  'multiplex_barcodes.tsv' with 2 allowed mismatches.
 * 'deplex/Unassigned.fastq': FASTQ files with 9 reads representing the
   unassigned reads (those with barcode 'TTT') expected when
   demultiplexing 'multiplex.fastq' using
