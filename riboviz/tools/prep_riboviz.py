@@ -21,9 +21,9 @@ Process ribosome profiling data:
 * Builds hisat2 indices if requested ("build_indices: TRUE") using
   "hisat2 build" and saves these into an index directory
   ("dir_index").
-* Processes each sample fastq[.gz] file (sample IDs and files are
-  listed in "fq_files" and are assumed to be relative to "dir_in") in
-  turn:
+* Processes each sample fastq[.gz] file (sample IDs and files are \
+  listed in "fq_files" and are assumed to be relative to "dir_in") \
+  in turn:
     - Cuts out sequencing library adapters ("adapters", default
       "CTGTAGGCACC") using "cutadapt".
     - Extracts UMIs using "umi_tools extract", if requested
@@ -71,7 +71,7 @@ Process multiplexed ribosome profiling data:
   regular expression pattern ("umi_regexp").
 * Demultiplexes fastq[.gz] file with reference to a sample sheet
   ("sample_sheet"), using "riboviz.tools.demultiplex_fastq".
-* Processes each demultiplexed fastq[.gz], which has one or more
+* Processes each demultiplexed fastq[.gz], which has one or more \
   reads, in turn:
     - Removes rRNA or other contaminating reads by alignment to rRNA
       index files ("rrna_index_prefix") using "hisat2".
