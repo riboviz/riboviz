@@ -224,6 +224,9 @@ def demultiplex(sample_sheet_file,
         except Exception:
             raise IOError(
                 "Error: output directory {} cannot be created".format(out_dir))
+    elif os.path.isfile(out_dir):
+        raise IOError(
+            "Error: output directory {} cannot be created".format(out_dir))
 
     num_reads_file = os.path.join(out_dir, NUM_READS_FILE)
     if is_paired_end:
