@@ -1,14 +1,19 @@
 #! python
 """
-Creates simple simulated FASTQ files to test UMI/deduplication,
-adaptor trimming, and demultiplexing.
+Creates simulated FASTQ files to test UMI/deduplication, adaptor
+trimming, and demultiplexing.
 
 Usage:
 
-    python -m riboviz.tools.create_fastq_simdata DIRECTORY
+    python -m riboviz.tools.create_fastq_simdata [-h] \
+        -o OUTPUT_DIR
 
-where 'DIRECTORY' is the directory into	which the simulated files are
-to be written. The following files are created:
+Arguments:
+
+* '-h', '--help': show this help message and exit
+* '-o OUTPUT_DIR', '--output-dir OUTPUT_DIR': Output directory
+
+The following files are created:
 
 * 'umi5_umi3_umi_adaptor.fastq': FASTQ file with 9 reads,
   each with a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a
@@ -65,9 +70,36 @@ to be written. The following files are created:
   'multiplex.fastq' using 'riboviz.tools.demultiplex_fastq'
   and 'multiplex_barcodes.tsv'.
 """
-import sys
+import argparse
 from riboviz import create_fastq_simdata
 
 
+def parse_command_line_options():
+    """
+    Parse command-line options.
+
+    :returns: command-line options
+    :rtype: argparse.Namespace
+    """
+    parser = argparse.ArgumentParser(
+        description="Create simulated FASTQ files to test UMI/deduplication, adaptor trimming, and demultiplexing")
+    parser.add_argument("-o",
+                        "--output-dir",
+                        dest="output_dir",
+                        required=True,
+                        help="Output directory")
+    options = parser.parse_args()
+    return options
+
+
+def invoke_create_fastq_simdata():
+    """
+    Parse command-line options then invoke "create_fastq_simdata".
+    """
+    options = parse_command_line_options()
+    output_dir = options.output_dir
+    create_fastq_simdata.create_fastq_simdata(output_dir)
+
+
 if __name__ == "__main__":
-    create_fastq_simdata.create_fastq_simdata(sys.argv[1])
+    invoke_create_fastq_simdata()
