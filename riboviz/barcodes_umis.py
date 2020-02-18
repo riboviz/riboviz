@@ -26,10 +26,10 @@ def hamming_distance(str1, str2):
     return sum(1 for (a, b) in zip(str1, str2) if a != b)
 
 
-def generate_barcode_pairs(filename, length=1, delimiter="\t"):
+def create_barcode_pairs(filename, length=1, delimiter="\t"):
     """
-    Generate barcode pairs and write each pair plus the Hamming
-    distance between then to a file of tab-separated values.
+    Create barcode pairs and write each pair plus the Hamming distance
+    between then to a file of tab-separated values.
 
     :param filename: Filename
     :type filename: str or unicode
