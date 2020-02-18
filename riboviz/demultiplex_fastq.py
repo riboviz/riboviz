@@ -173,8 +173,9 @@ def demultiplex(sample_sheet_file,
                 out_dir=OUTPUT_DIR,
                 delimiter=barcodes_umis.BARCODE_DELIMITER):
     """
-    Demultiplex reads witin a FASTQ file using inline
-    barcodes. GZIPped FASTQ files can be handled too.
+    Demultiplex FASTQ files using UMI-tools-compliant barcodes present
+    within the FASTQ headers and a sample sheet file. GZIPped FASTQ
+    files can be handled too.
 
     The sample sheet is assumed to have a header with column names
     ``SampleID`` and ``TagRead``.

@@ -3,20 +3,21 @@
 Create barcode pairs and write each pair plus the Hamming distance
 between then to a file of tab-separated values.
 
-Usage:
+Usage::
 
-    python -m riboviz.tools.create_barcode_pairs [-h] \
+    python -m riboviz.tools.create_barcode_pairs [-h]
         -o OUTPUT_FILE -l LENGTH
 
-Arguments:
+    -h, --help            show this help message and exit
+    -o OUTPUT_FILE, --output-file OUTPUT_FILE
+                          Output file
+    -l LENGTH, --length LENGTH
+                          Barcode length
 
-* '-h', '--help': show this help message and exit
-* '-o OUTPUT_FILE', '--output-file OUTPUT_FILE': Output file
-* '-l LENGTH', '--length LENGTH': Barcode length
+See :py:func:`riboviz.barcodes_umis.create_barcode_pairs`.
 """
 import argparse
 from riboviz import barcodes_umis
-from riboviz import provenance
 
 
 def parse_command_line_options():
@@ -45,9 +46,9 @@ def parse_command_line_options():
 
 def invoke_create_barcode_pairs():
     """
-    Parse command-line options then invoke "create_barcode_pairs".
+    Parse command-line options then invoke
+    :py:func:`riboviz.barcodes_umis.create_barcode_pairs`.
     """
-    print(provenance.write_provenance_to_str(__file__))
     options = parse_command_line_options()
     output_file = options.output_file
     length = options.length
