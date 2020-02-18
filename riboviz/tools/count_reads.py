@@ -91,7 +91,7 @@ def invoke_count_reads():
     """
     Parse command-line options then invoke "count_reads".
     """
-    print(provenance.get_provenance_str(__file__))
+    print(provenance.write_provenance_to_str(__file__))
     options = parse_command_line_options()
     config_file = options.config_file
     input_dir = options.input_dir
