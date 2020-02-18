@@ -1,4 +1,3 @@
-#! python
 """
 Remove a single 5' mismatched nt AND filter reads with more than
 specified mismatches from a SAM file.

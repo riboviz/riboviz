@@ -1,16 +1,15 @@
 """
-Barcode and UMI-related utilities.
+Barcode and UMI-related constants and functions.
 """
 import csv
 import itertools
 
-
 NUCLEOTIDES = "ACGT"
-""" Nucleotide letters """
+""" Nucleotide letters. """
 BARCODE_DELIMITER = "_"
-""" Default barcode delmiter in fastq header """
+""" Default barcode delmiter in FASTQ headers. """
 UMI_DELIMITER = "_"
-""" Default UMI delmiter in fastq header """
+""" Default UMI delmiter in FASTQ headers. """
 
 
 def hamming_distance(str1, str2):
@@ -21,44 +20,10 @@ def hamming_distance(str1, str2):
     :type str1: str or unicode
     :param str2: String
     :type str2: str or unicode
-    :return: hamming distance
+    :return: Hamming distance
     :rtype: int
     """
     return sum(1 for (a, b) in zip(str1, str2) if a != b)
-
-
-def barcode_matches(record,
-                    barcode,
-                    mismatches=0,
-                    delimiter=BARCODE_DELIMITER):
-    """
-    Returns True if fastq record header includes barcode, up to a given
-    number of mismatches. The header is assumed to be of form:
-
-        @...<DELIMITER><BARCODE><DELIMITER>...
-
-    If <BARCODE> differs from barcode by greater than mismatches, o
-    there is no <BARCODE> or <BARCODE> has a different length than
-    barcode then False is returned.
-
-    :param record: Record
-    :type record: str or unicode
-    :param barcode: Barcode
-    :type barcode: str or unicode
-    :param mismatches: Number of mismatches
-    :type mismatches: int
-    :param delimiter: Barcode delimiter
-    :type delimiter: str or unicode
-    :returns: True or False
-    :rtype: bool
-    """
-    chunks = record.split(delimiter)
-    if len(chunks) == 1:
-        return False
-    candidate = chunks[1]
-    if len(candidate) != len(barcode):
-        return False
-    return hamming_distance(candidate, barcode) <= mismatches
 
 
 def generate_barcode_pairs(filename, length=1, delimiter="\t"):
@@ -83,3 +48,40 @@ def generate_barcode_pairs(filename, length=1, delimiter="\t"):
         for (a, b) in itertools.product(barcodes, repeat=2):
             distance = hamming_distance(a, b)
             writer.writerow([a, b, distance])
+
+
+def barcode_matches(record,
+                    barcode,
+                    mismatches=0,
+                    delimiter=BARCODE_DELIMITER):
+    """
+    Check if a FASTQ record header includes a barcode, allowing for
+    mismatches.
+
+    The header is assumed to be of form::
+
+        @...<DELIMITER><BARCODE><DELIMITER>...
+
+    If the hamming distance between ``<BARCODE>`` and ``barcode`` by
+    is greater than ``mismatches`` or there is no ``<BARCODE>`` or
+    ``<BARCODE>`` has a different length than ``barcode`` then
+    ``False`` is returned.
+
+    :param record: FASTQ ecord
+    :type record: str or unicode
+    :param barcode: Barcode
+    :type barcode: str or unicode
+    :param mismatches: Number of mismatches
+    :type mismatches: int
+    :param delimiter: Barcode delimiter
+    :type delimiter: str or unicode
+    :returns: ``True`` or ``False``
+    :rtype: bool
+    """
+    chunks = record.split(delimiter)
+    if len(chunks) == 1:
+        return False
+    candidate = chunks[1]
+    if len(candidate) != len(barcode):
+        return False
+    return hamming_distance(candidate, barcode) <= mismatches

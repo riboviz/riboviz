@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 """
-Upgrade YAML configuration file be compatible with current version of
-RiboViz.
+Upgrade previous versions of the workflow configuration to be
+compatible with current version.
 """
 import os
 import os.path
@@ -24,8 +23,8 @@ UPGRADES = {"rRNA_fasta": params.RRNA_FASTA_FILE,
             "t_rna": params.T_RNA_FILE,
             "codon_pos": params.CODON_POSITIONS_FILE}
 """
-Mapping from parameter names pre-commit 8da8071, 18 Dec 2019, to
-current configuration parameter names
+Map from configuration parameter names pre-commit 8da8071, 18 Dec
+2019, to current configuration parameter names.
 """
 
 UPDATES_10_11 = {
@@ -33,11 +32,12 @@ UPDATES_10_11 = {
     params.FEATURES_FILE:  "data/yeast_features.tsv"
 }
 """
-Parameters added between release 1.0.0, 9 Oct 2017, 83027ef and 1.1.0,
-31 Jan 2019, 340b9b5
+Map from configuration parameters to default values for parameters
+added between release 1.0.0, 9 Oct 2017, 83027ef and 1.1.0, 31 Jan
+2019, 340b9b5.
 """
 
-UPDATES_11_DEVELOP = {
+UPDATES_11_CURRENT = {
     params.LOGS_DIR: "vignette/logs",
     params.CMD_FILE: "run_riboviz_vignette.sh",
     params.T_RNA_FILE: "data/yeast_tRNAs.tsv",
@@ -47,25 +47,26 @@ UPDATES_11_DEVELOP = {
     params.COUNT_READS: True
 }
 """
-Parameters added between release 1.1.0, 31 Jan 2019, 340b9b5 to
-pre-commit 8da8071, 18 Dec 2019
+Map from configuration parameters to default values for parameters
+added between release 1.1.0, 31 Jan 2019, 340b9b5 to pre-commit
+8da8071, 18 Dec 2019.
 """
 
 
 def upgrade_config_file(input_file, output_file=None):
     """
-    Upgrade YAML configuration file be compatible with current version
-    of RiboViz.
+    Upgrade a YAML workflow configuration to be compatible with
+    current version.
 
-    If output_file is None then provided then upgraded content is
-    printed to standard out.
+    If ``output_file`` is ``None`` then the upgraded content is
+    printed to standard output.
 
-    :param input_file: Input YAML file
+    :param input_file: Input file
     :type input_file: str or unicode
-    :param output_file: Output YAML file or None
+    :param output_file: Output file or None
     :type output_file: str or unicode
-    :raises AssertionError: if input_file does not exist or is not \
-    a file
+    :raises AssertionError: If ``input_file`` does not exist or is \
+    not a file
     """
     assert os.path.exists(input_file) and os.path.isfile(input_file),\
         "{} does not exist or is not a file".format(input_file)
@@ -87,7 +88,7 @@ def upgrade_config_file(input_file, output_file=None):
 
     # Parameters added between release 1.1.0, 31 Jan 2019, 340b9b5 to
     # pre-commit 8da8071, 18 Dec 2019
-    for (key, value) in list(UPDATES_11_DEVELOP.items()):
+    for (key, value) in list(UPDATES_11_CURRENT.items()):
         if key not in config:
             config[key] = value
 
