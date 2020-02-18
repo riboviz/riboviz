@@ -65,7 +65,6 @@ def write_provenance(file_handle, file_path, prefix="# ", eol="\n"):
     :type eol: str or unicode
     """
     file_handle.write("{}Created by: RiboViz{}".format(prefix, eol))
-    print(type(file_handle))
     file_handle.write("{}Date: {}{}".format(prefix, datetime.today(), eol))
     import __main__
     if hasattr(__main__, "__file__"):
