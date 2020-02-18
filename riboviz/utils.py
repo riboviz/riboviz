@@ -175,7 +175,7 @@ def equal_dataframes(data1, data2, tolerance=0.0001):
                 "Unequal column values: %s" % column
 
 
-def equal_tsv_files(file1, file2, tolerance=0.0001, comment="#"):
+def equal_tsv(file1, file2, tolerance=0.0001, comment="#"):
     """
     Compare two tab-separated (TSV) files for equality. This function
     uses :py:func:`equal_dataframes`.

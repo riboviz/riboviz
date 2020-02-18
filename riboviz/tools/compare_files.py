@@ -5,13 +5,13 @@ Compare two files for equality.
 Usage:
 
     python -m riboviz.tools.compare_files [-h] \
-        -i INPUT_FILE -o OUTPUT_FILE [-n]
+        -1 FILE1 -2 FILE2 [-n]
 
 Arguments:
 
 * '-h', '--help': show this help message and exit
-* '-i INPUT_FILE', '--input-file OINPUT_FILE': Input file
-* '-o OUTPUT_FILE', '--output-file OUTPUT_FILE': Output file
+* '-1 FILE1', '--file1 FILE1': File1
+* '-2 FILE2', '--file2 FILE2': File2
 * '-n', '--names': Compare file names
 """
 import argparse
@@ -27,16 +27,16 @@ def parse_command_line_options():
     """
     parser = argparse.ArgumentParser(
         description="Compare two files for equality")
-    parser.add_argument("-i",
-                        "--input-file",
-                        dest="input_file",
+    parser.add_argument("-1",
+                        "--file1",
+                        dest="file1",
                         required=True,
-                        help="Input file")
-    parser.add_argument("-o",
-                        "--output-file",
-                        dest="output_file",
+                        help="File1")
+    parser.add_argument("-2",
+                        "--file2",
+                        dest="file2",
                         required=True,
-                        help="Output file")
+                        help="File2")
     parser.add_argument("-n",
                         "--names",
                         dest='names',
@@ -51,10 +51,10 @@ def invoke_compare_files():
     Parse command-line options then invoke "compare_files".
     """
     options = parse_command_line_options()
-    input_file = options.input_file
-    output_file = options.output_file
+    file1 = options.file1
+    file2 = options.file2
     names = options.names
-    compare_files.compare_files(input_file, output_file, names)
+    compare_files.compare_files(file1, file2, names)
 
 
 if __name__ == "__main__":

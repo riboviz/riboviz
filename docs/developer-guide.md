@@ -174,8 +174,8 @@ $ python -m riboviz.tools.compare_files -i INPUT_FILE -o OUTPUT_FILE [-n]
 
 where:
 
-* `-i INPUT_FILE`, `--input-file OINPUT_FILE'`: Input file
-* `-o OUTPUT_FILE`, `--output-file OUTPUT_FILE`: Output file
+* `-1 FILE1`, `--file1 FILE1`: File1
+* `-2 FILE2`, `--file2 FILE2`: File2
 * `-n`, `--names`: Compare file names
 
 If the files are equivalent an exit code of 0 is returned. If the files are not equivalent an error message is displayed and an exit code of 1 is returned.

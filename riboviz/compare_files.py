@@ -24,7 +24,7 @@ def compare_files(file1, file2, compare_names=True):
     * ``ht2``: :py:func:`riboviz.utils.equal_file_sizes`
     * ``pdf``: :py:func:`riboviz.utils.equal_file_names`
     * ``sam``: :py:func:`riboviz.sam_bam.equal_sam`
-    * ``tsv``: :py:func:`riboviz.utils.equal_tsv_files`
+    * ``tsv``: :py:func:`riboviz.utils.equal_tsv`
 
     :param file1: File name
     :type file1: str or unicode
@@ -55,6 +55,6 @@ def compare_files(file1, file2, compare_names=True):
     elif ext in [sam_bam.SAM_EXT]:
         sam_bam.equal_sam(file1, file2)
     elif ext in ["tsv"]:
-        utils.equal_tsv_files(file1, file2)
+        utils.equal_tsv(file1, file2)
     elif ext in fastq.FASTQ_ALL_EXTS:
         fastq.equal_fastq(file1, file2)
