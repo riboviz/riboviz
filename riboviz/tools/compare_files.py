@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 """
-Compare two files for equality.
+Compare files of different types for equality.
 
-Usage:
+Usage::
 
-    python -m riboviz.tools.compare_files [-h] \
+    python -m riboviz.tools.compare_files [-h]
         -1 FILE1 -2 FILE2 [-n]
 
-Arguments:
+    -h, --help            show this help message and exit
+    -1 FILE1, --file1 FILE1
+                          File1
+    -2 FILE2, --file2 FILE2
+                          File2
+    -n, --names           Compare file names
 
-* '-h', '--help': show this help message and exit
-* '-1 FILE1', '--file1 FILE1': File1
-* '-2 FILE2', '--file2 FILE2': File2
-* '-n', '--names': Compare file names
+See :py:func:`riboviz.compare_files.compare_files`.
 """
 import argparse
 from riboviz import compare_files
@@ -26,7 +28,7 @@ def parse_command_line_options():
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
-        description="Compare two files for equality")
+        description="Compare files of different types for equality")
     parser.add_argument("-1",
                         "--file1",
                         dest="file1",
@@ -48,7 +50,8 @@ def parse_command_line_options():
 
 def invoke_compare_files():
     """
-    Parse command-line options then invoke "compare_files".
+    Parse command-line options then invoke
+    :py:func:`riboviz.compare_files.compare_files`.
     """
     options = parse_command_line_options()
     file1 = options.file1

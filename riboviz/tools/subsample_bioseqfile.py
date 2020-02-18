@@ -1,77 +1,46 @@
-#! python
+#!/usr/bin/env python
 """
-Subsample an input fastq (or other sequencing) file, to produce a
+Subsample an input FASTQ (or other sequencing) file, to produce a
 smaller file whose reads are randomly sampled from of the input with a
 fixed probability.
 
-Usage:
+Usage::
 
-   python -m riboviz.tools.subsample_bioseqfile [-h] \
-        [-i [FILEIN]] [-o [FILEOUT]] \
-        [-t [FILETYPE]] [-p [PROB]] [-v [VERBOSE]]
+    python -m riboviz.tools.subsample_bioseqfile [-h]
+        -i INPUT_FILE -o OUTPUT_FILE
+        [-t FILE_TYPE] [-p PROB] [-v]
 
-Example:
+    -h, --help            show this help message and exit
+    -i INPUT_FILE, --input INPUT_FILE
+                          SeqIO file input
+    -o OUTPUT_FILE, --output OUTPUT_FILE
+                          SeqIO file output
+    -t FILE_TYPE, --type FILE_TYPE
+                          SeqIO file type (default 'fastq')
+    -p PROB, --probability PROB
+                          proportion to sample (default 0.01)
+    -v, --verbose         print progress statements
 
-    python -m riboviz.tools.subsample_bioseqfile \
-        -i vignette/input/SRR1042855_s1mi.fastq \
-        -p 0.00001 \
-        -o vignette/tmp/SRR1042855_s10.fastq \
+Examples::
+
+    python -m riboviz.tools.subsample_bioseqfile
+        -i vignette/input/SRR1042855_s1mi.fastq
+        -p 0.00001
+        -o vignette/tmp/SRR1042855_s10.fastq
         -t fastq
         -v
 
-    python -m riboviz.tools.subsample_bioseqfile \
-        -i vignette/input/SRR1042855_s1mi.fastq.gz \
-        -p 0.00001 \
-        -o vignette/tmp/SRR1042855_s10.fastq.gz \
+    python -m riboviz.tools.subsample_bioseqfile
+        -i vignette/input/SRR1042855_s1mi.fastq
+        -p 0.00001
+        -o vignette/tmp/SRR1042855_s10.fastq.gz
         -t fastq
+
+See :py:func:`riboviz.subsample_bioseqfile.subsample_bioseqfile`.
 """
 import argparse
-import gzip
-import os
-import os.path
-from random import random
-from Bio import SeqIO
 from riboviz import provenance
-
-
-def subsample_bioseq_file(input_file, prob, output_file, file_type,
-                          verbose=False):
-    """
-    Subsample a biological sequence file using Bio.SeqIO.
-
-    See https://biopython.org/wiki/SeqIO for description of valid
-    filetypes (fastq, etc).
-
-    :param input_file: Input file
-    :type input_file: str or unicode
-    :param prob: Proportion to sample
-    :type prob: float
-    :param output_file: Output file
-    :type output_file: str or unicode
-    :param file_type: SeqIO file type
-    :type file_type: str or unicode
-    :param verbose: Print progress statements?
-    :type verbose: bool
-    """
-    ext = os.path.splitext(input_file)[1]
-    is_gz = ext in [".gz", ".gzip"]
-    if is_gz:
-        open_file = gzip.open
-        open_r = "rt"
-        open_w = "wt"
-    else:
-        open_file = open
-        open_r = "r"
-        open_w = "w"
-    with open_file(input_file, open_r) as in_handle, \
-        open_file(output_file, open_w) as out_handle:
-        for record in SeqIO.parse(in_handle, file_type):
-            if random() < prob:
-                if verbose:
-                    print(record.id)
-                SeqIO.write(record, out_handle, file_type)
-    if verbose:
-        print("subsampling complete")
+from riboviz import subsample_bioseqfile
 
 
 def parse_command_line_options():
@@ -82,7 +51,7 @@ def parse_command_line_options():
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
-        description="Subsample reads from an input fastq file")
+        description="Subsample an input FASTQ (or other sequencing) file, to produce a smaller file whose reads are randomly sampled from of the input with a fixed probability")
     parser.add_argument("-i",
                         "--input",
                         dest="input_file",
@@ -113,9 +82,10 @@ def parse_command_line_options():
     return options
 
 
-def invoke_subsample_bioseq_file():
+def invoke_subsample_bioseqfile():
     """
-    Parse command-line options then invoke "subsample_bioseq_file".
+    Parse command-line options then invoke
+    :py:func:`riboviz.subsample_bioseqfile.subsample_bioseqfile`.
     """
     print(provenance.write_provenance_to_str(__file__))
     options = parse_command_line_options()
@@ -124,12 +94,12 @@ def invoke_subsample_bioseq_file():
     file_type = options.file_type
     prob = options.prob
     verbose = options.verbose
-    subsample_bioseq_file(input_file,
-                          prob,
-                          output_file,
-                          file_type,
-                          verbose)
+    subsample_bioseqfile.subsample_bioseqfile(input_file,
+                                              prob,
+                                              output_file,
+                                              file_type,
+                                              verbose)
 
 
 if __name__ == "__main__":
-    invoke_subsample_bioseq_file()
+    invoke_subsample_bioseqfile()
