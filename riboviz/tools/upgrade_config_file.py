@@ -10,7 +10,7 @@ Usage:
 """
 import argparse
 import sys
-from riboviz import upgrade_config_file
+from riboviz import upgrade_config
 
 
 def invoke_upgrade_config_file():
@@ -34,7 +34,7 @@ def invoke_upgrade_config_file():
     options = parser.parse_args()
     input_file = options.input
     output_file = options.output
-    upgrade_config_file.upgrade_config_file(input_file, output_file)
+    upgrade_config.upgrade_config_file(input_file, output_file)
 
 
 if __name__ == "__main__":

@@ -53,26 +53,14 @@ added between release 1.1.0, 31 Jan 2019, 340b9b5 to pre-commit
 """
 
 
-def upgrade_config_file(input_file, output_file=None):
+def upgrade_config(config):
     """
-    Upgrade a YAML workflow configuration to be compatible with
-    current version.
+    Upgrade workflow configuration to be compatible with current
+    configuration.
 
-    If ``output_file`` is ``None`` then the upgraded content is
-    printed to standard output.
-
-    :param input_file: Input file
-    :type input_file: str or unicode
-    :param output_file: Output file or None
-    :type output_file: str or unicode
-    :raises AssertionError: If ``input_file`` does not exist or is \
-    not a file
+    :param config: Configuration
+    :type config: dict
     """
-    assert os.path.exists(input_file) and os.path.isfile(input_file),\
-        "{} does not exist or is not a file".format(input_file)
-    with open(input_file, 'r') as f:
-        config = yaml.load(f, yaml.SafeLoader)
-
     # Upgrade existing keys
     for (old_key, new_key) in list(UPGRADES.items()):
         if old_key in config:
@@ -107,6 +95,27 @@ def upgrade_config_file(input_file, output_file=None):
     config[params.FEATURES_FILE] = os.path.join(
         features_super_dir, "data", features_dir_file[1])
 
+
+def upgrade_config_file(input_file, output_file=None):
+    """
+    Upgrade YAML workflow configuration file to be compatible with
+    current configuration.
+
+    If ``output_file`` is ``None`` then the upgraded content is
+    printed to standard output.
+
+    :param input_file: Input file
+    :type input_file: str or unicode
+    :param output_file: Output file or None
+    :type output_file: str or unicode
+    :raises AssertionError: If ``input_file`` does not exist or is \
+    not a file
+    """
+    assert os.path.exists(input_file) and os.path.isfile(input_file),\
+        "{} does not exist or is not a file".format(input_file)
+    with open(input_file, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    upgrade_config(config)
     if output_file is not None:
         with open(output_file, 'w') as f:
             yaml.dump(config, f, default_flow_style=False)
