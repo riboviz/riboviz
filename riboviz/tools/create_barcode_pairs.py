@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-Generate barcode pairs and write each pair plus the Hamming distance
+Create barcode pairs and write each pair plus the Hamming distance
 between then to a file of tab-separated values.
 
 Usage:
 
-    python -m riboviz.tools.generate_barcode_pairs [-h] \
+    python -m riboviz.tools.create_barcode_pairs [-h] \
         -o OUTPUT_FILE -l LENGTH
 
 Arguments:
@@ -27,7 +27,7 @@ def parse_command_line_options():
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
-        description="Generate barcode pairs and write each pair plus the Hamming distance between then to a file of tab-separated values")
+        description="Create barcode pairs and write each pair plus the Hamming distance between then to a file of tab-separated values")
     parser.add_argument("-o",
                         "--output-file",
                         dest="output_file",
@@ -43,16 +43,16 @@ def parse_command_line_options():
     return options
 
 
-def invoke_generate_barcode_pairs():
+def invoke_create_barcode_pairs():
     """
-    Parse command-line options then invoke "generate_barcode_pairs".
+    Parse command-line options then invoke "create_barcode_pairs".
     """
     print(provenance.get_provenance_str(__file__))
     options = parse_command_line_options()
     output_file = options.output_file
     length = options.length
-    barcodes_umis.generate_barcode_pairs(output_file, length)
+    barcodes_umis.create_barcode_pairs(output_file, length)
 
 
 if __name__ == "__main__":
-    invoke_generate_barcode_pairs()
+    invoke_create_barcode_pairs()

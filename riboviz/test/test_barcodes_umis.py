@@ -7,8 +7,8 @@ import tempfile
 import pytest
 from riboviz.barcodes_umis import NUCLEOTIDES
 from riboviz.barcodes_umis import barcode_matches
+from riboviz.barcodes_umis import create_barcode_pairs
 from riboviz.barcodes_umis import hamming_distance
-from riboviz.barcodes_umis import generate_barcode_pairs
 
 
 @pytest.fixture(scope="function")
@@ -141,14 +141,14 @@ def test_barcode_matches_two_mismatch():
     assert barcode_matches(record, barcode, 2)
 
 
-def test_generate_barcode_pairs_0(temporary_file):
+def test_create_barcode_pairs_0(temporary_file):
     """
     Test generating barcode pairs of length 0 creates an empty file.
 
     :param temporary_file: Temporary file
     :type temporary_file: str or unicode
     """
-    generate_barcode_pairs(temporary_file, length=0)
+    create_barcode_pairs(temporary_file, length=0)
     with open(temporary_file) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter="\t")
         rows = [row for row in csv_reader]
@@ -156,7 +156,7 @@ def test_generate_barcode_pairs_0(temporary_file):
 
 
 @pytest.mark.parametrize("delimiter", ["\t", ","])
-def test_generate_barcode_pairs_1(temporary_file, delimiter):
+def test_create_barcode_pairs_1(temporary_file, delimiter):
     """
     Test generating barcode pairs of length 1.
 
@@ -165,7 +165,7 @@ def test_generate_barcode_pairs_1(temporary_file, delimiter):
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
-    generate_barcode_pairs(temporary_file, length=1, delimiter=delimiter)
+    create_barcode_pairs(temporary_file, length=1, delimiter=delimiter)
     with open(temporary_file) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=delimiter)
         rows = [row for row in csv_reader]
