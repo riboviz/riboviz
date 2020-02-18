@@ -75,7 +75,7 @@ def load_deplexed_sample_sheet(file_name, delimiter="\t", comment="#"):
     :raise AssertionError: If there is no header with ``SampleID``, \
     ``TagRead`` and ``NumReads`` columns.
     """
-    sample_sheet = load_sample_sheet(file_name, comment, delimiter)
+    sample_sheet = load_sample_sheet(file_name, delimiter, comment)
     assert NUM_READS in sample_sheet.columns,\
         "Missing column {} in {}".format(NUM_READS, file_name)
     return sample_sheet
