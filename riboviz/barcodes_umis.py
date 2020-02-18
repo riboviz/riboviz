@@ -29,7 +29,7 @@ def hamming_distance(str1, str2):
 def create_barcode_pairs(filename, length=1, delimiter="\t"):
     """
     Create barcode pairs and write each pair plus the Hamming distance
-    between then to a file of tab-separated values.
+    between them to a file of tab-separated values.
 
     :param filename: Filename
     :type filename: str or unicode
