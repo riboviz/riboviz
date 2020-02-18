@@ -99,7 +99,7 @@ def invoke_check_fasta_gff():
     """
     Parse command-line options then invoke "check_fasta_gff_files".
     """
-    print(provenance.get_provenance_str(__file__))
+    print(provenance.write_provenance_to_str(__file__))
     options = parse_command_line_options()
     fasta = options.fasta
     gff = options.gff

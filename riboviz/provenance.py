@@ -92,11 +92,11 @@ def write_provenance_header(file_path, provenance_file, prefix="# "):
         write_provenance(f, file_path, prefix)
 
 
-def get_provenance_str(file_path, eol="\n"):
+def write_provenance_to_str(file_path, eol="\n"):
     """
-    Get a provenance header including version information about
-    ``file_path`` obtained using the ``git`` package. See
-    :py:func:`write_provenance`.
+    Write a provenance header to a string including version
+    information about ``file_path`` obtained using the ``git``
+    package. See :py:func:`write_provenance`.
 
     :param file_path: File path
     :type file_path: str or unicode

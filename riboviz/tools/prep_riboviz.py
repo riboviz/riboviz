@@ -663,7 +663,7 @@ def prep_riboviz(r_scripts, config_yaml, is_dry_run=False):
     if sys.version_info.major < 3:
         LOGGER.error("This script needs to be run under Python 3")
         return EXIT_PYTHON_2_ERROR
-    LOGGER.info(provenance.get_provenance_str(__file__, " "))
+    LOGGER.info(provenance.write_provenance_to_str(__file__, " "))
     try:
         run_workflow(r_scripts, config_yaml, is_dry_run)
     except FileNotFoundError as e:

@@ -47,7 +47,7 @@ def invoke_create_barcode_pairs():
     """
     Parse command-line options then invoke "create_barcode_pairs".
     """
-    print(provenance.get_provenance_str(__file__))
+    print(provenance.write_provenance_to_str(__file__))
     options = parse_command_line_options()
     output_file = options.output_file
     length = options.length

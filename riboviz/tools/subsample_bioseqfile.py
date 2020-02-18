@@ -117,7 +117,7 @@ def invoke_subsample_bioseq_file():
     """
     Parse command-line options then invoke "subsample_bioseq_file".
     """
-    print(provenance.get_provenance_str(__file__))
+    print(provenance.write_provenance_to_str(__file__))
     options = parse_command_line_options()
     input_file = options.input_file
     output_file = options.output_file
