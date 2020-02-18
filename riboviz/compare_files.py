@@ -1,5 +1,5 @@
 """
-Helper methods for comparing and validating files of different types.
+Compare files of different types for equality.
 """
 import os
 import os.path
@@ -16,22 +16,24 @@ def compare_files(file1, file2, compare_names=True):
     Compare two files for equality. The following functions are used
     to compare each type of file:
 
-    * pdf: utils.equal_file_ames(file1, file2)
-    * ht2, .bai: utils.equal_file_sizes(file1, file2)
-    * h5: h5.equal_h5(file1, file2)
-    * bedgraph: bedgraph.equal_bedgraph(file1, file2)
-    * bam: sam_bam.equal_bam(file1, file2)
-    * sam: sam_bam.equal_sam(file1, file2)
-    * tsv: utils.equal_tsv(file1, file2)
-    * fq: fastq.equal_fastq(file1, file2)
+    * ``bai``: :py:func:`riboviz.utils.equal_file_sizes`
+    * ``bam``: :py:func:`riboviz.sam_bam.equal_bam`
+    * ``bedgraph``: :py:func:`riboviz.bedgraph.equal_bedgraph`
+    * ``fq``: :py:func:`riboviz.fastq.equal_fastq`
+    * ``h5``: :py:func:`riboviz.h5.equal_h5`
+    * ``ht2``: :py:func:`riboviz.utils.equal_file_sizes`
+    * ``pdf``: :py:func:`riboviz.utils.equal_file_names`
+    * ``sam``: :py:func:`riboviz.sam_bam.equal_sam`
+    * ``tsv``: :py:func:`riboviz.utils.equal_tsv_files`
 
     :param file1: File name
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
-    :param compare_names: compare file names?
+    :param compare_names: Compare file names?
     :type: bool
-    :raise AssertionError: if files differ
+    :raise AssertionError: If one or other file does not exist, \
+    is a directory or their contents differ
     """
     assert os.path.exists(file1), "Non-existent file: %s" % file1
     assert os.path.exists(file2), "Non-existent file: %s" % file2

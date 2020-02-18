@@ -1,12 +1,12 @@
 """
-umi_tools-related constants
+umi_tools-related constants and functions.
 """
 
 UMI_COUNT = "umi_count"
-""" 'umi_tools group' TSV file UMI count column """
+""" Column in ``umi_tools group`` output file. """
 FINAL_UMI_COUNT = "final_umi_count"
-""" 'umi_tools group' TSV file number of reads in group column """
+""" Column in ``umi_tools group`` output file. """
 UNIQUE_ID = "unique_id"
-""" 'umi_tools group' TSV file group ID column """
+""" Column in ``umi_tools group`` output file. """
 READ_ID = "read_id"
-""" 'umi_tools group' TSV file read identifier column """
+""" Column in ``umi_tools group`` output file. """

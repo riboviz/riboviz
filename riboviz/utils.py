@@ -1,5 +1,5 @@
 """
-General utilities.
+Useful functions.
 """
 import os
 import os.path
@@ -9,38 +9,45 @@ import pandas as pd
 
 def value_in_dict(key, dictionary, allow_false_empty=False):
     """
-    Check that a value is in a dictionary and the value is not None.
+    Check that a value is in a dictionary and the value is not
+    ``None``.
 
-    If dictionary is
+    If dictionary is::
 
-    * {"A":1,"B":None,"C":{},"D":[],"E":[1],"F":True,"G":False}
+        {
+         "A":1,
+         "B":None,
+         "C":{},"D":[],
+         "E":[1],
+         "F":True,
+         "G":False
+        }
 
-    then
+    then:
 
-    * value_in_dict("A", dictionary): True
-    * value_in_dict("B", dictionary): False
-    * value_in_dict("C", dictionary): False
-    * value_in_dict("D", dictionary): False
-    * value_in_dict("E", dictionary): True
-    * value_in_dict("F", dictionary): True
-    * value_in_dict("G", dictionary): False
-
-    * value_in_dict("A", dictionary, True): True
-    * value_in_dict("B", dictionary, True): False
-    * value_in_dict("C", dictionary, True): True
-    * value_in_dict("D", dictionary, True): True
-    * value_in_dict("E", dictionary, True): True
-    * value_in_dict("F", dictionary, True): True
-    * value_in_dict("G", dictionary, True): True
+    * ``value_in_dict("A", dictionary)`` is ``True``
+    * ``value_in_dict("B", dictionary)`` is ``False``
+    * ``value_in_dict("C", dictionary)`` is ``False``
+    * ``value_in_dict("D", dictionary)`` is ``False``
+    * ``value_in_dict("E", dictionary)`` is ``True``
+    * ``value_in_dict("F", dictionary)`` is ``True``
+    * ``value_in_dict("G", dictionary)`` is ``False``
+    * ``value_in_dict("A", dictionary, True)`` is ``True``
+    * ``value_in_dict("B", dictionary, True)`` is ``False``
+    * ``value_in_dict("C", dictionary, True)`` is ``True``
+    * ``value_in_dict("D", dictionary, True)`` is ``True``
+    * ``value_in_dict("E", dictionary, True)`` is ``True``
+    * ``value_in_dict("F", dictionary, True)`` is ``True``
+    * ``value_in_dict("G", dictionary, True)`` is ``True``
 
     :param key: Key
     :type key: -
     :param dictionary: Dictionary
     :type dictionary: dict
-    :param allow_false_empty: Consider False, empty string, list, \
-    dict to be existant
+    :param allow_false_empty: Allow ``False``, empty string, \
+    ``list`` or ``dict`` to be considered as an existing value
     :type allow_false_empty: bool
-    :return: True or False
+    :return: ``True`` or ``False``
     :rtype: bool
     """
     is_in = key in dictionary and dictionary[key] is not None
@@ -64,13 +71,14 @@ def list_to_str(lst):
 def get_file_ext(file_name):
     """
     Given a file name return full file extension, everything after the
-    first "." in the file name. For example, for 'example.fastq.gz'
-    return 'fastq.gz', for 'example.fastq' return 'fastq', for 'example'
-    return ''. The extension is returned in lower-case.
+    first ``.`` in the file name. For example, given
+    ``example.fastq.gz`` return ``fastq.gz``, given  ``example.fastq``
+    return ``fastq``, given ``example`` return ``''``. The extension
+    is returned in lower-case.
 
     :param file_name: File name
-    :type file_name: str or unicode
-    :return: extension
+    :type file_name: str or uniecode
+    :return: Extension
     :rtype: str or unicode
     """
     file_type = ".".join(os.path.basename(file_name).split(".")[1:])
@@ -79,15 +87,15 @@ def get_file_ext(file_name):
 
 def equal_file_names(file1, file2):
     """
-    Compare local names of two files each of which must exist
-    and be a file.
+    Compare local names of two files each of which must exist and be a
+    file.
 
     :param file1: File name
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
-    :raise AssertionError: if file names differ
-    :raise Exception: if problems arise when loading the files
+    :raise AssertionError: If file do not exist, are not files or
+    their names differ
     """
     local_file1 = os.path.split(file1)[1].lower()
     local_file2 = os.path.split(file2)[1].lower()
@@ -107,8 +115,8 @@ def equal_file_sizes(file1, file2):
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
-    :raise AssertionError: if file sizes differ
-    :raise Exception: if problems arise when loading the files
+    :raise AssertionError: If the file sizes differ
+    :raise Exception: If problems arise when accessing the files
     """
     stat1 = os.stat(file1)
     stat2 = os.stat(file2)
@@ -118,33 +126,31 @@ def equal_file_sizes(file1, file2):
 
 def equal_dataframes(data1, data2, tolerance=0.0001):
     """
-    Compare two Pandas dataframes for equality.
+    Compare two Pandas data frames for equality. The data frames are
+    expected to be two dimensional i.e. rows and columns.
 
-    The dataframes are expected to be two dimensional i.e. rows and
-    columns.
+    The data frames are compared column-by-column:
 
-    Dataframes are compared column-by-column:
-
-    * float64 columns are converted to numpy arrays then tested for
+    * ``float64`` columns are converted to numpy arrays then tested for
       equality to within the given tolerance using
-      numpy.allclose. This is used instead of
-      pandas.testing.assert_frame_equal as there is an issue with how
-      that function handles precision (see
-      pandas.testing.assert_frame_equal doesn't do precision according
-      to the doc #25068,
+      ``numpy.allclose``. This is used instead of
+      ``pandas.testing.assert_frame_equal`` as there is an issue with
+      how that function handles precision (see
+      'pandas.testing.assert_frame_equal doesn't do precision
+      according to the doc' #25068,
       https://github.com/pandas-dev/pandas/issues/25068). In addition,
-      "NAN" values are considered to be equal.
-    * All other columns (object, int64, bool, datetime64, timedelta)
-      are compared for exact equality using
-      pandas.core.series.Series.equals.
+      ``NAN`` values are considered to be equal.
+    * All other columns (``object``, ``int64``, ``bool``,
+      ``datetime64``, ``timedelta``) are compared for exact equality
+      using ``pandas.core.series.Series.equals``.
 
     :param data1: dataframe
     :type data1: pandas.core.frame.DataFrame
     :param data2: dataframe
     :type data2: pandas.core.frame.DataFrame
-    :param tolerance: tolerance for floating point comparisons
+    :param tolerance: Tolerance for floating point comparisons
     :type tolerance: float
-    :raise AssertionError: if DataFrames differ in their data
+    :raise AssertionError: If the data frames differ in their content
     """
     assert data1.shape == data2.shape,\
         "Unequal shape: %s, %s"\
@@ -171,28 +177,27 @@ def equal_dataframes(data1, data2, tolerance=0.0001):
 
 def equal_tsv_files(file1, file2, tolerance=0.0001, comment="#"):
     """
-    Compare two tab-separated (TSV) files for equality.
-
-    See equal_dataframes.
+    Compare two tab-separated (TSV) files for equality. This function
+    uses :py:func:`equal_dataframes`.
 
     :param file1: File name
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
-    :param tolerance: tolerance for floating point comparisons
+    :param tolerance: Tolerance for floating point comparisons
     :type tolerance: float
     :param comment: Comment prefix
     :type comment: str or unicode
-    :raise AssertionError: if files differ in their data
-    :raise Exception: if problems arise when loading the files
+    :raise AssertionError: If files differ in their contents
+    :raise Exception: If problems arise when loading the files
     """
     data1 = pd.read_csv(file1, sep="\t", comment=comment)
     data2 = pd.read_csv(file2, sep="\t", comment=comment)
     try:
         equal_dataframes(data1, data2, tolerance)
-    except AssertionError as e:
+    except AssertionError as error:
         # Add file names to error message.
-        message = e.args[0]
+        message = error.args[0]
         message += " in file: " + str(file1) + ":" + str(file2)
-        e.args = (message,)
+        error.args = (message,)
         raise

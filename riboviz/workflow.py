@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 RiboViz workflow-related constants, types and functions.
 """

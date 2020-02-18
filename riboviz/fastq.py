@@ -1,5 +1,5 @@
 """
-FASTQ file-related utilities.
+FASTQ-related constants and functions.
 """
 import gzip
 import os.path
@@ -7,43 +7,41 @@ from Bio import SeqIO
 from riboviz import utils
 
 FASTQ_EXT = "fastq"
-""" fastq file extension """
+""" File extension. """
 FQ_EXT = "fq"
-""" fq file extension """
-FASTQ_FORMAT = "{}." + FASTQ_EXT
-""" fastq file name format string """
-FQ_FORMAT = "{}." + FQ_EXT
-""" fq file name format string """
+""" File extension. """
 FASTQ_GZ_EXT = FASTQ_EXT + ".gz"
-""" fastq.gz file extension """
+""" File extension. """
 FQ_GZ_EXT = FQ_EXT + ".gz"
-""" fq.gz file extension """
+""" File extension. """
+FASTQ_FORMAT = "{}." + FASTQ_EXT
+""" File name format. """
+FQ_FORMAT = "{}." + FQ_EXT
+""" File name format. """
 FASTQ_GZ_FORMAT = "{}." + FASTQ_GZ_EXT
-""" fastq.gz file name format string """
+""" File name format. """
 FQ_GZ_FORMAT = "{}." + FQ_GZ_EXT
-""" fq.gz file name format string """
-
+""" File name format. """
 FASTQ_EXTS = [FASTQ_EXT, FQ_EXT]
-""" FASTQ file extensions """
+""" File extensions. """
 FASTQ_GZ_EXTS = [FASTQ_GZ_EXT, FQ_GZ_EXT]
-""" FASTQ GZ file extensions """
+""" File extensions. """
 FASTQ_ALL_EXTS = FASTQ_EXTS + FASTQ_GZ_EXTS
-""" All FASTQ file extensions """
-
+""" File extensions. """
 FASTQ_FORMATS = {FASTQ_EXT: FASTQ_FORMAT,
                  FQ_EXT: FQ_FORMAT,
                  FASTQ_GZ_EXT: FASTQ_GZ_FORMAT,
                  FQ_GZ_EXT: FQ_GZ_FORMAT}
-""" Map from file extensions to file name formats """
+""" Map from file extensions to file name formats. """
 
 
 def is_fastq_gz(file_name):
     """
-    Does the given file end with .gz or .GZ or .gzip or .GZIP?
+    Does the given file end with ``gz``, ``GZ``, ``gzip`` or ``GZIP``?
 
     :param file_name: File name
     :type file_name: str or unicode
-    :return: True if file_name ends with .gz or .GZ
+    :return: ``True`` or ``False``
     :rtype: bool
     """
     ext = utils.get_file_ext(file_name)
@@ -52,13 +50,13 @@ def is_fastq_gz(file_name):
 
 def strip_fastq_gz(file_name):
     """
-    If the given file ends with .gz or .GZ then remove the .gz or .GZ
-    extension. If the file doesn't end with this extension then the
-    original name is returned.
+    If the given file ends with ``gz``, ``GZ``, ``gzip`` or ``GZIP``
+    then strip this part of the file name and return the
+    remains. Otherwise, return the given file name as-is.
 
     :param file_name: File name
     :type file_name: str or unicode
-    :return: File name without .gz or .GZ extension
+    :return: Stripped file name
     :rtype: str or unicode
     """
     if is_fastq_gz(file_name):
@@ -68,8 +66,8 @@ def strip_fastq_gz(file_name):
 
 def count_sequences(file_name):
     """
-    Count number of sequences in a FASTQ file. Both FASTQ and FASTQ.GZ
-    files are handled.
+    Count number of sequences in a FASTQ file. GZIPped FASTQ files can
+    be handled too.
 
     :param file_name: File name
     :type file_name: str or unicode
@@ -89,18 +87,19 @@ def count_sequences(file_name):
 
 def equal_fastq(file1, file2):
     """
-    Compare two FASTQ files for equality. The following are compared:
+    Compare two FASTQ files for equality. The following checks are
+    done:
 
     * Both files have the same number of records.
-    * All records in file1 are also in file2. The order of records is
-      ignored.
+    * All records in ``file1`` are also in ``file2``. The order of
+      records is ignored.
 
     :param file1: File name
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
-    :raise AssertionError: if files differ in their data
-    :raise Exception: if problems arise when loading the files
+    :raise AssertionError: If the files differ in their contents
+    :raise Exception: If problems arise when loading the files
     """
     seqs1 = {}
     for seq1 in SeqIO.parse(file1, "fastq"):
