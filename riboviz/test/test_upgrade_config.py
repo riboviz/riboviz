@@ -1,5 +1,5 @@
 """
-riboviz.upgrade_config_file test suite.
+riboviz.upgrade_config test suite.
 """
 import os
 import tempfile
@@ -7,7 +7,7 @@ import pytest
 import yaml
 import riboviz.test
 from riboviz.test import config
-from riboviz.upgrade_config_file import upgrade_config_file
+from riboviz.upgrade_config import upgrade_config_file
 
 
 @pytest.fixture(scope="function")
