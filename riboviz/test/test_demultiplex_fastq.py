@@ -110,14 +110,12 @@ def test_assign_samples():
         read1_fhs = [stack.enter_context(StringIO()) for f in range(2)]
         read2_fhs = [stack.enter_context(StringIO()) for f in range(2)]
         barcodes = ["CCC", "AAA"]
-        num_samples = 2
-        num_reads = [0] * num_samples
+        num_reads = [0] * len(barcodes)
         is_assigned = demultiplex_fastq.assign_samples(
             FASTQ_RECORD1, FASTQ_RECORD2,
             barcodes,
             read1_fhs, read2_fhs,
             True,
-            num_samples,
             num_reads,
             1, "_")
         assert is_assigned
@@ -137,14 +135,12 @@ def test_assign_samples_no_match():
         read1_fhs = [stack.enter_context(StringIO()) for f in range(2)]
         read2_fhs = [stack.enter_context(StringIO()) for f in range(2)]
         barcodes = ["GGG", "TTT"]
-        num_samples = 2
-        num_reads = [0] * num_samples
+        num_reads = [0] * len(barcodes)
         is_assigned = demultiplex_fastq.assign_samples(
             FASTQ_RECORD1, FASTQ_RECORD2,
             barcodes,
             read1_fhs, read2_fhs,
             True,
-            num_samples,
             num_reads,
             1, "_")
         assert not is_assigned
