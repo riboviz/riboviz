@@ -1,7 +1,8 @@
 """
-RiboViz workflow-related constants, types and functions.
-"""
+Workflow-related constants, types and functions.
 
+Each function applies a single step in the workflow.
+"""
 import collections
 import logging
 import os
@@ -22,25 +23,32 @@ RunConfigTuple = collections.namedtuple(
                        "is_dry_run",
                        "logs_dir",
                        "nprocesses"])
-""" Run-related configuration """
+"""
+Run-related configuration.
 
+* ``r_scripts``: R scripts directory.
+* ``cmd_file``: Bash commands file.
+* ``is_dry_run``: Is this a dry run? (if ``True`` workflow commands \
+   should not be submitted to the operating system for execution)
+* ``logs_dir``: Log files directory.
+* ``nprocesses``: Number of processes available.
+"""
 
 logging_utils.configure_logging()
 LOGGER = logging.getLogger(__name__)
-""" Logger """
+""" Logger. """
 
 
 def create_directory(directory, cmd_file, is_dry_run=False):
     """
-    Add bash command to create 'directory' to 'cmd_file' and, if \
-    'is_dry_run' is 'True' create the directory.
+    Add bash command to create ``directory`` to ``cmd_file`` and, if
+    ``is_dry_run`` is ``False``, create the directory.
 
     :param directory: Directory
     :type directory: str or unicode
     :param cmd_file: Commands file
     :type cmd_file: str or unicode
-    :param is_dry_run: Don't execute workflow commands (useful for \
-    seeing what commands would be executed)
+    :param is_dry_run: Don't execute workflow commands?
     :type is_dry_run: bool
     """
     with open(cmd_file, "a") as f:
@@ -52,26 +60,27 @@ def create_directory(directory, cmd_file, is_dry_run=False):
 
 def build_indices(fasta, index_dir, ht_prefix, log_file, run_config):
     """
-    Build indices for alignment using hisat2-build.
-    Index files have name <ht_prefix>.<N>.ht2.
+    Build indices for alignment using ``hisat2-build``.
 
-    :param fasta: FASTA file to be indexed
+    ``hisat2-build --version`` is also invoked as ``hisat2-build``
+    does not log its own version when it is run.
+
+    :param fasta: FASTA file (input)
     :type fasta: str or unicode
     :param index_dir: Index directory
     :type index_dir: str or unicode
-    :param ht_prefix: Prefix of HT2 index files
+    :param ht_prefix: Prefix of HT2 index files (output)
     :type ht_prefix: str or unicode
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if hisat2-build cannot be found
-    :raise AssertionError: if hisat2-build returns non-zero exit \
-    code
+    :raise FileNotFoundError: if ``hisat2-build`` cannot be found
+    :raise AssertionError: if ``hisat2-build`` returns a non-zero \
+    exit code
     """
-    LOGGER.info("Build indices for alignment (%s). Log: %s", fasta, log_file)
-    # Explicitly invoke --version as hisat2-build does not log its own
-    # version during a processing run.
+    LOGGER.info("Build indices for alignment (%s). Log: %s",
+                fasta, log_file)
     cmd = ["hisat2-build", "--version"]
     process_utils.run_logged_command(cmd, log_file,
                                      run_config.cmd_file,
@@ -86,20 +95,20 @@ def build_indices(fasta, index_dir, ht_prefix, log_file, run_config):
 def cut_adapters(adapter, original_fq, trimmed_fq,
                  log_file, run_config):
     """
-    Cut out sequencing library adapters using cutadapt.
+    Cut out sequencing library adapters using ``cutadapt``.
 
     :param adapter: Adapter to trim
     :type adapter: str or unicode
-    :param original_fq: FASTQ file to have adapters trimmed
+    :param original_fq: FASTQ file (input)
     :type original_fq: str or unicode
-    :param trimmed_fq: FASTQ file with trimmed adapters
+    :param trimmed_fq: FASTQ file with trimmed adapters (output)
     :type trimmed_fq: str or unicode
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if cutadapt cannot be found
-    :raise AssertionError: if cutadapt returns non-zero exit code
+    :raise FileNotFoundError: if ``cutadapt`` cannot be found
+    :raise AssertionError: if ``cutadapt`` returns a non-zero exit code
     """
     LOGGER.info("Cut out sequencing library adapters. Log: %s", log_file)
     cmd = ["cutadapt", "--trim-n", "-O", "1", "-m", "5",
@@ -113,21 +122,22 @@ def cut_adapters(adapter, original_fq, trimmed_fq,
 def extract_barcodes_umis(original_fq, extract_fq, regexp,
                           log_file, run_config):
     """
-    Extract barcodes and UMIs using "umi_tools extract".
+    Extract barcodes and UMIs using ``umi_tools extract``.
 
-    :param original_fq: FASTQ file to have UMIs and barcodes extracted
+    :param original_fq: FASTQ file (input)
     :type original_fq: str or unicode
-    :param extract_fq: FASTQ file with UMIs and barcodes extracted
+    :param extract_fq: FASTQ file with UMIs and barcodes extracted \
+    (output)
     :type extract_fq: str or unicode
-    :param regexp: umi_tools-compliant regular expression to extract \
+    :param regexp: UMI-tools-compliant regular expression to extract \
     barcodes and UMIs
     :type regexp: str or unicode
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if umi_tools cannot be found
-    :raise AssertionError: if umi_tooles returns non-zero exit \
+    :raise FileNotFoundError: if ``umi_tools`` cannot be found
+    :raise AssertionError: if ``umi_tools`` returns a non-zero exit \
     code
     """
     LOGGER.info("Extract barcodes and UMIs. Log: %s", log_file)
@@ -169,31 +179,32 @@ def map_to_r_rna(fastq, index_dir, ht_prefix, mapped_sam,
                  unmapped_fastq, log_file, run_config):
     """
     Remove rRNA or other contaminating reads by alignment to rRNA
-    index files using hisat2.
+    index files using ``hisat2``.
 
-    :param fastq: FASTQ file
+    ``hisat2 --version`` is also invoked as ``hisat2`` does not log
+    its own version when it is run.
+
+    :param fastq: FASTQ file (input)
     :type fastq: str or unicode
     :param index_dir: Index directory
     :type index_dir: str or unicode
-    :param ht_prefix: Prefix of HT2 rRNA index files for alignment
+    :param ht_prefix: Prefix of HT2 index files (input)
     :type ht_prefix: str or unicode
-    :param mapped_sam: SAM file for mapped reads
+    :param mapped_sam: SAM file for mapped reads (output)
     :type mapped_sam: str or unicode
-    :param unmapped_fastq: FASTQ file for unmapped reads
+    :param unmapped_fastq: FASTQ file for unmapped reads (output)
     :type unmapped_fastq: str or unicode
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if hisat2-build cannot be found
-    :raise AssertionError: if hisat2-build returns non-zero exit \
+    :raise FileNotFoundError: if ``hisat2`` cannot be found
+    :raise AssertionError: if ``hisat2`` returns a non-zero exit \
     code
     """
     LOGGER.info(
         "Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: %s",
         log_file)
-    # Explicitly invoke --version as hisat2 does not log its own
-    # version during a processing run.
     cmd = ["hisat2", "--version"]
     process_utils.run_logged_command(cmd, log_file,
                                      run_config.cmd_file,
@@ -211,31 +222,32 @@ def map_to_r_rna(fastq, index_dir, ht_prefix, mapped_sam,
 def map_to_orf(fastq, index_dir, ht_prefix, mapped_sam,
                unmapped_fastq, log_file, run_config):
     """
-    Align remaining reads to ORFs index files using hisat2.
+    Align remaining reads to ORF index files using ``hisat2``.
 
-    :param fastq: FASTQ file
+    ``hisat2 --version`` is also invoked as ``hisat2`` does not log
+    its own version when it is run.
+
+    :param fastq: FASTQ file (input)
     :type fastq: str or unicode
     :param index_dir: Index directory
     :type index_dir: str or unicode
-    :param ht_prefix: Prefix of HT2 ORF index files for alignment
+    :param ht_prefix: Prefix of HT2 index files (input)
     :type ht_prefix: str or unicode
-    :param mapped_sam: SAM file for mapped reads
+    :param mapped_sam: SAM file for mapped reads (output)
     :type mapped_sam: str or unicode
-    :param unmapped_fastq: FASTQ file for unmapped reads
+    :param unmapped_fastq: FASTQ file for unmapped reads (output)
     :type unmapped_fastq: str or unicode
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if hisat2-build cannot be found
-    :raise AssertionError: if hisat2-build returns non-zero exit \
+    :raise FileNotFoundError: if ``hisat2`` cannot be found
+    :raise AssertionError: if ``hisat2`` returns a non-zero exit \
     code
     """
     LOGGER.info(
         "Align remaining reads to ORFs index files using hisat2. Log: %s",
         log_file)
-    # Explicitly invoke --version as hisat2 does not log its own
-    # version during a processing run.
     cmd = ["hisat2", "--version"]
     process_utils.run_logged_command(cmd, log_file,
                                      run_config.cmd_file,
@@ -255,21 +267,21 @@ def trim_5p_mismatches(orf_map_sam, orf_map_sam_clean, summary_file,
                        log_file, run_config):
     """
     Trim 5' mismatches from reads and remove reads with more than 2
-    mismatches using riboviz.tools.trim_5p_mismatches.
+    mismatches using :py:mod:`riboviz.tools.trim_5p_mismatches`.
 
-    :param orf_map_sam: ORF-mapped reads
+    :param orf_map_sam: ORF-mapped reads (input)
     :type orf_map_sam: str or unicode
-    :param orf_map_sam_clean: Cleaned ORF-mapped reads
+    :param orf_map_sam_clean: Trimmed ORF-mapped reads (output)
     :type orf_map_sam_clean: str or unicode
-    :param summary_file: TSV summary file with "num_processed", \
-    "num_discarded", "num_trimmed" and "num_written" columns
+    :param summary_file: :py:mod:`riboviz.tools.trim_5p_mismatches` \
+    summary file (output)
     :type summary_file: str or unicode
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if python cannot be found
-    :raise AssertionError: if python returns non-zero exit code
+    :raise FileNotFoundError: if ``python`` cannot be found
+    :raise AssertionError: if ``python`` returns non-zero exit code
     """
     LOGGER.info(
         "Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: %s",
@@ -283,24 +295,25 @@ def trim_5p_mismatches(orf_map_sam, orf_map_sam_clean, summary_file,
 
 def sort_bam(sam_file, bam_file, log_file, run_config):
     """
-    Convert SAM to BAM and sort on genome using "samtools view" and
-    "samtools sort".
+    Convert SAM to BAM and sort on genome using ``samtools view`` and
+    ``samtools sort``.
 
-    :param sam_file: SAM file
+    ``samtools --version`` is also invoked as ``samtools`` does not
+    log its own version when it is run.
+
+    :param sam_file: SAM file (input)
     :type sam_file: str or unicode
-    :param bam_file: BAM file
+    :param bam_file: BAM file (output)
     :type bam_file: str or unicode
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if samtools cannot be found
-    :raise AssertionError: if samtools returns non-zero exit code
+    :raise FileNotFoundError: if ``samtools`` cannot be found
+    :raise AssertionError: if ``samtools`` returns a non-zero exit code
     """
     LOGGER.info(
         "Convert SAM to BAM and sort on genome. Log: %s", log_file)
-    # Explicitly invoke --version as samtools does not log its own
-    # version during a processing run.
     cmd = ["samtools", "--version"]
     process_utils.run_logged_command(cmd, log_file,
                                      run_config.cmd_file,
@@ -316,20 +329,21 @@ def sort_bam(sam_file, bam_file, log_file, run_config):
 
 def index_bam(bam_file, log_file, run_config):
     """
-    Index BAM file using "samtools index".
+    Index BAM file using ``samtools index``.
 
-    :param bam_file: BAM file
+    ``samtools --version`` is also invoked as ``samtools`` does not
+    log its own version when it is run.
+
+    :param bam_file: BAM file (input)
     :type bam_file: str or unicode
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if samtools cannot be found
-    :raise AssertionError: if samtools returns non-zero exit code
+    :raise FileNotFoundError: if ``samtools`` cannot be found
+    :raise AssertionError: if ``samtools`` returns a non-zero exit code
     """
     LOGGER.info("Index BAM file. Log: %s", log_file)
-    # Explicitly invoke --version as samtools does not log its own
-    # version during a processing run.
     cmd = ["samtools", "--version"]
     process_utils.run_logged_command(cmd, log_file,
                                      run_config.cmd_file,
@@ -342,19 +356,19 @@ def index_bam(bam_file, log_file, run_config):
 
 def group_umis(bam_file, groups_file, log_file, run_config):
     """
-    Idenfity UMI groups using "umi_tools group".
+    Idenfity UMI groups using ``umi_tools group``.
 
-    :param bam_file: BAM file, input
+    :param bam_file: BAM file (input)
     :type bam_file: str or unicode
-    :param groups_file: Groups file, output
+    :param groups_file: UMI groups file (output)
     :type groups_file: str or unicode
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise OSError: if a third-party tool cannot be found
-    :raise FileNotFoundError: if umi_tools cannot be found
-    :raise AssertionError: if umi_tools returns non-zero exit code
+    :raise FileNotFoundError: if ``umi_tools`` cannot be found
+    :raise AssertionError: if ``umi_tools`` returns a non-zero exit \
+    code
     """
     LOGGER.info("Idenfity UMI groups. Log: %s", log_file)
     cmd = ["umi_tools", "group", "-I", bam_file,
@@ -367,21 +381,22 @@ def group_umis(bam_file, groups_file, log_file, run_config):
 def deduplicate_umis(bam_file, dedup_bam_file,
                      stats_prefix, log_file, run_config):
     """
-    Deduplicate UMIs using "umi_tools dedup".
+    Deduplicate UMIs using ``umi_tools dedup``.
 
-    :param bam_file: BAM file, input
+    :param bam_file: BAM file (input)
     :type bam_file: str or unicode
-    :param dedup_bam_file: Deduplicated BAM file, output
+    :param dedup_bam_file: Deduplicated BAM file (input)
     :type dedup_bam_file: str or unicode
-    :param stats_prefix: File prefix for deduplication statistics
+    :param stats_prefix: File prefix for deduplication statistics \
+    (output)
     :type stats_prefix: str or unicode
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise OSError: if a third-party tool cannot be found
-    :raise FileNotFoundError: if umi_tools cannot be found
-    :raise AssertionError: if umi_tools returns non-zero exit code
+    :raise FileNotFoundError: if ``umi_tools`` cannot be found
+    :raise AssertionError: if ``umi_tools`` returns a non-zero exit \
+    code
     """
     LOGGER.info("Deduplicate UMIs. Log: %s", log_file)
     cmd = ["umi_tools", "dedup", "-I", bam_file, "-S", dedup_bam_file,
@@ -395,22 +410,25 @@ def make_bedgraph(bam_file, bedgraph_file, is_plus,
                   log_file, run_config):
     """
     Calculate transcriptome coverage and save as a bedgraph using
-    "bedtools genomecov".
+    ``bedtools genomecov``.
 
-    :param bam_file: BAM file, input
+    ``bedtools --version`` is also invoked as ``bedtools`` does not
+    log its own version when it is run.
+
+    :param bam_file: BAM file (input)
     :type bam_file: str or unicode
-    :param bedgraph_file: Bedgraph file, output
+    :param bedgraph_file: Bedgraph file (output)
     :type bedgraph_file: str or unicode
-    :param is_plus: Is bedgraph to be created for plus strand (True) \
-    or minus strand (False)
+    :param is_plus: Is bedgraph to be created for plus strand \
+    (``True``) or minus strand (``False``)?
     :type is_plus: bool
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise OSError: if a third-party tool cannot be found
-    :raise FileNotFoundError: if bedtools cannot be found
-    :raise AssertionError: if bedtools returns non-zero exit code
+    :raise FileNotFoundError: if ``bedtools`` cannot be found
+    :raise AssertionError: if ``bedtools`` returns a non-zero exit \
+    code
     """
     if is_plus:
         strand = "+"
@@ -419,8 +437,6 @@ def make_bedgraph(bam_file, bedgraph_file, is_plus,
     LOGGER.info(
         "Calculate transcriptome coverage for %s strand and save as a bedgraph. Log: %s",
         strand, log_file)
-    # Explicitly invoke --version as bedtools does not log its own
-    # version during a processing run.
     cmd = ["bedtools", "--version"]
     process_utils.run_logged_command(cmd, log_file,
                                      run_config.cmd_file,
@@ -436,23 +452,25 @@ def make_bedgraph(bam_file, bedgraph_file, is_plus,
 def bam_to_h5(bam_file, h5_file, orf_gff_file, config,
               log_file, run_config):
     """
-    Make length-sensitive alignments in H5 format using bam_to_h5.R.
+    Make length-sensitive alignments in H5 format using
+    ``bam_to_h5.R``.
 
-    :param bam_file: BAM file, input
+    :param bam_file: BAM file (input)
     :type bam_file: str or unicode
-    :param h5_file: H5 file, output
+    :param h5_file: H5 file (output)
     :type h5_file: str or unicode
-    :param orf_gff_file: GFF2/GFF3 file for ORFs
+    :param orf_gff_file: GFF2/GFF3 file for ORFs (input)
     :type orf_gff_file: str or unicode
-    :param config: RiboViz configuration
+    :param config: Workflow configuration
     :type config: dict
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
     :raise KeyError: if a configuration parameter is mssing
-    :raise FileNotFoundError: if Rscript cannot be found
-    :raise AssertionError: if Rscript returns non-zero exit code
+    :raise FileNotFoundError: if ``Rscript`` cannot be found
+    :raise AssertionError: if ``Rscript`` returns a non-zero exit \
+    code
     """
     LOGGER.info("Make length-sensitive alignments in H5 format. Log: %s",
                 log_file)
@@ -483,21 +501,22 @@ def generate_stats_figs(h5_file, out_dir, config, log_file,
                         run_config):
     """
     Create summary statistics, and analyses and QC plots for both RPF
-    and mRNA datasets using generate_stats_figs.R.
+    and mRNA datasets using ``generate_stats_figs.R``.
 
-    :param h5_file: H5 file
+    :param h5_file: H5 file (input)
     :type h5_file: str or unicode
     :param out_dir: Directory for output files
     :type out_dir: str or unicode
-    :param config: RiboViz configuration
+    :param config: Workflow configuration
     :type config: dict
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
     :raise KeyError: if a configuration parameter is mssing
-    :raise FileNotFoundError: if Rscript cannot be found
-    :raise AssertionError: if Rscript returns non-zero exit code
+    :raise FileNotFoundError: if ``Rscript`` cannot be found
+    :raise AssertionError: if ``Rscript`` returns a non-zero exit \
+    code
     """
     LOGGER.info(
         "Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets. Log: %s",
@@ -537,21 +556,22 @@ def generate_stats_figs(h5_file, out_dir, config, log_file,
 
 def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
     """
-    Collate TPMs across sample results using collate_tpms.R.
+    Collate TPMs across sample results ``using collate_tpms.R``.
 
-    :param out_dir: Output files directory
+    :param out_dir: Output directory
     :type out_dir: str or unicode
     :param samples: Sample names
     :type samples: list(str or unicode)
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :param tpms_file: TPMS file relative to out_dir, if omitted \
-    then default, chosen by collate_tpms.R, is used
+    :param tpms_file: TPMS file relative to ``out_dir`` (if omitted \
+    then default, chosen by ``collate_tpms.R``, is used) (output)
     :type tpms_file: str or unicode
-    :raise FileNotFoundError: if Rscript cannot be found
-    :raise AssertionError: if Rscript returns non-zero exit code
+    :raise FileNotFoundError: if ``Rscript`` cannot be found
+    :raise AssertionError: if ``Rscript`` returns a non-zero exit \
+    code
     """
     LOGGER.info("Collate TPMs across sample results. Log: %s", log_file)
     cmd = ["Rscript", "--vanilla",
@@ -570,22 +590,22 @@ def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
 def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
                       run_config):
     """
-    Demultiplex reads using riboviz.tools.demultiplex_fastq.
+    Demultiplex reads using
+    :py:mod:`riboviz.tools.demultiplex_fastq`.
 
-    :param fastq: FASTQ file to demultiplex
+    :param fastq: FASTQ file (input)
     :type fastq: str or unicode
-    :param barcodes_file: Sample sheet filename, tab-delimited \
-    text format with SampleID and TagRead columns, where TagReads \
-    the barcodes to use to demultiplex fastq
+    :param barcodes_file: Sample sheet filename (input)
     :type barcodes_file: str or unicode
-    :param deplex_dir: Directory to write demultiplexed files
+    :param deplex_dir: Demultiplexed files directory
     :type deplex_dir: str or unicode
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if python cannot be found
-    :raise AssertionError: if python returns non-zero exit code
+    :raise FileNotFoundError: if ``python`` cannot be found
+    :raise AssertionError: if ``python`` returns a non-zero exit \
+    code
     """
     LOGGER.info("Demultiplex reads. Log: %s", log_file)
     cmd = ["python", "-m", demultiplex_fastq_tools_module.__name__,
@@ -599,26 +619,25 @@ def demultiplex_fastq(fastq, barcodes_file, deplex_dir, log_file,
 def count_reads(config_file, input_dir, tmp_dir, output_dir,
                 read_counts_file, log_file, run_config):
     """
-    Count reads using riboviz.tools.count_reads.
+    Count reads using :py:mod:`riboviz.tools.count_reads`.
 
-    :param config_file: Configuration file
+    :param config_file: Configuration file (input)
     :type config_file: str or unicode
-    :param input_dir: Input files directory
+    :param input_dir: Input directory
     :type input_dir: str or unicode
-    :param tmp_dir: Temporary files directory
+    :param tmp_dir: Temporary directory
     :type tmp_dir: str or unicode
-    :param output_dir: Output files directory
+    :param output_dir: Output directory
     :type output_dir: str or unicode
-    :param reads_file: Reads file output
-    :type reads_file: str or unicode
-    :param read_counts_file: File to output read counts to.
+    :param read_counts_file: Read counts file (output)
     :type read_counts_file: str or unicode
-    :param log_file: Log file
+    :param log_file: Log file (output)
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :raise FileNotFoundError: if python cannot be found
-    :raise AssertionError: if python returns non-zero exit code
+    :raise FileNotFoundError: if ``python`` cannot be found
+    :raise AssertionError: if ``python`` returns a non-zero exit \
+    code
     """
     LOGGER.info("Count reads. Log: %s", log_file)
     cmd = ["python", "-m", count_reads_module.__name__,
