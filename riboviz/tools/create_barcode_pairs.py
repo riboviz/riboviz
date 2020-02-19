@@ -12,7 +12,7 @@ Usage::
     -o OUTPUT_FILE, --output-file OUTPUT_FILE
                           Output file
     -l LENGTH, --length LENGTH
-                          Barcode length
+                          Barcode length (default 3)
 
 See :py:func:`riboviz.barcodes_umis.create_barcode_pairs`.
 """
@@ -39,7 +39,7 @@ def parse_command_line_options():
                         dest="length",
                         default=3,
                         type=int,
-                        help="Barcode length")
+                        help="Barcode length (default 3)")
     options = parser.parse_args()
     return options
 

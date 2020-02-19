@@ -1,5 +1,5 @@
 """
-Compare files of different types for equality.
+Compare files for equality.
 """
 import os
 import os.path
@@ -33,7 +33,8 @@ def compare_files(file1, file2, compare_names=True):
     :param compare_names: Compare file names?
     :type: bool
     :raise AssertionError: If one or other file does not exist, \
-    is a directory or their contents differ
+    is a directory or their contents differ or the file type is \
+    unknown
     """
     assert os.path.exists(file1), "Non-existent file: %s" % file1
     assert os.path.exists(file2), "Non-existent file: %s" % file2
@@ -58,3 +59,4 @@ def compare_files(file1, file2, compare_names=True):
         utils.equal_tsv(file1, file2)
     elif ext in fastq.FASTQ_ALL_EXTS:
         fastq.equal_fastq(file1, file2)
+    assert False, "Unknown file type"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-Upgrade previous versions of the workflow configuration to be
-compatible with current version.
+Upgrade workflow configuration file to be compatible with current
+configuration.
 
 Usage::
 
@@ -10,11 +10,10 @@ Usage::
 
     -h, --help            show this help message and exit
     -i INPUT_FILE, --input INPUT_FILE
-                          Input YAML configuration file
+                          Input file
     -o [OUTPUT_FILE], --output [OUTPUT_FILE]
-                          Output YAML configuration file. If not
-                          provided then upgraded content is printed to
-                          standard out
+                          Output file (if not provided then the
+                          upgraded configuration is printed)
 
 See :py:mod:`riboviz.upgrade_config.upgrade_config_file`.
 """
@@ -30,17 +29,17 @@ def parse_command_line_options():
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
-        description="Upgrade previous versions of the workflow configuration to be compatible with current version.")
+        description="Upgrade workflow configuration file to be compatible with current configuration")
     parser.add_argument("-i",
                         "--input",
                         dest="input_file",
                         required=True,
-                        help="Input YAML configuration file")
+                        help="Input file")
     parser.add_argument("-o",
                         "--output",
                         dest="output_file",
                         nargs='?',
-                        help="Output YAML configuration file. If not provided then upgraded content is printed to standard out")
+                        help="Output file (if not provided then the upgraded configuration is printed)")
     options = parser.parse_args()
     return options
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Compare files of different types for equality.
+Compare two files for equality.
 
 Usage::
 
@@ -28,7 +28,7 @@ def parse_command_line_options():
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
-        description="Compare files of different types for equality")
+        description="Compare two files for equality")
     parser.add_argument("-1",
                         "--file1",
                         dest="file1",

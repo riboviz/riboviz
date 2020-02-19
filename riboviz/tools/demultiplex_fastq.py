@@ -19,10 +19,11 @@ Usage::
                           FASTQ file, for paired reads
     -m MISMATCHES, --mismatches MISMATCHES
                           Number of mismatches permitted in barcode
+                          (default 1)
     -o [OUT_DIR], --outdir [OUT_DIR]
                           Output directory
     -d [DELIMITER], --delimiter [DELIMITER]
-                          Barcode delimiter
+                          Barcode delimiter (default _)
 
 See :py:func:`riboviz.demultiplex_fastq.demultiplex`.
 """
@@ -63,7 +64,7 @@ def parse_command_line_options():
                         dest="mismatches",
                         default=1,
                         type=int,
-                        help="Number of mismatches permitted in barcode")
+                        help="Number of mismatches permitted in barcode (default 1)")
     parser.add_argument("-o",
                         "--outdir",
                         dest="out_dir",
@@ -75,7 +76,8 @@ def parse_command_line_options():
                         dest="delimiter",
                         nargs='?',
                         default=barcodes_umis.BARCODE_DELIMITER,
-                        help="Barcode delimiter")
+                        help="Barcode delimiter (default " +
+                        barcodes_umis.BARCODE_DELIMITER + ")")
     options = parser.parse_args()
     return options
 
