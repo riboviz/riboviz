@@ -332,7 +332,7 @@ def trim_5p_mismatch_sam(tmp_dir, sample):
     ``<tmp_dir>/<sample>`` is searched for a SAM file matching
     :py:const:`riboviz.workflow_files.ORF_MAP_CLEAN_SAM` and
     a TSV file matching
-    :py:const:`riboviz.trim_5p_mismatch.TRIM_5P_MISMATCH_FILE`.
+    :py:const:`riboviz.workflow_files.TRIM_5P_MISMATCH_TSV`.
 
     If the TSV file exists it is parsed and the number of reads output
     extracted. If the TSV file cannot be found then the number of
@@ -357,7 +357,7 @@ def trim_5p_mismatch_sam(tmp_dir, sample):
     sam_file = sam_files[0]  # Only 1 match expected.
     # Look for trim_5p_mismatch.tsv.
     tsv_files = glob.glob(os.path.join(
-        tmp_dir, sample, trim_5p_mismatch.TRIM_5P_MISMATCH_FILE))
+        tmp_dir, sample, workflow_files.TRIM_5P_MISMATCH_TSV))
     is_tsv_problem = False
     if tsv_files:
         tsv_file = tsv_files[0]
