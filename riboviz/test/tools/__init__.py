@@ -1,5 +1,5 @@
 """
-riboviz.tools.prep_riboviz-related test fixtures.
+:py:mod:`riboviz.tools`-related test fixtures.
 """
 import os
 import shutil
@@ -17,19 +17,20 @@ def configuration_fixture(request):
     """
     Create a temporary configuration file and temporary directories.
 
-    Load a configuration file, create temporary index, tmp, and output
-    directories, update configuration to reference these files, save
-    as a temporary file, yield configuration to callers and delete all
-    temporary files on test completion.
+    Load a configuration file, create temporary index, temporary and
+    output directories, update the configuration to reference these
+    files, save the configuration into a temporary file then yield
+    configuration and temporary configuration file.
 
-    The test module using fixtures that call this function are
-    expected to define a TEST_CONFIG_FILE parameter specifying the
+    On completion delete temporary files and directories.
+
+    Any test module using fixtures that call this function are
+    must define a ``TEST_CONFIG_FILE`` parameter specifying the
     configuration file to be copied.
-    config_yaml = getattr(request.module, "TEST_CONFIG_FILE")
 
     :param request: Test module using this test fixture
     :type request: _pytest.fixtures.SubRequest
-    :return: configuration, path to configuration file
+    :return: temporary configuration and configuration file
     :rtype: tuple(dict, str or unicode)
     """
     config_yaml = getattr(request.module, "TEST_CONFIG_FILE")
@@ -67,19 +68,19 @@ def configuration_fixture(request):
 
 
 configuration = pytest.fixture(scope='function')(configuration_fixture)
-""" Function-level fixture for configuration_fixture """
+""" Function-level fixture for :py:func:`configuration_fixture` """
 
 configuration_module = pytest.fixture(scope='module')(configuration_fixture)
-""" Module-level fixture for configuration_fixture """
+""" Module-level fixture for :py:func:`configuration_fixture` """
 
 
 @pytest.fixture(scope="module")
-def run_prep_riboviz(configuration_module):
+def prep_riboviz_fixture(configuration_module):
     """
-    Fixture to run riboviz.tools.prep_riboviz.
+    Run :py:mod:`riboviz.tools.prep_riboviz`.
 
-    :param configuration_module: configuration and path to \
-    configuration file  (pytest fixture)
+    :param configuration_module: temporary configuration and \
+    configuration file
     :type configuration_module: tuple(dict, str or unicode)
     """
     _, config_path = configuration_module
