@@ -585,7 +585,7 @@ $ cd code-docs
 $ make html
 ```
 
-Open code-docs/_build/html/index.html in a browser.
+Open `code-docs/_build/html/index.html` in a browser.
 
 ## How the Sphinx documentation files were originally created
 
