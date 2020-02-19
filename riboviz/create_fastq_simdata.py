@@ -283,7 +283,8 @@ def make_fastq_records(tag,
 
 def create_fastq_simdata(output_dir):
     """
-    Create simulated FASTQ files.
+    Create simulated FASTQ files to test UMI/deduplication, adaptor
+    trimming, and demultiplexing.
 
     :param output_dir: Output directory
     :type output_dir: str or unicode

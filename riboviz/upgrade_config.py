@@ -98,10 +98,10 @@ def upgrade_config(config):
 
 def upgrade_config_file(input_file, output_file=None):
     """
-    Upgrade YAML workflow configuration file to be compatible with
-    current configuration.
+    Upgrade workflow configuration file to be compatible with current
+    configuration.
 
-    If ``output_file`` is ``None`` then the upgraded content is
+    If ``output_file`` is ``None`` then the upgraded configuration is
     printed to standard output.
 
     :param input_file: Input file

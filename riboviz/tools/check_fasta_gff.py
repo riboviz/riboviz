@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Check FASTA and GFF files for compatibility")
+Check FASTA and GFF files for compatibility.
 
 Usage::
 

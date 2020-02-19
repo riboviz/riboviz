@@ -436,7 +436,7 @@ def umi_tools_dedup_bam(tmp_dir, output_dir, sample):
 def count_reads_df(config_file, input_dir, tmp_dir, output_dir):
     """
     Scan input, temporary and output directories and count the number
-    of reads (sequences) processed by specific stages of the
+    of reads (sequences) processed by specific stages of a
     workflow. The scan is based on the directory structure and file
     patterns used by the workflow.
 
@@ -482,7 +482,7 @@ def count_reads_df(config_file, input_dir, tmp_dir, output_dir):
 def count_reads(config_file, input_dir, tmp_dir, output_dir, reads_file):
     """
     Scan input, temporary and output directories and count the number
-    of reads (sequences) processed by specific stages of the
+    of reads (sequences) processed by specific stages of a
     workflow. The scan is based on the configuration, directory
     structure and file patterns used by the workflow.
 
