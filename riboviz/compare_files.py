@@ -33,8 +33,7 @@ def compare_files(file1, file2, compare_names=True):
     :param compare_names: Compare file names?
     :type: bool
     :raise AssertionError: If one or other file does not exist, \
-    is a directory or their contents differ or the file type is \
-    unknown
+    is a directory or their contents differ
     """
     assert os.path.exists(file1), "Non-existent file: %s" % file1
     assert os.path.exists(file2), "Non-existent file: %s" % file2
@@ -43,20 +42,21 @@ def compare_files(file1, file2, compare_names=True):
     if compare_names:
         utils.equal_file_names(file1, file2)
     ext = utils.get_file_ext(file1)
-    if ext in ["pdf"]:
+    if ext.endswith(tuple(["pdf"])):
         utils.equal_file_names(file1, file2)
-    elif ext in [hisat2.HT2_EXT, sam_bam.BAI_EXT]:
+    elif ext.endswith(tuple([hisat2.HT2_EXT, sam_bam.BAI_EXT])):
         utils.equal_file_sizes(file1, file2)
-    elif ext in [h5.H5_EXT]:
+    elif ext.endswith(tuple([h5.H5_EXT])):
         h5.equal_h5(file1, file2)
-    elif ext in [bedgraph.BEDGRAPH_EXT]:
+    elif ext.endswith(tuple([bedgraph.BEDGRAPH_EXT])):
         bedgraph.equal_bedgraph(file1, file2)
-    elif ext in [sam_bam.BAM_EXT]:
+    elif ext.endswith(tuple([sam_bam.BAM_EXT])):
         sam_bam.equal_bam(file1, file2)
-    elif ext in [sam_bam.SAM_EXT]:
+    elif ext.endswith(tuple([sam_bam.SAM_EXT])):
         sam_bam.equal_sam(file1, file2)
-    elif ext in ["tsv"]:
+    elif ext.endswith(tuple(["tsv"])):
         utils.equal_tsv(file1, file2)
-    elif ext in fastq.FASTQ_ALL_EXTS:
+    elif ext.endswith(tuple(fastq.FASTQ_ALL_EXTS)):
         fastq.equal_fastq(file1, file2)
-    assert False, "Unknown file type"
+    else:
+        assert False, "Unknown file type: " + ext
