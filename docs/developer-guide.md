@@ -288,7 +288,6 @@ $ pytest -v -k test_output_bam\[WT3AT\] riboviz/test/regression/test_vignette.py
 ```
 
 Note that in such cases, if `--skip-workflow` is not provided then the workflow will be run in its entirety.
-```
 
 ---
 
