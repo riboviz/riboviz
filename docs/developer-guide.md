@@ -67,6 +67,16 @@ Install:
 $ conda install -y pytest-cov
 ```
 
+### Sphinx
+
+Web site:
+
+* [Sphinx](https://www.sphinx-doc.org/)
+
+```console
+$ pip install sphinx
+```
+
 ---
 
 ## Install R packages for developers
@@ -556,3 +566,85 @@ $ dot -Tsvg workflow.dot > workflow.svg
 ```
 
 When `.dot` files are updated, the corresponding `.svg` images should be updated also.
+
+---
+
+## Sphinx code documentation
+
+### Updating HTML documentation
+
+Create Sphinx pages to reference source code:
+
+```console
+$ sphinx-apidoc -f -o code-docs/ riboviz
+```
+
+Create HTML documentation
+
+```console
+$ cd code-docs
+$ make html
+```
+
+Open code-docs/_build/html/index.html in a browser.
+
+## How the Sphinx documentation files were originally created
+
+```console
+$ sphinx-quickstart code-docs
+> Separate source and build directories (y/n) [n]: y
+> Project name: RiboViz
+> Author name(s): The University of Edinburgh; Rutgers University; University of California, Berkeley
+> Project release []: 
+> Project language [en]: 
+```
+
+Edit `code-docs/conf.py`:
+
+* Uncomment:
+
+```python
+# import os
+# import sys
+# sys.path.insert(0, os.path.abspath('.'))
+```
+
+* Update above to:
+
+```python
+sys.path.insert(0, os.path.abspath('../../riboviz'))
+```
+
+* Update:
+
+```python
+extensions = [
+]
+```
+
+* to:
+
+```python
+extensions = [
+    'sphinx.ext.autodoc'
+]
+```
+
+Edit `code-docs/index.rst` and replace content with:
+
+```
+RiboViz code documentation
+==========================
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Code documentation
+
+   modules
+
+Indices and tables:
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+```
