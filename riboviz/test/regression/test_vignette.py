@@ -35,7 +35,6 @@ from riboviz import h5
 from riboviz import hisat2
 from riboviz import sam_bam
 from riboviz import test
-from riboviz import trim_5p_mismatch
 from riboviz import compare_files
 from riboviz import workflow_files
 from riboviz import workflow_r
@@ -171,7 +170,7 @@ def test_sample_tmp_sam(expected, scratch_directory, sample, file_name):
 @pytest.mark.usefixtures("run_prep_riboviz")
 @pytest.mark.parametrize("sample", test.VIGNETTE_SAMPLES)
 @pytest.mark.parametrize("file_name", [
-    trim_5p_mismatch.TRIM_5P_MISMATCH_FILE])
+    workflow_files.TRIM_5P_MISMATCH_TSV])
 def test_sample_tmp_tsv(expected, sample, file_name):
     """
     Test tmp tsv files for equality.

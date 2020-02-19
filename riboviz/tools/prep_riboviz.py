@@ -141,7 +141,6 @@ from riboviz import params
 from riboviz import provenance
 from riboviz import sam_bam
 from riboviz import sample_sheets
-from riboviz import trim_5p_mismatch
 from riboviz import utils
 from riboviz import workflow
 from riboviz import workflow_files
@@ -256,8 +255,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
 
     orf_map_sam_clean = os.path.join(tmp_dir, workflow_files.ORF_MAP_CLEAN_SAM)
     trim_5p_mismatch_tsv = os.path.join(
-        tmp_dir,
-        trim_5p_mismatch.TRIM_5P_MISMATCH_FILE)
+        tmp_dir, workflow_files.TRIM_5P_MISMATCH_TSV)
     log_file = os.path.join(run_config.logs_dir,
                             LOG_FORMAT.format(step, "trim_5p_mismatch.log"))
     workflow.trim_5p_mismatches(orf_map_sam,
