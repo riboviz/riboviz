@@ -1,6 +1,89 @@
 # Coding style
 
-## Python
+## Documenting code
+
+### Python
+
+Python code should be documented using [doc-strings](https://www.python.org/dev/peps/pep-0257/). The doc-strings should include [Sphinx](https://www.sphinx-doc.org/en/master/)-compliant [reStructuredText](https://docutils.sourceforge.io/rst.html) markup. Examples are given below.
+
+Modules should have a doc-string descring the module. For example:
+
+```python
+"""
+Workflow configuration parameter names.
+"""
+```
+
+Constants and module-level variable should have doc-strings briefly describing what they are. For example:
+
+```python
+INPUT_DIR = "dir_in"
+""" Input directory. """
+```
+
+Functions should have doc-strings describing what they do and their parameters, return values (if applicable) and any exceptions (if applicable). Types of parameters and return values should also be documented. These should be documented using specific fields. For example:
+
+```python
+def load_sample_sheet(file_name, delimiter="\t", comment="#"):
+    """
+    Load a sample sheet from a file. The sample sheet is assumed to
+    have a header with column names ``SampleID`` and ``TagRead``.
+
+    :param file_name: File name
+    :type file_name: str or unicode
+    :param delimiter: Delimiter
+    :type delimiter: str or unicode
+    :param comment: Comment prefix
+    :type comment: str or unicode
+    :return: Sample sheet
+    :rtype: pandas.core.frame.DataFrame
+    :raise FileNotFoundError: If the file cannot be found or is \
+    not a file
+    :raise AssertionError: If there is no header with ``SampleID`` \
+    and ``TagRead`` columns.
+    """
+```
+
+To use fixed-width (teletype-style) text use ` `` ` (see the markup on `SampleID` and `TagRead` above).
+
+For references to other Python modules, functions or constants use Sphinx's `:py:` roles. For example:
+
+* Cross-reference to a module (`:py:mod:`):
+
+```python
+Count reads using :py:mod:`riboviz.tools.count_reads`.
+```
+
+* Cross-reference to a constant (`:py:constant:`):
+
+```python
+... also matching :py:const:`riboviz.workflow_files.UMI_EXTRACT_FQ` ...
+```
+
+* Cross-reference to a function (`:py:func:`):
+
+```python
+See :py:func:`riboviz.count_reads.count_reads` for information ...
+```
+
+Note that if the cross-reference is to an entity in the same module only the local name of the entity needs to be specified. For example:
+
+```python
+See :py:func:`count_reads` for information ...
+```
+
+For examples and further information, see:
+
+* Our source code.
+* Sphinx's Python [Info field lists](https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists) on the Python fields that Sphinx can recognise.
+* Sphinx's [Cross-referencing Python objects](https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#cross-referencing-python-objects) on the available cross-references.
+* Sphinx's [The Python Domain](https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#the-python-domain)
+
+---
+
+## Style checking
+
+### Python
 
 Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible. For example, to run these on `riboviz/compare_files.py`:
 
@@ -10,9 +93,7 @@ $ pycodestyle riboviz/compare_files.py
 $ 2to3 riboviz/compare_files.py
 ```
 
----
-
-## R
+### R
 
 Follow [Google’s R Style Guide](https://google.github.io/styleguide/Rguide.html), a fork of [Tidyverse R Style guide](https://style.tidyverse.org/), where possible - the Google fork is largely the same but differentiates more between functions (BigCamelCase) and variable names (snake_case) and does not assign to the right, for example. The Tidyverse R Style guide is implemented in `lintr` and `styleR` packages, so please bear in mind the small number of changes needed to follow the Google style.  
 
