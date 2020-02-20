@@ -20,29 +20,29 @@ Introduction:
 
 Quick start:
 
-* [Install prerequisites](./docs/install.md)
-* [Quick install scripts](./docs/quick-install.md) (Ubuntu and CentOS only)
-* [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./docs/run-vignette.md). Run a "vignette" of the RiboViz workflow to see RiboViz's capabilities.
-* [Run UMI extraction, deduplication and demultiplexing examples](./docs/run-dedup-demultiplex-examples.md). Run RiboViz on simulated data, to see how RiboViz handles duplicated and multiplexed data.
-* [Upgrade configuration files from RiboViz 1.x](./docs/upgrade-1x.md)
+* [Install prerequisites](./docs/user/install.md)
+* [Quick install scripts](./docs/user/quick-install.md) (Ubuntu and CentOS only)
+* [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./docs/user/run-vignette.md). Run a "vignette" of the RiboViz workflow to see RiboViz's capabilities.
+* [Run UMI extraction, deduplication and demultiplexing examples](./docs/user/run-dedup-demultiplex-examples.md). Run RiboViz on simulated data, to see how RiboViz handles duplicated and multiplexed data.
+* [Upgrade configuration files from RiboViz 1.x](./docs/user/upgrade-1x.md)
 
 Usage:
 
-* [What the RiboViz workflow does](./docs/prep-riboviz-operation.md)
-* [Configuring the RiboViz workflow](./docs/prep-riboviz-config.md)
-* [Running the RiboViz workflow](./docs/prep-riboviz-running.md)
+* [What the RiboViz workflow does](./docs/user/prep-riboviz-operation.md)
+* [Configuring the RiboViz workflow](./docs/user/prep-riboviz-config.md)
+* [Running the RiboViz workflow](./docs/user/prep-riboviz-running.md)
 
 Reference:
 
-* [riboviz.tools.create_fastq_simdata example FASTQ file generator](./docs/create-fastq-simdata.md)
-* [riboviz.tools.demultiplex_fastq fastq demultiplexer](./docs/demultiplex-fastq.md)
-* [riboviz.tools.count_reads reads counter](./docs/count-reads.md)
+* [riboviz.tools.demultiplex_fastq fastq demultiplexer](./docs/user/demultiplex-fastq.md)
+* [riboviz.tools.count_reads reads counter](./docs/user/count-reads.md)
 * [Content and provenance of repository data files](./docs/data.md)
-* [Structure of HDF5 data](./docs/hdf5-data.md)
+* [Structure of HDF5 data](./docs/user/hdf5-data.md)
 
 ## Develop RiboViz
 
-* [Developer guide](./docs/developer-guide.md)
+* [Developer guide](./docs/developer/developer-guide.md)
+* [riboviz.tools.create_fastq_simdata example FASTQ file generator](./docs/developer/create-fastq-simdata.md)
 
 ## Releases
 
