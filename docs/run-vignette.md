@@ -87,20 +87,19 @@ num_processes: 4
 
 ## Dry run `prep_riboviz`
 
-`prep_riboviz` supports a `--dry-run` command-line parameter which can be used to validate the configuration. 
+`prep_riboviz` supports a `-d` (or `--dry-run`) command-line parameter which can "dry run" the workflow. This validates the configuration without executing the workflow steps.
 
 **Tip:** we strongly recommend doing a dry run before doing a live run on data you have not processed before.
 
-Run `prep_riboviz` with `--dry-run` enabled:
+Run `prep_riboviz` in dry run mode:
 
 ```console
-$ python -m riboviz.tools.prep_riboviz --dry-run rscripts/ vignette/vignette_config.yaml
+$ python -m riboviz.tools.prep_riboviz -d -c vignette/vignette_config.yaml
 ```
 
 where:
 
-* `--dry-run`: flag to enable the dry run.
-* `rscripts/`: path to the directory with RiboViz's R scripts, relative to the RiboViz home directory.
+* `-d`: flag to enable the dry run.
 * `vignette/vignette_config.yaml`: path to the vignette configuration file.
 
 ### Troubleshooting: `This script needs to be run under Python 3`
@@ -118,7 +117,7 @@ This warning is expected and can be ignored. The vignette configuration file int
 Run `prep_riboviz`:
 
 ```console
-$ python -m riboviz.tools.prep_riboviz rscripts/ vignette/vignette_config.yaml
+$ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 ```
 
 For full information on how to run `prep_riboviz` and the options available, see [Running the RiboViz workflow](./prep-riboviz-running.md)

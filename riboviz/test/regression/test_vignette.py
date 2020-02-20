@@ -26,7 +26,6 @@ import shutil
 import tempfile
 import pytest
 import pysam
-import riboviz
 from riboviz import h5
 from riboviz import hisat2
 from riboviz import sam_bam
@@ -47,9 +46,7 @@ def prep_riboviz_fixture(skip_workflow_fixture):
     :type skip_workflow_fixture: bool
     """
     if not skip_workflow_fixture:
-        exit_code = prep_riboviz.prep_riboviz(
-            riboviz.R_SCRIPTS,
-            test.VIGNETTE_CONFIG)
+        exit_code = prep_riboviz.prep_riboviz(test.VIGNETTE_CONFIG)
         assert exit_code == 0, \
             "prep_riboviz returned non-zero exit code %d" % exit_code
 

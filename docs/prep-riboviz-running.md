@@ -121,21 +121,20 @@ This parameter is currently used by `hisat2`, `samtools sort`, `bam_to_h5.R` and
 
 ## Dry run `prep_riboviz`
 
-`prep_riboviz` supports a `--dry-run` command-line parameter which can be used to validate the configuration. 
+`prep_riboviz` supports a `-d` (or `--dry-run`) command-line parameter which can "dry run" the workflow. This validates the configuration without executing the workflow steps.
 
 **Tip:** we strongly recommend doing a dry run before doing a live run on data you have not processed before.
 
-Run `prep_riboviz` with `--dry-run` enabled:
+Run `prep_riboviz` in dry run mode:
 
 ```console
-$ python -m riboviz.tools.prep_riboviz --dry-run rscripts/ <CONFIG>
+$ python -m riboviz.tools.prep_riboviz -d -c <CONFIG_FILE>
 ```
 
 where:
 
-* `--dry-run`: flag to enable the dry run.
-* `rscripts/`: path to the directory with RiboViz's R scripts, relative to the RiboViz home directory.
-* `<CONFIG>`: path to a YAML configuration file.
+* `-d`: flag to enable the dry run.
+* `<CONFIG_FILE>`: path to a YAML configuration file.
 
 For more on this feature, see [Capturing commands submitted to bash](#capturing-commands-submitted-to-bash) below.
 
@@ -146,13 +145,12 @@ For more on this feature, see [Capturing commands submitted to bash](#capturing-
 Run `prep_riboviz`:
 
 ```console
-$ python -m riboviz.tools.prep_riboviz rscripts/ <CONFIG>
+$ python -m riboviz.tools.prep_riboviz -c <CONFIG_FILE>
 ```
 
 where:
 
-* `rscripts/`: path to the directory with RiboViz's R scripts, relative to the RiboViz home directory.
-* `<CONFIG>`: path to a YAML configuration file.
+* `<CONFIG_FILE>`: path to a YAML configuration file.
 
 Information on the key steps during processing is displayed. More detailed information, including the causes of any errors, is also added to a timestamped log file, in the current directory, named `riboviz-YYYYMMDD-HHMMSS.log` (for example, `riboviz.20190926-002455.log`).
 
@@ -280,14 +278,12 @@ To invoke `prep_riboviz` from outwith the RiboViz home directory:
 * Run:
 
 ```console
-$ PYTHONPATH=<RIBOVIZ> python -m riboviz.tools.prep_riboviz \
-    <PATH>/rscripts/ <CONFIG>
+$ PYTHONPATH=<RIBOVIZ> python -m riboviz.tools.prep_riboviz -c <CONFIG_FILE>
 ```
 
 where:
 
 * `<RIBOVIZ>`: path to RiboViz home directory, which can be relative to the current directory or absolute.
-* `<RIBOVIZ>/rscripts/`: path to the directory with RiboViz's R scripts.
 * `<CONFIG>`: path to a YAML configuration file, which can be relative to the current directory or absolute.
 
 For example, given an `analysis/` directory with contents:
@@ -322,7 +318,7 @@ asite_disp_length_file: riboviz/data/yeast_standard_asite_disp_length.txt
 
 ```console
 $ PYTHONPATH=riboviz/ python -m riboviz.tools.prep_riboviz \
-  riboviz/rscripts/ analysis/sample_config.yaml 
+  -c analysis/sample_config.yaml 
 ```
 
 Absolute paths can also be used. For example, if the file paths were as follows:
@@ -346,7 +342,7 @@ asite_disp_length_file: /home/user/riboviz/data/yeast_standard_asite_disp_length
 
 ```console
 $ PYTHONPATH=/home/user/riboviz/ python -m riboviz.tools.prep_riboviz \
-    /home/user/riboviz/rscripts/ /home/user/analysis/sample_config.yaml 
+  -c /home/user/analysis/sample_config.yaml 
 ```
 
 ---
