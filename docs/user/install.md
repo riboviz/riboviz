@@ -194,7 +194,9 @@ If you see:
 $ bash miniconda3.sh -b -p $HOME/miniconda3
 miniconda3.sh: line 1: --2019-07-31: command not found
 miniconda3.sh: line 2: syntax error near unexpected token `('
-miniconda3.sh: line 2: `Resolving repo.continuum.io (repo.continuum.io)... 104.18.200.79, 104.18.201.79, 2606:4700::6812:c94f, ...'
+miniconda3.sh: line 2: `Resolving repo.continuum.io
+(repo.continuum.io)... 104.18.200.79, 104.18.201.79,
+2606:4700::6812:c94f, ...'
 ```
 
 then rerun `wget` and use `-O`, not `-o`.
