@@ -7,7 +7,6 @@ mode using ``vignette/vignette_config.yaml``
 """
 import yaml
 import pytest
-import riboviz
 import riboviz.process_utils
 import riboviz.test
 import riboviz.tools
@@ -27,9 +26,7 @@ def test_missing_config_file():
     Test that using a non-existent configuration file gives the
     expected error code.
     """
-    exit_code = prep_riboviz.prep_riboviz(riboviz.R_SCRIPTS,
-                                          "nosuch.yaml",
-                                          True)
+    exit_code = prep_riboviz.prep_riboviz("nosuch.yaml", True)
     assert exit_code == prep_riboviz.EXIT_FILE_NOT_FOUND_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
@@ -47,9 +44,7 @@ def test_no_fq_files_error(configuration):
     config[params.FQ_FILES] = []
     with open(config_path, 'w') as f:
         yaml.dump(config, f)
-    exit_code = prep_riboviz.prep_riboviz(riboviz.R_SCRIPTS,
-                                          config_path,
-                                          True)
+    exit_code = prep_riboviz.prep_riboviz(config_path, True)
     assert exit_code == prep_riboviz.EXIT_CONFIG_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
@@ -67,9 +62,7 @@ def test_fq_files_multiplex_fq_files_error(configuration):
     config[params.MULTIPLEX_FQ_FILES] = ["somefile.fastq"]
     with open(config_path, 'w') as f:
         yaml.dump(config, f)
-    exit_code = prep_riboviz.prep_riboviz(riboviz.R_SCRIPTS,
-                                          config_path,
-                                          True)
+    exit_code = prep_riboviz.prep_riboviz(config_path, True)
     assert exit_code == prep_riboviz.EXIT_CONFIG_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
@@ -89,9 +82,7 @@ def test_multiplex_fq_files_missing_sample_sheet_error(configuration):
     config[params.SAMPLE_SHEET] = "noSuchFile.tsv"
     with open(config_path, 'w') as f:
         yaml.dump(config, f)
-    exit_code = prep_riboviz.prep_riboviz(riboviz.R_SCRIPTS,
-                                          config_path,
-                                          True)
+    exit_code = prep_riboviz.prep_riboviz(config_path, True)
     assert exit_code == prep_riboviz.EXIT_FILE_NOT_FOUND_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
@@ -112,9 +103,7 @@ def test_missing_fq_files(configuration):
     }
     with open(config_path, 'w') as f:
         yaml.dump(config, f)
-    exit_code = prep_riboviz.prep_riboviz(riboviz.R_SCRIPTS,
-                                          config_path,
-                                          True)
+    exit_code = prep_riboviz.prep_riboviz(config_path, True)
     assert exit_code == prep_riboviz.EXIT_PROCESSING_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
@@ -132,9 +121,7 @@ def test_missing_dir_in(configuration):
     del config[params.INPUT_DIR]
     with open(config_path, 'w') as f:
         yaml.dump(config, f)
-    exit_code = prep_riboviz.prep_riboviz(riboviz.R_SCRIPTS,
-                                          config_path,
-                                          True)
+    exit_code = prep_riboviz.prep_riboviz(config_path, True)
     assert exit_code == prep_riboviz.EXIT_CONFIG_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
@@ -160,8 +147,6 @@ def test_missing_files_error(configuration, parameter):
     config[parameter] = "noSuchFile.txt"
     with open(config_path, 'w') as f:
         yaml.dump(config, f)
-    exit_code = prep_riboviz.prep_riboviz(riboviz.R_SCRIPTS,
-                                          config_path,
-                                          True)
+    exit_code = prep_riboviz.prep_riboviz(config_path, True)
     assert exit_code == prep_riboviz.EXIT_FILE_NOT_FOUND_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code

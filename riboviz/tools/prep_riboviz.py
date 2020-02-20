@@ -4,13 +4,17 @@ Run the workflow.
 
 Usage::
 
-    python -m riboviz.tools.prep_riboviz
-        [--dry-run] <R_SCRIPTS_DIRECTORY> <CONFIG_FILE>
+    python -m riboviz.tools.prep_riboviz [-h] -c CONFIG_FILE [-d]
+
+    -h, --help            show this help message and exit
+    -c CONFIG_FILE, --config-file CONFIG_FILE
+                          Configuration file
+    -d, --dry-run         Dry run?
 
 Example::
 
     python -m riboviz.tools.prep_riboviz
-        rscripts/ vignette/vignette_config.yaml
+        -c vignette/vignette_config.yaml
 
 The script can process sample data or multiplexed sample data
 (relevant configuration parameters are shown in brackets).
@@ -126,6 +130,7 @@ what commands will be run, validating the configuration, without
 actually running the commands, and having a bash script that can be
 run directly in future.
 """
+import argparse
 from datetime import datetime
 import errno
 import logging
@@ -133,6 +138,7 @@ import os
 import os.path
 import sys
 import yaml
+import riboviz
 from riboviz import demultiplex_fastq
 from riboviz import fastq
 from riboviz import h5
@@ -410,7 +416,7 @@ def process_samples(samples, in_dir, index_dir, r_rna_index,
             sample_out_dir = os.path.join(out_dir, sample)
             sample_logs_dir = os.path.join(run_config.logs_dir, sample)
             sample_run_config = workflow.RunConfigTuple(
-                run_config.r_scripts,
+                riboviz.R_SCRIPTS,
                 run_config.cmd_file,
                 run_config.is_dry_run,
                 sample_logs_dir,
@@ -436,14 +442,12 @@ def process_samples(samples, in_dir, index_dir, r_rna_index,
     return successes
 
 
-def run_workflow(r_scripts, config_yaml, is_dry_run=False):
+def run_workflow(config_file, is_dry_run=False):
     """
     Run the workflow.
 
-    :param r_scripts: R scripts directory
-    :type r_scripts: str or unicode
-    :param config_yaml: Configuration file path
-    :type config_yaml: str or unicode
+    :param config_file: Configuration file path
+    :type config_file: str or unicode
     :param is_dry_run: Is this a dry run? (if ``True`` workflow \
     commands will not be submitted to the operating system for \
     execution)
@@ -455,8 +459,8 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     :raise TypeError: if a configuration parameter has an invalid type
     :raise Exception: if any other error arises
     """
-    LOGGER.info("Configuration file: %s", config_yaml)
-    with open(config_yaml, 'r') as f:
+    LOGGER.info("Configuration file: %s", config_file)
+    with open(config_file, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
 
     if value_in_dict(params.CMD_FILE, config):
@@ -505,7 +509,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
                                         input_file)
 
     run_config = workflow.RunConfigTuple(
-        r_scripts,
+        riboviz.R_SCRIPTS,
         cmd_file,
         is_dry_run,
         logs_dir,
@@ -627,12 +631,12 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
         log_file = os.path.join(logs_dir, "count_reads.log")
         read_counts_file = os.path.join(out_dir,
                                         workflow_files.READ_COUNTS_FILE)
-        workflow.count_reads(config_yaml, in_dir, tmp_dir, out_dir,
+        workflow.count_reads(config_file, in_dir, tmp_dir, out_dir,
                              read_counts_file, log_file, run_config)
     LOGGER.info("Completed")
 
 
-def prep_riboviz(r_scripts, config_yaml, is_dry_run=False):
+def prep_riboviz(config_file, is_dry_run=False):
     """
     Run the workflow. This function invokes :py:func:`run_workflow`,
     catches and logs any exceptions and maps these to exit codes.
@@ -645,10 +649,8 @@ def prep_riboviz(r_scripts, config_yaml, is_dry_run=False):
     * :py:const:`EXIT_PROCESSING_ERROR`
     * :py:const:`EXIT_PYTHON_2_ERROR`
 
-    :param r_scripts: R scripts direectory
-    :type r_scripts: str or unicode
-    :param config_yaml: Configuration file path
-    :type config_yaml: str or unicode
+    :param config_file: Configuration file path
+    :type config_file: str or unicode
     :param is_dry_run: Is this a dry run? (if ``True`` workflow \
     commands will not be submitted to the operating system for \
     execution)
@@ -661,7 +663,7 @@ def prep_riboviz(r_scripts, config_yaml, is_dry_run=False):
         return EXIT_PYTHON_2_ERROR
     LOGGER.info(provenance.write_provenance_to_str(__file__, " "))
     try:
-        run_workflow(r_scripts, config_yaml, is_dry_run)
+        run_workflow(config_file, is_dry_run)
     except FileNotFoundError as e:
         LOGGER.error("File not found: %s", e.filename)
         return EXIT_FILE_NOT_FOUND_ERROR
@@ -675,21 +677,47 @@ def prep_riboviz(r_scripts, config_yaml, is_dry_run=False):
         LOGGER.error("Configuration parameter error: %s", e.args[0])
         return EXIT_CONFIG_ERROR
     except Exception:
-        LOGGER.error("Processing error: %s", config_yaml)
+        LOGGER.error("Processing error: %s", config_file)
         exc_type, _, _ = sys.exc_info()
         LOGGER.exception(exc_type.__name__)
         return EXIT_PROCESSING_ERROR
     return EXIT_OK
 
 
-if __name__ == "__main__":
-    sys.argv.pop(0)  # Remove program name.
-    is_dry_run_arg = (sys.argv[0] == DRY_RUN)
-    if is_dry_run_arg:
-        sys.argv.pop(0)
-    r_scripts_arg = sys.argv[0]
-    config_yaml_arg = sys.argv[1]
-    exit_code = prep_riboviz(r_scripts_arg,
-                             config_yaml_arg,
-                             is_dry_run_arg)
+def parse_command_line_options():
+    """
+    Parse command-line options.
+
+    :returns: command-line options
+    :rtype: argparse.Namespace
+    """
+    parser = argparse.ArgumentParser(
+        description="Run workflow")
+    parser.add_argument("-c",
+                        "--config-file",
+                        dest="config_file",
+                        required=True,
+                        help="Configuration file")
+    parser.add_argument("-d",
+                        "--dry-run",
+                        dest='is_dry_run',
+                        action='store_true',
+                        help="Dry run?")
+    options = parser.parse_args()
+    return options
+
+
+def invoke_prep_riboviz():
+    """
+    Parse command-line options then invoke
+    :py:func:`prep_riboviz`.
+    """
+    options = parse_command_line_options()
+    config_file = options.config_file
+    is_dry_run = options.is_dry_run
+    exit_code = prep_riboviz(config_file, is_dry_run)
     sys.exit(exit_code)
+
+
+if __name__ == "__main__":
+    invoke_prep_riboviz()
