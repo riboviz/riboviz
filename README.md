@@ -45,11 +45,6 @@ Command-line tools:
 * [riboviz.tools.trim_5p_mismatch](./riboviz/tools/trim_5p_mismatch.py): Remove a single 5' mismatched nt and filter reads with more than a specified mismatches from a SAM file and save the trimming summary to a file. (invoked as part of a workflow)
 * [riboviz.tools.upgrade_config_file](./riboviz/tools/upgrade_config_file.py): Upgrade workflow configuration file to be compatible with current configuration.
 
-Reference:
-
-* [Content and provenance of repository data files](./docs/data.md)
-* [Structure of HDF5 data](./docs/user/hdf5-data.md)
-
 ## Develop RiboViz
 
 * [Install developer prerequisites](./docs/developer/install.md)
@@ -60,6 +55,11 @@ Reference:
 * [Writing and updating documentation](./docs/developer/documentation.md)
 * [Developer guide](./docs/developer/developer-guide.md)
 * [riboviz.tools.create_fastq_simdata example FASTQ file generator](./docs/developer/create-fastq-simdata.md)
+
+## Reference
+
+* [Content and provenance of repository data files](./docs/reference/data.md)
+* [Structure of HDF5 data](./docs/reference/hdf5-data.md)
 
 ## Releases
 
