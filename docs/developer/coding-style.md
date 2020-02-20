@@ -77,7 +77,7 @@ For examples and further information, see:
 * Our source code.
 * Sphinx's Python [Info field lists](https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists) on the Python fields that Sphinx can recognise.
 * Sphinx's [Cross-referencing Python objects](https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#cross-referencing-python-objects) on the available cross-references.
-* Sphinx's [The Python Domain](https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#the-python-domain)
+* Sphinx's [The Python Domain](https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#the-python-domain).
 
 ---
 
