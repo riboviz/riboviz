@@ -44,6 +44,7 @@ Reference:
 
 * [Install developer prerequisites](./docs/developer/install.md)
 * [Developing and running tests](./docs/developer/testing.md)
+* [Writing and updating documentation](./docs/developer/documentation.md)
 * [Developer guide](./docs/developer/developer-guide.md)
 * [riboviz.tools.create_fastq_simdata example FASTQ file generator](./docs/developer/create-fastq-simdata.md)
 
