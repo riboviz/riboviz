@@ -4,8 +4,10 @@ trimming, and demultiplexing.
 
 The following files are created.
 
-``umi5_umi3`` files:
+Reads with 5' UMI, 3' UMI and adaptor:
 
+* Prefix: ``umi5_umi3``.
+* These files can be used to test adaptor trimming and deduplication.
 * ``umi5_umi3_umi_adaptor.fastq``: FASTQ file with 9 reads, each with
   a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a 11nt adaptor
   at the 3' end. Reads can be grouped by UMI into 5 groups.
@@ -15,8 +17,10 @@ The following files are created.
   UMIs extracted and concatenated to the header, with a ``_``
   delimiter.
 
-``umi3`` files:
+Reads with 5' UMI, 3' UMI and adaptor:
 
+* Prefix: ``umi3``.
+* These files can be used to test adaptor trimming and deduplication.
 * ``umi3_umi_adaptor.fastq``: FASTQ file with 8 reads, each with a 4nt
   UMI at the 3' end and a 11nt adaptor at the 3' end. Reads can be
   grouped by UMI into 4 groups.
@@ -25,13 +29,17 @@ The following files are created.
 * ``umi3.fastq``: FASTQ file identical to the above but with the UMI
   extracted and concatenated to the header, with a ``_`` delimiter.
 
-``multiplex`` files:
+Reads with 5' UMI, 3' UMI, adaptor and barcode:
 
+* Prefix: ``multiplex``.
+* These files can be used to test adaptor trimming, demultiplexing and
+  deduplication.
 * ``multiplex_barcodes.tsv``: tab-separated values file with
   ``SampleID`` column (with values ``Tag0|1|2``) and ``TagRead``
   column (with values ``ACG``, ``GAC``, ``CGA``). This is consistent
   with the sample sheet file format expected by
-  :py:mod:`riboviz.tools.demultiplex_fastq`.
+  :py:mod:`riboviz.tools.demultiplex_fastq` and
+  :py:mod:`riboviz.demultiplex_fastq`.
 * ``multiplex_umi_barcode_adaptor.fastq``: FASTQ file with 90 reads:
     - Each read has a 4nt UMI at the 5' end, a 4nt UMI at the 3' end,
       a 3nt barcode at the 3' end and a 11nt adaptor at the 3' end.
@@ -167,7 +175,7 @@ def trim_fastq_record_5prime(record,
                              add_trim=False,
                              delimiter=barcodes_umis.UMI_DELIMITER):
     """
-    Copy FASTQ record, but trim sequence and quality scores at 5' end 
+    Copy FASTQ record, but trim sequence and quality scores at 5' end
     by given length.
 
     :param record: Record
