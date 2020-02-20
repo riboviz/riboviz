@@ -1,19 +1,32 @@
 """
 :py:mod:`riboviz.tools.prep_riboviz` regression test suite.
 
+The regression test suite runs :py:mod:`riboviz.tools.prep_riboviz` on
+the vignette data, in ``vignette/``
+(:py:const:`riboviz.test.VIGNETTE_DIR`), then compares the results, in
+``vignette/``, to a directory of pre-calculated results, specified by
+the user.
+
+Usage::
+
+    pytest riboviz/test/regression/test_vignette.py
+      --expected=DIRECTORY
+      [--skip-workflow]
+      [--check-index-tmp]
+
 The test suite accepts three custom command-line parameters:
 
 * ``--expected=<DIRECTORY>``: Directory with expected data files,
   against which files in ``vignette/`` will be checked.
 * ``--skip-workflow``: Workflow will not be run prior to checking data
   files.
-* `--check-index-tmp`: Check index and temporary files (default is
+* ``--check-index-tmp``: Check index and temporary files (default is
   that only the output files are checked).
 
-If ``--skip-workflow`` is provided then the module-level fixture
+If ``--skip-workflow`` is not specified then the module-level fixture
 :py:func:`prep_riboviz_fixture` runs
-:py:mod:`riboviz.tools.prep_riboviz` regression test suite using the
-vignette configuration, ``vignette/vignette-config.yaml``,
+:py:mod:`riboviz.tools.prep_riboviz` using the vignette configuration,
+``vignette/vignette-config.yaml``,
 (:py:const:`riboviz.test.VIGNETTE_CONFIG`).
 
 The vignette output files (and the index and temporary files, if
