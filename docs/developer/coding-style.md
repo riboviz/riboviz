@@ -18,7 +18,16 @@ Follow [Google’s R Style Guide](https://google.github.io/styleguide/Rguide.htm
 
 `Lintr` package can be used to produce programmatic output of style issues but does not edit the code, whilst the `styleR` package makes automatic adjustments to selections or files by default.
 
-Lintr can be used within an IDE such as RStudio via an add-in once installed if preferred and run on the current file. It can also be run within the R terminal (for example on `generate_stats_figs.R`) with the command: `lint("$HOME/RiboViz/rscripts/generate_stats_figs.R")`, but if there is considerable output or you wish to work through the output bit by bit, it's possible to send it to an output file using `sink()` as below:
+Lintr can be used within an IDE such as RStudio via an add-in once installed if preferred and run on the current file. It can also be run within the R terminal. For example, it can be run on `generate_stats_figs.R` with the command:
+
+```console
+$ R
+```
+```R
+> lint("$HOME/RiboViz/rscripts/generate_stats_figs.R")
+```
+
+If there is considerable output or you wish to work through the output bit by bit, it's possible to send it to an output file using `sink()` as below:
 
 ```console
 $ R
