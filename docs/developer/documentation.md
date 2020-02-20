@@ -84,7 +84,7 @@ Indices and tables:
 
 ## Update workflow images
 
-Workflow images in [images](../images) are written in the open source [dot](https://graphviz.org/doc/info/lang.html) language from [GraphViz](https://www.graphviz.org/). For an overview, see [Drawing graphs with dot](https://www.graphviz.org/pdf/dotguide.pdf). GraphViz includes a command-line tool, `dot`, for converting dot files into image in various formats.
+Workflow images in `docs/images/` are written in the open source [dot](https://graphviz.org/doc/info/lang.html) language from [GraphViz](https://www.graphviz.org/). For an overview, see [Drawing graphs with dot](https://www.graphviz.org/pdf/dotguide.pdf). GraphViz includes a command-line tool, `dot`, for converting dot files into image in various formats.
 
 Convert `.dot` file to `.svg` file:
 
