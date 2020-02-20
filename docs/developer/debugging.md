@@ -25,13 +25,34 @@ this will accept `debug()` and `browser()` statements run from the interactive R
 For example, in the vignette we call:
 
 ```console
-Rscript --vanilla rscripts/generate_stats_figs.R --Ncores=1 --MinReadLen=10 --MaxReadLen=50 --Buffer=250 --PrimaryID=Name --dataset=vignette --hdFile=vignette/output/WTnone.h5 --out_prefix=vignette/output/WTnone --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --dir_out=vignette/output --do_pos_sp_nt_freq=True --t_rna=data/yeast_tRNAs.tsv --codon_pos=data/yeast_codon_pos_i200.RData --features_file=data/yeast_features.tsv --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --count_threshold=64 --asite_disp_length_file=vignette/input/asite_disp_length_yeast_standard.txt
+Rscript --vanilla rscripts/generate_stats_figs.R --Ncores=1 \
+ --MinReadLen=10 --MaxReadLen=50 --Buffer=250 --PrimaryID=Name \
+ --dataset=vignette --hdFile=vignette/output/WTnone.h5 \
+ --out_prefix=vignette/output/WTnone \
+ --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True \
+ --dir_out=vignette/output --do_pos_sp_nt_freq=True \
+ --t_rna=data/yeast_tRNAs.tsv \
+ --codon_pos=data/yeast_codon_pos_i200.RData \
+ --features_file=data/yeast_features.tsv \
+ --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
+ --count_threshold=64 \
+ --asite_disp_length_file=vignette/input/asite_disp_length_yeast_standard.txt
 ```
 
 But to debug a new feature, instead run:
 
 ```console
-R --vanilla --args --Ncores=1 --MinReadLen=10 --MaxReadLen=50 --Buffer=250 --PrimaryID=Name --dataset=vignette --hdFile=vignette/output/WTnone.h5 --out_prefix=vignette/output/WTnone --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --dir_out=vignette/output --do_pos_sp_nt_freq=True --t_rna=data/yeast_tRNAs.tsv --codon_pos=data/yeast_codon_pos_i200.RData --features_file=data/yeast_features.tsv --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --count_threshold=64 --asite_disp_length_file=vignette/input/asite_disp_length_yeast_standard.txt
+R --vanilla --args --Ncores=1 --MinReadLen=10 --MaxReadLen=50 \
+ --Buffer=250 --PrimaryID=Name --dataset=vignette \
+ --hdFile=vignette/output/WTnone.h5 --out_prefix=vignette/output/WTnone \
+ --orf_fasta=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True \
+ --dir_out=vignette/output --do_pos_sp_nt_freq=True \
+ --t_rna=data/yeast_tRNAs.tsv \
+ --codon_pos=data/yeast_codon_pos_i200.RData \
+ --features_file=data/yeast_features.tsv \
+ --orf_gff_file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
+ --count_threshold=64 \
+ --asite_disp_length_file=vignette/input/asite_disp_length_yeast_standard.txt 
 ```
 
 then 
@@ -40,4 +61,4 @@ then
 > source('rscripts/generate_stats_figs.R')
 ```
 
-For example, to debug a specific line of code, you could add a `browser()` statement in the source first. Alternatively, you could copy and paste the parts of the code you wanted to run, as long as earlier dependencies are run first (packages, importing command args, function definitions).
+For example, to debug a specific line of code, you could add a `browser()` statement in the source first. Alternatively, you could copy and paste the parts of the code you wanted to run, as long as earlier dependencies are run first (packages, importing command arguments, function definitions).
