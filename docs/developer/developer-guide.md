@@ -17,18 +17,6 @@ To request that a branch be merged into the `develop` branch create a new pull r
 
 ---
 
-## Logging
-
-`prep_riboviz` logging is handled via Python's `logging` module. The configuration file is in `riboviz/logging.yaml`.
-
-A custom configuration file can be provided by defining a `RIBOVIZ_LOG_CONFIG` environment variable, for example:
-
-```console
-$ RIBOVIZ_LOG_CONFIG=custom_logging.yaml
-```
-
----
-
 ## Repository structure
 
 ```

@@ -397,6 +397,8 @@ This means that the bash script output by `prep_riboviz` with `--dry-run` may no
 
 You can customise logging by editing the file `riboviz/logging.yaml`.
 
+### Removing timestamps
+
 If you do not want `riboviz.log` to include a timestamp (i.e. you want the log file to be named `riboviz.log`) then edit `riboviz/logging.yaml` and replace:
 
 ```yaml
@@ -407,6 +409,14 @@ with:
 
 ```yaml  
   handlers: [console, file_handler]
+```
+
+#### Using custom log configuration files
+
+A custom log configuration file can be provided by defining a `RIBOVIZ_LOG_CONFIG` environment variable. For example:
+
+```console
+$ RIBOVIZ_LOG_CONFIG=custom_logging.yaml
 ```
 
 ---
