@@ -14,7 +14,7 @@ $ 2to3 riboviz/compare_files.py
 
 ## R
 
-Follow [Google’s R Style Guide](https://google.github.io/styleguide/Rguide.html), a fork of [Tidyverse R Style guide](https://style.tidyverse.org/) where possible - the Google fork is largely the same but differentiates more between functions (BigCamelCase) and variable names (snake_case) and does not assign to the right, for example. The Tidyverse R Style guide is implemented in `lintr` and `styleR` packages, so please bear in mind the small number of changes needed to follow the Google style.  
+Follow [Google’s R Style Guide](https://google.github.io/styleguide/Rguide.html), a fork of [Tidyverse R Style guide](https://style.tidyverse.org/), where possible - the Google fork is largely the same but differentiates more between functions (BigCamelCase) and variable names (snake_case) and does not assign to the right, for example. The Tidyverse R Style guide is implemented in `lintr` and `styleR` packages, so please bear in mind the small number of changes needed to follow the Google style.  
 
 `Lintr` package can be used to produce programmatic output of style issues but does not edit the code, whilst the `styleR` package makes automatic adjustments to selections or files by default.
 
