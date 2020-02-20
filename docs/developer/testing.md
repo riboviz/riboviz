@@ -2,24 +2,26 @@
 
 ## Run vignette regression test suite
 
-The vignette regression test suite optionally runs `prep_riboviz` on the vignette data, in `vignette/`, then compares the results, in `vignette/`, to a directory of pre-calculated results.
+`riboviz.test.regression.test_vignette` is a regression test suite. The regression test suite runs riboviz.tools.prep_riboviz on the vignette data, in `vignette/`, then compares the results, in `vignette/`, to a directory of pre-calculated results, specified by the user.
 
-The tests can be run using pytest:
+Usage:
 
 ```console
 $ pytest riboviz/test/regression/test_vignette.py \
-        --expected=<DIRECTORY> \
-        [--skip-workflow] \
-	[--check-index-tmp]
+    --expected=DIRECTORY \
+    [--skip-workflow] \
+    [--check-index-tmp]
 ```
 
-where:
+The test suite accepts three custom command-line parameters:
 
-* `--expected=<DIRECTORY>`: directory with expected vignette files. This is assumed to have `index/` `tmp/` and `output/` directories.
-* `--skip-workflow`: request that the `prep_riboviz` workflow **not** be run, instead use existing data files in `vignette/` for testing.
-* `--check-index-tmp`: request that the index and temporary files be checked also (the default is that only the output files are checked)
+* `--expected=<DIRECTORY>`: Directory with expected data files, against which files in vignette/ will be checked.
+* `--skip-workflow`: Workflow will not be run prior to checking data files.
+* `--check-index-tmp`: Check index and temporary files (default is that only the output files are checked).
 
-For each file output by the vignette, the files are compared using the same comparisons as for `compare_files` above.
+If `--skip-workflow` is not specified then `riboviz.tools.prep_riboviz` is run using the vignette configuration, `vignette/vignette-config.yaml`.
+
+The vignette output files (and the index and temporary files, if `--check-index-tmp` was provided) in `vignette/` are then compared against those in the directory provided via the expected parameter.
 
 If `--check-index-tmp` is not provided then tests for index and temporary files will be skipped. This will appear as follows:
 
@@ -38,35 +40,27 @@ riboviz/test/regression/test_vignette.py::test_index[2-yeast_rRNA] SKIPPED [  5%
 ...
 ```
 
-Useful pytest flags are:
-
-* `-s`: disable output capture so, for example, `print` messages are shown.
-* `-v`: verbose mode, displays names of test functions run.
-* `-k`: run a specific test function.
-
-Specific subsets of tests, or individual tests, can be rerun, for example:
-
-```console
-$ pytest -s -k "test_output_bam" riboviz/test/regression/test_vignette.py --expected=<DIRECTORY> --skip-workflow
-
-$ pytest -v -k test_output_bam\[WT3AT\] riboviz/test/regression/test_vignette.py --expected=$HOME/vignette-20190802-4f28def --skip-workflow
-```
-
-Note that in such cases, if `--skip-workflow` is not provided then the workflow will be run in its entirety.
-
 ---
 
-## Run non-regression tests
+## Run all tests (excluding regression tests)
 
-Run all tests (excluding regression tests):
+Run:
 
 ```console
 $ pytest -v --ignore-glob="*regression*"
 ```
 
-Run all tests and generate test coverage report (including lines that were not invoked):
+Run all tests and create a test coverage report which includes the line numbers of statements that were not executed:
 
 ```console
 $ pytest --cov-config=.coveragerc --cov-report term-missing \
     --cov=riboviz --ignore-glob="*regression*"
 ```
+
+---
+
+## Useful pytest flags
+
+* `-s`: disable output capture so, for example, `print` messages are shown.
+* `-v`: verbose mode, displays names of test functions run.
+* `-k`: run a specific test function.
