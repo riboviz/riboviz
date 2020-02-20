@@ -43,6 +43,7 @@ Reference:
 ## Develop RiboViz
 
 * [Install developer prerequisites](./docs/developer/install.md)
+* [Coding style](./docs/developer/coding-style.md)
 * [Debugging](./docs/developer/debugging.md)
 * [Developing and running tests](./docs/developer/testing.md)
 * [Writing and updating documentation](./docs/developer/documentation.md)
