@@ -43,6 +43,7 @@ Reference:
 ## Develop RiboViz
 
 * [Install developer prerequisites](./docs/developer/install.md)
+* [Git branching model](./docs/git-branching-model.md)
 * [Coding style](./docs/developer/coding-style.md)
 * [Debugging](./docs/developer/debugging.md)
 * [Developing and running tests](./docs/developer/testing.md)
