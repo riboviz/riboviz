@@ -41,6 +41,7 @@ Reference:
 
 ## Develop RiboViz
 
+* [Install developer prerequisites](./docs/developer/install.md)
 * [Developer guide](./docs/developer/developer-guide.md)
 * [riboviz.tools.create_fastq_simdata example FASTQ file generator](./docs/developer/create-fastq-simdata.md)
 
