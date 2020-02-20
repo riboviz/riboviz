@@ -12,6 +12,7 @@ Usage:
 
 ```console
 $ git clone https://github.com/riboviz/<REPOSITORY>
+$ cd riboviz
 $ pytest riboviz/test/regression/test_vignette.py --expected=$HOME/<REPOSITORY>
 ```
 
