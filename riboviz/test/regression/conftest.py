@@ -1,60 +1,58 @@
 """
-pytest plugin file.
+pytest plugin file for regression tests. See
+https://docs.pytest.org/en/latest/writing_plugins.html
 
-See https://docs.pytest.org/en/latest/writing_plugins.html
+This allows pytest to take in additional command-line parameters to
+pass onto the regression test modules:
+
+* ``--expected=<DIRECTORY>``: Directory with expected data files,
+  against which files in ``vignette/`` will be checked.
+* ``--skip-workflow``: Workflow will not be run prior to checking data
+  files.
+* `--check-index-tmp`: Check index and temporary files (default is
+  that only the output files are checked).
 """
 import os.path
 import pytest
 
 EXPECTED = "--expected"
-""" Command-line flag for directory with expected data files """
+""" Directory with expected data files command-line flag."""
 SKIP_WORKFLOW = "--skip-workflow"
-""" Command-line flag to specify that workflow should not be run """
+""" Do not run workflow command-line flag. """
 CHECK_INDEX_TMP = "--check-index-tmp"
-"""
-Command-line flag to specify that index and temprary files should be
-checked too (default is that only output files are checked.
-"""
+""" Check index and temporary files command-line flag. """
 
 
 def pytest_addoption(parser):
     """
-    pytest configuration hook.
-
-    See
+    pytest configuration hook. See
     https://docs.pytest.org/en/latest/reference.html#_pytest.hookspec.pytest_addoption
 
     :param parser: command-line parser
     :type parser: _pytest.config.argparsing.Parser
     """
-    parser.addoption(
-        EXPECTED,
-        action="store",
-        required=True,
-        help="Directory with expected data files"
-    )
-    parser.addoption(
-        SKIP_WORKFLOW,
-        action="store_true",
-        required=False,
-        help="Workflow should not be run"
-    )
-    parser.addoption(
-        CHECK_INDEX_TMP,
-        action="store_true",
-        required=False,
-        help="Index and temporary files should be checked too"
-    )
+    parser.addoption(EXPECTED,
+                     action="store",
+                     required=True,
+                     help="Directory with expected data files")
+    parser.addoption(SKIP_WORKFLOW,
+                     action="store_true",
+                     required=False,
+                     help="Do not run workflow")
+    parser.addoption(CHECK_INDEX_TMP,
+                     action="store_true",
+                     required=False,
+                     help="Check index and temporary files")
 
 
 @pytest.fixture
-def expected(request):
+def expected_fixture(request):
     """
-    Gets value for "--expected" command-line option.
+    Gets value for ``--expected`` command-line option.
 
     :param request: request
     :type request: _pytest.fixtures.SubRequest
-    :return: directory with expected data files
+    :return: directory
     :rtype: str or unicode
     :raise AssertionError: if the option has a value that is \
     not a directory
@@ -66,28 +64,29 @@ def expected(request):
 
 
 @pytest.fixture(scope="module")
-def skip_workflow(request):
+def skip_workflow_fixture(request):
     """
-    Gets value for "--skip-workflow" command-line option.
+    Gets value for ``--skip-workflow`` command-line option.
 
     :param request: request
     :type request: _pytest.fixtures.SubRequest
-    :return: whether workflow should be skipped
+    :return: flag
     :rtype: bool
     """
     return request.config.getoption(SKIP_WORKFLOW)
 
 
 @pytest.fixture(scope="module")
-def skip_index_tmp(request):
+def skip_index_tmp_fixture(request):
     """
-    Gets value for "--check-index-tmp" command-line option and, if
-    False, or undefined, invokes "pytest.skip" to skip a test.
+    Gets value for `--check-index-tmp` command-line option. If
+    ``False``, or undefined, invokes ``pytest.skip`` to skip
+    test.
 
     :param request: request
     :type request: _pytest.fixtures.SubRequest
-    :return: whether temporary files should be checked
+    :return: flag
     :rtype: bool
     """
     if not request.config.getoption(CHECK_INDEX_TMP):
-        pytest.skip('Checking output files only')
+        pytest.skip('Skipped index and temporary files tests')

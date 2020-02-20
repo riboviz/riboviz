@@ -25,7 +25,7 @@ The HDF5 file is organized in the following hierarchy `/<Gene>/<Dataset>/reads/d
 ```
 The `data` table is an integer table with each rows representing a read length and columns representing nucleotide positions. The first row corresponds to reads of length 15 and the last row corresponds to reads of length 50. All reads are mapped to their 5' ends (see below).
 
-![as](http://gdurl.com/9UUu)
+![H5 architecture](../images/h5_architecture.png)
 
 ## Read attributes
 
