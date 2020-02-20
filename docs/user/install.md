@@ -364,7 +364,7 @@ UMI-tools version: 1.0.0
 
 ## Hisat2
 
-Web site: [Hisat2](https://ccb.jhu.edu/software/hisat2/index.shtml)
+Web site: [Hisat2](https://daehwankimlab.github.io/hisat2/)
 
 Install:
 
