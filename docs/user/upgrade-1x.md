@@ -24,4 +24,4 @@ $ python -m riboviz.tools.upgrade_config_file \
 
 **Tip:** we strongly recommend you visually inspect the updated configuration to ensure the updates reflect your local environment. This especially relates to any file paths.
 
-For details of the changes applied, see [riboviz.tools.upgrade_config_file](../../riboviz/tools/upgrade_config_file.py).
+For details of the changes applied, see [riboviz.tools.upgrade_config_file](../../riboviz/upgrade_config.py).
