@@ -420,7 +420,9 @@ $ bowtie --version
 Built on 462e5beae518
 Mon Dec 11 19:27:01 UTC 2017
 Compiler: gcc version 4.8.2 20140120 (Red Hat 4.8.2-15) (GCC) 
-Options: -O3 -m64  -Wl,--hash-style=both -DWITH_TBB -DPOPCNT_CAPABILITY -g -O2 -fvisibility=hidden -I/hbb_exe/include   -g -O2 -fvisibility=hidden -I/hbb_exe/include  
+Options: -O3 -m64  -Wl,--hash-style=both -DWITH_TBB
+-DPOPCNT_CAPABILITY -g -O2 -fvisibility=hidden -I/hbb_exe/include
+-g -O2 -fvisibility=hidden -I/hbb_exe/include
 Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 ```
 
@@ -657,8 +659,11 @@ DESCRIPTION  libs  LICENSE  Meta  NAMESPACE  NEWS
 **Troubleshooting: Cannot allocate memory**
 
 ```
-Error in system2(file.path(R.home("bin"), "R"), c(if (nzchar(arch)) paste0("--arch=",  : 
-  cannot popen ' '/usr/lib/R/bin/R' --no-save --slave 2>&1 < '/tmp/Rtmpw3pOH7/file12471113d0d2b'', probable reason 'Cannot allocate memory'
+Error in system2(file.path(R.home("bin"), "R"), c(if (nzchar(arch))
+paste0("--arch=",  :
+  cannot popen ' '/usr/lib/R/bin/R' --no-save --slave 2>&1 <
+  '/tmp/Rtmpw3pOH7/file12471113d0d2b'', probable reason 'Cannot
+  allocate memory'
 * removing "/home/ubuntu/R/x86_64-pc-linux-gnu-library/3.5/Rsamtools"
 Warning in q("no", status = status, runLast = FALSE) :
   system call failed: Cannot allocate memory
@@ -666,8 +671,8 @@ Warning in q("no", status = status, runLast = FALSE) :
 The downloaded source packages are in
         "/tmp/RtmpOEVbaL/downloaded_packages"
 installation path not writeable, unable to update packages: foreign
-Warning message:
-In install.packages(pkgs = doing, lib = lib, ...) :
+Warning message:e
+In install.packagees(pkgs = doing, lib = lib, ...) :
   installation of package "Rsamtools" had non-zero exit status
 ```
 
