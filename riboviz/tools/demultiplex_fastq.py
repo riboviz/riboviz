@@ -25,7 +25,53 @@ Usage::
     -d [DELIMITER], --delimiter [DELIMITER]
                           Barcode delimiter (default _)
 
-See :py:func:`riboviz.demultiplex_fastq.demultiplex`.
+For example, run UMI-tools on sample data and extract barcodes::
+
+    $ mkdir extracts/
+    $ umi_tools extract --bc-pattern="^(?P<cell_1>.{9})(?P<umi_1>.{0}).+$"
+      --extract-method=regex -I data/demultiplex/Sample_4reads_R1.fastq.gz
+      -S extracts/Sample_4reads_R1.fastq.gz
+    $ umi_tools extract --bc-pattern="^(?P<cell_1>.{9})(?P<umi_1>.{0}).+$"
+      --extract-method=regex -I data/demultiplex/Sample_4reads_R2.fastq.gz
+      -S extracts/Sample_4reads_R2.fastq.gz
+    $ umi_tools extract --bc-pattern="^(?P<cell_1>.{9})(?P<umi_1>.{0}).+$"
+      --extract-method=regex -I data/demultiplex/Sample_init10000_R1.fastq.gz
+      -S extracts/Sample_init10000_R1.fastq.gz
+    $ umi_tools extract --bc-pattern="^(?P<cell_1>.{9})(?P<umi_1>.{0}).+$"
+      --extract-method=regex -I data/demultiplex/Sample_init10000_R2.fastq.gz
+      -S extracts/Sample_init10000_R2.fastq.gz
+
+(note that the regular expression to extract the barcodes
+intentionally includes a zero-length UMI - we are assuming that this
+data has no UMIs)
+
+Demultiplex single-end data::
+
+    $ mkdir extracts-deplexed/
+    $ python -m riboviz.tools.demultiplex_fastq
+      -1 extracts/Sample_4reads_R1.fastq.gz
+      -s data/demultiplex/TagSeqBarcodedOligos2015.txt
+      -o extracts-deplexed/TestSingleSplit4reads
+    $ python -m riboviz.tools.demultiplex_fastq
+      -1 extracts/Sample_init10000_R1.fastq.gz
+      -s data/demultiplex/TagSeqBarcodedOligos2015.txt
+      -o extracts-deplexed/TestSingleSplit10000
+
+Demultiplex paired-end data::
+
+    $ python -m riboviz.tools.demultiplex_fastq
+      -1 extracts/Sample_4reads_R1.fastq.gz
+      -2 extracts/Sample_4reads_R2.fastq.gz
+      -s data/demultiplex/TagSeqBarcodedOligos2015.txt
+      -o extracts-deplexed/TestPairSplit4reads
+    $ python -m riboviz.tools.demultiplex_fastq
+      -1 extracts/Sample_init10000_R1.fastq.gz
+      -2 extracts/Sample_init10000_R2.fastq.gz
+      -s data/demultiplex/TagSeqBarcodedOligos2015.txt
+      -o extracts-deplexed/TestPairSplit10000
+
+See :py:mod:`riboviz.demultiplex_fastq` for information on the sample
+sheet file and the output files.
 """
 
 import argparse

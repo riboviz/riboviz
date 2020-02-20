@@ -28,6 +28,21 @@ The output file is a TSV file with columns:
 * ``File``: Path to file.
 * ``NumReads``: Number of reads in the file.
 * ``Description``: Human-readable description of the file contents.
+
+For example::
+
+    # Created by: RiboViz
+    # Date: 2020-02-12 06:34:50.340316
+    # Command-line tool: /home/ubuntu/riboviz/riboviz/tools/count_reads.py
+    # File: /home/ubuntu/riboviz/riboviz/count_reads.py
+    # Version: commit 0c39652154fd9623f2cebbace6e741f54d712b32 date 2020-02-12 06:24:19-08:00
+    SampleName	Program	File	NumReads	Description
+    WTnone	input	vignette/input/SRR1042855_s1mi.fastq.gz	963571	input
+    WT3AT	input	vignette/input/SRR1042864_s1mi.fastq.gz	1374448	input
+    WT3AT	cutadapt	vignette/tmp/WT3AT/trim.fq	1373362	Reads after removal of sequencing library adapters
+    WT3AT	hisat2	vignette/tmp/WT3AT/nonrRNA.fq	486233	rRNA or other contaminating reads removed by alignment to rRNA index files
+    WT3AT	hisat2  vignette/tmp/WT3AT/rRNA_map.sam	1373362	Reads with rRNA and other contaminating reads removed by alignment to rRNA index files
+
 """
 import glob
 import os

@@ -12,7 +12,8 @@ Usage::
     -o OUTPUT_DIR, --output-dir OUTPUT_DIR
                           Output directory
 
-See :py:func:`riboviz.create_fastq_simdata.create_fastq_simdata`.
+See :py:mod:`riboviz.create_fastq_simdata` for information on the
+files created.
 """
 import argparse
 from riboviz import create_fastq_simdata

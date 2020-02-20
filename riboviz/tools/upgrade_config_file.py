@@ -15,7 +15,8 @@ Usage::
                           Output file (if not provided then the
                           upgraded configuration is printed)
 
-See :py:mod:`riboviz.upgrade_config.upgrade_config_file`.
+See :py:mod:`riboviz.upgrade_config` for information on the changes
+applied.
 """
 import argparse
 from riboviz import upgrade_config
