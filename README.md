@@ -32,11 +32,21 @@ Usage:
 * [Configuring the RiboViz workflow](./docs/user/prep-riboviz-config.md)
 * [Running the RiboViz workflow](./docs/user/prep-riboviz-running.md)
 
+Command-line tools:
+
+* [riboviz.tools.check_fasta_gff](./riboviz/tools/check_fasta_gff.py): Check FASTA and GFF files for compatibility.
+* [riboviz.tools.compare_files](./riboviz/tools/compare_files.py): Compare two files for equality.
+* [riboviz.tools.count_reads](./riboviz/tools/count_reads.py): Scan input, temporary and output directories and count the number of reads (sequences) processed by specific stages of a workflow. (invoked as part of a workflow)
+* [riboviz.tools.create_barcode_pairs](./riboviz/tools/create_barcode_pairs.py): Create barcode pairs and write each pair plus the Hamming distance between then to a file of tab-separated values.
+* [riboviz.tools.create_fastq_simdata](./riboviz/tools/create_fastq_simdata.py): Create simulated FASTQ files to test UMI/deduplication, adaptor trimming, anddemultiplexing. Files in `data/simdata/` were created using this tool.
+* [riboviz.tools.demultiplex_fastq](./riboviz/tools/demultiplex_fastq.py): Demultiplex FASTQ files using UMI-tools-compliant barcodes present within the FASTQ headers and a sample sheet file. (invoked as part of a workflow)
+* [riboviz.tools.prep_riboviz](./riboviz/tools/prep_riboviz.py): Run the workflow.
+* [riboviz.tools.subsample_bioseqfile](./riboviz/tools/subsample_bioseqfile.py): Subsample an input FASTQ (or other sequencing) file, to produce a smaller file whose reads are randomly sampled from of the input with a fixed probability.
+* [riboviz.tools.trim_5p_mismatch](./riboviz/tools/trim_5p_mismatch.py): Remove a single 5' mismatched nt and filter reads with more than a specified mismatches from a SAM file and save the trimming summary to a file. (invoked as part of a workflow)
+* [riboviz.tools.upgrade_config_file](./riboviz/tools/upgrade_config_file.py): Upgrade workflow configuration file to be compatible with current configuration.
+
 Reference:
 
-* [riboviz.tools.compare_files file comparison tool](./docs/user/compare-files.md)
-* [riboviz.tools.demultiplex_fastq fastq demultiplexer](./docs/user/demultiplex-fastq.md)
-* [riboviz.tools.count_reads reads counter](./docs/user/count-reads.md)
 * [Content and provenance of repository data files](./docs/data.md)
 * [Structure of HDF5 data](./docs/user/hdf5-data.md)
 
