@@ -93,3 +93,5 @@ $ dot -Tsvg workflow.dot > workflow.svg
 ```
 
 When `.dot` files are updated, the corresponding `.svg` images should be updated also.
+
+Alternatively, use an [Editor supporting live preview of GraphViz images](./install.md#editor-supporting-live-preview-of-graphviz-images-optional) that also allows these to be exported as `.svg` images.
