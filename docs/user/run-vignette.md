@@ -16,11 +16,11 @@ Downsampled genome and annotation data for *Saccharomyces cerevisiae* (yeast):
 
 * `vignette/input/yeast_YAL_CDS_w_250utrs.fa`: transcript sequences containing both coding regions and flanking regions from just the left arm of chromosome 1.
 * `vignette/input/yeast_YAL_CDS_w_250utrs.gff3`: matched genome feature file specifying coding sequences locations (start and stop coordinates) within the transcripts.
-* For information on the provenance of these files see [Saccharomyces cerevisiae (yeast) genome and annotation data](../data.md#saccharomyces-cerevisiae-yeast-genome-and-annotation-data) and [Downsampled Saccharomyces cerevisiae (yeast) genome and annotation data](../data.md#downsampled-saccharomyces-cerevisiae-yeast-genome-and-annotation-data).
+* For information on the provenance of these files see [Saccharomyces cerevisiae (yeast) genome and annotation data](../reference/data.md#saccharomyces-cerevisiae-yeast-genome-and-annotation-data) and [Downsampled Saccharomyces cerevisiae (yeast) genome and annotation data](../reference/data.md#downsampled-saccharomyces-cerevisiae-yeast-genome-and-annotation-data).
 
 Ribosomal rRNA and other contaminant sequences to avoid aligning to:
 
-* `vignette/input/yeast_rRNA_R64-1-1.fa`. For information on the provenance of this file see [Ribosomal RNA (rRNA) contaminants to remove](../data.md#ribosomal-rna-rrna-contaminants-to-remove)
+* `vignette/input/yeast_rRNA_R64-1-1.fa`. For information on the provenance of this file see [Ribosomal RNA (rRNA) contaminants to remove](../reference/data.md#ribosomal-rna-rrna-contaminants-to-remove)
 
 Additional organism-specific data, for creating statistics and figures:
 
@@ -28,13 +28,13 @@ Additional organism-specific data, for creating statistics and figures:
 * `data/yeast_features.tsv`: features to correlate with ORFs.
 * `data/yeast_tRNAs.tsv`: tRNA estimates.
 * `data/yeast_standard_asite_disp_length.txt`: summary of read frame displacement from 5' end to A-site for each read length based on "standard" yeast data from early ribosome profiling papers.
-* For information on the provenance of these files see [Additional yeast-specific data](../data.md#additional-yeast-specific-data).
+* For information on the provenance of these files see [Additional yeast-specific data](../reference/data.md#additional-yeast-specific-data).
 
 Downsampled ribosome profiling data for *Saccharomyces cerevisiae* (yeast):
 
 * `vignette/input/SRR1042855_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type no additive.
 * `vignette/input/SRR1042864_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type + 3-AT.
-* For information on the provenance of these files see [Downsampled ribosome profiling data from Saccharomyces cerevisiae](../data.md#downsampled-ribosome-profiling-data-from-saccharomyces-cerevisiae)
+* For information on the provenance of these files see [Downsampled ribosome profiling data from Saccharomyces cerevisiae](../reference/data.md#downsampled-ribosome-profiling-data-from-saccharomyces-cerevisiae)
 
 For full information on how to configure `prep_riboviz` and its inputs, see [Configuring the RiboViz workflow](./prep-riboviz-config.md).
 

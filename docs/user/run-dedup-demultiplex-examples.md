@@ -1,6 +1,6 @@
 # Run UMI extraction, deduplication and demultiplexing examples
 
-Examples of using `riboviz.tools.prep_riboviz` to do UMI extraction and deduplication and also demultiplexing of multiplexed data are provided. These use [Simulated FASTQ test files](../data.md#simulated-fastq-test-files) located within `data/simdata/`.
+Examples of using `riboviz.tools.prep_riboviz` to do UMI extraction and deduplication and also demultiplexing of multiplexed data are provided. These use [Simulated FASTQ test files](../reference/data.md#simulated-fastq-test-files) located within `data/simdata/`.
 
 ## UMI extraction and deduplication
 
