@@ -194,7 +194,9 @@ If you see:
 $ bash miniconda3.sh -b -p $HOME/miniconda3
 miniconda3.sh: line 1: --2019-07-31: command not found
 miniconda3.sh: line 2: syntax error near unexpected token `('
-miniconda3.sh: line 2: `Resolving repo.continuum.io (repo.continuum.io)... 104.18.200.79, 104.18.201.79, 2606:4700::6812:c94f, ...'
+miniconda3.sh: line 2: `Resolving repo.continuum.io
+(repo.continuum.io)... 104.18.200.79, 104.18.201.79,
+2606:4700::6812:c94f, ...'
 ```
 
 then rerun `wget` and use `-O`, not `-o`.
@@ -364,7 +366,7 @@ UMI-tools version: 1.0.0
 
 ## Hisat2
 
-Web site: [Hisat2](https://ccb.jhu.edu/software/hisat2/index.shtml)
+Web site: [Hisat2](https://daehwankimlab.github.io/hisat2/)
 
 Install:
 
@@ -420,7 +422,9 @@ $ bowtie --version
 Built on 462e5beae518
 Mon Dec 11 19:27:01 UTC 2017
 Compiler: gcc version 4.8.2 20140120 (Red Hat 4.8.2-15) (GCC) 
-Options: -O3 -m64  -Wl,--hash-style=both -DWITH_TBB -DPOPCNT_CAPABILITY -g -O2 -fvisibility=hidden -I/hbb_exe/include   -g -O2 -fvisibility=hidden -I/hbb_exe/include  
+Options: -O3 -m64  -Wl,--hash-style=both -DWITH_TBB
+-DPOPCNT_CAPABILITY -g -O2 -fvisibility=hidden -I/hbb_exe/include
+-g -O2 -fvisibility=hidden -I/hbb_exe/include
 Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 ```
 
@@ -657,8 +661,11 @@ DESCRIPTION  libs  LICENSE  Meta  NAMESPACE  NEWS
 **Troubleshooting: Cannot allocate memory**
 
 ```
-Error in system2(file.path(R.home("bin"), "R"), c(if (nzchar(arch)) paste0("--arch=",  : 
-  cannot popen ' '/usr/lib/R/bin/R' --no-save --slave 2>&1 < '/tmp/Rtmpw3pOH7/file12471113d0d2b'', probable reason 'Cannot allocate memory'
+Error in system2(file.path(R.home("bin"), "R"), c(if (nzchar(arch))
+paste0("--arch=",  :
+  cannot popen ' '/usr/lib/R/bin/R' --no-save --slave 2>&1 <
+  '/tmp/Rtmpw3pOH7/file12471113d0d2b'', probable reason 'Cannot
+  allocate memory'
 * removing "/home/ubuntu/R/x86_64-pc-linux-gnu-library/3.5/Rsamtools"
 Warning in q("no", status = status, runLast = FALSE) :
   system call failed: Cannot allocate memory
@@ -666,8 +673,8 @@ Warning in q("no", status = status, runLast = FALSE) :
 The downloaded source packages are in
         "/tmp/RtmpOEVbaL/downloaded_packages"
 installation path not writeable, unable to update packages: foreign
-Warning message:
-In install.packages(pkgs = doing, lib = lib, ...) :
+Warning message:e
+In install.packagees(pkgs = doing, lib = lib, ...) :
   installation of package "Rsamtools" had non-zero exit status
 ```
 
@@ -780,7 +787,5 @@ These instructions were tested on:
 
 | Operating System | Memory (GB) | Processors | RAM (GB) | Python | R |
 | ---------------- | ----------- | ---------- | -------- | ------ | - |
-| Ubuntu 18.04 | 8 | 4 | 20  | 2.7.16 | 3.4.4 |
 | Ubuntu 18.04 | 8 | 4 | 20  | 3.7.3 | 3.4.4 |
-| CentOS 7.4.1708 (Core) | 8 | 4 | 20 | 2.7.16 | 3.5.2 |
 | CentOS 7.4.1708 (Core) | 8 | 4 | 20 | 3.7.3 | 3.5.2 |

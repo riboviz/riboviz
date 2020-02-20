@@ -14,7 +14,16 @@ Usage::
                           File2
     -n, --names           Compare file names
 
-See :py:func:`riboviz.compare_files.compare_files`.
+If the files are equivalent an exit code of 0 is returned. If the
+files are not equivalent an exception is raised and an exit code of 1
+is returned.
+
+If ``-n`` is provided then the file names are also compared for
+equality (for example, if comparing the same file in two different
+directories).
+
+See :py:func:`riboviz.compare_files.compare_files` for information on
+the nature of the comparisons.
 """
 import argparse
 from riboviz import compare_files

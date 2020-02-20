@@ -21,7 +21,33 @@ Usage::
     -r READS_FILE, --reads-file READS_FILE
                           Reads file (output)
 
-See :py:func:`riboviz.count_reads.count_reads`.
+Example::
+
+    $ python -m riboviz.tools.count_reads
+      -c vignette/vignette_config.yaml
+      -i vignette/input/ -t vignette/tmp/ -o vignette/output/
+      -r read_counts.tsv
+    ...
+    vignette/input/SRR1042855_s1mi.fastq.gz
+    vignette/input/SRR1042864_s1mi.fastq.gz
+    vignette/input/example_missing_file.fastq.gz
+    [Errno 2] No such file or directory:
+        'vignette/input/example_missing_file.fastq.gz'
+    vignette/tmp/WT3AT/trim.fq
+    vignette/tmp/WT3AT/nonrRNA.fq
+    vignette/tmp/WT3AT/rRNA_map.sam
+    vignette/tmp/WT3AT/unaligned.fq
+    vignette/tmp/WT3AT/orf_map.sam
+    vignette/tmp/WT3AT/trim_5p_mismatch.tsv
+    vignette/tmp/WTnone/trim.fq
+    vignette/tmp/WTnone/nonrRNA.fq
+    vignette/tmp/WTnone/rRNA_map.sam
+    vignette/tmp/WTnone/unaligned.fq
+    vignette/tmp/WTnone/orf_map.sam
+    vignette/tmp/WTnone/trim_5p_mismatch.tsv
+
+See :py:func:`riboviz.count_reads.count_reads` for information on what
+files are read and how the reads are counted.
 """
 import argparse
 from riboviz import count_reads

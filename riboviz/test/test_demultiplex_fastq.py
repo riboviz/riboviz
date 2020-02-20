@@ -1,5 +1,5 @@
 """
-riboviz.demultiplex_fastq test suite.
+:py:mod:`riboviz.demultiplex_fastq` tests.
 """
 from io import StringIO
 from contextlib import ExitStack
@@ -18,16 +18,16 @@ FASTQ_RECORD1 = ["@X1:Tag_AAC_ 1:N:0:XXXXXXXX\n",
                  "GATTACCA\n",
                  "+\n",
                  "IIIIIIII\n"]
-""" Sample fastq record """
+""" Sample FASTQ record. """
 FASTQ_RECORD2 = ["@X1:Tag_AAC_ 1:N:0:XXXXXXXX\n",
                  "AAAAAAAA\n",
                  "+\n",
                  "IIIIIIII\n"]
-""" Sample fastq record """
+""" Sample FASTQ record """
 
 
 @pytest.fixture(scope="function")
-def temporary_dir():
+def tmp_dir():
     """
     Create a temporary directory.
 
@@ -42,7 +42,8 @@ def temporary_dir():
 
 def test_assign_sample():
     """
-    Test assign_sample with matching barcode.
+    Test :py:func:`riboviz.demultiplex_fastq.assign_sample`
+    with a record with a matching barcode.
     """
     with StringIO() as read1_fh:
         barcode = "AAA"
@@ -57,7 +58,8 @@ def test_assign_sample():
 
 def test_assign_sample_no_match():
     """
-    Test assign_sample with non-matching barcode.
+    Test :py:func:`riboviz.demultiplex_fastq.assign_sample`
+    with a record with a non-matching barcode.
     """
     with StringIO() as read1_fh:
         barcode = "GGG"
@@ -72,7 +74,8 @@ def test_assign_sample_no_match():
 
 def test_assign_sample_paired_end():
     """
-    Test assign_sample with paired end.
+    Test :py:func:`riboviz.demultiplex_fastq.assign_sample`
+    with a record and a paired end record with a matching barcode.
     """
     with StringIO() as read1_fh, StringIO() as read2_fh:
         barcode = "AAA"
@@ -88,7 +91,9 @@ def test_assign_sample_paired_end():
 
 def test_assign_sample_paired_end_no_match():
     """
-    Test assign_sample with paired end and non-matching barcode.
+    Test :py:func:`riboviz.demultiplex_fastq.assign_sample`
+    with a record and a paired end record with a non-matching
+    barcode.
     """
     with StringIO() as read1_fh, StringIO() as read2_fh:
         barcode = "GGG"
@@ -104,7 +109,8 @@ def test_assign_sample_paired_end_no_match():
 
 def test_assign_samples():
     """
-    Test assign_samples with paired ends.
+    Test :py:func:`riboviz.demultiplex_fastq.assign_samples` with
+    paired ends records and matching barcodes.
     """
     with ExitStack() as stack:
         read1_fhs = [stack.enter_context(StringIO()) for f in range(2)]
@@ -129,7 +135,8 @@ def test_assign_samples():
 
 def test_assign_samples_no_match():
     """
-    Test assign_samples with paired ends and non-matching barcode.
+    Test :py:func:`riboviz.demultiplex_fastq.assign_samples` with
+    paired end records and non-matching barcodes.
     """
     with ExitStack() as stack:
         read1_fhs = [stack.enter_context(StringIO()) for f in range(2)]
@@ -152,45 +159,45 @@ def test_assign_samples_no_match():
         assert read2_fhs[1].getvalue() == ""
 
 
-def test_demultiplex_no_sample_sheet(temporary_dir):
+def test_demultiplex_no_sample_sheet(tmp_dir):
     """
-    Test demultiplex raises FileNotFoundError if the sample sheet is
-    not found.
+    Test :py:func:`riboviz.demultiplex_fastq.demultiplex` raises
+    ``FileNotFoundError`` if the sample sheet is not found.
 
-    :param temporary_dir: Temporary directory
-    :type temporary_dir: str or unicode
+    :param tmp_dir: Temporary directory
+    :type tmp_dir: str or unicode
     """
     with pytest.raises(FileNotFoundError):
         demultiplex_fastq.demultiplex(
             "nosuchfile.tsv",
             os.path.join(riboviz.test.SIMDATA_DIR,
                          "multiplex.fastq"),
-            out_dir=temporary_dir)
+            out_dir=tmp_dir)
 
 
-def test_demultiplex_no_read1_file(temporary_dir):
+def test_demultiplex_no_read1_file(tmp_dir):
     """
-    Test demultiplex raises FileNotFoundError if the
-    read1 file is not found.
+    Test :py:func:`riboviz.demultiplex_fastq.demultiplex` raises
+    ``FileNotFoundError`` if the FASTQ file is not found.
 
-    :param temporary_dir: Temporary directory
-    :type temporary_dir: str or unicode
+    :param tmp_dir: Temporary directory
+    :type tmp_dir: str or unicode
     """
     with pytest.raises(FileNotFoundError):
         demultiplex_fastq.demultiplex(
             os.path.join(riboviz.test.SIMDATA_DIR,
                          "multiplex_barcodes.tsv"),
             "nosuchfile.fastq",
-            out_dir=temporary_dir)
+            out_dir=tmp_dir)
 
 
-def test_demultiplex_no_read2_file(temporary_dir):
+def test_demultiplex_no_read2_file(tmp_dir):
     """
-    Test demultiplex raises FileNotFoundError if the
-    read2 file is not found.
+    Test :py:func:`riboviz.demultiplex_fastq.demultiplex` raises
+    ``FileNotFoundError`` if the paired FASTQ file is not found.
 
-    :param temporary_dir: Temporary directory
-    :type temporary_dir: str or unicode
+    :param tmp_dir: Temporary directory
+    :type tmp_dir: str or unicode
     """
     with pytest.raises(FileNotFoundError):
         demultiplex_fastq.demultiplex(
@@ -199,13 +206,13 @@ def test_demultiplex_no_read2_file(temporary_dir):
             os.path.join(riboviz.test.SIMDATA_DIR,
                          "multiplex.fastq"),
             "nosuchfile.fastq",
-            out_dir=temporary_dir)
+            out_dir=tmp_dir)
 
 
 def test_demultiplex_output_error():
     """
-    Test demultiplex raises FileNotFoundError if the
-    output directory cannot be created.
+    Test :py:func:`riboviz.demultiplex_fastq.demultiplex` raises
+    ``IOError`` if the output directory cannot be created.
     """
     with pytest.raises(IOError):
         demultiplex_fastq.demultiplex(
@@ -218,24 +225,22 @@ def test_demultiplex_output_error():
                                  "multiplex_barcodes.tsv"))
 
 
-@pytest.mark.parametrize("fmt",
+@pytest.mark.parametrize("file_format",
                          [fastq.FASTQ_FORMAT,
                           fastq.FQ_FORMAT,
                           fastq.FASTQ_FORMAT.upper(),
                           fastq.FQ_FORMAT.upper()])
-def test_demultiplex(temporary_dir, fmt):
+def test_demultiplex(tmp_dir, file_format):
     """
-    Validate that TSV and FASTQ files produced by
-    riboviz.demultiplex_fastq have the expected
-    content.
+    Test :py:func:`riboviz.demultiplex_fastq.demultiplex`.
 
-    :param temporary_dir: Temporary directory
-    :type temporary_dir: str or unicode
-    :param fmt: fastq file format
-    :type fmt: str or unicode
+    :param tmp_dir: Temporary directory
+    :type tmp_dir: str or unicode
+    :param file_format: FASTQ file format
+    :type file_format: str or unicode
     """
-    tmp_fastq_file = os.path.join(temporary_dir,
-                                  fmt.format("test_multiplex"))
+    tmp_fastq_file = os.path.join(tmp_dir,
+                                  file_format.format("test_multiplex"))
     shutil.copyfile(os.path.join(riboviz.test.SIMDATA_DIR,
                                  "multiplex.fastq"),
                     tmp_fastq_file)
@@ -244,10 +249,10 @@ def test_demultiplex(temporary_dir, fmt):
                      "multiplex_barcodes.tsv"),
         tmp_fastq_file,
         mismatches=2,
-        out_dir=temporary_dir)
+        out_dir=tmp_dir)
 
     actual_num_reads = os.path.join(
-        temporary_dir,
+        tmp_dir,
         demultiplex_fastq.NUM_READS_FILE)
     expected_num_reads = os.path.join(
         riboviz.test.SIMDATA_DIR,
@@ -257,8 +262,8 @@ def test_demultiplex(temporary_dir, fmt):
     for tag in ["Tag0", "Tag1", "Tag2", "Unassigned"]:
         # Actual data has extension matching lower-case version
         # of multiplexed file's extension.
-        actual_fq = os.path.join(temporary_dir,
-                                 fmt.lower().format(tag))
+        actual_fq = os.path.join(tmp_dir,
+                                 file_format.lower().format(tag))
         # Simulated data always has a .fastq extension.
         expected_fq = os.path.join(riboviz.test.SIMDATA_DIR,
                                    "deplex",
@@ -266,7 +271,7 @@ def test_demultiplex(temporary_dir, fmt):
         fastq.equal_fastq(expected_fq, actual_fq)
 
 
-@pytest.mark.parametrize("extension",
+@pytest.mark.parametrize("file_format",
                          [(fastq.FASTQ_GZ_FORMAT,
                            fastq.FASTQ_FORMAT),
                           (fastq.FQ_GZ_FORMAT,
@@ -275,19 +280,21 @@ def test_demultiplex(temporary_dir, fmt):
                            fastq.FASTQ_FORMAT),
                           (fastq.FQ_GZ_FORMAT.upper(),
                            fastq.FQ_FORMAT)])
-def test_demultiplex_gz(temporary_dir, extension):
+def test_demultiplex_gz(tmp_dir, file_format):
     """
-    Validate that TSV and FASTQ files produced by
-    riboviz.demultiplex_fastq on multiplexed GZ files have the
-    expected content.
+    Test :py:func:`riboviz.demultiplex_fastq.demultiplex` using
+    GZIPped FASTQ files.
 
-    :param temporary_dir: Temporary directory
-    :type temporary_dir: str or unicode
-    :param extension: (gz format,  non-gz format)
-    :type extension: tuple(str or unicode, str or unicode)
+    Each ``file_format`` consists of a FASTQ GZIP file name format and
+    the corresponding non-GZIP FASTQ file name format.
+
+    :param tmp_dir: Temporary directory
+    :type tmp_dir: str or unicode
+    :param file_format: File name format
+    :type file_format: tuple(str or unicode, str or unicode)
     """
-    gz_fmt, fmt = extension
-    tmp_fastq_file = os.path.join(temporary_dir,
+    gz_fmt, fmt = file_format
+    tmp_fastq_file = os.path.join(tmp_dir,
                                   gz_fmt.format("test_multiplex"))
     with open(os.path.join(riboviz.test.SIMDATA_DIR,
                            "multiplex.fastq"), "rb") as fr:
@@ -298,10 +305,10 @@ def test_demultiplex_gz(temporary_dir, extension):
                      "multiplex_barcodes.tsv"),
         tmp_fastq_file,
         mismatches=2,
-        out_dir=temporary_dir)
+        out_dir=tmp_dir)
 
     actual_num_reads = os.path.join(
-        temporary_dir,
+        tmp_dir,
         demultiplex_fastq.NUM_READS_FILE)
     expected_num_reads = os.path.join(
         riboviz.test.SIMDATA_DIR,
@@ -311,9 +318,9 @@ def test_demultiplex_gz(temporary_dir, extension):
     for tag in ["Tag0", "Tag1", "Tag2", "Unassigned"]:
         # Actual data has extension matching lower-case version
         # of multiplexed file's extension.
-        actual_fq_gz = os.path.join(temporary_dir,
+        actual_fq_gz = os.path.join(tmp_dir,
                                     gz_fmt.lower().format(tag))
-        actual_fq = os.path.join(temporary_dir,
+        actual_fq = os.path.join(tmp_dir,
                                  fmt.format(tag))
         # Simulated data always has a .fastq extension.
         expected_fq = os.path.join(riboviz.test.SIMDATA_DIR,

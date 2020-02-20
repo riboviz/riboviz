@@ -48,9 +48,9 @@ If sample files (`fq_files`) are specified, then `prep_riboviz` processes the sa
 4. Collate TPMs across results, using `collate_tpms.R` and write into output directory (`dir_out`). Only the results from successfully-processed samples are collated.
 5. Count the number of reads (sequences) processed by specific stages if requested (if `count_reads: TRUE`).
 
-[Workflow](./images/workflow.svg) (SVG) shows an images of the workflow with the key steps, inputs and outputs.
+[Workflow](../images/workflow.svg) (SVG) shows an images of the workflow with the key steps, inputs and outputs.
 
-[Workflow with deduplication](./images/workflow-dedup.svg) (SVG) shows the workflow, if `dedup_umis: TRUE`.
+[Workflow with deduplication](../images/workflow-dedup.svg) (SVG) shows the workflow, if `dedup_umis: TRUE`.
 
 ---
 
@@ -66,8 +66,9 @@ If a multiplexed file (`multiplex_fq_files`) is specified, then `prep_riboviz`, 
 6. Demultiplex file with reference to the sample sheet (`sample_sheet`), using `demultiplex_fastq`. Sample IDs in the `SampleID` column in the sample sheet are used to name the demultiplexed files.
 7. Process each demultiplexed FASTQ file which has one or more reads, in turn (as for 3.3 to 3.13 above)
 8. Collate TPMs across results, using `collate_tpms.R` and write into output directory (`dir_out`) (as for 4. above.
+9. Count the number of reads (sequences) processed by specific stages if requested (if `count_reads: TRUE`).
 
-[Workflow with demultiplexing](./images/workflow-deplex.svg) (SVG) shows an images of the workflow with the key steps, inputs and outputs.
+[Workflow with demultiplexing](../images/workflow-deplex.svg) (SVG) shows an images of the workflow with the key steps, inputs and outputs.
 
 ---
 

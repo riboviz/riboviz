@@ -1,6 +1,74 @@
 """
 Upgrade previous versions of the workflow configuration to be
 compatible with current version.
+
+Configuration parameters that have been renamed from 1.x are updated:
+
+* ``rRNA_fasta`` => ``rrna_fasta_file``
+* ``orf_fasta`` => ``orf_fasta_file``
+* ``rRNA_index`` => ``rrna_index_prefix``
+* ``orf_index`` => ``orf_index_prefix``
+* ``nprocesses`` => ``num_processes``
+* ``MinReadLen`` => ``min_read_length``
+* ``MaxReadLen`` => ``max_read_length``
+* ``Buffer`` => ``buffer``
+* ``PrimaryID`` => ``primary_id``
+* ``SecondID`` => ``secondary_id``
+* ``StopInCDS`` => ``stop_in_cds``
+* ``isTestRun`` => ``is_test_run``
+* ``ribovizGFF`` => ``is_riboviz_gff``
+* ``t_rna`` => ``t_rna_file``
+* ``codon_pos`` => ``codon_positions_file``
+
+Expected parameters added between release 1.0.0 and 1.1.0 are added
+along with default values, if they are not already present in the
+configuration:
+
+* ``do_pos_sp_nt_freq: true``
+* ``features_file: data/yeast_features.tsv``
+
+Expected parameters added between release 1.1.0 and the current
+release are added along with default values, if they are not already
+present in the configuration:
+
+* ``dir_logs: vignette/logs``
+* ``cmd_file: run_riboviz_vignette.sh``
+* ``t_rna_file: data/yeast_tRNAs.tsv``
+* ``codon_positions_file: data/yeast_codon_pos_i200.RData``
+* ``count_threshold: 64``
+* ``asite_disp_length_file: data/yeast_standard_asite_disp_length.txt``
+
+The values of parameters ``rrna_index_prefix`` and
+``orf_index_prefix`` are updated to be file names only, as, these are
+now assumed to be relative to ``<dir_index>``. For example the
+configuration parameters::
+
+    rRNA_index: vignette/index/yeast_rRNA
+    orf_index: vignette/index/YAL_CDS_w_250
+
+are updated to::
+
+    rRNA_index_prefix: yeast_rRNA
+    orf_index_prefix: YAL_CDS_w_250
+
+The value of parameter ``features_file`` is changed to reflect the
+relocation of this file in a ``scripts/`` directory to its new
+location in a ``data/`` directory. For example, the configuration
+parameter::
+
+    features_file: scripts/yeast_features.tsv
+
+is updated to::
+
+    features_file: data/yeast_features.tsv
+
+As another example, the configuration parameter::
+
+    features_file: /home/user/riboviz/scripts/yeast_features.tsv
+
+is updated to::
+
+    features_file: /home/user/riboviz/data/yeast_features.tsv
 """
 import os
 import os.path

@@ -1,6 +1,6 @@
 # Run UMI extraction, deduplication and demultiplexing examples
 
-Examples of using `riboviz.tools.prep_riboviz` to do UMI extraction and deduplication and also demultiplexing of multiplexed data are provided. These use [Simulated FASTQ test files](./data.md#simulated-fastq-test-files) located within `data/simdata/`.
+Examples of using `riboviz.tools.prep_riboviz` to do UMI extraction and deduplication and also demultiplexing of multiplexed data are provided. These use [Simulated FASTQ test files](../reference/data.md#simulated-fastq-test-files) located within `data/simdata/`.
 
 ## UMI extraction and deduplication
 
@@ -9,7 +9,7 @@ Examples of using `riboviz.tools.prep_riboviz` to do UMI extraction and deduplic
 The example can be run as follows:
 
 ```console
-$ python -m riboviz.tools.prep_riboviz rscripts/ vignette/simdata_umi_config.yaml 
+$ python -m riboviz.tools.prep_riboviz -c vignette/simdata_umi_config.yaml 
 ```
 
 ## Barcode and UMI extraction, demultiplexing and deduplication
@@ -19,5 +19,5 @@ $ python -m riboviz.tools.prep_riboviz rscripts/ vignette/simdata_umi_config.yam
 The example can be run as follows:
 
 ```console
-$ python -m riboviz.tools.prep_riboviz rscripts/ vignette/simdata_multiplex_config.yaml 
+$ python -m riboviz.tools.prep_riboviz -c vignette/simdata_multiplex_config.yaml 
 ```
