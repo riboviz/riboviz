@@ -34,6 +34,7 @@ Usage:
 
 Reference:
 
+* [riboviz.tools.compare_files file comparison tool](./docs/user/compare-files.md)
 * [riboviz.tools.demultiplex_fastq fastq demultiplexer](./docs/user/demultiplex-fastq.md)
 * [riboviz.tools.count_reads reads counter](./docs/user/count-reads.md)
 * [Content and provenance of repository data files](./docs/data.md)
