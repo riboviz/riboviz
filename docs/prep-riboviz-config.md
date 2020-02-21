@@ -45,7 +45,7 @@ For processing multiplexed FASTQ files, a sample sheet (tab-separated values wit
 | `dir_out` | Output directory |
 | `dir_tmp` | Intermediate files directory |
 | `dir_logs` | Log files directory |
-| `cmd_file` | Bash commands file, to log bash commands executed by the workflow |
+| `cmd_file` | Bash commands file, to log bash commands executed by the workflow (if omitted, `run_riboviz_vignette.sh` is used) |
 | `rrna_fasta_file` | Ribosomal rRNA and other contaminant sequences to avoid aligning to (FASTA file) |
 | `orf_fasta_file` | Transcript sequences file containing both coding regions and flanking regions (FASTA file) |
 | `orf_gff_file` | Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts (GTF/GFF3 file) |
@@ -80,6 +80,7 @@ For processing multiplexed FASTQ files, a sample sheet (tab-separated values wit
 | `codon_positions_file` | Position of codons within each gene (RData file) |
 | `count_threshold` | Remove genes with a read count below this threshold, when generating statistics and figures |
 | `asite_disp_length_file` | Summary of read frame displacement from 5' end to A-site for each read length based on "standard" yeast data from early ribosome profiling papers (tab-separated values file) |
+| `count_reads` | `TRUE|FALSE`, post-process workflow files log file and produce TSV file with counts of reads in each FASTQ, SAM, and BAM file processed? |
 
 ### Examples
 

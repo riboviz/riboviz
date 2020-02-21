@@ -43,7 +43,8 @@ UPDATES_11_DEVELOP = {
     params.T_RNA_FILE: "data/yeast_tRNAs.tsv",
     params.CODON_POSITIONS_FILE: "data/yeast_codon_pos_i200.RData",
     params.COUNT_THRESHOLD: 64,
-    params.ASITE_DISP_LENGTH_FILE: "data/yeast_standard_asite_disp_length.txt"
+    params.ASITE_DISP_LENGTH_FILE: "data/yeast_standard_asite_disp_length.txt",
+    params.COUNT_READS: True
 }
 """
 Parameters added between release 1.1.0, 31 Jan 2019, 340b9b5 to

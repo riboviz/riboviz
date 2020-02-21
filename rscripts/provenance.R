@@ -15,7 +15,6 @@ library(git2r)
 #' @param file_path R file path.
 #' @return: message.
 get_version <- function(file_path = getopt::get_Rscript_filename()) {
-  file_name <- basename(file_path)
   location <- dirname(normalizePath(file_path))
   version <- tryCatch({
     repo <- git2r::repository(location)
@@ -28,19 +27,31 @@ get_version <- function(file_path = getopt::get_Rscript_filename()) {
     version <- "unknown"
     return(version)
   })
-  return(paste(file_name, "version", version))
+  return(version)
 }
 
 
-#' Write a metadata header to a file with RiboViz date and
+#' Write a provenance header to a file with RiboViz date and
 #' version information.
 #'
-#' @param file_path Path to R file creating the data file.
+#' @param file_path Path to R file invoking this function.
 #' @param data_file Path to file into which header is to be written.
-write_metadata_header <- function(file_path, data_file) {
+write_provenance_header <- function(file_path, data_file) {
   conx <- file(data_file, open = "w")
   writeLines("# Created by: RiboViz", conx)
   writeLines(paste("# Date:", toString(Sys.time())), conx)
-  writeLines(paste("# Component/version:", get_version(file_path)), conx)
+  writeLines(paste("# File:", file_path), conx)
+  writeLines(paste("# Version:", get_version(file_path)), conx)
   close(conx)
+}
+
+#' Print provenance information with RiboViz date and version
+#' information.
+#'
+#' @param file_path Path to R file invoking this function.
+print_provenance <- function(file_path) {
+  print("Created by: RiboViz")
+  print(paste("Date:", toString(Sys.time())))
+  print(paste("File:", file_path))
+  print(paste("Version:", get_version(file_path)))
 }
