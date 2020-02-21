@@ -6,11 +6,11 @@ Each function takes in the following arguments:
 * Command-specific input files.
 * Command-specific output files.
 * Other command-specific configuration.
-* A ``log_file`` file parameter which is where the output from the
-  command printed into standard output or standard error is to be
-  captured and written.
-* A ``run_config`` (:py:class:`RunConfigTuple`) which provides each \
-  function with common configuration, notably:
+* A log file (``log_file``) file parameter which is where the output
+  from the command printed into standard output or standard error is
+  to be captured and written.
+* A run configuration (``run_config``, :py:class:`RunConfigTuple`) \
+  which provides each function with common configuration, notably:
     - The command file in which the commands sent to the operating
       system are to be written.
     - Whether the invocation is part of a dry run? If so the commands
