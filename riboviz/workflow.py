@@ -59,7 +59,6 @@ RunConfigTuple = collections.namedtuple(
     "RunConfigTuple", ["r_scripts",
                        "cmd_file",
                        "is_dry_run",
-                       "logs_dir",
                        "nprocesses"])
 """
 Run-related configuration.
@@ -68,7 +67,6 @@ Run-related configuration.
 * ``cmd_file``: Bash commands file.
 * ``is_dry_run``: Is this a dry run? (if ``True`` workflow commands \
    should not be submitted to the operating system for execution)
-* ``logs_dir``: Log files directory.
 * ``nprocesses``: Number of processes available.
 """
 
