@@ -113,6 +113,10 @@ where:
 * `rscripts/`: path to the directory with RiboViz's R scripts, relative to the RiboViz home directory.
 * `vignette/vignette_config.yaml`: path to the vignette configuration file.
 
+### Troubleshooting: `This script needs to be run under Python 3`
+
+This warning arises if you try and run `prep_riboviz.py` under Python 2. You can only run `prep_riboviz.py` with Python 3.
+
 ### Troubleshooting: `File not found: vignette/input/example_missing_file.fastq.gz`
 
 This warning is expected and can be ignored. The vignette configuration file intentionally includes a reference to a missing input file. This demonstrates that if processing of one sample fails it does not block the processing of the other samples.

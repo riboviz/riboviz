@@ -118,6 +118,7 @@ processes ("num_processes"):
 * 2: Errors occurred loading or accessing configuration e.g. missing
   configuration parameters, inconsistent configuration parameters.
 * 3: Error occurred during processing.
+* 4: User is using Python 2.
 
 Commands that are submitted to bash are recorded within a file
 specified by a "cmd_file" configuration parameter.
@@ -164,6 +165,9 @@ configuration parameters, inconsistent configuration parameters.
 """
 EXIT_PROCESSING_ERROR = 3
 """ Error occurred during processing. """
+EXIT_PYTHON_2_ERROR = 4
+""" User is using Python 2. """
+
 
 LOG_FORMAT = "{:02d}_{}"
 """ File name format for step-specific log files. """
@@ -455,9 +459,7 @@ def run_workflow(r_scripts, config_yaml, is_dry_run=False):
     :raise TypeError: if a configuration parameter has an invalid type
     :raise Exception: if any other error arises
     """
-    LOGGER.info("Running under Python: %s", sys.version)
     LOGGER.info("Configuration file: %s", config_yaml)
-
     with open(config_yaml, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
 
@@ -647,6 +649,7 @@ def prep_riboviz(r_scripts, config_yaml, is_dry_run=False):
       configuration e.g. missing configuration parameters,
       inconsistent configuration parameters.e
     * EXIT_PROCESSING_ERROR (3): Error occurred during processing.
+    * EXIT_PYTHON_2_ERROR (4): User is using Python 2.
 
     :param r_scripts: R scripts direectory
     :type r_scripts: str or unicode
@@ -658,6 +661,10 @@ def prep_riboviz(r_scripts, config_yaml, is_dry_run=False):
     :return: exit code
     :rtype: int
     """
+    LOGGER.info("Running under Python: %s", sys.version)
+    if sys.version_info.major < 3:
+        LOGGER.error("This script needs to be run under Python 3")
+        return EXIT_PYTHON_2_ERROR
     LOGGER.info(provenance.get_provenance_str(__file__, " "))
     try:
         run_workflow(r_scripts, config_yaml, is_dry_run)
