@@ -1,41 +1,40 @@
 """
-Bedgraph-related constants.
+Bedgraph-related constants and functions.
 """
 import pandas as pd
 
 BEDGRAPH_EXT = "bedgraph"
-""" Bedgraph file extension """
+""" File extension. """
 BEDGRAPH_FORMAT = "{}." + BEDGRAPH_EXT
-""" Format string for bedgraph files """
+""" File name format. """
 TRACK_PREFIX = "track type=bedGraph"
-""" Track line prefix """
+""" Track line prefix. """
 COLUMNS = ["Chromosome", "Start", "End", "Data"]
-""" Column names """
+""" Column names. """
 
 
 def load_bedgraph(bed_file):
     """
-    Load bedGraph file. A bedGraph file has format:
+    Load a bedGraph file. A bedGraph file has format:
 
-    * Track definition line.
-      - `track type=bedGraph ...`
+    * Track definition line: ``track type=bedGraph ...``
     * Track data rows, each in 4 column BED format:
-      - Chromosone (string)
-      - Chromosone start coordinate (integer)
-      - Chromosone end coordinate (integer)
-      - Data value (integer, as RiboViz uses bedGraphs for counts)
+        - Chromosome (string)
+        - Chromosome start coordinate (integer)
+        - Chromosome end coordinate (integer)
+        - Data value (integer, as RiboViz uses bedGraphs for counts)
 
-    The DataFrame returned has four column names: "Chromosome",
-    "Start", "End", "Data".
+    The ``DataFrame`` returned has four column names: ``Chromosome``,
+    ``Start``, ``End``, ``Data``.
 
     :param bed_file: File name
     :type bed_file: str or unicode
-    :return: bedGraph track and data
+    :return: bedGraph track definition line and data
     :rtype: tuple(str or unicode, pandas.core.frame.DataFrame)
-    :raise AssertionError: if the first line of the file does
-    not start with "track type=bedGraph" or the rest of the file
+    :raise AssertionError: If the first line of the file does \
+    not start with ``track type=bedGraph`` or the rest of the file \
     does not have 4 columns
-    :raise Exception: if problems arise when loading the file
+    :raise Exception: if any problems arise
     """
     with open(bed_file) as f:
         track = f.readline()
@@ -58,9 +57,9 @@ def equal_bedgraph(file1, file2):
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
-    :raise AssertionError: if files are not bedGraphs or they
-    differ in their data
-    :raise Exception: if problems arise when loading the files
+    :raise AssertionError: If the files are invalid bedGraph files \
+    or their contents differ
+    :raise Exception: If problems arise when loading the files
     """
     (track1, data1) = load_bedgraph(file1)
     (track2, data2) = load_bedgraph(file2)

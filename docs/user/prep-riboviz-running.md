@@ -1,26 +1,28 @@
 # Running the RiboViz workflow
 
-This page describes how to run `prep_riboviz.py`. It is assumed you are familiar with [Configuring the RiboViz workflow](./prep-riboviz-config.md).
+This page describes how to run `riboviz.tools.prep_riboviz`. It is assumed you are familiar with [Configuring the RiboViz workflow](./prep-riboviz-config.md).
 
 Contents:
 
 * [Prepare input data](#prepare-input-data)
 * [Set up your environment](#set-up-your-environment)
 * [Configure number of processes (optional)](#configure-number-of-processes-optional)
-* [Dry run `prep_riboviz.py`](#dry-run-prep_ribovizpy)
-* [Run `prep_riboviz.py`](#run-prep_ribovizpy)
+* [Dry run `prep_riboviz`](#dry-run-prep_riboviz)
+* [Run `prep_riboviz`](#run-prep_riboviz)
   - [Troubleshooting: `This script needs to be run under Python 3`](#troubleshooting-this-script-needs-to-be-run-under-python-3)
   - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
   - [Troubleshooting: `WARNING: dedup_umis was TRUE but extract_umis was FALSE`](#troubleshooting-warning-dedup_umis-was-true-but-extract_umis-was-false)
   - [Troubleshooting: `Configuration parameter error: No sample files or multiplexed files are specified`](#troubleshooting-configuration-parameter-error-no-sample-files-or-multiplexed-files-are-specified)
   - [Troubleshooting: `Configuration parameter error: Both sample files and multiplexed files are specified`](#troubleshooting-configuration-parameter-error-both-sample-files-and-multiplexed-files-are-specified)
   - [Troubleshooting: `Configuration parameter error: Multiplexed files are specified but no sample sheet`](#troubleshooting-configuration-parameter-error-multiplexed-files-are-specified-but-no-sample-sheet)
-* [Invoking `prep_riboviz.py` from outwith the RiboViz home directory](#invoking-prep_ribovizpy-from-outwith-the-riboviz-home-directory)
+* [Invoking `prep_riboviz` from outwith the RiboViz home directory](#invoking-prep_riboviz-from-outwith-the-riboviz-home-directory)
 * [Managing your disk usage](#managing-your-disk-usage)
 * [Using-pre-generated hisat2 indices](#using-pre-generated-hisat2-indices)
 * [Capturing commands submitted to bash](#capturing-commands-submitted-to-bash)
   - [Capturing bash commands and demultiplexing](#capturing-bash-commands-and-demultiplexing)
 * [Customising logging](#customising-logging)
+  - [Removing timestamps](#removing-timestamps)
+  - [Using custom log configuration files](#using-custom-log-configuration-files)
 * [Exit codes](#exit-codes)
 
 ---
@@ -99,9 +101,9 @@ $ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 
 ## Configure number of processes (optional)
 
-`prep_riboviz.py` can instruct the tools it invokes to use a specific number of processes. By default this is 1.
+`prep_riboviz` can instruct the tools it invokes to use a specific number of processes. By default this is 1.
 
-To configure `prep_riboviz.py` to use additional processes, in the configuration file, change:
+To configure `prep_riboviz` to use additional processes, in the configuration file, change:
 
 ```yaml
 num_processes: 1
@@ -119,58 +121,38 @@ This parameter is currently used by `hisat2`, `samtools sort`, `bam_to_h5.R` and
 
 ---
 
-## Dry run `prep_riboviz.py`
+## Dry run `prep_riboviz`
 
-`prep_riboviz.py` supports a `--dry-run` command-line parameter which can be used to validate the configuration. 
+`prep_riboviz` supports a `-d` (or `--dry-run`) command-line parameter which can "dry run" the workflow. This validates the configuration without executing the workflow steps.
 
 **Tip:** we strongly recommend doing a dry run before doing a live run on data you have not processed before.
 
-Run `prep_riboviz.py` with `--dry-run` enabled:
-
-* Either:
+Run `prep_riboviz` in dry run mode:
 
 ```console
-$ python -m riboviz.tools.prep_riboviz --dry-run rscripts/ <CONFIG>
-```
-
-* Or:
-
-```console
-$ PYTHONPATH=. python riboviz/tools/prep_riboviz.py --dry-run rscripts/ <CONFIG>
+$ python -m riboviz.tools.prep_riboviz -d -c <CONFIG_FILE>
 ```
 
 where:
 
-* `riboviz/tools/prep_riboviz.py`: path to `prep_riboviz.py`, relative to the RiboViz home directory.
-* `--dry-run`: flag to enable the dry run.
-* `rscripts/`: path to the directory with RiboViz's R scripts, relative to the RiboViz home directory.
-* `<CONFIG>`: path to a YAML configuration file.
+* `-d`: flag to enable the dry run.
+* `<CONFIG_FILE>`: path to a YAML configuration file.
 
 For more on this feature, see [Capturing commands submitted to bash](#capturing-commands-submitted-to-bash) below.
 
 ---
 
-## Run `prep_riboviz.py`
+## Run `prep_riboviz`
 
-Run `prep_riboviz.py`:
-
-* Either:
+Run `prep_riboviz`:
 
 ```console
-$ python -m riboviz.tools.prep_riboviz rscripts/ <CONFIG>
-```
-
-* Or:
-
-```console
-$ PYTHONPATH=. python riboviz/tools/prep_riboviz.py rscripts/ <CONFIG>
+$ python -m riboviz.tools.prep_riboviz -c <CONFIG_FILE>
 ```
 
 where:
 
-* `riboviz/tools/prep_riboviz.py`: path to `prep_riboviz.py`, relative to the RiboViz home directory.
-* `rscripts/`: path to the directory with RiboViz's R scripts, relative to the RiboViz home directory.
-* `<CONFIG>`: path to a YAML configuration file.
+* `<CONFIG_FILE>`: path to a YAML configuration file.
 
 Information on the key steps during processing is displayed. More detailed information, including the causes of any errors, is also added to a timestamped log file, in the current directory, named `riboviz-YYYYMMDD-HHMMSS.log` (for example, `riboviz.20190926-002455.log`).
 
@@ -184,7 +166,7 @@ See [Exit codes](#exit-codes), below, for a complete list of exit codes.
 
 ### Troubleshooting: `This script needs to be run under Python 3`
 
-This warning arises if you try and run `prep_riboviz.py` under Python 2. You can only run `prep_riboviz.py` with Python 3.
+This warning arises if you try and run `prep_riboviz` under Python 2. You can only run `prep_riboviz` with Python 3.
 
 ### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
 
@@ -233,7 +215,7 @@ extract_umis: FALSE
 dedup_umis: TRUE
 ```
 
-While `prep_riboviz.py` gives a warning, it will continue execution.
+While `prep_riboviz` gives a warning, it will continue execution.
 
 Unless you explicitly want this to occur you should:
 
@@ -275,9 +257,9 @@ then this means you provided a `multiplex_fq_files` parameter in your configurat
 
 ---
 
-## Invoking `prep_riboviz.py` from outwith the RiboViz home directory
+## Invoking `prep_riboviz` from outwith the RiboViz home directory
 
-To invoke `prep_riboviz.py` from outwith the RiboViz home directory:
+To invoke `prep_riboviz` from outwith the RiboViz home directory:
 
 * Ensure that all the input paths in the YAML configuration file are correctly configured:
   - `dir_in`
@@ -298,15 +280,12 @@ To invoke `prep_riboviz.py` from outwith the RiboViz home directory:
 * Run:
 
 ```console
-$ PYTHONPATH=<RIBOVIZ> python <RIBOVIZ>/riboviz/tools/prep_riboviz.py \
-    <PATH>/rscripts/ <CONFIG>
+$ PYTHONPATH=<RIBOVIZ> python -m riboviz.tools.prep_riboviz -c <CONFIG_FILE>
 ```
 
 where:
 
 * `<RIBOVIZ>`: path to RiboViz home directory, which can be relative to the current directory or absolute.
-* `riboviz/tools/prep_riboviz.py`: path to `prep_riboviz.py`, relative to `<RIBOVIZ>`.
-* `<RIBOVIZ>/rscripts/`: path to the directory with RiboViz's R scripts.
 * `<CONFIG>`: path to a YAML configuration file, which can be relative to the current directory or absolute.
 
 For example, given an `analysis/` directory with contents:
@@ -337,11 +316,11 @@ codon_positions_file: riboviz/data/yeast_codon_pos_i200.RData
 asite_disp_length_file: riboviz/data/yeast_standard_asite_disp_length.txt
 ```
 
-`prep_riboviz.py` can then be run in the parent directory of `analysis/` and `riboviz/` as follows:
+`prep_riboviz` can then be run in the parent directory of `analysis/` and `riboviz/` as follows:
 
 ```console
-$ PYTHONPATH=riboviz/ python riboviz/riboviz/tools/prep_riboviz.py \
-  riboviz/rscripts/ analysis/sample_config.yaml 
+$ PYTHONPATH=riboviz/ python -m riboviz.tools.prep_riboviz \
+  -c analysis/sample_config.yaml 
 ```
 
 Absolute paths can also be used. For example, if the file paths were as follows:
@@ -361,20 +340,20 @@ codon_positions_file: /home/user/riboviz/data/yeast_codon_pos_i200.RData
 asite_disp_length_file: /home/user/riboviz/data/yeast_standard_asite_disp_length.txt
 ```
 
-`prep_riboviz.py` can then be run from any directory as follows:
+`prep_riboviz` can then be run from any directory as follows:
 
 ```console
-$ PYTHONPATH=/home/user/riboviz/ python /home/user/riboviz/riboviz/tools/prep_riboviz.py \
-    /home/user/riboviz/rscripts/ /home/user/analysis/sample_config.yaml 
+$ PYTHONPATH=/home/user/riboviz/ python -m riboviz.tools.prep_riboviz \
+  -c /home/user/analysis/sample_config.yaml 
 ```
 
 ---
 
 ## Managing your disk usage
 
-`prep_riboviz.py` generates many intermediate files and some of these may be unompressed and **large**, i.e. about the same size as the input files. All these files are placed in a temporary directory (`dir_tmp`). The temporary directory's contents can be inspected for troubleshooting, if necessary.
+`prep_riboviz` generates many intermediate files and some of these may be unompressed and **large**, i.e. about the same size as the input files. All these files are placed in a temporary directory (`dir_tmp`). The temporary directory's contents can be inspected for troubleshooting, if necessary.
 
-Similarly, `prep_riboviz.py` creates numerous log files.
+Similarly, `prep_riboviz` creates numerous log files.
 
 For example, here is the volume of the outputs from a run of the vignette as documented in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md):
 
@@ -398,7 +377,7 @@ If you have already generated hisat2 indices for the same organism and annotatio
 
 ## Capturing commands submitted to bash
 
-When run in `--dry-run` mode or live, `prep_riboviz.py` logs the commands it submits to bash to execute local scripts and third-party tools. These are logged into a bash script (`cmd_file`). This script can be used for debugging. However it can also be run as-is and the effect is the same as running, or rerunning, `prep_riboviz.py`.
+When run in `--dry-run` mode or live, `prep_riboviz` logs the commands it submits to bash to execute local scripts and third-party tools. These are logged into a bash script (`cmd_file`). This script can be used for debugging. However it can also be run as-is and the effect is the same as running, or rerunning, `prep_riboviz`.
 
 For example, if `cmd_file` had value `run_riboviz.sh` then the script can be run as follows:
 
@@ -408,17 +387,19 @@ $ bash run_riboviz.sh
 
 ### Capturing bash commands and demultiplexing 
 
-When run with demultiplexing enabled, `prep_riboviz.py` determines the demultiplexed files to process based on the samples in the `num_reads.tsv` file, output by `demultipled_fastq.py`, which have one or more reads.
+When run with demultiplexing enabled, `prep_riboviz` determines the demultiplexed files to process based on the samples in the `num_reads.tsv` file, output by `riboviz.tools.demultiplex_fastq`, which have one or more reads.
 
-If running `prep_riboviz.py` in dry run mode then this file does not exist. In this case, `prep_riboviz.py` will determine the samples based on the samples in the sample sheet.
+If running `prep_riboviz` in dry run mode then this file does not exist. In this case, `prep_riboviz` will determine the samples based on the samples in the sample sheet.
 
-This means that the bash script output by `prep_riboviz.py` with `--dry-run` may not match that output during a live run, if, during the live run, some samples had 0 associated reads.
+This means that the bash script output by `prep_riboviz` with `--dry-run` may not match that output during a live run, if, during the live run, some samples had 0 associated reads.
 
 ---
 
 ## Customising logging
 
 You can customise logging by editing the file `riboviz/logging.yaml`.
+
+### Removing timestamps
 
 If you do not want `riboviz.log` to include a timestamp (i.e. you want the log file to be named `riboviz.log`) then edit `riboviz/logging.yaml` and replace:
 
@@ -432,11 +413,19 @@ with:
   handlers: [console, file_handler]
 ```
 
+### Using custom log configuration files
+
+A custom log configuration file can be provided by defining a `RIBOVIZ_LOG_CONFIG` environment variable. For example:
+
+```console
+$ RIBOVIZ_LOG_CONFIG=custom_logging.yaml
+```
+
 ---
 
 ## Exit codes
 
-`prep_riboviz.py` returns the following exit codes:
+`prep_riboviz` returns the following exit codes:
 
 * 0: Processing successfully completed.
 * 1: A file does not seem to exist.

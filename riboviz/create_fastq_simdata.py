@@ -1,74 +1,88 @@
 """
-Creates simple simulated FASTQ files to test UMI/deduplication,
-adaptor trimming, and demultiplexing.
+Create simulated FASTQ files to test UMI/deduplication, adaptor
+trimming, and demultiplexing.
 
-The following files are created:
+The following files are created.
 
-* `umi5_umi3_umi_adaptor.fastq`: FASTQ file with 9 reads,
-  each with a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a
-  11nt adaptor at the 3' end. Reads can be grouped by UMI into 5
-  groups.
-* `umi5_umi3_umi.fastq`: FASTQ file identical to the above but
-  with the adaptor trimmed.
-* `umi5_umi3.fastq`: FASTQ file identical to the
-  above but with the UMIs extracted and concatenated to the header,
-  with a "_" delimiter.
-* `umi3_umi_adaptor.fastq`: FASTQ file with 8 reads, each
-  with a 4nt UMI at the 3' end and a 11nt adaptor at the 3' end. Reads
-  can be grouped by UMI into 4 groups.
-* `umi3_umi.fastq`: FASTQ file identical to the above but
-  with the adaptor trimmed.
-* `umi3.fastq`: FASTQ file identical to the above but with
-   the UMI extracted and concatenated to the header, with a "_"
-   delimiter.
-* `multiplex_barcodes.tsv`: tab-separated values file with
-  `SampleID` column (with values `Tag0|1|2`) and `TagRead` column
-  (with values `ACG`, `GAC`, `CGA`). This is consistent with the file
-  format expected by `riboviz.tools.demultiplex_fastq`.
-* `multiplex_umi_barcode_adaptor.fastq`: FASTQ file with 90
-  reads:
-  - Each read has a 4nt UMI at the 5' end, a 4nt UMI at the 3' end, a
-    3nt barcode at the 3' end and a 11nt adaptor at the 3' end.
-  - There are 9 reads for each of the following barcodes:
-    - `ACG`, `ACT`, `TAG`
-    - `GAC`, `GTC`, `GTA`
-    - `CGA`, `TGA`, `CTT`
-  - The second and third barcodes in each list have a mismatch of 1nt
-    and 2nt respectively with the first barcode in each list.
-  - When the file is demultiplexed, assuming up to 2 mismatches are
-    allowed, then 3 sets of 27 reads will be produced, grouped by
-    the 1st barcode in each list.
-  - There are 9 reads with barcode `TTT`, which has a mismatch of 3nts
-    to `ACG`, `GAC`, `CGA`. When the file is demultiplexed, assuming
-    up to 2 mismatches are allowed, then these 9 reads will be
-    unassigned.
-* `multiplex_umi_barcode.fastq`: FASTQ file identical to the
-  above but with the adaptor trimmed.
-* `multiplex.fastq`: FASTQ file identical to the above but
-  with the barcode and UMIs extracted into the header and delimited by
-  "_".
-* `deplex/Tag0|1|2.fastq`: FASTQ files each with 27 reads
+Reads with 5' UMI, 3' UMI and adaptor:
+
+* Prefix: ``umi5_umi3``.
+* These files can be used to test adaptor trimming and deduplication.
+* ``umi5_umi3_umi_adaptor.fastq``: FASTQ file with 9 reads, each with
+  a 4nt UMI at the 5' end, a 4nt UMI at the 3' end and a 11nt adaptor
+  at the 3' end. Reads can be grouped by UMI into 5 groups.
+* ``umi5_umi3_umi.fastq``: FASTQ file identical to the above but with
+  the adaptor trimmed.
+* ``umi5_umi3.fastq``: FASTQ file identical to the above but with the
+  UMIs extracted and concatenated to the header, with a ``_``
+  delimiter.
+
+Reads with 5' UMI, 3' UMI and adaptor:
+
+* Prefix: ``umi3``.
+* These files can be used to test adaptor trimming and deduplication.
+* ``umi3_umi_adaptor.fastq``: FASTQ file with 8 reads, each with a 4nt
+  UMI at the 3' end and a 11nt adaptor at the 3' end. Reads can be
+  grouped by UMI into 4 groups.
+* ``umi3_umi.fastq``: FASTQ file identical to the above but with the
+  adaptor trimmed.
+* ``umi3.fastq``: FASTQ file identical to the above but with the UMI
+  extracted and concatenated to the header, with a ``_`` delimiter.
+
+Reads with 5' UMI, 3' UMI, adaptor and barcode:
+
+* Prefix: ``multiplex``.
+* These files can be used to test adaptor trimming, demultiplexing and
+  deduplication.
+* ``multiplex_barcodes.tsv``: tab-separated values file with
+  ``SampleID`` column (with values ``Tag0|1|2``) and ``TagRead``
+  column (with values ``ACG``, ``GAC``, ``CGA``). This is consistent
+  with the sample sheet file format expected by
+  :py:mod:`riboviz.tools.demultiplex_fastq` and
+  :py:mod:`riboviz.demultiplex_fastq`.
+* ``multiplex_umi_barcode_adaptor.fastq``: FASTQ file with 90 reads:
+    - Each read has a 4nt UMI at the 5' end, a 4nt UMI at the 3' end,
+      a 3nt barcode at the 3' end and a 11nt adaptor at the 3' end.
+    - There are 9 reads for each of the following barcodes:
+        - ``ACG``, ``ACT``, ``TAG``
+        - ``GAC``, ``GTC``, ``GTA``
+        - ``CGA``, ``TGA``, ``CTT``
+    - The second and third barcodes in each list have a mismatch of
+      1nt and 2nt respectively with the first barcode in each list.
+    - When the file is demultiplexed, assuming up to 2 mismatches are
+      allowed, then 3 sets of 27 reads will be produced, grouped by
+      the 1st barcode in each list.
+    - There are 9 reads with barcode ``TTT``, which has a mismatch of
+      3nts to ``ACG``, ``GAC``, ``CGA``. When the file is
+      demultiplexed, assuming up to 2 mismatches are allowed, then
+      these 9 reads will be unassigned.
+* ``multiplex_umi_barcode.fastq``: FASTQ file identical to the above
+  but with the adaptor trimmed.
+* ``multiplex.fastq``: FASTQ file identical to the above but with the
+  barcode and UMIs extracted into the header and delimited by ``_``.
+* ``deplex/Tag0|1|2.fastq``: FASTQ files each with 27 reads
   representing the results expected when demultiplexing
-  `multiplex.fastq` using `riboviz.tools.demultiplex_fastq` and
-  `multiplex_barcodes.tsv`.
-* `deplex/Unassigned.fastq`: FASTQ files with 9 reads representing the
-  unassigned reads (those with barcode `TTT`) expected when
-  demultiplexing `multiplex.fastq` using
-  `riboviz.tools.demultiplex_fastq` and `multiplex_barcodes.tsv`.
-* `deplex/num_reads.tsv`: tab-separated values with expected counts of
+  ``multiplex.fastq`` using :py:mod:`riboviz.tools.demultiplex_fastq`
+  with ``multiplex_barcodes.tsv`` and 2 allowed mismatches.
+* ``deplex/Unassigned.fastq``: FASTQ files with 9 reads representing
+  the unassigned reads (those with barcode ``TTT``) expected when
+  demultiplexing ``multiplex.fastq`` using
+  :py:mod:`riboviz.tools.demultiplex_fastq` with
+  ``multiplex_barcodes.tsv`` and 2 allowed mismatches.
+* ``deplex/num_reads.tsv``: tab-separated values with expected counts of
   reads for each barcode expected when demultiplexing
-  `multiplex.fastq` using `riboviz.tools.demultiplex_fastq`
-  and `multiplex_barcodes.tsv`.
+  ``multiplex.fastq`` using :py:mod:`riboviz.tools.demultiplex_fastq`
+  with ``multiplex_barcodes.tsv`` and 2 allowed mismatches.
 """
 import os
 import os.path
-from random import choices, seed
+from random import choices
+from random import seed
 import shutil
 import pandas as pd
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
 from riboviz import barcodes_umis
 from riboviz import demultiplex_fastq
 from riboviz import fastq
@@ -82,11 +96,10 @@ QUALITY_HIGH = list(range(39, 41))
 
 def simulate_quality(k, qualities=QUALITY_MEDIUM, weights=None):
     """
-    Simulate quality scores. This is a thin wrapper around
-    random.choices whose default values represent medium Phred quality
-    values.
-
-    See https://docs.python.org/3/library/random.html#random.choices
+    Simulate quality scores. This is a thin wrapper around Python
+    `random.choices` whose default values represent medium Phred quality
+    values. See
+    https://docs.python.org/3/library/random.html#random.choices.
 
     :param k: Number of quality scores requested
     :type k: int
@@ -94,7 +107,7 @@ def simulate_quality(k, qualities=QUALITY_MEDIUM, weights=None):
     :type qualities: list(int)
     :param weights: Optional weightings for qualities
     :type weights: list(ints)
-    :return k quality scores, selected at random from qualities
+    :return k: quality scores, selected at random from qualities
     :rtype: list(int)
     """
     return choices(qualities, k=k, weights=weights)
@@ -102,7 +115,8 @@ def simulate_quality(k, qualities=QUALITY_MEDIUM, weights=None):
 
 def make_fastq_record(name, reads, scores=None, qualities=QUALITY_MEDIUM):
     """
-    Make a fastq record with sequence readall and name.
+    Make a FASTQ record with a sequence ``reads`` and name
+    ``name``.
 
     :param name: Name
     :type name: str or unicode
@@ -110,16 +124,16 @@ def make_fastq_record(name, reads, scores=None, qualities=QUALITY_MEDIUM):
     :type reads: str or unicode
     :param scores: Quality scores
     :type scores: list(int)
-    :param qualities: Available quality scores, used if scores is
-    None, in conjunction with simulate_quality to calculate quality
-    scores
+    :param qualities: Available quality scores, used if scores is \
+    ``None``, in conjunction with :py:func:`simulate_quality` \
+    to calculate quality scores
     :type qualities: list(int)
     :return: fastq record
     :rtype: Bio.SeqRecord.SeqRecord
     """
     if scores is None:
         scores = simulate_quality(len(reads), qualities=qualities)
-    record = SeqRecord(Seq(reads, IUPAC.ambiguous_dna),
+    record = SeqRecord(Seq(reads),
                        id=name,
                        name=name,
                        description=name)
@@ -132,18 +146,18 @@ def trim_fastq_record_3prime(record,
                              add_trim=False,
                              delimiter=barcodes_umis.UMI_DELIMITER):
     """
-    Copy fastq record, but trim sequence and quality scores at 3' end
+    Copy FASTQ record, but trim sequence and quality scores at 3' end
     by given length.
 
-    :param record: fastq record
+    :param record: Record
     :type record: Bio.SeqRecord.SeqRecord
     :param trim: Number of nts to trim by
     :type trim: int
-    :param delimiter: Delimiter to use, if add_trim is True
+    :param delimiter: Delimiter to use, if ``add_trim`` is ``True``
     :type delimiter: str or unicode
-    :param add_trim: Add subsequence that was removed to record ID
+    :param add_trim: Add subsequence that was trimmed to record ID?
     :type add_trim: bool
-    :return: fastq record
+    :return: New record
     :rtype: Bio.SeqRecord.SeqRecord
     """
     quality = record.letter_annotations["phred_quality"]
@@ -161,18 +175,18 @@ def trim_fastq_record_5prime(record,
                              add_trim=False,
                              delimiter=barcodes_umis.UMI_DELIMITER):
     """
-    Copy fastq record, but trim sequence and quality scores at 5' end
+    Copy FASTQ record, but trim sequence and quality scores at 5' end
     by given length.
 
-    :param record: fastq record
+    :param record: Record
     :type record: Bio.SeqRecord.SeqRecord
     :param trim: Number of nts to trim by
     :type trim: int
-    :param add_trim: Add subsequence that was removed to record ID
+    :param add_trim: Add subsequence that was trimmed to record ID?
     :type add_trim: bool
-    :param delimiter: Delimiter to use, if add_trim is True
+    :param delimiter: Delimiter to use, if ``add_trim`` is ``True``
     :type delimiter: str or unicode
-    :return: fastq record
+    :return: New record
     :rtype: Bio.SeqRecord.SeqRecord
     """
     quality = record.letter_annotations["phred_quality"]
@@ -194,26 +208,26 @@ def make_fastq_records(tag,
                        adaptor="",
                        post_adaptor_nt=""):
     """
-    Create a set of complementary fastq records.
+    Create a set of complementary FASTQ records.
 
-    - A record for sequence: umi5 + read + umi3 + barcode + adaptor +
-      post_adaptor_nt.
-    - A record as above with the adaptor and post_adaptor_nt trimmed:
-      umi5 + read + umi3 + barcode.
-      - If adaptor and post_adaptor_nt are both "" then this is
-        equivalent to the above record.
-    - A record as above with the barcode and UMIs trimmed and added to
-      the header with "_" delimiters: read.
-      - If both the barcode and both UMIs are "" then this is
-        equivalent to the above record.
-      - Depending on whether barcode, umi5 and umi3 are "" the header
-        will be extended with one of:
-        - "<barcode>_<umi5><umi3>"
-        - "<barcode>_<umi3>"
-        - "_<umi5><umi3>"
-        - "<umi3>"
+    * A record for sequence: ``umi5`` + ``read`` + ``umi3`` +
+      ``barcode`` + ``adaptor`` + ``post_adaptor_nt``.
+    * A record as above with ``adaptor`` and ``post_adaptor_nt``
+      trimmed: ``umi5`` + ``read`` + ``umi3`` + ``barcode``.
+        - If ``adaptor`` and ``post_adaptor_nt`` are both ``''`` then
+          this is equivalent to the above record.
+    * A record as above with the barcode and UMIs trimmed and added to
+      the header with ``_`` delimiters: ``read``.
+        - If both the barcode and both UMIs are ``''`` then this is
+          equivalent to the above record.
+        - Depending on whether ``barcode``, ``umi5`` and ``umi3`` are
+          ``''``  the header will be extended with one of:
+            - ``<barcode>_<umi5><umi3>``
+            - ``<barcode>_<umi3>``
+            - ``_<umi5><umi3>``
+            - ``<umi3>``
 
-    :param tag: Human-readable tag.
+    :param tag: Human-readable tag
     :type tag: str or unicode
     :param read: Read
     :type read: str or unicode
@@ -229,9 +243,9 @@ def make_fastq_records(tag,
     :type adaptor: str or unicode
     :param post_adaptor_nt: 3' end post-adaptor nts
     :type post_adaptor_nt: str or unicode
-    :returnL full record, adaptor-trimmed record, barcode- and
+    :return: full record, adaptor-trimmed record, barcode- and \
     UMI-extracted record
-    :rtype: tuple(Bio.SeqRecord.SeqRecord, Bio.SeqRecord.SeqRecord,
+    :rtype: tuple(Bio.SeqRecord.SeqRecord, Bio.SeqRecord.SeqRecord, \
     Bio.SeqRecord.SeqRecord)
     """
     sequence = umi5 + read + umi3 + barcode + adaptor + post_adaptor_nt
@@ -277,7 +291,8 @@ def make_fastq_records(tag,
 
 def create_fastq_simdata(output_dir):
     """
-    Create simulated fastq files.
+    Create simulated FASTQ files to test UMI/deduplication, adaptor
+    trimming, and demultiplexing.
 
     :param output_dir: Output directory
     :type output_dir: str or unicode
@@ -420,7 +435,8 @@ def create_fastq_simdata(output_dir):
                                    read, qualities,
                                    umi5, umi3, barcode,
                                    adaptor, post_adaptor_nt)
-                for [tag, umi5, read, umi3, qualities] in config_5_3_post_adaptor_nt]
+                for [tag, umi5, read, umi3, qualities] in
+                config_5_3_post_adaptor_nt]
             records.extend(records_post_adaptor_nt)
             num_reads_per_barcode[barcode_index] += len(records)
             # ZIP records into three lists: UMI+barcode+adaptor

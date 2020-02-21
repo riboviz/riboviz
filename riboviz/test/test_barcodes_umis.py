@@ -1,20 +1,17 @@
 """
-barcodes_umis.py test suite.
+:py:mod:`riboviz.barcodes_umis` tests.
 """
 import csv
 import os
 import tempfile
 import pytest
-from riboviz.barcodes_umis import NUCLEOTIDES
-from riboviz.barcodes_umis import barcode_matches
-from riboviz.barcodes_umis import hamming_distance
-from riboviz.barcodes_umis import generate_barcode_pairs
+from riboviz import barcodes_umis
 
 
 @pytest.fixture(scope="function")
-def temporary_file():
+def tmp_file():
     """
-    Create a temporary file with a ".dat" suffix.
+    Create a temporary file with a ``dat`` suffix.
 
     :return: path to temporary file
     :rtype: str or unicode
@@ -27,156 +24,176 @@ def temporary_file():
 
 def test_hamming_distance_empty():
     """
-    Test hamming_distance with empty strings.
+    Test :py:func:`riboviz.barcodes_umis.hamming_distance` with empty
+    strings.
     """
-    assert hamming_distance("", "") == 0
+    assert barcodes_umis.hamming_distance("", "") == 0
 
 
 def test_hamming_distance_equal_characters():
     """
-    Test hamming_distance with equal characters.
+    Test :py:func:`riboviz.barcodes_umis.hamming_distance` with equal
+    characters.
     """
-    assert hamming_distance("A", "A") == 0
+    assert barcodes_umis.hamming_distance("A", "A") == 0
 
 
 def test_hamming_distance_nonequal_characters():
     """
-    Test hamming_distance with non-equal characters.
+    Test :py:func:`riboviz.barcodes_umis.hamming_distance` with
+    non-equal characters.
     """
-    assert hamming_distance("A", "T") == 1
+    assert barcodes_umis.hamming_distance("A", "T") == 1
 
 
 def test_hamming_distance_equal_strings():
     """
-    Test hamming_distance with equal strings.
+    Test :py:func:`riboviz.barcodes_umis.hamming_distance` with equal
+    strings.
     """
-    assert hamming_distance("GATTACCA", "GATTACCA") == 0
+    assert barcodes_umis.hamming_distance("GATTACCA", "GATTACCA") == 0
 
 
 def test_hamming_distance_one():
     """
-    Test hamming_distance with strings 1 apart.
+    Test :py:func:`riboviz.barcodes_umis.hamming_distance` with
+    strings distance 1 apart.
     """
-    assert hamming_distance("GATTACCA", "GATTGCCA") == 1
+    assert barcodes_umis.hamming_distance("GATTACCA", "GATTGCCA") == 1
 
 
 def test_hamming_distance_eight():
     """
-    Test hamming_distance with strings 8 apart.
+    Test :py:func:`riboviz.barcodes_umis.hamming_distance` with
+    strings distance 8 apart.
     """
-    assert hamming_distance("GATTACCA", "CTAATGGT") == 8
+    assert barcodes_umis.hamming_distance("GATTACCA", "CTAATGGT") == 8
 
 
 def test_barcode_matches():
     """
-    Test barcode_matches with default mismatches and delimiter.
+    Test :py:func:`riboviz.barcodes_umis.barcode_matches` with default
+    mismatches and delimiter.
     """
     record = "@X1:Tag_AAA_ 1:N:0:XXXXXXXX"
     barcode = "AAA"
-    assert barcode_matches(record, barcode)
+    assert barcodes_umis.barcode_matches(record, barcode)
 
 
 def test_barcode_matches_no_match():
     """
-    Test barcode_matches with a non-matching record.
+    Test :py:func:`riboviz.barcodes_umis.barcode_matches` with a
+    non-matching record.
     """
     record = "@X1:Tag_AAA_ 1:N:0:XXXXXXXX"
     barcode = "AAC"
-    assert not barcode_matches(record, barcode)
+    assert not barcodes_umis.barcode_matches(record, barcode)
 
 
 def test_barcode_matches_different_length_barcode():
     """
-    Test barcode_matches with a record with a different length barcode.
+    Test :py:func:`riboviz.barcodes_umis.barcode_matches` with a
+    record with that has a barcode a different length from that being
+    matched.
     """
     record = "@X1:Tag_AAAA_ 1:N:0:XXXXXXXX"
     barcode = "AAA"
-    assert not barcode_matches(record, barcode)
+    assert not barcodes_umis.barcode_matches(record, barcode)
 
 
 def test_barcode_matches_delimiter():
     """
-    Test barcode_matches with a non-default delimiter.
+    Test :py:func:`riboviz.barcodes_umis.barcode_matches` with a
+    non-default delimiter.
     """
     record = "@X1:Tag.AAA. 1:N:0:XXXXXXXX"
     barcode = "AAA"
-    assert barcode_matches(record, barcode, delimiter=".")
+    assert barcodes_umis.barcode_matches(record, barcode, delimiter=".")
 
 
 def test_barcode_matches_no_barcode():
     """
-    Test barcode_matches with a record with no barcode.
+    Test :py:func:`riboviz.barcodes_umis.barcode_matches` with a
+    record with no barcode.
     """
     record = "@X1:Tag 1:N:0:XXXXXXXX"
     barcode = "AAA"
-    assert not barcode_matches(record, barcode)
+    assert not barcodes_umis.barcode_matches(record, barcode)
 
 
 def test_barcode_matches_one_mismatch():
     """
-    Test barcode_matches with 1 allowed mismatch.
+    Test :py:func:`riboviz.barcodes_umis.barcode_matches` with 1
+    allowed mismatch.
     """
     record = "@X1:Tag_AAC_ 1:N:0:XXXXXXXX"
     barcode = "AAA"
-    assert barcode_matches(record, barcode, 1)
+    assert barcodes_umis.barcode_matches(record, barcode, 1)
 
 
 def test_barcode_matches_one_mismatch_false():
     """
-    Test barcode_matches with 1 allowed mismatch and a non-matching
-    record.
+    Test :py:func:`riboviz.barcodes_umis.barcode_matches` with 1
+    allowed mismatch and a non-matching record.
     """
     record = "@X1:Tag_ACC_ 1:N:0:XXXXXXXX"
     barcode = "AAA"
-    assert not barcode_matches(record, barcode, 1)
+    assert not barcodes_umis.barcode_matches(record, barcode, 1)
 
 
 def test_barcode_matches_two_mismatch():
     """
-    Test barcode_matches with 1 allowed mismatch and a non-matching
-    record.
+    Test :py:func:`riboviz.barcodes_umis.barcode_matches` with 2
+    allowed mismatches and a non-matching record.
     """
     record = "@X1:Tag_ACC_ 1:N:0:XXXXXXXX"
     barcode = "AAA"
-    assert barcode_matches(record, barcode, 2)
+    assert barcodes_umis.barcode_matches(record, barcode, 2)
 
 
-def test_generate_barcode_pairs_0(temporary_file):
+def test_create_barcode_pairs_0(tmp_file):
     """
-    Test generating barcode pairs of length 0 creates an empty file.
+    Test :py:func:`riboviz.barcodes_umis.create_barcode_pairs` of
+    length 0 creates an empty file.
 
-    :param temporary_file: Temporary file
-    :type temporary_file: str or unicode
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
     """
-    generate_barcode_pairs(temporary_file, length=0)
-    with open(temporary_file) as csv_file:
+    barcodes_umis.create_barcode_pairs(tmp_file, length=0)
+    with open(tmp_file) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter="\t")
         rows = [row for row in csv_reader]
     assert len(rows) == 0, "Expected zero rows"
 
 
 @pytest.mark.parametrize("delimiter", ["\t", ","])
-def test_generate_barcode_pairs_1(temporary_file, delimiter):
+def test_create_barcode_pairs_1(tmp_file, delimiter):
     """
-    Test generating barcode pairs of length 1.
+    Test :py:func:`riboviz.barcodes_umis.create_barcode_pairs` of
+    length 1.
 
-    :param temporary_file: Temporary file
-    :type temporary_file: str or unicode
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
-    generate_barcode_pairs(temporary_file, length=1)
-    with open(temporary_file) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter="\t")
+    barcodes_umis.create_barcode_pairs(tmp_file,
+                                       length=1,
+                                       delimiter=delimiter)
+    with open(tmp_file) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=delimiter)
         rows = [row for row in csv_reader]
-    assert len(rows) == 2 ** len(NUCLEOTIDES)
+    assert len(rows) == 2 ** len(barcodes_umis.NUCLEOTIDES)
     for row in rows:
         for nucleotide in row[0:2]:
-            assert nucleotide in NUCLEOTIDES, \
-                ("{} is not in {}".format(nucleotide, str(NUCLEOTIDES)))
+            assert nucleotide in barcodes_umis.NUCLEOTIDES, \
+                ("{} is not in {}".format(nucleotide,
+                                          str(barcodes_umis.NUCLEOTIDES)))
         if row[0] == row[1]:
             assert int(row[2]) == 0,\
-                "Hamming distance of {} and {} is not 0".format(row[0], row[1])
+                "Hamming distance of {} and {} is not 0".format(row[0],
+                                                                row[1])
         else:
             assert int(row[2]) == 1,\
-                "Hamming distance of {} and {} is not 1".format(row[0], row[1])
+                "Hamming distance of {} and {} is not 1".format(row[0],
+                                                                row[1])

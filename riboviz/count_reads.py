@@ -1,33 +1,48 @@
 """
 Scan input, temporary and output directories and count the number of
-reads (sequences) processed by specific stages of a RiboViz
-workflow. The scan is based on the configuration, directory structure
-and file patterns used by RiboViz.
+reads (sequences) processed by specific stages of a workflow. The scan
+is based on the configuration, directory structure and file patterns
+used by the workflow.
 
 The following information is included:
 
 * Input files: number of reads in the FASTQ files used as inputs.
-* 'cutadapt': number of reads in the FASTQ file output.
-* 'riboviz.tools.demultiplex_fastq': FASTQ files output by
-  "demultiplex_fastq", using the information in the associated
-  'num_reads.tsv' summary files, or, if these can't be found, the
+* ``cutadapt``: number of reads in the FASTQ file output.
+* :py:mod:`riboviz.tools.demultiplex_fastq`:  number of reads in the
+  FASTQ files output, using the information in the associated
+  ``num_reads.tsv`` summary files, or, if these can't be found, the
   FASTQ files themselves.
-* 'hisat2': number of reads in the SAM file and FASTQ file output.
-* 'riboviz.tools.trim_5p_mismatch': number of reads in the SAM file
-  output as recorded in the 'trim_5p_mismatch.tsv' summary file
+* ``hisat2``: number of reads in the SAM file and FASTQ file output.
+* :py:mod:`riboviz.tools.trim_5p_mismatch`: number of reads in the SAM
+  file output as recorded in the ``trim_5p_mismatch.tsv`` summary file
   output, or the SAM file itself, if the TSV file cannot be found.
-* 'umi_tools dedup': number of reads in the BAM file output.
+* ``umi_tools dedup``: number of reads in the BAM file output.
 
 The output file is a TSV file with columns:
 
-* 'SampleName': Name of the sample to which this file belongs. This is
-  an empty value if the step was not sample-specific
-  (e.g. demultiplexing a multiplexed FASTQ file).
-* 'Program': Program that wrote the file. The special token
-  'input' denotes input files.
-* 'File': Path to file.
-* 'NumReads': Number of reads in the file.
-* 'Description': Human-readable description of the file contents.
+* ``SampleName``: Name of the sample to which this file belongs. This
+  is an empty value if the step was not sample-specific
+  (e.g. processing a a multiplexed FASTQ file).
+* ``Program``: Program that wrote the file. The special token
+  ``input`` denotes input files.
+* ``File``: Path to file.
+* ``NumReads``: Number of reads in the file.
+* ``Description``: Human-readable description of the file contents.
+
+For example::
+
+    # Created by: RiboViz
+    # Date: 2020-02-12 06:34:50.340316
+    # Command-line tool: /home/ubuntu/riboviz/riboviz/tools/count_reads.py
+    # File: /home/ubuntu/riboviz/riboviz/count_reads.py
+    # Version: commit 0c39652154fd9623f2cebbace6e741f54d712b32 date 2020-02-12 06:24:19-08:00
+    SampleName	Program	File	NumReads	Description
+    WTnone	input	vignette/input/SRR1042855_s1mi.fastq.gz	963571	input
+    WT3AT	input	vignette/input/SRR1042864_s1mi.fastq.gz	1374448	input
+    WT3AT	cutadapt	vignette/tmp/WT3AT/trim.fq	1373362	Reads after removal of sequencing library adapters
+    WT3AT	hisat2	vignette/tmp/WT3AT/nonrRNA.fq	486233	rRNA or other contaminating reads removed by alignment to rRNA index files
+    WT3AT	hisat2  vignette/tmp/WT3AT/rRNA_map.sam	1373362	Reads with rRNA and other contaminating reads removed by alignment to rRNA index files
+
 """
 import glob
 import os
@@ -46,48 +61,50 @@ from riboviz.tools import demultiplex_fastq as demultiplex_fastq_tools_module
 from riboviz.tools import trim_5p_mismatch as trim_5p_mismatch_tools_module
 
 SAMPLE_NAME = "SampleName"
-""" Sample name column name """
+""" Column name. """
 PROGRAM = "Program"
-""" Program column name """
+""" Column name. """
 FILE = "File"
-""" File column name """
+""" Column name. """
 NUM_READS = "NumReads"
-""" NumReads column name """
+""" Column name. """
 DESCRIPTION = "Description"
-""" Description column name """
+""" Column name. """
 HEADER = [SAMPLE_NAME, PROGRAM, FILE, NUM_READS, DESCRIPTION]
-""" Number of reads file header """
+""" File header. """
 INPUT = "input"
-"""
-Special value for PROGRAM field to denote input files that do not
-originate from any step in a workflow
-"""
+""" ``Program`` value to denote input files """
 
 
 def input_fq(config_file, input_dir):
     """
-    Extract reads FASTQ input files.
+    Extract names of FASTQ input files from workflow configuration
+    file and count the number of reads in each file.
 
-    The configuration file is checked to see if it has an 'fq_files'
-    key whose value is a dict from sample names to sample files. If
-    present this mapping is used to determine which input files in
-    input_dir are have their reads counted and the sample names for
-    these files.
+    The configuration file is checked to see if it has an ``fq_files``
+    key whose value is mappings from sample names to sample files
+    (relative to ``input_dir``). Each FASTQ file has its reads
+    counted.
 
-    If there is no 'fq_files' key but there is a 'multiplex_fq_files'
-    key then the value of this key is assumed to be a list of
-    multiplexed input files and their reads are counted.
+    If there is no ``fq_files`` key but there is a
+    ``multiplex_fq_files`` key then the value of this key is assumed
+    to be a list of multiplexed input files (relative to
+    ``input_dir``). Each FASTQ file has its reads counted.
 
     If both keys exist then both sets of input files are traversed.
 
     If neither key exists then no input files are traversed.
 
+    For each file a ``pandas.core.frame.Series`` is created with
+    fields ``SampleName`` (sample name recorded in configuration or,
+    for multiplexed files, ``''``), ``Program`` (set to ``input``),
+    ``File``, ``NumReads``, ``Description`` (``input``).
+
     :param config_file: Configuration file
     :type config_file: str or unicode
     :param input_dir: Directory
     :type input_dir: str or unicode
-    :return: List of Series with fields SampleName, Program, File,
-    NumReads, Description or []
+    :return: list of ``pandas.core.frame.Series``, or ``[]``
     :rtype: list(pandas.core.frame.Series)
     """
     with open(config_file, 'r') as f:
@@ -121,19 +138,23 @@ def input_fq(config_file, input_dir):
 
 def cutadapt_fq(tmp_dir, sample=""):
     """
-    Extract reads from FASTQ file output by "cutadapt".
+    Count number of reads in the FASTQ file output by ``cutadapt``.
+
+    ``<tmp_dir>/<sample>`` is searched for a FASTQ file matching
+    :py:const:`riboviz.workflow_files.ADAPTER_TRIM_FQ`. Any file
+    also matching :py:const:`riboviz.workflow_files.UMI_EXTRACT_FQ`
+    is then removed (these file names overlap). The number of reads in
+    the resulting file are counted.
+
+    A ``pandas.core.frame.Series`` is created with fields
+    ``SampleName``, ``Program``, ``File``, ``NumReads``,
+    ``Description``.
 
     :param tmp_dir: Directory
     :type tmp_dir: str or unicode
-    :param sample: Sample name / subdirectory of tmp_dir, or "" if a
-    multiplexed file was processed
+    :param sample: Sample name
     :type sample: str or unicode
-    :param fq_file_name: FASTQ file name
-    :type fq_file_name: str or unicode
-    :param description: Description of this step
-    :type description: str or unicode
-    :return: Series with fields SampleName, Program, File, NumReads,
-    Description or None
+    :return: ``pandas.core.frame.Series``, or ``None``
     :rtype: pandas.core.frame.Series
     """
     fq_files = glob.glob(os.path.join(
@@ -162,21 +183,28 @@ def cutadapt_fq(tmp_dir, sample=""):
 
 def umi_tools_deplex_fq(tmp_dir):
     """
-    Extract reads from FASTQ files output by "demultiplex_fastq",
-    using the information in the associated 'num_reads.tsv' summary
-    files, or, if these can't be found, the FAST files themselves
+    Count number of reads in the FASTQ files output by
+    :py:mod:`riboviz.tools.demultiplex_fastq`.
+
+    ``tmp_dir`` is searched for directories matching
+    :py:const:`riboviz.workflow_files.DEPLEX_DIR_FORMAT`.
+    Each of these directories is traversed to identify FASTQ
+    files. Each of these directories is also traversed to identify TSV
+    files matching
+    :py:const:`riboviz.demultiplex_fastq.NUM_READS_FILE`.
+
+    If, for a directory, the TSV file exists it is parsed and the
+    number of reads in each FASTQ file extracted. If the TSV file
+    cannot be found then the number of reads in the FASTQ files
+    themselves are counted.
+
+    For each file a ``pandas.core.frame.Series`` is created with
+    fields ``SampleName``, ``Program``, ``File``, ``NumReads``,
+    ``Description``.
 
     :param tmp_dir: Directory
     :type tmp_dir: str or unicode
-    :param sample: Sample name / subdirectory of tmp_dir, or "" if a
-    multiplexed file was processed
-    :type sample: str or unicode
-    :param fq_file_name: FASTQ file name
-    :type fq_file_name: str or unicode
-    :param description: Description of this step
-    :type description: str or unicode
-    :return: List of Series with fields SampleName, Program, File,
-    NumReads, Description or []
+    :return: list of ``pandas.core.frame.Series``, or ``[]``
     :rtype: list(pandas.core.frame.Series)
     """
     deplex_dirs = glob.glob(os.path.join(
@@ -239,18 +267,24 @@ def umi_tools_deplex_fq(tmp_dir):
 
 def hisat2_fq(tmp_dir, sample, fq_file_name, description):
     """
-    Extract reads from FASTQ file output by "hisat2".
+    Count number of reads in the FASTQ file output by ``hisat2``.
+
+    ``<tmp_dir>/<sample>`` is searched for a FASTQ file matching
+    ``fq_file_name``. The number of reads in the file are counted.
+
+    A ``pandas.core.frame.Series`` is created with fields
+    ``SampleName``, ``Program``, ``File``, ``NumReads``,
+    ``Description``.
 
     :param tmp_dir: Directory
     :type tmp_dir: str or unicode
-    :param sample: Sample name / subdirectory of tmp_dir
+    :param sample: Sample name
     :type sample: str or unicode
-    :param fq_file_name: FASTQ file name
+    :param fq_file_name: FASTQ file name pattern
     :type fq_file_name: str or unicode
     :param description: Description of this step
     :type description: str or unicode
-    :return: Series with fields SampleName, Program, File, NumReads,
-    Description or None
+    :return: ``pandas.core.frame.Series``, or ``None``
     :rtype: pandas.core.frame.Series
     """
     fq_files = glob.glob(os.path.join(tmp_dir, sample, fq_file_name))
@@ -270,18 +304,24 @@ def hisat2_fq(tmp_dir, sample, fq_file_name, description):
 
 def hisat2_sam(tmp_dir, sample, sam_file_name, description):
     """
-    Extract reads from SAM file output by "hisat2".
+    Count number of reads in the SAM file output by ``hisat2``.
+
+    ``<tmp_dir>/<sample>`` is searched for a SAM file matching
+    ``sam_file_name``. The number of reads in the file are counted.
+
+    A ``pandas.core.frame.Series`` is created with fields
+    ``SampleName``, ``Program``, ``File``, ``NumReads``,
+    ``Description``.
 
     :param tmp_dir: Directory
     :type tmp_dir: str or unicode
-    :param sample: Sample name / subdirectory of tmp_dir
+    :param sample: Sample name
     :type sample: str or unicode
-    :param sam_file_name: SAM file name
+    :param sam_file_name: SAM file name pattern
     :type sam_file_name: str or unicode
     :param description: Description of this step
     :type description: str or unicode
-    :return: Series with fields SampleName, Program, File, NumReads,
-    Description or None
+    :return: ``pandas.core.frame.Series``, or ``None``
     :rtype: pandas.core.frame.Series
     """
     sam_files = glob.glob(os.path.join(tmp_dir, sample, sam_file_name))
@@ -301,16 +341,27 @@ def hisat2_sam(tmp_dir, sample, sam_file_name, description):
 
 def trim_5p_mismatch_sam(tmp_dir, sample):
     """
-    Extract reads from SAM file output by "trim_5p_mismatch", using
-    the information in the associated 'trim_5p_mismatch.tsv' summary
-    file, or, if this can't be found, the SAM file itself.
+    Count number of reads in the SAM file output by
+    :py:mod:`riboviz.tools.trim_5p_mismatch`.
+
+    ``<tmp_dir>/<sample>`` is searched for a SAM file matching
+    :py:const:`riboviz.workflow_files.ORF_MAP_CLEAN_SAM` and
+    a TSV file matching
+    :py:const:`riboviz.workflow_files.TRIM_5P_MISMATCH_TSV`.
+
+    If the TSV file exists it is parsed and the number of reads output
+    extracted. If the TSV file cannot be found then the number of
+    reads in the SAM file itself are counted.
+
+    A ``pandas.core.frame.Series`` is created with fields
+    ``SampleName``, ``Program``, ``File``, ``NumReads``,
+    ``Description``.
 
     :param tmp_dir: Directory
     :type tmp_dir: str or unicode
-    :param sample: Sample name / subdirectory of tmp_dir
+    :param sample: Sample name
     :type sample: str or unicode
-    :return: Series with fields SampleName, Program, File, NumReads,
-    Description or None
+    :return: ``pandas.core.frame.Series``, or ``None``
     :rtype: pandas.core.frame.Series
     """
     # Look for the SAM file.
@@ -321,7 +372,7 @@ def trim_5p_mismatch_sam(tmp_dir, sample):
     sam_file = sam_files[0]  # Only 1 match expected.
     # Look for trim_5p_mismatch.tsv.
     tsv_files = glob.glob(os.path.join(
-        tmp_dir, sample, trim_5p_mismatch.TRIM_5P_MISMATCH_FILE))
+        tmp_dir, sample, workflow_files.TRIM_5P_MISMATCH_TSV))
     is_tsv_problem = False
     if tsv_files:
         tsv_file = tsv_files[0]
@@ -351,19 +402,25 @@ def trim_5p_mismatch_sam(tmp_dir, sample):
 
 def umi_tools_dedup_bam(tmp_dir, output_dir, sample):
     """
-    Extract reads from BAM file output by "umi_tools dedup". A check
-    is made for a file, '<tmp_dir>/<sample>/pre_dedup.bam', and, if
-    this exists, then reads are counted from
-    '<out_dir>/<sample>/<sample>.bam'.
+    Count number of reads in the BAM file output by
+    ``umi_tools dedup``.
+
+    ``<tmp_dir>/<sample>`` is searched for a BAM file matching
+    :py:const:`riboviz.workflow_files.PRE_DEDUP_BAM` and
+    if this is found the reads in the output file
+    ``<output_dir>/<sample>/<sample>.bam`` are counted.
+
+    A ``pandas.core.frame.Series`` is created with fields
+    ``SampleName``, ``Program``, ``File``, ``NumReads``,
+    ``Description``.
 
     :param tmp_dir: Temporary directory
     :type tmp_dir: str or unicode
     :param output_dir: Output directory
     :type output_dir: str or unicode
-    :param sample: Sample name / subdirectory of tmp_dir
+    :param sample: Sample name
     :type sample: str or unicode
-    :return: Series with fields SampleName, Program, File, NumReads,
-    Description or None
+    :return: ``pandas.core.frame.Series``, or ``None``
     :rtype: pandas.core.frame.Series
     """
     # Look for pre_dedup.bam
@@ -394,12 +451,13 @@ def umi_tools_dedup_bam(tmp_dir, output_dir, sample):
 def count_reads_df(config_file, input_dir, tmp_dir, output_dir):
     """
     Scan input, temporary and output directories and count the number
-    of reads (sequences) processed by specific stages of a RiboViz
+    of reads (sequences) processed by specific stages of a
     workflow. The scan is based on the directory structure and file
-    patterns used by RiboViz.
+    patterns used by the workflow.
 
-    The DataFrame returned has columns: SampleName, Program, File,
-    NumReads, Description.
+    A ``pandas.core.frame.DataFrame`` is created with columns
+    ``SampleName``, ``Program``, ``File``, ``NumReads``,
+    ``Description``.
 
     :param config_file: Configuration file
     :type config_file: str or unicode
@@ -409,7 +467,7 @@ def count_reads_df(config_file, input_dir, tmp_dir, output_dir):
     :type tmp_dir: str or unicode
     :param output_dir: Output files directory
     :type output_dir: str or unicode
-    :return: DataFrame
+    :return: ``pandas.core.frame.DataFrame``
     :rtype: pandas.core.frame.DataFrame
     """
     df = pd.DataFrame(columns=HEADER)
@@ -439,12 +497,13 @@ def count_reads_df(config_file, input_dir, tmp_dir, output_dir):
 def count_reads(config_file, input_dir, tmp_dir, output_dir, reads_file):
     """
     Scan input, temporary and output directories and count the number
-    of reads (sequences) processed by specific stages of a RiboViz
+    of reads (sequences) processed by specific stages of a
     workflow. The scan is based on the configuration, directory
-    structure and file patterns used by RiboViz.
+    structure and file patterns used by the workflow.
 
-    reads_file is a TSV file with columns: SampleName, Program, File,
-    NumReads, Description.
+    The output is written as tab-separated values into
+    `reads_file`. The file header has column names ``SampleName``,
+    ``Program``, ``File``, ``NumReads``, ``Description``.
 
     :param config_file: Configuration file
     :type config_file: str or unicode
@@ -457,7 +516,8 @@ def count_reads(config_file, input_dir, tmp_dir, output_dir, reads_file):
     :param reads_file: Reads file output
     :type reads_file: str or unicode
     """
-    reads_df = count_reads_df(config_file, input_dir, tmp_dir, output_dir)
+    reads_df = count_reads_df(config_file, input_dir, tmp_dir,
+                              output_dir)
     provenance.write_provenance_header(__file__, reads_file)
     reads_df[list(reads_df.columns)].to_csv(
         reads_file, mode='a', sep="\t", index=False)
