@@ -1,7 +1,5 @@
-#! python
 """
-Remove a single 5' mismatched nt AND filter reads with more than
-specified mismatches from a SAM file.
+Trim 5' reads constants and functions.
 """
 import re
 import pysam
@@ -10,23 +8,23 @@ from riboviz import provenance
 
 
 NUM_PROCESSED = "num_processed"
-""" Key for number of reads processed """
+""" Trimming summary key. """
 NUM_DISCARDED = "num_discarded"
-""" Key for number of reads discarded """
+""" Trimming summary key. """
 NUM_TRIMMED = "num_trimmed"
-""" Key for number of reads trimmed """
+""" Trimming summary key. """
 NUM_WRITTEN = "num_written"
-""" Key for number of reads written """
+""" Trimming summary key. """
 TRIM_5P_MISMATCH_FILE = "trim_5p_mismatch.tsv"
 """ Default summary file name. """
 
 
 def increase_soft_clip_init(read):
     """
-    Edit CIGAR string of a read to increase soft clip, reducing
+    Edit CIGAR string of a read to increase soft clip, reducing the
     number of initial matches.
 
-    :param read: Read in SAM file.
+    :param read: Read
     :type read: pysam.libcalignedsegment.AlignedSegment
     """
     cigar_string = read.cigarstring
@@ -55,10 +53,10 @@ def increase_soft_clip_init(read):
 
 def increase_soft_clip_term(read):
     """
-    Edit CIGAR string of a read to increase soft clip, reducing
+    Edit CIGAR string of a read to increase soft clip, reducing the
     number of terminal matches.
 
-    :param read: Read in SAM file.
+    :param read: Read
     :type read: pysam.libcalignedsegment.AlignedSegment
     """
     cigar_string = read.cigarstring
@@ -92,20 +90,27 @@ def trim_5p_mismatch(sam_file_in,
                      fivep_remove=True,
                      max_mismatches=1):
     """
-    Remove a single 5' mismatched nt AND filter reads with more than
-    specified mismatches from a SAM file.
+    Remove a single 5' mismatched nt and filter reads with more than
+    a specified mismatches from a SAM file. A trimming summary is
+    returned, with keys:
 
-    :param sam_file_in: SAM file input
+    * ``num_processed``
+    * ``num_discarded``
+    * ``num_trimmed``
+    * ``num_written``
+
+    and values with the numbers of reads corresponding to each of
+    these categories.
+
+    :param sam_file_in: SAM input file
     :type sam_file_in: str or unicode
-    :param sam_file_out: SAM file output
+    :param sam_file_out: SAM output file
     :type sam_file_out: str or unicode
     :param fivep_remove: Remove mismatched 5' nt?
     :type fivep_remove: bool
-    :param max_mismatches: Number of mismatches to allow
+    :param max_mismatches: Number of mismatches
     :type max_mismatches: int
-    :return dict with keys "num_processed", "num_discarded",
-    "num_trimmed" and "num_written" and numbers of reads corresponding
-    to each
+    :return: trimming summary
     :rtype: dict
     """
     num_processed = 0
@@ -113,7 +118,7 @@ def trim_5p_mismatch(sam_file_in,
     num_trimmed = 0
     num_written = 0
     with pysam.AlignmentFile(sam_file_in, "r") as sam_in,\
-        pysam.AlignmentFile(sam_file_out, "wh", template=sam_in) as sam_out:
+         pysam.AlignmentFile(sam_file_out, "wh", template=sam_in) as sam_out:
         for read in sam_in.fetch():
             num_processed += 1
             if (num_processed % 1000000) == 1:
@@ -184,22 +189,19 @@ def trim_5p_mismatch_file(sam_file_in,
                           max_mismatches=1,
                           summary_file=TRIM_5P_MISMATCH_FILE):
     """
-    Remove a single 5' mismatched nt AND filter reads with more than
-    specified mismatches from a SAM file and save results to a
-    summary_file.
+    Remove a single 5' mismatched nt and filter reads with more than
+    a specified mismatches from a SAM file and save the trimming
+    summary to a file. See :py:func:`trim_5p_mismatch`.
 
-    :param sam_file_in: SAM file input
+    :param sam_file_in: SAM input file
     :type sam_file_in: str or unicode
-    :param sam_file_out: SAM file output
+    :param sam_file_out: SAM output file
     :type sam_file_out: str or unicode
     :param fivep_remove: Remove mismatched 5' nt?
     :type fivep_remove: bool
-    :param max_mismatches: Number of mismatches to allow
+    :param max_mismatches: Number of mismatches
     :type max_mismatches: int
-    :param sam_file_in: TSV file output with
-    :type sam_file_in: str or unicode
-    :param summary_file: TSV summary file with "num_processed",
-    "num_discarded", "num_trimmed" and "num_written" columns
+    :param summary_file: Summary file name
     :type summary_file: str or unicode
     """
     summary = trim_5p_mismatch(sam_file_in,

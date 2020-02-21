@@ -1,17 +1,27 @@
 """
-Demultiplex fastq files using UMI-tools-compliant barcodes present
-within the fastq headers. These headers are assumed to be of form:
+Demultiplex FASTQ files constants and functions.
+
+Demultiplex FASTQ files using UMI-tools-compliant barcodes present
+within the FASTQ headers and a sample sheet file.
+
+FASTQ headers are assumed to be of form::
 
     @..._<BARCODE>_...
 
-where the barcode is the first section delimited by underscores. If
-another delimiter was used then that can be specified.
+where the barcode is the first section that is delimited by
+underscores. The delimiter can be specified.
+
+The sample sheet is assumed to have a header with column names
+``SampleID`` and ``TagRead``.
+
+See also :py:mod:`riboviz.sample_sheets`.
 
 Known issue:
 
 If the number of mismatches is less than the Hamming distance between
-the barcodes (`TagReads` within the sample sheet) then a read will be
-assigned to the first barcode that matches even if this is not the closest barcode in terms of Hamming distance
+the barcodes (``TagReads`` within the sample sheet) then a read will
+be assigned to the first barcode that matches even if this is not the
+closest barcode in terms of Hamming distance.
 
 For example, imagine we had a barcode in a read, AGA, and our barcodes
 in our samplesheet are AAA, CCC, GGG, TTT. The Hamming distances
@@ -35,7 +45,6 @@ above two examples, the Hamming distance between each of the sample
 barcodes is 3 is less than the number of mismatches times 2, which is
 4 and 6 respectively.
 """
-
 import gzip
 import os
 from itertools import islice
@@ -46,9 +55,9 @@ from riboviz import utils
 
 
 NUM_READS_FILE = "num_reads.tsv"
-""" Number of reads summary file name """
+""" Number of reads file name. """
 OUTPUT_DIR = "output"
-""" Default directory for demultiplexed files """
+""" Default directory name for demultiplexed files. """
 
 
 def assign_sample(fastq_record1,
@@ -60,30 +69,30 @@ def assign_sample(fastq_record1,
                   mismatches,
                   delimiter):
     """
-    Check if fastq record matches barcode for a sample and, if so, add
-    the record to the fastq output file(s) for that sample.
+    Check if a FASTQ record matches a barcode for a sample and, if so,
+    add the record to the FASTQ output file for that sample.
 
-    :param fastq_record1: fastq record
+    :param fastq_record1: FASTQ record
     :type fastq_record1: list(str or unicode)
-    :param fastq_record2: fastq record for paired read (or None if
-    none)
+    :param fastq_record2: FASTQ record for paired read, or ``None``
     :type fastq_record2: list(str or unicode)
-    :param barcode: Barcode to match fastq record against
+    :param barcode: Barcode
     :type barcode: str or unicode
     :param read1_split_fh: Read 1 output file handle
     :type read1_split_fh: io.IOBase
-    :param read2_split_fh: Read 2 output file handle (None if none)
+    :param read2_split_fh: Read 2 output file handle, or ``None``
     :type read2_split_fh: io.IOBase
-    :param is_paired_end: Are paired reads being used? (if True then
-    fastq_record2 is assumed to have a fastq record and read2_split_fh
-    is assumed to have an output file handle)
+    :param is_paired_end: Are paired reads being used? (if \
+    ``True`` then ``fastq_record2`` is assumed to have a FASTQ \
+    record and ``read2_split_fh`` is assumed to be an output \
+    file handle, not ``None``)
     :type is_paired_end: bool
-    :param mismatches: Number of mismatches permitted in barcode
+    :param mismatches: Mismatches allowed
     :type mismatches: int
     :param delimiter: Barcode delimiter
     :type delimiter: str or unicode
-    :returns: True if fastq record matches barcode
-    :rtype: Bool
+    :returns: `True` if FASTQ record matches barcode
+    :rtype: bool
     """
     is_assigned = False
     if barcodes_umis.barcode_matches(
@@ -101,52 +110,51 @@ def assign_samples(fastq_record1,
                    read1_split_fhs,
                    read2_split_fhs,
                    is_paired_end,
-                   num_samples,
                    num_reads,
                    mismatches,
                    delimiter):
     """
-    Iterate through each sample and check if fastq record matches
-    barcode for a sample and, if so, add the record to the fastq
-    output file(s) for that barcode, and update the count in num_reads
-    for the sample.
+    Iterate through sample barcodes and check if the FASTQ
+    record matches the barcode for a sample and, if so, add the record
+    to the FASTQ output file for the sample and update the count in
+    ``num_reads`` for the sample.
 
-    :param fastq_record1: fastq record
+    `read1_split_fhs`, `read2_split_fhs` (if ``is_paired_end`` is
+    ``True``), ``barcodes`` and ``num_reads`` are all expected to be
+    the same length.
+
+    :param fastq_record1: FASTQ record
     :type fastq_record1: list(str or unicode)
-    :param fastq_record2: fastq record for paired read (or None)
+    :param fastq_record2: FASTQ record for paired read, or ``None``
     :type fastq_record2: list(str or unicode)
-    :param barcodes: Barcodes to match fastq record against
+    :param barcodes: Barcodes
     :type barcodes: list(str or unicode)
-    :param read1_split_fhs: Read 1 output file handles (assumed to be
-    of the same length as barcodes)
+    :param read1_split_fhs: Read 1 output file handles
     :type read1_split_fhs: list(io.IOBase)
-    :param read2_split_fhs: Read 2 output file handles (None if none)
+    :param read2_split_fhs: Read 2 output file handles, or ``None``
     :type read2_split_fhs: list(io.IOBase)
-    :param is_paired_end: Are paired reads being used? (if True then
-    fastq_record2 is assumed to have a fastq record and
-    read2_split_fhs is assumed to have output file handles and be of
-    the same length as read1_split_fhs)
+    :param is_paired_end: Are paired reads being used? (if \
+    ``True`` then ``fastq_record2`` is assumed to have a FASTQ \
+    record and ``read2_split_fhs`` is assumed to have a \
+    complementary output file handle)
     :type is_paired_end: bool
-    :param num_samples: Number of samples
-    :type num_samples: int
-    :param num_reads: Number of reads matching barcodes for each
-    sample
+    :param num_reads: Number of matched reads for each sample
     :type num_reads: list(int)
-    :param mismatches: Number of mismatches permitted in barcode
+    :param mismatches: Mismatches allowed
     :type mismatches: int
     :param delimiter: Barcode delimiter
     :type delimiter: str or unicode
-    :returns: True if fastq record matches barcode for a sample
-    :rtype: Bool
+    :returns: `True` if FASTQ record matches barcode
+    :rtype: bool
     """
     is_assigned = False
-    for sample in range(num_samples):
+    for sample, barcode in enumerate(barcodes):
         read2_split_fh = None
         if is_paired_end:
             read2_split_fh = read2_split_fhs[sample]
         is_assigned = assign_sample(fastq_record1,
                                     fastq_record2,
-                                    barcodes[sample],
+                                    barcode,
                                     read1_split_fhs[sample],
                                     read2_split_fh,
                                     is_paired_end,
@@ -165,17 +173,24 @@ def demultiplex(sample_sheet_file,
                 out_dir=OUTPUT_DIR,
                 delimiter=barcodes_umis.BARCODE_DELIMITER):
     """
-    Demultiplex reads from fastq[.gz] by inline barcodes.
+    Demultiplex FASTQ files using UMI-tools-compliant barcodes present
+    within the FASTQ headers and a sample sheet file. GZIPped FASTQ
+    files can be handled too.
 
-    :param sample_sheet_file: Sample sheet filename, tab-delimited
-    text format with SampleID and TagRead columns
+    The sample sheet is assumed to have a header with column names
+    ``SampleID`` and ``TagRead``.
+
+    ``read2_file``, if provided, must be the same format as
+    ``read1_file`` i.e. if ``read1_file`` is GZIPped then
+    ``read2_file`` must be also.
+
+    :param sample_sheet_file: Sample sheet file name
     :type sample_sheet_file: str or unicode
-    :param read1_file: Read 1 filename (fastq[.gz] format)
+    :param read1_file: FASTQ file name
     :type read1_file: str or unicode
-    :param read2_file: Read 2 pair filename (fastq[.gz] format,
-    must be the same as read1_file format)
+    :param read2_file: FASTQ file name, for paired reads, or ``None``
     :type read2_file: str or unicode
-    :param mismatches: Number of mismatches permitted in barcode
+    :param mismatches: Mismatches allowed
     :type mismatches: int
     :param out_dir: Output directory
     :type out_dir: str or unicode
@@ -223,6 +238,9 @@ def demultiplex(sample_sheet_file,
         except Exception:
             raise IOError(
                 "Error: output directory {} cannot be created".format(out_dir))
+    elif os.path.isfile(out_dir):
+        raise IOError(
+            "Error: output directory {} cannot be created".format(out_dir))
 
     num_reads_file = os.path.join(out_dir, NUM_READS_FILE)
     if is_paired_end:
@@ -278,7 +296,6 @@ def demultiplex(sample_sheet_file,
                                      read1_split_fhs,
                                      read2_split_fhs,
                                      is_paired_end,
-                                     num_samples,
                                      num_reads,
                                      mismatches,
                                      delimiter)

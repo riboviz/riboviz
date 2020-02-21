@@ -1,51 +1,60 @@
 #!/usr/bin/env python
 """
-Upgrade YAML configuration file be compatible with current version of
-RiboViz
+Upgrade workflow configuration file to be compatible with current
+configuration.
 
-    usage: upgrade_config_file.py [-h] -i INPUT [-o [OUTPUT]]
+Usage::
 
-    optional arguments:
-      -h, --help            show this help message and exit
-      -i INPUT, --input INPUT
-                            Input YAML configuration file
-      -o [OUTPUT], --output [OUTPUT]
-                            Output YAML configuration file. If not
-                            provided then upgraded content is printed
-                            to standard out
+    python -m riboviz.tools.upgrade_config_file [-h]
+        -i INPUT_FILE [-o [OUTPUT_FILE]]
+
+    -h, --help            show this help message and exit
+    -i INPUT_FILE, --input INPUT_FILE
+                          Input file
+    -o [OUTPUT_FILE], --output [OUTPUT_FILE]
+                          Output file (if not provided then the
+                          upgraded configuration is printed)
+
+See :py:mod:`riboviz.upgrade_config` for information on the changes
+applied.
 """
 import argparse
-import sys
-from riboviz import upgrade_config_file
+from riboviz import upgrade_config
+
+
+def parse_command_line_options():
+    """
+    Parse command-line options.
+
+    :returns: command-line options
+    :rtype: argparse.Namespace
+    """
+    parser = argparse.ArgumentParser(
+        description="Upgrade workflow configuration file to be compatible with current configuration")
+    parser.add_argument("-i",
+                        "--input",
+                        dest="input_file",
+                        required=True,
+                        help="Input file")
+    parser.add_argument("-o",
+                        "--output",
+                        dest="output_file",
+                        nargs='?',
+                        help="Output file (if not provided then the upgraded configuration is printed)")
+    options = parser.parse_args()
+    return options
 
 
 def invoke_upgrade_config_file():
     """
-    Upgrade YAML configuration file be compatible with current version
-    of RiboViz. Parse command-line arguments then invoke
-    upgrade_config_file.
+    Parse command-line options then invoke
+    :py:mod:`riboviz.upgrade_config.upgrade_config_file`.
     """
-    parser = argparse.ArgumentParser(
-        description="Upgrade YAML configuration file be compatible with current version of RiboViz")
-    parser.add_argument("-i",
-                        "--input",
-                        dest="input",
-                        required=True,
-                        help="Input YAML configuration file")
-    parser.add_argument("-o",
-                        "--output",
-                        dest="output",
-                        nargs='?',
-                        help="Output YAML configuration file. If not provided then upgraded content is printed to standard out")
-    options = parser.parse_args()
-    input_file = options.input
-    output_file = options.output
-    upgrade_config_file.upgrade_config_file(input_file, output_file)
+    options = parse_command_line_options()
+    input_file = options.input_file
+    output_file = options.output_file
+    upgrade_config.upgrade_config_file(input_file, output_file)
 
 
 if __name__ == "__main__":
-    try:
-        invoke_upgrade_config_file()
-    except Exception as e:
-        print(e)
-        sys.exit(1)
+    invoke_upgrade_config_file()

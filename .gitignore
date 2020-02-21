@@ -18,3 +18,6 @@ vignette/*index
 vignette/*logs
 vignette/*tmp
 vignette/*output
+code-docs/_build/
+code-docs/modules.rst
+code-docs/riboviz*.rst

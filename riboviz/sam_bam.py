@@ -1,37 +1,32 @@
 """
 SAM and BAM-related constants and functions.
 """
-import os
-import os.path
 import pysam
 from riboviz import utils
 
 PG_TAG = "PG"
-""" SAM file PG (program) tag """
+""" SAM file ``PG`` (program) tag. """
 SAM_EXT = "sam"
-""" SAM file extension """
+""" SAM file extension. """
 BAM_EXT = "bam"
-""" BAM file extension """
+""" BAM file extension. """
 BAI_EXT = "bai"
-""" BAI file extension """
+""" BAI file extension. """
 SAM_FORMAT = "{}." + SAM_EXT
-""" Format string for SAM files """
+""" SAM file name format. """
 BAM_FORMAT = "{}." + BAM_EXT
-""" Format string for BAM files """
+""" BAM file name format. """
 BAI_FORMAT = "{}." + BAI_EXT
-"""
-Format string for BAM index file based on default behaviour of
-"samtools index"
-"""
+""" BAI file name format. """
 
 
 def is_bam(file_name):
     """
-    Does the given file end with .bam or .BAM?
+    Does a file name have extension ``bam`` or ``BAM``?
 
     :param file_name: File name
     :type file_name: str or unicode
-    :return: True if file_name ends with .bam or .BAM, False otherwise
+    :return: ``True`` if ``file_name`` has extension ``bam`` or ``BAM``
     :rtype: bool
     """
     ext = utils.get_file_ext(file_name)
@@ -40,11 +35,11 @@ def is_bam(file_name):
 
 def is_sam(file_name):
     """
-    Does the given file end with .sam or .SAM?
+    Does a file name have extension ``sam`` or ``SAM``?
 
     :param file_name: File name
     :type file_name: str or unicode
-    :return: True if file_name ends with .sam or .SAM, False otherwise
+    :return: ``True`` if ``file_name`` has extension ``sam`` or ``SAM``
     :rtype: bool
     """
     ext = utils.get_file_ext(file_name)
@@ -78,30 +73,30 @@ def count_sequences(file_name):
 
 def equal_bam(file1, file2):
     """
-    Compare two BAM files for equality. The following are compared:
+    Compare two BAM files for equality. The following content is
+    compared:
 
     * Index-specific information:
-      - Index statistics.
-      - Number of unequal reads without coordinates.
-      - Number of mapped alignments.
-      - Number of unmapped alignments.
-    * Header values for all but "PG".
+        - Index statistics.
+        - Number of unequal reads without coordinates.
+        - Number of mapped alignments.
+        - Number of unmapped alignments.
+    * Header values for all but the ``PG`` tag.
     * Reference numbers, names and lengths.
-    * Reads
+    * Reads.
 
     BAM files are assumed to have been sorted by their leftmost
-    coordinate position.
-
-    BAM files are required to have complementary BAI files.
+    coordinate position and are expected to have complementary BAI
+    files.
 
     :param file1: File name
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
-    :raise AssertionError: if files differ in their data or they
-    are missing complementary BAI files
-    :raise Exception: if problems arise when loading the files or, if
-    applicable, their complementary BAI files
+    :raise AssertionError: if files differ in their content or BAM \
+    files are missing complementary BAI files
+    :raise Exception: if problems arise when loading the files or, \
+    if applicable, their complementary BAI files
     """
     with pysam.AlignmentFile(file1, mode="rb") as bam_file1,\
             pysam.AlignmentFile(file2, mode="rb") as bam_file2:
@@ -131,9 +126,10 @@ def equal_bam(file1, file2):
 
 def equal_sam(file1, file2):
     """
-    Compare two SAM files for equality. The following are compared:
+    Compare two SAM files for equality. The following content is
+    compared:
 
-    * Header values for all but "PG".
+    * Header values for all but the ``PG`` tag.
     * Reference numbers, names and lengths.
     * Reads.
 
@@ -144,7 +140,7 @@ def equal_sam(file1, file2):
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
-    :raise AssertionError: if files differ in their data
+    :raise AssertionError: if files differ in their content
     :raise Exception: if problems arise when loading the files
     """
     with pysam.AlignmentFile(file1) as sam_file1,\
@@ -159,8 +155,8 @@ def equal_sam(file1, file2):
 
 def equal_bam_sam_metadata(file1, file2):
     """
-    Compare BAM or SAM file metadata for equality.
-    Category, version, compression, description are compared.
+    Compare BAM or SAM file metadata for equality. Category, version,
+    compression, and description values are compared.
 
     :param file1: File name
     :type file1: pysam.AlignmentFile
@@ -188,14 +184,14 @@ def equal_bam_sam_metadata(file1, file2):
 
 def equal_bam_sam_references(file1, file2):
     """
-    Compare BAM or SAM file references for equality.
-    Reference numbers, names and lengths are compared.
+    Compare BAM or SAM file references for equality. Reference
+    numbers, names and lengths are compared.
 
     :param file1: File name
     :type file1: pysam.AlignmentFile
     :param file2: File name
     :type file2: pysam.AlignmentFile
-    :raise AssertionError: if files differ in their references data
+    :raise AssertionError: if files differ in their references
     """
     assert file1.nreferences == file2.nreferences,\
         "Unequal number of reference sequences: %s (%d), %s (%d)"\
@@ -213,11 +209,10 @@ def equal_bam_sam_references(file1, file2):
 
 def equal_bam_sam_headers(file1, file2):
     """
-    Compare BAM or SAM file header data for equality.
-
-    Values for all but "PG" are compared. "PG" is not compared as it
-    holds information on the command-line invocation that created a
-    file and the file names and paths may differ.
+    Compare BAM or SAM file header data for equality. Values for all
+    but ``PG`` are compared. ``PG`` is not compared as it holds
+    information on the command-line invocation that created a file and
+    file names and paths may differ.
 
     :param file1: File name
     :type file1: pysam.AlignmentFile
@@ -240,7 +235,7 @@ def equal_bam_sam_headers(file1, file2):
 
 def get_segment_qname(segment):
     """
-    Return the qualified name of a read segment
+    Return the qualified name of a read segment.
 
     :param segment: read segment
     :type segment: pysam.libcalignedsegment.AlignedSegment
@@ -252,10 +247,8 @@ def get_segment_qname(segment):
 
 def equal_bam_sam_reads(file1, file2):
     """
-    Compare BAM or SAM reads for equality.
-
-    BAM/SAM files are assumed to have been sorted by their leftmost
-    coordinate position.
+    Compare BAM or SAM reads for equality. BAM/SAM files are assumed
+    to have been sorted by their leftmost coordinate position.
 
     :param file1: File name
     :type file1: pysam.AlignmentFile
