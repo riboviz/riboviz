@@ -16,11 +16,10 @@ import pytest
 import pandas as pd
 import riboviz
 import riboviz.test
-from riboviz import file_names
+from riboviz import fastq
 from riboviz import params
 from riboviz import umi_tools
-from riboviz import validation
-from riboviz import workflow_files_logger
+from riboviz import workflow_files
 from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
 from riboviz.test.tools import configuration_module  # Test fixture
@@ -50,12 +49,12 @@ def test_adaptor_trimming(configuration_module, sample_id):
     config, _ = configuration_module
     expected_output = os.path.join(
         riboviz.test.SIMDATA_DIR,
-        sample_id + "_umi.fastq")
+        fastq.FASTQ_FORMAT.format(sample_id + "_umi"))
     actual_output = os.path.join(
         config[params.TMP_DIR],
         sample_id,
-        file_names.ADAPTER_TRIM_FQ)
-    validation.equal_fastq(expected_output, actual_output)
+        workflow_files.ADAPTER_TRIM_FQ)
+    fastq.equal_fastq(expected_output, actual_output)
 
 
 @pytest.mark.parametrize("sample_id", [riboviz.test.SIMDATA_UMI_SAMPLE])
@@ -74,12 +73,12 @@ def test_umi_extract(configuration_module, sample_id):
     config, _ = configuration_module
     expected_output = os.path.join(
         riboviz.test.SIMDATA_DIR,
-        sample_id + ".fastq")
+        fastq.FASTQ_FORMAT.format(sample_id))
     actual_output = os.path.join(
         config[params.TMP_DIR],
         sample_id,
-        file_names.UMI_EXTRACT_FQ)
-    validation.equal_fastq(expected_output, actual_output)
+        workflow_files.UMI_EXTRACT_FQ)
+    fastq.equal_fastq(expected_output, actual_output)
 
 
 def check_umi_groups(config, sample_id, num_groups):
@@ -97,7 +96,7 @@ def check_umi_groups(config, sample_id, num_groups):
     tmp_dir = config[params.TMP_DIR]
     groups_tsv = os.path.join(tmp_dir,
                               sample_id,
-                              file_names.POST_DEDUP_GROUPS_TSV)
+                              workflow_files.POST_DEDUP_GROUPS_TSV)
     groups = pd.read_csv(groups_tsv, sep="\t")
     assert groups.shape[0] == num_groups, \
         ("Expected %d unique groups but found %d"
@@ -193,25 +192,3 @@ def test_tpms_collated_tsv(configuration_module, sample_id):
     """
     config, _ = configuration_module
     check_tpms_collated_tsv(config, sample_id, 2)
-
-
-@pytest.mark.usefixtures("run_prep_riboviz")
-def test_workflow_files_tsv(configuration_module):
-    """
-    Validate the workflow files log file produced from running the
-    workflow.
-
-    :param configuration_module: configuration and path to
-    configuration file (pytest fixture)
-    :type configuration_module: tuple(dict, str or unicode)
-    """
-    config, _ = configuration_module
-    workflow_files_log_file = os.path.join(
-        config[params.OUTPUT_DIR],
-        file_names.WORKFLOW_FILES_LOG_FILE)
-    workflow_files_logger.validate_log_file(
-        workflow_files_log_file,
-        [config[params.INDEX_DIR],
-         config[params.TMP_DIR],
-         config[params.OUTPUT_DIR]],
-         [workflow_files_log_file])
