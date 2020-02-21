@@ -8,7 +8,7 @@ from riboviz import sam_bam
 from riboviz.test import data
 
 
-@pytest.mark.parametrize("extension", [".sam", ".SAM"])
+@pytest.mark.parametrize("extension", [sam_bam.SAM_EXT, sam_bam.SAM_EXT.upper()])
 def test_is_sam(extension):
     """
     Test is_sam with SAM extensions.
@@ -16,10 +16,10 @@ def test_is_sam(extension):
     :param extension: Extension
     :type extension: str or unicode
     """
-    assert sam_bam.is_sam("sample{}".format(extension))
+    assert sam_bam.is_sam("sample.{}".format(extension))
 
 
-@pytest.mark.parametrize("extension", [".bam", ".BAM", ".txt"])
+@pytest.mark.parametrize("extension", [sam_bam.BAM_EXT, sam_bam.BAM_EXT.upper(), "txt"])
 def test_not_is_sam(extension):
     """
     Test is_sam with non-SAM extensions.
@@ -27,10 +27,10 @@ def test_not_is_sam(extension):
     :param extension: Extension
     :type extension: str or unicode
     """
-    assert not sam_bam.is_sam("sample{}".format(extension))
+    assert not sam_bam.is_sam("sample.{}".format(extension))
 
 
-@pytest.mark.parametrize("extension", [".bam", ".BAM"])
+@pytest.mark.parametrize("extension", [sam_bam.BAM_EXT, sam_bam.BAM_EXT.upper()])
 def test_is_bam(extension):
     """
     Test is_bam with BAM extensions.
@@ -38,10 +38,10 @@ def test_is_bam(extension):
     :param extension: Extension
     :type extension: str or unicode
     """
-    assert sam_bam.is_bam("sample{}".format(extension))
+    assert sam_bam.is_bam("sample.{}".format(extension))
 
 
-@pytest.mark.parametrize("extension", [".sam", ".SAM", ".txt"])
+@pytest.mark.parametrize("extension", [sam_bam.SAM_EXT, sam_bam.SAM_EXT.upper(), "txt"])
 def test_not_is_bam(extension):
     """
     Test is_sam with non-BAM extensions.
@@ -49,14 +49,14 @@ def test_not_is_bam(extension):
     :param extension: Extension
     :type extension: str or unicode
     """
-    assert not sam_bam.is_bam("sample{}".format(extension))
+    assert not sam_bam.is_bam("sample.{}".format(extension))
 
 
 @pytest.mark.parametrize("test_case",
                          [("WTnone_rRNA_map_20", (20, 6)),
                           ("WTnone_rRNA_map_6_primary", (6, 6)),
                           ("WTnone_rRNA_map_14_secondary", (14, 0))])
-@pytest.mark.parametrize("file_type", ["sam", "bam"])
+@pytest.mark.parametrize("file_type", [sam_bam.SAM_FORMAT, sam_bam.BAM_FORMAT])
 def test_count_sequences(test_case, file_type):
     """
     Test test_count_sequences.
@@ -71,6 +71,6 @@ def test_count_sequences(test_case, file_type):
     """
     file_name, expected_counts = test_case
     sam_bam_file = os.path.join(os.path.dirname(data.__file__),
-                                file_name + "." + file_type)
+                                file_type.format(file_name))
     actual_counts = sam_bam.count_sequences(sam_bam_file)
     assert expected_counts == actual_counts

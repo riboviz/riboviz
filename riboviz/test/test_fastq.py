@@ -22,7 +22,7 @@ def fastq_file():
     :return: path to temporary FASTQ file
     :rtype: str or unicode
     """
-    _, fastq_file = tempfile.mkstemp(prefix="tmp", suffix=".fastq")
+    _, fastq_file = tempfile.mkstemp(prefix="tmp", suffix=fastq.FASTQ_EXT)
     yield fastq_file
     if os.path.exists(fastq_file):
         os.remove(fastq_file)
@@ -36,21 +36,25 @@ def fastq_gz_file():
     :return: path to temporary FASTQ.GZ file
     :rtype: str or unicode
     """
-    _, fastq_file = tempfile.mkstemp(prefix="tmp", suffix=".fastq.gz")
+    _, fastq_file = tempfile.mkstemp(prefix="tmp",
+                                     suffix="." + fastq.FASTQ_GZ_EXT)
     yield fastq_file
     if os.path.exists(fastq_file):
         os.remove(fastq_file)
 
 
-@pytest.mark.parametrize("extension", [".gz", ".gzip", ".GZ", ".GZIP"])
+@pytest.mark.parametrize("extension", [fastq.FASTQ_GZ_FORMAT,
+                                       fastq.FQ_GZ_FORMAT,
+                                       fastq.FASTQ_GZ_FORMAT.upper(),
+                                       fastq.FQ_GZ_FORMAT.upper()])
 def test_is_fastq_gz(extension):
     """
     Test is_fastq_gz with GZIP extensions.
 
-    :param extension: Extension
+    :param extension: extension file format
     :type extension: str or unicode
     """
-    assert fastq.is_fastq_gz("sample.fastq{}".format(extension))
+    assert fastq.is_fastq_gz(extension.format("sample"))
 
 
 @pytest.mark.parametrize("extension", [".txt", ""])
@@ -61,19 +65,29 @@ def test_not_is_fastq_gz(extension):
     :param extension: Extension
     :type extension: str or unicode
     """
-    assert not fastq.is_fastq_gz("sample.fastq.{}".format(extension))
+    assert not fastq.is_fastq_gz("sample{}".format(extension))
 
 
-@pytest.mark.parametrize("extension", [".gz", ".gzip", ".GZ", ".GZIP"])
+@pytest.mark.parametrize("extension",
+                         [(fastq.FASTQ_GZ_FORMAT,
+                           fastq.FASTQ_FORMAT),
+                          (fastq.FQ_GZ_FORMAT,
+                           fastq.FQ_FORMAT),
+                          (fastq.FASTQ_GZ_FORMAT.upper(),
+                           fastq.FASTQ_FORMAT.upper()),
+                          (fastq.FQ_GZ_FORMAT.upper(),
+                           fastq.FQ_FORMAT.upper())])
 def test_strip_fastq_gz(extension):
     """
     Test strip_fastq_gz with GZIP extensions.
 
-    :param extension: Extension
-    :type extension: str or unicode
+    :param extension: (GZIP extension file format,
+    corresponding non-GZIP extension file format)
+    :type extension: tuple(str or unicode, str or unicode)
     """
-    assert fastq.strip_fastq_gz("sample.fastq{}".format(extension)) == \
-        "sample.fastq"
+    gz_ext, ext = extension
+    assert fastq.strip_fastq_gz(gz_ext.format("sample")) == \
+        ext.format("sample")
 
 
 @pytest.mark.parametrize("extension", [".txt", ""])
@@ -85,42 +99,8 @@ def test_not_strip_fastq_gz(extension):
     :param extension: Extension
     :type extension: str or unicode
     """
-    file_name = "sample.fastq{}".format(extension)
+    file_name = "sample{}".format(extension)
     assert file_name == fastq.strip_fastq_gz(file_name)
-
-
-def test_get_fastq_filename_gz_false():
-    """
-    Test get_fastq_filename with is_gz=False.
-    """
-    assert fastq.get_fastq_filename("sample") == "sample.fastq"
-
-
-def test_get_fastq_filename_gz_true():
-    """
-    Test get_fastq_filename with is_gz=True.
-    """
-    assert fastq.get_fastq_filename("sample", True) == "sample.fastq.gz"
-
-
-def test_get_fastq_filenames_gz_false():
-    """
-    Test get_fastq_filenames with is_gz=False.
-    """
-    file_names = ["sample{}".format(i) for i in range(0, 3)]
-    expected_names = ["sample{}.fastq".format(i) for i in range(0, 3)]
-    actual_names = fastq.get_fastq_filenames(file_names)
-    assert expected_names == actual_names
-
-
-def test_get_fastq_filenames_gz_true():
-    """
-    Test get_fastq_filenames with is_gz=True.
-    """
-    file_names = ["sample{}".format(i) for i in range(0, 3)]
-    expected_names = ["sample{}.fastq.gz".format(i) for i in range(0, 3)]
-    actual_names = fastq.get_fastq_filenames(file_names, True)
-    assert expected_names == actual_names
 
 
 def get_test_fastq_sequences(read_length, count):
@@ -143,10 +123,10 @@ def get_test_fastq_sequences(read_length, count):
                                         repeat=read_length)][0:count]
     # Create a list of SeqRecords
     sequences = [SeqRecord(Seq(read, IUPAC.ambiguous_dna),
-                         id="read{}".format(i),
-                         name="read{}".format(i),
-                         description="read{}".format(i))
-               for read, i in zip(reads, range(0, len(reads)))]
+                           id="read{}".format(i),
+                           name="read{}".format(i),
+                           description="read{}".format(i))
+                 for read, i in zip(reads, range(0, len(reads)))]
     quality = list(range(0, read_length))
     for sequence in sequences:
         sequence.letter_annotations["phred_quality"] = quality
