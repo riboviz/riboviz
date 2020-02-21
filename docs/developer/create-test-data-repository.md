@@ -6,9 +6,9 @@ Any repository hosted on GitHub should not exceed 1GB in size. GitHub's [What is
 
 ## Create a repository on GitHub
 
-Create a repository, `test-data-<YYYYMMDD>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: ``test-data-20200220`.
+Create a repository, `regression-test-data-<YYYYMMDD>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: ``regression-test-data-20200220`.
 
-## Clone a local copy of the repository
+## Clone a local copy of the new repository
 
 ```console
 $ git clone https://github.com/riboviz/<REPOSITORY>
@@ -34,7 +34,7 @@ $ source install/environment.sh > ~/<REPOSITORY>/environment.txt 2>&1
 Copy template `README.md`:
 
 ```console
-$ cp docs/developer/test-readme-template.md ~/<REPOSITORY>/README.md
+$ cp docs/developer/regression-test-data-readme.md ~/<REPOSITORY>/README.md
 ```
 
 Edit `<REPOSITORY>/README.md` and fill in the details about the regression test data.
