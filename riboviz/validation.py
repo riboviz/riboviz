@@ -4,11 +4,13 @@ Helper methods for comparing and validating files of different types.
 import os
 import os.path
 import subprocess
-
 from Bio import SeqIO
 import numpy as np
 import pandas as pd
 import pysam
+from riboviz import bedgraph
+from riboviz import fastq
+from riboviz import sam_bam
 
 
 def equal_names(file1, file2):
@@ -23,8 +25,8 @@ def equal_names(file1, file2):
     :raise AssertionError: if file names differ
     :raise Exception: if problems arise when loading the files
     """
-    local_file1 = os.path.split(file1)[1]
-    local_file2 = os.path.split(file2)[1]
+    local_file1 = os.path.split(file1)[1].lower()
+    local_file2 = os.path.split(file2)[1].lower()
     assert os.path.exists(file1) and os.path.isfile(file1),\
         "File %s does not exist or is not a file"
     assert os.path.exists(file2) and os.path.isfile(file2),\
@@ -70,9 +72,6 @@ def equal_h5(file1, file2):
             return_code, ' '.join(map(str, cmd)))
 
 
-BEDGRAPH_COLUMNS = ["Chromosome", "Start", "End", "Data"]
-
-
 def load_bedgraph(bed_file):
     """
     Load bedGraph file. A bedGraph file has format:
@@ -99,14 +98,14 @@ def load_bedgraph(bed_file):
     """
     with open(bed_file) as f:
         track = f.readline()
-    assert track.startswith("track type=bedGraph"),\
+    assert track.startswith(bedgraph.TRACK_PREFIX),\
         "Invalid bedgraph file: %s. Invalid track line: %s"\
         % (bed_file, track)
     data = pd.read_csv(bed_file, sep="\t", header=None, skiprows=1)
-    assert data.shape[1] == len(BEDGRAPH_COLUMNS),\
+    assert data.shape[1] == len(bedgraph.COLUMNS),\
         "Invalid bedgraph file: %s. Expected 4 columns, found %d"\
         % (bed_file, data.shape[1])
-    data.columns = BEDGRAPH_COLUMNS
+    data.columns = bedgraph.COLUMNS
     return (track, data)
 
 
@@ -288,7 +287,7 @@ def equal_bam_sam_headers(file1, file2):
     assert keys1 == keys2,\
         "Unequal header keys: %s, %s" % (file1.filename, file2.filename)
     for key in keys1:
-        if key == "PG":
+        if key == sam_bam.PG_TAG:
             continue
         assert file1.header[key] == file2.header[key],\
             "Unequal values for key %s: %s (%s), %s (%s)"\
@@ -575,7 +574,7 @@ def compare(file1, file2, compare_names=True):
     assert not os.path.isdir(file2), "Directory: %s" % file2
     if compare_names:
         equal_names(file1, file2)
-    ext = os.path.splitext(file1)[1]
+    ext = os.path.splitext(file1)[1].lower()
     if ext in [".pdf"]:
         equal_names(file1, file2)
     if ext in [".ht2", ".bai"]:
@@ -590,5 +589,5 @@ def compare(file1, file2, compare_names=True):
         equal_sam(file1, file2)
     if ext in [".tsv"]:
         equal_tsv(file1, file2)
-    if ext in [".fq"]:
+    if ext in fastq.EXTENSIONS:
         equal_fastq(file1, file2)
