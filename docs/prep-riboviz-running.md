@@ -9,6 +9,7 @@ Contents:
 * [Configure number of processes (optional)](#configure-number-of-processes-optional)
 * [Dry run `prep_riboviz.py`](#dry-run-prep_ribovizpy)
 * [Run `prep_riboviz.py`](#run-prep_ribovizpy)
+  - [Troubleshooting: `This script needs to be run under Python 3`](#troubleshooting-this-script-needs-to-be-run-under-python-3)
   - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
   - [Troubleshooting: `WARNING: dedup_umis was TRUE but extract_umis was FALSE`](#troubleshooting-warning-dedup_umis-was-true-but-extract_umis-was-false)
   - [Troubleshooting: `Configuration parameter error: No sample files or multiplexed files are specified`](#troubleshooting-configuration-parameter-error-no-sample-files-or-multiplexed-files-are-specified)
@@ -180,6 +181,10 @@ $ echo $0
 ```
 
 See [Exit codes](#exit-codes), below, for a complete list of exit codes.
+
+### Troubleshooting: `This script needs to be run under Python 3`
+
+This warning arises if you try and run `prep_riboviz.py` under Python 2. You can only run `prep_riboviz.py` with Python 3.
 
 ### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
 
@@ -437,3 +442,4 @@ with:
 * 1: A file does not seem to exist.
 * 2: Errors occurred loading or accessing configuration e.g. missing configuration parameters, inconsistent configuration parameters.
 * 3: Error occurred during processing.
+* 4: User is using Python 2.                          
