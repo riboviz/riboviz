@@ -64,6 +64,7 @@ For example:
 
 ```console
 $ cp -r vignette/ ~/regression-test-data-<BRANCH>-<COMMIT-HASH>
+...after doing some development...
 $ pytest riboviz/test/regression/test_vignette.py \
     --expected=$HOME/regression-test-data-<BRANCH>-<COMMIT-HASH> \
     --check-index-tmp
