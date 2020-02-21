@@ -23,7 +23,7 @@ If `--skip-workflow` is not specified then `riboviz.tools.prep_riboviz` is run u
 
 The vignette output files (and the index and temporary files, if `--check-index-tmp` was provided) in `vignette/` are then compared against those in the directory provided via the expected parameter.
 
-If `--check-index-tmp` is not provided then tests for index and temporary files will be skipped. This will appear as follows:
+If `--check-index-tmp` is not provided (the default behaviour) then tests for index and temporary files will be skipped. This will appear as follows:
 
 ```console
 riboviz/test/regression/test_vignette.py ssssssssssssssssssssssssssssss.....
@@ -39,6 +39,37 @@ riboviz/test/regression/test_vignette.py::test_index[2-YAL_CDS_w_250] SKIPPED [ 
 riboviz/test/regression/test_vignette.py::test_index[2-yeast_rRNA] SKIPPED [  5%]
 ...
 ```
+
+### Regression test data
+
+Regression test data can be found within repositories prefixed `regression-test-data-<YYYYMMDD>`, within the [riboviz](https://github.com/riboviz) project on GitHub. These contain output files from the workflow.
+
+A regression test data repository can be used as follows (for example):
+
+```console
+$ git clone https://github.com/riboviz/regression-test-data-<YYYYMMDD>
+$ cd riboviz
+$ pytest riboviz/test/regression/test_vignette.py --expected=$HOME/regression-test-data-<YYYYMMDD>
+```
+
+**Note:** The most recent `regression-test-data-<YYYYMMDD>` repository will be consistent with the most recent version of the code on the `develop` branch.
+
+**Note:** Do not use the `--check-index-tmp` parameter when running regression tests using these repositories as the repositories contain no index or temporary files.
+
+### Using your own regression test directory
+
+After running the vignette you can copy `vignette` directory and then use that directory as the argument provided to the `--expected` parameter. This can be useful if you are changing any aspect of the workflow and want to ensure that you have not inadvertently changed the contents of the index or temporary files in any way.
+
+For example:
+
+```console
+$ cp -r vignette/ ~/regression-test-data-<BRANCH>-<COMMIT-HASH>
+$ pytest riboviz/test/regression/test_vignette.py \
+    --expected=$HOME/regression-test-data-<BRANCH>-<COMMIT-HASH> \
+    --check-index-tmp
+```
+
+Alternatively, you may find this useful if your changes *were* intended to change the contents of the index, temporary, or output, files - the copy of `vignette` serves as your new regression test directory. You could use this as a basis for [Creating a regression test data repository](./create-test-data-repository.md)
 
 ---
 
