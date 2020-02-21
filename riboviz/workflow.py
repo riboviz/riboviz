@@ -203,6 +203,7 @@ def map_to_r_rna(fastq, index_dir, ht_prefix, mapped_sam,
                                      run_config.is_dry_run)
     index_file_path = os.path.join(index_dir, ht_prefix)
     cmd = ["hisat2", "-p", str(run_config.nprocesses), "-N", "1",
+           "-k", "1",
            "--un", unmapped_fastq, "-x", index_file_path,
            "-S", mapped_sam, "-U", fastq]
     process_utils.run_logged_command(cmd, log_file,
