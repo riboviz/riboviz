@@ -2,7 +2,7 @@
 
 ## Run vignette regression test suite
 
-`riboviz.test.regression.test_vignette` is a regression test suite. The regression test suite runs riboviz.tools.prep_riboviz on the vignette data, in `vignette/`, then compares the results, in `vignette/`, to a directory of pre-calculated results, specified by the user.
+`riboviz.test.regression.test_vignette` is a regression test suite. The regression test suite runs `riboviz.tools.prep_riboviz` on the vignette data, in `vignette/`, then compares the results, in `vignette/`, to a directory of pre-calculated results, specified by the user.
 
 Usage:
 
