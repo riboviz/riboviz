@@ -16,101 +16,11 @@ Example::
     python -m riboviz.tools.prep_riboviz
         -c vignette/vignette_config.yaml
 
-The script can process sample data or multiplexed sample data
-(relevant configuration parameters are shown in brackets).
-
-Process ribosome profiling data:
-
-* Reads configuration information from configuration file.
-* Builds hisat2 indices if requested (``build_indices: TRUE``) using
-  ``hisat2 build`` and saves these into an index directory
-  (``dir_index``).
-* Processes each sample FASTQ file (sample IDs and files are \
-  listed in ``fq_files`` and are assumed to be relative to ``dir_in``) \
-  in turn:
-    - Cuts out sequencing library adapters (``adapters``, default
-      ``CTGTAGGCACC``) using ``cutadapt``.
-    - Extracts UMIs using ``umi_tools extract``, if requested
-      (``extract_umis: TRUE``), using a UMI-tools-compliant
-      regular expression pattern (``umi_regexp``).
-    - Removes rRNA or other contaminating reads by alignment to
-      rRNA index files (``rrna_index_prefix``) using ``hisat2``.
-    - Aligns remaining reads to ORFs index files
-      (``orf_index_prefix``). using ``hisat2``.
-    - Trims 5' mismatches from reads and remove reads with more than 2
-      mismatches using :py:mod:`riboviz.tools.trim_5p_mismatch`.
-    - Outputs UMI groups pre-deduplication using ``umi_tools group``
-      if requested (``dedup_umis: TRUE`` and ``group_umis: TRUE``)
-    - Deduplicates UMIs using ``umi_tools dedup``, if requested
-      (``dedup_umis: TRUE``)
-    - Outputs UMI groups post-deduplication using ``umi_tools group``
-      if requested (``dedup_umis: TRUE`` and ``group_umis:TRUE``)
-    - Exports bedgraph files for plus and minus strands, if requested
-      (``make_bedgraph: TRUE``) using ``bedtools genomecov``.
-    - Writes intermediate files produced above into a sample-specific
-      directory under the temporary directory  (``dir_tmp``).
-    - Makes length-sensitive alignments in compressed h5 format using
-      ``bam_to_h5.R``.
-    - Generates summary statistics, and analyses and QC plots for both
-      RPF and mRNA datasets using ``generate_stats_figs.R``. This
-      includes estimated read counts, reads per base, and transcripts
-      per million for each ORF in each sample.
-    - Writes output files produced above into an sample-specific
-      directory under the output directory (``dir_out``).
-* Collates TPMs across all processed samples, using
-  ``collate_tpms.R`` and writes into output directory (``dir_out``).
-
-Process multiplexed ribosome profiling data:
-
-* Reads configuration information from configuration file.
-* Builds hisat2 indices if requested (``build_indices: TRUE``) using
-  ``hisat2 build`` and saves these into an index directory
-  (``dir_index``).
-* Reads FASTQ file (the file is listed in ``multiplex_fq_files``
-  and is assumed to be relative to ``dir_in``).
-* Cuts out sequencing library adapters (``adapters``, default
-  ``CTGTAGGCACC``) using ``cutadapt``.
-* Extracts barcodes and UMIs using ``umi_tools extract``, if requested
-  (``extract_umis: TRUE``), using a UMI-tools-compliant
-  regular expression pattern (``umi_regexp``).
-* Demultiplexes FASTQ file with reference to a sample sheet
-  (``sample_sheet``), using :py:mod:`riboviz.tools.demultiplex_fastq`.
-* Processes each demultiplexed FASTQ file, which has one or more \
-  reads, in turn:
-    - Removes rRNA or other contaminating reads by alignment to rRNA
-      index files (``rrna_index_prefix``) using ``hisat2``.
-    - Aligns remaining reads to ORFs index files (``orf_index_prefix``)
-      using ``hisat2``.
-    - Trims 5' mismatches from reads and remove reads with more than 2
-      mismatches using :py:mod:`riboviz.tools.trim_5p_mismatch`.
-    - Outputs UMI groups pre-deduplication using ``umi_tools group``
-      if requested (``dedup_umis: TRUE`` and ``group_umis: TRUE``).
-    - Deduplicates UMIs using ``umi_tools dedup``, if requested
-      (``dedup_umis: TRUE``).
-    - Outputs UMI groups post-deduplication using ``umi_tools group``
-      if requested (``dedup_umis: TRUE`` and ``group_umis: TRUE``)
-    - Exports bedgraph files for plus and minus strands, if requested
-      (``make_bedgraph: TRUE``) using ``bedtools genomecov``.
-    - Writes intermediate files produced above into a sample-specific
-      directory under the temporary directory  (``dir_tmp``).
-    - Makes length-sensitive alignments in compressed h5 format using
-      ``bam_to_h5.R``.
-    - Generates summary statistics, and analyses and QC plots for both
-      RPF and mRNA datasets using ``generate_stats_figs.R``. This
-      includes estimated read counts, reads per base, and transcripts
-      per million for each ORF in each sample.
-    - Writes output files produced above into an sample-specific
-      directory under the output directory (``dir_out``).
-* Collates TPMs across all processed samples, using
-  ``collate_tpms.R`` and writes into output directory (``dir_out``).
-
-The script can parallelize parts of its operation over many processes
-(``num_processes``):
-
-* This value is used to configure ``hisat2``, ``samtools sort``,
-  ``bam_to_h5.R`` and ``generate_stats_figs.R``.
-* For ``cutadapt``, the number of available processors on the host will
-  be used.
+If ``--dry-run`` is provided then the commands submitted to the
+operating system, will not be executed. This can be useful for seeing
+what commands will be run, validating the configuration, without
+actually running the commands, and having a bash script that can be
+run directly in future.
 
 The following exit codes are returned:
 
@@ -121,14 +31,120 @@ The following exit codes are returned:
 * 3: Error occurred during processing.
 * 4: User is using Python 2.
 
-Commands that are submitted to bash are recorded within a file
-specified by a ``cmd_file`` configuration parameter.
+Operation is as follows.
 
-If ``--dry-run`` is provided then the commands submitted to the
-operating syste, will not be executed. This can be useful for seeing
-what commands will be run, validating the configuration, without
-actually running the commands, and having a bash script that can be
-run directly in future.
+:py:func:`invoke_prep_riboviz`:
+
+* Parses command-line options using
+  :py:func:`parse_command_line_options`.
+* Invokes :py:func:`prep_riboviz` then exits using the exit code
+  returned.
+
+:py:func:`prep_riboviz`:
+
+* Checks Python version.
+* Writes provenance (file name, Git commit hash and date) to workflow
+  log file.
+* Invokes :py:func:`run_workflow` to run the workflow.
+* Catches and logs errors thrown by :py:func:`run_workflow` and maps
+  these to the corresponding exit codes.
+
+:py:func:`run_workflow`:
+
+* Reads configuration information from configuration file.
+* Sets up command file into which commands sent to the operating
+  system are to be written (a bash script).
+* Creates index, temporary, output and logs directories.
+* Checks for existence of all non-sample-specific data files to avoid
+  having to repeatedly recheck these when processing each sample. This
+  also allows the workflow to terminate before processing any samples,
+  if any of these files cannot be found.
+* Builds HISAT2 indices, if requested, using ``hisat2 build``.
+* Checks if non-multiplexed FASTQ sample files or a multiplexed FASTQ
+  sample file have been specified.
+* If non-multiplexed sample files have been specified:
+    - Processes the samples using :py:func:`process_samples`.
+* If a multiplexed sample file has been specified:
+    - Cuts out sequencing library adapters using ``cutadapt``.
+    - Extracts barcodes and UMIs using ``umi_tools extract``, if
+      requested, using a UMI-tools-compliant regular expression
+      pattern.
+    - Demultiplexes the sample file with reference to the sample
+      sheet, using :py:mod:`riboviz.tools.demultiplex_fastq`.
+    - Parses the number of reads file produced when demultiplexing
+      samples to get the names of all samples which had 1 or more
+      reads.
+    - Determines the names of the corresponding demultiplexed sample
+      files.
+    - Processes the demultiplexed samples using
+      :py:func:`process_samples`.
+* Collates TPMs across all processed samples using
+  ``collate_tpms.R``.
+* Counts the reads at each step using
+  :py:mod:`riboviz.tools.count_reads`.
+
+:py:func:`process_samples`:
+
+* Processes a collection of FASTQ sample files. For each sample:
+    - Checks that the sample exists (if doing a dry run with
+      multiplexed data this check is skipped as the file won't exist).
+    - Creates sample-specific temporary, output and logs directories.
+    - Processes the sample using :py:func:`process_sample`.
+* The number of successfully and unsuccessfully processed samples are
+  counted and the number of successfully processed samples is
+  returned.
+
+:py:func:`process_sample`:
+
+* Processes a single FASTQ sample file.
+* Cuts out sequencing library adapters using ``cutadapt``. If the
+  samples arise from demultiplexed FASTQ file then this step in
+  skipped as the adapters have already been cut.
+* Extracts barcodes and UMIs using ``umi_tools extract``, if
+  requested, using a UMI-tools-compliant regular expression
+  pattern. If the samples arise from demultiplexed FASTQ file then
+  this step is skipped as thew barcodes and UMIs have already been
+  extracted.
+* Removes rRNA or other contaminating reads by alignment to rRNA index
+  files using ``hisat2``.
+* Aligns remaining reads to ORFs index files using ``hisat2``.
+* Trims 5' mismatches from reads and remove reads with more than 2
+  mismatches using :py:mod:`riboviz.tools.trim_5p_mismatch`.
+* Sorts resultant BAM file using ``samtools view | samtools sort``.
+* Indexes resultant BAM file using ``samtools index``.
+* If deduplication has been requested:
+    - Outputs UMI groups pre-deduplication using ``umi_tools group``,
+      if requested.
+    - Deduplicates UMIs using ``umi_tools dedup``.
+    - Indexes resultant BAM file using ``samtools index``.
+    - Outputs UMI groups post-deduplication using ``umi_tools group``,
+      if requested.
+* Exports bedgraph files for plus and minus strands, if requested,
+  using ``bedtools genomecov``.
+* Makes length-sensitive alignments in compressed h5 format using
+  ``bam_to_h5.R``.
+* Generates summary statistics, and analyses and QC plots for both RPF
+  and mRNA datasets using ``generate_stats_figs.R``. This includes
+  estimated read counts, reads per base, and transcripts per million
+  for each ORF in each sample.
+* Writes intermediate files produced above into a sample-specific
+  temporary directory.
+* Writes output files produced above into a sample-specific output
+  directory.
+
+:py:const:`LOGGER` is used to log information in the workflow log
+file.
+
+Invocation of specific steps in the workflow is handled by calls to
+functions in :py:mod:`riboviz.workflow`.
+
+The script can parallelize parts of its operation over many processes
+(``num_processes``):
+
+* This value is used to configure ``hisat2``, ``samtools sort``,
+  ``bam_to_h5.R`` and ``generate_stats_figs.R``.
+* For ``cutadapt``, the number of available processors on the host will
+  be used.
 """
 import argparse
 from datetime import datetime
@@ -180,9 +196,63 @@ LOGGER = logging.getLogger(__name__)
 
 def process_sample(sample, sample_fastq, index_dir, r_rna_index,
                    orf_index, is_trimmed, config, tmp_dir, out_dir,
-                   run_config):
+                   logs_dir, run_config):
     """
     Process a single FASTQ sample file.
+
+    (relevant configuration parameters are shown in brackets).
+
+    * Processes a single FASTQ sample file.
+    * Uses a step counter to number step-specific log files.
+    * Cuts out sequencing library adapters (``adapters``) using \
+      ``cutadapt`` (via :py:func:`riboviz.workflow.cut_adapters`).
+        - If the samples arise from demultiplexed FASTQ file then this
+          step is skipped as the adapters have already been cut.
+    * Extracts barcodes and UMIs using ``umi_tools extract``, if \
+      requested (``extract_umis``), using a UMI-tools-compliant \
+      regular expression pattern (``umi_regexp``) (via \
+      :py:func:`riboviz.workflow.extract_barcodes_umis`).
+        - If the samples arise from demultiplexed FASTQ file then this
+          step is skipped as thew barcodes and UMIs have already been
+          extracted.
+    * Removes rRNA or other contaminating reads by alignment to rRNA
+      index files (``rrna_index_prefix``) using ``hisat2`` (via
+      :py:func:`riboviz.workflow.map_to_r_rna`).
+    * Aligns remaining reads to ORFs index files
+      (``orf_index_prefix``). using ``hisat2`` (via
+      :py:func:`riboviz.workflow.map_to_orf`).
+    * Trims 5' mismatches from reads and remove reads with more than 2
+      mismatches using :py:mod:`riboviz.tools.trim_5p_mismatch` (via
+      :py:func:`riboviz.workflow.trim_5p_mismatches`).
+    * Sorts resultant BAM file using ``samtools view | samtools sort``
+      (via :py:func:`riboviz.workflow.sort_bam`).
+    * Indexes resultant BAM file using ``samtools index`` (via
+      :py:func:`riboviz.workflow.index_bam`).
+    * If deduplication has been requested (``dedup_umis``):
+        - Outputs UMI groups pre-deduplication using ``umi_tools
+          group`` if requested (``group_umis``) (via
+          :py:func:`riboviz.workflow.group_umis`).
+        - Deduplicates UMIs using ``umi_tools dedup`` (via
+          :py:func:`riboviz.workflow.deduplicate_umis`).
+        - Indexes resultant BAM file using ``samtools index`` (via
+          :py:func:`riboviz.workflow.index_bam`).
+        - Outputs UMI groups post-deduplication using ``umi_tools
+          group``, if requested (``group_umis``) (via
+          :py:func:`riboviz.workflow.group_umis`).
+    * Exports bedgraph files for plus and minus strands, if requested
+      (``make_bedgraph``), using ``bedtools genomecov``. (via
+      :py:func:`riboviz.workflow.make_bedgraph`).
+    * Makes length-sensitive alignments in compressed h5 format using
+      ``bam_to_h5.R``. (via :py:func:`riboviz.workflow.bam_to_h5`).
+    * Generates summary statistics, and analyses and QC plots for both
+      RPF and mRNA datasets using ``generate_stats_figs.R``. This
+      includes estimated read counts, reads per base, and transcripts
+      per million for each ORF in each sample. (via
+      :py:func:`riboviz.workflow.generate_stats_figs`).
+    * Writes intermediate files produced above into a sample-specific
+      temporary directory.
+    * Writes output files produced above into a sample-specific output
+      directory.
 
     :param sample: Sample name
     :type sample: str or unicode
@@ -203,6 +273,8 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
     :type tmp_dir: str or unicode
     :param out_dir: Output directory
     :type out_dir: str or unicode
+    :param logs_dir: Logs directory
+    :type logs_dir: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
     :raise FileNotFoundError: if ``sample_fastq`` or a third-party \
@@ -219,7 +291,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
         LOGGER.info("Skipping adaptor trimming and barcode/UMI extraction")
         trim_fq = sample_fastq
     else:
-        log_file = os.path.join(run_config.logs_dir,
+        log_file = os.path.join(logs_dir,
                                 LOG_FORMAT.format(step, "cutadapt.log"))
         trim_fq = os.path.join(tmp_dir, workflow_files.ADAPTER_TRIM_FQ)
         workflow.cut_adapters(config[params.ADAPTERS],
@@ -231,7 +303,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
             extract_trim_fq = os.path.join(tmp_dir,
                                            workflow_files.UMI_EXTRACT_FQ)
             log_file = os.path.join(
-                run_config.logs_dir,
+                logs_dir,
                 LOG_FORMAT.format(step, "umi_tools_extract.log"))
             workflow.extract_barcodes_umis(trim_fq,
                                            extract_trim_fq,
@@ -243,7 +315,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
 
     non_r_rna_trim_fq = os.path.join(tmp_dir, workflow_files.NON_RRNA_FQ)
     r_rna_map_sam = os.path.join(tmp_dir, workflow_files.RRNA_MAP_SAM)
-    log_file = os.path.join(run_config.logs_dir,
+    log_file = os.path.join(logs_dir,
                             LOG_FORMAT.format(step, "hisat2_rrna.log"))
     workflow.map_to_r_rna(trim_fq, index_dir, r_rna_index,
                           r_rna_map_sam, non_r_rna_trim_fq, log_file,
@@ -252,7 +324,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
 
     orf_map_sam = os.path.join(tmp_dir, workflow_files.ORF_MAP_SAM)
     unaligned_fq = os.path.join(tmp_dir, workflow_files.UNALIGNED_FQ)
-    log_file = os.path.join(run_config.logs_dir,
+    log_file = os.path.join(logs_dir,
                             LOG_FORMAT.format(step, "hisat2_orf.log"))
     workflow.map_to_orf(non_r_rna_trim_fq, index_dir,
                         orf_index, orf_map_sam, unaligned_fq,
@@ -262,7 +334,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
     orf_map_sam_clean = os.path.join(tmp_dir, workflow_files.ORF_MAP_CLEAN_SAM)
     trim_5p_mismatch_tsv = os.path.join(
         tmp_dir, workflow_files.TRIM_5P_MISMATCH_TSV)
-    log_file = os.path.join(run_config.logs_dir,
+    log_file = os.path.join(logs_dir,
                             LOG_FORMAT.format(step, "trim_5p_mismatch.log"))
     workflow.trim_5p_mismatches(orf_map_sam,
                                 orf_map_sam_clean,
@@ -270,7 +342,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
                                 run_config)
     step += 1
 
-    log_file = os.path.join(run_config.logs_dir,
+    log_file = os.path.join(logs_dir,
                             LOG_FORMAT.format(step, "samtools_view_sort.log"))
     sample_out_prefix = os.path.join(out_dir, sample)
 
@@ -285,7 +357,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
     workflow.sort_bam(orf_map_sam_clean, sample_bam, log_file,
                       run_config)
     step += 1
-    log_file = os.path.join(run_config.logs_dir,
+    log_file = os.path.join(logs_dir,
                             LOG_FORMAT.format(step, "samtools_index.log"))
     workflow.index_bam(sample_bam, log_file, run_config)
     step += 1
@@ -299,7 +371,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
             umi_groups = os.path.join(tmp_dir,
                                       workflow_files.PRE_DEDUP_GROUPS_TSV)
             log_file = os.path.join(
-                run_config.logs_dir,
+                logs_dir,
                 LOG_FORMAT.format(step, "umi_tools_group.log"))
             workflow.group_umis(sample_bam, umi_groups,
                                 log_file, run_config)
@@ -307,7 +379,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
 
         sample_out_bam = sam_bam.BAM_FORMAT.format(sample_out_prefix)
         log_file = os.path.join(
-            run_config.logs_dir,
+            logs_dir,
             LOG_FORMAT.format(step, "umi_tools_dedup.log"))
         dedup_stats_prefix = os.path.join(tmp_dir,
                                           workflow_files.DEDUP_STATS_PREFIX)
@@ -317,7 +389,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
         step += 1
 
         log_file = os.path.join(
-            run_config.logs_dir,
+            logs_dir,
             LOG_FORMAT.format(step, "samtools_index.log"))
         workflow.index_bam(sample_out_bam, log_file, run_config)
         step += 1
@@ -326,7 +398,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
             umi_groups = os.path.join(tmp_dir,
                                       workflow_files.POST_DEDUP_GROUPS_TSV)
             log_file = os.path.join(
-                run_config.logs_dir,
+                logs_dir,
                 LOG_FORMAT.format(step, "umi_tools_group.log"))
             workflow.group_umis(sample_out_bam, umi_groups,
                                 log_file, run_config)
@@ -335,7 +407,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
     is_make_bedgraph = value_in_dict(params.MAKE_BEDGRAPH, config)
     if is_make_bedgraph:
         log_file = os.path.join(
-            run_config.logs_dir,
+            logs_dir,
             LOG_FORMAT.format(step, "bedtools_genome_cov_plus.log"))
         plus_bedgraph = os.path.join(out_dir, workflow_files.PLUS_BEDGRAPH)
         workflow.make_bedgraph(sample_out_bam, plus_bedgraph,
@@ -343,7 +415,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
         step += 1
 
         log_file = os.path.join(
-            run_config.logs_dir,
+            logs_dir,
             LOG_FORMAT.format(step, "bedtools_genome_cov_minus.log"))
         minus_bedgraph = os.path.join(out_dir, workflow_files.MINUS_BEDGRAPH)
         workflow.make_bedgraph(sample_out_bam, minus_bedgraph,
@@ -351,7 +423,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
         step += 1
 
     orf_gff_file = config[params.ORF_GFF_FILE]
-    log_file = os.path.join(run_config.logs_dir,
+    log_file = os.path.join(logs_dir,
                             LOG_FORMAT.format(step, "bam_to_h5.log"))
     sample_out_h5 = h5.H5_FORMAT.format(sample_out_prefix)
     workflow.bam_to_h5(sample_out_bam, sample_out_h5,
@@ -359,7 +431,7 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
     step += 1
 
     log_file = os.path.join(
-        run_config.logs_dir,
+        logs_dir,
         LOG_FORMAT.format(step, "generate_stats_figs.log"))
     workflow.generate_stats_figs(sample_out_h5, out_dir,
                                  config, log_file, run_config)
@@ -369,10 +441,26 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
 
 def process_samples(samples, in_dir, index_dir, r_rna_index,
                     orf_index, is_trimmed, config, tmp_dir, out_dir,
-                    run_config, check_samples_exist=True):
+                    logs_dir, run_config, check_samples_exist=True):
     """
     Process FASTQ sample files. Any exceptions in the processing of
     any sample are logged but are not thrown from this function.
+
+    (relevant configuration parameters are shown in brackets).
+
+    * Processes a collection of FASTQ sample files. For each sample:
+        - Checks that the sample exists (if doing a dry run with
+          multiplexed data this check is skipped as the file won't
+          exist).
+        - Creates sample-specific temporary, output and logs
+          directories (via
+          :py:func:`riboviz.workflow.create_directory`).
+        - Processes the sample using :py:func:`process_sample`.
+        - If any errors arise when processing the sample, the error is
+          logged but processing continues onto the other samples.
+    * The number of successfully and unsuccessfully processed samples
+      are counted and the number of successfully processed samples is
+      returned.
 
     :param samples: Sample names and files
     :type samples: dict
@@ -414,21 +502,17 @@ def process_samples(samples, in_dir, index_dir, r_rna_index,
                         errno.ENOENT, os.strerror(errno.ENOENT), sample_fastq)
             sample_tmp_dir = os.path.join(tmp_dir, sample)
             sample_out_dir = os.path.join(out_dir, sample)
-            sample_logs_dir = os.path.join(run_config.logs_dir, sample)
-            sample_run_config = workflow.RunConfigTuple(
-                riboviz.R_SCRIPTS,
-                run_config.cmd_file,
-                run_config.is_dry_run,
-                sample_logs_dir,
-                run_config.nprocesses)
-            for directory in [sample_tmp_dir, sample_out_dir, sample_logs_dir]:
+            sample_logs_dir = os.path.join(logs_dir, sample)
+            for directory in [sample_tmp_dir,
+                              sample_out_dir,
+                              sample_logs_dir]:
                 workflow.create_directory(directory,
                                           run_config.cmd_file,
                                           run_config.is_dry_run)
             process_sample(sample, sample_fastq, index_dir,
-                           r_rna_index, orf_index, is_trimmed, config,
-                           sample_tmp_dir, sample_out_dir,
-                           sample_run_config)
+                           r_rna_index, orf_index, is_trimmed,
+                           config, sample_tmp_dir, sample_out_dir,
+                           sample_logs_dir, run_config)
             successes.append(sample)
         except FileNotFoundError as e:
             LOGGER.error("File not found: %s", e.filename)
@@ -445,6 +529,70 @@ def process_samples(samples, in_dir, index_dir, r_rna_index,
 def run_workflow(config_file, is_dry_run=False):
     """
     Run the workflow.
+
+    (relevant configuration parameters are shown in brackets).
+
+    * Reads configuration information from configuration file.
+    * Sets up command file (``cmd_file``) into which commands sent to
+      the operating system are to be written (a bash script).
+    * Creates index (``dir_in``), temporary (``dir_tmp``), output
+      (``dir_output``) and logs (``dir_logs``) directories (via
+      :py:func:`riboviz.workflow.create_directory`).
+    * Checks existence of all non-sample-specific data files
+      (``rrna_fasta_file``, ``orf_fasta_file``, ``orf_gff_file``,
+      ``features_file``, ``t_rna_file``, ``codon_positions_file``,
+      ``asite_disp_length_file``) to avoid having to repeatedly
+      recheck these when processing each sample. This also allows the
+      workflow to terminate before processing any samples, if any of
+      these files cannot be found.
+    * Sets up a run configuration \
+      (:py:class:`riboviz.workflow.RunConfigTuple`) which provides \
+      each function with common configuration, notably:
+        - The command file (``cmd_file``) in which the commands sent
+          to the operating system are to be written.
+        - Whether the invocation is part of a dry run? If so the
+          commands are recorded in the command file but are not
+          submitted to the operating system.
+        - The number of processes available (``num_processes``), for
+          commands which allow the number of processeses to use to be
+          specified.
+        - R scripts directory.
+    * Builds HISAT2 indices, if requested (``build_indices``), using
+      ``hisat2 build``` and writes these into the index directory
+      (``dir_index``) (via
+      :py:func:`riboviz.workflow.build_indices`).
+    * Checks if non-multiplexed FASTQ sample files (``fq_files``) or a
+      multiplexed FASTQ sample file (``multiplex_fq_files``) have been
+      specified.
+    * If non-multiplexed sample files have been specified:
+        - Processes samples using :py:func:`process_samples`.
+        - Raises an error if no sample was processed successfully.
+    * If a multiplexed sample file has been specified:
+        - Checks for the existence of the multiplexed sample file and
+          a sample sheet file (``sample_sheet``).
+        - Cuts out sequencing library adapters (``adapters``) using
+          ``cutadapt`` (via :py:func:`riboviz.workflow.cut_adapters`).
+        - Extracts barcodes and UMIs using ``umi_tools extract``, if
+          requested (``extract_umis``), using a UMI-tools-compliant
+          regular expression pattern (``umi_regexp``) (via
+          :py:func:`riboviz.workflow.extract_barcodes_umis`).
+        - Demultiplexes the sample file with reference to the sample
+          sheet, using :py:mod:`riboviz.tools.demultiplex_fastq` (via
+          :py:func:`riboviz.workflow.demultiplex_fastq`) .
+        - Parses the number of reads file produced when demultiplexing
+          samples to get the names of all samples which had 1 or more
+          reads.
+        - Determines the names of the corresponding demultiplexed
+          sample files.
+        - Processes the demultiplexed samples using
+          :py:func:`process_samples`.
+        - Raises an error if no sample was processed successfully.
+    * Collates TPMs across all processed samples using
+      ``collate_tpms.R``  and writes these into the output directory
+      (via :py:mod:`riboviz.workflow.collate_tpms`).
+    * Counts the reads at each step using
+      :py:mod:`riboviz.tools.count_reads`) and writes these into the
+      output directory (via :py:mod:`riboviz.workflow.count_reads`).
 
     :param config_file: Configuration file path
     :type config_file: str or unicode
@@ -512,7 +660,6 @@ def run_workflow(config_file, is_dry_run=False):
         riboviz.R_SCRIPTS,
         cmd_file,
         is_dry_run,
-        logs_dir,
         nprocesses)
 
     in_dir = config[params.INPUT_DIR]
@@ -550,7 +697,7 @@ def run_workflow(config_file, is_dry_run=False):
         samples = config[params.FQ_FILES]
         processed_samples = process_samples(
             samples, in_dir, index_dir, r_rna_index, orf_index,
-            False, config, tmp_dir, out_dir, run_config)
+            False, config, tmp_dir, out_dir, logs_dir, run_config)
         if not processed_samples:
             raise Exception("No samples were processed successfully")
 
@@ -619,7 +766,8 @@ def run_workflow(config_file, is_dry_run=False):
                         for sample in samples}
         processed_samples = process_samples(
             sample_files, deplex_dir, index_dir, r_rna_index,
-            orf_index, True, config, tmp_dir, out_dir, run_config,
+            orf_index, True, config, tmp_dir, out_dir, logs_dir,
+            run_config,
             False)
         if not processed_samples:
             raise Exception("No samples were processed successfully")
@@ -638,8 +786,17 @@ def run_workflow(config_file, is_dry_run=False):
 
 def prep_riboviz(config_file, is_dry_run=False):
     """
-    Run the workflow. This function invokes :py:func:`run_workflow`,
-    catches and logs any exceptions and maps these to exit codes.
+    Run the workflow.
+
+    * Checks whether Python 3 is being used and, if not, returns an
+      exit code (:py:const:`EXIT_PYTHON_2_ERROR`).
+    * Writes provenance (file name, Git commit hash and date) to
+      workflow log file.
+    * Invokes :py:func:`run_workflow` to run the workflow.
+    * Catches and logs errors thrown by :py:func:`run_workflow` and
+      maps these to the corresponding exit codes.
+    * Returns :py:const:`EXIT_OK`, if no errors arose, or an exit code
+      reflecting the error that arose.
 
     Exit codes are as follows:
 
@@ -709,6 +866,10 @@ def parse_command_line_options():
 
 def invoke_prep_riboviz():
     """
+    Parses command-line options using
+    :py:func:`parse_command_line_options` then invokes
+    :py:func:`prep_riboviz` then exits using the exit code returned.
+
     Parse command-line options then invoke
     :py:func:`prep_riboviz`.
     """
