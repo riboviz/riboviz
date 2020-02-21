@@ -1,7 +1,45 @@
 """
 Workflow-related constants, types and functions.
 
-Each function applies a single step in the workflow.
+Each function takes in the following arguments:
+
+* Command-specific input files.
+* Command-specific output files.
+* Other command-specific configuration.
+* A ``log_file`` file parameter which is where the output from the
+  command printed into standard output or standard error is to be
+  captured and written.
+* A ``run_config`` (:py:class:`RunConfigTuple`) which provides each \
+  function with common configuration, notably:
+    - The command file in which the commands sent to the operating
+      system are to be written.
+    - Whether the invocation is part of a dry run? If so the commands
+      are recorded in the command file but are not submitted to the
+      operating system.
+    - The number of processes available, for commands which allow the
+      number of processeses to use to be specified.
+    - R scripts directory.
+
+Each function applies a single step in the workflow:
+
+* :py:const:`LOGGER` is used to log information about the step in the
+  workflow log file.
+* Lists with each element of the commands (command name and \
+  arguments) to be sent to the operating system is constructed.
+    - Some steps require explicit invocation of tools with their
+      ``--version`` flag to ensure information about the tool's
+      version is logged (e.g. ``hisat2``).
+    - Invocations of piped commands e.g. ``samtools view | samtools
+      sort`` require two command lists.
+* The command list(s) are then submitted to the operating system \
+  using the helper functions in :py:mod:`riboviz.process_utils`:
+    - :py:func:`riboviz.process_utils.run_logged_command`.
+    - :py:func:`riboviz.process_utils.run_logged_pipe_command`.
+    - :py:func:`riboviz.process_utils.run_logged_redirect_command`.
+
+:py:func:`create_directory` is a simplified version of the above, used
+to create directories and to record ``mkdir`` commands in the command
+file.
 """
 import collections
 import logging
