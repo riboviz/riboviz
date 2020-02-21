@@ -6,7 +6,7 @@ Any repository hosted on GitHub should not exceed 1GB in size. GitHub's [What is
 
 ## Create a repository on GitHub
 
-Create a repository, `regression-test-data-<YYYYMMDD>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: ``regression-test-data-20200220`.
+Create a repository, `regression-test-data-<YYYYMMDD>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: `regression-test-data-20200220`.
 
 ## Clone a local copy of the new repository
 
