@@ -1,7 +1,7 @@
 # load getopt to allow use of get_Rscript_filename for provenance-gathering
 suppressMessages(library(getopt, quietly=T))
 
-# check result of get_Rscript_filename()
+# check result of get_Rscript_filename(); will be NA if running interactively
 this_script <- getopt::get_Rscript_filename()
 
 # Handle interactive session behaviours while getting Rscript filename:
@@ -14,25 +14,16 @@ HandleRscriptFilename <- function() {
     return(this_script)
   }
 }
-# run function
+# run function to obtain name of this script (interactivity fix)
 HandleRscriptFilename()
 
 # Specify full path to rscripts folder
 path_to_rscripts <- file.path("~", "RiboViz","rscripts")
 
-# path to this file:
+# specify path to this file:
 path_to_this_script <- file.path(path_to_rscripts, this_script)
 
-# Check if file exists at that path
-file.exists(file.path(path_to_rscripts, this_script))
-
-# source "provenance.R" for functions relating to provenance
-  # DEBUGGING NOTE: if running R interactively & encounter this error here:
-   # Error in file(filename, "r", encoding = encoding) : 
-   #   cannot open the connection 
-  # ensure you set working directory as 'RiboViz/rscripts'. 
-  # This is due to Rstudio etc affecting paths: 
-  # the path will be by default the project's path otherwise
+# source provenance.R
 source(file.path(path_to_rscripts, "provenance.R"))
 
 suppressMessages(library(Rsamtools))
