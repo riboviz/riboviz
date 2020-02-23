@@ -1,22 +1,19 @@
 # load getopt to allow use of get_Rscript_filename for provenance-gathering
 suppressMessages(library(getopt, quietly=T))
 
-#' Handle interactive session behaviours while getting Rscript filename
-#' 
-#' Returns "unknown" message if get_Rscript_filename() returns NA ie interactive 
-#' session.
-#' 
-#' @param rScriptFilename current script name, or unknown in interactive session
-
+# check result of get_Rscript_filename()
 this_script <- getopt::get_Rscript_filename()
 
+# Handle interactive session behaviours while getting Rscript filename:
+# if results of get_Rscript_filename() returns NA (ie interactive session)
+# then set variable this_script to "generate_stats_figs.R" to resolve breakage
 HandleRscriptFilename <- function() {
   if (is.na(this_script)){ 
     # if interactivity breaks get_Rscript_filename()
     this_script <<- "generate_stats_figs.R"
   }
 }
-
+# run function
 HandleRscriptFilename()
 
 # Specify full path to rscripts folder
