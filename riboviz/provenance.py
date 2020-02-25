@@ -1,51 +1,111 @@
 """
-Provenance-related utilities.
+Provenance-related functions.
 """
 from datetime import datetime
 import os.path
+from io import StringIO
 import git
 import git.exc
 
 
 def get_version(file_path=__file__):
     """
-    Get RiboViz version information.
+    Get version information about ``file_path`` using the ``git``
+    package.
 
-    If the file is within the scope of a Git repository then a
-    message including the given file name, Git commit hash and date of
-    HEAD is returned.
+    If ``file_path`` is within the scope of a Git repository then a
+    string including the Git commit hash and date of ``HEAD`` is
+    returned. The message has format ``commit <HASH> date <DATE>``.
 
-    If the file is not within the scope of a Git repository then an
-    "unknown" message is returned.
+    If ``file_path`` is not within the scope of a Git repository then
+    the string ``unknown`` is returned.
 
-    :param file_path: Python file path
+    :param file_path: File path
     :type file_path: str or unicode
-    :return: message
+    :return: Version information
     :rtype: str or unicode
     """
-    file_name = os.path.basename(file_path)
     location = os.path.dirname(os.path.abspath(file_path))
     try:
-        repository = git.Repo(location, search_parent_directories=True)
+        repository = git.Repo(location,
+                              search_parent_directories=True)
         sha = repository.head.object.hexsha
         time = repository.head.commit.authored_datetime
         version = "commit {} date {}".format(sha, str(time))
     except git.exc.InvalidGitRepositoryError:  # pylint: disable=E1101
         version = "unknown"
-    return "{} version {}".format(file_name, version)
+    return version
 
 
-def write_metadata_header(file_path, data_file):
+def write_provenance(file_handle, file_path, prefix="# ", eol="\n"):
     """
-    Write a metadata header to a file with RiboViz date and version
-    information.
+    Write a provenance header to a file including version information
+    about ``file_path`` obtained using the ``git`` package. See also
+    :py:func:`get_version`.
 
-    :param file_path: Path to Python file creating the data file.
+    The header has form::
+
+        <prefix> Created by: RiboViz
+        <prefix> Date: <YYYY>-<MM>-<DD> <HH>:<MM>:<SS>.<SSSSS>
+        <prefix> Command-line tool: <MAIN_MODULE>
+        <prefix> File: <file_path>
+        <prefix> Version: commit <HASH> date <DATE>
+
+    where ``<MAIN_MODULE>`` is the Python module defined as
+    ``__main__`` (i.e. the identify of the currently running
+    program).
+
+    :param file_handle: File handle to which content is to be written
+    :type file_handle: _io.TextIOWrapper
+    :param file_path: File path
     :type file_path: str or unicode
-    :param data_file: Path to file into which header is to be written.
-    :type data_file: str or unicode
+    :param prefix: Prefix for each line e.g. a comment symbol
+    :type prefix: str or unicode
+    :param eol: End of line character
+    :type eol: str or unicode
     """
-    with open(data_file, 'w') as f:
-        f.write("# Created by: RiboViz\n")
-        f.write("# Date: {}\n".format(datetime.today()))
-        f.write("# Component/version: {}\n".format(get_version(file_path)))
+    file_handle.write("{}Created by: RiboViz{}".format(prefix, eol))
+    file_handle.write("{}Date: {}{}".format(prefix, datetime.today(), eol))
+    import __main__
+    if hasattr(__main__, "__file__"):
+        file_handle.write("{}Command-line tool: {}{}".format(
+            prefix, __main__.__file__, eol))
+    file_handle.write("{}File: {}{}".format(prefix, file_path, eol))
+    file_handle.write("{}Version: {}{}".format(
+        prefix, get_version(file_path), eol))
+
+
+def write_provenance_header(file_path, provenance_file, prefix="# "):
+    """
+    Write a provenance header to a file including version information
+    about ``file_path`` obtained using the ``git`` package. See
+    :py:func:`write_provenance`.
+
+    :param file_path: File path
+    :type file_path: str or unicode
+    :param provenance_file: File to which content is to be written
+    :type provenance: _io.TextIOWrapper
+    :param prefix: Prefix for each line e.g. a comment symbol
+    :type prefix: str or unicode
+    """
+    with open(provenance_file, 'w') as f:
+        write_provenance(f, file_path, prefix)
+
+
+def write_provenance_to_str(file_path, eol="\n"):
+    """
+    Write a provenance header to a string including version
+    information about ``file_path`` obtained using the ``git``
+    package. See :py:func:`write_provenance`.
+
+    :param file_path: File path
+    :type file_path: str or unicode
+    :param eol: End of line character
+    :type eol: str or unicode
+    :return: Provenance header as a string
+    :rtype: str or unicode
+    """
+    with StringIO() as s:
+        write_provenance(s, file_path, "", eol)
+        provenance = s.getvalue()
+    return provenance

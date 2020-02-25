@@ -1,5 +1,5 @@
 """
-process_utils tests.
+:py:mod:`riboviz.process_utils` tests.
 """
 import os.path
 import tempfile
@@ -9,67 +9,66 @@ from riboviz import utils
 
 
 @pytest.fixture(scope="function")
-def log_out():
+def tmp_stdout_file():
     """
-    Create a temporary file for stdout logs and delete when done.
+    Create a temporary file with a ``log`` suffix.
 
-    :return: file
-    :rtype: str or unicdo(dict, str or unicode)
+    :return: path to temporary file
+    :rtype: str or unicode
     """
-    _, out_file = tempfile.mkstemp(prefix="log_out_", suffix=".txt")
-    yield out_file
-    if os.path.exists(out_file):
-        os.remove(out_file)
+    _, tmp_stdout_file = tempfile.mkstemp(prefix="tmp_stdout", suffix=".log")
+    yield tmp_stdout_file
+    if os.path.exists(tmp_stdout_file):
+        os.remove(tmp_stdout_file)
 
 
 @pytest.fixture(scope="function")
-def log_err():
+def tmp_stderr_file():
     """
-    Create a temporary file for stderr logs and delete when done.
+    Create a temporary file with a ``log`` suffix.
 
-    :return: file
-    :rtype: str or unicdo(dict, str or unicode)
+    :return: path to temporary file
+    :rtype: str or unicode
     """
-    _, err_file = tempfile.mkstemp(prefix="log_err_", suffix=".txt")
-    yield err_file
-    if os.path.exists(err_file):
-        os.remove(err_file)
+    _, tmp_stderr_file = tempfile.mkstemp(prefix="tmp_stderr", suffix=".log")
+    yield tmp_stderr_file
+    if os.path.exists(tmp_stderr_file):
+        os.remove(tmp_stderr_file)
 
 
 @pytest.fixture(scope="function")
-def redirect():
+def tmp_redirect_file():
     """
-    Create a temporary file to capture redirected output and delete
-    when done.
+    Create a temporary file with a ``txt`` suffix.
 
     :return: file
     :rtype: str or unicdo(dict, str or unicode)
     """
-    _, redirect_file = tempfile.mkstemp(prefix="redirect_", suffix=".txt")
-    yield redirect_file
-    if os.path.exists(redirect_file):
-        os.remove(redirect_file)
+    _, tmp_redirect_file = tempfile.mkstemp(prefix="tmp_redirect_",
+                                            suffix=".txt")
+    yield tmp_redirect_file
+    if os.path.exists(tmp_redirect_file):
+        os.remove(tmp_redirect_file)
 
 
 @pytest.fixture(scope="function")
-def cmd_file():
+def tmp_cmd_file():
     """
-    Create a temporary file for commands submitted to the shell and
-    delete when done.
+    Create a temporary file with a ``sh`` suffix.
 
     :return: file
     :rtype: str or unicdo(dict, str or unicode)
     """
-    _, cmd_file = tempfile.mkstemp(prefix="cmd_", suffix=".txt")
-    yield cmd_file
-    if os.path.exists(cmd_file):
-        os.remove(cmd_file)
+    _, tmp_cmd_file = tempfile.mkstemp(prefix="tmp_cmd_", suffix=".sh")
+    yield tmp_cmd_file
+    if os.path.exists(tmp_cmd_file):
+        os.remove(tmp_cmd_file)
 
 
 def test_run_command_stdout_stderr():
     """
-    Test writing output and errors to stdout and stderr. This
-    test ensures no unexpected exceptions are thrown.
+    Test :py:func:`riboviz.process_utils.run_command` using standard
+    output and standard error.
     """
     path = os.path.realpath(__file__)
     cmd = ["ls", path, "no-such-file.txt", path]
@@ -79,27 +78,29 @@ def test_run_command_stdout_stderr():
         pass
 
 
-def test_run_command_log_out_err(log_out, log_err):
+def test_run_command_log_out_err(tmp_stdout_file, tmp_stderr_file):
     """
-    Test writing output and errors to log files.
+    Test :py:func:`riboviz.process_utils.run_command` using files to
+    capture standard output and standard error.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
-    :param log_err: Error log file (via test fixture)
-    :type log_err: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
+    :param tmp_stderr_file: Error log file
+    :type tmp_stderr_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd = ["ls", path, "no-such-file.txt", path]
-    with open(log_out, 'w') as out, open(log_err, 'w') as err:
+    with open(tmp_stdout_file, 'w') as out, \
+         open(tmp_stderr_file, 'w') as err:
         try:
             process_utils.run_command(cmd, out, err)
         except AssertionError:
             pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 2
     assert lines[0] == path  # Output from ls
     assert lines[1] == path  # Output from ls
-    lines = [line.rstrip('\n') for line in open(log_err)]
+    lines = [line.rstrip('\n') for line in open(tmp_stderr_file)]
     assert len(lines) == 1
     assert lines[0] == \
         "ls: cannot access 'no-such-file.txt': No such file or directory" \
@@ -107,21 +108,22 @@ def test_run_command_log_out_err(log_out, log_err):
         "ls: cannot access no-such-file.txt: No such file or directory"
 
 
-def test_run_command_log_out_error_one_file(log_out):
+def test_run_command_log_out_error_one_file(tmp_stdout_file):
     """
-    Test writing output and errors to a single log file.
+    Test :py:func:`riboviz.process_utils.run_command` using a single
+    file to capture both standard output and standard error.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd = ["ls", path, "no-such-file.txt", path]
-    with open(log_out, "w") as out_err:
+    with open(tmp_stdout_file, "w") as out_err:
         try:
             process_utils.run_command(cmd, out_err, out_err)
         except AssertionError:
             pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 3
     assert lines[0] == \
         "ls: cannot access 'no-such-file.txt': No such file or directory" \
@@ -131,51 +133,55 @@ def test_run_command_log_out_error_one_file(log_out):
     assert lines[2] == path  # Output from ls
 
 
-def test_run_command_log_out_err_alt(log_out, log_err):
+def test_run_command_log_out_err_alt(tmp_stdout_file, tmp_stderr_file):
     """
-    Test another example of writing output and errors to log files.
+    Test :py:func:`riboviz.process_utils.run_command` using files to
+    capture standard output and standard error. Different commands are
+    submitted to the operating system.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
-    :param log_err: Error log file (via test fixture)
-    :type log_err: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
+    :param tmp_stderr_file: Error log file
+    :type tmp_stderr_file: str or unicode
     """
     path = os.path.realpath(__file__)
     num_lines = len([line for line in open(path)])
     cmd = ["wc", "-l", path, "no-such-file.txt", path]
-    with open(log_out, 'w') as out, open(log_err, 'w') as err:
+    with open(tmp_stdout_file, 'w') as out, \
+        open(tmp_stderr_file, 'w') as err:
         try:
             process_utils.run_command(cmd, out, err)
         except AssertionError:
             pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 3
     assert lines[0] == "%5d %s" % (num_lines, path)  # Output from wc
     assert lines[1] == "%5d %s" % (num_lines, path)  # Output from wc
     assert lines[2] == "%5d total" % (num_lines * 2)  # Output from wc
-    lines = [line.rstrip('\n') for line in open(log_err)]
+    lines = [line.rstrip('\n') for line in open(tmp_stderr_file)]
     assert len(lines) == 1
     assert lines[0] == \
         "wc: no-such-file.txt: No such file or directory"
 
 
-def test_run_command_log_out_error_one_file_alt(log_out):
+def test_run_command_log_out_error_one_file_alt(tmp_stdout_file):
     """
-    Test another example of writing output and errors to a single log
-    file.
+    Test :py:func:`riboviz.process_utils.run_command` using a single
+    file to capture both standard output and standard error. Different
+    commands are submitted to the operating system.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
     """
     path = os.path.realpath(__file__)
     num_lines = len([line for line in open(path)])
     cmd = ["wc", "-l", path, "no-such-file.txt", path]
-    with open(log_out, "w") as out_err:
+    with open(tmp_stdout_file, "w") as out_err:
         try:
             process_utils.run_command(cmd, out_err, out_err)
         except AssertionError:
             pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 4
     assert lines[0] == "%5d %s" % (num_lines, path)  # Output from wc
     assert lines[1] == "wc: no-such-file.txt: No such file or directory"
@@ -183,47 +189,49 @@ def test_run_command_log_out_error_one_file_alt(log_out):
     assert lines[3] == "%5d total" % (num_lines * 2)  # Output from wc
 
 
-def test_run_redirect_command_stdout(redirect):
+def test_run_redirect_command_stdout(tmp_redirect_file):
     """
-    Test writing errors to stderr. This test ensures no unexpected
-    exceptions are thrown.
+    Test :py:func:`riboviz.process_utils.run_redirect_command` using
+    standard output.
 
-    :param redirect: File for redirected output (via test fixture)
-    :type redirect: str or unicode
+    :param tmp_redirect_file: File for redirected output
+    :type tmp_redirect_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd = ["cat", path, "no-such-file.txt"]
     try:
-        process_utils.run_redirect_command(cmd, redirect)
+        process_utils.run_redirect_command(cmd, tmp_redirect_file)
     except AssertionError:
         pass
     # Compare path to captured redirect.
-    with open(path) as expected, open(redirect) as actual:
+    with open(path) as expected, open(tmp_redirect_file) as actual:
         for line1, line2 in zip(expected, actual):
             assert line1 == line2
 
 
-def test_run_redirect_command_log_err(log_err, redirect):
+def test_run_redirect_command_tmp_stderr_file(tmp_redirect_file,
+                                              tmp_stderr_file):
     """
-    Test writing errors to a log file.
+    Test :py:func:`riboviz.process_utils.run_redirect_command` using
+    a file to capture standard error.
 
-    :param log_err: Error log file (via test fixture)
-    :type log_err: str or unicode
-    :param redirect: File for redirected output (via test fixture)
-    :type redirect: str or unicode
+    :param tmp_redirect_file: File for redirected output
+    :type tmp_redirect_file: str or unicode
+    :param tmp_stderr_file: Error log file
+    :type tmp_stderr_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd = ["cat", path, "no-such-file.txt", path]
-    with open(log_err, "w") as err:
+    with open(tmp_stderr_file, "w") as err:
         try:
-            process_utils.run_redirect_command(cmd, redirect, err)
+            process_utils.run_redirect_command(cmd, tmp_redirect_file, err)
         except AssertionError:
             pass
     # Compare path to captured redirect.
-    with open(path) as expected, open(redirect) as actual:
+    with open(path) as expected, open(tmp_redirect_file) as actual:
         for line1, line2 in zip(expected, actual):
             assert line1 == line2
-    lines = [line.rstrip('\n') for line in open(log_err)]
+    lines = [line.rstrip('\n') for line in open(tmp_stderr_file)]
     assert len(lines) == 1
     assert lines[0] == \
         "cat: no-such-file.txt: No such file or directory"
@@ -231,10 +239,8 @@ def test_run_redirect_command_log_err(log_err, redirect):
 
 def test_run_pipe_command_stdout_stderr():
     """
-    Test writing output and errors to stdout and stderr where
-    the first command in the pipeline logs some error.
-
-    This test ensures no unexpected exceptions are thrown.
+    Test :py:func:`riboviz.process_utils.run_pipe_command` using
+    standard output and standard error.
     """
     path = os.path.realpath(__file__)
     cmd1 = ["cat", path, "no-such-file", path]
@@ -245,62 +251,61 @@ def test_run_pipe_command_stdout_stderr():
         pass
 
 
-def test_run_pipe_command_log_out_err(log_out, log_err):
+def test_run_pipe_command_log_out_err(tmp_stdout_file, tmp_stderr_file):
     """
-    Test writing output and errors to stdout and stderr where
-    the first command in the pipeline logs some error.
+    Test :py:func:`riboviz.process_utils.run_pipe_command` using files
+    to capture standard output and standard error.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
-    :param log_err: Error log file (via test fixture)
-    :type log_err: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
+    :param tmp_stderr_file: Error log file
+    :type tmp_stderr_file: str or unicode
     """
     path = os.path.realpath(__file__)
     num_lines = len([line for line in open(path)])
     cmd1 = ["cat", path, "no-such-file", path]
     cmd2 = ["wc", "-l"]
-    with open(log_out, 'w') as out, open(log_err, 'w') as err:
+    with open(tmp_stdout_file, 'w') as out, open(tmp_stderr_file, 'w') as err:
         try:
             process_utils.run_pipe_command(cmd1, cmd2, out, err)
         except AssertionError:
             pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 1
     assert lines[0] == str(num_lines * 2)  # Output from wc
-    lines = [line.rstrip('\n') for line in open(log_err)]
+    lines = [line.rstrip('\n') for line in open(tmp_stderr_file)]
     assert len(lines) == 1
     assert lines[0] == "cat: no-such-file: No such file or directory"
 
 
-def test_run_pipe_command_log_out_err_one_file(log_out):
+def test_run_pipe_command_log_out_err_one_file(tmp_stdout_file):
     """
-    Test writing output and errors to a single log file where
-    the first command in the pipeline logs some error.
+    Test :py:func:`riboviz.process_utils.run_pipe_command` using a
+    single file to capture both standard output and standard error.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
     """
     path = os.path.realpath(__file__)
     num_lines = len([line for line in open(path)])
     cmd1 = ["cat", path, "no-such-file", path]
     cmd2 = ["wc", "-l"]
-    with open(log_out, 'w') as out_err:
+    with open(tmp_stdout_file, 'w') as out_err:
         try:
             process_utils.run_pipe_command(cmd1, cmd2, out_err, out_err)
         except AssertionError:
             pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 2
     assert lines[0] == "cat: no-such-file: No such file or directory"
     assert str(num_lines * 2) == lines[1]  # Output from wc
 
 
-def test_run_pipe_command_stdout_stderr2():
+def test_run_pipe_command_stdout_stderr_error():
     """
-    Test writing output and errors to stdout and stderr where
-    the second command in the pipeline logs some error.
-
-    This test ensures no unexpected exceptions are thrown.
+    Test :py:func:`riboviz.process_utils.run_pipe_command` using
+    standard output and standard error, where the second command in
+    the pipeline includes an error.
     """
     path = os.path.realpath(__file__)
     cmd1 = ["cat", path, "no-such-file", path]
@@ -311,70 +316,74 @@ def test_run_pipe_command_stdout_stderr2():
         pass
 
 
-def test_run_pipe_command_log_out_err2(log_out, log_err):
+def test_run_pipe_command_log_out_err_error(tmp_stdout_file,
+                                            tmp_stderr_file):
     """
-    Test writing output and errors to log files where
-    the second command in the pipeline logs some error.
+    Test :py:func:`riboviz.process_utils.run_pipe_command` using files
+    to capture standard output and standard error, where the second
+    command in the pipeline includes an error.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
-    :param log_err: Error log file (via test fixture)
-    :type log_err: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
+    :param tmp_stderr_file: Error log file
+    :type tmp_stderr_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd1 = ["cat", path, "no-such-file", path]
     cmd2 = ["wc", "-l", "-x"]
-    with open(log_out, 'w') as out, open(log_err, 'w') as err:
+    with open(tmp_stdout_file, 'w') as out, open(tmp_stderr_file, 'w') as err:
         try:
             process_utils.run_pipe_command(cmd1, cmd2, out, err)
         except AssertionError:
             pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 0  # Expect output to be empty
-    lines = [line.rstrip('\n') for line in open(log_err)]
+    lines = [line.rstrip('\n') for line in open(tmp_stderr_file)]
     assert len(lines) == 3
     assert lines[0] == "cat: no-such-file: No such file or directory"
     assert lines[1] == "wc: invalid option -- 'x'"
     assert lines[2] == "Try 'wc --help' for more information."
 
 
-def test_run_pipe_command_log_out_err_one_file2(log_out):
+def test_run_pipe_command_log_out_err_one_file_error(tmp_stdout_file):
     """
-    Test writing output and errors to a single log file where
-    the second command in the pipeline logs some error.
+    Test :py:func:`riboviz.process_utils.run_pipe_command` using a
+    single file to capture both standard output and standard error,
+    where the second command in the pipeline includes an error.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd1 = ["cat", path, "no-such-file", path]
     cmd2 = ["wc", "-l", "-x"]
-    with open(log_out, 'w') as out_err:
+    with open(tmp_stdout_file, 'w') as out_err:
         try:
             process_utils.run_pipe_command(cmd1, cmd2, out_err, out_err)
         except AssertionError:
             pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 3
     assert lines[0] == "cat: no-such-file: No such file or directory"
     assert lines[1] == "wc: invalid option -- 'x'"
     assert lines[2] == "Try 'wc --help' for more information."
 
 
-def test_run_logged_command(log_out):
+def test_run_logged_command(tmp_stdout_file):
     """
-    Test writing output and errors to a single log file.
+    Test :py:func:`riboviz.process_utils.run_logged_command` using a
+    single file to capture both standard output and standard error.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd = ["ls", path, "no-such-file.txt", path]
     try:
-        process_utils.run_logged_command(cmd, log_out)
+        process_utils.run_logged_command(cmd, tmp_stdout_file)
     except AssertionError:
         pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 3
     assert lines[0] == \
         "ls: cannot access 'no-such-file.txt': No such file or directory" \
@@ -384,23 +393,25 @@ def test_run_logged_command(log_out):
     assert lines[2] == path  # Output from ls
 
 
-def test_run_logged_command_cmd_file(log_out, cmd_file):
+def test_run_logged_command_cmd_file(tmp_stdout_file, tmp_cmd_file):
     """
-    Test writing output and errors to a single log file with shell
-    commands written to a command file.
+    Test :py:func:`riboviz.process_utils.run_logged_command` using a
+    single file to capture both standard output and standard error and
+    a file to capture commands sent to the operating system.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
-    :param cmd_file: Command file (via test fixture)
-    :type cmd_file: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
+    :param tmp_cmd_file: Command file
+    :type tmp_cmd_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd = ["ls", path, "no-such-file.txt", path]
     try:
-        process_utils.run_logged_command(cmd, log_out, cmd_file)
+        process_utils.run_logged_command(cmd, tmp_stdout_file,
+                                         tmp_cmd_file)
     except AssertionError:
         pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 3
     assert lines[0] == \
         "ls: cannot access 'no-such-file.txt': No such file or directory" \
@@ -408,35 +419,36 @@ def test_run_logged_command_cmd_file(log_out, cmd_file):
         "ls: cannot access no-such-file.txt: No such file or directory"
     assert lines[1] == path  # Output from ls
     assert lines[2] == path  # Output from ls
-    with open(cmd_file) as f:
+    with open(tmp_cmd_file) as f:
         actual_cmds = f.readlines()
     assert len(actual_cmds) == 1
     assert actual_cmds[0].rstrip('\n') == utils.list_to_str(cmd)
 
 
-def test_run_logged_command_cmd_file_cmd_to_log(log_out, cmd_file):
+def test_run_logged_command_cmd_file_cmd_to_log(tmp_stdout_file,
+                                                tmp_cmd_file):
     """
-    Test writing output and errors to a single log file with shell
-    commands written to a command file, where the shell command
-    submitted via Python differs from that to be logged, due to
-    the presence of quotes.
+    Test :py:func:`riboviz.process_utils.run_logged_command` using a
+    single file to capture both standard output and standard error and
+    a file to capture commands sent to the operating system, where the
+    command to be logged differs from that submitted.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
-    :param cmd_file: Command file (via test fixture)
-    :type cmd_file: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
+    :param tmp_cmd_file: Command file
+    :type tmp_cmd_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd = ["ls", path, "no-such-file.txt", path]
     cmd_to_log = ["ls", path, "'no-such-file.txt'", path]
     try:
         process_utils.run_logged_command(cmd,
-                                         log_out,
-                                         cmd_file,
+                                         tmp_stdout_file,
+                                         tmp_cmd_file,
                                          cmd_to_log=cmd_to_log)
     except AssertionError:
         pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 3
     assert lines[0] == \
         "ls: cannot access 'no-such-file.txt': No such file or directory" \
@@ -444,160 +456,171 @@ def test_run_logged_command_cmd_file_cmd_to_log(log_out, cmd_file):
         "ls: cannot access no-such-file.txt: No such file or directory"
     assert lines[1] == path  # Output from ls
     assert lines[2] == path  # Output from ls
-    with open(cmd_file) as f:
+    with open(tmp_cmd_file) as f:
         actual_cmds = f.readlines()
     assert len(actual_cmds) == 1
     assert actual_cmds[0].rstrip('\n') == utils.list_to_str(cmd_to_log)
 
 
-def test_run_logged_command_cmd_file_dry_run(log_out, cmd_file):
+def test_run_logged_command_cmd_file_dry_run(tmp_stdout_file, tmp_cmd_file):
     """
-    Test dry run of command, ensuring it is not run but that
-    it is written to a command file.
+    Test :py:func:`riboviz.process_utils.run_logged_command` using a
+    single file to capture both standard output and standard error and
+    a file to capture commands sent to the operating system, with
+    the ``dry_run`` parameter set to ``True``.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
-    :param cmd_file: Command file (via test fixture)
-    :type cmd_file: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
+    :param tmp_cmd_file: Command file
+    :type tmp_cmd_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd = ["ls", path, "no-such-file.txt", path]
-    process_utils.run_logged_command(cmd, log_out, cmd_file, True)
-    with open(log_out) as f:
+    process_utils.run_logged_command(cmd, tmp_stdout_file,
+                                     tmp_cmd_file, True)
+    with open(tmp_stdout_file) as f:
         lines = f.readlines()
     assert len(lines) == 0
-    with open(cmd_file) as f:
+    with open(tmp_cmd_file) as f:
         actual_cmds = f.readlines()
     assert len(actual_cmds) == 1
     assert actual_cmds[0].rstrip('\n') == utils.list_to_str(cmd)
 
 
-def test_run_logged_redirect_command(log_err, redirect):
+def test_run_logged_redirect_command(tmp_stderr_file, tmp_redirect_file):
     """
-    Test writing errors to a log file.
+    Test :py:func:`riboviz.process_utils.run_logged_redirect_command`
+    using a file to capture standard error.
 
-    :param log_err: Error log file (via test fixture)
-    :type log_err: str or unicode
-    :param redirect: File for redirected output (via test fixture)
-    :type redirect: str or unicode
+    :param tmp_stderr_file: Error log file
+    :type tmp_stderr_file: str or unicode
+    :param tmp_redirect_file: File for redirected output
+    :type tmp_redirect_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd = ["cat", path, "no-such-file.txt", path]
     try:
-        process_utils.run_logged_redirect_command(cmd, redirect, log_err)
+        process_utils.run_logged_redirect_command(cmd, tmp_redirect_file, tmp_stderr_file)
     except AssertionError:
         pass
     # Compare path to captured redirect.
-    with open(path) as expected, open(redirect) as actual:
+    with open(path) as expected, open(tmp_redirect_file) as actual:
         for line1, line2 in zip(expected, actual):
             assert line1 == line2
-    lines = [line.rstrip('\n') for line in open(log_err)]
+    lines = [line.rstrip('\n') for line in open(tmp_stderr_file)]
     assert len(lines) == 1
     assert lines[0] == \
         "cat: no-such-file.txt: No such file or directory"
 
 
-def test_run_logged_redirect_command_cmd_file(log_err, redirect, cmd_file):
+def test_run_logged_redirect_command_cmd_file(
+        tmp_stderr_file, tmp_redirect_file, tmp_cmd_file):
     """
-    Test writing errors to a log file with shell commands written to a
-    command file.
+    Test :py:func:`riboviz.process_utils.run_logged_redirect_command`
+    using a file to capture standard error and a file to capture
+    commands sent to the operating system.
 
-    :param log_err: Error log file (via test fixture)
-    :type log_err: str or unicode
-    :param redirect: File for redirected output (via test fixture)
-    :type redirect: str or unicode
-    :param cmd_file: Command file (via test fixture)
-    :type cmd_file: str or unicode
+    :param tmp_stderr_file: Error log file
+    :type tmp_stderr_file: str or unicode
+    :param tmp_redirect_file: File for redirected output
+    :type tmp_redirect_file: str or unicode
+    :param tmp_cmd_file: Command file
+    :type tmp_cmd_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd = ["cat", path, "no-such-file.txt", path]
     try:
         process_utils.run_logged_redirect_command(cmd,
-                                                  redirect,
-                                                  log_err,
-                                                  cmd_file)
+                                                  tmp_redirect_file,
+                                                  tmp_stderr_file,
+                                                  tmp_cmd_file)
     except AssertionError:
         pass
     # Compare path to captured redirect.
-    with open(path) as expected, open(redirect) as actual:
+    with open(path) as expected, open(tmp_redirect_file) as actual:
         for line1, line2 in zip(expected, actual):
             assert line1 == line2
-    lines = [line.rstrip('\n') for line in open(log_err)]
+    lines = [line.rstrip('\n') for line in open(tmp_stderr_file)]
     assert len(lines) == 1
     assert lines[0] == \
         "cat: no-such-file.txt: No such file or directory"
-    with open(cmd_file) as f:
+    with open(tmp_cmd_file) as f:
         actual_cmds = f.readlines()
     assert len(actual_cmds) == 1
-    expected_cmd = "%s > %s" % (utils.list_to_str(cmd), redirect)
+    expected_cmd = "%s > %s" % (utils.list_to_str(cmd), tmp_redirect_file)
     assert actual_cmds[0].rstrip('\n') == expected_cmd
 
 
 def test_run_logged_redirect_command_cmd_file_dry_run(
-        log_err, redirect, cmd_file):
+        tmp_stderr_file, tmp_redirect_file, tmp_cmd_file):
     """
-    Test dry run of a command that redirects its output to a file,
-    ensuring it is not run but that it is written to a command file.
+    Test :py:func:`riboviz.process_utils.run_logged_redirect_command`
+    using a file to capture standard error and a file to capture
+    commands sent to the operating system, with the ``dry_run``
+    parameter set to ``True``.
 
-    :param log_err: Error log file (via test fixture)
-    :type log_err: str or unicode
-    :param redirect: File for redirected output (via test fixture)
-    :type redirect: str or unicode
-    :param cmd_file: Command file (via test fixture)
-    :type cmd_file: str or unicode
+    :param tmp_stderr_file: Error log file
+    :type tmp_stderr_file: str or unicode
+    :param tmp_redirect_file: File for redirected output
+    :type tmp_redirect_file: str or unicode
+    :param tmp_cmd_file: Command file
+    :type tmp_cmd_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd = ["cat", path, "no-such-file.txt", path]
     process_utils.run_logged_redirect_command(cmd,
-                                              redirect,
-                                              log_err,
-                                              cmd_file,
+                                              tmp_redirect_file,
+                                              tmp_stderr_file,
+                                              tmp_cmd_file,
                                               True)
-    with open(redirect) as f:
+    with open(tmp_redirect_file) as f:
         lines = f.readlines()
     assert len(lines) == 0
-    with open(log_err) as f:
+    with open(tmp_stderr_file) as f:
         lines = f.readlines()
     assert len(lines) == 0
-    with open(cmd_file) as f:
+    with open(tmp_cmd_file) as f:
         actual_cmds = f.readlines()
     assert len(actual_cmds) == 1
-    expected_cmd = "%s > %s" % (utils.list_to_str(cmd), redirect)
+    expected_cmd = "%s > %s" % (utils.list_to_str(cmd), tmp_redirect_file)
     assert actual_cmds[0].rstrip('\n') == expected_cmd
 
 
-def test_run_logged_pipe_command_log(log_out):
+def test_run_logged_pipe_command_log(tmp_stdout_file):
     """
-    Test writing output and errors to a single log file where
-    the first command in the pipeline logs some error.
+    Test :py:func:`riboviz.process_utils.run_logged_pipe_command`
+    using a single file to capture both standard output and standard
+    error.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
     """
     path = os.path.realpath(__file__)
     num_lines = len([line for line in open(path)])
     cmd1 = ["cat", path, "no-such-file", path]
     cmd2 = ["wc", "-l"]
     try:
-        process_utils.run_logged_pipe_command(cmd1, cmd2, log_out)
+        process_utils.run_logged_pipe_command(cmd1, cmd2, tmp_stdout_file)
     except AssertionError:
         pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 2
     assert lines[0] == "cat: no-such-file: No such file or directory"
     assert str(num_lines * 2) == lines[1]  # Output from wc
 
 
-def test_run_logged_pipe_command_log_cmd_file(log_out, cmd_file):
+def test_run_logged_pipe_command_log_cmd_file(tmp_stdout_file,
+                                              tmp_cmd_file):
     """
-    Test writing output and errors to a single log file where
-    the first command in the pipeline logs some error and with shell
-    commands written to a command file.
+    Test :py:func:`riboviz.process_utils.run_logged_pipe_command`
+    using a single file to capture both standard output and standard
+    error and a file to capture commands sent to the operating
+    system.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
-    :param cmd_file: Command file (via test fixture)
-    :type cmd_file: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
+    :param tmp_cmd_file: Command file
+    :type tmp_cmd_file: str or unicode
     """
     path = os.path.realpath(__file__)
     num_lines = len([line for line in open(path)])
@@ -606,15 +629,15 @@ def test_run_logged_pipe_command_log_cmd_file(log_out, cmd_file):
     try:
         process_utils.run_logged_pipe_command(cmd1,
                                               cmd2,
-                                              log_out,
-                                              cmd_file)
+                                              tmp_stdout_file,
+                                              tmp_cmd_file)
     except AssertionError:
         pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 2
     assert lines[0] == "cat: no-such-file: No such file or directory"
     assert str(num_lines * 2) == lines[1]  # Output from wc
-    with open(cmd_file) as f:
+    with open(tmp_cmd_file) as f:
         actual_cmds = f.readlines()
     assert len(actual_cmds) == 1
     expected_cmd = "%s | %s" % (utils.list_to_str(cmd1),
@@ -622,28 +645,31 @@ def test_run_logged_pipe_command_log_cmd_file(log_out, cmd_file):
     assert actual_cmds[0].rstrip('\n') == expected_cmd
 
 
-def test_run_logged_pipe_command_log_cmd_file_dry_run(log_out, cmd_file):
+def test_run_logged_pipe_command_log_cmd_file_dry_run(tmp_stdout_file,
+                                                      tmp_cmd_file):
     """
-    Test dry run of a command that pipes its output to another command
-    ensuring it is not run but that it is written to a command file.
+    Test :py:func:`riboviz.process_utils.run_logged_pipe_command`
+    using a single file to capture both standard output and standard
+    error and a file to capture commands sent to the operating
+    system, with the ``dry_run`` parameter set to ``True``.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
-    :param cmd_file: Command file (via test fixture)
-    :type cmd_file: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
+    :param tmp_cmd_file: Command file
+    :type tmp_cmd_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd1 = ["cat", path, "no-such-file", path]
     cmd2 = ["wc", "-l"]
     process_utils.run_logged_pipe_command(cmd1,
                                           cmd2,
-                                          log_out,
-                                          cmd_file,
+                                          tmp_stdout_file,
+                                          tmp_cmd_file,
                                           True)
-    with open(log_out) as f:
+    with open(tmp_stdout_file) as f:
         lines = f.readlines()
     assert len(lines) == 0
-    with open(cmd_file) as f:
+    with open(tmp_cmd_file) as f:
         actual_cmds = f.readlines()
     assert len(actual_cmds) == 1
     expected_cmd = "%s | %s" % (utils.list_to_str(cmd1),
@@ -651,22 +677,23 @@ def test_run_logged_pipe_command_log_cmd_file_dry_run(log_out, cmd_file):
     assert actual_cmds[0].rstrip('\n') == expected_cmd
 
 
-def test_run_logged_pipe_command2(log_out):
+def test_run_logged_pipe_command_error(tmp_stdout_file):
     """
-    Test writing output and errors to a single log file where
-    the second command in the pipeline logs some error.
+    Test :py:func:`riboviz.process_utils.run_logged_pipe_command`
+    using a single file to capture both standard output and standard
+    error, where the first command in the pipeline includes an error.
 
-    :param log_out: Output log file (via test fixture)
-    :type log_out: str or unicode
+    :param tmp_stdout_file: Output log file
+    :type tmp_stdout_file: str or unicode
     """
     path = os.path.realpath(__file__)
     cmd1 = ["cat", path, "no-such-file", path]
     cmd2 = ["wc", "-l", "-x"]
     try:
-        process_utils.run_logged_pipe_command(cmd1, cmd2, log_out)
+        process_utils.run_logged_pipe_command(cmd1, cmd2, tmp_stdout_file)
     except AssertionError:
         pass
-    lines = [line.rstrip('\n') for line in open(log_out)]
+    lines = [line.rstrip('\n') for line in open(tmp_stdout_file)]
     assert len(lines) == 3
     assert lines[0] == "cat: no-such-file: No such file or directory"
     assert lines[1] == "wc: invalid option -- 'x'"

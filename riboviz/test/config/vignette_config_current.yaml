@@ -1,0 +1,37 @@
+dir_in: vignette/input
+dir_out: vignette/output
+dir_tmp: vignette/tmp
+dir_logs: vignette/logs
+cmd_file: run_riboviz_vignette.sh
+rrna_fasta_file: vignette/input/yeast_rRNA_R64-1-1.fa
+orf_fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa
+orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3
+aligner: hisat2
+build_indices: TRUE
+make_bedgraph: TRUE
+dir_index: vignette/index
+rrna_index_prefix: yeast_rRNA
+orf_index_prefix: YAL_CDS_w_250
+fq_files:
+  WTnone: SRR1042855_s1mi.fastq.gz
+  WT3AT: SRR1042864_s1mi.fastq.gz
+  NotHere: example_missing_file.fastq.gz
+adapters: CTGTAGGCACC
+num_processes: 1
+min_read_length: 10
+max_read_length: 50
+buffer: 250
+primary_id: Name
+secondary_id: NULL
+dataset: vignette
+stop_in_cds: FALSE
+is_test_run: FALSE
+rpf: TRUE
+is_riboviz_gff: TRUE
+features_file: data/yeast_features.tsv
+do_pos_sp_nt_freq: TRUE
+t_rna_file: data/yeast_tRNAs.tsv
+codon_positions_file: data/yeast_codon_pos_i200.RData
+count_threshold: 64
+asite_disp_length_file: data/yeast_standard_asite_disp_length.txt
+count_reads: TRUE

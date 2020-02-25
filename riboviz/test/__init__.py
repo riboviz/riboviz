@@ -1,38 +1,39 @@
 """
-General test-related constants.
+Test constants.
 """
 import os.path
 import riboviz
 
-
-BASE_PATH = os.path.dirname(os.path.dirname(riboviz.__file__))
-""" Path of parent riboviz module. """
-
-VIGNETTE_DIR = os.path.join(BASE_PATH, "vignette")
-""" Path of vignette/ derived from BASE_PATH. """
-
-PY_SCRIPTS = os.path.join(BASE_PATH, "riboviz/tools")
-""" Path of riboviz/tools/ derived from BASE_PATH. """
-
-R_SCRIPTS = os.path.join(BASE_PATH, "rscripts")
-""" Path of rscripts/ derived from BASE_PATH. """
-
-DATA_DIR = os.path.join(BASE_PATH, "data")
-""" Path of data/ derived from BASE_PATH. """
-
-SIMDATA_DIR = os.path.join(DATA_DIR, "simdata")
-""" Path of data/simdata/ derived from DATA_DIR. """
-
+SIMDATA_DIR = os.path.join(riboviz.DATA_DIR, "simdata")
+""" Path to ``data/simdata/``. """
+VIGNETTE_DIR = os.path.join(riboviz.BASE_PATH, "vignette")
+""" Path to ``vignette/``. """
 VIGNETTE_CONFIG = os.path.join(VIGNETTE_DIR, "vignette_config.yaml")
-""" Path of vignette/vignette_config.yaml derived from VIGNETTE_DIR. """
+""" Path to ``vignette/vignette_config.yaml``. """
+VIGNETTE_SAMPLES = ["WT3AT", "WTnone"]
+""" Sample names in ``vignette/vignette_config.yaml``. """
+VIGNETTE_INDEX_DIR_NAME = "index"
+""" Index directory name. """
+VIGNETTE_INDEX_DIR = os.path.join(VIGNETTE_DIR, VIGNETTE_INDEX_DIR_NAME)
+""" Path to ``vignette/index/``. """
+VIGNETTE_TMP_DIR_NAME = "tmp"
+""" Temporary directory name. """
+VIGNETTE_TMP_DIR = os.path.join(VIGNETTE_DIR, VIGNETTE_TMP_DIR_NAME)
+""" Path to ``vignette/tmp/``. """
+VIGNETTE_OUTPUT_DIR_NAME = "output"
+""" Output directory name. """
+VIGNETTE_OUTPUT_DIR = os.path.join(VIGNETTE_DIR, VIGNETTE_OUTPUT_DIR_NAME)
+""" Path to ``vignette/output/``. """
+INDEX_PREFIXES = ["YAL_CDS_w_250", "yeast_rRNA"]
+""" Index file prefixes. """
+NUM_INDICES = 9
+""" Number of index files for each type of index. """
 
 SIMDATA_UMI_CONFIG = os.path.join(VIGNETTE_DIR, "simdata_umi_config.yaml")
-"""
-Path of vignette/simdata_umi_config.yaml derived from VIGNETTE_DIR.
-"""
+""" Path to ``vignette/simdata_umi_config.yaml``. """
+SIMDATA_UMI_SAMPLE = "umi5_umi3"
+""" Sample name in ``vignette/simdata_umi_config.yaml``. """
 
 SIMDATA_MULTIPLEX_CONFIG = os.path.join(
     VIGNETTE_DIR, "simdata_multiplex_config.yaml")
-"""
-Path of vignette/simdata_multiplex_config.yaml derived from VIGNETTE_DIR.
-"""
+""" Path to ``vignette/simdata_multiplex_config.yaml``. """

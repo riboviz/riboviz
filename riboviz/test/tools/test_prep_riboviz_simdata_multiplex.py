@@ -1,133 +1,147 @@
 """
-riboviz.tools.prep_riboviz test suite to test adaptor trimming,
-barcode and UMI extraction, demultpliexing and deduplication.
+:py:mod:`riboviz.tools.prep_riboviz` demultiplexing tests.
 
-The test suite runs riboviz.tools.prep_riboviz using a copy of
-"vignette/simdata_multiplex_config.yaml" and the simulated data in
-"data/simdata/". It then validates the outputs of the adaptor
-trimming, barcode and UMI extraction, demultiplexing and deduplication
-steps against the expected outputs, also in "data/simdata/".
+The test suite runs :py:mod:`riboviz.tools.prep_riboviz` using
+``vignette/simdata_multiplex_config.yaml``
+(:py:const:`riboviz.test.SIMDATA_MULTIPLEX_CONFIG`) and simulated data
+in ``data/simdata/`` (created by
+:py:mod:`riboviz.tools.create_fastq_simdata`).
 
-The simulated data in "data/simdata/" is expected to have been created
-using riboviz.tools.create_fastq_simdata.
+It then validates the outputs of adaptor trimming, UMI extraction,
+demultiplexing and deduplication steps against the expected outputs,
+also in ``data/simdata/``. Collated TPMs are also validated.
+
+Each test function is configured with the module-level fixture
+:py:func:`riboviz.test.tools.prep_riboviz_fixture` to ensure
+that :py:mod:`riboviz.tools.prep_riboviz` is run once before the
+test functions are run.
 """
 import os
 import pytest
 import riboviz
-import riboviz.process_utils
 import riboviz.test
-import riboviz.tools
-import riboviz.validation
+from riboviz import demultiplex_fastq
+from riboviz import fastq
 from riboviz import params
-from riboviz.demultiplex_fastq import NUM_READS_FILE
-from riboviz.tools import prep_riboviz
-from riboviz.test.tools import configuration_module  # Test fixture
-from riboviz.test.tools import run_prep_riboviz  # Test fixture
-from riboviz.test.tools.test_prep_riboviz_simdata_umi import check_umi_groups
-from riboviz.test.tools.test_prep_riboviz_simdata_umi import check_tpms_collated_tsv
+from riboviz import utils
+from riboviz import workflow_files
+from riboviz.test.tools import configuration_module
+from riboviz.test.tools import prep_riboviz_fixture
+from riboviz.test.tools.test_prep_riboviz_simdata_umi \
+    import check_umi_groups
+from riboviz.test.tools.test_prep_riboviz_simdata_umi \
+    import check_tpms_collated_tsv
 
 
 TEST_CONFIG_FILE = riboviz.test.SIMDATA_MULTIPLEX_CONFIG
 """
-YAML configuration used as a template configuration by these tests -
-required by configuration test fixture
+Test file location constant, used by a callback in
+:py:func:`riboviz.test.tools.configuration_module`.
 """
 
 
-@pytest.mark.usefixtures("run_prep_riboviz")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_adaptor_trimming(configuration_module):
     """
-    Validate that adaptor trimming, performed by "cutadapt" produces
-    the expected results.
+    Test that the results of adaptor trimming are as expected.
 
-    :param configuration_module: configuration and path to
-    configuration file (pytest fixture)
+    :param configuration_module: temporary configuration and \
+    configuration file
     :type configuration_module: tuple(dict, str or unicode)
     """
     config, _ = configuration_module
     expected_output = os.path.join(
         riboviz.test.SIMDATA_DIR,
-        "multiplex_umi_barcode.fastq")
+        fastq.FASTQ_FORMAT.format("multiplex_umi_barcode"))
     actual_output = os.path.join(
         config[params.TMP_DIR],
-        "multiplex_umi_barcode_adaptor_trim.fq")
-    riboviz.validation.equal_fastq(expected_output, actual_output)
+        workflow_files.ADAPTER_TRIM_FQ_FORMAT.format(
+            "multiplex_umi_barcode_adaptor"))
+    fastq.equal_fastq(expected_output, actual_output)
 
 
-@pytest.mark.usefixtures("run_prep_riboviz")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_barcode_umi_extract(configuration_module):
     """
-    Validate that barcode and UMI extraction, performed by "umi_tools
-    extract" produces the expected results.
+    Test that the results of barcode and UMI extraction are as expected.
 
-    :param configuration_module: configuration and path to
-    configuration file (pytest fixture)
+    :param configuration_module: temporary configuration and \
+    configuration file
     :type configuration_module: tuple(dict, str or unicode)
     """
     config, _ = configuration_module
     expected_output = os.path.join(
         riboviz.test.SIMDATA_DIR,
-        "multiplex.fastq")
+        fastq.FASTQ_FORMAT.format("multiplex"))
     actual_output = os.path.join(
         config[params.TMP_DIR],
-        "multiplex_umi_barcode_adaptor_extract_trim.fq")
-    riboviz.validation.equal_fastq(expected_output, actual_output)
+        workflow_files.UMI_EXTRACT_FQ_FORMAT.format(
+            "multiplex_umi_barcode_adaptor"))
+    fastq.equal_fastq(expected_output, actual_output)
 
 
-@pytest.mark.usefixtures("run_prep_riboviz")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_deplex_num_reads(configuration_module):
     """
-    Validate that "num_reads.tsv", produced by
-    riboviz.demultiplex_fastq has the expected content.
+    Test that the number of reads summary, produced during
+    demultiplexing, is as expected.
 
-    :param configuration_module: configuration and path to
-    configuration file (pytest fixture)
+    :param configuration_module: temporary configuration and \
+    configuration file
     :type configuration_module: tuple(dict, str or unicode)
     """
     config, _ = configuration_module
     actual_dir = os.path.join(
         config[params.TMP_DIR],
-        "multiplex_umi_barcode_adaptor_deplex")
-    actual_output = os.path.join(actual_dir, NUM_READS_FILE)
+        workflow_files.DEPLEX_DIR_FORMAT.format(
+            "multiplex_umi_barcode_adaptor"))
+    actual_output = os.path.join(actual_dir,
+                                 demultiplex_fastq.NUM_READS_FILE)
     expected_output = os.path.join(
-        riboviz.test.SIMDATA_DIR, "deplex", NUM_READS_FILE)
-    riboviz.validation.compare(expected_output, actual_output)
+        riboviz.test.SIMDATA_DIR,
+        "deplex",
+        demultiplex_fastq.NUM_READS_FILE)
+    utils.equal_tsv(expected_output, actual_output)
 
 
 @pytest.mark.parametrize(
-    "fastq", ["Tag0.fastq", "Tag1.fastq", "Tag2.fastq", "Unassigned.fastq"])
-@pytest.mark.usefixtures("run_prep_riboviz")
-def test_deplex_reads(configuration_module, fastq):
+    "sample_id", ["Tag0", "Tag1", "Tag2", "Unassigned"])
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_deplex_reads(configuration_module, sample_id):
     """
-    Validate that ".fastq", produced by
-    riboviz.demultiplex_fastq have the expected content.
+    Test that the FASTQ files output by demultiplexing are as
+    expected.
 
-    :param configuration_module: configuration and path to
-    configuration file (pytest fixture)
+    :param configuration_module: temporary configuration and \
+    configuration file
     :type configuration_module: tuple(dict, str or unicode)
-    :param fastq: FASTQ file
-    :type fastq: str or unicode
+    :param sample_id: sample ID for demultiplexed reads
+    :type sample_id: str or unicode
     """
+    # Actual data has a .fq extension.
+    actual_file_name = fastq.FQ_FORMAT.format(sample_id)
+    # Simulated data has a .fastq extension.
+    expected_file_name = fastq.FASTQ_FORMAT.format(sample_id)
     config, _ = configuration_module
     actual_dir = os.path.join(
         config[params.TMP_DIR],
-        "multiplex_umi_barcode_adaptor_deplex")
-    actual_output = os.path.join(actual_dir, fastq)
+        workflow_files.DEPLEX_DIR_FORMAT.format(
+            "multiplex_umi_barcode_adaptor"))
+    actual_output = os.path.join(actual_dir, actual_file_name)
     expected_output = os.path.join(
-        riboviz.test.SIMDATA_DIR, "deplex", fastq)
-    riboviz.validation.compare(expected_output, actual_output)
+        riboviz.test.SIMDATA_DIR, "deplex", expected_file_name)
+    fastq.equal_fastq(expected_output, actual_output)
 
 
 @pytest.mark.parametrize("sample_id", ["Tag0", "Tag1", "Tag2"])
-@pytest.mark.usefixtures("run_prep_riboviz")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_deplex_umi_groups(configuration_module, sample_id):
     """
-    Validate the information on UMI groups post-"umi_tools extract",
-    for each demultiplexed file, by parsing the ".tsv" file output by
-    "umi_tools group".
+    Test that the UMI groups are as expected. See
+    :py:func:`riboviz.test.tools.test_prep_riboviz_simdata_umi.check_umi_groups`.
 
-    :param configuration_module: configuration and path to
-    configuration file (pytest fixture)
+    :param configuration_module: temporary configuration and \
+    configuration file
     :type configuration_module: tuple(dict, str or unicode)
     :param sample_id: sample ID for demultiplexed reads
     :type sample_id: str or unicode
@@ -137,13 +151,14 @@ def test_deplex_umi_groups(configuration_module, sample_id):
 
 
 @pytest.mark.parametrize("sample_id", ["Tag0", "Tag1", "Tag2"])
-@pytest.mark.usefixtures("run_prep_riboviz")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_deplex_tpms_collated_tsv(configuration_module, sample_id):
     """
-    Validate the "TPMs_collated.tsv" file produced by the workflow.
+    Test that the collated TPMs are as expected. See
+    :py:func:`riboviz.test.tools.test_prep_riboviz_simdata_umi.check_tpms_collated_tsv`.
 
-    :param configuration_module: configuration and path to
-    configuration file (pytest fixture)
+    :param configuration_module: temporary configuration and \
+    configuration file
     :type configuration_module: tuple(dict, str or unicode)
     :param sample_id: sample ID for demultiplexed reads
     :type sample_id: str or unicode
