@@ -1,32 +1,35 @@
-# generate_stats_figs.R
-# currently (22 December 2019) undergoing refactoring by EW
-# TODO:
-# - tidy gene_sp_read_length to GetGeneReadLength DONE
-# - replace gff IRanges call with gff_df tidy DONE
-# - tidy get_cod_pos
-# - functionalize gene_poslen_counts, wrapper functions
-# - tidy do_pos_sp_nt_freq
-# - functionalize gene_read_frames
-# - replace GetCodonPositionReads call by GetGeneCodonPosReads1dsnap
-# - functionalize pos_sp_rpf_norm_reads wrapper
-# - tidy GetMRNACoverage wrapper
-# - functionalize pos_sp_mrna_norm_coverage
-# - functionalize GetTPMs into *_tpms.tsv
-# - refactor Codon-specific ribosome densities 
-# - replace write.table with write_tsv
-# - replace Reduce, lapply, sapply by purrr functions?? Maybe using nested data frames
-# - duplicate generate_stats_figs.R as .Rmd file
-#
+# load libraries
+suppressMessages(library(Rsamtools))
+suppressMessages(library(rtracklayer))
+suppressMessages(library(rhdf5))
+suppressMessages(library(parallel))
+suppressMessages(library(optparse))
+suppressMessages(library(RcppRoll))
+suppressMessages(library(ggplot2))
+suppressMessages(library(tidyr))
+suppressMessages(library(dplyr))
+suppressMessages(library(magrittr))
+suppressMessages(library(purrr))
 
-# @Flic_Anderson this line commented out as not required while get_Rscript_filename() removed
-# suppressMessages(library(getopt))
+# load getopt to allow use of get_Rscript_filename for provenance-gathering
+suppressMessages(library(getopt, quietly=T))
 
-# Determine location of provenance.R relative to current file
-rscripts_dir <- "rscripts" # @Flic_Anderson temporary fix
 
-#rscripts_dir <- file.path(dirname(getopt::get_Rscript_filename()))
-source(paste0(rscripts_dir, "/provenance.R"))
-source(paste0(rscripts_dir, "/read_count_functions.R"))
+# Handle interactive session behaviours or use get_Rscript_filename():
+if (interactive()) {
+  # Use hard-coded script name and assume script is in "rscripts"
+  # directory. This assumes that interactive R is being run within
+  # the parent of rscripts/ but imposes no other constraints on
+  # where rscripts/ or its parents are located.
+  this_script <- "generate_stats_figs.R"
+  path_to_this_script <- file.path("rscripts", this_script)
+  source(file.path("rscripts", "provenance.R"))
+} else {
+  # Deduce file name and path using reflection as before.
+  this_script <- getopt::get_Rscript_filename()
+  path_to_this_script <- this_script
+  source(file.path(dirname(this_script), "provenance.R"))
+}
 
 # define input options for optparse package
 option_list <- list(
@@ -117,7 +120,9 @@ option_list <- list(
   )
 )
 
-print_provenance(get_Rscript_filename())
+# print provenance
+print_provenance(path_to_this_script)
+
 # read in commandline arguments
 opt <- optparse::parse_args(OptionParser(option_list = option_list),
                             convert_hyphens_to_underscores=TRUE)
@@ -144,13 +149,10 @@ read_range <- min_read_length:max_read_length
 # read in positions of all exons/genes in GFF format and convert to tibble data frame 
 gff_df <- readGFFAsDf(orf_gff_file)
 
-#####
-
 # set ggplot2 theme for plots drawn after this; use dark on light theme
 ggplot2::theme_set(theme_bw())
 
 #####
-
 
 # check for 3nt periodicity
 print("Starting: Check for 3nt periodicity globally")
@@ -231,7 +233,7 @@ ggsave(
 
 tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3nt_periodicity.tsv"))
 
-write_provenance_header(get_Rscript_filename(), tsv_file_path)
+write_provenance_header(this_script, tsv_file_path)
 
 write.table(
   gene_pos_counts_bothends,
@@ -266,7 +268,7 @@ read_len_plot <- ggplot(read_length_data, aes(x = Length, y = Counts)) +
 # save read lengths plot and file
 ggsave(read_len_plot, filename = file.path(output_dir, paste0(output_prefix, "read_lengths.pdf")))
 tsv_file_path <- file.path(output_dir, paste0(output_prefix, "read_lengths.tsv"))
-write_provenance_header(get_Rscript_filename(), tsv_file_path)
+write_provenance_header(this_script, tsv_file_path)
 write.table(
   read_length_data,
   file = tsv_file_path,
@@ -337,7 +339,7 @@ if (do_pos_sp_nt_freq) {
 
   # save file
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_nt_freq.tsv"))
-  write_provenance_header(get_Rscript_filename(), tsv_file_path)
+  write_provenance_header(this_script, tsv_file_path)
   write.table(all_out, file = tsv_file_path, append = T, sep = "\t", row = F, col = T, quote = F)
 
   print("Completed nucleotide composition bias table")
@@ -361,7 +363,7 @@ if (!is.na(asite_disp_length_file)) {
       asite_disp_length = asite_disp_length
     )
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3ntframe_bygene.tsv"))
-  write_provenance_header(get_Rscript_filename(), tsv_file_path)
+  write_provenance_header(this_script, tsv_file_path)
   write.table(
     gene_read_frames,
     file = tsv_file_path,
@@ -461,7 +463,7 @@ if (rpf & !is.na(asite_disp_length_file)) {
   # Save plot and file
   ggsave(pos_sp_rpf_norm_reads_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.pdf")))
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.tsv"))
-  write_provenance_header(get_Rscript_filename(), tsv_file_path)
+  write_provenance_header(this_script, tsv_file_path)
   write.table(
     pos_sp_rpf_norm_reads %>%
       mutate_if(is.numeric, signif, digits=4),
@@ -547,7 +549,7 @@ if (!rpf) {
   # Save plot and file
   ggsave(pos_sp_mrna_norm_coverage_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_mrna_norm_coverage.pdf")))
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_mrns_norm_coverage.tsv"))
-  write_provenance_header(get_Rscript_filename(), tsv_file_path)
+  write_provenance_header(this_script, tsv_file_path)
   write.table(
     pos_sp_mrna_norm_coverage,
     file = tsv_file_path,
@@ -579,7 +581,7 @@ tpms <- data.frame(
 
 # write out to *_tpms.tsv
 tsv_file_path <- file.path(output_dir, paste0(output_prefix, "tpms.tsv"))
-write_provenance_header(get_Rscript_filename(), tsv_file_path)
+write_provenance_header(this_script, tsv_file_path)
 write.table(
   tpms,
   file = tsv_file_path,
@@ -702,7 +704,7 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
     # Save plot and file
     ggsave(cod_dens_tRNA_plot, filename = file.path(output_dir, paste0(output_prefix, "codon_ribodens.pdf")))
     tsv_file_path <- file.path(output_dir, paste0(output_prefix, "codon_ribodens.tsv"))
-    write_provenance_header(get_Rscript_filename(), tsv_file_path)
+    write_provenance_header(this_script, tsv_file_path)
     write.table(
       cod_dens_tRNA,
       file = tsv_file_path,
