@@ -24,11 +24,13 @@ if (interactive()) {
   this_script <- "generate_stats_figs.R"
   path_to_this_script <- file.path("rscripts", this_script)
   source(file.path("rscripts", "provenance.R"))
+  source(file.path("rscripts", "read_count_functions.R"))
 } else {
   # Deduce file name and path using reflection as before.
   this_script <- getopt::get_Rscript_filename()
   path_to_this_script <- this_script
   source(file.path(dirname(this_script), "provenance.R"))
+  source(file.path(dirname(this_script), "read_count_functions.R"))
 }
 
 # define input options for optparse package
@@ -233,7 +235,7 @@ ggsave(
 
 tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3nt_periodicity.tsv"))
 
-write_provenance_header(this_script, tsv_file_path)
+write_provenance_header(path_to_this_script, tsv_file_path)
 
 write.table(
   gene_pos_counts_bothends,
@@ -268,7 +270,7 @@ read_len_plot <- ggplot(read_length_data, aes(x = Length, y = Counts)) +
 # save read lengths plot and file
 ggsave(read_len_plot, filename = file.path(output_dir, paste0(output_prefix, "read_lengths.pdf")))
 tsv_file_path <- file.path(output_dir, paste0(output_prefix, "read_lengths.tsv"))
-write_provenance_header(this_script, tsv_file_path)
+write_provenance_header(path_to_this_script, tsv_file_path)
 write.table(
   read_length_data,
   file = tsv_file_path,
@@ -339,7 +341,7 @@ if (do_pos_sp_nt_freq) {
 
   # save file
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_nt_freq.tsv"))
-  write_provenance_header(this_script, tsv_file_path)
+  write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(all_out, file = tsv_file_path, append = T, sep = "\t", row = F, col = T, quote = F)
 
   print("Completed nucleotide composition bias table")
@@ -363,7 +365,7 @@ if (!is.na(asite_disp_length_file)) {
       asite_disp_length = asite_disp_length
     )
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3ntframe_bygene.tsv"))
-  write_provenance_header(this_script, tsv_file_path)
+  write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
     gene_read_frames,
     file = tsv_file_path,
@@ -392,6 +394,7 @@ if (!is.na(asite_disp_length_file)) {
 
 print("Starting: Position specific distribution of reads")
 
+# @FlicAnderson: split this if chunk up into more named functions maybe to help with errors?
 # For RPF datasets, generate codon-based position-specific reads
 if (rpf & !is.na(asite_disp_length_file)) {
   # Get codon-based position-specific reads for each gene, in a tibble
@@ -420,10 +423,11 @@ if (rpf & !is.na(asite_disp_length_file)) {
                 map(CountPerCodon,
                     ~extract(.,seq_len(length_threshold)))) %>%
     # remove NormCts as vector and (3 lines later) make these rows of a matrix
-    pull(NormCtperCodon5end) %>%
+    dplyr::pull(NormCtperCodon5end) %>%
     unlist %>% 
     matrix(byrow=T,ncol=length_threshold) %>%
     # calculate column means and standard deviations in tidy data frame
+    # @FlicAnderson: Why is this in {} brackets?
     {tibble(Position = seq_len(length_threshold),
             Mean = colMeans(.) %>% as.numeric,
             SD   = apply(.,2,sd),
@@ -439,7 +443,7 @@ if (rpf & !is.na(asite_disp_length_file)) {
               map2(CountPerCodon,LengthCodons,
                    ~extract(.x, .y + 1 - seq_len(length_threshold)))) %>%              
     # remove NormCts as vector and (3 lines later) make these rows of a matrix
-    pull(NormCtperCodon3end) %>%
+    dplyr::pull(NormCtperCodon3end) %>%
     unlist %>% 
     matrix(byrow=T,ncol=length_threshold)  %>% 
     # calculate column means and standard deviations in tidy data frame
@@ -463,7 +467,7 @@ if (rpf & !is.na(asite_disp_length_file)) {
   # Save plot and file
   ggsave(pos_sp_rpf_norm_reads_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.pdf")))
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.tsv"))
-  write_provenance_header(this_script, tsv_file_path)
+  write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
     pos_sp_rpf_norm_reads %>%
       mutate_if(is.numeric, signif, digits=4),
@@ -549,7 +553,7 @@ if (!rpf) {
   # Save plot and file
   ggsave(pos_sp_mrna_norm_coverage_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_mrna_norm_coverage.pdf")))
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_mrns_norm_coverage.tsv"))
-  write_provenance_header(this_script, tsv_file_path)
+  write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
     pos_sp_mrna_norm_coverage,
     file = tsv_file_path,
@@ -581,7 +585,7 @@ tpms <- data.frame(
 
 # write out to *_tpms.tsv
 tsv_file_path <- file.path(output_dir, paste0(output_prefix, "tpms.tsv"))
-write_provenance_header(this_script, tsv_file_path)
+write_provenance_header(path_to_this_script, tsv_file_path)
 write.table(
   tpms,
   file = tsv_file_path,
@@ -628,7 +632,6 @@ if (!is.na(features_file)) {
 # Codon-specific ribosome density for tRNA correlation; skip if missing t_rna_file & codon_positions_file
 if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
   print("Starting: Codon-specific ribosome densities for correlations with tRNAs")
-  browser()
   # Only for RPF datasets
   if (rpf) {
     # TODO: This section needs attention. Can be refactored analogously to reads_per_codon_etc
@@ -704,7 +707,7 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
     # Save plot and file
     ggsave(cod_dens_tRNA_plot, filename = file.path(output_dir, paste0(output_prefix, "codon_ribodens.pdf")))
     tsv_file_path <- file.path(output_dir, paste0(output_prefix, "codon_ribodens.tsv"))
-    write_provenance_header(this_script, tsv_file_path)
+    write_provenance_header(path_to_this_script, tsv_file_path)
     write.table(
       cod_dens_tRNA,
       file = tsv_file_path,
