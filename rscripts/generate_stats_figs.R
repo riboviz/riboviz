@@ -1,6 +1,4 @@
-suppressMessages(library(getopt, quietly=T))
-# Determine location of provenance.R relative to current file
-source(file.path(dirname(getopt::get_Rscript_filename()), "provenance.R"))
+# load libraries
 suppressMessages(library(Rsamtools))
 suppressMessages(library(rtracklayer))
 suppressMessages(library(rhdf5))
@@ -13,8 +11,25 @@ suppressMessages(library(dplyr))
 suppressMessages(library(magrittr))
 suppressMessages(library(purrr))
 
-# set ggplot2 theme for plots drawn after this; use dark on light theme
-ggplot2::theme_set(theme_bw())
+# load getopt to allow use of get_Rscript_filename for provenance-gathering
+suppressMessages(library(getopt, quietly=T))
+
+
+# Handle interactive session behaviours or use get_Rscript_filename():
+if (interactive()) {
+  # Use hard-coded script name and assume script is in "rscripts"
+  # directory. This assumes that interactive R is being run within
+  # the parent of rscripts/ but imposes no other constraints on
+  # where rscripts/ or its parents are located.
+  this_script <- "generate_stats_figs.R"
+  path_to_this_script <- file.path("rscripts", this_script)
+  source(file.path("rscripts", "provenance.R"))
+} else {
+  # Deduce file name and path using reflection as before.
+  this_script <- getopt::get_Rscript_filename()
+  path_to_this_script <- this_script
+  source(file.path(dirname(this_script), "provenance.R"))
+}
 
 # define input options for optparse package
 option_list <- list(
@@ -101,7 +116,9 @@ option_list <- list(
   )
 )
 
-print_provenance(get_Rscript_filename())
+# print provenance
+print_provenance(path_to_this_script)
+
 # read in commandline arguments
 opt <- optparse::parse_args(OptionParser(option_list = option_list),
                             convert_hyphens_to_underscores=TRUE)
@@ -126,6 +143,9 @@ read_range <- min_read_length:max_read_length
 # read in positions of all exons/genes in GFF format and subset CDS locations
 gff <- readGFFAsGRanges(orf_gff_file)
 gff_df <- gff %>% data.frame %>% as_tibble # @ewallace: tidy tibble version
+
+# set ggplot2 theme for plots drawn after this; use dark on light theme
+ggplot2::theme_set(theme_bw())
 
 # check for 3nt periodicity
 print("Starting: Check for 3nt periodicity globally")
@@ -302,7 +322,7 @@ nt_period_plot <- ggplot(
 ggsave(nt_period_plot, filename = file.path(output_dir, paste0(output_prefix, "3nt_periodicity.pdf")))
 
 tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3nt_periodicity.tsv"))
-write_provenance_header(get_Rscript_filename(), tsv_file_path)
+write_provenance_header(this_script, tsv_file_path)
 write.table(
   gene_pos_counts_bothends,
   file = tsv_file_path,
@@ -335,7 +355,7 @@ read_len_plot <- ggplot(read_length_data, aes(x = Length, y = Counts)) +
 # save read lengths plot and file
 ggsave(read_len_plot, filename = file.path(output_dir, paste0(output_prefix, "read_lengths.pdf")))
 tsv_file_path <- file.path(output_dir, paste0(output_prefix, "read_lengths.tsv"))
-write_provenance_header(get_Rscript_filename(), tsv_file_path)
+write_provenance_header(this_script, tsv_file_path)
 write.table(
   read_length_data,
   file = tsv_file_path,
@@ -433,7 +453,7 @@ if (do_pos_sp_nt_freq) {
 
   # save file
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_nt_freq.tsv"))
-  write_provenance_header(get_Rscript_filename(), tsv_file_path)
+  write_provenance_header(this_script, tsv_file_path)
   write.table(all_out, file = tsv_file_path, append = T, sep = "\t", row = F, col = T, quote = F)
 
   print("Completed nucleotide composition bias table")
@@ -623,7 +643,7 @@ if (!is.na(asite_disp_length_file)) {
       asite_disp_length = asite_disp_length
     )
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3ntframe_bygene.tsv"))
-  write_provenance_header(get_Rscript_filename(), tsv_file_path)
+  write_provenance_header(this_script, tsv_file_path)
   write.table(
     gene_read_frames,
     file = tsv_file_path,
@@ -772,7 +792,7 @@ if (rpf) {
   # Save plot and file
   ggsave(pos_sp_rpf_norm_reads_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.pdf")))
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.tsv"))
-  write_provenance_header(get_Rscript_filename(), tsv_file_path)
+  write_provenance_header(this_script, tsv_file_path)
   write.table(
     pos_sp_rpf_norm_reads,
     file = tsv_file_path,
@@ -855,7 +875,7 @@ if (!rpf) {
   # Save plot and file
   ggsave(pos_sp_mrna_norm_coverage_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_mrna_norm_coverage.pdf")))
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_mrns_norm_coverage.tsv"))
-  write_provenance_header(get_Rscript_filename(), tsv_file_path)
+  write_provenance_header(this_script, tsv_file_path)
   write.table(
     pos_sp_mrna_norm_coverage,
     file = tsv_file_path,
@@ -902,7 +922,7 @@ tpms <- data.frame(
 
 # write out to *_tpms.tsv
 tsv_file_path <- file.path(output_dir, paste0(output_prefix, "tpms.tsv"))
-write_provenance_header(get_Rscript_filename(), tsv_file_path)
+write_provenance_header(this_script, tsv_file_path)
 write.table(
   tpms,
   file = tsv_file_path,
@@ -1016,7 +1036,7 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
     # Save plot and file
     ggsave(cod_dens_tRNA_plot, filename = file.path(output_dir, paste0(output_prefix, "codon_ribodens.pdf")))
     tsv_file_path <- file.path(output_dir, paste0(output_prefix, "codon_ribodens.tsv"))
-    write_provenance_header(get_Rscript_filename(), tsv_file_path)
+    write_provenance_header(this_script, tsv_file_path)
     write.table(
       cod_dens_tRNA,
       file = tsv_file_path,
