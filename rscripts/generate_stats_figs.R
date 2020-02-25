@@ -1,31 +1,4 @@
-# load getopt to allow use of get_Rscript_filename for provenance-gathering
-suppressMessages(library(getopt, quietly=T))
-
-# check result of get_Rscript_filename(); will be NA if running interactively
-this_script <- getopt::get_Rscript_filename()
-
-# Handle interactive session behaviours while getting Rscript filename:
-# if results of get_Rscript_filename() returns NA (ie interactive session)
-# then set variable this_script to "generate_stats_figs.R" to resolve breakage
-HandleRscriptFilename <- function() {
-  if (is.na(this_script)){ 
-    # if interactivity breaks get_Rscript_filename()
-    this_script <<- "generate_stats_figs.R"
-    return(this_script)
-  }
-}
-# run function to obtain name of this script (interactivity fix)
-HandleRscriptFilename()
-
-# Specify full path to rscripts folder
-path_to_rscripts <- file.path("~", "RiboViz","rscripts")
-
-# specify path to this file:
-path_to_this_script <- file.path(path_to_rscripts, this_script)
-
-# source provenance.R
-source(file.path(path_to_rscripts, "provenance.R"))
-
+# load libraries
 suppressMessages(library(Rsamtools))
 suppressMessages(library(rtracklayer))
 suppressMessages(library(rhdf5))
@@ -38,8 +11,25 @@ suppressMessages(library(dplyr))
 suppressMessages(library(magrittr))
 suppressMessages(library(purrr))
 
-# set ggplot2 theme for plots drawn after this; use dark on light theme
-ggplot2::theme_set(theme_bw())
+# load getopt to allow use of get_Rscript_filename for provenance-gathering
+suppressMessages(library(getopt, quietly=T))
+
+
+# Handle interactive session behaviours or use get_Rscript_filename():
+if (interactive()) {
+  # Use hard-coded script name and assume script is in "rscripts"
+  # directory. This assumes that interactive R is being run within
+  # the parent of rscripts/ but imposes no other constraints on
+  # where rscripts/ or its parents are located.
+  this_script <- "generate_stats_figs.R"
+  path_to_this_script <- file.path("rscripts", this_script)
+  source(file.path("rscripts", "provenance.R"))
+} else {
+  # Deduce file name and path using reflection as before.
+  this_script <- getopt::get_Rscript_filename()
+  path_to_this_script <- this_script
+  source(file.path(dirname(this_script), "provenance.R"))
+}
 
 # define input options for optparse package
 option_list <- list(
@@ -153,6 +143,9 @@ read_range <- min_read_length:max_read_length
 # read in positions of all exons/genes in GFF format and subset CDS locations
 gff <- readGFFAsGRanges(orf_gff_file)
 gff_df <- gff %>% data.frame %>% as_tibble # @ewallace: tidy tibble version
+
+# set ggplot2 theme for plots drawn after this; use dark on light theme
+ggplot2::theme_set(theme_bw())
 
 # check for 3nt periodicity
 print("Starting: Check for 3nt periodicity globally")
