@@ -394,7 +394,7 @@ if (!is.na(asite_disp_length_file)) {
 
 print("Starting: Position specific distribution of reads")
 
-# @FlicAnderson: split this if chunk up into more named functions maybe to help with errors?
+# @FlicAnderson: split this if chunk up
 # For RPF datasets, generate codon-based position-specific reads
 if (rpf & !is.na(asite_disp_length_file)) {
   # Get codon-based position-specific reads for each gene, in a tibble
@@ -470,7 +470,10 @@ if (rpf & !is.na(asite_disp_length_file)) {
   write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
     pos_sp_rpf_norm_reads %>%
-      mutate_if(is.numeric, signif, digits=4),
+      # @FlicAnderson: CHECK THIS! the numbers look quite different to a recent vignette package output..?
+      # mutate_if() mutates if the data is numeric, rounds values to specified number digits
+      # Is 4 significant figures in mutate_if() enough? Leads to (0, 1, 1.5, 0.5, 1.414)
+      mutate_if(is.numeric, signif, digits=4), 
     file = tsv_file_path,
     append = T,
     sep = "\t",
