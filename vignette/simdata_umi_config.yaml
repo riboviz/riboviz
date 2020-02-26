@@ -1,39 +1,46 @@
-dir_in: data/simdata/ # Input directory
-dir_out: vignette/simdata_umi_output # Output directory
-dir_tmp: vignette/simdata_umi_tmp # Intermediate files directory
-dir_logs: vignette/simdata_umi_logs # Log files directory
-cmd_file: run_riboviz_simdata_umi.sh # Bash commands file
-rrna_fasta_file: vignette/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning to
-orf_fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa # ORF file to align to
-orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3 # GFF2/GFF3 file for ORFs
+adapters: TCGTATGCCGTCTTCTGCTTG # Illumina sequencing adapter(s) to remove
 aligner: hisat2 # Short read aligner to use. Currently only hisat2 works
-build_indices: TRUE # Build indices for aligner? if TRUE, remake indices from fasta files
-make_bedgraph: TRUE # Output bedgraph files, as TSV, in addition to h5?
-dir_index: vignette/index # Built indices directory
-rrna_index_prefix: yeast_rRNA # rRNA index file prefix, relative to dir_index
-orf_index_prefix: YAL_CDS_w_250 # ORF index file prefix, relative to dir_index
-fq_files: # fastq files to be processed, relative to dir_in
-  umi5_umi3: umi5_umi3_umi_adaptor.fastq
-adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
-extract_umis: TRUE # Extract UMIs if TRUE
-dedup_umis: TRUE # Extract UMIs and deduplicate reads if TRUE
-group_umis: TRUE # Summarise UMI groups before and after deduplication, if TRUE
-umi_regexp: ^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$ # UMI-tools-compliant regular expression to extract UMIs
-num_processes: 1 # Number of processes to parallelize over
-min_read_length: 10 # Minimum read length in H5 output
-max_read_length: 50 # Maximum read length in H5 output
+asite_disp_length_file: W-Sc_2016/input/asite_disp_length_yeast_standard.txt # Table of fixed A-site positions by read length
 buffer: 250 # Length of flanking region around the CDS
-primary_id: Name # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
-secondary_id: NULL # Secondary gene IDs to access the data (COX1, EFB1, etc.)
-dataset: simdata_umi # Dataset name
-stop_in_cds: FALSE # Are stop codons part of the CDS annotations in GFF?
-is_test_run: FALSE # Is this a test run
-rpf: TRUE # Is the dataset an RPF or mRNA dataset?
-is_riboviz_gff: TRUE # Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3
-features_file: data/yeast_features.tsv # Features to correlate with ORFs
-do_pos_sp_nt_freq: TRUE # Calculate position-specific nucleotide frequency?
-t_rna_file: data/yeast_tRNAs.tsv # tRNA estimates
+build_indices: true # Build indices for aligner? if TRUE, remake indices from fasta files
+cmd_file: run_riboviz_W-Sc_2016.sh # Bash commands file
 codon_positions_file: data/yeast_codon_pos_i200.RData # Codon positions in each gene
-count_threshold: 1 # Remove genes with a read count below this threshold, when generating statistics and figures
-asite_disp_length_file: data/yeast_standard_asite_disp_length.txt # Table of fixed A-site positions by read length
-count_reads: TRUE # Scan input, temporary and output files and produce counts of reads in each FASTQ, SAM, and BAM file processed?
+count_reads: true # Scan input, temporary and output files and produce counts of reads in each FASTQ, SAM, and BAM file processed?
+count_threshold: 64 # Remove genes with a read count below this threshold, when generating statistics and figures
+dataset: W-Sc_2016 # Dataset name
+dedup_umis: true # Extract UMIs and deduplicate reads if TRUE
+dir_in: W-Sc_2016/input # Input directory
+dir_index: W-Sc_2016/index # Built indices directory
+dir_logs: W-Sc_2016/logs # Log files directory
+dir_out: W-Sc_2016/output # Output directory
+dir_tmp: W-Sc_2016/tmp # Intermediate files directory
+do_pos_sp_nt_freq: true # Calculate position-specific nucleotide frequency?
+extract_umis: true # Extract UMIs if true
+features_file: data/yeast_features.tsv # Features to correlate with ORFs
+fq_files: # fastq files to be processed, relative to dir_in
+  WT3AT: SRR1042864_GSM1279579_wild-type_3-AT_Saccharomyces_cerevisiae_OTHER.fastq.gz
+  WTCHX: SRR1042853_GSM1279568_wild-type_CHX_Saccharomyces_cerevisiae_OTHER.fastq.gz
+  WTGMP-PNP: SRR1042858_GSM1279573_wild-type_GMP-PNP_Saccharomyces_cerevisiae_OTHER.fastq.gz
+  WTHiMg: SRR1042859_GSM1279574_wild-type_high_Mg_Saccharomyces_cerevisiae_OTHER.fastq.gz
+  WTdiamide: SRR1042868_GSM1279581_wild-type_diamide_Saccharomyces_cerevisiae_OTHER.fastq.gz
+  WTdismfpnt78: SRR1042878_GSM1279589_wild-type_disome_footprints_Saccharomyces_cerevisiae_OTHER.fastq.gz
+  WTdismfpnt79: SRR1042879_GSM1279589_wild-type_disome_footprints_Saccharomyces_cerevisiae_OTHER.fastq.gz
+  WTnone: SRR1042855_GSM1279570_wild-type_no_additive_Saccharomyces_cerevisiae_OTHER.fastq.gz
+group_umis: true # Summarise UMI groups before and after deduplication, if true
+is_riboviz_gff: true # Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3
+is_test_run: false # Is this a test run
+make_bedgraph: true # Output bedgraph files, as TSV, in addition to h5?
+max_read_length: 50 # Maximum read length in H5 output
+min_read_length: 10 # Minimum read length in H5 output
+num_processes: 8 # Number of processes to parallelize over
+orf_fasta_file: W-Sc_2016/input/yeast_CDS_w_250utrs.fa # ORF file to align to
+orf_gff_file: W-Sc_2016/input/yeast_CDS_w_250utrs.gff3 # GFF2/GFF3 file for ORFs
+orf_index_prefix: yeast_CDS_w_250 # ORF index file prefix, relative to dir_index
+primary_id: Name # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
+rpf: true # Is the dataset an RPF or mRNA dataset?
+rrna_fasta_file: W-Sc_2016/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning to
+rrna_index_prefix: yeast_rRNA # rRNA index file prefix, relative to dir_index
+secondary_id: null # Secondary gene IDs to access the data (COX1, EFB1, etc.)
+stop_in_cds: false # Are stop codons part of the CDS annotations in GFF?
+t_rna_file: data/yeast_tRNAs.tsv # tRNA estimates
+umi_regexp: (?P<umi_1>.{8}) # UMI-tools-compliant regular expression to extract UMIs
