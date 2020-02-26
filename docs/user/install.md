@@ -77,7 +77,10 @@ $ sudo yum install -y epel-release
 
 ### bedtools
 
-Web site: [bedtools](http://bedtools.readthedocs.io/en/latest/)
+Web sites:
+
+* [bedtools](http://bedtools.readthedocs.io/en/latest/)
+* [GitHub](https://github.com/arq5x/bedtools2)
 
 **Ubuntu**
 
