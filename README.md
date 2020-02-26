@@ -71,6 +71,10 @@ Command-line tools:
 | [0.9.0](https://github.com/riboviz/RiboViz/releases/tag/0.9.0) | Additional code/data associated with the paper below |
 | [0.8.0](https://github.com/riboviz/RiboViz/releases/tag/0.8.0) | Associated with Carja et al. (2017) "riboviz: analysis and visualization of ribosome profiling datasets", bioRXiv, 12 January 2017,doi: [10.1101/100032](https://doi.org/10.1101/100032) |
 
+## Acknowledgements
+
+For contributors and funders, see [Acknowledgements](./docs/acks.md).
+
 ## License
 
 **RiboViz** is released under the [Apache License 2.0](./LICENSE).
