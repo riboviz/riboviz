@@ -66,7 +66,7 @@ Lawrence, M., Gentleman, R. and Carey, V. (2009) rtracklayer: an {R} package for
 
 Chang, W., Cheng, J., Allaire, J.J., Xie Y. and McPherson, J (2019) shiny: Web Application Framework for R. R package version 1.3.2. https://CRAN.R-project.org/package=shiny
 
-Morgan, M., Anders, S., Lawrence, M., Aboyoun, P., Pagès, H. and Gentleman, R. (2009) ShortRead: a Bioconductor package for input, quality assessment and exploration of high-throughput sequence data. Bioinformatics 25:2607-2608. doi: [10.1093/bioinformatics/btp450](http://dx.doi.org10.1093/bioinformatics/btp450).
+Morgan, M., Anders, S., Lawrence, M., Aboyoun, P., Pagès, H. and Gentleman, R. (2009) ShortRead: a Bioconductor package for input, quality assessment and exploration of high-throughput sequence data. Bioinformatics 25:2607-2608. doi: [10.1093/bioinformatics/btp450](http://dx.doi.org/10.1093/bioinformatics/btp450).
 
 Sphinx, https://www.sphinx-doc.org/
 
