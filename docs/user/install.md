@@ -231,6 +231,19 @@ Install:
 $ conda install -y gitpython
 ```
 
+### pandas
+
+Web sites:
+
+* [pandas](https://pandas.pydata.org/)
+* [GitHub](https://github.com/pandas-dev/pandas)
+
+Install:
+
+```console
+$ conda install -y pandas
+```
+
 ### Cutadapt
 
 Web sites:
