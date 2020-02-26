@@ -75,6 +75,8 @@ Command-line tools:
 
 For contributors and funders, see [Acknowledgements](./docs/acks.md).
 
+For citations of third-party software used by RiboViz, see [References](./docs/reference/references.md).
+
 ## License
 
 **RiboViz** is released under the [Apache License 2.0](./LICENSE).
