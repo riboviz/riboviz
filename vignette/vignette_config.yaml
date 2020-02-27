@@ -16,8 +16,8 @@ dir_tmp: vignette/tmp # Intermediate files directory
 do_pos_sp_nt_freq: TRUE # Calculate position-specific nucleotide frequency?
 features_file: data/yeast_features.tsv # Features to correlate with ORFs
 fq_files: # fastq files to be processed, relative to dir_in
-  WT3AT: SRR1042864_s1mi.fastq.gz
   WTnone: SRR1042855_s1mi.fastq.gz
+  WT3AT: SRR1042864_s1mi.fastq.gz
   NotHere: example_missing_file.fastq.gz # Test case for missing file
 is_riboviz_gff: TRUE # Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3
 is_test_run: FALSE # Is this a test run
