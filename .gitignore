@@ -1,4 +1,5 @@
 .gitignore
+.coverage
 .DS_Store
 oldData/
 .Rproj.user
@@ -10,3 +11,13 @@ Shiny/2010
 Shiny/Supp
 scripts/script_for_transcript_annotation.nb.html
 *~
+*.pyc
+__pycache__
+.idea/
+vignette/*index
+vignette/*logs
+vignette/*tmp
+vignette/*output
+code-docs/_build/
+code-docs/modules.rst
+code-docs/riboviz*.rst
