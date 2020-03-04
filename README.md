@@ -78,3 +78,9 @@ For citations of third-party software used by **RiboViz**, see [References](./do
 **RiboViz** is Copyright (2016-2020) The University of Edinburgh; Rutgers University; University of California, Berkeley; The University of Pennsylvania.
 
 **RiboViz** is released under the [Apache License 2.0](./LICENSE).
+
+To cite **RiboViz**, please use both of the following references:
+
+riboviz: analysis and visualization of ribosome profiling datasets, Carja et al., BMC Bioinformatics 2017. doi:10.1186/s12859-017-1873-8.
+
+RiboViz Team (2020) RiboViz: analysis and visualization of ribosome profiling datasets, 2.0.beta, https://github.com/riboviz/riboviz/releases/tag/2.0.beta.
