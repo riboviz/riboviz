@@ -792,7 +792,7 @@ Your versions may differ from those shown.
 Get RiboViz:
 
 ```console
-$ git clone https://github.com/riboviz/RiboViz
+$ git clone https://github.com/riboviz/riboviz
 ```
 
 ---
