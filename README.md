@@ -80,6 +80,8 @@ For citations of third-party software used by **RiboViz**, see [References](./do
 
 **RiboViz** is released under the [Apache License 2.0](./LICENSE).
 
+## Citing RiboViz
+
 To cite **RiboViz**, please use both of the following references:
 
 riboviz: analysis and visualization of ribosome profiling datasets, Carja et al., BMC Bioinformatics 2017. doi:10.1186/s12859-017-1873-8.
