@@ -14,6 +14,7 @@ conda install -y gitpython
 conda install -y pandas
 conda install -y -c bioconda cutadapt
 conda install -y -c bioconda pysam
+conda install -y -c bioconda samtools
 conda install -y -c anaconda biopython
 pip install gffutils
 conda install -y -c anaconda h5py

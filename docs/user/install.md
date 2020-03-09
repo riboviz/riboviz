@@ -77,7 +77,10 @@ $ sudo yum install -y epel-release
 
 ### bedtools
 
-Web site: [bedtools](http://bedtools.readthedocs.io/en/latest/)
+Web sites:
+
+* [bedtools](http://bedtools.readthedocs.io/en/latest/)
+* [GitHub](https://github.com/arq5x/bedtools2)
 
 **Ubuntu**
 
@@ -229,6 +232,19 @@ Install:
 
 ```console
 $ conda install -y gitpython
+```
+
+### pandas
+
+Web sites:
+
+* [pandas](https://pandas.pydata.org/)
+* [GitHub](https://github.com/pandas-dev/pandas)
+
+Install:
+
+```console
+$ conda install -y pandas
 ```
 
 ### Cutadapt
@@ -776,7 +792,7 @@ Your versions may differ from those shown.
 Get RiboViz:
 
 ```console
-$ git clone https://github.com/riboviz/RiboViz
+$ git clone https://github.com/riboviz/riboviz
 ```
 
 ---

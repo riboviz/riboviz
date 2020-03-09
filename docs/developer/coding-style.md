@@ -105,7 +105,7 @@ Lintr can be used within an IDE such as RStudio via an add-in once installed if 
 $ R
 ```
 ```R
-> lint("$HOME/RiboViz/rscripts/generate_stats_figs.R")
+> lint("$HOME/riboviz/rscripts/generate_stats_figs.R")
 ```
 
 If there is considerable output or you wish to work through the output bit by bit, it's possible to send it to an output file using `sink()` as below:
@@ -115,7 +115,7 @@ $ R
 ```
 ```R
 > sink('lintR-output.txt')
-> lint("$HOME/RiboViz/rscripts/generate_stats_figs.R")
+> lint("$HOME/riboviz/rscripts/generate_stats_figs.R")
 > sink()
 ```
 

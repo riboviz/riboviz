@@ -2,7 +2,7 @@
 
 Provenance:
 
-* URL: https://github.com/RiboViz/RiboViz
+* URL: https://github.com/riboviz/riboviz
 * Date: <DATE>
 * Branch: <BRANCH>
 * Commit: <COMMIT-HASH>

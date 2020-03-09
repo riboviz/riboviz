@@ -42,7 +42,7 @@ riboviz/test/regression/test_vignette.py::test_index[2-yeast_rRNA] SKIPPED [  5%
 
 ### Regression test data
 
-Regression test data can be found within repositories prefixed `regression-test-data-<YYYYMMDD>`, within the [riboviz](https://github.com/riboviz) project on GitHub. These contain output files from the workflow.
+Regression test data can be found within repositories prefixed `regression-test-data-<YYYYMMDD>|<TAG>`, within the [riboviz](https://github.com/riboviz) project on GitHub. These contain output files from the workflow.
 
 A regression test data repository can be used as follows (for example):
 
@@ -53,6 +53,8 @@ $ pytest riboviz/test/regression/test_vignette.py --expected=$HOME/regression-te
 ```
 
 **Note:** The most recent `regression-test-data-<YYYYMMDD>` repository will be consistent with the most recent version of the code on the `develop` branch.
+
+**Note:** `regression-test-data-<TAG>` repositories will be consistent with releases with tagged with `<TAG>`.
 
 **Note:** Do not use the `--check-index-tmp` parameter when running regression tests using these repositories as the repositories contain no index or temporary files.
 

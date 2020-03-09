@@ -6,11 +6,11 @@ We have developed this bioinformatics toolkit, **RiboViz**, for analyzing riboso
 
 Existing yeast datasets consist of a mix of studies, some of which use elongation inhibitors such as cycloheximide (CHX) and others that flash freeze (FF) the samples to prevent initiation and elongation during sample preparation. In general, each experimental step can potentially introduce biases in processed datasets. **RiboViz** can help identify these biases by allowing users to compare and contrast datasets obtained under different experimental conditions.
 
-All the code for processing the raw reads is available in this repository.
-
 The current version of **RiboViz** is designed for yeast datasets but it can be customised and used to analyse datasets relating to other organisms.
 
 For information on **RiboViz**, see "riboviz: analysis and visualization of ribosome profiling datasets", Carja et al., BMC Bioinformatics 2017. doi:10.1186/s12859-017-1873-8.
+
+All the code for processing the raw reads is available in this repository.
 
 ## Use RiboViz
 
@@ -18,8 +18,8 @@ Quick start:
 
 * [Install prerequisites](./docs/user/install.md)
 * [Quick install scripts](./docs/user/quick-install.md) (Ubuntu and CentOS only)
-* [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./docs/user/run-vignette.md). Run a "vignette" of the RiboViz workflow to see RiboViz's capabilities.
-* [Run UMI extraction, deduplication and demultiplexing examples](./docs/user/run-dedup-demultiplex-examples.md). Run RiboViz on simulated data, to see how RiboViz handles duplicated and multiplexed data.
+* [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./docs/user/run-vignette.md). Run a "vignette" of the **RiboViz** workflow to see **RiboViz**'s capabilities.
+* [Run UMI extraction, deduplication and demultiplexing examples](./docs/user/run-dedup-demultiplex-examples.md). Run **RiboViz** on simulated data, to see how **RiboViz** handles duplicated and multiplexed data.
 * [Upgrade configuration files from RiboViz 1.x](./docs/user/upgrade-1x.md)
 
 Usage:
@@ -62,11 +62,28 @@ Command-line tools:
 
 | Release | Description |
 | ------- | ----------- |
-| [1.1.0](https://github.com/riboviz/RiboViz/releases/tag/1.1.0) | Most recent version prior to commencement of BBSRC/NSF Riboviz project |
-| [1.0.0](https://github.com/riboviz/RiboViz/releases/tag/1.0.0) | Associated with Carja et al. (2017) "riboviz: analysis and visualization of ribosome profiling datasets", BMC Bioinformatics, volume 18, article 461 (2017), 25 October 2017, doi: [10.1186/s12859-017-1873-8](https://doi.org/10.1186/s12859-017-1873-8) |
-| [0.9.0](https://github.com/riboviz/RiboViz/releases/tag/0.9.0) | Additional code/data associated with the paper below |
-| [0.8.0](https://github.com/riboviz/RiboViz/releases/tag/0.8.0) | Associated with Carja et al. (2017) "riboviz: analysis and visualization of ribosome profiling datasets", bioRXiv, 12 January 2017,doi: [10.1101/100032](https://doi.org/10.1101/100032) |
+| [2.0.beta](https://github.com/riboviz/riboviz/releases/tag/2.0.beta) | Current stable release |
+| [1.1.0](https://github.com/riboviz/riboviz/releases/tag/1.1.0) | Most recent version prior to commencement of BBSRC/NSF Riboviz project |
+| [1.0.0](https://github.com/riboviz/riboviz/releases/tag/1.0.0) | Associated with Carja et al. (2017) "riboviz: analysis and visualization of ribosome profiling datasets", BMC Bioinformatics, volume 18, article 461 (2017), 25 October 2017, doi: [10.1186/s12859-017-1873-8](https://doi.org/10.1186/s12859-017-1873-8) |
+| [0.9.0](https://github.com/riboviz/riboviz/releases/tag/0.9.0) | Additional code/data associated with the paper below |
+| [0.8.0](https://github.com/riboviz/riboviz/releases/tag/0.8.0) | Associated with Carja et al. (2017) "riboviz: analysis and visualization of ribosome profiling datasets", bioRXiv, 12 January 2017,doi: [10.1101/100032](https://doi.org/10.1101/100032) |
 
-## License
+## Citing RiboViz
+
+To cite **RiboViz**, please use both of the following references:
+
+riboviz: analysis and visualization of ribosome profiling datasets, Carja et al., BMC Bioinformatics 2017. doi:10.1186/s12859-017-1873-8.
+
+RiboViz Team (2020) RiboViz: analysis and visualization of ribosome profiling datasets, 2.0.beta, https://github.com/riboviz/riboviz/releases/tag/2.0.beta.
+
+## Acknowledgements
+
+For contributors and funders, see [Acknowledgements](./docs/acks.md).
+
+For citations of third-party software used by **RiboViz**, see [References](./docs/reference/references.md).
+
+## Copyright and License
+
+**RiboViz** is Copyright (2016-2020) The University of Edinburgh; Rutgers University; University of California, Berkeley; The University of Pennsylvania.
 
 **RiboViz** is released under the [Apache License 2.0](./LICENSE).
