@@ -1,6 +1,6 @@
 # read_count_functions.R
 # R functions for dealing with data in h5 "ribogrid" format
-# https://github.com/riboviz/RiboViz/
+# https://github.com/riboviz/riboViz/
 
 # read in dependent packages
 suppressMessages(library(Rsamtools))
