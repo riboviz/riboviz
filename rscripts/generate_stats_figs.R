@@ -1,19 +1,7 @@
-# load libraries
-suppressMessages(library(Rsamtools))
-suppressMessages(library(rtracklayer))
-suppressMessages(library(rhdf5))
-suppressMessages(library(parallel))
-suppressMessages(library(optparse))
-suppressMessages(library(RcppRoll))
-suppressMessages(library(ggplot2))
-suppressMessages(library(tidyr))
-suppressMessages(library(dplyr))
-suppressMessages(library(magrittr))
-suppressMessages(library(purrr))
-
 # load getopt to allow use of get_Rscript_filename for provenance-gathering
+ # and sourcing read_count_functions.R
 suppressMessages(library(getopt, quietly=T))
-
+# NOTE: other libraries loaded from read_count_functions.R
 
 # Handle interactive session behaviours or use get_Rscript_filename():
 if (interactive()) {
