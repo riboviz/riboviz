@@ -144,96 +144,148 @@ ggplot2::theme_set(theme_bw())
 
 #####
 
-# check for 3nt periodicity
-print("Starting: Check for 3nt periodicity globally")
+#
+#
+# START 3NT PERIODICITY
+#
+#
 
-# NOTE: Do not use mclapply when accessing H5 data
+# big function with probable arguments
+ThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df) {
+  
+  # check for 3nt periodicity
+  print("Starting: Check for 3nt periodicity globally")
+  
+  # NOTE: Do not use mclapply when accessing H5 data
+  
+  CalculateThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df){  
+    
+    # get gene and position specific total counts for all read lengths
+    gene_poslen_counts_5start_df <-
+      lapply(gene_names,
+             function(gene) 
+               GetGeneDatamatrix5start(gene,
+                                       dataset,
+                                       hdf5file,
+                                       posn_5start = GetCDS5start(gene, gff_df),
+                                       n_buffer = nnt_buffer,
+                                       nnt_gene = nnt_gene)
+      ) %>%
+      Reduce("+", .) %>% # sums the list of data matrices
+      TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = min_read_length) 
+    
+    gene_poslen_counts_3end_df <-
+      lapply(gene_names,
+             function(gene)
+               GetGeneDatamatrix3end(
+                 gene,
+                 dataset,
+                 hdf5file,
+                 posn_3end = GetCDS3end(gene, gff_df),
+                 n_buffer = nnt_buffer,
+                 nnt_gene = nnt_gene
+               )) %>%
+      Reduce("+", .) %>% # sums the list of data matrices
+      TidyDatamatrix(startpos = -nnt_gene + 1, startlen = min_read_length)
+    
+    # summarize by adding different read lengths
+    gene_pos_counts_5start <- gene_poslen_counts_5start_df %>%
+      group_by(Pos) %>%
+      summarize(Counts = sum(Counts))
+    
+    gene_pos_counts_3end <- gene_poslen_counts_3end_df  %>%
+      group_by(Pos) %>%
+      summarize(Counts = sum(Counts))
+    
+    three_nucleotide_periodicity_data <- bind_rows(
+      gene_pos_counts_5start %>% mutate(End = "5'"),
+      gene_pos_counts_3end %>% mutate(End = "3'")
+    ) %>%
+      mutate(End = factor(End, levels = c("5'", "3'")))
+    
+    #return(three_nucleotide_periodicity_data)
+    
+  } # end CalculateThreeNucleotidePeriodicity() definition
+  
+  # define PlotThreeNucleotidePeriodicity() function with reasonable arguments
+  PlotThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data){
+    
+    # Plot
+    nt_period_plot <- ggplot(
+      three_nucleotide_periodicity_data,
+      aes(x = Pos, y = Counts)) +
+      geom_line() +
+      facet_wrap(~End, scales = "free") +
+      labs(x = "Nucleotide Position", y = "Read counts")
+    
+    #return(three_nucleotide_periodicity_plot) # currently nt_period_plot
+    
+  } # end PlotThreeNucleotidePeriodicity() definition
+  
+  # run:
+  #PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
+  
+  # function to do the ribogrid & ribogridbar plots?
+  # ribogrid_5start
+  gene_poslen_counts_5start_df %>%
+    plot_ribogrid() %>%
+    ggsave(
+      filename = file.path(output_dir, paste0(output_prefix, "startcodon_ribogrid.pdf")),
+      width = 6, height = 3
+    )
+  
+  gene_poslen_counts_5start_df %>%
+    barplot_ribogrid() %>%
+    ggsave(
+      filename = file.path(output_dir, paste0(output_prefix, "startcodon_ribogridbar.pdf")),
+      width = 6, height = 5
+    )
+  
+  SavePlotThreeNucleotidePeriodicity <- function() {
+    
+    # Save plot and file
+    ggsave(
+      nt_period_plot, 
+      filename = file.path(output_dir, paste0(output_prefix, "3nt_periodicity.pdf"))
+    )
+    # return()? NO RETURN
+    
+  } # end of function definition SavePlotThreeNucleotidePeriodicity()
+  
+  
+  WriteThreeNucleotidePeriodicity <- function() {
+    
+    tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3nt_periodicity.tsv"))
+    
+    write_provenance_header(path_to_this_script, tsv_file_path)
+    
+    write.table(
+      three_nucleotide_periodicity_data,
+      file = tsv_file_path,
+      append = T,
+      sep = "\t",
+      row = F,
+      col = T,
+      quote = F)
+    
+    # return()? NO RETURN
+    
+  }  # end of function definition WriteThreeNucleotidePeriodicity()
+  
+  print("Completed: Check for 3nt periodicity globally")
+  
+} # end ThreeNucleotidePeriodicity() function definition
 
-# get gene and position specific total counts for all read lengths
-gene_poslen_counts_5start_df <-
-  lapply(gene_names,
-  function(gene) 
-    GetGeneDatamatrix5start(gene,
-    dataset,
-    hdf5file,
-    posn_5start = GetCDS5start(gene, gff_df),
-    n_buffer = nnt_buffer,
-    nnt_gene = nnt_gene)
-  ) %>%
-  Reduce("+", .) %>% # sums the list of data matrices
-  TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = min_read_length) 
+# run
+#ThreeNucleotidePeriodicity()
 
-# ribogrid_5start
-gene_poslen_counts_5start_df %>%
-  plot_ribogrid() %>%
-  ggsave(
-    filename = file.path(output_dir, paste0(output_prefix, "startcodon_ribogrid.pdf")),
-    width = 6, height = 3
-  )
-
-gene_poslen_counts_5start_df %>%
-  barplot_ribogrid() %>%
-  ggsave(
-    filename = file.path(output_dir, paste0(output_prefix, "startcodon_ribogridbar.pdf")),
-    width = 6, height = 5
-  )
-
-gene_poslen_counts_3end_df <-
-  lapply(gene_names,
-  function(gene)
-  GetGeneDatamatrix3end(
-    gene,
-    dataset,
-    hdf5file,
-    posn_3end = GetCDS3end(gene, gff_df),
-    n_buffer = nnt_buffer,
-    nnt_gene = nnt_gene
-  )) %>%
-  Reduce("+", .) %>% # sums the list of data matrices
-  TidyDatamatrix(startpos = -nnt_gene + 1, startlen = min_read_length)
-
-# summarize by adding different read lengths
-gene_pos_counts_5start <- gene_poslen_counts_5start_df %>%
-  group_by(Pos) %>%
-  summarize(Counts = sum(Counts))
-
-gene_pos_counts_3end <- gene_poslen_counts_3end_df  %>%
-  group_by(Pos) %>%
-  summarize(Counts = sum(Counts))
-
-gene_pos_counts_bothends <- bind_rows(
-  gene_pos_counts_5start %>% mutate(End = "5'"),
-  gene_pos_counts_3end %>% mutate(End = "3'")
-) %>%
-  mutate(End = factor(End, levels = c("5'", "3'")))
-
-# Plot
-nt_period_plot <- ggplot(
-  gene_pos_counts_bothends,
-  aes(x = Pos, y = Counts)) +
-  geom_line() +
-  facet_wrap(~End, scales = "free") +
-  labs(x = "Nucleotide Position", y = "Read counts")
-
-# Save plot and file
-ggsave(
-  nt_period_plot, 
-  filename = file.path(output_dir, paste0(output_prefix, "3nt_periodicity.pdf"))
-)
-
-tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3nt_periodicity.tsv"))
-
-write_provenance_header(path_to_this_script, tsv_file_path)
-
-write.table(
-  gene_pos_counts_bothends,
-  file = tsv_file_path,
-  append = T,
-  sep = "\t",
-  row = F,
-  col = T,
-  quote = F)
-print("Completed: Check for 3nt periodicity globally")
+#
+#
+# END 3NT PERIODICITY
+#
+# START ALL MAPPED READS
+#
+#
 
 #####
 ## distribution of lengths of all mapped reads
@@ -270,6 +322,14 @@ write.table(
 )
 
 print("Completed: Distribution of lengths of all mapped reads")
+
+#
+#
+# END ALL MAPPED READS
+#
+# START BIASES IN NUCLEOTIDE COMPOSITION
+#
+# 
 
 #####
 ## biases in nucleotide composition along mapped read lengths
@@ -335,6 +395,14 @@ if (do_pos_sp_nt_freq) {
   print("Completed nucleotide composition bias table")
 }
 
+#
+#
+# END BIASES IN NUCLEOTIDE COMPOSITION
+#
+# START CALCULATE READ FRAME FOR EVERY ORF
+#
+# 
+
 ## calculate read frame for every annotated ORF
 
 if (!is.na(asite_disp_length_file)) {
@@ -376,6 +444,14 @@ if (!is.na(asite_disp_length_file)) {
 
   print("Completed: Check for 3nt periodicity (frame) by Gene")
 }
+
+#
+#
+# END CALCULATE READ FRAME FOR EVERY ORF
+#
+# START RPF POSITION SPECIFIC DISTRIBUTION OF READS
+#
+#
 
 #####
 ## position specific distribution of reads
@@ -471,6 +547,14 @@ if (rpf & !is.na(asite_disp_length_file)) {
   )
 }
 
+#
+#
+# END RPF POSITION SPECIFIC DISTRIBUTION OF READS
+#
+# START MRNA POSITION SPECIFIC DISTRIBUTION OF READS
+#
+#
+
 # for mRNA datasets, generate nt-based position-specific reads
 if (!rpf) {
   # TODO: rewrite along the lines of rpf above
@@ -558,6 +642,16 @@ if (!rpf) {
 
 print("Completed: Position specific distribution of reads")
 
+
+#
+#
+# END MRNA POSITION SPECIFIC DISTRIBUTION OF READS
+#
+# START TPMS OF GENES
+#
+#
+
+
 ## Calculate TPMs of genes
 
 print("Starting: Calculate TPMs of genes")
@@ -587,6 +681,13 @@ write.table(
   quote = F
 )
 
+#
+#
+# END TPMS OF GENES
+#
+# START TPMS CORRELATIONS WITH FEATURES
+#
+#
 
 ## Correlations between TPMs of genes with their sequence-based features
 
@@ -711,6 +812,14 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
   }
 
   print("Completed: Codon-specific ribosome densities for correlations with tRNAs")
+  
 } else {
+  
   print("Skipped: Codon-specific ribosome densities for correlations with tRNAs - t-rna-file and/or codon-positions-file not provided")
 }
+
+#
+#
+# END TPMS CORRELATIONS WITH FEATURES
+#
+#
