@@ -13,7 +13,7 @@ Usage::
       [--check-index-tmp]
       [--config-file=FILE]
 
-The test suite accepts three custom command-line parameters:
+The test suite accepts the following command-line parameters:
 
 * ``--expected=<DIRECTORY>``: Directory with expected data files,
   against which files specified in the configuration file (see below)
