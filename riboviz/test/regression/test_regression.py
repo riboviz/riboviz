@@ -7,7 +7,7 @@ directory of pre-calculated results, specified by the user.
 
 Usage::
 
-    pytest riboviz/test/regression/test_vignette.py
+    pytest riboviz/test/regression/test_regression.py
       --expected=DIRECTORY
       [--skip-workflow]
       [--check-index-tmp]

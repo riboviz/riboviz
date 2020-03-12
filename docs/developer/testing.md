@@ -2,12 +2,12 @@
 
 ## Run vignette regression test suite
 
-`riboviz.test.regression.test_vignette` is a regression test suite. The regression test suite runs `riboviz.tools.prep_riboviz` using a given configuration file, then compares the results to a directory of pre-calculated results, specified by the user.
+`riboviz.test.regression.test_regression` is a regression test suite. The regression test suite runs `riboviz.tools.prep_riboviz` using a given configuration file, then compares the results to a directory of pre-calculated results, specified by the user.
 
 Usage:
 
 ```console
-$ pytest riboviz/test/regression/test_vignette.py \
+$ pytest riboviz/test/regression/test_regression.py \
     --expected=DIRECTORY \
     [--skip-workflow] \
     [--check-index-tmp] \
@@ -53,23 +53,23 @@ and the directories with the expected data are:
 If `--check-index-tmp` is not provided (the default behaviour) then tests for index and temporary files will be skipped. This will appear as follows:
 
 ```console
-$ pytest  riboviz/test/regression/test_vignette.py --expected=$HOME/vignette-20200304-2.0.beta --skip-workflow
+$ pytest  riboviz/test/regression/test_regression.py --expected=$HOME/vignette-20200304-2.0.beta --skip-workflow
 ...
-riboviz/test/regression/test_vignette.py ssssssssssssssssssssssssssssss. [ 43%]
+riboviz/test/regression/test_regression.py ssssssssssssssssssssssssssssss. [ 43%]
 .........................................                                [100%]
 ```
 
 or, if using pytest's `-v`, verbose, mode:
 
 ```console
-$ pytest -vs riboviz/test/regression/test_vignette.py --expected=$HOME/vignette-20200304-2.0.beta --skip-workflow
+$ pytest -vs riboviz/test/regression/test_regression.py --expected=$HOME/vignette-20200304-2.0.beta --skip-workflow
 ...
-riboviz/test/regression/test_vignette.py::test_index[YAL_CDS_w_250-vignette/index-1] SKIPPED
+riboviz/test/regression/test_regression.py::test_index[YAL_CDS_w_250-vignette/index-1] SKIPPED
 ...
-riboviz/test/regression/test_vignette.py::test_sample_tmp_tsv[WT3AT-vignette/tmp-trim_5p_mismatch.tsv] SKIPPED
-riboviz/test/regression/test_vignette.py::test_sample_output_bai[WTnone-vignette/output] PASSED
+riboviz/test/regression/test_regression.py::test_sample_tmp_tsv[WT3AT-vignette/tmp-trim_5p_mismatch.tsv] SKIPPED
+riboviz/test/regression/test_regression.py::test_sample_output_bai[WTnone-vignette/output] PASSED
 ...
-riboviz/test/regression/test_vignette.py::test_output_tsv[vignette/output-read_counts.tsv] PASSED
+riboviz/test/regression/test_regression.py::test_output_tsv[vignette/output-read_counts.tsv] PASSED
 ...
 ```
 
@@ -82,7 +82,7 @@ A regression test data repository can be used as follows (for example):
 ```console
 $ git clone https://github.com/riboviz/regression-test-data-<YYYYMMDD>
 $ cd riboviz
-$ pytest riboviz/test/regression/test_vignette.py --expected=$HOME/regression-test-data-<YYYYMMDD>
+$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-<YYYYMMDD>
 ```
 
 **Note:** The most recent `regression-test-data-<YYYYMMDD>` repository will be consistent with the most recent version of the code on the `develop` branch.
@@ -104,7 +104,7 @@ $ cp -r vignette/ ~/regression-test-data-<BRANCH>-<COMMIT-HASH>
 Then, after doing some development, you can run:
 
 ```console
-$ pytest riboviz/test/regression/test_vignette.py \
+$ pytest riboviz/test/regression/test_regression.py \
     --expected=$HOME/regression-test-data-<BRANCH>-<COMMIT-HASH> \
     --check-index-tmp
 ```
