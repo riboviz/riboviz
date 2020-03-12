@@ -54,7 +54,7 @@ with the data to be tested are::
     vignette/simdata_umi_output
     vignette/simdata_umi_tmp
 
-and the directories with the expected data are:
+and the directories with the expected data are::
 
     /home/user/simdata-umi-data/index
     /home/user/simdata-umi-data/simdata_umi_output

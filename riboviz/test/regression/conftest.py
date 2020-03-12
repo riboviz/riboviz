@@ -1,6 +1,5 @@
 """
-pytest plugin file for regression tests. See
-https://docs.pytest.org/en/latest/writing_plugins.html
+pytest plugin file for regression tests.
 
 This allows pytest to take in additional command-line parameters to
 pass onto regression test modules:
@@ -135,7 +134,7 @@ def pytest_generate_tests(metafunc):
       configuration file, else use
       :py:const:`riboviz.test.VIGNETTE_CONFIG`.
     * Load configuration from file.
-    * Inspect each test fixture used by the test functions and
+    * Inspect each test fixture used by the test functions and \
       configure with values from the configuration:
         - ``sample``: keys from value of
           :py:const:`riboviz.params.FQ_FILES` (sample names).
