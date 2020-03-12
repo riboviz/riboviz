@@ -173,6 +173,12 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df) {
       ) %>%
       Reduce("+", .) %>% # sums the list of data matrices
       TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = min_read_length) 
+    # gives: 
+    # > str(gene_poslen_counts_5start_df)
+    # Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	3075 obs. of  3 variables:
+    #   $ ReadLen: int  10 11 12 13 14 15 16 17 18 19 ...
+    #   $ Pos    : int  -24 -24 -24 -24 -24 -24 -24 -24 -24 -24 ...
+    #   $ Counts : int  0 0 0 0 0 0 5 4 6 0 ...
     
     gene_poslen_counts_3end_df <-
       lapply(gene_names,
@@ -187,43 +193,86 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df) {
                )) %>%
       Reduce("+", .) %>% # sums the list of data matrices
       TidyDatamatrix(startpos = -nnt_gene + 1, startlen = min_read_length)
+    # gives:
+    # > str(gene_poslen_counts_3end_df)
+    # Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	3075 obs. of  3 variables:
+    #   $ ReadLen: int  10 11 12 13 14 15 16 17 18 19 ...
+    #   $ Pos    : int  -49 -49 -49 -49 -49 -49 -49 -49 -49 -49 ...
+    #   $ Counts : int  0 0 0 0 0 49 62 27 219 50 ...
     
     # summarize by adding different read lengths
     gene_pos_counts_5start <- gene_poslen_counts_5start_df %>%
       group_by(Pos) %>%
       summarize(Counts = sum(Counts))
+    # gives: 
+    # > str(gene_pos_counts_5start)
+    # Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	75 obs. of  2 variables:
+    #   $ Pos   : int  -24 -23 -22 -21 -20 -19 -18 -17 -16 -15 ...
+    #   $ Counts: int  285 318 307 386 291 347 840 330 475 355 ...
     
     gene_pos_counts_3end <- gene_poslen_counts_3end_df  %>%
       group_by(Pos) %>%
       summarize(Counts = sum(Counts))
+    # gives: 
+    # > str(gene_pos_counts_3end)
+    # Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	75 obs. of  2 variables:
+    #   $ Pos   : int  -49 -48 -47 -46 -45 -44 -43 -42 -41 -40 ...
+    #   $ Counts: int  19030 13023 50280 19458 12573 46012 19043 13282 36968 20053 ...
     
     three_nucleotide_periodicity_data <- bind_rows(
       gene_pos_counts_5start %>% mutate(End = "5'"),
       gene_pos_counts_3end %>% mutate(End = "3'")
     ) %>%
       mutate(End = factor(End, levels = c("5'", "3'")))
+    # gives: 
+    # > str(three_nucleotide_periodicity_data)
+    # Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	150 obs. of  3 variables:
+    #   $ Pos   : int  -24 -23 -22 -21 -20 -19 -18 -17 -16 -15 ...
+    #   $ Counts: int  285 318 307 386 291 347 840 330 475 355 ...
+    #   $ End   : Factor w/ 2 levels "5'","3'": 1 1 1 1 1 1 1 1 1 1 ...
     
-    #return(three_nucleotide_periodicity_data)
+    return(three_nucleotide_periodicity_data)
     
   } # end CalculateThreeNucleotidePeriodicity() definition
+  # gives: 
+  #   CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hdf5file = hdf5file, gff_df = gff_df)
+  #   # A tibble: 150 x 3
+  #   Pos Counts End  
+  #   <int>  <int> <fct>
+  #     1   -24    285 5'   
+  #     2   -23    318 5'   
+  #     3   -22    307 5'   
+  #     4   -21    386 5'   
+  #     5   -20    291 5'   
+  #     6   -19    347 5'   
+  #     7   -18    840 5'   
+  #     8   -17    330 5'   
+  #     9   -16    475 5'   
+  #    10   -15    355 5'   
+  #   # … with 140 more rows
+  
+  # run the function:
+  three_nucleotide_periodicity_data <- CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hdf5file = hdf5file, gff_df = gff_df)
   
   # define PlotThreeNucleotidePeriodicity() function with reasonable arguments
   PlotThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data){
     
     # Plot
-    nt_period_plot <- ggplot(
+    three_nucleotide_periodicity_plot <- ggplot(
       three_nucleotide_periodicity_data,
       aes(x = Pos, y = Counts)) +
       geom_line() +
       facet_wrap(~End, scales = "free") +
       labs(x = "Nucleotide Position", y = "Read counts")
     
-    #return(three_nucleotide_periodicity_plot) # currently nt_period_plot
+    return(three_nucleotide_periodicity_plot) 
     
   } # end PlotThreeNucleotidePeriodicity() definition
   
   # run:
   #PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
+  
+  three_nucleotide_periodicity_plot <- PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
   
   # function to do the ribogrid & ribogridbar plots?
   # ribogrid_5start
@@ -245,7 +294,7 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df) {
     
     # Save plot and file
     ggsave(
-      nt_period_plot, 
+      three_nucleotide_periodicity_plot, 
       filename = file.path(output_dir, paste0(output_prefix, "3nt_periodicity.pdf"))
     )
     # return()? NO RETURN
