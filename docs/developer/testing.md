@@ -50,27 +50,38 @@ and the directories with the expected data are:
 /home/user/simdata-umi-data/simdata_umi_tmp
 ```
 
+If running with a configuration that used UMI extraction, deduplication and grouping then note that:
+
+* UMI deduplication statistics files are not checked (files prefixed by `dedup_stats`).
+* UMI group file post-deduplication files are not checked (`post_dedup_groups.tsv`). These files can differ between runs depending on which reads are removed by `umi_tools dedup`.
+* BAM file output by deduplication (`<SAMPLE>.bam`). These files can  differ between runs depending on which reads are removed by `umi_tools dedup`.
+* In each case the associated tests are skipped.
+
 If `--check-index-tmp` is not provided (the default behaviour) then tests for index and temporary files will be skipped. This will appear as follows:
 
 ```console
-$ pytest  riboviz/test/regression/test_regression.py --expected=$HOME/vignette-20200304-2.0.beta --skip-workflow
+$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/vignette-20200304-2.0.beta --skip-workflow
 ...
-riboviz/test/regression/test_regression.py ssssssssssssssssssssssssssssss. [ 43%]
-.........................................                                [100%]
+riboviz/test/regression/test_regression.py ssssssssssssssssssssssssssssssssss..ss......................................
 ```
 
 or, if using pytest's `-v`, verbose, mode:
 
 ```console
-$ pytest -vs riboviz/test/regression/test_regression.py --expected=$HOME/vignette-20200304-2.0.beta --skip-workflow
+$ pytest -v riboviz/test/regression/test_regression.py --expected=$HOME/vignette-20200304-2.0.beta --skip-workflow
 ...
-riboviz/test/regression/test_regression.py::test_index[YAL_CDS_w_250-vignette/index-1] SKIPPED
+riboviz/test/regression/test_regression.py::test_hisat2_build_index_files[YAL_CDS_w_250-vignette/index-1] SKIPPED [  1%]
 ...
-riboviz/test/regression/test_regression.py::test_sample_tmp_tsv[WT3AT-vignette/tmp-trim_5p_mismatch.tsv] SKIPPED
-riboviz/test/regression/test_regression.py::test_sample_output_bai[WTnone-vignette/output] PASSED
+riboviz/test/regression/test_regression.py::test_hisat2_build_index_files[YAL_CDS_w_250-vignette/index-8] SKIPPED [ 10%]
+riboviz/test/regression/test_regression.py::test_hisat2_build_index_files[yeast_rRNA-vignette/index-1] SKIPPED [ 11%]
 ...
-riboviz/test/regression/test_regression.py::test_output_tsv[vignette/output-read_counts.tsv] PASSED
+riboviz/test/regression/test_regression.py::test_hisat2_build_index_files[yeast_rRNA-vignette/index-8] SKIPPED [ 21%]
+riboviz/test/regression/test_regression.py::test_cutadapt_fq_files[WTnone-vignette/tmp-trim.fq] SKIPPED [ 22%]
 ...
+riboviz/test/regression/test_regression.py::test_umitools_group_tsv[WT3AT-vignette/tmp-False-pre_dedup_groups.tsv] SKIPPED [ 50%]
+riboviz/test/regression/test_regression.py::test_bedtools_bedgraph[WTnone-vignette/output-minus.bedgraph] PASSED [ 51%]
+...
+riboviz/test/regression/test_regression.py::test_read_counts_tsv[vignette/output-read_counts.tsv] PASSED [100%]
 ```
 
 ### Regression test data

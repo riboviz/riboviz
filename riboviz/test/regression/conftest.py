@@ -25,6 +25,7 @@ import pytest
 import yaml
 from riboviz import params
 from riboviz import test
+from riboviz import utils
 
 EXPECTED = "--expected"
 """ Directory with expected data files command-line flag."""
@@ -38,8 +39,7 @@ CONFIG_FILE = "--config-file"
 
 def pytest_addoption(parser):
     """
-    pytest configuration hook. See
-    https://docs.pytest.org/en/latest/reference.html#_pytest.hookspec.pytest_addoption
+    pytest configuration hook.
 
     :param parser: command-line parser
     :type parser: _pytest.config.argparsing.Parser
@@ -150,6 +150,12 @@ def pytest_generate_tests(metafunc):
         - ``tmp_dir``: value of :py:const:`riboviz.params.TMP_DIR`.
         - ``output_dir``: value of
           :py:const:`riboviz.params.OUTPUT_DIR`.
+        - ``extract_umis``: value of
+          :py:const:`riboviz.params.EXTRACT_UMIS`.
+        - ``dedup_umis``: value of
+          :py:const:`riboviz.params.DEDUP_UMIS`.
+        - ``group_umis``: value of
+          :py:const:`riboviz.params.GROUP_UMIS`.
 
     :param metafunc: pytest test function inspection object
     :type metafunc: _pytest.python.Metafunc
@@ -170,13 +176,16 @@ def pytest_generate_tests(metafunc):
            test.VIGNETTE_MISSING_SAMPLE in samples:
             samples.remove(test.VIGNETTE_MISSING_SAMPLE)
         metafunc.parametrize("sample", samples)
-    if "index_prefix" in metafunc.fixturenames:
-        metafunc.parametrize("index_prefix",
-                             [config[params.ORF_INDEX_PREFIX],
-                              config[params.RRNA_INDEX_PREFIX]])
-    if "index_dir" in metafunc.fixturenames:
-        metafunc.parametrize("index_dir", [config[params.INDEX_DIR]])
-    if "tmp_dir" in metafunc.fixturenames:
-        metafunc.parametrize("tmp_dir", [config[params.TMP_DIR]])
-    if "output_dir" in metafunc.fixturenames:
-        metafunc.parametrize("output_dir", [config[params.OUTPUT_DIR]])
+    fixtures = {
+        "index_prefix": [config[params.ORF_INDEX_PREFIX],
+                         config[params.RRNA_INDEX_PREFIX]],
+        "index_dir": [config[params.INDEX_DIR]],
+        "tmp_dir": [config[params.TMP_DIR]],
+        "output_dir": [config[params.OUTPUT_DIR]],
+        "extract_umis": [utils.value_in_dict(params.EXTRACT_UMIS, config)],
+        "dedup_umis": [utils.value_in_dict(params.DEDUP_UMIS, config)],
+        "group_umis": [utils.value_in_dict(params.GROUP_UMIS, config)]
+    }
+    for fixture, value in fixtures.items():
+        if fixture in metafunc.fixturenames:
+            metafunc.parametrize(fixture, value)
