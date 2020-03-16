@@ -21,3 +21,7 @@ vignette/*output
 code-docs/_build/
 code-docs/modules.rst
 code-docs/riboviz*.rst
+
+#ignore G-Sc_2014
+/G-Sc_2014/*
+
