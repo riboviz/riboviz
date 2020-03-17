@@ -1,7 +1,9 @@
 # load getopt to allow use of get_Rscript_filename for provenance-gathering
  # and sourcing read_count_functions.R
+# load here for the same reason 
 suppressMessages(library(getopt, quietly=T))
-# NOTE: other libraries loaded from read_count_functions.R
+suppressMessages(library(here))
+# NOTE: other libraries loaded from read_count_functions.R  
 
 # Handle interactive session behaviours or use get_Rscript_filename():
 if (interactive()) {
@@ -10,15 +12,15 @@ if (interactive()) {
   # the parent of rscripts/ but imposes no other constraints on
   # where rscripts/ or its parents are located.
   this_script <- "generate_stats_figs.R"
-  path_to_this_script <- file.path("rscripts", this_script)
-  source(file.path("rscripts", "provenance.R"))
-  source(file.path("rscripts", "read_count_functions.R"))
+  path_to_this_script <- here("rscripts", this_script)
+  source(here("rscripts", "provenance.R"))
+  source(here("rscripts", "read_count_functions.R"))
 } else {
   # Deduce file name and path using reflection as before.
   this_script <- getopt::get_Rscript_filename()
   path_to_this_script <- this_script
-  source(file.path(dirname(this_script), "provenance.R"))
-  source(file.path(dirname(this_script), "read_count_functions.R"))
+  source(file.path(dirname(this_script), "provenance.R")) # FLIC: consider if this can be redone using here() too
+  source(file.path(dirname(this_script), "read_count_functions.R")) # FLIC: consider if this can be redone using here() too
 }
 
 # define input options for optparse package
