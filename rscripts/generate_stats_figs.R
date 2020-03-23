@@ -924,28 +924,38 @@ BiasesInNucleotideCompositionAlongMappedReadLengths <- function(gene_names, data
       
       # Get position-specific nucleotide counts for reads in each frame
       
+      # # TODO: test this function
+      # CalculatePositionSpecificNucleotideCountsByFrame <- function(gene_names, cframe, lid, num_processes){
+      #   mcapply(gene_names, function(gene){
+      #     cons_mat(gene = gene, pos_IR = out[[gene]], cframe = cframe, lid = lid)
+      #   }, mc.cores = num_processes)
+      # } # end of function definition CalculatePositionSpecificNucleotideCountsByFrame()
+      # test_frame0 <- CalculatePositionSpecificNucleotideCountsByFrame(gene_names, cframe=0, lid, num_processes)
       
+      # frame 0
       fr0 <- mclapply(gene_names, function(gene) {
         cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 0, lid = lid)
       }, mc.cores = num_processes)
       allfr0 <- do.call(rbind, fr0)
       
+      # frame 1
       fr1 <- mclapply(gene_names, function(gene) {
         cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 1, lid = lid)
       }, mc.cores = num_processes)
       allfr1 <- do.call(rbind, fr1)
       
+      # frame 2
       fr2 <- mclapply(gene_names, function(gene) {
         cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 2, lid = lid)
       }, mc.cores = num_processes)
       allfr2 <- do.call(rbind, fr2)
       
-      # Get position-specific freq for all nts
+      # Get position-specific freq for all nucleotides
       cnt_fr0 <- signif(comb_freq(allfr0), 3)
       cnt_fr1 <- signif(comb_freq(allfr1), 3)
       cnt_fr2 <- signif(comb_freq(allfr2), 3)
       
-      output <- data.frame(rbind(cnt_fr0, cnt_fr1, cnt_fr2))
+      output <- data.frame(rbind(cnt_fr0, cnt_fr1, cnt_fr2)) # TODO: replace variablename 'output'
       all_out <- rbind(all_out, output)
     } # end of the for() loop
     
