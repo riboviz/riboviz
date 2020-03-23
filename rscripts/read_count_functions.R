@@ -134,6 +134,60 @@ TidyDatamatrix <- function(data_mat, startpos = 1, startlen = 1) {
     mutate(Pos = as.integer(Pos), Counts = as.integer(Counts))
 }
 
+AllGenes5StartPositionLengthCountsTibble <- function(gene_names, dataset, hdf5file, gff_df){
+# get gene and position specific total counts for all read lengths
+gene_poslen_counts_5start_df <-
+  lapply(gene_names,
+         function(gene) 
+           GetGeneDatamatrix5start(gene,
+                                   dataset,
+                                   hdf5file,
+                                   posn_5start = GetCDS5start(gene, gff_df),
+                                   n_buffer = nnt_buffer,
+                                   nnt_gene = nnt_gene)
+  ) %>%
+  Reduce("+", .) %>% # sums the list of data matrices
+  TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = min_read_length) 
+
+  return(gene_poslen_counts_5start_df)
+} #to run:
+#AllGenes5PrimePositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hdf5file = hdf5file, gff_df = gff_df)
+
+# gives: 
+# > str(gene_poslen_counts_5start_df)
+# Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	3075 obs. of  3 variables:
+#   $ ReadLen: int  10 11 12 13 14 15 16 17 18 19 ...
+#   $ Pos    : int  -24 -24 -24 -24 -24 -24 -24 -24 -24 -24 ...
+#   $ Counts : int  0 0 0 0 0 0 5 4 6 0 ...
+
+
+AllGenes3EndPositionLengthCountsTibble <- function(gene_names, dataset, hdf5file, gff_df){
+  gene_poslen_counts_3end_df <-
+    lapply(gene_names,
+           function(gene)
+             GetGeneDatamatrix3end(
+               gene,
+               dataset,
+               hdf5file,
+               posn_3end = GetCDS3end(gene, gff_df),
+               n_buffer = nnt_buffer,
+               nnt_gene = nnt_gene
+             )) %>%
+    Reduce("+", .) %>% # sums the list of data matrices
+    TidyDatamatrix(startpos = -nnt_gene + 1, startlen = min_read_length)
+  
+  return(gene_poslen_counts_3end_df)
+} #to run:
+#AllGenes3EndPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hdf5file = hdf5file, gff_df = gff_df)
+
+# # gives:
+# # > str(gene_poslen_counts_3end_df)
+# # Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	3075 obs. of  3 variables:
+# #   $ ReadLen: int  10 11 12 13 14 15 16 17 18 19 ...
+# #   $ Pos    : int  -49 -49 -49 -49 -49 -49 -49 -49 -49 -49 ...
+# #   $ Counts : int  0 0 0 0 0 49 62 27 219 50 ...
+
+
 plot_ribogrid <- function(tidymat) {
   ggplot(data = tidymat, aes(x = Pos, y = ReadLen, fill = Counts)) +
     geom_tile() +
