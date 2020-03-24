@@ -153,6 +153,8 @@ ggplot2::theme_set(theme_bw())
 #  SaveFunction - PDF writeouts of plots
 #  WriteFunction - .TSV file creation
 
+# NOTE: Do not use mclapply when accessing H5 data
+
 #####
 
 #
@@ -161,182 +163,170 @@ ggplot2::theme_set(theme_bw())
 #
 #
 
+CalculateThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df){  
+  
+  # get gene and position specific total counts for all read lengths
+  gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hdf5file = hdf5file, gff_df = gff_df)
+  
+  gene_poslen_counts_3end_df <- AllGenes3EndPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hdf5file = hdf5file, gff_df = gff_df)
+  
+  # summarize by adding different read lengths
+  gene_pos_counts_5start <- gene_poslen_counts_5start_df %>%
+    group_by(Pos) %>%
+    summarize(Counts = sum(Counts))
+  # gives: 
+  # > str(gene_pos_counts_5start)
+  # Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	75 obs. of  2 variables:
+  #   $ Pos   : int  -24 -23 -22 -21 -20 -19 -18 -17 -16 -15 ...
+  #   $ Counts: int  285 318 307 386 291 347 840 330 475 355 ...
+  
+  gene_pos_counts_3end <- gene_poslen_counts_3end_df  %>%
+    group_by(Pos) %>%
+    summarize(Counts = sum(Counts))
+  # gives: 
+  # > str(gene_pos_counts_3end)
+  # Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	75 obs. of  2 variables:
+  #   $ Pos   : int  -49 -48 -47 -46 -45 -44 -43 -42 -41 -40 ...
+  #   $ Counts: int  19030 13023 50280 19458 12573 46012 19043 13282 36968 20053 ...
+  
+  three_nucleotide_periodicity_data <- bind_rows(
+    gene_pos_counts_5start %>% mutate(End = "5'"),
+    gene_pos_counts_3end %>% mutate(End = "3'")
+  ) %>%
+    mutate(End = factor(End, levels = c("5'", "3'")))
+  # gives: 
+  # > str(three_nucleotide_periodicity_data)
+  # Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	150 obs. of  3 variables:
+  #   $ Pos   : int  -24 -23 -22 -21 -20 -19 -18 -17 -16 -15 ...
+  #   $ Counts: int  285 318 307 386 291 347 840 330 475 355 ...
+  #   $ End   : Factor w/ 2 levels "5'","3'": 1 1 1 1 1 1 1 1 1 1 ...
+  
+  return(three_nucleotide_periodicity_data)
+  
+} # end CalculateThreeNucleotidePeriodicity() definition
+# gives: 
+#   CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hdf5file = hdf5file, gff_df = gff_df)
+#   # A tibble: 150 x 3
+#   Pos Counts End  
+#   <int>  <int> <fct>
+#     1   -24    285 5'   
+#     2   -23    318 5'   
+#     3   -22    307 5'   
+#     4   -21    386 5'   
+#     5   -20    291 5'   
+#     6   -19    347 5'   
+#     7   -18    840 5'   
+#     8   -17    330 5'   
+#     9   -16    475 5'   
+#    10   -15    355 5'   
+#   # … with 140 more rows
+
+# define PlotThreeNucleotidePeriodicity() function with reasonable arguments
+PlotThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data){
+  
+  # Plot
+  three_nucleotide_periodicity_plot <- ggplot(
+    three_nucleotide_periodicity_data,
+    aes(x = Pos, y = Counts)) +
+    geom_line() +
+    facet_wrap(~End, scales = "free") +
+    labs(x = "Nucleotide Position", y = "Read counts")
+  
+  return(three_nucleotide_periodicity_plot) 
+  
+} # end PlotThreeNucleotidePeriodicity() definition
+
+# potentially replace/tweak plot_ribogrid() to follow StyleGuide
+PlotStartCodonRiboGrid <- function(gene_poslen_counts_5start_df){
+  # function to do the ribogrid & ribogridbar plots?
+  # ribogrid_5start
+  start_codon_ribogrid_plot <- plot_ribogrid(gene_poslen_counts_5start_df)
+  return(start_codon_ribogrid_plot) 
+} # end PlotStartCodonRiboGrid() definition
+
+SaveStartCodonRiboGrid <- function(start_codon_ribogrid_plot){
+  # function to do the ribogrid & ribogridbar plots?
+  # ribogrid_5start
+  start_codon_ribogrid_plot %>%
+    ggsave(
+      filename = file.path(output_dir, paste0(output_prefix, "startcodon_ribogrid.pdf")),
+      width = 6, height = 3
+    )
+  #return() # no return as writing-out
+} # end SaveStartCodonRiboGrid() definition
+
+PlotStartCodonRiboGridBar <- function(gene_poslen_counts_5start_df){  
+  start_codon_ribogrid_bar_plot <- barplot_ribogrid(gene_poslen_counts_5start_df)
+  return(start_codon_ribogrid_bar_plot) 
+} # end PlotStartCodonRiboGridBar() definition
+
+SaveStartCodonRiboGridBar <- function(start_codon_ribogrid_bar_plot){  
+  start_codon_ribogrid_bar_plot %>%  
+    ggsave(
+      filename = file.path(output_dir, paste0(output_prefix, "startcodon_ribogridbar.pdf")),
+      width = 6, height = 5
+    )
+  #return() # no return as writing-out
+} # end SaveStartCodonRiboGridBar() definition
+
+SavePlotThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_plot) {
+  # Save plot and file
+  ggsave(
+    three_nucleotide_periodicity_plot, 
+    filename = file.path(output_dir, paste0(output_prefix, "3nt_periodicity.pdf"))
+  )
+  # return() # NO RETURN as writing out
+} # end of function definition SavePlotThreeNucleotidePeriodicity()
+
+WriteThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data) {
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3nt_periodicity.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    three_nucleotide_periodicity_data,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F)
+  # return()? NO RETURN
+}  # end of function definition WriteThreeNucleotidePeriodicity()
+
+
 # big function with probable arguments
 ThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df) {
   
   # check for 3nt periodicity
   print("Starting: Check for 3nt periodicity globally")
   
-  # NOTE: Do not use mclapply when accessing H5 data
-  
-  CalculateThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df){  
-    
-    # get gene and position specific total counts for all read lengths
-    gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hdf5file = hdf5file, gff_df = gff_df)
-    
-    gene_poslen_counts_3end_df <- AllGenes3EndPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hdf5file = hdf5file, gff_df = gff_df)
-    
-    # summarize by adding different read lengths
-    gene_pos_counts_5start <- gene_poslen_counts_5start_df %>%
-      group_by(Pos) %>%
-      summarize(Counts = sum(Counts))
-    # gives: 
-    # > str(gene_pos_counts_5start)
-    # Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	75 obs. of  2 variables:
-    #   $ Pos   : int  -24 -23 -22 -21 -20 -19 -18 -17 -16 -15 ...
-    #   $ Counts: int  285 318 307 386 291 347 840 330 475 355 ...
-    
-    gene_pos_counts_3end <- gene_poslen_counts_3end_df  %>%
-      group_by(Pos) %>%
-      summarize(Counts = sum(Counts))
-    # gives: 
-    # > str(gene_pos_counts_3end)
-    # Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	75 obs. of  2 variables:
-    #   $ Pos   : int  -49 -48 -47 -46 -45 -44 -43 -42 -41 -40 ...
-    #   $ Counts: int  19030 13023 50280 19458 12573 46012 19043 13282 36968 20053 ...
-    
-    three_nucleotide_periodicity_data <- bind_rows(
-      gene_pos_counts_5start %>% mutate(End = "5'"),
-      gene_pos_counts_3end %>% mutate(End = "3'")
-    ) %>%
-      mutate(End = factor(End, levels = c("5'", "3'")))
-    # gives: 
-    # > str(three_nucleotide_periodicity_data)
-    # Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	150 obs. of  3 variables:
-    #   $ Pos   : int  -24 -23 -22 -21 -20 -19 -18 -17 -16 -15 ...
-    #   $ Counts: int  285 318 307 386 291 347 840 330 475 355 ...
-    #   $ End   : Factor w/ 2 levels "5'","3'": 1 1 1 1 1 1 1 1 1 1 ...
-    
-    return(three_nucleotide_periodicity_data)
-    
-  } # end CalculateThreeNucleotidePeriodicity() definition
-  
-  # gives: 
-  #   CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hdf5file = hdf5file, gff_df = gff_df)
-  #   # A tibble: 150 x 3
-  #   Pos Counts End  
-  #   <int>  <int> <fct>
-  #     1   -24    285 5'   
-  #     2   -23    318 5'   
-  #     3   -22    307 5'   
-  #     4   -21    386 5'   
-  #     5   -20    291 5'   
-  #     6   -19    347 5'   
-  #     7   -18    840 5'   
-  #     8   -17    330 5'   
-  #     9   -16    475 5'   
-  #    10   -15    355 5'   
-  #   # … with 140 more rows
-  
-  # run the function:
+  # CalculateThreeNucleotidePeriodicity():
   three_nucleotide_periodicity_data <- CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hdf5file = hdf5file, gff_df = gff_df)
   
-  # define PlotThreeNucleotidePeriodicity() function with reasonable arguments
-  PlotThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data){
-    
-    # Plot
-    three_nucleotide_periodicity_plot <- ggplot(
-      three_nucleotide_periodicity_data,
-      aes(x = Pos, y = Counts)) +
-      geom_line() +
-      facet_wrap(~End, scales = "free") +
-      labs(x = "Nucleotide Position", y = "Read counts")
-    
-    return(three_nucleotide_periodicity_plot) 
-    
-  } # end PlotThreeNucleotidePeriodicity() definition
-  
-  # run:
-  #PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
-  # creates plot object
-  
+  # PlotThreeNucleotidePeriodicity()
   three_nucleotide_periodicity_plot <- PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
   
   # NOTE: repeated from inside CalculateThreeNucleotidePeriodicity() as preferred not to return multiple objects in list (hassle :S)
   gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hdf5file = hdf5file, gff_df = gff_df)
   
-  
-  # potentially replace/tweak plot_ribogrid() to follow StyleGuide
-  PlotStartCodonRiboGrid <- function(gene_poslen_counts_5start_df){
-    # function to do the ribogrid & ribogridbar plots?
-    # ribogrid_5start
-    start_codon_ribogrid_plot <- plot_ribogrid(gene_poslen_counts_5start_df)
-    return(start_codon_ribogrid_plot) 
-  } # end PlotStartCodonRiboGrid() definition
-  
-  # run: 
+  # run PlotStartCodonRiboGrid()
   start_codon_ribogrid_plot <- PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
   # creates plot object
   
-  
-  SaveStartCodonRiboGrid <- function(start_codon_ribogrid_plot){
-    # function to do the ribogrid & ribogridbar plots?
-    # ribogrid_5start
-    start_codon_ribogrid_plot %>%
-      ggsave(
-        filename = file.path(output_dir, paste0(output_prefix, "startcodon_ribogrid.pdf")),
-        width = 6, height = 3
-      )
-    #return() # no return as writing-out
-  } # end SaveStartCodonRiboGrid() definition
-  
-  # run: 
+  # run SaveStartCodonRiboGrid(): 
   SaveStartCodonRiboGrid(start_codon_ribogrid_plot)
   
-  
-  PlotStartCodonRiboGridBar <- function(gene_poslen_counts_5start_df){  
-    start_codon_ribogrid_bar_plot <- barplot_ribogrid(gene_poslen_counts_5start_df)
-    return(start_codon_ribogrid_bar_plot) 
-  } # end PlotStartCodonRiboGridBar() definition
-  
-  # run: 
+  # run PlotStartCodonRiboGridBar(): 
   start_codon_ribogrid_bar_plot <- PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
   # creates plot object
   
-  
-  SaveStartCodonRiboGridBar <- function(start_codon_ribogrid_bar_plot){  
-    start_codon_ribogrid_bar_plot %>%  
-      ggsave(
-        filename = file.path(output_dir, paste0(output_prefix, "startcodon_ribogridbar.pdf")),
-        width = 6, height = 5
-      )
-    #return() # no return as writing-out
-  } # end SaveStartCodonRiboGridBar() definition
-  
-  # run: 
+  # run SaveStartCodonRiboGridBar(): 
   SaveStartCodonRiboGrid(start_codon_ribogrid_bar_plot)
   
-  
-  SavePlotThreeNucleotidePeriodicity <- function() {
-    
-    # Save plot and file
-    ggsave(
-      three_nucleotide_periodicity_plot, 
-      filename = file.path(output_dir, paste0(output_prefix, "3nt_periodicity.pdf"))
-    )
-    # return() # NO RETURN as writing out
-    
-  } # end of function definition SavePlotThreeNucleotidePeriodicity()
-  
-  
-  WriteThreeNucleotidePeriodicity <- function() {
-    
-    tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3nt_periodicity.tsv"))
-    
-    write_provenance_header(path_to_this_script, tsv_file_path)
-    
-    write.table(
-      three_nucleotide_periodicity_data,
-      file = tsv_file_path,
-      append = T,
-      sep = "\t",
-      row = F,
-      col = T,
-      quote = F)
-    
-    # return()? NO RETURN
-    
-  }  # end of function definition WriteThreeNucleotidePeriodicity()
+  # run SavePlotThreeNucleotidePeriodicity():
+  SavePlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_plot)
+
+  # run WriteThreeNucleotidePeriodicity():
+  WriteThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
   
   print("Completed: Check for 3nt periodicity globally")
   
