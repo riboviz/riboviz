@@ -163,6 +163,8 @@ ggplot2::theme_set(theme_bw())
 #
 #
 
+# MEDIUM FUNCTIONS:   
+
 CalculateThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df){  
   
   # get gene and position specific total counts for all read lengths
@@ -292,6 +294,7 @@ WriteThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data) {
   # return()? NO RETURN
 }  # end of function definition WriteThreeNucleotidePeriodicity()
 
+# BIG FUNCTION:   
 
 # big function with probable arguments
 ThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df) {
@@ -331,7 +334,7 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df) {
   print("Completed: Check for 3nt periodicity globally")
   
 } # end ThreeNucleotidePeriodicity() function definition
-# run
+# run ThreeNucleotidePeriodicity():
 ThreeNucleotidePeriodicity(gene_names, dataset, hdf5file, gff_df)
 
 #
@@ -342,93 +345,96 @@ ThreeNucleotidePeriodicity(gene_names, dataset, hdf5file, gff_df)
 #
 #
 
+# MEDIUM FUNCTIONS:   
+
+# calculate function
+CalculateReadLengths <- function(gene_names, dataset, hdf5file){
+  
+  ## distribution of lengths of all mapped reads
+  print("Starting: Distribution of lengths of all mapped reads")
+  
+  # read length-specific read counts stored as attributes of 'reads' in H5 file
+  gene_sp_read_length <- lapply(gene_names, function(gene) {
+    GetGeneReadLength(gene,dataset,hdf5file)
+  })
+  
+  # sum reads of each length across all genes
+  read_length_data <- data.frame(
+    Length = read_range,
+    Counts = gene_sp_read_length %>% 
+      Reduce("+", .)
+  )
+  
+  # return read length data
+  return(read_length_data)
+  
+} # end definition of function CalculateReadLengths()
+# > str(read_length_data)
+# 'data.frame':	41 obs. of  2 variables:
+#   $ Length: int  10 11 12 13 14 15 16 17 18 19 ...
+#   $ Counts: num  0 0 0 0 0 ...
+
+# plot function
+PlotReadLengths <- function(read_length_data){
+  
+  # plot read lengths with counts
+  read_len_plot <- ggplot(read_length_data, aes(x = Length, y = Counts)) +
+    geom_bar(stat = "identity")
+  
+  return(read_len_plot) 
+  
+} # end definition of function PlotReadLengths()
+
+# save pdf
+SavePlotReadLengths <- function(read_len_plot) {
+  
+  ggsave(read_len_plot, filename = file.path(output_dir, paste0(output_prefix, "read_lengths.pdf")))
+  
+  # return() # NO RETURN as writing out
+  
+} # end definition of function SavePlotReadLenths()
+
+# save read lengths plot and file
+WriteReadLengths <- function(read_length_data){
+  
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "read_lengths.tsv"))
+  
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  
+  write.table(
+    read_length_data,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+  # return() NO RETURN as writing out
+} # end definition of function WriteReadLengths()
+
+# BIG FUNCTION
+
 DistributionOfLengthsMappedReads <- function(gene_names, dataset, hdf5file){
   
-  # calculate function
-  CalculateReadLengths <- function(gene_names, dataset, hdf5file){
-    
-    ## distribution of lengths of all mapped reads
-    print("Starting: Distribution of lengths of all mapped reads")
-    
-    # read length-specific read counts stored as attributes of 'reads' in H5 file
-    gene_sp_read_length <- lapply(gene_names, function(gene) {
-      GetGeneReadLength(gene,dataset,hdf5file)
-    })
-    
-    # sum reads of each length across all genes
-    read_length_data <- data.frame(
-      Length = read_range,
-      Counts = gene_sp_read_length %>% 
-        Reduce("+", .)
-    )
-    
-    # return read length data
-    return(read_length_data)
-    
-  } # end definition of function CalculateReadLengths()
-  # run:
+
+  # run CalculateReadLengths():
   read_length_data <- CalculateReadLengths(gene_names, dataset, hdf5file)
   
-  # > str(read_length_data)
-  # 'data.frame':	41 obs. of  2 variables:
-  #   $ Length: int  10 11 12 13 14 15 16 17 18 19 ...
-  #   $ Counts: num  0 0 0 0 0 ...
-  
-  # plot function
-  PlotReadLengths <- function(read_length_data){
-    
-    # plot read lengths with counts
-    read_len_plot <- ggplot(read_length_data, aes(x = Length, y = Counts)) +
-      geom_bar(stat = "identity")
-    
-    return(read_len_plot) 
-    
-  } # end definition of function PlotReadLengths()
-  # run:
+  # run PlotReadLengths():
   read_len_plot <- PlotReadLengths(read_length_data)
   # creates plot object
   
-  # save pdf
-  SavePlotReadLengths <- function(read_len_plot) {
-    
-    ggsave(read_len_plot, filename = file.path(output_dir, paste0(output_prefix, "read_lengths.pdf")))
-    
-    # return() # NO RETURN as writing out
-    
-  } # end definition of function SavePlotReadLenths()
-  # to run:
-  #SavePlotReadLengths(read_len_plot)
+  # to run SavePlotReadLenths():
+  SavePlotReadLengths(read_len_plot)
   
-  # save read lengths plot and file
-  WriteReadLengths <- function(read_length_data){
-    
-    tsv_file_path <- file.path(output_dir, paste0(output_prefix, "read_lengths.tsv"))
-    
-    write_provenance_header(path_to_this_script, tsv_file_path)
-    
-    write.table(
-      read_length_data,
-      file = tsv_file_path,
-      append = T,
-      sep = "\t",
-      row = F,
-      col = T,
-      quote = F
-    )
-    
-    # return() NO RETURN as writing out
-    
-  } # end definition of function WriteReadLengths()
-  # to run: 
-  #WriteReadLengths(read_length_data)
+  # to run WriteReadLengths(): 
+  WriteReadLengths(read_length_data)
   
   print("Completed: Distribution of lengths of all mapped reads")
   
 } # end of definition of function DistributionOfLengthsMappedReads()
-
-# to run:
-#DistributionOfLengthsMappedReads(gene_names, dataset, hdf5file)
-
+# run DistributionOfLengthsMappedReads():
 DistributionOfLengthsMappedReads(gene_names, dataset, hdf5file)
 
 #
