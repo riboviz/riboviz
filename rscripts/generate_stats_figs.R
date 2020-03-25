@@ -147,6 +147,18 @@ ggplot2::theme_set(theme_bw())
 ####
 
 # REFACTORING NOTE: Breaking functions into large & medium chunks: 
+
+# LARGE CHUNKS: 
+#  3nt periodicity
+#  Lengths all mapped reads
+#  Biases in nucleotide composition
+#  Calculate read frame for every orf
+#  RPF position specific distribution of reads
+#  mRNA position specific distribution of reads
+#  TPMs of genes
+#  TPMs correlations with features
+
+# MEDIUM CHUNKS: 
 # Following this naming convention: 
 #  CalculateFunction - computational code
 #  PlotFunction - plot creation
