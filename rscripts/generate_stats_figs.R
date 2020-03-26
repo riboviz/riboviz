@@ -335,7 +335,7 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df) {
   # creates plot object
   
   # run SaveStartCodonRiboGridBar(): 
-  SaveStartCodonRiboGrid(start_codon_ribogrid_bar_plot)
+  SaveStartCodonRiboGridBar(start_codon_ribogrid_bar_plot)
   
   # run SavePlotThreeNucleotidePeriodicity():
   SavePlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_plot)
@@ -438,7 +438,6 @@ WriteReadLengths <- function(read_length_data){
 
 DistributionOfLengthsMappedReads <- function(gene_names, dataset, hdf5file){
   
-
   # run CalculateReadLengths():
   read_length_data <- CalculateReadLengths(gene_names, dataset, hdf5file)
   
@@ -476,6 +475,125 @@ DistributionOfLengthsMappedReads(gene_names, dataset, hdf5file)
 #
 # 
 
+# MEDIUM FUNCTIONS: 
+
+# CALCULATE Biases In Nucleotide Composition Along Mapped Read Lengths  
+CalculateBiasesInNucleotideComposition <- function(gene_names, dataset, hdf5file, read_range, min_read_length){
+  
+  # This is in a conditional loop because it fails for some inputs
+  # and has not been debugged. Needs to be rewritten in tidyverse
+  all_out <- c() # creates output object set to null
+  for (lid in seq_len(length(read_range))) { # TODO: WHAT IS LID
+    out <- lapply(gene_names, function(x) { # TODO: fix variablename 'out' (also check below for uses)
+      # For each read length convert reads to IRanges
+      GetNTReadPosition(gene = as.character(x), 
+                        dataset = dataset,
+                        hdf5file = hdf5file, 
+                        lid = lid, min_read_length = min_read_length)
+    })
+    names(out) <- gene_names
+    
+    # read_range is sequence 10:50 (inclusive)
+    # length(read_range) is 41
+    # seq_len(41) generates sequence 1:41
+    
+    # GetNTReadPosition: 
+    # GetNTReadPosition <- function(gene, dataset, hdf5file, lid, min_read_length) {
+    #   reads_pos_len <- GetGeneDatamatrix(gene, dataset, hdf5file)[lid, ] # Get reads of a particular length
+    #   reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (lid + min_read_length - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
+    #   pos <- rep(1:length(reads_pos_len), reads_pos_len) # nt positions weighted by number of reads mapping to it
+    #   pos_IR <- IRanges::IRanges(start = pos, width = (lid + min_read_length - 1)) # Create an IRanges object for position-specific reads of a particular length
+    #   return(pos_IR)
+    # }
+    
+    # TODO FLIC testcode
+    # for (lid in 1:3) { # TODO: WHAT IS LID
+    #   out <- lapply(gene_names, function(x) { # TODO: fix variablename 'out' (also check below for uses)
+    #     # For each read length convert reads to IRanges
+    #     GetNTReadPosition(gene = as.character(x), 
+    #                       dataset = dataset,
+    #                       hdf5file = hdf5file, 
+    #                       lid = lid, min_read_length = min_read_length)
+    #   })
+    # names(out) <- gene_names[1]
+    
+    # Get position-specific nucleotide counts for reads in each frame
+    
+    # # TODO: test this function
+    # CalculatePositionSpecificNucleotideCountsByFrame <- function(gene_names, cframe, lid, num_processes){
+    #   mcapply(gene_names, function(gene){
+    #     cons_mat(gene = gene, pos_IR = out[[gene]], cframe = cframe, lid = lid)
+    #   }, mc.cores = num_processes)
+    # } # end of function definition CalculatePositionSpecificNucleotideCountsByFrame()
+    # test_frame0 <- CalculatePositionSpecificNucleotideCountsByFrame(gene_names, cframe=0, lid, num_processes)
+    
+    # frame 0
+    fr0 <- mclapply(gene_names, function(gene) {
+      cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 0, lid = lid)
+    }, mc.cores = num_processes)
+    allfr0 <- do.call(rbind, fr0)
+    
+    # frame 1
+    fr1 <- mclapply(gene_names, function(gene) {
+      cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 1, lid = lid)
+    }, mc.cores = num_processes)
+    allfr1 <- do.call(rbind, fr1)
+    
+    # frame 2
+    fr2 <- mclapply(gene_names, function(gene) {
+      cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 2, lid = lid)
+    }, mc.cores = num_processes)
+    allfr2 <- do.call(rbind, fr2)
+    
+    # Get position-specific freq for all nucleotides
+    cnt_fr0 <- signif(comb_freq(allfr0), 3)
+    cnt_fr1 <- signif(comb_freq(allfr1), 3)
+    cnt_fr2 <- signif(comb_freq(allfr2), 3)
+    
+    output <- data.frame(rbind(cnt_fr0, cnt_fr1, cnt_fr2)) # TODO: replace variablename 'output'
+    all_out <- rbind(all_out, output)
+  } # end of the for() loop
+  
+  # TODO:
+  print("finished for loop")
+  
+  # Prepare variables for output file
+  Length <- unlist(lapply(read_range, function(x) {
+    rep(x, x * 3)
+  }))
+  Position <- unlist(lapply(read_range, function(x) {
+    rep(1:x, 3)
+  }))
+  Frame <- unlist(lapply(read_range, function(x) {
+    rep(0:2, each = x)
+  }))
+  
+  # TODO:
+  print("finished prepping L, R, F variables")
+  
+  all_out <- cbind(Length, Position, Frame, all_out)
+  all_out[is.na(all_out)] <- 0
+  
+  # TODO:
+  print("finished, returning all_out")
+  
+  return(all_out) # TODO: ensure this is correct; rename the returned output
+} # end of function definition of CalculateBiasesInNucleotideComposition()
+# run: 
+#CalculateBiasesInNucleotideComposition(gene_names, dataset, hdf5file, read_range, min_read_length)
+
+## WRITE DATA Biases In Nucleotide Composition Along Mapped Read Lengths
+WriteBiasesInNucleotideComposition <- function(all_out){
+  # save file
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_nt_freq.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(all_out, file = tsv_file_path, append = T, sep = "\t", row = F, col = T, quote = F)
+} # end of function definition: WriteBiasesInNucleotideComposition()
+# run: 
+#WriteBiasesInNucleotideComposition(all_out)
+
+
+# BIG FUNCTIONS
 
 if (!do_pos_sp_nt_freq) {
   
@@ -483,130 +601,47 @@ if (!do_pos_sp_nt_freq) {
   
 } # TODO: FLIC FIGURE OUT IF USING ELSE OR NOT # else { # if do_pos_sp_nt_freq parameter set to true, calculate position-specific nucleotide frequency:
 
+
 # big function with probable arguments
 BiasesInNucleotideCompositionAlongMappedReadLengths <- function(gene_names, dataset, hdf5file, read_range, min_read_length) {
   
   print("Starting: Biases in nucleotide composition along mapped read lengths")
   
   ## CALCULATE Biases In Nucleotide Composition Along Mapped Read Lengths  
-  
-  CalculateBiasesInNucleotideComposition <- function(gene_names, dataset, hdf5file, read_range, min_read_length){
-    
-    # This is in a conditional loop because it fails for some inputs
-    # and has not been debugged. Needs to be rewritten in tidyverse
-    all_out <- c()
-    for (lid in seq_len(length(read_range))) { # TODO: WHAT IS LID
-      out <- lapply(gene_names, function(x) { # TODO: fix variablename 'out' (also check below for uses)
-        # For each read length convert reads to IRanges
-        GetNTReadPosition(gene = as.character(x), 
-                          dataset = dataset,
-                          hdf5file = hdf5file, 
-                          lid = lid, min_read_length = min_read_length)
-      })
-      names(out) <- gene_names
-      
-      # read_range is sequence 10:50 (inclusive)
-      # length(read_range) is 41
-      # seq_len(41) generates sequence 1:41
-      
-      # GetNTReadPosition: 
-      # GetNTReadPosition <- function(gene, dataset, hdf5file, lid, min_read_length) {
-      #   reads_pos_len <- GetGeneDatamatrix(gene, dataset, hdf5file)[lid, ] # Get reads of a particular length
-      #   reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (lid + min_read_length - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
-      #   pos <- rep(1:length(reads_pos_len), reads_pos_len) # nt positions weighted by number of reads mapping to it
-      #   pos_IR <- IRanges::IRanges(start = pos, width = (lid + min_read_length - 1)) # Create an IRanges object for position-specific reads of a particular length
-      #   return(pos_IR)
-      # }
-      
-      
-      
-      # Get position-specific nucleotide counts for reads in each frame
-      
-      # # TODO: test this function
-      # CalculatePositionSpecificNucleotideCountsByFrame <- function(gene_names, cframe, lid, num_processes){
-      #   mcapply(gene_names, function(gene){
-      #     cons_mat(gene = gene, pos_IR = out[[gene]], cframe = cframe, lid = lid)
-      #   }, mc.cores = num_processes)
-      # } # end of function definition CalculatePositionSpecificNucleotideCountsByFrame()
-      # test_frame0 <- CalculatePositionSpecificNucleotideCountsByFrame(gene_names, cframe=0, lid, num_processes)
-      
-      # frame 0
-      fr0 <- mclapply(gene_names, function(gene) {
-        cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 0, lid = lid)
-      }, mc.cores = num_processes)
-      allfr0 <- do.call(rbind, fr0)
-      
-      # frame 1
-      fr1 <- mclapply(gene_names, function(gene) {
-        cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 1, lid = lid)
-      }, mc.cores = num_processes)
-      allfr1 <- do.call(rbind, fr1)
-      
-      # frame 2
-      fr2 <- mclapply(gene_names, function(gene) {
-        cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 2, lid = lid)
-      }, mc.cores = num_processes)
-      allfr2 <- do.call(rbind, fr2)
-      
-      # Get position-specific freq for all nucleotides
-      cnt_fr0 <- signif(comb_freq(allfr0), 3)
-      cnt_fr1 <- signif(comb_freq(allfr1), 3)
-      cnt_fr2 <- signif(comb_freq(allfr2), 3)
-      
-      output <- data.frame(rbind(cnt_fr0, cnt_fr1, cnt_fr2)) # TODO: replace variablename 'output'
-      all_out <- rbind(all_out, output)
-    } # end of the for() loop
-    
-    # TODO:
-    print("finished for loop")
-    
-    # Prepare variables for output file
-    Length <- unlist(lapply(read_range, function(x) {
-      rep(x, x * 3)
-    }))
-    Position <- unlist(lapply(read_range, function(x) {
-      rep(1:x, 3)
-    }))
-    Frame <- unlist(lapply(read_range, function(x) {
-      rep(0:2, each = x)
-    }))
-    
-    # TODO:
-    print("finished prepping L, R, F variables")
-    
-    all_out <- cbind(Length, Position, Frame, all_out)
-    all_out[is.na(all_out)] <- 0
-    
-    return(all_out) # TODO: ensure this is correct; rename the returned output
-    
-    # TODO:
-    print("finished")
-    
-  } # end of function definition of CalculateBiasesInNucleotideComposition()
-  # run: 
-  #CalculateBiasesInNucleotideComposition(gene_names, dataset, hdf5file, read_range, min_read_length)
-  
-  
   all_out <- CalculateBiasesInNucleotideComposition(gene_names, dataset, hdf5file, read_range, min_read_length)
+  # > str(all_out)
+  # 'data.frame':	3690 obs. of  7 variables:
+  #   $ Length  : int  10 10 10 10 10 10 10 10 10 10 ...
+  # $ Position: int  1 2 3 4 5 6 7 8 9 10 ...
+  # $ Frame   : int  0 0 0 0 0 0 0 0 0 0 ...
+  # $ A       : num  0 0 0 0 0 0 0 0 0 0 ...
+  # $ C       : num  0 0 0 0 0 0 0 0 0 0 ...
+  # $ G       : num  0 0 0 0 0 0 0 0 0 0 ...
+  # $ T       : num  0 0 0 0 0 0 0 0 0 0 ...
   
   ## WRITE DATA Biases In Nucleotide Composition Along Mapped Read Lengths
-  WriteBiasesInNucleotideComposition <- function(all_out){
-    # save file
-    tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_nt_freq.tsv"))
-    write_provenance_header(path_to_this_script, tsv_file_path)
-    write.table(all_out, file = tsv_file_path, append = T, sep = "\t", row = F, col = T, quote = F)
-  } # end of function definition: WriteBiasesInNucleotideComposition()
-  # run: 
-  #WriteBiasesInNucleotideComposition()
+  WriteBiasesInNucleotideComposition(all_out)
+  # >   WriteBiasesInNucleotideComposition(all_out)
+  # Warning message:
+  #   In write.table(all_out, file = tsv_file_path, append = T, sep = "\t",  :
+  #                    appending column names to file
   
-  print("Completed nucleotide composition bias table")
+  # print("Completed nucleotide composition bias table")
   
 } # end definition of function: BiasesInNucleotideCompositionAlongMappedReadLengths()
-
 # to run:
 #BiasesInNucleotideCompositionAlongMappedReadLengths(gene_names, dataset, hdf5file, read_range, min_read_length)
-
 BiasesInNucleotideCompositionAlongMappedReadLengths(gene_names, dataset, hdf5file, read_range, min_read_length)
+# > BiasesInNucleotideCompositionAlongMappedReadLengths(gene_names, dataset, hdf5file, read_range, min_read_length)
+# [1] "Starting: Biases in nucleotide composition along mapped read lengths"
+# [1] "finished for loop"
+# [1] "finished prepping L, R, F variables"
+# [1] "finished, returning all_out"
+# Warning message:
+#   In write.table(all_out, file = tsv_file_path, append = T, sep = "\t",  :
+#                    appending column names to file
+
+
 
 #
 #
