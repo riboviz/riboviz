@@ -349,6 +349,15 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df) {
 # run ThreeNucleotidePeriodicity():
 ThreeNucleotidePeriodicity(gene_names, dataset, hdf5file, gff_df)
 
+#26Mar: 
+# > ThreeNucleotidePeriodicity(gene_names, dataset, hdf5file, gff_df)
+# [1] "Starting: Check for 3nt periodicity globally"
+# Saving 7 x 7 in image
+# [1] "Completed: Check for 3nt periodicity globally"
+# Warning message:
+#   In write.table(three_nucleotide_periodicity_data, file = tsv_file_path,  :
+#                    appending column names to file
+
 #
 #
 # END 3NT PERIODICITY
@@ -449,6 +458,16 @@ DistributionOfLengthsMappedReads <- function(gene_names, dataset, hdf5file){
 # run DistributionOfLengthsMappedReads():
 DistributionOfLengthsMappedReads(gene_names, dataset, hdf5file)
 
+#26Mar:
+# > DistributionOfLengthsMappedReads(gene_names, dataset, hdf5file)
+# [1] "Starting: Distribution of lengths of all mapped reads"
+# Saving 7 x 7 in image
+# [1] "Completed: Distribution of lengths of all mapped reads"
+# Warning message:
+#   In write.table(read_length_data, file = tsv_file_path, append = T,  :
+#                    appending column names to file
+
+
 #
 #
 # END ALL MAPPED READS
@@ -462,7 +481,7 @@ if (!do_pos_sp_nt_freq) {
   
   print("NOT calculating position-specific nucleotide frequency - reason: do_pos_sp_nt_freq parameter set to FALSE")
   
-}# TODO: FLIC FIGURE OUT IF USING ELSE OR NOT # else { # if do_pos_sp_nt_freq parameter set to true, calculate position-specific nucleotide frequency:
+} # TODO: FLIC FIGURE OUT IF USING ELSE OR NOT # else { # if do_pos_sp_nt_freq parameter set to true, calculate position-specific nucleotide frequency:
 
 # big function with probable arguments
 BiasesInNucleotideCompositionAlongMappedReadLengths <- function(gene_names, dataset, hdf5file, read_range, min_read_length) {
@@ -485,6 +504,21 @@ BiasesInNucleotideCompositionAlongMappedReadLengths <- function(gene_names, data
                           lid = lid, min_read_length = min_read_length)
       })
       names(out) <- gene_names
+      
+      # read_range is sequence 10:50 (inclusive)
+      # length(read_range) is 41
+      # seq_len(41) generates sequence 1:41
+      
+      # GetNTReadPosition: 
+      # GetNTReadPosition <- function(gene, dataset, hdf5file, lid, min_read_length) {
+      #   reads_pos_len <- GetGeneDatamatrix(gene, dataset, hdf5file)[lid, ] # Get reads of a particular length
+      #   reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (lid + min_read_length - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
+      #   pos <- rep(1:length(reads_pos_len), reads_pos_len) # nt positions weighted by number of reads mapping to it
+      #   pos_IR <- IRanges::IRanges(start = pos, width = (lid + min_read_length - 1)) # Create an IRanges object for position-specific reads of a particular length
+      #   return(pos_IR)
+      # }
+      
+      
       
       # Get position-specific nucleotide counts for reads in each frame
       
