@@ -131,7 +131,7 @@ hdf5file <- rhdf5::H5Fopen(hd_file) # filehandle for the h5 file
 
 # list of gene names taken from h5 file
 gene_names <- rhdf5::h5ls(hdf5file, recursive = 1)$name
-#gene_names <- rhdf5::h5ls(here::here(opt$hd_file), recursive = 1)$name # replaces h5Fopen(hd_file) methods
+#gene_names <- rhdf5::h5ls(here::here(opt$hd_file), recursive = 1)$name # TODO FLIC this can replace h5Fopen(hd_file) method?
 
 # accesses gene names $name from main group (recursive=FALSE, same as recursive=1)
 # > h5ls(here(opt$hd_file), recursive = FALSE)
