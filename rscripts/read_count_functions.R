@@ -60,6 +60,10 @@ GetGeneDatamatrix <- function(gene, dataset, hdf5file) {
     return()
 }
 
+GetGeneDatamatrixNew <- function(gene, dataset, hdf5file){
+  rhdf5::h5read(file = hdf5file, name = paste0("/", gene, "/", dataset, "/reads/data")) %>%
+    return()
+}
 # TODO: start here ^^^^^
 
 GetGeneReadLength <- function(gene, dataset, hdf5file) {
