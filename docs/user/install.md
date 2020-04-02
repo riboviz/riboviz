@@ -277,7 +277,7 @@ Check package has installed `cutadapt` tool:
 
 ```console
 $ cutadapt --v
-2.3
+1.18
 ```
 
 ### pysam
@@ -291,6 +291,7 @@ Install:
 
 ```console
 $ conda install -y -c bioconda pysam
+$ conda install -y -c bioconda samtools
 ```
 
 Check package has installed `samtools` tool:
@@ -300,12 +301,6 @@ $ samtools --version
 samtools 1.9
 Using htslib 1.9
 Copyright (C) 2018 Genome Research Ltd.
-```
-
-If `samtools` was not installed, then install it explicitly:
-
-```console
-$ conda install -c bioconda samtools
 ```
 
 ### BioPython
@@ -810,11 +805,56 @@ $ git clone https://github.com/riboviz/riboviz
 
 ---
 
-## Tested platforms
+## Check installation
 
-These instructions were tested on:
+You can now check your installation by running RiboViz tests.
 
-| Operating System | Memory (GB) | Processors | RAM (GB) | Python | R |
-| ---------------- | ----------- | ---------- | -------- | ------ | - |
-| Ubuntu 18.04 | 8 | 4 | 20  | 3.7.3 | 3.4.4 |
-| CentOS 7.4.1708 (Core) | 8 | 4 | 20 | 3.7.3 | 3.5.2 |
+Run tests:
+
+```console
+$ pytest --ignore-glob="*regression*"
+============================= test session starts ==============================
+platform linux -- Python 3.7.7, pytest-5.4.1, py-1.8.1, pluggy-0.13.1
+rootdir: /home/ubuntu/riboviz
+collected 165 items
+
+riboviz/test/test_barcodes_umis.py .................                     [ 10%]
+riboviz/test/test_demultiplex_fastq.py ..................                [ 21%]
+riboviz/test/test_fastq.py ........................                      [ 35%]
+riboviz/test/test_process_utils.py ........................              [ 50%]
+riboviz/test/test_sam_bam.py ................                            [ 60%]
+riboviz/test/test_trim_5p_mismatch.py ............                       [ 67%]
+riboviz/test/test_upgrade_config.py .....                                [ 70%]
+riboviz/test/test_utils.py ....................                          [ 82%]
+riboviz/test/tools/test_prep_riboviz.py ............                     [ 89%]
+riboviz/test/tools/test_prep_riboviz_simdata_multiplex.py .............  [ 97%]
+riboviz/test/tools/test_prep_riboviz_simdata_umi.py ....                 [100%]
+...
+================== 165 passed, 1 warning in 208.70s (0:03:28) ==================
+```
+
+`PendingDeprecationWarning` `warnings` can be ignored.
+
+Download regression test data:
+
+```console
+$ cd
+$ git clone https://github.com/riboviz/regression-test-data-2.0.beta
+```
+
+Run regression tests (these may take a few minutes):
+
+```
+$ cd riboviz
+$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0.beta/
+============================= test session starts ==============================
+platform linux -- Python 3.7.7, pytest-5.4.1, py-1.8.1, pluggy-0.13.1
+rootdir: /home/ubuntu/riboviz
+collected 76 items
+riboviz/test/regression/test_regression.py sssssssssssssssssssssssssssss [ 38%]
+sssss..ss......................................                          [100%]
+...
+============ 40 passed, 36 skipped, 1 warning in 209.86s (0:03:29) ==
+```
+
+`PendingDeprecationWarning` `warnings` can be ignored.
