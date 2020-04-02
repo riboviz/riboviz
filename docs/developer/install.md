@@ -28,19 +28,6 @@ Install:
 $ conda install -y pycodestyle
 ```
 
-### pytest
-
-Web sites:
-
-* [pytest](https://pytest.org/)
-* [GitHub](https://github.com/pytest-dev/pytest/)
-
-Install:
-
-```console
-$ conda install -y pytest
-```
-
 ### pytest-cov
 
 Web sites:

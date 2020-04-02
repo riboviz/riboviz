@@ -234,6 +234,19 @@ Install:
 $ conda install -y gitpython
 ```
 
+### pytest
+
+Web sites:
+
+* [pytest](https://pytest.org/)
+* [GitHub](https://github.com/pytest-dev/pytest/)
+
+Install:
+
+```console
+$ conda install -y pytest
+```
+
 ### pandas
 
 Web sites:
@@ -353,10 +366,10 @@ $ python
 >>> import h5py
 >>> h5py.run_tests()
 ...
-OK (skipped=16, expected failures=6)
+============ 521 passed, 25 skipped, 3 xfailed, 1 warning in 5.50s =============
 ```
 
-The test report should be `OK` as above. Your number of `skipped` and `expected failures` may differ, depending upon the version of h5py installed.
+Your number of `skipped` and `xfailed` (expected failures may differ, depending upon the version of h5py installed.
 
 ### UMI-tools
 
