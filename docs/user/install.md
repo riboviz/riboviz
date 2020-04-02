@@ -220,7 +220,7 @@ If you find when installing packages below that your version of Python is too ne
 $ conda create --name riboviz python=<VERSION>
 ```
 
-    - For example:
+  - For example:
 
 ```console
 $ conda create --name riboviz python=3.7
