@@ -179,10 +179,17 @@ $ bash miniconda3.sh -b -p $HOME/miniconda3
 
 **Note:** make sure you use `-O`, which provides a name for the downloaded file, and not `-o`, which provides the name of a file for messages about the download.
 
-Activate environment and check:
+Activate environment:
 
 ```console
 $ source $HOME/miniconda3/bin/activate
+```
+
+Create a `riboviz` environment and activate it:
+
+```console
+$ conda create --name riboviz python=3.7
+$ conda activate riboviz
 $ python -V
 Python 3.7.3
 ```
@@ -202,7 +209,22 @@ miniconda3.sh: line 2: `Resolving repo.continuum.io
 2606:4700::6812:c94f, ...'
 ```
 
-then rerun `wget` and use `-O`, not `-o`.
+**Troubleshooting: incompatible Python versions**
+
+If you find when installing packages below that your version of Python is too new (e.g. your Python version is 3.8 and the tool only works with Python 3.7), then two options are:
+
+1. See if a more recent version of the tool is available. For example a version available via `pip` may be more up-to-date than a version available via `conda`.
+2. Create a conda environment that supports a version of Python compatible with the tools.
+
+```console
+$ conda create --name riboviz python=<VERSION>
+```
+
+    - For example:
+
+```console
+$ conda create --name riboviz python=3.7
+```
 
 ---
 
