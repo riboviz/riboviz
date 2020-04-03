@@ -503,9 +503,7 @@ Web sites:
 * [The R Project for Statistical Computing](https://www.r-project.org/)
 * [The Comprehensive R Archive Network](https://cran.r-project.org/) (CRAN).
 
-**Note:** Release 2.14.0 or later is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
-
-We recommend using R 3.4+.
+**Note:** Release 2.14.0 or later is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package. However, we recommend using R **3.4+**.
 
 ### Install R and packages required by R packages to be installed
 
@@ -533,11 +531,64 @@ $ sudo yum install -y openssl-devel
 $ sudo yum install -y libcurl-devel
 ```
 
+**Troubleshooting: the most recent version of R is not installed**
+
+Default package managers may not have the most up-to-date version of R available. [The Comprehensive R Archive Network](https://cran.r-project.org/) has information on alternative ways to get a more recent version of R.
+
+For example, following CRAN-R's [UBUNTU PACKAGES FOR R](https://cran.r-project.org/bin/linux/ubuntu/README.html) to get the latest R 3.6 packages:
+
+* Get your Ubuntu version, for example:
+
+```console
+$ lsb_release -a
+No LSB modules are available.
+Distributor ID:	Ubuntu
+Description:	Ubuntu 18.04 LTS
+Release:	18.04
+Codename:	bionic
+```
+
+* Open `/etc/apt/sources.list` in an editor (requires `sudo` access), for example:
+
+```console
+$ sudo nano /etc/apt/sources.list
+```
+
+* From UBUNTU PACKAGES FOR R get the entry for your Ubuntu version and add it to the end of the file. For example:
+
+```
+deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/
+```
+
+* Install CRAN-R Ubuntu server key:
+
+```console
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+```
+
+* Update packages:
+
+```console
+$ sudo apt-get update
+```
+
+* Install:
+
+```console
+$ sudo apt-get -s install r-base
+$ R --version
+R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+```
+
 ### Check R has installed
 
 ```console
 $ R --version
-R version 3.5.1 (2018-07-02) -- "Feather Spray"
+R version 3.4.4 (2018-03-15) -- "Someone to Lean On"
+$ Rscript --version
+R scripting front-end version 3.4.4 (2018-03-15)
 ```
 
 Your version of R may differ from that shown.
