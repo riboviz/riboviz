@@ -51,16 +51,7 @@ GetCDS3end <- function(name, gffdf, ftype="CDS", fstrand="+") {
 # TODO: start here vvvvv
 
 # function to get data matrix of read counts for gene and dataset from hdf5file
-GetGeneDatamatrix <- function(gene, dataset, hdf5file) {
-  hdf5file %>%
-    rhdf5::H5Dopen(
-      name = paste0("/", gene, "/", dataset, "/reads/data")
-    ) %>%
-    rhdf5::H5Dread() %>%
-    return()
-}
-
-GetGeneDatamatrixNew <- function(gene, dataset, hdf5file){
+GetGeneDatamatrix <- function(gene, dataset, hdf5file){
   rhdf5::h5read(file = hdf5file, name = paste0("/", gene, "/", dataset, "/reads/data")) %>%
     return()
 }

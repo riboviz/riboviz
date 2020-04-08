@@ -127,7 +127,8 @@ print("generate_stats_figs.R running with parameters:")
 opt
 
 # prepare files, opens hdf5 file connection
-hdf5file <- rhdf5::H5Fopen(hd_file) # filehandle for the h5 file
+hdf5file <- hd_file
+#hdf5file <- rhdf5::H5Fopen(hd_file) # filehandle for the h5 file
  # aiming to replace this ^^^^ in order to do away with an open connection-object (hdf5file)
   # & will instead use the variable (hd_file) which has path of .h5 file e.g. "vignette/output/WTnone/WTnone.h5"
 
