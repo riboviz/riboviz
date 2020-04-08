@@ -129,7 +129,7 @@ print("generate_stats_figs.R running with parameters:")
 opt
 
 # prepare files, opens hdf5 file connection
-hdf5file <- rhdf5::H5Fopen(hd_file) # filehandle for the h5 file
+hdf5file <- hd_file # filehandle for the h5 file
 
 # read in positions of all exons/genes in GFF format and subset CDS locations
 gene_names <- rhdf5::h5ls(hdf5file, recursive = 1)$name
@@ -151,12 +151,8 @@ ggplot2::theme_set(theme_bw())
 print("Starting: Check for 3nt periodicity globally")
 
 # function to get data matrix of read counts for gene and dataset from hdf5file
-GetGeneDatamatrix <- function(gene, dataset, hdf5file) {
-  hdf5file %>%
-    rhdf5::H5Dopen(
-      name = paste0("/", gene, "/", dataset, "/reads/data")
-    ) %>%
-    rhdf5::H5Dread() %>%
+GetGeneDatamatrix <- function(gene, dataset, hdf5file){
+  rhdf5::h5read(file = hdf5file, name = paste0("/", gene, "/", dataset, "/reads/data")) %>%
     return()
 }
 
