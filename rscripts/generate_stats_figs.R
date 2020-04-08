@@ -128,10 +128,16 @@ opt
 
 # prepare files, opens hdf5 file connection
 hdf5file <- rhdf5::H5Fopen(hd_file) # filehandle for the h5 file
+ # aiming to replace this ^^^^ in order to do away with an open connection-object (hdf5file)
+  # & will instead use the variable (hd_file) which has path of .h5 file e.g. "vignette/output/WTnone/WTnone.h5"
 
 # list of gene names taken from h5 file
 gene_names <- rhdf5::h5ls(hdf5file, recursive = 1)$name
 #gene_names <- rhdf5::h5ls(here::here(opt$hd_file), recursive = 1)$name # TODO FLIC this can replace h5Fopen(hd_file) method?
+# running this commented-out line after `hdf5file <- rhdf5::H5Fopen(hd_file)` gives error, need to run h5closeAll() and then re-do this line: 
+# Warning message:
+#   In h5checktypeOrOpenLoc(file, readonly = TRUE, native = native) :
+#   An open HDF5 file handle exists. If the file has changed on disk meanwhile, the function may not work properly. Run 'h5closeAll()' to close all open HDF5 object handles.
 
 # accesses gene names $name from main group (recursive=FALSE, same as recursive=1)
 # > h5ls(here(opt$hd_file), recursive = FALSE)
