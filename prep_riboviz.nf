@@ -63,7 +63,7 @@ process cutAdapters {
     input:
         tuple val(sample_id), file(sample_file) from samples
     output:
-        tuple val(sample_id), file("trim.fq") into cuts
+        tuple val(sample_id), file("trim.fq") into cut_samples
     shell:
         // TODO configure -j 0 in a more Nextflow-esque way.
         """
@@ -71,22 +71,22 @@ process cutAdapters {
         """
 }
 
-// Route "cuts" output channel depending on whether UMIs are to be
-// extracted.
-cuts.branch {
-    adapters_umis: params.extract_umis
-    adapters: ! params.extract_umis
+// Route "cut_samples" channel depending on whether UMIs are to be
+// extracted or not.
+cut_samples.branch {
+    umi_samples: params.extract_umis
+    non_umi_samples: ! params.extract_umis
 }
-.set { cuts_branch }
+.set { cut_samples_branch }
 
 process extractUmis {
     tag "${sample_id}"
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}"
     input:
-        tuple val(sample_id), file(sample_file) from cuts_branch.adapters_umis
+        tuple val(sample_id), file(sample_file) from cut_samples_branch.umi_samples
     output:
-        tuple val(sample_id), file("extract_trim.fq") into extract_adapters
+        tuple val(sample_id), file("extract_trim.fq") into umi_extracted_samples
     when:
         params.extract_umis
     shell:
@@ -95,21 +95,21 @@ process extractUmis {
         """
 }
 
-// Combine "cuts_branch.adapters" and "extract_adapters" channels and
-// route to downstream processing steps. By definition of
-// "cuts.branch" only one of the input channels will have content.
-trimmed = cuts_branch.adapters.mix(extract_adapters)
+// Combine channels and route to downstream processing steps. By
+// definition of "cut_samples.branch" only one of the input channels
+// will have content.
+trimmed_samples = cut_samples_branch.non_umi_samples.mix(umi_extracted_samples)
 
 process hisat2rRNA {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}"
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(fastq) from trimmed
+        tuple val(sample_id), file(fastq) from trimmed_samples
         each file(indices) from rrna_indices
     output:
-        tuple val(sample_id), file("nonrRNA.fq") into non_rrnas
-        tuple val(sample_id), file("rRNA_map.sam") into rrna_maps
+        tuple val(sample_id), file("nonrRNA.fq") into non_rrna_fqs
+        tuple val(sample_id), file("rRNA_map.sam") into rrna_map_sams
     shell:
         """
         hisat2 --version
@@ -122,11 +122,11 @@ process hisat2ORF {
     publishDir "${params.dir_tmp}/${sample_id}"
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(fastq) from non_rrnas
+        tuple val(sample_id), file(fastq) from non_rrna_fqs
         each file(indices) from orf_indices
     output:
-        tuple val(sample_id), file("unaligned.fq") into unaligneds
-        tuple val(sample_id), file("orf_map.sam") into orf_maps
+        tuple val(sample_id), file("unaligned.fq") into unaligned_fqs
+        tuple val(sample_id), file("orf_map.sam") into orf_map_sams
     shell:
         """
         hisat2 --version
@@ -139,10 +139,10 @@ process trim5pMismatches {
     publishDir "${params.dir_tmp}/${sample_id}"
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(sam) from orf_maps
+        tuple val(sample_id), file(sam) from orf_map_sams
     output:
-        tuple val(sample_id), file("orf_map_clean.sam") into clean_orf_maps
-        tuple val(sample_id), file("trim_5p_mismatch.tsv") into trim_summaries
+        tuple val(sample_id), file("orf_map_clean.sam") into clean_orf_map_sams
+        tuple val(sample_id), file("trim_5p_mismatch.tsv") into trim_summary_tsvs
     shell:
         """
         python -m riboviz.tools.trim_5p_mismatch -m 2 -i ${sam} -o orf_map_clean.sam -s trim_5p_mismatch.tsv
@@ -154,9 +154,9 @@ process samViewSort {
     publishDir "${params.dir_tmp}/${sample_id}"
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(sam) from clean_orf_maps
+        tuple val(sample_id), file(sam) from clean_orf_map_sams
     output:
-        tuple val(sample_id), file("orf_map_clean.bam"), file("orf_map_clean.bam.bai") into bams
+        tuple val(sample_id), file("orf_map_clean.bam"), file("orf_map_clean.bam.bai") into orf_map_bams
     shell:
         """
         samtools --version
@@ -165,23 +165,43 @@ process samViewSort {
         """
 }
 
-// Route "bams" output channel depending on whether UMIs are to be
-// deduplicated.
-bams.branch {
+// Route "orf_map_bams" output channel depending on whether UMIs are
+// to be deduplicated or not.
+orf_map_bams.branch {
     umi_bams: params.dedup_umis
     umi_free_bams: ! params.dedup_umis
 }
-.set { bams_branch }
+.set { orf_map_bams_branch }
+
+// Split "orf_map_bams_branch.umi_bams" channel so can use as input to
+// multiple downstream tasks.
+orf_map_bams_branch.umi_bams.into { pre_dedup_group_bams; pre_dedup_bams }
+
+process groupUmisPreDedup {
+    tag "${sample_id}"
+    errorStrategy 'ignore'
+    publishDir "${params.dir_tmp}/${sample_id}"
+    input:
+        tuple val(sample_id), file(bam), file(bam_bai) from pre_dedup_group_bams
+    output:
+        tuple val(sample_id), file("pre_dedup_groups.tsv") into pre_dedup_groups_tsv
+    when:
+        params.group_umis
+    shell:
+        """
+        umi_tools group -I ${bam} --group-out pre_dedup_groups.tsv
+        """
+}
 
 process dedupUmis {
     tag "${sample_id}"
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}"
     input:
-        tuple val(sample_id), file(bam), file(bam_bai) from bams_branch.umi_bams
+        tuple val(sample_id), file(bam), file(bam_bai) from pre_dedup_bams
     output:
         tuple val(sample_id), file("dedup.bam"), file("dedup.bam.bai") into dedup_bams
-        tuple val(sample_id), file("dedup_stats*.tsv") into dedup_stats_tsv
+        tuple val(sample_id), file("dedup_stats*.tsv") into dedup_stats_tsvs
     when:
         params.dedup_umis
     shell:
@@ -192,10 +212,30 @@ process dedupUmis {
         """
 }
 
-// Combine "bams_branch.umi_free_bams" and "dedup_bams" channels
-// and route to downstream processing steps. By definition of
-// "bams_branch" only one of the input channels will have content.
-pre_output_bams = bams_branch.umi_free_bams.mix(dedup_bams)
+// Split "dedup_bams" channel so can use as input to multiple
+// downstream tasks.
+dedup_bams.into { post_dedup_group_bams; post_dedup_bams }
+
+process groupUmisPostDedup {
+    tag "${sample_id}"
+    errorStrategy 'ignore'
+    publishDir "${params.dir_tmp}/${sample_id}"
+    input:
+        tuple val(sample_id), file(bam), file(bam_bai) from post_dedup_group_bams
+    output:
+        tuple val(sample_id), file("post_dedup_groups.tsv") into post_dedup_groups_tsv
+    when:
+        params.group_umis
+    shell:
+        """
+        umi_tools group -I ${bam} --group-out post_dedup_groups.tsv
+        """
+}
+
+// Combine "orf_map_bams_branch.umi_free_bams" and "post_dedup_bams"
+// channels and route to downstream processing steps. By definition of
+// "orf_map_bams_branch" only one of the input channels will have content.
+pre_output_bams = orf_map_bams_branch.umi_free_bams.mix(post_dedup_bams)
 
 process outputBams {
     tag "${sample_id}"
@@ -214,14 +254,14 @@ process outputBams {
 
 // Split "output_bams" channel so can use as input to multiple
 // downstream tasks.
-output_bams.into { bams_bedgraphs; bams_summary }
+output_bams.into { bedgraph_bams; summary_bams }
 
 process makeBedgraphs {
     tag "${sample_id}"
     publishDir "${params.dir_out}/${sample_id}"
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(bam), file(bam_bai) from bams_bedgraphs
+        tuple val(sample_id), file(bam), file(bam_bai) from bedgraph_bams
     output:
         tuple val(sample_id), file("plus.bedgraph"), file("minus.bedgraph") into bedgraphs
     when:
@@ -238,7 +278,7 @@ process makeBedgraphs {
 // Could be used as a model for implementing collect_tpms.R task.
 process summarise {
     input:
-        val(samples) from bams_summary.map({name, f1, f2 -> return (name) }).collect()
+        val(samples) from summary_bams.map({name, bam, bam_bai -> return (name) }).collect()
     output:
         val(samples) into summary
     shell:
