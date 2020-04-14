@@ -181,6 +181,7 @@ process dedupUmis {
         tuple val(sample_id), file(bam), file(bam_bai) from bams_branch.umi_bams
     output:
         tuple val(sample_id), file("dedup.bam"), file("dedup.bam.bai") into dedup_bams
+        tuple val(sample_id), file("dedup_stats*.tsv") into dedup_stats_tsv
     when:
         params.dedup_umis
     shell:
