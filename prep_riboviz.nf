@@ -55,14 +55,13 @@ process cutAdapters {
     publishDir "${params.dir_tmp}/${sample_id}"
     input:
         tuple val(sample_id), file(sample_file) from samples
-        val adapters from params.adapters
     output:
         tuple val(sample_id), file("trim.fq") into cut_adapters
     shell:
         // TODO configure -j 0 in a more Nextflow-esque way.
         """
         echo Trimming ${sample_id}
-        cutadapt --trim-n -O 1 -m 5 -a ${adapters} -o trim.fq ${sample_file} -j 0
+        cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} -o trim.fq ${sample_file} -j 0
         """
 }
 
