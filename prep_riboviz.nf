@@ -73,7 +73,6 @@ process cutAdapters {
     output:
         tuple val(sample_id), file("trim.fq") into cut_samples
     shell:
-        // TODO configure -j 0 in a more Nextflow-esque way.
         """
         cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} -o trim.fq ${sample_file} -j 0
         """
@@ -288,7 +287,7 @@ process bamToH5 {
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(bam), file(bam_bai) from summary_bams
-        each gff from orf_gff_file
+        each file(gff) from orf_gff_file
     output:
         tuple val(sample_id), file("${sample_id}.h5") into h5s
     when:
