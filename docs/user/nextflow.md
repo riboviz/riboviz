@@ -1,6 +1,6 @@
 # RiboViz Nextflow workflow
 
-[Nextflow](https://www.nextflow.io/) is a workflow management system. The file `riboviz.nf` is a port of the RiboViz Python workflow, `riboviz.tools.prep_riboviz`, into a Nextflow workflow. In a future release, the RiboViz Python workflow will be deprecated by this Nextflow workflow.
+[Nextflow](https://www.nextflow.io/) is a workflow management system. The file `prep_riboviz.nf` is a port of the RiboViz Python workflow, `riboviz.tools.prep_riboviz`, into a Nextflow workflow. In a future release, the RiboViz Python workflow will be deprecated by this Nextflow workflow.
 
 For more information on Nextflow, see their [Documentation](https://www.nextflow.io/docs/latest/index.html).
 
@@ -145,7 +145,7 @@ The Nextflow workflow uses the same YAML configuration file as `riboviz.tools.pr
 Run:
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflow run riboviz.nf \
+$ PYTHONPATH=$HOME/riboviz nextflow run prep_riboviz.nf \
     -params-file <CONFIG_FILE>  -ansi-log false
 ```
 
@@ -158,10 +158,10 @@ where:
 For example, to run the vignette:
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflow run riboviz.nf \
+$ PYTHONPATH=$HOME/riboviz nextflow run prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false
 N E X T F L O W  ~  version 20.01.0
-Launching `riboviz.nf` [furious_bell] - revision: 134fcb8f6f
+Launching `prep_riboviz.nf` [furious_bell] - revision: 134fcb8f6f
 Missing file (NotHere): example_missing_file.fastq.gz
 [5c/676372] Submitted process > buildIndicesORF (YAL_CDS_w_250)
 [f7/6fcdf1] Submitted process > cutAdapters (WT3AT)
@@ -217,7 +217,7 @@ yeast_rRNA.8.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yea
 
 The `.ht2` files are symbolic links to the outputs of process `e5/ccf3e6`, an invocation of task `buildIndicesrRNA`.
 
-`riboviz.nf` uses Nextflow's [publishDir](https://www.nextflow.io/docs/latest/process.html#publishdir) directive which allows files to be published to specific directories outwith `work/`. By default, the files in this directory are symlinked to those in `work/`. `riboviz.nf` uses this to publishes files to the index (`dir_index`), temporary (`dir_tmp`), and output (`dir_out`) directories specified in the configuration file.
+`prep_riboviz.nf` uses Nextflow's [publishDir](https://www.nextflow.io/docs/latest/process.html#publishdir) directive which allows files to be published to specific directories outwith `work/`. By default, the files in this directory are symlinked to those in `work/`. `prep_riboviz.nf` uses this to publishes files to the index (`dir_index`), temporary (`dir_tmp`), and output (`dir_out`) directories specified in the configuration file.
 
 ---
 
@@ -254,7 +254,7 @@ Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 `-with-report`, `-with-timeline` and `-with-dag` flags allow you to reques that Nextflow create reports on a run and an image of the task execution workflow. For example:
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflow run riboviz.nf \
+$ PYTHONPATH=$HOME/riboviz nextflow run prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false \
     -with-report report.html -with-timeline timeline.html \
     -with-dag workflow.svg
@@ -264,13 +264,13 @@ $ PYTHONPATH=$HOME/riboviz nextflow run riboviz.nf \
 
 ## Incremental build
 
-If processing of a sample fails then `riboviz.nf` has been written to ensure that this does not prevent the processing of other samples. For example, if the file for the vignette sample `WTnone` was corrupt in some way:
+If processing of a sample fails then `prep_riboviz.nf` has been written to ensure that this does not prevent the processing of other samples. For example, if the file for the vignette sample `WTnone` was corrupt in some way:
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflow run riboviz.nf \
+$ PYTHONPATH=$HOME/riboviz nextflow run prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false
 N E X T F L O W  ~  version 20.01.0
-Launching `riboviz.nf` [mad_heisenberg] - revision: 134fcb8f6f
+Launching `prep_riboviz.nf` [mad_heisenberg] - revision: 134fcb8f6f
 Missing file (NotHere): example_missing_file.fastq.gz
 [a4/e3fc5d] Submitted process > cutAdapters (WT3AT)
 [03/f1cfc3] Submitted process > cutAdapters (WTnone)
@@ -287,17 +287,17 @@ Processed samples: WT3AT
 If a workflow fails, then a `-resume` option allows it to be rerun from the point at which it failed (for example, after fixing the issue with the file for `WTnone`):
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflow run riboviz.nf \
+$ PYTHONPATH=$HOME/riboviz nextflow run prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false -resume
 ```
 
 This feature also supports incremental build. For example, given a `vignette_config.yaml` which specifies only sample `WTnone`, running Nextflow gives:
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflon riboviz.nf \
+$ PYTHONPATH=$HOME/riboviz nextflon prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false
 N E X T F L O W  ~  version 20.01.0
-Launching `riboviz.nf` [serene_noether] - revision: 26bb98ec7b
+Launching `prep_riboviz.nf` [serene_noether] - revision: 26bb98ec7b
 Missing file (NotHere): example_missing_file.fastq.gz
 [bf/ddd7de] Submitted process > cutAdapters (WTnone)
 [0d/f82601] Submitted process > buildIndicesrRNA (yeast_rRNA)
@@ -312,10 +312,10 @@ Processed samples: WTnone
 If `WT3AT` is then added to `vignette_config.yaml` and Nextflow is run with the `-resume` option, then only the processing for `WT3AT` is done, the cached outputs to date for `WTnone` being reused, not recomputed:
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflow run riboviz.nf \
+$ PYTHONPATH=$HOME/riboviz nextflow run prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false -resume
 N E X T F L O W  ~  version 20.01.0
-Launching `riboviz.nf` [desperate_coulomb] - revision: 26bb98ec7b
+Launching `prep_riboviz.nf` [desperate_coulomb] - revision: 26bb98ec7b
 Missing file (NotHere): example_missing_file.fastq.gz
 [80/79a5f4] Submitted process > cutAdapters (WT3AT)
 [bf/ddd7de] Cached process > cutAdapters (WTnone)
