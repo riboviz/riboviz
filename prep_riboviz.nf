@@ -6,12 +6,20 @@ params.make_bedgraph = true
 params.extract_umis = false
 params.dedup_umis = false
 params.group_umis = false
+if (! params.secondary_id) {
+    secondary_id = "NULL"
+} else {
+    secondary_id = params.secondary_id
+}
 
 rrna_fasta = Channel.fromPath(params.rrna_fasta_file,
                               checkIfExists: true)
 
 orf_fasta = Channel.fromPath(params.orf_fasta_file,
                              checkIfExists: true)
+
+orf_gff_file = Channel.fromPath(params.orf_gff_file,
+                                checkIfExists: true)
 
 // Create list of samples whose files exist.
 samples = []
@@ -274,11 +282,40 @@ process makeBedgraphs {
         """
 }
 
+process bamToH5 {
+    tag "${sample_id}"
+    publishDir "${params.dir_out}/${sample_id}"
+    errorStrategy 'ignore'
+    input:
+        tuple val(sample_id), file(bam), file(bam_bai) from summary_bams
+        each gff from orf_gff_file
+    output:
+        tuple val(sample_id), file("${sample_id}.h5") into h5s
+    when:
+        params.make_bedgraph
+    shell:
+        """
+        Rscript --vanilla /home/ubuntu/riboviz/rscripts/bam_to_h5.R \
+           --num-processes=${params.num_processes} \
+           --min-read-length=${params.min_read_length} \
+           --max-read-length=${params.max_read_length} \
+           --buffer=${params.buffer} \
+           --primary-id=${params.primary_id} \
+           --secondary-id=${secondary_id} \
+           --dataset=${params.dataset} \
+           --bam-file=${bam} \
+           --hd-file=${sample_id}.h5 \
+           --orf-gff-file=${gff} \
+           --is-riboviz-gff=${params.is_riboviz_gff} \
+           --stop-in-cds=${params.stop_in_cds}
+        """
+}
+
 // Collect sample IDs and print list.
 // Could be used as a model for implementing collect_tpms.R task.
 process summarise {
     input:
-        val(samples) from summary_bams.map({name, bam, bam_bai -> return (name) }).collect()
+        val(samples) from h5s.map({name, h5 -> return (name) }).collect()
     output:
         val(samples) into summary
     shell:
