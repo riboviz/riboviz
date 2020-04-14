@@ -17,9 +17,15 @@ rrna_fasta = Channel.fromPath(params.rrna_fasta_file,
 
 orf_fasta = Channel.fromPath(params.orf_fasta_file,
                              checkIfExists: true)
+// Split "orf_fasta" channel so can use as input to multiple
+// downstream tasks.
+orf_fasta.into { orf_fasta_index; orf_fasta_generate_stats_figs }
 
-orf_gff_file = Channel.fromPath(params.orf_gff_file,
-                                checkIfExists: true)
+orf_gff = Channel.fromPath(params.orf_gff_file,
+                           checkIfExists: true)
+// Split "orf_fasta" channel so can use as input to multiple
+// downstream tasks.
+orf_gff.into { orf_gff_bam_to_h5; orf_gff_generate_stats_figs }
 
 // Create list of samples whose files exist.
 samples = []
@@ -52,7 +58,7 @@ process buildIndicesORF {
     tag "${params.orf_index_prefix}"
     publishDir "${params.dir_index}"
     input:
-        file fasta from orf_fasta
+        file fasta from orf_fasta_index
     output:
         file "${params.orf_index_prefix}.*.ht2" into orf_indices
     when:
@@ -287,11 +293,9 @@ process bamToH5 {
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(bam), file(bam_bai) from summary_bams
-        each file(gff) from orf_gff_file
+        each file(gff) from orf_gff_bam_to_h5
     output:
         tuple val(sample_id), file("${sample_id}.h5") into h5s
-    when:
-        params.make_bedgraph
     shell:
         """
         Rscript --vanilla /home/ubuntu/riboviz/rscripts/bam_to_h5.R \
@@ -310,11 +314,57 @@ process bamToH5 {
         """
 }
 
+t_rna = Channel.fromPath(params.t_rna_file,
+                         checkIfExists: true)
+codon_positions = Channel.fromPath(params.codon_positions_file,
+                                   checkIfExists: true)
+features = Channel.fromPath(params.features_file,
+                            checkIfExists: true)
+asite_disp_length = Channel.fromPath(params.asite_disp_length_file,
+                                     checkIfExists: true)
+
+process generateStatsFigs {
+    tag "${sample_id}"
+    publishDir "${params.dir_out}/${sample_id}"
+    errorStrategy 'ignore'
+    input:
+        tuple val(sample_id), file(h5) from h5s
+	each file(fasta) from orf_fasta_generate_stats_figs
+        each file(gff) from orf_gff_generate_stats_figs
+	each file(t_rna) from t_rna
+	each file(codon_positions) from codon_positions
+	each file(features) from features
+	each file(asite_disp_length) from asite_disp_length
+    output:
+        tuple val(sample_id), file("tpms.tsv") into tpms_tsv
+    shell:
+        """
+        Rscript --vanilla /home/ubuntu/riboviz/rscripts/generate_stats_figs.R \
+           --num-processes=${params.num_processes} \
+           --min-read-length=${params.min_read_length} \
+           --max-read-length=${params.max_read_length} \
+           --buffer=${params.buffer} \
+           --primary-id=${params.primary_id} \
+           --dataset=${params.dataset} \
+           --hd-file=${h5} \
+           --orf-fasta-file=${fasta} \
+           --rpf=${params.rpf} \
+           --output-dir=. \
+           --do-pos-sp-nt-freq=${params.do_pos_sp_nt_freq} \
+           --t-rna-file=${t_rna} \
+           --codon-positions-file=${codon_positions} \
+           --features-file=${features} \
+	   --orf-gff-file=${gff} \
+           --asite-disp-length-file=${asite_disp_length} \
+           --count-threshold=${params.count_threshold}
+        """
+}
+
 // Collect sample IDs and print list.
 // Could be used as a model for implementing collect_tpms.R task.
 process summarise {
     input:
-        val(samples) from h5s.map({name, h5 -> return (name) }).collect()
+        val(samples) from tpms_tsv.map({name, tpms_tsv -> return (name) }).collect()
     output:
         val(samples) into summary
     shell:
