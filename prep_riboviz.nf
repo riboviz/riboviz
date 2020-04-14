@@ -1,7 +1,28 @@
 #!/usr/bin/env nextflow
 
+// Initialise optional variables to avoid "WARN: Access to undefined
+// parameter `<PARAM>`" when running Nextflow.
+params.make_bedgraph = true
+params.extract_umis = false
+params.dedup_umis = false
+params.group_umis = false
+
 rrna_fasta = Channel.fromPath(params.rrna_fasta_file,
                               checkIfExists: true)
+
+orf_fasta = Channel.fromPath(params.orf_fasta_file,
+                             checkIfExists: true)
+
+// Create list of samples whose files exist.
+samples = []
+for (entry in params.fq_files) {
+    sample_file = file("${params.dir_in}/${entry.value}")
+    if (sample_file.exists()) {
+        samples.add([entry.key, sample_file])
+    } else {
+        println "Missing file ($entry.key): $entry.value"
+    }
+}
 
 process buildIndicesrRNA {
     tag "${params.rrna_index_prefix}"
@@ -19,9 +40,6 @@ process buildIndicesrRNA {
         """
 }
 
-orf_fasta = Channel.fromPath(params.orf_fasta_file,
-                             checkIfExists: true)
-
 process buildIndicesORF {
     tag "${params.orf_index_prefix}"
     publishDir "${params.dir_index}"
@@ -38,17 +56,6 @@ process buildIndicesORF {
         """
 }
 
-// Filter samples down to those whose files exist.
-samples = []
-for (entry in params.fq_files) {
-    sample_file = file("${params.dir_in}/${entry.value}")
-    if (sample_file.exists()) {
-        samples.add([entry.key, sample_file])
-    } else {
-        println "Missing file ($entry.key): $entry.value"
-    }
-}
-
 process cutAdapters {
     tag "${sample_id}"
     errorStrategy 'ignore'
@@ -56,7 +63,7 @@ process cutAdapters {
     input:
         tuple val(sample_id), file(sample_file) from samples
     output:
-        tuple val(sample_id), file("trim.fq") into cut_adapters
+        tuple val(sample_id), file("trim.fq") into cuts
     shell:
         // TODO configure -j 0 in a more Nextflow-esque way.
         """
@@ -64,12 +71,41 @@ process cutAdapters {
         """
 }
 
+// Route "cuts" output channel depending on whether UMIs are to be
+// extracted.
+cuts.branch {
+    adapters_umis: params.extract_umis
+    adapters: ! params.extract_umis
+}
+.set { cuts_branch }
+
+process extractUmis {
+    tag "${sample_id}"
+    errorStrategy 'ignore'
+    publishDir "${params.dir_tmp}/${sample_id}"
+    input:
+        tuple val(sample_id), file(sample_file) from cuts_branch.adapters_umis
+    output:
+        tuple val(sample_id), file("extract_trim.fq") into extract_adapters
+    when:
+        params.extract_umis
+    shell:
+        """
+        umi_tools extract -I ${sample_file} --bc-pattern="${params.umi_regexp}" --extract-method=regex -S extract_trim.fq
+        """
+}
+
+// Combine "cuts_branch.adapters" and "extract_adapters" channels and
+// route to downstream processing steps. By definition of
+// "cuts.branch" only one of the input channels will have content.
+trimmed = cuts_branch.adapters.mix(extract_adapters)
+
 process hisat2rRNA {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}"
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(fastq) from cut_adapters
+        tuple val(sample_id), file(fastq) from trimmed
         each file(indices) from rrna_indices
     output:
         tuple val(sample_id), file("nonrRNA.fq") into non_rrnas
@@ -115,22 +151,69 @@ process trim5pMismatches {
 
 process samViewSort {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}"
+    publishDir "${params.dir_tmp}/${sample_id}"
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(sam) from clean_orf_maps
     output:
-        tuple val(sample_id), file("${sample_id}.bam"), file("${sample_id}.bam.bai") into bams
+        tuple val(sample_id), file("orf_map_clean.bam"), file("orf_map_clean.bam.bai") into bams
     shell:
         """
         samtools --version
-        samtools view -b ${sam} | samtools sort -@ ${params.num_processes} -O bam -o ${sample_id}.bam -
-        samtools index ${sample_id}.bam
+        samtools view -b ${sam} | samtools sort -@ ${params.num_processes} -O bam -o orf_map_clean.bam -
+        samtools index orf_map_clean.bam
         """
 }
 
-// Split "bams" channel so can use as input to multiple downstream tasks.
-bams.into { bams_bedgraphs; bams_summary }
+// Route "bams" output channel depending on whether UMIs are to be
+// deduplicated.
+bams.branch {
+    umi_bams: params.dedup_umis
+    umi_free_bams: ! params.dedup_umis
+}
+.set { bams_branch }
+
+process dedupUmis {
+    tag "${sample_id}"
+    errorStrategy 'ignore'
+    publishDir "${params.dir_tmp}/${sample_id}"
+    input:
+        tuple val(sample_id), file(bam), file(bam_bai) from bams_branch.umi_bams
+    output:
+        tuple val(sample_id), file("dedup.bam"), file("dedup.bam.bai") into dedup_bams
+    when:
+        params.dedup_umis
+    shell:
+        """
+        umi_tools dedup -I ${bam} -S dedup.bam --output-stats=dedup_stats
+        samtools --version
+        samtools index dedup.bam
+        """
+}
+
+// Combine "bams_branch.umi_free_bams" and "dedup_bams" channels
+// and route to downstream processing steps. By definition of
+// "bams_branch" only one of the input channels will have content.
+pre_output_bams = bams_branch.umi_free_bams.mix(dedup_bams)
+
+process outputBams {
+    tag "${sample_id}"
+    publishDir "${params.dir_out}/${sample_id}"
+    errorStrategy 'ignore'
+    input:
+        tuple val(sample_id), file(bam), file(bam_bai) from pre_output_bams
+    output:
+        tuple val(sample_id), file("${sample_id}.bam"), file("${sample_id}.bam.bai") into output_bams
+    shell:
+        """
+        cp ${bam} ${sample_id}.bam
+        cp ${bam_bai} ${sample_id}.bam.bai
+        """
+}
+
+// Split "output_bams" channel so can use as input to multiple
+// downstream tasks.
+output_bams.into { bams_bedgraphs; bams_summary }
 
 process makeBedgraphs {
     tag "${sample_id}"
