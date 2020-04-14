@@ -60,7 +60,6 @@ process cutAdapters {
     shell:
         // TODO configure -j 0 in a more Nextflow-esque way.
         """
-        echo Trimming ${sample_id}
         cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} -o trim.fq ${sample_file} -j 0
         """
 }
@@ -68,6 +67,7 @@ process cutAdapters {
 process hisat2rRNA {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}"
+    errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(fastq) from cut_adapters
         each file(indices) from rrna_indices
@@ -84,6 +84,7 @@ process hisat2rRNA {
 process hisat2ORF {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}"
+    errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(fastq) from non_rrnas
         each file(indices) from orf_indices
@@ -100,6 +101,7 @@ process hisat2ORF {
 process trim5pMismatches {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}"
+    errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(sam) from orf_maps
     output:
@@ -111,11 +113,28 @@ process trim5pMismatches {
         """
 }
 
+process samViewSort {
+    tag "${sample_id}"
+    publishDir "${params.dir_out}/${sample_id}"
+    errorStrategy 'ignore'
+    input:
+        tuple val(sample_id), file(sam) from clean_orf_maps
+    output:
+        tuple val(sample_id), file("${sample_id}.bam"), file("${sample_id}.bam.bai") into bams
+    shell:
+        """
+        samtools --version
+        samtools view -b ${sam} | samtools sort -@ ${params.num_processes} -O bam -o ${sample_id}.bam -
+        samtools index ${sample_id}.bam
+        """
+}
+
+
 // Collect sample IDs and print list.
 // Could be used as a model for implementing collect_tpms.R task.
 process summarise {
     input:
-        val(samples) from clean_orf_maps.map({name, f -> return (name) }).collect()
+        val(samples) from bams.map({name, f1, f2 -> return (name) }).collect()
     output:
         val(samples) into summary
     shell:
