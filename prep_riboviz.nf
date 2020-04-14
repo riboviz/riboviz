@@ -129,12 +129,32 @@ process samViewSort {
         """
 }
 
+// Split "bams" channel so can use as input to multiple downstream tasks.
+bams.into { bams_bedgraphs; bams_summary }
+
+process makeBedgraphs {
+    tag "${sample_id}"
+    publishDir "${params.dir_out}/${sample_id}"
+    errorStrategy 'ignore'
+    input:
+        tuple val(sample_id), file(bam), file(bam_bai) from bams_bedgraphs
+    output:
+        tuple val(sample_id), file("plus.bedgraph"), file("minus.bedgraph") into bedgraphs
+    when:
+        params.make_bedgraph
+    shell:
+        """
+        bedtools --version
+        bedtools genomecov -ibam ${bam} -trackline -bga -5 -strand + > plus.bedgraph
+        bedtools genomecov -ibam ${bam} -trackline -bga -5 -strand - > minus.bedgraph
+        """
+}
 
 // Collect sample IDs and print list.
 // Could be used as a model for implementing collect_tpms.R task.
 process summarise {
     input:
-        val(samples) from bams.map({name, f1, f2 -> return (name) }).collect()
+        val(samples) from bams_summary.map({name, f1, f2 -> return (name) }).collect()
     output:
         val(samples) into summary
     shell:
