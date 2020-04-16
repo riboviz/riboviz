@@ -76,7 +76,7 @@ TO DO
 
 # Examples still needed
 
-* fixed-length extensions but still removing nearby UTR introns. We could adapt YBL72ish)
+* fixed-length extensions but still removing nearby UTR introns. We could adapt YBL72ish.
 * ensembl format gff
 * gff with 3'UTR introns
-* examples with multiple ORFs on a transcript, drosophila or human
+* examples with multiple ORFs on a transcript, drosophila/human/bacterial?
