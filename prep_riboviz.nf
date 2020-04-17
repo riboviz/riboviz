@@ -11,6 +11,11 @@ if (! params.secondary_id) {
 } else {
     secondary_id = params.secondary_id
 }
+if (params.dedup_umis) {
+    if (! params.extract_umis) {
+        println("WARNING: dedup_umis was TRUE but extract_umis was FALSE.")
+    }
+}
 
 rrna_fasta = Channel.fromPath(params.rrna_fasta_file,
                               checkIfExists: true)
@@ -34,7 +39,7 @@ for (entry in params.fq_files) {
     if (sample_file.exists()) {
         samples.add([entry.key, sample_file])
     } else {
-        println "Missing file ($entry.key): $entry.value"
+        println("WARNING: Missing file ($entry.key): $entry.value")
     }
 }
 
@@ -395,4 +400,4 @@ process collateTpms {
         """
 }
 
-completed_samples.subscribe { println "Processed samples: ${it.join(' ')} "}
+completed_samples.subscribe { println("Processed samples: ${it.join(' ')}") }
