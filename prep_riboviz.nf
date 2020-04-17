@@ -204,7 +204,7 @@ process groupUmisPreDedup {
     output:
         tuple val(sample_id), file("pre_dedup_groups.tsv") into pre_dedup_groups_tsv
     when:
-        params.group_umis
+        params.dedup_umis && params.group_umis
     shell:
         """
         umi_tools group -I ${bam} --group-out pre_dedup_groups.tsv
@@ -243,7 +243,7 @@ process groupUmisPostDedup {
     output:
         tuple val(sample_id), file("post_dedup_groups.tsv") into post_dedup_groups_tsv
     when:
-        params.group_umis
+        params.dedup_umis && params.group_umis
     shell:
         """
         umi_tools group -I ${bam} --group-out post_dedup_groups.tsv
