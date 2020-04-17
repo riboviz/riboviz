@@ -13,7 +13,7 @@ Usage:
 ```console
 $ git clone https://github.com/riboviz/<REPOSITORY>
 $ cd riboviz
-$ pytest riboviz/test/regression/test_vignette.py --expected=$HOME/<REPOSITORY>
+$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/<REPOSITORY>
 ```
 
 For full instructions see the RiboViz developer guide in the RiboViz repository.
