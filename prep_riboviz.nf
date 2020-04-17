@@ -6,6 +6,7 @@ params.make_bedgraph = true
 params.extract_umis = false
 params.dedup_umis = false
 params.group_umis = false
+params.count_reads = true
 if (! params.secondary_id) {
     secondary_id = "NULL"
 } else {
@@ -382,7 +383,6 @@ process prepareCollateTpms {
 }
 
 process collateTpms {
-    errorStrategy 'ignore'
     publishDir "${params.dir_out}"
     input:
         val(sample_ids) from sample_tpms_id.collect()
@@ -400,4 +400,71 @@ process collateTpms {
         """
 }
 
-completed_samples.subscribe { println("Processed samples: ${it.join(' ')}") }
+// Create YAML file with fq_files and multiplex_fq_files
+// entries from configuration.
+import org.yaml.snakeyaml.Yaml
+yaml = new Yaml()
+Map params_samples = [:]
+if (params.containsKey("fq_files")) {
+    params_samples.fq_files = params.fq_files
+}
+if (params.containsKey("multiplex_fq_files")) {
+    params_samples.multiplex_fq_files = params.multiplex_fq_files
+}
+samples_yaml = yaml.dump(params_samples)
+// TODO combine with above so only existing files are checked.
+/**
+    samples = []
+    for (entry in params.fq_files) {
+        sample_file = file("${params.dir_in}/${entry.value}")
+        if (sample_file.exists()) {
+            samples.add([entry.key, sample_file])
+    }
+*/
+// TODO can this be made dependent on completed_samples?
+
+process createSamplesFile {
+    // TODO remove
+    publishDir "${params.dir_out}"
+    input:
+        val(samples_yaml) from samples_yaml
+    output:
+        file("samples.yaml") into samples_yaml_file
+    shell:
+        """
+        echo "${samples_yaml}" > samples.yaml
+        """
+}
+
+inputs = Channel.fromPath(params.dir_in,
+                          checkIfExists: true)
+tmp = Channel.fromPath(params.dir_tmp,
+                       checkIfExists: true)
+outputs = Channel.fromPath(params.dir_out,
+                           checkIfExists: true)
+
+// TODO ensure this is only done when all other tasks complete
+// TODO Make dependent on completed_samples?
+process countReads {
+    publishDir "${params.dir_out}"
+    input:
+        file inputs from inputs
+        file tmp from tmp
+        file outputs from outputs
+	file samples_yaml from samples_yaml_file
+	val completed_samples from completed_samples
+    output:
+        file "read_counts.tsv" into read_counts_tsv
+        val sample_ids  into finished
+    shell:
+        """
+        python -m riboviz.tools.count_reads \
+           -c ${samples_yaml} \
+           -i ${inputs} \
+           -t ${tmp} \
+           -o ${outputs} \
+           -r read_counts.tsv  
+        """
+}
+
+finished.subscribe { println("Processed samples: ${it.join(' ')}") }
