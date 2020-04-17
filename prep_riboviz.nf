@@ -3,6 +3,11 @@
 import org.yaml.snakeyaml.Yaml
 
 /*
+ * Optional inputs follow pattern
+ * https://github.com/nextflow-io/patterns/blob/master/optional-input.nf
+ */
+
+/*
  * Validate configuration.
  */
 // Initialise optional variables to avoid "WARN: Access to undefined
@@ -71,8 +76,14 @@ t_rna = Channel.fromPath(params.t_rna_file,
                          checkIfExists: true)
 codon_positions = Channel.fromPath(params.codon_positions_file,
                                    checkIfExists: true)
-features = Channel.fromPath(params.features_file,
-                            checkIfExists: true)
+if (params.containsKey('features_file')) {
+    features = Channel.fromPath(params.features_file,
+                                checkIfExists: true)
+    do_features = true
+} else {
+    features = file("NA")
+    do_features = false
+}
 asite_disp_length = Channel.fromPath(params.asite_disp_length_file,
                                      checkIfExists: true)
 
@@ -396,7 +407,9 @@ process generateStatsFigs {
         tuple val(sample_id), file("tpms.tsv") into tpms_tsv
         tuple val(sample_id), file("*.pdf") into stats_figs_pdfs
         tuple val(sample_id), file("*.tsv") into stats_figs_tsvs
+        tuple val(sample_id), file("features.pdf") optional (! do_features) into features_tsv
     shell:
+        features_flag = do_features ? "--features-file=${features}" : ''
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/generate_stats_figs.R \
            --num-processes=${params.num_processes} \
@@ -412,12 +425,14 @@ process generateStatsFigs {
            --do-pos-sp-nt-freq=${params.do_pos_sp_nt_freq} \
            --t-rna-file=${t_rna} \
            --codon-positions-file=${codon_positions} \
-           --features-file=${features} \
+           ${features_flag} \
 	   --orf-gff-file=${gff} \
            --asite-disp-length-file=${asite_disp_length} \
            --count-threshold=${params.count_threshold}
         """
 }
+
+features_tsv.subscribe { println("Output_features: ${it.join(' ')}") }
 
 process prepareCollateTpms {
     tag "${sample_id}"
