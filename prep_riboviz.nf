@@ -210,6 +210,7 @@ process trim5pMismatches {
     publishDir "${params.dir_tmp}/${sample_id}"
     errorStrategy 'ignore'
     input:
+        env PYTHONPATH from workflow.projectDir
         tuple val(sample_id), file(sam) from orf_map_sams
     output:
         tuple val(sample_id), file("orf_map_clean.sam") into clean_orf_map_sams
@@ -363,7 +364,7 @@ process bamToH5 {
         tuple val(sample_id), file("${sample_id}.h5") into h5s
     shell:
         """
-        Rscript --vanilla /home/ubuntu/riboviz/rscripts/bam_to_h5.R \
+        Rscript --vanilla ${workflow.projectDir}/rscripts/bam_to_h5.R \
            --num-processes=${params.num_processes} \
            --min-read-length=${params.min_read_length} \
            --max-read-length=${params.max_read_length} \
@@ -397,7 +398,7 @@ process generateStatsFigs {
         tuple val(sample_id), file("*.tsv") into stats_figs_tsvs
     shell:
         """
-        Rscript --vanilla /home/ubuntu/riboviz/rscripts/generate_stats_figs.R \
+        Rscript --vanilla ${workflow.projectDir}/rscripts/generate_stats_figs.R \
            --num-processes=${params.num_processes} \
            --min-read-length=${params.min_read_length} \
            --max-read-length=${params.max_read_length} \
@@ -442,7 +443,7 @@ process collateTpms {
         val sample_ids into completed_samples
     shell:
         """
-        Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R \
+        Rscript --vanilla ${workflow.projectDir}/rscripts/collate_tpms.R \
             --sample-subdirs=False \
             --output-dir=. \
             --tpms-file=TPMs_collated.tsv \
@@ -466,6 +467,7 @@ count_reads_config_yaml = new Yaml().dump(count_reads_config)
 process countReads {
     publishDir "${params.dir_out}"
     input:
+        env PYTHONPATH from workflow.projectDir
         val count_reads_config_yaml from count_reads_config_yaml
 	// Force dependency on output of collateTpms so this process
         // is only run when all other processing has completed.

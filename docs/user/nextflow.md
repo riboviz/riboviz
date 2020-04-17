@@ -145,36 +145,47 @@ The Nextflow workflow uses the same YAML configuration file as `riboviz.tools.pr
 Run:
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflow run prep_riboviz.nf \
-    -params-file <CONFIG_FILE>  -ansi-log false
+$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE>  -ansi-log false
 ```
 
 where:
 
-* `PYTHONPATH=$HOME/riboviz`: allows Python commands invoked by Nextflow to find RiboViz scripts (`riboviz.tools.trim_5p_mismatch` etc.)
 * `<CONFIG_FILE>`: path to a YAML configuration file.
 * `-ansi-log false`: requests that each invocation of a Nextflow task is displayed on a separate line.
 
 For example, to run the vignette:
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflow run prep_riboviz.nf \
-    -params-file vignette/vignette_config.yaml -ansi-log false
+$ nextflow run prep_riboviz.nf \
+  -params-file vignette/vignette_config.yaml -ansi-log false
 N E X T F L O W  ~  version 20.01.0
-Launching `prep_riboviz.nf` [furious_bell] - revision: 134fcb8f6f
-Missing file (NotHere): example_missing_file.fastq.gz
-[5c/676372] Submitted process > buildIndicesORF (YAL_CDS_w_250)
-[f7/6fcdf1] Submitted process > cutAdapters (WT3AT)
-[e5/ccf3e6] Submitted process > buildIndicesrRNA (yeast_rRNA)
-[5b/ff17ba] Submitted process > cutAdapters (WTnone)
-[ad/1e7c54] Submitted process > hisat2rRNA (WTnone)
-[e4/deff35] Submitted process > hisat2rRNA (WT3AT)
-[1b/642455] Submitted process > hisat2ORF (WTnone)
-[b9/aaf172] Submitted process > trim5pMismatches (WTnone)
-[e8/8514a6] Submitted process > hisat2ORF (WT3AT)
-[23/a980bc] Submitted process > trim5pMismatches (WT3AT)
-[b4/837e33] Submitted process > summarise
-Processed samples: WTnone WT3AT 
+Launching `prep_riboviz.nf` [spontaneous_tuckerman] - revision: df3abc34a0
+WARNING: Missing file (NotHere): example_missing_file.fastq.gz
+[ac/bc3d6e] Submitted process > buildIndicesORF (YAL_CDS_w_250)
+[ca/426ea2] Submitted process > buildIndicesrRNA (yeast_rRNA)
+[d3/152a62] Submitted process > cutAdapters (WT3AT)
+[47/47d57a] Submitted process > cutAdapters (WTnone)
+[a0/38d1c6] Submitted process > hisat2rRNA (WTnone)
+[ba/49d366] Submitted process > hisat2rRNA (WT3AT)
+[59/2a044b] Submitted process > hisat2ORF (WTnone)
+[11/0568c7] Submitted process > trim5pMismatches (WTnone)
+[3a/6d2466] Submitted process > samViewSort (WTnone)
+[9c/78d8f1] Submitted process > outputBams (WTnone)
+[d7/f246eb] Submitted process > bamToH5 (WTnone)
+[d3/ab8201] Submitted process > makeBedgraphs (WTnone)
+[18/3b8305] Submitted process > hisat2ORF (WT3AT)
+[87/5efa62] Submitted process > trim5pMismatches (WT3AT)
+[82/542fe7] Submitted process > samViewSort (WT3AT)
+[fc/7f025c] Submitted process > outputBams (WT3AT)
+[1b/caab6a] Submitted process > makeBedgraphs (WT3AT)
+[99/3f0ed1] Submitted process > bamToH5 (WT3AT)
+[15/7ca6e7] Submitted process > generateStatsFigs (WTnone)
+[96/ff6cc3] Submitted process > generateStatsFigs (WT3AT)
+[79/9d4a2a] Submitted process > prepareCollateTpms (WTnone)
+[47/d5b87b] Submitted process > prepareCollateTpms (WT3AT)
+[27/60cbbd] Submitted process > collateTpms
+Processed samples: WTnone WT3AT
+[11/d033a5] Submitted process > countReads
 ```
 
 ---
@@ -254,7 +265,7 @@ Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 `-with-report`, `-with-timeline` and `-with-dag` flags allow you to reques that Nextflow create reports on a run and an image of the task execution workflow. For example:
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflow run prep_riboviz.nf \
+$ nextflow run prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false \
     -with-report report.html -with-timeline timeline.html \
     -with-dag workflow.svg
@@ -267,7 +278,7 @@ $ PYTHONPATH=$HOME/riboviz nextflow run prep_riboviz.nf \
 If processing of a sample fails then `prep_riboviz.nf` has been written to ensure that this does not prevent the processing of other samples. For example, if the file for the vignette sample `WTnone` was corrupt in some way:
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflow run prep_riboviz.nf \
+$ nextflow run prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false
 N E X T F L O W  ~  version 20.01.0
 Launching `prep_riboviz.nf` [mad_heisenberg] - revision: 134fcb8f6f
@@ -280,21 +291,20 @@ Missing file (NotHere): example_missing_file.fastq.gz
 [35/1c7ac8] Submitted process > hisat2rRNA (WT3AT)
 [1a/af8ff1] Submitted process > hisat2ORF (WT3AT)
 [c4/2f18a2] Submitted process > trim5pMismatches (WT3AT)
-[df/28719b] Submitted process > summarise
-Processed samples: WT3AT 
+...
 ```
 
 If a workflow fails, then a `-resume` option allows it to be rerun from the point at which it failed (for example, after fixing the issue with the file for `WTnone`):
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflow run prep_riboviz.nf \
+$ nextflow run prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false -resume
 ```
 
 This feature also supports incremental build. For example, given a `vignette_config.yaml` which specifies only sample `WTnone`, running Nextflow gives:
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflon prep_riboviz.nf \
+$ nextflow run prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false
 N E X T F L O W  ~  version 20.01.0
 Launching `prep_riboviz.nf` [serene_noether] - revision: 26bb98ec7b
@@ -305,14 +315,13 @@ Missing file (NotHere): example_missing_file.fastq.gz
 [02/dac1f8] Submitted process > hisat2rRNA (WTnone)
 [15/e5f9ed] Submitted process > hisat2ORF (WTnone)
 [ed/fc50b9] Submitted process > trim5pMismatches (WTnone)
-[c0/29b60a] Submitted process > summarise
-Processed samples: WTnone 
+...
 ```
 
 If `WT3AT` is then added to `vignette_config.yaml` and Nextflow is run with the `-resume` option, then only the processing for `WT3AT` is done, the cached outputs to date for `WTnone` being reused, not recomputed:
 
 ```console
-$ PYTHONPATH=$HOME/riboviz nextflow run prep_riboviz.nf \
+$ nextflow run prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false -resume
 N E X T F L O W  ~  version 20.01.0
 Launching `prep_riboviz.nf` [desperate_coulomb] - revision: 26bb98ec7b
@@ -327,6 +336,5 @@ Missing file (NotHere): example_missing_file.fastq.gz
 [e3/9c39d7] Submitted process > hisat2rRNA (WT3AT)
 [a6/49addd] Submitted process > hisat2ORF (WT3AT)
 [46/d5db2c] Submitted process > trim5pMismatches (WT3AT)
-[a5/5c6c05] Submitted process > summarise
-Processed samples: WTnone WT3AT 
+...
 ```
