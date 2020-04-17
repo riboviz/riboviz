@@ -337,6 +337,8 @@ process generateStatsFigs {
 	each file(asite_disp_length) from asite_disp_length
     output:
         tuple val(sample_id), file("tpms.tsv") into tpms_tsv
+        tuple val(sample_id), file("*.pdf") into stats_figs_pdfs
+        tuple val(sample_id), file("*.tsv") into stats_figs_tsvs
     shell:
         """
         Rscript --vanilla /home/ubuntu/riboviz/rscripts/generate_stats_figs.R \
@@ -360,18 +362,37 @@ process generateStatsFigs {
         """
 }
 
-// Collect sample IDs and print list.
-// Could be used as a model for implementing collect_tpms.R task.
-process summarise {
+process prepareCollateTpms {
+    tag "${sample_id}"
+    errorStrategy 'ignore'
     input:
-        val(samples) from tpms_tsv.map({name, tpms_tsv -> return (name) }).collect()
+        tuple val(sample_id), file(tsv) from tpms_tsv
     output:
-        val(samples) into summary
+        val(sample_id) into sample_tpms_id
+        file("${sample_id}_tpms.tsv") into sample_tpms_tsv
     shell:
         """
-        echo "Processed samples: ${samples.join(' ')}"
+        cp ${tsv} ${sample_id}_tpms.tsv
         """
 }
 
-// Print output from summarise.
-summary.subscribe { println "Processed samples: ${it.join(' ')} "}
+process collateTpms {
+    errorStrategy 'ignore'
+    publishDir "${params.dir_out}"
+    input:
+        val(sample_ids) from sample_tpms_id.collect()
+        file(tsvs) from sample_tpms_tsv.collect()
+    output:
+        file("TPMs_collated.tsv") into collated_tpms_tsv
+        val(sample_ids) into completed_samples
+    shell:
+        """
+        Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R \
+            --sample-subdirs=False \
+            --output-dir=. \
+            --tpms-file=TPMs_collated.tsv \
+            ${sample_ids.join(' ')}
+        """
+}
+
+completed_samples.subscribe { println "Processed samples: ${it.join(' ')} "}
