@@ -1,48 +1,92 @@
 #!/usr/bin/env nextflow
 
+import org.yaml.snakeyaml.Yaml
+
+/*
+ * Validate configuration.
+ */
 // Initialise optional variables to avoid "WARN: Access to undefined
 // parameter `<PARAM>`" when running Nextflow.
+params.fq_files = [:]
+params.multiplex_fq_files = []
 params.make_bedgraph = true
 params.extract_umis = false
 params.dedup_umis = false
 params.group_umis = false
 params.count_reads = true
+
 if (! params.secondary_id) {
     secondary_id = "NULL"
 } else {
     secondary_id = params.secondary_id
 }
+
 if (params.dedup_umis) {
     if (! params.extract_umis) {
-        println("WARNING: dedup_umis was TRUE but extract_umis was FALSE.")
+        println("WARNING: dedup_umis was TRUE but extract_umis was FALSE")
     }
 }
 
+// Filter params.fq_files down to those samples that exist and
+// create paths to these files.
+sample_files = []
+missing = []
+for (entry in params.fq_files) {
+    sample_file = file("${params.dir_in}/${entry.value}")
+    if (sample_file.exists()) {
+        sample_files.add([entry.key, sample_file])
+    } else {
+        println("WARNING: Missing file ($entry.key): $entry.value")
+	missing.add(entry)
+    }
+}
+params.fq_files.removeAll{ it -> missing.contains(it) }
+
+// Filter params.multiplex_fq_files down to those files that exist
+// andcreate paths to these files.
+
+multiplex_sample_files = []
+missing = []
+for (entry in params.multiplex_fq_files) {
+    sample_file = file("${params.dir_in}/${entry}")
+    if (sample_file.exists()) {
+        multiplex_sample_files.add(sample_file)
+    } else {
+        println("WARNING: Missing multiplexed file: $entry")
+	missing.add(entry)
+    }
+}
+params.multiplex_fq_files.removeAll{ it -> missing.contains(it) }
+
+/*
+ * Set up non-sample-specific input files.
+ */
 rrna_fasta = Channel.fromPath(params.rrna_fasta_file,
                               checkIfExists: true)
-
+orf_gff = Channel.fromPath(params.orf_gff_file,
+                           checkIfExists: true)
 orf_fasta = Channel.fromPath(params.orf_fasta_file,
                              checkIfExists: true)
+t_rna = Channel.fromPath(params.t_rna_file,
+                         checkIfExists: true)
+codon_positions = Channel.fromPath(params.codon_positions_file,
+                                   checkIfExists: true)
+features = Channel.fromPath(params.features_file,
+                            checkIfExists: true)
+asite_disp_length = Channel.fromPath(params.asite_disp_length_file,
+                                     checkIfExists: true)
+
+/*
+ * Workflow processes.
+ */ 
+
 // Split "orf_fasta" channel so can use as input to multiple
 // downstream tasks.
 orf_fasta.into { orf_fasta_index; orf_fasta_generate_stats_figs }
 
-orf_gff = Channel.fromPath(params.orf_gff_file,
-                           checkIfExists: true)
-// Split "orf_fasta" channel so can use as input to multiple
+// Split "orf_gff" channel so can use as input to multiple
 // downstream tasks.
 orf_gff.into { orf_gff_bam_to_h5; orf_gff_generate_stats_figs }
-
-// Create list of samples whose files exist.
-samples = []
-for (entry in params.fq_files) {
-    sample_file = file("${params.dir_in}/${entry.value}")
-    if (sample_file.exists()) {
-        samples.add([entry.key, sample_file])
-    } else {
-        println("WARNING: Missing file ($entry.key): $entry.value")
-    }
-}
 
 process buildIndicesrRNA {
     tag "${params.rrna_index_prefix}"
@@ -81,12 +125,13 @@ process cutAdapters {
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}"
     input:
-        tuple val(sample_id), file(sample_file) from samples
+        tuple val(sample_id), file(sample_file) from sample_files
     output:
         tuple val(sample_id), file("trim.fq") into cut_samples
     shell:
         """
-        cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} -o trim.fq ${sample_file} -j 0
+        cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} \
+            -o trim.fq ${sample_file} -j 0
         """
 }
 
@@ -110,13 +155,15 @@ process extractUmis {
         params.extract_umis
     shell:
         """
-        umi_tools extract -I ${sample_file} --bc-pattern="${params.umi_regexp}" --extract-method=regex -S extract_trim.fq
+        umi_tools extract -I ${sample_file} \
+            --bc-pattern="${params.umi_regexp}" \
+            --extract-method=regex -S extract_trim.fq
         """
 }
 
 // Combine channels and route to downstream processing steps. By
 // definition of "cut_samples.branch" only one of the input channels
-// will have content.
+// will have content. 
 trimmed_samples = cut_samples_branch.non_umi_samples.mix(umi_extracted_samples)
 
 process hisat2rRNA {
@@ -132,7 +179,9 @@ process hisat2rRNA {
     shell:
         """
         hisat2 --version
-        hisat2 -p ${params.num_processes} -N 1 -k 1 --un nonrRNA.fq -x ${params.rrna_index_prefix} -S rRNA_map.sam -U ${fastq}
+        hisat2 -p ${params.num_processes} -N 1 -k 1 \
+            --un nonrRNA.fq -x ${params.rrna_index_prefix} \
+            -S rRNA_map.sam -U ${fastq}
         """
 }
 
@@ -149,7 +198,10 @@ process hisat2ORF {
     shell:
         """
         hisat2 --version
-        hisat2 -p ${params.num_processes} -k 2 --no-spliced-alignment --rna-strandness F --no-unal --un unaligned.fq -x ${params.orf_index_prefix} -S orf_map.sam -U ${fastq}
+        hisat2 -p ${params.num_processes} -k 2 \
+            --no-spliced-alignment --rna-strandness F --no-unal \
+            --un unaligned.fq -x ${params.orf_index_prefix} \
+            -S orf_map.sam -U ${fastq}
         """
 }
 
@@ -164,7 +216,8 @@ process trim5pMismatches {
         tuple val(sample_id), file("trim_5p_mismatch.tsv") into trim_summary_tsvs
     shell:
         """
-        python -m riboviz.tools.trim_5p_mismatch -m 2 -i ${sam} -o orf_map_clean.sam -s trim_5p_mismatch.tsv
+        python -m riboviz.tools.trim_5p_mismatch -m 2 \
+            -i ${sam} -o orf_map_clean.sam -s trim_5p_mismatch.tsv
         """
 }
 
@@ -179,7 +232,8 @@ process samViewSort {
     shell:
         """
         samtools --version
-        samtools view -b ${sam} | samtools sort -@ ${params.num_processes} -O bam -o orf_map_clean.bam -
+        samtools view -b ${sam} | samtools sort \
+            -@ ${params.num_processes} -O bam -o orf_map_clean.bam -
         samtools index orf_map_clean.bam
         """
 }
@@ -194,7 +248,9 @@ orf_map_bams.branch {
 
 // Split "orf_map_bams_branch.umi_bams" channel so can use as input to
 // multiple downstream tasks.
-orf_map_bams_branch.umi_bams.into { pre_dedup_group_bams; pre_dedup_bams }
+orf_map_bams_branch.umi_bams.into {
+    pre_dedup_group_bams; pre_dedup_bams
+}
 
 process groupUmisPreDedup {
     tag "${sample_id}"
@@ -253,7 +309,8 @@ process groupUmisPostDedup {
 
 // Combine "orf_map_bams_branch.umi_free_bams" and "post_dedup_bams"
 // channels and route to downstream processing steps. By definition of
-// "orf_map_bams_branch" only one of the input channels will have content.
+// "orf_map_bams_branch" only one of the input channels will have
+// content.
 pre_output_bams = orf_map_bams_branch.umi_free_bams.mix(post_dedup_bams)
 
 process outputBams {
@@ -288,8 +345,10 @@ process makeBedgraphs {
     shell:
         """
         bedtools --version
-        bedtools genomecov -ibam ${bam} -trackline -bga -5 -strand + > plus.bedgraph
-        bedtools genomecov -ibam ${bam} -trackline -bga -5 -strand - > minus.bedgraph
+        bedtools genomecov -ibam ${bam} -trackline -bga -5 \
+            -strand + > plus.bedgraph
+        bedtools genomecov -ibam ${bam} -trackline -bga -5 \
+            -strand - > minus.bedgraph
         """
 }
 
@@ -319,15 +378,6 @@ process bamToH5 {
            --stop-in-cds=${params.stop_in_cds}
         """
 }
-
-t_rna = Channel.fromPath(params.t_rna_file,
-                         checkIfExists: true)
-codon_positions = Channel.fromPath(params.codon_positions_file,
-                                   checkIfExists: true)
-features = Channel.fromPath(params.features_file,
-                            checkIfExists: true)
-asite_disp_length = Channel.fromPath(params.asite_disp_length_file,
-                                     checkIfExists: true)
 
 process generateStatsFigs {
     tag "${sample_id}"
@@ -374,8 +424,8 @@ process prepareCollateTpms {
     input:
         tuple val(sample_id), file(tsv) from tpms_tsv
     output:
-        val(sample_id) into sample_tpms_id
-        file("${sample_id}_tpms.tsv") into sample_tpms_tsv
+        val sample_id into sample_tpms_id
+        file "${sample_id}_tpms.tsv" into sample_tpms_tsv
     shell:
         """
         cp ${tsv} ${sample_id}_tpms.tsv
@@ -385,11 +435,11 @@ process prepareCollateTpms {
 process collateTpms {
     publishDir "${params.dir_out}"
     input:
-        val(sample_ids) from sample_tpms_id.collect()
-        file(tsvs) from sample_tpms_tsv.collect()
+        val sample_ids from sample_tpms_id.collect()
+        file tsvs from sample_tpms_tsv.collect()
     output:
-        file("TPMs_collated.tsv") into collated_tpms_tsv
-        val(sample_ids) into completed_samples
+        file "TPMs_collated.tsv" into collated_tpms_tsv
+        val sample_ids into completed_samples
     shell:
         """
         Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R \
@@ -400,71 +450,48 @@ process collateTpms {
         """
 }
 
-// Create YAML file with fq_files and multiplex_fq_files
-// entries from configuration.
-import org.yaml.snakeyaml.Yaml
-yaml = new Yaml()
-Map params_samples = [:]
-if (params.containsKey("fq_files")) {
-    params_samples.fq_files = params.fq_files
-}
-if (params.containsKey("multiplex_fq_files")) {
-    params_samples.multiplex_fq_files = params.multiplex_fq_files
-}
-samples_yaml = yaml.dump(params_samples)
-// TODO combine with above so only existing files are checked.
-/**
-    samples = []
-    for (entry in params.fq_files) {
-        sample_file = file("${params.dir_in}/${entry.value}")
-        if (sample_file.exists()) {
-            samples.add([entry.key, sample_file])
-    }
-*/
-// TODO can this be made dependent on completed_samples?
+completed_samples.subscribe { println("Processed samples: ${it.join(' ')}") }
 
-process createSamplesFile {
-    // TODO remove
-    publishDir "${params.dir_out}"
-    input:
-        val(samples_yaml) from samples_yaml
-    output:
-        file("samples.yaml") into samples_yaml_file
-    shell:
-        """
-        echo "${samples_yaml}" > samples.yaml
-        """
-}
+// Create YAML fragment including params.fq_files and
+// params.multiplex_fq_files to serve as a configuration file for
+// riboviz.tools.count_reads. There is no way to get the location
+// of the RiboViz YAML configuration file itself from within Nextflow
+// (there is no way to access the "-param-file" argument to
+// Nextflow).
+Map count_reads_config = [:]
+count_reads_config.fq_files = params.fq_files
+count_reads_config.multiplex_fq_files = params.multiplex_fq_files
+count_reads_config_yaml = new Yaml().dump(count_reads_config)
 
-inputs = Channel.fromPath(params.dir_in,
-                          checkIfExists: true)
-tmp = Channel.fromPath(params.dir_tmp,
-                       checkIfExists: true)
-outputs = Channel.fromPath(params.dir_out,
-                           checkIfExists: true)
-
-// TODO ensure this is only done when all other tasks complete
-// TODO Make dependent on completed_samples?
 process countReads {
     publishDir "${params.dir_out}"
     input:
-        file inputs from inputs
-        file tmp from tmp
-        file outputs from outputs
-	file samples_yaml from samples_yaml_file
+        val count_reads_config_yaml from count_reads_config_yaml
+	// Force dependency on output of collateTpms so this process
+        // is only run when all other processing has completed.
 	val completed_samples from completed_samples
     output:
         file "read_counts.tsv" into read_counts_tsv
-        val sample_ids  into finished
+    when:
+        params.count_reads
     shell:
+        // workflow.projectDir is directory into which outputs
+	// have been published.
+	// TODO: It would be preferable to:
+	// 1. Stage these directories into this process's
+	//    work directory. If this is possible, and how to do it,
+        //    if so, has not been determined.
+	// 2. Stage outputs from the processes for which reads
+	//    are to be counted into this process's work directory.
+        //    This would require a new implementation of
+	//    riboviz.tools.count_reads.
         """
+        echo "${count_reads_config_yaml}" > sample_files.yaml
         python -m riboviz.tools.count_reads \
-           -c ${samples_yaml} \
-           -i ${inputs} \
-           -t ${tmp} \
-           -o ${outputs} \
+           -c sample_files.yaml \
+           -i ${workflow.projectDir}/${params.dir_in} \
+           -t ${workflow.projectDir}/${params.dir_tmp} \
+           -o ${workflow.projectDir}/${params.dir_out} \
            -r read_counts.tsv  
         """
 }
-
-finished.subscribe { println("Processed samples: ${it.join(' ')}") }
