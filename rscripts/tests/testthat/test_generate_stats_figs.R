@@ -24,7 +24,26 @@ library(here)
 # source generate_stats_figs.R:
 source(here::here("rscripts", "generate_stats_figs.R"))
 
-# checking options / opt set-up is fine, we expect 22 items 
-#  (21 riboviz options passed to generate_stats_figs.R + help = 22)
-expect_equal(length(opt), 22)
+context("Set-up & imports")
 
+test_that("passed-in options all present", {
+  
+  # checking options / opt set-up is fine, we expect 22 items 
+  #  (21 riboviz options passed to generate_stats_figs.R + help = 22)
+  expect_equal(length(opt), 22)
+
+})
+
+test_that("all required files exist, are readable", {
+
+  expect_equal(file.exists(hd_file), as.logical("TRUE"))
+  
+  # str(h5ls(here(opt$hd_file), recursive = 1))
+  # 'data.frame':	68 obs. of  5 variables:
+  #   $ group : chr  "/" "/" "/" "/" ...
+  # $ name  : chr  "YAL001C" "YAL002W" "YAL003W" "YAL005C" ...
+  # $ otype : chr  "H5I_GROUP" "H5I_GROUP" "H5I_GROUP" "H5I_GROUP" ...
+  # $ dclass: chr  "" "" "" "" ...
+  # $ dim   : chr  "" "" "" "" ...
+  
+})
