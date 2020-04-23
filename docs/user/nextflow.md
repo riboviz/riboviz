@@ -391,6 +391,3 @@ $ pytest riboviz/test/regression/test_nextflow_regression.py \
 Please note that *existing* regression test data, produced by `riboviz.tools.prep_riboviz` *can* be used with the outputs from Nextflow, but with the following caveats:
 
 * Tests referencing the additional files output by Nextflow, documented above, will fail.
-* `riboviz.tools.count_reads`-related tests will fail as:
-   - Currently, when run under Nextflow this includes absolute paths to files not relative paths.
-   - `riboviz.tools.count_reads` has not yet been updated to process the additional files ouput by Nextflow.

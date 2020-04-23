@@ -86,6 +86,7 @@ from riboviz import h5
 from riboviz import hisat2
 from riboviz import sam_bam
 from riboviz import compare_files
+from riboviz import count_reads
 from riboviz import process_utils
 from riboviz import workflow_files
 from riboviz import workflow_r
@@ -612,7 +613,7 @@ def test_collate_tpms_tsv(expected_fixture, output_dir, file_name):
 def test_read_counts_tsv(expected_fixture, output_dir, file_name):
     """
     Test :py:mod:`riboviz.tools.count_reads` TSV files for
-    equality. See :py:func:`riboviz.compare_files.compare_files`.
+    equality. See :py:func:`riboviz.count_reads.equal_read_counts`.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
@@ -622,6 +623,6 @@ def test_read_counts_tsv(expected_fixture, output_dir, file_name):
     :type file_name: str or unicode
     """
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
-    compare_files.compare_files(
+    count_reads.equal_read_counts(
         os.path.join(expected_fixture, output_dir_name, file_name),
         os.path.join(output_dir, file_name))
