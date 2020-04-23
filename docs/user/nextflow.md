@@ -190,6 +190,37 @@ Processed samples: WTnone WT3AT
 
 ---
 
+## Differences to temporary files
+
+Please note the following differences in the files created to those of `riboviz.tools.prep_riboviz` as documented in [What the RiboViz workflow does](docs/user/prep-riboviz-operation.md).
+
+Two additional sample-specific temporary files are produced:
+
+* `orf_map_clean.bam`: BAM file equivalent of `orf_map_clean.sam`, ORF-mapped reads with mismatched nt trimmed.
+* `orf_map_clean.bam.bai`: BAM index file for the above.
+
+If deduplication is not enabled (if `dedup_umis: FALSE`) then these are copied to become the output files:
+
+* `<SAMPLE_ID>.bam`: BAM file of reads mapped to transcripts, which can be directly used in genome browsers.
+* `<SAMPLE_ID>.bam.bai`: BAM index file for `<SAMPLE_ID>.bam`.
+
+If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specific temporary files are also produced:
+
+* `dedup.bam`: BAM file post deduplication.
+* `dedup.bam.bai`: BAM index file for the above.
+
+These replace:
+
+* `pre_dedup.bam`: BAM file prior to deduplication.
+* `pre_dedup.bam.bai`: BAM index file for `pre_dedup.bam`.
+
+These are copied to become the output files:
+
+* `<SAMPLE_ID>.bam`: BAM file of reads mapped to transcripts, which can be directly used in genome browsers.
+* `<SAMPLE_ID>.bam.bai`: BAM index file for `<SAMPLE_ID>.bam`.
+
+---
+
 ## Nextflow's `work/` directory
 
 Nextflow creates a `work/` directory with all the files created during execution of the workflow. Every invocation of a task - every process - has its own subdirectory within Nextflow's `work/` directory named after the process identifiers (e.g. `ad/1e7c54`). These subdirectories have:
