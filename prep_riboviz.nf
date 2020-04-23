@@ -72,20 +72,47 @@ orf_gff = Channel.fromPath(params.orf_gff_file,
                            checkIfExists: true)
 orf_fasta = Channel.fromPath(params.orf_fasta_file,
                              checkIfExists: true)
-t_rna = Channel.fromPath(params.t_rna_file,
-                         checkIfExists: true)
-codon_positions = Channel.fromPath(params.codon_positions_file,
-                                   checkIfExists: true)
-if (params.containsKey('features_file')) {
-    features = Channel.fromPath(params.features_file,
-                                checkIfExists: true)
-    do_features = true
+/*
+ * Set up optional inputs for generate_stats_figs.R.
+ *
+ * If an optional file is not provided then a "Missing_<PARAM>" file
+ * (for example "Missing_features_file") is created within the work/
+ * directories for the generateStatsFigs process. This symbolically
+ * links to a non-existent "Missing_<PARAM>" file in the users current
+ * directory. This is not an issue since the files will not be passed
+ * onto generate_stats_figs.R and no attempt is made to use them. They
+ * are a side-effect of using the Nextflow pattern for optional inputs,
+ * https://github.com/nextflow-io/patterns/blob/master/optional-input.nf.
+ */
+if (params.containsKey('t_rna_file') && params.containsKey('codon_positions_file')) {
+    t_rna_file = Channel.fromPath(params.t_rna_file, checkIfExists: true)
+    codon_positions_file = Channel.fromPath(params.codon_positions_file,
+                                            checkIfExists: true)
+    is_t_rna_and_codon_positions_file = true
+} else if ((! params.containsKey('t_rna_file')) && (! params.containsKey('codon_positions_file')))
+{
+    t_rna_file = file("Missing_t_rna_file")
+    codon_positions_file = file("Missing_codon_positions_file")
+    is_t_rna_and_codon_positions_file = false
 } else {
-    features = file("NA")
-    do_features = false
+    error "ERROR: Either both t_rna_file and codon_positions_file must be provided or none must be provided."
 }
-asite_disp_length = Channel.fromPath(params.asite_disp_length_file,
+if (params.containsKey('features_file')) {
+    features_file = Channel.fromPath(params.features_file,
                                      checkIfExists: true)
+    is_features_file = true
+} else {
+    features_file = file("Missing_features_file")
+    is_features_file = false
+}
+if (params.containsKey('asite_disp_length_file')) {
+    asite_disp_length_file = Channel.fromPath(params.asite_disp_length_file,
+                                              checkIfExists: true)
+    is_asite_disp_length_file = true
+} else {
+    asite_disp_length_file = file("Missing_aside_disp_length_file")
+    is_asite_disp_length_file = false
+}
 
 /*
  * Workflow processes.
@@ -399,17 +426,25 @@ process generateStatsFigs {
         tuple val(sample_id), file(h5) from h5s
 	each file(fasta) from orf_fasta_generate_stats_figs
         each file(gff) from orf_gff_generate_stats_figs
-	each file(t_rna) from t_rna
-	each file(codon_positions) from codon_positions
-	each file(features) from features
-	each file(asite_disp_length) from asite_disp_length
+	each file(t_rna) from t_rna_file
+	each file(codon_positions) from codon_positions_file
+	each file(features) from features_file
+	each file(asite_disp_length) from asite_disp_length_file
     output:
         tuple val(sample_id), file("tpms.tsv") into tpms_tsv
         tuple val(sample_id), file("*.pdf") into stats_figs_pdfs
         tuple val(sample_id), file("*.tsv") into stats_figs_tsvs
-        tuple val(sample_id), file("features.pdf") optional (! do_features) into features_tsv
+        tuple val(sample_id), file("codon_ribodens.pdf") optional (! is_t_rna_and_codon_positions_file) into codon_ribodens_pdf
+        tuple val(sample_id), file("codon_ribodens.tsv") optional (! is_t_rna_and_codon_positions_file) into codon_ribodens_tsv
+        tuple val(sample_id), file("features.pdf") optional (! is_features_file) into features_tsv
+        tuple val(sample_id), file("3ntframe_bygene.tsv") optional (! is_asite_disp_length_file) into nt3frame_bygene_tsv
+        tuple val(sample_id), file("3ntframe_propbygene.pdf") optional (! is_asite_disp_length_file) into nt3frame_propbygene_pdf
     shell:
-        features_flag = do_features ? "--features-file=${features}" : ''
+        t_rna_flag = is_t_rna_and_codon_positions_file ? "--t-rna-file=${t_rna}" : ''
+        codon_positions_flag = is_t_rna_and_codon_positions_file ? "--codon-positions-file=${codon_positions}" : ''
+        features_flag = is_features_file ? "--features-file=${features}" : ''
+        asite_disp_length_flag = is_asite_disp_length_file ? "--asite-disp-length-file=${asite_disp_length}" : ''
+        count_threshold_flag = params.containsKey('count_threshold') ? "--count-threshold=${params['count_threshold']}": ''
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/generate_stats_figs.R \
            --num-processes=${params.num_processes} \
@@ -423,16 +458,14 @@ process generateStatsFigs {
            --rpf=${params.rpf} \
            --output-dir=. \
            --do-pos-sp-nt-freq=${params.do_pos_sp_nt_freq} \
-           --t-rna-file=${t_rna} \
-           --codon-positions-file=${codon_positions} \
+           ${t_rna_flag} \
+           ${codon_positions_flag} \
            ${features_flag} \
 	   --orf-gff-file=${gff} \
-           --asite-disp-length-file=${asite_disp_length} \
-           --count-threshold=${params.count_threshold}
+           ${asite_disp_length_flag} \
+           ${count_threshold_flag}
         """
 }
-
-features_tsv.subscribe { println("Output_features: ${it.join(' ')}") }
 
 process prepareCollateTpms {
     tag "${sample_id}"

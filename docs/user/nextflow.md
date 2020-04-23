@@ -230,6 +230,10 @@ The `.ht2` files are symbolic links to the outputs of process `e5/ccf3e6`, an in
 
 `prep_riboviz.nf` uses Nextflow's [publishDir](https://www.nextflow.io/docs/latest/process.html#publishdir) directive which allows files to be published to specific directories outwith `work/`. By default, the files in this directory are symlinked to those in `work/`. `prep_riboviz.nf` uses this to publishes files to the index (`dir_index`), temporary (`dir_tmp`), and output (`dir_out`) directories specified in the configuration file.
 
+### `Missing` files
+
+If an optional file for `generate_stats_figs.R` is not provided within the YAML configuration file then a `Missing_<PARAM>` file (for example `Missing_features_file`) is created within the `work/` directories for the `generateStatsFigs` process. This symbolically links to a non-existent `Missing_<PARAM>` file in your current directory. This is not an issue since the files will not be passed onto `generate_stats_figs.R` and no attempt is made to use them. They are a side-effect of using the Nextflow pattern for optional inputs, [optional inputs](https://github.com/nextflow-io/patterns/blob/master/optional-input.nf).
+
 ---
 
 ## Debugging and bash scripts
