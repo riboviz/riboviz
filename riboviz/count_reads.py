@@ -426,21 +426,19 @@ def umi_tools_dedup_bam(tmp_dir, output_dir, sample):
     # Look for pre_dedup.bam.
     files = glob.glob(
         os.path.join(tmp_dir, sample, workflow_files.PRE_DEDUP_BAM))
-    if files:
-        # Look for the BAM file output.
-        files = glob.glob(os.path.join(
-            output_dir, sample, sam_bam.BAM_FORMAT.format(sample)))
-        if not files:
-            return None
-        file_name = files[0]
-    else:
+    if not files:
         # Look for dedup.bam (Nextflow).
         files = glob.glob(
             os.path.join(tmp_dir, sample, workflow_files.DEDUP_BAM))
         if not files:
             # Deduplication was not done.
             return None
-        file_name = files[0]  # Only 1 match expected.
+    # Look for the BAM file output.
+    files = glob.glob(os.path.join(
+        output_dir, sample, sam_bam.BAM_FORMAT.format(sample)))
+    if not files:
+        return None
+    file_name = files[0]
     print(file_name)
     try:
         sequences, _ = sam_bam.count_sequences(file_name)
