@@ -373,3 +373,24 @@ Missing file (NotHere): example_missing_file.fastq.gz
 [46/d5db2c] Submitted process > trim5pMismatches (WT3AT)
 ...
 ```
+
+---
+
+## Run vignette regression test suite
+
+There is a separate regression test suite for Nextflow, to reflect the different files produced. The syntax is is identical to that documented in [Run vignette regression test suite](docs/developer/testing.md#run-vignette-regression-test-suite), except that the suite is at `riboviz/test/regression/test_regression.py` i.e.
+
+```console
+$ pytest riboviz/test/regression/test_nextflow_regression.py \
+    --expected=DIRECTORY \
+    [--skip-workflow] \
+    [--check-index-tmp] \
+    [--config-file=FILE]
+```
+
+Please note that *existing* regression test data, produced by `riboviz.tools.prep_riboviz` *can* be used with the outputs from Nextflow, but with the following caveats:
+
+* Tests referencing the additional files output by Nextflow, documented above, will fail.
+* `riboviz.tools.count_reads`-related tests will fail as:
+   - Currently, when run under Nextflow this includes absolute paths to files not relative paths.
+   - `riboviz.tools.count_reads` has not yet been updated to process the additional files ouput by Nextflow.
