@@ -128,7 +128,7 @@ orf_gff.into { orf_gff_bam_to_h5; orf_gff_generate_stats_figs }
 
 process buildIndicesrRNA {
     tag "${params.rrna_index_prefix}"
-    publishDir "${params.dir_index}"
+    publishDir "${params.dir_index}", mode: 'copy', overwrite: true
     input:
         file fasta from rrna_fasta
     output:
@@ -144,7 +144,7 @@ process buildIndicesrRNA {
 
 process buildIndicesORF {
     tag "${params.orf_index_prefix}"
-    publishDir "${params.dir_index}"
+    publishDir "${params.dir_index}", mode: 'copy', overwrite: true
     input:
         file fasta from orf_fasta_index
     output:
@@ -161,7 +161,7 @@ process buildIndicesORF {
 process cutAdapters {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}"
+    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
     input:
         tuple val(sample_id), file(sample_file) from sample_files
     output:
@@ -184,7 +184,7 @@ cut_samples.branch {
 process extractUmis {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}"
+    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
     input:
         tuple val(sample_id), file(sample_file) from cut_samples_branch.umi_samples
     output:
@@ -206,7 +206,7 @@ trimmed_samples = cut_samples_branch.non_umi_samples.mix(umi_extracted_samples)
 
 process hisat2rRNA {
     tag "${sample_id}"
-    publishDir "${params.dir_tmp}/${sample_id}"
+    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(fastq) from trimmed_samples
@@ -225,7 +225,7 @@ process hisat2rRNA {
 
 process hisat2ORF {
     tag "${sample_id}"
-    publishDir "${params.dir_tmp}/${sample_id}"
+    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(fastq) from non_rrna_fqs
@@ -245,7 +245,7 @@ process hisat2ORF {
 
 process trim5pMismatches {
     tag "${sample_id}"
-    publishDir "${params.dir_tmp}/${sample_id}"
+    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         env PYTHONPATH from workflow.projectDir
@@ -262,7 +262,7 @@ process trim5pMismatches {
 
 process samViewSort {
     tag "${sample_id}"
-    publishDir "${params.dir_tmp}/${sample_id}"
+    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(sam) from clean_orf_map_sams
@@ -294,7 +294,7 @@ orf_map_bams_branch.umi_bams.into {
 process groupUmisPreDedup {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}"
+    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
     input:
         tuple val(sample_id), file(bam), file(bam_bai) from pre_dedup_group_bams
     output:
@@ -310,7 +310,7 @@ process groupUmisPreDedup {
 process dedupUmis {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}"
+    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
     input:
         tuple val(sample_id), file(bam), file(bam_bai) from pre_dedup_bams
     output:
@@ -333,7 +333,7 @@ dedup_bams.into { post_dedup_group_bams; post_dedup_bams }
 process groupUmisPostDedup {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}"
+    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
     input:
         tuple val(sample_id), file(bam), file(bam_bai) from post_dedup_group_bams
     output:
@@ -354,7 +354,7 @@ pre_output_bams = orf_map_bams_branch.umi_free_bams.mix(post_dedup_bams)
 
 process outputBams {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}"
+    publishDir "${params.dir_out}/${sample_id}", mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(bam), file(bam_bai) from pre_output_bams
@@ -373,7 +373,7 @@ output_bams.into { bedgraph_bams; summary_bams }
 
 process makeBedgraphs {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}"
+    publishDir "${params.dir_out}/${sample_id}", mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(bam), file(bam_bai) from bedgraph_bams
@@ -393,7 +393,7 @@ process makeBedgraphs {
 
 process bamToH5 {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}"
+    publishDir "${params.dir_out}/${sample_id}", mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(bam), file(bam_bai) from summary_bams
@@ -420,7 +420,7 @@ process bamToH5 {
 
 process generateStatsFigs {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}"
+    publishDir "${params.dir_out}/${sample_id}", mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(h5) from h5s
@@ -482,7 +482,7 @@ process prepareCollateTpms {
 }
 
 process collateTpms {
-    publishDir "${params.dir_out}"
+    publishDir "${params.dir_out}", mode: 'copy', overwrite: true
     input:
         val sample_ids from sample_tpms_id.collect()
         file tsvs from sample_tpms_tsv.collect()
@@ -513,7 +513,7 @@ count_reads_config.multiplex_fq_files = params.multiplex_fq_files
 count_reads_config_yaml = new Yaml().dump(count_reads_config)
 
 process countReads {
-    publishDir "${params.dir_out}"
+    publishDir "${params.dir_out}", mode: 'copy', overwrite: true
     input:
         env PYTHONPATH from workflow.projectDir
         val count_reads_config_yaml from count_reads_config_yaml
