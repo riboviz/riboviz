@@ -32,36 +32,41 @@ if (params.dedup_umis) {
     }
 }
 
-// Filter params.fq_files down to those samples that exist and
-// create paths to these files.
 sample_files = [:]
-for (entry in params.fq_files) {
-    sample_file = file("${params.dir_in}/${entry.value}")
-    if (sample_file.exists()) {
-        sample_files[entry.key] = sample_file
-    } else {
-        println("WARNING: Missing file ($entry.key): $entry.value")
-        params.fq_files.remove(entry.key)
-    }
-}
-
-// Filter params.multiplex_fq_files down to those files that exist
-// and create paths to these files.
 multiplex_sample_files = []
-// Can't remove missing in-loop as get a
-// "Unexpected error [ConcurrentModificationException]" so keep
-// track and remove after.
-missing = []
-for (entry in params.multiplex_fq_files) {
-    sample_file = file("${params.dir_in}/${entry}")
-    if (sample_file.exists()) {
-        multiplex_sample_files.add(sample_file)
-    } else {
-        println("WARNING: Missing multiplexed file: $entry")
-        missing.add(entry)
+if ((! params.fq_files) && (! params.multiplex_fq_files)) {
+    error "No sample files (fq_files) or multiplexed files (multiplex_fq_files) are specified"
+} else if (params.fq_files && params.multiplex_fq_files) {
+    error "Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are specified"
+} else if (params.fq_files) {
+    // Filter params.fq_files down to those samples that exist.
+    for (entry in params.fq_files) {
+        sample_file = file("${params.dir_in}/${entry.value}")
+        if (sample_file.exists()) {
+            sample_files[entry.key] = sample_file
+        } else {
+            println("WARNING: Missing file ($entry.key): $entry.value")
+        }
     }
+    if (! sample_files) {
+        error "No sample files (fq_files) exist"
+    }
+} else {
+    // Filter params.multiplex_fq_files down to those files that exist.
+    for (entry in params.multiplex_fq_files) {
+        sample_file = file("${params.dir_in}/${entry}")
+        if (sample_file.exists()) {
+            multiplex_sample_files.add(sample_file)
+        } else {
+            println("WARNING: Missing multiplexed file: $entry")
+        }
+    }
+    if (! multiplex_sample_files) {
+        error "No multiplexed files (multiplex_fq_files) exist"
+    }
+    sample_sheet = Channel.fromPath(params.sample_sheet,
+                                    checkIfExists: true)
 }
-params.multiplex_fq_files.removeAll{ it -> missing.contains(it) }
 
 // Create YAML fragment including params.fq_files and
 // params.multiplex_fq_files to serve as a configuration file for
