@@ -34,23 +34,23 @@ if (params.dedup_umis) {
 
 // Filter params.fq_files down to those samples that exist and
 // create paths to these files.
-sample_files = []
-missing = []
+sample_files = [:]
 for (entry in params.fq_files) {
     sample_file = file("${params.dir_in}/${entry.value}")
     if (sample_file.exists()) {
-        sample_files.add([entry.key, sample_file])
+        sample_files[entry.key] = sample_file
     } else {
         println("WARNING: Missing file ($entry.key): $entry.value")
-	missing.add(entry)
+        params.fq_files.remove(entry.key)
     }
 }
-params.fq_files.removeAll{ it -> missing.contains(it) }
 
 // Filter params.multiplex_fq_files down to those files that exist
-// andcreate paths to these files.
-
+// and create paths to these files.
 multiplex_sample_files = []
+// Can't remove missing in-loop as get a
+// "Unexpected error [ConcurrentModificationException]" so keep
+// track and remove after.
 missing = []
 for (entry in params.multiplex_fq_files) {
     sample_file = file("${params.dir_in}/${entry}")
@@ -58,10 +58,21 @@ for (entry in params.multiplex_fq_files) {
         multiplex_sample_files.add(sample_file)
     } else {
         println("WARNING: Missing multiplexed file: $entry")
-	missing.add(entry)
+        missing.add(entry)
     }
 }
 params.multiplex_fq_files.removeAll{ it -> missing.contains(it) }
+
+// Create YAML fragment including params.fq_files and
+// params.multiplex_fq_files to serve as a configuration file for
+// riboviz.tools.count_reads. There is no way to get the location
+// of the RiboViz YAML configuration file itself from within Nextflow
+// (there is no way to access the "-param-file" argument to
+// Nextflow).
+Map sample_files_config = [:]
+sample_files_config.fq_files = params.fq_files
+sample_files_config.multiplex_fq_files = params.multiplex_fq_files
+sample_files_config_yaml = new Yaml().dump(sample_files_config)
 
 /*
  * Set up non-sample-specific input files.
@@ -163,7 +174,7 @@ process cutAdapters {
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
     input:
-        tuple val(sample_id), file(sample_file) from sample_files
+        tuple val(sample_id), file(sample_file) from sample_files.collect{ id, file -> [id, file] }
     output:
         tuple val(sample_id), file("trim.fq") into cut_samples
     shell:
@@ -501,22 +512,11 @@ process collateTpms {
 
 completed_samples.subscribe { println("Processed samples: ${it.join(' ')}") }
 
-// Create YAML fragment including params.fq_files and
-// params.multiplex_fq_files to serve as a configuration file for
-// riboviz.tools.count_reads. There is no way to get the location
-// of the RiboViz YAML configuration file itself from within Nextflow
-// (there is no way to access the "-param-file" argument to
-// Nextflow).
-Map count_reads_config = [:]
-count_reads_config.fq_files = params.fq_files
-count_reads_config.multiplex_fq_files = params.multiplex_fq_files
-count_reads_config_yaml = new Yaml().dump(count_reads_config)
-
 process countReads {
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
     input:
         env PYTHONPATH from workflow.projectDir
-        val count_reads_config_yaml from count_reads_config_yaml
+        val sample_files_config_yaml from sample_files_config_yaml
 	// Force dependency on output of collateTpms so this process
         // is only run when all other processing has completed.
 	val completed_samples from completed_samples
@@ -536,7 +536,7 @@ process countReads {
         //    This would require a new implementation of
 	//    riboviz.tools.count_reads.
         """
-        echo "${count_reads_config_yaml}" > sample_files.yaml
+        echo "${sample_files_config_yaml}" > sample_files.yaml
         python -m riboviz.tools.count_reads \
            -c sample_files.yaml \
            -i ${workflow.projectDir}/${params.dir_in} \
