@@ -33,7 +33,7 @@ if (params.dedup_umis) {
 }
 
 sample_files = [:]
-multiplex_sample_files = []
+multiplex_files = [:]
 if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     error "No sample files (fq_files) or multiplexed files (multiplex_fq_files) are specified"
 } else if (params.fq_files && params.multiplex_fq_files) {
@@ -54,18 +54,20 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
 } else {
     // Filter params.multiplex_fq_files down to those files that exist.
     for (entry in params.multiplex_fq_files) {
-        sample_file = file("${params.dir_in}/${entry}")
-        if (sample_file.exists()) {
-            multiplex_sample_files.add(sample_file)
+        multiplex_file = file("${params.dir_in}/${entry}")
+        if (multiplex_file.exists()) {
+	    // Use file basename as a key.
+            multiplex_files[multiplex_file.baseName] = multiplex_file
         } else {
             println("WARNING: Missing multiplexed file: $entry")
         }
     }
-    if (! multiplex_sample_files) {
+    if (! multiplex_files) {
         error "No multiplexed files (multiplex_fq_files) exist"
     }
-    sample_sheet = Channel.fromPath(params.sample_sheet,
-                                    checkIfExists: true)
+    multiplex_sample_sheet = Channel.fromPath(
+        "${params.dir_in}/${params.sample_sheet}",
+        checkIfExists: true)
 }
 
 // Create YAML fragment including params.fq_files and
@@ -74,10 +76,10 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
 // of the RiboViz YAML configuration file itself from within Nextflow
 // (there is no way to access the "-param-file" argument to
 // Nextflow).
-Map sample_files_config = [:]
-sample_files_config.fq_files = params.fq_files
-sample_files_config.multiplex_fq_files = params.multiplex_fq_files
-sample_files_config_yaml = new Yaml().dump(sample_files_config)
+Map data_files_config = [:]
+data_files_config.fq_files = params.fq_files
+data_files_config.multiplex_fq_files = params.multiplex_fq_files
+data_files_config_yaml = new Yaml().dump(data_files_config)
 
 /*
  * Set up non-sample-specific input files.
@@ -131,7 +133,7 @@ if (params.containsKey('asite_disp_length_file')) {
 }
 
 /*
- * Workflow processes.
+ * Indexing processes.
  */ 
 
 // Split "orf_fasta" channel so can use as input to multiple
@@ -174,6 +176,10 @@ process buildIndicesORF {
         """
 }
 
+/*
+ * Sample file (fq_files)-specific processes.
+ */
+
 process cutAdapters {
     tag "${sample_id}"
     errorStrategy 'ignore'
@@ -214,6 +220,67 @@ process extractUmis {
             --extract-method=regex -S extract_trim.fq
         """
 }
+
+/*
+ * Multiplexed files (multiplex_fq_files)-specific processes.
+ */
+
+process cutAdaptersMultiplex {
+    tag "${multiplex_id}"
+    errorStrategy 'ignore'
+    publishDir "${params.dir_tmp}", mode: 'copy', overwrite: true
+    input:
+        tuple val(multiplex_id), file(multiplex_file) from multiplex_files.collect{ id, file -> [id, file] }
+    output:
+        tuple val(multiplex_id), file("${multiplex_id}_trim.fq") into cut_multiplex
+    shell:
+        """
+        cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} \
+            -o ${multiplex_id}_trim.fq ${multiplex_file} -j 0
+        """
+}
+
+// Route "cut_multiplex" channel depending on whether UMIs are to be
+// extracted or not.
+cut_multiplex.branch {
+    umi_multiplex: params.extract_umis
+    non_umi_multiplex: ! params.extract_umis
+}
+.set { cut_multiplex_branch }
+
+process extractUmisMultiplex {
+    tag "${multiplex_id}"
+    errorStrategy 'ignore'
+    publishDir "${params.dir_tmp}", mode: 'copy', overwrite: true
+    input:
+        tuple val(multiplex_id), file(multiplex_file) from cut_multiplex_branch.umi_multiplex
+    output:
+        tuple val(multiplex_id), file("${multiplex_id}_extract_trim.fq") into umi_extracted_multiplex
+    when:
+        params.extract_umis
+    shell:
+        """
+        umi_tools extract -I ${multiplex_file} \
+            --bc-pattern="${params.umi_regexp}" \
+            --extract-method=regex -S ${multiplex_id}_extract_trim.fq
+        """
+}
+
+// Combine channels and route to downstream processing steps. By
+// definition of "cut_multiplex.branch" only one of the input channels
+// will have content.
+trimmed_multiplex = cut_multiplex_branch.non_umi_multiplex.mix(umi_extracted_multiplex)
+
+trimmed_multiplex.subscribe { println("Processed multiplex: ${it.join(' ')}") }
+
+// TODO process demultiplex
+
+// TODO join sample files to trimmed_samples below
+
+/*
+ * Sample processes. Common to both sample files (fq_files) and
+ * demultiplexed files (multiplex_fq_files).
+ */
 
 // Combine channels and route to downstream processing steps. By
 // definition of "cut_samples.branch" only one of the input channels
@@ -521,7 +588,7 @@ process countReads {
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
     input:
         env PYTHONPATH from workflow.projectDir
-        val sample_files_config_yaml from sample_files_config_yaml
+        val data_files_config_yaml from data_files_config_yaml
 	// Force dependency on output of collateTpms so this process
         // is only run when all other processing has completed.
 	val completed_samples from completed_samples
@@ -541,9 +608,9 @@ process countReads {
         //    This would require a new implementation of
 	//    riboviz.tools.count_reads.
         """
-        echo "${sample_files_config_yaml}" > sample_files.yaml
+        echo "${data_files_config_yaml}" > data_files.yaml
         python -m riboviz.tools.count_reads \
-           -c sample_files.yaml \
+           -c data_files.yaml \
            -i ${workflow.projectDir}/${params.dir_in} \
            -t ${workflow.projectDir}/${params.dir_tmp} \
            -o ${workflow.projectDir}/${params.dir_out} \
