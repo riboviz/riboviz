@@ -271,9 +271,32 @@ process extractUmisMultiplex {
 // will have content.
 trimmed_multiplex = cut_multiplex_branch.non_umi_multiplex.mix(umi_extracted_multiplex)
 
-trimmed_multiplex.subscribe { println("Processed multiplex: ${it.join(' ')}") }
+process demultiplex {
+    tag "${multiplex_id}"
+    publishDir "${params.dir_tmp}/${multiplex_id}_deplex", mode: 'copy', overwrite: true
+    errorStrategy 'ignore'
+    input:
+        env PYTHONPATH from workflow.projectDir
+        tuple val(multiplex_id), file(multiplex_file) from trimmed_multiplex
+        each file(sample_sheet) from multiplex_sample_sheet
+    output:
+        tuple val(multiplex_id), file("num_reads.tsv") into multiplex_num_reads_tsv
+        tuple val(multiplex_id), file("Unassigned.f*") into multiplex_unassigned_fq
+        file("*.f*") into multiplex_samples_fq
+    shell:
+        """
+        python -m riboviz.tools.demultiplex_fastq \
+            -1 ${multiplex_file} -s ${sample_sheet} -o . -m 2
+        """
+}
 
-// TODO process demultiplex
+// TODO process multiplex_samples_fq into sample_id, filename pairs
+// (use filename.baseName)
+
+// TODO remove
+multiplex_num_reads_tsv.subscribe { println("NumReads: ${it.join(' ')}") }
+multiplex_unassigned_fq.subscribe { println("Unassigned: ${it.join(' ')}") }
+multiplex_samples_fq.subscribe { println("Samples: ${it.join(' ')}") }
 
 // TODO join sample files to trimmed_samples below
 
