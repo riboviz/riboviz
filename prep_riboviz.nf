@@ -34,6 +34,7 @@ if (params.dedup_umis) {
 
 sample_files = [:]
 multiplex_files = [:]
+multiplex_sample_sheet = ""
 if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     error "No sample files (fq_files) or multiplexed files (multiplex_fq_files) are specified"
 } else if (params.fq_files && params.multiplex_fq_files) {
@@ -56,7 +57,7 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     for (entry in params.multiplex_fq_files) {
         multiplex_file = file("${params.dir_in}/${entry}")
         if (multiplex_file.exists()) {
-	    // Use file basename as a key.
+            // Use file basename as a key.
             multiplex_files[multiplex_file.baseName] = multiplex_file
         } else {
             println("WARNING: Missing multiplexed file: $entry")
@@ -68,6 +69,7 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     multiplex_sample_sheet = Channel.fromPath(
         "${params.dir_in}/${params.sample_sheet}",
         checkIfExists: true)
+    is_multiplexed = true
 }
 
 // Create YAML fragment including params.fq_files and
@@ -99,16 +101,19 @@ orf_fasta = Channel.fromPath(params.orf_fasta_file,
  * links to a non-existent "Missing_<PARAM>" file in the users current
  * directory. This is not an issue since the files will not be passed
  * onto generate_stats_figs.R and no attempt is made to use them. They
- * are a side-effect of using the Nextflow pattern for optional inputs,
+ * are a side-effect of using the Nextflow pattern for optional
+ * inputs,
  * https://github.com/nextflow-io/patterns/blob/master/optional-input.nf.
  */
-if (params.containsKey('t_rna_file') && params.containsKey('codon_positions_file')) {
-    t_rna_file = Channel.fromPath(params.t_rna_file, checkIfExists: true)
-    codon_positions_file = Channel.fromPath(params.codon_positions_file,
+if (params.containsKey('t_rna_file')
+    && params.containsKey('codon_positions_file')) {
+    t_rna_file = Channel.fromPath(params.t_rna_file,
+                                  checkIfExists: true)
+    codon_positions_file = Channel.fromPath(params.codon_positions_file, 
                                             checkIfExists: true)
     is_t_rna_and_codon_positions_file = true
-} else if ((! params.containsKey('t_rna_file')) && (! params.containsKey('codon_positions_file')))
-{
+} else if ((! params.containsKey('t_rna_file'))
+           && (! params.containsKey('codon_positions_file'))) {
     t_rna_file = file("Missing_t_rna_file")
     codon_positions_file = file("Missing_codon_positions_file")
     is_t_rna_and_codon_positions_file = false
@@ -183,9 +188,11 @@ process buildIndicesORF {
 process cutAdapters {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}/${sample_id}", \
+        mode: 'copy', overwrite: true
     input:
-        tuple val(sample_id), file(sample_file) from sample_files.collect{ id, file -> [id, file] }
+        tuple val(sample_id), file(sample_file) \
+            from sample_files.collect{ id, file -> [id, file] }
     output:
         tuple val(sample_id), file("trim.fq") into cut_samples
     shell:
@@ -206,11 +213,14 @@ cut_samples.branch {
 process extractUmis {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}/${sample_id}", \
+        mode: 'copy', overwrite: true
     input:
-        tuple val(sample_id), file(sample_file) from cut_samples_branch.umi_samples
+        tuple val(sample_id), file(sample_file) \
+            from cut_samples_branch.umi_samples
     output:
-        tuple val(sample_id), file("extract_trim.fq") into umi_extracted_samples
+        tuple val(sample_id), file("extract_trim.fq") \
+            into umi_extracted_samples
     when:
         params.extract_umis
     shell:
@@ -230,9 +240,11 @@ process cutAdaptersMultiplex {
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}", mode: 'copy', overwrite: true
     input:
-        tuple val(multiplex_id), file(multiplex_file) from multiplex_files.collect{ id, file -> [id, file] }
+        tuple val(multiplex_id), file(multiplex_file) \
+            from multiplex_files.collect{ id, file -> [id, file] }
     output:
-        tuple val(multiplex_id), file("${multiplex_id}_trim.fq") into cut_multiplex
+        tuple val(multiplex_id), file("${multiplex_id}_trim.fq") \
+            into cut_multiplex
     shell:
         """
         cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} \
@@ -253,9 +265,11 @@ process extractUmisMultiplex {
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}", mode: 'copy', overwrite: true
     input:
-        tuple val(multiplex_id), file(multiplex_file) from cut_multiplex_branch.umi_multiplex
+        tuple val(multiplex_id), file(multiplex_file) \
+            from cut_multiplex_branch.umi_multiplex
     output:
-        tuple val(multiplex_id), file("${multiplex_id}_extract_trim.fq") into umi_extracted_multiplex
+        tuple val(multiplex_id), file("${multiplex_id}_extract_trim.fq") \
+            into umi_extracted_multiplex
     when:
         params.extract_umis
     shell:
@@ -269,20 +283,24 @@ process extractUmisMultiplex {
 // Combine channels and route to downstream processing steps. By
 // definition of "cut_multiplex.branch" only one of the input channels
 // will have content.
-trimmed_multiplex = cut_multiplex_branch.non_umi_multiplex.mix(umi_extracted_multiplex)
+trimmed_multiplex = cut_multiplex_branch.non_umi_multiplex.mix(
+    umi_extracted_multiplex)
 
 process demultiplex {
     tag "${multiplex_id}"
-    publishDir "${params.dir_tmp}/${multiplex_id}_deplex", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}/${multiplex_id}_deplex", \
+        mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         env PYTHONPATH from workflow.projectDir
         tuple val(multiplex_id), file(multiplex_file) from trimmed_multiplex
         each file(sample_sheet) from multiplex_sample_sheet
     output:
-        tuple val(multiplex_id), file("num_reads.tsv") into multiplex_num_reads_tsv
-        tuple val(multiplex_id), file("Unassigned.f*") into multiplex_unassigned_fq
-        file("*.f*") into multiplex_samples_fq
+        tuple val(multiplex_id), file("num_reads.tsv") \
+                into multiplex_num_reads_tsv
+        tuple val(multiplex_id), file("Unassigned.f*") \
+            into multiplex_unassigned_fq
+        file("*.f*") into multiplex_output_fq
     shell:
         """
         python -m riboviz.tools.demultiplex_fastq \
@@ -290,15 +308,14 @@ process demultiplex {
         """
 }
 
-// TODO process multiplex_samples_fq into sample_id, filename pairs
-// (use filename.baseName)
-
-// TODO remove
-multiplex_num_reads_tsv.subscribe { println("NumReads: ${it.join(' ')}") }
-multiplex_unassigned_fq.subscribe { println("Unassigned: ${it.join(' ')}") }
-multiplex_samples_fq.subscribe { println("Samples: ${it.join(' ')}") }
-
-// TODO join sample files to trimmed_samples below
+// multiplex_samples_fq channel outputs a single list with all the
+// output fastq files. Flatten this list and output tuples, of sample
+// IDs and file names as separate items onto a new channel, filtering out
+// Unassigned.fq.
+multiplex_samples_fq = multiplex_output_fq
+    .flatten()
+    .filter { it.baseName != "Unassigned" }
+    .map { [it.baseName, it] }
 
 /*
  * Sample processes. Common to both sample files (fq_files) and
@@ -308,11 +325,13 @@ multiplex_samples_fq.subscribe { println("Samples: ${it.join(' ')}") }
 // Combine channels and route to downstream processing steps. By
 // definition of "cut_samples.branch" only one of the input channels
 // will have content. 
-trimmed_samples = cut_samples_branch.non_umi_samples.mix(umi_extracted_samples)
+trimmed_samples = cut_samples_branch.non_umi_samples.mix(
+    umi_extracted_samples).mix(multiplex_samples_fq)
 
 process hisat2rRNA {
     tag "${sample_id}"
-    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}/${sample_id}", \
+        mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(fastq) from trimmed_samples
@@ -331,7 +350,8 @@ process hisat2rRNA {
 
 process hisat2ORF {
     tag "${sample_id}"
-    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}/${sample_id}", \
+        mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(fastq) from non_rrna_fqs
@@ -351,14 +371,17 @@ process hisat2ORF {
 
 process trim5pMismatches {
     tag "${sample_id}"
-    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}/${sample_id}", \
+        mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         env PYTHONPATH from workflow.projectDir
         tuple val(sample_id), file(sam) from orf_map_sams
     output:
-        tuple val(sample_id), file("orf_map_clean.sam") into clean_orf_map_sams
-        tuple val(sample_id), file("trim_5p_mismatch.tsv") into trim_summary_tsvs
+        tuple val(sample_id), file("orf_map_clean.sam") \
+            into clean_orf_map_sams
+        tuple val(sample_id), file("trim_5p_mismatch.tsv") \
+            into trim_summary_tsvs
     shell:
         """
         python -m riboviz.tools.trim_5p_mismatch -m 2 \
@@ -368,12 +391,14 @@ process trim5pMismatches {
 
 process samViewSort {
     tag "${sample_id}"
-    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}/${sample_id}", \
+        mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(sam) from clean_orf_map_sams
     output:
-        tuple val(sample_id), file("orf_map_clean.bam"), file("orf_map_clean.bam.bai") into orf_map_bams
+        tuple val(sample_id), file("orf_map_clean.bam"), \
+            file("orf_map_clean.bam.bai") into orf_map_bams
     shell:
         """
         samtools --version
@@ -400,11 +425,14 @@ orf_map_bams_branch.umi_bams.into {
 process groupUmisPreDedup {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}/${sample_id}", \
+        mode: 'copy', overwrite: true
     input:
-        tuple val(sample_id), file(bam), file(bam_bai) from pre_dedup_group_bams
+        tuple val(sample_id), file(bam), file(bam_bai) \
+            from pre_dedup_group_bams
     output:
-        tuple val(sample_id), file("pre_dedup_groups.tsv") into pre_dedup_groups_tsv
+        tuple val(sample_id), file("pre_dedup_groups.tsv") \
+            into pre_dedup_groups_tsv
     when:
         params.dedup_umis && params.group_umis
     shell:
@@ -416,12 +444,16 @@ process groupUmisPreDedup {
 process dedupUmis {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}/${sample_id}", \
+        mode: 'copy', overwrite: true
     input:
-        tuple val(sample_id), file(bam), file(bam_bai) from pre_dedup_bams
+        tuple val(sample_id), file(bam), file(bam_bai) \
+            from pre_dedup_bams
     output:
-        tuple val(sample_id), file("dedup.bam"), file("dedup.bam.bai") into dedup_bams
-        tuple val(sample_id), file("dedup_stats*.tsv") into dedup_stats_tsvs
+        tuple val(sample_id), file("dedup.bam"), \
+            file("dedup.bam.bai") into dedup_bams
+        tuple val(sample_id), file("dedup_stats*.tsv") \
+            into dedup_stats_tsvs
     when:
         params.dedup_umis
     shell:
@@ -439,11 +471,14 @@ dedup_bams.into { post_dedup_group_bams; post_dedup_bams }
 process groupUmisPostDedup {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}/${sample_id}", \
+        mode: 'copy', overwrite: true
     input:
-        tuple val(sample_id), file(bam), file(bam_bai) from post_dedup_group_bams
+        tuple val(sample_id), file(bam), file(bam_bai) \
+            from post_dedup_group_bams
     output:
-        tuple val(sample_id), file("post_dedup_groups.tsv") into post_dedup_groups_tsv
+        tuple val(sample_id), file("post_dedup_groups.tsv") \
+            into post_dedup_groups_tsv
     when:
         params.dedup_umis && params.group_umis
     shell:
@@ -460,12 +495,15 @@ pre_output_bams = orf_map_bams_branch.umi_free_bams.mix(post_dedup_bams)
 
 process outputBams {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_out}/${sample_id}", \
+        mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(bam), file(bam_bai) from pre_output_bams
+        tuple val(sample_id), file(bam), file(bam_bai) \
+            from pre_output_bams
     output:
-        tuple val(sample_id), file("${sample_id}.bam"), file("${sample_id}.bam.bai") into output_bams
+        tuple val(sample_id), file("${sample_id}.bam"), \
+            file("${sample_id}.bam.bai") into output_bams
     shell:
         """
         cp ${bam} ${sample_id}.bam
@@ -479,12 +517,15 @@ output_bams.into { bedgraph_bams; summary_bams }
 
 process makeBedgraphs {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_out}/${sample_id}", \
+        mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(bam), file(bam_bai) from bedgraph_bams
+        tuple val(sample_id), file(bam), file(bam_bai) \
+            from bedgraph_bams
     output:
-        tuple val(sample_id), file("plus.bedgraph"), file("minus.bedgraph") into bedgraphs
+        tuple val(sample_id), file("plus.bedgraph"), \
+            file("minus.bedgraph") into bedgraphs
     when:
         params.make_bedgraph
     shell:
@@ -499,7 +540,8 @@ process makeBedgraphs {
 
 process bamToH5 {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_out}/${sample_id}", \
+        mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(bam), file(bam_bai) from summary_bams
@@ -526,31 +568,62 @@ process bamToH5 {
 
 process generateStatsFigs {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_out}/${sample_id}", \
+        mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(h5) from h5s
-	each file(fasta) from orf_fasta_generate_stats_figs
+        each file(fasta) from orf_fasta_generate_stats_figs
         each file(gff) from orf_gff_generate_stats_figs
-	each file(t_rna) from t_rna_file
-	each file(codon_positions) from codon_positions_file
-	each file(features) from features_file
-	each file(asite_disp_length) from asite_disp_length_file
+        each file(t_rna) from t_rna_file
+        each file(codon_positions) from codon_positions_file
+        each file(features) from features_file
+        each file(asite_disp_length) from asite_disp_length_file
     output:
         tuple val(sample_id), file("tpms.tsv") into tpms_tsv
-        tuple val(sample_id), file("*.pdf") into stats_figs_pdfs
-        tuple val(sample_id), file("*.tsv") into stats_figs_tsvs
-        tuple val(sample_id), file("codon_ribodens.pdf") optional (! is_t_rna_and_codon_positions_file) into codon_ribodens_pdf
-        tuple val(sample_id), file("codon_ribodens.tsv") optional (! is_t_rna_and_codon_positions_file) into codon_ribodens_tsv
-        tuple val(sample_id), file("features.pdf") optional (! is_features_file) into features_tsv
-        tuple val(sample_id), file("3ntframe_bygene.tsv") optional (! is_asite_disp_length_file) into nt3frame_bygene_tsv
-        tuple val(sample_id), file("3ntframe_propbygene.pdf") optional (! is_asite_disp_length_file) into nt3frame_propbygene_pdf
+        tuple val(sample_id), file("3nt_periodicity.pdf") \
+            into nt3_periodicity_pdf
+        tuple val(sample_id), file("3nt_periodicity.tsv") \
+            into nt3_periodicity_tsv
+        tuple val(sample_id), file("pos_sp_nt_freq.tsv") \
+            into pos_sp_nt_freq_tsv
+        tuple val(sample_id), file("pos_sp_rpf_norm_reads.pdf") \
+            into pos_sp_rpf_norm_reads_pdf
+        tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
+            into pos_sp_rpf_norm_reads_tsv
+        tuple val(sample_id), file("read_lengths.pdf") \
+            into read_lengths_pdf
+        tuple val(sample_id), file("read_lengths.tsv") \
+            into read_lengths_tsv
+        tuple val(sample_id), file("startcodon_ribogridbar.pdf") \
+            into start_codon_ribogridbar_pdf
+        tuple val(sample_id), file("startcodon_ribogrid.pdf") \
+            into start_codon_ribogrid_pdf
+        tuple val(sample_id), file("codon_ribodens.pdf") \
+            optional (! is_t_rna_and_codon_positions_file) \
+            into codon_ribodens_pdf
+        tuple val(sample_id), file("codon_ribodens.tsv") \
+            optional (! is_t_rna_and_codon_positions_file) \
+            into codon_ribodens_tsv
+        tuple val(sample_id), file("features.pdf") \
+            optional (! is_features_file) into features_tsv
+        tuple val(sample_id), file("3ntframe_bygene.tsv") \
+            optional (! is_asite_disp_length_file) \
+            into nt3frame_bygene_tsv
+        tuple val(sample_id), file("3ntframe_propbygene.pdf") \
+            optional (! is_asite_disp_length_file) \
+            into nt3frame_propbygene_pdf
     shell:
-        t_rna_flag = is_t_rna_and_codon_positions_file ? "--t-rna-file=${t_rna}" : ''
-        codon_positions_flag = is_t_rna_and_codon_positions_file ? "--codon-positions-file=${codon_positions}" : ''
-        features_flag = is_features_file ? "--features-file=${features}" : ''
-        asite_disp_length_flag = is_asite_disp_length_file ? "--asite-disp-length-file=${asite_disp_length}" : ''
-        count_threshold_flag = params.containsKey('count_threshold') ? "--count-threshold=${params['count_threshold']}": ''
+        t_rna_flag = is_t_rna_and_codon_positions_file \
+            ? "--t-rna-file=${t_rna}" : ''
+        codon_positions_flag = is_t_rna_and_codon_positions_file \
+            ? "--codon-positions-file=${codon_positions}" : ''
+        features_flag = is_features_file \
+            ? "--features-file=${features}" : ''
+        asite_disp_length_flag = is_asite_disp_length_file \
+            ? "--asite-disp-length-file=${asite_disp_length}" : ''
+        count_threshold_flag = params.containsKey('count_threshold') \
+            ? "--count-threshold=${params['count_threshold']}": ''
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/generate_stats_figs.R \
            --num-processes=${params.num_processes} \
@@ -567,7 +640,7 @@ process generateStatsFigs {
            ${t_rna_flag} \
            ${codon_positions_flag} \
            ${features_flag} \
-	   --orf-gff-file=${gff} \
+           --orf-gff-file=${gff} \
            ${asite_disp_length_flag} \
            ${count_threshold_flag}
         """
@@ -612,24 +685,24 @@ process countReads {
     input:
         env PYTHONPATH from workflow.projectDir
         val data_files_config_yaml from data_files_config_yaml
-	// Force dependency on output of collateTpms so this process
+        // Force dependency on output of collateTpms so this process
         // is only run when all other processing has completed.
-	val completed_samples from completed_samples
+        val completed_samples from completed_samples
     output:
         file "read_counts.tsv" into read_counts_tsv
     when:
         params.count_reads
     shell:
         // workflow.projectDir is directory into which outputs
-	// have been published.
-	// TODO: It would be preferable to:
-	// 1. Stage these directories into this process's
-	//    work directory. If this is possible, and how to do it,
+        // have been published.
+        // TODO: It would be preferable to:
+        // 1. Stage these directories into this process's
+        //    work directory. If this is possible, and how to do it,
         //    if so, has not been determined.
-	// 2. Stage outputs from the processes for which reads
-	//    are to be counted into this process's work directory.
+        // 2. Stage outputs from the processes for which reads
+        //    are to be counted into this process's work directory.
         //    This would require a new implementation of
-	//    riboviz.tools.count_reads.
+        //    riboviz.tools.count_reads.
         """
         echo "${data_files_config_yaml}" > data_files.yaml
         python -m riboviz.tools.count_reads \
