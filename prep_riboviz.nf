@@ -309,12 +309,15 @@ process demultiplex {
 }
 
 // multiplex_samples_fq channel outputs a single list with all the
-// output fastq files. Flatten this list and output tuples, of sample
-// IDs and file names as separate items onto a new channel, filtering out
-// Unassigned.fq.
+// output fastq files. Filter out Unassigned.fq and any empty files
+// (corresponding to barcodes for which there were no samples, then
+// flatten this list and output tuples, of sample IDs and file names
+// as separate items onto a new channel.
 multiplex_samples_fq = multiplex_output_fq
     .flatten()
     .filter { it.baseName != "Unassigned" }
+    .filter{ it.size() > 0 }
+    .view { "Demultiplexed sample file (non-empty): ${it.getName()}" }
     .map { [it.baseName, it] }
 
 /*
