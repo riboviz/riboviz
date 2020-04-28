@@ -129,7 +129,7 @@ print("generate_stats_figs.R running with parameters:")
 opt
 
 # prepare files, opens hdf5 file connection
-hdf5file <- rhdf5::H5Fopen(hd_file) # filehandle for the h5 file
+hdf5file <- hd_file # filehandle for the h5 file
 
 # read in positions of all exons/genes in GFF format and subset CDS locations
 gene_names <- rhdf5::h5ls(hdf5file, recursive = 1)$name
@@ -151,12 +151,8 @@ ggplot2::theme_set(theme_bw())
 print("Starting: Check for 3nt periodicity globally")
 
 # function to get data matrix of read counts for gene and dataset from hdf5file
-GetGeneDatamatrix <- function(gene, dataset, hdf5file) {
-  hdf5file %>%
-    rhdf5::H5Dopen(
-      name = paste0("/", gene, "/", dataset, "/reads/data")
-    ) %>%
-    rhdf5::H5Dread() %>%
+GetGeneDatamatrix <- function(gene, dataset, hdf5file){
+  rhdf5::h5read(file = hdf5file, name = paste0("/", gene, "/", dataset, "/reads/data")) %>%
     return()
 }
 
@@ -337,10 +333,13 @@ print("Completed: Check for 3nt periodicity globally")
 print("Starting: Distribution of lengths of all mapped reads")
 
 # read length-specific read counts stored as attributes of 'reads' in H5 file
-gene_sp_read_length <- lapply(gene_names, function(x) {
-  rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", x, "/", dataset, "/reads")), "reads_by_len"))
-})
+GetGeneReadLength <- function(gene, hdf5file){
+  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["reads_by_len"]]
+}
 
+gene_sp_read_length <- lapply(gene_names, function(x) {
+  GetGeneReadLength(x, hdf5file = hdf5file)
+})
 
 # sum reads of each length across all genes
 read_length_data <- data.frame(
@@ -895,13 +894,13 @@ print("Starting: Calculate TPMs of genes")
 
 # read length-specific total counts stored as attributes of 'reads_total' in H5 file
 GetGeneLength <- function(gene, hdf5file) {
-  start_codon_pos <- rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", gene, "/", dataset, "/reads")), "start_codon_pos"))[1]
-  stop_codon_pos <- rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", gene, "/", dataset, "/reads")), "stop_codon_pos"))[1]
+  start_codon_pos <- rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["start_codon_pos"]][1]
+  stop_codon_pos <- rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["stop_codon_pos"]][1]
   return(stop_codon_pos - start_codon_pos)
 }
 
-GetGeneReadsTotal <- function(gene, hdf5file) {
-  rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", gene, "/", dataset, "/reads")), "reads_total"))
+GetGeneReadsTotal <- function(gene, hdf5file){
+  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["reads_total"]]
 }
 
 GetGeneReadDensity <- function(gene, hdf5file, buffer = 50) {
