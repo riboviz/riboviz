@@ -1,6 +1,6 @@
 
 # source generate_stats_figs.R
-source(here::here("rscripts", "generate_stats_figs.R"))
+#source(here::here("rscripts", "generate_stats_figs.R"))
 
 print("testing h5-open-106 fixes")
 
