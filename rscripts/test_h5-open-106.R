@@ -1,3 +1,5 @@
+# load library {here}
+suppressMessages(library(here, quietly=T))
 
 # source generate_stats_figs.R
 source(here::here("rscripts", "generate_stats_figs.R"))
