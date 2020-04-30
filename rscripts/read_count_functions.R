@@ -270,30 +270,30 @@ GetMRNACoverage <- function(gene, dataset, hdf5file, left, right, read_range, mi
 ### functions to calculate read frame etc. ###
 
 CalcAsiteFixedOneLength <- function(reads_pos_length, min_read_length,
-                                    read_length, asite_disp) {
+                                    read_length, asite_displacement) {
   # Calculate read A-site using a fixed displacement for a single read length
   length_row_choose <- read_length - min_read_length + 1
   reads_pos_length[length_row_choose, ] %>%
-    dplyr::lag(n = asite_disp, default = 0)
+    dplyr::lag(n = asite_displacement, default = 0)
 }
 
 CalcAsiteFixed <- function(reads_pos_length, min_read_length,
                            asite_displacement_length = data.frame(
                              read_length = c(28, 29, 30),
-                             asite_disp = c(15, 15, 15)
+                             asite_displacement = c(15, 15, 15)
                            ),
                            colsum_out = TRUE) {
   # Calculate read A-site using a fixed displacement for fixed read lengths
   npos <- ncol(reads_pos_length)
   Asite_counts_bylength <-
     purrr::map2(
-      asite_displacement_length$read_length, asite_displacement_length$asite_disp,
-      function(read_length, asite_disp) {
+      asite_displacement_length$read_length, asite_displacement_length$asite_displacement,
+      function(read_length, asite_displacement) {
         CalcAsiteFixedOneLength(
           reads_pos_length,
           min_read_length,
           read_length,
-          asite_disp
+          asite_displacement
         )
       }
     )
@@ -340,7 +340,7 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hdf5file, left, right,
                          min_read_length, 
                          asite_displacement_length = data.frame(
                              read_length = c(28, 29, 30),
-                             asite_disp = c(15, 15, 15)
+                             asite_displacement = c(15, 15, 15)
                            ), 
                          snapdisp=0L) {
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
@@ -409,7 +409,7 @@ WilcoxTestFrame <- function(x, left, right) {
 GetGeneReadFrame <- function(gene, dataset, hdf5file, left, right, min_read_length,
                              asite_displacement_length = data.frame(
                                read_length = c(28, 29, 30),
-                               asite_disp = c(15, 15, 15)
+                               asite_displacement = c(15, 15, 15)
                              )) {
   # example from vignette:
   #   GetGeneReadFrame(hdf5file, "YAL003W", dataset, 251, 871, min_read_length)
