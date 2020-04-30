@@ -708,11 +708,66 @@ if (do_pos_sp_nt_freq) {
 # MEDIUM FUNCTIONS:
 
 # get asite displacement legnths
-ReadAsiteDisplacementLengthFile <- function(asite_disp_length_file){
+ReadAsiteDisplacementLengthFromFile <- function(asite_disp_length_file){
   asite_displacement_length <- readr::read_tsv(asite_disp_length_file,
                                        comment = "#"
   )
+  return(asite_displacement_length)
 }
+
+CalculateGeneReadFrames <- function(dataset, hdf5file, gff_df, min_read_length, asite_displacement_length_from_file) {
+  # TODO: wrap in function
+  gene_read_frames_data <- gff_df %>%
+    dplyr::filter(type == "CDS") %>%
+    dplyr::select(gene = seqnames, left = start, right = end) %>%
+    purrr::pmap_dfr(GetGeneReadFrame,
+                    hdf5file = hdf5file,
+                    dataset = dataset,
+                    min_read_length = min_read_length,
+                    asite_displacement_length = asite_displacement_length_from_file
+    )
+  return(gene_read_frames_data)
+} # end CalculateGeneReadFrames() definition
+# gives: 
+# TODO
+
+PlotGeneReadFrames <- function(gene_read_frames_data){
+  gene_read_frame_plot <- gene_read_frames_data %>%
+    filter(Ct_fr0 + Ct_fr1 + Ct_fr2 > count_threshold) %>%
+    BoxplotReadFrameProportion()
+  
+  return(gene_read_frame_plot)
+} # end PlotGeneReadFrames() definition
+# gives: 
+# TODO
+
+SaveGeneReadFrames <- function(gene_read_frame_plot){
+  # save read lengths plot and file
+  ggsave(gene_read_frame_plot,
+         filename = file.path(output_dir, paste0(output_prefix, "3ntframe_propbygene.pdf")),
+         width = 3, height = 3
+  )
+  #return() # no return as writing-out
+} # end SaveGeneReadFrames() definition
+# gives: 
+# TODO
+
+WriteGeneReadFrames <- function(gene_read_frames_data){
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3ntframe_bygene.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    gene_read_frames_data,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+  #return() # no return as writing-out
+} # end WriteGeneReadFrames() definition
+# gives: 
+# TODO
 
 # BIG FUNCTIONS:
 
@@ -722,42 +777,26 @@ if (is.na(asite_disp_length_file)) {
 
 
 if (!is.na(asite_disp_length_file)) {
+  
+  # check frame by gene
   print("Starting: Check for 3nt periodicity (frame) by gene")
-  asite_displacement_length <- readr::read_tsv(asite_disp_length_file,
-                                       comment = "#"
-  )
-  # TODO: wrap in function
-  gene_read_frames <- gff_df %>%
-    dplyr::filter(type == "CDS") %>%
-    dplyr::select(gene = seqnames, left = start, right = end) %>%
-    purrr::pmap_dfr(GetGeneReadFrame,
-                    hdf5file = hdf5file,
-                    dataset = dataset,
-                    min_read_length = min_read_length,
-                    asite_displacement_length = asite_displacement_length
-    )
-  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3ntframe_bygene.tsv"))
-  write_provenance_header(path_to_this_script, tsv_file_path)
-  write.table(
-    gene_read_frames,
-    file = tsv_file_path,
-    append = T,
-    sep = "\t",
-    row = F,
-    col = T,
-    quote = F
-  )
   
-  gene_read_frame_plot <- gene_read_frames %>%
-    filter(Ct_fr0 + Ct_fr1 + Ct_fr2 > count_threshold) %>%
-    BoxplotReadFrameProportion()
+  # get a-site displacement lengths from file
+  asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(asite_disp_length_file)
+
+  # run CalculateGeneReadFrames() to create data object
+  gene_read_frames_data <- CalculateGeneReadFrames(dataset, hdf5file, gff_df, min_read_length, asite_displacement_length)
   
-  # save read lengths plot and file
-  ggsave(gene_read_frame_plot,
-         filename = file.path(output_dir, paste0(output_prefix, "3ntframe_propbygene.pdf")),
-         width = 3, height = 3
-  )
+  # run PlotGeneReadFrames():
+  gene_read_frame_plot <- PlotGeneReadFrames(gene_read_frames_data)
+  # creates plot object
   
+  # run SaveGeneReadFrames():
+  SaveGeneReadFrames(gene_read_frame_plot)
+  
+  # run WriteGeneReadFrames():
+  WriteGeneReadFrames(gene_read_frames_data)
+
   print("Completed: Check for 3nt periodicity (frame) by Gene")
 }
 
