@@ -423,7 +423,7 @@ CalculateReadLengths <- function(gene_names, dataset, hdf5file){
   
   # read length-specific read counts stored as attributes of 'reads' in H5 file
   gene_sp_read_length <- lapply(gene_names, function(gene) {
-    GetGeneReadLength(gene,dataset,hdf5file)
+    GetGeneReadLength(gene, hdf5file)
   })
   
   # sum reads of each length across all genes
@@ -674,6 +674,8 @@ BiasesInNucleotideCompositionAlongMappedReadLengths <- function(gene_names, data
   #                    appending column names to file
   
   # print("Completed nucleotide composition bias table")
+  
+  print("Completed: Biases in nucleotide composition along mapped read lengths")
   
 } # end definition of function: BiasesInNucleotideCompositionAlongMappedReadLengths()
 # to run:

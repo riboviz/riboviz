@@ -53,14 +53,10 @@ GetGeneDatamatrix <- function(gene, dataset, hdf5file){
   rhdf5::h5read(file = hdf5file, name = paste0("/", gene, "/", dataset, "/reads/data")) %>%
     return()
 }
-GetGeneReadLength <- function(gene, dataset, hdf5file) {
-  hdf5file %>%
-    rhdf5::H5Gopen(
-      name = paste0("/", gene, "/", dataset, "/reads")
-    ) %>%
-      rhdf5::H5Aopen(name = "reads_by_len") %>%
-    rhdf5::H5Aread() %>% # return array with the read data
-    return()
+
+# function to get read length stored as attribute "reads_by_len" of 'reads' in H5 file
+GetGeneReadLength <- function(gene, hdf5file){
+  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["reads_by_len"]]
 }
 
 # function to get matrix of read counts between specific positions
@@ -282,7 +278,7 @@ CalcAsiteFixedOneLength <- function(reads_pos_length, min_read_length,
 }
 
 CalcAsiteFixed <- function(reads_pos_length, min_read_length,
-                           asite_disp_length = data.frame(
+                           asite_displacement_length = data.frame(
                              read_length = c(28, 29, 30),
                              asite_disp = c(15, 15, 15)
                            ),
@@ -291,7 +287,7 @@ CalcAsiteFixed <- function(reads_pos_length, min_read_length,
   npos <- ncol(reads_pos_length)
   Asite_counts_bylength <-
     purrr::map2(
-      asite_disp_length$read_length, asite_disp_length$asite_disp,
+      asite_displacement_length$read_length, asite_displacement_length$asite_disp,
       function(read_length, asite_disp) {
         CalcAsiteFixedOneLength(
           reads_pos_length,
@@ -305,7 +301,7 @@ CalcAsiteFixed <- function(reads_pos_length, min_read_length,
     Asite_counts <- purrr::reduce(Asite_counts_bylength, `+`)
     return(Asite_counts)
   } else {
-    # this has only as many columns as asite_disp_length,
+    # this has only as many columns as asite_displacement_length,
     # probably LESS than data_mat
     Asite_counts_bylengthmat <- unlist(Asite_counts_bylength) %>%
       matrix(ncol = npos, byrow = TRUE)
@@ -342,7 +338,7 @@ NormByMean <- function(x,...) {
 
 GetGeneCodonPosReads1dsnap <- function(gene, dataset, hdf5file, left, right, 
                          min_read_length, 
-                         asite_disp_length = data.frame(
+                         asite_displacement_length = data.frame(
                              read_length = c(28, 29, 30),
                              asite_disp = c(15, 15, 15)
                            ), 
@@ -350,7 +346,7 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hdf5file, left, right,
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hdf5file) # Get the matrix of read counts
   reads_asitepos <- CalcAsiteFixed(
     reads_pos_length, min_read_length,
-    asite_disp_length
+    asite_displacement_length
   )
   SnapToCodon(reads_asitepos,left,right,snapdisp)
 }
@@ -411,7 +407,7 @@ WilcoxTestFrame <- function(x, left, right) {
 }
 
 GetGeneReadFrame <- function(gene, dataset, hdf5file, left, right, min_read_length,
-                             asite_disp_length = data.frame(
+                             asite_displacement_length = data.frame(
                                read_length = c(28, 29, 30),
                                asite_disp = c(15, 15, 15)
                              )) {
@@ -420,7 +416,7 @@ GetGeneReadFrame <- function(gene, dataset, hdf5file, left, right, min_read_leng
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hdf5file)
   reads_asitepos <- CalcAsiteFixed(
     reads_pos_length, min_read_length,
-    asite_disp_length
+    asite_displacement_length
   )
   sum_by_frame <- SumByFrame(reads_asitepos, left, right)
   wt_frame <- WilcoxTestFrame(reads_asitepos, left, right)
@@ -511,13 +507,13 @@ comb_freq <- function(allfr) {
 
 # read length-specific total counts stored as attributes of 'reads_total' in H5 file
 GetGeneLength <- function(gene, dataset, hdf5file) {
-  start_codon_pos <- rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", gene, "/", dataset, "/reads")), "start_codon_pos"))[1]
-  stop_codon_pos <- rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", gene, "/", dataset, "/reads")), "stop_codon_pos"))[1]
+  start_codon_pos <- rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["start_codon_pos"]][1]
+  stop_codon_pos <- rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["stop_codon_pos"]][1]
   return(stop_codon_pos - start_codon_pos)
 }
 
 GetGeneReadsTotal <- function(gene, dataset, hdf5file) {
-  rhdf5::H5Aread(rhdf5::H5Aopen(rhdf5::H5Gopen(hdf5file, paste0("/", gene, "/", dataset, "/reads")), "reads_total"))
+  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["reads_total"]]
 }
 
 GetGeneReadDensity <- function(gene, dataset, hdf5file, buffer = 50) {
