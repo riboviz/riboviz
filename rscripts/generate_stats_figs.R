@@ -997,6 +997,8 @@ write.table(
   quote = F
 )
 
+print("Completed: Calculate TPMs of genes")
+
 #
 #
 # END TPMS OF GENES
@@ -1139,3 +1141,5 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
 # END TPMS CORRELATIONS WITH FEATURES
 #
 #
+
+print("Completed generate_stats_figs.R")
