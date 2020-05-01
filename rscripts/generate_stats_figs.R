@@ -1185,9 +1185,7 @@ GeneTranscriptsPerMillion <- function(gene, dataset, hdf5file){
     WriteGeneTranscriptsPerMillion(tpms)
     
     print("Completed: Calculate TPMs of genes")
-    
-    return(tpms)
-    
+
 } # end GeneTranscriptsPerMillion() definition
 # run GeneTranscriptsPerMillion():
 GeneTranscriptsPerMillion(gene, dataset, hdf5file)
