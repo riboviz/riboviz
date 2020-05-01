@@ -1137,36 +1137,61 @@ print("Completed: Position specific distribution of reads")
 #
 
 
-## Calculate TPMs of genes
+# MEDIUM FUNCTIONS: 
 
-print("Starting: Calculate TPMs of genes")
+CalculateGeneTranscriptsPerMillion <- function(gene, dataset, hdf5file){
+  # calculate transcripts per million (TPM)
+  # @FlicAnderson: what does reads_per_b stand for? Reads per Base? o.0  If so, maybe worth using full word?
+  gene_sp_reads <- sapply(gene_names, GetGeneReadsTotal, dataset, hdf5file)
+  reads_per_b <- sapply(gene_names, GetGeneReadDensity, dataset, hdf5file)
+  
+  tpms <- data.frame(
+    ORF = gene_names,
+    readcount = gene_sp_reads,
+    rpb = reads_per_b,
+    tpm = reads_per_b * 1e6 / sum(reads_per_b)
+  )
+  
+  return(tpms)
+} # end CalculateGeneTranscriptsPerMillion() definition
 
-# calculate transcripts per million (TPM)
-# TODO: make this a single function
-gene_sp_reads <- sapply(gene_names, GetGeneReadsTotal, dataset, hdf5file)
-reads_per_b <- sapply(gene_names, GetGeneReadDensity, dataset, hdf5file)
 
-tpms <- data.frame(
-  ORF = gene_names,
-  readcount = gene_sp_reads,
-  rpb = reads_per_b,
-  tpm = reads_per_b * 1e6 / sum(reads_per_b)
-)
+WriteGeneTranscriptsPerMillion <-  function(tpms){
+  # write out to *_tpms.tsv
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "tpms.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    tpms,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+  # return() NO RETURN as writing out
+} # end WriteGeneTranscriptsPerMillion() definition
 
-# write out to *_tpms.tsv
-tsv_file_path <- file.path(output_dir, paste0(output_prefix, "tpms.tsv"))
-write_provenance_header(path_to_this_script, tsv_file_path)
-write.table(
-  tpms,
-  file = tsv_file_path,
-  append = T,
-  sep = "\t",
-  row = F,
-  col = T,
-  quote = F
-)
 
-print("Completed: Calculate TPMs of genes")
+# BIG FUNCTIONS: 
+
+# Calculate TPMs of genes
+GeneTranscriptsPerMillion <- function(gene, dataset, hdf5file){
+  
+  print("Starting: Calculate TPMs of genes")
+  
+    tpms <- CalculateGeneTranscriptsPerMillion(gene, dataset, hdf5file)
+    
+    WriteGeneTranscriptsPerMillion(tpms)
+    
+    print("Completed: Calculate TPMs of genes")
+    
+    return(tpms)
+    
+} # end GeneTranscriptsPerMillion() definition
+# run GeneTranscriptsPerMillion():
+GeneTranscriptsPerMillion(gene, dataset, hdf5file)
+
 
 #
 #
@@ -1178,18 +1203,33 @@ print("Completed: Calculate TPMs of genes")
 
 ## Correlations between TPMs of genes with their sequence-based features
 
-# Correlate TPMs of genes with sequence-based features, skip if missing features_file
-if (!is.na(features_file)) {
-  print("Starting: Correlations between TPMs of genes with their sequence-based features")
-  
+# MEDIUM FUNCTIONS: 
+
+# read features file
+ReadSequenceBasedFeatures <- function(features_file){
   features <- read.table(features_file, h = T)
-  
+  return(features)
+} # end ReadSequenceBasedFeatures() definition
+# gives: 
+# TODO
+
+
+CalculateSequenceBasedFeatures <- function(features, tpms){
   # Prepare data for plot
   # Consider only genes with at least count_threshold mapped reads
   features_plot_data <- merge(features, tpms, by = "ORF") %>%
     filter(readcount >= count_threshold, !is.na(ORF)) %>%
     select(-readcount, -rpb) %>%
     gather(Feature, Value, -ORF, -tpm)
+  
+  return(features_plot_data)
+  
+} # end CalculateSequenceBasedFeatures() definition
+# gives:
+# TODO
+
+
+PlotSequenceBasedFeatures <- function(features_plot_data){
   
   features_plot <- ggplot(features_plot_data, aes(x = tpm, y = Value)) +
     geom_point(alpha = 0.3) +
@@ -1198,13 +1238,44 @@ if (!is.na(features_file)) {
     geom_smooth(method = "lm") +
     xlab("TPM (transcripts per million)")
   
+  return(features_plot)
+} # end PlotSequenceBasedFeatures() definition
+
+
+WriteSequenceBasedFeatures <- function(features_plot) {
   # Save plot and file
   ggsave(features_plot, filename = file.path(output_dir, paste0(output_prefix, "features.pdf")))
   
+  # return() NO RETURN as writing out
+  
+} # end WriteSequenceBasedFeatures() definition
+
+
+# BIG FUNCTIONS: 
+
+# Correlate TPMs of genes with sequence-based features, skip if missing features_file
+if (!is.na(features_file)) { # do correlating
+  
+  print("Starting: Correlations between TPMs of genes with their sequence-based features")
+  
+  features <- ReadSequenceBasedFeatures(features_file)
+  
+  tpms <- CalculateGeneTranscriptsPerMillion(gene, dataset, hdf5file) # repeated from TPMs section to make it available here
+  
+  features_plot_data <- CalculateSequenceBasedFeatures(features, tpms)
+  
+  features_plot <- PlotSequenceBasedFeatures(features_plot_data)
+  
+  WriteSequenceBasedFeatures(features_plot)
+  
   print("Completed: Correlations between TPMs of genes with their sequence-based features")
-} else {
+  
+} else { # skip
+  
   print("Skipped: Correlations between TPMs of genes with their sequence-based features - features_file.tsv not provided")
+  
 }
+
 
 ## Codon-specific ribosome densities for correlations with tRNAs
 
