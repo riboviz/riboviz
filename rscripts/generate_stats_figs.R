@@ -957,8 +957,11 @@ WriteCodonBasedPositonSpecificReadsPerGene <- function(pos_sp_rpf_norm_reads_dat
 
 # BIG FUNCTIONS: 
 
-PositionSpecificDistributionOfReadsRPF <- function(gene, dataset, hdf5file, gff_df, min_read_length, asite_displacement_length){
-  #   # Ribosome profiling method for position-specific distribution of reads
+# run ribosome profiling method for position specific distribution of reads:
+if (rpf & !is.na(asite_disp_length_file)) {
+  
+  print("Starting: Position specific distribution of reads - RPF method")
+
   reads_per_codon_etc <- CalculateCodonBasedPositonSpecificReadsPerGene(gene, dataset, hdf5file, gff_df, min_read_length, asite_displacement_length)
   
   pos_sp_rpf_norm_reads_5end <- CalculateMetageneMeanNormalisedReadCounts5End(reads_per_codon_etc)
@@ -972,17 +975,6 @@ PositionSpecificDistributionOfReadsRPF <- function(gene, dataset, hdf5file, gff_
   SaveCodonBasedPositonSpecificReadsPerGene(pos_sp_rpf_norm_reads_plot)
   
   WriteCodonBasedPositonSpecificReadsPerGene(pos_sp_rpf_norm_reads_data)
-  
-} # end of PositionSpecificDistributionOfReadsRPF() definition.
-# gives: # TODO
-
-
-# run ribosome profiling method for position specific distribution of reads:
-if (rpf & !is.na(asite_disp_length_file)) {
-  
-  print("Starting: Position specific distribution of reads - RPF method")
-  
- PositionSpecificDistributionOfReadsRPF(gene, dataset, hdf5file, gff_df, min_read_length, asite_displacement_length)
    
 }
 
@@ -1003,8 +995,6 @@ if (rpf & !is.na(asite_disp_length_file)) {
 
 # BIG FUNCTIONS: 
 
-
-# RUN: 
 
 # run mRNA dataset method for position specific distribution of reads:
 # if (!rpf) {
