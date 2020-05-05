@@ -27,6 +27,9 @@ if (interactive()) {
   source(here::here("rscripts", "read_count_functions.R"))
 }
 
+# print provenance
+print_provenance(path_to_this_script)
+
 # define input options for optparse package
 option_list <- list(
   make_option("--output-dir",
@@ -116,9 +119,6 @@ option_list <- list(
   )
 )
 
-# print provenance
-print_provenance(path_to_this_script)
-
 # read in commandline arguments
 opt <- optparse::parse_args(OptionParser(option_list = option_list),
                             convert_hyphens_to_underscores=TRUE)
@@ -132,9 +132,6 @@ opt
 
 # prepare files, opens hdf5 file connection
 hdf5file <- hd_file
-#hdf5file <- rhdf5::H5Fopen(hd_file) # filehandle for the h5 file
- # aiming to replace this ^^^^ in order to do away with an open connection-object (hdf5file)
-  # & will instead use the variable (hd_file) which has path of .h5 file e.g. "vignette/output/WTnone/WTnone.h5"
 
 # list of gene names taken from h5 file
 gene_names <- rhdf5::h5ls(hdf5file, recursive = 1)$name
