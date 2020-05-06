@@ -56,9 +56,15 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     // Filter params.multiplex_fq_files down to those files that exist.
     for (entry in params.multiplex_fq_files) {
         multiplex_file = file("${params.dir_in}/${entry}")
-        if (multiplex_file.exists()) {
+        if (multiplex_file.exists() || true) {
             // Use file basename as a key.
-            multiplex_files[multiplex_file.baseName] = multiplex_file
+            multiplex_file_name = multiplex_file.baseName
+            if (multiplex_file_name.toLowerCase().endsWith(".fastq")) {
+                multiplex_file_name = multiplex_file_name - '.fastq'
+            } else if (multiplex_file_name.toLowerCase().endsWith(".fq")) {
+                multiplex_file_name = multiplex_file_name - '.fq'
+            }
+            multiplex_files[multiplex_file_name] = multiplex_file
         } else {
             println("WARNING: Missing multiplexed file: $entry")
         }
