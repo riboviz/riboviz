@@ -300,7 +300,10 @@ process demultiplex {
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        env PYTHONPATH from workflow.projectDir
+        // Use .toString to prevent changing hashes of
+	// workflow.projectDir triggering reexecution of this
+	// process if "nextflow run" is run with "-resume".
+        env PYTHONPATH from workflow.projectDir.toString()
         tuple val(multiplex_id), file(multiplex_file) from trimmed_multiplex
         each file(sample_sheet) from multiplex_sample_sheet
     output:
@@ -391,7 +394,10 @@ process trim5pMismatches {
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        env PYTHONPATH from workflow.projectDir
+        // Use .toString to prevent changing hashes of
+	// workflow.projectDir triggering reexecution of this
+	// process if "nextflow run" is run with "-resume".
+        env PYTHONPATH from workflow.projectDir.toString()
         tuple val(sample_id), file(sam) from orf_map_sams
     output:
         tuple val(sample_id), file("orf_map_clean.sam") \
@@ -699,7 +705,10 @@ completed_samples.subscribe { println("Processed samples: ${it.join(' ')}") }
 process countReads {
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
     input:
-        env PYTHONPATH from workflow.projectDir
+        // Use .toString to prevent changing hashes of
+	// workflow.projectDir triggering reexecution of this
+	// process if "nextflow run" is run with "-resume".
+        env PYTHONPATH from workflow.projectDir.toString()
         val data_files_config_yaml from data_files_config_yaml
         // Force dependency on output of collateTpms so this process
         // is only run when all other processing has completed.
