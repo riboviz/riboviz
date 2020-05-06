@@ -57,11 +57,13 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     for (entry in params.multiplex_fq_files) {
         multiplex_file = file("${params.dir_in}/${entry}")
         if (multiplex_file.exists() || true) {
-            // Use file basename as a key.
+            // Use file base name as key, ensuring that if file
+	    // has extension .fastq.gz or .fq.fz then both extensions
+	    // are removed from the name.
             multiplex_file_name = multiplex_file.baseName
-            if (multiplex_file_name.toLowerCase().endsWith(".fastq")) {
+            if (multiplex_file_name.endsWith(".fastq")) {
                 multiplex_file_name = multiplex_file_name - '.fastq'
-            } else if (multiplex_file_name.toLowerCase().endsWith(".fq")) {
+            } else if (multiplex_file_name.endsWith(".fq")) {
                 multiplex_file_name = multiplex_file_name - '.fq'
             }
             multiplex_files[multiplex_file_name] = multiplex_file
@@ -319,12 +321,17 @@ process demultiplex {
 // (corresponding to barcodes for which there were no samples, then
 // flatten this list and output tuples, of sample IDs and file names
 // as separate items onto a new channel.
+// Use file base names as sample IDs, ensuring that if a file
+// has extension .fastq.gz or .fq.fz then both extensions
+// are removed from the name.
 multiplex_samples_fq = multiplex_output_fq
     .flatten()
-    .filter { it.baseName != "Unassigned" }
     .filter{ it.size() > 0 }
-    .view { "Demultiplexed sample file (non-empty): ${it.getName()}" }
     .map { [it.baseName, it] }
+    .map { n, f -> [n.endsWith(".fq") ? n - ".fq" : n, f]  }
+    .map { n, f -> [n.endsWith(".fastq") ? n - ".fastq" : n, f]  }
+    .filter { n, f -> n != "Unassigned" }
+    .view { n, f -> "Demultiplexed sample file (non-empty): ${n} (${f.getName()})" }
 
 /*
  * Sample processes. Common to both sample files (fq_files) and
