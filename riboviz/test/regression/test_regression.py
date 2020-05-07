@@ -443,9 +443,9 @@ def test_umitools_pre_dedup_group_tsv(
     tmp_dir_name = os.path.basename(os.path.normpath(tmp_dir))
     compare_files.compare_files(
         os.path.join(expected_fixture, tmp_dir_name, sample,
-                     workflow_files.POST_DEDUP_GROUPS_TSV),
+                     workflow_files.PRE_DEDUP_GROUPS_TSV),
         os.path.join(tmp_dir, sample,
-                     workflow_files.POST_DEDUP_GROUPS_TSV))
+                     workflow_files.PRE_DEDUP_GROUPS_TSV))
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
