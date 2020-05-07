@@ -12,6 +12,7 @@ Usage::
       [--skip-workflow]
       [--check-index-tmp]
       [--config-file=FILE]
+      [--nextflow]
 
 The test suite accepts the following command-line parameters:
 
