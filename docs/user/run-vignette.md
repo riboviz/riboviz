@@ -44,10 +44,9 @@ For full information on how to configure `prep_riboviz` and its inputs, see [Con
 
 If you have not already done so, activate your Python environment:
 
-* Miniconda Python 3.6+:
-
 ```console
 $ source $HOME/miniconda3/bin/activate
+$ conda activate riboviz
 ```
 
 If you have not already done so, set the paths to Hisat2 and Bowtie:
