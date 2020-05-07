@@ -199,6 +199,11 @@ Two additional sample-specific temporary files are produced:
 * `orf_map_clean.bam`: BAM file equivalent of `orf_map_clean.sam`, ORF-mapped reads with mismatched nt trimmed.
 * `orf_map_clean.bam.bai`: BAM index file for the above.
 
+These replace:
+
+* `pre_dedup.bam`: BAM file prior to deduplication.
+* `pre_dedup.bam.bai`: BAM index file for `pre_dedup.bam`.
+
 If deduplication is not enabled (if `dedup_umis: FALSE`) then these are copied to become the output files:
 
 * `<SAMPLE_ID>.bam`: BAM file of reads mapped to transcripts, which can be directly used in genome browsers.
@@ -208,11 +213,6 @@ If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specifi
 
 * `dedup.bam`: BAM file post deduplication.
 * `dedup.bam.bai`: BAM index file for the above.
-
-These replace:
-
-* `pre_dedup.bam`: BAM file prior to deduplication.
-* `pre_dedup.bam.bai`: BAM index file for `pre_dedup.bam`.
 
 These are copied to become the output files:
 
@@ -378,16 +378,9 @@ Missing file (NotHere): example_missing_file.fastq.gz
 
 ## Run vignette regression test suite
 
-There is a separate regression test suite for Nextflow, to reflect the different files produced. The syntax is is identical to that documented in [Run vignette regression test suite](docs/developer/testing.md#run-vignette-regression-test-suite), except that the suite is at `riboviz/test/regression/test_regression.py` i.e.
+There is a separate regression test suite for Nextflow, to reflect the different files produced. The syntax is is identical to that documented in [Run vignette regression test suite](docs/developer/testing.md#run-vignette-regression-test-suite), except that:
 
-```console
-$ pytest riboviz/test/regression/test_nextflow_regression.py \
-    --expected=DIRECTORY \
-    [--skip-workflow] \
-    [--check-index-tmp] \
-    [--config-file=FILE]
-```
+* A extra `--nextflow` flag needs to be provided.
+* The `--skip-workflow` flag must be provided i.e. you must run Nextflow yourself.
 
-Please note that *existing* regression test data, produced by `riboviz.tools.prep_riboviz` *can* be used with the outputs from Nextflow, but with the following caveats:
-
-* Tests referencing the additional files output by Nextflow, documented above, will fail.
+Please note that *existing* regression test data, produced by `riboviz.tools.prep_riboviz` *can* be used with the outputs from Nextflow, but that tests referencing the additional files output by Nextflow, documented above, will fail.

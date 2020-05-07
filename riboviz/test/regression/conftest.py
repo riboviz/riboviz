@@ -21,6 +21,9 @@ pass onto regression test modules:
   :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` is provided then sample
   names are extracted from the sample sheet file specified in
   :py:const:`riboviz.params.SAMPLE_SHEET`.
+* ``--nextflow``: Run Nextflow-specific tests. Some regression tests
+  differ for Nextflow due to differences in file naming. This should
+  only be used with ``--skip-workflow``.
 """
 import os.path
 import pytest
@@ -38,6 +41,8 @@ CHECK_INDEX_TMP = "--check-index-tmp"
 """ Check index and temporary files command-line flag. """
 CONFIG_FILE = "--config-file"
 """ Configuration file command-line flag. """
+NEXTFLOW = "--nextflow"
+""" Nextflow command-line flag. """
 
 
 def pytest_addoption(parser):
@@ -63,6 +68,10 @@ def pytest_addoption(parser):
                      action="store",
                      required=False,
                      help="Configuration file")
+    parser.addoption(NEXTFLOW,
+                     action="store_true",
+                     required=False,
+                     help="Run Nextflow tests")
 
 
 @pytest.fixture(scope="module")
@@ -127,6 +136,19 @@ def config_fixture(request):
     else:
         config_file = test.VIGNETTE_CONFIG
     return config_file
+
+
+@pytest.fixture(scope="module")
+def nextflow_fixture(request):
+    """
+    Gets value for ``--nextflow`` command-line option.
+
+    :param request: request
+    :type request: _pytest.fixtures.SubRequest
+    :return: flag
+    :rtype: bool
+    """
+    return request.config.getoption(NEXTFLOW)
 
 
 def pytest_generate_tests(metafunc):
