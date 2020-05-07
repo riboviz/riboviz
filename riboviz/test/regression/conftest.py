@@ -138,10 +138,9 @@ def pytest_generate_tests(metafunc):
       configure with values from the configuration:
         - ``sample``: keys from value of
           :py:const:`riboviz.params.FQ_FILES` (sample names).
-          If :py:const:`riboviz.test.VIGNETTE_CONFIG` configuration
-          file is being used then key
+          If key
           :py:const:`riboviz.test.VIGNETTE_MISSING_SAMPLE` is
-          removed.
+          present, then it is removed.
         - ``index_prefix``: value of
           :py:const:`riboviz.params.ORF_INDEX_PREFIX` and
           :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
@@ -172,8 +171,7 @@ def pytest_generate_tests(metafunc):
         config = yaml.load(f, yaml.SafeLoader)
     if "sample" in metafunc.fixturenames:
         samples = list(config[params.FQ_FILES].keys())
-        if config_file == test.VIGNETTE_CONFIG and \
-           test.VIGNETTE_MISSING_SAMPLE in samples:
+        if test.VIGNETTE_MISSING_SAMPLE in samples:
             samples.remove(test.VIGNETTE_MISSING_SAMPLE)
         metafunc.parametrize("sample", samples)
     fixtures = {
