@@ -16,14 +16,17 @@ pass onto regression test modules:
   temporary and output directories specified in this file will be
   validated against those specified by ``--expected``. If not provided
   then the file :py:const:`riboviz.test.VIGNETTE_CONFIG` will be
-  used. The configuration file must specify demultiplexed samples
-  (i.e. it should use :py:const:`riboviz.params.FQ_FILES` and not
-  :py:const:`riboviz.params.MULTIPLEX_FQ_FILES`).
+  used. Sample names are extracted from
+  :py:const:`riboviz.params.FQ_FILES`. If, instead,
+  :py:const:`riboviz.params.MULTIPLEX_FQ_FILES is provided then sample
+  names are extracted from the sample sheet file specified in
+  :py:const:`riboviz.params.SAMPLE_SHEET`.
 """
 import os.path
 import pytest
 import yaml
 from riboviz import params
+from riboviz import sample_sheets
 from riboviz import test
 from riboviz import utils
 
@@ -136,11 +139,16 @@ def pytest_generate_tests(metafunc):
     * Load configuration from file.
     * Inspect each test fixture used by the test functions and \
       configure with values from the configuration:
-        - ``sample``: keys from value of
-          :py:const:`riboviz.params.FQ_FILES` (sample names).
-          If key
-          :py:const:`riboviz.test.VIGNETTE_MISSING_SAMPLE` is
-          present, then it is removed.
+        - ``sample``:
+            - If :py:const:`riboviz.params.FQ_FILES` is provided then
+              sample names are the keys from this value.
+            - If :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` is
+              provided then sample names are extracted from the sample
+              sheet file specified in
+              :py:const:`riboviz.params.SAMPLE_SHEET`.
+            - If sample name
+              :py:const:`riboviz.test.VIGNETTE_MISSING_SAMPLE`
+              is present, then it is removed from the sample names.
         - ``index_prefix``: value of
           :py:const:`riboviz.params.ORF_INDEX_PREFIX` and
           :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
@@ -169,11 +177,6 @@ def pytest_generate_tests(metafunc):
         "No such file: %s" % config_file
     with open(config_file, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
-    if "sample" in metafunc.fixturenames:
-        samples = list(config[params.FQ_FILES].keys())
-        if test.VIGNETTE_MISSING_SAMPLE in samples:
-            samples.remove(test.VIGNETTE_MISSING_SAMPLE)
-        metafunc.parametrize("sample", samples)
     fixtures = {
         "index_prefix": [config[params.ORF_INDEX_PREFIX],
                          config[params.RRNA_INDEX_PREFIX]],
@@ -184,6 +187,20 @@ def pytest_generate_tests(metafunc):
         "dedup_umis": [utils.value_in_dict(params.DEDUP_UMIS, config)],
         "group_umis": [utils.value_in_dict(params.GROUP_UMIS, config)]
     }
+    if "sample" in metafunc.fixturenames:
+        samples = []
+        if params.FQ_FILES in config:
+            samples = list(config[params.FQ_FILES].keys())
+        elif params.MULTIPLEX_FQ_FILES in config:
+            sample_sheet_file = os.path.join(
+                config[params.INPUT_DIR],
+                config[params.SAMPLE_SHEET])
+            sample_sheet = sample_sheets.load_sample_sheet(
+                sample_sheet_file)
+            samples = list(sample_sheet[sample_sheets.SAMPLE_ID])
+        if test.VIGNETTE_MISSING_SAMPLE in samples:
+            samples.remove(test.VIGNETTE_MISSING_SAMPLE)
+        fixtures["sample"] = samples
     for fixture, value in fixtures.items():
         if fixture in metafunc.fixturenames:
             metafunc.parametrize(fixture, value)
