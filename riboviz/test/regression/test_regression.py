@@ -42,9 +42,9 @@ files, each sample-specific output file is only validated if the
 directory with the expected results has a corresponding output file
 for the sample. This is because the sample names for the tests are
 derived from the sample sheet file
-(:py:const`riboviz.params.SAMPLE_SHEET`) and it can't be guaranteed
-that a sample in the sample sheet will yield corresponding sample
-files post-demultiplexing.
+(:py:const:`riboviz.params.SAMPLE_SHEET`) and it can't be
+guaranteed that a sample in the sample sheet will yield
+corresponding sample files post-demultiplexing.
 
 As the expected data directories and those with the data to be tested
 may vary in their paths the following approach is used:

@@ -18,7 +18,7 @@ pass onto regression test modules:
   then the file :py:const:`riboviz.test.VIGNETTE_CONFIG` will be
   used. Sample names are extracted from
   :py:const:`riboviz.params.FQ_FILES`. If, instead,
-  :py:const:`riboviz.params.MULTIPLEX_FQ_FILES is provided then sample
+  :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` is provided then sample
   names are extracted from the sample sheet file specified in
   :py:const:`riboviz.params.SAMPLE_SHEET`.
 """
