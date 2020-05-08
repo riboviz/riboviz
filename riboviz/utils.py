@@ -155,7 +155,7 @@ def equal_dataframes(data1, data2, tolerance=0.0001):
     assert data1.shape == data2.shape,\
         "Unequal shape: %s, %s"\
         % (str(data1.shape), str(data2.shape))
-    assert data1.columns.equals(data2.columns),\
+    assert set(data1.columns) == set(data2.columns),\
         "Unequal column names: %s, %s"\
         % (str(data1.columns), str(data2.columns))
     for column in data1.columns:
