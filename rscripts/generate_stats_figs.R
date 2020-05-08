@@ -130,16 +130,8 @@ attach(opt)
 print("generate_stats_figs.R running with parameters:")
 opt
 
-# prepare files, opens hdf5 file connection
-hdf5file <- hd_file
-
 # list of gene names taken from h5 file
-gene_names <- rhdf5::h5ls(hdf5file, recursive = 1)$name
-#gene_names <- rhdf5::h5ls(here::here(opt$hd_file), recursive = 1)$name # TODO FLIC this can replace h5Fopen(hd_file) method?
-# running this commented-out line after `hdf5file <- rhdf5::H5Fopen(hd_file)` gives error, need to run h5closeAll() and then re-do this line: 
-# Warning message:
-#   In h5checktypeOrOpenLoc(file, readonly = TRUE, native = native) :
-#   An open HDF5 file handle exists. If the file has changed on disk meanwhile, the function may not work properly. Run 'h5closeAll()' to close all open HDF5 object handles.
+gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
 
 # accesses gene names $name from main group (recursive=FALSE, same as recursive=1)
 # > h5ls(here(opt$hd_file), recursive = FALSE)
@@ -221,12 +213,12 @@ ggplot2::theme_set(theme_bw())
 
 # MEDIUM FUNCTIONS:   
 
-CalculateThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df){  
+CalculateThreeNucleotidePeriodicity <- function(gene_names, dataset, hd_file, gff_df){  
   
   # get gene and position specific total counts for all read lengths
-  gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hdf5file = hdf5file, gff_df = gff_df)
+  gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hd_file = hd_file, gff_df = gff_df)
   
-  gene_poslen_counts_3end_df <- AllGenes3EndPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hdf5file = hdf5file, gff_df = gff_df)
+  gene_poslen_counts_3end_df <- AllGenes3EndPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hd_file = hd_file, gff_df = gff_df)
   
   # summarize by adding different read lengths
   gene_pos_counts_5start <- gene_poslen_counts_5start_df %>%
@@ -263,7 +255,7 @@ CalculateThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, g
   
 } # end CalculateThreeNucleotidePeriodicity() definition
 # gives: 
-#   CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hdf5file = hdf5file, gff_df = gff_df)
+#   CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
 #   # A tibble: 150 x 3
 #   Pos Counts End  
 #   <int>  <int> <fct>
@@ -353,19 +345,19 @@ WriteThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data) {
 # BIG FUNCTION:   
 
 # big function with probable arguments
-ThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df) {
+ThreeNucleotidePeriodicity <- function(gene_names, dataset, hd_file, gff_df) {
   
   # check for 3nt periodicity
   print("Starting: Check for 3nt periodicity globally")
   
   # CalculateThreeNucleotidePeriodicity():
-  three_nucleotide_periodicity_data <- CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hdf5file = hdf5file, gff_df = gff_df)
+  three_nucleotide_periodicity_data <- CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
   
   # PlotThreeNucleotidePeriodicity()
   three_nucleotide_periodicity_plot <- PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
   
   # NOTE: repeated from inside CalculateThreeNucleotidePeriodicity() as preferred not to return multiple objects in list (hassle :S)
-  gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hdf5file = hdf5file, gff_df = gff_df)
+  gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hd_file = hd_file, gff_df = gff_df)
   
   # run PlotStartCodonRiboGrid()
   start_codon_ribogrid_plot <- PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
@@ -391,10 +383,10 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hdf5file, gff_df) {
   
 } # end ThreeNucleotidePeriodicity() function definition
 # run ThreeNucleotidePeriodicity():
-ThreeNucleotidePeriodicity(gene_names, dataset, hdf5file, gff_df)
+ThreeNucleotidePeriodicity(gene_names, dataset, hd_file, gff_df)
 
 #26Mar: 
-# > ThreeNucleotidePeriodicity(gene_names, dataset, hdf5file, gff_df)
+# > ThreeNucleotidePeriodicity(gene_names, dataset, hd_file, gff_df)
 # [1] "Starting: Check for 3nt periodicity globally"
 # Saving 7 x 7 in image
 # [1] "Completed: Check for 3nt periodicity globally"
@@ -413,14 +405,14 @@ ThreeNucleotidePeriodicity(gene_names, dataset, hdf5file, gff_df)
 # MEDIUM FUNCTIONS:   
 
 # calculate function
-CalculateReadLengths <- function(gene_names, dataset, hdf5file){
+CalculateReadLengths <- function(gene_names, dataset, hd_file){
   
   ## distribution of lengths of all mapped reads
   print("Starting: Distribution of lengths of all mapped reads")
   
   # read length-specific read counts stored as attributes of 'reads' in H5 file
   gene_sp_read_length <- lapply(gene_names, function(gene) {
-    GetGeneReadLength(gene, hdf5file)
+    GetGeneReadLength(gene, hd_file)
   })
   
   # sum reads of each length across all genes
@@ -480,10 +472,10 @@ WriteReadLengths <- function(read_length_data){
 
 # BIG FUNCTION
 
-DistributionOfLengthsMappedReads <- function(gene_names, dataset, hdf5file){
+DistributionOfLengthsMappedReads <- function(gene_names, dataset, hd_file){
   
   # run CalculateReadLengths():
-  read_length_data <- CalculateReadLengths(gene_names, dataset, hdf5file)
+  read_length_data <- CalculateReadLengths(gene_names, dataset, hd_file)
   
   # run PlotReadLengths():
   read_len_plot <- PlotReadLengths(read_length_data)
@@ -499,10 +491,10 @@ DistributionOfLengthsMappedReads <- function(gene_names, dataset, hdf5file){
   
 } # end of definition of function DistributionOfLengthsMappedReads()
 # run DistributionOfLengthsMappedReads():
-DistributionOfLengthsMappedReads(gene_names, dataset, hdf5file)
+DistributionOfLengthsMappedReads(gene_names, dataset, hd_file)
 
 #26Mar:
-# > DistributionOfLengthsMappedReads(gene_names, dataset, hdf5file)
+# > DistributionOfLengthsMappedReads(gene_names, dataset, hd_file)
 # [1] "Starting: Distribution of lengths of all mapped reads"
 # Saving 7 x 7 in image
 # [1] "Completed: Distribution of lengths of all mapped reads"
@@ -522,7 +514,7 @@ DistributionOfLengthsMappedReads(gene_names, dataset, hdf5file)
 # MEDIUM FUNCTIONS: 
 
 # CALCULATE Biases In Nucleotide Composition Along Mapped Read Lengths  
-CalculateBiasesInNucleotideComposition <- function(gene_names, dataset, hdf5file, read_range, min_read_length){
+CalculateBiasesInNucleotideComposition <- function(gene_names, dataset, hd_file, read_range, min_read_length){
   
   # This is in a conditional loop because it fails for some inputs
   # and has not been debugged. Needs to be rewritten in tidyverse
@@ -532,7 +524,7 @@ CalculateBiasesInNucleotideComposition <- function(gene_names, dataset, hdf5file
       # For each read length convert reads to IRanges
       GetNTReadPosition(gene = as.character(x), 
                         dataset = dataset,
-                        hdf5file = hdf5file, 
+                        hd_file = hd_file, 
                         lid = lid, min_read_length = min_read_length)
     })
     names(out) <- gene_names
@@ -542,8 +534,8 @@ CalculateBiasesInNucleotideComposition <- function(gene_names, dataset, hdf5file
     # seq_len(41) generates sequence 1:41
     
     # GetNTReadPosition: 
-    # GetNTReadPosition <- function(gene, dataset, hdf5file, lid, min_read_length) {
-    #   reads_pos_len <- GetGeneDatamatrix(gene, dataset, hdf5file)[lid, ] # Get reads of a particular length
+    # GetNTReadPosition <- function(gene, dataset, hd_file, lid, min_read_length) {
+    #   reads_pos_len <- GetGeneDatamatrix(gene, dataset, hd_file)[lid, ] # Get reads of a particular length
     #   reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (lid + min_read_length - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
     #   pos <- rep(1:length(reads_pos_len), reads_pos_len) # nt positions weighted by number of reads mapping to it
     #   pos_IR <- IRanges::IRanges(start = pos, width = (lid + min_read_length - 1)) # Create an IRanges object for position-specific reads of a particular length
@@ -556,7 +548,7 @@ CalculateBiasesInNucleotideComposition <- function(gene_names, dataset, hdf5file
     #     # For each read length convert reads to IRanges
     #     GetNTReadPosition(gene = as.character(x), 
     #                       dataset = dataset,
-    #                       hdf5file = hdf5file, 
+    #                       hd_file = hd_file, 
     #                       lid = lid, min_read_length = min_read_length)
     #   })
     # names(out) <- gene_names[1]
@@ -624,7 +616,7 @@ CalculateBiasesInNucleotideComposition <- function(gene_names, dataset, hdf5file
   return(all_out) # TODO: ensure this is correct; rename the returned output
 } # end of function definition of CalculateBiasesInNucleotideComposition()
 # run: 
-#CalculateBiasesInNucleotideComposition(gene_names, dataset, hdf5file, read_range, min_read_length)
+#CalculateBiasesInNucleotideComposition(gene_names, dataset, hd_file, read_range, min_read_length)
 
 ## WRITE DATA Biases In Nucleotide Composition Along Mapped Read Lengths
 WriteBiasesInNucleotideComposition <- function(all_out){
@@ -647,12 +639,12 @@ if (!do_pos_sp_nt_freq) {
 
 
 # big function with probable arguments
-BiasesInNucleotideCompositionAlongMappedReadLengths <- function(gene_names, dataset, hdf5file, read_range, min_read_length) {
+BiasesInNucleotideCompositionAlongMappedReadLengths <- function(gene_names, dataset, hd_file, read_range, min_read_length) {
   
   print("Starting: Biases in nucleotide composition along mapped read lengths")
   
   ## CALCULATE Biases In Nucleotide Composition Along Mapped Read Lengths  
-  all_out <- CalculateBiasesInNucleotideComposition(gene_names, dataset, hdf5file, read_range, min_read_length)
+  all_out <- CalculateBiasesInNucleotideComposition(gene_names, dataset, hd_file, read_range, min_read_length)
   # > str(all_out)
   # 'data.frame':	3690 obs. of  7 variables:
   #   $ Length  : int  10 10 10 10 10 10 10 10 10 10 ...
@@ -676,12 +668,12 @@ BiasesInNucleotideCompositionAlongMappedReadLengths <- function(gene_names, data
   
 } # end definition of function: BiasesInNucleotideCompositionAlongMappedReadLengths()
 # to run:
-#BiasesInNucleotideCompositionAlongMappedReadLengths(gene_names, dataset, hdf5file, read_range, min_read_length)
+#BiasesInNucleotideCompositionAlongMappedReadLengths(gene_names, dataset, hd_file, read_range, min_read_length)
 
 if (do_pos_sp_nt_freq) {
-  BiasesInNucleotideCompositionAlongMappedReadLengths(gene_names, dataset, hdf5file, read_range, min_read_length)
+  BiasesInNucleotideCompositionAlongMappedReadLengths(gene_names, dataset, hd_file, read_range, min_read_length)
 }
-# > BiasesInNucleotideCompositionAlongMappedReadLengths(gene_names, dataset, hdf5file, read_range, min_read_length)
+# > BiasesInNucleotideCompositionAlongMappedReadLengths(gene_names, dataset, hd_file, read_range, min_read_length)
 # [1] "Starting: Biases in nucleotide composition along mapped read lengths"
 # [1] "finished for loop"
 # [1] "finished prepping L, R, F variables"
@@ -712,13 +704,13 @@ ReadAsiteDisplacementLengthFromFile <- function(asite_disp_length_file){
   return(asite_displacement_length)
 }
 
-CalculateGeneReadFrames <- function(dataset, hdf5file, gff_df, min_read_length, asite_displacement_length_from_file) {
+CalculateGeneReadFrames <- function(dataset, hd_file, gff_df, min_read_length, asite_displacement_length_from_file) {
   # TODO: wrap in function
   gene_read_frames_data <- gff_df %>%
     dplyr::filter(type == "CDS") %>%
     dplyr::select(gene = seqnames, left = start, right = end) %>%
     purrr::pmap_dfr(GetGeneReadFrame,
-                    hdf5file = hdf5file,
+                    hd_file = hd_file,
                     dataset = dataset,
                     min_read_length = min_read_length,
                     asite_displacement_length = asite_displacement_length_from_file
@@ -782,7 +774,7 @@ if (!is.na(asite_disp_length_file)) {
   asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(asite_disp_length_file)
 
   # run CalculateGeneReadFrames() to create data object
-  gene_read_frames_data <- CalculateGeneReadFrames(dataset, hdf5file, gff_df, min_read_length, asite_displacement_length)
+  gene_read_frames_data <- CalculateGeneReadFrames(dataset, hd_file, gff_df, min_read_length, asite_displacement_length)
   
   # run PlotGeneReadFrames():
   gene_read_frame_plot <- PlotGeneReadFrames(gene_read_frames_data)
@@ -810,13 +802,13 @@ print("Starting: Position specific distribution of reads")
 
 # MEDIUM FUNCTIONS:
 
-CalculateCodonBasedPositionSpecificReadsPerGene <- function(gene, dataset, hdf5file, gff_df, min_read_length, asite_displacement_length){
+CalculateCodonBasedPositionSpecificReadsPerGene <- function(gene, dataset, hd_file, gff_df, min_read_length, asite_displacement_length){
   # Get codon-based position-specific reads for each gene, in a tibble
   reads_per_codon_etc <- tibble(gene=gene_names) %>%
     mutate(CountPerCodon = map(gene, ~GetGeneCodonPosReads1dsnap(
       .,
       dataset,
-      hdf5file,
+      hd_file,
       left = GetCDS5start(., gff_df),
       right = GetCDS3end(., gff_df),
       min_read_length = min_read_length,
@@ -959,7 +951,7 @@ if (rpf & !is.na(asite_disp_length_file)) {
   
   print("Starting: Position specific distribution of reads - RPF method")
 
-  reads_per_codon_etc <- CalculateCodonBasedPositionSpecificReadsPerGene(gene, dataset, hdf5file, gff_df, min_read_length, asite_displacement_length)
+  reads_per_codon_etc <- CalculateCodonBasedPositionSpecificReadsPerGene(gene, dataset, hd_file, gff_df, min_read_length, asite_displacement_length)
   
   pos_sp_rpf_norm_reads_5end <- CalculateMetageneMeanNormalisedReadCounts5End(reads_per_codon_etc)
   
@@ -1136,11 +1128,11 @@ print("Completed: Position specific distribution of reads")
 
 # MEDIUM FUNCTIONS: 
 
-CalculateGeneTranscriptsPerMillion <- function(gene, dataset, hdf5file){
+CalculateGeneTranscriptsPerMillion <- function(gene, dataset, hd_file){
   # calculate transcripts per million (TPM)
   # @FlicAnderson: what does reads_per_b stand for? Reads per Base? o.0  If so, maybe worth using full word?
-  gene_sp_reads <- sapply(gene_names, GetGeneReadsTotal, dataset, hdf5file)
-  reads_per_b <- sapply(gene_names, GetGeneReadDensity, dataset, hdf5file)
+  gene_sp_reads <- sapply(gene_names, GetGeneReadsTotal, dataset, hd_file)
+  reads_per_b <- sapply(gene_names, GetGeneReadDensity, dataset, hd_file)
   
   tpms <- data.frame(
     ORF = gene_names,
@@ -1173,11 +1165,11 @@ WriteGeneTranscriptsPerMillion <-  function(tpms){
 # BIG FUNCTIONS: 
 
 # Calculate TPMs of genes
-GeneTranscriptsPerMillion <- function(gene, dataset, hdf5file){
+GeneTranscriptsPerMillion <- function(gene, dataset, hd_file){
   
   print("Starting: Calculate TPMs of genes")
   
-    tpms <- CalculateGeneTranscriptsPerMillion(gene, dataset, hdf5file)
+    tpms <- CalculateGeneTranscriptsPerMillion(gene, dataset, hd_file)
     
     WriteGeneTranscriptsPerMillion(tpms)
     
@@ -1185,7 +1177,7 @@ GeneTranscriptsPerMillion <- function(gene, dataset, hdf5file){
 
 } # end GeneTranscriptsPerMillion() definition
 # run GeneTranscriptsPerMillion():
-GeneTranscriptsPerMillion(gene, dataset, hdf5file)
+GeneTranscriptsPerMillion(gene, dataset, hd_file)
 
 
 #
@@ -1255,7 +1247,7 @@ if (!is.na(features_file)) { # do correlating
   
   features <- ReadSequenceBasedFeatures(features_file)
   
-  tpms <- CalculateGeneTranscriptsPerMillion(gene, dataset, hdf5file) # repeated from TPMs section to make it available here
+  tpms <- CalculateGeneTranscriptsPerMillion(gene, dataset, hd_file) # repeated from TPMs section to make it available here
   
   features_plot_data <- CalculateSequenceBasedFeatures(features, tpms)
   
@@ -1277,14 +1269,14 @@ if (!is.na(features_file)) { # do correlating
 
 # MEDIUM FUNCTIONS: 
 
-CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, gene, dataset, hdf5file, buffer, count_threshold){
+CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, gene, dataset, hd_file, buffer, count_threshold){
   
   t_rna_df <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
   load(codon_positions_file) # Position of codons in each gene (numbering ignores first 200 codons)
   # Reads in an object named "codon_pos"
   out <- lapply(gene_names, function(gene) {
     # From "Position specific distribution of reads" plot
-    GetCodonPositionReads(gene, dataset, hdf5file, 
+    GetCodonPositionReads(gene, dataset, hd_file, 
                           left = (buffer - 15), right = (buffer + 11), 
                           min_read_length = min_read_length)
   }) # Get codon-based position-specific reads for each gene
@@ -1402,7 +1394,7 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
     # Needs separate calculation of per-codon normalized reads
     # WAITING: we want new format of codon_pos from @john-s-f before editing this chunk
     
-    cod_dens_tRNA_data <- CalculateCodonSpecificRibosomeDensity(t_rna_file, gene, dataset, hdf5file, buffer, count_threshold)
+    cod_dens_tRNA_data <- CalculateCodonSpecificRibosomeDensity(t_rna_file, gene, dataset, hd_file, buffer, count_threshold)
     
     cod_dens_tRNA_plot <- PlotCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_data)
     
