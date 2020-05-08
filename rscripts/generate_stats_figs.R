@@ -800,137 +800,130 @@ if (!is.na(asite_disp_length_file)) {
 print("Starting: Position specific distribution of reads")
 
 
-# MEDIUM FUNCTIONS:
+# codon-specific reads for RPF datasets
+GetCodonPositionReads <- function(hd_file, gene, dataset, left, right, min_read_length) {
+  # @ewallace: this needs documentation of inputs and outputs
+  lid <- 28 - min_read_length + 1
+  reads_pos <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
+  reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
+  end_reads_pos_subset <- ncol(reads_pos_subset) # Number of columns of the subset
+  
+  l28 <- RcppRoll::roll_suml(reads_pos_subset[lid, 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[14, 2:end_reads_pos_subset]), 3)] # Map reads of length 28 to codons
+  l29 <- RcppRoll::roll_suml(reads_pos_subset[(lid + 1), 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[15, 2:end_reads_pos_subset]), 3)] # Map reads of length 29 to codons
+  l30 <- RcppRoll::roll_suml(reads_pos_subset[(lid + 2), 1:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[16, 1:end_reads_pos_subset]), 3)] # Map reads of length 30 to codons
+  
+  cod_sp_counts <- l28 + l29 + l30 # Sum of reads of lengths 28-30 at each codon
+  cod_sp_counts <- cod_sp_counts[1:(length(cod_sp_counts) - 1)]
+  return(cod_sp_counts)
+}
 
-CalculateCodonBasedPositionSpecificReadsPerGene <- function(gene, dataset, hd_file, gff_df, min_read_length, asite_displacement_length){
-  # Get codon-based position-specific reads for each gene, in a tibble
-  reads_per_codon_etc <- tibble(gene=gene_names) %>%
-    mutate(CountPerCodon = map(gene, ~GetGeneCodonPosReads1dsnap(
-      .,
-      dataset,
+# Nt-specific coverage for mRNA datasets
+GetMRNACoverage <- function(hd_file, gene, dataset, left, right, read_range, min_read_length, buffer) {
+  reads_pos <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
+  reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS mapped reads are considered
+  
+  nt_IR_list <- lapply(read_range, function(w) {
+    IRanges::IRanges(start = rep(1:ncol(reads_pos_subset), reads_pos_subset[(w - min_read_length + 1), ]), width = w)
+  }) # Create list of IRanges for position-specific reads of all length
+  nt_IR <- unlist(as(nt_IR_list, "IRangesList")) # Combine IRanges from different read lengths
+  nt_cov <- IRanges::coverage(nt_IR) # Estimate nt-specific coverage of mRNA reads
+  
+  # Subset coverage to only CDS
+  nt_counts <- rep.int(S4Vectors::runValue(nt_cov), S4Vectors::runLength(nt_cov))
+  if (length(nt_counts) >= (buffer - left)) {
+    nt_counts <- nt_counts[(buffer - left):length(nt_counts)]
+  } else {
+    nt_counts <- 0
+  }
+  
+  cds_length <- ncol(reads_pos_subset) - (buffer - left - 1) # Length of CDS
+  nt_sp_counts <- rep(0, cds_length)
+  
+  if (length(nt_counts) < cds_length) {
+    if (length(nt_counts) > 0) {
+      nt_sp_counts[1:length(nt_counts)] <- nt_counts
+    }
+  } else {
+    nt_sp_counts <- nt_counts[1:cds_length]
+  }
+  return(nt_sp_counts)
+}
+
+# For RPF datasets, generate codon-based position-specific reads
+if (rpf) {
+  # create empty matrix to store position-specific read counts
+  out5p <- matrix(NA, nrow = length(gene_names), ncol = 500) # 5'
+  out3p <- matrix(NA, nrow = length(gene_names), ncol = 500) # 3'
+  
+  out <- lapply(gene_names, function(gene) {
+    GetCodonPositionReads(
       hd_file,
-      left = GetCDS5start(., gff_df),
-      right = GetCDS3end(., gff_df),
-      min_read_length = min_read_length,
-      asite_displacement_length = asite_displacement_length,
-    ) ),
-    NormCtperCodon = map(CountPerCodon, ~NormByMean(.) ),
-    SumAsiteCt = map(CountPerCodon,~sum(.)) %>% unlist,
-    LengthCodons = map(CountPerCodon,~length(.)) %>% unlist
+      gene,
+      dataset,
+      left = (buffer - 15),
+      right = (buffer + 11),
+      min_read_length = min_read_length
     )
+  }) # Get codon-based position-specific reads for each gene
+  names(out) <- gene_names
   
-  return(reads_per_codon_etc)
+  cc <- 1
+  for (gene in gene_names) {
+    tmp <- out[[gene]]
+    # Only consider genes with at least count_threshold mapped reads along its CDS
+    if (sum(tmp) >= count_threshold) {
+      tmp <- tmp / mean(tmp)
+      if (length(tmp) > 500) {
+        out5p[cc, ] <- tmp[1:500]
+        out3p[cc, ] <- rev(tmp)[1:500]
+      } else {
+        out5p[cc, 1:length(tmp)] <- tmp
+        out3p[cc, 1:length(tmp)] <- rev(tmp)
+      }
+    }
+    cc <- cc + 1
+  }
   
-} # end CalculateCodonBasedPositionSpecificReadsPerGene() definition
-# gives: 
-# TODO
-
-
-CalculateMetageneMeanNormalisedReadCounts5End <- function(reads_per_codon_etc){
-  # @FlicAnderson: Should naming be 5End or 5Start? Clarify?
+  # Estimate position-specific mean and std error of mapped read counts
+  m5p <- signif(apply(out5p, 2, mean, na.rm = T), 4)
+  m3p <- signif(apply(out3p, 2, mean, na.rm = T), 4)
+  s5p <- signif(apply(out5p, 2, function(x) {
+    sd(x, na.rm = T) / sqrt(sum(!is.na(x)))
+  }), 4)
+  s3p <- signif(apply(out3p, 2, function(x) {
+    sd(x, na.rm = T) / sqrt(sum(!is.na(x)))
+  }), 4)
   
-  # metagene mean normalized read counts for 5' end positions 1 to length_threshold
-  pos_sp_rpf_norm_reads_5end <- 
-    reads_per_codon_etc %>%
-    # select genes over count_threshold and length_threshold
-    filter(SumAsiteCt > count_threshold, LengthCodons > length_threshold) %>%
-    # Extract from codon positions 1 to length_threshold
-    transmute(NormCtperCodon5end = 
-                map(CountPerCodon,
-                    ~extract(.,seq_len(length_threshold)))) %>%
-    # remove NormCts as vector and (3 lines later) make these rows of a matrix
-    dplyr::pull(NormCtperCodon5end) %>%
-    unlist %>% 
-    matrix(byrow=T,ncol=length_threshold) %>%
-    # calculate column means and standard deviations in tidy data frame
-    # @FlicAnderson: Why is this in {} brackets?
-    {tibble(Position = seq_len(length_threshold),
-            Mean = colMeans(.) %>% as.numeric,
-            SD   = apply(.,2,sd),
-            End  = "5'")}
+  # Normalize reads to last 50 codons of the 500-codon window.
+  # This allows easy comparison between datasets
+  s5p <- s5p / mean(m5p[450:500])
+  s3p <- s3p / mean(m3p[450:500])
+  m5p <- m5p / mean(m5p[450:500])
+  m3p <- m3p / mean(m3p[450:500])
   
-  return(pos_sp_rpf_norm_reads_5end)
-} # end CalculateMetageneMeanNormalisedReadCounts5End() definition
-# gives: 
-# TODO
-
-
-CalculateMetageneMeanNormalisedReadCounts3End <- function(reads_per_codon_etc){
+  # Create a dataframe to store the output for plots/analyses
+  pos_sp_rpf_norm_reads <- data.frame(
+    Position = c(1:500, 0:-499),
+    Mean = c(m5p, m3p),
+    SD = c(s5p, s3p),
+    End = factor(rep(c("5'", "3'"), each = 500), levels = c("5'", "3'"))
+  )
   
-  # metagene mean normalized read counts for 3' end stop-length_threshold to stop
-  pos_sp_rpf_norm_reads_3end <- 
-    reads_per_codon_etc %>%
-    # select genes over count_threshold and length_threshold
-    filter(SumAsiteCt > count_threshold, LengthCodons > length_threshold) %>%
-    # Extract from last length_threshold codon positions
-    transmute(NormCtperCodon3end = 
-                map2(CountPerCodon,LengthCodons,
-                     ~extract(.x, .y + 1 - seq_len(length_threshold)))) %>%              
-    # remove NormCts as vector and (3 lines later) make these rows of a matrix
-    dplyr::pull(NormCtperCodon3end) %>%
-    unlist %>% 
-    matrix(byrow=T,ncol=length_threshold)  %>% 
-    # calculate column means and standard deviations in tidy data frame
-    {tibble(Position = seq_len(length_threshold),
-            Mean = colMeans(.),
-            SD   = apply(.,2,sd),
-            End  = "3'")}
-  
-  return(pos_sp_rpf_norm_reads_3end)
-  
-} # end CalculateMetageneMeanNormalisedReadCounts3End() definition
-# gives: 
-# TODO
-
-
-CalculateMetageneMeanNormalisedReadCounts <- function(pos_sp_rpf_norm_reads_5end, pos_sp_rpf_norm_reads_3end) {
-  # @FlicAnderson: potentially include CalculateMetageneMeanNormalisedReadCounts5End() and CalculateMetageneMeanNormalisedReadCounts3End() in this function?
-  
-  pos_sp_rpf_norm_reads_data <- bind_rows(pos_sp_rpf_norm_reads_5end,
-                                          pos_sp_rpf_norm_reads_3end)
-  
-  return(pos_sp_rpf_norm_reads_data)
-  
-} # end CalculateMetageneMeanNormalisedReadCounts() definition
-# gives: 
-# TODO
-
-
-# Plot
-PlotCodonBasedPositionSpecificReadsPerGene <- function(pos_sp_rpf_norm_reads_data){
-  
+  # Plot
   pos_sp_rpf_norm_reads_plot <- ggplot(
-    pos_sp_rpf_norm_reads_data,
+    pos_sp_rpf_norm_reads,
     aes(Position, Mean, col = End)
   ) +
     geom_line() +
     facet_grid(~End, scales = "free") +
     guides(col = FALSE)
   
-  return(pos_sp_rpf_norm_reads_plot)
-  
-} # end PlotCodonBasedPositionSpecificReadsPerGene() definition
-
-
-SaveCodonBasedPositionSpecificReadsPerGene <- function(pos_sp_rpf_norm_reads_plot){
-  # Save plot
+  # Save plot and file
   ggsave(pos_sp_rpf_norm_reads_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.pdf")))
-  #return() # no return as writing-out
-  
-} # end SaveCodonBasedPositionSpecificReadsPerGene() definition
-
-WriteCodonBasedPositionSpecificReadsPerGene <- function(pos_sp_rpf_norm_reads_data){
-  # save data to file
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.tsv"))
-  
-  write_provenance_header(path_to_this_script, tsv_file_path)
-  
+  write_provenance_header(this_script, tsv_file_path)
   write.table(
-    pos_sp_rpf_norm_reads_data %>%
-      # @FlicAnderson: CHECK THIS! the numbers look quite different to a recent vignette package output..?
-      # mutate_if() mutates if the data is numeric, rounds values to specified number digits
-      # Is 4 significant figures in mutate_if() enough? Leads to (0, 1, 1.5, 0.5, 1.414)
-      mutate_if(is.numeric, signif, digits=4), 
+    pos_sp_rpf_norm_reads,
     file = tsv_file_path,
     append = T,
     sep = "\t",
@@ -938,37 +931,10 @@ WriteCodonBasedPositionSpecificReadsPerGene <- function(pos_sp_rpf_norm_reads_da
     col = T,
     quote = F
   )
-  
-  # return() # no return as writing-out
-  
-} # end of WriteCodonBasedPositionSpecificReadsPerGene() definition
-
-
-# BIG FUNCTIONS: 
-
-# run ribosome profiling method for position specific distribution of reads:
-if (rpf & !is.na(asite_disp_length_file)) {
-  
-  print("Starting: Position specific distribution of reads - RPF method")
-
-  reads_per_codon_etc <- CalculateCodonBasedPositionSpecificReadsPerGene(gene, dataset, hd_file, gff_df, min_read_length, asite_displacement_length)
-  
-  pos_sp_rpf_norm_reads_5end <- CalculateMetageneMeanNormalisedReadCounts5End(reads_per_codon_etc)
-  
-  pos_sp_rpf_norm_reads_3end <- CalculateMetageneMeanNormalisedReadCounts3End(reads_per_codon_etc)
-  
-  pos_sp_rpf_norm_reads_data <- CalculateMetageneMeanNormalisedReadCounts(pos_sp_rpf_norm_reads_5end, pos_sp_rpf_norm_reads_3end)
-  
-  pos_sp_rpf_norm_reads_plot <- PlotCodonBasedPositionSpecificReadsPerGene(pos_sp_rpf_norm_reads_data)
-  
-  SaveCodonBasedPositionSpecificReadsPerGene(pos_sp_rpf_norm_reads_plot)
-  
-  WriteCodonBasedPositionSpecificReadsPerGene(pos_sp_rpf_norm_reads_data)
-  
-  print("Completed: Position specific distribution of reads - RPF method")
-   
 }
 
+
+print("Completed: Position specific distribution of reads - RPF method")
 
 
 #
@@ -980,17 +946,135 @@ if (rpf & !is.na(asite_disp_length_file)) {
 #
 
 
-# MEDIUM FUNCTIONS:
+# # MEDIUM FUNCTIONS:
+# 
+# CalculateNucleotideBasedPositionSpecificReads <- function(gene, dataset, min_read_length, read_range, buffer){
+#   
+#   # create empty matrix to store position-specific read counts
+#   out5p <- matrix(NA, nrow = length(gene_names), ncol = 1500) # 5'
+#   out3p <- matrix(NA, nrow = length(gene_names), ncol = 1500) # 3'
+#   
+#   # TODO
+#   out <- lapply(gene_names, function(gene) {
+#     GetMRNACoverage(
+#       gene,
+#       dataset,
+#       left = (buffer - 49),
+#       right = (buffer - 3),
+#       min_read_length = min_read_length,
+#       read_range,
+#       buffer
+#     )
+#   })
+#   names(out) <- gene_names
+#   
+#   cc <- 1
+#   for (gene in gene_names) {
+#     tmp <- out[[gene]]
+#     # only consider genes with at least 1 mapped read along its CDS
+#     if (sum(tmp) > 0) {
+#       tmp <- tmp / mean(tmp)
+#       if (length(tmp) > 1500) {
+#         out5p[cc, ] <- tmp[1:1500]
+#         out3p[cc, ] <- rev(tmp)[1:1500]
+#       } else {
+#         out5p[cc, 1:length(tmp)] <- tmp
+#         out3p[cc, 1:length(tmp)] <- rev(tmp)
+#       }
+#     }
+#     cc <- cc + 1
+#   }
+#   
+#   # estimate position-specific mean and std error of mapped read counts
+#   m5p <- signif(apply(out5p, 2, mean, na.rm = T), 4)
+#   m3p <- signif(apply(out3p, 2, mean, na.rm = T), 4)
+#   s5p <- signif(apply(out5p, 2, function(x) {
+#     sd(x, na.rm = T) / sqrt(sum(!is.na(x)))
+#   }), 4)
+#   s3p <- signif(apply(out3p, 2, function(x) {
+#     sd(x, na.rm = T) / sqrt(sum(!is.na(x)))
+#   }), 4)
+#   
+#   # normalize reads to last 150 nts of the 1500-nt window.
+#   # this allows easy comparison between datasets
+#   s5p <- s5p / mean(m5p[1350:1500])
+#   s3p <- s3p / mean(m3p[1350:1500])
+#   m5p <- m5p / mean(m5p[1350:1500])
+#   m3p <- m3p / mean(m3p[1350:1500])
+#   
+#   # create a dataframe to store the output for plots/analyses
+#   pos_sp_mrna_norm_coverage <- data.frame(
+#     Position = c(1:1500, 0:-1499),
+#     Mean = c(m5p, m3p),
+#     SD = c(s5p, s3p),
+#     End = factor(rep(c("5'", "3'"), each = 1500), levels = c("5'", "3'"))
+#   )
+#   
+#   return(pos_sp_mrna_norm_coverage)
+#   
+# } # end CalculateNucleotideBasedPositionSpecificReads() definition
+# # gives: 
+# # TODO
+# 
+# 
+# PlotNucleotideBasedPositionSpecificReadsPerGene <- function(pos_sp_mrna_norm_coverage){
+#   # plot
+#   pos_sp_mrna_norm_coverage_plot <- ggplot(pos_sp_mrna_norm_coverage, aes(Position, Mean, col = End)) +
+#     geom_line() +
+#     facet_grid(~End, scales = "free") +
+#     guides(col = FALSE)
+#   
+#   return(pos_sp_mrna_norm_coverage_plot)
+#   
+# } # end PlotNucleotideBasedPositionSpecificReadsPerGene() definition
+# 
+# 
+# SaveNucleotideBasedPositionSpecificReadsPerGene <- function(pos_sp_mrna_norm_coverage_plot){
+#   
+#   # Save plot and file
+#   ggsave(pos_sp_mrna_norm_coverage_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_mrna_norm_coverage.pdf")))
+#   # return() # NO RETURN as writing out
+#   
+# }  # end SaveNucleotideBasedPositionSpecificReadsPerGene() definition
+# 
+# 
+# WriteNucleotideBasedPositionSpecificReadsPerGene <- function(pos_sp_mrna_norm_coverage){
+#   
+#   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_mrns_norm_coverage.tsv"))
+#   write_provenance_header(path_to_this_script, tsv_file_path)
+#   write.table(
+#     pos_sp_mrna_norm_coverage,
+#     file = tsv_file_path,
+#     append = T,
+#     sep = "\t",
+#     row = F,
+#     col = T,
+#     quote = F
+#   )
+#   # return() # NO RETURN as writing out
+# } # end WriteNucleotideBasedPositionSpecificReadsPerGene() definition
 
-CalculateNucleotideBasedPositionSpecificReads <- function(gene, dataset, min_read_length, read_range, buffer){
+
+# BIG FUNCTIONS: 
+
+
+# run mRNA dataset method for position specific distribution of reads 
+ # (nucleotide-based instead of codon-based as per RPF method)
+
+if (!rpf) {
+  
+  print("Starting: Position specific distribution of reads - mRNA dataset method")
+  
+  # TODO: rewrite along the lines of rpf above
+  warning("Warning: nt-based position-specific reads for non-RPF datasets not tested")
   
   # create empty matrix to store position-specific read counts
   out5p <- matrix(NA, nrow = length(gene_names), ncol = 1500) # 5'
   out3p <- matrix(NA, nrow = length(gene_names), ncol = 1500) # 3'
   
-  # TODO
   out <- lapply(gene_names, function(gene) {
     GetMRNACoverage(
+      hd_file,
       gene,
       dataset,
       left = (buffer - 49),
@@ -1044,38 +1128,16 @@ CalculateNucleotideBasedPositionSpecificReads <- function(gene, dataset, min_rea
     End = factor(rep(c("5'", "3'"), each = 1500), levels = c("5'", "3'"))
   )
   
-  return(pos_sp_mrna_norm_coverage)
-  
-} # end CalculateNucleotideBasedPositionSpecificReads() definition
-# gives: 
-# TODO
-
-
-PlotNucleotideBasedPositionSpecificReadsPerGene <- function(pos_sp_mrna_norm_coverage){
   # plot
   pos_sp_mrna_norm_coverage_plot <- ggplot(pos_sp_mrna_norm_coverage, aes(Position, Mean, col = End)) +
     geom_line() +
     facet_grid(~End, scales = "free") +
     guides(col = FALSE)
   
-  return(pos_sp_mrna_norm_coverage_plot)
-  
-} # end PlotNucleotideBasedPositionSpecificReadsPerGene() definition
-
-
-SaveNucleotideBasedPositionSpecificReadsPerGene <- function(pos_sp_mrna_norm_coverage_plot){
-  
   # Save plot and file
   ggsave(pos_sp_mrna_norm_coverage_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_mrna_norm_coverage.pdf")))
-  # return() # NO RETURN as writing out
-  
-}  # end SaveNucleotideBasedPositionSpecificReadsPerGene() definition
-
-
-WriteNucleotideBasedPositionSpecificReadsPerGene <- function(pos_sp_mrna_norm_coverage){
-  
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_mrns_norm_coverage.tsv"))
-  write_provenance_header(path_to_this_script, tsv_file_path)
+  write_provenance_header(this_script, tsv_file_path)
   write.table(
     pos_sp_mrna_norm_coverage,
     file = tsv_file_path,
@@ -1085,30 +1147,6 @@ WriteNucleotideBasedPositionSpecificReadsPerGene <- function(pos_sp_mrna_norm_co
     col = T,
     quote = F
   )
-  # return() # NO RETURN as writing out
-} # end WriteNucleotideBasedPositionSpecificReadsPerGene() definition
-
-
-# BIG FUNCTIONS: 
-
-
-# run mRNA dataset method for position specific distribution of reads 
- # (nucleotide-based instead of codon-based as per RPF method)
-
-if (!rpf) {
-  
-  print("Starting: Position specific distribution of reads - mRNA dataset method")
-  
-  # TODO: rewrite along the lines of rpf above
-  warning("Warning: nt-based position-specific reads for non-RPF datasets not tested")
-  
-  pos_sp_mrna_norm_coverage <- CalculateNucleotideBasedPositionSpecificReads(gene, dataset, min_read_length, read_range, buffer)
-  
-  pos_sp_mrna_norm_coverage_plot <- PlotNucleotideBasedPositionSpecificReadsPerGene(pos_sp_mrna_norm_coverage)
-  
-  SaveNucleotideBasedPositionSpecificReadsPerGene(pos_sp_mrna_norm_coverage_plot)
-  
-  WriteNucleotideBasedPositionSpecificReadsPerGene(pos_sp_mrna_norm_coverage)
   
   print("Completed: Position specific distribution of reads - mRNA dataset method")
   
@@ -1269,14 +1307,15 @@ if (!is.na(features_file)) { # do correlating
 
 # MEDIUM FUNCTIONS: 
 
-CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, gene, dataset, hd_file, buffer, count_threshold){
-  
+CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_file, gene, dataset, hd_file, buffer, count_threshold){
+  # dev version:
+  # yeast_tRNAs <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
   t_rna_df <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
   load(codon_positions_file) # Position of codons in each gene (numbering ignores first 200 codons)
   # Reads in an object named "codon_pos"
   out <- lapply(gene_names, function(gene) {
     # From "Position specific distribution of reads" plot
-    GetCodonPositionReads(gene, dataset, hd_file, 
+    GetCodonPositionReads(hd_file=hd_file, gene=gene, dataset=dataset, 
                           left = (buffer - 15), right = (buffer + 11), 
                           min_read_length = min_read_length)
   }) # Get codon-based position-specific reads for each gene
@@ -1388,20 +1427,98 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
   print("Starting: Codon-specific ribosome densities for correlations with tRNAs")
   # Only for RPF datasets
   
+  # if (rpf) {
+  #   
+  #   # TODO: This section needs attention. Can be refactored analogously to reads_per_codon_etc
+  #   # Needs separate calculation of per-codon normalized reads
+  #   # WAITING: we want new format of codon_pos from @john-s-f before editing this chunk
+  #   
+  #   cod_dens_tRNA_data <- CalculateCodonSpecificRibosomeDensity(t_rna_file, hd_file, gene, dataset, buffer, count_threshold)
+  #   
+  #   cod_dens_tRNA_plot <- PlotCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_data)
+  #   
+  #   SaveCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_plot)
+  #   
+  #   WriteCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_data)
+  #   
+  # }
+  
+  # Only for RPF datasets
   if (rpf) {
+    # This still depends on yeast-specific arguments and should be edited.
+    yeast_tRNAs <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
+    load(codon_positions_file) # Position of codons in each gene (numbering ignores first 200 codons)
+    # Reads in an object named "codon_pos"
+    out <- lapply(gene_names, function(gene) {
+      # From "Position specific distribution of reads" plot
+      GetCodonPositionReads(hd_file, gene, dataset, left = (buffer - 15), right = (buffer + 11), min_read_length = min_read_length)
+    }) # Get codon-based position-specific reads for each gene
+    names(out) <- gene_names
     
-    # TODO: This section needs attention. Can be refactored analogously to reads_per_codon_etc
-    # Needs separate calculation of per-codon normalized reads
-    # WAITING: we want new format of codon_pos from @john-s-f before editing this chunk
+    gene_len <- sapply(out, length) # Calculate gene length in codons
+    out <- out[gene_len > 201] # Ignore genes with <=200 sense codons
     
-    cod_dens_tRNA_data <- CalculateCodonSpecificRibosomeDensity(t_rna_file, gene, dataset, hd_file, buffer, count_threshold)
+    trim_out <- lapply(out, function(x) {
+      x[201:(length(x) - 1)]
+    }) # Trim first 200 codons and stop codon from each gene
+    read_counts_trim <- sapply(trim_out, sum) # Calculate read counts in trimmed genes
+    trim_out <- trim_out[read_counts_trim >= count_threshold] # Ignore genes with fewer than count_threshold mapped reads
     
-    cod_dens_tRNA_plot <- PlotCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_data)
+    norm_out <- lapply(trim_out, function(x) {
+      x / mean(x)
+    }) # Normalize reads in each gene by their mean
     
-    SaveCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_plot)
+    # Calculate codon-specific mean ribosome-densities at A/P/E sites of the mapped reads
+    a_mn <- sapply(names(codon_pos), function(codon) {
+      mean(unlist(apply(codon_pos[[codon]], 1, function(a) {
+        pos <- as.numeric(a[2])
+        norm_out[[a[1]]][pos]
+      })), na.rm = T)
+    })
+    p_mn <- sapply(names(codon_pos), function(codon) {
+      mean(unlist(apply(codon_pos[[codon]], 1, function(a) {
+        pos <- as.numeric(a[2]) + 1
+        norm_out[[a[1]]][pos]
+      })), na.rm = T)
+    })
+    e_mn <- sapply(names(codon_pos), function(codon) {
+      mean(unlist(apply(codon_pos[[codon]], 1, function(a) {
+        pos <- as.numeric(a[2]) + 2
+        norm_out[[a[1]]][pos]
+      })), na.rm = T)
+    })
     
-    WriteCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_data)
+    # Sort the values
+    A <- a_mn[order(names(codon_pos))]
+    P <- p_mn[order(names(codon_pos))]
+    E <- e_mn[order(names(codon_pos))]
     
+    cod_dens_tRNA <- cbind(yeast_tRNAs, A, P, E)
+    
+    # Prepare data for plot
+    cod_dens_tRNA_wide <- cod_dens_tRNA %>%
+      gather(tRNA_type, tRNA_value, 3:6) %>%
+      gather(Site, Ribodens, 3:5)
+    
+    cod_dens_tRNA_plot <- ggplot(cod_dens_tRNA_wide, aes(x = tRNA_value, y = Ribodens)) +
+      geom_point(alpha = 0.3) +
+      facet_grid(Site ~ tRNA_type, scales = "free_x") +
+      geom_smooth(method = "lm") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    
+    # Save plot and file
+    ggsave(cod_dens_tRNA_plot, filename = file.path(output_dir, paste0(output_prefix, "codon_ribodens.pdf")))
+    tsv_file_path <- file.path(output_dir, paste0(output_prefix, "codon_ribodens.tsv"))
+    write_provenance_header(this_script, tsv_file_path)
+    write.table(
+      cod_dens_tRNA,
+      file = tsv_file_path,
+      append = T,
+      sep = "\t",
+      row = F,
+      col = T,
+      quote = F
+    )
   }
   
   print("Completed: Codon-specific ribosome densities for correlations with tRNAs")
