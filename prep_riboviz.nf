@@ -12,34 +12,65 @@ import org.yaml.snakeyaml.Yaml
  */
 // Initialise optional variables to avoid "WARN: Access to undefined
 // parameter `<PARAM>`" when running Nextflow.
-params.fq_files = [:]
-params.multiplex_fq_files = []
+params.buffer = 250
 params.build_indices = true
-params.make_bedgraph = true
-params.extract_umis = false
-params.dedup_umis = false
-params.group_umis = false
 params.count_reads = true
+params.count_threshold = 1
+params.dataset = "dataset"
+params.dedup_umis = false
+params.dir_index = "index"
+params.dir_out = "output"
+params.dir_tmp = "tmp"
+params.do_pos_sp_nt_freq = true
+params.extract_umis = false
+params.fq_files = [:]
+params.group_umis = false
+params.is_riboviz_gff = true
+params.make_bedgraph = true
+params.max_read_length = 50
+params.min_read_length = 10
+params.multiplex_fq_files = []
 params.num_processes = 1
+params.primary_id = "Name"
+params.rpf = true
+params.secondary_id = "NULL"
+params.stop_in_cds = false
+
+if (! params.containsKey('adapters')) {
+    exit 1, "Undefined adapters (adapters)"
+}
+if (! params.containsKey('orf_index_prefix')) {
+    exit 1, "Undefined ORF index prefix (orf_index_prefix)"
+}
+if (! params.containsKey('rrna_index_prefix')) {
+    exit 1, "Undefined rRNA index prefix (rrna_index_prefix)"
+}
 if (! params.secondary_id) {
     secondary_id = "NULL"
 } else {
     secondary_id = params.secondary_id
 }
-
 if (params.dedup_umis) {
     if (! params.extract_umis) {
-        println("WARNING: dedup_umis was TRUE but extract_umis was FALSE")
+        println("Warning: UMI deduplication was requested (dedup_umi: TRUE) but UMI extraction was not (extract_umis: FALSE)")
+    }
+}
+if (params.extract_umis) {
+    if (! params.containsKey('umi_regexp')) {
+        exit 1, "Undefined barcode/UMI regular expression (umi_regexp) despite UMI extraction being requested (extract_umis: FALSE)"
     }
 }
 
 sample_files = [:]
 multiplex_files = [:]
 multiplex_sample_sheet = ""
+if (! params.containsKey('dir_in')) {
+    exit 1, "Input directory (dir_in) is undefined"
+}
 if ((! params.fq_files) && (! params.multiplex_fq_files)) {
-    error "No sample files (fq_files) or multiplexed files (multiplex_fq_files) are specified"
+    exit 1, "No sample files (fq_files) or multiplexed files (multiplex_fq_files) are defined"
 } else if (params.fq_files && params.multiplex_fq_files) {
-    error "Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are specified"
+    exit 1, "Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are defined"
 } else if (params.fq_files) {
     // Filter params.fq_files down to those samples that exist.
     for (entry in params.fq_files) {
@@ -47,17 +78,17 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
         if (sample_file.exists()) {
             sample_files[entry.key] = sample_file
         } else {
-            println("WARNING: Missing file ($entry.key): $entry.value")
+            println("No such file ($entry.key): $entry.value")
         }
     }
     if (! sample_files) {
-        error "No sample files (fq_files) exist"
+        exit 1, "None of the defined sample files (fq_files) exist"
     }
 } else {
     // Filter params.multiplex_fq_files down to those files that exist.
     for (entry in params.multiplex_fq_files) {
         multiplex_file = file("${params.dir_in}/${entry}")
-        if (multiplex_file.exists() || true) {
+        if (multiplex_file.exists()) {
             // Use file base name as key, ensuring that if file
 	    // has extension .fastq.gz or .fq.fz then both extensions
 	    // are removed from the name.
@@ -69,11 +100,14 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
             }
             multiplex_files[multiplex_file_name] = multiplex_file
         } else {
-            println("WARNING: Missing multiplexed file: $entry")
+            println("No such file: $entry")
         }
     }
     if (! multiplex_files) {
-        error "No multiplexed files (multiplex_fq_files) exist"
+        exit 1, "None of the defined multiplexed files (multiplex_fq_files) exist"
+    }
+    if (! params.containsKey('sample_sheet')) {
+        exit 1, "Undefined sample sheet (sample_sheet)"
     }
     multiplex_sample_sheet = Channel.fromPath(
         "${params.dir_in}/${params.sample_sheet}",
@@ -92,15 +126,23 @@ data_files_config.fq_files = params.fq_files
 data_files_config.multiplex_fq_files = params.multiplex_fq_files
 data_files_config_yaml = new Yaml().dump(data_files_config)
 
-/*
- * Set up non-sample-specific input files.
- */
+// Set up non-sample-specific input files.
+if (! params.containsKey('rrna_fasta_file')) {
+    exit 1, "Undefined rRNA FASTA file (rrna_fasta_file)"
+}
 rrna_fasta = Channel.fromPath(params.rrna_fasta_file,
                               checkIfExists: true)
-orf_gff = Channel.fromPath(params.orf_gff_file,
-                           checkIfExists: true)
+if (! params.containsKey('orf_fasta_file')) {
+    exit 1, "Undefined ORF FASTA file (orf_fasta_file)"
+}
 orf_fasta = Channel.fromPath(params.orf_fasta_file,
                              checkIfExists: true)
+if (! params.containsKey('orf_gff_file')) {
+    exit 1, "Undefined ORF GFF file (orf_gff_file)"
+}
+orf_gff = Channel.fromPath(params.orf_gff_file,
+                           checkIfExists: true)
+
 /*
  * Set up optional inputs for generate_stats_figs.R.
  *
@@ -127,7 +169,7 @@ if (params.containsKey('t_rna_file')
     codon_positions_file = file("Missing_codon_positions_file")
     is_t_rna_and_codon_positions_file = false
 } else {
-    error "ERROR: Either both t_rna_file and codon_positions_file must be provided or none must be provided."
+    exit 1, "Either both tRNA estimates (t_rna_file) and codon positions (codon_positions_file) must be defined or neither must be defined"
 }
 if (params.containsKey('features_file')) {
     features_file = Channel.fromPath(params.features_file,
