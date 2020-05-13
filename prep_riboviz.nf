@@ -14,6 +14,7 @@ import org.yaml.snakeyaml.Yaml
 // parameter `<PARAM>`" when running Nextflow.
 params.fq_files = [:]
 params.multiplex_fq_files = []
+params.build_indices = true
 params.make_bedgraph = true
 params.extract_umis = false
 params.dedup_umis = false
