@@ -19,7 +19,7 @@ params.extract_umis = false
 params.dedup_umis = false
 params.group_umis = false
 params.count_reads = true
-
+params.num_processes = 1
 if (! params.secondary_id) {
     secondary_id = "NULL"
 } else {
