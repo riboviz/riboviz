@@ -292,7 +292,7 @@ Web sites:
 Install:
 
 ```console
-$ conda install -y -c bioconda cutadapt 
+$ conda install -y -c bioconda cutadapt
 ```
 
 Check package has installed `cutadapt` tool:
@@ -371,7 +371,7 @@ Web site:
 Install:
 
 ```console
-$ conda install -y -c anaconda h5py 
+$ conda install -y -c anaconda h5py
 ```
 
 Check package has installed:
@@ -418,7 +418,7 @@ Install:
 
 ```console
 $ wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.1.0-Linux_x86_64.zip
-$ unzip hisat2-2.1.0-Linux_x86_64.zip 
+$ unzip hisat2-2.1.0-Linux_x86_64.zip
 $ ls hisat2-2.1.0/
 ```
 
@@ -433,7 +433,7 @@ $ hisat2 --version
 64-bit
 Built on login-node03
 Wed Jun  7 15:53:42 EDT 2017
-Compiler: gcc version 4.8.2 (GCC) 
+Compiler: gcc version 4.8.2 (GCC)
 Options: -O3 -m64 -msse2 -funroll-loops -g3 -DPOPCNT_CAPABILITY
 Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 ```
@@ -467,7 +467,7 @@ $ bowtie --version
 64-bit
 Built on 462e5beae518
 Mon Dec 11 19:27:01 UTC 2017
-Compiler: gcc version 4.8.2 20140120 (Red Hat 4.8.2-15) (GCC) 
+Compiler: gcc version 4.8.2 20140120 (Red Hat 4.8.2-15) (GCC)
 Options: -O3 -m64  -Wl,--hash-style=both -DWITH_TBB
 -DPOPCNT_CAPABILITY -g -O2 -fvisibility=hidden -I/hbb_exe/include
 -g -O2 -fvisibility=hidden -I/hbb_exe/include
@@ -638,6 +638,20 @@ Install in R:
 
 ```r
 > install.packages("git2r")
+```
+
+### here
+
+Web sites:
+
+* [here](https://here.r-lib.org/)
+* [CRAN](https://cran.r-project.org/package=here)
+* [GitHub](https://github.com/r-lib/here)
+
+Install in R:
+
+```r
+> install.packages("here")
 ```
 
 ### Bioconductor Rsamtools, rdf5, rtracklayer, Biostrings, ShortRead
