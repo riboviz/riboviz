@@ -196,7 +196,7 @@ def demultiplex(sample_sheet_file,
     :type out_dir: str or unicode
     :param delimiter: Barcode delimiter
     :type delimiter: str or unicode
-    """
+     """
     print(("Demultiplexing reads for file: " + read1_file))
     print(("Using sample sheet: " + sample_sheet_file))
 
@@ -207,10 +207,8 @@ def demultiplex(sample_sheet_file,
     total_reads = 0
     sample_ids = list(sample_sheet[sample_sheets.SAMPLE_ID])
     barcodes = list(sample_sheet[sample_sheets.TAG_READ])
-    length_tag = len(barcodes[1])
     print(("Number of samples: {}".format(num_samples)))
     print(("Allowed mismatches: {}".format(mismatches)))
-    print(("Tag length: {}".format(length_tag)))
     print(("Barcode delimiter: {}".format(delimiter)))
 
     if not os.path.isfile(read1_file):
