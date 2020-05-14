@@ -353,10 +353,8 @@ process demultiplex {
         each file(sample_sheet) from multiplex_sample_sheet
     output:
         tuple val(multiplex_id), file("num_reads.tsv") \
-                into multiplex_num_reads_tsv
-        tuple val(multiplex_id), file("Unassigned.f*") \
-            into multiplex_unassigned_fq
-        file("*.f*") into multiplex_output_fq
+                into demultiplexed_num_reads_tsv
+        file("*.f*") into demultiplexed_output_fq
     shell:
         """
         python -m riboviz.tools.demultiplex_fastq \
@@ -369,17 +367,28 @@ process demultiplex {
 // (corresponding to barcodes for which there were no samples, then
 // flatten this list and output tuples, of sample IDs and file names
 // as separate items onto a new channel.
-// Use file base names as sample IDs, ensuring that if a file
-// has extension .fastq.gz or .fq.fz then both extensions
-// are removed from the name.
-multiplex_samples_fq = multiplex_output_fq
+
+demultiplexed_output_fq
     .flatten()
-    .filter{ it.size() > 0 }
+    // Use file basename as sample ID.
     .map { [it.baseName, it] }
-    .map { n, f -> [n.endsWith(".fq") ? n - ".fq" : n, f]  }
-    .map { n, f -> [n.endsWith(".fastq") ? n - ".fastq" : n, f]  }
+    // If file was .fastq|fq.gz then basename will include .fq|fastq
+    // so strip that off too.
+    .map { n, f -> [n.endsWith(".fq") ? n - ".fq" : n, f] }
+    .map { n, f -> [n.endsWith(".fastq") ? n - ".fastq" : n, f] }
     .filter { n, f -> n != "Unassigned" }
-    .view { n, f -> "Demultiplexed sample file (non-empty): ${n} (${f.getName()})" }
+    .branch { n, f ->
+        empties: f.size() <= 0
+        non_empties: f.size() > 0
+    }
+    .set { demultiplexed_fq }
+
+demultiplexed_fq.empties
+    .map { n, f -> n }
+    .collect()
+    .view { "No demultiplexed data for samples: ${it.join(', ')}" }
+
+multiplex_samples_fq = demultiplexed_fq.non_empties
 
 /*
  * Sample processes. Common to both sample files (fq_files) and
@@ -714,7 +723,7 @@ process generateStatsFigs {
         """
 }
 
-processed_samples.subscribe { println("Finished processing sample: ${it}") }
+processed_samples.view { "Finished processing sample: ${it}" }
 
 // Prefix sample-specific TPMs files, tpms.tsv, with sample ID so all 
 // sample-specific TPMs files can be staged into the same directory
@@ -734,7 +743,7 @@ process renameTpms {
 }
 
 process collateTpms {
-    tag "${sample_ids.join(' ')}"
+    tag "${sample_ids.join(', ')}"
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
     input:
         val sample_ids from sample_tpms_id.collect()
@@ -789,6 +798,4 @@ process countReads {
         """
 }
 
-read_counts_tsv.subscribe {
-    println("Finished!")
-}
+read_counts_tsv.view { "Finished!" }
