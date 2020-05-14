@@ -61,6 +61,7 @@ if (params.extract_umis) {
     }
 }
 
+num_samples = 0
 sample_files = [:]
 multiplex_files = [:]
 multiplex_sample_sheet = ""
@@ -77,6 +78,7 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
         sample_file = file("${params.dir_in}/${entry.value}")
         if (sample_file.exists()) {
             sample_files[entry.key] = sample_file
+	    num_samples++
         } else {
             println("No such file ($entry.key): $entry.value")
         }
@@ -645,6 +647,7 @@ process generateStatsFigs {
         each file(features) from features_file
         each file(asite_disp_length) from asite_disp_length_file
     output:
+        val sample_id into processed_samples
         tuple val(sample_id), file("tpms.tsv") into tpms_tsv
         tuple val(sample_id), file("3nt_periodicity.pdf") \
             into nt3_periodicity_pdf
@@ -711,13 +714,18 @@ process generateStatsFigs {
         """
 }
 
-process prepareCollateTpms {
+processed_samples.subscribe { println("Finished processing sample: ${it}") }
+
+// Prefix sample-specific TPMs files, tpms.tsv, with sample ID so all 
+// sample-specific TPMs files can be staged into the same directory
+// for running collateTpms.
+process renameTpms {
     tag "${sample_id}"
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(tsv) from tpms_tsv
     output:
-        val sample_id into sample_tpms_id
+        val(sample_id) into sample_tpms_id
         file "${sample_id}_tpms.tsv" into sample_tpms_tsv
     shell:
         """
@@ -726,13 +734,14 @@ process prepareCollateTpms {
 }
 
 process collateTpms {
+    tag "${sample_ids.join(' ')}"
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
     input:
         val sample_ids from sample_tpms_id.collect()
         file tsvs from sample_tpms_tsv.collect()
     output:
         file "TPMs_collated.tsv" into collated_tpms_tsv
-        val sample_ids into completed_samples
+        val sample_ids into collated_tpms_samples
     shell:
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/collate_tpms.R \
@@ -742,8 +751,6 @@ process collateTpms {
             ${sample_ids.join(' ')}
         """
 }
-
-completed_samples.subscribe { println("Processed samples: ${it.join(' ')}") }
 
 process countReads {
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
@@ -755,7 +762,7 @@ process countReads {
         val data_files_config_yaml from data_files_config_yaml
         // Force dependency on output of collateTpms so this process
         // is only run when all other processing has completed.
-        val completed_samples from completed_samples
+        val collated_tpms_samples from collated_tpms_samples
     output:
         file "read_counts.tsv" into read_counts_tsv
     when:
@@ -780,4 +787,8 @@ process countReads {
            -o ${workflow.projectDir}/${params.dir_out} \
            -r read_counts.tsv  
         """
+}
+
+read_counts_tsv.subscribe {
+    println("Finished!")
 }
