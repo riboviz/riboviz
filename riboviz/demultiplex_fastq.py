@@ -44,6 +44,8 @@ sample sheet is less than the number of mismatches times 2. In the
 above two examples, the Hamming distance between each of the sample
 barcodes is 3 is less than the number of mismatches times 2, which is
 4 and 6 respectively.
+
+Files are not output for any barcode that has no matching reads.
 """
 import gzip
 import os
@@ -202,14 +204,14 @@ def demultiplex(sample_sheet_file,
 
     sample_sheet = sample_sheets.load_sample_sheet(sample_sheet_file)
     num_samples = sample_sheet.shape[0]
-    num_reads = [0] * num_samples
-    num_unassigned_reads = 0
-    total_reads = 0
     sample_ids = list(sample_sheet[sample_sheets.SAMPLE_ID])
     barcodes = list(sample_sheet[sample_sheets.TAG_READ])
     print(("Number of samples: {}".format(num_samples)))
     print(("Allowed mismatches: {}".format(mismatches)))
     print(("Barcode delimiter: {}".format(delimiter)))
+    num_reads = [0] * num_samples
+    num_unassigned_reads = 0
+    total_reads = 0
 
     if not os.path.isfile(read1_file):
         raise FileNotFoundError(
@@ -241,37 +243,36 @@ def demultiplex(sample_sheet_file,
             "Error: output directory {} cannot be created".format(out_dir))
 
     num_reads_file = os.path.join(out_dir, NUM_READS_FILE)
-    if is_paired_end:
-        read1_split_fhs = [
-            open_file(os.path.join(out_dir,
-                                   file_format.format(sample_id + "_R1")),
-                      "wt")
-            for sample_id in sample_ids]
-        read1_unassigned_fh = open_file(
-            os.path.join(out_dir,
-                         file_format.format(
-                             sample_sheets.UNASSIGNED_TAG + "_R1")), "wt")
-        read2_split_fhs = [
-            open_file(os.path.join(out_dir,
-                                   file_format.format(sample_id + "_R2")),
-                      "wt")
-            for sample_id in sample_ids]
-        read2_unassigned_fh = open_file(
-            os.path.join(out_dir,
-                         file_format.format(
-                             sample_sheets.UNASSIGNED_TAG + "_R2")), "wt")
+    if not is_paired_end:
+        extension = ""
     else:
-        read1_split_fhs = [
-            open_file(os.path.join(out_dir,
-                                   file_format.format(sample_id)),
-                      "wt")
-            for sample_id in sample_ids]
-        read1_unassigned_fh = open_file(
+        extension = "_R1"
+    read1_split_files = [
+        os.path.join(out_dir,
+                     file_format.format(sample_id + extension))
+        for sample_id in sample_ids]
+    read1_unassigned_file = os.path.join(
+        out_dir,
+        file_format.format(sample_sheets.UNASSIGNED_TAG + extension))
+    read1_split_fhs = [open_file(file_name, "wt")
+                       for file_name in read1_split_files]
+    read1_unassigned_fh = open_file(read1_unassigned_file, "wt")
+    if is_paired_end:
+        read2_split_files = [
             os.path.join(out_dir,
-                         file_format.format(
-                             sample_sheets.UNASSIGNED_TAG)), "wt")
-        read2_split_fhs = None
-
+                         file_format.format(sample_id + "_R2"))
+            for sample_id in sample_ids]
+        read2_split_fhs = [open_file(file_name, "wt")
+                           for file_name in read2_split_files]
+        read2_unassigned_file = os.path.join(
+            out_dir,
+            file_format.format(sample_sheets.UNASSIGNED_TAG + "_R2"))
+        read2_unassigned_fh = open_file(read2_unassigned_file, "wt")
+    else:
+        read2_split_files = []
+        read2_split_fhs = []
+        read2_unassigned_file = None
+        read2_unassigned_fh = None
     while True:
         # Get fastq record/read (4 lines)
         fastq_record1 = list(islice(read1_fh, 4))
@@ -317,6 +318,13 @@ def demultiplex(sample_sheet_file,
         read2_fh.close()
 
     print(("All {} reads processed".format(total_reads)))
+
+    # Purge files with no reads.
+    for (sample_id, index) in zip(sample_ids, range(len(sample_ids))):
+        if num_reads[index] == 0:
+            os.remove(read1_split_files[index])
+            if is_paired_end:
+                os.remove(read2_split_files[index])
 
     # Output number of reads by sample to file.
     sample_sheet[sample_sheets.NUM_READS] = num_reads
