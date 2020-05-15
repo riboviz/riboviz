@@ -366,6 +366,9 @@ process demultiplex {
 // (corresponding to barcodes for which there were no samples, then
 // flatten this list and output tuples, of sample IDs and file names
 // as separate items onto a new channel.
+// Note: this only works for .fq|fastq files since empty .gz files
+// have a non-zero size. Ideally, demultiplex_fastq would not output
+// empty files.
 
 demultiplexed_output_fq
     .flatten()
