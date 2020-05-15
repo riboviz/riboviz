@@ -55,13 +55,13 @@ if (params.num_processes < 1) {
     exit 1, "Number of processes (num_processes) is < 1"
 }
 if (params.min_read_length < 1) {
-    exit 1, "Minimum read length (min_read_length) is < 1"
+    exit 1, "Minimum read length in H5 output (min_read_length) is < 1"
 }
 if (params.max_read_length < 1) {
-    exit 1, "Maximum read length (max_read_length) is < 1"
+    exit 1, "Maximum read length in H5 output (max_read_length) is < 1"
 }
 if (params.max_read_length < params.min_read_length) {
-    exit 1, "Maximum read length is less than minimum read length (max_read_length)"
+    exit 1, "Maximum read length in H5 output is less than minimum read length (max_read_length)"
 }
 if (! params.secondary_id) {
     secondary_id = "NULL"
