@@ -379,14 +379,10 @@ process demultiplex {
         """
 }
 
-// multiplex_samples_fq channel outputs a single list with all the
-// output fastq files. Filter out Unassigned.fq and any empty files
-// (corresponding to barcodes for which there were no samples, then
-// flatten this list and output tuples, of sample IDs and file names
-// as separate items onto a new channel.
-// Note: this only works for .fq|fastq files since empty .gz files
-// have a non-zero size. Ideally, demultiplex_fastq would not output
-// empty files.
+// demultiplexed_output_fq outputs a single list with all the output
+// files. Extract sample IDs from file basenames, filter out
+// "Unassigned" and output tuples of sample IDs and file names as
+// separate items onto a new channel.
 
 demultiplexed_output_fq
     .flatten()
@@ -397,18 +393,12 @@ demultiplexed_output_fq
     .map { n, f -> [n.endsWith(".fq") ? n - ".fq" : n, f] }
     .map { n, f -> [n.endsWith(".fastq") ? n - ".fastq" : n, f] }
     .filter { n, f -> n != "Unassigned" }
-    .branch { n, f ->
-        empties: f.size() <= 0
-        non_empties: f.size() > 0
-    }
-    .set { demultiplexed_fq }
+    .into { demultiplexed_samples_ids; demultiplexed_samples_fq }
 
-demultiplexed_fq.empties
+demultiplexed_samples_ids
     .map { n, f -> n }
     .collect()
-    .view { "No demultiplexed data for samples: ${it.join(', ')}" }
-
-multiplex_samples_fq = demultiplexed_fq.non_empties
+    .view { "Demultiplexed samples: ${it.join(', ')}"}
 
 /*
  * Sample processes. Common to both sample files (fq_files) and
@@ -419,7 +409,7 @@ multiplex_samples_fq = demultiplexed_fq.non_empties
 // definition of "cut_samples.branch" only one of the input channels
 // will have content. 
 trimmed_samples = cut_samples_branch.non_umi_samples.mix(
-    umi_extracted_samples).mix(multiplex_samples_fq)
+    umi_extracted_samples).mix(demultiplexed_samples_fq)
 
 process hisat2rRNA {
     tag "${sample_id}"
