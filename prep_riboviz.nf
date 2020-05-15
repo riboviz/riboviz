@@ -3,15 +3,149 @@
 import org.yaml.snakeyaml.Yaml
 
 /*
- * Optional inputs follow pattern
- * https://github.com/nextflow-io/patterns/blob/master/optional-input.nf
- */
+===================================
+RiboViz ribosome profiling workflow
+===================================
+
+Running
+-------
+
+nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml
+
+where '<CONFIG>' is a YAML configuration file. The YAML configuration
+parameters are as follows (all are mandatory unless stated).
+
+Configuration
+-------------
+
+Organism data:
+
+* 'orf_fasta_file': Transcript sequences file containing both coding
+  regions and flanking regions (FASTA file)
+* 'orf_gff_file': Matched genome feature file, specifying coding
+  sequences locations (start and stop coordinates) within the
+  transcripts (GTF/GFF3 file)
+* 'rrna_fasta_file': Ribosomal rRNA and other contaminant sequences to
+  avoid aligning to (FASTA file)
+
+Ribosome profiling data:
+
+* 'dir_in': Input directory.
+* Either:
+  - 'fq_files': Dictionary of FASTQ files to be processed, relative to
+     '<dir_in>'. Each item consists of a sample name with a file
+     name value (e.g. 'WT3AT: SRR1042864_s1mi.fastq.gz')
+* Or:
+  - 'multiplex_fq_files': List with a multiplexed FASTQ file,
+    relative to '<dir_in>'. If this is provided then the 'fq_files'
+    parameter must not be present in the configuration and the
+    'sample_sheet' parameter must be present.
+  - 'sample_sheet': A sample sheet, relative to '<dir_in>', mandatory
+    if 'multiplex_fq_files' is used (tab-separated values file with,
+    at least, 'SampleID' and 'TagRead' (barcode) columns)
+* If neither or both of 'fq_files' and 'multiplex_fq_files' parameters
+  are provided then the workflow will exit.
+
+Indexing:
+
+* 'build_indices': 'TRUE' or 'FALSE', rebuild indices from FASTA
+  files? (default 'TRUE')
+* 'orf_index_prefix': Prefix for ORF index files, relative to
+  '<dir_index>' .
+* 'rrna_index_prefix': Prefix for rRNA index files, relative to
+  '<dir_index>'.
+* 'dir_index': Directory to write indexed files to (default 'index')
+
+Outputs:
+
+* 'dir_tmp': Directory to write temporary files to (default 'tmp')
+* 'dir_out': Directory to write temporary files to (default 'output')
+
+Adapter trimming:
+
+* 'adapters': Illumina sequencing adapter(s) to remove.
+
+Barcode and UMI extraction, deduplication, demultiplexing:
+
+* 'extract_umis': 'TRUE' or 'FALSE', extract UMIs after adapter
+  trimming? (default 'FALSE')
+* 'umi_regexp': UMI-tools-compliant regular expression to extract
+  barcodes and UMIs. For details on the regular expression format, see
+  UMI-tools documentation on Barcode extraction
+  https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction.
+  Only required if 'extract_umis' is 'TRUE'.
+  - If 'fq_files' are provided then 'umi_regexp' should extract only
+    UMIs (i.e. it should contain '<umi>' elements only).
+  - If 'multiplex_fq_files' is provided then 'umi_regexp' should
+    extract both barcodes and UMIs (i.e. it should contain both
+    '<cell>' and '<umi>' elements).
+* 'dedup_umis': 'TRUE' or 'FALSE', deduplicate reads using UMI-tools?
+  (default 'FALSE')
+* 'group_umis': 'TRUE' or 'FALSE', summarise UMI groups both pre- and
+  post-deduplication, using UMI-tools? Useful for debugging (default
+  'FALSE')
+* If 'dedup_umis' is 'TRUE' but 'extract_umis' is 'FALSE' then a
+  warning will be displayed, but processing will continue.
+
+Statistics and figure generation input files:
+
+* 'asite_disp_length_file': Summary of read frame displacement from 5'
+  end to A-site for each read length based on 'standard' yeast data
+  from early ribosome profiling papers (tab-separated values file with
+  'read_length', 'asite_disp' columns)
+* 'codon_positions_file': Position of codons within each gene (RData
+  file)
+* 'features_file': Features to correlate with ORFs (tab-separated
+  values file with 'ORF', 'Length_log10', 'uATGs', 'FE_atg', 'FE_cap',
+  'utr', 'utr_gc', 'polyA' columns)
+* 't_rna_file': tRNA estimates file (tab-separated values file with
+  'AA', 'Codon', 'tRNA', 'tAI', 'Microarray', 'RNA.seq' columns)
+
+Statistics and figure generation parameters:
+
+* 'buffer': Length of flanking region around the CDS (default 250)
+* 'count_reads': 'TRUE' or 'FALSE', scan input, temporary and output
+  files and produce counts of reads in each FASTQ, SAM, and BAM file
+  processed? (default: 'TRUE')
+* 'count_threshold': Remove genes with a read count below this
+  threshold, when generating statistics and figures (default 1)
+* 'dataset': Human-readable name of the dataset (default 'dataset')
+* 'do_pos_sp_nt_freq': 'TRUE' or 'FALSE', calculate position-specific
+  nucleotide freqeuency? (default 'TRUE')
+* 'is_riboviz_gff': 'TRUE' or 'FALSE', does the GFF file contain 3
+  elements per gene - UTR5, CDS, and UTR3? (default 'TRUE')
+* 'make_bedgraph': 'TRUE' or 'FALSE', output bedgraph data files in
+  addition to H5 files? (default 'TRUE')
+* 'max_read_length': Maximum read length in H5 output (default 50)
+* 'min_read_length': Minimum read length in H5 output (default 10)
+* 'primary_id': Primary gene IDs to access the data (YAL001C, YAL003W,
+  etc.) (default 'Name')
+* 'rpf': 'TRUE' or 'FALSE', is the dataset an RPF or mRNA dataset?
+  (default 'TRUE')
+* 'secondary_id': Secondary gene IDs to access the data (COX1, EFB1,
+   etc. or 'NULL') (default 'NULL')
+* 'stop_in_cds': 'TRUE' or 'FALSE', are stop codons part of the CDS
+  annotations in GFF? (default ('FALSE')
+
+General:
+
+* 'num_processes': Number of processes to parallelize over, used by
+  specific steps in the workflow (default 1)
+
+Notes
+------
+
+Optional inputs follow pattern
+https://github.com/nextflow-io/patterns/blob/master/optional-input.nf.
+*/
 
 /*
- * Validate configuration.
- */
-// Initialise optional variables to avoid "WARN: Access to undefined
-// parameter `<PARAM>`" when running Nextflow.
+Initialise and validate configuration.
+
+Initialise optional variables to avoid "WARN: Access to undefined
+parameter '<PARAM>'" errors.
+*/
+
 params.buffer = 250
 params.build_indices = true
 params.count_reads = true
@@ -79,6 +213,10 @@ if (params.extract_umis) {
     }
 }
 
+/*
+Validate input files.
+*/
+
 num_samples = 0
 sample_files = [:]
 multiplex_files = [:]
@@ -91,7 +229,7 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
 } else if (params.fq_files && params.multiplex_fq_files) {
     exit 1, "Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are defined"
 } else if (params.fq_files) {
-    // Filter params.fq_files down to those samples that exist.
+    // Filter 'params.fq_files' down to those samples that exist.
     for (entry in params.fq_files) {
         sample_file = file("${params.dir_in}/${entry.value}")
         if (sample_file.exists()) {
@@ -105,13 +243,13 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
         exit 1, "None of the defined sample files (fq_files) exist"
     }
 } else {
-    // Filter params.multiplex_fq_files down to those files that exist.
+    // Filter 'params.multiplex_fq_files' down to those files that exist.
     for (entry in params.multiplex_fq_files) {
         multiplex_file = file("${params.dir_in}/${entry}")
         if (multiplex_file.exists()) {
             // Use file base name as key, ensuring that if file
-	    // has extension .fastq.gz or .fq.fz then both extensions
-	    // are removed from the name.
+	    // has extension '.fastq.gz' or '.fq.gz' then both
+	    // extensions are removed from the name.
             multiplex_file_name = multiplex_file.baseName
             if (multiplex_file_name.endsWith(".fastq")) {
                 multiplex_file_name = multiplex_file_name - '.fastq'
@@ -134,18 +272,17 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
         checkIfExists: true)
 }
 
-// Create YAML fragment including params.fq_files and
-// params.multiplex_fq_files to serve as a configuration file for
+// Create YAML fragment including 'params.fq_files' and
+// 'params.multiplex_fq_files' to serve as a configuration file for
 // riboviz.tools.count_reads. There is no way to get the location
-// of the RiboViz YAML configuration file itself from within Nextflow
-// (there is no way to access the "-param-file" argument to
-// Nextflow).
+// of the YAML configuration file itself (i.e. the value of
+// '-param-file' from within Nextflow.
 Map data_files_config = [:]
 data_files_config.fq_files = params.fq_files
 data_files_config.multiplex_fq_files = params.multiplex_fq_files
 data_files_config_yaml = new Yaml().dump(data_files_config)
 
-// Set up non-sample-specific input files.
+// Non-sample-specific input files.
 if (! params.containsKey('rrna_fasta_file')) {
     exit 1, "Undefined rRNA FASTA file (rrna_fasta_file)"
 }
@@ -162,19 +299,15 @@ if (! params.containsKey('orf_gff_file')) {
 orf_gff = Channel.fromPath(params.orf_gff_file,
                            checkIfExists: true)
 
-/*
- * Set up optional inputs for generate_stats_figs.R.
- *
- * If an optional file is not provided then a "Missing_<PARAM>" file
- * (for example "Missing_features_file") is created within the work/
- * directories for the generateStatsFigs process. This symbolically
- * links to a non-existent "Missing_<PARAM>" file in the users current
- * directory. This is not an issue since the files will not be passed
- * onto generate_stats_figs.R and no attempt is made to use them. They
- * are a side-effect of using the Nextflow pattern for optional
- * inputs,
- * https://github.com/nextflow-io/patterns/blob/master/optional-input.nf.
- */
+// Optional inputs for generate_stats_figs.R.
+// If an optional file is not provided then a 'Missing_<PARAM>' file
+// (for example 'Missing_features_file') is created within the 'work/'
+// directories for the generateStatsFigs process. This symbolically
+// links to a non-existent 'Missing_<PARAM>' file in the users current
+// directory. This is not an issue since the files will not be passed
+// onto generate_stats_figs.R and no attempt is made to use them. They
+// are a side-effect of using the Nextflow pattern for optional
+// inputs.
 if (params.containsKey('t_rna_file')
     && params.containsKey('codon_positions_file')) {
     t_rna_file = Channel.fromPath(params.t_rna_file,
@@ -208,15 +341,11 @@ if (params.containsKey('asite_disp_length_file')) {
 }
 
 /*
- * Indexing processes.
- */ 
+Indexing.
+*/ 
 
-// Split "orf_fasta" channel so can use as input to multiple
-// downstream tasks.
+// Split channels for use in multiple downstream processes.
 orf_fasta.into { orf_fasta_index; orf_fasta_generate_stats_figs }
-
-// Split "orf_gff" channel so can use as input to multiple
-// downstream tasks.
 orf_gff.into { orf_gff_bam_to_h5; orf_gff_generate_stats_figs }
 
 process buildIndicesrRNA {
@@ -252,8 +381,8 @@ process buildIndicesORF {
 }
 
 /*
- * Sample file (fq_files)-specific processes.
- */
+Sample file (fq_files)-specific processes.
+*/
 
 process cutAdapters {
     tag "${sample_id}"
@@ -272,8 +401,8 @@ process cutAdapters {
         """
 }
 
-// Route "cut_samples" channel depending on whether UMIs are to be
-// extracted or not.
+// Route 'cut_samples' channel outputs depending on whether UMIs are
+// to be extracted or not.
 cut_samples.branch {
     umi_samples: params.extract_umis
     non_umi_samples: ! params.extract_umis
@@ -302,8 +431,8 @@ process extractUmis {
 }
 
 /*
- * Multiplexed files (multiplex_fq_files)-specific processes.
- */
+Multiplexed files (multiplex_fq_files)-specific processes.
+*/
 
 process cutAdaptersMultiplex {
     tag "${multiplex_id}"
@@ -322,8 +451,8 @@ process cutAdaptersMultiplex {
         """
 }
 
-// Route "cut_multiplex" channel depending on whether UMIs are to be
-// extracted or not.
+// Route 'cut_multiplex' channel outputs depending on whether UMIs are
+// to be extracted or not.
 cut_multiplex.branch {
     umi_multiplex: params.extract_umis
     non_umi_multiplex: ! params.extract_umis
@@ -350,9 +479,9 @@ process extractUmisMultiplex {
         """
 }
 
-// Combine channels and route to downstream processing steps. By
-// definition of "cut_multiplex.branch" only one of the input channels
-// will have content.
+// Combine channels for downstream processing. By definition of
+// 'cut_multiplex.branch' only one of the input channels will have
+// content.
 trimmed_multiplex = cut_multiplex_branch.non_umi_multiplex.mix(
     umi_extracted_multiplex)
 
@@ -362,9 +491,9 @@ process demultiplex {
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        // Use .toString to prevent changing hashes of
-	// workflow.projectDir triggering reexecution of this
-	// process if "nextflow run" is run with "-resume".
+        // Use '.toString' to prevent changing hashes of
+	// 'workflow.projectDir' triggering reexecution of this
+	// process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
         tuple val(multiplex_id), file(multiplex_file) from trimmed_multiplex
         each file(sample_sheet) from multiplex_sample_sheet
@@ -379,17 +508,16 @@ process demultiplex {
         """
 }
 
-// demultiplexed_output_fq outputs a single list with all the output
+// 'demultiplexed_output_fq' outputs a single list with all the output
 // files. Extract sample IDs from file basenames, filter out
-// "Unassigned" and output tuples of sample IDs and file names as
+// 'Unassigned' and output tuples of sample IDs and file names as
 // separate items onto a new channel.
-
 demultiplexed_output_fq
     .flatten()
     // Use file basename as sample ID.
     .map { [it.baseName, it] }
-    // If file was .fastq|fq.gz then basename will include .fq|fastq
-    // so strip that off too.
+    // If file was '.fastq|fq.gz' then basename will include
+    // '.fq|fastq' so strip that off too.
     .map { n, f -> [n.endsWith(".fq") ? n - ".fq" : n, f] }
     .map { n, f -> [n.endsWith(".fastq") ? n - ".fastq" : n, f] }
     .filter { n, f -> n != "Unassigned" }
@@ -401,13 +529,14 @@ demultiplexed_samples_ids
     .view { "Demultiplexed samples: ${it.join(', ')}"}
 
 /*
- * Sample processes. Common to both sample files (fq_files) and
- * demultiplexed files (multiplex_fq_files).
- */
+Sample-specific processes.
 
-// Combine channels and route to downstream processing steps. By
-// definition of "cut_samples.branch" only one of the input channels
-// will have content. 
+Common to both sample files (fq_files) and demultiplexed files.
+*/
+
+// Combine channels for downstream processing. By definition of
+// 'cut_samples.branch' only one of the input channels will have
+// content.
 trimmed_samples = cut_samples_branch.non_umi_samples.mix(
     umi_extracted_samples).mix(demultiplexed_samples_fq)
 
@@ -458,9 +587,9 @@ process trim5pMismatches {
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        // Use .toString to prevent changing hashes of
-	// workflow.projectDir triggering reexecution of this
-	// process if "nextflow run" is run with "-resume".
+        // Use '.toString' to prevent changing hashes of
+	// 'workflow.projectDir' triggering reexecution of this
+	// process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
         tuple val(sample_id), file(sam) from orf_map_sams
     output:
@@ -494,7 +623,7 @@ process samViewSort {
         """
 }
 
-// Route "orf_map_bams" output channel depending on whether UMIs are
+// Route "orf_map_bams" channel outputs depending on whether UMIs are
 // to be deduplicated or not.
 orf_map_bams.branch {
     umi_bams: params.dedup_umis
@@ -502,8 +631,7 @@ orf_map_bams.branch {
 }
 .set { orf_map_bams_branch }
 
-// Split "orf_map_bams_branch.umi_bams" channel so can use as input to
-// multiple downstream tasks.
+// Split channel for use in multiple downstream processes.
 orf_map_bams_branch.umi_bams.into {
     pre_dedup_group_bams; pre_dedup_bams
 }
@@ -550,8 +678,7 @@ process dedupUmis {
         """
 }
 
-// Split "dedup_bams" channel so can use as input to multiple
-// downstream tasks.
+// Split channel for use in multiple downstream processes.
 dedup_bams.into { post_dedup_group_bams; post_dedup_bams }
 
 process groupUmisPostDedup {
@@ -573,9 +700,8 @@ process groupUmisPostDedup {
         """
 }
 
-// Combine "orf_map_bams_branch.umi_free_bams" and "post_dedup_bams"
-// channels and route to downstream processing steps. By definition of
-// "orf_map_bams_branch" only one of the input channels will have
+// Combine channels for downstream processing. By definition of
+// 'orf_map_bams_branch' only one of the input channels will have
 // content.
 pre_output_bams = orf_map_bams_branch.umi_free_bams.mix(post_dedup_bams)
 
@@ -597,8 +723,7 @@ process outputBams {
         """
 }
 
-// Split "output_bams" channel so can use as input to multiple
-// downstream tasks.
+// Split channel for use in multiple downstream processes.
 output_bams.into { bedgraph_bams; summary_bams }
 
 process makeBedgraphs {
@@ -774,12 +899,12 @@ process collateTpms {
 process countReads {
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
     input:
-        // Use .toString to prevent changing hashes of
-	// workflow.projectDir triggering reexecution of this
-	// process if "nextflow run" is run with "-resume".
+        // Use '.toString' to prevent changing hashes of
+	// 'workflow.projectDir' triggering reexecution of this
+	// process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
         val data_files_config_yaml from data_files_config_yaml
-        // Force dependency on output of collateTpms so this process
+        // Force dependency on output of 'collateTpms' so this process
         // is only run when all other processing has completed.
         val collated_tpms_samples from collated_tpms_samples
     output:
@@ -787,7 +912,7 @@ process countReads {
     when:
         params.count_reads
     shell:
-        // workflow.projectDir is directory into which outputs
+        // 'workflow.projectDir' is directory into which outputs
         // have been published.
         // TODO: It would be preferable to:
         // 1. Stage these directories into this process's
