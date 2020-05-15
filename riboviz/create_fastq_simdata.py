@@ -35,9 +35,9 @@ Reads with 5' UMI, 3' UMI, adaptor and barcode:
 * These files can be used to test adaptor trimming, demultiplexing and
   deduplication.
 * ``multiplex_barcodes.tsv``: tab-separated values file with
-  ``SampleID`` column (with values ``Tag0|1|2``) and ``TagRead``
-  column (with values ``ACG``, ``GAC``, ``CGA``). This is consistent
-  with the sample sheet file format expected by
+  ``SampleID`` column (with values ``Tag0|1|2|3``) and ``TagRead``
+  column (with values ``ACG``, ``GAC``, ``CGA``, ``CCC``). This is
+  consistent with the sample sheet file format expected by
   :py:mod:`riboviz.tools.demultiplex_fastq` and
   :py:mod:`riboviz.demultiplex_fastq`.
 * ``multiplex_umi_barcode_adaptor.fastq``: FASTQ file with 90 reads:
@@ -51,7 +51,11 @@ Reads with 5' UMI, 3' UMI, adaptor and barcode:
       1nt and 2nt respectively with the first barcode in each list.
     - When the file is demultiplexed, assuming up to 2 mismatches are
       allowed, then 3 sets of 27 reads will be produced, grouped by
-      the 1st barcode in each list.
+      the 1st barcode in each list, corresponding to ``Tag0|1|2``
+      in ``multiplex_barcodes.tsv``. If up to 2 mismatches are
+      allowed then ``Tag3``, with barcode ``CCC`` will not match
+      with any read since the possible matches will have been grabbed
+      by ``Tag0|1|2``'s barcodes.
     - There are 9 reads with barcode ``TTT``, which has a mismatch of
       3nts to ``ACG``, ``GAC``, ``CGA``. When the file is
       demultiplexed, assuming up to 2 mismatches are allowed, then
@@ -404,6 +408,8 @@ def create_fastq_simdata(output_dir):
     sample_rows = []
     for index, barcode in enumerate(barcode_sets[0]):
         sample_rows.append([tag_format.format(index), barcode])
+    # Append entry for sample Tag3, barcode CCC.
+    sample_rows.append([tag_format.format(num_barcodes), 'CCC'])
     sample_rows_df = pd.DataFrame(sample_rows, columns=sample_sheet.columns)
     sample_sheet = sample_sheet.append(sample_rows_df, ignore_index=True)
     sample_sheet[list(sample_sheet.columns)].to_csv(
@@ -412,7 +418,6 @@ def create_fastq_simdata(output_dir):
 
     # Barcode that will be unassigned during demultiplexing.
     barcode_sets[0].append('TTT')
-    unassigned_index = num_barcodes
     num_reads_per_barcode = [0] * (num_barcodes + 1)
     # Iterate over mismatches then barcodes so can interleave reads
     # for each barcode i.e. reads for each barcodes will be created
@@ -460,6 +465,7 @@ def create_fastq_simdata(output_dir):
 
     # The last file of barcode-specific reads will be that for the
     # unassigned reads so rename that file.
+    unassigned_index = num_barcodes
     unassigned_tag_filename = fastq.FASTQ_FORMAT.format(
         tag_format.format(unassigned_index))
     shutil.move(os.path.join(deplex_dir, unassigned_tag_filename),
@@ -469,7 +475,10 @@ def create_fastq_simdata(output_dir):
 
     # Save expected demultiplexing data on counts of reads per-barcode.
     num_unassigned_reads = num_reads_per_barcode[unassigned_index]
+    # Delete from count of reads-per-barcode
     del num_reads_per_barcode[unassigned_index]
+    # Append entry for sample Tag3, barcode CCC, 0 matches.
+    num_reads_per_barcode.append(0)
     sample_sheet[sample_sheets.NUM_READS] = num_reads_per_barcode
     sample_sheets.save_deplexed_sample_sheet(
         sample_sheet,
