@@ -64,7 +64,7 @@ if (params.extract_umis) {
 num_samples = 0
 sample_files = [:]
 multiplex_files = [:]
-multiplex_sample_sheet = ""
+multiplex_sample_sheet = Channel.empty()
 if (! params.containsKey('dir_in')) {
     exit 1, "Input directory (dir_in) is undefined"
 }
@@ -114,7 +114,6 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     multiplex_sample_sheet = Channel.fromPath(
         "${params.dir_in}/${params.sample_sheet}",
         checkIfExists: true)
-    is_multiplexed = true
 }
 
 // Create YAML fragment including params.fq_files and
