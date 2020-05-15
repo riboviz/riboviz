@@ -45,6 +45,24 @@ if (! params.containsKey('orf_index_prefix')) {
 if (! params.containsKey('rrna_index_prefix')) {
     exit 1, "Undefined rRNA index prefix (rrna_index_prefix)"
 }
+if (params.buffer < 0) {
+    exit 1, "CDS flanking buffer (buffer) is < 0"
+}
+if (params.count_threshold < 0) {
+    exit 1, "Read count threshold (count_threshold) is < 0"
+}
+if (params.num_processes < 1) {
+    exit 1, "Number of processes (num_processes) is < 1"
+}
+if (params.min_read_length < 1) {
+    exit 1, "Minimum read length (min_read_length) is < 1"
+}
+if (params.max_read_length < 1) {
+    exit 1, "Maximum read length (max_read_length) is < 1"
+}
+if (params.max_read_length < params.min_read_length) {
+    exit 1, "Maximum read length is less than minimum read length (max_read_length)"
+}
 if (! params.secondary_id) {
     secondary_id = "NULL"
 } else {
