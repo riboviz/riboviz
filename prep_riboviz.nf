@@ -221,6 +221,7 @@ num_samples = 0
 sample_files = [:]
 multiplex_files = [:]
 multiplex_sample_sheet = Channel.empty()
+is_multiplexed = false
 if (! params.containsKey('dir_in')) {
     exit 1, "Input directory (dir_in) is undefined"
 }
@@ -270,6 +271,7 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     multiplex_sample_sheet = Channel.fromPath(
         "${params.dir_in}/${params.sample_sheet}",
         checkIfExists: true)
+    is_multiplexed = true
 }
 
 // Create YAML fragment including 'params.fq_files' and
@@ -485,6 +487,11 @@ process extractUmisMultiplex {
 trimmed_multiplex = cut_multiplex_branch.non_umi_multiplex.mix(
     umi_extracted_multiplex)
 
+// Split channel for use in multiple downstream processes.
+multiplex_sample_sheet.into {
+    multiplex_sample_sheet_report; multiplex_sample_sheet_demultiplex
+}
+
 process demultiplex {
     tag "${multiplex_id}"
     publishDir "${params.dir_tmp}/${multiplex_id}_deplex", \
@@ -496,7 +503,7 @@ process demultiplex {
 	// process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
         tuple val(multiplex_id), file(multiplex_file) from trimmed_multiplex
-        each file(sample_sheet) from multiplex_sample_sheet
+        each file(sample_sheet) from multiplex_sample_sheet_demultiplex
     output:
         tuple val(multiplex_id), file("num_reads.tsv") \
                 into demultiplexed_num_reads_tsv
@@ -521,12 +528,30 @@ demultiplexed_output_fq
     .map { n, f -> [n.endsWith(".fq") ? n - ".fq" : n, f] }
     .map { n, f -> [n.endsWith(".fastq") ? n - ".fastq" : n, f] }
     .filter { n, f -> n != "Unassigned" }
-    .into { demultiplexed_samples_ids; demultiplexed_samples_fq }
+    .into { demultiplexed_samples_report; demultiplexed_samples_fq }
 
-demultiplexed_samples_ids
-    .map { n, f -> n }
-    .collect()
-    .view { "Demultiplexed samples: ${it.join(', ')}"}
+if (is_multiplexed) {
+
+    demultiplexed_sample_ids = demultiplexed_samples_report
+        .map { n, f -> n }
+        .toList() // [] if none
+        .view { "Demultiplexed samples: ${it}"}
+        // Wrap list in list, so 'merge' below doesn't append lists
+        .map { it -> [it] }
+
+    multiplexed_sample_ids = multiplex_sample_sheet_report
+        // Extract original sample IDs from sample sheet
+        .splitCsv(header: true, sep: '\t')
+        .map { row -> row.SampleID } // No output if no 'SampleID' column
+        .toList() // [] if no 'SampleID' column
+        // Wrap list in list, so 'merge' below doesn't append lists
+        .map { it -> [it] }
+
+    multiplexed_sample_ids
+        .merge(demultiplexed_sample_ids)
+        .map { a, b -> a - b}
+        .view { "Non-demultiplexed samples: ${it}" }
+}
 
 /*
 Sample-specific processes.
