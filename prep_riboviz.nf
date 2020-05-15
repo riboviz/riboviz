@@ -46,7 +46,7 @@ if (! params.containsKey('rrna_index_prefix')) {
     exit 1, "Undefined rRNA index prefix (rrna_index_prefix)"
 }
 if (params.buffer < 0) {
-    exit 1, "CDS flanking buffer (buffer) is < 0"
+    exit 1, "CDS flanking region length (buffer) is < 0"
 }
 if (params.count_threshold < 0) {
     exit 1, "Read count threshold (count_threshold) is < 0"
