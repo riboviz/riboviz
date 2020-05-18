@@ -269,6 +269,11 @@ def test_demultiplex(tmp_dir, file_format):
                                    "deplex",
                                    fastq.FASTQ_FORMAT.format(tag))
         fastq.equal_fastq(expected_fq, actual_fq)
+    # The definition of the simulated data means that Tag3 has no
+    # matches, as Tag0|1|2 will match any barcodes first. Check
+    # there is no Tag3-related output file.
+    assert not os.path.exists(os.path.join(tmp_dir,
+                                           file_format.lower().format("Tag3")))
 
 
 @pytest.mark.parametrize("file_format",
@@ -331,3 +336,8 @@ def test_demultiplex_gz(tmp_dir, file_format):
             with open(actual_fq, "wb") as fw:
                 shutil.copyfileobj(fr, fw)
         fastq.equal_fastq(expected_fq, actual_fq)
+    # The definition of the simulated data means that Tag3 has no
+    # matches, as Tag0|1|2 will match any barcodes first. Check
+    # there is no Tag3-related output file.
+    assert not os.path.exists(os.path.join(tmp_dir,
+                                           gz_fmt.lower().format("Tag3")))

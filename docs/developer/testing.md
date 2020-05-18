@@ -23,7 +23,7 @@ The test suite accepts the following command-line parameters:
 
 If the configuration specifies samples (`fq_files`) then `--check-index-tmp` can be used.
 
-If the configuration specifies multiplexed samples (`multiplex_fq_files) then `--check-index-tmp` cannot be used. The regression test module does not implement support for validating temporary files produced for worklows including demultiplexing. For sample-specific output files, each sample-specific output file is only validated if the directory with the expected results has a corresponding output file for the sample. This is because the sample names for the tests are derived from the sample sheet file (`sample_sheet`) and it can't be guaranteed that a sample in the sample sheet will yield corresponding sample files post-demultiplexing.
+If the configuration specifies multiplexed samples (`multiplex_fq_files`) then `--check-index-tmp` cannot be used. The regression test module does not implement support for validating temporary files produced for worklows including demultiplexing. For sample-specific output files, each sample-specific output file is only validated if the directory with the expected results has a corresponding output file for the sample. This is because the sample names for the tests are derived from the sample sheet file (`sample_sheet`) and it can't be guaranteed that a sample in the sample sheet will yield corresponding sample files post-demultiplexing.
 
 As the expected data directories and those with the data to be tested may vary in their paths the following approach is used:
 
