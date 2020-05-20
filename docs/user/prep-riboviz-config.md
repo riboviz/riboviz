@@ -74,12 +74,12 @@ For processing multiplexed FASTQ files, a sample sheet (tab-separated values wit
 | `is_test_run` | `TRUE` or `FALSE`, is this a test run? (unused) |
 | `rpf` | `TRUE` or `FALSE`, is the dataset an RPF or mRNA dataset? |
 | `is_riboviz_gff` | `TRUE` or `FALSE`, does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3? |
-| `features_file` | Features to correlate with ORFs (tab-separated values file) |
+| `features_file` | Features to correlate with ORFs (tab-separated values file)  (optional) |
 | `do_pos_sp_nt_freq` | `TRUE` or `FALSE`, calculate position-specific nucleotide freqeuency? |
-| `t_rna_file` | tRNA estimates file (tab-separated values file) |
-| `codon_positions_file` | Position of codons within each gene (RData file) |
+| `t_rna_file` | tRNA estimates file (tab-separated values file)  (optional) |
+| `codon_positions_file` | Position of codons within each gene (RData file)  (optional) |
 | `count_threshold` | Remove genes with a read count below this threshold, when generating statistics and figures |
-| `asite_disp_length_file` | Summary of read frame displacement from 5' end to A-site for each read length based on "standard" yeast data from early ribosome profiling papers (tab-separated values file) |
+| `asite_disp_length_file` | Summary of read frame displacement from 5' end to A-site for each read length based on "standard" yeast data from early ribosome profiling papers (tab-separated values file) (optional) |
 | `count_reads` | `TRUE` or `FALSE`, scan input, temporary and output files and produce counts of reads in each FASTQ, SAM, and BAM file processed? |
 
 ### Examples
@@ -113,3 +113,5 @@ If both `fq_files` and `multiplex_fq_files` parameters are provided then `prep_r
 If `fq_files` are provided then `umi_regexp` should extract only UMIs (i.e. it should contain `<umi>` elements only).
 
 If `multiplex_fq_files` is provided then `umi_regexp` should extract both barcodes and UMIs (i.e. it should contain both `<cell>` and `<umi>` elements).
+
+While both `codon_positions_file` and `t_rna_file` are optional, either both must be specified or neither must be specified.
