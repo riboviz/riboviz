@@ -115,7 +115,7 @@ def helpMessage() {
     * 't_rna_file': tRNA estimates file (tab-separated values file
       with 'AA', 'Codon', 'tRNA', 'tAI', 'Microarray', 'RNA.seq'
       columns)  (optional)
-    * While both `codon_features_file` and `t_rna_file` are optional
+    * While both `codon_positions_file` and `t_rna_file` are optional
       either both must be specified or neither must be specified.
 
     Statistics and figure generation parameters:
