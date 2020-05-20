@@ -190,7 +190,9 @@ Finished processing sample: WT3AT
 Workflow finished! (OK)
 ```
 
-Each sample-specific process is labelled with the sample ID. The `collateTpms` process will display the names of all the samples that are collated.
+Each sample-specific process is labelled with the sample ID, indexing processes are labelled with the index prefix, and multiplexed file-specific processes (not shown above, but an example is below) are labelled with the file name (minus extension)
+
+The `collateTpms` process displays the names of all the samples that are collated.
 
 ---
 
