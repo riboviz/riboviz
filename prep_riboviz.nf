@@ -958,4 +958,6 @@ process countReads {
         """
 }
 
-read_counts_tsv.view { "Finished!" }
+workflow.onComplete {
+    println "Workflow finished! (${workflow.success ? 'OK' : 'failed'})"
+}
