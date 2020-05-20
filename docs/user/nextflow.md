@@ -145,13 +145,15 @@ The Nextflow workflow uses the same YAML configuration file as `riboviz.tools.pr
 Run:
 
 ```console
-$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE>  -ansi-log false
+$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE> -ansi-log false
 ```
 
 where:
 
 * `<CONFIG_FILE>`: path to a YAML configuration file.
 * `-ansi-log false`: requests that each invocation of a Nextflow task is displayed on a separate line.
+
+Configuration parameters can also be provided via the command-line in the form `--<PARAMETER>=<VALUE>` (for example `--make_bedgraph=FALSE`).
 
 For example, to run the vignette:
 
@@ -193,6 +195,18 @@ Workflow finished! (OK)
 Each sample-specific process is labelled with the sample ID, indexing processes are labelled with the index prefix, and multiplexed file-specific processes (not shown above, but an example is below) are labelled with the file name (minus extension)
 
 The `collateTpms` process displays the names of all the samples that are collated.
+
+---
+
+## Help
+
+Usage and configuration information can be viewed via use of the `--help` flag:
+
+```console
+$ nextflow run prep_riboviz.nf --help
+```
+
+Note that `--help` displays workflow help, whereas `-help` display's the `nextflow run` command's in-built help.
 
 ---
 

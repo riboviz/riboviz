@@ -6,138 +6,159 @@ import org.yaml.snakeyaml.Yaml
 ===================================
 RiboViz ribosome profiling workflow
 ===================================
-
-Running
--------
-
-nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml
-
-where '<CONFIG>' is a YAML configuration file. The YAML configuration
-parameters are as follows (all are mandatory unless stated).
-
-Configuration
--------------
-
-Organism data:
-
-* 'orf_fasta_file': Transcript sequences file containing both coding
-  regions and flanking regions (FASTA file)
-* 'orf_gff_file': Matched genome feature file, specifying coding
-  sequences locations (start and stop coordinates) within the
-  transcripts (GTF/GFF3 file)
-* 'rrna_fasta_file': Ribosomal rRNA and other contaminant sequences to
-  avoid aligning to (FASTA file)
-
-Ribosome profiling data:
-
-* 'dir_in': Input directory.
-* Either:
-  - 'fq_files': Dictionary of FASTQ files to be processed, relative to
-     '<dir_in>'. Each item consists of a sample name with a file
-     name value (e.g. 'WT3AT: SRR1042864_s1mi.fastq.gz')
-* Or:
-  - 'multiplex_fq_files': List with a multiplexed FASTQ file,
-    relative to '<dir_in>'. If this is provided then the 'fq_files'
-    parameter must not be present in the configuration and the
-    'sample_sheet' parameter must be present.
-  - 'sample_sheet': A sample sheet, relative to '<dir_in>', mandatory
-    if 'multiplex_fq_files' is used (tab-separated values file with,
-    at least, 'SampleID' and 'TagRead' (barcode) columns)
-* If neither or both of 'fq_files' and 'multiplex_fq_files' parameters
-  are provided then the workflow will exit.
-
-Indexing:
-
-* 'build_indices': 'TRUE' or 'FALSE', rebuild indices from FASTA
-  files? (default 'TRUE')
-* 'orf_index_prefix': Prefix for ORF index files, relative to
-  '<dir_index>' .
-* 'rrna_index_prefix': Prefix for rRNA index files, relative to
-  '<dir_index>'.
-* 'dir_index': Directory to write indexed files to (default 'index')
-
-Outputs:
-
-* 'dir_tmp': Directory to write temporary files to (default 'tmp')
-* 'dir_out': Directory to write temporary files to (default 'output')
-
-Adapter trimming:
-
-* 'adapters': Illumina sequencing adapter(s) to remove.
-
-Barcode and UMI extraction, deduplication, demultiplexing:
-
-* 'extract_umis': 'TRUE' or 'FALSE', extract UMIs after adapter
-  trimming? (default 'FALSE')
-* 'umi_regexp': UMI-tools-compliant regular expression to extract
-  barcodes and UMIs. For details on the regular expression format, see
-  UMI-tools documentation on Barcode extraction
-  https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction.
-  Only required if 'extract_umis' is 'TRUE'.
-  - If 'fq_files' are provided then 'umi_regexp' should extract only
-    UMIs (i.e. it should contain '<umi>' elements only).
-  - If 'multiplex_fq_files' is provided then 'umi_regexp' should
-    extract both barcodes and UMIs (i.e. it should contain both
-    '<cell>' and '<umi>' elements).
-* 'dedup_umis': 'TRUE' or 'FALSE', deduplicate reads using UMI-tools?
-  (default 'FALSE')
-* 'group_umis': 'TRUE' or 'FALSE', summarise UMI groups both pre- and
-  post-deduplication, using UMI-tools? Useful for debugging (default
-  'FALSE')
-* If 'dedup_umis' is 'TRUE' but 'extract_umis' is 'FALSE' then a
-  warning will be displayed, but processing will continue.
-
-Statistics and figure generation input files:
-
-* 'asite_disp_length_file': Summary of read frame displacement from 5'
-  end to A-site for each read length based on 'standard' yeast data
-  from early ribosome profiling papers (tab-separated values file with
-  'read_length', 'asite_disp' columns)
-* 'codon_positions_file': Position of codons within each gene (RData
-  file)
-* 'features_file': Features to correlate with ORFs (tab-separated
-  values file with 'ORF', 'Length_log10', 'uATGs', 'FE_atg', 'FE_cap',
-  'utr', 'utr_gc', 'polyA' columns)
-* 't_rna_file': tRNA estimates file (tab-separated values file with
-  'AA', 'Codon', 'tRNA', 'tAI', 'Microarray', 'RNA.seq' columns)
-
-Statistics and figure generation parameters:
-
-* 'buffer': Length of flanking region around the CDS (default 250)
-* 'count_reads': 'TRUE' or 'FALSE', scan input, temporary and output
-  files and produce counts of reads in each FASTQ, SAM, and BAM file
-  processed? (default: 'TRUE')
-* 'count_threshold': Remove genes with a read count below this
-  threshold, when generating statistics and figures (default 1)
-* 'dataset': Human-readable name of the dataset (default 'dataset')
-* 'do_pos_sp_nt_freq': 'TRUE' or 'FALSE', calculate position-specific
-  nucleotide freqeuency? (default 'TRUE')
-* 'is_riboviz_gff': 'TRUE' or 'FALSE', does the GFF file contain 3
-  elements per gene - UTR5, CDS, and UTR3? (default 'TRUE')
-* 'make_bedgraph': 'TRUE' or 'FALSE', output bedgraph data files in
-  addition to H5 files? (default 'TRUE')
-* 'max_read_length': Maximum read length in H5 output (default 50)
-* 'min_read_length': Minimum read length in H5 output (default 10)
-* 'primary_id': Primary gene IDs to access the data (YAL001C, YAL003W,
-  etc.) (default 'Name')
-* 'rpf': 'TRUE' or 'FALSE', is the dataset an RPF or mRNA dataset?
-  (default 'TRUE')
-* 'secondary_id': Secondary gene IDs to access the data (COX1, EFB1,
-   etc. or 'NULL') (default 'NULL')
-* 'stop_in_cds': 'TRUE' or 'FALSE', are stop codons part of the CDS
-  annotations in GFF? (default ('FALSE')
-
-General:
-
-* 'num_processes': Number of processes to parallelize over, used by
-  specific steps in the workflow (default 1)
-
-Notes
-------
-
-Optional inputs follow pattern
-https://github.com/nextflow-io/patterns/blob/master/optional-input.nf.
 */
+
+def helpMessage() {
+    log.info """
+
+    Usage
+    -----
+
+        nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml [--help]
+
+    where '<CONFIG>' is a YAML configuration file. The YAML
+    configuration parameters are as follows (all are mandatory unless
+    stated). 
+
+    Configuration parameters can also be provided via the
+    command-line in the form `--<PARAMETER>=<VALUE>` (for example
+    `--make_bedgraph=FALSE`).
+
+    '--help' displays this help information and exits.
+
+    Configuration
+    -------------
+
+    Organism data:
+
+    * 'orf_fasta_file': Transcript sequences file containing both
+      coding regions and flanking regions (FASTA file)
+    * 'orf_gff_file': Matched genome feature file, specifying coding
+      sequences locations (start and stop coordinates) within the
+      transcripts (GTF/GFF3 file)
+    * 'rrna_fasta_file': Ribosomal rRNA and other contaminant
+      sequences to avoid aligning to (FASTA file)
+
+    Ribosome profiling data:
+
+    * 'dir_in': Input directory.
+    * Either:
+      - 'fq_files': Dictionary of FASTQ files to be processed,
+        relative to '<dir_in>'. Each item consists of a sample name
+        with a file name value
+        (e.g. 'WT3AT: SRR1042864_s1mi.fastq.gz')
+    * Or:
+      - 'multiplex_fq_files': List with a multiplexed FASTQ file,
+        relative to '<dir_in>'. If this is provided then the
+        'fq_files' parameter must not be present in the configuration
+        and the 'sample_sheet' parameter must be present.
+      - 'sample_sheet': A sample sheet, relative to '<dir_in>',
+        mandatory if 'multiplex_fq_files' is used (tab-separated
+        values file with, at least, 'SampleID' and 'TagRead' (barcode)
+        columns)
+    * If neither or both of 'fq_files' and 'multiplex_fq_files'
+      parameters are provided then the workflow will exit.
+
+    Indexing:
+
+    * 'build_indices': 'TRUE' or 'FALSE', rebuild indices from FASTA
+      files? (default 'TRUE')
+    * 'orf_index_prefix': Prefix for ORF index files, relative to
+      '<dir_index>' .
+    * 'rrna_index_prefix': Prefix for rRNA index files, relative to
+      '<dir_index>'.
+    * 'dir_index': Directory to write indexed files to (default 'index')
+
+    Outputs:
+
+    * 'dir_tmp': Directory to write temporary files to (default 'tmp')
+    * 'dir_out': Directory to write temporary files to
+      (default 'output')
+
+    Adapter trimming:
+
+    * 'adapters': Illumina sequencing adapter(s) to remove.
+
+    Barcode and UMI extraction, deduplication, demultiplexing:
+
+    * 'extract_umis': 'TRUE' or 'FALSE', extract UMIs after adapter
+      trimming? (default 'FALSE')
+    * 'umi_regexp': UMI-tools-compliant regular expression to extract
+      barcodes and UMIs. For details on the regular expression format,
+      see UMI-tools documentation on Barcode extraction
+      https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction.
+      Only required if 'extract_umis' is 'TRUE'.
+      - If 'fq_files' are provided then 'umi_regexp' should extract
+        only UMIs (i.e. it should contain '<umi>' elements only).
+      - If 'multiplex_fq_files' is provided then 'umi_regexp' should
+        extract both barcodes and UMIs (i.e. it should contain both
+        '<cell>' and '<umi>' elements).
+    * 'dedup_umis': 'TRUE' or 'FALSE', deduplicate reads using
+      UMI-tools? (default 'FALSE')
+    * 'group_umis': 'TRUE' or 'FALSE', summarise UMI groups both pre-
+      and post-deduplication, using UMI-tools? Useful for debugging
+      (default 'FALSE')
+    * If 'dedup_umis' is 'TRUE' but 'extract_umis' is 'FALSE' then a
+      warning will be displayed, but processing will continue.
+
+    Statistics and figure generation input files:
+
+    * 'asite_disp_length_file': Summary of read frame displacement
+      from 5' end to A-site for each read length based on 'standard'
+      yeast data from early ribosome profiling papers (tab-separated
+      values file with 'read_length', 'asite_disp' columns) (optional)
+    * 'codon_positions_file': Position of codons within each gene
+      (RData file) (optional)
+    * 'features_file': Features to correlate with ORFs (tab-separated
+      values file with 'ORF', 'Length_log10', 'uATGs', 'FE_atg',
+      'FE_cap', 'utr', 'utr_gc', 'polyA' columns) (optional)
+    * 't_rna_file': tRNA estimates file (tab-separated values file
+      with 'AA', 'Codon', 'tRNA', 'tAI', 'Microarray', 'RNA.seq'
+      columns)  (optional)
+    * While both `codon_features_file` and `t_rna_file` are optional
+      either both must be specified or neither must be specified.
+
+    Statistics and figure generation parameters:
+    
+    * 'buffer': Length of flanking region around the CDS (default 250)
+    * 'count_reads': 'TRUE' or 'FALSE', scan input, temporary and
+      output files and produce counts of reads in each FASTQ, SAM, and
+      BAM file  processed? (default: 'TRUE')
+    * 'count_threshold': Remove genes with a read count below this
+      threshold, when generating statistics and figures (default 1)
+    * 'dataset': Human-readable name of the dataset (default
+       'dataset')
+    * 'do_pos_sp_nt_freq': 'TRUE' or 'FALSE', calculate
+      position-specific nucleotide freqeuency? (default 'TRUE')
+    * 'is_riboviz_gff': 'TRUE' or 'FALSE', does the GFF file contain 3
+      elements per gene - UTR5, CDS, and UTR3? (default 'TRUE')
+    * 'make_bedgraph': 'TRUE' or 'FALSE', output bedgraph data files in
+      addition to H5 files? (default 'TRUE')
+    * 'max_read_length': Maximum read length in H5 output (default 50)
+    * 'min_read_length': Minimum read length in H5 output (default 10)
+    * 'primary_id': Primary gene IDs to access the data (YAL001C,
+      YAL003W, etc.) (default 'Name')
+    * 'rpf': 'TRUE' or 'FALSE', is the dataset an RPF or mRNA dataset?
+      (default 'TRUE')
+    * 'secondary_id': Secondary gene IDs to access the data (COX1,
+      EFB1, etc. or 'NULL') (default 'NULL')
+    * 'stop_in_cds': 'TRUE' or 'FALSE', are stop codons part of the
+      CDS annotations in GFF? (default ('FALSE')
+
+    General:
+
+    * 'num_processes': Number of processes to parallelize over, used
+      by specific steps in the workflow (default 1)
+    """.stripIndent()
+}
+
+// Help message implementation, following
+// https://github.com/nf-core/rnaseq/blob/master/main.nf (MIT License)
+params.help = false
+if (params.help) {
+    helpMessage()
+    exit 0
+}
 
 /*
 Initialise and validate configuration.
@@ -308,6 +329,8 @@ orf_gff = Channel.fromPath(params.orf_gff_file,
 // onto generate_stats_figs.R and no attempt is made to use them. They
 // are a side-effect of using the Nextflow pattern for optional
 // inputs.
+// Optional inputs implementation follows pattern
+// https://github.com/nextflow-io/patterns/blob/master/optional-input.nf.
 if (params.containsKey('t_rna_file')
     && params.containsKey('codon_positions_file')) {
     t_rna_tsv = Channel.fromPath(params.t_rna_file,
@@ -807,6 +830,8 @@ process bamToH5 {
         """
 }
 
+// Optional inputs implementation follows pattern
+// https://github.com/nextflow-io/patterns/blob/master/optional-input.nf.
 process generateStatsFigs {
     tag "${sample_id}"
     publishDir "${params.dir_out}/${sample_id}", \
