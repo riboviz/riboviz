@@ -217,10 +217,9 @@ if (params.extract_umis) {
 Validate input files.
 */
 
-num_samples = 0
-sample_files = [:]
-multiplex_files = [:]
-multiplex_sample_sheet = Channel.empty()
+sample_id_fq = [:]
+multiplex_id_fq = [:]
+multiplex_sample_sheet_tsv = Channel.empty()
 is_multiplexed = false
 if (! params.containsKey('dir_in')) {
     exit 1, "Input directory (dir_in) is undefined"
@@ -232,43 +231,42 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
 } else if (params.fq_files) {
     // Filter 'params.fq_files' down to those samples that exist.
     for (entry in params.fq_files) {
-        sample_file = file("${params.dir_in}/${entry.value}")
-        if (sample_file.exists()) {
-            sample_files[entry.key] = sample_file
-	    num_samples++
+        sample_fq = file("${params.dir_in}/${entry.value}")
+        if (sample_fq.exists()) {
+            sample_id_fq[entry.key] = sample_fq
         } else {
             println("No such file ($entry.key): $entry.value")
         }
     }
-    if (! sample_files) {
+    if (! sample_id_fq) {
         exit 1, "None of the defined sample files (fq_files) exist"
     }
 } else {
     // Filter 'params.multiplex_fq_files' down to those files that exist.
     for (entry in params.multiplex_fq_files) {
-        multiplex_file = file("${params.dir_in}/${entry}")
-        if (multiplex_file.exists()) {
+        multiplex_fq = file("${params.dir_in}/${entry}")
+        if (multiplex_fq.exists()) {
             // Use file base name as key, ensuring that if file
 	    // has extension '.fastq.gz' or '.fq.gz' then both
 	    // extensions are removed from the name.
-            multiplex_file_name = multiplex_file.baseName
-            if (multiplex_file_name.endsWith(".fastq")) {
-                multiplex_file_name = multiplex_file_name - '.fastq'
-            } else if (multiplex_file_name.endsWith(".fq")) {
-                multiplex_file_name = multiplex_file_name - '.fq'
+            multiplex_id = multiplex_fq.baseName
+            if (multiplex_id.endsWith(".fastq")) {
+                multiplex_id = multiplex_id - '.fastq'
+            } else if (multiplex_id.endsWith(".fq")) {
+                multiplex_id = multiplex_id - '.fq'
             }
-            multiplex_files[multiplex_file_name] = multiplex_file
+            multiplex_id_fq[multiplex_id] = multiplex_fq
         } else {
             println("No such file: $entry")
         }
     }
-    if (! multiplex_files) {
+    if (! multiplex_id_fq) {
         exit 1, "None of the defined multiplexed files (multiplex_fq_files) exist"
     }
     if (! params.containsKey('sample_sheet')) {
         exit 1, "Undefined sample sheet (sample_sheet)"
     }
-    multiplex_sample_sheet = Channel.fromPath(
+    multiplex_sample_sheet_tsv = Channel.fromPath(
         "${params.dir_in}/${params.sample_sheet}",
         checkIfExists: true)
     is_multiplexed = true
@@ -278,11 +276,11 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
 // 'params.multiplex_fq_files' to serve as a configuration file for
 // riboviz.tools.count_reads. There is no way to get the location
 // of the YAML configuration file itself (i.e. the value of
-// '-param-file' from within Nextflow.
-Map data_files_config = [:]
-data_files_config.fq_files = params.fq_files
-data_files_config.multiplex_fq_files = params.multiplex_fq_files
-data_files_config_yaml = new Yaml().dump(data_files_config)
+// '-param-file') from within Nextflow so this is a workaround.
+Map ribosome_fqs = [:]
+ribosome_fqs.fq_files = params.fq_files
+ribosome_fqs.multiplex_fq_files = params.multiplex_fq_files
+ribosome_fqs_yaml = new Yaml().dump(ribosome_fqs)
 
 // Non-sample-specific input files.
 if (! params.containsKey('rrna_fasta_file')) {
@@ -312,33 +310,33 @@ orf_gff = Channel.fromPath(params.orf_gff_file,
 // inputs.
 if (params.containsKey('t_rna_file')
     && params.containsKey('codon_positions_file')) {
-    t_rna_file = Channel.fromPath(params.t_rna_file,
-                                  checkIfExists: true)
-    codon_positions_file = Channel.fromPath(params.codon_positions_file, 
-                                            checkIfExists: true)
+    t_rna_tsv = Channel.fromPath(params.t_rna_file,
+                                 checkIfExists: true)
+    codon_positions_rdata = Channel.fromPath(params.codon_positions_file, 
+                                             checkIfExists: true)
     is_t_rna_and_codon_positions_file = true
 } else if ((! params.containsKey('t_rna_file'))
            && (! params.containsKey('codon_positions_file'))) {
-    t_rna_file = file("Missing_t_rna_file")
-    codon_positions_file = file("Missing_codon_positions_file")
+    t_rna_tsv = file("Missing_t_rna_file")
+    codon_positions_rdata = file("Missing_codon_positions_file")
     is_t_rna_and_codon_positions_file = false
 } else {
     exit 1, "Either both tRNA estimates (t_rna_file) and codon positions (codon_positions_file) must be defined or neither must be defined"
 }
 if (params.containsKey('features_file')) {
-    features_file = Channel.fromPath(params.features_file,
-                                     checkIfExists: true)
+    features_tsv = Channel.fromPath(params.features_file,
+                                    checkIfExists: true)
     is_features_file = true
 } else {
-    features_file = file("Missing_features_file")
+    features_tsv = file("Missing_features_file")
     is_features_file = false
 }
 if (params.containsKey('asite_disp_length_file')) {
-    asite_disp_length_file = Channel.fromPath(params.asite_disp_length_file,
-                                              checkIfExists: true)
+    asite_disp_length_txt = Channel.fromPath(params.asite_disp_length_file,
+                                             checkIfExists: true)
     is_asite_disp_length_file = true
 } else {
-    asite_disp_length_file = file("Missing_aside_disp_length_file")
+    asite_disp_length_txt = file("Missing_aside_disp_length_file")
     is_asite_disp_length_file = false
 }
 
@@ -347,22 +345,22 @@ Indexing.
 */ 
 
 // Split channels for use in multiple downstream processes.
-orf_fasta.into { orf_fasta_index; orf_fasta_generate_stats_figs }
-orf_gff.into { orf_gff_bam_to_h5; orf_gff_generate_stats_figs }
+orf_fasta.into { build_indices_orf_fasta; generate_stats_figs_orf_fasta }
+orf_gff.into { bam_to_h5_orf_gff; generate_stats_figs_orf_gff }
 
 process buildIndicesrRNA {
     tag "${params.rrna_index_prefix}"
     publishDir "${params.dir_index}", mode: 'copy', overwrite: true
     input:
-        file fasta from rrna_fasta
+        file rrna_fasta from rrna_fasta
     output:
-        file "${params.rrna_index_prefix}.*.ht2" into rrna_indices
+        file "${params.rrna_index_prefix}.*.ht2" into rrna_index_ht2
     when:
         params.build_indices
     shell:
         """
         hisat2-build --version
-        hisat2-build ${fasta} ${params.rrna_index_prefix}
+        hisat2-build ${rrna_fasta} ${params.rrna_index_prefix}
         """
 }
 
@@ -370,15 +368,15 @@ process buildIndicesORF {
     tag "${params.orf_index_prefix}"
     publishDir "${params.dir_index}", mode: 'copy', overwrite: true
     input:
-        file fasta from orf_fasta_index
+        file orf_fasta from build_indices_orf_fasta
     output:
-        file "${params.orf_index_prefix}.*.ht2" into orf_indices
+        file "${params.orf_index_prefix}.*.ht2" into orf_index_ht2
     when:
         params.build_indices
     shell:
         """
         hisat2-build --version
-        hisat2-build ${fasta} ${params.orf_index_prefix}
+        hisat2-build ${orf_fasta} ${params.orf_index_prefix}
         """
 }
 
@@ -392,24 +390,26 @@ process cutAdapters {
     publishDir "${params.dir_tmp}/${sample_id}", \
         mode: 'copy', overwrite: true
     input:
-        tuple val(sample_id), file(sample_file) \
-            from sample_files.collect{ id, file -> [id, file] }
+        tuple val(sample_id), file(sample_fq) \
+            from sample_id_fq.collect{ id, file -> [id, file] }
     output:
-        tuple val(sample_id), file("trim.fq") into cut_samples
+        tuple val(sample_id), file("trim.fq") into cut_fq	
+    when:
+        ! is_multiplexed
     shell:
         """
         cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} \
-            -o trim.fq ${sample_file} -j 0
+            -o trim.fq ${sample_fq} -j 0
         """
 }
 
-// Route 'cut_samples' channel outputs depending on whether UMIs are
-// to be extracted or not.
-cut_samples.branch {
-    umi_samples: params.extract_umis
-    non_umi_samples: ! params.extract_umis
+// Route 'cut_fq' channel outputs depending on whether UMIs are to be
+// extracted or not.
+cut_fq.branch {
+    umi_fq: params.extract_umis
+    non_umi_fq: ! params.extract_umis
 }
-.set { cut_samples_branch }
+.set { cut_fq_branch }
 
 process extractUmis {
     tag "${sample_id}"
@@ -417,16 +417,16 @@ process extractUmis {
     publishDir "${params.dir_tmp}/${sample_id}", \
         mode: 'copy', overwrite: true
     input:
-        tuple val(sample_id), file(sample_file) \
-            from cut_samples_branch.umi_samples
+        tuple val(sample_id), file(sample_fq) \
+            from cut_fq_branch.umi_fq
     output:
         tuple val(sample_id), file("extract_trim.fq") \
-            into umi_extracted_samples
+            into umi_extract_fq
     when:
-        params.extract_umis
+        params.extract_umis && ! is_multiplexed
     shell:
         """
-        umi_tools extract -I ${sample_file} \
+        umi_tools extract -I ${sample_fq} \
             --bc-pattern="${params.umi_regexp}" \
             --extract-method=regex -S extract_trim.fq
         """
@@ -441,55 +441,57 @@ process cutAdaptersMultiplex {
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}", mode: 'copy', overwrite: true
     input:
-        tuple val(multiplex_id), file(multiplex_file) \
-            from multiplex_files.collect{ id, file -> [id, file] }
+        tuple val(multiplex_id), file(multiplex_fq) \
+            from multiplex_id_fq.collect{ id, file -> [id, file] }
     output:
         tuple val(multiplex_id), file("${multiplex_id}_trim.fq") \
-            into cut_multiplex
+            into cut_multiplex_fq
+    when:
+        is_multiplexed
     shell:
         """
         cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} \
-            -o ${multiplex_id}_trim.fq ${multiplex_file} -j 0
+            -o ${multiplex_id}_trim.fq ${multiplex_fq} -j 0
         """
 }
 
-// Route 'cut_multiplex' channel outputs depending on whether UMIs are
-// to be extracted or not.
-cut_multiplex.branch {
-    umi_multiplex: params.extract_umis
-    non_umi_multiplex: ! params.extract_umis
+// Route 'cut_multiplex_fq' channel outputs depending on whether UMIs
+// are to be extracted or not.
+cut_multiplex_fq.branch {
+    umi_fq: params.extract_umis
+    non_umi_fq: ! params.extract_umis
 }
-.set { cut_multiplex_branch }
+.set { cut_multiplex_fq_branch }
 
 process extractUmisMultiplex {
     tag "${multiplex_id}"
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}", mode: 'copy', overwrite: true
     input:
-        tuple val(multiplex_id), file(multiplex_file) \
-            from cut_multiplex_branch.umi_multiplex
+        tuple val(multiplex_id), file(multiplex_fq) \
+            from cut_multiplex_fq_branch.umi_fq
     output:
         tuple val(multiplex_id), file("${multiplex_id}_extract_trim.fq") \
-            into umi_extracted_multiplex
+            into umi_extract_multiplex_fq
     when:
-        params.extract_umis
+        params.extract_umis && is_multiplexed
     shell:
         """
-        umi_tools extract -I ${multiplex_file} \
+        umi_tools extract -I ${multiplex_fq} \
             --bc-pattern="${params.umi_regexp}" \
             --extract-method=regex -S ${multiplex_id}_extract_trim.fq
         """
 }
 
 // Combine channels for downstream processing. By definition of
-// 'cut_multiplex.branch' only one of the input channels will have
+// 'cut_multiplex_fq.branch' only one of the input channels will have
 // content.
-trimmed_multiplex = cut_multiplex_branch.non_umi_multiplex.mix(
-    umi_extracted_multiplex)
+trimmed_multiplex_fq = cut_multiplex_fq_branch.non_umi_fq
+    .mix(umi_extract_multiplex_fq)
 
 // Split channel for use in multiple downstream processes.
-multiplex_sample_sheet.into {
-    multiplex_sample_sheet_report; multiplex_sample_sheet_demultiplex
+multiplex_sample_sheet_tsv.into {
+    report_multiplex_sample_sheet_tsv; deplex_multiplex_sample_sheet_tsv
 }
 
 process demultiplex {
@@ -502,24 +504,24 @@ process demultiplex {
 	// 'workflow.projectDir' triggering reexecution of this
 	// process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
-        tuple val(multiplex_id), file(multiplex_file) from trimmed_multiplex
-        each file(sample_sheet) from multiplex_sample_sheet_demultiplex
+        tuple val(multiplex_id), file(multiplex_fq) from trimmed_multiplex_fq
+        each file(sample_sheet_tsv) from deplex_multiplex_sample_sheet_tsv
     output:
         tuple val(multiplex_id), file("num_reads.tsv") \
-                into demultiplexed_num_reads_tsv
-        file("*.f*") into demultiplexed_output_fq
+                into demultiplex_num_reads_tsv
+        file("*.f*") into demultiplex_fq
     shell:
         """
         python -m riboviz.tools.demultiplex_fastq \
-            -1 ${multiplex_file} -s ${sample_sheet} -o . -m 2
+            -1 ${multiplex_fq} -s ${sample_sheet_tsv} -o . -m 2
         """
 }
 
-// 'demultiplexed_output_fq' outputs a single list with all the output
+// 'demultiplex_fq' outputs a single list with all the output
 // files. Extract sample IDs from file basenames, filter out
-// 'Unassigned' and output tuples of sample IDs and file names as
+// 'Unassigned' and output tuples of sample IDs and file names as 
 // separate items onto a new channel.
-demultiplexed_output_fq
+demultiplex_fq
     .flatten()
     // Use file basename as sample ID.
     .map { [it.baseName, it] }
@@ -528,18 +530,18 @@ demultiplexed_output_fq
     .map { n, f -> [n.endsWith(".fq") ? n - ".fq" : n, f] }
     .map { n, f -> [n.endsWith(".fastq") ? n - ".fastq" : n, f] }
     .filter { n, f -> n != "Unassigned" }
-    .into { demultiplexed_samples_report; demultiplexed_samples_fq }
+    .into { report_demultiplex_samples_fq; demultiplex_samples_fq }
 
 if (is_multiplexed) {
 
-    demultiplexed_sample_ids = demultiplexed_samples_report
+    demultiplex_sample_ids = report_demultiplex_samples_fq
         .map { n, f -> n }
         .toList() // [] if none
         .view { "Demultiplexed samples: ${it}"}
         // Wrap list in list, so 'merge' below doesn't append lists
         .map { it -> [it] }
 
-    multiplexed_sample_ids = multiplex_sample_sheet_report
+    multiplex_sample_sheet_ids = report_multiplex_sample_sheet_tsv
         // Extract original sample IDs from sample sheet
         .splitCsv(header: true, sep: '\t')
         .map { row -> row.SampleID } // No output if no 'SampleID' column
@@ -547,8 +549,8 @@ if (is_multiplexed) {
         // Wrap list in list, so 'merge' below doesn't append lists
         .map { it -> [it] }
 
-    multiplexed_sample_ids
-        .merge(demultiplexed_sample_ids)
+    multiplex_sample_sheet_ids
+        .merge(demultiplex_sample_ids)
         .map { a, b -> a - b}
         .view { "Non-demultiplexed samples: ${it}" }
 }
@@ -560,10 +562,11 @@ Common to both sample files (fq_files) and demultiplexed files.
 */
 
 // Combine channels for downstream processing. By definition of
-// 'cut_samples.branch' only one of the input channels will have
-// content.
-trimmed_samples = cut_samples_branch.non_umi_samples.mix(
-    umi_extracted_samples).mix(demultiplexed_samples_fq)
+// upstream conditions and processes, only one of the channels
+// will have content.
+trimmed_fq = cut_fq_branch.non_umi_fq
+    .mix(umi_extract_fq)
+    .mix(demultiplex_samples_fq)
 
 process hisat2rRNA {
     tag "${sample_id}"
@@ -571,17 +574,17 @@ process hisat2rRNA {
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(fastq) from trimmed_samples
-        each file(indices) from rrna_indices
+        tuple val(sample_id), file(sample_fq) from trimmed_fq
+        each file(rrna_index_ht2) from rrna_index_ht2
     output:
-        tuple val(sample_id), file("nonrRNA.fq") into non_rrna_fqs
-        tuple val(sample_id), file("rRNA_map.sam") into rrna_map_sams
+        tuple val(sample_id), file("nonrRNA.fq") into non_rrna_fq
+        tuple val(sample_id), file("rRNA_map.sam") into rrna_map_sam
     shell:
         """
         hisat2 --version
         hisat2 -p ${params.num_processes} -N 1 -k 1 \
             --un nonrRNA.fq -x ${params.rrna_index_prefix} \
-            -S rRNA_map.sam -U ${fastq}
+            -S rRNA_map.sam -U ${sample_fq}
         """
 }
 
@@ -591,18 +594,18 @@ process hisat2ORF {
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(fastq) from non_rrna_fqs
-        each file(indices) from orf_indices
+        tuple val(sample_id), file(sample_fq) from non_rrna_fq
+        each file(orf_index_ht2) from orf_index_ht2
     output:
-        tuple val(sample_id), file("unaligned.fq") into unaligned_fqs
-        tuple val(sample_id), file("orf_map.sam") into orf_map_sams
+        tuple val(sample_id), file("unaligned.fq") into unaligned_fq
+        tuple val(sample_id), file("orf_map.sam") into orf_map_sam
     shell:
         """
         hisat2 --version
         hisat2 -p ${params.num_processes} -k 2 \
             --no-spliced-alignment --rna-strandness F --no-unal \
             --un unaligned.fq -x ${params.orf_index_prefix} \
-            -S orf_map.sam -U ${fastq}
+            -S orf_map.sam -U ${sample_fq}
         """
 }
 
@@ -616,16 +619,16 @@ process trim5pMismatches {
 	// 'workflow.projectDir' triggering reexecution of this
 	// process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
-        tuple val(sample_id), file(sam) from orf_map_sams
+        tuple val(sample_id), file(sample_sam) from orf_map_sam
     output:
         tuple val(sample_id), file("orf_map_clean.sam") \
-            into clean_orf_map_sams
+            into trim_orf_map_sam
         tuple val(sample_id), file("trim_5p_mismatch.tsv") \
-            into trim_summary_tsvs
+            into trim_summary_tsv
     shell:
         """
         python -m riboviz.tools.trim_5p_mismatch -m 2 \
-            -i ${sam} -o orf_map_clean.sam -s trim_5p_mismatch.tsv
+            -i ${sample_sam} -o orf_map_clean.sam -s trim_5p_mismatch.tsv
         """
 }
 
@@ -635,30 +638,30 @@ process samViewSort {
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(sam) from clean_orf_map_sams
+        tuple val(sample_id), file(sample_sam) from trim_orf_map_sam
     output:
         tuple val(sample_id), file("orf_map_clean.bam"), \
-            file("orf_map_clean.bam.bai") into orf_map_bams
+            file("orf_map_clean.bam.bai") into orf_map_bam
     shell:
         """
         samtools --version
-        samtools view -b ${sam} | samtools sort \
+        samtools view -b ${sample_sam} | samtools sort \
             -@ ${params.num_processes} -O bam -o orf_map_clean.bam -
         samtools index orf_map_clean.bam
         """
 }
 
-// Route "orf_map_bams" channel outputs depending on whether UMIs are
+// Route "orf_map_bam" channel outputs depending on whether UMIs are
 // to be deduplicated or not.
-orf_map_bams.branch {
-    umi_bams: params.dedup_umis
-    umi_free_bams: ! params.dedup_umis
+orf_map_bam.branch {
+    dedup_bam: params.dedup_umis
+    non_dedup_bam: ! params.dedup_umis
 }
-.set { orf_map_bams_branch }
+.set { orf_map_bam_branch }
 
 // Split channel for use in multiple downstream processes.
-orf_map_bams_branch.umi_bams.into {
-    pre_dedup_group_bams; pre_dedup_bams
+orf_map_bam_branch.dedup_bam.into {
+    pre_dedup_group_bam; pre_dedup_bam
 }
 
 process groupUmisPreDedup {
@@ -667,16 +670,16 @@ process groupUmisPreDedup {
     publishDir "${params.dir_tmp}/${sample_id}", \
         mode: 'copy', overwrite: true
     input:
-        tuple val(sample_id), file(bam), file(bam_bai) \
-            from pre_dedup_group_bams
+        tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
+            from pre_dedup_group_bam
     output:
         tuple val(sample_id), file("pre_dedup_groups.tsv") \
-            into pre_dedup_groups_tsv
+            into pre_dedup_group_tsv
     when:
         params.dedup_umis && params.group_umis
     shell:
         """
-        umi_tools group -I ${bam} --group-out pre_dedup_groups.tsv
+        umi_tools group -I ${sample_bam} --group-out pre_dedup_groups.tsv
         """
 }
 
@@ -686,25 +689,26 @@ process dedupUmis {
     publishDir "${params.dir_tmp}/${sample_id}", \
         mode: 'copy', overwrite: true
     input:
-        tuple val(sample_id), file(bam), file(bam_bai) \
-            from pre_dedup_bams
+        tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
+            from pre_dedup_bam
     output:
         tuple val(sample_id), file("dedup.bam"), \
-            file("dedup.bam.bai") into dedup_bams
+            file("dedup.bam.bai") into dedup_bam
         tuple val(sample_id), file("dedup_stats*.tsv") \
-            into dedup_stats_tsvs
+            into dedup_stats_tsv
     when:
         params.dedup_umis
     shell:
         """
-        umi_tools dedup -I ${bam} -S dedup.bam --output-stats=dedup_stats
+        umi_tools dedup -I ${sample_bam} -S dedup.bam \
+            --output-stats=dedup_stats
         samtools --version
         samtools index dedup.bam
         """
 }
 
 // Split channel for use in multiple downstream processes.
-dedup_bams.into { post_dedup_group_bams; post_dedup_bams }
+dedup_bam.into { post_dedup_group_bam; post_dedup_bam }
 
 process groupUmisPostDedup {
     tag "${sample_id}"
@@ -712,23 +716,23 @@ process groupUmisPostDedup {
     publishDir "${params.dir_tmp}/${sample_id}", \
         mode: 'copy', overwrite: true
     input:
-        tuple val(sample_id), file(bam), file(bam_bai) \
-            from post_dedup_group_bams
+        tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
+            from post_dedup_group_bam
     output:
         tuple val(sample_id), file("post_dedup_groups.tsv") \
-            into post_dedup_groups_tsv
+            into post_dedup_group_tsv
     when:
         params.dedup_umis && params.group_umis
     shell:
         """
-        umi_tools group -I ${bam} --group-out post_dedup_groups.tsv
+        umi_tools group -I ${sample_bam} --group-out post_dedup_groups.tsv
         """
 }
 
 // Combine channels for downstream processing. By definition of
-// 'orf_map_bams_branch' only one of the input channels will have
+// 'orf_map_bam_branch' only one of the input channels will have
 // content.
-pre_output_bams = orf_map_bams_branch.umi_free_bams.mix(post_dedup_bams)
+pre_output_bam = orf_map_bam_branch.non_dedup_bam.mix(post_dedup_bam)
 
 process outputBams {
     tag "${sample_id}"
@@ -736,20 +740,20 @@ process outputBams {
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(bam), file(bam_bai) \
-            from pre_output_bams
+        tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
+            from pre_output_bam
     output:
         tuple val(sample_id), file("${sample_id}.bam"), \
-            file("${sample_id}.bam.bai") into output_bams
+            file("${sample_id}.bam.bai") into output_bam
     shell:
         """
-        cp ${bam} ${sample_id}.bam
-        cp ${bam_bai} ${sample_id}.bam.bai
+        cp ${sample_bam} ${sample_id}.bam
+        cp ${sample_bam_bai} ${sample_id}.bam.bai
         """
 }
 
 // Split channel for use in multiple downstream processes.
-output_bams.into { bedgraph_bams; summary_bams }
+output_bam.into { bedgraph_bam; bam_to_h5_bam }
 
 process makeBedgraphs {
     tag "${sample_id}"
@@ -757,19 +761,19 @@ process makeBedgraphs {
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(bam), file(bam_bai) \
-            from bedgraph_bams
+        tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
+            from bedgraph_bam
     output:
         tuple val(sample_id), file("plus.bedgraph"), \
-            file("minus.bedgraph") into bedgraphs
+            file("minus.bedgraph") into bedgraph
     when:
         params.make_bedgraph
     shell:
         """
         bedtools --version
-        bedtools genomecov -ibam ${bam} -trackline -bga -5 \
+        bedtools genomecov -ibam ${sample_bam} -trackline -bga -5 \
             -strand + > plus.bedgraph
-        bedtools genomecov -ibam ${bam} -trackline -bga -5 \
+        bedtools genomecov -ibam ${sample_bam} -trackline -bga -5 \
             -strand - > minus.bedgraph
         """
 }
@@ -780,8 +784,9 @@ process bamToH5 {
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(bam), file(bam_bai) from summary_bams
-        each file(gff) from orf_gff_bam_to_h5
+        tuple val(sample_id), file(sample_bam), \
+	    file(sample_bam_bai) from bam_to_h5_bam
+        each file(orf_gff) from bam_to_h5_orf_gff
     output:
         tuple val(sample_id), file("${sample_id}.h5") into h5s
     shell:
@@ -794,9 +799,9 @@ process bamToH5 {
            --primary-id=${params.primary_id} \
            --secondary-id=${secondary_id} \
            --dataset=${params.dataset} \
-           --bam-file=${bam} \
+           --bam-file=${sample_bam} \
            --hd-file=${sample_id}.h5 \
-           --orf-gff-file=${gff} \
+           --orf-gff-file=${orf_gff} \
            --is-riboviz-gff=${params.is_riboviz_gff} \
            --stop-in-cds=${params.stop_in_cds}
         """
@@ -808,15 +813,15 @@ process generateStatsFigs {
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(h5) from h5s
-        each file(fasta) from orf_fasta_generate_stats_figs
-        each file(gff) from orf_gff_generate_stats_figs
-        each file(t_rna) from t_rna_file
-        each file(codon_positions) from codon_positions_file
-        each file(features) from features_file
-        each file(asite_disp_length) from asite_disp_length_file
+        tuple val(sample_id), file(sample_h5) from h5s
+        each file(orf_fasta) from generate_stats_figs_orf_fasta
+        each file(orf_gff) from generate_stats_figs_orf_gff
+        each file(t_rna_tsv) from t_rna_tsv
+        each file(codon_positions_rdata) from codon_positions_rdata
+        each file(features_tsv) from features_tsv
+        each file(asite_disp_length_txt) from asite_disp_length_txt
     output:
-        val sample_id into processed_samples
+        val sample_id into finished_sample_id
         tuple val(sample_id), file("tpms.tsv") into tpms_tsv
         tuple val(sample_id), file("3nt_periodicity.pdf") \
             into nt3_periodicity_pdf
@@ -843,7 +848,7 @@ process generateStatsFigs {
             optional (! is_t_rna_and_codon_positions_file) \
             into codon_ribodens_tsv
         tuple val(sample_id), file("features.pdf") \
-            optional (! is_features_file) into features_tsv
+            optional (! is_features_file) into features_pdf
         tuple val(sample_id), file("3ntframe_bygene.tsv") \
             optional (! is_asite_disp_length_file) \
             into nt3frame_bygene_tsv
@@ -852,13 +857,13 @@ process generateStatsFigs {
             into nt3frame_propbygene_pdf
     shell:
         t_rna_flag = is_t_rna_and_codon_positions_file \
-            ? "--t-rna-file=${t_rna}" : ''
+            ? "--t-rna-file=${t_rna_tsv}" : ''
         codon_positions_flag = is_t_rna_and_codon_positions_file \
-            ? "--codon-positions-file=${codon_positions}" : ''
+            ? "--codon-positions-file=${codon_positions_rdata}" : ''
         features_flag = is_features_file \
-            ? "--features-file=${features}" : ''
+            ? "--features-file=${features_tsv}" : ''
         asite_disp_length_flag = is_asite_disp_length_file \
-            ? "--asite-disp-length-file=${asite_disp_length}" : ''
+            ? "--asite-disp-length-file=${asite_disp_length_txt}" : ''
         count_threshold_flag = params.containsKey('count_threshold') \
             ? "--count-threshold=${params['count_threshold']}": ''
         """
@@ -869,21 +874,21 @@ process generateStatsFigs {
            --buffer=${params.buffer} \
            --primary-id=${params.primary_id} \
            --dataset=${params.dataset} \
-           --hd-file=${h5} \
-           --orf-fasta-file=${fasta} \
+           --hd-file=${sample_h5} \
+           --orf-fasta-file=${orf_fasta} \
            --rpf=${params.rpf} \
            --output-dir=. \
            --do-pos-sp-nt-freq=${params.do_pos_sp_nt_freq} \
            ${t_rna_flag} \
            ${codon_positions_flag} \
            ${features_flag} \
-           --orf-gff-file=${gff} \
+           --orf-gff-file=${orf_gff} \
            ${asite_disp_length_flag} \
            ${count_threshold_flag}
         """
 }
 
-processed_samples.view { "Finished processing sample: ${it}" }
+finished_sample_id.view { "Finished processing sample: ${it}" }
 
 // Prefix sample-specific TPMs files, tpms.tsv, with sample ID so all 
 // sample-specific TPMs files can be staged into the same directory
@@ -892,13 +897,13 @@ process renameTpms {
     tag "${sample_id}"
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(tsv) from tpms_tsv
+        tuple val(sample_id), file(tpms_tsv) from tpms_tsv
     output:
-        val(sample_id) into sample_tpms_id
-        file "${sample_id}_tpms.tsv" into sample_tpms_tsv
+        val(sample_id) into tpms_sample_id
+        file "${sample_id}_tpms.tsv" into tpms_sample_tsv
     shell:
         """
-        cp ${tsv} ${sample_id}_tpms.tsv
+        cp ${tpms_tsv} ${sample_id}_tpms.tsv
         """
 }
 
@@ -906,11 +911,11 @@ process collateTpms {
     tag "${sample_ids.join(', ')}"
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
     input:
-        val sample_ids from sample_tpms_id.collect()
-        file tsvs from sample_tpms_tsv.collect()
+        val sample_ids from tpms_sample_id.collect()
+        file tpms_tsvs from tpms_sample_tsv.collect()
     output:
-        file "TPMs_collated.tsv" into collated_tpms_tsv
-        val sample_ids into collated_tpms_samples
+        file "TPMs_collated.tsv" into collate_tpms_tsv
+        val sample_ids into collate_tpms_sample_ids
     shell:
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/collate_tpms.R \
@@ -928,10 +933,10 @@ process countReads {
 	// 'workflow.projectDir' triggering reexecution of this
 	// process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
-        val data_files_config_yaml from data_files_config_yaml
+        val ribosome_fqs_yaml from ribosome_fqs_yaml
         // Force dependency on output of 'collateTpms' so this process
         // is only run when all other processing has completed.
-        val collated_tpms_samples from collated_tpms_samples
+        val samples_ids from collate_tpms_sample_ids
     output:
         file "read_counts.tsv" into read_counts_tsv
     when:
@@ -948,9 +953,9 @@ process countReads {
         //    This would require a new implementation of
         //    riboviz.tools.count_reads.
         """
-        echo "${data_files_config_yaml}" > data_files.yaml
+        echo "${ribosome_fqs_yaml}" > ribosome_fqs.yaml
         python -m riboviz.tools.count_reads \
-           -c data_files.yaml \
+           -c ribosome_fqs.yaml \
            -i ${workflow.projectDir}/${params.dir_in} \
            -t ${workflow.projectDir}/${params.dir_tmp} \
            -o ${workflow.projectDir}/${params.dir_out} \
