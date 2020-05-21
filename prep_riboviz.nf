@@ -62,7 +62,8 @@ def helpMessage() {
     Indexing:
 
     * 'build_indices': 'TRUE' or 'FALSE', rebuild indices from FASTA
-      files? (default 'TRUE')
+      files? (default 'TRUE'). If 'FALSE' then 'dir_index' is expected
+      to contain the index files.
     * 'orf_index_prefix': Prefix for ORF index files, relative to
       '<dir_index>' .
     * 'rrna_index_prefix': Prefix for rRNA index files, relative to
