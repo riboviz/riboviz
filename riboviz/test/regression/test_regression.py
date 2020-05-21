@@ -2,8 +2,9 @@
 :py:mod:`riboviz.tools.prep_riboviz` regression test suite.
 
 The regression test suite runs :py:mod:`riboviz.tools.prep_riboviz`
-using a given configuration file, then compares the results to a
-directory of pre-calculated results, specified by the user.
+or :py:const:`riboviz.test.NEXTFLOW_WORKFLOW` (via Nextflow) using a
+given configuration file, then compares the results to a directory of
+pre-calculated results, specified by the user.
 
 Usage::
 
@@ -29,9 +30,9 @@ The test suite accepts the following command-line parameters:
   validated against those specified by ``--expected``. If not provided
   then the file :py:const:`riboviz.test.VIGNETTE_CONFIG` will be
   used.
-* ``--nextflow``: Run Nextflow-specific tests. Some regression tests
-  differ for Nextflow due to differences in file naming. This should
-  only be used with ``--skip-workflow``.
+* ``--nextflow``: Run :py:const:`riboviz.test.NEXTFLOW_WORKFLOW` (via
+  Nextflow). Note that some regression tests differ for Nextflow due
+  to differences in naming of some temporary files.
 
 If the configuration specifies samples
 (:py:const:`riboviz.params.FQ_FILES`) then ``--check-index-tmp``
@@ -97,6 +98,7 @@ fixtures used by these tests.
 """
 import os
 import shutil
+import subprocess
 import tempfile
 import pytest
 import pysam
@@ -122,13 +124,16 @@ def prep_riboviz_fixture(skip_workflow_fixture, config_fixture,
     :type skip_workflow_fixture: bool
     :param config_fixture: Configuration file
     :type config_fixture: str or unicode
-    :param nextflow_fixture: Should Nextflow tests be run?
+    :param nextflow_fixture: Should Nextflow be run?
     :type nextflow_fixture: bool
     """
     if not skip_workflow_fixture:
-        assert not nextflow_fixture, \
-            "--nextflow was specified along with a request to run the Python workflow"
-        exit_code = prep_riboviz.prep_riboviz(config_fixture)
+        if not nextflow_fixture:
+            exit_code = prep_riboviz.prep_riboviz(config_fixture)
+        else:
+            cmd = ["nextflow", "run", test.NEXTFLOW_WORKFLOW,
+                   "-params-file", config_fixture, "-ansi-log", "false"]
+            exit_code = subprocess.call(cmd)
         assert exit_code == 0, \
             "prep_riboviz returned non-zero exit code %d" % exit_code
 
