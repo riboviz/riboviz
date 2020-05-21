@@ -1,4 +1,4 @@
-# Running the RiboViz workflow
+# Running the RiboViz Python workflow
 
 This page describes how to run `riboviz.tools.prep_riboviz`. It is assumed you are familiar with [Configuring the RiboViz workflow](./prep-riboviz-config.md).
 

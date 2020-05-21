@@ -119,7 +119,7 @@ Run `prep_riboviz`:
 $ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 ```
 
-For full information on how to run `prep_riboviz` and the options available, see [Running the RiboViz workflow](./prep-riboviz-running.md)
+For full information on how to run `prep_riboviz` and the options available, see [Running the RiboViz Python workflow](./prep-riboviz-run-python.md)
 
 ---
 
