@@ -51,7 +51,7 @@ The workflow also supports the following configuration parameters. All directory
 | `rrna_fasta_file` | Ribosomal rRNA and other contaminant sequences to avoid aligning to (FASTA file) |
 | `orf_fasta_file` | Transcript sequences file containing both coding regions and flanking regions (FASTA file) |
 | `orf_gff_file` | Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts (GTF/GFF3 file) |
-| `build_indices` | `TRUE` or `FALSE`, rebuild indices from FASTA files? |
+| `build_indices` | `TRUE` or `FALSE`, rebuild indices from FASTA files? If `FALSE` then `dir_index` is expected to contain the index files |
 | `dir_index` | Built indices directory |
 | `rrna_index_prefix` | Prefix for rRNA index files, relative to `<dir_index>` |
 | `orf_index_prefix` | Prefix for ORF index files, relative to `<dir_index>` |

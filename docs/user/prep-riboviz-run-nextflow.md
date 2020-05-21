@@ -1,16 +1,117 @@
-# RiboViz Nextflow workflow
+# Running the RiboViz Nextflow workflow
 
-[Nextflow](https://www.nextflow.io/) is a workflow management system. The file `prep_riboviz.nf` is a port of the RiboViz Python workflow, `riboviz.tools.prep_riboviz`, into a Nextflow workflow. In a future release, the RiboViz Python workflow will be deprecated by this Nextflow workflow.
+This page describes how to run the Nextflow workflow, `prep_riboviz.nf`. It is assumed you are familiar with [Configuring the RiboViz workflow](./prep-riboviz-config.md).
+
+Contents:
+
+* [Prepare input data](#prepare-input-data)
+* [Set up your environment](#set-up-your-environment)
+* [Configure number of processes (optional)](#configure-number-of-processes-optional)
+* [Run the Nextflow workflow](#run-the-nextflow-workflow)
+  - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
+* [Help](#help)
+* [Incremental build](#incremental-build)
+* [Multiplexed files](#multiplexed-files)
+* [Debugging and bash scripts](#debugging-and-bash-scripts)
+* [Generating reports](#generating-reports)
+* [Managing your disk usage](#managing-your-disk-usage)
 
 ---
 
-## Configuring the Nextflow workflow
+## Prepare input data
 
-The Nextflow workflow uses the same YAML configuration file as `riboviz.tools.prep_riboviz` (as described in [Configuring the RiboViz workflow](./prep-riboviz-config.md).
+For each condition/sample in your experiment, merge all the FASTQ files with the ribosome profiling data for each condition/sample into a single FASTQ file. It is recommended that the files are also gzip-compressed to save space.
+
+Multiple FASTQ files can be merged and compressed as follows:
+
+```console
+$ cat <SAMPLE_1_A>.fastq <SAMPLE_1_B>.fastq ... | gzip >> <SAMPLE_1>.fastq.gz
+$ cat <SAMPLE_2_Y>.fastq <SAMPLE_2_Z>.fastq ... | gzip >> <SAMPLE_2>.fastq.gz
+...etc...
+```
+
+Multiple gzipped FASTQ files can be merged as follows:
+
+```console
+$ cat <SAMPLE_1_A>.fastq.gz <SAMPLE_1_B>.fastq.gz ... | gzip >> <SAMPLE_1>.fastq.gz
+```
+
+Input files files should then be placed into a single input directory (`dir_in`). If this is not possible, then create an input directory and provide symbolic links to the actual files. For example, given:
+
+```
+samples/
+  sample1/
+    sample1.fastq.gz
+  sample2/
+    sample2.fastq.gz
+```
+
+These can be symlinked into a single directory, `data`, a sibling of `samples`, as follows:
+
+```console
+$ mkdir data
+$ cd data/
+$ ln -s ../samples/sample1/sample1.fastq.gz
+$ ln -s ../samples/sample2/sample2.fastq.gz
+$ ls -l
+```
+```
+total 0
+lrwxrwxrwx 1 user user 41 Aug 22 02:55 sample1.fastq.gz -> ../samples/sample1/sample1.fastq.gz
+lrwxrwxrwx 1 user user 41 Aug 22 02:55 sample2.fastq.gz -> ../samples/sample2/sample2.fastq.gz
+```
 
 ---
 
-## Running the Nextflow workflow
+## Set up your environment
+
+If you have not already done so, activate your Python environment:
+
+```console
+$ source $HOME/miniconda3/bin/activate
+$ conda activate riboviz
+```
+
+If you have not already done so, set the paths to Hisat2 and Bowtie:
+
+* If you followed [Create `setenv.sh` to configure Hisat2 and Bowtie paths](./install.md#create-setenvsh-to-configure-hisat2-and-bowtie-paths), then run:
+
+```console
+$ source $HOME/setenv.sh
+```
+
+* Otherwise, run the following (your directory names may be different, depending on the versions of Hisat2 and Bowtie you have):
+
+```console
+$ export PATH=~/hisat2-2.1.0:$PATH
+$ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
+```
+
+---
+
+## Configure number of processes (optional)
+
+The workflow can instruct the tools it invokes to use a specific number of processes. By default this is 1.
+
+To configure the workflow to use additional processes, in the configuration file, change:
+
+```yaml
+num_processes: 1
+```
+
+* to the desired number of processes:
+
+```yaml
+num_processes: 4
+```
+
+This parameter is currently used by `hisat2`, `samtools sort`, `bam_to_h5.R` and `generate_stats_figs.R`.
+
+**Note:** for `cutadapt` the number of available processors on the host will be used regardless.
+
+---
+
+## Run the Nextflow workflow
 
 Run:
 
@@ -25,46 +126,48 @@ where:
 
 Configuration parameters can also be provided via the command-line in the form `--<PARAMETER>=<VALUE>` (for example `--make_bedgraph=FALSE`).
 
-For example, to run the vignette:
+Information on the key steps during processing is displayed.
 
-```console
-$ nextflow run prep_riboviz.nf \
-    -params-file vignette/vignette_config.yaml -ansi-log false
-N E X T F L O W  ~  version 20.01.0
-Launching `prep_riboviz.nf` [goofy_jones] - revision: 0e94b1fa62
-No such file (NotHere): example_missing_file.fastq.gz
-[93/e96307] Submitted process > buildIndicesORF (YAL_CDS_w_250)
-[f1/38397f] Submitted process > cutAdapters (WT3AT)
-[1a/a01841] Submitted process > buildIndicesrRNA (yeast_rRNA)
-[f0/5779d2] Submitted process > cutAdapters (WTnone)
-[c2/497da3] Submitted process > hisat2rRNA (WTnone)
-[14/479d3b] Submitted process > hisat2rRNA (WT3AT)
-[cd/2e10ec] Submitted process > hisat2ORF (WTnone)
-[02/1fef3f] Submitted process > trim5pMismatches (WTnone)
-[9e/90df9d] Submitted process > samViewSort (WTnone)
-[1e/1a3f4d] Submitted process > outputBams (WTnone)
-[d8/3d85de] Submitted process > makeBedgraphs (WTnone)
-[26/055ef0] Submitted process > bamToH5 (WTnone)
-[d6/355a50] Submitted process > hisat2ORF (WT3AT)
-[90/78ca31] Submitted process > trim5pMismatches (WT3AT)
-[03/dfb679] Submitted process > samViewSort (WT3AT)
-[85/ccbb35] Submitted process > outputBams (WT3AT)
-[75/7e865e] Submitted process > bamToH5 (WT3AT)
-[32/a55251] Submitted process > makeBedgraphs (WT3AT)
-[d5/7a7e8b] Submitted process > generateStatsFigs (WTnone)
-[f4/5188e3] Submitted process > generateStatsFigs (WT3AT)
-Finished processing sample: WTnone
-[c1/184176] Submitted process > renameTpms (WTnone)
-Finished processing sample: WT3AT
-[6f/716c9e] Submitted process > renameTpms (WT3AT)
-[c6/bd5296] Submitted process > collateTpms (WTnone, WT3AT)
-[a6/3cb086] Submitted process > countReads
-Workflow finished! (OK)
-```
-
-Each sample-specific process is labelled with the sample ID, indexing processes are labelled with the index prefix, and multiplexed file-specific processes (not shown above, but an example is below) are labelled with the file name (minus extension)
+Each sample-specific process is labelled with the sample ID, indexing processes are labelled with the index prefix, and multiplexed file-specific processes are labelled with the file name (minus extension).
 
 The `collateTpms` process displays the names of all the samples that are collated.
+
+### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
+
+If using more than one process (`num_processes` > 1) you might get the error:
+
+```
+samtools sort: couldn't allocate memory for bam_mem
+```
+
+This leads to a failure to create `.bam` and `.bam.bai` files.
+
+In this case, you may need to explicitly set the amount of memory per thread in calls to `samtools sort`.
+
+Check how much free memory you have e.g.
+
+```console
+$ free --mega
+              total        used        free      shared  buff/cache   available
+Mem:           2017         684        1028           2         303        1181
+Swap:           969         619         350
+```
+
+Divide the free memory by the number of processes, `num_processes` e.g. 1024/4 = 256 MB.
+
+Edit `prep_riboviz.nf` and change the lines:
+
+```
+	samtools view -b ${sample_sam} | samtools sort \
+            -@ ${params.num_processes} -O bam -o orf_map_clean.bam -
+```
+
+to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
+
+```
+	samtools view -b ${sample_sam} | samtools sort -m 256M \
+            -@ ${params.num_processes} -O bam -o orf_map_clean.bam -
+```
 
 ---
 
@@ -82,7 +185,7 @@ Note that `--help` displays workflow help, whereas `-help` display's the `nextfl
 
 ## Incremental build
 
-If processing of a sample fails then `prep_riboviz.nf` has been written to ensure that this does not prevent the processing of other samples. For example, if the file for the vignette sample `WTnone` was corrupt in some way:
+If processing of a sample fails then the workflow has been written to ensure that this does not prevent the processing of other samples. For example, if the file for the vignette sample `WTnone` was corrupt in some way:
 
 ```console
 $ nextflow run prep_riboviz.nf \
@@ -101,7 +204,7 @@ No such file (NotHere): example_missing_file.fastq.gz
 ...
 ```
 
-If a workflow fails, then a `-resume` option allows it to be rerun from the point at which it failed (for example, after fixing the issue with the file for `WTnone`):
+If the workflow fails, then a `-resume` option allows it to be rerun from the point at which it failed (for example, after fixing the issue with the file for `WTnone`):
 
 ```console
 $ nextflow run prep_riboviz.nf \
@@ -228,7 +331,7 @@ Workflow finished! (OK)
 
 ## Debugging and bash scripts
 
-As each `work/` subdirectory has symbolic links to any input files it requires,plus a bash script with the command that was run, that specific step can be run standalone. This can be useful for debugging. For example:
+As described in [Nextflow `work/` directory](./prep-riboviz-operation#nextflow-work-directory), each Nextflow `work/` subdirectory has symbolic links to any input files it requires, plus a bash script with the command that was run, that specific step can be run standalone. This can be useful for debugging. For example:
 
 ```console
 $ cd work/37/b11ee1d2fb315a1b72adb65c11b44/
@@ -256,7 +359,7 @@ Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 
 ## Generating reports
 
-`-with-report`, `-with-timeline` and `-with-dag` flags allow you to reques that Nextflow create reports on a run and an image of the task execution workflow. For example:
+Nextflow's `-with-report`, `-with-timeline` and `-with-dag` flags allow you to reques that Nextflow create reports on a run and an image of the task execution workflow. For example:
 
 ```console
 $ nextflow run prep_riboviz.nf \
@@ -264,3 +367,20 @@ $ nextflow run prep_riboviz.nf \
     -with-report report.html -with-timeline timeline.html \
     -with-dag workflow.svg
 ```
+
+---
+
+## Managing your disk usage
+
+The workflow generates many intermediate files and some of these may be unompressed and **large**, i.e. about the same size as the input files. All these files are placed in a temporary directory (`dir_tmp`). The temporary directory's contents can be inspected for troubleshooting, if necessary.
+
+For example, here is the volume of the outputs from a run of the vignette as documented in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md):
+
+| Directory |   MB |
+| --------- | ---- |
+| `index`   |    9 |
+| `tmp`     | 1040 |
+| `output`  |    3 |
+| Total     | 1052 |
+
+**Tip:** We recommend you delete temporary directories and log directories when you have completed your analyses to your satisfaction.
