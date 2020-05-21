@@ -1,6 +1,6 @@
 # Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file
 
-`riboviz.tools.prep_riboviz` is a Python implementation of the RiboViz analysis workflow. This page describes how you can run a "vignette" of the workflow on a sample data set - *Saccharomyces cerevisiae* reads - to output of HDF5 files and generate summary statistics.
+This page describes how you can run a "vignette" of the workflow on a sample data set - *Saccharomyces cerevisiae* reads - to output of HDF5 files and generate summary statistics.
 
 ---
 
@@ -36,7 +36,7 @@ Downsampled ribosome profiling data for *Saccharomyces cerevisiae* (yeast):
 * `vignette/input/SRR1042864_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type + 3-AT.
 * For information on the provenance of these files see [Downsampled ribosome profiling data from Saccharomyces cerevisiae](../reference/data.md#downsampled-ribosome-profiling-data-from-saccharomyces-cerevisiae)
 
-For full information on how to configure `prep_riboviz` and its inputs, see [Configuring the RiboViz workflow](./prep-riboviz-config.md).
+For full information on how to configure the workflow and its inputs, see [Configuring the RiboViz workflow](./prep-riboviz-config.md).
 
 ---
 
@@ -68,9 +68,9 @@ $ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 
 ## Configure number of processes (optional)
 
-`prep_riboviz` can instruct the tools it invokes to use a specific number of processes. By default this is 1.
+The workflow can instruct the tools it invokes to use a specific number of processes. By default this is 1.
 
-To configure `prep_riboviz` to use additional processes, in `vignette/vignette_config.yaml` change:
+To configure the workflow to use additional processes, in `vignette/vignette_config.yaml` change:
 
 ```yaml
 num_processes: 1
@@ -84,13 +84,13 @@ num_processes: 4
 
 ---
 
-## Dry run `prep_riboviz`
+## Dry run workflow (Python workflow only)
 
-`prep_riboviz` supports a `-d` (or `--dry-run`) command-line parameter which can "dry run" the workflow. This validates the configuration without executing the workflow steps.
+The Python workflow supports a `-d` (or `--dry-run`) command-line parameter which can "dry run" the workflow. This validates the configuration without executing the workflow steps.
 
 **Tip:** we strongly recommend doing a dry run before doing a live run on data you have not processed before.
 
-Run `prep_riboviz` in dry run mode:
+Run workflow in dry run mode:
 
 ```console
 $ python -m riboviz.tools.prep_riboviz -d -c vignette/vignette_config.yaml
@@ -103,7 +103,7 @@ where:
 
 ### Troubleshooting: `This script needs to be run under Python 3`
 
-This warning arises if you try and run `prep_riboviz` under Python 2. You can only run `prep_riboviz` with Python 3.
+This warning arises if you try and run the workflow under Python 2. You can only run the workflow under Python 3.
 
 ### Troubleshooting: `File not found: vignette/input/example_missing_file.fastq.gz`
 
@@ -111,15 +111,27 @@ This warning is expected and can be ignored. The vignette configuration file int
 
 ---
 
-## Run `prep_riboviz`
+## Run the workflow
 
-Run `prep_riboviz`:
+To run the Python workflow:
 
 ```console
 $ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 ```
 
-For full information on how to run `prep_riboviz` and the options available, see [Running the RiboViz Python workflow](./prep-riboviz-run-python.md)
+* For full information on how to run the Python workflow and the options available, see [Running the RiboViz Python workflow](./prep-riboviz-run-python.md)
+
+To run the Nextflow workflow:
+
+```console
+$ nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false
+```
+
+* For full information on how to run the Nextflow workflow and the options available, see [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md)
+
+### Troubleshooting: `No such file (NotHere): example_missing_file.fastq.gz` (Nextflow workflow)
+
+This warning is expected and can be ignored. The vignette configuration file intentionally includes a reference to a missing input file. This demonstrates that if processing of one sample fails it does not block the processing of the other samples.
 
 ---
 
@@ -153,18 +165,24 @@ Intermediate outputs in `vignette/tmp`:
 ```
 WT3AT/
   nonrRNA.fq
+  orf_map_clean.bam     # Nextflow workflow only
+  orf_map_clean.bam.bai # Nextflow workflow only
   orf_map_clean.sam
   orf_map.sam
   rRNA_map.sam
+  trim_5p_mismatch.tsv
   trim.fq
-  unaligned.sam
+  unaligned.fq
 WTnone/
   nonrRNA.fq
+  orf_map_clean.bam     # Nextflow workflow only
+  orf_map_clean.bam.bai # Nextflow workflow only
   orf_map_clean.sam
   orf_map.sam
   rRNA_map.sam
+  trim_5p_mismatch.tsv
   trim.fq
-  unaligned.sam
+  unaligned.fq
 ```
 
 Outputs in `vignette/output`:
@@ -216,7 +234,7 @@ read_counts.tsv
 TPMs_collated.tsv
 ```
 
-For full information on what `prep_riboviz` does and the files it outputs, see [What the RiboViz workflow does](./prep-riboviz-operation.md).
+For full information on what the workflow does and the files it outputs, see [What the RiboViz workflow does](./prep-riboviz-operation.md).
 
 ---
 
@@ -226,10 +244,9 @@ Before rerunning the vignette, delete the auto-generated index, temporary, logs 
 
 ```console
 $ rm -rf vignette/index
-$ rm -rf vignette/logs
 $ rm -rf vignette/tmp
 $ rm -rf vignette/output
-$ rm -rf vignette/logs
+$ rm -rf vignette/logs  # Python workflow only
 ```
 
 You might also want to do this if you have run the vignette with a missing R package, and then want to run it again from scratch.
