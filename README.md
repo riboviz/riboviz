@@ -12,6 +12,15 @@ For information on **RiboViz**, see "riboviz: analysis and visualization of ribo
 
 All the code for processing the raw reads is available in this repository.
 
+## Python and Nextflow workflows
+
+This release contains two versions of the RiboViz workflow:
+
+* A Python workflow, `riboviz.tools.prep_riboviz`.
+* A Nextflow workflow, `prep_riboviz_nf`. [Nextflow](https://www.nextflow.io/) is a workflow management system and `prep_riboviz.nf` is a port of `riboviz.tools.prep_riboviz`, into a Nextflow workflow. In the next release, the Python workflow will be deprecated by this Nextflow workflow.
+
+Instructions for the configuration and use of both versions are provided.
+
 ## Use RiboViz
 
 Quick start:
