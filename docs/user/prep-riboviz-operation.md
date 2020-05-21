@@ -1,6 +1,8 @@
 # What the RiboViz workflow does
 
-This page describes what `riboviz.tools.prep_riboviz` does. 
+This page describes what the RiboViz workflow does.
+
+Except where noted, this information applies to both the Python workflow and the Nextflow workflow.
 
 Configuration parameters are shown in brackets and are described in [Configuring the RiboViz workflow](./prep-riboviz-config.md).
 
@@ -8,7 +10,7 @@ Configuration parameters are shown in brackets and are described in [Configuring
 
 ## Coordinating local scripts and third-party components
 
-`prep_riboviz` prepares ribosome profiling data for by implementing a workflow that uses a combination of local Python and R scripts and third-party components. These are as follows:
+The workflow prepares ribosome profiling data for by implementing a workflow that uses a combination of local Python and R scripts and third-party components. These are as follows:
 
 * `hisat2-build`: build rRNA and ORF indices.
 * `cutadapt`: cut adapters.
@@ -27,7 +29,7 @@ Configuration parameters are shown in brackets and are described in [Configuring
 
 ## Process ribosome profiling sample data
 
-If sample files (`fq_files`) are specified, then `prep_riboviz` processes the sample files as follows:
+If sample files (`fq_files`) are specified, then the workflow processes the sample files as follows:
 
 1. Read configuration information from YAML configuration file.
 2. Build hisat2 indices if requested (if `build_indices: TRUE`) using `hisat2 build` and save these into the index directory (`dir_index`).
@@ -56,7 +58,7 @@ If sample files (`fq_files`) are specified, then `prep_riboviz` processes the sa
 
 ## Process multiplexed ribosome profiling sample data
 
-If a multiplexed file (`multiplex_fq_files`) is specified, then `prep_riboviz`, the `prep_riboviz` processes the multiplexed file as follows:
+If a multiplexed file (`multiplex_fq_files`) is specified, then the workflow processes the multiplexed file as follows:
 
 1. Read configuration information (as for 1. above).
 2. Build hisat2 indices if requested (as for 2. above).
@@ -91,13 +93,16 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `orf_map_clean.sam`: ORF-mapped reads with mismatched nt trimmed.
 * `trim_5p_mismatch.tsv`: number of reads processed, discarded, trimmed and written when trimming 5' mismatches from reads and removing reads with more than a set number of mismatches.
 * `unaligned.sam`: unaligned reads. These files can be used to find common contaminants or translated sequences not in your ORF annotation.
-
+* `orf_map_clean.bam`: BAM file equivalent of `orf_map_clean.sam`, ORF-mapped reads with mismatched nt trimmed. If deduplication is not enabled (if `dedup_umis: FALSE`) then this is copied to become the output file `<SAMPLE_ID>.bam` (see below). (Nextflow workflow only)
+* `orf_map_clean.bam.bai`: BAM index file for the above. If deduplication is not enabled (if `dedup_umis: FALSE`) then this is copied to become the output file `<SAMPLE_ID>.bam.bai` (see below). (Nextflow workflow only)
 
 If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specific files are also produced:
 
 * `extract_trim.fq`: adapter trimmed reads with UMIs extracted. This is not present if a multiplexed file (`multiplex_fq_files`) is specified.
-* `pre_dedup.bam`: BAM file prior to deduplication.
-* `pre_dedup.bam.bai`: BAM index file for `pre_dedup.bam`.
+* `pre_dedup.bam`: BAM file prior to deduplication. (Python workflow only)
+* `pre_dedup.bam.bai`: BAM index file for `pre_dedup.bam`. (Python workflow only)
+* `dedup.bam`: BAM file post deduplication. This is copied to become the output file `<SAMPLE_ID>.bam`. (Nextflow workflow only)
+* `dedup.bam.bai`: BAM index file for the above. This is copied to become the output file `<SAMPLE_ID>.bam`. (Nextflow workflow only)
 * UMI groups pre- and post-deduplication (if `group_umis: TRUE`):
   - `pre_dedup_groups.tsv`: UMI groups before deduplication.
   - `post_dedup_groups.tsv`: UMI groups after deduplication.
@@ -159,7 +164,9 @@ In addition, the following files are also put into the output directory:
 
 ## Log files
 
-Information on the execution of `prep_riboviz`, including the causes of any errors, is added to a timestamped log file in the current directory, named `riboviz-YYYYMMDD-HHMMSS.log` (for example, `riboviz.20190926-002455.log`).
+### Python workflow
+
+Information on the execution of the Python workflow, including the causes of any errors, is added to a timestamped log file in the current directory, named `riboviz-YYYYMMDD-HHMMSS.log` (for example, `riboviz.20190926-002455.log`).
 
 Log files for each processing step are placed in a timestamped subdirectory (`YYYYMMDD-HHMMSS`) within the logs directory (`dir_logs`). 
 
@@ -236,11 +243,17 @@ collate_tpms.log
 count_reads.log
 ```
 
+### Nextflow workflow
+
+Information on the execution of the Nextflow workflow is added to a file `.nextflow.log`. Log files from previous runs are in files named `.nextflow.log.1`, `.nextflow.log.2` etc. Every time Nextflow is run, the log file names are adjusted - on each successive run `.nextflow.log.1` becomes `.nextflow.log.2` and `.nextflow.log` becomes `.nextflow.log.1`).
+
+Log files for the invocation of each step in the workflow are captured in the [Nextflow `work/` directory](#nextflow-work-directory) described below.
+
 ---
 
 ## Read counts file
 
-`prep_riboviz` will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is produced by scanning input, temporary and output directories and counting the number of reads (sequences) processed by specific stages of a RiboViz workflow.
+The workflow will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is produced by scanning input, temporary and output directories and counting the number of reads (sequences) processed by specific stages of a RiboViz workflow.
 
 The read counts file, `read_counts.tsv`, is written into the output directory.
 
@@ -287,4 +300,50 @@ WTnone	hisat2	vignette/tmp/WTnone/rRNA_map.sam	1430213	Reads with rRNA and other
 WTnone	hisat2	vignette/tmp/WTnone/unaligned.fq	452266	Unaligned reads removed by alignment of remaining reads to ORFs index files
 WTnone	hisat2	vignette/tmp/WTnone/orf_map.sam	14516	Reads aligned to ORFs index files
 WTnone	riboviz.tools.trim_5p_mismatch	vignette/tmp/WTnone/orf_map_clean.sam	14516	Reads after trimming of 5' mismatches and removal of those with more than 2 mismatches
-``
+```
+
+---
+
+## Nextflow `work/` directory
+
+Nextflow creates a `work/` directory with all the files created during execution of Nextflow workflows. Every invocation of a task - every process - has its own subdirectory within Nextflow's `work/` directory named after the process identifiers (e.g. `ad/1e7c54`) which are displayed when Nextflow runs. These subdirectories have:
+
+* Input files. These are symbolic links to the input files for the task which, depending on the task, can be:
+  - Output files in other `work/` subdirectories. For example, the directory for an `hisat2rRNA` proces will have input files which are symbolic links to the output files produced by a `cutAdapters` process,
+  - Input files for the workflow. For example, the directory for a `cutAdapters` process will have an input file which is a symbolic link to a sample file in `vignettte/input`.
+* Output files, from the invocation of the task.
+* Standard output (`.command.out`) and standard error (`.command.err`) files and exit codes (`.exitcode`) for each process.
+* Bash script (`.command.sh`) containing the specific command invoked by Nextflow by that process.
+
+For example, for a process `ad/1e7c54`, an invocation of task `hisat2rRNA` for sample `WTnone`, the `work/` directory would include:
+
+```console
+$ find work/ad/1e7c54a889f21451cb07d29655e0be/ -printf '%P\t%l\n' | sort
+.command.begin
+.command.err
+.command.log
+.command.out
+.command.run
+.command.sh
+.command.trace
+.exitcode
+nonrRNA.fq
+rRNA_map.sam
+trim.fq	/home/ubuntu/riboviz/work/5b/ff17ba3e19c5d659e54b04b08dab85/trim.fq
+yeast_rRNA.1.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yeast_rRNA.1.ht2
+yeast_rRNA.2.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yeast_rRNA.2.ht2
+yeast_rRNA.3.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yeast_rRNA.3.ht2
+yeast_rRNA.4.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yeast_rRNA.4.ht2
+yeast_rRNA.5.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yeast_rRNA.5.ht2
+yeast_rRNA.6.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yeast_rRNA.6.ht2
+yeast_rRNA.7.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yeast_rRNA.7.ht2
+yeast_rRNA.8.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yeast_rRNA.8.ht2
+```
+
+The `.ht2` files are symbolic links to the outputs of process `e5/ccf3e6`, an invocation of task `buildIndicesrRNA`.
+
+`prep_riboviz.nf` uses Nextflow's [publishDir](https://www.nextflow.io/docs/latest/process.html#publishdir) directive which allows files to be published to specific directories outwith `work/`. By default, the files in this directory are symlinked to those in `work/`. `prep_riboviz.nf` uses this to publishes files to the index (`dir_index`), temporary (`dir_tmp`), and output (`dir_out`) directories specified in the workflow configuration file.
+
+### `Missing` files
+
+If an optional file for `generate_stats_figs.R` is not provided within the YAML configuration file then a `Missing_<PARAM>` file (for example `Missing_features_file`) is created within the `work/` directories for the `generateStatsFigs` process. This symbolically links to a non-existent `Missing_<PARAM>` file in your current directory. This is not an issue since the files will not be passed onto `generate_stats_figs.R` and no attempt is made to use them. They are a side-effect of using the Nextflow pattern for optional inputs, [optional inputs](https://github.com/nextflow-io/patterns/blob/master/optional-input.nf).
