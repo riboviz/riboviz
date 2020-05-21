@@ -4,10 +4,12 @@ Nextflow error handling and exit code tests.
 The test suite runs ``nextflow run prep_riboviz.nf``.
 """
 import os.path
+import shutil
 import tempfile
 import yaml
 import pytest
 import riboviz.test
+from riboviz import hisat2
 from riboviz import params
 from riboviz.test.nextflow import run_nextflow
 
@@ -24,6 +26,19 @@ def tmp_file():
     yield tmp_file
     if os.path.exists(tmp_file):
         os.remove(tmp_file)
+
+
+@pytest.fixture(scope="function")
+def tmp_dir():
+    """
+    Create a temporary directory.
+
+    :return: directory
+    :rtype: str or unicode
+    """
+    tmp_dir = tempfile.mkdtemp("tmp")
+    yield tmp_dir
+    shutil.rmtree(tmp_dir)
 
 
 def test_no_sample_multiplex_fq_files(tmp_file):
@@ -267,6 +282,88 @@ def test_max_read_length_less_min(tmp_file):
         config = yaml.load(f, yaml.SafeLoader)
     config[params.MIN_READ_LENGTH] = 10
     config[params.MAX_READ_LENGTH] = 9
+    with open(tmp_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = run_nextflow(tmp_file)
+    assert exit_code != 0, \
+        "Unexpected exit code %d" % exit_code
+
+
+def test_build_indices_false_no_such_index_dir(tmp_file):
+    """
+    Test that :py:const:`riboviz.params.BUILD_INDICES` is false
+    and no such index directory :py:const:`riboviz.params.INDEX_DIR`
+    raises a non-zero exit code.
+
+    :param tmp_file: Path to temporary file, to write configuration to
+    :type tmp_file: str or unicode
+    """
+    with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    config[params.BUILD_INDICES] = False
+    config[params.INDEX_DIR] = "NoSuchDirectory"
+    with open(tmp_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = run_nextflow(tmp_file)
+    assert exit_code != 0, \
+        "Unexpected exit code %d" % exit_code
+
+
+def test_build_indices_false_no_such_orf_index_prefix(tmp_file, tmp_dir):
+    """
+    Test that :py:const:`riboviz.params.BUILD_INDICES` is false
+    and no such files with prefixe
+    :py:const:`riboviz.params.ORF_INDEX_PREFIX` raises a non-zero
+    exit code.
+
+    :param tmp_file: Path to temporary file, to write configuration to
+    :type tmp_file: str or unicode
+    :param tmp_dir: Path to temporary directory
+    :type tmp_dir: str or unicode
+    """
+    with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    config[params.BUILD_INDICES] = False
+    config[params.INDEX_DIR] = tmp_dir
+    # Create empty file with rRNA index prefix, so check for that
+    # file will succeed.
+    with open(os.path.join(tmp_dir,
+                           hisat2.HT2_FORMAT.format(
+                               config[params.RRNA_INDEX_PREFIX],
+                               1)), 'w') as f:
+        pass
+    config[params.ORF_INDEX_PREFIX] = "NoSuchOrfPrefix"
+    with open(tmp_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = run_nextflow(tmp_file)
+    assert exit_code != 0, \
+        "Unexpected exit code %d" % exit_code
+
+
+def test_build_indices_false_no_such_rrna_index_prefix(tmp_file, tmp_dir):
+    """
+    Test that :py:const:`riboviz.params.BUILD_INDICES` is false
+    and no such files with prefixe
+    :py:const:`riboviz.params.RRNA_INDEX_PREFIX` raises a non-zero
+    exit code.
+
+    :param tmp_file: Path to temporary file, to write configuration to
+    :type tmp_file: str or unicode
+    :param tmp_dir: Path to temporary directory
+    :type tmp_dir: str or unicode
+    """
+    with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    config[params.BUILD_INDICES] = False
+    config[params.INDEX_DIR] = tmp_dir
+    # Create empty file with ORF index prefix, so check for that
+    # file will succeed.
+    with open(os.path.join(tmp_dir,
+                           hisat2.HT2_FORMAT.format(
+                               config[params.ORF_INDEX_PREFIX],
+                               1)), 'w') as f:
+        pass
+    config[params.RRNA_INDEX_PREFIX] = "NoSuchRrnaPrefix"
     with open(tmp_file, 'w') as f:
         yaml.dump(config, f)
     exit_code = run_nextflow(tmp_file)
