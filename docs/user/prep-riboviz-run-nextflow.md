@@ -373,7 +373,7 @@ Workflow finished! (OK)
 
 ## Debugging and bash scripts
 
-As described in [Nextflow `work/` directory](./prep-riboviz-operation#nextflow-work-directory), each Nextflow `work/` subdirectory has symbolic links to any input files it requires, plus a bash script with the command that was run, that specific step can be run standalone. This can be useful for debugging. For example:
+As described in [Nextflow `work/` directory](./prep-riboviz-operation.md#nextflow-work-directory), each Nextflow `work/` subdirectory has symbolic links to any input files it requires, plus a bash script with the command that was run, that specific step can be run standalone. This can be useful for debugging. For example:
 
 ```console
 $ cd work/37/b11ee1d2fb315a1b72adb65c11b44/
