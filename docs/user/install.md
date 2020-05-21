@@ -793,6 +793,111 @@ You may need to assign more memory to R or your machine.
 
 ---
 
+## Nextflow
+
+**Note:** Nextflow only needs to be installed if you plan to use the Nextflow version of RiboViz.
+
+Web sites:
+
+* [Nextflow](https://www.nextflow.io/)
+* [Documentation](https://www.nextflow.io/docs/latest/index.html)
+* [GitHub](https://github.com/nextflow-io/nextflow)
+
+### Install Nextflow using conda (recommended)
+
+Install Nextflow and its dependencies (including Java):
+
+```console
+$ conda install -y -c bioconda nextflow
+```
+
+Check install:
+
+```console
+$ javac -version
+$ java -version
+$ nextflow -version
+
+      N E X T F L O W
+      version 20.01.0 build 5264
+      created 12-02-2020 10:14 UTC (02:14 PDT)
+      cite doi:10.1038/nbt.3820
+      http://nextflow.io
+```
+
+### Install Nextflow (alternative)
+
+Install [OpenJDK](https://openjdk.java.net) 1.8:
+
+* Ubuntu 18 users:
+
+```console
+$ sudo apt-get install -y openjdk-8-jdk-headless
+```
+
+* CentOS 7 users:
+
+```console
+$ sudo yum install -y openjdk-8-jdk-headless
+```
+
+Check install:
+
+```console
+$ javac -version
+$ java -version
+```
+
+Install Nextflow:
+
+```console
+$ curl -s https://get.nextflow.io | bash
+$ export PATH=$HOME/nextflow:$PATH
+$ nextflow -version
+
+      N E X T F L O W
+      version 20.01.0 build 5264
+      created 12-02-2020 10:14 UTC (02:14 PDT)
+      cite doi:10.1038/nbt.3820
+      http://nextflow.io
+```
+
+Set `PATH`:
+
+```console
+$ export PATH=$HOME/nextflow:$PATH
+```
+
+Update the `setenv.sh` script (see [Create `setenv.sh` to configure Hisat2 and Bowtie paths](#create-setenvsh-to-configure-hisat2-and-bowtie-paths) above) by adding:
+
+```
+export PATH=$HOME/nextflow:$PATH
+```
+
+### Run Nextflow "hello" example
+
+```console
+$ nextflow run hello
+N E X T F L O W  ~  version 20.01.0
+Pulling nextflow-io/hello ...
+downloaded from https://github.com/nextflow-io/hello.git
+Launching `nextflow-io/hello` [spontaneous_magritte] - revision: 1d43afc0ec [master]
+WARN: The use of `echo` method is deprecated
+executor >  local (4)
+[1d/bb459e] process > sayHello [100%] 4 of 4 /
+Hola world!
+
+Bonjour world!
+
+Ciao world!
+
+Hello world!
+```
+
+This runs Nextflow workflow [main.nf](https://github.com/nextflow-io/hello/blob/master/main.nf) from [nextflow-io/hello.git](https://github.com/nextflow-io/hello.git).
+
+---
+
 ## Check names and versions of Python packages
 
 Run:
@@ -818,6 +923,8 @@ gffutils                  0.9
 
 h5py                      2.9.0
 
+nextflow                  20.01.0
+
 pysam                     0.15.2
 
 pyyaml                    5.1
@@ -828,6 +935,8 @@ umi_tools                 1.0.0
 ```
 
 Your versions may differ from those shown.
+
+`nextflow` will only be shown if you installed Nextflow.
 
 ---
 
@@ -899,28 +1008,45 @@ You can now check your installation by running RiboViz tests.
 Run tests:
 
 ```console
-$ pytest --ignore-glob="*regression*"
-============================= test session starts ==============================
-platform linux -- Python 3.7.7, pytest-5.4.1, py-1.8.1, pluggy-0.13.1
+$ pytest --ignore-glob="*regression*" --ignore-glob="*nextflow*"
+=============================== test session starts ===============================
+platform linux -- Python 3.7.3, pytest-5.3.5, py-1.8.1, pluggy-0.13.1
 rootdir: /home/ubuntu/riboviz
-collected 165 items
+plugins: cov-2.8.1
+collected 166 items                                                               
+riboviz/test/test_barcodes_umis.py .................                        [ 10%]
+riboviz/test/test_demultiplex_fastq.py ..................                   [ 21%]
+riboviz/test/test_fastq.py ........................                         [ 35%]
+riboviz/test/test_process_utils.py ........................                 [ 50%]
+riboviz/test/test_sam_bam.py ................                               [ 59%]
+riboviz/test/test_trim_5p_mismatch.py ............                          [ 66%]
+riboviz/test/test_upgrade_config.py .....                                   [ 69%]
+riboviz/test/test_utils.py ....................                             [ 81%]
+riboviz/test/tools/test_prep_riboviz.py ............                        [ 89%]
+riboviz/test/tools/test_prep_riboviz_simdata_multiplex.py 
+..............    [ 97%]
+riboviz/test/tools/test_prep_riboviz_simdata_umi.py ....                    [100%]
 
-riboviz/test/test_barcodes_umis.py .................                     [ 10%]
-riboviz/test/test_demultiplex_fastq.py ..................                [ 21%]
-riboviz/test/test_fastq.py ........................                      [ 35%]
-riboviz/test/test_process_utils.py ........................              [ 50%]
-riboviz/test/test_sam_bam.py ................                            [ 60%]
-riboviz/test/test_trim_5p_mismatch.py ............                       [ 67%]
-riboviz/test/test_upgrade_config.py .....                                [ 70%]
-riboviz/test/test_utils.py ....................                          [ 82%]
-riboviz/test/tools/test_prep_riboviz.py ............                     [ 89%]
-riboviz/test/tools/test_prep_riboviz_simdata_multiplex.py .............  [ 97%]
-riboviz/test/tools/test_prep_riboviz_simdata_umi.py ....                 [100%]
 ...
-================== 165 passed, 1 warning in 208.70s (0:03:28) ==================
+=================== 166 passed, 1 warning in 259.81s (0:04:19) ====================
 ```
 
 `PendingDeprecationWarning` `warnings` can be ignored.
+
+If you installed Nextflow, run the Nextflow tests too:
+
+```console
+$ pytest riboviz/test/nextflow
+=============================== test session starts ===============================
+platform linux -- Python 3.7.3, pytest-5.3.5, py-1.8.1, pluggy-0.13.1
+rootdir: /home/ubuntu/riboviz
+plugins: cov-2.8.1
+collected 30 items                                                                
+
+riboviz/test/nextflow/test_nextflow_errors.py ..............................
+
+========================= 30 passed in 103.46s (0:01:43) ==========================
+```
 
 Download regression test data:
 
@@ -929,19 +1055,35 @@ $ cd
 $ git clone https://github.com/riboviz/regression-test-data-2.0.beta
 ```
 
-Run regression tests (these may take a few minutes):
+Run the regression tests for the RiboViz Python workflow (these may take a few minutes):
 
-```
-$ cd riboviz
+```console
 $ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0.beta/
 ============================= test session starts ==============================
-platform linux -- Python 3.7.7, pytest-5.4.1, py-1.8.1, pluggy-0.13.1
+platform linux -- Python 3.7.3, pytest-5.3.5, py-1.8.1, pluggy-0.13.1 -- /home/ubuntu/miniconda3/bin/python
 rootdir: /home/ubuntu/riboviz
-collected 76 items
-riboviz/test/regression/test_regression.py sssssssssssssssssssssssssssss [ 38%]
-sssss..ss......................................                          [100%]
+collected 82 items
+
+riboviz/test/regression/test_regression.py ssssssssssssssssssssssssssssssss [ 39%]
+ssssss..ssss......................................                          [100%]
+
 ...
-============ 40 passed, 36 skipped, 1 warning in 209.86s (0:03:29) ==
+============== 40 passed, 42 skipped, 1 warning in 215.47s (0:03:35) ==============
 ```
 
-`PendingDeprecationWarning` `warnings` can be ignored.
+If you installed Nextflow, run the regression tests for the RiboViz Nextflow workflow (these may take a few minutes):
+
+```console
+$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0.beta/ --nextflow
+=============================== test session starts ===============================
+platform linux -- Python 3.7.3, pytest-5.3.5, py-1.8.1, pluggy-0.13.1 -- /home/ubuntu/miniconda3/bin/python
+cachedir: .pytest_cache
+rootdir: /home/ubuntu/riboviz
+plugins: cov-2.8.1
+collected 82 items
+
+riboviz/test/regression/test_regression.py ssssssssssssssssssssssssssssssss [ 39%]
+ssssss..ssss......................................                          [100%]
+
+============== 40 passed, 42 skipped, 1 warning in 163.16s (0:02:43) ==============
+```
