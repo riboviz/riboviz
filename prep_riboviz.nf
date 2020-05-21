@@ -305,6 +305,20 @@ ribosome_fqs.multiplex_fq_files = params.multiplex_fq_files
 ribosome_fqs_yaml = new Yaml().dump(ribosome_fqs)
 
 // Non-sample-specific input files.
+if (! params.build_indices) {
+    pre_built_rrna_index_ht2 = Channel
+        .fromPath("${params.dir_index}/${params.rrna_index_prefix}.*.ht2",
+                  checkIfExists: true)
+        .collect()
+    pre_built_orf_index_ht2 = Channel
+        .fromPath("${params.dir_index}/${params.orf_index_prefix}.*.ht2",
+                  checkIfExists: true)
+        .collect()
+} else {
+    pre_built_rrna_index_ht2 = Channel.empty()
+    pre_built_orf_index_ht2 = Channel.empty()
+}
+
 if (! params.containsKey('rrna_fasta_file')) {
     exit 1, "Undefined rRNA FASTA file (rrna_fasta_file)"
 }
@@ -378,7 +392,7 @@ process buildIndicesrRNA {
     input:
         file rrna_fasta from rrna_fasta
     output:
-        file "${params.rrna_index_prefix}.*.ht2" into rrna_index_ht2
+        file "${params.rrna_index_prefix}.*.ht2" into built_rrna_index_ht2
     when:
         params.build_indices
     shell:
@@ -394,7 +408,7 @@ process buildIndicesORF {
     input:
         file orf_fasta from build_indices_orf_fasta
     output:
-        file "${params.orf_index_prefix}.*.ht2" into orf_index_ht2
+        file "${params.orf_index_prefix}.*.ht2" into built_orf_index_ht2
     when:
         params.build_indices
     shell:
@@ -403,6 +417,13 @@ process buildIndicesORF {
         hisat2-build ${orf_fasta} ${params.orf_index_prefix}
         """
 }
+
+// Combine "[pre_]built_rrna|orf_index_ht2" channels for downstream
+// processing. Due to foregoing behaviour conditional on
+// 'params.build_indices' one one of 'pre_built_rrna|orf_index_ht2' or
+// 'built_rrna|orf_index_ht2' will have content.
+rrna_index_ht2 = pre_built_rrna_index_ht2.mix(built_rrna_index_ht2)
+orf_index_ht2 = pre_built_orf_index_ht2.mix(built_orf_index_ht2)
 
 /*
 Sample file (fq_files)-specific processes.
