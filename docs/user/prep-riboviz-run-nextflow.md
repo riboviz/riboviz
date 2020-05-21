@@ -163,7 +163,7 @@ Or, edit your YAML configuration, and add the line:
 samsort_memory: 256M
 ```
 
-For information on the allowable values, see [samtools sort](http://www.htslib.org/doc/samtools-sort.html) and its `-m` fla.
+For information on the allowable values, see [samtools sort](http://www.htslib.org/doc/samtools-sort.html) and its `-m` flag.
 
 ---
 
