@@ -21,6 +21,7 @@ conda install -y -c anaconda biopython
 pip install gffutils
 conda install -y -c anaconda h5py
 conda install -y -c bioconda umi_tools
+conda install -y -c bioconda nextflow
 conda list
 conda deactivate
 conda deactivate
