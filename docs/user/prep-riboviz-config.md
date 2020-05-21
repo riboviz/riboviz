@@ -1,16 +1,18 @@
 # Configuring the RiboViz workflow
 
-This page describes the inputs that the RiboViz Python and Nextflow workflows require and how they are configured.
+This page describes the inputs that the RiboViz workflow requires and how it is configured.
+
+These inputs apply to both the Python workflow and the Nextflow workflow.
 
 ---
 
 ## Input files
 
-The RiboViz workflows require the following inputs (file formats are in brackets).
+The workflow requires the following inputs (file formats are in brackets).
 
 ### Configuration
 
-A configuration file containing all the information required for the analysis workflow, including the locations of the other input files ([YAML](http://www.yaml.org/)). For details, see [Configuration parameters](#configuration-parameters) below.
+A configuration file containing all the information required for the workflow, including the locations of the other input files ([YAML](http://www.yaml.org/)). For details, see [Configuration parameters](#configuration-parameters) below.
 
 ### Organism data
 
@@ -37,7 +39,7 @@ For processing multiplexed FASTQ files, a sample sheet (tab-separated values wit
 
 ## Configuration parameters
 
-The RiboViz workflows also support the following configuration parameters. All directory and file paths can be relative or absolute. If relative then they are relative to the directory the RiboViz workflows are invoked from.
+The workflow also supports the following configuration parameters. All directory and file paths can be relative or absolute. If relative then they are relative to the directory the workflow is invoked from.
 
 | Parameter | Description |
 | --------- | ----------- |
@@ -108,7 +110,7 @@ Example `umi_regexp` are:
 
 If `dedup_umis` is `TRUE` but `extract_umis` is `FALSE` then a warning will be displayed, but processing will continue.
 
-If both `fq_files` and `multiplex_fq_files` parameters are provided then the RiboViz workflows will exit. Only a group of non-multiplexed files or a single multiplexed file can be provided.
+If both `fq_files` and `multiplex_fq_files` parameters are provided then the workflow will exit. Only a group of non-multiplexed files or a single multiplexed file can be provided.
 
 If `fq_files` are provided then `umi_regexp` should extract only UMIs (i.e. it should contain `<umi>` elements only).
 
