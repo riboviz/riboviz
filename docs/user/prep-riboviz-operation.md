@@ -102,7 +102,7 @@ If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specifi
 * `pre_dedup.bam`: BAM file prior to deduplication. (Python workflow only)
 * `pre_dedup.bam.bai`: BAM index file for `pre_dedup.bam`. (Python workflow only)
 * `dedup.bam`: BAM file post deduplication. This is copied to become the output file `<SAMPLE_ID>.bam`. (Nextflow workflow only)
-* `dedup.bam.bai`: BAM index file for the above. This is copied to become the output file `<SAMPLE_ID>.bam`. (Nextflow workflow only)
+* `dedup.bam.bai`: BAM index file for the above. This is copied to become the output file `<SAMPLE_ID>.bam.bai`. (Nextflow workflow only)
 * UMI groups pre- and post-deduplication (if `group_umis: TRUE`):
   - `pre_dedup_groups.tsv`: UMI groups before deduplication.
   - `post_dedup_groups.tsv`: UMI groups after deduplication.
