@@ -84,6 +84,7 @@ The workflow also supports the following configuration parameters. All directory
 | `stop_in_cds` | `TRUE` or `FALSE`, are stop codons part of the CDS annotations in GFF? |
 | `t_rna_file` | tRNA estimates file (tab-separated values file)  (optional) |
 | `umi_regexp` | UMI-tools-compliant regular expression to extract barcodes and UMIs. For details on the regular expression format, see UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction). Only required if `extract_umis` is `TRUE`. |
+| `validate_only ` | Validate configuration, check that mandatory parameters have been provided and that input files exist, then exit without running the workflow (default `FALSE`) (Nextflow workflow only) |
 
 ### Examples
 

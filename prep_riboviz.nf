@@ -148,6 +148,9 @@ def helpMessage() {
 
     General:
 
+    * 'validate_only: Validate configuration, check that mandatory
+      parameters have been provided and that input files exist, then
+      exit without running the workflow (default 'FALSE')
     * 'num_processes': Number of processes to parallelize over, used
       by specific steps in the workflow (default 1)
     * 'samsort_memory': Memory to give to 'samtools sort' (
@@ -195,6 +198,11 @@ params.rpf = true
 params.secondary_id = "NULL"
 params.stop_in_cds = false
 params.samsort_memory = null
+params.validate_only = false
+
+if (params.validate_only) {
+    println("Validating configuration only")
+}
 
 if (! params.containsKey('adapters')) {
     exit 1, "Undefined adapters (adapters)"
@@ -206,22 +214,22 @@ if (! params.containsKey('rrna_index_prefix')) {
     exit 1, "Undefined rRNA index prefix (rrna_index_prefix)"
 }
 if (params.buffer < 0) {
-    exit 1, "CDS flanking region length (buffer) is < 0"
+    exit 1, "CDS flanking region length (buffer) must be >= 0"
 }
 if (params.count_threshold < 0) {
-    exit 1, "Read count threshold (count_threshold) is < 0"
+    exit 1, "Read count threshold (count_threshold) must be >= 0"
 }
 if (params.num_processes < 1) {
-    exit 1, "Number of processes (num_processes) is < 1"
+    exit 1, "Number of processes (num_processes) must be >= 1"
 }
 if (params.min_read_length < 1) {
-    exit 1, "Minimum read length in H5 output (min_read_length) is < 1"
+    exit 1, "Minimum read length in H5 output (min_read_length) must be >= 1"
 }
 if (params.max_read_length < 1) {
-    exit 1, "Maximum read length in H5 output (max_read_length) is < 1"
+    exit 1, "Maximum read length in H5 output (max_read_length) must be >= 1"
 }
 if (params.max_read_length < params.min_read_length) {
-    exit 1, "Maximum read length in H5 output is less than minimum read length (max_read_length)"
+    exit 1, "Maximum read length in H5 output (max_read_length) must be >= minimum read length (min_read_length)"
 }
 if (! params.secondary_id) {
     secondary_id = "NULL"
@@ -230,12 +238,12 @@ if (! params.secondary_id) {
 }
 if (params.dedup_umis) {
     if (! params.extract_umis) {
-        println("Warning: UMI deduplication was requested (dedup_umi: TRUE) but UMI extraction was not (extract_umis: FALSE)")
+        println("Warning: deduplication was requested (dedup_umi: TRUE) but UMI extraction was not (extract_umis: FALSE)")
     }
 }
 if (params.extract_umis) {
     if (! params.containsKey('umi_regexp')) {
-        exit 1, "Undefined barcode/UMI regular expression (umi_regexp) despite UMI extraction being requested (extract_umis: FALSE)"
+        exit 1, "Undefined barcode/UMI regular expression (umi_regexp) when UMI extraction is requested (extract_umis: TRUE)"
     }
 }
 
@@ -248,12 +256,12 @@ multiplex_id_fq = [:]
 multiplex_sample_sheet_tsv = Channel.empty()
 is_multiplexed = false
 if (! params.containsKey('dir_in')) {
-    exit 1, "Input directory (dir_in) is undefined"
+    exit 1, "Undefined input directory (dir_in)"
 }
 if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     exit 1, "No sample files (fq_files) or multiplexed files (multiplex_fq_files) are defined"
 } else if (params.fq_files && params.multiplex_fq_files) {
-    exit 1, "Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are defined"
+    exit 1, "Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are defined - only one or the other should be defined"
 } else if (params.fq_files) {
     // Filter 'params.fq_files' down to those samples that exist.
     for (entry in params.fq_files) {
@@ -261,7 +269,7 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
         if (sample_fq.exists()) {
             sample_id_fq[entry.key] = sample_fq
         } else {
-            println("No such file ($entry.key): $entry.value")
+            println("No such sample file ($entry.key): $entry.value")
         }
     }
     if (! sample_id_fq) {
@@ -273,8 +281,8 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
         multiplex_fq = file("${params.dir_in}/${entry}")
         if (multiplex_fq.exists()) {
             // Use file base name as key, ensuring that if file
-	    // has extension '.fastq.gz' or '.fq.gz' then both
-	    // extensions are removed from the name.
+            // has extension '.fastq.gz' or '.fq.gz' then both
+            // extensions are removed from the name.
             multiplex_id = multiplex_fq.baseName
             if (multiplex_id.endsWith(".fastq")) {
                 multiplex_id = multiplex_id - '.fastq'
@@ -283,7 +291,7 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
             }
             multiplex_id_fq[multiplex_id] = multiplex_fq
         } else {
-            println("No such file: $entry")
+            println("No such multiplexed file: $entry")
         }
     }
     if (! multiplex_id_fq) {
@@ -292,9 +300,12 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     if (! params.containsKey('sample_sheet')) {
         exit 1, "Undefined sample sheet (sample_sheet)"
     }
-    multiplex_sample_sheet_tsv = Channel.fromPath(
-        "${params.dir_in}/${params.sample_sheet}",
-        checkIfExists: true)
+    sample_sheet = file("${params.dir_in}/${params.sample_sheet}")
+    if (! sample_sheet.exists()) {
+        exit 1, "No such sample sheet (sample_sheet): ${sample_sheet}"
+    }
+    multiplex_sample_sheet_tsv = Channel.fromPath(sample_sheet,
+                                                  checkIfExists: true)
     is_multiplexed = true
 }
 
@@ -310,10 +321,17 @@ ribosome_fqs_yaml = new Yaml().dump(ribosome_fqs)
 
 // Non-sample-specific input files.
 if (! params.build_indices) {
+    rrna_index_prefix = file("${params.dir_index}/${params.rrna_index_prefix}.*.ht2")
+    if (! rrna_index_prefix) {
+        exit 1, "No such rRNA index files (rrna_index_prefix): ${params.dir_index}/${params.rrna_index_prefix}.*.ht2"
+    }
     pre_built_rrna_index_ht2 = Channel
-        .fromPath("${params.dir_index}/${params.rrna_index_prefix}.*.ht2",
-                  checkIfExists: true)
+        .fromPath(rrna_index_prefix, checkIfExists: true)
         .collect()
+    orf_index_prefix = file("${params.dir_index}/${params.orf_index_prefix}.*.ht2")
+    if (! orf_index_prefix) {
+        exit 1, "No such ORF index files (orf_index_prefix): ${params.dir_index}/${params.orf_index_prefix}.*.ht2"
+    }
     pre_built_orf_index_ht2 = Channel
         .fromPath("${params.dir_index}/${params.orf_index_prefix}.*.ht2",
                   checkIfExists: true)
@@ -326,18 +344,27 @@ if (! params.build_indices) {
 if (! params.containsKey('rrna_fasta_file')) {
     exit 1, "Undefined rRNA FASTA file (rrna_fasta_file)"
 }
-rrna_fasta = Channel.fromPath(params.rrna_fasta_file,
-                              checkIfExists: true)
+rrna_fasta_file = file(params.rrna_fasta_file)
+if (! rrna_fasta_file.exists()) {
+    exit 1, "No such file rRNA FASTA file (rrna_fasta_file): ${rrna_fasta_file}"
+}
+rrna_fasta = Channel.fromPath(rrna_fasta_file, checkIfExists: true)
 if (! params.containsKey('orf_fasta_file')) {
     exit 1, "Undefined ORF FASTA file (orf_fasta_file)"
 }
-orf_fasta = Channel.fromPath(params.orf_fasta_file,
-                             checkIfExists: true)
+orf_fasta_file = file(params.orf_fasta_file)
+if (! orf_fasta_file.exists()) {
+    exit 1, "No such ORF FASTA file (orf_fasta_file): ${orf_fasta_file}"
+}
+orf_fasta = Channel.fromPath(orf_fasta_file, checkIfExists: true)
 if (! params.containsKey('orf_gff_file')) {
     exit 1, "Undefined ORF GFF file (orf_gff_file)"
 }
-orf_gff = Channel.fromPath(params.orf_gff_file,
-                           checkIfExists: true)
+orf_gff_file = file(params.orf_gff_file)
+if (! orf_gff_file.exists()) {
+    exit 1, "No such ORF GFF file (orf_gff_file): ${orf_gff_file}"
+}
+orf_gff = Channel.fromPath(orf_gff_file, checkIfExists: true)
 
 // Optional inputs for generate_stats_figs.R.
 // If an optional file is not provided then a 'Missing_<PARAM>' file
@@ -352,9 +379,16 @@ orf_gff = Channel.fromPath(params.orf_gff_file,
 // https://github.com/nextflow-io/patterns/blob/master/optional-input.nf.
 if (params.containsKey('t_rna_file')
     && params.containsKey('codon_positions_file')) {
-    t_rna_tsv = Channel.fromPath(params.t_rna_file,
-                                 checkIfExists: true)
-    codon_positions_rdata = Channel.fromPath(params.codon_positions_file, 
+    t_rna_file = file(params.t_rna_file)
+    if (! t_rna_file.exists()) {
+        exit 1, "No such tRNA estimates file (t_rna_file): ${t_rna_file}"
+    }
+    t_rna_tsv = Channel.fromPath(t_rna_file, checkIfExists: true)
+    codon_positions_file = file(params.codon_positions_file)
+    if (! codon_positions_file.exists()) {
+        exit 1, "No such codon positions file (codon_positions_file): ${codon_positions_file}"
+    }
+    codon_positions_rdata = Channel.fromPath(codon_positions_file,
                                              checkIfExists: true)
     is_t_rna_and_codon_positions_file = true
 } else if ((! params.containsKey('t_rna_file'))
@@ -366,20 +400,31 @@ if (params.containsKey('t_rna_file')
     exit 1, "Either both tRNA estimates (t_rna_file) and codon positions (codon_positions_file) must be defined or neither must be defined"
 }
 if (params.containsKey('features_file')) {
-    features_tsv = Channel.fromPath(params.features_file,
-                                    checkIfExists: true)
+    features_file = file(params.features_file)
+    if (! features_file.exists()) {
+        exit 1, "No such features file (features_file): ${features_file}"
+    }
+    features_tsv = Channel.fromPath(features_file, checkIfExists: true)
     is_features_file = true
 } else {
     features_tsv = file("Missing_features_file")
     is_features_file = false
 }
 if (params.containsKey('asite_disp_length_file')) {
-    asite_disp_length_txt = Channel.fromPath(params.asite_disp_length_file,
+    asite_disp_length_file = file(params.asite_disp_length_file)
+    if (! asite_disp_length_file.exists()) {
+        exit 1, "No such A-site displacement file (asite_disp_length_file): ${asite_disp_length_file}"
+    }
+    asite_disp_length_txt = Channel.fromPath(asite_disp_length_file,
                                              checkIfExists: true)
     is_asite_disp_length_file = true
 } else {
     asite_disp_length_txt = file("Missing_aside_disp_length_file")
     is_asite_disp_length_file = false
+}
+
+if (params.validate_only) {
+    exit 0, "Validated configuration"
 }
 
 /*
@@ -442,9 +487,9 @@ process cutAdapters {
         tuple val(sample_id), file(sample_fq) \
             from sample_id_fq.collect{ id, file -> [id, file] }
     output:
-        tuple val(sample_id), file("trim.fq") into cut_fq	
+        tuple val(sample_id), file("trim.fq") into cut_fq
     when:
-        ! is_multiplexed
+        (! is_multiplexed)
     shell:
         """
         cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} \
@@ -472,7 +517,7 @@ process extractUmis {
         tuple val(sample_id), file("extract_trim.fq") \
             into umi_extract_fq
     when:
-        params.extract_umis && ! is_multiplexed
+        params.extract_umis && (! is_multiplexed)
     shell:
         """
         umi_tools extract -I ${sample_fq} \
@@ -550,8 +595,8 @@ process demultiplex {
     errorStrategy 'ignore'
     input:
         // Use '.toString' to prevent changing hashes of
-	// 'workflow.projectDir' triggering reexecution of this
-	// process if 'nextflow run' is run with '-resume'.
+        // 'workflow.projectDir' triggering reexecution of this
+        // process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
         tuple val(multiplex_id), file(multiplex_fq) from trimmed_multiplex_fq
         each file(sample_sheet_tsv) from deplex_multiplex_sample_sheet_tsv
@@ -665,8 +710,8 @@ process trim5pMismatches {
     errorStrategy 'ignore'
     input:
         // Use '.toString' to prevent changing hashes of
-	// 'workflow.projectDir' triggering reexecution of this
-	// process if 'nextflow run' is run with '-resume'.
+        // 'workflow.projectDir' triggering reexecution of this
+        // process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
         tuple val(sample_id), file(sample_sam) from orf_map_sam
     output:
@@ -835,7 +880,7 @@ process bamToH5 {
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(sample_bam), \
-	    file(sample_bam_bai) from bam_to_h5_bam
+            file(sample_bam_bai) from bam_to_h5_bam
         each file(orf_gff) from bam_to_h5_orf_gff
     output:
         tuple val(sample_id), file("${sample_id}.h5") into h5s
@@ -982,8 +1027,8 @@ process countReads {
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
     input:
         // Use '.toString' to prevent changing hashes of
-	// 'workflow.projectDir' triggering reexecution of this
-	// process if 'nextflow run' is run with '-resume'.
+        // 'workflow.projectDir' triggering reexecution of this
+        // process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
         val ribosome_fqs_yaml from ribosome_fqs_yaml
         // Force dependency on output of 'collateTpms' so this process
