@@ -1,12 +1,12 @@
 # Configuring the RiboViz workflow
 
-This page describes the inputs that `riboviz.tools.prep_riboviz` requires and how it is configured.
+This page describes the inputs that the RiboViz Python and Nextflow workflows require and how they are configured.
 
 ---
 
 ## Input files
 
-`prep_riboviz` requires the following inputs (file formats are in brackets).
+The RiboViz workflows require the following inputs (file formats are in brackets).
 
 ### Configuration
 
@@ -37,15 +37,15 @@ For processing multiplexed FASTQ files, a sample sheet (tab-separated values wit
 
 ## Configuration parameters
 
-`prep_riboviz` supports the following configuration parameters. All directory and file paths can be relative or absolute. If relative then they are relative to the directory `prep_riboviz` is invoked from.
+The RiboViz workflows also support the following configuration parameters. All directory and file paths can be relative or absolute. If relative then they are relative to the directory the RiboViz workflows are invoked from.
 
 | Parameter | Description |
 | --------- | ----------- |
 | `dir_in` | Input directory |
 | `dir_out` | Output directory |
 | `dir_tmp` | Intermediate files directory |
-| `dir_logs` | Log files directory |
-| `cmd_file` | Bash commands file, to log bash commands executed by the workflow (if omitted, `run_riboviz_vignette.sh` is used) |
+| `dir_logs` | Log files directory (Python workflow only) |
+| `cmd_file` | Bash commands file, to log bash commands executed by the workflow (if omitted, `run_riboviz_vignette.sh` is used) (Python workflow only) |
 | `rrna_fasta_file` | Ribosomal rRNA and other contaminant sequences to avoid aligning to (FASTA file) |
 | `orf_fasta_file` | Transcript sequences file containing both coding regions and flanking regions (FASTA file) |
 | `orf_gff_file` | Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts (GTF/GFF3 file) |
@@ -108,7 +108,7 @@ Example `umi_regexp` are:
 
 If `dedup_umis` is `TRUE` but `extract_umis` is `FALSE` then a warning will be displayed, but processing will continue.
 
-If both `fq_files` and `multiplex_fq_files` parameters are provided then `prep_riboviz` will exit. Only a group of non-multiplexed files or a single multiplexed file can be provided.
+If both `fq_files` and `multiplex_fq_files` parameters are provided then the RiboViz workflows will exit. Only a group of non-multiplexed files or a single multiplexed file can be provided.
 
 If `fq_files` are provided then `umi_regexp` should extract only UMIs (i.e. it should contain `<umi>` elements only).
 
