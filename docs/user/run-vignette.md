@@ -117,6 +117,50 @@ To run the Python workflow:
 
 ```console
 $ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
+Running under Python: 3.7.3 (default, Mar 27 2019, 22:11:17)
+[GCC 7.3.0]
+Created by: RiboViz Date: 2020-05-21 04:23:53.072951 Command-line
+tool: /home/ubuntu/riboviz/riboviz/tools/prep_riboviz.py File:
+/home/ubuntu/riboviz/riboviz/tools/prep_riboviz.py Version: commit
+5ecebd6d842fd9e090d16a36f8c0656e5c82b710 date 2020-05-21 04:22:14-07:00
+Configuration file: vignette/vignette_config.yaml
+Command file: run_riboviz_vignette.sh
+Number of processes: 1
+Build indices for alignment, if necessary/requested
+Build indices for alignment (vignette/input/yeast_rRNA_R64-1-1.fa). Log: vignette/logs/20200521-042353/hisat2_build_r_rna.log
+Build indices for alignment (vignette/input/yeast_YAL_CDS_w_250utrs.fa). Log: vignette/logs/20200521-042353/hisat2_build_orf.log
+Processing samples
+Processing sample: WTnone
+Processing file: vignette/input/SRR1042855_s1mi.fastq.gz
+Cut out sequencing library adapters. Log: vignette/logs/20200521-042353/WTnone/01_cutadapt.log
+Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: vignette/logs/20200521-042353/WTnone/02_hisat2_rrna.log
+Align remaining reads to ORFs index files using hisat2. Log: vignette/logs/20200521-042353/WTnone/03_hisat2_orf.log
+Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: vignette/logs/20200521-042353/WTnone/04_trim_5p_mismatch.log
+Convert SAM to BAM and sort on genome. Log: vignette/logs/20200521-042353/WTnone/05_samtools_view_sort.log
+Index BAM file. Log: vignette/logs/20200521-042353/WTnone/06_samtools_index.log
+Calculate transcriptome coverage for + strand and save as a bedgraph. Log: vignette/logs/20200521-042353/WTnone/07_bedtools_genome_cov_plus.log
+Calculate transcriptome coverage for - strand and save as a bedgraph. Log: vignette/logs/20200521-042353/WTnone/08_bedtools_genome_cov_minus.log
+Make length-sensitive alignments in H5 format. Log: vignette/logs/20200521-042353/WTnone/09_bam_to_h5.log
+Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets. Log: vignette/logs/20200521-042353/WTnone/10_generate_stats_figs.log
+Finished processing sample: vignette/input/SRR1042855_s1mi.fastq.gz
+Processing sample: WT3AT
+Processing file: vignette/input/SRR1042864_s1mi.fastq.gz
+Cut out sequencing library adapters. Log: vignette/logs/20200521-042353/WT3AT/01_cutadapt.log
+Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: vignette/logs/20200521-042353/WT3AT/02_hisat2_rrna.log
+Align remaining reads to ORFs index files using hisat2. Log: vignette/logs/20200521-042353/WT3AT/03_hisat2_orf.log
+Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: vignette/logs/20200521-042353/WT3AT/04_trim_5p_mismatch.log
+Convert SAM to BAM and sort on genome. Log: vignette/logs/20200521-042353/WT3AT/05_samtools_view_sort.log
+Index BAM file. Log: vignette/logs/20200521-042353/WT3AT/06_samtools_index.log
+Calculate transcriptome coverage for + strand and save as a bedgraph. Log: vignette/logs/20200521-042353/WT3AT/07_bedtools_genome_cov_plus.log
+Calculate transcriptome coverage for - strand and save as a bedgraph. Log: vignette/logs/20200521-042353/WT3AT/08_bedtools_genome_cov_minus.log
+Make length-sensitive alignments in H5 format. Log: vignette/logs/20200521-042353/WT3AT/09_bam_to_h5.log
+Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets. Log: vignette/logs/20200521-042353/WT3AT/10_generate_stats_figs.log
+Finished processing sample: vignette/input/SRR1042864_s1mi.fastq.gz
+File not found: vignette/input/example_missing_file.fastq.gz
+Finished processing 3 samples, 1 failed
+Collate TPMs across sample results. Log: vignette/logs/20200521-042353/collate_tpms.log
+Count reads. Log: vignette/logs/20200521-042353/count_reads.log
+Completed
 ```
 
 * For full information on how to run the Python workflow and the options available, see [Running the RiboViz Python workflow](./prep-riboviz-run-python.md)
@@ -124,7 +168,38 @@ $ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 To run the Nextflow workflow:
 
 ```console
-$ nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false
+$ nextflow run prep_riboviz.nf \
+    -params-file vignette/vignette_config.yaml -ansi-log false
+N E X T F L O W  ~  version 20.01.0
+Launching `prep_riboviz.nf` [goofy_jones] - revision: 0e94b1fa62
+No such file (NotHere): example_missing_file.fastq.gz
+[93/e96307] Submitted process > buildIndicesORF (YAL_CDS_w_250)
+[f1/38397f] Submitted process > cutAdapters (WT3AT)
+[1a/a01841] Submitted process > buildIndicesrRNA (yeast_rRNA)
+[f0/5779d2] Submitted process > cutAdapters (WTnone)
+[c2/497da3] Submitted process > hisat2rRNA (WTnone)
+[14/479d3b] Submitted process > hisat2rRNA (WT3AT)
+[cd/2e10ec] Submitted process > hisat2ORF (WTnone)
+[02/1fef3f] Submitted process > trim5pMismatches (WTnone)
+[9e/90df9d] Submitted process > samViewSort (WTnone)
+[1e/1a3f4d] Submitted process > outputBams (WTnone)
+[d8/3d85de] Submitted process > makeBedgraphs (WTnone)
+[26/055ef0] Submitted process > bamToH5 (WTnone)
+[d6/355a50] Submitted process > hisat2ORF (WT3AT)
+[90/78ca31] Submitted process > trim5pMismatches (WT3AT)
+[03/dfb679] Submitted process > samViewSort (WT3AT)
+[85/ccbb35] Submitted process > outputBams (WT3AT)
+[75/7e865e] Submitted process > bamToH5 (WT3AT)
+[32/a55251] Submitted process > makeBedgraphs (WT3AT)
+[d5/7a7e8b] Submitted process > generateStatsFigs (WTnone)
+[f4/5188e3] Submitted process > generateStatsFigs (WT3AT)
+Finished processing sample: WTnone
+[c1/184176] Submitted process > renameTpms (WTnone)
+Finished processing sample: WT3AT
+[6f/716c9e] Submitted process > renameTpms (WT3AT)
+[c6/bd5296] Submitted process > collateTpms (WTnone, WT3AT)
+[a6/3cb086] Submitted process > countReads
+Workflow finished! (OK)
 ```
 
 * For full information on how to run the Nextflow workflow and the options available, see [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md)
