@@ -264,11 +264,3 @@ $ nextflow run prep_riboviz.nf \
     -with-report report.html -with-timeline timeline.html \
     -with-dag workflow.svg
 ```
-
----
-
-## Run vignette regression test suite
-
-There is a separate regression test suite for Nextflow, to reflect the different files produced. The syntax is is identical to that documented in [Run vignette regression test suite](docs/developer/testing.md#run-vignette-regression-test-suite), except that an extra `--nextflow` flag needs to be provided.
-
-Please note that *existing* regression test data, produced by `riboviz.tools.prep_riboviz` *can* be used with the outputs from Nextflow, but that tests referencing the additional temporary files output by Nextflow, documented above, will fail.
