@@ -1041,11 +1041,12 @@ $ pytest riboviz/test/nextflow
 platform linux -- Python 3.7.3, pytest-5.3.5, py-1.8.1, pluggy-0.13.1
 rootdir: /home/ubuntu/riboviz
 plugins: cov-2.8.1
-collected 30 items                                                                
+collected 33 items                                                                
 
-riboviz/test/nextflow/test_nextflow_errors.py ..............................
+riboviz/test/nextflow/test_nextflow_errors.py ............................. [ 87%]
+....                                                                        [100%]
 
-========================= 30 passed in 103.46s (0:01:43) ==========================
+========================= 33 passed in 172.95s (0:02:52) ==========================
 ```
 
 Download regression test data:
