@@ -249,6 +249,48 @@ No such file (NotHere): example_missing_file.fastq.gz
 ...
 ```
 
+As another example, if the configuration file had:
+
+```yaml
+make_bedgraph: FALSE
+```
+
+then bedgraphs will not be created when the workflow is run. If you decide you do want the bedgraphs you can use `-resume` in conjunction with setting the `make_bedgraph` parameter to `TRUE`, on the command-line, to create the bedgraphs. For example:
+
+```console
+$ nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false -resume --make_bedgraph=TRUE
+N E X T F L O W  ~  version 20.01.0
+Launching `prep_riboviz.nf` [loving_fermi] - revision: 6df32df2e2
+No such file (NotHere): example_missing_file.fastq.gz
+[51/2f6008] Cached process > cutAdapters (WTnone)
+[fe/9f150a] Cached process > cutAdapters (WT3AT)
+[4c/71f6ea] Cached process > buildIndicesORF (YAL_CDS_w_250)
+[42/3c9bd2] Cached process > buildIndicesrRNA (yeast_rRNA)
+[2e/8a1462] Cached process > hisat2rRNA (WT3AT)
+[6d/06df71] Cached process > hisat2rRNA (WTnone)
+[77/218316] Cached process > hisat2ORF (WT3AT)
+[e0/f45966] Cached process > hisat2ORF (WTnone)
+[8f/c92188] Cached process > trim5pMismatches (WT3AT)
+[bd/87fae1] Cached process > trim5pMismatches (WTnone)
+[bb/598220] Cached process > samViewSort (WTnone)
+[3b/3a09d2] Cached process > samViewSort (WT3AT)
+[dc/a27468] Cached process > outputBams (WTnone)
+[f9/3528ca] Cached process > outputBams (WT3AT)
+[5a/bef907] Cached process > bamToH5 (WTnone)
+[89/cf27fd] Cached process > bamToH5 (WT3AT)
+[74/a2f2aa] Cached process > generateStatsFigs (WTnone)
+Finished processing sample: WTnone
+[c6/bfef26] Cached process > generateStatsFigs (WT3AT)
+Finished processing sample: WT3AT
+[b0/b534d4] Submitted process > makeBedgraphs (WTnone)
+[80/2638f2] Cached process > renameTpms (WTnone)
+[5f/4db643] Cached process > renameTpms (WT3AT)
+[ff/5a41cb] Submitted process > makeBedgraphs (WT3AT)
+[12/8109a2] Cached process > collateTpms (WTnone, WT3AT)
+[0c/9d6aa8] Cached process > countReads
+Workflow finished! (OK)
+```
+
 ---
 
 ## Multiplexed files
