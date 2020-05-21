@@ -78,6 +78,7 @@ The workflow also supports the following configuration parameters. All directory
 | `rpf` | `TRUE` or `FALSE`, is the dataset an RPF or mRNA dataset? |
 | `rrna_fasta_file` | Ribosomal rRNA and other contaminant sequences to avoid aligning to (FASTA file) |
 | `rrna_index_prefix` | Prefix for rRNA index files, relative to `<dir_index>` |
+| `samsort_memory` | Memory to give to `samtools sort` (default `768M`, [samtools sort](http://www.htslib.org/doc/samtools-sort.html) built-in default) (Nextflow workflow only) |
 | `sample_sheet` | A sample sheet, relative to `<dir_in>`, mandatory if `multiplex_fq_files` is used (tab-separated values file) |
 | `secondary_id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) |
 | `stop_in_cds` | `TRUE` or `FALSE`, are stop codons part of the CDS annotations in GFF? |

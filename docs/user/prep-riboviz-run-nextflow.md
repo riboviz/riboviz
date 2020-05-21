@@ -155,19 +155,15 @@ Swap:           969         619         350
 
 Divide the free memory by the number of processes, `num_processes` e.g. 1024/4 = 256 MB.
 
-Edit `prep_riboviz.nf` and change the lines:
+Either, rerun the workflow and provide the memory via the command line e.g. `--samsort_memory=256M`.
 
-```
-	samtools view -b ${sample_sam} | samtools sort \
-            -@ ${params.num_processes} -O bam -o orf_map_clean.bam -
+Or, edit your YAML configuration, and add the line:
+
+```yaml
+samsort_memory: 256M
 ```
 
-to include the `samtools` flag `-m <MEMORY_DIV_PROCESSES>M` e.g.:
-
-```
-	samtools view -b ${sample_sam} | samtools sort -m 256M \
-            -@ ${params.num_processes} -O bam -o orf_map_clean.bam -
-```
+For information on the allowable values, see [samtools sort](http://www.htslib.org/doc/samtools-sort.html) and its `-m` fla.
 
 ---
 

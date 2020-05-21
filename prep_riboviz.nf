@@ -144,12 +144,15 @@ def helpMessage() {
     * 'secondary_id': Secondary gene IDs to access the data (COX1,
       EFB1, etc. or 'NULL') (default 'NULL')
     * 'stop_in_cds': 'TRUE' or 'FALSE', are stop codons part of the
-      CDS annotations in GFF? (default ('FALSE')
+      CDS annotations in GFF? (default 'FALSE')
 
     General:
 
     * 'num_processes': Number of processes to parallelize over, used
       by specific steps in the workflow (default 1)
+    * 'samsort_memory': Memory to give to 'samtools sort' (
+      default '768M', 'samtools sort' built-in default,
+      see http://www.htslib.org/doc/samtools-sort.html)
     """.stripIndent()
 }
 
@@ -191,6 +194,7 @@ params.primary_id = "Name"
 params.rpf = true
 params.secondary_id = "NULL"
 params.stop_in_cds = false
+params.samsort_memory = null
 
 if (! params.containsKey('adapters')) {
     exit 1, "Undefined adapters (adapters)"
@@ -688,9 +692,10 @@ process samViewSort {
         tuple val(sample_id), file("orf_map_clean.bam"), \
             file("orf_map_clean.bam.bai") into orf_map_bam
     shell:
+        memory = params.samsort_memory != null ? "-m ${params.samsort_memory}" : ""
         """
         samtools --version
-        samtools view -b ${sample_sam} | samtools sort \
+        samtools view -b ${sample_sam} | samtools sort ${memory} \
             -@ ${params.num_processes} -O bam -o orf_map_clean.bam -
         samtools index orf_map_clean.bam
         """
