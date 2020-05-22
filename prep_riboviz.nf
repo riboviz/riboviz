@@ -1065,9 +1065,9 @@ process countReads {
         echo "${ribosome_fqs_yaml}" > ribosome_fqs.yaml
         python -m riboviz.tools.count_reads \
            -c ribosome_fqs.yaml \
-           -i ${workflow.projectDir}/${params.dir_in} \
-           -t ${workflow.projectDir}/${params.dir_tmp} \
-           -o ${workflow.projectDir}/${params.dir_out} \
+           -i ${file(params.dir_in).toAbsolutePath()} \
+           -t ${file(params.dir_tmp).toAbsolutePath()} \
+           -o ${file(params.dir_out).toAbsolutePath()} \
            -r read_counts.tsv  
         """
 }

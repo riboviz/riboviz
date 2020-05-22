@@ -17,6 +17,7 @@ Contents:
 * [Debugging and bash scripts](#debugging-and-bash-scripts)
 * [Generating reports](#generating-reports)
 * [Managing your disk usage](#managing-your-disk-usage)
+* [Invoking the workflow from outwith the RiboViz home directory](#invoking-the-workflow-from-outwith-the-riboviz-home-directory)
 
 ---
 
@@ -469,3 +470,99 @@ For example, here is the volume of the outputs from a run of the vignette as doc
 | Total     | 1052 |
 
 **Tip:** We recommend you delete temporary directories and log directories when you have completed your analyses to your satisfaction.
+
+---
+
+## Invoking the workflow from outwith the RiboViz home directory
+
+To invoke the workflow from outwith the RiboViz home directory:
+
+* Ensure that all the input paths in the YAML configuration file are correctly configured:
+  - `dir_in`
+  - `orf_fasta_file`
+  - `orf_gff_file`
+  - `rrna_fasta_file`
+* Ensure that all the output paths in the YAML configuration file are correctly configured:
+  - `dir_index`
+  - `dir_out`
+  - `dir_tmp`
+* Ensure that all the data paths in the YAML configuration file are correctly configured:
+  - `asite_disp_length_file`
+  - `codon_positions_file`
+  - `features_file`
+  - `t_rna_file`
+
+* Run:
+
+```console
+$ nextflow run <RIBOVIZ>/prep_riboviz.nf -params-file <CONFIG_FILE> \
+    -ansi-log false
+```
+
+where:
+
+* `<RIBOVIZ>`: path to RiboViz home directory, which can be relative to the current directory or absolute.
+* `<CONFIG>`: path to a YAML configuration file, which can be relative to the current directory or absolute.
+
+For example, given an `analysis/` directory with contents:
+
+```
+sample_config.yaml
+sample_input/
+  sample.fq.gz
+  yeast_rRNA_R64-1-1.fa
+  yeast_YAL_CDS_w_250utrs.fa
+  yeast_YAL_CDS_w_250utrs.gff3
+```
+
+and assuming that `analysis/` is a sibling of `riboviz/`, then file paths in `sample_config.yaml` can be configured as follows:
+
+```yaml
+asite_disp_length_file: riboviz/data/yeast_standard_asite_disp_length.txt
+codon_positions_file: riboviz/data/yeast_codon_pos_i200.RData
+dir_in: analysis/input
+dir_index: analysis/index
+dir_out: analysis/output
+dir_tmp: analysis/tmp
+features_file: riboviz/data/yeast_features.tsv
+fq_files:
+  WTnone: SRR1042855_s1mi.fastq.gz
+  WT3AT: SRR1042864_s1mi.fastq.gz
+orf_fasta_file: analysis/input/yeast_YAL_CDS_w_250utrs.fa
+orf_gff_file: analysis/input/yeast_YAL_CDS_w_250utrs.gff3
+rrna_fasta_file: analysis/input/yeast_rRNA_R64-1-1.fa
+t_rna_file: riboviz/data/yeast_tRNAs.tsv
+```
+
+The workflow can then be run in the parent directory of `analysis/` and `riboviz/` as follows:
+
+```console
+$ nextflow run riboviz/prep_riboviz.nf \
+    -params-file analysis/sample_config.yaml -ansi-log false
+```
+
+Absolute paths can also be used. For example, if the file paths were as follows:
+
+```yaml
+asite_disp_length_file: /home/user/riboviz/data/yeast_standard_asite_disp_length.txt
+codon_positions_file: /home/user/riboviz/data/yeast_codon_pos_i200.RData
+dir_in: /home/user/analysis/input
+dir_index: /home/user/analysis/index
+dir_out: /home/user/analysis/output
+dir_tmp: /home/user/analysis/tmp
+features_file: /home/user/riboviz/data/yeast_features.tsv
+fq_files:
+  WTnone: SRR1042855_s1mi.fastq.gz
+  WT3AT: SRR1042864_s1mi.fastq.gz
+orf_fasta_file: /home/user/analysis/input/yeast_YAL_CDS_w_250utrs.fa
+orf_gff_file: /home/user/analysis/input/yeast_YAL_CDS_w_250utrs.gff3
+rrna_fasta_file: /home/user/analysis/input/yeast_rRNA_R64-1-1.fa
+t_rna_file: /home/user/riboviz/data/yeast_tRNAs.tsv
+```
+
+The workflow could then be run from any directory as follows:
+
+```console
+$ nextflow run /home/user/riboviz/prep_riboviz.nf \
+    -params-file /home/user/analysis/sample_config.yaml -ansi-log false
+```
