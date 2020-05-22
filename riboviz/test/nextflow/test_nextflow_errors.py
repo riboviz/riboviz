@@ -44,7 +44,7 @@ def tmp_dir():
 def test_no_sample_multiplex_fq_files(tmp_file):
     """
     Test that missing :py:const:`riboviz.params.FQ_FILES` and
-    :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` raises a non-zero
+    :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` returns a non-zero
     exit code.
 
     :param tmp_file: Path to temporary file, to write configuration to
@@ -64,7 +64,7 @@ def test_no_sample_multiplex_fq_files(tmp_file):
 def test_both_sample_multiplex_fq_files(tmp_file):
     """
     Test that providing both :py:const:`riboviz.params.FQ_FILES` and
-    :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` raises a non-zero
+    :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` returns a non-zero
     exit code.
 
     :param tmp_file: Path to temporary file, to write configuration to
@@ -121,10 +121,10 @@ def test_multiplex_fq_files_not_found(tmp_file):
         "Unexpected exit code %d" % exit_code
 
 
-def test_multiplex_fq_files_no_sample_sheet(tmp_file):
+def test_no_sample_sheet(tmp_file):
     """
     Test that providing :py:const:`riboviz.params.MULTIPLEX_FQ_FILES`
-    but no :py:const:`riboviz.params.SAMPLE_SHEET` raises a non-zero
+    but no :py:const:`riboviz.params.SAMPLE_SHEET` returns a non-zero
     exit code.
 
     :param tmp_file: Path to temporary file, to write configuration to
@@ -140,11 +140,11 @@ def test_multiplex_fq_files_no_sample_sheet(tmp_file):
         "Unexpected exit code %d" % exit_code
 
 
-def test_multiplex_fq_files_sample_sheet_not_found(tmp_file):
+def test_sample_sheet_not_found(tmp_file):
     """
     Test that providing :py:const:`riboviz.params.MULTIPLEX_FQ_FILES`
     and a non-existent :py:const:`riboviz.params.SAMPLE_SHEET` file
-    raises a non-zero exit code.
+    returns a non-zero exit code.
 
     :param tmp_file: Path to temporary file, to write configuration to
     :type tmp_file: str or unicode
@@ -171,7 +171,7 @@ def test_multiplex_fq_files_sample_sheet_not_found(tmp_file):
                           params.CODON_POSITIONS_FILE])
 def test_no_mandatory_parameter(tmp_file, parameter):
     """
-    Test that not providing a mandatory parameter raises a non-zero
+    Test that not providing a mandatory parameter returns a non-zero
     exit code.
 
     This test also covers the case where if one of
@@ -205,7 +205,7 @@ def test_no_mandatory_parameter(tmp_file, parameter):
                           params.ASITE_DISP_LENGTH_FILE])
 def test_file_not_found(tmp_file, parameter):
     """
-    Test that providing a missing file for a file parameter raises a
+    Test that providing a missing file for a file parameter returns a
     non-zero exit code.
 
     :param tmp_file: Path to temporary file, to write configuration to
@@ -226,7 +226,7 @@ def test_file_not_found(tmp_file, parameter):
 def test_extract_umis_no_umi_regexp(tmp_file):
     """
     Test that if :py:const:`riboviz.params.EXTRACT_UMIS` is `TRUE`
-    but no :py:const:`riboviz.params.UMI_REGEXP` raises a non-zero
+    but no :py:const:`riboviz.params.UMI_REGEXP` returns a non-zero
     exit code.
 
     :param tmp_file: Path to temporary file, to write configuration to
@@ -250,7 +250,7 @@ def test_extract_umis_no_umi_regexp(tmp_file):
                           (params.MAX_READ_LENGTH, 0)])
 def test_invalid_value(tmp_file, parameter):
     """
-    Test that providing invalid values for a parameter raises a
+    Test that providing invalid values for a parameter returns a
     non-zero exit code.
 
     :param tmp_file: Path to temporary file, to write configuration to
@@ -272,7 +272,7 @@ def test_invalid_value(tmp_file, parameter):
 def test_max_read_length_less_min(tmp_file):
     """
     Test that :py:const:`riboviz.params.MAX_READ_LENGTH` less than
-    :py:const:`riboviz.params.MIN_READ_LENGTH` raises a non-zero exit
+    :py:const:`riboviz.params.MIN_READ_LENGTH` returns a non-zero exit
     code.
 
     :param tmp_file: Path to temporary file, to write configuration to
@@ -293,7 +293,7 @@ def test_build_indices_false_no_such_index_dir(tmp_file):
     """
     Test that :py:const:`riboviz.params.BUILD_INDICES` is false
     and no such index directory :py:const:`riboviz.params.INDEX_DIR`
-    raises a non-zero exit code.
+    returns a non-zero exit code.
 
     :param tmp_file: Path to temporary file, to write configuration to
     :type tmp_file: str or unicode
@@ -313,7 +313,7 @@ def test_build_indices_false_no_such_orf_index_prefix(tmp_file, tmp_dir):
     """
     Test that :py:const:`riboviz.params.BUILD_INDICES` is false
     and no such files with prefixe
-    :py:const:`riboviz.params.ORF_INDEX_PREFIX` raises a non-zero
+    :py:const:`riboviz.params.ORF_INDEX_PREFIX` returns a non-zero
     exit code.
 
     :param tmp_file: Path to temporary file, to write configuration to
@@ -344,7 +344,7 @@ def test_build_indices_false_no_such_rrna_index_prefix(tmp_file, tmp_dir):
     """
     Test that :py:const:`riboviz.params.BUILD_INDICES` is false
     and no such files with prefixe
-    :py:const:`riboviz.params.RRNA_INDEX_PREFIX` raises a non-zero
+    :py:const:`riboviz.params.RRNA_INDEX_PREFIX` returns a non-zero
     exit code.
 
     :param tmp_file: Path to temporary file, to write configuration to
@@ -368,4 +368,73 @@ def test_build_indices_false_no_such_rrna_index_prefix(tmp_file, tmp_dir):
         yaml.dump(config, f)
     exit_code = run_nextflow(tmp_file)
     assert exit_code != 0, \
+        "Unexpected exit code %d" % exit_code
+
+
+def test_validate_skip_inputs_fq_files_not_found(tmp_file):
+    """
+    Test that non-existent :py:const:`riboviz.params.FQ_FILES` files
+    in the presence of both :py:const:`riboviz.params.VALIDATE_ONLY`
+    and :py:const:`riboviz.params.SKIP_INPUTS` returns a zero exit
+    code.
+
+    :param tmp_file: Path to temporary file, to write configuration to
+    :type tmp_file: str or unicode
+    """
+    with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    config[params.FQ_FILES] = {
+        "foo1": "foo1.fq", "foo2": "foo2.fq"
+    }
+    config[params.VALIDATE_ONLY] = True
+    config[params.SKIP_INPUTS] = True
+    with open(tmp_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = run_nextflow(tmp_file)
+    assert exit_code == 0, \
+        "Unexpected exit code %d" % exit_code
+
+
+def test_validate_skip_inputs_multiplex_fq_files_not_found(tmp_file):
+    """
+    Test that non-existent
+    :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` in the presence of
+    both :py:const:`riboviz.params.VALIDATE_ONLY` and
+    :py:const:`riboviz.params.SKIP_INPUTS` returns a zero exit code.
+
+    :param tmp_file: Path to temporary file, to write configuration to
+    :type tmp_file: str or unicode
+    """
+    with open(riboviz.test.SIMDATA_MULTIPLEX_CONFIG, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    config[params.MULTIPLEX_FQ_FILES] = ["foo1.fq", "foo2.fq"]
+    config[params.VALIDATE_ONLY] = True
+    config[params.SKIP_INPUTS] = True
+    with open(tmp_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = run_nextflow(tmp_file)
+    assert exit_code == 0, \
+        "Unexpected exit code %d" % exit_code
+
+
+def test_validate_skip_inputs_sample_sheet_not_found(tmp_file):
+    """
+    Test that providing :py:const:`riboviz.params.MULTIPLEX_FQ_FILES`
+    and a non-existent :py:const:`riboviz.params.SAMPLE_SHEET` file
+    in the presence of both :py:const:`riboviz.params.VALIDATE_ONLY`
+    and :py:const:`riboviz.params.SKIP_INPUTS` returns a zero exit
+    code.
+
+    :param tmp_file: Path to temporary file, to write configuration to
+    :type tmp_file: str or unicode
+    """
+    with open(riboviz.test.SIMDATA_MULTIPLEX_CONFIG, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    config[params.SAMPLE_SHEET] = "foo.tsv"
+    config[params.VALIDATE_ONLY] = True
+    config[params.SKIP_INPUTS] = True
+    with open(tmp_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = run_nextflow(tmp_file)
+    assert exit_code == 0, \
         "Unexpected exit code %d" % exit_code

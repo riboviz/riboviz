@@ -1037,16 +1037,16 @@ If you installed Nextflow, run the Nextflow tests too:
 
 ```console
 $ pytest riboviz/test/nextflow
-=============================== test session starts ===============================
+============================== test session starts ===============================
 platform linux -- Python 3.7.3, pytest-5.3.5, py-1.8.1, pluggy-0.13.1
 rootdir: /home/ubuntu/riboviz
 plugins: cov-2.8.1
-collected 33 items                                                                
+collected 36 items
 
-riboviz/test/nextflow/test_nextflow_errors.py ............................. [ 87%]
-....                                                                        [100%]
+riboviz/test/nextflow/test_nextflow_errors.py ............................ [ 77%]
+........                                                                   [100%]
 
-========================= 33 passed in 172.95s (0:02:52) ==========================
+========================= 36 passed in 143.72s (0:02:23) =========================
 ```
 
 Download regression test data:

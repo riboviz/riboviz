@@ -111,6 +111,29 @@ This warning is expected and can be ignored. The vignette configuration file int
 
 ---
 
+## Validate configuration (Nextflow workflow only)
+
+The Nextflow workflow supports a `--validate_only` command-line parameter which allows for the workflow configuration to be validated without running the workflow.
+
+**Tip:** we strongly recommend validating the configuration before doing a live run on data you have not processed before.
+
+Validate configuration:
+
+```console
+$ nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml --validate_only
+N E X T F L O W  ~  version 20.01.0
+Launching `prep_riboviz.nf` [compassionate_hoover] - revision: caa1a2bf21
+Validating configuration only
+No such sample file (NotHere): example_missing_file.fastq.gz
+Validated configuration
+```
+
+### Troubleshooting: `No such file (NotHere): example_missing_file.fastq.gz` (Nextflow workflow)
+
+This warning is expected and can be ignored. The vignette configuration file intentionally includes a reference to a missing input file. This demonstrates that if processing of one sample fails it does not block the processing of the other samples.
+
+---
+
 ## Run the workflow
 
 To run the Python workflow:
@@ -203,10 +226,6 @@ Workflow finished! (OK)
 ```
 
 * For full information on how to run the Nextflow workflow and the options available, see [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md)
-
-### Troubleshooting: `No such file (NotHere): example_missing_file.fastq.gz` (Nextflow workflow)
-
-This warning is expected and can be ignored. The vignette configuration file intentionally includes a reference to a missing input file. This demonstrates that if processing of one sample fails it does not block the processing of the other samples.
 
 ---
 

@@ -21,8 +21,8 @@ def helpMessage() {
     stated). 
 
     Configuration parameters can also be provided via the
-    command-line in the form `--<PARAMETER>=<VALUE>` (for example
-    `--make_bedgraph=FALSE`).
+    command-line in the form '--<PARAMETER>=<VALUE>' (for example
+    '--make_bedgraph=FALSE').
 
     '--help' displays this help information and exits.
 
@@ -61,9 +61,9 @@ def helpMessage() {
 
     Indexing:
 
-    * 'build_indices': 'TRUE' or 'FALSE', rebuild indices from FASTA
-      files? (default 'TRUE'). If 'FALSE' then 'dir_index' is expected
-      to contain the index files.
+    * 'build_indices': Rebuild indices from FASTA files? (default
+      'TRUE'). If 'FALSE' then 'dir_index' is expected to contain the
+      index files.
     * 'orf_index_prefix': Prefix for ORF index files, relative to
       '<dir_index>' .
     * 'rrna_index_prefix': Prefix for rRNA index files, relative to
@@ -82,8 +82,8 @@ def helpMessage() {
 
     Barcode and UMI extraction, deduplication, demultiplexing:
 
-    * 'extract_umis': 'TRUE' or 'FALSE', extract UMIs after adapter
-      trimming? (default 'FALSE')
+    * 'extract_umis': Extract UMIs after adapter trimming? (default
+      'FALSE')
     * 'umi_regexp': UMI-tools-compliant regular expression to extract
       barcodes and UMIs. For details on the regular expression format,
       see UMI-tools documentation on Barcode extraction
@@ -94,10 +94,10 @@ def helpMessage() {
       - If 'multiplex_fq_files' is provided then 'umi_regexp' should
         extract both barcodes and UMIs (i.e. it should contain both
         '<cell>' and '<umi>' elements).
-    * 'dedup_umis': 'TRUE' or 'FALSE', deduplicate reads using
-      UMI-tools? (default 'FALSE')
-    * 'group_umis': 'TRUE' or 'FALSE', summarise UMI groups both pre-
-      and post-deduplication, using UMI-tools? Useful for debugging
+    * 'dedup_umis': Deduplicate reads using UMI-tools? (default
+      'FALSE')
+    * 'group_umis': Smmarise UMI groups both pre- and
+      post-deduplication using UMI-tools? Useful for debugging 
       (default 'FALSE')
     * If 'dedup_umis' is 'TRUE' but 'extract_umis' is 'FALSE' then a
       warning will be displayed, but processing will continue.
@@ -116,41 +116,44 @@ def helpMessage() {
     * 't_rna_file': tRNA estimates file (tab-separated values file
       with 'AA', 'Codon', 'tRNA', 'tAI', 'Microarray', 'RNA.seq'
       columns)  (optional)
-    * While both `codon_positions_file` and `t_rna_file` are optional
+    * While both 'codon_positions_file' and 't_rna_file' are optional
       either both must be specified or neither must be specified.
 
     Statistics and figure generation parameters:
     
     * 'buffer': Length of flanking region around the CDS (default 250)
-    * 'count_reads': 'TRUE' or 'FALSE', scan input, temporary and
-      output files and produce counts of reads in each FASTQ, SAM, and
-      BAM file  processed? (default: 'TRUE')
+    * 'count_reads': Scan input, temporary and output files and
+      produce counts of reads in each FASTQ, SAM, and BAM file
+      processed? (default 'TRUE')
     * 'count_threshold': Remove genes with a read count below this
       threshold, when generating statistics and figures (default 1)
     * 'dataset': Human-readable name of the dataset (default
        'dataset')
-    * 'do_pos_sp_nt_freq': 'TRUE' or 'FALSE', calculate
-      position-specific nucleotide freqeuency? (default 'TRUE')
-    * 'is_riboviz_gff': 'TRUE' or 'FALSE', does the GFF file contain 3
-      elements per gene - UTR5, CDS, and UTR3? (default 'TRUE')
-    * 'make_bedgraph': 'TRUE' or 'FALSE', output bedgraph data files in
-      addition to H5 files? (default 'TRUE')
+    * 'do_pos_sp_nt_freq': Calculate position-specific nucleotide
+      freqeuency? (default 'TRUE') 
+    * 'is_riboviz_gff': Does the GFF file contain 3 elements per gene
+      - UTR5, CDS, and UTR3? (default 'TRUE') 
+    * 'make_bedgraph': Output bedgraph data files in addition to H5
+      files? (default 'TRUE') 
     * 'max_read_length': Maximum read length in H5 output (default 50)
     * 'min_read_length': Minimum read length in H5 output (default 10)
     * 'primary_id': Primary gene IDs to access the data (YAL001C,
       YAL003W, etc.) (default 'Name')
-    * 'rpf': 'TRUE' or 'FALSE', is the dataset an RPF or mRNA dataset?
-      (default 'TRUE')
+    * 'rpf': Is the dataset an RPF or mRNA dataset? (default 'TRUE')
     * 'secondary_id': Secondary gene IDs to access the data (COX1,
       EFB1, etc. or 'NULL') (default 'NULL')
-    * 'stop_in_cds': 'TRUE' or 'FALSE', are stop codons part of the
-      CDS annotations in GFF? (default 'FALSE')
+    * 'stop_in_cds': Are stop codons part of the CDS annotations in
+      GFF? (default 'FALSE')
 
     General:
 
     * 'validate_only: Validate configuration, check that mandatory
       parameters have been provided and that input files exist, then
-      exit without running the workflow (default 'FALSE')
+      exit without running the workflow? (default 'FALSE')
+    * 'skip_inputs': When validating configuration (see
+      'validate_only' above) skip checks for existence of ribosome
+      profiling data files ('fq_files', 'multiplexed_fq_files',
+      'sample_sheet')? (default 'FALSE')
     * 'num_processes': Number of processes to parallelize over, used
       by specific steps in the workflow (default 1)
     * 'samsort_memory': Memory to give to 'samtools sort' (
@@ -199,6 +202,7 @@ params.secondary_id = "NULL"
 params.stop_in_cds = false
 params.samsort_memory = null
 params.validate_only = false
+params.skip_inputs = false
 
 if (params.validate_only) {
     println("Validating configuration only")
@@ -255,57 +259,65 @@ sample_id_fq = [:]
 multiplex_id_fq = [:]
 multiplex_sample_sheet_tsv = Channel.empty()
 is_multiplexed = false
+if (params.validate_only && params.skip_inputs) {
+    println("Skipping checks for existence of of ribosome profiling input files (fq_files|multiplex_fq_files|sample_sheet)")
+}
 if (! params.containsKey('dir_in')) {
     exit 1, "Undefined input directory (dir_in)"
-}
-if ((! params.fq_files) && (! params.multiplex_fq_files)) {
+} else if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     exit 1, "No sample files (fq_files) or multiplexed files (multiplex_fq_files) are defined"
 } else if (params.fq_files && params.multiplex_fq_files) {
     exit 1, "Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are defined - only one or the other should be defined"
 } else if (params.fq_files) {
-    // Filter 'params.fq_files' down to those samples that exist.
-    for (entry in params.fq_files) {
-        sample_fq = file("${params.dir_in}/${entry.value}")
-        if (sample_fq.exists()) {
-            sample_id_fq[entry.key] = sample_fq
-        } else {
-            println("No such sample file ($entry.key): $entry.value")
+    if ((! params.validate_only) || (! params.skip_inputs)) {
+        // Filter 'params.fq_files' down to those samples that exist.
+        for (entry in params.fq_files) {
+            sample_fq = file("${params.dir_in}/${entry.value}")
+            if (sample_fq.exists()) {
+                sample_id_fq[entry.key] = sample_fq
+            } else {
+                println("No such sample file ($entry.key): $entry.value")
+            }
         }
-    }
-    if (! sample_id_fq) {
-        exit 1, "None of the defined sample files (fq_files) exist"
+        if (! sample_id_fq) {
+            exit 1, "None of the defined sample files (fq_files) exist"
+        }
     }
 } else {
-    // Filter 'params.multiplex_fq_files' down to those files that exist.
-    for (entry in params.multiplex_fq_files) {
-        multiplex_fq = file("${params.dir_in}/${entry}")
-        if (multiplex_fq.exists()) {
-            // Use file base name as key, ensuring that if file
-            // has extension '.fastq.gz' or '.fq.gz' then both
-            // extensions are removed from the name.
-            multiplex_id = multiplex_fq.baseName
-            if (multiplex_id.endsWith(".fastq")) {
-                multiplex_id = multiplex_id - '.fastq'
-            } else if (multiplex_id.endsWith(".fq")) {
-                multiplex_id = multiplex_id - '.fq'
+    if ((! params.validate_only) || (! params.skip_inputs)) {
+        // Filter 'params.multiplex_fq_files' down to those files that exist.
+        for (entry in params.multiplex_fq_files) {
+            multiplex_fq = file("${params.dir_in}/${entry}")
+            if (multiplex_fq.exists()) {
+                // Use file base name as key, ensuring that if file
+                // has extension '.fastq.gz' or '.fq.gz' then both
+                // extensions are removed from the name.
+                multiplex_id = multiplex_fq.baseName
+                if (multiplex_id.endsWith(".fastq")) {
+                    multiplex_id = multiplex_id - '.fastq'
+                } else if (multiplex_id.endsWith(".fq")) {
+                    multiplex_id = multiplex_id - '.fq'
+                }
+                multiplex_id_fq[multiplex_id] = multiplex_fq
+            } else {
+                println("No such multiplexed file: $entry")
             }
-            multiplex_id_fq[multiplex_id] = multiplex_fq
-        } else {
-            println("No such multiplexed file: $entry")
         }
-    }
-    if (! multiplex_id_fq) {
-        exit 1, "None of the defined multiplexed files (multiplex_fq_files) exist"
+        if (! multiplex_id_fq) {
+            exit 1, "None of the defined multiplexed files (multiplex_fq_files) exist"
+        }
     }
     if (! params.containsKey('sample_sheet')) {
         exit 1, "Undefined sample sheet (sample_sheet)"
     }
     sample_sheet = file("${params.dir_in}/${params.sample_sheet}")
-    if (! sample_sheet.exists()) {
-        exit 1, "No such sample sheet (sample_sheet): ${sample_sheet}"
+    if ((! params.validate_only) || (! params.skip_inputs)) {
+        if (! sample_sheet.exists()) {
+            exit 1, "No such sample sheet (sample_sheet): ${sample_sheet}"
+        }
+        multiplex_sample_sheet_tsv = Channel.fromPath(sample_sheet,
+                                                      checkIfExists: true)
     }
-    multiplex_sample_sheet_tsv = Channel.fromPath(sample_sheet,
-                                                  checkIfExists: true)
     is_multiplexed = true
 }
 

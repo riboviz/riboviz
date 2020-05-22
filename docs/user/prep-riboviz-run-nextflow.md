@@ -111,6 +111,51 @@ This parameter is currently used by `hisat2`, `samtools sort`, `bam_to_h5.R` and
 
 ---
 
+## Validate configuration
+
+The workflow supports a `--validate_only` command-line parameter which allows for the workflow configuration to be validated without running the workflow.
+
+**Tip:** we strongly recommend validating the configuration before doing a live run on data you have not processed before.
+
+Validate configuration:
+
+```console
+$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE> --validate_only
+```
+
+where:
+
+* `<CONFIG_FILE>`: path to a YAML configuration file.
+
+### Skip checks for ribosome profiling data files parameter
+
+`--validate_only` can be complemented by a `--skip_inputs` command-line parameter. This skips checks for the existence of the ribosome profiling data files (`fq_files`, `multiplexed_fq_files`, `sample_sheet`). An example without `--skip_inputs` might appear as:
+
+```console
+$ nextflow run prep_riboviz.nf -params-file vignette/experiment_config.yaml -ansi-log false --validate_only 
+N E X T F L O W  ~  version 20.01.0
+Launching `prep_riboviz.nf` [elated_bartik] - revision: e6bda28069
+Validating configuration only
+No such sample file (WTone): SRR1234_s1mi.fastq.gz
+No such sample file (WTtwo): SRR5678_s1mi.fastq.gz
+None of the defined sample files (fq_files) exist
+```
+
+And with `--skip_inputs` this might appear as:
+
+```console
+$ nextflow run prep_riboviz.nf -params-file vignette/experiment_config.yaml -ansi-log false --validate_only --skip_inputs
+N E X T F L O W  ~  version 20.01.0
+Launching `prep_riboviz.nf` [compassionate_galileo] - revision: e6bda28069
+Validating configuration only
+Skipping checks of ribosome profiling input files (fq_files|multiplex_fq_files
+Validated configuration
+```
+
+This can be useful if you want to check that a configuration file you have received or downloaded is valid, before actually downloading, or preparing, the ribosome profiling data files.
+
+---
+
 ## Run the Nextflow workflow
 
 Run:
