@@ -284,7 +284,7 @@ def test_demultiplex(tmp_dir, file_format):
                           (fastq.FASTQ_GZ_FORMAT.upper(),
                            fastq.FASTQ_FORMAT),
                           (fastq.FQ_GZ_FORMAT.upper(),
-                           fastq.FQ_FORMAT)])
+                           fastq.FQ_FORMAT)], ids=str)
 def test_demultiplex_gz(tmp_dir, file_format):
     """
     Test :py:func:`riboviz.demultiplex_fastq.demultiplex` using
