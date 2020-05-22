@@ -247,7 +247,7 @@ def test_extract_umis_no_umi_regexp(tmp_file):
                           (params.COUNT_THRESHOLD, -1),
                           (params.NUM_PROCESSES, 0),
                           (params.MIN_READ_LENGTH, 0),
-                          (params.MAX_READ_LENGTH, 0)])
+                          (params.MAX_READ_LENGTH, 0)], ids=str)
 def test_invalid_value(tmp_file, parameter):
     """
     Test that providing invalid values for a parameter returns a
