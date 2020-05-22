@@ -84,7 +84,7 @@ def test_not_is_fastq_gz(extension):
                           (fastq.FASTQ_GZ_FORMAT.upper(),
                            fastq.FASTQ_FORMAT.upper()),
                           (fastq.FQ_GZ_FORMAT.upper(),
-                           fastq.FQ_FORMAT.upper())])
+                           fastq.FQ_FORMAT.upper())], ids=str)
 def test_strip_fastq_gz(file_format):
     """
     Test :py:func:`riboviz.fastq.strip_fastq_gz` with FASTQ GZIP
