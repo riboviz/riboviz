@@ -7,6 +7,8 @@ Contents:
 * [Prepare input data](#prepare-input-data)
 * [Set up your environment](#set-up-your-environment)
 * [Configure number of processes (optional)](#configure-number-of-processes-optional)
+* [Validate configuration](#validate-configuration)
+  - [Skip checks for ribosome profiling data files parameter](#skip-checks-for-ribosome-profiling-data-files-parameter)
 * [Run the Nextflow workflow](#run-the-nextflow-workflow)
   - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
 * [Help](#help)
