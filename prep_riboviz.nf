@@ -997,7 +997,9 @@ process generateStatsFigs {
         """
 }
 
-finished_sample_id.view { "Finished processing sample: ${it}" }
+finished_sample_id
+    .ifEmpty { exit 1, "No sample was processed successfully" }
+    .view { "Finished processing sample: ${it}" }
 
 // Prefix sample-specific TPMs files, tpms.tsv, with sample ID so all 
 // sample-specific TPMs files can be staged into the same directory
