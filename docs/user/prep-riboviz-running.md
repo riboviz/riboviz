@@ -76,10 +76,9 @@ lrwxrwxrwx 1 user user 41 Aug 22 02:55 sample2.fastq.gz -> ../samples/sample2/sa
 
 If you have not already done so, activate your Python environment:
 
-* Miniconda Python 3.6+:
-
 ```console
 $ source $HOME/miniconda3/bin/activate
+$ conda activate riboviz
 ```
 
 If you have not already done so, set the paths to Hisat2 and Bowtie:

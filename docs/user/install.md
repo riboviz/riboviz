@@ -179,10 +179,17 @@ $ bash miniconda3.sh -b -p $HOME/miniconda3
 
 **Note:** make sure you use `-O`, which provides a name for the downloaded file, and not `-o`, which provides the name of a file for messages about the download.
 
-Activate environment and check:
+Activate environment:
 
 ```console
 $ source $HOME/miniconda3/bin/activate
+```
+
+Create a `riboviz` environment and activate it:
+
+```console
+$ conda create --name riboviz python=3.7
+$ conda activate riboviz
 $ python -V
 Python 3.7.3
 ```
@@ -202,7 +209,22 @@ miniconda3.sh: line 2: `Resolving repo.continuum.io
 2606:4700::6812:c94f, ...'
 ```
 
-then rerun `wget` and use `-O`, not `-o`.
+**Troubleshooting: incompatible Python versions**
+
+If you find when installing packages below that your version of Python is too new (e.g. your Python version is 3.8 and the tool only works with Python 3.7), then two options are:
+
+1. See if a more recent version of the tool is available. For example a version available via `pip` may be more up-to-date than a version available via `conda`.
+2. Create a conda environment that supports a version of Python compatible with the tools.
+
+```console
+$ conda create --name riboviz python=<VERSION>
+```
+
+  - For example:
+
+```console
+$ conda create --name riboviz python=3.7
+```
 
 ---
 
@@ -232,6 +254,19 @@ Install:
 
 ```console
 $ conda install -y gitpython
+```
+
+### pytest
+
+Web sites:
+
+* [pytest](https://pytest.org/)
+* [GitHub](https://github.com/pytest-dev/pytest/)
+
+Install:
+
+```console
+$ conda install -y pytest
 ```
 
 ### pandas
@@ -266,7 +301,7 @@ Check package has installed `cutadapt` tool:
 
 ```console
 $ cutadapt --v
-2.3
+1.18
 ```
 
 ### pysam
@@ -280,6 +315,7 @@ Install:
 
 ```console
 $ conda install -y -c bioconda pysam
+$ conda install -y -c bioconda samtools
 ```
 
 Check package has installed `samtools` tool:
@@ -289,12 +325,6 @@ $ samtools --version
 samtools 1.9
 Using htslib 1.9
 Copyright (C) 2018 Genome Research Ltd.
-```
-
-If `samtools` was not installed, then install it explicitly:
-
-```console
-$ conda install -c bioconda samtools
 ```
 
 ### BioPython
@@ -355,10 +385,10 @@ $ python
 >>> import h5py
 >>> h5py.run_tests()
 ...
-OK (skipped=16, expected failures=6)
+============ 521 passed, 25 skipped, 3 xfailed, 1 warning in 5.50s =============
 ```
 
-The test report should be `OK` as above. Your number of `skipped` and `expected failures` may differ, depending upon the version of h5py installed.
+Your number of `skipped` and `xfailed` (expected failures may differ, depending upon the version of h5py installed.
 
 ### UMI-tools
 
@@ -475,9 +505,7 @@ Web sites:
 * [The R Project for Statistical Computing](https://www.r-project.org/)
 * [The Comprehensive R Archive Network](https://cran.r-project.org/) (CRAN).
 
-**Note:** Release 2.14.0 or later is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
-
-We recommend using R 3.4+.
+**Note:** Release 2.14.0 or later is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package. However, we recommend using R **3.4+**.
 
 ### Install R and packages required by R packages to be installed
 
@@ -505,11 +533,64 @@ $ sudo yum install -y openssl-devel
 $ sudo yum install -y libcurl-devel
 ```
 
+**Troubleshooting: the most recent version of R is not installed**
+
+Default package managers may not have the most up-to-date version of R available. [The Comprehensive R Archive Network](https://cran.r-project.org/) has information on alternative ways to get a more recent version of R.
+
+For example, following CRAN-R's [UBUNTU PACKAGES FOR R](https://cran.r-project.org/bin/linux/ubuntu/README.html) to get the latest R 3.6 packages:
+
+* Get your Ubuntu version, for example:
+
+```console
+$ lsb_release -a
+No LSB modules are available.
+Distributor ID:	Ubuntu
+Description:	Ubuntu 18.04 LTS
+Release:	18.04
+Codename:	bionic
+```
+
+* Open `/etc/apt/sources.list` in an editor (requires `sudo` access), for example:
+
+```console
+$ sudo nano /etc/apt/sources.list
+```
+
+* From UBUNTU PACKAGES FOR R get the entry for your Ubuntu version and add it to the end of the file. For example:
+
+```
+deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/
+```
+
+* Install CRAN-R Ubuntu server key:
+
+```console
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+```
+
+* Update packages:
+
+```console
+$ sudo apt-get update
+```
+
+* Install:
+
+```console
+$ sudo apt-get -s install r-base
+$ R --version
+R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+```
+
 ### Check R has installed
 
 ```console
 $ R --version
-R version 3.5.1 (2018-07-02) -- "Feather Spray"
+R version 3.4.4 (2018-03-15) -- "Someone to Lean On"
+$ Rscript --version
+R scripting front-end version 3.4.4 (2018-03-15)
 ```
 
 Your version of R may differ from that shown.
@@ -799,11 +880,56 @@ $ git clone https://github.com/riboviz/riboviz
 
 ---
 
-## Tested platforms
+## Check installation
 
-These instructions were tested on:
+You can now check your installation by running RiboViz tests.
 
-| Operating System | Memory (GB) | Processors | RAM (GB) | Python | R |
-| ---------------- | ----------- | ---------- | -------- | ------ | - |
-| Ubuntu 18.04 | 8 | 4 | 20  | 3.7.3 | 3.4.4 |
-| CentOS 7.4.1708 (Core) | 8 | 4 | 20 | 3.7.3 | 3.5.2 |
+Run tests:
+
+```console
+$ pytest --ignore-glob="*regression*"
+============================= test session starts ==============================
+platform linux -- Python 3.7.7, pytest-5.4.1, py-1.8.1, pluggy-0.13.1
+rootdir: /home/ubuntu/riboviz
+collected 165 items
+
+riboviz/test/test_barcodes_umis.py .................                     [ 10%]
+riboviz/test/test_demultiplex_fastq.py ..................                [ 21%]
+riboviz/test/test_fastq.py ........................                      [ 35%]
+riboviz/test/test_process_utils.py ........................              [ 50%]
+riboviz/test/test_sam_bam.py ................                            [ 60%]
+riboviz/test/test_trim_5p_mismatch.py ............                       [ 67%]
+riboviz/test/test_upgrade_config.py .....                                [ 70%]
+riboviz/test/test_utils.py ....................                          [ 82%]
+riboviz/test/tools/test_prep_riboviz.py ............                     [ 89%]
+riboviz/test/tools/test_prep_riboviz_simdata_multiplex.py .............  [ 97%]
+riboviz/test/tools/test_prep_riboviz_simdata_umi.py ....                 [100%]
+...
+================== 165 passed, 1 warning in 208.70s (0:03:28) ==================
+```
+
+`PendingDeprecationWarning` `warnings` can be ignored.
+
+Download regression test data:
+
+```console
+$ cd
+$ git clone https://github.com/riboviz/regression-test-data-2.0.beta
+```
+
+Run regression tests (these may take a few minutes):
+
+```
+$ cd riboviz
+$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0.beta/
+============================= test session starts ==============================
+platform linux -- Python 3.7.7, pytest-5.4.1, py-1.8.1, pluggy-0.13.1
+rootdir: /home/ubuntu/riboviz
+collected 76 items
+riboviz/test/regression/test_regression.py sssssssssssssssssssssssssssss [ 38%]
+sssss..ss......................................                          [100%]
+...
+============ 40 passed, 36 skipped, 1 warning in 209.86s (0:03:29) ==
+```
+
+`PendingDeprecationWarning` `warnings` can be ignored.
