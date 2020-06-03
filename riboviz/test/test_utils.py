@@ -29,7 +29,7 @@ def test_list_to_str_int():
     assert list_str == "1 2 3", "Unexpected string {}".format(list_str)
 
 
-@pytest.mark.parametrize("value", [True, 1, [1], {"a": 1}])
+@pytest.mark.parametrize("value", [True, 1, [1], {"a": 1}], ids=str)
 @pytest.mark.parametrize("allow_false_empty", [False, True])
 def test_value_in_dict(value, allow_false_empty):
     """
@@ -71,7 +71,7 @@ def test_value_in_dict_none(allow_false_empty):
     assert not utils.value_in_dict("B", values, allow_false_empty)
 
 
-@pytest.mark.parametrize("value", [False, [], {}])
+@pytest.mark.parametrize("value", [False, [], {}], ids=str)
 @pytest.mark.parametrize("allow_false_empty", [False, True])
 def test_value_in_dict_allow_false_empty(value, allow_false_empty):
     """

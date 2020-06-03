@@ -12,6 +12,10 @@ VIGNETTE_CONFIG = os.path.join(VIGNETTE_DIR, "vignette_config.yaml")
 """ Path to ``vignette/vignette_config.yaml``. """
 VIGNETTE_SAMPLES = ["WT3AT", "WTnone"]
 """ Sample names in ``vignette/vignette_config.yaml``. """
+VIGNETTE_MISSING_SAMPLE = "NotHere"
+"""
+Name of missing sample in ``vignette/vignette_config.yaml`` for tests.
+"""
 VIGNETTE_INDEX_DIR_NAME = "index"
 """ Index directory name. """
 VIGNETTE_INDEX_DIR = os.path.join(VIGNETTE_DIR, VIGNETTE_INDEX_DIR_NAME)
