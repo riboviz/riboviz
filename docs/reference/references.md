@@ -30,6 +30,8 @@ Kim D., Langmead, B. and Salzberg, S.L. (2015) HISAT: a fast spliced aligner wit
 
 Hester, J. and Angly, F. (2019) lintr: A 'Linter' for R Code. R package version 2.0.0. https://CRAN.R-project.org/package=lintr
 
+Di Tommaso, P., Chatzou, M., Floden, E. W., Barja, P. P., Palumbo, E., & Notredame, C. (2017). Nextflow enables reproducible computational workflows. Nature Biotechnology, 35(4), 316–319. doi: [10.1038/nbt.3820](https://doi.org/10.1038/nbt.3820).
+
 Davis, T.L. (2019) optparse: Command Line Option Parser. R package version 1.6.4. https://CRAN.R-project.org/package=optparse.
 
 McKinney, W. (2010) [Data Structures for Statistical Computing in Python](http://conference.scipy.org/proceedings/scipy2010/mckinney.html), Proceedings of the 9th Python in Science Conference, 51-56.
@@ -43,8 +45,6 @@ Sievert, S. (2018) plotly for R. https://plotly-r.com/
 pycodestyle, https://github.com/pycqa/pycodestyle/
 
 pylint, https://www.pylint.org/
-
-Li et al. (2009) The Sequence Alignment/Map format and SAMtools, Bioinformatics. 2009 Aug 15;25(16):2078-9. doi:[10.1093/bioinformatics/btp352](https://doi.org/10.1093/bioinformatics/btp352)
 
 pytest, https://github.com/pytest-dev/pytest/
 
@@ -63,6 +63,8 @@ Fischer, B., Pau, G. and Smith, M. (2017) rhdf5: HDF5 interface to R. R package 
 Morgan, M., Pagès, J., Obenchain V. and Hayden, N. (2017) Rsamtools: Binary alignment (BAM), FASTA, variant call (BCF), and tabix file import. R package version 1.30.0. http://bioconductor.org/packages/release/bioc/html/Rsamtools.html.
 
 Lawrence, M., Gentleman, R. and Carey, V. (2009) rtracklayer: an {R} package for interfacing with genome browsers. Bioinformatics 25:1841-1842. doi: [10.1093/bioinformatics/btp328](http://bioinformatics.oxfordjournals.org/content/25/14/1841.abstract).
+
+Li et al. (2009) The Sequence Alignment/Map format and SAMtools, Bioinformatics. 2009 Aug 15;25(16):2078-9. doi:[10.1093/bioinformatics/btp352](https://doi.org/10.1093/bioinformatics/btp352)
 
 Chang, W., Cheng, J., Allaire, J.J., Xie Y. and McPherson, J (2019) shiny: Web Application Framework for R. R package version 1.3.2. https://CRAN.R-project.org/package=shiny
 

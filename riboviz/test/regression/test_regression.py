@@ -2,8 +2,9 @@
 :py:mod:`riboviz.tools.prep_riboviz` regression test suite.
 
 The regression test suite runs :py:mod:`riboviz.tools.prep_riboviz`
-using a given configuration file, then compares the results to a
-directory of pre-calculated results, specified by the user.
+or :py:const:`riboviz.test.NEXTFLOW_WORKFLOW` (via Nextflow) using a
+given configuration file, then compares the results to a directory of
+pre-calculated results, specified by the user.
 
 Usage::
 
@@ -12,6 +13,7 @@ Usage::
       [--skip-workflow]
       [--check-index-tmp]
       [--config-file=FILE]
+      [--nextflow]
 
 The test suite accepts the following command-line parameters:
 
@@ -28,6 +30,9 @@ The test suite accepts the following command-line parameters:
   validated against those specified by ``--expected``. If not provided
   then the file :py:const:`riboviz.test.VIGNETTE_CONFIG` will be
   used.
+* ``--nextflow``: Run :py:const:`riboviz.test.NEXTFLOW_WORKFLOW` (via
+  Nextflow). Note that some regression tests differ for Nextflow due
+  to differences in naming of some temporary files.
 
 If the configuration specifies samples
 (:py:const:`riboviz.params.FQ_FILES`) then ``--check-index-tmp``
@@ -93,6 +98,7 @@ fixtures used by these tests.
 """
 import os
 import shutil
+import subprocess
 import tempfile
 import pytest
 import pysam
@@ -100,6 +106,7 @@ from riboviz import h5
 from riboviz import hisat2
 from riboviz import sam_bam
 from riboviz import compare_files
+from riboviz import count_reads
 from riboviz import workflow_files
 from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
@@ -107,7 +114,8 @@ from riboviz import test
 
 
 @pytest.fixture(scope="module")
-def prep_riboviz_fixture(skip_workflow_fixture, config_fixture):
+def prep_riboviz_fixture(skip_workflow_fixture, config_fixture,
+                         nextflow_fixture):
     """
     Run :py:mod:`riboviz.tools.prep_riboviz` if
     ``skip_workflow_fixture`` is not ``True``.
@@ -116,9 +124,16 @@ def prep_riboviz_fixture(skip_workflow_fixture, config_fixture):
     :type skip_workflow_fixture: bool
     :param config_fixture: Configuration file
     :type config_fixture: str or unicode
+    :param nextflow_fixture: Should Nextflow be run?
+    :type nextflow_fixture: bool
     """
     if not skip_workflow_fixture:
-        exit_code = prep_riboviz.prep_riboviz(config_fixture)
+        if not nextflow_fixture:
+            exit_code = prep_riboviz.prep_riboviz(config_fixture)
+        else:
+            cmd = ["nextflow", "run", test.NEXTFLOW_WORKFLOW,
+                   "-params-file", config_fixture, "-ansi-log", "false"]
+            exit_code = subprocess.call(cmd)
         assert exit_code == 0, \
             "prep_riboviz returned non-zero exit code %d" % exit_code
 
@@ -344,8 +359,9 @@ def test_trim5p_mismatch_tsv(expected_fixture, tmp_dir, sample):
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_samtools_view_sort_index_pre_dedup(
-        dedup_umis, expected_fixture, tmp_dir, sample):
+def test_samtools_view_sort_index_pre_dedup_bam(
+        dedup_umis, expected_fixture, tmp_dir, sample,
+        nextflow_fixture):
     """
     Test ``samtools view | samtools sort`` BAM and ``samtools index``
     BAI files for equality. See
@@ -353,6 +369,8 @@ def test_samtools_view_sort_index_pre_dedup(
 
     If UMI deduplication was not enabled in the configuration that
     produced the data then this test is skipped.
+
+    If Nextflow tests were requested then this test is skipped.
 
     :param dedup_umi: Was UMI deduplication configured?
     :type dedup_umis: bool
@@ -362,9 +380,13 @@ def test_samtools_view_sort_index_pre_dedup(
     :type tmp_dir: str or unicode
     :param sample: sample name
     :type sample: str or unicode
+    :param nextflow_fixture: Should Nextflow tests be run?
+    :type nextflow_fixture: bool
     """
     if not dedup_umis:
         pytest.skip('Skipped test applicable to UMI deduplication')
+    if nextflow_fixture:
+        pytest.skip('Skipped test not applicable to Nextflow')
     tmp_dir_name = os.path.basename(os.path.normpath(tmp_dir))
     compare_files.compare_files(
         os.path.join(expected_fixture, tmp_dir_name, sample,
@@ -375,6 +397,72 @@ def test_samtools_view_sort_index_pre_dedup(
         os.path.join(expected_fixture, tmp_dir_name, sample,
                      bai_file_name),
         os.path.join(tmp_dir, sample, bai_file_name))
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_samtools_view_sort_index_orf_map_clean_bam(
+        expected_fixture, tmp_dir, sample, nextflow_fixture):
+    """
+    Test ``samtools view | samtools sort`` BAM and ``samtools index``
+    BAI files for equality. See
+    :py:func:`riboviz.compare_files.compare_files`.
+
+    If Nextflow tests were requested then this test is run.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param tmp_dir: Temporary directory, from configuration file
+    :type tmp_dir: str or unicode
+    :param sample: sample name
+    :type sample: str or unicode
+    :param nextflow_fixture: Should Nextflow tests be run?
+    :type nextflow_fixture: bool
+    """
+    if not nextflow_fixture:
+        pytest.skip('Skipped test applicable to Nextflow only')
+    tmp_dir_name = os.path.basename(os.path.normpath(tmp_dir))
+    compare_files.compare_files(
+        os.path.join(expected_fixture, tmp_dir_name, sample,
+                     workflow_files.ORF_MAP_CLEAN_BAM),
+        os.path.join(tmp_dir, sample, workflow_files.ORF_MAP_CLEAN_BAM))
+    bai_file_name = sam_bam.BAI_FORMAT.format(workflow_files.ORF_MAP_CLEAN_BAM)
+    compare_files.compare_files(
+        os.path.join(expected_fixture, tmp_dir_name, sample,
+                     bai_file_name),
+        os.path.join(tmp_dir, sample, bai_file_name))
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_samtools_index_dedup_bam(dedup_umis, tmp_dir, sample,
+                                  nextflow_fixture):
+    """
+    Test ``samtools index`` BAI files for equality. See
+    :py:func:`riboviz.compare_files.compare_files`.
+
+    If UMI deduplication was not enabled in the configuration that
+    produced the data then this test is skipped.
+
+    If Nextflow tests were requested then this test is run.
+
+    :param dedup_umi: Was UMI deduplication configured?
+    :type dedup_umis: bool
+    :param tmp_dir: Temporary directory, from configuration file
+    :type tmp_dir: str or unicode
+    :param sample: sample name
+    :type sample: str or unicode
+    :param nextflow_fixture: Should Nextflow tests be run?
+    :type nextflow_fixture: bool
+    """
+    if not dedup_umis:
+        pytest.skip('Skipped test applicable to UMI deduplication')
+    if not nextflow_fixture:
+        pytest.skip('Skipped test applicable to Nextflow only')
+    assert os.path.exists(os.path.join(tmp_dir, sample,
+                                       workflow_files.DEDUP_BAM))
+    assert os.path.exists(os.path.join(
+        tmp_dir, sample, sam_bam.BAI_FORMAT.format(workflow_files.DEDUP_BAM)))
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
@@ -633,7 +721,7 @@ def test_read_counts_tsv(expected_fixture, output_dir):
     :type output_dir: str or unicode
     """
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
-    compare_files.compare_files(
+    count_reads.equal_read_counts(
         os.path.join(expected_fixture, output_dir_name,
                      workflow_files.READ_COUNTS_FILE),
         os.path.join(output_dir, workflow_files.READ_COUNTS_FILE))

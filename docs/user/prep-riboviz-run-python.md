@@ -1,6 +1,6 @@
-# Running the RiboViz workflow
+# Running the RiboViz Python workflow
 
-This page describes how to run `riboviz.tools.prep_riboviz`. It is assumed you are familiar with [Configuring the RiboViz workflow](./prep-riboviz-config.md).
+This page describes how to run the Python workflow, `riboviz.tools.prep_riboviz`. It is assumed you are familiar with [Configuring the RiboViz workflow](./prep-riboviz-config.md).
 
 Contents:
 
@@ -17,7 +17,6 @@ Contents:
   - [Troubleshooting: `Configuration parameter error: Multiplexed files are specified but no sample sheet`](#troubleshooting-configuration-parameter-error-multiplexed-files-are-specified-but-no-sample-sheet)
 * [Invoking `prep_riboviz` from outwith the RiboViz home directory](#invoking-prep_riboviz-from-outwith-the-riboviz-home-directory)
 * [Managing your disk usage](#managing-your-disk-usage)
-* [Using-pre-generated hisat2 indices](#using-pre-generated-hisat2-indices)
 * [Capturing commands submitted to bash](#capturing-commands-submitted-to-bash)
   - [Capturing bash commands and demultiplexing](#capturing-bash-commands-and-demultiplexing)
 * [Customising logging](#customising-logging)
@@ -365,12 +364,6 @@ For example, here is the volume of the outputs from a run of the vignette as doc
 | Total     | 1053 |
 
 **Tip:** We recommend you delete temporary directories and log directories when you have completed your analyses to your satisfaction.
-
----
-
-## Using pre-generated hisat2 indices
-
-If you have already generated hisat2 indices for the same organism and annotation, set `build_indices` to `FALSE` and specify the index directory (`dir_index`) which contains the indices.
 
 ---
 
