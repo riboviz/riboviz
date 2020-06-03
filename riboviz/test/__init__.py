@@ -41,3 +41,6 @@ SIMDATA_UMI_SAMPLE = "umi5_umi3"
 SIMDATA_MULTIPLEX_CONFIG = os.path.join(
     VIGNETTE_DIR, "simdata_multiplex_config.yaml")
 """ Path to ``vignette/simdata_multiplex_config.yaml``. """
+
+NEXTFLOW_WORKFLOW = os.path.join(riboviz.BASE_PATH, "prep_riboviz.nf")
+""" Path to ``prep_riboviz.nf``. """

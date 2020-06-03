@@ -46,6 +46,7 @@ For example::
 """
 import glob
 import os
+import os.path
 import yaml
 import pandas as pd
 from riboviz import demultiplex_fastq
@@ -423,18 +424,22 @@ def umi_tools_dedup_bam(tmp_dir, output_dir, sample):
     :return: ``pandas.core.frame.Series``, or ``None``
     :rtype: pandas.core.frame.Series
     """
-    # Look for pre_dedup.bam
-    files = glob.glob(os.path.join(
-        tmp_dir, sample, workflow_files.PRE_DEDUP_BAM))
+    # Look for pre_dedup.bam.
+    files = glob.glob(
+        os.path.join(tmp_dir, sample, workflow_files.PRE_DEDUP_BAM))
     if not files:
-        # Deduplication was not done.
-        return None
+        # Look for dedup.bam (Nextflow).
+        files = glob.glob(
+            os.path.join(tmp_dir, sample, workflow_files.DEDUP_BAM))
+        if not files:
+            # Deduplication was not done.
+            return None
     # Look for the BAM file output.
     files = glob.glob(os.path.join(
         output_dir, sample, sam_bam.BAM_FORMAT.format(sample)))
     if not files:
         return None
-    file_name = files[0]  # Only 1 match expected.
+    file_name = files[0]
     print(file_name)
     try:
         sequences, _ = sam_bam.count_sequences(file_name)
@@ -521,3 +526,65 @@ def count_reads(config_file, input_dir, tmp_dir, output_dir, reads_file):
     provenance.write_provenance_header(__file__, reads_file)
     reads_df[list(reads_df.columns)].to_csv(
         reads_file, mode='a', sep="\t", index=False)
+
+
+def equal_read_counts(file1, file2, comment="#"):
+    """
+    Compare two read counts files for equality. The comparison is done
+    with the aid of Pandas DataFrames.
+
+    The data frames are compared column-by-column. All columns, with
+    the exception of ``File`` are compared for exact equality
+    using ``pandas.core.series.Series.equals``.
+
+    :param file1: File name
+    :type file1: str or unicode
+    :param file2: File name
+    :type file2: str or unicode
+    :param comment: Comment prefix
+    :type comment: str or unicode
+    :raise AssertionError: If files differ in their contents
+    :raise Exception: If problems arise when loading the files
+    """
+    data1 = pd.read_csv(file1, sep="\t", comment=comment)
+    data2 = pd.read_csv(file2, sep="\t", comment=comment)
+    try:
+        assert data1.shape == data2.shape,\
+            "Unequal shape: %s, %s"\
+            % (str(data1.shape), str(data2.shape))
+        assert set(HEADER) == set(data1.columns),\
+            "Unequal column names: %s, %s"\
+            % (str(HEADER), str(data1.columns))
+        assert set(data1.columns) == set(data2.columns),\
+            "Unequal column names: %s, %s"\
+            % (str(data1.columns), str(data2.columns))
+        for column in [SAMPLE_NAME, PROGRAM, NUM_READS, DESCRIPTION]:
+            column1 = data1[column]
+            column2 = data2[column]
+            assert column1.equals(column2),\
+                "Unequal column values: %s" % column
+        for (f1, f2) in zip(data1[FILE], data2[FILE]):
+            is_abs1 = os.path.isabs(f1)
+            is_abs2 = os.path.isabs(f2)
+            if (is_abs1 and is_abs2) or \
+               ((not is_abs1) and (not is_abs2)):
+                assert f1 == f2, "Unequal column values: %s" % FILE
+            elif is_abs1:
+                assert f1.endswith(f2), \
+                    "Unequal column values: %s" % FILE
+            else:
+                assert f2.endswith(f1), \
+                    "Unequal column values: %s" % FILE
+    except AssertionError as error:
+        # Add file names to error message.
+        message = error.args[0]
+        message += " in file: " + str(file1) + ":" + str(file2)
+        error.args = (message,)
+        raise
+
+if __name__ == '__main__':
+
+    import sys
+    a = sys.argv[1]
+    b = sys.argv[2]
+    equal_read_counts(a, b)

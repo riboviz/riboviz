@@ -100,3 +100,11 @@ IS_TEST_RUN = "is_test_run"
 """ Is this a test run? (unused). """
 ALIGNER = "aligner"
 """ Short read aligner to use (unused). """
+
+VALIDATE_ONLY = "validate_only"
+""" Validate configuration only? (Nextflow workflow only). """
+SKIP_INPUTS = "skip_inputs"
+"""
+When validating configuration skip checks for existence of ribosome
+profiling data files.
+"""
