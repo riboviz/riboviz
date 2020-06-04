@@ -943,7 +943,7 @@ Your versions may differ from those shown.
 Either run bash script:
 
 ```console
-$ Rscript install/list-r-packages.R
+$ Rscript rscripts/list-r-packages.R
 ```
 
 Or run in R:
