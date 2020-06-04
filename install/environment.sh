@@ -16,5 +16,5 @@ echo "# pip list"
 pip list
 echo "# conda list"
 conda list
-echo "# Rscript install/list-r-packages.R"
-Rscript install/list-r-packages.R
+echo "# Rscript rscripts/list-r-packages.R"
+Rscript rscripts/list-r-packages.R
