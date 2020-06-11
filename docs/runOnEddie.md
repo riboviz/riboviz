@@ -94,7 +94,7 @@ Get RiboViz:
 
 `$ git clone https://github.com/riboviz/riboviz`
 
-## Run the workflow
+## Run a "vignette" of the RiboViz workflow
 
 Remember to change to the `riboviz` directory
 
@@ -181,3 +181,127 @@ Finished processing sample: WTnone
 [d8/a8fcb5] Submitted process > countReads
 Workflow finished! (OK)
 ```
+More information about the vignette : [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./docs/user/run-vignette.md).
+
+## Job submission
+
+Computational work on Eddie is usually submitted to the cluster as batch jobs initiated from a login node. In order to submit a job you need to write a Grid Engine job submission script containing details of the program to run as well as requests for resources. Then submit this job script to the cluster with the `qsub` command.
+
+You can create a job script named `job_riboviz.sh` in your `riboviz` directory to run a riboviz workflow:
+
+```
+#!/bin/sh
+# Grid Engine options (lines prefixed with #$)
+#$ -N riboviz_vignette              
+#$ -cwd                  
+#$ -l h_rt=00:10:00 
+#$ -l h_vmem=8G
+#  These options are:
+#  job name: -N
+#  use the current working directory: -cwd
+#  runtime limit of 10 minutes: -l h_rt
+#  ask for 8 Gbyte RAM: -l h_vmem
+# Initialise the environment modules
+. /etc/profile.d/modules.sh
+ 
+export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
+module load igmm/apps/BEDTools 
+module load igmm/apps/bowtie
+module load igmm/apps/hdf5
+module load igmm/apps/HISAT2
+module load igmm/apps/pigz
+module load igmm/apps/R/3.6.3
+module load anaconda
+source activate riboviz
+ 
+# Run the program
+python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
+```
+### Submit the job
+
+Check that you are in your `riboviz` directory 
+
+`$ qsub job_riboviz.sh`
+
+This will output the result to `riboviz_vignette.o` in the current working directory and errors to `riboviz_vigette.e`
+
+You can use `qstat` to see how things are going (queue status)
+
+```console
+$ qstat
+job-ID     prior   name       user         state submit/start at     queue                          jclass                                                     slots ja-task-ID
+----------------------------------------------------------------------------------------------------------------------                            --------------------------
+   2701173 0.00000 riboviz_vi s1919303     qw    06/11/2020 13:22:28                                                                                               1
+```
+
+After your job has finished, you can get some useful info (such as how much memory it actually used)
+```console
+$ qacct -j 2701137
+==============================================================
+qname        eddie
+hostname     node1c17.ecdf.ed.ac.uk
+group        eddie_users
+owner        s1919303
+project      uoe_baseline
+department   defaultdepartment
+jobname      riboviz_vignette
+jobnumber    2701173
+taskid       undefined
+pe_taskid    NONE
+account      sge
+priority     0
+cwd          /home/s1919303/riboviz
+submit_host  login02.ecdf.ed.ac.uk
+submit_cmd   qsub /exports/eddie3_homes_local/s1919303/job_riboviz.sh
+qsub_time    06/11/2020 13:22:28.652
+start_time   06/11/2020 13:22:37.680
+end_time     06/11/2020 13:27:51.952
+granted_pe   NONE
+slots        1
+failed       0
+deleted_by   NONE
+exit_status  0
+ru_wallclock 314.272
+ru_utime     290.658
+ru_stime     10.078
+ru_maxrss    904316
+ru_ixrss     0
+ru_ismrss    0
+ru_idrss     0
+ru_isrss     0
+ru_minflt    3064424
+ru_majflt    0
+ru_nswap     0
+ru_inblock   0
+ru_oublock   1696
+ru_msgsnd    0
+ru_msgrcv    0
+ru_nsignals  0
+ru_nvcsw     198940
+ru_nivcsw    117557
+wallclock    314.333
+cpu          300.736
+mem          179.488
+io           7.731
+iow          0.000
+ioops        1566484
+maxvmem      1.656G
+maxrss       0.000
+maxpss       0.000
+arid         undefined
+jc_name      NONE
+bound_cores  0,4
+
+```
+
+If you want to kill a job you've submitted to Eddie
+
+`$ qdel 2701173`
+
+or
+
+`$ qdel riboviz_vignette`
+
+There are plenty more options, such as stating the number of cores you require, described here
+
+https://www.wiki.ed.ac.uk/display/ResearchServices/Job+Submission
