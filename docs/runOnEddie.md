@@ -1,24 +1,24 @@
 # Run riboviz on Eddie
 
-This page describes how you can run riboviz on Eddie
+This page describes how you can run riboviz on Eddie. All python and R packages required to run riboviz have been intalled in `/exports/csce/eddie/biology/groups/wallace_rna`
 
 ---
-### Log in
+## Log in
 Connect to the cluster using ssh from a terminal window (Linux and Mac OS) or use a client such as MobaXterm (Windows)
 
 `$ ssh -X <YOUR UUN>@eddie.ecdf.ed.ac.uk`
 
 **Note** that access to the cluster is only available from the University network. External users should first connect to the University network using the VPN Service.
 
-### Ask to work inside a node interactively
+## Ask to work inside a node interactively
 
-`$qlogin -l h_vmem=8G`
+`$ qlogin -l h_vmem=8G`
 
 This means that I ask for 8GB RAM
 
 Much more info available from: https://www.wiki.ed.ac.uk/display/ResearchServices/Interactive+Sessions
 
-**Troubleshooting: fail to enter inside node**
+**Troubleshooting: fail to enter interactive node**
 
 If you see:
 
@@ -30,28 +30,71 @@ Your "qlogin" request could not be scheduled, try again later.
 ```
 Eddie may be under maintenance. You could check Eddie's status here: https://alerts.is.ed.ac.uk/ 
 
+Another reason this can fail is that EDDIE is running OK but there are no free nodes at present.
+
 You have to wait the service back. It usually won't take too long.
 
-### Change to group directory
-
-`cd /exports/csce/eddie/biology/groups/wallace_rna`
+## Set the environment
 
 ### Load necessary modules on node
 
 ```
-$module load igmm/apps/BEDTools 
-$module load igmm/apps/bowtie
-$module load igmm/apps/hdf5 
-$module load igmm/apps/HISAT2
-$module load igmm/apps/pigz
-$module load R/3.5.3
-$module load anaconda
+$ module load igmm/apps/BEDTools 
+$ module load igmm/apps/bowtie
+$ module load igmm/apps/hdf5 
+$ module load igmm/apps/HISAT2
+$ module load igmm/apps/pigz
+$ module load igmm/apps/R/3.6.3
+$ module load anaconda
 ```
+### Configure anaconda enviroment
+
+Configure your `.condarc file` to point to the `anaconda directory` in `/exports/csce/eddie/biology/groups/wallace_rna/`. If you do not have `.condarc file` in your `home` directory, create it first.
+
+```
+envs_dirs:
+  - /exports/csce/eddie/biology/groups/wallace_rna/anaconda/envs
+pkgs_dirs:
+  - /exports/csce/eddie/biology/groups/wallace_rna/anaconda/pkgs
+```
+
 ### Activate environment
 
-`$source activate riboviz`
+`/exports/csce/eddie/biology/groups/wallace_rna` has Anaconda packages (in `anaconda`) and all the Python packages required by RiboViz are there, accessible as a `riboviz` conda environment.
 
-### Run the workflow
+`$ source activate riboviz`
+
+### Configure R packages path
+
+`export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary`
+
+## Create `set-riboviz-env.sh`
+
+You can create a script named `set-riboviz-env.sh` for above commands
+
+```
+#!/usr/bin/env bash
+export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
+module load igmm/apps/BEDTools 
+module load igmm/apps/bowtie
+module load igmm/apps/hdf5
+module load igmm/apps/HISAT2
+module load igmm/apps/pigz
+module load igmm/apps/R/3.6.3
+module load anaconda
+source activate riboviz
+```
+In future you need only to run:
+
+`$ source set-riboviz-env.sh`
+
+## RiboViz
+
+Get RiboViz:
+
+`$ git clone https://github.com/riboviz/riboviz`
+
+## Run the workflow
 
 Remember to change to the `riboviz` directory
 
