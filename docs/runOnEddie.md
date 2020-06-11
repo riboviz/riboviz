@@ -4,13 +4,18 @@ This page describes how you can run riboviz on Eddie. All python and R packages 
 
 ---
 ## Log in
+
 Connect to the cluster using ssh from a terminal window (Linux and Mac OS) or use a client such as MobaXterm (Windows)
 
 `$ ssh -X <YOUR UUN>@eddie.ecdf.ed.ac.uk`
 
 **Note** that access to the cluster is only available from the University network. External users should first connect to the University network using the VPN Service.
 
-## Ask to work inside a node interactively
+## Interactive Sessions
+
+There are a limited number of nodes that accept interactive login sessions, to allow you to run interactive jobs or graphical 
+
+applications. To start an interactive session run:
 
 `$ qlogin -l h_vmem=8G`
 
