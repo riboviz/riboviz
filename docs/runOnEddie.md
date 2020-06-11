@@ -39,9 +39,9 @@ Another reason this can fail is that EDDIE is running OK but there are no free n
 
 You have to wait the service back. It usually won't take too long.
 
-## Set the environment
+### Set the environment
 
-### Load necessary modules on node
+#### Load necessary modules on node
 
 ```
 $ module load igmm/apps/BEDTools 
@@ -52,7 +52,7 @@ $ module load igmm/apps/pigz
 $ module load igmm/apps/R/3.6.3
 $ module load anaconda
 ```
-### Configure anaconda enviroment
+#### Configure anaconda enviroment
 
 Configure your `.condarc file` to point to the `anaconda directory` in `/exports/csce/eddie/biology/groups/wallace_rna/`. If you do not have `.condarc file` in your `home` directory, create it first.
 
@@ -63,13 +63,13 @@ pkgs_dirs:
   - /exports/csce/eddie/biology/groups/wallace_rna/anaconda/pkgs
 ```
 
-### Activate environment
+#### Activate environment
 
 `/exports/csce/eddie/biology/groups/wallace_rna` has Anaconda packages (in `anaconda`) and all the Python packages required by RiboViz are there, accessible as a `riboviz` conda environment.
 
 `$ source activate riboviz`
 
-### Configure R packages path
+#### Configure R packages path
 
 `export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary`
 
