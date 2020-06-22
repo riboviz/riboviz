@@ -40,7 +40,7 @@ If sample files (`fq_files`) are specified, then the workflow processes the samp
    4. Align remaining reads to ORFs index files (`orf_index_prefix`). using `hisat2`.
    5. Trim 5' mismatches from reads and remove reads with more than 2 mismatches using `trim_5p_mismatch`.
    6. Output UMI groups pre-deduplication using `umi_tools group` if requested (if `dedup_umis: TRUE` and `group_umis: TRUE`)
-   7. Deduplicate reads using `umi_tools dedup`, if requested (if `dedup_umis: TRUE`)
+   7. Deduplicate reads using `umi_tools dedup`, if requested (if `dedup_umis: TRUE`), and output deduplication statistics, if requested (if `dedup_stats: TRUE`).  
    8. Output UMI groups post-deduplication using `umi_tools group` if requested (if `dedup_umis: TRUE` and `group_umis: TRUE`)
    9. Export bedgraph files for plus and minus strands, if requested (if `make_bedgraph: TRUE`) using `bedtools genomecov`.
    10. Write intermediate files produced above into a sample-specific directory, named using the sample ID, within the temporary directory (`dir_tmp`).
@@ -106,7 +106,7 @@ If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specifi
 * UMI groups pre- and post-deduplication (if `group_umis: TRUE`):
   - `pre_dedup_groups.tsv`: UMI groups before deduplication.
   - `post_dedup_groups.tsv`: UMI groups after deduplication.
-* UMI deduplication statistics:
+* UMI deduplication statistics (if `dedup_stats: TRUE`):
   - `dedup_stats_edit_distance.tsv`: edit distance between UMIs at each position.
   - `dedup_stats_per_umi_per_position.tsv`: histogram of counts per position per UMI pre- and post-deduplication.
   - `dedup_stats_per_umi.tsv`: number of times each UMI was observed, total counts and median counts, pre- and post-deduplication

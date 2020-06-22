@@ -53,6 +53,7 @@ The workflow also supports the following configuration parameters. All directory
 | `count_reads` | Scan input, temporary and output files and produce counts of reads in each FASTQ, SAM, and BAM file processed? |
 | `count_threshold` | Remove genes with a read count below this threshold, when generating statistics and figures |
 | `dataset` | Human-readable name of the dataset |
+| `dedup_stats` | Output UMI deduplication statistics? (default `TRUE`) |
 | `dedup_umis` | Deduplicate reads using UMI-tools? |
 | `dir_in` | Input directory |
 | `dir_index` | Built indices directory |

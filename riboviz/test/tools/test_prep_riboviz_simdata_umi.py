@@ -146,6 +146,30 @@ def test_umi_group(configuration_module, sample_id):
     check_umi_groups(config, sample_id, 5)
 
 
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("sample_id", [riboviz.test.SIMDATA_UMI_SAMPLE])
+@pytest.mark.parametrize("stats_file", ["edit_distance.tsv",
+                                        "per_umi_per_position.tsv",
+                                        "per_umi.tsv"])
+def test_umi_stats_files(configuration_module, sample_id, stats_file):
+    """
+    Test that the UMI deduplication statistics files exist.
+
+    :param configuration_module: temporary configuration and \
+    configuration file
+    :type configuration_module: tuple(dict, str or unicode)
+    :param sample_id: sample ID
+    :type sample_id: str or unicode
+    :param stats_file: statistics file name
+    :type stats_file: str or unicode
+    """
+    config, _ = configuration_module
+    stats_file = os.path.join(config[params.TMP_DIR], sample_id,
+                              workflow_files.DEDUP_STATS_FORMAT.format(
+                                  stats_file))
+    assert os.path.exists(stats_file)
+
+
 def check_tpms_collated_tsv(config, sample_id, expected_num_columns):
     """
     Test that the collated TPMs are as expected.
