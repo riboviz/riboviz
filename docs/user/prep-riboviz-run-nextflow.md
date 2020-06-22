@@ -213,6 +213,16 @@ samsort_memory: 256M
 
 For information on the allowable values, see [samtools sort](http://www.htslib.org/doc/samtools-sort.html) and its `-m` flag.
 
+### Troubleshooting: deduplication and memory issues
+
+If running a workflow using deduplication, then you might encounter memory issues arising from an issue with UMI-Tools. UMI-tools has an option, `--output-stats`, which calculates statistics relating to deduplication. This option can result in excessive memory usage during deduplication (for more information, see the UMI-Tools issue "excessive dedup memory usage with output-stats" [#409](https://github.com/CGATOxford/UMI-tools/issues/409)).
+
+The workflow sets `--output-stats` by default. If you find you are having issues with memory usage then you might be able to resolve these by requesting that deduplication statistics are not calculated. You can do this by editing your YAML configuration file and setting:
+
+```yaml
+dedup_stats: FALSE
+```
+
 ---
 
 ## Help
