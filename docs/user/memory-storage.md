@@ -28,7 +28,7 @@ We have a ticket for a future release to Profile RiboViz to determine memory req
 
 ---
 
-## Managing your storage usage
+## Storage requirements
 
 The workflow generates many intermediate files and some of these may be unompressed and **large**, i.e. about the same size as the input files. All these files are placed in a temporary directory (`dir_tmp`). The temporary directory's contents can be inspected for troubleshooting, if necessary.
 
