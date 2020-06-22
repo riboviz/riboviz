@@ -37,7 +37,6 @@ Usage:
 * [Configuring the RiboViz workflow](./docs/user/prep-riboviz-config.md)
 * [Running the RiboViz Python workflow](./docs/user/prep-riboviz-run-python.md)
 * [Running the RiboViz Nextflow workflow](./docs/user/prep-riboviz-run-nextflow.md)
-* [RiboViz Nextflow workflow](./docs/user/nextflow.md)
 
 Command-line tools:
 
