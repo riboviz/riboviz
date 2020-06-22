@@ -11,6 +11,7 @@ Contents:
 * [Run `prep_riboviz`](#run-prep_riboviz)
   - [Troubleshooting: `This script needs to be run under Python 3`](#troubleshooting-this-script-needs-to-be-run-under-python-3)
   - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
+  - [Troubleshooting: deduplication and memory issues](#troubleshooting-deduplication-and-memory-issues)
   - [Troubleshooting: `WARNING: dedup_umis was TRUE but extract_umis was FALSE`](#troubleshooting-warning-dedup_umis-was-true-but-extract_umis-was-false)
   - [Troubleshooting: `Configuration parameter error: No sample files or multiplexed files are specified`](#troubleshooting-configuration-parameter-error-no-sample-files-or-multiplexed-files-are-specified)
   - [Troubleshooting: `Configuration parameter error: Both sample files and multiplexed files are specified`](#troubleshooting-configuration-parameter-error-both-sample-files-and-multiplexed-files-are-specified)
