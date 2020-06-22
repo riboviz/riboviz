@@ -17,7 +17,6 @@ Contents:
   - [Troubleshooting: `Configuration parameter error: Both sample files and multiplexed files are specified`](#troubleshooting-configuration-parameter-error-both-sample-files-and-multiplexed-files-are-specified)
   - [Troubleshooting: `Configuration parameter error: Multiplexed files are specified but no sample sheet`](#troubleshooting-configuration-parameter-error-multiplexed-files-are-specified-but-no-sample-sheet)
 * [Invoking `prep_riboviz` from outwith the RiboViz home directory](#invoking-prep_riboviz-from-outwith-the-riboviz-home-directory)
-* [Managing your disk usage](#managing-your-disk-usage)
 * [Capturing commands submitted to bash](#capturing-commands-submitted-to-bash)
   - [Capturing bash commands and demultiplexing](#capturing-bash-commands-and-demultiplexing)
 * [Customising logging](#customising-logging)
@@ -355,24 +354,6 @@ asite_disp_length_file: /home/user/riboviz/data/yeast_standard_asite_disp_length
 $ PYTHONPATH=/home/user/riboviz/ python -m riboviz.tools.prep_riboviz \
   -c /home/user/analysis/sample_config.yaml 
 ```
-
----
-
-## Managing your disk usage
-
-The workflow generates many intermediate files and some of these may be unompressed and **large**, i.e. about the same size as the input files. All these files are placed in a temporary directory (`dir_tmp`). The temporary directory's contents can be inspected for troubleshooting, if necessary. The workflow also creates numerous log files.
-
-For example, here is the volume of the outputs from a run of the vignette as documented in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md):
-
-| Directory         |   MB |
-| ----------------- | ---- |
-| `vignette/index`  |    9 |
-| `vignette/tmp`    |  812 |
-| `vignette/output` |    3 |
-| `vignette/logs`   |    1 |
-| Total             |  825 |
-
-**Tip:** We recommend you regularly delete temporary directories and log directories when you have completed your analyses to your satisfaction.
 
 ---
 
