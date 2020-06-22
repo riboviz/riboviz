@@ -24,7 +24,7 @@ dedup_stats: FALSE
 
 ### Profiling RiboViz's memory requirements
 
-We have a ticket for a future release to Profile RiboViz to determine memory requirements [#179](https://github.com/riboviz/riboviz/issues/179). In the meantime, welcome contributions from users as to the memory requirements of your analyses, both when running the vignette and your own analyses. An indication of the hardware and operating system you used and the size of your input files (FASTA, GFF ans FASTQ files) (both bytes and number of lines) would be also useful. Please add your notes to the issue.
+We have a ticket for a future release to Profile RiboViz to determine memory requirements [#179](https://github.com/riboviz/riboviz/issues/179). In the meantime, welcome contributions from users as to the memory requirements of your analyses, both when running the vignette and your own analyses. Please record an indication of the hardware and operating system you used, the memory you had available and the size of your input files (FASTA, GFF ans FASTQ files) (both bytes and number of lines).
 
 ---
 
