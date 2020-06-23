@@ -19,8 +19,9 @@ echo "| Git | $GIT_VERSION |"
 CURL_VERSION=$(curl --version | head -n 1 | cut -d" " -f2)
 # curl 7.68.0 (x86_64-conda_cos6-linux-gnu) libcurl/7.68.0 OpenSSL/1.1.1 zlib/1.2.11 libssh2/1.8.2
 echo "| cURL | $CURL_VERSION |"
-BEDTOOLS_VERSION=$(bedtools --version | cut -d" " -f2)
+BEDTOOLS_VERSION=$(bedtools --version | cut -d" " -f2 | tr -d 'v')
 # bedtools v2.26.0
+# Use tr to remove leading "v".
 echo "| bedtools | $BEDTOOLS_VERSION |"
 HD5TOOLS_VERSION=$(h5diff --version | cut -d" " -f3)
 # h5diff: Version 1.10.4
@@ -44,9 +45,10 @@ echo "| UMI-tools | $UMITOOLS_VERSION |"
 JAVAC_VERSION=$(javac -version 2>&1 | head -n 1 | cut -d" " -f2)
 # javac 1.8.0_152-release
 echo "| Java (javac) | $JAVAC_VERSION |"
-JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d" " -f3)
+JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d" " -f3 | tr -d '"'x)
 # openjdk version "1.8.0_152-release"
 # java outputs version information to standard error stream.
+# Use tr to remove enclosing quotes.
 echo "| Java (java) | $JAVA_VERSION |"
 NEXTFLOW_VERSION=$(nextflow -v | cut -d" " -f3)
 # nextflow version 20.01.0.5264
@@ -54,7 +56,7 @@ echo "| Nextflow | $NEXTFLOW_VERSION |"
 GRAPHVIZ_VERSION=$(dot -V 2>&1 | cut -d" " -f5)
 # dot - graphviz version 2.40.1 (20161225.0304)
 # dot outputs version information to standard error stream.
-echo "| GraphiViz (dot) | $GRAPHVIZ_VERSION |"
+echo "| GraphViz (dot) | $GRAPHVIZ_VERSION |"
 HISAT2_VERSION=$(hisat2 --version)
 HISAT2_VERSION=$(echo "$HISAT2_VERSION" | head -n 1  | cut -d" " -f3)
 # /home/ubuntu/hisat2-2.1.0/hisat2-align-s version 2.1.0
@@ -80,7 +82,7 @@ for pkg in ${CONDA_LIST[@]}; do
     # newlines so grep can be used.
     # grep for "$pkg " to ensure exact matches. "-iw" is not enough to
     # stop "pytest" matching "pytest-cov", for example.
-    # Delimiter between columns can be 1 or more spaces, so tr is used
+    # Delimiter between columns can be 1 or more spaces, so use tr
     # to remove multiple spaces.
     echo "| $pkg | $PKG_VERSION | conda | |"
 done

@@ -29,7 +29,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | ----------------- | ------- |
 | Git | 2.17.1 |
 | cURL | 7.68.0 |
-| bedtools | v2.26.0 |
+| bedtools | 2.26.0 |
 | hdf5tools (h5diff) | 1.10.4 |
 | pigz | 2.4 |
 | Python | 3.7.3 |
@@ -37,9 +37,9 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | samtools | 1.9 |
 | UMI-tools | 1.0.1 |
 | Java (javac) | 1.8.0_152-release |
-| Java (java) | "1.8.0_152-release" |
+| Java (java) | 1.8.0_152-release |
 | Nextflow | 20.01.0.5264 |
-| GraphiViz (dot) | 2.40.1 |
+| GraphViz (dot) | 2.40.1 |
 | Hisat2 | 2.1.0 |
 | Bowtie | 1.2.2 |
 | R | 3.4.4 |
