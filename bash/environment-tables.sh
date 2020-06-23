@@ -41,13 +41,20 @@ echo "| samtools | $SAMTOOLS_VERSION |"
 UMITOOLS_VERSION=$(umi_tools -v | cut -d" " -f3)
 # UMI-tools version: 1.0.1
 echo "| UMI-tools | $UMITOOLS_VERSION |"
-# nextflow is optional
-NEXTFLOW_VERSION=$(nextflow -v 2> /dev/null)
-if [ -n "$NEXTFLOW" ] ; then
-    NEXTFLOW_VERSION=$(nextflow -v | cut -d" " -f3)
-    echo "| Nextflow | $NEXTFLOW_VERSION |"
-    # nextflow version 20.01.0.5264
-fi
+JAVAC_VERSION=$(javac -version 2>&1 | head -n 1 | cut -d" " -f2)
+# javac 1.8.0_152-release
+echo "| Java (javac) | $JAVAC_VERSION |"
+JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d" " -f3)
+# openjdk version "1.8.0_152-release"
+# java outputs version information to standard error stream.
+echo "| Java (java) | $JAVA_VERSION |"
+NEXTFLOW_VERSION=$(nextflow -v | cut -d" " -f3)
+# nextflow version 20.01.0.5264
+echo "| Nextflow | $NEXTFLOW_VERSION |"
+GRAPHVIZ_VERSION=$(dot -V 2>&1 | cut -d" " -f5)
+# dot - graphviz version 2.40.1 (20161225.0304)
+# dot outputs version information to standard error stream.
+echo "| GraphiViz (dot) | $GRAPHVIZ_VERSION |"
 HISAT2_VERSION=$(hisat2 --version)
 HISAT2_VERSION=$(echo "$HISAT2_VERSION" | head -n 1  | cut -d" " -f3)
 # /home/ubuntu/hisat2-2.1.0/hisat2-align-s version 2.1.0

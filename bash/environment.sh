@@ -22,6 +22,8 @@ echo "# h5diff --version # Tool from hdf5tools"
 h5diff --version
 echo "# pigz --version"
 pigz --version
+echo "# dot -v # Tool from GraphViz"
+dot -V
 echo "# python --version"
 python --version
 echo "# conda list"
@@ -34,16 +36,12 @@ echo "# samtools --version"
 samtools --version
 echo "# umi_tools -v"
 umi_tools -v
-# nextflow is optional
-NEXTFLOW=$(nextflow -v 2> /dev/null)
-if [ -n "$NEXTFLOW" ] ; then
-    echo "# javac -version"
-    javac -version
-    echo "# java -version"
-    java -version
-    echo "# nextflow -v"
-    nextflow -v
-fi
+echo "# javac -version"
+javac -version
+echo "# java -version"
+java -version
+echo "# nextflow -v"
+nextflow -v
 echo "# hisat2-build --version"
 hisat2-build --version
 echo "# hisat2 --version"
