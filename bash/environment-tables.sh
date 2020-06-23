@@ -11,8 +11,8 @@
 #
 # Examples of the version strings output by each command are given to
 # help show how these are parsed to extract version numbers.
-echo "| Package | Version |"
-echo "| ------- | ------- |"
+echo "| Command-line tool | Version |"
+echo "| ----------------- | ------- |"
 GIT_VERSION=$(git --version | cut -d" " -f3)
 # git version 2.17.1
 echo "| Git | $GIT_VERSION |"
@@ -65,7 +65,7 @@ echo " "
 echo "| Python Package | Version | Package Manager |"
 echo "| -------------- | ------- | --------------- |"
 CONDA_PKGS=$(conda list)
-CONDA_LIST=(pyyaml gitpython pytest pandas cutadapt pysam biopython h5py umi_tools)
+CONDA_LIST=(biopython cutadapt gitpython h5py pandas pysam pytest pyyaml samtools umi_tools)
 for pkg in ${CONDA_LIST[@]}; do
     PKG_VERSION=$(echo "$CONDA_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
     # pkg     M.N    ...
@@ -84,7 +84,7 @@ for pkg in ${PIP_LIST[@]}; do
     echo "| $pkg | $PKG_VERSION | pip |"
 done
 # Python packages for developers.
-CONDA_DEV_LIST=(pytest-cov pylint pycodestyle)
+CONDA_DEV_LIST=(pycodestyle pylint pytest-cov)
 for pkg in ${CONDA_DEV_LIST[@]}; do
     PKG_VERSION=$(echo "$CONDA_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
     echo "| $pkg | $PKG_VERSION | conda |"
@@ -100,7 +100,7 @@ echo " "
 echo "| R Package | Version |"
 echo "| --------- | ------- |"
 R_PKGS=$(Rscript rscripts/list-r-packages.R)
-R_LIST=(RcppRoll optparse tidyr ggplot2 shiny plotly readr git2r here Rsamtools rhdf5 rtracklayer Biostrings ShortRead)
+R_LIST=(Biostrings ggplot2 git2r here optparse plotly RcppRoll readr rhdf5 Rsamtools rtracklayer shiny tidyr ShortRead)
 for pkg in ${R_LIST[@]}; do
     PKG_VERSION=$(echo "$R_PKGS" | grep -iw "$pkg " | tr -s " ")
     PKG_VERSION=$(echo $PKG_VERSION | cut -d" " -f2)
