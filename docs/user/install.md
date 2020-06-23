@@ -50,6 +50,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | cutadapt | 1.18 | conda | |
 | gitpython | 3.0.5 | conda | |
 | h5py | 2.10.0 | conda | |
+| nextflow | 20.01.0 | conda | |
 | pandas | 1.0.1 | conda | |
 | pycodestyle | 2.5.0 | conda | |
 | pylint | 2.4.4 | conda | |
