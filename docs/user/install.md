@@ -707,7 +707,7 @@ Install in R:
 > install.packages("here")
 ```
 
-### Bioconductor Rsamtools, rdf5, rtracklayer, Biostrings, ShortRead
+### Bioconductor Rsamtools, rhdf5, rtracklayer, Biostrings, ShortRead
 
 Web sites:
 
