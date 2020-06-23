@@ -2,7 +2,7 @@
 
 ## Update Dependencies overview in Install RiboViz and dependencies
 
-To update the [Dependencies overview](./docs/user/install.md#dependencies-overview) tables in [Install RiboViz and dependencies](./docs/user/install.md):
+To update the [Dependencies overview](../user/install.md#dependencies-overview) tables in [Install RiboViz and dependencies](../user/install.md):
 
 * Run:
 
