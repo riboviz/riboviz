@@ -72,7 +72,7 @@ echo " "
 echo "| Python Package | Version | Package Manager |"
 echo "| -------------- | ------- | --------------- |"
 CONDA_PKGS=$(conda list)
-CONDA_LIST=(biopython cutadapt gitpython h5py pandas pysam pytest pyyaml samtools umi_tools)
+CONDA_LIST=(biopython cutadapt gitpython h5py pandas pycodestyle pylint pysam pytest pytest-cov pyyaml samtools umi_tools)
 for pkg in ${CONDA_LIST[@]}; do
     PKG_VERSION=$(echo "$CONDA_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
     # pkg     M.N    ...
@@ -85,29 +85,16 @@ for pkg in ${CONDA_LIST[@]}; do
     echo "| $pkg | $PKG_VERSION | conda | |"
 done
 PIP_PKGS=$(pip list)
-PIP_LIST=(gffutils)
+PIP_LIST=(gffutils sphinx)
 for pkg in ${PIP_LIST[@]}; do
     PKG_VERSION=$(echo "$PIP_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
     echo "| $pkg | $PKG_VERSION | pip |"
 done
-# Python packages for developers.
-CONDA_DEV_LIST=(pycodestyle pylint pytest-cov)
-for pkg in ${CONDA_DEV_LIST[@]}; do
-    PKG_VERSION=$(echo "$CONDA_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
-    echo "| $pkg | $PKG_VERSION | conda |"
-done
-PIP_DEV_LIST=(sphinx)
-for pkg in ${PIP_DEV_LIST[@]}; do
-    PKG_VERSION=$(echo "$PIP_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
-    echo "| $pkg | $PKG_VERSION | pip |"
-done
-echo " "
-echo "Packages only required for developing RiboViz only: ${CONDA_DEV_LIST[@]} ${PIP_DEV_LIST[@]}"
 echo " "
 echo "| R Package | Version |"
 echo "| --------- | ------- |"
 R_PKGS=$(Rscript rscripts/list-r-packages.R)
-R_LIST=(Biostrings ggplot2 git2r here optparse plotly RcppRoll readr rhdf5 Rsamtools rtracklayer shiny tidyr ShortRead)
+R_LIST=(Biostrings ggplot2 git2r here lintr optparse plotly RcppRoll readr rhdf5 Rsamtools rtracklayer shiny tidyr ShortRead styler)
 for pkg in ${R_LIST[@]}; do
     PKG_VERSION=$(echo "$R_PKGS" | grep -iw "$pkg " | tr -s " ")
     PKG_VERSION=$(echo $PKG_VERSION | cut -d" " -f2)
@@ -117,13 +104,3 @@ for pkg in ${R_LIST[@]}; do
     # To remove leading space, use echo $PKG_VERSION outwith a string.
     echo "| $pkg | $PKG_VERSION |"
 done
-# R packages for developers.
-R_DEV_LIST=(lintr styler)
-for pkg in ${R_DEV_LIST[@]}; do
-    PKG_VERSION=$(echo "$R_PKGS" | grep -iw "$pkg " | tr -s " ")
-    PKG_VERSION=$(echo $PKG_VERSION | cut -d" " -f2)
-    echo "| $pkg | $PKG_VERSION |"
-done
-echo " "
-echo "Packages only required for developing RiboViz only: ${R_DEV_LIST[@]}"
-echo " "
