@@ -17,9 +17,9 @@ There are a limited number of nodes that accept interactive login sessions, to a
 
 applications. To start an interactive session run:
 
-`$ qlogin -l h_vmem=8G`
+`$ qlogin -l h_vmem=16G`
 
-This means that I ask for 8GB RAM
+This means that I ask for 16GB RAM
 
 Much more info available from: https://www.wiki.ed.ac.uk/display/ResearchServices/Interactive+Sessions
 
@@ -200,7 +200,7 @@ You can create a job script named `job_riboviz.sh` in your `riboviz` directory t
 #$ -N riboviz_vignette              
 #$ -cwd                  
 #$ -l h_rt=00:10:00 
-#$ -l h_vmem=8G
+#$ -l h_vmem=16G
 #  These options are:
 #  job name: -N
 #  use the current working directory: -cwd
