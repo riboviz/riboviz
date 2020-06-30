@@ -1,11 +1,26 @@
+#!/usr/bin/env python3
+
 #gffutils, biopython, bcbio-gff packages need to be installed
-import gffutils, subprocess
+import gffutils,os,argparse
 from Bio import SeqIO
 from collections import defaultdict
 from BCBio import GFF
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import SeqFeature, FeatureLocation
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--fasta')
+parser.add_argument('--gff3')
+parser.add_argument('--output')
+parser.add_argument('--min_length')
+args = parser.parse_args()
+
+myfasta = args.fasta
+mygff3 = args.gff3
+output_file = args.output
+protein_length = int(args.min_length)
 
 def getORF(seq, treshold, start, stop, end_UTR5, end_CDS, name):
     f = defaultdict(list)
@@ -46,7 +61,7 @@ def getORF(seq, treshold, start, stop, end_UTR5, end_CDS, name):
                         #f.write(name + '\t' + type + '\t' + str(e) +'\t'+ str(d)+ '\n')
     return f
     
-db = gffutils.create_db("uORFtest_yeast_4CDS_w_250utrs.gff3", 'myGFF.db', merge_strategy="create_unique", keep_order=True, force=True)
+db = gffutils.create_db(mygff3, 'myGFF.db', merge_strategy="create_unique", keep_order=True, force=True)
 db = gffutils.FeatureDB('myGFF.db')
 
 position_dict = {}
@@ -65,7 +80,7 @@ stop = ["TAA","TAG","TGA"]
 
 for key in position_dict.keys():
     
-    for record in SeqIO.parse("uORFtest_yeast_4CDS_w_250utrs.fa", "fasta"):
+    for record in SeqIO.parse(myfasta, "fasta"):
         
                if key == record.id:
                  
@@ -78,8 +93,10 @@ for key in position_dict.keys():
                   name = key
                   
                   print(name)
+                  
+                  treshold = protein_length
                  
-                  output_dict = getORF(sequence,10,start,stop,end_UTR5,end_CDS,name)
+                  output_dict = getORF(sequence,treshold,start,stop,end_UTR5,end_CDS,name)
                   
                   print(output_dict)
                 
@@ -89,13 +106,13 @@ for key in position_dict.keys():
                         
                         for i in range(len(values)):
                             
-                             out_file = "test_out4.gff"
+                             out_file = output_file
                   
                              seq = record.seq
                   
                              rec = SeqRecord(seq, name)
                   
-                             qualifiers = {"source": "riboviz", "score": ".", "start_codon": seq[values[i][3]-1:values[i][3]+2], "Name": name + "_" + str(values[i][3]),"frame":values[i][2]}
+                             qualifiers = {"source": "riboviz", "score": ".", "start_codon": seq[values[i][3]-1:values[i][3]+2], "Name": name + "_" + values[i][5] + "_" + str(values[i][3]),"frame":values[i][2]}
                   
                              feature = SeqFeature(FeatureLocation(values[i][3]-1, values[i][4]), type=values[i][5], strand=1,qualifiers=qualifiers)
 
@@ -104,6 +121,5 @@ for key in position_dict.keys():
                              with open(out_file, "a") as out_handle:
                       
                                 GFF.write([rec], out_handle)
-                             
-val = "sed  '/#/d'  test_out4.gff > new.gff"
-subprocess.call(val, shell= True)
+                                
+os.system("sed -i '/#/d' {}" .format(output_file))
