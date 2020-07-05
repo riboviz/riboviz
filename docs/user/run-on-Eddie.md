@@ -18,6 +18,11 @@ Contents:
 * [Get Riboviz](#Riboviz)
 * [Run a "vignette" of the RiboViz workflow in an interactive node](#Run-a-"vignette"-of-the-RiboViz-workflow)
 * [Job submission](#Job-submission)
+  - [Submitting Jobs](#Submitting-Jobs)
+  - [Submitting Jobs](#Submitting-Jobs)
+  - [Monitoring Jobs](#Monitoring-Jobs)
+  - [Cancelling Jobs](#Cancelling-Jobs)
+  - [Job accounting](#Job-accounting)
   
 ---
 ## Logging in
@@ -222,7 +227,7 @@ You can create a job script named `job_riboviz.sh` in your `riboviz` directory t
 #$ -N riboviz_vignette              
 #$ -cwd                  
 #$ -l h_rt=00:10:00 
-#$ -l h_vmem=16G
+#$ -l h_vmem=32G
 #  These options are:
 #  job name: -N
 #  use the current working directory: -cwd
@@ -241,18 +246,22 @@ module load igmm/apps/R/3.6.3
 module load anaconda
 source activate riboviz
  
-# Run the program
+# Run the python workflow
 python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 ```
-### Submit the job
+### Submitting Jobs
 
 Check that you are in your `riboviz` directory 
 
 `$ qsub job_riboviz.sh`
 
-This will output the result to `riboviz_vignette.o` in the current working directory and errors to `riboviz_vigette.e`
+This will output the result to `riboviz_vignette.o[Your Job-ID]` in the current working directory and errors to `riboviz_vigette.e[Your Job-ID]`
 
-You can use `qstat` to see how things are going (queue status)
+The contents of `riboviz_vignette.o[Your Job-ID]` should be the same as [Run a "vignette" of the RiboViz workflow in an interactive node](#Run-a-"vignette"-of-the-RiboViz-workflow)
+
+### Monitoring Jobs
+
+Active jobs (i.e. pending or running) can be monitored with the `qstat` command
 
 ```console
 $ qstat
@@ -261,7 +270,22 @@ job-ID     prior   name       user         state submit/start at     queue      
    2701173 0.00000 riboviz_vi s1919303     qw    06/11/2020 13:22:28                                                                                               1
 ```
 
-After your job has finished, you can get some useful info (such as how much memory it actually used)
+### Cancelling Jobs
+
+If you want to kill a job you've submitted to Eddie, use the `qdel` command
+
+`$ qdel [Your Job-ID]`
+
+or
+
+`$ qdel [Your Job-Name]`
+
+### Job accounting
+
+Detailed information about completed jobs is available with the `qacct` command:
+
+`$ qacct -j [Your Job-ID]`
+
 ```console
 $ qacct -j 2701137
 ==============================================================
@@ -321,14 +345,4 @@ bound_cores  0,4
 
 ```
 
-If you want to kill a job you've submitted to Eddie
-
-`$ qdel 2701173`
-
-or
-
-`$ qdel riboviz_vignette`
-
-There are plenty more options, such as stating the number of cores you require, described here
-
-https://www.wiki.ed.ac.uk/display/ResearchServices/Job+Submission
+More info about job submision： https://www.wiki.ed.ac.uk/display/ResearchServices/Job+Submission
