@@ -8,6 +8,10 @@ These guidelines may be useful for running riboviz in other HPC systems.
 
 All python and R packages required to run riboviz have been intalled in `/exports/csce/eddie/biology/groups/wallace_rna` on Eddie
 
+Contents:
+
+[logging in](#Logging-in)
+
 ---
 ## Logging in
 
