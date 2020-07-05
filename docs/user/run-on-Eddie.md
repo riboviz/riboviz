@@ -1,6 +1,12 @@
-# Run riboviz on Eddie
+# Running riboviz on Eddie (for U. of Edinburgh users)
 
-This page describes how you can run riboviz on Eddie. All python and R packages required to run riboviz have been intalled in `/exports/csce/eddie/biology/groups/wallace_rna`
+This page describes how you can run riboviz on Eddie.
+
+Eddie service documentation is here: https://www.wiki.ed.ac.uk/display/ResearchServices/Eddie
+
+These guidelines may be useful for running riboviz in other HPC systems.
+
+All python and R packages required to run riboviz have been intalled in `/exports/csce/eddie/biology/groups/wallace_rna` on Eddie
 
 ---
 ## Log in
