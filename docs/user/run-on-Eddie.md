@@ -14,7 +14,7 @@ Contents:
 * [Configure anaconda enviroment](#Configure-anaconda-enviroment)
 * [Interactive Sessions](#Interactive-Sessions)
   - [Set up the environment from scratch (optional)](#Set-up-the-environment-from-scratch)
-* [Create `set-riboviz-env.sh`](#create-set-riboviz-env.sh)
+* [Create `set-riboviz-env.sh`](#create-set-riboviz)
 * [Get Riboviz](#Riboviz)
 * [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow)
 * [Job submission](#Job-submission)
