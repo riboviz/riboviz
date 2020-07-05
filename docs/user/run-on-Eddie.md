@@ -9,7 +9,7 @@ These guidelines may be useful for running riboviz in other HPC systems.
 All python and R packages required to run riboviz have been intalled in `/exports/csce/eddie/biology/groups/wallace_rna` on Eddie
 
 ---
-## Log in
+## Logging in
 
 Connect to the cluster using ssh from a terminal window (Linux and Mac OS) or use a client such as MobaXterm (Windows)
 
@@ -47,17 +47,6 @@ You have to wait the service back. It usually won't take too long.
 
 ### Set the environment
 
-#### Load necessary modules on node
-
-```
-$ module load igmm/apps/BEDTools 
-$ module load igmm/apps/bowtie
-$ module load igmm/apps/hdf5 
-$ module load igmm/apps/HISAT2
-$ module load igmm/apps/pigz
-$ module load igmm/apps/R/3.6.3
-$ module load anaconda
-```
 #### Configure anaconda enviroment
 
 Configure your `.condarc file` to point to the `anaconda directory` in `/exports/csce/eddie/biology/groups/wallace_rna/`. If you do not have `.condarc file` in your `home` directory, create it first.
@@ -78,6 +67,18 @@ pkgs_dirs:
 #### Configure R packages path
 
 `export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary`
+
+#### Load necessary modules on node
+
+```
+$ module load igmm/apps/BEDTools 
+$ module load igmm/apps/bowtie
+$ module load igmm/apps/hdf5 
+$ module load igmm/apps/HISAT2
+$ module load igmm/apps/pigz
+$ module load igmm/apps/R/3.6.3
+$ module load anaconda
+```
 
 ## Create `set-riboviz-env.sh`
 
