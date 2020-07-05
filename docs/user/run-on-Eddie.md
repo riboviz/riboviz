@@ -10,8 +10,15 @@ All python and R packages required to run riboviz have been intalled in `/export
 
 Contents:
 
-[logging in](#Logging-in)
-
+* [Logging in](#Logging-in)
+* [Configure anaconda enviroment](#Configure-anaconda-enviroment)
+* [Interactive Sessions](#Interactive-Sessions)
+  - [Set up the environment from scratch (optional)](#Set-up-the-environment-from-scratch)
+* [Create `set-riboviz-env.sh`](#Create-set-riboviz-env.sh)
+* [Get Riboviz](#Riboviz)
+* [Run a "vignette" of the RiboViz workflow in an interactive node](#Run-a-"vignette"-of-the-RiboViz-workflow)
+* [Job submission](#Job-submission)
+  
 ---
 ## Logging in
 
@@ -21,6 +28,18 @@ Connect to the cluster using ssh from a terminal window (Linux and Mac OS) or us
 
 **Note** that access to the cluster is only available from the University network. External users should first connect to the University network using the VPN Service.
 
+---
+## Configure anaconda enviroment
+
+Configure your `.condarc file` to point to the `anaconda directory` in `/exports/csce/eddie/biology/groups/wallace_rna/`. If you do not have `.condarc file` in your `home` directory, create it first.
+
+```
+envs_dirs:
+  - /exports/csce/eddie/biology/groups/wallace_rna/anaconda/envs
+pkgs_dirs:
+  - /exports/csce/eddie/biology/groups/wallace_rna/anaconda/pkgs
+```
+---
 ## Interactive Sessions
 
 There are a limited number of nodes that accept interactive login sessions, to allow you to run interactive jobs or graphical 
@@ -49,18 +68,7 @@ Another reason this can fail is that EDDIE is running OK but there are no free n
 
 You have to wait the service back. It usually won't take too long.
 
-### Set the environment
-
-#### Configure anaconda enviroment
-
-Configure your `.condarc file` to point to the `anaconda directory` in `/exports/csce/eddie/biology/groups/wallace_rna/`. If you do not have `.condarc file` in your `home` directory, create it first.
-
-```
-envs_dirs:
-  - /exports/csce/eddie/biology/groups/wallace_rna/anaconda/envs
-pkgs_dirs:
-  - /exports/csce/eddie/biology/groups/wallace_rna/anaconda/pkgs
-```
+### Set up the environment from scratch 
 
 #### Activate environment
 
@@ -83,7 +91,7 @@ $ module load igmm/apps/pigz
 $ module load igmm/apps/R/3.6.3
 $ module load anaconda
 ```
-
+---
 ## Create `set-riboviz-env.sh`
 
 You can create a script named `set-riboviz-env.sh` for above commands
@@ -104,12 +112,14 @@ In future you need only to run:
 
 `$ source set-riboviz-env.sh`
 
+---
 ## RiboViz
 
 Get RiboViz:
 
 `$ git clone https://github.com/riboviz/riboviz`
 
+---
 ## Run a "vignette" of the RiboViz workflow
 
 Remember to change to the `riboviz` directory
@@ -199,6 +209,7 @@ Workflow finished! (OK)
 ```
 More information about the vignette : [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./docs/user/run-vignette.md).
 
+---
 ## Job submission
 
 Computational work on Eddie is usually submitted to the cluster as batch jobs initiated from a login node. In order to submit a job you need to write a Grid Engine job submission script containing details of the program to run as well as requests for resources. Then submit this job script to the cluster with the `qsub` command.
@@ -216,7 +227,7 @@ You can create a job script named `job_riboviz.sh` in your `riboviz` directory t
 #  job name: -N
 #  use the current working directory: -cwd
 #  runtime limit of 10 minutes: -l h_rt
-#  ask for 8 Gbyte RAM: -l h_vmem
+#  ask for 16 Gbyte RAM: -l h_vmem
 # Initialise the environment modules
 . /etc/profile.d/modules.sh
  
