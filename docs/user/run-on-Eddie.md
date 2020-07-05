@@ -14,9 +14,9 @@ Contents:
 * [Configure anaconda enviroment](#Configure-anaconda-enviroment)
 * [Interactive Sessions](#Interactive-Sessions)
   - [Set up the environment from scratch (optional)](#Set-up-the-environment-from-scratch)
-* [Create `set-riboviz-env.sh`](#Create-`set-riboviz-env.sh`)
+* [Create `set-riboviz-env.sh`](#create-set-riboviz-env.sh)
 * [Get Riboviz](#Riboviz)
-* [Run a "vignette" of the RiboViz workflow in an interactive node](#Run-a-"vignette"-of-the-RiboViz-workflow)
+* [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow)
 * [Job submission](#Job-submission)
   - [Submitting Jobs](#Submitting-Jobs)
   - [Submitting Jobs](#Submitting-Jobs)
@@ -258,7 +258,7 @@ Check that you are in your `riboviz` directory
 
 This will output the result to `riboviz_vignette.o[Your Job-ID]` in the current working directory and errors to `riboviz_vigette.e[Your Job-ID]`
 
-The contents of `riboviz_vignette.o[Your Job-ID]` should be the same as [Run a "vignette" of the RiboViz workflow in an interactive node](#Run-a-"vignette"-of-the-RiboViz-workflow)
+The contents of `riboviz_vignette.o[Your Job-ID]` should be the same as [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow)
 
 ### Monitoring Jobs
 
