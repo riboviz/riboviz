@@ -14,7 +14,7 @@ Contents:
 * [Configure anaconda enviroment](#Configure-anaconda-enviroment)
 * [Interactive Sessions](#Interactive-Sessions)
   - [Set up the environment from scratch (optional)](#Set-up-the-environment-from-scratch)
-* [Create `set-riboviz-env.sh`](#Create-set-riboviz-env.sh)
+* [Create `set-riboviz-env.sh`](#Create-`set-riboviz-env.sh`)
 * [Get Riboviz](#Riboviz)
 * [Run a "vignette" of the RiboViz workflow in an interactive node](#Run-a-"vignette"-of-the-RiboViz-workflow)
 * [Job submission](#Job-submission)
@@ -249,6 +249,7 @@ source activate riboviz
 # Run the python workflow
 python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 ```
+
 ### Submitting Jobs
 
 Check that you are in your `riboviz` directory 
