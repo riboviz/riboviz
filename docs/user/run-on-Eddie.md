@@ -22,6 +22,10 @@ Contents:
   - [Monitoring Jobs](#Monitoring-Jobs)
   - [Cancelling Jobs](#Cancelling-Jobs)
   - [Job accounting](#Job-accounting)
+ * [Run a full-size example dataset on Eddie](#Run-a-full-size-example-dataset-on-Eddie)
+   - [Create directories for input paths](#Create-directories-for-input-paths)
+   - [Download SRR files](#Download-SRR-files)
+   - [Create `qsub` script](#Create-qsub-script)
   
 ---
 ## Logging in
@@ -35,7 +39,9 @@ Connect to the cluster using ssh from a terminal window (Linux and Mac OS) or us
 ---
 ## Configure anaconda enviroment
 
-Configure your `.condarc file` to point to the `anaconda directory` in `/exports/csce/eddie/biology/groups/wallace_rna/`. If you do not have `.condarc file` in your `home` directory, create it first.
+Configure your `.condarc file` to point to the `anaconda directory` in `/exports/csce/eddie/biology/groups/wallace_rna/`. 
+
+If you do not have `.condarc file` in your `home` directory, create it first.
 
 ```
 envs_dirs:
@@ -55,9 +61,11 @@ $ git clone https://github.com/riboviz/riboviz
 $ git clone https://github.com/riboviz/example-datasets
 ```
 
-**Note** Your home directory space is enough for running a vignette but is not enough for running a full-size dataset. 
+**Note** that your home directory space is enough for running a vignette but is not enough for running a full-size dataset. 
 
-We recommend using the cluster filesystem (/exports/[COLLEGE]/eddie/...) for storing riboviz and example-datasets. If you do not have a group space, you can use your scratch directory (/exports/eddie/scratch/UUN)
+We recommend using the cluster filesystem (/exports/[COLLEGE]/eddie/...) for storing riboviz and example-datasets. 
+
+If you do not have a group space, you can use your scratch directory (/exports/eddie/scratch/UUN)
 
 ---
 ## Interactive Sessions
@@ -260,7 +268,7 @@ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 
 ### Submitting Jobs
 
-Check that you are in your `riboviz` directory 
+Check that you are in your `riboviz/riboviz` directory 
 
 `$ qsub job_riboviz.sh`
 
@@ -358,3 +366,97 @@ More info about job submision： https://www.wiki.ed.ac.uk/display/ResearchServi
 
 ---
 ## Run a full-size example dataset on Eddie
+
+Example-datasets home page is here: https://github.com/riboviz/example-datasets
+
+The paths in the YAML configuration file in `example-datasets` directory is just a reference. You could edit the paths accroding to your directory structure
+
+For example, if I want to run the `Wallace_2020_JEC21` dataset on Eddie:
+
+### Create directories for input paths
+
+Create a directory named `Wallace_2020_JEC21` in `/exports/eddie/scratch/s1919303/riboviz/riboviz`
+
+`$ mkdir Wallace_2020_JEC21`
+
+Create a directory named `input` in `Wallace_2020_JEC21`
+
+```
+$ cd Wallace_2020_JEC21
+$ mkdir input
+```
+Create a directory named `contaminants` in `Wallace_2020_JEC21` and copy the contaminants files in `example-dataset` to the directory
+
+Create a directory named `annotation` in `Wallace_2020_JEC21` and copy the annotation files in `example-dataset` to the directory
+
+```
+$ mkdir contaminants
+$ mkdir annotation 
+$ cp /exports/eddie/scratch/s1919303/riboviz/example-datasets/fungi/cryptococcus/contaminants/JEC21_rrna.fasta contaminants
+$ cp /exports/eddie/scratch/s1919303/riboviz/example-datasets/fungi/cryptococcus/annotation/JEC21_10p_up12dwn9_CDS_with_120bputrs.fa annotation
+```
+
+Copy the YAML configuration file to `Wallace_2020_JEC21`
+
+```
+$ cp /exports/eddie/scratch/s1919303/riboviz/example-datasets/fungi/cryptococcus/Wallace_2020_JEC21_NEEDSCOMPLETEOVERHAUL_config.yaml .`
+```
+
+### Download SRR files
+
+Actually Eddie has SRA Toolkit. Type this command line `$ module load igmm/apps/sratoolkit/2.8.2-1` then you can use fastq-dump. 
+
+But I found it is too slow for `fastq-dump` to download a dataset like Wallace_2020_JEC21 which is around 50G before compressed. Even we can use the --gzip option to directly download the .gz file. It is still too slow.
+
+After many tests I think the fastest way to download datasets is to use `fasterq-dump` and Aspera client
+
+Follow this documentation and install the latest version of SRA Toolkit: https://github.com/ncbi/sra-tools/wiki/02.-Installing-SRA-Toolkit
+
+Get the Wallace_2020_JEC21 dataset (remember change to the `Wallace_2020_JEC21/input` directory):
+
+```
+#prefetch with Aspera client
+$ prefetch SRR9620588 SRR9620586
+$ fasterq-dump SRR9620588
+$ fasterq-dump SRR9620586
+```
+
+`fasterq-dump` did not have the --gzip option, you have to compress the datasets after you download them:
+
+`$ pigz *.fastq`
+
+### Create `qsub` script
+
+Create the script in `/exports/eddie/scratch/s1919303/riboviz/riboviz/`
+
+```
+#!/bin/sh
+# Grid Engine options (lines prefixed with #$)
+#$ -N Wallace_2020_JEC21              
+#$ -cwd                  
+#$ -l h_rt=10:00:00 
+#$ -l h_vmem=32G
+#  These options are:
+#  job name: -N
+#  use the current working directory: -cwd
+#  runtime limit of 10 hours: -l h_rt
+#  ask for 32 Gbyte RAM: -l h_vmem
+# Initialise the environment modules
+. /etc/profile.d/modules.sh
+ 
+export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
+module load igmm/apps/BEDTools 
+module load igmm/apps/bowtie
+module load igmm/apps/hdf5
+module load igmm/apps/HISAT2
+module load igmm/apps/pigz
+module load igmm/apps/R/3.6.3
+module load anaconda
+source activate riboviz
+ 
+# Run the python workflow
+python -m riboviz.tools.prep_riboviz -c Wallace_2020_JEC21/Wallace_2020_JEC21_NEEDSCOMPLETEOVERHAUL_config.yaml
+```
+Then run:
+
+`$ qsub [Your script]`
