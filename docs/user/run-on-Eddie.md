@@ -6,16 +6,16 @@ Eddie service documentation is here: https://www.wiki.ed.ac.uk/display/ResearchS
 
 These guidelines may be useful for running riboviz in other HPC systems.
 
-All python and R packages required to run riboviz have been intalled in `/exports/csce/eddie/biology/groups/wallace_rna` on Eddie
+All python and R packages required to run riboviz have been installed in `/exports/csce/eddie/biology/groups/wallace_rna` on Eddie
 
 Contents:
 
 * [Logging in](#Logging-in)
 * [Configure anaconda enviroment](#Configure-anaconda-enviroment)
+* [Get Riboviz and example-datasets](#Riboviz-and-example-datasets)
 * [Interactive Sessions](#Interactive-Sessions)
   - [Set up the environment from scratch (optional)](#Set-up-the-environment-from-scratch)
 * [Create `set-riboviz-env.sh`](#Create-set-riboviz-envsh)
-* [Get Riboviz](#Riboviz)
 * [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow)
 * [Job submission](#Job-submission)
   - [Submitting Jobs](#Submitting-Jobs)
@@ -43,6 +43,22 @@ envs_dirs:
 pkgs_dirs:
   - /exports/csce/eddie/biology/groups/wallace_rna/anaconda/pkgs
 ```
+---
+## RiboViz and example-datasets
+
+Get RiboViz and example-datasets:
+
+```
+$ mkdir riboviz
+$ cd riboviz
+$ git clone https://github.com/riboviz/riboviz
+$ git clone https://github.com/riboviz/example-datasets
+```
+
+**Note** Your home directory space is enough for running a vignette but is not enough for running a full-size dataset. 
+
+We recommend using the cluster filesystem (/exports/[COLLEGE]/eddie/...) for storing riboviz and example-datasets. If you do not have a group space, you can use your scratch directory (/exports/eddie/scratch/UUN)
+
 ---
 ## Interactive Sessions
 
@@ -117,16 +133,9 @@ In future you need only to run:
 `$ source set-riboviz-env.sh`
 
 ---
-## RiboViz
-
-Get RiboViz:
-
-`$ git clone https://github.com/riboviz/riboviz`
-
----
 ## Run a "vignette" of the RiboViz workflow
 
-Remember to change to the `riboviz` directory
+Remember to change to the `riboviz/riboviz` directory
 
 To run the Python workflow:
 
@@ -346,3 +355,6 @@ bound_cores  0,4
 ```
 
 More info about job submision： https://www.wiki.ed.ac.uk/display/ResearchServices/Job+Submission
+
+---
+## Run a full-size example dataset on Eddie
