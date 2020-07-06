@@ -457,6 +457,9 @@ source activate riboviz
 # Run the python workflow
 python -m riboviz.tools.prep_riboviz -c Wallace_2020_JEC21/Wallace_2020_JEC21_NEEDSCOMPLETEOVERHAUL_config.yaml
 ```
+
+Check that you are in `/exports/eddie/scratch/s1919303/riboviz/riboviz/`
+
 Then run:
 
 `$ qsub [Your script]`
