@@ -19,7 +19,6 @@ Contents:
 * [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow)
 * [Job submission](#Job-submission)
   - [Submitting Jobs](#Submitting-Jobs)
-  - [Submitting Jobs](#Submitting-Jobs)
   - [Monitoring Jobs](#Monitoring-Jobs)
   - [Cancelling Jobs](#Cancelling-Jobs)
   - [Job accounting](#Job-accounting)
