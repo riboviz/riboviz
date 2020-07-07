@@ -14,7 +14,7 @@ All the code for processing the raw reads is available in this repository.
 
 ## Python and Nextflow workflows
 
-This release contains two versions of the RiboViz workflow:
+This release contains two versions of the **RiboViz** workflow:
 
 * A Python workflow, `riboviz.tools.prep_riboviz`.
 * A Nextflow workflow, `prep_riboviz_nf`. [Nextflow](https://www.nextflow.io/) is a workflow management system and `prep_riboviz.nf` is a port of `riboviz.tools.prep_riboviz`, into a Nextflow workflow. In the next release, the Python workflow will be deprecated by this Nextflow workflow.
@@ -25,7 +25,7 @@ Instructions for the configuration and use of both versions are provided.
 
 Quick start:
 
-* [Install prerequisites](./docs/user/install.md)
+* [Install RiboViz and dependencies](./docs/user/install.md)
 * [Quick install scripts](./docs/user/quick-install.md) (Ubuntu and CentOS only)
 * [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./docs/user/run-vignette.md). Run a "vignette" of the **RiboViz** workflow to see **RiboViz**'s capabilities.
 * [Run UMI extraction, deduplication and demultiplexing examples](./docs/user/run-dedup-demultiplex-examples.md). Run **RiboViz** on simulated data, to see how **RiboViz** handles duplicated and multiplexed data.
@@ -37,7 +37,7 @@ Usage:
 * [Configuring the RiboViz workflow](./docs/user/prep-riboviz-config.md)
 * [Running the RiboViz Python workflow](./docs/user/prep-riboviz-run-python.md)
 * [Running the RiboViz Nextflow workflow](./docs/user/prep-riboviz-run-nextflow.md)
-* [RiboViz Nextflow workflow](./docs/user/nextflow.md)
+* [Memory and storage](./docs/user/memory-storage.md). Information and advice relating to **RiboViz**'s memory and storage requirements.
 
 Command-line tools:
 
@@ -56,7 +56,7 @@ Command-line tools:
 
 ## Develop RiboViz
 
-* [Install developer prerequisites](./docs/developer/install.md)
+* [Install developer dependencies](./docs/developer/install.md)
 * [Git branching model](./docs/developer/git-branching-model.md)
 * [Coding style](./docs/developer/coding-style.md)
 * [Debugging](./docs/developer/debugging.md)

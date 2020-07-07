@@ -12,6 +12,7 @@
 
 ## Contributors
 
+* Jared Bard, The Drummond Lab, The University of Chicago.
 * Matthew S. Sachs, Department of Biology, Texas A&M University.
 * Siyin Xue.
 

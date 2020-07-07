@@ -83,8 +83,10 @@ and the directories with the expected data are::
 If running with a configuration that used UMI extraction,
 deduplication and grouping then note that:
 
-* UMI deduplication statistics files are not checked (files prefixed
-  by :py:const:`riboviz.workflow_files.DEDUP_STATS_PREFIX`).
+* UMI deduplication statistics files (files prefixed
+  by :py:const:`riboviz.workflow_files.DEDUP_STATS_PREFIX`) can differ
+  between runs depending on which reads are removed by ``umi_tools
+  dedup``, so only the existence of the files is checked.
 * UMI group file post-deduplication files,
   (:py:const:`riboviz.workflow_files.POST_DEDUP_GROUPS_TSV`) can
   differ between runs depending on which reads are removed by
@@ -504,6 +506,56 @@ def test_samtools_view_sort_index(dedup_umis, expected_fixture,
         return
     compare_files.compare_files(expected_file, actual_file)
     compare_files.compare_files(expected_bai_file, actual_bai_file)
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("stats_file", ["edit_distance.tsv",
+                                        "per_umi_per_position.tsv",
+                                        "per_umi.tsv"])
+def test_umitools_dedup_stats_tsv(
+        dedup_umis, dedup_stats, expected_fixture, tmp_dir,
+        sample, stats_file):
+    """
+    Test ``umi_tools dedup --output-stats`` TSV files exist.
+
+    If UMI deduplication was not enabled in the configuration that
+    produced the data then this test is skipped.
+
+    If UMI deduplication statistics were not enabled in the
+    configuration that produced the data then this test is skipped.
+
+    As these files can differ between runs depending on which reads
+    are removed by ``umi_tools dedup``, only the existence of the
+    files is checked.
+
+    :param dedup_umi: Was UMI deduplication configured?
+    :type dedup_umis: bool
+    :param dedup_stats: Were UMI deduplication statistics enabled?
+    :type dedup_stats: bool
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param tmp_dir: Temporary directory, from configuration file
+    :type tmp_dir: str or unicode
+    :param sample: sample name
+    :type sample: str or unicode
+    :param stats_file: statistics file name
+    :type stats_file: str or unicode
+    """
+    if not dedup_umis:
+        pytest.skip('Skipped test applicable to UMI deduplication')
+    if not dedup_stats:
+        pytest.skip('Skipped test applicable to UMI deduplication statistics')
+    file_name = os.path.join(sample,
+                             workflow_files.DEDUP_STATS_FORMAT.format(
+                                 stats_file))
+    tmp_dir_name = os.path.basename(os.path.normpath(tmp_dir))
+    expected_file = os.path.join(expected_fixture, tmp_dir_name,
+                                 file_name)
+    if not os.path.exists(expected_file):
+        pytest.skip('Skipped as expected file does not exist')
+    actual_file = os.path.join(tmp_dir, file_name)
+    assert os.path.exists(actual_file)
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")

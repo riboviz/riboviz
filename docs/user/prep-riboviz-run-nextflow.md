@@ -11,12 +11,12 @@ Contents:
   - [Skip checks for ribosome profiling data files parameter](#skip-checks-for-ribosome-profiling-data-files-parameter)
 * [Run the Nextflow workflow](#run-the-nextflow-workflow)
   - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
+  - [Troubleshooting: deduplication and memory issues](#troubleshooting-deduplication-and-memory-issues)
 * [Help](#help)
 * [Incremental build](#incremental-build)
 * [Multiplexed files](#multiplexed-files)
 * [Debugging and bash scripts](#debugging-and-bash-scripts)
 * [Generating reports](#generating-reports)
-* [Managing your disk usage](#managing-your-disk-usage)
 * [Invoking the workflow from outwith the RiboViz home directory](#invoking-the-workflow-from-outwith-the-riboviz-home-directory)
 
 ---
@@ -212,6 +212,10 @@ samsort_memory: 256M
 ```
 
 For information on the allowable values, see [samtools sort](http://www.htslib.org/doc/samtools-sort.html) and its `-m` flag.
+
+### Troubleshooting: deduplication and memory issues
+
+See [Troubleshooting: deduplication and memory issues](memory-storage.md#troubleshooting-deduplication-and-memory-issues) in [Memory and storage](./memory-storage.md).
 
 ---
 
@@ -453,23 +457,6 @@ $ nextflow run prep_riboviz.nf \
     -with-report report.html -with-timeline timeline.html \
     -with-dag workflow.svg
 ```
-
----
-
-## Managing your disk usage
-
-The workflow generates many intermediate files and some of these may be unompressed and **large**, i.e. about the same size as the input files. All these files are placed in a temporary directory (`dir_tmp`). The temporary directory's contents can be inspected for troubleshooting, if necessary.
-
-For example, here is the volume of the outputs from a run of the vignette as documented in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md):
-
-| Directory |   MB |
-| --------- | ---- |
-| `index`   |    9 |
-| `tmp`     | 1040 |
-| `output`  |    3 |
-| Total     | 1052 |
-
-**Tip:** We recommend you delete temporary directories and log directories when you have completed your analyses to your satisfaction.
 
 ---
 
