@@ -19,14 +19,14 @@ if (interactive()) {
   path_to_this_script <- here("rscripts", this_script)
   source(here::here("rscripts", "provenance.R"))
   source(here::here("rscripts", "read_count_functions.R"))
-  source(here::here("rscripts", "analysis_block_functions.R"))
+  source(here::here("rscripts", "stats_figs_block_functions"))
 } else {
   # Deduce file name and path using reflection as before.
   this_script <- getopt::get_Rscript_filename()
   path_to_this_script <- this_script
   source(here::here("rscripts", "provenance.R"))
   source(here::here("rscripts", "read_count_functions.R"))
-  source(here::here("rscripts", "analysis_block_functions.R"))
+  source(here::here("rscripts", "stats_figs_block_functions"))
 }
 
 # print provenance
@@ -335,7 +335,7 @@ print("Starting: Position specific distribution of reads")
 # For RPF datasets, generate codon-based position-specific reads
 if (rpf) {
   
-  pos_sp_rpf_norm_reads_data <- CalculatePositionSpecificDistributionOfReads(hd_file, gene, dataset, buffer, min_read_length, count_threshold)
+  pos_sp_rpf_norm_reads_data <- CalculatePositionSpecificDistributionOfReads(hd_file, gene_names, dataset, buffer, min_read_length, count_threshold)
   
   pos_sp_rpf_norm_reads_plot <- PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
   
@@ -366,7 +366,7 @@ if (!rpf) {
   warning("Warning: nt-based position-specific reads for non-RPF datasets not tested")
 
   # calculate
-  pos_sp_mrna_norm_coverage <- CalculateNucleotideBasedPositionSpecificReadsMRNA(gene, dataset, min_read_length, read_range, buffer)
+  pos_sp_mrna_norm_coverage <- CalculateNucleotideBasedPositionSpecificReadsMRNA(gene_names, dataset, min_read_length, read_range, buffer)
   
   # plot
   PlotNucleotideBasedPositionSpecificReadsPerGeneMRNA(pos_sp_mrna_norm_coverage)
@@ -393,11 +393,11 @@ print("Completed: Position specific distribution of reads")
 #
 
 # Calculate TPMs of genes
-GeneTranscriptsPerMillion <- function(gene, dataset, hd_file){
+GeneTranscriptsPerMillion <- function(gene_names, dataset, hd_file){
   
   print("Starting: Calculate TPMs of genes")
   
-  tpms <- CalculateGeneTranscriptsPerMillion(gene, dataset, hd_file)
+  tpms <- CalculateGeneTranscriptsPerMillion(gene_names, dataset, hd_file)
   
   WriteGeneTranscriptsPerMillion(tpms)
   
@@ -406,7 +406,7 @@ GeneTranscriptsPerMillion <- function(gene, dataset, hd_file){
 } # end GeneTranscriptsPerMillion() definition
 
 # run GeneTranscriptsPerMillion():
-GeneTranscriptsPerMillion(gene, dataset, hd_file)
+GeneTranscriptsPerMillion(gene_names, dataset, hd_file)
 
 
 #
@@ -426,7 +426,7 @@ if (!is.na(features_file)) { # do correlating
 
   features <- ReadSequenceBasedFeatures(features_file)
 
-  tpms <- CalculateGeneTranscriptsPerMillion(gene, dataset, hd_file) # repeated from TPMs section to make it available here
+  tpms <- CalculateGeneTranscriptsPerMillion(gene_names, dataset, hd_file) # repeated from TPMs section to make it available here
 
   features_plot_data <- CalculateSequenceBasedFeatures(features, tpms)
 
@@ -452,7 +452,7 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
 
   if (rpf) {
     
-    cod_dens_tRNA_data <- CalculateCodonSpecificRibosomeDensity(t_rna_file, codon_positions_file, gene, hd_file, dataset, buffer, count_threshold)
+    cod_dens_tRNA_data <- CalculateCodonSpecificRibosomeDensity(t_rna_file, codon_positions_file, gene_names, hd_file, dataset, buffer, count_threshold)
     
     cod_dens_tRNA_plot <- PlotCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_data)
 
