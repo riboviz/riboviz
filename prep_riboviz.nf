@@ -96,6 +96,8 @@ def helpMessage() {
         '<cell>' and '<umi>' elements).
     * 'dedup_umis': Deduplicate reads using UMI-tools? (default
       'FALSE')
+    * 'dedup_stats': Output UMI deduplication statistics? (default
+      'TRUE')
     * 'group_umis': Smmarise UMI groups both pre- and
       post-deduplication using UMI-tools? Useful for debugging 
       (default 'FALSE')
@@ -190,6 +192,7 @@ params.do_pos_sp_nt_freq = true
 params.extract_umis = false
 params.fq_files = [:]
 params.group_umis = false
+params.dedup_stats = true
 params.is_riboviz_gff = true
 params.make_bedgraph = true
 params.max_read_length = 50
@@ -802,13 +805,15 @@ process dedupUmis {
         tuple val(sample_id), file("dedup.bam"), \
             file("dedup.bam.bai") into dedup_bam
         tuple val(sample_id), file("dedup_stats*.tsv") \
+            optional (! params.dedup_stats) \
             into dedup_stats_tsv
     when:
         params.dedup_umis
     shell:
+        output_stats_flag = params.dedup_stats \
+	    ? "--output-stats=dedup_stats" : ''
         """
-        umi_tools dedup -I ${sample_bam} -S dedup.bam \
-            --output-stats=dedup_stats
+        umi_tools dedup -I ${sample_bam} -S dedup.bam ${output_stats_flag}
         samtools --version
         samtools index dedup.bam
         """

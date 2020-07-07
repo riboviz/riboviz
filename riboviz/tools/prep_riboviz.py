@@ -115,7 +115,8 @@ Operation is as follows.
 * If deduplication has been requested:
     - Outputs UMI groups pre-deduplication using ``umi_tools group``,
       if requested.
-    - Deduplicates UMIs using ``umi_tools dedup``.
+    - Deduplicates UMIs using ``umi_tools dedup``, and outputs
+      deduplication statistics, if requested.
     - Indexes resultant BAM file using ``samtools index``.
     - Outputs UMI groups post-deduplication using ``umi_tools group``,
       if requested.
@@ -233,7 +234,9 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
           group`` if requested (``group_umis``) (via
           :py:func:`riboviz.workflow.group_umis`).
         - Deduplicates UMIs using ``umi_tools dedup`` (via
-          :py:func:`riboviz.workflow.deduplicate_umis`).
+          :py:func:`riboviz.workflow.deduplicate_umis`), and
+          outputs deduplication statistics, if requested
+          (``dedup_stats``).
         - Indexes resultant BAM file using ``samtools index`` (via
           :py:func:`riboviz.workflow.index_bam`).
         - Outputs UMI groups post-deduplication using ``umi_tools
@@ -381,8 +384,14 @@ def process_sample(sample, sample_fastq, index_dir, r_rna_index,
         log_file = os.path.join(
             logs_dir,
             LOG_FORMAT.format(step, "umi_tools_dedup.log"))
-        dedup_stats_prefix = os.path.join(tmp_dir,
-                                          workflow_files.DEDUP_STATS_PREFIX)
+        is_dedup_stats = True
+        if params.DEDUP_STATS in config:
+            is_dedup_stats = value_in_dict(params.DEDUP_STATS, config)
+        dedup_stats_prefix = None
+        if is_dedup_stats:
+            dedup_stats_prefix = os.path.join(
+                tmp_dir,
+                workflow_files.DEDUP_STATS_PREFIX)
         workflow.deduplicate_umis(
             sample_bam, sample_out_bam, dedup_stats_prefix,
             log_file, run_config)

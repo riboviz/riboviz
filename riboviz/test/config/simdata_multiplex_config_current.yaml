@@ -8,6 +8,7 @@ codon_positions_file: data/yeast_codon_pos_i200.RData
 count_reads: TRUE
 count_threshold: 1
 dataset: simdata_multiplex
+dedup_stats: TRUE
 dedup_umis: TRUE
 dir_in: data/simdata/
 dir_index: vignette/index

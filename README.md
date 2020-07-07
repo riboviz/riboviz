@@ -14,7 +14,7 @@ All the code for processing the raw reads is available in this repository.
 
 ## Python and Nextflow workflows
 
-This release contains two versions of the RiboViz workflow:
+This release contains two versions of the **RiboViz** workflow:
 
 * A Python workflow, `riboviz.tools.prep_riboviz`.
 * A Nextflow workflow, `prep_riboviz_nf`. [Nextflow](https://www.nextflow.io/) is a workflow management system and `prep_riboviz.nf` is a port of `riboviz.tools.prep_riboviz`, into a Nextflow workflow. In the next release, the Python workflow will be deprecated by this Nextflow workflow.
@@ -37,6 +37,7 @@ Usage:
 * [Configuring the RiboViz workflow](./docs/user/prep-riboviz-config.md)
 * [Running the RiboViz Python workflow](./docs/user/prep-riboviz-run-python.md)
 * [Running the RiboViz Nextflow workflow](./docs/user/prep-riboviz-run-nextflow.md)
+* [Memory and storage](./docs/user/memory-storage.md). Information and advice relating to **RiboViz**'s memory and storage requirements.
 
 Command-line tools:
 
