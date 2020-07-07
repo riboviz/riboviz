@@ -430,58 +430,7 @@ WriteGeneReadFrames <- function(gene_read_frames_data){
 #
 #
 
-# codon-specific reads for RPF datasets
-GetCodonPositionReads <- function(hd_file, gene, dataset, left, right, min_read_length) {
-  # @ewallace: this needs documentation of inputs and outputs
-  lid <- 28 - min_read_length + 1
-  reads_pos <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
-  reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
-  end_reads_pos_subset <- ncol(reads_pos_subset) # Number of columns of the subset
-  
-  l28 <- RcppRoll::roll_suml(reads_pos_subset[lid, 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[14, 2:end_reads_pos_subset]), 3)] # Map reads of length 28 to codons
-  l29 <- RcppRoll::roll_suml(reads_pos_subset[(lid + 1), 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[15, 2:end_reads_pos_subset]), 3)] # Map reads of length 29 to codons
-  l30 <- RcppRoll::roll_suml(reads_pos_subset[(lid + 2), 1:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[16, 1:end_reads_pos_subset]), 3)] # Map reads of length 30 to codons
-  
-  cod_sp_counts <- l28 + l29 + l30 # Sum of reads of lengths 28-30 at each codon
-  cod_sp_counts <- cod_sp_counts[1:(length(cod_sp_counts) - 1)]
-  return(cod_sp_counts)
-}
-
-# Nt-specific coverage for mRNA datasets
-GetMRNACoverage <- function(hd_file, gene, dataset, left, right, read_range, min_read_length, buffer) {
-  reads_pos <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
-  reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS mapped reads are considered
-  
-  nt_IR_list <- lapply(read_range, function(w) {
-    IRanges::IRanges(start = rep(1:ncol(reads_pos_subset), reads_pos_subset[(w - min_read_length + 1), ]), width = w)
-  }) # Create list of IRanges for position-specific reads of all length
-  nt_IR <- unlist(as(nt_IR_list, "IRangesList")) # Combine IRanges from different read lengths
-  nt_cov <- IRanges::coverage(nt_IR) # Estimate nt-specific coverage of mRNA reads
-  
-  # Subset coverage to only CDS
-  nt_counts <- rep.int(S4Vectors::runValue(nt_cov), S4Vectors::runLength(nt_cov))
-  if (length(nt_counts) >= (buffer - left)) {
-    nt_counts <- nt_counts[(buffer - left):length(nt_counts)]
-  } else {
-    nt_counts <- 0
-  }
-  
-  cds_length <- ncol(reads_pos_subset) - (buffer - left - 1) # Length of CDS
-  nt_sp_counts <- rep(0, cds_length)
-  
-  if (length(nt_counts) < cds_length) {
-    if (length(nt_counts) > 0) {
-      nt_sp_counts[1:length(nt_counts)] <- nt_counts
-    }
-  } else {
-    nt_sp_counts <- nt_counts[1:cds_length]
-  }
-  return(nt_sp_counts)
-}
-
-
-
-CalculatePositionSpecificDistributionOfReads <- function(hd_file, gene, dataset, buffer, min_read_length, count_threshold){
+CalculatePositionSpecificDistributionOfReads <- function(hd_file, gene_names, dataset, buffer, min_read_length, count_threshold){
   
   # create empty matrix to store position-specific read counts
   out5p <- matrix(NA, nrow = length(gene_names), ncol = 500) # 5'
@@ -588,7 +537,7 @@ WritePositionSpecificDistributionOfReads <- function(pos_sp_rpf_norm_reads_data)
 
 # # MEDIUM FUNCTIONS:
 
-CalculateNucleotideBasedPositionSpecificReadsMRNA <- function(gene, dataset, min_read_length, read_range, buffer){
+CalculateNucleotideBasedPositionSpecificReadsMRNA <- function(gene_names, dataset, min_read_length, read_range, buffer){
   # create empty matrix to store position-specific read counts
   out5p <- matrix(NA, nrow = length(gene_names), ncol = 1500) # 5'
   out3p <- matrix(NA, nrow = length(gene_names), ncol = 1500) # 3'
@@ -698,7 +647,7 @@ WriteNucleotideBasedPositionSpecificReadsPerGeneMRNA <- function(pos_sp_mrna_nor
 
 # MEDIUM FUNCTIONS:
 
-CalculateGeneTranscriptsPerMillion <- function(gene, dataset, hd_file){
+CalculateGeneTranscriptsPerMillion <- function(gene_names, dataset, hd_file){
   # calculate transcripts per million (TPM)
   # @FlicAnderson: what does reads_per_b stand for? Reads per Base? o.0  If so, maybe worth using full word?
   gene_sp_reads <- sapply(gene_names, GetGeneReadsTotal, dataset, hd_file)
@@ -794,7 +743,7 @@ WriteSequenceBasedFeatures <- function(features_plot) {
 
 
 # # MEDIUM FUNCTIONS:
-CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_file, gene, hd_file, dataset, buffer, count_threshold){
+CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_file, gene_names, hd_file, dataset, buffer, count_threshold){
   
   # This still depends on yeast-specific arguments and should be edited.
   yeast_tRNAs <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
