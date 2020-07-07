@@ -697,100 +697,100 @@ WriteSequenceBasedFeatures <- function(features_plot) {
 ## Codon-specific ribosome densities for correlations with tRNAs
 
 
-# MEDIUM FUNCTIONS:
-
-
-CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_file, gene, dataset, hd_file, buffer, count_threshold){
-  # dev version:
-  # yeast_tRNAs <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
-  t_rna_df <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
-  load(codon_positions_file) # Position of codons in each gene (numbering ignores first 200 codons)
-  # Reads in an object named "codon_pos"
-  out <- lapply(gene_names, function(gene) {
-    # From "Position specific distribution of reads" plot
-    GetCodonPositionReads(hd_file=hd_file, gene=gene, dataset=dataset,
-                          left = (buffer - 15), right = (buffer + 11),
-                          min_read_length = min_read_length)
-  }) # Get codon-based position-specific reads for each gene
-  names(out) <- gene_names
-  
-  gene_len <- sapply(out, length) # Calculate gene length in codons
-  out <- out[gene_len > 201] # Ignore genes with <=200 sense codons
-  
-  trim_out <- lapply(out, function(x) {
-    x[201:(length(x) - 1)]
-  }) # Trim first 200 codons and stop codon from each gene
-  read_counts_trim <- sapply(trim_out, sum) # Calculate read counts in trimmed genes
-  trim_out <- trim_out[read_counts_trim >= count_threshold] # Ignore genes with fewer than count_threshold mapped reads
-  
-  norm_out <- lapply(trim_out, function(x) {
-    x / mean(x)
-  }) # Normalize reads in each gene by their mean
-  
-  
-  # TODO: figure this out
-  # Calculate codon-specific mean ribosome-densities at A/P/E sites of the mapped reads
-  a_mn <- sapply(names(codon_pos), function(codon) {
-    mean(unlist(apply(codon_pos[[codon]], 1, function(a) {
-      pos <- as.numeric(a[2])
-      norm_out[[a[1]]][pos]
-    })), na.rm = T)
-  })
-  p_mn <- sapply(names(codon_pos), function(codon) {
-    mean(unlist(apply(codon_pos[[codon]], 1, function(a) {
-      pos <- as.numeric(a[2]) + 1
-      norm_out[[a[1]]][pos]
-    })), na.rm = T)
-  })
-  e_mn <- sapply(names(codon_pos), function(codon) {
-    mean(unlist(apply(codon_pos[[codon]], 1, function(a) {
-      pos <- as.numeric(a[2]) + 2
-      norm_out[[a[1]]][pos]
-    })), na.rm = T)
-  })
-  
-  # Sort the values
-  A <- a_mn[order(names(codon_pos))]
-  P <- p_mn[order(names(codon_pos))]
-  E <- e_mn[order(names(codon_pos))]
-  
-  # TODO: this is a misnomer. Can calculate A/P/E-site norm density without t_rna_df.
-  # Should replace t_rna_df with an argument "codon_features_file"
-  # then plot against features in that, analogosly to (gene) to "features_file" above
-  cod_dens_tRNA_data <- cbind(t_rna_df, A, P, E)
-  
-  return(cod_dens_tRNA_data)
-  
-} # end of CalculateCodonSpecificRibosomeDensity() definition
-# gives:
-# TODO
-
+# # MEDIUM FUNCTIONS:
+# 
+# 
+# CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_file, gene, dataset, hd_file, buffer, count_threshold){
+#   # dev version:
+#   # yeast_tRNAs <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
+#   t_rna_df <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
+#   load(codon_positions_file) # Position of codons in each gene (numbering ignores first 200 codons)
+#   # Reads in an object named "codon_pos"
+#   out <- lapply(gene_names, function(gene) {
+#     # From "Position specific distribution of reads" plot
+#     GetCodonPositionReads(hd_file=hd_file, gene=gene, dataset=dataset,
+#                           left = (buffer - 15), right = (buffer + 11),
+#                           min_read_length = min_read_length)
+#   }) # Get codon-based position-specific reads for each gene
+#   names(out) <- gene_names
+#   
+#   gene_len <- sapply(out, length) # Calculate gene length in codons
+#   out <- out[gene_len > 201] # Ignore genes with <=200 sense codons
+#   
+#   trim_out <- lapply(out, function(x) {
+#     x[201:(length(x) - 1)]
+#   }) # Trim first 200 codons and stop codon from each gene
+#   read_counts_trim <- sapply(trim_out, sum) # Calculate read counts in trimmed genes
+#   trim_out <- trim_out[read_counts_trim >= count_threshold] # Ignore genes with fewer than count_threshold mapped reads
+#   
+#   norm_out <- lapply(trim_out, function(x) {
+#     x / mean(x)
+#   }) # Normalize reads in each gene by their mean
+#   
+#   
+#   # TODO: figure this out
+#   # Calculate codon-specific mean ribosome-densities at A/P/E sites of the mapped reads
+#   a_mn <- sapply(names(codon_pos), function(codon) {
+#     mean(unlist(apply(codon_pos[[codon]], 1, function(a) {
+#       pos <- as.numeric(a[2])
+#       norm_out[[a[1]]][pos]
+#     })), na.rm = T)
+#   })
+#   p_mn <- sapply(names(codon_pos), function(codon) {
+#     mean(unlist(apply(codon_pos[[codon]], 1, function(a) {
+#       pos <- as.numeric(a[2]) + 1
+#       norm_out[[a[1]]][pos]
+#     })), na.rm = T)
+#   })
+#   e_mn <- sapply(names(codon_pos), function(codon) {
+#     mean(unlist(apply(codon_pos[[codon]], 1, function(a) {
+#       pos <- as.numeric(a[2]) + 2
+#       norm_out[[a[1]]][pos]
+#     })), na.rm = T)
+#   })
+#   
+#   # Sort the values
+#   A <- a_mn[order(names(codon_pos))]
+#   P <- p_mn[order(names(codon_pos))]
+#   E <- e_mn[order(names(codon_pos))]
+#   
+#   # TODO: this is a misnomer. Can calculate A/P/E-site norm density without t_rna_df.
+#   # Should replace t_rna_df with an argument "codon_features_file"
+#   # then plot against features in that, analogosly to (gene) to "features_file" above
+#   cod_dens_tRNA_data <- cbind(t_rna_df, A, P, E)
+#   
+#   return(cod_dens_tRNA_data)
+#   
+# } # end of CalculateCodonSpecificRibosomeDensity() definition
+# # gives:
+# # TODO
+# 
 
 PlotCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_data) {
-  
+
   # Prepare data for plot
   cod_dens_tRNA_wide <- cod_dens_tRNA_data %>%
     gather(tRNA_type, tRNA_value, 3:6) %>%
     gather(Site, Ribodens, 3:5)
-  
+
   # Plot
   cod_dens_tRNA_plot <- ggplot(cod_dens_tRNA_wide, aes(x = tRNA_value, y = Ribodens)) +
     geom_point(alpha = 0.3) +
     facet_grid(Site ~ tRNA_type, scales = "free_x") +
     geom_smooth(method = "lm") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  
+
   return(cod_dens_tRNA_plot)
 } # end of PlotCodonSpecificRibosomeDensityTRNACorrelation() definition
 
 
 SaveCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_plot){
-  
+
   # save plot
   ggsave(cod_dens_tRNA_plot, filename = file.path(output_dir, paste0(output_prefix, "codon_ribodens.pdf")))
-  
+
   # return() # NO RETURN as writing out
-  
+
 } # end of SaveCodonSpecificRibosomeDensityTRNACorrelation() definition
 
 
