@@ -520,3 +520,53 @@ GetGeneReadDensity <- function(gene, dataset, hd_file, buffer = 50) {
   # buffer
   GetGeneReadsTotal(gene, dataset, hd_file) / (GetGeneLength(gene, dataset, hd_file) + 50)
 }
+
+
+# codon-specific reads for RPF datasets
+GetCodonPositionReads <- function(hd_file, gene, dataset, left, right, min_read_length) {
+  # @ewallace: this needs documentation of inputs and outputs
+  lid <- 28 - min_read_length + 1
+  reads_pos <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
+  reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
+  end_reads_pos_subset <- ncol(reads_pos_subset) # Number of columns of the subset
+  
+  l28 <- RcppRoll::roll_suml(reads_pos_subset[lid, 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[14, 2:end_reads_pos_subset]), 3)] # Map reads of length 28 to codons
+  l29 <- RcppRoll::roll_suml(reads_pos_subset[(lid + 1), 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[15, 2:end_reads_pos_subset]), 3)] # Map reads of length 29 to codons
+  l30 <- RcppRoll::roll_suml(reads_pos_subset[(lid + 2), 1:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[16, 1:end_reads_pos_subset]), 3)] # Map reads of length 30 to codons
+  
+  cod_sp_counts <- l28 + l29 + l30 # Sum of reads of lengths 28-30 at each codon
+  cod_sp_counts <- cod_sp_counts[1:(length(cod_sp_counts) - 1)]
+  return(cod_sp_counts)
+}
+
+# Nt-specific coverage for mRNA datasets
+GetMRNACoverage <- function(hd_file, gene, dataset, left, right, read_range, min_read_length, buffer) {
+  reads_pos <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
+  reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS mapped reads are considered
+  
+  nt_IR_list <- lapply(read_range, function(w) {
+    IRanges::IRanges(start = rep(1:ncol(reads_pos_subset), reads_pos_subset[(w - min_read_length + 1), ]), width = w)
+  }) # Create list of IRanges for position-specific reads of all length
+  nt_IR <- unlist(as(nt_IR_list, "IRangesList")) # Combine IRanges from different read lengths
+  nt_cov <- IRanges::coverage(nt_IR) # Estimate nt-specific coverage of mRNA reads
+  
+  # Subset coverage to only CDS
+  nt_counts <- rep.int(S4Vectors::runValue(nt_cov), S4Vectors::runLength(nt_cov))
+  if (length(nt_counts) >= (buffer - left)) {
+    nt_counts <- nt_counts[(buffer - left):length(nt_counts)]
+  } else {
+    nt_counts <- 0
+  }
+  
+  cds_length <- ncol(reads_pos_subset) - (buffer - left - 1) # Length of CDS
+  nt_sp_counts <- rep(0, cds_length)
+  
+  if (length(nt_counts) < cds_length) {
+    if (length(nt_counts) > 0) {
+      nt_sp_counts[1:length(nt_counts)] <- nt_counts
+    }
+  } else {
+    nt_sp_counts <- nt_counts[1:cds_length]
+  }
+  return(nt_sp_counts)
+}
