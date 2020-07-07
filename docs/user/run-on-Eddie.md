@@ -464,7 +464,7 @@ Then run:
 
 `$ qsub [Your script]`
 
- Remember to move the output data to DataStore or other persistent storage after the jobs have finished. 
+ If you run the example-dataset in your scratch space, remember to move the output data to DataStore or other persistent storage after the jobs have finished. 
  
  Files older than one month are removed from this directory automatically.
  
