@@ -463,3 +463,9 @@ Check that you are in `/exports/eddie/scratch/s1919303/riboviz/riboviz/`
 Then run:
 
 `$ qsub [Your script]`
+
+ Remember to move the output data to DataStore or other persistent storage after the jobs have finished. 
+ 
+ Files older than one month are removed from this directory automatically.
+ 
+ More info about storage is here: https://www.wiki.ed.ac.uk/display/ResearchServices/Storage#Storage-Homedirectories
