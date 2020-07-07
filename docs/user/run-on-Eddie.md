@@ -468,4 +468,4 @@ Then run:
  
  Files older than one month are removed from this directory automatically.
  
- More info about storage is here: https://www.wiki.ed.ac.uk/display/ResearchServices/Storage#Storage-Homedirectories
+ More info about storage is here: https://www.wiki.ed.ac.uk/display/ResearchServices/Storage
