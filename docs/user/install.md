@@ -98,158 +98,53 @@ Constraints:
 
 ---
 
-## General packages
+## Install general packages
 
-### Git
+| Package | Links |
+| ------- | ----- |
+| Git | [Git](https://git-scm.com/) |
+| cURL | [cURL](https://curl.haxx.se/) |
+| EPEL (CentOS only) | [EPEL](https://fedoraproject.org/wiki/EPEL) |
+| bedtools | [bedtools](http://bedtools.readthedocs.io/en/latest/), [GitHub](https://github.com/arq5x/bedtools2) |
+| hdf5tools | [HDF5](https://portal.hdfgroup.org/display/HDF5) |
+| pigz | [pigz](http://zlib.net/pigz/) |
 
-Website: [Git](https://git-scm.com/)
-
-**Ubuntu**
-
-Install:
+### Install on Ubuntu
 
 ```console
 $ sudo apt-get install -y git
+$ sudo apt-get install -y curl
+$ sudo apt-get install -y bedtools
+$ sudo apt-get install -y hdf5-tools
+$ sudo apt-get install -y pigz
 ```
 
-**CentOS**
-
-Install:
+### Install on CentOS
 
 ```console
 $ sudo yum install -y git
+$ sudo yum install -y curl
+$ sudo yum install -y epel-release
+$ sudo yum install -y BEDTools
+$ sudo yum install -y hdf5-devel
+$ sudo yum install -y pigz
 ```
 
-**Check package has installed:**
+### Check packages have installed
 
 ```console
 $ git --version
-```
-
-### cURL
-
-Website: [cURL](https://curl.haxx.se/)
-
-**Ubuntu**
-
-Install:
-
-```console
-$ sudo apt-get install -y curl
-```
-
-**CentOS**
-
-Install:
-
-```console
-$ sudo yum install -y curl
-```
-
-**Check package has installed:**
-
-```console
 $ curl --version
-```
-
-### EPEL (CentOS only)
-
-Website [EPEL](https://fedoraproject.org/wiki/EPEL)
-
-Install:
-
-```console
-$ sudo yum install -y epel-release
-```
-
-### bedtools
-
-Web sites:
-
-* [bedtools](http://bedtools.readthedocs.io/en/latest/)
-* [GitHub](https://github.com/arq5x/bedtools2)
-
-**Ubuntu**
-
-Install:
-
-```console
-$ sudo apt-get install -y bedtools
-```
-
-**CentOS**
-
-Install:
-
-```console
-$ sudo yum install -y BEDTools
-```
-
-**Check package has installed:**
-
-```console
 $ bedtools -version
-```
-
-### hdf5tools
-
-Web site: [HDF5](https://portal.hdfgroup.org/display/HDF5)
-
-**Ubuntu**
-
-Install:
-
-```console
-$ sudo apt-get install -y hdf5-tools
-```
-
-**CentOS**
-
-Install:
-
-```console
-$ sudo yum install -y hdf5-devel
-```
-
-**Check package has installed:**
-
-```console
 $ h5diff -version
+$ pigz --version
 ```
 
 `h5diff` is one of the hdf5tools.
 
-### pigz
-
-Web site: [pigz](http://zlib.net/pigz/)
-
-pigz is a parallel implementation of gzip for multi-processor, multi-core machines. It may already be available on your system. Check by running the following command:
-
-```console
-$ pigz --version
-```
-
-If it is not present, please install it as follows:
-
-**Ubuntu**
-
-Install:
-
-```console
-$ sudo apt-get install -y pigz
-```
-
-**CentOS**
-
-Install:
-
-```console
-$ sudo yum install -y pigz
-```
-
 ---
 
-## Python
+## Install Python
 
 Web site: [python](https://www.python.org/)
 
@@ -261,7 +156,7 @@ The instructions which follow have been written under the assumption that you ar
 
 If you are using other distributions of Python you will need to consult the relevant documentation for each package for installation information.
 
-### Miniconda Python 3.6+
+### Install Miniconda Python 3.6+
 
 Install:
 
@@ -320,151 +215,48 @@ $ conda create --name riboviz python=3.7
 
 ---
 
-## Python packages
+## Install Python packages
 
-### pyyaml
+| Package | Links |
+| ------- | ----- |
+| pyyaml | [PyYAML](https://pyyaml.org/), [GitHub](https://github.com/yaml/pyyaml/) |
+| gitpython | [gitpython](https://gitpython.readthedocs.io/en/stable/), [GitHub](https://github.com/gitpython-developers/GitPython) |
+| pytest | [pytest](https://pytest.org/), [GitHub](https://github.com/pytest-dev/pytest/) |
+| pandas | [pandas](https://pandas.pydata.org/), [GitHub](https://github.com/pandas-dev/pandas) |
+| Cutadapt | [GitHub](https://github.com/marcelm/cutadapt), [readthedocs](https://cutadapt.readthedocs.io/) |
+| pysam | [GitHub](https://github.com/pysam-developers/pysam/), [readthedocs](https://pysam.readthedocs.io/) |
+| BioPython | [Biopython](http://biopython.org/) |
+| gffutils | [gffutils](http://daler.github.io/gffutils/) |
+| h5py | [h5py](https://www.h5py.org/) |
+| UMI-tools | [GitHub](https://github.com/CGATOxford/UMI-tools), [readthedocs](https://readthedocs.org/projects/umi-tools/) |
 
-Web sites:
-
-* [PyYAML](https://pyyaml.org/)
-* [GitHub](https://github.com/yaml/pyyaml/)
+**Note:** Cutadapt v1.18 (2018-09-07), or later, is required.
 
 Install:
 
 ```console
 $ conda install -y pyyaml
-```
-
-### gitpython
-
-Web sites:
-
-* [gitpython](https://gitpython.readthedocs.io/en/stable/)
-* [GitHub](https://github.com/gitpython-developers/GitPython)
-
-Install:
-
-```console
 $ conda install -y gitpython
-```
-
-### pytest
-
-Web sites:
-
-* [pytest](https://pytest.org/)
-* [GitHub](https://github.com/pytest-dev/pytest/)
-
-Install:
-
-```console
 $ conda install -y pytest
-```
-
-### pandas
-
-Web sites:
-
-* [pandas](https://pandas.pydata.org/)
-* [GitHub](https://github.com/pandas-dev/pandas)
-
-Install:
-
-```console
 $ conda install -y pandas
-```
-
-### Cutadapt
-
-Web sites:
-
-* [GitHub](https://github.com/marcelm/cutadapt)
-* [readthedocs](https://cutadapt.readthedocs.io/)
-
-Cutadapt v1.18 (2018-09-07), or later, is required.
-
-Install:
-
-```console
 $ conda install -y -c bioconda cutadapt
+$ conda install -y -c bioconda pysam
+$ conda install -y -c bioconda samtools
+$ conda install -y -c anaconda biopython
+$ pip install gffutils
+$ conda install -y -c anaconda h5py
+$ conda install -y -c bioconda umi_tools
 ```
 
-Check package has installed the `cutadapt` tool:
+Check packages have installed command-line tools:
 
 ```console
 $ cutadapt --version
-```
-
-### pysam
-
-Web sites:
-
-* [GitHub](https://github.com/pysam-developers/pysam/)
-* [readthedocs](https://pysam.readthedocs.io/)
-
-Install:
-
-```console
-$ conda install -y -c bioconda pysam
-$ conda install -y -c bioconda samtools
-```
-
-Check package has installed the `samtools` tool:
-
-```console
 $ samtools --version
+$ umi_tools -v
 ```
 
-### BioPython
-
-Web site:
-
-* [Biopython](http://biopython.org/)
-
-Install:
-
-```console
-$ conda install -y -c anaconda biopython
-```
-
-### gffutils
-
-Web site:
-
-* [gffutils](http://daler.github.io/gffutils/)
-
-Install:
-
-```console
-$ pip install gffutils
-```
-
-**Note:** `pip install` is recommended. Using
-
-```console
-$ conda install -y -c bioconda gffutils
-```
-
-under Python 3, seems to confuse the Python environment and sets Python to:
-
-```console
-$ python --version
-Python 2.7.16 :: Anaconda, Inc.
-```
-
-### h5py
-
-Web site:
-
-* [h5py](https://www.h5py.org/)
-
-Install:
-
-```console
-$ conda install -y -c anaconda h5py
-```
-
-Check package has installed:
+Check h5py package has installed:
 
 ```console
 $ python
@@ -478,42 +270,40 @@ $ python
 
 Your number of `skipped` and `xfailed` (expected failures may differ, depending upon the version of h5py installed.
 
-### UMI-tools
-
-Web sites:
-
-* [GitHub](https://github.com/CGATOxford/UMI-tools)
-* [readthedocs](https://readthedocs.org/projects/umi-tools/)
-
-Install:
+**Note:** For `gffutils`, `pip install` is recommended because using
 
 ```console
-$ conda install -y -c bioconda umi_tools
+$ conda install -y -c bioconda gffutils
 ```
 
-Check package has installed the `umi_tools` tool:
+under Python 3, seems to confuse the Python environment and sets Python to:
 
 ```console
-$ umi_tools -v
+$ python --version
+Python 2.7.16 :: Anaconda, Inc.
 ```
 
 ---
 
-## Hisat2
+## Install Bioinformatics tools
 
-Web site: [Hisat2](https://daehwankimlab.github.io/hisat2/)
+| Package | Links |
+| ------- | ----- |
+| Hisat2 (2.1.0) | [Hisat2](https://daehwankimlab.github.io/hisat2/) |
+| Bowtie | [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml) |
+| Nextflow | [Nextflow](https://www.nextflow.io/), [Documentation](https://www.nextflow.io/docs/latest/index.html), [GitHub](https://github.com/nextflow-io/nextflow) |
 
-Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
+You may choose to install more recent versions of Hisat2 and Bowtie than in the examples that follows. The directory names may differ, depending on the versions you have.
 
-Install:
+### Install Hisat2
+
+**Note:** Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
 
 ```console
 $ wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.1.0-Linux_x86_64.zip
 $ unzip hisat2-2.1.0-Linux_x86_64.zip
 $ ls hisat2-2.1.0/
 ```
-
-Your directory name may differ, depending on the version of Hisat2 you have.
 
 Update `PATH` and check that the `hisat2` tool is available:
 
@@ -522,25 +312,15 @@ $ export PATH=~/hisat2-2.1.0:$PATH
 $ hisat2 --version
 ```
 
----
+### Install Bowtie
 
-## Bowtie
-
-Web site: [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml)
-
-**Note:** We are working to add back a Bowtie alignment option.
-
-You may choose to install a more recent version of Hisat2 than in the example that follows.
-
-Install:
+**Note:** We are working to add a Bowtie alignment option.
 
 ```console
 $ wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/1.2.2/bowtie-1.2.2-linux-x86_64.zip/download -O bowtie.zip
 $ unzip bowtie.zip
 $ ls bowtie-1.2.2-linux-x86_64/
 ```
-
-Your directory name may differ, depending on the version of Bowtie you have.
 
 Update `PATH` and check that the `bowtie` tool is available:
 
@@ -549,7 +329,97 @@ $ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 $ bowtie --version
 ```
 
-## Create `setenv.sh` to configure Hisat2 and Bowtie paths
+### Install Nextflow
+
+**Note:** Nextflow only needs to be installed if you plan to use the Nextflow version of RiboViz.
+
+**Install Nextflow using conda (recommended)**
+
+Install Nextflow and its dependencies (including Java):
+
+```console
+$ conda install -y -c bioconda nextflow
+```
+
+Check install:
+
+```console
+$ javac -version
+$ java -version
+$ nextflow -version
+
+      N E X T F L O W
+      version 20.01.0 build 5264
+      created 12-02-2020 10:14 UTC (02:14 PDT)
+      cite doi:10.1038/nbt.3820
+      http://nextflow.io
+```
+
+
+Your version of Nextflow may differ from that shown.
+
+**Install Nextflow (alternative)**
+
+Install [OpenJDK](https://openjdk.java.net) 1.8:
+
+* Ubuntu 18 users:
+
+```console
+$ sudo apt-get install -y openjdk-8-jdk-headless
+```
+
+* CentOS 7 users:
+
+```console
+$ sudo yum install -y openjdk-8-jdk-headless
+```
+
+Check install:
+
+```console
+$ javac -version
+$ java -version
+```
+
+Install Nextflow:
+
+```console
+$ curl -s https://get.nextflow.io | bash
+$ export PATH=$HOME/nextflow:$PATH
+$ nextflow -version
+```
+
+Set `PATH`:
+
+```console
+$ export PATH=$HOME/nextflow:$PATH
+```
+
+**Run Nextflow "hello" example**
+
+```console
+$ nextflow run hello
+N E X T F L O W  ~  version 20.01.0
+Pulling nextflow-io/hello ...
+downloaded from https://github.com/nextflow-io/hello.git
+Launching `nextflow-io/hello` [spontaneous_magritte] - revision: 1d43afc0ec [master]
+WARN: The use of `echo` method is deprecated
+executor >  local (4)
+[1d/bb459e] process > sayHello [100%] 4 of 4 /
+Hola world!
+
+Bonjour world!
+
+Ciao world!
+
+Hello world!
+```
+
+This runs Nextflow workflow [main.nf](https://github.com/nextflow-io/hello/blob/master/main.nf) from [nextflow-io/hello.git](https://github.com/nextflow-io/hello.git).
+
+---
+
+## Create `setenv.sh` to configure paths
 
 Create a `setenv.sh` script with the paths to your Hisat2 and Bowtie directories. For example:
 
@@ -561,6 +431,12 @@ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 
 Remember, your directory names may differ, depending on the versions of Hisat2 and Bowtie you have.
 
+If you installed Nextflow using the "Install Nextflow (alternative)" instructions then also add:
+
+```
+export PATH=$HOME/nextflow:$PATH
+```
+
 In future you can configure the paths by running:
 
 ```console
@@ -569,7 +445,7 @@ $ source setenv.sh
 
 ---
 
-## R 2.14.0+
+## Install R 2.14.0+
 
 Web sites:
 
@@ -582,7 +458,7 @@ R 3.4, or later, is strongly recommended.
 
 ### Install R and packages required by R packages to be installed
 
-**Ubuntu**
+**Install on Ubuntu**
 
 ```console
 $ sudo apt-get update -y
@@ -594,7 +470,7 @@ $ sudo apt-get install -y libssl-dev
 $ sudo apt-get install -y libcurl4-openssl-dev
 ```
 
-**CentOS**
+**Install on CentOS**
 
 ```console
 $ sudo yum update -y
@@ -670,7 +546,24 @@ Your version of R may differ from that shown.
 
 ---
 
-## R packages
+## Install R packages
+
+| Package | Links |
+| ------- | ----- |
+| RcppRoll | [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html) |
+| optparse | [optparse](https://cran.r-project.org/web/packages/optparse/index.html) |
+| tidyr | [tidyr](https://cran.r-project.org/web/packages/tidyr/index.html) |
+| ggplot2 | [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html) |
+| shiny | [shiny](https://cran.r-project.org/web/packages/shiny/index.html) |
+| plotly | [plotly](https://cran.r-project.org/web/packages/plotly/index.html) |
+| readr | [readr](https://cran.r-project.org/web/packages/readr/index.html) |
+| git2r |  [git2r](https://docs.ropensci.org/git2r), [GitHub](https://github.com/ropensci/git2r) |
+| here | [here](https://here.r-lib.org/), [CRAN](https://cran.r-project.org/package=here), [GitHub](https://github.com/r-lib/here) |
+| Bioconductor Rsamtools | [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html) |
+| Bioconductor rhdf5 | [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html) |
+| Bioconductor rtracklayer | [rtracklayer](https://bioconductor.org/packages/release/bioc/html/rtracklayer.html) |
+| Bioconductor Biostrings | [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html) |
+| Bioconductor ShortRead | [ShortRead](https://bioconductor.org/packages/release/bioc/html/ShortRead.html) |
 
 If, when installing R packages, you see a message like:
 
@@ -683,113 +576,19 @@ to install packages into? (yes/No/cancel)
 
 then enter `yes`.
 
-### RcppRoll
-
-Web site: [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html)
-
 Install in R:
 
 ```r
 > install.packages("RcppRoll")
-```
-
-### optparse
-
-Web site: [optparse](https://cran.r-project.org/web/packages/optparse/index.html)
-
-Install in R:
-
-```r
 > install.packages("optparse")
-```
-
-### tidyr
-
-Web site: [tidyr](https://cran.r-project.org/web/packages/tidyr/index.html)
-
-Install in R:
-
-```r
 > install.packages("tidyr")
-```
-
-### ggplot2
-
-Web site: [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html)
-
-Install in R:
-
-```r
 > install.packages("ggplot2")
-```
-
-### shiny
-
-Web site: [shiny](https://cran.r-project.org/web/packages/shiny/index.html)
-
-Install in R:
-
-```r
 > install.packages("shiny")
-```
-
-### plotly
-
-Web site: [plotly](https://cran.r-project.org/web/packages/plotly/index.html)
-
-Install in R:
-
-```r
 > install.packages("plotly")
-```
-
-### readr
-
-Website: [readr](https://cran.r-project.org/web/packages/readr/index.html)
-
-Install in R:
-
-```r
 > install.packages("readr")
-```
-
-### git2r
-
-Web sites:
-
-* [git2r](https://docs.ropensci.org/git2r)
-* [GitHub](https://github.com/ropensci/git2r)
-
-Install in R:
-
-```r
 > install.packages("git2r")
-```
-
-### here
-
-Web sites:
-
-* [here](https://here.r-lib.org/)
-* [CRAN](https://cran.r-project.org/package=here)
-* [GitHub](https://github.com/r-lib/here)
-
-Install in R:
-
-```r
 > install.packages("here")
 ```
-
-### Bioconductor Rsamtools, rhdf5, rtracklayer, Biostrings, ShortRead
-
-Web sites:
-
-* [Bioconductor](https://bioconductor.org)
-* [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html)
-* [rtracklayer](https://bioconductor.org/packages/release/bioc/html/rtracklayer.html)
-* [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html)
-* [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html)
-* [ShortRead](https://bioconductor.org/packages/release/bioc/html/ShortRead.html)
 
 The commands to install Bioconductor packages depend on your version of R. For full details:
 
@@ -819,7 +618,7 @@ For example, for R 3.5, install in R:
 > BiocManager::install("ShortRead")
 ```
 
-**Troubleshooting: installation path not writeable**
+### Troubleshooting: installation path not writeable
 
 The following warning can be ignored:
 
@@ -844,7 +643,7 @@ $ ls ~/R/x86_64-redhat-linux-gnu-library/3.5/Rsamtools/
 DESCRIPTION  libs  LICENSE  Meta  NAMESPACE  NEWS
 ```
 
-**Troubleshooting: Cannot allocate memory**
+### Troubleshooting: Cannot allocate memory
 
 ```
 Error in system2(file.path(R.home("bin"), "R"), c(if (nzchar(arch))
@@ -868,109 +667,7 @@ You may need to assign more memory to R or your machine.
 
 ---
 
-## Nextflow
-
-**Note:** Nextflow only needs to be installed if you plan to use the Nextflow version of RiboViz.
-
-Web sites:
-
-* [Nextflow](https://www.nextflow.io/)
-* [Documentation](https://www.nextflow.io/docs/latest/index.html)
-* [GitHub](https://github.com/nextflow-io/nextflow)
-
-### Install Nextflow using conda (recommended)
-
-Install Nextflow and its dependencies (including Java):
-
-```console
-$ conda install -y -c bioconda nextflow
-```
-
-Check install:
-
-```console
-$ javac -version
-$ java -version
-$ nextflow -version
-
-      N E X T F L O W
-      version 20.01.0 build 5264
-      created 12-02-2020 10:14 UTC (02:14 PDT)
-      cite doi:10.1038/nbt.3820
-      http://nextflow.io
-```
-
-
-Your version of Nextflow may differ from that shown.
-
-### Install Nextflow (alternative)
-
-Install [OpenJDK](https://openjdk.java.net) 1.8:
-
-* Ubuntu 18 users:
-
-```console
-$ sudo apt-get install -y openjdk-8-jdk-headless
-```
-
-* CentOS 7 users:
-
-```console
-$ sudo yum install -y openjdk-8-jdk-headless
-```
-
-Check install:
-
-```console
-$ javac -version
-$ java -version
-```
-
-Install Nextflow:
-
-```console
-$ curl -s https://get.nextflow.io | bash
-$ export PATH=$HOME/nextflow:$PATH
-$ nextflow -version
-```
-
-Set `PATH`:
-
-```console
-$ export PATH=$HOME/nextflow:$PATH
-```
-
-Update the `setenv.sh` script (see [Create `setenv.sh` to configure Hisat2 and Bowtie paths](#create-setenvsh-to-configure-hisat2-and-bowtie-paths) above) by adding:
-
-```
-export PATH=$HOME/nextflow:$PATH
-```
-
-### Run Nextflow "hello" example
-
-```console
-$ nextflow run hello
-N E X T F L O W  ~  version 20.01.0
-Pulling nextflow-io/hello ...
-downloaded from https://github.com/nextflow-io/hello.git
-Launching `nextflow-io/hello` [spontaneous_magritte] - revision: 1d43afc0ec [master]
-WARN: The use of `echo` method is deprecated
-executor >  local (4)
-[1d/bb459e] process > sayHello [100%] 4 of 4 /
-Hola world!
-
-Bonjour world!
-
-Ciao world!
-
-Hello world!
-```
-
-This runs Nextflow workflow [main.nf](https://github.com/nextflow-io/hello/blob/master/main.nf) from [nextflow-io/hello.git](https://github.com/nextflow-io/hello.git).
-
----
-
-## RiboViz
+## Get RiboViz
 
 Get RiboViz:
 
@@ -988,45 +685,17 @@ Run tests:
 
 ```console
 $ pytest --ignore-glob="*regression*" --ignore-glob="*nextflow*"
-=============================== test session starts ===============================
-platform linux -- Python 3.7.3, pytest-5.3.5, py-1.8.1, pluggy-0.13.1
-rootdir: /home/ubuntu/riboviz
-plugins: cov-2.8.1
-collected 166 items                                                               
-riboviz/test/test_barcodes_umis.py .................                        [ 10%]
-riboviz/test/test_demultiplex_fastq.py ..................                   [ 21%]
-riboviz/test/test_fastq.py ........................                         [ 35%]
-riboviz/test/test_process_utils.py ........................                 [ 50%]
-riboviz/test/test_sam_bam.py ................                               [ 59%]
-riboviz/test/test_trim_5p_mismatch.py ............                          [ 66%]
-riboviz/test/test_upgrade_config.py .....                                   [ 69%]
-riboviz/test/test_utils.py ....................                             [ 81%]
-riboviz/test/tools/test_prep_riboviz.py ............                        [ 89%]
-riboviz/test/tools/test_prep_riboviz_simdata_multiplex.py 
-..............    [ 97%]
-riboviz/test/tools/test_prep_riboviz_simdata_umi.py ....                    [100%]
-
-...
-=================== 166 passed, 1 warning in 259.81s (0:04:19) ====================
 ```
 
-`PendingDeprecationWarning` `warnings` can be ignored.
+All tests should pass (some may be skipped, but none should fail). `PendingDeprecationWarning` `warnings` can be ignored.
 
 If you installed Nextflow, run the Nextflow tests too:
 
 ```console
 $ pytest riboviz/test/nextflow
-============================== test session starts ===============================
-platform linux -- Python 3.7.3, pytest-5.3.5, py-1.8.1, pluggy-0.13.1
-rootdir: /home/ubuntu/riboviz
-plugins: cov-2.8.1
-collected 36 items
-
-riboviz/test/nextflow/test_nextflow_errors.py ............................ [ 77%]
-........                                                                   [100%]
-
-========================= 36 passed in 143.72s (0:02:23) =========================
 ```
+
+Again, all tests should pass (some may be skipped, but none should fail).
 
 Download regression test data:
 
@@ -1039,34 +708,17 @@ Run the regression tests for the RiboViz Python workflow (these may take a few m
 
 ```console
 $ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0.beta/
-============================= test session starts ==============================
-platform linux -- Python 3.7.3, pytest-5.3.5, py-1.8.1, pluggy-0.13.1 -- /home/ubuntu/miniconda3/bin/python
-rootdir: /home/ubuntu/riboviz
-collected 82 items
-
-riboviz/test/regression/test_regression.py ssssssssssssssssssssssssssssssss [ 39%]
-ssssss..ssss......................................                          [100%]
-
-...
-============== 40 passed, 42 skipped, 1 warning in 215.47s (0:03:35) ==============
 ```
+
+All tests should pass (some may be skipped, but none should fail).
 
 If you installed Nextflow, run the regression tests for the RiboViz Nextflow workflow (these may take a few minutes):
 
 ```console
 $ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0.beta/ --nextflow
-=============================== test session starts ===============================
-platform linux -- Python 3.7.3, pytest-5.3.5, py-1.8.1, pluggy-0.13.1 -- /home/ubuntu/miniconda3/bin/python
-cachedir: .pytest_cache
-rootdir: /home/ubuntu/riboviz
-plugins: cov-2.8.1
-collected 82 items
-
-riboviz/test/regression/test_regression.py ssssssssssssssssssssssssssssssss [ 39%]
-ssssss..ssss......................................                          [100%]
-
-============== 40 passed, 42 skipped, 1 warning in 163.16s (0:02:43) ==============
 ```
+
+Again, all tests should pass (some may be skipped, but none should fail).
 
 ---
 
