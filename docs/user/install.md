@@ -526,7 +526,8 @@ $ sudo apt-get update
 * Install:
 
 ```console
-$ sudo apt-get -s install r-base
+$ sudo apt-get install -y r-base
+$ sudo apt-get install -y r-base-dev
 $ R --version
 R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
 Copyright (C) 2020 The R Foundation for Statistical Computing
@@ -607,7 +608,7 @@ For example, for R 3.4, install in R:
 > biocLite("ShortRead")
 ```
 
-For example, for R 3.5, install in R:
+For example, for R 3.5 or R 3.6, install in R:
 
 ```r
 > install.packages("BiocManager")
