@@ -65,7 +65,7 @@ If running with a configuration that used UMI extraction, deduplication and grou
 If `--check-index-tmp` is not provided (the default behaviour) then tests for index and temporary files will be skipped. This will appear as follows:
 
 ```console
-$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/vignette-20200304-2.0.beta --skip-workflow
+$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/vignette-20200304-2.0 --skip-workflow
 ...
 riboviz/test/regression/test_regression.py ssssssssssssssssssssssssssssssssss..ssss......................................
 ```
@@ -73,7 +73,7 @@ riboviz/test/regression/test_regression.py ssssssssssssssssssssssssssssssssss..s
 or, if using pytest's `-v`, verbose, mode:
 
 ```console
-$ pytest -v riboviz/test/regression/test_regression.py --expected=$HOME/vignette-20200304-2.0.beta --skip-workflow
+$ pytest -v riboviz/test/regression/test_regression.py --expected=$HOME/vignette-20200304-2.0 --skip-workflow
 ...
 riboviz/test/regression/test_regression.py::test_hisat2_build_index[YAL_CDS_w_250-vignette/index-1] SKIPPED [  1%]
 ...

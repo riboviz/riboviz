@@ -702,14 +702,14 @@ Download regression test data:
 
 ```console
 $ cd
-$ git clone https://github.com/riboviz/regression-test-data-2.0.beta
+$ git clone https://github.com/riboviz/regression-test-data-2.0
 ```
 
 Run the regression tests for the RiboViz Python workflow (these may take a few minutes):
 
 ```console
 $ cd riboviz
-$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0.beta/
+$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0/
 ```
 
 All tests should pass (some may be skipped, but none should fail).
@@ -717,7 +717,7 @@ All tests should pass (some may be skipped, but none should fail).
 If you installed Nextflow, run the regression tests for the RiboViz Nextflow workflow (these may take a few minutes):
 
 ```console
-$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0.beta/ --nextflow
+$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0/ --nextflow
 ```
 
 Again, all tests should pass (some may be skipped, but none should fail).
