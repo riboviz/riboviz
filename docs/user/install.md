@@ -94,7 +94,7 @@ Constraints:
 * Cutadapt v1.18 (2018-09-07), or later, is required.
 * Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
 * R 2.14.0, or later, is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
-* R 3.4, or later, is strongly recommended.
+* R 3.6, or later, is strongly recommended.
 
 ---
 
@@ -454,7 +454,7 @@ Web sites:
 
 **Note:** R 2.14.0, or later, is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
 
-**Note:** R 3.4, or later, is strongly recommended.
+**Note:** R 3.6, or later, is strongly recommended.
 
 ### Install R and packages required by R packages to be installed
 
@@ -482,9 +482,9 @@ $ sudo yum install -y openssl-devel
 $ sudo yum install -y libcurl-devel
 ```
 
-**Troubleshooting: the most recent version of R is not installed**
+**Troubleshooting: `the most recent version of R is not installed` or `package "..." is not available (for R version ...)`
 
-Default package managers may not have the most up-to-date version of R available. [The Comprehensive R Archive Network](https://cran.r-project.org/) has information on alternative ways to get a more recent version of R.
+Default package managers may not have the most up-to-date version of R available. This may cause problems when installing R packages. [The Comprehensive R Archive Network](https://cran.r-project.org/) has information on alternative ways to get a more recent version of R.
 
 For example, following CRAN-R's [UBUNTU PACKAGES FOR R](https://cran.r-project.org/bin/linux/ubuntu/README.html) to get the latest R 3.6 packages:
 
@@ -538,9 +538,9 @@ Platform: x86_64-pc-linux-gnu (64-bit)
 
 ```console
 $ R --version
-R version 3.4.4 (2018-03-15) -- "Someone to Lean On"
-$ Rscript --version
-R scripting front-end version 3.4.4 (2018-03-15)
+R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
 ```
 
 Your version of R may differ from that shown.
@@ -597,17 +597,6 @@ The commands to install Bioconductor packages depend on your version of R. For f
 * Click the link of a Bioconductor release consistent with your version of R.
 * Click the link of the specific package.
 
-For example, for R 3.4, install in R:
-
-```r
-> source("https://bioconductor.org/biocLite.R")
-> biocLite("Rsamtools")
-> biocLite("rtracklayer")
-> biocLite("rhdf5")
-> biocLite("Biostrings")
-> biocLite("ShortRead")
-```
-
 For example, for R 3.5 or R 3.6, install in R:
 
 ```r
@@ -617,6 +606,17 @@ For example, for R 3.5 or R 3.6, install in R:
 > BiocManager::install("rhdf5")
 > BiocManager::install("Biostrings")
 > BiocManager::install("ShortRead")
+```
+
+For example, for R 3.4, install in R:
+
+```r
+> source("https://bioconductor.org/biocLite.R")
+> biocLite("Rsamtools")
+> biocLite("rtracklayer")
+> biocLite("rhdf5")
+> biocLite("Biostrings")
+> biocLite("ShortRead")
 ```
 
 ### Troubleshooting: installation path not writeable
@@ -665,6 +665,20 @@ In install.packagees(pkgs = doing, lib = lib, ...) :
 ```
 
 You may need to assign more memory to R or your machine.
+
+### Troubleshooting: package "XML" is not available (for R version 3.6.3) 
+
+If you get this errort when running:
+
+```R
+> BiocManager::install("rtracklayer")
+```
+
+then one solution may be to install "XML" specifying the URL of the source package, for example:
+
+```R
+> install.packages("https://cran.r-project.org/src/contrib/Archive/XML/XML_3.99-0.3.tar.gz", repos=NULL, type="source")
+```
 
 ---
 
