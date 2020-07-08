@@ -14,7 +14,7 @@ Contents:
 
 * [Logging in](#logging-in)
 * [Configure Anaconda enviroment](#configure-anaconda-enviroment)
-* [Get Riboviz and example-datasets](#riboviz-and-example-datasets)
+* [Get Riboviz and example-datasets](#get-riboviz-and-example-datasets)
 * [Interactive sessions](#interactive-sessions)
 * [Set up your environment from scratch (optional)](#set-up-your-environment-from-scratch-optional)
 * [Create `set-riboviz-env.sh`](#create-set-riboviz-envsh)
