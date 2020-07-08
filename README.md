@@ -74,7 +74,8 @@ Command-line tools:
 
 | Release | Description |
 | ------- | ----------- |
-| [2.0.beta](https://github.com/riboviz/riboviz/releases/tag/2.0.beta) | Current stable release |
+| [2.0](https://github.com/riboviz/riboviz/releases/tag/2.0) | Current stable release |
+| [2.0.beta](https://github.com/riboviz/riboviz/releases/tag/2.0.beta) | 2.0 beta release |
 | [1.1.0](https://github.com/riboviz/riboviz/releases/tag/1.1.0) | Most recent version prior to commencement of BBSRC/NSF Riboviz project |
 | [1.0.0](https://github.com/riboviz/riboviz/releases/tag/1.0.0) | Associated with Carja et al. (2017) "riboviz: analysis and visualization of ribosome profiling datasets", BMC Bioinformatics, volume 18, article 461 (2017), 25 October 2017, doi: [10.1186/s12859-017-1873-8](https://doi.org/10.1186/s12859-017-1873-8) |
 | [0.9.0](https://github.com/riboviz/riboviz/releases/tag/0.9.0) | Additional code/data associated with the paper below |
