@@ -92,7 +92,7 @@ Constraints:
 * RiboViz is **not** compatible with Python 2. Python 2 comes to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
 * Either [Miniconda](https://conda.io/miniconda.html) Python 3.6, or later, or [Anaconda Distribution](https://www.anaconda.com/distribution/) Python 3.6, or later, are strongly recommended.
 * Cutadapt v1.18 (2018-09-07), or later, is required.
-* Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2#245) and [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2#242)) which Hisat2 say will be resolved in a future release.
+* Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
 * R 2.14.0, or later, is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
 * R 3.4, or later, is strongly recommended.
 
@@ -503,7 +503,7 @@ $ umi_tools -v
 
 Web site: [Hisat2](https://daehwankimlab.github.io/hisat2/)
 
-Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2#245) and [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2#242)) which Hisat2 say will be resolved in a future release.
+Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
 
 Install:
 
