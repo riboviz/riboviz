@@ -1,12 +1,8 @@
-# Install prerequisites
+# Install RiboViz and dependencies
 
 ## About these instructions
 
 These instructions were written for Ubuntu 18.04 and CentOS 7.4. Other Linux flavours will require different commands to be run.
-
-Other versions of the prerequisites, different from the versions stated, may be usable
-
-Only minimal installation instructions are given for each prerequisite. See the documentation for each prerequisite for full instructions.
 
 Installing some of these tools requires you to have permission to run `sudo` to install and configure software. If you don't have `sudo` access you will have to ask a local system administrator to run these commands for you.
 
@@ -20,6 +16,85 @@ We suggest that you:
 ### Mac OSX users
 
 We suggest that you check out the web sites for each prerequisite for information on how to install the prerequisites under Mac OS X.
+
+---
+
+## Dependencies overview
+
+The following tables summarise the packages required by RiboViz. Instructions to install each dependency are given in the following sections - only minimal installation instructions are given, see the documentation for each dependency for full instructions.
+
+The versions listed are those used by a RiboViz developer when preparing the current release. Other versions of the prerequisites, different from the versions shown, may also be usable, but see the constraints below.
+
+| Command-line tool | Version |
+| ----------------- | ------- |
+| Git | 2.17.1 |
+| cURL | 7.68.0 |
+| bedtools | 2.26.0 |
+| hdf5tools (h5diff) | 1.10.4 |
+| pigz | 2.4 |
+| Python | 3.7.3 |
+| Cutadapt | 1.18 |
+| samtools | 1.9 |
+| UMI-tools | 1.0.1 |
+| Java (javac) | 1.8.0_152-release |
+| Java (java) | 1.8.0_152-release |
+| Nextflow | 20.01.0.5264 |
+| GraphViz (dot) | 2.40.1 |
+| Hisat2 | 2.1.0 |
+| Bowtie | 1.2.2 |
+| R | 3.4.4 |
+ 
+| Python Package | Version | Package Manager |
+| -------------- | ------- | --------------- |
+| biopython | 1.76 | conda | |
+| cutadapt | 1.18 | conda | |
+| gitpython | 3.0.5 | conda | |
+| h5py | 2.10.0 | conda | |
+| nextflow | 20.01.0 | conda | |
+| pandas | 1.0.1 | conda | |
+| pycodestyle | 2.5.0 | conda | |
+| pylint | 2.4.4 | conda | |
+| pysam | 0.15.3 | conda | |
+| pytest | 5.3.5 | conda | |
+| pytest-cov | 2.8.1 | conda | |
+| pyyaml | 5.3 | conda | |
+| samtools | 1.9 | conda | |
+| umi_tools | 1.0.1 | conda | |
+| gffutils | 0.10.1 | pip |
+| sphinx | 2.4.3 | pip |
+ 
+| R Package | Version |
+| --------- | ------- |
+| Biostrings | 2.46.0 |
+| ggplot2 | 3.2.1 |
+| git2r | 0.26.1 |
+| here | 0.1 |
+| lintr | 2.0.0 |
+| optparse | 1.6.4 |
+| plotly | 4.9.0 |
+| RcppRoll | 0.3.0 |
+| readr | 1.3.1 |
+| rhdf5 | 2.22.0 |
+| Rsamtools | 1.30.0 |
+| rtracklayer | 1.38.3 |
+| shiny | 1.3.2 |
+| tidyr | 1.0.0 |
+| ShortRead | 1.36.1 |
+| styler | 1.2.0 |
+ 
+Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
+
+* Python pycodestyle, pylint, pytest-cov, sphinx
+* R: lintr, styler
+
+Constraints:
+
+* RiboViz is **not** compatible with Python 2. Python 2 comes to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
+* Either [Miniconda](https://conda.io/miniconda.html) Python 3.6, or later, or [Anaconda Distribution](https://www.anaconda.com/distribution/) Python 3.6, or later, are strongly recommended.
+* Cutadapt v1.18 (2018-09-07), or later, is required.
+* Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
+* R 2.14.0, or later, is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
+* R 3.4, or later, is strongly recommended.
 
 ---
 
@@ -45,6 +120,12 @@ Install:
 $ sudo yum install -y git
 ```
 
+**Check package has installed:**
+
+```console
+$ git --version
+```
+
 ### cURL
 
 Website: [cURL](https://curl.haxx.se/)
@@ -63,6 +144,12 @@ Install:
 
 ```console
 $ sudo yum install -y curl
+```
+
+**Check package has installed:**
+
+```console
+$ curl --version
 ```
 
 ### EPEL (CentOS only)
@@ -102,7 +189,6 @@ $ sudo yum install -y BEDTools
 
 ```console
 $ bedtools -version
-bedtools v2.26.0
 ```
 
 ### hdf5tools
@@ -125,6 +211,14 @@ Install:
 $ sudo yum install -y hdf5-devel
 ```
 
+**Check package has installed:**
+
+```console
+$ h5diff -version
+```
+
+`h5diff` is one of the hdf5tools.
+
 ### pigz
 
 Web site: [pigz](http://zlib.net/pigz/)
@@ -133,7 +227,6 @@ pigz is a parallel implementation of gzip for multi-processor, multi-core machin
 
 ```console
 $ pigz --version
-pigz 2.4
 ```
 
 If it is not present, please install it as follows:
@@ -160,13 +253,13 @@ $ sudo yum install -y pigz
 
 Web site: [python](https://www.python.org/)
 
-It is strongly recommended that you use [Miniconda](https://conda.io/miniconda.html) Python 3.6+. Alternatively, use the [Anaconda Distribution](https://www.anaconda.com/distribution/) of Python 3.6+.
+RiboViz is **not** compatible with Python 2. Python 2 comes to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
+
+Either [Miniconda](https://conda.io/miniconda.html) Python 3.6, or later, or [Anaconda Distribution](https://www.anaconda.com/distribution/) Python 3.6, or later, are strongly recommended.
 
 The instructions which follow have been written under the assumption that you are using Miniconda Python. If using Anaconda then, when installing some packages, you will be told that they are already available. This is because Anaconda comes with a wide range of common Python packages.
 
 If you are using other distributions of Python you will need to consult the relevant documentation for each package for installation information.
-
-**Note:** RiboViz is **not** compatible with Python 2. Python 2 comes to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
 
 ### Miniconda Python 3.6+
 
@@ -190,8 +283,7 @@ Create a `riboviz` environment and activate it:
 ```console
 $ conda create --name riboviz python=3.7
 $ conda activate riboviz
-$ python -V
-Python 3.7.3
+$ python --version
 ```
 
 Your version of Python may differ from that shown.
@@ -289,7 +381,7 @@ Web sites:
 * [GitHub](https://github.com/marcelm/cutadapt)
 * [readthedocs](https://cutadapt.readthedocs.io/)
 
-v1.18 (2018-09-07) or above is required.
+Cutadapt v1.18 (2018-09-07), or later, is required.
 
 Install:
 
@@ -297,11 +389,10 @@ Install:
 $ conda install -y -c bioconda cutadapt
 ```
 
-Check package has installed `cutadapt` tool:
+Check package has installed the `cutadapt` tool:
 
 ```console
-$ cutadapt --v
-1.18
+$ cutadapt --version
 ```
 
 ### pysam
@@ -318,13 +409,10 @@ $ conda install -y -c bioconda pysam
 $ conda install -y -c bioconda samtools
 ```
 
-Check package has installed `samtools` tool:
+Check package has installed the `samtools` tool:
 
 ```console
 $ samtools --version
-samtools 1.9
-Using htslib 1.9
-Copyright (C) 2018 Genome Research Ltd.
 ```
 
 ### BioPython
@@ -403,11 +491,10 @@ Install:
 $ conda install -y -c bioconda umi_tools
 ```
 
-Check package has installed `umi_tools` tool:
+Check package has installed the `umi_tools` tool:
 
 ```console
 $ umi_tools -v
-UMI-tools version: 1.0.0
 ```
 
 ---
@@ -415,6 +502,8 @@ UMI-tools version: 1.0.0
 ## Hisat2
 
 Web site: [Hisat2](https://daehwankimlab.github.io/hisat2/)
+
+Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
 
 Install:
 
@@ -426,21 +515,12 @@ $ ls hisat2-2.1.0/
 
 Your directory name may differ, depending on the version of Hisat2 you have.
 
-Update `PATH` and check `hisat2` tool is available:
+Update `PATH` and check that the `hisat2` tool is available:
 
 ```console
 $ export PATH=~/hisat2-2.1.0:$PATH
 $ hisat2 --version
-/home/ubuntu/hisat2-2.1.0/hisat2-align-s version 2.1.0
-64-bit
-Built on login-node03
-Wed Jun  7 15:53:42 EDT 2017
-Compiler: gcc version 4.8.2 (GCC)
-Options: -O3 -m64 -msse2 -funroll-loops -g3 -DPOPCNT_CAPABILITY
-Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 ```
-
-Your version of Hisat2 may differ from that shown.
 
 ---
 
@@ -449,6 +529,8 @@ Your version of Hisat2 may differ from that shown.
 Web site: [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml)
 
 **Note:** We are working to add back a Bowtie alignment option.
+
+You may choose to install a more recent version of Hisat2 than in the example that follows.
 
 Install:
 
@@ -460,23 +542,12 @@ $ ls bowtie-1.2.2-linux-x86_64/
 
 Your directory name may differ, depending on the version of Bowtie you have.
 
-Update `PATH` and check `bowtie` tool is available:
+Update `PATH` and check that the `bowtie` tool is available:
 
 ```console
 $ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
 $ bowtie --version
-/home/ubuntu/bowtie-1.2.2-linux-x86_64/bowtie-align-s version 1.2.2
-64-bit
-Built on 462e5beae518
-Mon Dec 11 19:27:01 UTC 2017
-Compiler: gcc version 4.8.2 20140120 (Red Hat 4.8.2-15) (GCC)
-Options: -O3 -m64  -Wl,--hash-style=both -DWITH_TBB
--DPOPCNT_CAPABILITY -g -O2 -fvisibility=hidden -I/hbb_exe/include
--g -O2 -fvisibility=hidden -I/hbb_exe/include
-Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 ```
-
-Your version of Bowtie may differ from that shown.
 
 ## Create `setenv.sh` to configure Hisat2 and Bowtie paths
 
@@ -505,7 +576,9 @@ Web sites:
 * [The R Project for Statistical Computing](https://www.r-project.org/)
 * [The Comprehensive R Archive Network](https://cran.r-project.org/) (CRAN).
 
-**Note:** Release 2.14.0 or later is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package. However, we recommend using R **3.4+**.
+R 2.14.0, or later, is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
+
+R 3.4, or later, is strongly recommended.
 
 ### Install R and packages required by R packages to be installed
 
@@ -707,7 +780,7 @@ Install in R:
 > install.packages("here")
 ```
 
-### Bioconductor Rsamtools, rdf5, rtracklayer, Biostrings, ShortRead
+### Bioconductor Rsamtools, rhdf5, rtracklayer, Biostrings, ShortRead
 
 Web sites:
 
@@ -827,6 +900,9 @@ $ nextflow -version
       http://nextflow.io
 ```
 
+
+Your version of Nextflow may differ from that shown.
+
 ### Install Nextflow (alternative)
 
 Install [OpenJDK](https://openjdk.java.net) 1.8:
@@ -856,12 +932,6 @@ Install Nextflow:
 $ curl -s https://get.nextflow.io | bash
 $ export PATH=$HOME/nextflow:$PATH
 $ nextflow -version
-
-      N E X T F L O W
-      version 20.01.0 build 5264
-      created 12-02-2020 10:14 UTC (02:14 PDT)
-      cite doi:10.1038/nbt.3820
-      http://nextflow.io
 ```
 
 Set `PATH`:
@@ -897,84 +967,6 @@ Hello world!
 ```
 
 This runs Nextflow workflow [main.nf](https://github.com/nextflow-io/hello/blob/master/main.nf) from [nextflow-io/hello.git](https://github.com/nextflow-io/hello.git).
-
----
-
-## Check names and versions of Python packages
-
-Run:
-
-```console
-$ conda list
-```
-
-Alternatively, run:
-
-```console
-$ pip list
-```
-
-The Python packages and their versions will be listed. Here is an edited version showing the specific packages installed earlier:
-
-```
-biopython                 1.76
-cutadapt                  1.18
-gffutils                  0.10.1
-gitpython                 3.0.5
-h5py                      2.10.0
-nextflow                  20.01.0
-pandas                    1.0.1
-pysam                     0.15.3
-pyyaml                    5.3
-samtools                  1.9
-umi_tools                 1.0.1
-```
-
-Your versions may differ from those shown.
-
-`nextflow` will only be shown if you installed Nextflow.
-
----
-
-## Check names and versions of R packages
-
-(from [list user installed packages](https://www.r-bloggers.com/list-of-user-installed-r-packages-and-their-versions/))
-
-Either run bash script:
-
-```console
-$ Rscript install/list-r-packages.R
-```
-
-Or run in R:
-
-```r
-> ip <- as.data.frame(installed.packages()[,c(1,3:4)])
-> rownames(ip) <- NULL
-> ip <- ip[is.na(ip$Priority),1:2,drop=FALSE]
-> print(ip, row.names=FALSE)
-```
-
-The R packages and their versions will be listed. Here is an edited version showing the specific packages installed earlier:
-
-```
-           Biostrings    2.46.0
-              ggplot2     3.2.1
-                git2r    0.26.1
-                 here       0.1
-             optparse     1.6.4
-               plotly     4.9.0
-             RcppRoll     0.3.0
-                readr     1.3.1
-                rhdf5    2.22.0
-            Rsamtools    1.30.0
-          rtracklayer    1.38.3
-                shiny     1.3.2
-            ShortRead    1.36.1
-                tidyr     1.0.0
-```
-
-Your versions may differ from those shown.
 
 ---
 
@@ -1075,3 +1067,35 @@ ssssss..ssss......................................                          [100
 
 ============== 40 passed, 42 skipped, 1 warning in 163.16s (0:02:43) ==============
 ```
+
+---
+
+## Reference
+
+### Check names and versions of Python packages
+
+Run:
+
+```console
+$ conda list
+```
+
+Alternatively, run:
+
+```console
+$ pip list
+```
+
+The Python packages and their versions will be listed.
+
+`nextflow` will only be shown if you installed Nextflow.
+
+### Check names and versions of R packages
+
+Run:
+
+```console
+$ Rscript rscripts/list-r-packages.R
+```
+
+The R packages and their versions will be listed.

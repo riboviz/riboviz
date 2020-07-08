@@ -6,9 +6,6 @@ oldData/
 riboviz.Rproj
 .RData
 .Rhistory
-Shiny/2009
-Shiny/2010
-Shiny/Supp
 scripts/script_for_transcript_annotation.nb.html
 *~
 *.pyc

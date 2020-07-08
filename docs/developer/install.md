@@ -1,4 +1,4 @@
-# Install developer prerequisites
+# Install developer dependencies
 
 ## Install Python packages
 
@@ -117,7 +117,6 @@ Check install:
 
 ```console
 $ dot -V
-dot - graphviz version 2.40.1 (20161225.0304)
 ```
 
 ### Editor supporting live preview of GraphViz images (optional)

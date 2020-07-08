@@ -1,6 +1,6 @@
 # Quick install scripts
 
-`install/` contains simple bash scripts to automate some of the installation of **riboviz**'s dependencies. They are the manual commands of [Install prerequisites](./install.md) in bash script form.
+`bash/` contains simple bash scripts to automate some of the installation of **riboviz**'s dependencies. They are the manual commands of [Install RiboViz and dependencies](./install.md) in bash script form.
 
 These scripts were written for Ubuntu 18.04 and CentOS 7.4.
 

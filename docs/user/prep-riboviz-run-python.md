@@ -11,12 +11,12 @@ Contents:
 * [Run `prep_riboviz`](#run-prep_riboviz)
   - [Troubleshooting: `This script needs to be run under Python 3`](#troubleshooting-this-script-needs-to-be-run-under-python-3)
   - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
+  - [Troubleshooting: deduplication and memory issues](#troubleshooting-deduplication-and-memory-issues)
   - [Troubleshooting: `WARNING: dedup_umis was TRUE but extract_umis was FALSE`](#troubleshooting-warning-dedup_umis-was-true-but-extract_umis-was-false)
   - [Troubleshooting: `Configuration parameter error: No sample files or multiplexed files are specified`](#troubleshooting-configuration-parameter-error-no-sample-files-or-multiplexed-files-are-specified)
   - [Troubleshooting: `Configuration parameter error: Both sample files and multiplexed files are specified`](#troubleshooting-configuration-parameter-error-both-sample-files-and-multiplexed-files-are-specified)
   - [Troubleshooting: `Configuration parameter error: Multiplexed files are specified but no sample sheet`](#troubleshooting-configuration-parameter-error-multiplexed-files-are-specified-but-no-sample-sheet)
 * [Invoking `prep_riboviz` from outwith the RiboViz home directory](#invoking-prep_riboviz-from-outwith-the-riboviz-home-directory)
-* [Managing your disk usage](#managing-your-disk-usage)
 * [Capturing commands submitted to bash](#capturing-commands-submitted-to-bash)
   - [Capturing bash commands and demultiplexing](#capturing-bash-commands-and-demultiplexing)
 * [Customising logging](#customising-logging)
@@ -204,6 +204,10 @@ cmd_sort = ["samtools", "sort", "-@", str(run_config.nprocesses),
             "-O", "bam", "-o", bam_file, "-"]
 ```
 
+### Troubleshooting: deduplication and memory issues
+
+See [Troubleshooting: deduplication and memory issues](memory-storage.md#troubleshooting-deduplication-and-memory-issues) in [Memory and storage](./memory-storage.md).
+
 ### Troubleshooting: `WARNING: dedup_umis was TRUE but extract_umis was FALSE`
 
 This warning means that in your YAML configuration file you have defined:
@@ -344,26 +348,6 @@ asite_disp_length_file: /home/user/riboviz/data/yeast_standard_asite_disp_length
 $ PYTHONPATH=/home/user/riboviz/ python -m riboviz.tools.prep_riboviz \
   -c /home/user/analysis/sample_config.yaml 
 ```
-
----
-
-## Managing your disk usage
-
-`prep_riboviz` generates many intermediate files and some of these may be unompressed and **large**, i.e. about the same size as the input files. All these files are placed in a temporary directory (`dir_tmp`). The temporary directory's contents can be inspected for troubleshooting, if necessary.
-
-Similarly, `prep_riboviz` creates numerous log files.
-
-For example, here is the volume of the outputs from a run of the vignette as documented in [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md):
-
-| Directory |   MB |
-| --------- | ---- |
-| `index`   |    9 |
-| `tmp`     | 1040 |
-| `output`  |    3 |
-| `logs`    |    1 |
-| Total     | 1053 |
-
-**Tip:** We recommend you delete temporary directories and log directories when you have completed your analyses to your satisfaction.
 
 ---
 

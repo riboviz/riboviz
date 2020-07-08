@@ -183,6 +183,9 @@ def pytest_generate_tests(metafunc):
           :py:const:`riboviz.params.EXTRACT_UMIS`.
         - ``dedup_umis``: value of
           :py:const:`riboviz.params.DEDUP_UMIS`.
+        - ``dedup_stats``: value of
+          :py:const:`riboviz.params.DEDUP_STATS` or `TRUE` if
+          undefined
         - ``group_umis``: value of
           :py:const:`riboviz.params.GROUP_UMIS`.
 
@@ -207,6 +210,7 @@ def pytest_generate_tests(metafunc):
         "output_dir": [config[params.OUTPUT_DIR]],
         "extract_umis": [utils.value_in_dict(params.EXTRACT_UMIS, config)],
         "dedup_umis": [utils.value_in_dict(params.DEDUP_UMIS, config)],
+        "dedup_stats": [True if params.DEDUP_STATS not in config else utils.value_in_dict(params.DEDUP_STATS, config)],
         "group_umis": [utils.value_in_dict(params.GROUP_UMIS, config)]
     }
     if "sample" in metafunc.fixturenames:

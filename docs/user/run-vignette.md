@@ -186,7 +186,7 @@ Count reads. Log: vignette/logs/20200521-042353/count_reads.log
 Completed
 ```
 
-* For full information on how to run the Python workflow and the options available, see [Running the RiboViz Python workflow](./prep-riboviz-run-python.md)
+* For full information on how to run the Python workflow, the options available, and troubleshooting advice, see [Running the RiboViz Python workflow](./prep-riboviz-run-python.md)
 
 To run the Nextflow workflow:
 
@@ -225,7 +225,7 @@ Finished processing sample: WT3AT
 Workflow finished! (OK)
 ```
 
-* For full information on how to run the Nextflow workflow and the options available, see [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md)
+* For full information on how to run the Nextflow workflow, the options available, and troubleshooting advice, see [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md)
 
 ---
 
@@ -341,6 +341,13 @@ $ rm -rf vignette/index
 $ rm -rf vignette/tmp
 $ rm -rf vignette/output
 $ rm -rf vignette/logs  # Python workflow only
+```
+
+Delete the log files and the bash script (Python workflow only):
+
+```console
+$ rm riboviz.*.log
+$ rm run_riboviz_vignette.sh
 ```
 
 You might also want to do this if you have run the vignette with a missing R package, and then want to run it again from scratch.
