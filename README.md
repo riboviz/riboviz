@@ -37,7 +37,7 @@ Usage:
 * [Configuring the RiboViz workflow](./docs/user/prep-riboviz-config.md)
 * [Running the RiboViz Python workflow](./docs/user/prep-riboviz-run-python.md)
 * [Running the RiboViz Nextflow workflow](./docs/user/prep-riboviz-run-nextflow.md)
-* [Running the RiboViz workflow on Eddie](./docs/user/run-on-Eddie.md)
+* [Running the RiboViz workflow on Eddie](./docs/user/run-on-eddie.md)
 * [Memory and storage](./docs/user/memory-storage.md). Information and advice relating to **RiboViz**'s memory and storage requirements.
 
 Command-line tools:
