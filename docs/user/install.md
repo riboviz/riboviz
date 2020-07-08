@@ -684,6 +684,7 @@ You can now check your installation by running RiboViz tests.
 Run tests:
 
 ```console
+$ cd riboviz
 $ pytest --ignore-glob="*regression*" --ignore-glob="*nextflow*"
 ```
 
@@ -707,6 +708,7 @@ $ git clone https://github.com/riboviz/regression-test-data-2.0.beta
 Run the regression tests for the RiboViz Python workflow (these may take a few minutes):
 
 ```console
+$ cd riboviz
 $ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0.beta/
 ```
 
