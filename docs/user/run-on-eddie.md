@@ -1,6 +1,8 @@
-# Running riboviz on Eddie (for U. of Edinburgh users)
+# Running the RiboViz workflow on Eddie
 
 This page describes how you can run riboviz on Eddie.
+
+**Note:** This information is for University of Edinburgh users only.
 
 Eddie service documentation is here: https://www.wiki.ed.ac.uk/display/ResearchServices/Eddie
 
