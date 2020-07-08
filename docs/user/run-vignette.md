@@ -342,6 +342,10 @@ $ rm -rf vignette/tmp
 $ rm -rf vignette/output
 $ rm -rf vignette/logs  # Python workflow only
 ```
+You can delete the log files AND run script using this conmand 
+
+`$ rm riboviz.*.log`
+`$ rm run_riboviz_vignette.sh`
 
 You might also want to do this if you have run the vignette with a missing R package, and then want to run it again from scratch.
 
