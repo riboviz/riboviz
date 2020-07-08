@@ -293,7 +293,7 @@ Python 2.7.16 :: Anaconda, Inc.
 | Bowtie | [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml) |
 | Nextflow | [Nextflow](https://www.nextflow.io/), [Documentation](https://www.nextflow.io/docs/latest/index.html), [GitHub](https://github.com/nextflow-io/nextflow) |
 
-You may choose to install more recent versions of Hisat2 and Bowtie than in the examples that follows. The directory names may differ, depending on the versions you have.
+The directory names may differ, depending on the versions you have.
 
 ### Install Hisat2
 
@@ -452,9 +452,9 @@ Web sites:
 * [The R Project for Statistical Computing](https://www.r-project.org/)
 * [The Comprehensive R Archive Network](https://cran.r-project.org/) (CRAN).
 
-R 2.14.0, or later, is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
+**Note:** R 2.14.0, or later, is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
 
-R 3.4, or later, is strongly recommended.
+**Note:** R 3.4, or later, is strongly recommended.
 
 ### Install R and packages required by R packages to be installed
 

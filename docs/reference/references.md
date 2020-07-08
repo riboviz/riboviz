@@ -26,6 +26,8 @@ h5py, https://www.h5py.org/
 
 The HDF Group. Hierarchical Data Format, version 5, 1997-2020, http://www.hdfgroup.org/HDF5/.
 
+Müller, K. (2017). here: A Simpler Way to Find Your Files. R package version 0.1. https://CRAN.R-project.org/package=here
+
 Kim D., Langmead, B. and Salzberg, S.L. (2015) HISAT: a fast spliced aligner with low memory requirements. Nature Methods 2015. doi: [10.1038/nmeth.3317](https://doi.org/10.1038/nmeth.3317).
 
 Hester, J. and Angly, F. (2019) lintr: A 'Linter' for R Code. R package version 2.0.0. https://CRAN.R-project.org/package=lintr
