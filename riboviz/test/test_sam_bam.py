@@ -60,7 +60,8 @@ def test_not_is_bam(extension):
 @pytest.mark.parametrize("test_case",
                          [("WTnone_rRNA_map_20", (20, 6)),
                           ("WTnone_rRNA_map_6_primary", (6, 6)),
-                          ("WTnone_rRNA_map_14_secondary", (14, 0))])
+                          ("WTnone_rRNA_map_14_secondary", (14, 0))],
+                         ids=str)
 @pytest.mark.parametrize("file_format",
                          [sam_bam.SAM_FORMAT, sam_bam.BAM_FORMAT])
 def test_count_sequences(test_case, file_format):

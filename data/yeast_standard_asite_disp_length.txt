@@ -3,7 +3,7 @@
 # based on "standard" yeast data from early ribosome profiling papers
 # 15nt to the a-site, 12-nt to the p-site/ start codon.
 # Edward Wallace, December 2019
-read_length	asite_disp
+read_length	asite_displacement
 28	15
 29	15
 30	15

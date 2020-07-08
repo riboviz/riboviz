@@ -8,6 +8,7 @@ codon_positions_file: data/yeast_codon_pos_i200.RData # Codon positions in each 
 count_reads: TRUE # Scan input, temporary and output files and produce counts of reads in each FASTQ, SAM, and BAM file processed?
 count_threshold: 1 # Remove genes with a read count below this threshold, when generating statistics and figures
 dataset: simdata_umi # Dataset name
+dedup_stats: TRUE # Output UMI deduplication statistics?
 dedup_umis: TRUE # Extract UMIs and deduplicate reads if TRUE
 dir_in: data/simdata/ # Input directory
 dir_index: vignette/index # Built indices directory

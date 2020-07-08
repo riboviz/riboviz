@@ -424,7 +424,7 @@ def deduplicate_umis(bam_file, dedup_bam_file,
     :param dedup_bam_file: Deduplicated BAM file (input)
     :type dedup_bam_file: str or unicode
     :param stats_prefix: File prefix for deduplication statistics \
-    (output)
+    (output) or None if no statistics are to be output
     :type stats_prefix: str or unicode
     :param log_file: Log file (output)
     :type log_file: str or unicode
@@ -435,8 +435,13 @@ def deduplicate_umis(bam_file, dedup_bam_file,
     code
     """
     LOGGER.info("Deduplicate UMIs. Log: %s", log_file)
-    cmd = ["umi_tools", "dedup", "-I", bam_file, "-S", dedup_bam_file,
-           "--output-stats=" + stats_prefix]
+    if stats_prefix:
+        cmd = ["umi_tools", "dedup", "-I", bam_file,
+               "-S", dedup_bam_file,
+               "--output-stats=" + stats_prefix]
+    else:
+        cmd = ["umi_tools", "dedup", "-I", bam_file,
+               "-S", dedup_bam_file]
     process_utils.run_logged_command(cmd, log_file,
                                      run_config.cmd_file,
                                      run_config.is_dry_run)

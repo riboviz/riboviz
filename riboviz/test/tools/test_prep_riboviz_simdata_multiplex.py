@@ -133,6 +133,33 @@ def test_deplex_reads(configuration_module, sample_id):
     fastq.equal_fastq(expected_output, actual_output)
 
 
+@pytest.mark.parametrize("sample_id", ["Tag3"])
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_deplex_unmatched_samples(configuration_module, sample_id):
+    """
+    Test that no FASTQ files are output by demultiplexing for
+    samples for which there were no matching reads.
+
+    The definition of the simulated data means that Tag3 has no
+    matches, as Tag0|1|2 will match any barcodes first. Check
+    there is no Tag3-related output file.e
+
+    :param configuration_module: temporary configuration and \
+    configuration file
+    :type configuration_module: tuple(dict, str or unicode)
+    :param sample_id: sample ID for demultiplexed reads
+    :type sample_id: str or unicode
+    """
+    # Actual data has a .fq extension.
+    config, _ = configuration_module
+    output_dir = os.path.join(
+        config[params.TMP_DIR],
+        workflow_files.DEPLEX_DIR_FORMAT.format(
+            "multiplex_umi_barcode_adaptor"))
+    file_name = os.path.join(output_dir, fastq.FQ_FORMAT.format(sample_id))
+    assert not os.path.exists(file_name)
+
+
 @pytest.mark.parametrize("sample_id", ["Tag0", "Tag1", "Tag2"])
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_deplex_umi_groups(configuration_module, sample_id):

@@ -101,7 +101,8 @@ def tmp_tsv_file():
         os.remove(tmp_tsv_file)
 
 
-@pytest.mark.parametrize("test_case", TEST_5P_CASES + TEST_5POS_5NEG_CASES)
+@pytest.mark.parametrize("test_case", TEST_5P_CASES + TEST_5POS_5NEG_CASES,
+                         ids=str)
 def test_trim_5p_mismatch(test_case, tmp_sam_file):
     """
     Run :py:func:`riboviz.trim_5p_mismatch.trim_5p_mismatch`.
@@ -128,7 +129,8 @@ def test_trim_5p_mismatch(test_case, tmp_sam_file):
     assert summary == expected_summary, "Unexpeted summary"
 
 
-@pytest.mark.parametrize("test_case", TEST_5P_CASES + TEST_5POS_5NEG_CASES)
+@pytest.mark.parametrize("test_case", TEST_5P_CASES + TEST_5POS_5NEG_CASES,
+                         ids=str)
 def test_trim_5p_mismatch_file(test_case, tmp_sam_file, tmp_tsv_file):
     """
     Run :py:func:`riboviz.trim_5p_mismatch.trim_5p_mismatch_file`.
