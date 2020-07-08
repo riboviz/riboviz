@@ -2,7 +2,7 @@
 
 ## Authors
 
-* Edward Wallace, Felicity Anderson: [The Wallace Lab](https://ewallace.github.io/), The University of Edinburgh.
+* Edward Wallace, Felicity Anderson, Siyin Xue: [The Wallace Lab](https://ewallace.github.io/), The University of Edinburgh.
 * Premal Shah, John Favate, Bala Desinghu, Tongji Xing: [The Shah Lab](https://theshahlab.org/), Rutgers University.
 * Liana Lareau, Amanda Mok: [The Lareau Lab](http://www.lareaulab.org/), University of California, Berkeley.
 * Kostas Kavousannakis, Mike Jackson: [EPCC](https://www.epcc.ed.ac.uk/), The University of Edinburgh.
@@ -14,7 +14,6 @@
 
 * Jared Bard, The Drummond Lab, The University of Chicago.
 * Matthew S. Sachs, Department of Biology, Texas A&M University.
-* Siyin Xue.
 
 ---
 
