@@ -13,16 +13,16 @@ All Python and R packages required to run **RiboViz** have been installed in `/e
 Contents:
 
 * [Logging in](#logging-in)
-* [Configure anaconda enviroment](#configure-anaconda-enviroment)
+* [Configure Anaconda enviroment](#configure-anaconda-enviroment)
 * [Get Riboviz and example-datasets](#riboviz-and-example-datasets)
-* [Interactive Sessions](#interactive-sessions)
-* [Set up your environment from scratch (optional)](#set-up-your-environment-from-scratch)
+* [Interactive sessions](#interactive-sessions)
+* [Set up your environment from scratch (optional)](#set-up-your-environment-from-scratch-optional)
 * [Create `set-riboviz-env.sh`](#create-set-riboviz-envsh)
 * [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-riboviz-workflow)
 * [Job submission](#job-submission)
-  - [Submitting Jobs](#submitting-jobs)
-  - [Monitoring Jobs](#monitoring-jobs)
-  - [Cancelling Jobs](#cancelling-jobs)
+  - [Submitting jobs](#submitting-jobs)
+  - [Monitoring jobs](#monitoring-jobs)
+  - [Cancelling jobs](#cancelling-jobs)
   - [Job accounting](#job-accounting)
  * [Run a full-size example dataset](#run-a-full-size-example-dataset)
    - [Create directories for input paths](#create-directories-for-input-paths)
@@ -60,7 +60,7 @@ pkgs_dirs:
 
 ---
 
-## **RiboViz** and example-datasets
+## Get **RiboViz** and example-datasets
 
 Get **RiboViz** and example-datasets:
 
@@ -79,7 +79,7 @@ If you do not have a group space, you can use your scratch directory (`/exports/
 
 ---
 
-## Interactive Sessions
+## Interactive sessions
 
 There are a limited number of nodes that accept interactive login sessions, to allow you to run interactive jobs or graphical  applications. To start an interactive session run:
 
@@ -108,7 +108,7 @@ waiting for interactive job to be scheduled ...timeout (5 s) expired while waiti
 Your "qlogin" request could not be scheduled, try again later.
 ```
 
-There may be no free nodes at present. Alternatively, Eddie may be under maintenance. You can check Eddie's status on the [information Systems Alerts](https://alerts.is.ed.ac.uk/).
+There may be no free nodes at present. Alternatively, Eddie may be under maintenance. You can check Eddie's status on the [Information Systems Alerts](https://alerts.is.ed.ac.uk/).
 
 Either way, you have to wait for a free node to become available or for Eddie to come back up. It usually won't take too long.
 
@@ -116,7 +116,7 @@ Either way, you have to wait for a free node to become available or for Eddie to
 
 ## Set up your environment from scratch (optional)
 
-### Activate environment
+### Activate Anaconda
 
 `/exports/csce/eddie/biology/groups/wallace_rna` has Anaconda packages (in `anaconda`) and all the Python packages required by **RiboViz** are there, accessible as a `riboviz` conda environment.
 
@@ -300,7 +300,7 @@ source activate riboviz
 python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 ```
 
-### Submitting Jobs
+### Submitting jobs
 
 Change into the **RiboViz** repository:
 
@@ -324,9 +324,9 @@ A job ID will be displayed.
 
 This will output the standard output from `prep_riboviz.py` to a file, `riboviz_vignette.o[Your-Job-ID]`, in the current working directory, and errors to a foile, `riboviz_vigette.e[Your-Job-ID]`.
 
-The contents of `riboviz_vignette.o[Your-Job-ID]` should be the same as the standard output of [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow).
+The contents of `riboviz_vignette.o[Your-Job-ID]` should be the same as the standard output of [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow) above.
 
-### Monitoring Jobs
+### Monitoring jobs
 
 Active jobs (i.e. pending or running) can be monitored with the `qstat` command
 
@@ -337,7 +337,7 @@ job-ID     prior   name       user         state submit/start at     queue      
    2701173 0.00000 riboviz_vi s1919303     qw    06/11/2020 13:22:28                                                                                               1
 ```
 
-### Cancelling Jobs
+### Cancelling jobs
 
 If you want to kill a job you've submitted to Eddie, use the `qdel` command
 
@@ -416,7 +416,7 @@ bound_cores  0,4
 
 ```
 
-More info about job submision： https://www.wiki.ed.ac.uk/display/ResearchServices/Job+Submission
+See [Job submission](https://www.wiki.ed.ac.uk/display/ResearchServices/Job+Submission) for more information.
 
 ---
 
