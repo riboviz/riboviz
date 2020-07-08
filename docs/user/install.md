@@ -702,7 +702,7 @@ Run tests:
 
 ```console
 $ cd riboviz
-$ pytest --ignore-glob="*regression*" --ignore-glob="*nextflow*" --ignore-glob="*test_prep_simdata*"
+$ pytest --ignore-glob="*regression*" --ignore-glob="*nextflow*"
 ```
 
 All tests should pass (some may be skipped, but none should fail). `PendingDeprecationWarning` `warnings` can be ignored.

@@ -2,7 +2,7 @@
 
 Examples of configurations that request that the RiboViz workflow do UMI extraction and deduplication and also demultiplexing of multiplexed data are provided. These use [Simulated FASTQ test files](../reference/data.md#simulated-fastq-test-files) located within `data/simdata/`.
 
-**Note:** These currently fail if using R 3.6.3 and related packages at the invocation of `generate_stats_figs.R`. This is a tiny mock data with very few reads and the failure could be arising, for example, in having no genes above the count threshold and so lots of empty sections.
+**Note:** These currently do not output `codon_ribodens.pdf|tsv` during the invocation of `generate_stats_figs.R`. This is a tiny mock data with very few reads and failures arise if these files are requested.
 
 ## UMI extraction and deduplication
 
