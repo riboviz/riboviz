@@ -22,11 +22,11 @@ args = parser.parse_args()
 myfasta = args.fasta
 mygff3 = args.gff3
 output_file = args.output
-treshold = args.min_length
+min_length = args.min_length
 start = args.start_codons
 stop = args.stop_codons
 
-def getORF(seq, treshold, start, stop, end_UTR5, end_CDS, name):
+def getORF(seq, min_length, start, stop, end_UTR5, end_CDS, name):
     gff_dict = defaultdict(list)
     for frame in range(3):
          start_codon_index = 0
@@ -42,7 +42,7 @@ def getORF(seq, treshold, start, stop, end_UTR5, end_CDS, name):
                  end_codon_index = i
                  stop_uorf = end_codon_index+3
                  length = end_codon_index - start_codon_index + 3
-                 if length >= treshold * 3:       
+                 if length >= min_length * 3:       
                      start_codon_found = False
                      if start_uorf < end_UTR5 and stop_uorf < end_UTR5:
                         type = "uORF"
@@ -76,7 +76,7 @@ for key in position_dict.keys():
                   end_UTR5 = position_dict[key][2]                
                   end_CDS = position_dict[key][1]               
                   name = key                                 
-                  output_dict = getORF(sequence,treshold,start,stop,end_UTR5,end_CDS,name)                 
+                  output_dict = getORF(sequence,min_length,start,stop,end_UTR5,end_CDS,name)                 
                   print(output_dict)               
                   for values in output_dict.values():                                               
                         for i in range(len(values)):                           
