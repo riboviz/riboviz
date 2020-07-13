@@ -42,7 +42,7 @@ def getORF(seq, treshold, start, stop, end_UTR5, end_CDS, name):
                  end_codon_index = i
                  stop_uorf = end_codon_index+3
                  length = end_codon_index - start_codon_index + 3
-                 if length >= treshold * 3:        #treshold is protein length but length is nuc
+                 if length >= treshold * 3:       
                      start_codon_found = False
                      if start_uorf < end_UTR5 and stop_uorf < end_UTR5:
                         type = "uORF"
