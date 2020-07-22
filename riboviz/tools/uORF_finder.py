@@ -1,99 +1,169 @@
-#!/usr/bin/env python3
-
-#gffutils, biopython, bcbio-gff packages need to be installed
 import gffutils,os,argparse
+import pandas as pd
 from Bio import SeqIO
-from collections import defaultdict
 from BCBio import GFF
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--fasta')
-parser.add_argument('--gff3')
-parser.add_argument('--output')
-parser.add_argument('--min_length',type=int)
-parser.add_argument('--start_codons',default = ['ATG'],nargs="+")
-parser.add_argument('--stop_codons',default = ['TAA','TAG','TGA'],nargs="+")
-args = parser.parse_args()
-
-myfasta = args.fasta
-mygff3 = args.gff3
-output_file = args.output
-min_length = args.min_length
-start = args.start_codons
-stop = args.stop_codons
-
-def getORF(seq, min_length, start, stop, end_UTR5, end_CDS, name):
-    gff_dict = defaultdict(list)
-    for frame in range(3):
-         start_codon_index = 0
-         end_codon_index = 0
-         start_codon_found = False
-         for i in range(frame, len(seq), 3):
-              current_codon = seq[i:i+3]                            
-              if current_codon in start and not start_codon_found:
-                 start_codon_found = True
-                 start_codon_index = i
-                 start_uorf = start_codon_index + 1                
-              if current_codon in stop and start_codon_found:
-                 end_codon_index = i
-                 stop_uorf = end_codon_index+3
-                 length = end_codon_index - start_codon_index + 3
-                 if length >= min_length * 3:       
-                     start_codon_found = False
-                     if start_uorf < end_UTR5 and stop_uorf < end_UTR5:
-                        type = "uORF"
-                        gff_info = [length, frame+1, start_uorf, stop_uorf, type, name]
-                        gff_dict[name].append(gff_info)
-                     if start_uorf < end_UTR5 and stop_uorf == end_CDS:
-                        type = "CDS_NTE"
-                        gff_info1 = [length, frame+1, start_uorf, stop_uorf, type, name]
-                        gff_dict[name].append(gff_info1)
-                     if start_uorf < end_UTR5 and end_UTR5 < stop_uorf < end_CDS:
-                        type = "overlap_uORF"
-                        gff_info2 = [length, frame+1, start_uorf, stop_uorf, type, name]
-                        gff_dict[name].append(gff_info2)
-    return gff_dict
+def parse_command_line_options():
     
-db = gffutils.create_db(mygff3, 'myGFF.db', merge_strategy="create_unique", keep_order=True, force=True)
-db = gffutils.FeatureDB('myGFF.db')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--fasta')
+    parser.add_argument('--gff3')
+    parser.add_argument('--output')
+    parser.add_argument('--min_length',type=int)
+    parser.add_argument('--new_fasta')
+    parser.add_argument('--start_codons',default = ['ATG'],nargs="+")
+    parser.add_argument('--stop_codons',default = ['TAA','TAG','TGA'],nargs="+")
+    args = parser.parse_args()
+    
+    return args
+ 
+    
+def extract_UTR5_CDS_postion(mygff3):
+    
+    db = gffutils.create_db(mygff3, 'myGFF.db', merge_strategy="create_unique", keep_order=True, force=True)
+    db = gffutils.FeatureDB('myGFF.db')
+    position_dict = {}
+    for i in db.features_of_type("UTR5"):
+        dict = {}
+        for j in db.features_of_type("CDS"):
+            if i.seqid == j.seqid:
+               dict[i.seqid]=[i.start-1,j.end,i.end]
+               position_dict.update(dict)
+    
+    return position_dict
 
-position_dict = {}
-for i in db.features_of_type("UTR5"):
-    dict = {}
-    for j in db.features_of_type("CDS"):
-         if i.seqid == j.seqid:
-            dict[i.seqid]=[i.start-1,j.end,i.end]
-            position_dict.update(dict)
-            
-for key in position_dict.keys():    
-    for record in SeqIO.parse(myfasta, "fasta"):       
+  
+def extract_fasta_sequence(myfasta,newfasta,position_dict):
+
+        for key in position_dict.keys(): 
+            for record in SeqIO.parse(myfasta, "fasta"):     
                if key == record.id:                 
-                  sequence = record.seq[position_dict[key][0]:position_dict[key][1]]                 
-                  end_UTR5 = position_dict[key][2]                
-                  end_CDS = position_dict[key][1]               
-                  name = key                                 
-                  output_dict = getORF(sequence,min_length,start,stop,end_UTR5,end_CDS,name)                 
-                  print(output_dict)               
-                  for values in output_dict.values():                                               
-                        for i in range(len(values)):                           
-                             out_file = output_file                  
-                             seq = record.seq                 
-                             rec = SeqRecord(seq, name)                
-                             qualifiers = {"source": "riboviz", 
-                                           "score": ".", 
-                                           "start_codon": seq[values[i][2]-1:values[i][2]+2], 
-                                           "Name": name + "_" + values[i][4] + "_" + str(values[i][2]),
-                                           "frame":values[i][1]}                
-                             feature = SeqFeature(FeatureLocation(values[i][2]-1, values[i][3]), 
-                                                  type=values[i][4], 
-                                                  strand=1,
-                                                  qualifiers=qualifiers)
-                             rec.features = [feature]
-                             with open(out_file, "a") as out_handle:                     
-                                GFF.write([rec], out_handle)                             
+                  sequences = SeqRecord(Seq(str(record.seq[position_dict[key][0]:position_dict[key][1]])),id = record.id)
+                  with open(newfasta, "a") as output_handle:
+                        SeqIO.write(sequences, output_handle, "fasta")
+                        
+       
+def startstop_codon(newfasta,start_codons,stop_codons):
+    
+    new_fasta_iterator = SeqIO.parse(newfasta, "fasta")
+    for record in new_fasta_iterator:
+         seq = record.seq
+         for frame in range(3):
+             for i in range(frame, len(seq), 3):
+                  current_codon1 = seq[i:i+3]                            
+                  if current_codon1 in start_codons:
+                      start_codon_index = i 
+                      for j in range(start_codon_index,len(seq),3):
+                          current_codon2 = seq[j:j+3]
+                          if current_codon2 in stop_codons:
+                            stop_codon_index = j
+                            length = stop_codon_index - start_codon_index + 3
+                            start_uorf = start_codon_index + 1 
+                            stop_uorf = stop_codon_index+3
+                            yield (record.id, frame, start_uorf, stop_uorf,length)
+                            break
 
-os.system("sed -i '/#/d' {}" .format(output_file))
+                            
+def check_length(min_length,initial_list):
+    
+    val = [list(ele) for ele in initial_list]
+    condition = lambda x: x[4] >= min_length * 3
+    filter_length_list = list(filter(condition, val))
+    
+    return filter_length_list
+                        
+
+def check_uorf_type(filter_length_list,position_dict):
+    
+       for key in position_dict.keys():         
+           for i in filter_length_list:
+              if key == i[0]:             
+                 end_UTR5 = position_dict[key][2]                
+                 end_CDS = position_dict[key][1]               
+                 start_uorf = i[2]
+                 stop_uorf = i[3]
+                 if start_uorf < end_UTR5 and stop_uorf < end_UTR5:
+                      i.append("uORF")
+                 if start_uorf < end_UTR5 and stop_uorf == end_CDS:
+                      i.append("CDS_NTE")
+                 if start_uorf < end_UTR5 and end_UTR5 < stop_uorf < end_CDS:
+                      i.append("overlap_uORF")
+
+       return filter_length_list
+ 
+       
+def remove_main_orfs(filter_length_type_list):
+    
+    condition = lambda x: len(x) == 6
+    filter_length_type_orfs_list = list(filter(condition, filter_length_type_list))
+    
+    return filter_length_type_orfs_list
+    
+
+def longest_orf(filter_length_type_orfs_list):
+
+    df = pd.DataFrame(filter_length_type_orfs_list)
+    df.columns = ['name', 'frame', 'start_uorf', 'stop_uorf', 'length', 'type']
+    df1 = df[df.duplicated('stop_uorf', keep=False)].groupby('stop_uorf')['start_uorf'].apply(list).reset_index()
+    dic = df1.set_index('stop_uorf').T.to_dict('list')
+    longest_pos_dict = {}
+    for key,values in dic.items():
+        longest_pos_dict[key] = min(dic[key][0])
+    g=[]
+    for x in filter_length_type_orfs_list:
+        for key,values in longest_pos_dict.items():
+            if x[2] != values and x[3] == key:
+               g.append(x)
+    final_list = [item for item in filter_length_type_orfs_list if item not in g]
+    
+    return final_list
+    
+     
+def write_to_gff3(final_list,output_file,newfasta):
+   
+   new_fasta_iterator = SeqIO.parse(newfasta, "fasta")
+   for record in new_fasta_iterator:
+    for i in final_list:
+        if record.id == i[0]:              
+           seq = record.seq 
+           name = i[0]
+           rec = SeqRecord(seq, name)
+           qualifiers = {"source": "riboviz", 
+                         "score": ".", 
+                         "start_codon": seq[i[2]-1:i[2]+2], 
+                         "Name": name + "_" + i[5] + "_" + str(i[2]),
+                         "frame":i[1]}                
+           feature = SeqFeature(FeatureLocation(i[2]-1, i[3]), 
+                                type= i[5], 
+                                strand=1,
+                                qualifiers=qualifiers)
+           rec.features = [feature]
+           with open(output_file, "a") as out_handle:                     
+                 GFF.write([rec], out_handle)
+   
+
+def invoke_uorfs_finder():
+
+    options = parse_command_line_options()
+    myfasta = options.fasta
+    mygff3 = options.gff3
+    output_file = options.output
+    min_length = options.min_length
+    start_codons = options.start_codons
+    stop_codons = options.stop_codons
+    newfasta = options.new_fasta
+    position_dict = extract_UTR5_CDS_postion(mygff3)
+    extract_fasta_sequence(myfasta,newfasta,position_dict)                       
+    initial_list = list(startstop_codon(newfasta,start_codons,stop_codons))
+    filter_length_list = check_length(min_length,initial_list)
+    filter_length_type_list = check_uorf_type(filter_length_list,position_dict)
+    filter_length_type_orfs_list = remove_main_orfs(filter_length_type_list)
+    final_list = longest_orf(filter_length_type_orfs_list)
+    write_to_gff3(final_list,output_file,newfasta)
+    os.system("sed -i '/#/d' {}" .format(output_file))
+    
+if __name__ == "__main__":
+    invoke_uorfs_finder()
