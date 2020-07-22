@@ -1,8 +1,6 @@
 YAL005C	riboviz	uORF	100	132	.	+	.	Name=YAL005C_uORF_100;frame=0;start_codon=TTG
-YAL005C	riboviz	uORF	103	132	.	+	.	Name=YAL005C_uORF_103;frame=0;start_codon=ATG
 YAL005C	riboviz	uORF	122	181	.	+	.	Name=YAL005C_uORF_122;frame=1;start_codon=TTG
 YAL038W	riboviz	uORF	64	183	.	+	.	Name=YAL038W_uORF_64;frame=0;start_codon=TTG
-YAL038W	riboviz	uORF	109	183	.	+	.	Name=YAL038W_uORF_109;frame=0;start_codon=ATG
 YAL038W	riboviz	overlap_uORF	202	258	.	+	.	Name=YAL038W_overlap_uORF_202;frame=0;start_codon=TTG
 YAL038W	riboviz	uORF	185	238	.	+	.	Name=YAL038W_uORF_185;frame=1;start_codon=TTG
 YOR303W	riboviz	uORF	35	124	.	+	.	Name=YOR303W_uORF_35;frame=1;start_codon=TTG
@@ -10,7 +8,4 @@ YOR303W	riboviz	CDS_NTE	200	1486	.	+	.	Name=YOR303W_CDS_NTE_200;frame=1;start_co
 YOR303W	riboviz	uORF	117	194	.	+	.	Name=YOR303W_uORF_117;frame=2;start_codon=ATG
 YOR335C	riboviz	uORF	145	243	.	+	.	Name=YOR335C_uORF_145;frame=0;start_codon=GTG
 YOR335C	riboviz	uORF	41	169	.	+	.	Name=YOR335C_uORF_41;frame=1;start_codon=ATG
-YOR335C	riboviz	uORF	44	169	.	+	.	Name=YOR335C_uORF_44;frame=1;start_codon=ATG
-YOR335C	riboviz	uORF	68	169	.	+	.	Name=YOR335C_uORF_68;frame=1;start_codon=TTG
-YOR335C	riboviz	uORF	98	169	.	+	.	Name=YOR335C_uORF_98;frame=1;start_codon=TTG
 YOR335C	riboviz	CDS_NTE	203	3127	.	+	.	Name=YOR335C_CDS_NTE_203;frame=1;start_codon=TTG
