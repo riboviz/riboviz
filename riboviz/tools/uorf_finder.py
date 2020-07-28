@@ -1,3 +1,37 @@
+'''
+
+Identify upstream open reading frames
+
+Usage::
+
+    python uorf_finder.py --fasta FASTA_FILE_IN  --gff3 GFF3_FILE_IN 
+                          --output GFF3_FILE_OUT --newfasta FASTA_FILE_OUT
+                          --min_length MINIMUM_NUMBER_OF_CODON
+                          [--start_codons [START_CODONS]] 
+                          [--stop_codons [STOP_CODONS]]
+                          
+                          
+    --fasta        FASTA_FILE_IN   FASTA file input
+    --gff3         GFF3_FILE_IN    GFF3 file input
+    --output       GFF3_FILE_OUT   GFF3 file output
+    --newfasta     FASTA_FILE_OUT  FASTA file output
+                                   a new fasta file only contains the UTR5 and CDS region of the input fasta file
+    --min_length   MINIMUM_NUMBER_OF_CODON  The minimum number of codon you want for your uORFs
+    --start_codons [START_CODONS]  start codon
+                                   (default is ATG)
+    --stop_codons  [STOP_CODONS]   stop codon
+                                   (default is TAA TGA TAG)
+                                  
+Examples::
+                          
+     python uorf_finder.py --fasta uORFtest_yeast_4CDS_w_250utrs.fa -
+                            -gff3 uORFtest_yeast_4CDS_w_250utrs.gff3 
+                            --output output_from_script.gff3
+                            --min_length 10
+
+'''
+
+
 import gffutils,os,argparse
 import pandas as pd
 from Bio import SeqIO
