@@ -97,7 +97,7 @@ def startstop_codon(newfasta,start_codons,stop_codons):
                             length = stop_codon_index - start_codon_index + 3
                             start_uorf = start_codon_index + 1 
                             stop_uorf = stop_codon_index+3
-                            yield (record.id, frame, start_uorf, stop_uorf,length)
+                            yield (record.id, frame+1, start_uorf, stop_uorf,length)
                             break
 
                             
