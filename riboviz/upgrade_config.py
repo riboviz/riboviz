@@ -58,25 +58,6 @@ are updated to::
 
     rRNA_index_prefix: yeast_rRNA
     orf_index_prefix: YAL_CDS_w_250
-
-The value of parameter ``features_file`` is changed to reflect the
-relocation of this file in a ``scripts/`` directory to its new
-location in a ``data/`` directory. For example, the configuration
-parameter::
-
-    features_file: scripts/yeast_features.tsv
-
-is updated to::
-
-    features_file: data/yeast_features.tsv
-
-As another example, the configuration parameter::
-
-    features_file: /home/user/riboviz/scripts/yeast_features.tsv
-
-is updated to::
-
-    features_file: /home/user/riboviz/data/yeast_features.tsv
 """
 import os
 import os.path
@@ -169,14 +150,6 @@ def upgrade_config(config):
         # Index prefixes are now relative to params.DIR_INDEX
         prefix = os.path.split(config[key])[1]
         config[key] = prefix
-
-    # Replace <PATH>/scripts/yeast_features.tsv with
-    # <PATH>/data/yeast_features.tsv
-    features_file = config[params.FEATURES_FILE]
-    features_dir_file = os.path.split(features_file)
-    features_super_dir = os.path.split(features_dir_file[0])[0]
-    config[params.FEATURES_FILE] = os.path.join(
-        features_super_dir, "data", features_dir_file[1])
 
 
 def upgrade_config_file(input_file, output_file=None):
