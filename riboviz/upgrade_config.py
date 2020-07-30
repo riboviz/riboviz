@@ -31,12 +31,20 @@ Expected parameters added between release 1.1.0 and the current
 release are added along with default values, if they are not already
 present in the configuration:
 
-* ``dir_logs: vignette/logs``
-* ``cmd_file: run_riboviz_vignette.sh``
-* ``t_rna_file: data/yeast_tRNAs.tsv``
-* ``codon_positions_file: data/yeast_codon_pos_i200.RData``
-* ``count_threshold: 64``
 * ``asite_disp_length_file: data/yeast_standard_asite_disp_length.txt``
+* ``cmd_file: run_riboviz_vignette.sh``
+* ``codon_positions_file: data/yeast_codon_pos_i200.RData``
+* ``count_reads: true``
+* ``count_threshold: 64``
+* ``dedup_stats: false``
+* ``dedup_umis: false``
+* ``dir_logs: vignette/logs``
+* ``extract_umis: false``
+* ``group_umis: false``
+* ``multiplex_fq_files: null``
+* ``sample_sheet: null``
+* ``t_rna_file: data/yeast_tRNAs.tsv``
+* ``umi_regexp: null``
 
 The values of parameters ``rrna_index_prefix`` and
 ``orf_index_prefix`` are updated to be file names only, as, these are
@@ -106,13 +114,20 @@ added between release 1.0.0, 9 Oct 2017, 83027ef and 1.1.0, 31 Jan
 """
 
 UPDATES_11_CURRENT = {
-    params.LOGS_DIR: "vignette/logs",
-    params.CMD_FILE: "run_riboviz_vignette.sh",
-    params.T_RNA_FILE: "data/yeast_tRNAs.tsv",
-    params.CODON_POSITIONS_FILE: "data/yeast_codon_pos_i200.RData",
-    params.COUNT_THRESHOLD: 64,
     params.ASITE_DISP_LENGTH_FILE: "data/yeast_standard_asite_disp_length.txt",
-    params.COUNT_READS: True
+    params.CMD_FILE: "run_riboviz_vignette.sh",
+    params.CODON_POSITIONS_FILE: "data/yeast_codon_pos_i200.RData",
+    params.COUNT_READS: True,
+    params.COUNT_THRESHOLD: 64,
+    params.DEDUP_STATS: False,
+    params.DEDUP_UMIS: False,
+    params.EXTRACT_UMIS: False,
+    params.GROUP_UMIS: False,
+    params.LOGS_DIR: "vignette/logs",
+    params.MULTIPLEX_FQ_FILES: None,
+    params.SAMPLE_SHEET: None,
+    params.T_RNA_FILE: "data/yeast_tRNAs.tsv",
+    params.UMI_REGEXP: None
 }
 """
 Map from configuration parameters to default values for parameters
