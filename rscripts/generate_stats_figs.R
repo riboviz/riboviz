@@ -136,7 +136,7 @@ opt
 gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
 
 # read in coding sequences
-coding_seqs <- readDNAStringSet(orf_fasta_file)
+coding_seqs <- Biostrings::readDNAStringSet(orf_fasta_file)
 
 # range of read lengths between parameters set in config file
 read_range <- min_read_length:max_read_length
