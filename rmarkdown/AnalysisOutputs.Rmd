@@ -1,0 +1,100 @@
+
+---
+title: "AnalysisOutputs"
+author: "FlicAnderson"
+date: "03/08/2020"
+output: html_document
+params:
+  orf_fasta_file: FALSE  # FASTA file with nt seq
+  orf_gff_file: NA  # riboviz generated GFF2/GFF3 annotation file
+  min_read_length: 10  # Minimum read length in H5 output
+  max_read_length: 50  # Maximum read length in H5 output
+  dataset: "vignette"  # Name of the dataset
+  hd_file: "output.h5"  # Location of H5 output file
+---
+
+The outputs can be changed by editing the params called in the following terminal command, 
+... which should match the params listed in the .yaml section at the top of the .Rmd
+
+`Rscript -e "rmarkdown::render(\"rmarkdown/AnalysisOutputs.Rmd\", params=list(orf_fasta_file=\"/vignette/input/yeast_YAL_CDS_w_250utrs.fa\", orf_gff_file=\"/vignette/input/yeast_YAL_CDS_w_250utrs.gff3\", min_read_length=10, max_read_length=50, dataset=\"vignette\", hd_file=\"/vignette/output/WT3AT/WT3AT.h5\"))"`
+
+From the python call to generate_stats_figs.R (for sample WT3AT from vignette):
+> Rscript --vanilla /home/flic/riboviz/rscripts/generate_stats_figs.R --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WT3AT/WT3AT.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WT3AT --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
+
+To run the thing from inside R, use `rmarkdown::render("rmarkdown/AnalysisOutputs.Rmd", params=list(orf_fasta_file="/vignette/input/yeast_YAL_CDS_w_250utrs.fa", orf_gff_file="/vignette/input/yeast_YAL_CDS_w_250utrs.gff3", min_read_length=10, max_read_length=50, dataset="vignette", hd_file="/vignette/output/WT3AT/WT3AT.h5"))`
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# load getopt to allow use of get_Rscript_filename for provenance-gathering
+# and sourcing read_count_functions.R
+# load here for the same reason
+suppressMessages(library(getopt, quietly=T))
+suppressMessages(library(here))
+suppressMessages(library(Rsamtools))
+suppressMessages(library(rtracklayer))
+suppressMessages(library(rhdf5))
+suppressMessages(library(parallel))
+suppressMessages(library(optparse))
+suppressMessages(library(RcppRoll))
+suppressMessages(library(ggplot2))
+suppressMessages(library(tidyr))
+suppressMessages(library(dplyr))
+suppressMessages(library(magrittr))
+suppressMessages(library(purrr))
+suppressMessages(library(here))
+```
+
+```{r source_script, include=FALSE}
+source(here("rscripts", "read_count_functions.R"), local = knitr::knit_global())
+
+#   source(here::here("rscripts", "provenance.R"))
+#   source(here::here("rscripts", "read_count_functions.R"))
+#   source(here::here("rscripts", "stats_figs_block_functions.R"))
+
+# or sys.source("your-script.R", envir = knitr::knit_global())
+```
+
+```{r close_connections_1}
+# prepare files, opens hdf5 file connection
+#hdf5file <- rhdf5::H5Fopen(hd_file) # filehandle for the h5 file
+rhdf5::h5closeAll()
+```
+
+
+
+```{r read_ins}
+
+# head(h5ls(params$hd_file, recursive = FALSE)) 
+# # doesn't work with: rmarkdown::render("rscripts/AnalysisOutputs.Rmd", params=list(hd_file="vignette/output/WT3AT/WT3AT.h5"))
+
+head(h5ls(here(params$hd_file), recursive = FALSE))
+# does work with: rmarkdown::render("rscripts/AnalysisOutputs.Rmd", params=list(hd_file="vignette/output/WT3AT/WT3AT.h5"))
+# therefore need here() round stuff!
+  # can I do that at the params bit?  SEEMS NOT :P  Suppose this is because I haven't library(here)'d yet.
+
+# read in positions of all exons/genes in GFF format and subset CDS locations
+gene_names <- rhdf5::h5ls(here(params$hd_file), recursive = 1)$name
+head(gene_names)
+
+# # read in coding sequences
+coding_seqs <- Biostrings::readDNAStringSet(here(params$orf_fasta_file))
+str(coding_seqs)
+# 
+# # range of read lengths between parameters set in config file
+read_range <- params$min_read_length:params$max_read_length
+read_range
+# 
+# # read in positions of all exons/genes in GFF format and convert to tibble data frame
+gff_df <- readGFFAsDf(here(params$orf_gff_file))
+str(gff_df)
+
+# set ggplot2 theme for plots drawn after this; use dark on light theme
+#ggplot2::theme_set(theme_bw())
+```
+
+```{r close_connections_2}
+# prepare files, opens hdf5 file connection
+#hdf5file <- rhdf5::H5Fopen(hd_file) # filehandle for the h5 file
+rhdf5::h5closeAll()
+```
