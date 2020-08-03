@@ -23,6 +23,9 @@ From the python call to generate_stats_figs.R (for sample WT3AT from vignette):
 
 To run the thing from inside R, use `rmarkdown::render("rmarkdown/AnalysisOutputs.Rmd", params=list(orf_fasta_file="/vignette/input/yeast_YAL_CDS_w_250utrs.fa", orf_gff_file="/vignette/input/yeast_YAL_CDS_w_250utrs.gff3", min_read_length=10, max_read_length=50, dataset="vignette", hd_file="/vignette/output/WT3AT/WT3AT.h5"))`
 
+
+File path variables need to be wrapped in here() to give full path, or it doesn't work (e.g. orf_fasta_file, orf_gff_file, hd_file).
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
