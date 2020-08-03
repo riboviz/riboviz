@@ -1,0 +1,35 @@
+---
+title: "ParamsTest"
+author: "FlicAnderson"
+date: "03/08/2020"
+output: html_document
+params:
+  myName: ""
+  defaultParam: "defaultValue"
+---
+
+This ParamsTest.Rmd is saved at: `"~/riboviz/rmarkdown/ParamsTest.Rmd"`.
+
+NOTE: I had to install `pandoc` to be able to run this from console, which I did by running `sudo apt install pandoc` from my Ubuntu 18.04 Linux setup while inside the riboviz miniconda3 environment as usual for running riboviz. 
+
+I found that I needed to do this when I got the following error:
+ "Error: pandoc version 1.12.3 or higher is required and was not found (see the help page ?rmarkdown::pandoc_available).
+  Execution halted".  So I now have: pandoc 1.19.2.4 (`pandoc -v`)
+
+
+
+```{r color, results='markup'}
+print(params$myName)
+
+print(params$defaultParam)
+```
+
+The outputs can be changed by editing the params called in the following terminal command, 
+... which should match the params listed in the .yaml section at the top of the .Rmd
+`Rscript -e "rmarkdown::render(\"rmarkdown/ParamsTest.Rmd\", params=list(myName=\"Eeyore\", defaultParam=\"NotDefault\"))"`
+
+To run the thing from inside R, use `rmarkdown::render("rmarkdown/ParamsTest.Rmd", params=list(myName="Flic", defaultParam="NotDefault"))`
+
+Pressing `"Knit"` from within Rstudio doesn't do anything useful for `myName` because you're passing in an empty parameter (`myName: ""`), but for `defaultParam`, since that has a value already set in the .yaml section at the top of the .Rmd, it just shows THAT value.
+
+---
