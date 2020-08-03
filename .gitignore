@@ -6,7 +6,7 @@ oldData/
 riboviz.Rproj
 .RData
 .Rhistory
-scripts/script_for_transcript_annotation.nb.html
+rmarkdown/*.html
 *~
 *.pyc
 __pycache__
