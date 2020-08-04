@@ -47,6 +47,8 @@ max_read_length <- params$max_read_length
 ```
 This block (^^) is repetitive but currently needed to be able to use the values read in from the console call (via .Rmd yaml params) in external code chunks called via `knitr::read_chunk()`. Otherwise, the default values of 10 and 50 are used regardless of if 5 and 25 are read in as parameters during the call.
 
+I tested whether the source("script.R", local=knitr::knit_global()) or sys.source("script.R, envir=knitr::knit_global()) block described [here in the rmarkdown cookbook](https://bookdown.org/yihui/rmarkdown-cookbook/source-script.html) would help instead of the repeated x <- params$x, but **it doesn't work**, and means that the default parameters from the yaml are used in the external code blocks :C
+
 ```{r echo=FALSE}
 knitr::read_chunk(here("rmarkdown","ParamsTestScript.R"))
 ```
@@ -63,7 +65,6 @@ This runs everything from the block
 <<check_params>>
 head(read_range)
 ```
-This runs everything from the block too, plus can do things with the read_range object. 
-
+This runs everything from the block too, plus can do things with the read_range obect.
 
 Pleasingly, `junk_block_I_wont_use` doesn't show up anywhere, which is good. Means I can just define chunks I don't want to use 
