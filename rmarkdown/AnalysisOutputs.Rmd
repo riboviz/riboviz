@@ -87,7 +87,10 @@ suppressMessages(library(dplyr))
 suppressMessages(library(magrittr))
 suppressMessages(library(purrr))
 suppressMessages(library(here))
+suppressMessages(library(knitr)) 
 ```
+
+NOTE: added knitr to the library() calls! Need to update documentation/installation etc too. 
 
 ```{r source_script, include=FALSE}
 
