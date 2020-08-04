@@ -88,6 +88,29 @@ suppressMessages(library(magrittr))
 suppressMessages(library(purrr))
 suppressMessages(library(here))
 suppressMessages(library(knitr)) 
+
+output_dir <- here::here(params$output_dir)
+orf_fasta_file <- here::here(params$orf_fasta_file)
+orf_gff_file <- here::here(params$orf_gff_file)
+num_processes <- params$num_processes
+min_read_length <- params$min_read_length
+max_read_length <- params$max_read_length
+buffer <- params$buffer
+primary_id <- params$primary_id
+dataset <- params$dataset
+rpf <- params$rpf
+features_file <- params$features_file
+do_pos_sp_nt_freq <- params$do_pos_sp_nt_freq
+t_rna_file <- params$t_rna_file
+codon_positions_file <- params$codon_positions_file
+count_threshold <- params$count_threshold
+length_threshold <- params$length_threshold
+output_prefix <- params$output_prefix
+hd_file <- here::here(params$hd_file)
+nnt_buffer <- params$nnt_buffer
+nnt_gene <- params$nnt_gene
+asite_disp_length_file <- params$asite_disp_length_file
+
 ```
 
 NOTE: added knitr to the library() calls! Need to update documentation/installation etc too. 
@@ -97,6 +120,7 @@ NOTE: added knitr to the library() calls! Need to update documentation/installat
 source(here::here("rscripts", "provenance.R"), local = knitr::knit_global())
 source(here::here("rscripts", "read_count_functions.R"), local = knitr::knit_global())
 source(here::here("rscripts", "stats_figs_block_functions.R"), local = knitr::knit_global())
+#source(here::here("rscripts", "generate_stats_figs_markdown.R"), local = knitr::knit_global())
 # or sys.source("your-script.R", envir = knitr::knit_global())
 ```
 
@@ -139,16 +163,16 @@ print_provenance(path_to_this_script)
 ```{r read_ins, include=FALSE}
 
 # read in positions of all exons/genes in GFF format and subset CDS locations
-gene_names <- rhdf5::h5ls(here(params$hd_file), recursive = 1)$name
+gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
 
 # read in coding sequences
-coding_seqs <- Biostrings::readDNAStringSet(here(params$orf_fasta_file))
+coding_seqs <- Biostrings::readDNAStringSet(orf_fasta_file)
 
 # range of read lengths between parameters set in config file
-read_range <- params$min_read_length:params$max_read_length
+read_range <- min_read_length:max_read_length
 
 # read in positions of all exons/genes in GFF format and convert to tibble data frame
-gff_df <- readGFFAsDf(here(params$orf_gff_file))
+gff_df <- readGFFAsDf(orf_gff_file)
 
 # set ggplot2 theme for plots drawn after this; use dark on light theme
 ggplot2::theme_set(theme_bw())
@@ -157,8 +181,6 @@ ggplot2::theme_set(theme_bw())
 ```{r check_params}
 
 # parameters with filepaths need here() to avoid path confusion
-hd_file <- here(params$hd_file)
-output_dir <- here(params$output_dir)
 
 print(params)
 str(params)
@@ -222,6 +244,27 @@ attach(params)
 ```{r CalculateReadLengths, echo=FALSE}
 print("Next block goes here")
 ```
+
+### Distribution of Lengths of Mapped Reads Reading-In External Code
+#### ...from generate_stats_figs_markdown.R, a copy of generate_stats_figs.R)
+```{r echo=FALSE, cache=FALSE}
+knitr::read_chunk(here("rscripts","generate_stats_figs_markdown.R"))
+```
+
+```{r DistributionOfLengthsMappedReads}
+```
+First way (^^) of running this code chunk: it's fine, not sure if one can add the Plot part into it, or if it has to be empty in order to run that chunk properly? 
+
+```{r DistribReadLength}
+<<DistributionOfLengthsMappedReads>>
+  
+# this works fine, because the returned output of CalculateReadLengths() is the input of PlotReadLengths() 
+PlotReadLengths(CalculateReadLengths(gene_names, dataset, hd_file))
+   
+#PlotReadLengths(read_length_data) # this didn't work because read_length_data is not RETURNED by the function run by that chunk of code!
+```
+This (^^) is probably the BETTER way of doing the code chunk stuff, and also I can solve the "also make the plots in .html" issue by using the medium functions. 
+
 
 To run in terminal: 
 
