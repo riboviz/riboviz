@@ -31,28 +31,48 @@ params:
 The outputs can be changed by editing the params called in the following terminal command, 
 ... which should match the params listed in the .yaml section at the top of the .Rmd
 
-`Rscript -e "rmarkdown::render(\"rmarkdown/AnalysisOutputs.Rmd\", params=list(orf_fasta_file=\"/vignette/input/yeast_YAL_CDS_w_250utrs.fa\", orf_gff_file=\"/vignette/input/yeast_YAL_CDS_w_250utrs.gff3\", min_read_length=10, max_read_length=50, dataset=\"vignette\", hd_file=\"/vignette/output/WT3AT/WT3AT.h5\"))"`
+`Rscript -e "rmarkdown::render(\"rmarkdown/AnalysisOutputs.Rmd\", params=list(output_dir=\"vignette/output/WT3AT\", orf_fasta_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.fa\", orf_gff_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.gff3\", num_processes=1, min_read_length=10, max_read_length=50, buffer=250, primary_id=\"Name\", dataset=\"vignette\", rpf=TRUE, features_file=NA, do_pos_sp_nt_freq=TRUE, t_rna_file=NA, codon_positions_file=NA, count_threshold=64, length_threshold=500, output_prefix=\"\", hd_file=\"vignette/output/WT3AT/WT3AT.h5\", nnt_buffer=25, nnt_gene=50, asite_disp_length_file=NA))"`
+
+NOTE: These params at the top of the .Rmd (in the YAML section) are NOT the same as those PASSED INTO generate_stats_figs.R (yet).  Those ones use a mix of underscores and hyphens, and that is then resolved in `generate_stats_figs.R` by the line `opt <- optparse::parse_args(OptionParser(option_list = option_list), convert_hyphens_to_underscores=TRUE)`.  I haven't quite figured out HOW to resolve the optparse / parse_args() stuff WITH rmarkdown parameters.  I seem to have some environment issues wrong somewhere, or it's possibly just a pain to do?  
+BE AWARE THAT THESE INPUTS DO NOT MATCH THOSE FED IN BY RIBOVIZ YET!
 
 From the python call to generate_stats_figs.R (for sample WT3AT from vignette):
 > Rscript --vanilla /home/flic/riboviz/rscripts/generate_stats_figs.R --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WT3AT/WT3AT.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WT3AT --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
 
-To run the thing from inside R, use `rmarkdown::render("rmarkdown/AnalysisOutputs.Rmd", params=list(orf_fasta_file="/vignette/input/yeast_YAL_CDS_w_250utrs.fa", orf_gff_file="/vignette/input/yeast_YAL_CDS_w_250utrs.gff3", min_read_length=10, max_read_length=50, dataset="vignette", hd_file="/vignette/output/WT3AT/WT3AT.h5"))`
-
-
-File path variables need to be wrapped in here() to give full path, or it doesn't work (e.g. orf_fasta_file, orf_gff_file, hd_file).
-
-```{r, setup, include=FALSE}
-# set this option in the first code chunk in the document
-knitr::opts_chunk$set(echo = params$my_name)
+To run the thing from **inside** R (for WT3AT sample from vignette), use:
+```{r exampleRun, eval=FALSE}
+rmarkdown::render("rmarkdown/AnalysisOutputs.Rmd",
+                  params=list(
+                      output_dir="vignette/output/WT3AT",
+                      orf_fasta_file="vignette/input/yeast_YAL_CDS_w_250utrs.fa",
+                      orf_gff_file="vignette/input/yeast_YAL_CDS_w_250utrs.gff3", 
+                      num_processes=1,
+                      min_read_length=10, 
+                      max_read_length=50, 
+                      buffer=250,
+                      primary_id="Name",
+                      dataset="vignette", 
+                      rpf=TRUE,
+                      features_file=NA, 
+                      do_pos_sp_nt_freq=TRUE, 
+                      t_rna_file=NA, 
+                      codon_positions_file=NA, 
+                      count_threshold=64, 
+                      length_threshold=500, 
+                      output_prefix="", 
+                      hd_file="vignette/output/WT3AT/WT3AT.h5", 
+                      nnt_buffer=25, 
+                      nnt_gene=50, 
+                      asite_disp_length_file=NA
+                  )
+)
 ```
 
-```{r setup2, include=FALSE}
+NOTE: File path variables need to be wrapped in here() at some point to give full path, or it doesn't work (e.g. orf_fasta_file, orf_gff_file, hd_file).  This is done for SOME variables so far (as of ThreeNucleotidePeriodicity blocks) in `check_params` chunk, where they're reassigned as `exampleparam <- here(params$exampleparam)`.
+
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-
-# load getopt to allow use of get_Rscript_filename for provenance-gathering
-# and sourcing read_count_functions.R
-# load here for the same reason
 suppressMessages(library(getopt, quietly=T))
 suppressMessages(library(here))
 suppressMessages(library(Rsamtools))
@@ -74,98 +94,91 @@ suppressMessages(library(here))
 source(here::here("rscripts", "provenance.R"), local = knitr::knit_global())
 source(here::here("rscripts", "read_count_functions.R"), local = knitr::knit_global())
 source(here::here("rscripts", "stats_figs_block_functions.R"), local = knitr::knit_global())
-
 # or sys.source("your-script.R", envir = knitr::knit_global())
 ```
 
-```{r close_connections_1}
-# prepare files, opens hdf5 file connection
-#hdf5file <- rhdf5::H5Fopen(hd_file) # filehandle for the h5 file
+```{r close_connections_1, include=FALSE}
+# close any open hdf5 file connection
 rhdf5::h5closeAll()
 ```
 
 ```{r provenance}
 # handle interactive vs standard running
-if(interactive()){
-  this_script <- "AnalysisOutputs.Rmd"
+# if(interactive()){
+#   this_script <- "AnalysisOutputs.Rmd"
+#   path_to_this_script <- here("rmarkdown", this_script)
+#   print("interactive")
+# } else {
+#   this_script <- getopt::get_Rscript_filename()
+#   path_to_this_script <- this_script
+#   print("not interactive")
+# }
+
+
+if(is.na(getopt::get_Rscript_filename())){
+    this_script <- "AnalysisOutputs.Rmd"
   path_to_this_script <- here("rmarkdown", this_script)
 } else {
   this_script <- getopt::get_Rscript_filename()
   path_to_this_script <- this_script
 }
 
+# print
+path_to_this_script
+this_script
+get_Rscript_filename()
+
 # print provenance
 print_provenance(path_to_this_script)
 ```
 
 
-```{r read_ins}
-
-#print(params$my_name)
-
-# print(my_name)
-# # label: read_ins
-# # Quitting from lines 89-120 (AnalysisOutputs.Rmd) 
-# # Error in print(my_name) : object 'my_name' not found
-
-# # head(h5ls(params$hd_file, recursive = FALSE)) 
-# # # doesn't work with: rmarkdown::render("rscripts/AnalysisOutputs.Rmd", params=list(hd_file="vignette/output/WT3AT/WT3AT.h5"))
-# 
-# head(h5ls(here(params$hd_file), recursive = FALSE))
-# # does work with: rmarkdown::render("rscripts/AnalysisOutputs.Rmd", params=list(hd_file="vignette/output/WT3AT/WT3AT.h5"))
-# # therefore need here() round stuff!
-#   # can I do that at the params bit?  SEEMS NOT :P  Suppose this is because I haven't library(here)'d yet.
+```{r read_ins, include=FALSE}
 
 # read in positions of all exons/genes in GFF format and subset CDS locations
 gene_names <- rhdf5::h5ls(here(params$hd_file), recursive = 1)$name
-head(gene_names)
 
-# # read in coding sequences
+# read in coding sequences
 coding_seqs <- Biostrings::readDNAStringSet(here(params$orf_fasta_file))
-str(coding_seqs)
-# 
-# # range of read lengths between parameters set in config file
+
+# range of read lengths between parameters set in config file
 read_range <- params$min_read_length:params$max_read_length
-read_range
-# 
-# # read in positions of all exons/genes in GFF format and convert to tibble data frame
+
+# read in positions of all exons/genes in GFF format and convert to tibble data frame
 gff_df <- readGFFAsDf(here(params$orf_gff_file))
-str(gff_df)
 
 # set ggplot2 theme for plots drawn after this; use dark on light theme
 ggplot2::theme_set(theme_bw())
-
-hd_file <- here(params$hd_file)
-
 ```
 
 ```{r check_params}
+
+# parameters with filepaths need here() to avoid path confusion
+hd_file <- here(params$hd_file)
+output_dir <- here(params$output_dir)
 
 print(params)
 str(params)
 
 attach(params)
-
-#three_nucleotide_periodicity_data <- CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
-
-# three_nucleotide_periodicity_data <- CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = params$dataset, hd_file = here(params$hd_file), gff_df = gff_df)
-# 
-# str(three_nucleotide_periodicity_data)
-
-
 ```
 
+### Three Nucleotide Periodicity 
 
-```{r 3nt}
-#ThreeNucleotidePeriodicity <- function(gene_names, dataset, hd_file, gff_df) {
+```{r CalculateThreeNucleotidePeriodicity, include=FALSE}
 
   # check for 3nt periodicity
   print("Starting: Check for 3nt periodicity globally")
 
   # CalculateThreeNucleotidePeriodicity():
   three_nucleotide_periodicity_data <- CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
+```
+
+```{r PlotThreeNucleotidePeriodicity, echo=FALSE}
 
   # PlotThreeNucleotidePeriodicity()
+  three_nucleotide_periodicity_plot <- PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
+  # do plot for .Rmd
   PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
 
   # NOTE: repeated from inside CalculateThreeNucleotidePeriodicity() as preferred not to return multiple objects in list (hassle :S)
@@ -174,35 +187,42 @@ attach(params)
   # run PlotStartCodonRiboGrid()
   start_codon_ribogrid_plot <- PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
   # creates plot object
-  start_codon_ribogrid_plot
-
+  # do plot for .Rmd
+  PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
+  
   # run SaveStartCodonRiboGrid():
-  #SaveStartCodonRiboGrid(start_codon_ribogrid_plot)
+  SaveStartCodonRiboGrid(start_codon_ribogrid_plot)
 
   # run PlotStartCodonRiboGridBar():
   start_codon_ribogrid_bar_plot <- PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
   # creates plot object
-  start_codon_ribogrid_bar_plot
-  
+  # do plot for .Rmd  
+  PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
+
   # run SaveStartCodonRiboGridBar():
-  #SaveStartCodonRiboGridBar(start_codon_ribogrid_bar_plot)
+  SaveStartCodonRiboGridBar(start_codon_ribogrid_bar_plot)
 
   # run SavePlotThreeNucleotidePeriodicity():
-  #SavePlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_plot)
+  SavePlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_plot)
+```
+
+```{r WriteThreeNucleotidePeriodicity, include=FALSE}
 
   # run WriteThreeNucleotidePeriodicity():
-  #WriteThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
-# Quitting from lines 160-204 (AnalysisOutputs.Rmd) 
-# Error in file(data_file, open = "w") : cannot open the connection
+  WriteThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
 
   print("Completed: Check for 3nt periodicity globally")
-
-#} # end ThreeNucleotidePeriodicity() function definition
-
-# run ThreeNucleotidePeriodicity():
-#ThreeNucleotidePeriodicity(gene_names, dataset, hd_file, gff_df)
-
 ```
+
+### Distribution of Lengths of Mapped Reads
+
+```{r CalculateReadLengths, echo=FALSE}
+print("Next block goes here")
+```
+
+To run in terminal: 
+
+`Rscript -e "rmarkdown::render(\"rmarkdown/AnalysisOutputs.Rmd\", params=list(output_dir=\"vignette/output/WT3AT\", orf_fasta_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.fa\", orf_gff_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.gff3\", num_processes=1, min_read_length=10, max_read_length=50, buffer=250, primary_id=\"Name\", dataset=\"vignette\", rpf=TRUE, features_file=NA, do_pos_sp_nt_freq=TRUE, t_rna_file=NA, codon_positions_file=NA, count_threshold=64, length_threshold=500, output_prefix=\"\", hd_file=\"vignette/output/WT3AT/WT3AT.h5\", nnt_buffer=25, nnt_gene=50, asite_disp_length_file=NA))"`
 
 
 ```{r close_connections_2}
@@ -212,3 +232,4 @@ rhdf5::h5closeAll()
 detach(params)
 rm(list=ls())
 ```
+NOTE: This last block isn't ideal, should be removed at the end perhaps. Using attach()/detach() isn't top, but currently saves me having to add "params$" before every call of the parameters in all the scripts... :s
