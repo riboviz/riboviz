@@ -49,11 +49,10 @@ suppressMessages(library(here))
 ```
 
 ```{r source_script, include=FALSE}
-source(here("rscripts", "read_count_functions.R"), local = knitr::knit_global())
 
-#   source(here::here("rscripts", "provenance.R"))
-#   source(here::here("rscripts", "read_count_functions.R"))
-#   source(here::here("rscripts", "stats_figs_block_functions.R"))
+source(here::here("rscripts", "provenance.R"), local = knitr::knit_global())
+source(here::here("rscripts", "read_count_functions.R"), local = knitr::knit_global())
+source(here::here("rscripts", "stats_figs_block_functions.R"), local = knitr::knit_global())
 
 # or sys.source("your-script.R", envir = knitr::knit_global())
 ```
@@ -64,7 +63,19 @@ source(here("rscripts", "read_count_functions.R"), local = knitr::knit_global())
 rhdf5::h5closeAll()
 ```
 
+```{r provenance}
+if(interactive()){
+  this_script <- "AnalysisOutputs.Rmd"
+  path_to_this_script <- here("rmarkdown", this_script)
+} else {
+  this_script <- getopt::get_Rscript_filename()
+  path_to_this_script <- this_script
+}
 
+# print provenance
+print_provenance(path_to_this_script)
+
+```
 
 ```{r read_ins}
 
@@ -93,8 +104,11 @@ gff_df <- readGFFAsDf(here(params$orf_gff_file))
 str(gff_df)
 
 # set ggplot2 theme for plots drawn after this; use dark on light theme
-#ggplot2::theme_set(theme_bw())
+ggplot2::theme_set(theme_bw())
 ```
+
+
+
 
 ```{r close_connections_2}
 # prepare files, opens hdf5 file connection
