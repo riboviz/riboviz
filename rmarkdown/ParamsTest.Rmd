@@ -6,6 +6,8 @@ output: html_document
 params:
   myName: ""
   defaultParam: "defaultValue"
+  min_read_length: 10  # Minimum read length in H5 output
+  max_read_length: 50  # Maximum read length in H5 output
 ---
 
 This ParamsTest.Rmd is saved at: `"~/riboviz/rmarkdown/ParamsTest.Rmd"`.
@@ -16,20 +18,52 @@ I found that I needed to do this when I got the following error:
  "Error: pandoc version 1.12.3 or higher is required and was not found (see the help page ?rmarkdown::pandoc_available).
   Execution halted".  So I now have: pandoc 1.19.2.4 (`pandoc -v`)
 
-
+```{r setup}
+library(knitr)
+library(here)
+```
 
 ```{r color, results='markup'}
 print(params$myName)
 
 print(params$defaultParam)
+
+print(params$min_read_length)
 ```
 
 The outputs can be changed by editing the params called in the following terminal command, 
 ... which should match the params listed in the .yaml section at the top of the .Rmd
-`Rscript -e "rmarkdown::render(\"rmarkdown/ParamsTest.Rmd\", params=list(myName=\"Eeyore\", defaultParam=\"NotDefault\"))"`
+`Rscript -e "rmarkdown::render(\"rmarkdown/ParamsTest.Rmd\", params=list(myName=\"Eeyore\", defaultParam=\"NotDefault\", min_read_length=5, max_read_length=25))"`
 
-To run the thing from inside R, use `rmarkdown::render("rmarkdown/ParamsTest.Rmd", params=list(myName="Flic", defaultParam="NotDefault"))`
+To run the thing from inside R, use `rmarkdown::render("rmarkdown/ParamsTest.Rmd", params=list(myName="Flic", defaultParam="NotDefault", min_read_length=5, max_read_length=25))`
 
 Pressing `"Knit"` from within Rstudio doesn't do anything useful for `myName` because you're passing in an empty parameter (`myName: ""`), but for `defaultParam`, since that has a value already set in the .yaml section at the top of the .Rmd, it just shows THAT value.
 
----
+```{r params_prep}
+
+min_read_length <- params$min_read_length
+max_read_length <- params$max_read_length
+
+```
+This block (^^) is repetitive but currently needed to be able to use the values read in from the console call (via .Rmd yaml params) in external code chunks called via `knitr::read_chunk()`. Otherwise, the default values of 10 and 50 are used regardless of if 5 and 25 are read in as parameters during the call.
+
+```{r echo=FALSE}
+knitr::read_chunk(here("rmarkdown","ParamsTestScript.R"))
+```
+
+```{r first}
+<<other_block>>
+print(x+y)
+```
+
+```{r check_params}
+```
+This runs everything from the block
+```{r second}
+<<check_params>>
+head(read_range)
+```
+This runs everything from the block too, plus can do things with the read_range object. 
+
+
+Pleasingly, `junk_block_I_wont_use` doesn't show up anywhere, which is good. Means I can just define chunks I don't want to use 
