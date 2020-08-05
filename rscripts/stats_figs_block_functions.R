@@ -156,9 +156,6 @@ WriteThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data) {
 # calculate function
 CalculateReadLengths <- function(gene_names, dataset, hd_file){
   
-  ## distribution of lengths of all mapped reads
-  print("Starting: Distribution of lengths of all mapped reads")
-  
   # read length-specific read counts stored as attributes of 'reads' in H5 file
   gene_sp_read_length <- lapply(gene_names, function(gene) {
     GetGeneReadLength(gene, hd_file)
@@ -503,6 +500,7 @@ PlotPositionSpecificDistributionOfReads <- function(pos_sp_rpf_norm_reads_data){
     geom_line() +
     facet_grid(~End, scales = "free") +
     guides(col = FALSE)
+  return(pos_sp_rpf_norm_reads_plot)
 } # end of definition of function PlotPositionSpecificDistributionOfReads()
 
 SavePositionSpecificDistributionOfReads <- function(pos_sp_rpf_norm_reads_plot){
