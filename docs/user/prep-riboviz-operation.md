@@ -146,14 +146,14 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `pos_sp_nt_freq.tsv`
 * `pos_sp_rpf_norm_reads.pdf`
 * `pos_sp_rpf_norm_reads.tsv`
-* `features.pdf`
+* `features.pdf`: only output if `--features-file` was defined.
 * `tpms.tsv`
-* `codon_ribodens.tsv`
-* `codon_ribodens.pdf`
+* `codon_ribodens.tsv`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
+* `codon_ribodens.pdf`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
 * `startcodon_ribogridbar.pdf`
 * `startcodon_ribogrid.pdf`
-* `3ntframe_bygene.tsv`
-* `3ntframe_propbygene.pdf`
+* `3ntframe_bygene.tsv`: only output if `--asite-disp-length-file` was defined.
+* `3ntframe_propbygene.pdf`: only output if `--asite-disp-length-file` was defined.
 
 In addition, the following files are also put into the output directory:
 
