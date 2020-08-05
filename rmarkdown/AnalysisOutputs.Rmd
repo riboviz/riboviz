@@ -31,44 +31,47 @@ params:
 The outputs can be changed by editing the params called in the following terminal command, 
 ... which should match the params listed in the .yaml section at the top of the .Rmd
 
-`Rscript -e "rmarkdown::render(\"rmarkdown/AnalysisOutputs.Rmd\", params=list(output_dir=\"vignette/output/WT3AT\", orf_fasta_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.fa\", orf_gff_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.gff3\", num_processes=1, min_read_length=10, max_read_length=50, buffer=250, primary_id=\"Name\", dataset=\"vignette\", rpf=TRUE, features_file=NA, do_pos_sp_nt_freq=TRUE, t_rna_file=NA, codon_positions_file=NA, count_threshold=64, length_threshold=500, output_prefix=\"\", hd_file=\"vignette/output/WT3AT/WT3AT.h5\", nnt_buffer=25, nnt_gene=50, asite_disp_length_file=NA))"`
+`Rscript -e "rmarkdown::render(\"rmarkdown/AnalysisOutputs.Rmd\", params=list(output_dir=\"vignette/output/WT3AT\", orf_fasta_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.fa\", orf_gff_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.gff3\", num_processes=1, min_read_length=10, max_read_length=50, buffer=250, primary_id=\"Name\", dataset=\"vignette\", rpf=TRUE, features_file=\"data/yeast_features.tsv\", do_pos_sp_nt_freq=TRUE, t_rna_file=\"data/yeast_tRNAs.tsv\", codon_positions_file=\"data/yeast_codon_pos_i200.RData\", count_threshold=64, length_threshold=500, output_prefix=\"\", hd_file=\"vignette/output/WT3AT/WT3AT.h5\", nnt_buffer=25, nnt_gene=50, asite_disp_length_file=\"data/yeast_standard_asite_disp_length.txt\"))"`
 
 NOTE: These params at the top of the .Rmd (in the YAML section) are NOT the same as those PASSED INTO generate_stats_figs.R (yet).  Those ones use a mix of underscores and hyphens, and that is then resolved in `generate_stats_figs.R` by the line `opt <- optparse::parse_args(OptionParser(option_list = option_list), convert_hyphens_to_underscores=TRUE)`.  I haven't quite figured out HOW to resolve the optparse / parse_args() stuff WITH rmarkdown parameters.  I seem to have some environment issues wrong somewhere, or it's possibly just a pain to do?  
 BE AWARE THAT THESE INPUTS DO NOT MATCH THOSE FED IN BY RIBOVIZ YET!
 
-From the python call to generate_stats_figs.R (for sample WT3AT from vignette):
+From the **python call** to generate_stats_figs.R (for sample WT3AT from vignette):
 > Rscript --vanilla /home/flic/riboviz/rscripts/generate_stats_figs.R --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WT3AT/WT3AT.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WT3AT --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
 
 To run the thing from **inside** R (for WT3AT sample from vignette), use:
 ```{r exampleRun, eval=FALSE}
-rmarkdown::render("rmarkdown/AnalysisOutputs.Rmd",
-                  params=list(
-                      output_dir="vignette/output/WT3AT",
-                      orf_fasta_file="vignette/input/yeast_YAL_CDS_w_250utrs.fa",
-                      orf_gff_file="vignette/input/yeast_YAL_CDS_w_250utrs.gff3", 
-                      num_processes=1,
-                      min_read_length=10, 
-                      max_read_length=50, 
-                      buffer=250,
-                      primary_id="Name",
-                      dataset="vignette", 
-                      rpf=TRUE,
-                      features_file=NA, 
-                      do_pos_sp_nt_freq=TRUE, 
-                      t_rna_file=NA, 
-                      codon_positions_file=NA, 
-                      count_threshold=64, 
-                      length_threshold=500, 
-                      output_prefix="", 
-                      hd_file="vignette/output/WT3AT/WT3AT.h5", 
-                      nnt_buffer=25, 
-                      nnt_gene=50, 
-                      asite_disp_length_file=NA
-                  )
+rmarkdown::render(
+  "rmarkdown/AnalysisOutputs.Rmd", 
+  params=list(
+    output_dir="vignette/output/WT3AT", 
+    orf_fasta_file="vignette/input/yeast_YAL_CDS_w_250utrs.fa", 
+    orf_gff_file="vignette/input/yeast_YAL_CDS_w_250utrs.gff3", 
+    num_processes=1, 
+    min_read_length=10, 
+    max_read_length=50, 
+    buffer=250, 
+    primary_id="Name", 
+    dataset="vignette", 
+    rpf=TRUE, 
+    features_file="data/yeast_features.tsv", 
+    do_pos_sp_nt_freq=TRUE, 
+    t_rna_file="data/yeast_tRNAs.tsv", 
+    codon_positions_file="data/yeast_codon_pos_i200.RData", 
+    count_threshold=64, 
+    length_threshold=500, 
+    output_prefix="", 
+    hd_file="vignette/output/WT3AT/WT3AT.h5", 
+    nnt_buffer=25, 
+    nnt_gene=50, 
+    asite_disp_length_file="data/yeast_standard_asite_disp_length.txt"
+  )
 )
 ```
 
 NOTE: File path variables need to be wrapped in here() at some point to give full path, or it doesn't work (e.g. orf_fasta_file, orf_gff_file, hd_file).  This is done for SOME variables so far (as of ThreeNucleotidePeriodicity blocks) in `check_params` chunk, where they're reassigned as `exampleparam <- here(params$exampleparam)`.
+
+### SETUP
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -99,17 +102,17 @@ buffer <- params$buffer
 primary_id <- params$primary_id
 dataset <- params$dataset
 rpf <- params$rpf
-features_file <- params$features_file
+features_file <- here::here(params$features_file)
 do_pos_sp_nt_freq <- params$do_pos_sp_nt_freq
-t_rna_file <- params$t_rna_file
-codon_positions_file <- params$codon_positions_file
+t_rna_file <- here::here(params$t_rna_file)
+codon_positions_file <- here::here(params$codon_positions_file)
 count_threshold <- params$count_threshold
 length_threshold <- params$length_threshold
 output_prefix <- params$output_prefix
 hd_file <- here::here(params$hd_file)
 nnt_buffer <- params$nnt_buffer
 nnt_gene <- params$nnt_gene
-asite_disp_length_file <- params$asite_disp_length_file
+asite_disp_length_file <- here::here(params$asite_disp_length_file)
 
 ```
 
@@ -129,6 +132,8 @@ source(here::here("rscripts", "stats_figs_block_functions.R"), local = knitr::kn
 rhdf5::h5closeAll()
 ```
 
+### PROVENANCE
+
 ```{r provenance}
 # handle interactive vs standard running
 # if(interactive()){
@@ -143,7 +148,7 @@ rhdf5::h5closeAll()
 
 
 if(is.na(getopt::get_Rscript_filename())){
-    this_script <- "AnalysisOutputs.Rmd"
+  this_script <- "AnalysisOutputs.Rmd"
   path_to_this_script <- here("rmarkdown", this_script)
 } else {
   this_script <- getopt::get_Rscript_filename()
@@ -159,6 +164,7 @@ get_Rscript_filename()
 print_provenance(path_to_this_script)
 ```
 
+### READ-IN
 
 ```{r read_ins, include=FALSE}
 
@@ -178,97 +184,122 @@ gff_df <- readGFFAsDf(orf_gff_file)
 ggplot2::theme_set(theme_bw())
 ```
 
-```{r check_params}
+### CHECK PARAMETERS
+
+```{r check_params, warning=FALSE}
 
 # parameters with filepaths need here() to avoid path confusion
-
-print(params)
 str(params)
 
 attach(params)
 ```
 
-### Three Nucleotide Periodicity 
-
-```{r CalculateThreeNucleotidePeriodicity, include=FALSE}
-
-  # check for 3nt periodicity
-  print("Starting: Check for 3nt periodicity globally")
-
-  # CalculateThreeNucleotidePeriodicity():
-  three_nucleotide_periodicity_data <- CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
-```
-
-```{r PlotThreeNucleotidePeriodicity, echo=FALSE}
-
-  # PlotThreeNucleotidePeriodicity()
-  three_nucleotide_periodicity_plot <- PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
-  # do plot for .Rmd
-  PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
-
-  # NOTE: repeated from inside CalculateThreeNucleotidePeriodicity() as preferred not to return multiple objects in list (hassle :S)
-  gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hd_file = hd_file, gff_df = gff_df)
-
-  # run PlotStartCodonRiboGrid()
-  start_codon_ribogrid_plot <- PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
-  # creates plot object
-  # do plot for .Rmd
-  PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
-  
-  # run SaveStartCodonRiboGrid():
-  SaveStartCodonRiboGrid(start_codon_ribogrid_plot)
-
-  # run PlotStartCodonRiboGridBar():
-  start_codon_ribogrid_bar_plot <- PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
-  # creates plot object
-  # do plot for .Rmd  
-  PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
-
-  # run SaveStartCodonRiboGridBar():
-  SaveStartCodonRiboGridBar(start_codon_ribogrid_bar_plot)
-
-  # run SavePlotThreeNucleotidePeriodicity():
-  SavePlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_plot)
-```
-
-```{r WriteThreeNucleotidePeriodicity, include=FALSE}
-
-  # run WriteThreeNucleotidePeriodicity():
-  WriteThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
-
-  print("Completed: Check for 3nt periodicity globally")
-```
-
-### Distribution of Lengths of Mapped Reads
-
-```{r CalculateReadLengths, echo=FALSE}
-print("Next block goes here")
-```
-
-### Distribution of Lengths of Mapped Reads Reading-In External Code
-#### ...from generate_stats_figs_markdown.R, a copy of generate_stats_figs.R)
 ```{r echo=FALSE, cache=FALSE}
 knitr::read_chunk(here("rscripts","generate_stats_figs_markdown.R"))
 ```
 
-```{r DistributionOfLengthsMappedReads}
-```
-First way (^^) of running this code chunk: it's fine, not sure if one can add the Plot part into it, or if it has to be empty in order to run that chunk properly? 
+### 3NT PERIODICITY
 
-```{r DistribReadLength}
-<<DistributionOfLengthsMappedReads>>
+```{r 3NTplot, echo=FALSE, warning=FALSE}
+
+<<ThreeNucleotidePeriodicityPlotChunk>>
+
+three_nucleotide_periodicity_plot
   
-# this works fine, because the returned output of CalculateReadLengths() is the input of PlotReadLengths() 
-PlotReadLengths(CalculateReadLengths(gene_names, dataset, hd_file))
-   
-#PlotReadLengths(read_length_data) # this didn't work because read_length_data is not RETURNED by the function run by that chunk of code!
 ```
-This (^^) is probably the BETTER way of doing the code chunk stuff, and also I can solve the "also make the plots in .html" issue by using the medium functions. 
 
+```{r 3NTribogridplot, echo=FALSE, warning=FALSE}
+
+<<ThreeNucleotidePeriodicityPlotRibogrids>>
+  
+start_codon_ribogrid_plot
+
+start_codon_ribogrid_bar_plot
+```
+
+
+### LENGTHS OF ALL MAPPED READS
+
+```{r DistribReadLength, echo=FALSE, warning=FALSE}
+
+<<DistributionOfLengthsMappedReadsPlotChunk>>
+  
+read_len_plot
+   
+```
+
+## BIASES IN NUCLEOTIDE COMPOSITION
+
+```{r BiasesInNucleotideComposition, echo=FALSE, warning=FALSE}
+
+<<BiasesInNucleotideCompositionAlongMappedReadLengthsChunk>>
+  
+  print("No plot for this")
+
+```
+
+## CALCULATE READ FRAME FOR EVERY ORF
+
+```{r CalculateReadFramePerAnnotatedOrf, echo=FALSE, warning=FALSE}
+
+<<CalculateReadFramePerOrfPlotChunk>>
+
+gene_read_frame_plot
+```
+
+### POSITION SPECIFIC DISTRIBUTION OF READS
+
+```{r PositionSpecificDistributionOfReads_rpf, echo=FALSE, warning=FALSE}
+
+<<PositionSpecificDistributionOfReadsRPFPlotChunk>>
+  
+if(rpf){
+    pos_sp_rpf_norm_reads_plot
+  }
+
+```
+
+```{r PositionSpecificDistributionOfReads_mrna, echo=FALSE, warning=FALSE}
+
+<<PositionSpecificDistributionOfReadsMRNAPlotChunk>>
+  
+if(!rpf){
+  pos_sp_mrna_norm_coverage_plot
+}
+
+```
+
+### TPMS OF GENES
+
+```{r TranscriptsPerMillion, echo=FALSE, warning=FALSE}
+<<GeneTranscriptsPerMillionChunk>>
+  
+print("No plot for this")
+
+```
+
+### TPMS CORRELATIONS WITH FEATURES
+
+```{r TPMsAndFeaturesCorrelation, echo=FALSE, warning=FALSE}
+<<TPMsWithFeaturesPlotChunk>>
+  
+if (!is.na(features_file)) { 
+  features_plot
+}
+```
+
+```{r CodonSpecificRibosomeDensityWithTRNAs, echo=FALSE, warning=FALSE}
+
+<<CodonSpecificRibosomeDensityTRNAsPlotChunk>>
+  
+if (!is.na(t_rna_file) & !is.na(codon_positions_file) & (rpf)) {
+  cod_dens_tRNA_plot
+}
+```
 
 To run in terminal: 
 
-`Rscript -e "rmarkdown::render(\"rmarkdown/AnalysisOutputs.Rmd\", params=list(output_dir=\"vignette/output/WT3AT\", orf_fasta_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.fa\", orf_gff_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.gff3\", num_processes=1, min_read_length=10, max_read_length=50, buffer=250, primary_id=\"Name\", dataset=\"vignette\", rpf=TRUE, features_file=NA, do_pos_sp_nt_freq=TRUE, t_rna_file=NA, codon_positions_file=NA, count_threshold=64, length_threshold=500, output_prefix=\"\", hd_file=\"vignette/output/WT3AT/WT3AT.h5\", nnt_buffer=25, nnt_gene=50, asite_disp_length_file=NA))"`
+`Rscript -e "rmarkdown::render(\"rmarkdown/AnalysisOutputs.Rmd\", params=list(output_dir=\"vignette/output/WT3AT\", orf_fasta_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.fa\", orf_gff_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.gff3\", num_processes=1, min_read_length=10, max_read_length=50, buffer=250, primary_id=\"Name\", dataset=\"vignette\", rpf=TRUE, features_file=NA, do_pos_sp_nt_freq=TRUE, t_rna_file=NA, codon_positions_file=NA, count_threshold=64, length_threshold=500, output_prefix=\"\", hd_file=\"vignette/output/WT3AT/WT3AT.h5\", nnt_buffer=25, nnt_gene=50, asite_disp_length_file=\"data/yeast_standard_asite_disp_length.txt\"))"`
 
 
 ```{r close_connections_2}
