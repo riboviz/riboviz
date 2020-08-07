@@ -22,6 +22,8 @@ $ python -m riboviz.tools.upgrade_config_file \
     -i /home/user/riboviz-data/config.yaml -o nu_config.yaml 
 ```
 
-**Tip:** we strongly recommend you visually inspect the updated configuration to ensure the updates reflect your local environment. This especially relates to any file paths.
+**Note:** it is strongly recommended that you visually inspect the updated configuration to ensure the updates reflect your local environment. This especially relates to any file paths.
+
+**Note:** One specific change you may need to make, if your configuration files date from before release 1.1.0, is as follows. If the path of your `features_file` is `scripts/yeast_features.tsv` then this needs to be updated to `data/yeast_features.tsv`, to reflect the relocation of that file in the repository.
 
 For details of the changes applied, see [riboviz.upgrade_config](../../riboviz/upgrade_config.py).

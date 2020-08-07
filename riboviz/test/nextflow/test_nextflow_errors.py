@@ -223,6 +223,120 @@ def test_file_not_found(tmp_file, parameter):
         "Unexpected exit code %d" % exit_code
 
 
+@pytest.mark.parametrize("parameter",
+                         [params.FEATURES_FILE,
+                          params.ASITE_DISP_LENGTH_FILE])
+def test_optional_file_not_specified(tmp_file, parameter):
+    """
+    Test that validating a configuration with missing optional file
+    parameters returns a zero exit code.
+
+    :param tmp_file: Path to temporary file, to write configuration to
+    :type tmp_file: str or unicode
+    :param parameter: Parameter
+    :type parameter: str or unicode
+    """
+    with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    del config[parameter]
+    config[params.VALIDATE_ONLY] = True
+    with open(tmp_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = run_nextflow(tmp_file)
+    assert exit_code == 0, \
+        "Unexpected exit code %d" % exit_code
+
+
+def test_t_rna_codon_positions_not_specified(tmp_file):
+    """
+    Test that validating a configuration with missing optional file
+    parameters t_rna_file and codon_positions_file returns a zero exit
+    code.
+
+    :param tmp_file: Path to temporary file, to write configuration to
+    :type tmp_file: str or unicode
+    """
+    with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    del config[params.T_RNA_FILE]
+    del config[params.CODON_POSITIONS_FILE]
+    config[params.VALIDATE_ONLY] = True
+    with open(tmp_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = run_nextflow(tmp_file)
+    assert exit_code == 0, \
+        "Unexpected exit code %d" % exit_code
+
+
+@pytest.mark.parametrize("parameter",
+                         [params.FEATURES_FILE,
+                          params.ASITE_DISP_LENGTH_FILE])
+def test_optional_file_none(tmp_file, parameter):
+    """
+    Test that validating a configuration with optional file parameters
+    set to 'none' returns a zero exit code.
+
+    :param tmp_file: Path to temporary file, to write configuration to
+    :type tmp_file: str or unicode
+    :param parameter: Parameter
+    :type parameter: str or unicode
+    """
+    with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    config[parameter] = None
+    config[params.VALIDATE_ONLY] = True
+    with open(tmp_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = run_nextflow(tmp_file)
+    assert exit_code == 0, \
+        "Unexpected exit code %d" % exit_code
+
+
+def test_t_rna_codon_positions_none(tmp_file):
+    """
+    Test that validating a configuration with optional file
+    parameters t_rna_file and codon_positions_file set to
+    'none' returns a zero exit code.
+
+    :param tmp_file: Path to temporary file, to write configuration to
+    :type tmp_file: str or unicode
+    """
+    with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    config[params.T_RNA_FILE] = None
+    config[params.CODON_POSITIONS_FILE] = None
+    config[params.VALIDATE_ONLY] = True
+    with open(tmp_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = run_nextflow(tmp_file)
+    assert exit_code == 0, \
+        "Unexpected exit code %d" % exit_code
+
+
+@pytest.mark.parametrize("parameter",
+                         [params.T_RNA_FILE,
+                          params.CODON_POSITIONS_FILE])
+def test_t_rna_codon_positions_either_or(tmp_file, parameter):
+    """
+    Test that validating a configuration with co-dependent optional
+    file parameters - t_rna_file and codon_positions_file - where
+    one is defined and the other is not.
+
+    :param tmp_file: Path to temporary file, to write configuration to
+    :type tmp_file: str or unicode
+    :param parameter: Parameter
+    :type parameter: str or unicode
+    """
+    with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    config[parameter] = None
+    with open(tmp_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = run_nextflow(tmp_file)
+    assert exit_code != 0, \
+        "Unexpected exit code %d" % exit_code
+
+
 def test_extract_umis_no_umi_regexp(tmp_file):
     """
     Test that if :py:const:`riboviz.params.EXTRACT_UMIS` is `TRUE`
