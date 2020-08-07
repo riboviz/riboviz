@@ -6,7 +6,6 @@ import tempfile
 import pytest
 import yaml
 from riboviz import upgrade_config
-import riboviz.test
 from riboviz.test import config
 
 
@@ -42,7 +41,10 @@ def upgrade_and_validate(config_file,
     config_path = os.path.join(os.path.dirname(config.__file__),
                                config_file)
     upgrade_config.upgrade_config_file(config_path, upgraded_config_file)
-    with open(expected_config_file, "r") as f:
+    expected_config_path = os.path.join(
+        os.path.dirname(config.__file__),
+        expected_config_file)
+    with open(expected_config_path, "r") as f:
         expected_config = yaml.load(f, yaml.SafeLoader)
     with open(upgraded_config_file, "r") as f:
         actual_config = yaml.load(f, yaml.SafeLoader)
@@ -66,7 +68,7 @@ def test_upgrade_vignette_config(config_file, tmp_file):
     :type config_file: str or unicode
     """
     upgrade_and_validate(config_file, tmp_file,
-                         riboviz.test.VIGNETTE_CONFIG)
+                         "vignette_config_current.yaml")
 
 
 @pytest.mark.parametrize("config_file",
@@ -84,7 +86,7 @@ def test_upgrade_simdata_umi_config(config_file, tmp_file):
     :type tmp_file: str or unicode
     """
     upgrade_and_validate(config_file, tmp_file,
-                         riboviz.test.SIMDATA_UMI_CONFIG)
+                         "simdata_umi_config_current.yaml")
 
 
 @pytest.mark.parametrize("config_file",
@@ -102,4 +104,4 @@ def test_upgrade_simdata_multiplex_config(config_file, tmp_file):
     :type tmp_file: str or unicode
     """
     upgrade_and_validate(config_file, tmp_file,
-                         riboviz.test.SIMDATA_MULTIPLEX_CONFIG)
+                         "simdata_multiplex_config_current.yaml")

@@ -3,12 +3,9 @@
 .DS_Store
 oldData/
 .Rproj.user
-RiboViz.Rproj
+riboviz.Rproj
 .RData
 .Rhistory
-Shiny/2009
-Shiny/2010
-Shiny/Supp
 scripts/script_for_transcript_annotation.nb.html
 *~
 *.pyc
@@ -21,3 +18,5 @@ vignette/*output
 code-docs/_build/
 code-docs/modules.rst
 code-docs/riboviz*.rst
+.nextflow*
+work

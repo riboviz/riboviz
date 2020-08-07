@@ -1,7 +1,7 @@
 # Provenance-related utilities.
 
-library(getopt)
-library(git2r)
+suppressMessages(library(getopt))
+suppressMessages(library(git2r))
 
 #' Get RiboViz version information.
 #'
