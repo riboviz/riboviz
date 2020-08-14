@@ -38,8 +38,8 @@ def test_seqs_cds_codons_to_df_empty():
 def test_seqs_cds_codons_to_df():
     """
     Test :py:func:`riboviz.fasta_gff.seqs_cds_codons_to_df`
-    with values produces a data frame with the expected number
-    of values.
+    with values produces a data frame with the expected columns,
+    rows and values.
     """
     seqs_cds_codons = {
         "G1": fasta_gff.sequence_to_codons("ATGAAATAA"),
