@@ -50,6 +50,7 @@ Command-line tools:
 | [riboviz.tools.create_barcode_pairs](./riboviz/tools/create_barcode_pairs.py) | Create barcode pairs and write each pair plus the Hamming distance between then to a file of tab-separated values |
 | [riboviz.tools.create_fastq_simdata](./riboviz/tools/create_fastq_simdata.py) | Create simulated FASTQ files to test UMI/deduplication, adaptor trimming, anddemultiplexing. Files in `data/simdata/` were created using this tool |
 | [riboviz.tools.demultiplex_fastq](./riboviz/tools/demultiplex_fastq.py) | Demultiplex FASTQ files using UMI-tools-compliant barcodes present within the FASTQ headers and a sample sheet file (invoked as part of a workflow) |
+| [riboviz.tools.extract_cds_codons](./riboviz/tools/extract_cds_codons.py) | Extract coding sequence codons and export as a tab-separated values file |
 | [riboviz.tools.prep_riboviz](./riboviz/tools/prep_riboviz.py) | Run the workflow |
 | [riboviz.tools.subsample_bioseqfile](./riboviz/tools/subsample_bioseqfile.py) | Subsample an input FASTQ (or other sequencing) file, to produce a smaller file whose reads are randomly sampled from of the input with a fixed probability |
 | [riboviz.tools.trim_5p_mismatch](./riboviz/tools/trim_5p_mismatch.py) | Remove a single 5' mismatched nt and filter reads with more than a specified mismatches from a SAM file and save the trimming summary to a file (invoked as part of a workflow) |
