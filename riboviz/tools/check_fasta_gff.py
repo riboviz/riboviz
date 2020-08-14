@@ -11,7 +11,7 @@ Usage::
                           fasta file input
     -g GFF, --gff GFF     gff3 file input
 
-See :py:func:`riboviz.check_fasta_gff.check_fasta_gff`.
+See :py:func:`riboviz.fasta_gff.check_fasta_gff`.
 """
 import argparse
 from riboviz import fasta_gff
