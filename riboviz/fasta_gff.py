@@ -70,6 +70,21 @@ def check_fasta_gff(fasta, gff):
             print((cds_coord.seqid + " has internal STOP."))
 
 
+def sequence_to_codons(sequence):
+    """
+    Given a sequence, split into a list of codons.
+
+    :param sequence: Sequence
+    :type sequence: str or unicode
+    :return: list of codons
+    :rtype: list(str or unicode)
+    """
+    codons = [sequence[i:i+3] for i in range(0, len(sequence), 3)]
+    # Validate split was done correctly.
+    assert "".join(codons) == sequence
+    return codons
+
+
 def extract_cds(gff):
     """
     Extract information on genes and coding sequences from a GFF
@@ -82,7 +97,8 @@ def extract_cds(gff):
     :return: coding sequence information
     :rtype: dict(str or unicode -> list(tuple(int, int)))
     """
-    db = gffutils.create_db(gff, 'gff.db',
+    db = gffutils.create_db(gff,
+                            'gff.db',
                             merge_strategy="create_unique",
                             keep_order=True,
                             force=True)
@@ -93,6 +109,128 @@ def extract_cds(gff):
             cds[c.seqid] = []
         cds[c.seqid].append((c.start, c.end))
     return cds
+
+
+def get_cds(cds_coord, fasta):
+    """
+    Given a GFF feature for a CDS extract the coding
+    sequence from the given FASTA file.
+    If the length of coding sequence is not a factor of
+    3 then it is padded with ``N``.
+
+    :param cds_coord: GFF feature for a CDS
+    :type cds_coord: gffutils.feature.Feature
+    :param fasta: FASTA file
+    :type fasta: str or unicode
+    :return: sequence
+    :rtype: str or unicode
+    """
+    cds_len = cds_coord.end - cds_coord.start + 1
+    print("{} {} .. {} Length ({})".format(cds_coord.seqid,
+                                           cds_coord.start,
+                                           cds_coord.end,
+                                           cds_len))
+    # TODO what exceptions can this throw? Want to catch in caller.
+    sequence = cds_coord.sequence(fasta)
+    # Validate length was calculated correctly.
+    # TODO might this ever not hold?
+    assert cds_len == len(sequence)
+    cds_len_remainder = cds_len % 3
+    # TODO from check_fasta_gff, should this be done?
+    if cds_len_remainder != 0:
+        warnings.warn("{} has length that isn't divisible by 3".format(
+            cds_coord.seqid))
+        sequence += ("N" * (3 - cds_len_remainder))
+    return sequence
+
+
+def get_cds_codons(cds_coord, fasta):
+    """
+    Given a GFF feature for a CDS extract the coding
+    sequence from the given FASTA file and split into codons.
+
+    See :py:func:`get_cds` and :py:func:`sequence_to_codons`.
+
+    :param cds_coord: GFF feature for a CDS
+    :type cds_coord: gffutils.feature.Feature
+    :param fasta: FASTA file
+    :type fasta: str or unicode
+    :return: sequence
+    :rtype: str or unicode
+    """
+    sequence = get_cds(cds_coord, fasta)
+    print(sequence)
+    cds_codons = sequence_to_codons(sequence)
+    return cds_codons
+
+
+def get_seqs_cds_codons(fasta, gff):
+    """
+    Using information within a FASTA file extract information on the
+    codons in each coding sequence (as specified via CDS entries in
+    the complementary GFF file). A dictionary of the codons for each
+    coding sequence, keyed by sequence ID, is returned.
+
+    See :py:func:`get_cds_codons`.
+
+    :param fasta: FASTA file
+    :type fasta: str or unicode
+    :param gff: GFF file
+    :type gff: str or unicode
+    :return: Codons for each coding sequence, keyed by sequence ID
+    :rtype: list(dict)
+    """
+    gffdb = gffutils.create_db(gff,
+                               dbfn='gff.db',
+                               force=True,
+                               keep_order=True,
+                               merge_strategy='merge',
+                               sort_attribute_values=True)
+    seqs_cds_codons = {}
+    for cds_coord in gffdb.features_of_type('CDS'):
+        try:
+            cds_codons = get_cds_codons(cds_coord, fasta)
+        except Exception as e:
+            # TODO exit here rather than gulp and continue?
+            print(str(e))
+            continue
+        if cds_coord.seqid not in seqs_cds_codons:
+            seqs_cds_codons[cds_coord.seqid] = []
+        seqs_cds_codons[cds_coord.seqid].extend(cds_codons)
+    return seqs_cds_codons
+
+
+def seqs_cds_codons_to_df(seqs_cds_codons):
+    """
+    Given dictionary of the codons for coding sequences, keyed by
+    sequence ID, return a Pandas data frame with the codons, also
+    including the position of each codon in its sequence.
+
+    The data frame has columns:
+
+    * :py:const:`GENE`: sequence ID/gene name.
+    * :py:const:`CODON`: codon.
+    * :py:const:`POS`: codon position in coding sequence (1-indexed).
+
+    :param cds_codons: Codons for each coding sequence, keyed by
+    sequence ID
+    :type cds_codons: list(dict)
+    :return: data frame
+    :rtype: pandas.core.frame.DataFrame
+    """
+    seqs_cds_codons_list = []
+    num_seqs_cds_codons = 0
+    for seqid, cds_codons in list(seqs_cds_codons.items()):
+        num_seqs_cds_codons += len(cds_codons)
+        for pos, cds_codon in zip(range(0, len(cds_codons)), cds_codons):
+            seqs_cds_codons_list.append({GENE: seqid,
+                                         CODON: cds_codon,
+                                         POS: pos + 1})
+    df = pd.DataFrame(columns=[GENE, CODON, POS])
+    df = pd.DataFrame(seqs_cds_codons_list)
+    # Validate number of codons
+    assert num_seqs_cds_codons == df.shape[0]
+    return df
 
 
 def print_fasta_cds(cds, fasta):
@@ -106,10 +244,6 @@ def print_fasta_cds(cds, fasta):
     """
     with open(fasta, "rt") as f:
         for seq in SeqIO.parse(f, "fasta"):
-            # seq methods:
-            # 'annotations', 'dbxrefs', 'description', 'features',
-            # 'format', 'id', 'letter_annotations', 'lower', 'name',
-            # 'reverse_complement', 'seq', 'translate', 'upper'
             if seq.name in cds:
                 for (cds_start, cds_end) in cds[seq.name]:
                     print("---- {} ----".format(seq.name))
@@ -127,101 +261,46 @@ def print_fasta_cds(cds, fasta):
                     assert seq.seq == seq_pre_cds + seq_cds + seq_post_cds
 
 
-# TODO function comment.
-def get_cds_sequence(cds_coord, fasta):
-    cds_len = cds_coord.end - cds_coord.start + 1
-    print("{} {} {} ({})".format(cds_coord.seqid,
-                                 cds_coord.start,
-                                 cds_coord.end,
-                                 cds_len))
-    # cds_coord methods:
-    # 'astuple', 'attributes', 'bin', 'calc_bin', 'chrom',
-    # 'dialect', 'end', 'extra', 'featuretype', 'file_order',
-    # 'frame', 'id', 'keep_order', 'score', 'seqid', 'sequence',
-    # 'sort_attribute_values', 'source', 'start', 'stop', 'strand'
-    # TODO what exceptions can this throw? Want to catch in caller.
-    cds_seq = cds_coord.sequence(fasta)
-    # Validate length was calculated correctly.
-    assert cds_len == len(cds_seq)  # TODO might this ever not hold?
-    cds_len_remainder = cds_len % 3
-    # TODO from check_fasta_gff, should this be done?
-    if cds_len_remainder != 0:
-        warnings.warn("{} has length that isn't divisible by 3".format(
-            cds_coord.seqid))
-        cds_seq += ("N" * (3 - cds_len_remainder))
-    return cds_seq
-
-
-# TODO function comment.
-def split_into_codons(cds_seq):
-    codons = [cds_seq[i:i+3] for i in range(0, len(cds_seq), 3)]
-    # Validate split was done correctly.
-    assert "".join(codons) == cds_seq
-    return codons
-
-
-# TODO function comment.
-def codons_list_to_dict(seqid, codons):
-    codons_list = []
-    for pos, codon in zip(range(0, len(codons)), codons):
-        codons_list.append({GENE: seqid,
-                            CODON: codon,
-                            POS: pos + 1})
-    return codons_list
-
-                    
-def extract_cds_codons(fasta, gff):
+def extract_cds_codons(fasta,
+                       gff,
+                       cds_codons_file,
+                       delimiter="\t"):
     """
     Using information within a FASTA file extract information on the
-    codons in each coding sequence as specified via CDS entries in the
-    complementary GFF file. A with columns  :py:const:`GENE` (gene
-    name), :py:const:`CODON` (codon),  :py:const:`POS` (codon position
-    in coding sequenced, 1-indexed) is returned.
+    codons in each coding sequence (as specified via CDS entries in
+    the complementary GFF file) and save a tab-separated values file
+    with information on the positions of each codon in each coding
+    sequence.
+
+    The tab-separated values file has columns:
+
+    * :py:const:`GENE`: sequence ID/gene name.
+    * :py:const:`CODON`: codon.
+    * :py:const:`POS`: codon position in coding sequence (1-indexed).
+
+    See :py:func:`get_seqs_cds_codons` and
+    :py:func:`seqs_cds_codons_to_df`.
 
     :param fasta: FASTA file
     :type fasta: str or unicode
     :param gff: GFF file
     :type gff: str or unicode
-    :return: S
-    :rtype: pandas.core.frame.DataFrame
+    :params cds_codons_file: Coding sequence codons file
+    :type cds_codons_file: str or unicode
+    :param delimiter: Delimiter
+    :type delimiter: str or unicode
     """
-    gffdb = gffutils.create_db(gff,
-                               dbfn='gff.db',
-                               force=True,
-                               keep_order=True,
-                               merge_strategy='merge',
-                               sort_attribute_values=True)
-    # TODO Extract into new function, return DataFrame.
-    all_cds_codons = []
-    num_codons = 0
-    for cds_coord in gffdb.features_of_type('CDS'):
-        try:
-            cds_seq = get_cds_sequence(cds_coord, fasta)
-        except Exception as e:
-            # TODO exit here rather than gulp and continue?
-            print(str(e))
-            continue
-        print(cds_seq)
-        codons = split_into_codons(cds_seq)
-        all_cds_codons.extend(codons_list_to_dict(cds_coord.seqid, codons))
-        num_codons += len(codons)
-    df = pd.DataFrame(columns=[GENE, CODON, POS])
-    print(df)
-    df = pd.DataFrame(all_cds_codons)
-    print(df)
-    # Validate number of codons
-    assert num_codons == df.shape[0]
-    return df
-
-
-def extract_cds_codons_to_file(fasta, gff, cds_codons):
-    cds = extract_cds(gff)
     print("---- CDS (own) ----")
+    cds = extract_cds(gff)
     print(cds)
+    print("--- FASTA CDS ---")
     print_fasta_cds(cds, fasta)
-    cds = extract_cds_codons(fasta, gff)
     print("---- CDS (Bio) ----")
-    print(cds)
-    delimiter = "\t"
-    cds[list(cds.columns)].to_csv(
-        cds_codons, mode='a', sep=delimiter, index=False)
+    seqs_cds_codons = get_seqs_cds_codons(fasta, gff)
+    print(seqs_cds_codons)
+    df = seqs_cds_codons_to_df(seqs_cds_codons)
+    print(df)
+    df[list(df.columns)].to_csv(cds_codons_file,
+                                mode='w',
+                                sep=delimiter,
+                                index=False)

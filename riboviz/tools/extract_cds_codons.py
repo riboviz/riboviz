@@ -15,7 +15,7 @@ Usage::
     -c CDS_CODONS, --cds-codons CDS_CODONS
                           Coding sequence codons file output
 
-See :py:func:`riboviz.fasta_gff.extract_cds_codons_to_file` for
+See :py:func:`riboviz.fasta_gff.extract_cds_codons` for
 information on the tab-separated values file format.
 """
 import argparse
@@ -54,14 +54,14 @@ def parse_command_line_options():
 def invoke_extract_cds_codons():
     """
     Parse command-line options then invoke
-    :py:func:`riboviz.fasta_gff.extract_cds_codons_to_file`.
+    :py:func:`riboviz.fasta_gff.extract_cds_codons`.
     """
     print(provenance.write_provenance_to_str(__file__))
     options = parse_command_line_options()
     fasta = options.fasta
     gff = options.gff
     cds_codons = options.cds_codons
-    fasta_gff.extract_cds_codons_to_file(fasta, gff, cds_codons)
+    fasta_gff.extract_cds_codons(fasta, gff, cds_codons)
 
 
 if __name__ == "__main__":
