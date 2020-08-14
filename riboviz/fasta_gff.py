@@ -2,7 +2,6 @@
 FASTA and GFF-related functions.
 """
 import warnings
-from Bio import SeqIO
 from Bio.Seq import Seq
 import gffutils
 import pandas as pd
@@ -46,9 +45,6 @@ def check_fasta_gff(fasta, gff):
                                merge_strategy='merge',
                                sort_attribute_values=True)
     for cds_coord in gffdb.features_of_type('CDS'):
-        # for all CDS entries in gff,
-        # print(cds_coord.seqid)
-        # extract CDS
         try:
             cds_seq = cds_coord.sequence(fasta)
         except Exception as e:
@@ -126,10 +122,6 @@ def get_cds(cds_coord, fasta):
     :rtype: str or unicode
     """
     cds_len = cds_coord.end - cds_coord.start + 1
-    print("{} {} .. {} Length ({})".format(cds_coord.seqid,
-                                           cds_coord.start,
-                                           cds_coord.end,
-                                           cds_len))
     # TODO what exceptions can this throw? Want to catch in caller.
     sequence = cds_coord.sequence(fasta)
     # Validate length was calculated correctly.
@@ -159,7 +151,6 @@ def get_cds_codons(cds_coord, fasta):
     :rtype: str or unicode
     """
     sequence = get_cds(cds_coord, fasta)
-    print(sequence)
     cds_codons = sequence_to_codons(sequence)
     return cds_codons
 
@@ -233,34 +224,6 @@ def seqs_cds_codons_to_df(seqs_cds_codons):
     return df
 
 
-def print_fasta_cds(cds, fasta):
-    """
-    Print coding sequences of sequences in a FASTA file.
-
-    :param cds: coding sequence information
-    :type cds dict(str or unicode -> list(tuple(int, int)))
-    :param fasta: FASTA file
-    :type fasta: str or unicode
-    """
-    with open(fasta, "rt") as f:
-        for seq in SeqIO.parse(f, "fasta"):
-            if seq.name in cds:
-                for (cds_start, cds_end) in cds[seq.name]:
-                    print("---- {} ----".format(seq.name))
-                    seq_pre_cds = seq.seq[0:cds_start-1]
-                    seq_cds = seq.seq[cds_start-1:cds_end]
-                    seq_post_cds = seq.seq[cds_end:]
-                    print(len(seq_pre_cds))
-                    print(seq_pre_cds)
-                    print(len(seq_cds))
-                    print(seq_cds)
-                    print(len(seq_post_cds))
-                    print(seq_post_cds)
-                    print(len(seq.seq))
-                    # Validate sequence was split correctly.
-                    assert seq.seq == seq_pre_cds + seq_cds + seq_post_cds
-
-
 def extract_cds_codons(fasta,
                        gff,
                        cds_codons_file,
@@ -290,16 +253,8 @@ def extract_cds_codons(fasta,
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
-    print("---- CDS (own) ----")
-    cds = extract_cds(gff)
-    print(cds)
-    print("--- FASTA CDS ---")
-    print_fasta_cds(cds, fasta)
-    print("---- CDS (Bio) ----")
     seqs_cds_codons = get_seqs_cds_codons(fasta, gff)
-    print(seqs_cds_codons)
     df = seqs_cds_codons_to_df(seqs_cds_codons)
-    print(df)
     df[list(df.columns)].to_csv(cds_codons_file,
                                 mode='w',
                                 sep=delimiter,
