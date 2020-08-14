@@ -11,7 +11,8 @@ from riboviz import fasta_gff
     ("GA", ["GA"]),
     ("GAT", ["GAT"]),
     ("GATT", ["GAT", "T"]),
-    ("GATTACCA", ["GAT", "TAC", "CA"])])
+    ("ATGAAATAA", ["ATG", "AAA", "TAA"]),
+    ("ATGGGGCCCTAG", ["ATG", "GGG", "CCC", "TAG"])])
 def test_sequence_to_codons(seq_codons):
     """
     Test :py:func:`riboviz.fasta_gff.sequence_to_codons`
