@@ -4,7 +4,7 @@ Check FASTA and GFF files for compatibility.
 
 Usage::
 
-    python -m riboviz.tools.check_fasta_gff.py [-h] -f FASTA -g GFF
+    python -m riboviz.tools.check_fasta_gff [-h] -f FASTA -g GFF
 
     -h, --help            show this help message and exit
     -f FASTA, --fasta FASTA
@@ -14,7 +14,7 @@ Usage::
 See :py:func:`riboviz.check_fasta_gff.check_fasta_gff`.
 """
 import argparse
-from riboviz import check_fasta_gff
+from riboviz import fasta_gff
 from riboviz import provenance
 
 
@@ -44,13 +44,13 @@ def parse_command_line_options():
 def invoke_check_fasta_gff():
     """
     Parse command-line options then invoke
-    :py:func:`riboviz.check_fasta_gff.check_fasta_gff`.
+    :py:func:`riboviz.fasta_gff.check_fasta_gff`.
     """
     print(provenance.write_provenance_to_str(__file__))
     options = parse_command_line_options()
     fasta = options.fasta
     gff = options.gff
-    check_fasta_gff.check_fasta_gff(fasta, gff)
+    fasta_gff.check_fasta_gff(fasta, gff)
 
 
 if __name__ == "__main__":
