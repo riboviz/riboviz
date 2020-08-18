@@ -8,6 +8,8 @@ params:
   defaultParam: "defaultValue"
   min_read_length: 10  # Minimum read length in H5 output
   max_read_length: 50  # Maximum read length in H5 output
+  extraParam: "Surprise!"
+  extraParam2: "Boo"
 ---
 
 This ParamsTest.Rmd is saved at: `"~/riboviz/rmarkdown/ParamsTest.Rmd"`.
@@ -24,11 +26,14 @@ library(here)
 ```
 
 ```{r color, results='markup'}
+
 print(params$myName)
 
 print(params$defaultParam)
 
 print(params$min_read_length)
+
+print(params$max_read_length)
 ```
 
 The outputs can be changed by editing the params called in the following terminal command, 
@@ -39,7 +44,7 @@ To run the thing from inside R, use `rmarkdown::render("rmarkdown/ParamsTest.Rmd
 
 Pressing `"Knit"` from within Rstudio doesn't do anything useful for `myName` because you're passing in an empty parameter (`myName: ""`), but for `defaultParam`, since that has a value already set in the .yaml section at the top of the .Rmd, it just shows THAT value.
 
-```{r params_prep}
+```{r params_prep, echo=FALSE}
 
 min_read_length <- params$min_read_length
 max_read_length <- params$max_read_length
@@ -51,6 +56,31 @@ I tested whether the source("script.R", local=knitr::knit_global()) or sys.sourc
 
 ```{r echo=FALSE}
 knitr::read_chunk(here("rmarkdown","ParamsTestScript.R"))
+```
+
+```{r paramslol, echo=FALSE}
+<<intialargs_params>>
+paste("ParamsTest.Rmd sees min_read_length as", as.character(min_read_length))
+paste("ParamsTest.Rmd sees min_read_length as", as.character(max_read_length))
+```
+Repeat the parameter stuff to see what it reads as now we've called in blocks from ParamsTestScript.R:
+```{r color2}
+
+print(myName)
+
+print(defaultParam)
+
+print(min_read_length)
+
+print(max_read_length)
+
+print(params$myName)
+
+print(params$defaultParam)
+
+print(params$min_read_length)
+
+print(params$max_read_length)
 ```
 
 ```{r first}
@@ -65,6 +95,14 @@ This runs everything from the block
 <<check_params>>
 head(read_range)
 ```
-This runs everything from the block too, plus can do things with the read_range obect.
+This runs everything from the block too, plus can do things with the read_range object.
 
 Pleasingly, `junk_block_I_wont_use` doesn't show up anywhere, which is good. Means I can just define chunks I don't want to use 
+
+
+Extra parameters: what do they show up as?
+```{r theend}
+params$extraParam
+params$extraParam2
+```
+
