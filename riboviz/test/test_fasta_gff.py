@@ -32,7 +32,10 @@ def test_seqs_cds_codons_to_df_empty():
     with no values produces an empty data frame.
     """
     df = fasta_gff.seqs_cds_codons_to_df({})
-    assert df.shape == (0, 0), "Unexpected number of rows and columns"
+    assert df.shape == (0, 3), "Unexpected number of rows and columns"
+    for column in [fasta_gff.GENE, fasta_gff.POS, fasta_gff.CODON]:
+        assert column in list(df.columns),\
+            "Missing column {}".format(column)
 
 
 def test_seqs_cds_codons_to_df():

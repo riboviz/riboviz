@@ -48,12 +48,17 @@ def check_fasta_gff(fasta, gff):
         try:
             cds_seq = cds_coord.sequence(fasta)
         except Exception as e:
-            print(str(e))
+            # Log and continue with other CDSs. A typical exception
+            # that can be thrown by get_cds_codons, from
+            # gffutils.Feature.sequence is KeyError. This can arise if
+            # the GFF file contains information on a sequence that is
+            # not in the FASTA file.
+            warnings.warn(str(e))
             continue
         cds_len_remainder = len(cds_seq) % 3
         if cds_len_remainder != 0:
             warnings.warn(
-                cds_coord.seqid + " has length that isn't divisible by 3")
+                cds_coord.seqid + " has length not divisible by 3")
             cds_seq += ("N" * (3 - cds_len_remainder))
 
         cds_trans = Seq(cds_seq).translate()
@@ -120,17 +125,14 @@ def get_cds(cds_coord, fasta):
     :type fasta: str or unicode
     :return: sequence
     :rtype: str or unicode
+    :raises Exception: Exceptions specific to
+    gffutils.Feature.sequence (these are undocumented in the gffutils
+    documentation)
     """
-    cds_len = cds_coord.end - cds_coord.start + 1
-    # TODO what exceptions can this throw? Want to catch in caller.
     sequence = cds_coord.sequence(fasta)
-    # Validate length was calculated correctly.
-    # TODO might this ever not hold?
-    assert cds_len == len(sequence)
-    cds_len_remainder = cds_len % 3
-    # TODO from check_fasta_gff, should this be done?
+    cds_len_remainder = len(sequence) % 3
     if cds_len_remainder != 0:
-        warnings.warn("{} has length that isn't divisible by 3".format(
+        warnings.warn("{} has length not divisible by 3".format(
             cds_coord.seqid))
         sequence += ("N" * (3 - cds_len_remainder))
     return sequence
@@ -170,6 +172,8 @@ def get_seqs_cds_codons(fasta, gff):
     :type gff: str or unicode
     :return: Codons for each coding sequence, keyed by sequence ID
     :rtype: list(dict)
+    :raises Exception: Exceptions specific to gffutils.create_db
+    (these are undocumented in the gffutils documentation)
     """
     gffdb = gffutils.create_db(gff,
                                dbfn='gff.db',
@@ -182,8 +186,12 @@ def get_seqs_cds_codons(fasta, gff):
         try:
             cds_codons = get_cds_codons(cds_coord, fasta)
         except Exception as e:
-            # TODO exit here rather than gulp and continue?
-            print(str(e))
+            # Log and continue with other CDSs. A typical exception
+            # that can be thrown by get_cds_codons, from
+            # gffutils.Feature.sequence is KeyError. This can arise if
+            # the GFF file contains information on a sequence that is
+            # not in the FASTA file.
+            warnings.warn(str(e))
             continue
         if cds_coord.seqid not in seqs_cds_codons:
             seqs_cds_codons[cds_coord.seqid] = []
@@ -217,8 +225,12 @@ def seqs_cds_codons_to_df(seqs_cds_codons):
             seqs_cds_codons_list.append({GENE: seqid,
                                          CODON: cds_codon,
                                          POS: pos + 1})
+    # Create empty DataFrame so if seqs_cds_codons and
+    # seqs_cds_codons_list are empty we still have an empty DataFrame
+    # with the column names.
     df = pd.DataFrame(columns=[GENE, CODON, POS])
-    df = pd.DataFrame(seqs_cds_codons_list)
+    df = df.append(pd.DataFrame(seqs_cds_codons_list),
+                   ignore_index=True)
     # Validate number of codons
     assert num_seqs_cds_codons == df.shape[0]
     return df
