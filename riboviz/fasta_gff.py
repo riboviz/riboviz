@@ -5,6 +5,7 @@ import warnings
 from Bio.Seq import Seq
 import gffutils
 import pandas as pd
+from riboviz import provenance
 
 
 GENE = "Gene"
@@ -267,7 +268,8 @@ def extract_cds_codons(fasta,
     """
     seqs_cds_codons = get_seqs_cds_codons(fasta, gff)
     df = seqs_cds_codons_to_df(seqs_cds_codons)
+    provenance.write_provenance_header(__file__, cds_codons_file)
     df[list(df.columns)].to_csv(cds_codons_file,
-                                mode='w',
+                                mode='a',
                                 sep=delimiter,
                                 index=False)
