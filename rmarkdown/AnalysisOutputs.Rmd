@@ -33,10 +33,10 @@ To run this, now run generate_stats_figs_markdown.R R script. From commandline, 
 Rscript --vanilla rscripts/generate_stats_figs_markdown.R --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WT3AT/WT3AT.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WT3AT --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
 ```
 
-From the **python call** to generate_stats_figs.R (for sample WT3AT from vignette):
+This was built from the **python call** to generate_stats_figs.R (for sample WT3AT from vignette):
 > Rscript --vanilla /home/flic/riboviz/rscripts/generate_stats_figs.R --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WT3AT/WT3AT.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WT3AT --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
 
-To run the thing from **inside** R (for WT3AT sample from vignette), use:
+To run the RMARKDOWN ONLY from **inside** R (for WT3AT sample from vignette), use:
 ```{r exampleRun, eval=FALSE}
 rmarkdown::render(
   "rmarkdown/AnalysisOutputs.Rmd", 
@@ -148,26 +148,6 @@ get_Rscript_filename()
 
 # print provenance
 print_provenance(path_to_this_script)
-```
-
-### READ-IN
-
-```{r read_ins, include=FALSE}
-
-# read in positions of all exons/genes in GFF format and subset CDS locations
-gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
-
-# read in coding sequences
-coding_seqs <- Biostrings::readDNAStringSet(orf_fasta_file)
-
-# range of read lengths between parameters set in config file
-read_range <- min_read_length:max_read_length
-
-# read in positions of all exons/genes in GFF format and convert to tibble data frame
-gff_df <- readGFFAsDf(orf_gff_file)
-
-# set ggplot2 theme for plots drawn after this; use dark on light theme
-ggplot2::theme_set(theme_bw())
 ```
 
 ### CHECK PARAMETERS
@@ -304,12 +284,8 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file) & (rpf)) {
 }
 ```
 
-To run in terminal: 
 
-`Rscript -e "rmarkdown::render(\"rmarkdown/AnalysisOutputs.Rmd\", params=list(output_dir=\"vignette/output/WT3AT\", orf_fasta_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.fa\", orf_gff_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.gff3\", num_processes=1, min_read_length=10, max_read_length=50, buffer=250, primary_id=\"Name\", dataset=\"vignette\", rpf=TRUE, features_file=\"data/yeast_features.tsv\", do_pos_sp_nt_freq=TRUE, t_rna_file=\"data/yeast_tRNAs.tsv\", codon_positions_file=\"data/yeast_codon_pos_i200.RData\", count_threshold=64, length_threshold=500, output_prefix=\"\", hd_file=\"vignette/output/WT3AT/WT3AT.h5\", nnt_buffer=25, nnt_gene=50, asite_disp_length_file=\"data/yeast_standard_asite_disp_length.txt\"))"`
-
-
-```{r close_connections_2}
+```{r close_connections_2, echo=FALSE}
 # prepare files, opens hdf5 file connection
 #hdf5file <- rhdf5::H5Fopen(hd_file) # filehandle for the h5 file
 rhdf5::h5closeAll()
