@@ -2,7 +2,7 @@
 ---
 title: "AnalysisOutputs"
 author: "FlicAnderson"
-date: "03/08/2020"
+date: "19/08/2020"
 output: html_document
 params:
   output_dir: "./"  # Output directory
@@ -28,13 +28,10 @@ params:
   asite_disp_length_file: NA  # asite displacement file table with one displacement per read length
 ---
 
-The outputs can be changed by editing the params called in the following terminal command, 
-... which should match the params listed in the .yaml section at the top of the .Rmd
-
-`Rscript -e "rmarkdown::render(\"rmarkdown/AnalysisOutputs.Rmd\", params=list(output_dir=\"vignette/output/WT3AT\", orf_fasta_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.fa\", orf_gff_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.gff3\", num_processes=1, min_read_length=10, max_read_length=50, buffer=250, primary_id=\"Name\", dataset=\"vignette\", rpf=TRUE, features_file=\"data/yeast_features.tsv\", do_pos_sp_nt_freq=TRUE, t_rna_file=\"data/yeast_tRNAs.tsv\", codon_positions_file=\"data/yeast_codon_pos_i200.RData\", count_threshold=64, length_threshold=500, output_prefix=\"\", hd_file=\"vignette/output/WT3AT/WT3AT.h5\", nnt_buffer=25, nnt_gene=50, asite_disp_length_file=\"data/yeast_standard_asite_disp_length.txt\"))"`
-
-NOTE: These params at the top of the .Rmd (in the YAML section) are NOT the same as those PASSED INTO generate_stats_figs.R (yet).  Those ones use a mix of underscores and hyphens, and that is then resolved in `generate_stats_figs.R` by the line `opt <- optparse::parse_args(OptionParser(option_list = option_list), convert_hyphens_to_underscores=TRUE)`.  I haven't quite figured out HOW to resolve the optparse / parse_args() stuff WITH rmarkdown parameters.  I seem to have some environment issues wrong somewhere, or it's possibly just a pain to do?  
-BE AWARE THAT THESE INPUTS DO NOT MATCH THOSE FED IN BY RIBOVIZ YET!
+To run this, now run generate_stats_figs_markdown.R R script. From commandline, this is: 
+```
+Rscript --vanilla rscripts/generate_stats_figs_markdown.R --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WT3AT/WT3AT.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WT3AT --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
+```
 
 From the **python call** to generate_stats_figs.R (for sample WT3AT from vignette):
 > Rscript --vanilla /home/flic/riboviz/rscripts/generate_stats_figs.R --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WT3AT/WT3AT.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WT3AT --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
@@ -123,7 +120,6 @@ NOTE: added knitr to the library() calls! Need to update documentation/installat
 source(here::here("rscripts", "provenance.R"), local = knitr::knit_global())
 source(here::here("rscripts", "read_count_functions.R"), local = knitr::knit_global())
 source(here::here("rscripts", "stats_figs_block_functions.R"), local = knitr::knit_global())
-#source(here::here("rscripts", "generate_stats_figs_markdown.R"), local = knitr::knit_global())
 # or sys.source("your-script.R", envir = knitr::knit_global())
 ```
 
@@ -136,16 +132,6 @@ rhdf5::h5closeAll()
 
 ```{r provenance}
 # handle interactive vs standard running
-# if(interactive()){
-#   this_script <- "AnalysisOutputs.Rmd"
-#   path_to_this_script <- here("rmarkdown", this_script)
-#   print("interactive")
-# } else {
-#   this_script <- getopt::get_Rscript_filename()
-#   path_to_this_script <- this_script
-#   print("not interactive")
-# }
-
 
 if(is.na(getopt::get_Rscript_filename())){
   this_script <- "AnalysisOutputs.Rmd"
@@ -192,10 +178,31 @@ ggplot2::theme_set(theme_bw())
 str(params)
 
 attach(params)
+
+paste("This is initial parameters")
 ```
 
 ```{r echo=FALSE, cache=FALSE}
 knitr::read_chunk(here("rscripts","generate_stats_figs_markdown.R"))
+```
+
+### OPTIONS LIST STUFF: 
+
+```{r optionstlistthings}
+<<options_params>>
+
+```
+
+### CHECK PARAMS AFTER READ_CHUNK CALL
+
+```{r check_params2, echo=FALSE, warning=FALSE}
+
+<<check_params>>
+
+paste("This is post read_chunk() parameters")
+
+opt
+
 ```
 
 ### 3NT PERIODICITY
@@ -299,7 +306,7 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file) & (rpf)) {
 
 To run in terminal: 
 
-`Rscript -e "rmarkdown::render(\"rmarkdown/AnalysisOutputs.Rmd\", params=list(output_dir=\"vignette/output/WT3AT\", orf_fasta_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.fa\", orf_gff_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.gff3\", num_processes=1, min_read_length=10, max_read_length=50, buffer=250, primary_id=\"Name\", dataset=\"vignette\", rpf=TRUE, features_file=NA, do_pos_sp_nt_freq=TRUE, t_rna_file=NA, codon_positions_file=NA, count_threshold=64, length_threshold=500, output_prefix=\"\", hd_file=\"vignette/output/WT3AT/WT3AT.h5\", nnt_buffer=25, nnt_gene=50, asite_disp_length_file=\"data/yeast_standard_asite_disp_length.txt\"))"`
+`Rscript -e "rmarkdown::render(\"rmarkdown/AnalysisOutputs.Rmd\", params=list(output_dir=\"vignette/output/WT3AT\", orf_fasta_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.fa\", orf_gff_file=\"vignette/input/yeast_YAL_CDS_w_250utrs.gff3\", num_processes=1, min_read_length=10, max_read_length=50, buffer=250, primary_id=\"Name\", dataset=\"vignette\", rpf=TRUE, features_file=\"data/yeast_features.tsv\", do_pos_sp_nt_freq=TRUE, t_rna_file=\"data/yeast_tRNAs.tsv\", codon_positions_file=\"data/yeast_codon_pos_i200.RData\", count_threshold=64, length_threshold=500, output_prefix=\"\", hd_file=\"vignette/output/WT3AT/WT3AT.h5\", nnt_buffer=25, nnt_gene=50, asite_disp_length_file=\"data/yeast_standard_asite_disp_length.txt\"))"`
 
 
 ```{r close_connections_2}

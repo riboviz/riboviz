@@ -32,6 +32,8 @@ if (interactive()) {
 # print provenance
 print_provenance(path_to_this_script)
 
+## @knitr options_params
+
 # define input options for optparse package
 option_list <- list(
   make_option("--output-dir",
@@ -537,4 +539,61 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
 #
 #
 
-print("Completed generate_stats_figs.R")
+print("Completed generate_stats_figs_markdown.R")
+
+#
+#
+# MAKE MARKDOWN REPORT
+#
+#
+
+
+## @knitr markdownblock
+
+#R --vanilla --args --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WTnone/WTnone.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WTnone --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
+
+
+
+# # THESE PARAMETERS SHOULD MATCH RSCRIPT COMMAND ONES IN NEXTFLOW
+rmarkdown::render(
+  "rmarkdown/AnalysisOutputs.Rmd",
+  params=list(
+    output_dir="vignette/output/WT3AT",
+    orf_fasta_file="vignette/input/yeast_YAL_CDS_w_250utrs.fa",
+    orf_gff_file="vignette/input/yeast_YAL_CDS_w_250utrs.gff3",
+    num_processes=1,
+    min_read_length=10,
+    max_read_length=50,
+    buffer=250,
+    primary_id="Name",
+    dataset="vignette",
+    rpf=TRUE,
+    features_file="data/yeast_features.tsv",
+    do_pos_sp_nt_freq=TRUE,
+    t_rna_file="data/yeast_tRNAs.tsv",
+    codon_positions_file="data/yeast_codon_pos_i200.RData",
+    count_threshold=64,
+    length_threshold=500,
+    output_prefix="",
+    hd_file="vignette/output/WT3AT/WT3AT.h5",
+    nnt_buffer=25,
+    nnt_gene=50,
+    asite_disp_length_file="data/yeast_standard_asite_disp_length.txt"
+  )
+)
+
+# rmarkdown::render(
+#   "rmarkdown/ParamsTest.Rmd", 
+#   params=list(myName="Flic", 
+#               defaultParam="NotDefault", 
+#               min_read_length=5, 
+#               max_read_length=25, 
+#               extraParam="What"
+#   )
+# )
+# # parameter1: myName (defaults in render() call DO NOT OVERWRITE commandline arguments)
+# # parameter2: defaultParam (defaults in render() call DO NOT OVERWRITE commandline arguments)
+# # parameter3: min_read_length (defaults in render() call DO NOT OVERWRITE commandline arguments)
+# # parameter4: max_read_length (defaults in render() call DO NOT OVERWRITE commandline arguments)
+# # parameter5: extraParam NEW parameter created by render() default; not fed in from commandline argument
+# # parameter6: NOT FED IN VIA COMMANDLINE CALL OR RENDER ARGUMENT; will be created from .Rmd default parameters
