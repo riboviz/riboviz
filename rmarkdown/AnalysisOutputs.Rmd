@@ -32,12 +32,14 @@ To run this, now run generate_stats_figs_markdown.R R script. From commandline, 
 ```
 Rscript --vanilla rscripts/generate_stats_figs_markdown.R --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WT3AT/WT3AT.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WT3AT --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
 ```
+```{r asanaside, eval=FALSE, echo=FALSE}
+# This was built from the **python call** to generate_stats_figs.R (for sample WT3AT from vignette):
+# > Rscript --vanilla /home/flic/riboviz/rscripts/generate_stats_figs.R --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WT3AT/WT3AT.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WT3AT --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
+```
 
-This was built from the **python call** to generate_stats_figs.R (for sample WT3AT from vignette):
-> Rscript --vanilla /home/flic/riboviz/rscripts/generate_stats_figs.R --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WT3AT/WT3AT.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WT3AT --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
+```{r exampleRun, eval=FALSE, echo=FALSE}
 
-To run the RMARKDOWN ONLY from **inside** R (for WT3AT sample from vignette), use:
-```{r exampleRun, eval=FALSE}
+# To run this RMARKDOWN FILE ONLY from **inside** R (for WT3AT sample from vignette), use:
 rmarkdown::render(
   "rmarkdown/AnalysisOutputs.Rmd", 
   params=list(
@@ -66,9 +68,9 @@ rmarkdown::render(
 )
 ```
 
-NOTE: File path variables need to be wrapped in here() at some point to give full path, or it doesn't work (e.g. orf_fasta_file, orf_gff_file, hd_file).  This is done for SOME variables so far (as of ThreeNucleotidePeriodicity blocks) in `check_params` chunk, where they're reassigned as `exampleparam <- here(params$exampleparam)`.
-
 ### SETUP
+
+NOTE: installed & added knitr & rmarkdown to the library() calls! Need to update documentation/installation etc too. 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -113,8 +115,6 @@ asite_disp_length_file <- here::here(params$asite_disp_length_file)
 
 ```
 
-NOTE: added knitr to the library() calls! Need to update documentation/installation etc too. 
-
 ```{r source_script, include=FALSE}
 
 source(here::here("rscripts", "provenance.R"), local = knitr::knit_global())
@@ -130,7 +130,7 @@ rhdf5::h5closeAll()
 
 ### PROVENANCE
 
-```{r provenance}
+```{r provenance, echo=FALSE, warning=FALSE}
 # handle interactive vs standard running
 
 if(is.na(getopt::get_Rscript_filename())){
@@ -141,25 +141,8 @@ if(is.na(getopt::get_Rscript_filename())){
   path_to_this_script <- this_script
 }
 
-# print
-path_to_this_script
-this_script
-get_Rscript_filename()
-
 # print provenance
 print_provenance(path_to_this_script)
-```
-
-### CHECK PARAMETERS
-
-```{r check_params, warning=FALSE}
-
-# parameters with filepaths need here() to avoid path confusion
-str(params)
-
-attach(params)
-
-paste("This is initial parameters")
 ```
 
 ```{r echo=FALSE, cache=FALSE}
@@ -168,18 +151,17 @@ knitr::read_chunk(here("rscripts","generate_stats_figs_markdown.R"))
 
 ### OPTIONS LIST STUFF: 
 
-```{r optionstlistthings}
+```{r optionstlistthings, echo=FALSE, warning=FALSE, message=FALSE}
 <<options_params>>
-
 ```
 
-### CHECK PARAMS AFTER READ_CHUNK CALL
+#### CHECK PARAMS AFTER READ_CHUNK CALL
 
 ```{r check_params2, echo=FALSE, warning=FALSE}
 
 <<check_params>>
 
-paste("This is post read_chunk() parameters")
+paste("These are post knitr::read_chunk() parameters")
 
 opt
 
@@ -187,7 +169,7 @@ opt
 
 ### 3NT PERIODICITY
 
-```{r 3NTplot, echo=FALSE, warning=FALSE}
+```{r 3NTplot, echo=FALSE, warning=FALSE, message=FALSE}
 
 <<ThreeNucleotidePeriodicityPlotChunk>>
 
@@ -227,7 +209,7 @@ read_len_plot
 
 ## CALCULATE READ FRAME FOR EVERY ORF
 
-```{r CalculateReadFramePerAnnotatedOrf, echo=FALSE, warning=FALSE}
+```{r CalculateReadFramePerAnnotatedOrf, echo=FALSE, warning=FALSE, message=FALSE}
 
 <<CalculateReadFramePerOrfPlotChunk>>
 
@@ -267,7 +249,7 @@ print("No plot for this")
 
 ### TPMS CORRELATIONS WITH FEATURES
 
-```{r TPMsAndFeaturesCorrelation, echo=FALSE, warning=FALSE}
+```{r TPMsAndFeaturesCorrelation, echo=FALSE, warning=FALSE, message=FALSE}
 <<TPMsWithFeaturesPlotChunk>>
   
 if (!is.na(features_file)) { 
@@ -275,7 +257,7 @@ if (!is.na(features_file)) {
 }
 ```
 
-```{r CodonSpecificRibosomeDensityWithTRNAs, echo=FALSE, warning=FALSE}
+```{r CodonSpecificRibosomeDensityWithTRNAs, echo=FALSE, warning=FALSE, message=FALSE}
 
 <<CodonSpecificRibosomeDensityTRNAsPlotChunk>>
   
@@ -285,11 +267,11 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file) & (rpf)) {
 ```
 
 
-```{r close_connections_2, echo=FALSE}
-# prepare files, opens hdf5 file connection
-#hdf5file <- rhdf5::H5Fopen(hd_file) # filehandle for the h5 file
-rhdf5::h5closeAll()
-detach(params)
-rm(list=ls())
-```
-NOTE: This last block isn't ideal, should be removed at the end perhaps. Using attach()/detach() isn't top, but currently saves me having to add "params$" before every call of the parameters in all the scripts... :s
+
+TO DO: 
+
+* Alter .html output name according to samplename somehow
+* Add titles, captions to plots
+* find which parameter silences things like "## `geom_smooth()` using formula 'y ~ x'" and "## Parsed with column specification:" etc
+* facet plots nicely?
+* run with full-size datasets (Saccharomyces cerevisiae AND non-S. cerevisiae)
