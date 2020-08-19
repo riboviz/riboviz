@@ -131,6 +131,8 @@ opt <- optparse::parse_args(OptionParser(option_list = option_list),
 # ie `height` rather than `women$height`
 attach(opt)
 
+## @knitr dont_want_to_print_opt
+
 print("generate_stats_figs.R running with parameters:")
 opt
 
