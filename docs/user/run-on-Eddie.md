@@ -34,6 +34,8 @@ Connect to the cluster using ssh from a terminal window (Linux and Mac OS) or us
 
 `$ ssh -X <YOUR UUN>@eddie.ecdf.ed.ac.uk`
 
+In the rest of this document, we shall abbreviate your universal username as `$USER`.
+
 **Note** that access to the cluster is only available from the University network. External users should first connect to the University network using the VPN Service.
 
 ---
@@ -284,7 +286,7 @@ Active jobs (i.e. pending or running) can be monitored with the `qstat` command
 $ qstat
 job-ID     prior   name       user         state submit/start at     queue                          jclass                                                     slots ja-task-ID
 ----------------------------------------------------------------------------------------------------------------------                            --------------------------
-   2701173 0.00000 riboviz_vi s1919303     qw    06/11/2020 13:22:28                                                                                               1
+   2701173 0.00000 riboviz_vi $USER     qw    06/11/2020 13:22:28                                                                                               1
 ```
 
 ### Cancelling Jobs
@@ -309,7 +311,7 @@ $ qacct -j 2701137
 qname        eddie
 hostname     node1c17.ecdf.ed.ac.uk
 group        eddie_users
-owner        s1919303
+owner        $USER
 project      uoe_baseline
 department   defaultdepartment
 jobname      riboviz_vignette
@@ -318,9 +320,9 @@ taskid       undefined
 pe_taskid    NONE
 account      sge
 priority     0
-cwd          /home/s1919303/riboviz
+cwd          /home/$USER/riboviz
 submit_host  login02.ecdf.ed.ac.uk
-submit_cmd   qsub /exports/eddie3_homes_local/s1919303/job_riboviz.sh
+submit_cmd   qsub /exports/eddie3_homes_local/$USER/job_riboviz.sh
 qsub_time    06/11/2020 13:22:28.652
 start_time   06/11/2020 13:22:37.680
 end_time     06/11/2020 13:27:51.952
@@ -375,7 +377,7 @@ For example, if I want to run the `Wallace_2020_JEC21` dataset on Eddie:
 
 ### Create directories for input paths
 
-Create a directory named `Wallace_2020_JEC21` in `/exports/eddie/scratch/s1919303/riboviz/riboviz`
+Create a directory named `Wallace_2020_JEC21` in `/exports/eddie/scratch/$USER/riboviz/riboviz`
 
 `$ mkdir Wallace_2020_JEC21`
 
@@ -392,42 +394,56 @@ Create a directory named `annotation` in `Wallace_2020_JEC21` and copy the annot
 ```
 $ mkdir contaminants
 $ mkdir annotation 
-$ cp /exports/eddie/scratch/s1919303/riboviz/example-datasets/fungi/cryptococcus/contaminants/JEC21_rrna.fasta contaminants
-$ cp /exports/eddie/scratch/s1919303/riboviz/example-datasets/fungi/cryptococcus/annotation/JEC21_10p_up12dwn9_CDS_with_120bputrs.fa annotation
+$ cp /exports/eddie/scratch/$USER/riboviz/example-datasets/fungi/cryptococcus/contaminants/JEC21_rrna.fasta contaminants
+$ cp /exports/eddie/scratch/$USER/riboviz/example-datasets/fungi/cryptococcus/annotation/JEC21_10p_up12dwn9_CDS_with_120bputrs.fa annotation
 ```
 
 Copy the YAML configuration file to `Wallace_2020_JEC21`
 
 ```
-$ cp /exports/eddie/scratch/s1919303/riboviz/example-datasets/fungi/cryptococcus/Wallace_2020_JEC21_NEEDSCOMPLETEOVERHAUL_config.yaml .`
+$ cp /exports/eddie/scratch/$USER/riboviz/example-datasets/fungi/cryptococcus/Wallace_2020_JEC21_NEEDSCOMPLETEOVERHAUL_config.yaml .`
 ```
 
-### Download SRR files
+### Download fastq data files from the Short Read Archive (SRA)
 
-Actually Eddie has SRA Toolkit. Type this command line `$ module load igmm/apps/sratoolkit/2.8.2-1` then you can use fastq-dump. 
+Eddie has the SRA Toolkit, including utility `fasterq-dump` for downloading data files that has been included in sra toolkit since version 2.9.1. We recommend using `fasterq-dump`. An earlier tool, `fastq-dump`, is also included, but that is too slow to download on datasets about about 10GB.
 
-But I found it is too slow for `fastq-dump` to download a dataset like Wallace_2020_JEC21 which is around 50G before compressed. Even we can use the --gzip option to directly download the .gz file. It is still too slow.
-
-After many tests I think the fastest way to download datasets is to use `fasterq-dump` and Aspera client
-
-Follow this documentation and install the latest version of SRA Toolkit: https://github.com/ncbi/sra-tools/wiki/02.-Installing-SRA-Toolkit
-
-Get the Wallace_2020_JEC21 dataset (remember change to the `Wallace_2020_JEC21/input` directory):
+Before your first ever use of SRA toolkit, configure download and cache settings, by running:
 
 ```
+$ module load igmm/apps/sratoolkit/2.10.8
+$ vdb-config --interactive
+```
+then follow the interactive prompts.
+
+The key choice here is where to put your cache directory, which could get very large (100s of GB). We recommend using your scratch space `/exports/eddie/scratch/$USER/ncbi`, where `$USER` is replaced by your username. You may have to repeat the `vdb-config` step periodically, as data on Eddie scratch space is automatically cleared after one month.
+For more information about the configuration utility, see [SRA toolkit installation and configuration Guide](https://ncbi.github.io/sra-tools/install_config.html).
+
+Get the Wallace_2020_JEC21 dataset (remember to change to the `Wallace_2020_JEC21/input` directory first):
+
+```
+$ module load igmm/apps/sratoolkit/2.10.8
+$ module load igmm/apps/pigz
 #prefetch with Aspera client
 $ prefetch SRR9620588 SRR9620586
 $ fasterq-dump SRR9620588
 $ fasterq-dump SRR9620586
 ```
 
-`fasterq-dump` did not have the --gzip option, you have to compress the datasets after you download them:
+These download utilities do not have an option to compress (gzip) the files, nor apparently allow you to pipe their output into another program. So we use the `pigz` utility to compress. In fact we pipe the output of `fasterq-dump` into `pigz` to avoid writing uncompressed fastq data to disk.
 
-`$ pigz *.fastq`
+```
+$ module load igmm/apps/pigz
+$ pigz *.fastq
+```
+
+It may be helpful to test this functionality with a smaller download file, e.g. [SRR014376](https://trace.ncbi.nlm.nih.gov/Traces/sra/?run=SRR014376) from Ingolia 2009.
+
+Alternatively, it is possible to download `.fastq.gz` format files of SRA data from the European Nucleotide Archive, but we have not tested the speed. For example, from Ingolia 2009 [ftp link to SRR014376.fastq.gz](ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR014/SRR014376/SRR014376.fastq.gz).
 
 ### Create `qsub` script
 
-Create the script in `/exports/eddie/scratch/s1919303/riboviz/riboviz/`
+Create the script in `/exports/eddie/scratch/$USER/riboviz/riboviz/`
 
 ```
 #!/bin/sh
@@ -458,7 +474,7 @@ source activate riboviz
 python -m riboviz.tools.prep_riboviz -c Wallace_2020_JEC21/Wallace_2020_JEC21_NEEDSCOMPLETEOVERHAUL_config.yaml
 ```
 
-Check that you are in `/exports/eddie/scratch/s1919303/riboviz/riboviz/`
+Check that you are in `/exports/eddie/scratch/$USER/riboviz/riboviz/`
 
 Then run:
 
