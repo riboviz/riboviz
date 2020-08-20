@@ -423,14 +423,13 @@ Get the Wallace_2020_JEC21 dataset (remember to change to the `Wallace_2020_JEC2
 
 ```
 $ module load igmm/apps/sratoolkit/2.10.8
-$ module load igmm/apps/pigz
 #prefetch with Aspera client
 $ prefetch SRR9620588 SRR9620586
 $ fasterq-dump SRR9620588
 $ fasterq-dump SRR9620586
 ```
 
-These download utilities do not have an option to compress (gzip) the files, nor apparently allow you to pipe their output into another program. So we use the `pigz` utility to compress. In fact we pipe the output of `fasterq-dump` into `pigz` to avoid writing uncompressed fastq data to disk.
+These download utilities do not have an option to compress (gzip) the files, nor apparently allow you to pipe their output into another program. So we use the `pigz` utility to compress.
 
 ```
 $ module load igmm/apps/pigz
@@ -439,7 +438,7 @@ $ pigz *.fastq
 
 It may be helpful to test this functionality with a smaller download file, e.g. [SRR014376](https://trace.ncbi.nlm.nih.gov/Traces/sra/?run=SRR014376) from Ingolia 2009.
 
-Alternatively, it is possible to download `.fastq.gz` format files of SRA data from the European Nucleotide Archive, but we have not tested the speed. For example, from Ingolia 2009 [ftp link to SRR014376.fastq.gz](ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR014/SRR014376/SRR014376.fastq.gz).
+Alternatively, it is possible to download `.fastq.gz` format files of SRA data from the European Nucleotide Archive, but we have not tested the speed. For example, from Ingolia 2009 again, [ftp link to SRR014376.fastq.gz](ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR014/SRR014376/SRR014376.fastq.gz).
 
 ### Create `qsub` script
 
