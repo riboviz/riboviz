@@ -22,12 +22,14 @@ TEST_CDS_CODONS = {
     "YAL001C_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"],
     "YAL002C_CDS": ["ATG", "GTA", "TCA", "GGA", "TAG"],
     "YAL004CSingleCodonCDS_CDS": ["ATG", "AGA", "TGA"],
-    "YAL005CMultiCDS_CDS": ["ATG", "AGA", "TGA", "ATG", "GAT", "TAC",
-                            "TAG"],
+    "YAL005CMultiCDS_CDS_1": ["ATG", "AGA", "TGA"],
+    "YAL005CMultiCDS_CDS_2": ["ATG", "GAT", "TAC", "TAG"],
+    "YAL005CMultiCDS_CDS_3": ["ATG", "CCA", "ATT", "TGA"],
     "YAL006CEmptyCDS_CDS": ["ATG", "TGA"],
     "YAL008CNoNameAttr_mRNA_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"],
-    "YAL009CMultiCDS_CDS_1": ["ATG", "AGA", "TGA"],
-    "YAL009CMultiCDS_CDS_2": ["ATG", "GAT", "TAC", "TAG"]
+    "YAL009CMultiDuplicateCDS_CDS": ["ATG", "AGA", "TGA"],
+    "YAL009CMultiDuplicateCDS_CDS.1": ["ATG", "GAT", "TAC", "TAG"],
+    "YAL009CMultiDuplicateCDS_CDS.2": ["ATG", "CCA", "ATT", "TGA"]
 }
 """
 Expected codons for CDS in FASTA file (:py:const:`TEST_FASTA_FILE`)
@@ -111,7 +113,9 @@ def test_sequence_to_codons(seq_codons):
 @pytest.mark.parametrize("features", [
     ("SeqID_mRNA", {}, "SeqID_mRNA_CDS"),
     ("SeqID_mRNA", {"Name": []}, "SeqID_mRNA_CDS"),
-    ("SeqID_mRNA", {"Name": ["SeqID_CDS"]}, "SeqID_CDS")])
+    ("SeqID_mRNA", {"Name": ["SeqID_CDS"]}, "SeqID_CDS"),
+    ("SeqID_mRNA", {"ID": []}, "SeqID_mRNA_CDS"),
+    ("SeqID_mRNA", {"ID": ["SeqID_CDS"]}, "SeqID_CDS")])
 def test_get_feature_name(features):
     """
     Test :py:func:`riboviz.fasta_gff.get_feature_name`.
@@ -207,14 +211,15 @@ def check_feature_codons_df(feature_codons, df):
                               for codons in feature_codons.values()])
     assert num_rows == total_codon_length, \
         "Unexpected number of rows"
-    for seqid, codons in feature_codons.items():
-        seq_df = df.loc[df[fasta_gff.GENE] == seqid]
-        assert not seq_df.empty, "Missing row for {}".format(seqid)
-        num_rows, _ = seq_df.shape
+    for feature_name, codons in feature_codons.items():
+        feature_df = df.loc[df[fasta_gff.GENE] == feature_name]
+        assert not feature_df.empty, "Missing row for {}".format(
+            feature_name)
+        num_rows, _ = feature_df.shape
         assert num_rows == len(codons), \
-            "Unexpected number of rows for {}".format(seqid)
-        for pos, codon in zip(seq_df[fasta_gff.POS],
-                              seq_df[fasta_gff.CODON]):
+            "Unexpected number of rows for {}".format(feature_name)
+        for pos, codon in zip(feature_df[fasta_gff.POS],
+                              feature_df[fasta_gff.CODON]):
             # POS is 1-indexed.
             assert codons[pos - 1] == codon
 

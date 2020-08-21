@@ -91,9 +91,10 @@ def get_feature_name(feature, feature_format):
     """
     Get the name of a GFF feature.
 
-    If there is no feature name (no ``Name``) attribute defined in the
-    feature thh the ``feature_format`` is used to format the sequence
-    ID into a feature name.
+    If there is no feature name (no ``Name`` or ``ID``) attribute
+    defined in the feature the the ``feature_format`` is used to
+    format the sequence ID into a feature name. If both ``Name`` and
+    ``ID`` are defined then ``Name`` is used.
 
     :param feature: GFF feature
     :type feature: gffutils.feature.Feature
@@ -104,10 +105,12 @@ def get_feature_name(feature, feature_format):
     """
     if "Name" in feature.attributes:
         name_attr = feature.attributes["Name"]
+    elif "ID" in feature.attributes:
+        name_attr = feature.attributes["ID"]
     else:
         name_attr = []
     if name_attr != []:
-        name = name_attr[0]
+        name = name_attr[0].strip()
     else:
         name = feature_format.format(feature.seqid)
     return name
@@ -151,11 +154,17 @@ def get_cds_codons_from_fasta(fasta,
     CDSs whose sequences don't have a length divisible by 3 are
     ignored.
 
-    If there is no feature name (no ``Name``) attribute defined in the
-    GFF file then the ``feature_format`` is used to format
-    the sequence ID.
+    If there is no feature name (no ``Name`` or ``ID``) attribute
+    defined in the feature the the ``feature_format`` is used to
+    format the sequence ID into a feature name. If both ``Name`` and
+    ``ID`` are defined then ``Name`` is used.
 
-    See :py:func:`get_cds_from_fasta` and
+    If two or more CDSs for the same sequence have the same feature
+    name then the first CDS for that sequence has a feature name, as
+    defined above. Subsequent CDSs for that sequence have the feature
+    name with with the suffix ``.1``, ``.2`` etc. appended.
+
+    See also :py:func:`get_cds_from_fasta` and
     :py:func:`sequence_to_codons`.
 
     :param fasta: FASTA file
@@ -176,6 +185,7 @@ def get_cds_codons_from_fasta(fasta,
                                merge_strategy='merge',
                                sort_attribute_values=True)
     cds_codons = {}
+    same_feature_name_count = 0
     for feature in gffdb.features_of_type('CDS'):
         try:
             sequence = get_cds_from_fasta(feature, fasta)
@@ -186,8 +196,12 @@ def get_cds_codons_from_fasta(fasta,
             continue
         feature_name = get_feature_name(feature, feature_format)
         if feature_name not in cds_codons:
-            cds_codons[feature_name] = []
-        cds_codons[feature_name].extend(codons)
+            same_feature_name_count = 0
+        else:
+            same_feature_name_count += 1
+            feature_name = "{}.{}".format(feature_name,
+                                          same_feature_name_count)
+        cds_codons[feature_name] = codons
     return cds_codons
 
 
@@ -239,16 +253,13 @@ def extract_cds_codons(fasta,
     A tab-separated values file of the codons for each CDS, keyed by
     CDS feature name, is saved.
 
-    CDS whose sequences don't have a length divisible by 3 are
-    ignored.
-
     The tab-separated values file has columns:
 
     * :py:const:`GENE`: feature name.
     * :py:const:`CODON`: codon.
     * :py:const:`POS`: codon position in coding sequence (1-indexed).
 
-    See :py:func:`get_all_cds_codons_from_fasta` and
+    See also :py:func:`get_all_cds_codons_from_fasta` and
     :py:func:`feature_codons_to_df`.
 
     :param fasta: FASTA file
