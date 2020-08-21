@@ -39,7 +39,7 @@ as defined in GFF file (:py:const:`TEST_GFF_FILE`).
 
 class MockFeature:
     """
-    Mock of gffutils.feature.Feature class supporting ``seqid`, ``seq`
+    Mock of gffutils.feature.Feature class supporting ``seqid``, ``seq``
     and ``attributes`` attributes.
     """
 
@@ -121,8 +121,7 @@ def test_get_feature_name(features):
     Test :py:func:`riboviz.fasta_gff.get_feature_name`.
 
     :param features: sequence ID, attributes, expected feature name
-    :type features: tuple(str or unicode, str or unicode, str or
-    unicode)
+    :type features: tuple(str or unicode, str or unicode, str or unicode)
     """
     seq_id, attributes, feature_name = features
     assert fasta_gff.get_feature_name(
@@ -190,13 +189,30 @@ def test_get_cds_codons_from_fasta():
     assert cds_codons == TEST_CDS_CODONS
 
 
+def test_get_cds_codons_from_fasta_exclude_stop_codon():
+    """
+    Test :py:func:`riboviz.fasta_gff.get_cds_codons_from_fasta`
+    with FASTA file (:py:const:`TEST_FASTA_FILE`) and GFF file
+    (:py:const:`TEST_GFF_FILE`) where stop codons are to be
+    excluded from the codons returned.
+    """
+    cds_codons = fasta_gff.get_cds_codons_from_fasta(
+        TEST_FASTA_FILE,
+        TEST_GFF_FILE,
+        True)
+    cds_codons_minus_stops = {
+        name: codons[:-1] for name, codons in TEST_CDS_CODONS.items()
+    }
+    assert cds_codons == cds_codons_minus_stops
+
+
 def check_feature_codons_df(feature_codons, df):
     """
     Check contents of given dictionary with codons for features
     those of given DataFrame output by
     :py:func:`riboviz.fasta_gff.feature_codons_to_df`.
 
-    :param feature_codons: Dictionary keyed by feature name and with
+    :param feature_codons: Dictionary keyed by feature name and with \
     values that are lists of codons
     :type feature_codons: dict
     :param df: Pandas DataFrame
@@ -247,9 +263,9 @@ def test_feature_codons_to_df():
     check_feature_codons_df(feature_codons, df)
 
 
-def test_extract_cds_codons_empty_fasta(tmp_file):
+def test_get_cds_codons_file_empty_fasta(tmp_file):
     """
-    Test :py:func:`riboviz.fasta_gff.extract_cds_codons` with an empty
+    Test :py:func:`riboviz.fasta_gff.get_cds_codons_file` with an empty
     FASTA file and GFF file (:py:const:`TEST_GFF_FILE`). A
     header-only TSV file is expected as output.
 
@@ -258,22 +274,44 @@ def test_extract_cds_codons_empty_fasta(tmp_file):
     """
     # Use tmp_file as both empty FASTA input file and TSV output
     # file
-    fasta_gff.extract_cds_codons(tmp_file, TEST_GFF_FILE, tmp_file)
+    fasta_gff.get_cds_codons_file(tmp_file, TEST_GFF_FILE, tmp_file)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     check_feature_codons_df({}, df)
 
 
-def test_extract_cds_codons(tmp_file):
+def test_get_cds_codons_file(tmp_file):
     """
-    Test :py:func:`riboviz.fasta_gff.extract_cds_codons` with
+    Test :py:func:`riboviz.fasta_gff.get_cds_codons_file` with
     FASTA file (:py:const:`TEST_FASTA_FILE`) and GFF file
     (:py:const:`TEST_GFF_FILE`) and validate the TSV file output.
 
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
-    fasta_gff.extract_cds_codons(TEST_FASTA_FILE,
-                                 TEST_GFF_FILE,
-                                 tmp_file)
+    fasta_gff.get_cds_codons_file(TEST_FASTA_FILE,
+                                  TEST_GFF_FILE,
+                                  tmp_file)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     check_feature_codons_df(TEST_CDS_CODONS, df)
+
+
+def test_get_cds_codons_file_exclude_stop_codon(tmp_file):
+    """
+    Test :py:func:`riboviz.fasta_gff.get_cds_codons_file` with
+    FASTA file (:py:const:`TEST_FASTA_FILE`) and GFF file
+    (:py:const:`TEST_GFF_FILE`), where stop codons are to be
+    be excluded from the codons returned, and validate the TSV file
+    output.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    fasta_gff.get_cds_codons_file(TEST_FASTA_FILE,
+                                  TEST_GFF_FILE,
+                                  tmp_file,
+                                  True)
+    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
+    cds_codons_minus_stops = {
+        name: codons[:-1] for name, codons in TEST_CDS_CODONS.items()
+    }
+    check_feature_codons_df(cds_codons_minus_stops, df)

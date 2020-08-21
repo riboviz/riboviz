@@ -5,8 +5,8 @@ file.
 
 Usage::
 
-    python -m riboviz.tools.extract_cds_codons [-h] \
-        -f FASTA -g GFF -c CDS_CODONS
+    python -m riboviz.tools.get_cds_codons_file [-h] \
+        -f FASTA -g GFF -c CDS_CODONS [-e]
 
     -h, --help            show this help message and exit
     -f FASTA, --fasta FASTA
@@ -14,8 +14,10 @@ Usage::
     -g GFF, --gff GFF     gff3 file input
     -c CDS_CODONS, --cds-codons CDS_CODONS
                           Coding sequence codons file output
+    -e, --exclude-stop-codons
+                          Exclude stop codons (default false)
 
-See :py:func:`riboviz.fasta_gff.extract_cds_codons` for
+See :py:func:`riboviz.fasta_gff.get_cds_codons_file` for
 information on the tab-separated values file format.
 """
 import argparse
@@ -47,22 +49,29 @@ def parse_command_line_options():
                         dest="cds_codons",
                         required=True,
                         help="Coding sequence codons file output")
+    parser.add_argument("-e",
+                        "--exclude-stop-codons",
+                        dest="exclude_stop_codons",
+                        action='store_true',
+                        help="Exclude stop codons (default false)")
     options = parser.parse_args()
     return options
 
 
-def invoke_extract_cds_codons():
+def invoke_get_cds_codons_file():
     """
     Parse command-line options then invoke
-    :py:func:`riboviz.fasta_gff.extract_cds_codons`.
+    :py:func:`riboviz.fasta_gff.get_cds_codons_file`.
     """
     print(provenance.write_provenance_to_str(__file__))
     options = parse_command_line_options()
     fasta = options.fasta
     gff = options.gff
     cds_codons = options.cds_codons
-    fasta_gff.extract_cds_codons(fasta, gff, cds_codons)
+    exclude_stop_codons = options.exclude_stop_codons
+    fasta_gff.get_cds_codons_file(fasta, gff, cds_codons,
+                                  exclude_stop_codons)
 
 
 if __name__ == "__main__":
-    invoke_extract_cds_codons()
+    invoke_get_cds_codons_file()
