@@ -103,23 +103,23 @@ def get_feature_name(feature, feature_format):
     :rtype: str or unicode
     """
     if "Name" in feature.attributes:
-        cds_name_attr = feature.attributes["Name"]
+        name_attr = feature.attributes["Name"]
     else:
-        cds_name_attr = []
-    if cds_name_attr != []:
-        cds_name = cds_name_attr[0]
+        name_attr = []
+    if name_attr != []:
+        name = name_attr[0]
     else:
-        cds_name = feature_format.format(feature.seqid)
-    return cds_name
+        name = feature_format.format(feature.seqid)
+    return name
 
 
-def get_cds_from_fasta(cds_coord, fasta):
+def get_cds_from_fasta(feature, fasta):
     """
-    Given a GFF feature for a CDS extract the coding
-    sequence from the given FASTA file.
+    Get the sequence of a CDS from a FASTA file using a GFF feature
+    for the CDS.
 
-    :param cds_coord: GFF feature for a CDS
-    :type cds_coord: gffutils.feature.Feature
+    :param feature: GFF feature for the CDS
+    :type feature: gffutils.feature.Feature
     :param fasta: FASTA file
     :type fasta: str or unicode
     :return: sequence
@@ -131,51 +131,32 @@ def get_cds_from_fasta(cds_coord, fasta):
     KeyError. This can arise if the GFF file contains information on a
     sequence that is not in the FASTA file.
     """
-    sequence = cds_coord.sequence(fasta)
-    cds_len_remainder = len(sequence) % 3
-    assert cds_len_remainder == 0, \
-        "{} ({}) has length not divisible by 3".format(
-            cds_coord.seqid, sequence)
+    sequence = feature.sequence(fasta)
+    assert (len(sequence) % 3) == 0, \
+        "Feature {} ({}) has length not divisible by 3".format(
+            feature.seqid, sequence)
     return sequence
 
 
-def get_cds_codons_from_fasta(cds_coord, fasta):
+def get_cds_codons_from_fasta(fasta,
+                              gff,
+                              feature_format="{}_CDS"):
     """
-    Given a GFF feature for a CDS extract the coding
-    sequence from the given FASTA file and split into codons.
+    Using CDS entries within a GFF file, get the codons in each coding
+    sequence in the complementary FASTA file.
 
-    See :py:func:`get_cds_from_fasta` and
-    :py:func:`sequence_to_codons`.
+    A dictionary of the codons for each CDS, keyed by CDS feature
+    name, is returned.
 
-    :param cds_coord: GFF feature for a CDS
-    :type cds_coord: gffutils.feature.Feature
-    :param fasta: FASTA file
-    :type fasta: str or unicode
-    :return: sequence
-    :rtype: str or unicode
-    """
-    sequence = get_cds_from_fasta(cds_coord, fasta)
-    cds_codons = sequence_to_codons(sequence)
-    return cds_codons
-
-
-def get_seqs_cds_codons_from_fasta(fasta,
-                                   gff,
-                                   feature_format="{}_CDS"):
-    """
-    Using information within a FASTA file extract information on the
-    codons in each coding sequence (as specified via CDS entries in
-    the complementary GFF file). A dictionary of the codons for each
-    coding sequence, keyed by feature name, is returned.
-
-    CDS whose sequences don't have a length divisible by 3 are
+    CDSs whose sequences don't have a length divisible by 3 are
     ignored.
 
     If there is no feature name (no ``Name``) attribute defined in the
     GFF file then the ``feature_format`` is used to format
     the sequence ID.
 
-    See :py:func:`get_cds_codons_from_fasta`.
+    See :py:func:`get_cds_from_fasta` and
+    :py:func:`sequence_to_codons`.
 
     :param fasta: FASTA file
     :type fasta: str or unicode
@@ -194,26 +175,27 @@ def get_seqs_cds_codons_from_fasta(fasta,
                                keep_order=True,
                                merge_strategy='merge',
                                sort_attribute_values=True)
-    seqs_cds_codons = {}
-    for cds_coord in gffdb.features_of_type('CDS'):
+    cds_codons = {}
+    for feature in gffdb.features_of_type('CDS'):
         try:
-            cds_codons = get_cds_codons_from_fasta(cds_coord, fasta)
+            sequence = get_cds_from_fasta(feature, fasta)
+            codons = sequence_to_codons(sequence)
         except Exception as e:
             # Log and continue with other CDSs.
             warnings.warn(str(e))
             continue
-        cds_name = get_feature_name(cds_coord, feature_format)
-        if cds_name not in seqs_cds_codons:
-            seqs_cds_codons[cds_name] = []
-        seqs_cds_codons[cds_name].extend(cds_codons)
-    return seqs_cds_codons
+        feature_name = get_feature_name(feature, feature_format)
+        if feature_name not in cds_codons:
+            cds_codons[feature_name] = []
+        cds_codons[feature_name].extend(codons)
+    return cds_codons
 
 
-def seqs_cds_codons_to_df(seqs_cds_codons):
+def feature_codons_to_df(feature_codons):
     """
-    Given dictionary of the codons for coding sequences, keyed by
-    feature name, return a Pandas data frame with the codons, also
-    including the position of each codon in its sequence.
+    Given dictionary of the codons for features, keyed by feature
+    name, return a Pandas data frame with the codons, also
+    including the position of each codon in its enclosing sequence.
 
     The data frame has columns:
 
@@ -221,28 +203,28 @@ def seqs_cds_codons_to_df(seqs_cds_codons):
     * :py:const:`CODON`: codon.
     * :py:const:`POS`: codon position in coding sequence (1-indexed).
 
-    :param cds_codons: Codons for each coding sequence, keyed by
-    feature name
-    :type cds_codons: list(dict)
+    :param feature_codons: Codons for each feature, keyed by feature
+    name
+    :type feature_codons: list(dict)
     :return: data frame
     :rtype: pandas.core.frame.DataFrame
     """
-    seqs_cds_codons_list = []
-    num_seqs_cds_codons = 0
-    for feature_name, cds_codons in list(seqs_cds_codons.items()):
-        num_seqs_cds_codons += len(cds_codons)
-        for pos, cds_codon in zip(range(0, len(cds_codons)), cds_codons):
-            seqs_cds_codons_list.append({GENE: feature_name,
-                                         CODON: cds_codon,
-                                         POS: pos + 1})
-    # Create empty DataFrame so if seqs_cds_codons and
-    # seqs_cds_codons_list are empty we still have an empty DataFrame
+    feature_codons_list = []
+    num_feature_codons = 0
+    for feature_name, codons in list(feature_codons.items()):
+        num_feature_codons += len(codons)
+        for pos, codon in zip(range(0, len(codons)), codons):
+            feature_codons_list.append({GENE: feature_name,
+                                        CODON: codon,
+                                        POS: pos + 1})
+    # Create empty DataFrame so if feature_codons and
+    # feature_codons_list are empty we still have an empty DataFrame
     # with the column names.
     df = pd.DataFrame(columns=[GENE, CODON, POS])
-    df = df.append(pd.DataFrame(seqs_cds_codons_list),
+    df = df.append(pd.DataFrame(feature_codons_list),
                    ignore_index=True)
     # Validate number of codons
-    assert num_seqs_cds_codons == df.shape[0]
+    assert num_feature_codons == df.shape[0]
     return df
 
 
@@ -251,11 +233,11 @@ def extract_cds_codons(fasta,
                        cds_codons_file,
                        delimiter="\t"):
     """
-    Using information within a FASTA file extract information on the
-    codons in each coding sequence (as specified via CDS entries in
-    the complementary GFF file) and save a tab-separated values file
-    with information on the positions of each codon in each coding
-    sequence.
+    Using CDS entries within a GFF file, get the codons in each coding
+    sequence in the complementary FASTA file.
+
+    A tab-separated values file of the codons for each CDS, keyed by
+    CDS feature name, is saved.
 
     CDS whose sequences don't have a length divisible by 3 are
     ignored.
@@ -266,8 +248,8 @@ def extract_cds_codons(fasta,
     * :py:const:`CODON`: codon.
     * :py:const:`POS`: codon position in coding sequence (1-indexed).
 
-    See :py:func:`get_seqs_cds_codons_from_fasta` and
-    :py:func:`seqs_cds_codons_to_df`.
+    See :py:func:`get_all_cds_codons_from_fasta` and
+    :py:func:`feature_codons_to_df`.
 
     :param fasta: FASTA file
     :type fasta: str or unicode
@@ -278,10 +260,10 @@ def extract_cds_codons(fasta,
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
-    seqs_cds_codons = get_seqs_cds_codons_from_fasta(fasta, gff)
-    df = seqs_cds_codons_to_df(seqs_cds_codons)
+    cds_codons = get_cds_codons_from_fasta(fasta, gff)
+    cds_codons_df = feature_codons_to_df(cds_codons)
     provenance.write_provenance_header(__file__, cds_codons_file)
-    df[list(df.columns)].to_csv(cds_codons_file,
-                                mode='a',
-                                sep=delimiter,
-                                index=False)
+    cds_codons_df[list(cds_codons_df.columns)].to_csv(cds_codons_file,
+                                                      mode='a',
+                                                      sep=delimiter,
+                                                      index=False)

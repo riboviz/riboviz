@@ -18,7 +18,7 @@ TEST_GFF_FILE = os.path.join(os.path.dirname(data.__file__),
 TEST_GFF_NO_CDS_FILE = os.path.join(os.path.dirname(data.__file__),
                                     "test_fasta_gff_data_no_cds.gff")
 """ Test GFF file in :py:mod:`riboviz.test.data` with no CDS. """
-TEST_SEQS_CDS_CODONS = {
+TEST_CDS_CODONS = {
     "YAL001C_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"],
     "YAL002C_CDS": ["ATG", "GTA", "TCA", "GGA", "TAG"],
     "YAL004CSingleCodonCDS_CDS": ["ATG", "AGA", "TGA"],
@@ -133,10 +133,10 @@ def test_get_cds_from_fasta():
     file for this test.
     """
     expected_sequence = "ATGAAATAA"
-    cds_coord = MockFeature("SeqID", expected_sequence)
+    feature = MockFeature("SeqID", expected_sequence)
     # Any file name can be used as MockFeature ignores it and returns
     # the sequence given above.
-    sequence = fasta_gff.get_cds_from_fasta(cds_coord, "test.fasta")
+    sequence = fasta_gff.get_cds_from_fasta(feature, "test.fasta")
     assert sequence == expected_sequence
 
 
@@ -149,16 +149,16 @@ def test_get_cds_from_fasta_bad_length():
     ``gffutils.feature.Feature`` to avoid the need to use a FASTA
     file for this test.
     """
-    cds_coord = MockFeature("SeqID", "ATGATAA")
+    feature = MockFeature("SeqID", "ATGATAA")
     with pytest.raises(AssertionError):
         # Any file name can be used as MockFeature ignores it
         # and returns the sequence given above.
-        fasta_gff.get_cds_from_fasta(cds_coord, "test.fasta")
+        fasta_gff.get_cds_from_fasta(feature, "test.fasta")
 
 
-def test_get_seqs_cds_codons_from_fasta_empty(tmp_file):
+def test_get_cds_codons_from_fasta_empty(tmp_file):
     """
-    Test :py:func:`riboviz.fasta_gff.get_seqs_cds_codons_from_fasta`
+    Test :py:func:`riboviz.fasta_gff.get_cds_codons_from_fasta`
     with an empty FASTA file and GFF file
     (:py:const:`TEST_GFF_FILE`).
 
@@ -166,33 +166,33 @@ def test_get_seqs_cds_codons_from_fasta_empty(tmp_file):
     :type tmp_file: str or unicode
     """
     # Use tmp_file as both empty FASTA input file.
-    seqs_cds_codons = fasta_gff.get_seqs_cds_codons_from_fasta(
+    cds_codons = fasta_gff.get_cds_codons_from_fasta(
         tmp_file,
         TEST_GFF_FILE)
-    assert seqs_cds_codons == {}
+    assert cds_codons == {}
 
 
-def test_get_seqs_cds_codons_from_fasta():
+def test_get_cds_codons_from_fasta():
     """
-    Test :py:func:`riboviz.fasta_gff.extract_cds_codons_from_fasta`
+    Test :py:func:`riboviz.fasta_gff.get_cds_codons_from_fasta`
     with FASTA file (:py:const:`TEST_FASTA_FILE`) and GFF file
     (:py:const:`TEST_GFF_FILE`).
     """
-    seqs_cds_codons = fasta_gff.get_seqs_cds_codons_from_fasta(
+    cds_codons = fasta_gff.get_cds_codons_from_fasta(
         TEST_FASTA_FILE,
         TEST_GFF_FILE)
-    assert seqs_cds_codons == TEST_SEQS_CDS_CODONS
+    assert cds_codons == TEST_CDS_CODONS
 
 
-def check_seqs_cds_codons_df(seqs_cds_codons, df):
+def check_feature_codons_df(feature_codons, df):
     """
-    Check contents of given dictionary with codons for genes matches
+    Check contents of given dictionary with codons for features
     those of given DataFrame output by
-    :py:func:`riboviz.fasta_gff.seqs_cds_codons_to_df`.
+    :py:func:`riboviz.fasta_gff.feature_codons_to_df`.
 
-    :param seqs_cds_codons: Dictionary keyed by genes and with values
-    that are lists of codons
-    :type seqs_cds_codons: dict
+    :param feature_codons: Dictionary keyed by feature name and with
+    values that are lists of codons
+    :type feature_codons: dict
     :param df: Pandas DataFrame
     :rtype: pandas.core.frame.DataFrame
     """
@@ -202,42 +202,42 @@ def check_seqs_cds_codons_df(seqs_cds_codons, df):
         assert column in list(df.columns),\
             "Missing column {}".format(column)
     total_codon_length = sum([len(codons)
-                              for codons in seqs_cds_codons.values()])
+                              for codons in feature_codons.values()])
     assert num_rows == total_codon_length, \
         "Unexpected number of rows"
-    for seqid, cds_codons in seqs_cds_codons.items():
+    for seqid, codons in feature_codons.items():
         seq_df = df.loc[df[fasta_gff.GENE] == seqid]
         assert not seq_df.empty, "Missing row for {}".format(seqid)
         num_rows, _ = seq_df.shape
-        assert num_rows == len(cds_codons), \
+        assert num_rows == len(codons), \
             "Unexpected number of rows for {}".format(seqid)
-        for pos, cds_codon in zip(seq_df[fasta_gff.POS],
-                                  seq_df[fasta_gff.CODON]):
+        for pos, codon in zip(seq_df[fasta_gff.POS],
+                              seq_df[fasta_gff.CODON]):
             # POS is 1-indexed.
-            assert cds_codons[pos - 1] == cds_codon
+            assert codons[pos - 1] == codon
 
 
-def test_seqs_cds_codons_to_df_empty():
+def test_feature_codons_to_df_empty():
     """
-    Test :py:func:`riboviz.fasta_gff.seqs_cds_codons_to_df`
+    Test :py:func:`riboviz.fasta_gff.feature_codons_to_df`
     with no values produces an empty data frame.
     """
-    df = fasta_gff.seqs_cds_codons_to_df({})
-    check_seqs_cds_codons_df({}, df)
+    df = fasta_gff.feature_codons_to_df({})
+    check_feature_codons_df({}, df)
 
 
-def test_seqs_cds_codons_to_df():
+def test_feature_codons_to_df():
     """
-    Test :py:func:`riboviz.fasta_gff.seqs_cds_codons_to_df`
+    Test :py:func:`riboviz.fasta_gff.feature_codons_to_df`
     with values produces a data frame with the expected columns,
     rows and values.
     """
-    seqs_cds_codons = {
+    feature_codons = {
         "G1": fasta_gff.sequence_to_codons("ATGAAATAA"),
         "G2": fasta_gff.sequence_to_codons("ATGGGGCCCTAG")
     }
-    df = fasta_gff.seqs_cds_codons_to_df(seqs_cds_codons)
-    check_seqs_cds_codons_df(seqs_cds_codons, df)
+    df = fasta_gff.feature_codons_to_df(feature_codons)
+    check_feature_codons_df(feature_codons, df)
 
 
 def test_extract_cds_codons_empty_fasta(tmp_file):
@@ -253,7 +253,7 @@ def test_extract_cds_codons_empty_fasta(tmp_file):
     # file
     fasta_gff.extract_cds_codons(tmp_file, TEST_GFF_FILE, tmp_file)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    check_seqs_cds_codons_df({}, df)
+    check_feature_codons_df({}, df)
 
 
 def test_extract_cds_codons(tmp_file):
@@ -269,4 +269,4 @@ def test_extract_cds_codons(tmp_file):
                                  TEST_GFF_FILE,
                                  tmp_file)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    check_seqs_cds_codons_df(TEST_SEQS_CDS_CODONS, df)
+    check_feature_codons_df(TEST_CDS_CODONS, df)
