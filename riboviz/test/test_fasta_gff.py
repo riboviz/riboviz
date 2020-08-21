@@ -15,6 +15,9 @@ TEST_FASTA_FILE = os.path.join(os.path.dirname(data.__file__),
 TEST_GFF_FILE = os.path.join(os.path.dirname(data.__file__),
                              "test_fasta_gff_data.gff")
 """ Test GFF file in :py:mod:`riboviz.test.data`. """
+TEST_GFF_NO_CDS_FILE = os.path.join(os.path.dirname(data.__file__),
+                                    "test_fasta_gff_data_no_cds.gff")
+""" Test GFF file in :py:mod:`riboviz.test.data` with no CDS. """
 TEST_CDS = {
     "YAL001C_mRNA": [(10, 24)],
     "YAL002C_mRNA": [(10, 24)],
@@ -84,7 +87,15 @@ def test_extract_cds():
     cds = fasta_gff.extract_cds(TEST_GFF_FILE)
     assert cds == TEST_CDS
 
+def test_extract_cds_no_cds():
+    """
+    Test :py:func:`riboviz.fasta_gff.extract_cds` with
+    GFF file (:py:const:`TEST_GFF_NO_CDS_FILE`).
+    """
+    cds = fasta_gff.extract_cds(TEST_GFF_NO_CDS_FILE)
+    assert cds == {}
 
+    
 def test_get_seqs_cds_codons_empty_fasta(tmp_file):
     """
     Test :py:func:`riboviz.fasta_gff.get_seqs_cds_codons` with an
