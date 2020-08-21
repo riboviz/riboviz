@@ -126,6 +126,7 @@ def get_cds(cds_coord, fasta):
     :type fasta: str or unicode
     :return: sequence
     :rtype: str or unicode
+    :raises AssertionError: If 
     :raises Exception: Exceptions specific to
     gffutils.Feature.sequence (these are undocumented in the gffutils
     documentation)
@@ -172,7 +173,7 @@ def get_seqs_cds_codons(fasta, gff):
     :param gff: GFF file
     :type gff: str or unicode
     :return: Codons for each coding sequence, keyed by sequence ID
-    :rtype: list(dict)
+    :rtype: list(dict(str or unicode -> list(str or unicode)))
     :raises Exception: Exceptions specific to gffutils.create_db
     (these are undocumented in the gffutils documentation)
     """
