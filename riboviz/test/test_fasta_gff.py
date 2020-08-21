@@ -133,15 +133,18 @@ def test_extract_cds_codons(tmp_file):
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
-    fasta_gff.extract_cds_codons(TEST_FASTA_FILE, TEST_GFF_FILE, tmp_file)
+    fasta_gff.extract_cds_codons(TEST_FASTA_FILE,
+                                 TEST_GFF_FILE,
+                                 tmp_file)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     # Expected codons based on data in test_fasta_gff_data.fasta and
     # test_fasta_gff_data.gff.
     seqs_cds_codons = {
         "YAL001C_mRNA": ["ATG", "GCC", "CAC", "TGT", "TAA"],
         "YAL002C_mRNA": ["ATG", "GTA", "TCA", "GGA", "TAG"],
-        "YAL004CSingleCDS_mRNA": ["ATG", "AGA", "TGA"],
+        "YAL004CSingleCodonCDS_mRNA": ["ATG", "AGA", "TGA"],
         "YAL005CMultiCDS_mRNA": ["ATG", "AGA", "TGA", "ATG", "GAT",
-                                 "TAC", "TAG"]
+                                 "TAC", "TAG"],
+        "YAL006CEmptyCDS_mRNA": ["ATG", "TGA"]
     }
     check_seqs_cds_codons_df(seqs_cds_codons, df)
