@@ -18,26 +18,14 @@ TEST_GFF_FILE = os.path.join(os.path.dirname(data.__file__),
 TEST_GFF_NO_CDS_FILE = os.path.join(os.path.dirname(data.__file__),
                                     "test_fasta_gff_data_no_cds.gff")
 """ Test GFF file in :py:mod:`riboviz.test.data` with no CDS. """
-TEST_CDS = {
-    "YAL001C_mRNA": [(10, 24)],
-    "YAL002C_mRNA": [(10, 24)],
-    "YAL003CMissingGene_mRNA": [(28, 39)],
-    "YAL004CSingleCodonCDS_mRNA": [(10, 18)],
-    "YAL005CMultiCDS_mRNA": [(10, 18), (28, 39)],
-    "YAL006CEmptyCDS_mRNA": [(10, 15)],
-    "YAL007CBadLength_mRNA": [(10, 20)]
-}
-"""
-Expected CDS, start and end positions as defined in GFF file
-                               (:py:const:`TEST_GFF_FILE`).
-"""
 TEST_SEQS_CDS_CODONS = {
-    "YAL001C_mRNA": ["ATG", "GCC", "CAC", "TGT", "TAA"],
-    "YAL002C_mRNA": ["ATG", "GTA", "TCA", "GGA", "TAG"],
-    "YAL004CSingleCodonCDS_mRNA": ["ATG", "AGA", "TGA"],
-    "YAL005CMultiCDS_mRNA": ["ATG", "AGA", "TGA", "ATG", "GAT", "TAC",
-                             "TAG"],
-    "YAL006CEmptyCDS_mRNA": ["ATG", "TGA"]
+    "YAL001C_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"],
+    "YAL002C_CDS": ["ATG", "GTA", "TCA", "GGA", "TAG"],
+    "YAL004CSingleCodonCDS_CDS": ["ATG", "AGA", "TGA"],
+    "YAL005CMultiCDS_CDS": ["ATG", "AGA", "TGA", "ATG", "GAT", "TAC",
+                            "TAG"],
+    "YAL006CEmptyCDS_CDS": ["ATG", "TGA"],
+    "YAL008CNoNameAttr_mRNA_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"]
 }
 """
 Expected codons for CDS in FASTA file (:py:const:`TEST_FASTA_FILE`)
@@ -47,11 +35,11 @@ as defined in GFF file (:py:const:`TEST_GFF_FILE`).
 
 class MockFeature:
     """
-    Mock of gffutils.feature.Feature class supporting solo
-    ``seq`` attribute.
+    Mock of gffutils.feature.Feature class supporting ``seqid`, ``seq`
+    and ``attributes`` attributes.
     """
 
-    def __init__(self, seqid, seq):
+    def __init__(self, seqid, seq="", attributes={}):
         """
         Constructor.
 
@@ -61,9 +49,12 @@ class MockFeature:
         :type seqid: str or unicode
         :param seq: Sequence
         :type seq: str or unicode
+        :param attributes: Attributes
+        :type attributes: dict
         """
         self.seqid = seqid
         self.seq = seq
+        self.attributes = attributes
 
     def sequence(self, fasta):
         """
@@ -115,22 +106,21 @@ def test_sequence_to_codons(seq_codons):
         "Unexpected codons"
 
 
-def test_get_cds_from_gff():
+@pytest.mark.parametrize("features", [
+    ("SeqID_mRNA", {}, "SeqID_mRNA_CDS"),
+    ("SeqID_mRNA", {"Name": []}, "SeqID_mRNA_CDS"),
+    ("SeqID_mRNA", {"Name": ["SeqID_CDS"]}, "SeqID_CDS")])
+def test_get_feature_name(features):
     """
-    Test :py:func:`riboviz.fasta_gff.get_cds_from_gff` with
-    GFF file (:py:const:`TEST_GFF_FILE`).
-    """
-    cds = fasta_gff.get_cds_from_gff(TEST_GFF_FILE)
-    assert cds == TEST_CDS
+    Test :py:func:`riboviz.fasta_gff.get_feature_name`.
 
-
-def test_get_cds_from_gff_no_cds():
+    :param features: sequence ID, attributes, expected feature name
+    :type features: tuple(str or unicode, str or unicode, str or
+    unicode)
     """
-    Test :py:func:`riboviz.fasta_gff.get_cds_from_gff` with
-    GFF file (:py:const:`TEST_GFF_NO_CDS_FILE`) which has no CDS.
-    """
-    cds = fasta_gff.get_cds_from_gff(TEST_GFF_NO_CDS_FILE)
-    assert cds == {}
+    seq_id, attributes, feature_name = features
+    assert fasta_gff.get_feature_name(
+        MockFeature(seq_id, "", attributes), "{}_CDS") == feature_name
 
 
 def test_get_cds_from_fasta():

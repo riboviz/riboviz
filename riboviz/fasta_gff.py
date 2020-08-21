@@ -87,30 +87,30 @@ def sequence_to_codons(sequence):
     return codons
 
 
-def get_cds_from_gff(gff):
+def get_feature_name(feature, feature_format):
     """
-    Get information on genes and coding sequences from a GFF
-    file. A dictionary indexed by gene ID is returned. For each
-    gene ID is a list of tuples of form (CDS start position, CDS end
-    position).
+    Get the name of a GFF feature.
 
-    :param gff: GFF file
-    :type gff: str or unicode
-    :return: coding sequence information
-    :rtype: dict(str or unicode -> list(tuple(int, int)))
+    If there is no feature name (no ``Name``) attribute defined in the
+    feature thh the ``feature_format`` is used to format the sequence
+    ID into a feature name.
+
+    :param feature: GFF feature
+    :type feature: gffutils.feature.Feature
+    :param feature_format: Feature name format
+    :type feature_format: str or unicode
+    :return: Feature name
+    :rtype: str or unicode
     """
-    db = gffutils.create_db(gff,
-                            'gff.db',
-                            merge_strategy="create_unique",
-                            keep_order=True,
-                            force=True)
-    db = gffutils.FeatureDB('gff.db')
-    cds = {}
-    for c in db.features_of_type("CDS"):
-        if c.seqid not in cds:
-            cds[c.seqid] = []
-        cds[c.seqid].append((c.start, c.end))
-    return cds
+    if "Name" in feature.attributes:
+        cds_name_attr = feature.attributes["Name"]
+    else:
+        cds_name_attr = []
+    if cds_name_attr != []:
+        cds_name = cds_name_attr[0]
+    else:
+        cds_name = feature_format.format(feature.seqid)
+    return cds_name
 
 
 def get_cds_from_fasta(cds_coord, fasta):
@@ -127,7 +127,9 @@ def get_cds_from_fasta(cds_coord, fasta):
     :raises AssertionError: If sequence has length not divisible by 3
     :raises Exception: Exceptions specific to
     gffutils.Feature.sequence (these are undocumented in the gffutils
-    documentation)
+    documentation). A typical exception that can be thrown is
+    KeyError. This can arise if the GFF file contains information on a
+    sequence that is not in the FASTA file.
     """
     sequence = cds_coord.sequence(fasta)
     cds_len_remainder = len(sequence) % 3
@@ -157,15 +159,21 @@ def get_cds_codons_from_fasta(cds_coord, fasta):
     return cds_codons
 
 
-def get_seqs_cds_codons_from_fasta(fasta, gff):
+def get_seqs_cds_codons_from_fasta(fasta,
+                                   gff,
+                                   feature_format="{}_CDS"):
     """
     Using information within a FASTA file extract information on the
     codons in each coding sequence (as specified via CDS entries in
     the complementary GFF file). A dictionary of the codons for each
-    coding sequence, keyed by sequence ID, is returned.
+    coding sequence, keyed by feature name, is returned.
 
     CDS whose sequences don't have a length divisible by 3 are
     ignored.
+
+    If there is no feature name (no ``Name``) attribute defined in the
+    GFF file then the ``feature_format`` is used to format
+    the sequence ID.
 
     See :py:func:`get_cds_codons_from_fasta`.
 
@@ -173,7 +181,9 @@ def get_seqs_cds_codons_from_fasta(fasta, gff):
     :type fasta: str or unicode
     :param gff: GFF file
     :type gff: str or unicode
-    :return: Codons for each coding sequence, keyed by sequence ID
+    :param feature_format: Feature name format
+    :type feature_format: str or unicode
+    :return: Codons for each coding sequence, keyed by feature name
     :rtype: list(dict(str or unicode -> list(str or unicode)))
     :raises Exception: Exceptions specific to gffutils.create_db
     (these are undocumented in the gffutils documentation)
@@ -189,43 +199,40 @@ def get_seqs_cds_codons_from_fasta(fasta, gff):
         try:
             cds_codons = get_cds_codons_from_fasta(cds_coord, fasta)
         except Exception as e:
-            # Log and continue with other CDSs. A typical exception
-            # that can be thrown by gffutils.Feature.sequence is
-            # KeyError. This can arise if the GFF file contains
-            # information on a sequence that is not in the FASTA
-            # file.
+            # Log and continue with other CDSs.
             warnings.warn(str(e))
             continue
-        if cds_coord.seqid not in seqs_cds_codons:
-            seqs_cds_codons[cds_coord.seqid] = []
-        seqs_cds_codons[cds_coord.seqid].extend(cds_codons)
+        cds_name = get_feature_name(cds_coord, feature_format)
+        if cds_name not in seqs_cds_codons:
+            seqs_cds_codons[cds_name] = []
+        seqs_cds_codons[cds_name].extend(cds_codons)
     return seqs_cds_codons
 
 
 def seqs_cds_codons_to_df(seqs_cds_codons):
     """
     Given dictionary of the codons for coding sequences, keyed by
-    sequence ID, return a Pandas data frame with the codons, also
+    feature name, return a Pandas data frame with the codons, also
     including the position of each codon in its sequence.
 
     The data frame has columns:
 
-    * :py:const:`GENE`: sequence ID/gene name.
+    * :py:const:`GENE`: feature name.
     * :py:const:`CODON`: codon.
     * :py:const:`POS`: codon position in coding sequence (1-indexed).
 
     :param cds_codons: Codons for each coding sequence, keyed by
-    sequence ID
+    feature name
     :type cds_codons: list(dict)
     :return: data frame
     :rtype: pandas.core.frame.DataFrame
     """
     seqs_cds_codons_list = []
     num_seqs_cds_codons = 0
-    for seqid, cds_codons in list(seqs_cds_codons.items()):
+    for feature_name, cds_codons in list(seqs_cds_codons.items()):
         num_seqs_cds_codons += len(cds_codons)
         for pos, cds_codon in zip(range(0, len(cds_codons)), cds_codons):
-            seqs_cds_codons_list.append({GENE: seqid,
+            seqs_cds_codons_list.append({GENE: feature_name,
                                          CODON: cds_codon,
                                          POS: pos + 1})
     # Create empty DataFrame so if seqs_cds_codons and
@@ -255,7 +262,7 @@ def extract_cds_codons(fasta,
 
     The tab-separated values file has columns:
 
-    * :py:const:`GENE`: sequence ID/gene name.
+    * :py:const:`GENE`: feature name.
     * :py:const:`CODON`: codon.
     * :py:const:`POS`: codon position in coding sequence (1-indexed).
 
