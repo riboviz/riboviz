@@ -24,8 +24,9 @@ TEST_CDS = {
     "YAL003CMissingGene_mRNA": [(28, 39)],
     "YAL004CSingleCodonCDS_mRNA": [(10, 18)],
     "YAL005CMultiCDS_mRNA": [(10, 18), (28, 39)],
-    "YAL006CEmptyCDS_mRNA": [(10, 15)]
-    }
+    "YAL006CEmptyCDS_mRNA": [(10, 15)],
+    "YAL007CBadLength_mRNA": [(10, 20)]
+}
 """
 Expected CDS, start and end positions as defined in GFF file
                                (:py:const:`TEST_GFF_FILE`).
@@ -42,6 +43,41 @@ TEST_SEQS_CDS_CODONS = {
 Expected codons for CDS in FASTA file (:py:const:`TEST_FASTA_FILE`)
 as defined in GFF file (:py:const:`TEST_GFF_FILE`).
 """
+
+
+class MockFeature:
+    """
+    Mock of gffutils.feature.Feature class supporting solo
+    ``seq`` attribute.
+    """
+
+    def __init__(self, seqid, seq):
+        """
+        Constructor.
+
+        :param self: Object reference
+        :type self: MockFeature
+        :param seqid: Sequence ID
+        :type seqid: str or unicode
+        :param seq: Sequence
+        :type seq: str or unicode
+        """
+        self.seqid = seqid
+        self.seq = seq
+
+    def sequence(self, fasta):
+        """
+        Mock of.Feature.sequence function, which returns the value of
+        the ``seq`` attribute.
+
+        :param self: Object reference
+        :type self: MockFeature
+        :param fasta: FASTA file (ignored)
+        :type fasta: str or unicode
+        :return: Sequence
+        :rtype: str or unicode
+        """
+        return self.seq
 
 
 @pytest.fixture(scope="function")
@@ -95,6 +131,39 @@ def test_get_cds_from_gff_no_cds():
     """
     cds = fasta_gff.get_cds_from_gff(TEST_GFF_NO_CDS_FILE)
     assert cds == {}
+
+
+def test_get_cds_from_fasta():
+    """
+    Test :py:func:`riboviz.fasta_gff.get_cds_from_fasta` returns
+    a sequence.
+
+    :py:class:`MockFeature` is used to mock
+    ``gffutils.feature.Feature`` to avoid the need to use a FASTA
+    file for this test.
+    """
+    expected_sequence = "ATGAAATAA"
+    cds_coord = MockFeature("SeqID", expected_sequence)
+    # Any file name can be used as MockFeature ignores it and returns
+    # the sequence given above.
+    sequence = fasta_gff.get_cds_from_fasta(cds_coord, "test.fasta")
+    assert sequence == expected_sequence
+
+
+def test_get_cds_from_fasta_bad_length():
+    """
+    Test :py:func:`riboviz.fasta_gff.get_cds_from_fasta` raises an
+    error if given a sequence whose length is not divisible by 3.
+
+    :py:class:`MockFeature` is used to mock
+    ``gffutils.feature.Feature`` to avoid the need to use a FASTA
+    file for this test.
+    """
+    cds_coord = MockFeature("SeqID", "ATGATAA")
+    with pytest.raises(AssertionError):
+        # Any file name can be used as MockFeature ignores it
+        # and returns the sequence given above.
+        fasta_gff.get_cds_from_fasta(cds_coord, "test.fasta")
 
 
 def test_get_seqs_cds_codons_from_fasta_empty(tmp_file):

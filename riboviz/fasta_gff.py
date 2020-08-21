@@ -117,8 +117,6 @@ def get_cds_from_fasta(cds_coord, fasta):
     """
     Given a GFF feature for a CDS extract the coding
     sequence from the given FASTA file.
-    If the length of coding sequence is not a factor of
-    3 then it is padded with ``N``.
 
     :param cds_coord: GFF feature for a CDS
     :type cds_coord: gffutils.feature.Feature
@@ -126,17 +124,16 @@ def get_cds_from_fasta(cds_coord, fasta):
     :type fasta: str or unicode
     :return: sequence
     :rtype: str or unicode
-    :raises AssertionError:
+    :raises AssertionError: If sequence has length not divisible by 3
     :raises Exception: Exceptions specific to
     gffutils.Feature.sequence (these are undocumented in the gffutils
     documentation)
     """
     sequence = cds_coord.sequence(fasta)
     cds_len_remainder = len(sequence) % 3
-    if cds_len_remainder != 0:
-        warnings.warn("{} has length not divisible by 3".format(
-            cds_coord.seqid))
-        sequence += ("N" * (3 - cds_len_remainder))
+    assert cds_len_remainder == 0, \
+        "{} ({}) has length not divisible by 3".format(
+            cds_coord.seqid, sequence)
     return sequence
 
 
@@ -166,6 +163,9 @@ def get_seqs_cds_codons_from_fasta(fasta, gff):
     codons in each coding sequence (as specified via CDS entries in
     the complementary GFF file). A dictionary of the codons for each
     coding sequence, keyed by sequence ID, is returned.
+
+    CDS whose sequences don't have a length divisible by 3 are
+    ignored.
 
     See :py:func:`get_cds_codons_from_fasta`.
 
@@ -249,6 +249,9 @@ def extract_cds_codons(fasta,
     the complementary GFF file) and save a tab-separated values file
     with information on the positions of each codon in each coding
     sequence.
+
+    CDS whose sequences don't have a length divisible by 3 are
+    ignored.
 
     The tab-separated values file has columns:
 

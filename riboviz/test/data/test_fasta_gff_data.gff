@@ -5,3 +5,4 @@ YAL004CSingleCodonCDS_mRNA	yeastutrgff	CDS	10	18	.	+	0	Name=YAL004CSingleCodonCD
 YAL005CMultiCDS_mRNA	yeastutrgff	CDS	10	18	.	+	0	Name=YAL005CMultiCDS_CDS
 YAL005CMultiCDS_mRNA	yeastutrgff	CDS	28	39	.	+	0	Name=YAL005CMultiCDS_CDS
 YAL006CEmptyCDS_mRNA	yeastutrgff	CDS	10	15	.	+	0	Name=YAL006CEmptyCDS_CDS
+YAL007CBadLength_mRNA	yeastutrgff	CDS	10	20	.	+	0	Name=YAL007CBadLength_CDS
