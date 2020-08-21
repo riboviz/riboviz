@@ -15,6 +15,18 @@ TEST_FASTA_FILE = os.path.join(os.path.dirname(data.__file__),
 TEST_GFF_FILE = os.path.join(os.path.dirname(data.__file__),
                              "test_fasta_gff_data.gff")
 """ Test GFF file in :py:mod:`riboviz.test.data`. """
+TEST_SEQS_CDS_CODONS = {
+    "YAL001C_mRNA": ["ATG", "GCC", "CAC", "TGT", "TAA"],
+    "YAL002C_mRNA": ["ATG", "GTA", "TCA", "GGA", "TAG"],
+    "YAL004CSingleCodonCDS_mRNA": ["ATG", "AGA", "TGA"],
+    "YAL005CMultiCDS_mRNA": ["ATG", "AGA", "TGA", "ATG", "GAT", "TAC",
+                             "TAG"],
+    "YAL006CEmptyCDS_mRNA": ["ATG", "TGA"]
+}
+"""
+Expected codons for CDS in FASTA file (:py:const:`TEST_FASTA_FILE`)
+as defined in GFF file (:py:const:`TEST_GFF_FILE`).
+"""
 
 
 @pytest.fixture(scope="function")
@@ -108,10 +120,35 @@ def test_seqs_cds_codons_to_df():
     check_seqs_cds_codons_df(seqs_cds_codons, df)
 
 
+def test_get_seqs_cds_codons_empty_fasta(tmp_file):
+    """
+    Test :py:func:`riboviz.fasta_gff.get_seqs_cds_codons` with an
+    empty FASTA file and GFF file (:py:const:`TEST_GFF_FILE`).
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    # Use tmp_file as both empty FASTA input file.
+    seqs_cds_codons = fasta_gff.get_seqs_cds_codons(tmp_file,
+                                                    TEST_GFF_FILE)
+    assert seqs_cds_codons == {}
+
+
+def test_get_seqs_cds_codons():
+    """
+    Test :py:func:`riboviz.fasta_gff.extract_cds_codons` with
+    FASTA file (:py:const:`TEST_FASTA_FILE`) and GFF file
+    (:py:const:`TEST_GFF_FILE`) and validate the result.
+    """
+    seqs_cds_codons = fasta_gff.get_seqs_cds_codons(TEST_FASTA_FILE,
+                                                    TEST_GFF_FILE)
+    assert TEST_SEQS_CDS_CODONS == seqs_cds_codons
+
+
 def test_extract_cds_codons_empty_fasta(tmp_file):
     """
     Test :py:func:`riboviz.fasta_gff.extract_cds_codons` with an empty
-    FASTA file and a GFF file (:py:const:`TEST_GFF_FILE`). A
+    FASTA file and GFF file (:py:const:`TEST_GFF_FILE`). A
     header-only TSV file is expected as output.
 
     :param tmp_file: Temporary file
@@ -126,8 +163,8 @@ def test_extract_cds_codons_empty_fasta(tmp_file):
 
 def test_extract_cds_codons(tmp_file):
     """
-    Test :py:func:`riboviz.fasta_gff.extract_cds_codons` with a
-    FASTA file (:py:const:`TEST_FASTA_FILE`) and a GFF file
+    Test :py:func:`riboviz.fasta_gff.extract_cds_codons` with
+    FASTA file (:py:const:`TEST_FASTA_FILE`) and GFF file
     (:py:const:`TEST_GFF_FILE`) and validate the TSV file output.
 
     :param tmp_file: Temporary file
@@ -137,14 +174,4 @@ def test_extract_cds_codons(tmp_file):
                                  TEST_GFF_FILE,
                                  tmp_file)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    # Expected codons based on data in test_fasta_gff_data.fasta and
-    # test_fasta_gff_data.gff.
-    seqs_cds_codons = {
-        "YAL001C_mRNA": ["ATG", "GCC", "CAC", "TGT", "TAA"],
-        "YAL002C_mRNA": ["ATG", "GTA", "TCA", "GGA", "TAG"],
-        "YAL004CSingleCodonCDS_mRNA": ["ATG", "AGA", "TGA"],
-        "YAL005CMultiCDS_mRNA": ["ATG", "AGA", "TGA", "ATG", "GAT",
-                                 "TAC", "TAG"],
-        "YAL006CEmptyCDS_mRNA": ["ATG", "TGA"]
-    }
-    check_seqs_cds_codons_df(seqs_cds_codons, df)
+    check_seqs_cds_codons_df(TEST_SEQS_CDS_CODONS, df)
