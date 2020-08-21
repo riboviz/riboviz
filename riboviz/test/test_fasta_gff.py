@@ -25,7 +25,9 @@ TEST_CDS_CODONS = {
     "YAL005CMultiCDS_CDS": ["ATG", "AGA", "TGA", "ATG", "GAT", "TAC",
                             "TAG"],
     "YAL006CEmptyCDS_CDS": ["ATG", "TGA"],
-    "YAL008CNoNameAttr_mRNA_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"]
+    "YAL008CNoNameAttr_mRNA_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"],
+    "YAL009CMultiCDS_CDS_1": ["ATG", "AGA", "TGA"],
+    "YAL009CMultiCDS_CDS_2": ["ATG", "GAT", "TAC", "TAG"]
 }
 """
 Expected codons for CDS in FASTA file (:py:const:`TEST_FASTA_FILE`)

@@ -165,7 +165,7 @@ def get_cds_codons_from_fasta(fasta,
     :param feature_format: Feature name format
     :type feature_format: str or unicode
     :return: Codons for each coding sequence, keyed by feature name
-    :rtype: list(dict(str or unicode -> list(str or unicode)))
+    :rtype: dict(str or unicode -> list(str or unicode))
     :raises Exception: Exceptions specific to gffutils.create_db
     (these are undocumented in the gffutils documentation)
     """
@@ -205,7 +205,7 @@ def feature_codons_to_df(feature_codons):
 
     :param feature_codons: Codons for each feature, keyed by feature
     name
-    :type feature_codons: list(dict)
+    :type feature_codons: dict(str or unicode -> list(str or unicode))
     :return: data frame
     :rtype: pandas.core.frame.DataFrame
     """
