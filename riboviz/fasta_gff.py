@@ -50,10 +50,10 @@ def check_fasta_gff(fasta, gff):
             cds_seq = cds_coord.sequence(fasta)
         except Exception as e:
             # Log and continue with other CDSs. A typical exception
-            # that can be thrown by get_cds_codons, from
-            # gffutils.Feature.sequence is KeyError. This can arise if
-            # the GFF file contains information on a sequence that is
-            # not in the FASTA file.
+            # that can be thrown by gffutils.Feature.sequence is
+            # KeyError. This can arise if the GFF file contains
+            # information on a sequence that is not in the FASTA
+            # file.
             warnings.warn(str(e))
             continue
         cds_len_remainder = len(cds_seq) % 3
@@ -87,9 +87,9 @@ def sequence_to_codons(sequence):
     return codons
 
 
-def extract_cds(gff):
+def get_cds_from_gff(gff):
     """
-    Extract information on genes and coding sequences from a GFF
+    Get information on genes and coding sequences from a GFF
     file. A dictionary indexed by gene ID is returned. For each
     gene ID is a list of tuples of form (CDS start position, CDS end
     position).
@@ -113,7 +113,7 @@ def extract_cds(gff):
     return cds
 
 
-def get_cds(cds_coord, fasta):
+def get_cds_from_fasta(cds_coord, fasta):
     """
     Given a GFF feature for a CDS extract the coding
     sequence from the given FASTA file.
@@ -126,7 +126,7 @@ def get_cds(cds_coord, fasta):
     :type fasta: str or unicode
     :return: sequence
     :rtype: str or unicode
-    :raises AssertionError: If 
+    :raises AssertionError:
     :raises Exception: Exceptions specific to
     gffutils.Feature.sequence (these are undocumented in the gffutils
     documentation)
@@ -140,12 +140,13 @@ def get_cds(cds_coord, fasta):
     return sequence
 
 
-def get_cds_codons(cds_coord, fasta):
+def get_cds_codons_from_fasta(cds_coord, fasta):
     """
     Given a GFF feature for a CDS extract the coding
     sequence from the given FASTA file and split into codons.
 
-    See :py:func:`get_cds` and :py:func:`sequence_to_codons`.
+    See :py:func:`get_cds_from_fasta` and
+    :py:func:`sequence_to_codons`.
 
     :param cds_coord: GFF feature for a CDS
     :type cds_coord: gffutils.feature.Feature
@@ -154,19 +155,19 @@ def get_cds_codons(cds_coord, fasta):
     :return: sequence
     :rtype: str or unicode
     """
-    sequence = get_cds(cds_coord, fasta)
+    sequence = get_cds_from_fasta(cds_coord, fasta)
     cds_codons = sequence_to_codons(sequence)
     return cds_codons
 
 
-def get_seqs_cds_codons(fasta, gff):
+def get_seqs_cds_codons_from_fasta(fasta, gff):
     """
     Using information within a FASTA file extract information on the
     codons in each coding sequence (as specified via CDS entries in
     the complementary GFF file). A dictionary of the codons for each
     coding sequence, keyed by sequence ID, is returned.
 
-    See :py:func:`get_cds_codons`.
+    See :py:func:`get_cds_codons_from_fasta`.
 
     :param fasta: FASTA file
     :type fasta: str or unicode
@@ -186,13 +187,13 @@ def get_seqs_cds_codons(fasta, gff):
     seqs_cds_codons = {}
     for cds_coord in gffdb.features_of_type('CDS'):
         try:
-            cds_codons = get_cds_codons(cds_coord, fasta)
+            cds_codons = get_cds_codons_from_fasta(cds_coord, fasta)
         except Exception as e:
             # Log and continue with other CDSs. A typical exception
-            # that can be thrown by get_cds_codons, from
-            # gffutils.Feature.sequence is KeyError. This can arise if
-            # the GFF file contains information on a sequence that is
-            # not in the FASTA file.
+            # that can be thrown by gffutils.Feature.sequence is
+            # KeyError. This can arise if the GFF file contains
+            # information on a sequence that is not in the FASTA
+            # file.
             warnings.warn(str(e))
             continue
         if cds_coord.seqid not in seqs_cds_codons:
@@ -255,7 +256,7 @@ def extract_cds_codons(fasta,
     * :py:const:`CODON`: codon.
     * :py:const:`POS`: codon position in coding sequence (1-indexed).
 
-    See :py:func:`get_seqs_cds_codons` and
+    See :py:func:`get_seqs_cds_codons_from_fasta` and
     :py:func:`seqs_cds_codons_to_df`.
 
     :param fasta: FASTA file
@@ -267,7 +268,7 @@ def extract_cds_codons(fasta,
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
-    seqs_cds_codons = get_seqs_cds_codons(fasta, gff)
+    seqs_cds_codons = get_seqs_cds_codons_from_fasta(fasta, gff)
     df = seqs_cds_codons_to_df(seqs_cds_codons)
     provenance.write_provenance_header(__file__, cds_codons_file)
     df[list(df.columns)].to_csv(cds_codons_file,

@@ -69,7 +69,7 @@ def tmp_file():
 def test_sequence_to_codons(seq_codons):
     """
     Test :py:func:`riboviz.fasta_gff.sequence_to_codons`
-    with values vaid sequences.
+    with valid sequences.
 
     :param seq_codons: sequence and expected codons
     :type seq_codons: tuple(str or unicode, list(str or unicode))
@@ -79,53 +79,57 @@ def test_sequence_to_codons(seq_codons):
         "Unexpected codons"
 
 
-def test_extract_cds():
+def test_get_cds_from_gff():
     """
-    Test :py:func:`riboviz.fasta_gff.extract_cds` with
+    Test :py:func:`riboviz.fasta_gff.get_cds_from_gff` with
     GFF file (:py:const:`TEST_GFF_FILE`).
     """
-    cds = fasta_gff.extract_cds(TEST_GFF_FILE)
+    cds = fasta_gff.get_cds_from_gff(TEST_GFF_FILE)
     assert cds == TEST_CDS
 
-def test_extract_cds_no_cds():
+
+def test_get_cds_from_gff_no_cds():
     """
-    Test :py:func:`riboviz.fasta_gff.extract_cds` with
-    GFF file (:py:const:`TEST_GFF_NO_CDS_FILE`).
+    Test :py:func:`riboviz.fasta_gff.get_cds_from_gff` with
+    GFF file (:py:const:`TEST_GFF_NO_CDS_FILE`) which has no CDS.
     """
-    cds = fasta_gff.extract_cds(TEST_GFF_NO_CDS_FILE)
+    cds = fasta_gff.get_cds_from_gff(TEST_GFF_NO_CDS_FILE)
     assert cds == {}
 
-    
-def test_get_seqs_cds_codons_empty_fasta(tmp_file):
+
+def test_get_seqs_cds_codons_from_fasta_empty(tmp_file):
     """
-    Test :py:func:`riboviz.fasta_gff.get_seqs_cds_codons` with an
-    empty FASTA file and GFF file (:py:const:`TEST_GFF_FILE`).
+    Test :py:func:`riboviz.fasta_gff.get_seqs_cds_codons_from_fasta`
+    with an empty FASTA file and GFF file
+    (:py:const:`TEST_GFF_FILE`).
 
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
     # Use tmp_file as both empty FASTA input file.
-    seqs_cds_codons = fasta_gff.get_seqs_cds_codons(tmp_file,
-                                                    TEST_GFF_FILE)
+    seqs_cds_codons = fasta_gff.get_seqs_cds_codons_from_fasta(
+        tmp_file,
+        TEST_GFF_FILE)
     assert seqs_cds_codons == {}
 
 
-def test_get_seqs_cds_codons():
+def test_get_seqs_cds_codons_from_fasta():
     """
-    Test :py:func:`riboviz.fasta_gff.extract_cds_codons` with
-    FASTA file (:py:const:`TEST_FASTA_FILE`) and GFF file
-    (:py:const:`TEST_GFF_FILE`) and validate the result.
+    Test :py:func:`riboviz.fasta_gff.extract_cds_codons_from_fasta`
+    with FASTA file (:py:const:`TEST_FASTA_FILE`) and GFF file
+    (:py:const:`TEST_GFF_FILE`).
     """
-    seqs_cds_codons = fasta_gff.get_seqs_cds_codons(TEST_FASTA_FILE,
-                                                    TEST_GFF_FILE)
+    seqs_cds_codons = fasta_gff.get_seqs_cds_codons_from_fasta(
+        TEST_FASTA_FILE,
+        TEST_GFF_FILE)
     assert seqs_cds_codons == TEST_SEQS_CDS_CODONS
 
 
 def check_seqs_cds_codons_df(seqs_cds_codons, df):
     """
-    Check contents of DataFrame output by
-    :py:func:`riboviz.fasta_gff.seqs_cds_codons_to_df` contain the
-    given codons for the given genes.
+    Check contents of given dictionary with codons for genes matches
+    those of given DataFrame output by
+    :py:func:`riboviz.fasta_gff.seqs_cds_codons_to_df`.
 
     :param seqs_cds_codons: Dictionary keyed by genes and with values
     that are lists of codons
