@@ -199,7 +199,9 @@ read_len_plot
 
 ## BIASES IN NUCLEOTIDE COMPOSITION
 
-```{r BiasesInNucleotideComposition, echo=FALSE, warning=FALSE}
+No plot for this.
+
+```{r BiasesInNucleotideComposition, eval=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 
 <<BiasesInNucleotideCompositionAlongMappedReadLengthsChunk>>
   
@@ -240,7 +242,9 @@ if(!rpf){
 
 ### TPMS OF GENES
 
-```{r TranscriptsPerMillion, echo=FALSE, warning=FALSE}
+No plot for this.
+
+```{r TranscriptsPerMillion, eval=FALSE, echo=FALSE, warning=FALSE}
 <<GeneTranscriptsPerMillionChunk>>
   
 print("No plot for this")
@@ -272,6 +276,5 @@ TO DO:
 
 * Alter .html output name according to samplename somehow
 * Add titles, captions to plots
-* find which parameter silences things like "## `geom_smooth()` using formula 'y ~ x'" and "## Parsed with column specification:" etc
 * facet plots nicely?
 * run with full-size datasets (Saccharomyces cerevisiae AND non-S. cerevisiae)
