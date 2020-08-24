@@ -991,7 +991,7 @@ process generateStatsFigs {
         count_threshold_flag = params.containsKey('count_threshold') \
             ? "--count-threshold=${params['count_threshold']}": ''
         """
-        Rscript --vanilla ${workflow.projectDir}/rscripts/generate_stats_figs.R \
+        Rscript --vanilla ${workflow.projectDir}/rscripts/generate_stats_figs_markdown.R \
            --num-processes=${params.num_processes} \
            --min-read-length=${params.min_read_length} \
            --max-read-length=${params.max_read_length} \
