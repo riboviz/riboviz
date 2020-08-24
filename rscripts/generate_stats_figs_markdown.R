@@ -556,7 +556,7 @@ print("Completed generate_stats_figs_markdown.R")
 
 # THESE PARAMETERS SHOULD MATCH RSCRIPT COMMAND ONES IN NEXTFLOW
 rmarkdown::render(
-  "rmarkdown/AnalysisOutputs.Rmd",
+  here::here("rmarkdown", "AnalysisOutputs.Rmd"),
   params=list(
     output_dir= output_dir, 
     orf_fasta_file= orf_fasta_file,
