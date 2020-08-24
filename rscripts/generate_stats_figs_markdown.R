@@ -554,33 +554,31 @@ print("Completed generate_stats_figs_markdown.R")
 
 #R --vanilla --args --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WTnone/WTnone.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WTnone --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
 
-
-
-# # THESE PARAMETERS SHOULD MATCH RSCRIPT COMMAND ONES IN NEXTFLOW
+# THESE PARAMETERS SHOULD MATCH RSCRIPT COMMAND ONES IN NEXTFLOW
 rmarkdown::render(
   "rmarkdown/AnalysisOutputs.Rmd",
   params=list(
-    output_dir="vignette/output/WT3AT",
-    orf_fasta_file="vignette/input/yeast_YAL_CDS_w_250utrs.fa",
-    orf_gff_file="vignette/input/yeast_YAL_CDS_w_250utrs.gff3",
-    num_processes=1,
-    min_read_length=10,
-    max_read_length=50,
-    buffer=250,
-    primary_id="Name",
-    dataset="vignette",
-    rpf=TRUE,
-    features_file="data/yeast_features.tsv",
-    do_pos_sp_nt_freq=TRUE,
-    t_rna_file="data/yeast_tRNAs.tsv",
-    codon_positions_file="data/yeast_codon_pos_i200.RData",
-    count_threshold=64,
-    length_threshold=500,
-    output_prefix="",
-    hd_file="vignette/output/WT3AT/WT3AT.h5",
-    nnt_buffer=25,
-    nnt_gene=50,
-    asite_disp_length_file="data/yeast_standard_asite_disp_length.txt"
+    output_dir= output_dir, 
+    orf_fasta_file= orf_fasta_file,
+    orf_gff_file= orf_gff_file,
+    num_processes= num_processes,
+    min_read_length= min_read_length,
+    max_read_length= max_read_length,
+    buffer= buffer,
+    primary_id= primary_id,
+    dataset= dataset,
+    rpf= rpf, 
+    features_file= features_file,
+    do_pos_sp_nt_freq= do_pos_sp_nt_freq, 
+    t_rna_file= t_rna_file,
+    codon_positions_file= codon_positions_file,
+    count_threshold= count_threshold,
+    length_threshold= length_threshold,
+    output_prefix= output_prefix,
+    hd_file= hd_file,
+    nnt_buffer= nnt_buffer,
+    nnt_gene= nnt_gene,
+    asite_disp_length_file= asite_disp_length_file
   )
 )
 
