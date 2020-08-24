@@ -149,6 +149,15 @@ print_provenance(path_to_this_script)
 knitr::read_chunk(here("rscripts","generate_stats_figs_markdown.R"))
 ```
 
+## Sample Name: `r unlist(strsplit(hd_file, "[.|/]"))[length(unlist(strsplit(hd_file, "[.|/]")))-1]`
+
+```{r samplename, echo=FALSE}
+paste("Dataset:", dataset)
+paste("Sample Name:",  unlist(strsplit(hd_file, "[.|/]"))[length(unlist(strsplit(hd_file, "[.|/]")))-1])
+
+```
+
+
 ### OPTIONS LIST STUFF: 
 
 ```{r optionstlistthings, echo=FALSE, warning=FALSE, message=FALSE}
