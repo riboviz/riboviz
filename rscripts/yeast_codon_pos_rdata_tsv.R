@@ -51,6 +51,11 @@ all_genes <- matrix(, nrow = 0, ncol = 3)
 colnames(all_genes) <- c("Gene", "Codon", "Pos")
 print(all_genes)
 
+all_genes_xxx <- data.frame(Gene = character(),
+                            Codon = character(),
+			    Pos = numeric(),
+			    stringsAsFactors=FALSE) 
+
 print("For each codon, add the rows of its matrix to the above matrix, using the codon name for the values of the Codon column")
 num_rows <- 0
 codons <- attr(codon_pos, "name")
