@@ -10,15 +10,14 @@
 # The script operates as follows:
 #
 # 1. Load yeast_codon_pos_i200.RData.
-# 2. Create a matrix with columns Gene, Pos, Codon
+# 2. Create a matrix with columns Gene, Codon, Pos
 # 3. For each codon, add the rows of its matrix to the above matrix,
 #    using the codon name for the values of the Codon column.
 # 4. Convert matrix to data frame.
 # 5. Convert factors to characters.
 # 6. Convert Pos column to numberic.
 # 7. Sort by Gene then by Pos.
-# 8. Reorder columns to Gene, Codon, Pos
-# 9. Save data frame as TSV file.
+# 8. Save data frame as TSV file.
 
 suppressMessages(library(optparse, quietly = TRUE))
 option_list <- list(
@@ -36,7 +35,6 @@ option_list <- list(
 opt <- optparse::parse_args(OptionParser(option_list = option_list),
                             convert_hyphens_to_underscores = TRUE)
 attach(opt)
-opt
 
 print(paste0("Loading ", input_file))
 load(input_file)
@@ -48,9 +46,9 @@ print(paste0("class(ttt): ", class(ttt)))
 print(paste0("typeof(ttt): ", typeof(ttt)))
 head(ttt)
 
-print("Creating a matrix with columns Gene, Pos, Codon")
+print("Creating a matrix with columns Gene, Codon, Pos")
 all_genes <- matrix(, nrow = 0, ncol = 3)
-colnames(all_genes) <- c("Gene", "Pos", "Codon")
+colnames(all_genes) <- c("Gene", "Codon", "Pos")
 print(all_genes)
 
 print("For each codon, add the rows of its matrix to the above matrix, using the codon name for the values of the Codon column")
@@ -61,8 +59,7 @@ for (codon in codons) {
     genes <- codon_pos[[codon]]
     num_rows <- num_rows + nrow(genes)
     genes_codon <- cbind(genes, codon)
-#    head(genes_codon)
-#    genes_codon <- genes_codon[,c("Gene", "Codon", "Pos")]
+    genes_codon <- genes_codon[, c(1, 3, 2)]
     all_genes <- rbind(all_genes, genes_codon)
 }
 print(paste0("Expected number of rows: ", num_rows))
@@ -90,11 +87,6 @@ nrow(all_genes_df)
 print("Sorting by Gene then by Pos")
 all_genes_df <- all_genes_df[with(all_genes_df, order(Gene, Pos)), ]
 # all_genes_df <- all_genes_df[order(all_genes_df$Gene, all_genes_df$Pos),]
-head(all_genes_df)
-nrow(all_genes_df)
-
-print("Reordering columns to Gene, Codon, Pos")
-all_genes_df <- all_genes_df[,c("Gene", "Codon", "Pos")]
 head(all_genes_df)
 nrow(all_genes_df)
 
