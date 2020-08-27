@@ -15,9 +15,10 @@
 #    using the codon name for the values of the Codon column.
 # 4. Convert matrix to data frame.
 # 5. Convert factors to characters.
-# 6. Convert Pos column to numberic.
-# 7. Sort by Gene then by Pos.
-# 8. Save data frame as TSV file.
+# 6. Convert Pos column to numeric.
+# 7. Add optional offset (default 0) to each codon position.
+# 8. Sort by Gene then by Pos.
+# 9. Save data frame as TSV file.
 
 suppressMessages(library(optparse, quietly = TRUE))
 option_list <- list(
@@ -25,6 +26,11 @@ option_list <- list(
               type = "character",
 	      default = "data/yeast_codon_pos_i200.RData",
               help = "Yeast codon positions RData file"
+  ),
+  make_option("--offset",
+              type = "integer",
+	      default = 0,
+              help = "Codon position offset"
   ),
   make_option("--output-file",
               type = "character",
@@ -36,15 +42,15 @@ opt <- optparse::parse_args(OptionParser(option_list = option_list),
                             convert_hyphens_to_underscores = TRUE)
 attach(opt)
 
-print(paste0("Loading ", input_file))
+print(paste("Loading", input_file))
 load(input_file)
-print(paste0("class(codon_pos): ", class(codon_pos)))
-print(paste0("typeof(codon_pos): ", typeof(codon_pos)))
+print(paste("class(codon_pos):", class(codon_pos)))
+print(paste("typeof(codon_pos):", typeof(codon_pos)))
 
 print("Information about codon_pos entry for TTT:")
 ttt <- codon_pos[['TTT']]
-print(paste0("class(ttt): ", class(ttt)))
-print(paste0("typeof(ttt): ", typeof(ttt)))
+print(paste("class(ttt):", class(ttt)))
+print(paste("typeof(ttt):", typeof(ttt)))
 head(ttt)
 
 print("Creating a matrix with columns Gene, Codon, Pos")
@@ -63,8 +69,8 @@ for (codon in codons) {
     codon_genes <- codon_genes[, c(1, 3, 2)]
     genes_codons <- rbind(genes_codons, codon_genes)
 }
-print(paste0("Expected number of rows: ", num_rows))
-print(paste0("Actual number of rows: ", nrow(genes_codons)))
+print(paste("Expected number of rows:", num_rows))
+print(paste("Actual number of rows:", nrow(genes_codons)))
 head(genes_codons)
 
 print("Converting matrix to data frame")
@@ -80,11 +86,15 @@ genes_codons_df <- data.frame(lapply(genes_codons_df, as.character),
 print("Converting Pos to numeric")
 genes_codons_df <- transform(genes_codons_df, Pos = as.numeric(Pos))
 
+print(paste("Add offset", offset, "to each codon position"))
+genes_codons_df[, "Pos"] = genes_codons_df[, "Pos"] + offset
+head(genes_codons_df)
+
 print("Sorting by Gene then by Pos")
 genes_codons_df <- genes_codons_df[with(genes_codons_df, order(Gene, Pos)), ]
 head(genes_codons_df)
 
-print(paste0("Save data frame as TSV file to ", output_file))
+print(paste("Save data frame as TSV file to", output_file))
 write.table(genes_codons_df,
             output_file,
 	    row.names = FALSE,
