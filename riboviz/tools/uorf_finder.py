@@ -1,32 +1,30 @@
 """
-Identify upstream open reading frames
+Identify upstream open reading frames (uORFs).
 
 Usage::
 
-    python uorf_finder.py --fasta FASTA_FILE_IN  --gff3 GFF3_FILE_IN
-                          --output GFF3_FILE_OUT --newfasta FASTA_FILE_OUT
-                          --min_length MINIMUM_NUMBER_OF_CODON
-                          [--start_codons [START_CODONS]]
-                          [--stop_codons [STOP_CODONS]]
+    python -m riboviz.tools.uorf_finde [-h] \
+        -f FASTA -g GFF3 -o GFF3_OUTPUT -u FASTA_OUTPUT \
+        -m MIN_LENGTH [-s START_CODONS [START_CODONS ...]] \
+         [-e STOP_CODONS [STOP_CODONS ...]]
 
-
-    --fasta        FASTA_FILE_IN   FASTA file input
-    --gff3         GFF3_FILE_IN    GFF3 file input
-    --output       GFF3_FILE_OUT   GFF3 file output
-    --newfasta     FASTA_FILE_OUT  FASTA file output
-                                   a new fasta file only contains the UTR5 and CDS region of the input fasta file
-    --min_length   MINIMUM_NUMBER_OF_CODON  The minimum number of codon you want for your uORFs
-    --start_codons [START_CODONS]  start codon
-                                   (default is ATG)
-    --stop_codons  [STOP_CODONS]   stop codon
-                                   (default is TAA TGA TAG)
-
-Examples::
-
-     python uorf_finder.py --fasta uORFtest_yeast_4CDS_w_250utrs.fa -
-                            -gff3 uORFtest_yeast_4CDS_w_250utrs.gff3
-                            --output output_from_script.gff3
-                            --min_length 10
+    -h, --help            show this help message and exit
+    -f FASTA, --fasta FASTA
+                          fasta file input
+    -g GFF3, --gff3 GFF3  gff3 file input
+    -o GFF3_OUTPUT, --gff3-output GFF3_OUTPUT
+                          gff3 file output
+    -u FASTA_OUTPUT, --fasta-output FASTA_OUTPUT
+                          fasta file output with only UTR5 and CDS
+                          regions
+    -m MIN_LENGTH, --min-length MIN_LENGTH
+                          Minimum number of codons for uORFs
+    -s START_CODONS [START_CODONS ...], --start-codons START_CODONS
+     [START_CODONS ...] 
+                          Start codon (default ATG)
+    -e STOP_CODONS [STOP_CODONS ...], --stop-codons STOP_CODONS
+    -[STOP_CODONS ...]   
+                          Stop codons (default TAA TAG TGA)
 """
 import argparse
 import os
@@ -41,20 +39,46 @@ from Bio.SeqFeature import SeqFeature
 
 
 def parse_command_line_options():
+    """
+    Parse command-line options.
+
+    :returns: command-line options
+    :rtype: argparse.Namespace
+    """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--fasta')
-    parser.add_argument('--gff3')
-    parser.add_argument('--output')
-    parser.add_argument('--min_length', type=int)
-    parser.add_argument('--new_fasta')
-    parser.add_argument('--start_codons',
+    parser.add_argument('-f',
+                        '--fasta',
+                        required=True,
+                        help="fasta file input")
+    parser.add_argument('-g',
+                        '--gff3',
+                        required=True,
+                        help="gff3 file input")
+    parser.add_argument('-o',
+                        '--gff3-output',
+                        required=True,
+                        help="gff3 file output")
+    parser.add_argument('-u',
+                        '--fasta-output',
+                        required=True,
+                        help="fasta file output with only UTR5 and CDS regions")
+    parser.add_argument('-m',
+                        '--min-length',
+                        type=int,
+                        required=True,
+                        help="Minimum number of codons for uORFs")
+    parser.add_argument('-s',
+                        '--start-codons',
                         default=['ATG'],
-                        nargs="+")
-    parser.add_argument('--stop_codons',
+                        nargs="+",
+                        help="Start codon (default ATG)")
+    parser.add_argument('-e',
+                        '--stop-codons',
                         default=['TAA', 'TAG', 'TGA'],
-                        nargs="+")
-    args = parser.parse_args()
-    return args
+                        nargs="+",
+                        help="Stop codons (default TAA TAG TGA)")
+    options = parser.parse_args()
+    return options
 
 
 def extract_utr5_cds_postion(mygff3):
@@ -176,23 +200,25 @@ def write_to_gff3(final_list, output_file, newfasta):
 
 def invoke_uorfs_finder():
     options = parse_command_line_options()
-    myfasta = options.fasta
-    mygff3 = options.gff3
-    output_file = options.output
+    fasta = options.fasta
+    gff3 = options.gff3
+    gff3_output = options.gff3_output
     min_length = options.min_length
     start_codons = options.start_codons
     stop_codons = options.stop_codons
-    newfasta = options.new_fasta
-    position_dict = extract_utr5_cds_postion(mygff3)
-    extract_fasta_sequence(myfasta, newfasta, position_dict)
-    initial_list = list(startstop_codon(newfasta, start_codons, stop_codons))
+    fasta_output = options.fasta_output
+    position_dict = extract_utr5_cds_postion(gff3)
+    extract_fasta_sequence(fasta, fasta_output, position_dict)
+    initial_list = list(startstop_codon(fasta_output, start_codons, stop_codons))
     filter_length_list = check_length(min_length, initial_list)
     filter_length_type_list = check_uorf_type(filter_length_list,
                                               position_dict)
     filter_length_type_orfs_list = remove_main_orfs(filter_length_type_list)
     final_list = longest_orf(filter_length_type_orfs_list)
-    write_to_gff3(final_list, output_file, newfasta)
-    os.system("sed -i '/#/d' {}" .format(output_file))
+    write_to_gff3(final_list, gff3_output, fasta_output)
+    # TODO recode. This removes header comments that are present
+    # for every record in the GFF file.
+    os.system("sed -i '/#/d' {}" .format(gff3_output))
 
 
 if __name__ == "__main__":
