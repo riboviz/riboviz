@@ -61,7 +61,7 @@ for (codon in codons) {
     genes <- codon_pos[[codon]]
     num_rows <- num_rows + nrow(genes)
     genes_codon <- cbind(genes, codon)
-    head(genes_codon)
+#    head(genes_codon)
 #    genes_codon <- genes_codon[,c("Gene", "Codon", "Pos")]
     all_genes <- rbind(all_genes, genes_codon)
 }
