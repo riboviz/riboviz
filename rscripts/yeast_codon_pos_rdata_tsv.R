@@ -61,7 +61,7 @@ for (codon in codons) {
     genes <- codon_pos[[codon]]
     num_rows <- num_rows + nrow(genes)
     genes_codon <- cbind(genes, codon)
-    genes_codon <- genes_codon[,c("Gene", "Codon", "Pos")]
+#    genes_codon <- genes_codon[,c("Gene", "Codon", "Pos")]
     all_genes <- rbind(all_genes, genes_codon)
 }
 print(paste0("Expected number of rows: ", num_rows))
