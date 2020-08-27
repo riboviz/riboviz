@@ -1,241 +1,152 @@
 """
-prep_riboviz.py test suite to test error handling and exit
-codes. prep_riboviz.py is run in "dry-run" mode.
+:py:mod:`riboviz.tools.prep_riboviz` error handling and exit code tests.
+
+The test suite runs :py:mod:`riboviz.tools.prep_riboviz` in "dry-run"
+mode using ``vignette/vignette_config.yaml``
+(:py:const:`riboviz.test.VIGNETTE_CONFIG`).
 """
-import os
-import shutil
-import tempfile
-import pytest
 import yaml
-import riboviz
-import riboviz.test
+import pytest
 import riboviz.process_utils
-import riboviz.validation
+import riboviz.test
 import riboviz.tools
+from riboviz import params
 from riboviz.tools import prep_riboviz
+from riboviz.test.tools import configuration  # Test fixture
+
+TEST_CONFIG_FILE = riboviz.test.VIGNETTE_CONFIG
+"""
+Test file location constant, used by a callback in
+:py:func:`riboviz.test.tools.configuration_module`.
+"""
 
 
-@pytest.fixture(scope="module")
-def arguments():
+def test_missing_config_file():
     """
-    Fixture to create default locations of prep_riboviz.py
-    arguments.
-
-    :return: Python scripts directory, R scripts directory,
-    data directory, vignette configuration file
-    :rtype: tuple(str or unicode, str or unicode,
-    str or unicode, str or unicode)
+    Test that using a non-existent configuration file gives the
+    expected error code.
     """
-    arguments = (riboviz.test.PY_SCRIPTS,
-                 riboviz.test.R_SCRIPTS,
-                 riboviz.test.VIGNETTE_CONFIG)
-    yield arguments
+    exit_code = prep_riboviz.prep_riboviz("nosuch.yaml", True)
+    assert exit_code == prep_riboviz.EXIT_FILE_NOT_FOUND_ERROR, \
+        "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
-@pytest.fixture(scope="function")
-def configuration(arguments):
+def test_no_fq_files_error(configuration):
     """
-    Create a temporary copy of the vignette configuration file,
-    create temporary index, tmp, and output directories, save
-    updated configuration and delete all after tests complete.
+    Test that specifying no sample files gives the expected error
+    code.
 
-    :param arguments: Python scripts directory, R scripts directory,
-    data directory, vignette configuration file
-    (pytest fixture defined in this module)
-    :type arguments: tuple(str or unicode, str or unicode,
-    str or unicode, str or unicode)
-    :return: configuration, path to configuration file
-    :rtype: tuple(dict, str or unicode)
+    :param configuration_module: temporary configuration and \
+    configuration file
+    :type configuration_module: tuple(dict, str or unicode)
     """
-    _, _, config_yaml = arguments
-    with open(config_yaml, 'r') as f:
-        config = yaml.load(f, yaml.SafeLoader)
-
-    _, path = tempfile.mkstemp(prefix="tmp", suffix=".yaml")
-    index_dir = tempfile.mkdtemp("tmp_test_prep_riboviz_index")
-    tmp_dir = tempfile.mkdtemp("tmp_test_prep_riboviz_tmp")
-    out_dir = tempfile.mkdtemp("tmp_test_prep_riboviz_out")
-    logs_dir = tempfile.mkdtemp("tmp_test_prep_riboviz_logs")
-
-    config["dir_index"] = index_dir
-    config["dir_tmp"] = tmp_dir
-    config["dir_out"] = out_dir
-    config["dir_logs"] = logs_dir
-
-    with open(path, 'w') as f:
+    config, config_path = configuration
+    config[params.FQ_FILES] = []
+    with open(config_path, 'w') as f:
         yaml.dump(config, f)
-    yield (config, path)
-    if os.path.exists(path):
-        os.remove(path)
-    shutil.rmtree(index_dir)
-    shutil.rmtree(tmp_dir)
-    shutil.rmtree(out_dir)
-    shutil.rmtree(logs_dir)
-
-
-def test_config_error_missing_config_file(arguments):
-    """
-    Test that a non-existent configuration file causes
-    EXIT_CONFIG_ERROR to be returned.
-
-    :param arguments: Python scripts directory, R scripts directory,
-    data directory, vignette configuration file
-    (pytest fixture defined in this module)
-    :type arguments: tuple(str or unicode, str or unicode,
-    str or unicode, str or unicode)
-    """
-    py_scripts, r_scripts, _ = arguments
-    exit_code = prep_riboviz.prep_riboviz(py_scripts,
-                                          r_scripts,
-                                          "nosuch.yaml",
-                                          True)
+    exit_code = prep_riboviz.prep_riboviz(config_path, True)
     assert exit_code == prep_riboviz.EXIT_CONFIG_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
-@pytest.mark.parametrize("index", ["rRNA_fasta", "orf_fasta"])
-def test_index_error_missing_index_files(arguments, configuration, index):
+def test_fq_files_multiplex_fq_files_error(configuration):
     """
-    Test that the rRNA_fasta and orf_fasta configuration value being
-    non-existent files causes EXIT_INDEX_ERROR to be returned.
+    Test that specifying both sample files and multiplexed sample
+    files gives the expected error code.
 
-    :param arguments: Python scripts directory, R scripts directory,
-    data directory, vignette configuration file
-    (pytest fixture defined in this module)
-    :type arguments: tuple(str or unicode, str or unicode,
-    str or unicode, str or unicode)
-    :param configuration: configuration and path to configuration file
-    (pytest fixture defined in conftest.py)
-    :type configuration: tuple(dict, str or unicode)
-    :param index: index file name configuration parameter
-    :type index: str or unicode
+    :param configuration_module: temporary configuration and \
+    configuration file
+    :type configuration_module: tuple(dict, str or unicode)
     """
-    py_scripts, r_scripts, _ = arguments
-    config, path = configuration
-    config[index] = "nosuch.fa"
-    with open(path, 'w') as f:
+    config, config_path = configuration
+    config[params.MULTIPLEX_FQ_FILES] = ["somefile.fastq"]
+    with open(config_path, 'w') as f:
         yaml.dump(config, f)
-    exit_code = prep_riboviz.prep_riboviz(py_scripts,
-                                          r_scripts,
-                                          path,
-                                          True)
-    assert exit_code == prep_riboviz.EXIT_INDEX_ERROR, \
+    exit_code = prep_riboviz.prep_riboviz(config_path, True)
+    assert exit_code == prep_riboviz.EXIT_CONFIG_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
-def test_no_samples_error(arguments, configuration):
+def test_multiplex_fq_files_missing_sample_sheet_error(configuration):
     """
-    Test that no samples being specified causes
-    EXIT_NO_SAMPLES_ERROR to be returned.
+    Test that specifying multiplexed sample files and a non-existent
+    sample sheet gives the expected error code.
 
-    :param arguments: Python scripts directory, R scripts directory,
-    data directory, vignette configuration file
-    (pytest fixture defined in this module)
-    :type arguments: tuple(str or unicode, str or unicode,
-    str or unicode, str or unicode)
-    :param configuration: configuration and path to configuration file
-    (pytest fixture defined in conftest.py)
-    :type configuration: tuple(dict, str or unicode)
+    :param configuration_module: temporary configuration and \
+    configuration file
+    :type configuration_module: tuple(dict, str or unicode)
     """
-    py_scripts, r_scripts, _ = arguments
-    config, path = configuration
-    config["fq_files"] = []
-    with open(path, 'w') as f:
+    config, config_path = configuration
+    del config[params.FQ_FILES]
+    config[params.MULTIPLEX_FQ_FILES] = ["somefile.fastq"]
+    config[params.SAMPLE_SHEET] = "noSuchFile.tsv"
+    with open(config_path, 'w') as f:
         yaml.dump(config, f)
-    exit_code = prep_riboviz.prep_riboviz(py_scripts,
-                                          r_scripts,
-                                          path,
-                                          True)
-    assert exit_code == prep_riboviz.EXIT_NO_SAMPLES_ERROR, \
+    exit_code = prep_riboviz.prep_riboviz(config_path, True)
+    assert exit_code == prep_riboviz.EXIT_FILE_NOT_FOUND_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
-def test_samples_error_missing_samples(arguments, configuration):
+def test_missing_fq_files(configuration):
     """
-    Test that if all samples are non-existent files then
-    EXIT_SAMPLES_ERROR is returned.
+    Test that if sample files are non-existent this gives the expected
+    error code.
 
-    :param arguments: Python scripts directory, R scripts directory,
-    data directory, vignette configuration file
-    (pytest fixture defined in this module)
-    :type arguments: tuple(str or unicode, str or unicode,
-    str or unicode, str or unicode)
-    :param configuration: configuration and path to configuration file
-    (pytest fixture defined in conftest.py)
-    :type configuration: tuple(dict, str or unicode)
+    :param configuration_module: temporary configuration and \
+    configuration file
+    :type configuration_module: tuple(dict, str or unicode)
     """
-    py_scripts, r_scripts, _ = arguments
-    config, path = configuration
-    config["fq_files"] = {
+    config, config_path = configuration
+    config[params.FQ_FILES] = {
         "WT3AT": "nosuch.fastq.gz",
         "WTnone": "nosuch.fastq.gz"
     }
-    with open(path, 'w') as f:
+    with open(config_path, 'w') as f:
         yaml.dump(config, f)
-    exit_code = prep_riboviz.prep_riboviz(py_scripts,
-                                          r_scripts,
-                                          path,
-                                          True)
-    assert exit_code == prep_riboviz.EXIT_SAMPLES_ERROR, \
+    exit_code = prep_riboviz.prep_riboviz(config_path, True)
+    assert exit_code == prep_riboviz.EXIT_PROCESSING_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code
 
 
-@pytest.mark.parametrize("file_config", ["orf_gff_file",
-                                         "features_file",
-                                         "t_rna",
-                                         "codon_pos"])
-def test_missing_files_error(arguments, configuration, file_config):
+def test_missing_dir_in(configuration):
     """
-    Test that non-existent files being specified for org_gff_file,
-    features_file, t_rna and codon_pos then EXIT_SAMPLES_ERROR is
-    returned.
+    Test that if the input directory is non-existent this gives the
+    expected error code.
 
-    :param arguments: Python scripts directory, R scripts directory,
-    data directory, vignette configuration file
-    (pytest fixture defined in this module)
-    :type arguments: tuple(str or unicode, str or unicode,
-    str or unicode, str or unicode)
-    :param configuration: configuration and path to configuration file
-    (pytest fixture defined in conftest.py)
-    :type configuration: tuple(dict, str or unicode)
-    :param file_config: file name configuration parameter
-    :type file_config: str or unicode
+    :param configuration_module: temporary configuration and \
+    configuration file
+    :type configuration_module: tuple(dict, str or unicode)
     """
-    py_scripts, r_scripts, _ = arguments
-    config, path = configuration
-    config[file_config] = "noSuchFile.txt"
-    with open(path, 'w') as f:
+    config, config_path = configuration
+    del config[params.INPUT_DIR]
+    with open(config_path, 'w') as f:
         yaml.dump(config, f)
-    exit_code = prep_riboviz.prep_riboviz(py_scripts,
-                                          r_scripts,
-                                          path,
-                                          True)
-    assert exit_code == prep_riboviz.EXIT_SAMPLES_ERROR, \
-        "prep_riboviz returned with unexpected exit code %d" % exit_code
-
-
-def test_config_error_missing_dir_in(arguments, configuration):
-    """
-    Test that a missing "dir_in" configuration value causes
-    EXIT_CONFIG_ERROR to be returned.
-
-    :param arguments: Python scripts directory, R scripts directory,
-    data directory, vignette configuration file
-    (pytest fixture defined in this module)
-    :type arguments: tuple(str or unicode, str or unicode,
-    str or unicode, str or unicode)
-    :param configuration: configuration and path to configuration file
-    (pytest fixture defined in conftest.py)
-    :type configuration: tuple(dict, str or unicode)
-    """
-    py_scripts, r_scripts, _ = arguments
-    config, path = configuration
-    del config["dir_in"]
-    with open(path, 'w') as f:
-        yaml.dump(config, f)
-    exit_code = prep_riboviz.prep_riboviz(py_scripts,
-                                          r_scripts,
-                                          path,
-                                          True)
+    exit_code = prep_riboviz.prep_riboviz(config_path, True)
     assert exit_code == prep_riboviz.EXIT_CONFIG_ERROR, \
+        "prep_riboviz returned with unexpected exit code %d" % exit_code
+
+
+@pytest.mark.parametrize("parameter", [params.RRNA_FASTA_FILE,
+                                       params.ORF_FASTA_FILE,
+                                       params.ORF_GFF_FILE,
+                                       params.FEATURES_FILE,
+                                       params.T_RNA_FILE,
+                                       params.CODON_POSITIONS_FILE])
+def test_missing_files_error(configuration, parameter):
+    """
+    Test that using non-existent error code for other input files
+    gives the expected error code.
+
+    :param configuration_module: temporary configuration and \
+    configuration file
+    :type configuration_module: tuple(dict, str or unicode)
+    :param parameter: file name configuration parameter
+    :type parameter: str or unicode
+    """
+    config, config_path = configuration
+    config[parameter] = "noSuchFile.txt"
+    with open(config_path, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = prep_riboviz.prep_riboviz(config_path, True)
+    assert exit_code == prep_riboviz.EXIT_FILE_NOT_FOUND_ERROR, \
         "prep_riboviz returned with unexpected exit code %d" % exit_code

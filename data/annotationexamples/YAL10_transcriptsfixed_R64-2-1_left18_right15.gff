@@ -1,0 +1,13 @@
+##gff-version 3
+##source-version SGD R64-2-1, 2015-01-13
+##subset by Edward Wallace, yeastutrgff 2020-04-16
+YAL001C_mRNA	yeastutrgff	CDS	19	3501	.	+	0	Name= YAL001C_CDS
+YAL002W_mRNA	yeastutrgff	CDS	19	3843	.	+	0	Name= YAL002W_CDS
+YAL003W_mRNA	yeastutrgff	CDS	19	639	.	+	0	Name= YAL003W_CDS
+YAL005C_mRNA	yeastutrgff	CDS	19	1947	.	+	0	Name= YAL005C_CDS
+YAL007C_mRNA	yeastutrgff	CDS	19	666	.	+	0	Name= YAL007C_CDS
+YAL008W_mRNA	yeastutrgff	CDS	19	615	.	+	0	Name= YAL008W_CDS
+YAL009W_mRNA	yeastutrgff	CDS	19	798	.	+	0	Name= YAL009W_CDS
+YAL010C_mRNA	yeastutrgff	CDS	19	1500	.	+	0	Name= YAL010C_CDS
+YAL011W_mRNA	yeastutrgff	CDS	19	1896	.	+	0	Name= YAL011W_CDS
+YAL012W_mRNA	yeastutrgff	CDS	19	1203	.	+	0	Name= YAL012W_CDS

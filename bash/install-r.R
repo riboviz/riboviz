@@ -1,0 +1,13 @@
+r = getOption("repos")
+r["CRAN"] = "https://cloud.r-project.org" 
+options(repos = r)
+dir.create(path = Sys.getenv("R_LIBS_USER"), showWarnings=FALSE, recursive=TRUE)
+install.packages("RcppRoll", lib=Sys.getenv("R_LIBS_USER"))
+install.packages("optparse", lib=Sys.getenv("R_LIBS_USER"))
+install.packages("tidyr", lib=Sys.getenv("R_LIBS_USER"))
+install.packages("ggplot2", lib=Sys.getenv("R_LIBS_USER"))
+install.packages("shiny", lib=Sys.getenv("R_LIBS_USER"))
+install.packages("plotly", lib=Sys.getenv("R_LIBS_USER"))
+install.packages("readr", lib=Sys.getenv("R_LIBS_USER"))
+install.packages("git2r", lib=Sys.getenv("R_LIBS_USER"))
+install.packages("here", lib=Sys.getenv("R_LIBS_USER"))

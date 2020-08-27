@@ -1,56 +1,57 @@
-#! python
+#!/usr/bin/env python
+"""
+Check FASTA and GFF files for compatibility.
 
-## Check fasta and gff files are compatible with RiboViz
-## Specifically, test that 
-##    - the beginning of every CDS is a start codon (ATG; translates to M)
-##    - the stop of every CDS is a stop codon (TAG, TGA, TAA; translates to *)
-##    - there are no stop codons internal to the CDS.
-## Some unusual genes (e.g. frameshifts) might not have this.
-## 
-## example:
-##   python riboviz/tools/check_fasta_gff.py -fa vignette/input/yeast_YAL_CDS_w_250utrs.fa -gff vignette/input/yeast_YAL_CDS_w_250utrs.gff3 
+Usage::
 
-import argparse, gffutils
-from Bio import SeqIO
-from Bio.Seq import Seq
-from Bio.Alphabet import IUPAC
-# from warnings import warn
+    python -m riboviz.tools.check_fasta_gff [-h] -f FASTA -g GFF
 
-if __name__=="__main__" :
-    # take input options
-    parser = argparse.ArgumentParser(description="Check fasta and gff files have start and stop codons as expected")
-    parser.add_argument("-fa","--fastain",dest="fastain",nargs='?',help="fasta file input")
-    parser.add_argument("-gff","--gffin",dest="gffin",nargs='?',help="gff3 file input")
+    -h, --help            show this help message and exit
+    -f FASTA, --fasta FASTA
+                          fasta file input
+    -g GFF, --gff GFF     gff3 file input
+
+See :py:func:`riboviz.fasta_gff.check_fasta_gff`.
+"""
+import argparse
+from riboviz import fasta_gff
+from riboviz import provenance
+
+
+def parse_command_line_options():
+    """
+    Parse command-line options.
+
+    :returns: command-line options
+    :rtype: argparse.Namespace
+    """
+    parser = argparse.ArgumentParser(
+        description="Check FASTA and GFF files for compatibility")
+    parser.add_argument("-f",
+                        "--fasta",
+                        dest="fasta",
+                        required=True,
+                        help="fasta file input")
+    parser.add_argument("-g",
+                        "--gff",
+                        dest="gff",
+                        required=True,
+                        help="gff3 file input")
     options = parser.parse_args()
-    
-    gffin   = options.gffin
-    fastain = options.fastain
-    
-    print(( "Checking fasta file " + fastain + "\n with gff file " + gffin ))
-    
-    # open fasta and gff files
-    gffdb = gffutils.create_db(gffin, dbfn='test.db', force=True, keep_order=True,
-    merge_strategy='merge', sort_attribute_values=True)
-    
-    for CDS_coord in gffdb.features_of_type('CDS'):
-        # for all CDS entries in gff,
-        # print(CDS_coord.seqid)
-        # extract CDS
-        CDS_seq = CDS_coord.sequence(fastain)
-        
-        CDS_len_remainder = len(CDS_seq) % 3 
-        if not ( CDS_len_remainder == 0 ) :
-           warn( CDS_coord.seqid + " has length that isn't divisible by 3" )
-           CDS_seq += ( "N" * ( 3 - CDS_len_remainder) )
-        
-        # translate CDS
-        CDS_trans = Seq( CDS_seq, IUPAC.ambiguous_dna ).translate()
-        
-        if ( CDS_trans[0] != "M" ) :
-            print(( CDS_coord.seqid + " doesn't start with ATG" ))
-        if ( CDS_trans[-1] != "*" ) :
-            print(( CDS_coord.seqid + " doesn't stop at end" ))
-        if any( [ L == "*"  for L in CDS_trans[:-1] ] ) : 
-            print(( CDS_coord.seqid + " has internal STOP" ))
-    
-    print("Done checking")
+    return options
+
+
+def invoke_check_fasta_gff():
+    """
+    Parse command-line options then invoke
+    :py:func:`riboviz.fasta_gff.check_fasta_gff`.
+    """
+    print(provenance.write_provenance_to_str(__file__))
+    options = parse_command_line_options()
+    fasta = options.fasta
+    gff = options.gff
+    fasta_gff.check_fasta_gff(fasta, gff)
+
+
+if __name__ == "__main__":
+    invoke_check_fasta_gff()
