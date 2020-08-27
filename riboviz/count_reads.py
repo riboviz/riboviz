@@ -535,7 +535,9 @@ def equal_read_counts(file1, file2, comment="#"):
 
     The data frames are compared column-by-column. All columns, with
     the exception of ``File`` are compared for exact equality
-    using ``pandas.core.series.Series.equals``.
+    using ``pandas.core.series.Series.equals``. ``File`` is
+    compared using the basename of the file only, ignoring
+    the path.
 
     :param file1: File name
     :type file1: str or unicode
@@ -564,17 +566,10 @@ def equal_read_counts(file1, file2, comment="#"):
             assert column1.equals(column2),\
                 "Unequal column values: %s" % column
         for (f1, f2) in zip(data1[FILE], data2[FILE]):
-            is_abs1 = os.path.isabs(f1)
-            is_abs2 = os.path.isabs(f2)
-            if (is_abs1 and is_abs2) or \
-               ((not is_abs1) and (not is_abs2)):
-                assert f1 == f2, "Unequal column values: %s" % FILE
-            elif is_abs1:
-                assert f1.endswith(f2), \
-                    "Unequal column values: %s" % FILE
-            else:
-                assert f2.endswith(f1), \
-                    "Unequal column values: %s" % FILE
+            f1_name = os.path.basename(f1)
+            f2_name = os.path.basename(f2)
+            assert f1_name == f2_name, \
+                "Unequal column values: %s" % FILE
     except AssertionError as error:
         # Add file names to error message.
         message = error.args[0]
