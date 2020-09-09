@@ -52,7 +52,7 @@ ISSUE_FORMATS = {
     ISSUE_NO_STOP: "Sequence {} feature {} doesn't stop at end",
     ISSUE_INTERNAL_STOP: "Sequence {} feature {} has internal STOP",
     ISSUE_NO_ID_NAME: "Sequence {} feature {} has no 'ID' or 'Name' attribute",
-    ISSUE_DUPLICATE_FEATURE_ID: "Sequence {} has non-unique feature ID {}"
+    ISSUE_DUPLICATE_FEATURE_ID: "Sequence {} has non-unique 'ID' attribute {}"
 }
 """ Format strings for printing FASTA-GFF compatibility issues. """
 
@@ -84,7 +84,7 @@ def get_fasta_gff_cds_issues(fasta, gff):
     * :py:const:`ISSUE_NO_ID_NAME`: The CDS has no ``ID`` or ``Name``
       attribute.
     * :py:const:`ISSUE_DUPLICATE_FEATURE_ID`: The CDS has non-unique
-      feature ID.
+      ``ID`` attribute.
 
     Some unusual genes (e.g. frame shifts) might have these issues.
 
