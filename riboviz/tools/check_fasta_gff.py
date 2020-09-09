@@ -4,12 +4,16 @@ Check FASTA and GFF files for compatibility.
 
 Usage::
 
-    python -m riboviz.tools.check_fasta_gff [-h] -f FASTA -g GFF
+    python -m riboviz.tools.check_fasta_gff [-h] \
+        -f FASTA -g GFF [-o FEATURES_ISSUES]
 
     -h, --help            show this help message and exit
     -f FASTA, --fasta FASTA
                           fasta file input
     -g GFF, --gff GFF     gff3 file input
+    -o FEATURES_ISSUES, --features-issues FEATURES_ISSUES
+                          Features issues file output
+                          (default features_issues.tsv)
 
 See :py:func:`riboviz.fasta_gff.check_fasta_gff`.
 """
@@ -37,6 +41,11 @@ def parse_command_line_options():
                         dest="gff",
                         required=True,
                         help="gff3 file input")
+    parser.add_argument("-o",
+                        "--features-issues",
+                        dest="features_issues",
+                        default="features_issues.tsv",
+                        help="Features issues file output")
     options = parser.parse_args()
     return options
 
@@ -50,7 +59,8 @@ def invoke_check_fasta_gff():
     options = parse_command_line_options()
     fasta = options.fasta
     gff = options.gff
-    fasta_gff.check_fasta_gff(fasta, gff)
+    features_issues = options.features_issues
+    fasta_gff.check_fasta_gff(fasta, gff, features_issues)
 
 
 if __name__ == "__main__":

@@ -9,47 +9,71 @@ from riboviz import provenance
 
 
 GENE = "Gene"
-""" Column name (gene name). """
+""" Codon positions column name (gene name). """
 POS = "Pos"
 """
-Column name (codon position in coding sequence, 1-indexed by codon).
+Codon positions column name (codon position in coding sequence,
+1-indexed by codon).
 """
 CODON = "Codon"
-""" Column name (codon). """
+""" Codon positions column name (codon). """
 CDS_FEATURE_FORMAT = "{}_CDS"
 """
 CDS feature name format for CDS features which do not define ``Name``
 or ``ID`` attributes.
 """
 
+FEATURE = "Feature"
+""" FASTA-GFF compatibility column name (feature ID). """
+ISSUE = "Issue"
+""" FASTA-GFF compatibility column name (issue). """
+ISSUE_NO_ATG_START = "NoATGStart"
+""" FASTA-GFF compatibility issue column value. """
+ISSUE_NO_STOP = "NoStop"
+""" FASTA-GFF compatibility issue column value. """
+ISSUE_INTERNAL_STOP = "InternalStop"
+""" FASTA-GFF compatibility issue column value. """
+ISSUE_FORMATS = {
+    ISSUE_NO_ATG_START: "{} doesn't start with ATG",
+    ISSUE_NO_STOP: "{} doesn't stop at end",
+    ISSUE_INTERNAL_STOP: "{} has internal STOP"
+}
+""" Format strings for printing FASTA-GFF compatibility issues. """
 
-def check_fasta_gff(fasta, gff):
+
+def get_fasta_gff_cds_issues(fasta, gff):
     """
-    Check FASTA and GFF files for compatibility. Check that:
+    Check FASTA and GFF files for compatibility and return a list of
+    issues for each coding sequence, ``CDS``, feature. A dictionary
+    is returned, indexed by feature ID and with a list of issues for
+    each value. Issues are:
 
-    * The beginning of every CDS is a start codon (ATG; translates to
-      ``M``).
-    * The stop of every CDS is a stop codon (TAG, TGA, TAA; translates
-      to ``*``)
-    * There are no stop codons internal to the CDS.
+    * :py:const:`ISSUE_NO_ATG_START`: The beginning of a CDS does not
+      have a start codon (``ATG``, translates to ``M``)
+    * :py:const:`ISSUE_NO_STOP`: The end codon of the CDS is not a
+      stop codon (``TAG``, ``TGA``, ``TAA``, translates to ``*``).
+    * :py:const:`ISSUE_INTERNAL_STOP`: There are stop codons internal
+      to the CDS.
 
-    Some unusual genes (e.g. frameshifts) might not have this.
+    Some unusual genes (e.g. frame shifts) might have these issues.
 
-    Information is currently printed to standard output.
+    If a feature has no issues then it has a no entry in the
+    issues dictionary.
 
     :param fasta: FASTA file
     :type fasta: str or unicode
     :param gff: GFF file
     :type gff: str or unicode
+    :return: Dictionary of issues, indexed by feature ID.
+    :rtype: dict(str or unicode -> list(str or unicode))
     """
-    print(("Checking fasta file " + fasta))
-    print(("with gff file " + gff))
     gffdb = gffutils.create_db(gff,
                                dbfn='gff.db',
                                force=True,
                                keep_order=True,
                                merge_strategy='merge',
                                sort_attribute_values=True)
+    issues = {}
     for feature in gffdb.features_of_type('CDS'):
         try:
             sequence = feature.sequence(fasta)
@@ -61,6 +85,7 @@ def check_fasta_gff(fasta, gff):
             # file.
             warnings.warn(str(e))
             continue
+        feature_issues = []
         seq_len_remainder = len(sequence) % 3
         if seq_len_remainder != 0:
             warnings.warn(
@@ -69,11 +94,92 @@ def check_fasta_gff(fasta, gff):
             sequence += ("N" * (3 - seq_len_remainder))
         translation = Seq(sequence).translate()
         if translation[0] != "M":
-            print((feature.seqid + " doesn't start with ATG."))
+            feature_issues.append(ISSUE_NO_ATG_START)
         if translation[-1] != "*":
-            print((feature.seqid + " doesn't stop at end."))
+            feature_issues.append(ISSUE_NO_STOP)
         if any([L == "*" for L in translation[:-1]]):
-            print((feature.seqid + " has internal STOP."))
+            feature_issues.append(ISSUE_INTERNAL_STOP)
+        if feature_issues:
+            issues[feature.seqid] = feature_issues
+    return issues
+
+
+def fasta_gff_issues_to_df(feature_issues):
+    """
+    Given dictionary of the issues for features, keyed by feature
+    name, return a Pandas data frame with the issues.
+
+    The data frame has columns:
+
+    * :py:const:`FEATURE`: feature name.
+    * :py:const:`ISSUE`: issue.
+
+    :param feature_issues: Issues for each feature, keyed by feature \
+    name
+    :type feature_issues: dict(str or unicode -> list(str or unicode))
+    :return: data frame
+    :rtype: pandas.core.frame.DataFrame
+    """
+    feature_issues_list = []
+    for feature_name, issues in list(feature_issues.items()):
+        for issue in issues:
+            feature_issues_list.append({FEATURE: feature_name,
+                                        ISSUE: issue})
+    # Create empty DataFrame so if feature_issues and
+    # feature_issues_list are empty we still have an empty DataFrame
+    # with the column names.
+    df = pd.DataFrame(columns=[FEATURE, ISSUE])
+    df = df.append(pd.DataFrame(feature_issues_list),
+                   ignore_index=True)
+    return df
+
+
+def check_fasta_gff(fasta, gff, feature_issues_file, delimiter="\t"):
+    """
+    Check FASTA and GFF files for compatibility and both print and
+    save a list of issues for each coding sequence, ``CDS``,
+    feature.
+
+    A tab-separated values file of the issues for each CDS, keyed by
+    CDS feature name, is saved.
+
+    The tab-separated values file has columns:
+
+    * :py:const:`FEATURE`: feature name.
+    * :py:const:`ISSUE`: issue.
+
+    Issues include:
+
+    * :py:const:`ISSUE_NO_ATG_START`: The beginning of a CDS does not
+      have a start codon (``ATG``, translates to ``M``)
+    * :py:const:`ISSUE_NO_STOP`: The end codon of the CDS is not a
+      stop codon (``TAG``, ``TGA``, ``TAA``, translates to ``*``).
+    * :py:const:`ISSUE_INTERNAL_STOP`: There are stop codons internal
+      to the CDS.
+
+    See also :py:func:`get_fasta_gff_cds_issues` and
+    :py:func:`fasta_gff_issues_to_df`.
+
+    :param fasta: FASTA file
+    :type fasta: str or unicode
+    :param gff: GFF file
+    :type gff: str or unicode
+    :param fasta: FASTA file
+    :param feature_issues_file: Feature issues file
+    :type feature_issues_file: str or unicode
+    :param delimiter: Delimiter
+    :type delimiter: str or unicode
+    """
+    feature_issues = get_fasta_gff_cds_issues(fasta, gff)
+    feature_issues_df = fasta_gff_issues_to_df(feature_issues)
+    for _, row in feature_issues_df.iterrows():
+        print(ISSUE_FORMATS[row["Issue"]].format(row["Feature"]))
+    provenance.write_provenance_header(__file__, feature_issues_file)
+    feature_issues_df[list(feature_issues_df.columns)].to_csv(
+        feature_issues_file,
+        mode='a',
+        sep=delimiter,
+        index=False)
 
 
 def sequence_to_codons(sequence):
