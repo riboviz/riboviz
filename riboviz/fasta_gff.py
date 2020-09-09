@@ -46,7 +46,9 @@ ISSUE_NO_ID_NAME = "NoIdName"
 """ FASTA-GFF compatibility issue column value. """
 ISSUE_DUPLICATE_FEATURE_ID = "DuplicateFeatureId"
 """ FASTA-GFF compatibility issue column value. """
-ISSUE_FORMATS = {
+ISSUE_MULTIPLE_CDS = "MultipleCDS"
+""" FASTA-GFF compatibility issue column value. """
+ISSUE_FEATURE_FORMATS = {
     ISSUE_INCOMPLETE: "Sequence {} feature {} has length not divisible by 3",
     ISSUE_NO_ATG_START: "Sequence {} feature {} doesn't start with ATG",
     ISSUE_NO_STOP: "Sequence {} feature {} doesn't stop at end",
@@ -55,18 +57,23 @@ ISSUE_FORMATS = {
     ISSUE_DUPLICATE_FEATURE_ID: "Sequence {} has non-unique 'ID' attribute {}"
 }
 """ Format strings for printing FASTA-GFF compatibility issues. """
+ISSUE_SEQUENCE_FORMATS = {
+    ISSUE_MULTIPLE_CDS: "Sequence {} has multiple CDS"
+}
+""" Format strings for printing FASTA-GFF compatibility issues. """
 
 
 def get_fasta_gff_cds_issues(fasta, gff):
     """
     Check FASTA and GFF files for compatibility and return a list of
-    issues for each coding sequence, ``CDS``, feature. A list of
-    tuples of form (sequence ID, feature ID, list of issues) is
-    returned.
+    issues for relating to coding sequences, ``CDS``, features. A list
+    of tuples of form (sequence ID, feature ID None if not applicable
+    to the issue), issue) is returned.
 
     The feature ID is one of:
 
-    * Value of ``ID`` attribute for feature, if defuned.
+    * ``None`` if the issue relates to the sequence not the feature.
+    * Value of ``ID`` attribute for feature, if defined.
     * Value of ``Name`` attribute for feature, if defined, and if
       ``ID`` is undefined.
     * ``Undefined`` otherwise.
@@ -85,6 +92,7 @@ def get_fasta_gff_cds_issues(fasta, gff):
       attribute.
     * :py:const:`ISSUE_DUPLICATE_FEATURE_ID`: The CDS has non-unique
       ``ID`` attribute.
+    * :py:const:`ISSUE_MULTIPLE_CDS`: Sequence has multiple CDS.
 
     Some unusual genes (e.g. frame shifts) might have these issues.
 
@@ -95,10 +103,9 @@ def get_fasta_gff_cds_issues(fasta, gff):
     :type fasta: str or unicode
     :param gff: GFF file
     :type gff: str or unicode
-    :return: List of issues for each feature of each sequence
-    and feature ID.
-    :rtype: list(tuple(str or unicode, str or unicode, list(str or
-    unicode)))
+    :return: List of issues for sequences and features.
+    :rtype: list(tuple(str or unicode, str or unicode, str or
+    unicode))
     """
     gffdb = gffutils.create_db(gff,
                                dbfn='gff.db',
@@ -110,6 +117,7 @@ def get_fasta_gff_cds_issues(fasta, gff):
     # Track IDs of features encountered. Each ID must be unique within
     # a GFF file. See http://gmod.org/wiki/GFF3.
     feature_ids = set()
+    sequence_features = {}
     for feature in gffdb.features_of_type('CDS'):
         try:
             sequence = feature.sequence(fasta)
@@ -121,45 +129,51 @@ def get_fasta_gff_cds_issues(fasta, gff):
             # file.
             warnings.warn(str(e))
             continue
-        feature_issues = []
-
-        seq_len_remainder = len(sequence) % 3
-        if seq_len_remainder != 0:
-            feature_issues.append(ISSUE_INCOMPLETE)
-            sequence += ("N" * (3 - seq_len_remainder))
-
-        translation = Seq(sequence).translate()
-
-        if translation[0] != "M":
-            feature_issues.append(ISSUE_NO_ATG_START)
-
-        if translation[-1] != "*":
-            feature_issues.append(ISSUE_NO_STOP)
-
-        if any([L == "*" for L in translation[:-1]]):
-            feature_issues.append(ISSUE_INTERNAL_STOP)
 
         feature_id = None
         if "ID" in feature.attributes:
             feature_id = feature.attributes["ID"][0].strip()
             if feature_id in feature_ids:
-                feature_issues.append(ISSUE_DUPLICATE_FEATURE_ID)
+                issues.append((feature.seqid,
+                               feature_id,
+                               ISSUE_DUPLICATE_FEATURE_ID))
             else:
                 feature_ids.add(feature_id)
+            feature_id_name = feature_id
 
         feature_name = None
         if "Name" in feature.attributes:
             feature_name = feature.attributes["Name"][0].strip()
-        if not feature_id and not feature_name:
-            feature_issues.append(ISSUE_NO_ID_NAME)
-
-        if feature_id:
-            feature_id_name = feature_id
-        elif feature_name:
             feature_id_name = feature_name
-        else:
+        if not feature_id and not feature_name:
+            issues.append((feature.seqid,
+                           UNDEFINED_FEATURE,
+                           ISSUE_NO_ID_NAME))
             feature_id_name = UNDEFINED_FEATURE
-        issues.append((feature.seqid, feature_id_name, feature_issues))
+
+        seq_len_remainder = len(sequence) % 3
+        if seq_len_remainder != 0:
+            issues.append((feature.seqid, feature_id_name, ISSUE_INCOMPLETE))
+            sequence += ("N" * (3 - seq_len_remainder))
+
+        translation = Seq(sequence).translate()
+
+        if translation[0] != "M":
+            issues.append((feature.seqid, feature_id_name, ISSUE_NO_ATG_START))
+
+        if translation[-1] != "*":
+            issues.append((feature.seqid, feature_id_name, ISSUE_NO_STOP))
+
+        if any([L == "*" for L in translation[:-1]]):
+            issues.append((feature.seqid, feature_id_name, ISSUE_INTERNAL_STOP))
+
+        if feature.seqid not in sequence_features:
+            sequence_features[feature.seqid] = 0
+        sequence_features[feature.seqid] += 1
+
+    for sequence, num_features in list(sequence_features.items()):
+        if num_features > 1:
+            issues.append((sequence, None, ISSUE_MULTIPLE_CDS))
     return issues
 
 
@@ -174,19 +188,17 @@ def fasta_gff_issues_to_df(feature_issues):
     * :py:const:`FEATURE`: feature ID.
     * :py:const:`ISSUE`: issue.
 
-    :param feature_issues: List of issues for each feature of each
-    sequence and feature ID.
-    :type feature_issues: list(tuple(str or unicode, str or unicode,
-    list(str or unicode)))
+    :param feature_issues: List of issues for sequences and features.
+    :type feature_issues: list(tuple(str or unicode, str or unicode, str or
+    unicode))
     :return: data frame
     :rtype: pandas.core.frame.DataFrame
     """
     feature_issues_list = []
-    for (sequence_id, feature_id, issues) in feature_issues:
-        for issue in issues:
-            feature_issues_list.append({SEQUENCE: sequence_id,
-                                        FEATURE: feature_id,
-                                        ISSUE: issue})
+    for (sequence_id, feature_id, issue) in feature_issues:
+        feature_issues_list.append({SEQUENCE: sequence_id,
+                                    FEATURE: feature_id,
+                                    ISSUE: issue})
     # Create empty DataFrame so if feature_issues and
     # feature_issues_list are empty we still have an empty DataFrame
     # with the column names.
@@ -224,7 +236,11 @@ def check_fasta_gff(fasta, gff, feature_issues_file, delimiter="\t"):
     feature_issues = get_fasta_gff_cds_issues(fasta, gff)
     feature_issues_df = fasta_gff_issues_to_df(feature_issues)
     for _, row in feature_issues_df.iterrows():
-        print(ISSUE_FORMATS[row[ISSUE]].format(row[SEQUENCE], row[FEATURE]))
+        issue = row[ISSUE]
+        if issue in ISSUE_FEATURE_FORMATS:
+            print(ISSUE_FEATURE_FORMATS[issue].format(row[SEQUENCE], row[FEATURE]))
+        elif issue in ISSUE_SEQUENCE_FORMATS:
+            print(ISSUE_SEQUENCE_FORMATS[issue].format(row[SEQUENCE]))
     provenance.write_provenance_header(__file__, feature_issues_file)
     feature_issues_df[list(feature_issues_df.columns)].to_csv(
         feature_issues_file,
