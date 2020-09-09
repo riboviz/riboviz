@@ -35,11 +35,14 @@ ISSUE_NO_STOP = "NoStop"
 """ FASTA-GFF compatibility issue column value. """
 ISSUE_INTERNAL_STOP = "InternalStop"
 """ FASTA-GFF compatibility issue column value. """
+ISSUE_NO_ID_NAME = "NoIdName"
+""" FASTA-GFF compatibility issue column value. """
 ISSUE_FORMATS = {
     ISSUE_INCOMPLETE: "{} has length not divisible by 3",
     ISSUE_NO_ATG_START: "{} doesn't start with ATG",
     ISSUE_NO_STOP: "{} doesn't stop at end",
-    ISSUE_INTERNAL_STOP: "{} has internal STOP"
+    ISSUE_INTERNAL_STOP: "{} has internal STOP",
+    ISSUE_NO_ID_NAME: "{} has no 'ID' or 'Name' attribute"
 }
 """ Format strings for printing FASTA-GFF compatibility issues. """
 
@@ -59,6 +62,8 @@ def get_fasta_gff_cds_issues(fasta, gff):
       stop codon (``TAG``, ``TGA``, ``TAA``, translates to ``*``).
     * :py:const:`ISSUE_INTERNAL_STOP`: There are stop codons internal
       to the CDS.
+    * :py:const:`ISSUE_NO_ID_NAME`: The CDS no ``ID`` or ``Name``
+      attribute.
 
     Some unusual genes (e.g. frame shifts) might have these issues.
 
@@ -95,6 +100,9 @@ def get_fasta_gff_cds_issues(fasta, gff):
         if seq_len_remainder != 0:
             feature_issues.append(ISSUE_INCOMPLETE)
             sequence += ("N" * (3 - seq_len_remainder))
+        if "Name" not in feature.attributes \
+           and "ID" not in feature.attributes:
+            feature_issues.append(ISSUE_NO_ID_NAME)
         translation = Seq(sequence).translate()
         if translation[0] != "M":
             feature_issues.append(ISSUE_NO_ATG_START)
@@ -161,6 +169,8 @@ def check_fasta_gff(fasta, gff, feature_issues_file, delimiter="\t"):
       stop codon (``TAG``, ``TGA``, ``TAA``, translates to ``*``).
     * :py:const:`ISSUE_INTERNAL_STOP`: There are stop codons internal
       to the CDS.
+    * :py:const:`ISSUE_NO_ID_NAME`: The CDS no ``ID`` or ``Name``
+      attribute.
 
     See also :py:func:`get_fasta_gff_cds_issues` and
     :py:func:`fasta_gff_issues_to_df`.
