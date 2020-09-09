@@ -44,7 +44,7 @@ ISSUE_INTERNAL_STOP = "InternalStop"
 """ FASTA-GFF compatibility issue column value. """
 ISSUE_NO_ID_NAME = "NoIdName"
 """ FASTA-GFF compatibility issue column value. """
-ISSUE_DUPLICATE_FEATURE = "DuplicateFeatureId"
+ISSUE_DUPLICATE_FEATURE_ID = "DuplicateFeatureId"
 """ FASTA-GFF compatibility issue column value. """
 ISSUE_FORMATS = {
     ISSUE_INCOMPLETE: "Sequence {} feature {} has length not divisible by 3",
@@ -52,7 +52,7 @@ ISSUE_FORMATS = {
     ISSUE_NO_STOP: "Sequence {} feature {} doesn't stop at end",
     ISSUE_INTERNAL_STOP: "Sequence {} feature {} has internal STOP",
     ISSUE_NO_ID_NAME: "Sequence {} feature {} has no 'ID' or 'Name' attribute",
-    ISSUE_DUPLICATE_FEATURE: "Sequence {} has non-unique feature ID {}"
+    ISSUE_DUPLICATE_FEATURE_ID: "Sequence {} has non-unique feature ID {}"
 }
 """ Format strings for printing FASTA-GFF compatibility issues. """
 
@@ -83,7 +83,7 @@ def get_fasta_gff_cds_issues(fasta, gff):
       to the CDS.
     * :py:const:`ISSUE_NO_ID_NAME`: The CDS has no ``ID`` or ``Name``
       attribute.
-    * :py:const:`ISSUE_DUPLICATE_FEATURE`: The CDS has non-unique
+    * :py:const:`ISSUE_DUPLICATE_FEATURE_ID`: The CDS has non-unique
       feature ID.
 
     Some unusual genes (e.g. frame shifts) might have these issues.
@@ -143,7 +143,7 @@ def get_fasta_gff_cds_issues(fasta, gff):
         if "ID" in feature.attributes:
             feature_id = feature.attributes["ID"][0].strip()
             if feature_id in feature_ids:
-                feature_issues.append(ISSUE_DUPLICATE_FEATURE)
+                feature_issues.append(ISSUE_DUPLICATE_FEATURE_ID)
             else:
                 feature_ids.add(feature_id)
 
