@@ -116,16 +116,16 @@ def test_sequence_to_codons(seq_codons):
     ("SeqID_mRNA", {"Name": ["SeqID_CDS"]}, "SeqID_CDS"),
     ("SeqID_mRNA", {"ID": []}, None),
     ("SeqID_mRNA", {"ID": ["SeqID_CDS"]}, "SeqID_CDS")])
-def test_get_feature_name(features):
+def test_get_feature_id(features):
     """
-    Test :py:func:`riboviz.fasta_gff.get_feature_name`.
+    Test :py:func:`riboviz.fasta_gff.get_feature_id`.
 
-    :param features: sequence ID, attributes, expected feature name
+    :param features: sequence ID, attributes, expected feature ID
     :type features: tuple(str or unicode, str or unicode, str or unicode)
     """
-    seq_id, attributes, feature_name = features
-    assert fasta_gff.get_feature_name(
-        MockFeature(seq_id, "", attributes)) == feature_name
+    seq_id, attributes, feature_id = features
+    assert fasta_gff.get_feature_id(
+        MockFeature(seq_id, "", attributes)) == feature_id
 
 
 def test_get_cds_from_fasta():

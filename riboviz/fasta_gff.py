@@ -19,8 +19,8 @@ CODON = "Codon"
 """ Codon positions column name (codon). """
 CDS_FEATURE_FORMAT = "{}_CDS"
 """
-CDS feature name format for CDS features which do not define ``Name``
-or ``ID`` attributes.
+CDS feature name format for CDS features which do not define ``ID``
+or ``Name`` attributes.
 """
 
 SEQUENCE = "Sequence"
@@ -69,7 +69,7 @@ def get_fasta_gff_cds_issues(fasta, gff):
       stop codon (``TAG``, ``TGA``, ``TAA``, translates to ``*``).
     * :py:const:`ISSUE_INTERNAL_STOP`: There are stop codons internal
       to the CDS.
-    * :py:const:`ISSUE_NO_ID_NAME`: The CDS no ``ID`` or ``Name``
+    * :py:const:`ISSUE_NO_ID_NAME`: The CDS has no ``ID`` or ``Name``
       attribute.
 
     Some unusual genes (e.g. frame shifts) might have these issues.
@@ -187,7 +187,7 @@ def check_fasta_gff(fasta, gff, feature_issues_file, delimiter="\t"):
       stop codon (``TAG``, ``TGA``, ``TAA``, translates to ``*``).
     * :py:const:`ISSUE_INTERNAL_STOP`: There are stop codons internal
       to the CDS.
-    * :py:const:`ISSUE_NO_ID_NAME`: The CDS no ``ID`` or ``Name``
+    * :py:const:`ISSUE_NO_ID_NAME`: The CDS has no ``ID`` or ``Name``
       attribute.
 
     See also :py:func:`get_fasta_gff_cds_issues` and
@@ -230,11 +230,12 @@ def sequence_to_codons(sequence):
     return codons
 
 
-def get_feature_name(feature):
+def get_feature_id(feature):
     """
-    Get the name of a GFF feature.If there is no feature name (no
-    ``Name`` or ``ID``) attribute defined in the feature then ``None``
-    is returned.
+    Get the name of a GFF feature. If there is no feature name (no
+    ``ID`` or ``Name``) attribute defined in the feature then ``None``
+    is returned. If both are defined then ``ID`` is returned by
+    preference.
 
     :param feature: GFF feature
     :type feature: gffutils.feature.Feature
@@ -242,10 +243,10 @@ def get_feature_name(feature):
     :rtype: str or unicode
     """
     name = None
-    if "Name" in feature.attributes:
-        name_attr = feature.attributes["Name"]
-    elif "ID" in feature.attributes:
+    if "ID" in feature.attributes:
         name_attr = feature.attributes["ID"]
+    elif "Name" in feature.attributes:
+        name_attr = feature.attributes["Name"]
     else:
         name_attr = []
     if name_attr != []:
@@ -292,10 +293,10 @@ def get_cds_codons_from_fasta(fasta,
     CDSs whose sequences don't have a length divisible by 3 are
     ignored.
 
-    If there is no feature name (no ``Name`` or ``ID``) attribute
+    If there is no feature name (no ``ID`` or ``Name``) attribute
     defined in the feature the the ``feature_format`` is used to
-    format the sequence ID into a feature name. If both ``Name`` and
-    ``ID`` are defined then ``Name`` is used.
+    format the sequence ID into a feature name. If both ``ID`` and
+    ``Name`` are defined then ``ID`` is used.
 
     If two or more CDSs for the same sequence have the same feature
     name then the first CDS for that sequence has a feature name, as
@@ -326,7 +327,7 @@ def get_cds_codons_from_fasta(fasta,
                                merge_strategy='merge',
                                sort_attribute_values=True)
     cds_codons = {}
-    same_feature_name_count = 0
+    same_feature_id_count = 0
     for feature in gffdb.features_of_type('CDS'):
         try:
             sequence = get_cds_from_fasta(feature, fasta)
@@ -335,18 +336,18 @@ def get_cds_codons_from_fasta(fasta,
             # Log and continue with other CDSs.
             warnings.warn(str(e))
             continue
-        feature_name = get_feature_name(feature)
-        if feature_name is None:
-            feature_name = feature_format.format(feature.seqid)
-        if feature_name not in cds_codons:
-            same_feature_name_count = 0
+        feature_id = get_feature_id(feature)
+        if feature_id is None:
+            feature_id = feature_format.format(feature.seqid)
+        if feature_id not in cds_codons:
+            same_feature_id_count = 0
         else:
-            same_feature_name_count += 1
-            feature_name = "{}.{}".format(feature_name,
-                                          same_feature_name_count)
+            same_feature_id_count += 1
+            feature_id = "{}.{}".format(feature_id,
+                                          same_feature_id_count)
         if exclude_stop_codons:
             codons = codons[:-1]
-        cds_codons[feature_name] = codons
+        cds_codons[feature_id] = codons
     return cds_codons
 
 
@@ -370,10 +371,10 @@ def feature_codons_to_df(feature_codons):
     """
     feature_codons_list = []
     num_feature_codons = 0
-    for feature_name, codons in list(feature_codons.items()):
+    for feature_id, codons in list(feature_codons.items()):
         num_feature_codons += len(codons)
         for pos, codon in zip(range(0, len(codons)), codons):
-            feature_codons_list.append({GENE: feature_name,
+            feature_codons_list.append({GENE: feature_id,
                                         CODON: codon,
                                         POS: pos + 1})
     # Create empty DataFrame so if feature_codons and
