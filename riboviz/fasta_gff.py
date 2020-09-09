@@ -27,6 +27,8 @@ FEATURE = "Feature"
 """ FASTA-GFF compatibility column name (feature ID). """
 ISSUE = "Issue"
 """ FASTA-GFF compatibility column name (issue). """
+ISSUE_INCOMPLETE = "Incomplete"
+""" FASTA-GFF compatibility issue column value. """
 ISSUE_NO_ATG_START = "NoATGStart"
 """ FASTA-GFF compatibility issue column value. """
 ISSUE_NO_STOP = "NoStop"
@@ -34,6 +36,7 @@ ISSUE_NO_STOP = "NoStop"
 ISSUE_INTERNAL_STOP = "InternalStop"
 """ FASTA-GFF compatibility issue column value. """
 ISSUE_FORMATS = {
+    ISSUE_INCOMPLETE: "{} has length not divisible by 3",
     ISSUE_NO_ATG_START: "{} doesn't start with ATG",
     ISSUE_NO_STOP: "{} doesn't stop at end",
     ISSUE_INTERNAL_STOP: "{} has internal STOP"
@@ -48,6 +51,8 @@ def get_fasta_gff_cds_issues(fasta, gff):
     is returned, indexed by feature ID and with a list of issues for
     each value. Issues are:
 
+    * py:const:`ISSUE_INCOMPLETE`: The CDS has length not divisible by
+      3.
     * :py:const:`ISSUE_NO_ATG_START`: The beginning of a CDS does not
       have a start codon (``ATG``, translates to ``M``)
     * :py:const:`ISSUE_NO_STOP`: The end codon of the CDS is not a
@@ -88,9 +93,7 @@ def get_fasta_gff_cds_issues(fasta, gff):
         feature_issues = []
         seq_len_remainder = len(sequence) % 3
         if seq_len_remainder != 0:
-            warnings.warn(
-                "Feature {} ({}) has length not divisible by 3".format(
-                    feature.seqid, sequence))
+            feature_issues.append(ISSUE_INCOMPLETE)
             sequence += ("N" * (3 - seq_len_remainder))
         translation = Seq(sequence).translate()
         if translation[0] != "M":
@@ -150,6 +153,8 @@ def check_fasta_gff(fasta, gff, feature_issues_file, delimiter="\t"):
 
     Issues include:
 
+    * py:const:`ISSUE_INCOMPLETE`: The CDS has length not divisible by
+      3.
     * :py:const:`ISSUE_NO_ATG_START`: The beginning of a CDS does not
       have a start codon (``ATG``, translates to ``M``)
     * :py:const:`ISSUE_NO_STOP`: The end codon of the CDS is not a
