@@ -45,14 +45,14 @@ def check_fasta_gff(fasta, gff):
     print(("Checking fasta file " + fasta))
     print(("with gff file " + gff))
     gffdb = gffutils.create_db(gff,
-                               dbfn='test.db',
+                               dbfn='gff.db',
                                force=True,
                                keep_order=True,
                                merge_strategy='merge',
                                sort_attribute_values=True)
-    for cds_coord in gffdb.features_of_type('CDS'):
+    for feature in gffdb.features_of_type('CDS'):
         try:
-            cds_seq = cds_coord.sequence(fasta)
+            sequence = feature.sequence(fasta)
         except Exception as e:
             # Log and continue with other CDSs. A typical exception
             # that can be thrown by gffutils.Feature.sequence is
@@ -61,20 +61,19 @@ def check_fasta_gff(fasta, gff):
             # file.
             warnings.warn(str(e))
             continue
-        cds_len_remainder = len(cds_seq) % 3
-        if cds_len_remainder != 0:
+        seq_len_remainder = len(sequence) % 3
+        if seq_len_remainder != 0:
             warnings.warn(
-                cds_coord.seqid + " has length not divisible by 3")
-            cds_seq += ("N" * (3 - cds_len_remainder))
-
-        cds_trans = Seq(cds_seq).translate()
-
-        if cds_trans[0] != "M":
-            print((cds_coord.seqid + " doesn't start with ATG."))
-        if cds_trans[-1] != "*":
-            print((cds_coord.seqid + " doesn't stop at end."))
-        if any([L == "*" for L in cds_trans[:-1]]):
-            print((cds_coord.seqid + " has internal STOP."))
+                "Feature {} ({}) has length not divisible by 3".format(
+                    feature.seqid, sequence))
+            sequence += ("N" * (3 - seq_len_remainder))
+        translation = Seq(sequence).translate()
+        if translation[0] != "M":
+            print((feature.seqid + " doesn't start with ATG."))
+        if translation[-1] != "*":
+            print((feature.seqid + " doesn't stop at end."))
+        if any([L == "*" for L in translation[:-1]]):
+            print((feature.seqid + " has internal STOP."))
 
 
 def sequence_to_codons(sequence):
