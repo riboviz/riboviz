@@ -6,7 +6,7 @@ file.
 Usage::
 
     python -m riboviz.tools.get_cds_codons_file [-h] \
-        -f FASTA -g GFF -c CDS_CODONS [-e]
+        -f FASTA -g GFF [-c CDS_CODONS] [-e]
 
     -h, --help            show this help message and exit
     -f FASTA, --fasta FASTA
@@ -14,6 +14,7 @@ Usage::
     -g GFF, --gff GFF     gff3 file input
     -c CDS_CODONS, --cds-codons CDS_CODONS
                           Coding sequence codons file output
+                          (default cds_codons.tsv)
     -e, --exclude-stop-codons
                           Exclude stop codons (default false)
 
@@ -47,7 +48,7 @@ def parse_command_line_options():
     parser.add_argument("-c",
                         "--cds-codons",
                         dest="cds_codons",
-                        required=True,
+                        default="cds_codons.tsv",
                         help="Coding sequence codons file output")
     parser.add_argument("-e",
                         "--exclude-stop-codons",
