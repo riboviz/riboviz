@@ -230,22 +230,18 @@ def sequence_to_codons(sequence):
     return codons
 
 
-def get_feature_name(feature, feature_format):
+def get_feature_name(feature):
     """
-    Get the name of a GFF feature.
-
-    If there is no feature name (no ``Name`` or ``ID``) attribute
-    defined in the feature the the ``feature_format`` is used to
-    format the sequence ID into a feature name. If both ``Name`` and
-    ``ID`` are defined then ``Name`` is used.
+    Get the name of a GFF feature.If there is no feature name (no
+    ``Name`` or ``ID``) attribute defined in the feature then ``None``
+    is returned.
 
     :param feature: GFF feature
     :type feature: gffutils.feature.Feature
-    :param feature_format: Feature name format
-    :type feature_format: str or unicode
-    :return: Feature name
+    :return: Feature name or ``None``
     :rtype: str or unicode
     """
+    name = None
     if "Name" in feature.attributes:
         name_attr = feature.attributes["Name"]
     elif "ID" in feature.attributes:
@@ -254,8 +250,6 @@ def get_feature_name(feature, feature_format):
         name_attr = []
     if name_attr != []:
         name = name_attr[0].strip()
-    else:
-        name = feature_format.format(feature.seqid)
     return name
 
 
@@ -341,7 +335,9 @@ def get_cds_codons_from_fasta(fasta,
             # Log and continue with other CDSs.
             warnings.warn(str(e))
             continue
-        feature_name = get_feature_name(feature, feature_format)
+        feature_name = get_feature_name(feature)
+        if feature_name is None:
+            feature_name = feature_format.format(feature.seqid)
         if feature_name not in cds_codons:
             same_feature_name_count = 0
         else:

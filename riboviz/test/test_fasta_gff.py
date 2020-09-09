@@ -111,10 +111,10 @@ def test_sequence_to_codons(seq_codons):
 
 
 @pytest.mark.parametrize("features", [
-    ("SeqID_mRNA", {}, "SeqID_mRNA_CDS"),
-    ("SeqID_mRNA", {"Name": []}, "SeqID_mRNA_CDS"),
+    ("SeqID_mRNA", {}, None),
+    ("SeqID_mRNA", {"Name": []}, None),
     ("SeqID_mRNA", {"Name": ["SeqID_CDS"]}, "SeqID_CDS"),
-    ("SeqID_mRNA", {"ID": []}, "SeqID_mRNA_CDS"),
+    ("SeqID_mRNA", {"ID": []}, None),
     ("SeqID_mRNA", {"ID": ["SeqID_CDS"]}, "SeqID_CDS")])
 def test_get_feature_name(features):
     """
@@ -125,7 +125,7 @@ def test_get_feature_name(features):
     """
     seq_id, attributes, feature_name = features
     assert fasta_gff.get_feature_name(
-        MockFeature(seq_id, "", attributes), "{}_CDS") == feature_name
+        MockFeature(seq_id, "", attributes)) == feature_name
 
 
 def test_get_cds_from_fasta():
