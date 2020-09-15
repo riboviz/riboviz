@@ -235,7 +235,7 @@ Now, when you run `python`, `python3` should be invoked. If the symlinks aren't 
 $ export PATH=~/bin:$PATH
 ```
 
-This approach was suggested in a [comment](https://stackoverflow.com/a/55295939) on StackOverflow's [Unable to set default python version to python3 in ubuntu](https://stackoverflow.com/questions/41986507/unable-to-set-default-python-version-to-python3-in-ubuntu had a suggestion, using local symlinks).
+This approach was suggested in a [comment](https://stackoverflow.com/a/55295939) on StackOverflow's [Unable to set default python version to python3 in ubuntu](https://stackoverflow.com/questions/41986507/unable-to-set-default-python-version-to-python3-in-ubuntu).
 
 We would recommend using Miniconda, Anaconda or some other virtual environment solution for Python which provide a more usable means of managing multiple environments (including Python 2 and Python 3).
 
