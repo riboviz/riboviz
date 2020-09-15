@@ -154,7 +154,7 @@ Either [Miniconda](https://conda.io/miniconda.html) Python 3.6, or later, or [An
 
 The instructions which follow have been written under the assumption that you are using Miniconda Python. If using Anaconda then, when installing some packages, you will be told that they are already available. This is because Anaconda comes with a wide range of common Python packages.
 
-If you are using other distributions of Python you will need to consult the relevant documentation for each package for installation information.
+If you are using other distributions of Python you will need to consult the relevant documentation for each package for installation information. See also the section on [python and python3](#python-and-python3) below.
 
 ### Install Miniconda Python 3.6+
 
@@ -212,6 +212,32 @@ $ conda create --name riboviz python=<VERSION>
 ```console
 $ conda create --name riboviz python=3.7
 ```
+
+### `python` and `python3`
+
+If you have an environment which has both `python` and `python3`, such as can arise when you are using a system that has both native Python 2 and Python 3 packages installed, then please note the following.
+
+The RiboViz workflow invokes both Python and R scripts. It invokes Python scripts using the command `python`. If you have a system that has both `python`, which invokes Python 2, and `python3`, which invokes Python 3, then the workflow will fail as RiboViz's Python scripts are Python 3-compatible only.
+
+A workaround is to create a local `bin` directory with a symbolic link called `python` which points to Python 3 (and similarly for `pip` and `pip3`). This can be done as follows:
+
+```console
+$ mkdir ~/bin
+$ cd ~/bin
+$ ln -s $(which python3) python
+$ ln -s $(which pip3) pip
+$ cd
+```
+
+Now, when you run `python`, `python3` should be invoked. If the symlinks aren't picked up then you may need to add ~/bin to your PATH:
+
+```console
+$ export PATH=~/bin:$PATH
+```
+
+This approach was suggested in a [comment](https://stackoverflow.com/a/55295939) on StackOverflow's [Unable to set default python version to python3 in ubuntu](https://stackoverflow.com/questions/41986507/unable-to-set-default-python-version-to-python3-in-ubuntu had a suggestion, using local symlinks).
+
+We would recommend using Miniconda, Anaconda or some other virtual environment solution for Python which provide a more usable means of managing multiple environments (including Python 2 and Python 3).
 
 ---
 
