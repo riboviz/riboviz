@@ -81,7 +81,7 @@ def get_fasta_gff_cds_issues(fasta, gff):
 
     Issues are one of:
 
-    * py:const:`ISSUE_INCOMPLETE`: The CDS has length not divisible by
+    * :py:const:`ISSUE_INCOMPLETE`: The CDS has length not divisible by
       3.
     * :py:const:`ISSUE_NO_ATG_START`: The beginning of a CDS does not
       have a start codon (``ATG``, translates to ``M``)
@@ -105,7 +105,7 @@ def get_fasta_gff_cds_issues(fasta, gff):
     :param gff: GFF file
     :type gff: str or unicode
     :return: List of issues for sequences and features.
-    :rtype: list(tuple(str or unicode, str or unicode, str or
+    :rtype: list(tuple(str or unicode, str or unicode, str or \
     unicode))
     """
     gffdb = gffutils.create_db(gff,
@@ -193,8 +193,8 @@ def fasta_gff_issues_to_df(feature_issues):
     * :py:const:`ISSUE`: issue.
 
     :param feature_issues: List of issues for sequences and features.
-    :type feature_issues: list(tuple(str or unicode, str or unicode, str or
-    unicode))
+    :type feature_issues: list(tuple(str or unicode, str or unicode, \
+    str or unicode))
     :return: data frame
     :rtype: pandas.core.frame.DataFrame
     """
