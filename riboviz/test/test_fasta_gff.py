@@ -35,9 +35,9 @@ TEST_CHECK_ISSUES = [
     ("YAL011C_InternalStop_mRNA", "YAL011CInternalStop_CDS",
      fasta_gff.ISSUE_INTERNAL_STOP),
     ("YAL012C_NoATGStartNoStop_mRNA", "YAL12CNoATGStartNoStop_CDS",
-     fasta_gff.ISSUE_NO_ATG_START), 
+     fasta_gff.ISSUE_NO_ATG_START),
     ("YAL012C_NoATGStartNoStop_mRNA", "YAL12CNoATGStartNoStop_CDS",
-     fasta_gff.ISSUE_NO_STOP), 
+     fasta_gff.ISSUE_NO_STOP),
     ("YAL013C_NoATGStartInternalStop_mRNA",
      "YAL13CNoATGStartInternalStop_CDS",
      fasta_gff.ISSUE_NO_ATG_START),
@@ -162,9 +162,9 @@ def check_fasta_gff_issues_df(issues, df):
     a DataFrame output by
     :py:func:`riboviz.fasta_gff.fasta_gff_issues_to_df`.
 
-    :param issues: List of issues for sequences and features.                
+    :param issues: List of issues for sequences and features.
     :type issues: list(tuple(str or unicode, str or unicode, \
-    str or unicode))  
+    str or unicode))
     :param df: Pandas DataFrame
     :rtype: pandas.core.frame.DataFrame
     """
@@ -176,21 +176,10 @@ def check_fasta_gff_issues_df(issues, df):
     assert num_rows == len(issues), \
         "Unexpected number of rows"
     for sequence, feature, issue in issues:
-        pass
-    # TODO how to find tuple in DataFrame.
-
-def xxx():
-        issue_df = df.loc[df[fasta_gff.GENE] == feature_name]
-        feature_df = df.loc[df[fasta_gff.GENE] == feature_name]
-        assert not feature_df.empty, "Missing row for {}".format(
-            feature_name)
-        num_rows, _ = feature_df.shape
-        assert num_rows == len(codons), \
-            "Unexpected number of rows for {}".format(feature_name)
-        for pos, codon in zip(feature_df[fasta_gff.POS],
-                              feature_df[fasta_gff.CODON]):
-            # POS is 1-indexed.
-            assert codons[pos - 1] == codon
+        issue_df = df[(df[fasta_gff.SEQUENCE] == sequence) &
+                      (df[fasta_gff.FEATURE] == feature) &
+                      (df[fasta_gff.ISSUE] == issue)]
+        assert not issue_df.empty, "Missing row for {}".format(issue)
 
 
 def test_fasta_gff_issues_to_df():
@@ -206,6 +195,7 @@ def test_fasta_gff_issues_to_df():
 # TODO
 # def check_fasta_gff(fasta, gff, feature_issues_file, delimiter="\t"):
 # TODO
+
 
 @pytest.mark.parametrize("seq_codons", [
     ("", []),
