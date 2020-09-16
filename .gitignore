@@ -1,4 +1,5 @@
 *~
+*.bai
 code-docs/_build/
 code-docs/modules.rst
 code-docs/riboviz*.rst
