@@ -1,6 +1,7 @@
 """
 FASTA and GFF-related functions.
 """
+import bisect
 import warnings
 from Bio.Seq import Seq
 import gffutils
@@ -67,12 +68,12 @@ def get_fasta_gff_cds_issues(fasta, gff):
     """
     Check FASTA and GFF files for compatibility and return a list of
     issues for relating to coding sequences, ``CDS``, features. A list
-    of tuples of form (sequence ID, feature ID None if not applicable
+    of tuples of form (sequence ID, feature ID ('' if not applicable
     to the issue), issue) is returned.
 
     The feature ID is one of:
 
-    * ``None`` if the issue relates to the sequence not the feature.
+    * ``''`` if the issue relates to the sequence, not the feature.
     * Value of ``ID`` attribute for feature, if defined.
     * Value of ``Name`` attribute for feature, if defined, and if
       ``ID`` is undefined.
@@ -173,14 +174,17 @@ def get_fasta_gff_cds_issues(fasta, gff):
 
     for sequence, num_features in list(sequence_features.items()):
         if num_features > 1:
-            issues.append((sequence, None, ISSUE_MULTIPLE_CDS))
+            # Insert issue into list so entries remain grouped
+            # by sequence.
+            bisect.insort(issues, (sequence, '', ISSUE_MULTIPLE_CDS))
     return issues
 
 
 def fasta_gff_issues_to_df(feature_issues):
     """
     Given dictionary of the issues for features, keyed by feature
-    name, return a Pandas data frame with the issues.
+    name, return a Pandas data frame with the issues. The data frame
+    is sorted by sequence ID.
 
     The data frame has columns:
 
@@ -205,6 +209,7 @@ def fasta_gff_issues_to_df(feature_issues):
     df = pd.DataFrame(columns=[SEQUENCE, FEATURE, ISSUE])
     df = df.append(pd.DataFrame(feature_issues_list),
                    ignore_index=True)
+    print(df)
     return df
 
 
