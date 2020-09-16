@@ -9,14 +9,15 @@ from riboviz import fasta_gff
 from riboviz.test import data
 
 
-TEST_FASTA_FILE = os.path.join(os.path.dirname(data.__file__),
-                               "test_fasta_gff_data.fasta")
+TEST_FASTA_CODONS_FILE = os.path.join(os.path.dirname(data.__file__),
+                                      "test_fasta_gff_codons.fasta")
 """ Test FASTA file in :py:mod:`riboviz.test.data`. """
-TEST_GFF_FILE = os.path.join(os.path.dirname(data.__file__),
-                             "test_fasta_gff_data.gff")
+TEST_GFF_CODONS_FILE = os.path.join(os.path.dirname(data.__file__),
+                                    "test_fasta_gff_codons.gff")
 """ Test GFF file in :py:mod:`riboviz.test.data`. """
-TEST_GFF_NO_CDS_FILE = os.path.join(os.path.dirname(data.__file__),
-                                    "test_fasta_gff_data_no_cds.gff")
+TEST_GFF_NO_CDS_FILE = os.path.join(
+    os.path.dirname(data.__file__),
+    "test_fasta_gff_no_codons.gff")
 """ Test GFF file in :py:mod:`riboviz.test.data` with no CDS. """
 TEST_CDS_CODONS = {
     "YAL001C_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"],
@@ -32,8 +33,8 @@ TEST_CDS_CODONS = {
     "YAL009CMultiDuplicateCDS_CDS.2": ["ATG", "CCA", "ATT", "TGA"]
 }
 """
-Expected codons for CDS in FASTA file (:py:const:`TEST_FASTA_FILE`)
-as defined in GFF file (:py:const:`TEST_GFF_FILE`).
+Expected codons for CDS in FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`)
+as defined in GFF file (:py:const:`TEST_GFF_CODONS_FILE`).
 """
 
 
@@ -165,7 +166,7 @@ def test_get_cds_codons_from_fasta_empty(tmp_file):
     """
     Test :py:func:`riboviz.fasta_gff.get_cds_codons_from_fasta`
     with an empty FASTA file and GFF file
-    (:py:const:`TEST_GFF_FILE`).
+    (:py:const:`TEST_GFF_CODONS_FILE`).
 
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
@@ -173,32 +174,47 @@ def test_get_cds_codons_from_fasta_empty(tmp_file):
     # Use tmp_file as both empty FASTA input file.
     cds_codons = fasta_gff.get_cds_codons_from_fasta(
         tmp_file,
-        TEST_GFF_FILE)
+        TEST_GFF_CODONS_FILE)
+    assert cds_codons == {}
+
+
+def test_get_cds_codons_from_fasta_no_cds(tmp_file):
+    """
+    Test :py:func:`riboviz.fasta_gff.get_cds_codons_from_fasta`
+    with FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
+    (:py:const:`TEST_GFF_NO_CDS_FILE`) which defines no CDS.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    cds_codons = fasta_gff.get_cds_codons_from_fasta(
+        TEST_FASTA_CODONS_FILE,
+        TEST_GFF_NO_CDS_FILE)
     assert cds_codons == {}
 
 
 def test_get_cds_codons_from_fasta():
     """
     Test :py:func:`riboviz.fasta_gff.get_cds_codons_from_fasta`
-    with FASTA file (:py:const:`TEST_FASTA_FILE`) and GFF file
-    (:py:const:`TEST_GFF_FILE`).
+    with FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CODONS_FILE`).
     """
     cds_codons = fasta_gff.get_cds_codons_from_fasta(
-        TEST_FASTA_FILE,
-        TEST_GFF_FILE)
+        TEST_FASTA_CODONS_FILE,
+        TEST_GFF_CODONS_FILE)
     assert cds_codons == TEST_CDS_CODONS
 
 
 def test_get_cds_codons_from_fasta_exclude_stop_codon():
     """
     Test :py:func:`riboviz.fasta_gff.get_cds_codons_from_fasta`
-    with FASTA file (:py:const:`TEST_FASTA_FILE`) and GFF file
-    (:py:const:`TEST_GFF_FILE`) where stop codons are to be
+    with FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CODONS_FILE`) where stop codons are to be
     excluded from the codons returned.
     """
     cds_codons = fasta_gff.get_cds_codons_from_fasta(
-        TEST_FASTA_FILE,
-        TEST_GFF_FILE,
+        TEST_FASTA_CODONS_FILE,
+        TEST_GFF_CODONS_FILE,
         True)
     cds_codons_minus_stops = {
         name: codons[:-1] for name, codons in TEST_CDS_CODONS.items()
@@ -266,7 +282,7 @@ def test_feature_codons_to_df():
 def test_get_cds_codons_file_empty_fasta(tmp_file):
     """
     Test :py:func:`riboviz.fasta_gff.get_cds_codons_file` with an empty
-    FASTA file and GFF file (:py:const:`TEST_GFF_FILE`). A
+    FASTA file and GFF file (:py:const:`TEST_GFF_CODONS_FILE`). A
     header-only TSV file is expected as output.
 
     :param tmp_file: Temporary file
@@ -274,7 +290,7 @@ def test_get_cds_codons_file_empty_fasta(tmp_file):
     """
     # Use tmp_file as both empty FASTA input file and TSV output
     # file
-    fasta_gff.get_cds_codons_file(tmp_file, TEST_GFF_FILE, tmp_file)
+    fasta_gff.get_cds_codons_file(tmp_file, TEST_GFF_CODONS_FILE, tmp_file)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     check_feature_codons_df({}, df)
 
@@ -282,14 +298,14 @@ def test_get_cds_codons_file_empty_fasta(tmp_file):
 def test_get_cds_codons_file(tmp_file):
     """
     Test :py:func:`riboviz.fasta_gff.get_cds_codons_file` with
-    FASTA file (:py:const:`TEST_FASTA_FILE`) and GFF file
-    (:py:const:`TEST_GFF_FILE`) and validate the TSV file output.
+    FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CODONS_FILE`) and validate the TSV file output.
 
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
-    fasta_gff.get_cds_codons_file(TEST_FASTA_FILE,
-                                  TEST_GFF_FILE,
+    fasta_gff.get_cds_codons_file(TEST_FASTA_CODONS_FILE,
+                                  TEST_GFF_CODONS_FILE,
                                   tmp_file)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     check_feature_codons_df(TEST_CDS_CODONS, df)
@@ -298,16 +314,16 @@ def test_get_cds_codons_file(tmp_file):
 def test_get_cds_codons_file_exclude_stop_codon(tmp_file):
     """
     Test :py:func:`riboviz.fasta_gff.get_cds_codons_file` with
-    FASTA file (:py:const:`TEST_FASTA_FILE`) and GFF file
-    (:py:const:`TEST_GFF_FILE`), where stop codons are to be
+    FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CODONS_FILE`), where stop codons are to be
     be excluded from the codons returned, and validate the TSV file
     output.
 
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
-    fasta_gff.get_cds_codons_file(TEST_FASTA_FILE,
-                                  TEST_GFF_FILE,
+    fasta_gff.get_cds_codons_file(TEST_FASTA_CODONS_FILE,
+                                  TEST_GFF_CODONS_FILE,
                                   tmp_file,
                                   True)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
