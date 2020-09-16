@@ -49,6 +49,8 @@ ISSUE_DUPLICATE_FEATURE_ID = "DuplicateFeatureId"
 """ FASTA-GFF compatibility issue column value. """
 ISSUE_MULTIPLE_CDS = "MultipleCDS"
 """ FASTA-GFF compatibility issue column value. """
+ISSUE_MISSING_SEQUENCE = "MissingSequence"
+""" FASTA-GFF compatibility issue column value. """
 ISSUE_FEATURE_FORMATS = {
     ISSUE_INCOMPLETE: "Sequence {} feature {} has length not divisible by 3",
     ISSUE_NO_ATG_START: "Sequence {} feature {} doesn't start with ATG",
@@ -59,7 +61,8 @@ ISSUE_FEATURE_FORMATS = {
 }
 """ Format strings for printing FASTA-GFF compatibility issues. """
 ISSUE_SEQUENCE_FORMATS = {
-    ISSUE_MULTIPLE_CDS: "Sequence {} has multiple CDS"
+    ISSUE_MULTIPLE_CDS: "Sequence {} has multiple CDS",
+    ISSUE_MISSING_SEQUENCE: "Sequence {} missing in FASTA file"
 }
 """ Format strings for printing FASTA-GFF compatibility issues. """
 
@@ -94,6 +97,8 @@ def get_fasta_gff_cds_issues(fasta, gff):
     * :py:const:`ISSUE_DUPLICATE_FEATURE_ID`: The CDS has non-unique
       ``ID`` attribute.
     * :py:const:`ISSUE_MULTIPLE_CDS`: Sequence has multiple CDS.
+    * :py:const:`ISSUE_MISSING_SEQUENCE`: Sequence missing in FASTA
+      file.
 
     Some unusual genes (e.g. frame shifts) might have these issues.
 
@@ -120,17 +125,6 @@ def get_fasta_gff_cds_issues(fasta, gff):
     feature_ids = set()
     sequence_features = {}
     for feature in gffdb.features_of_type('CDS'):
-        try:
-            sequence = feature.sequence(fasta)
-        except Exception as e:
-            # Log and continue with other CDSs. A typical exception
-            # that can be thrown by gffutils.Feature.sequence is
-            # KeyError. This can arise if the GFF file contains
-            # information on a sequence that is not in the FASTA
-            # file.
-            warnings.warn(str(e))
-            continue
-
         feature_id = None
         if "ID" in feature.attributes:
             feature_id = feature.attributes["ID"][0].strip()
@@ -140,33 +134,52 @@ def get_fasta_gff_cds_issues(fasta, gff):
                                ISSUE_DUPLICATE_FEATURE_ID))
             else:
                 feature_ids.add(feature_id)
-            feature_id_name = feature_id
 
         feature_name = None
         if "Name" in feature.attributes:
             feature_name = feature.attributes["Name"][0].strip()
-            feature_id_name = feature_name
         if not feature_id and not feature_name:
             issues.append((feature.seqid,
                            UNDEFINED_FEATURE,
                            ISSUE_NO_ID_NAME))
+        if feature_id:
+            feature_id_name = feature_id
+        elif feature_name:
+            feature_id_name = feature_name
+        else:
             feature_id_name = UNDEFINED_FEATURE
+
+        try:
+            sequence = feature.sequence(fasta)
+        except KeyError as e:
+            issues.append((feature.seqid, '', ISSUE_MISSING_SEQUENCE))
+        except Exception as e:
+            # Log and continue with other CDSs. A typical exception
+            # that can be thrown by gffutils.Feature.sequence is
+            # KeyError. This can arise if the GFF file contains
+            # information on a sequence that is not in the FASTA
+            # file.
+            warnings.warn(str(e))
+            continue
 
         seq_len_remainder = len(sequence) % 3
         if seq_len_remainder != 0:
-            issues.append((feature.seqid, feature_id_name, ISSUE_INCOMPLETE))
+            issues.append((feature.seqid, feature_id_name,
+                           ISSUE_INCOMPLETE))
             sequence += ("N" * (3 - seq_len_remainder))
 
         translation = Seq(sequence).translate()
-
         if translation[0] != "M":
-            issues.append((feature.seqid, feature_id_name, ISSUE_NO_ATG_START))
+            issues.append((feature.seqid, feature_id_name,
+                           ISSUE_NO_ATG_START))
 
         if translation[-1] != "*":
-            issues.append((feature.seqid, feature_id_name, ISSUE_NO_STOP))
+            issues.append((feature.seqid, feature_id_name,
+                           ISSUE_NO_STOP))
 
         if any([L == "*" for L in translation[:-1]]):
-            issues.append((feature.seqid, feature_id_name, ISSUE_INTERNAL_STOP))
+            issues.append((feature.seqid, feature_id_name,
+                           ISSUE_INTERNAL_STOP))
 
         if feature.seqid not in sequence_features:
             sequence_features[feature.seqid] = 0
@@ -209,7 +222,6 @@ def fasta_gff_issues_to_df(feature_issues):
     df = pd.DataFrame(columns=[SEQUENCE, FEATURE, ISSUE])
     df = df.append(pd.DataFrame(feature_issues_list),
                    ignore_index=True)
-    print(df)
     return df
 
 
@@ -243,7 +255,8 @@ def check_fasta_gff(fasta, gff, feature_issues_file, delimiter="\t"):
     for _, row in feature_issues_df.iterrows():
         issue = row[ISSUE]
         if issue in ISSUE_FEATURE_FORMATS:
-            print(ISSUE_FEATURE_FORMATS[issue].format(row[SEQUENCE], row[FEATURE]))
+            print(ISSUE_FEATURE_FORMATS[issue].format(row[SEQUENCE],
+                                                      row[FEATURE]))
         elif issue in ISSUE_SEQUENCE_FORMATS:
             print(ISSUE_SEQUENCE_FORMATS[issue].format(row[SEQUENCE]))
     provenance.write_provenance_header(__file__, feature_issues_file)
