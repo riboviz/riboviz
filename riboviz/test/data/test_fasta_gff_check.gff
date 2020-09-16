@@ -1,0 +1,17 @@
+YAL001C_mRNA	yeastutrgff	CDS	10	24	.	+	0	ID=YAL001C_CDS
+YAL002C_mRNA	yeastutrgff	CDS	10	24	.	+	0	Name=YAL002C_CDS
+YAL003CMissingGene_mRNA	yeastutrgff	CDS	10	24	.	+	0	ID=YAL003CMissingGene_I
+YAL004CNoIDNameAttr_mRNA	yeastutrgff	CDS	10	24	.	+	0
+YAL005CNonUniqueID_mRNA	yeastutrgff	CDS	10	24	.	+	0	ID=YAL005_7CNonUniqueID_CDS
+YAL006CNonUniqueID_mRNA	yeastutrgff	CDS	10	24	.	+	0	ID=YAL005_7CNonUniqueID_CDS
+YAL007CNonUniqueID_mRNA	yeastutrgff	CDS	10	24	.	+	0	ID=YAL005_7CNonUniqueID_CDS
+YAL008CBadLengthNoStop_mRNA	yeastutrgff	CDS	10	20	.	+	0	ID=YAL008CBadLengthNoStop_CDS
+YAL009C_NonStart_mRNA	yeastutrgff	CDS	10	24	.	+	0	Name=YAL09CNonStart_CDS
+YAL010C_NonStop_mRNA	yeastutrgff	CDS	10	24	.	+	0	Name=YAL010CNonStop_CDS
+YAL011C_InternalStop_mRNA	yeastutrgff	CDS	10	24	.	+	0	Name=YAL011CInternalStop_CDS
+YAL012C_NonStartNonStop_mRNA	yeastutrgff	CDS	10	24	.	+	0	Name=YAL12CNonStartNonStop_CDS
+YAL013C_NonStartInternalStop_mRNA	yeastutrgff	CDS	10	24	.	+	0	Name=YAL13CNonStartInternalStop_CDS
+YAL014C_NonStartInternalStopNonStop_mRNA	yeastutrgff	CDS	10	24	.	+	0	Name=YAL14CNonStartInternalStopNonStop_CDS
+YAL015CMultiCDS_mRNA	yeastutrgff	CDS	10	18	.	+	0	ID=YAL015CMultiCDS_CDS_1
+YAL015CMultiCDS_mRNA	yeastutrgff	CDS	28	39	.	+	0	Name=YAL015CMultiCDS_CDS_2
+YAL015CMultiCDS_mRNA	yeastutrgff	CDS	49	60	.	+	0	ID=YAL015CMultiCDS_CDS_3
