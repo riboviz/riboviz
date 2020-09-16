@@ -26,7 +26,7 @@ TEST_CDS_CODONS = {
     "YAL005CMultiCDS_CDS_2": ["ATG", "GAT", "TAC", "TAG"],
     "YAL005CMultiCDS_CDS_3": ["ATG", "CCA", "ATT", "TGA"],
     "YAL006CEmptyCDS_CDS": ["ATG", "TGA"],
-    "YAL008CNoNameAttr_mRNA_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"],
+    "YAL008CNoIdNameAttr_mRNA_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"],
     "YAL009CMultiDuplicateCDS_CDS": ["ATG", "AGA", "TGA"],
     "YAL009CMultiDuplicateCDS_CDS.1": ["ATG", "GAT", "TAC", "TAG"],
     "YAL009CMultiDuplicateCDS_CDS.2": ["ATG", "CCA", "ATT", "TGA"]
