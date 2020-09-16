@@ -193,7 +193,7 @@ def get_fasta_gff_cds_issues(fasta, gff):
     return issues
 
 
-def fasta_gff_issues_to_df(feature_issues):
+def fasta_gff_issues_to_df(issues):
     """
     Given dictionary of the issues for features, keyed by feature
     name, return a Pandas data frame with the issues. The data frame
@@ -205,27 +205,27 @@ def fasta_gff_issues_to_df(feature_issues):
     * :py:const:`FEATURE`: feature ID.
     * :py:const:`ISSUE`: issue.
 
-    :param feature_issues: List of issues for sequences and features.
-    :type feature_issues: list(tuple(str or unicode, str or unicode, \
+    :param issues: List of issues for sequences and features.
+    :type issues: list(tuple(str or unicode, str or unicode, \
     str or unicode))
     :return: data frame
     :rtype: pandas.core.frame.DataFrame
     """
-    feature_issues_list = []
-    for (sequence_id, feature_id, issue) in feature_issues:
-        feature_issues_list.append({SEQUENCE: sequence_id,
-                                    FEATURE: feature_id,
-                                    ISSUE: issue})
-    # Create empty DataFrame so if feature_issues and
-    # feature_issues_list are empty we still have an empty DataFrame
+    issues_list = []
+    for (sequence_id, feature_id, issue) in issues:
+        issues_list.append({SEQUENCE: sequence_id,
+                            FEATURE: feature_id,
+                            ISSUE: issue})
+    # Create empty DataFrame so if issues and
+    # issues_list are empty we still have an empty DataFrame
     # with the column names.
     df = pd.DataFrame(columns=[SEQUENCE, FEATURE, ISSUE])
-    df = df.append(pd.DataFrame(feature_issues_list),
+    df = df.append(pd.DataFrame(issues_list),
                    ignore_index=True)
     return df
 
 
-def check_fasta_gff(fasta, gff, feature_issues_file, delimiter="\t"):
+def check_fasta_gff(fasta, gff, issues_file, delimiter="\t"):
     """
     Check FASTA and GFF files for compatibility and both print and
     save a list of issues for each coding sequence, ``CDS``,
@@ -245,23 +245,23 @@ def check_fasta_gff(fasta, gff, feature_issues_file, delimiter="\t"):
     :param gff: GFF file
     :type gff: str or unicode
     :param fasta: FASTA file
-    :param feature_issues_file: Feature issues file
-    :type feature_issues_file: str or unicode
+    :param issues_file: Feature issues file
+    :type issues_file: str or unicode
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
-    feature_issues = get_fasta_gff_cds_issues(fasta, gff)
-    feature_issues_df = fasta_gff_issues_to_df(feature_issues)
-    for _, row in feature_issues_df.iterrows():
+    issues = get_fasta_gff_cds_issues(fasta, gff)
+    issues_df = fasta_gff_issues_to_df(issues)
+    for _, row in issues_df.iterrows():
         issue = row[ISSUE]
         if issue in ISSUE_FEATURE_FORMATS:
             print(ISSUE_FEATURE_FORMATS[issue].format(row[SEQUENCE],
                                                       row[FEATURE]))
         elif issue in ISSUE_SEQUENCE_FORMATS:
             print(ISSUE_SEQUENCE_FORMATS[issue].format(row[SEQUENCE]))
-    provenance.write_provenance_header(__file__, feature_issues_file)
-    feature_issues_df[list(feature_issues_df.columns)].to_csv(
-        feature_issues_file,
+    provenance.write_provenance_header(__file__, issues_file)
+    issues_df[list(issues_df.columns)].to_csv(
+        issues_file,
         mode='a',
         sep=delimiter,
         index=False)
