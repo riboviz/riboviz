@@ -952,7 +952,8 @@ process generateStatsFigs {
         tuple val(sample_id), file("3nt_periodicity.tsv") \
             into nt3_periodicity_tsv
         tuple val(sample_id), file("pos_sp_nt_freq.tsv") \
-            into pos_sp_nt_freq_tsv
+	    optional (! params.do_pos_sp_nt_freq) \
+	    into pos_sp_nt_freq_tsv
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.pdf") \
             into pos_sp_rpf_norm_reads_pdf
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
