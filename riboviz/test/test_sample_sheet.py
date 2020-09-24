@@ -27,6 +27,30 @@ including unassigned samples and total number of reads.
 """
 
 
+def list_to_df(data, ignore_num_reads=False):
+    """
+    Convert a list of (sample_id, tag_read, num_reads) to a data
+    frame.
+
+    :param data: List
+    :type data: list(tuple(str or unicode, str or unicode, int))
+    :param ignore_num_reads: Ignore num_reads when creating data
+    frame?
+    :type ignore_num_reads: bol
+    :return: Data frame
+    :rtype: pandas.core.frame.DataFrame
+    """
+    df_data = []
+    for (sample_id, tag_read, num_reads) in data:
+        entry = {sample_sheets.SAMPLE_ID: sample_id,
+                 sample_sheets.TAG_READ: tag_read}
+        if not ignore_num_reads:
+            entry[sample_sheets.NUM_READS] = num_reads
+        df_data.append(entry)
+    df = pd.DataFrame(df_data)
+    return df
+
+
 @pytest.fixture(scope="function")
 def tmp_file():
     """
@@ -36,59 +60,6 @@ def tmp_file():
     :rtype: str or unicode
     """
     _, tmp_file = tempfile.mkstemp(prefix="tmp")
-    yield tmp_file
-    if os.path.exists(tmp_file):
-        os.remove(tmp_file)
-
-
-@pytest.fixture(scope="function")
-def sample_sheet_file():
-    """
-    Create a temporary sample sheet file using data from
-    :py:const:`TEST_SAMPLES`.
-
-    :return: path to temporary file
-    :rtype: str or unicode
-    """
-    _, tmp_file = tempfile.mkstemp(prefix="tmp")
-    with open(tmp_file, 'w') as csv_file:
-        writer = csv.DictWriter(csv_file,
-                                delimiter="\t",
-                                fieldnames=[sample_sheets.SAMPLE_ID,
-                                            sample_sheets.TAG_READ])
-        writer.writeheader()
-        for (sample_id, tag_read, _) in TEST_SAMPLES:
-                writer.writerow(
-                    { sample_sheets.SAMPLE_ID: sample_id,
-                      sample_sheets.TAG_READ: tag_read })
-    yield tmp_file
-    if os.path.exists(tmp_file):
-        os.remove(tmp_file)
-
-
-@pytest.fixture(scope="function")
-def deplex_sample_sheet_file():
-    """
-    Create a temporary sample sheet file with information on
-    demultiplexed samples using data from
-    :py:const:`TEST_SAMPLES_DEPLEX`.
-
-    :return: path to temporary file
-    :rtype: str or unicode
-    """
-    _, tmp_file = tempfile.mkstemp(prefix="tmp")
-    with open(tmp_file, 'w', newline='') as csv_file:
-        writer = csv.DictWriter(csv_file,
-                                delimiter="\t",
-                                fieldnames=[sample_sheets.SAMPLE_ID,
-                                            sample_sheets.TAG_READ,
-                                            sample_sheets.NUM_READS])
-        writer.writeheader()
-        for (sample_id, tag_read, num_reads) in TEST_SAMPLES_DEPLEX:
-                writer.writerow(
-                    { sample_sheets.SAMPLE_ID: sample_id,
-                      sample_sheets.TAG_READ: tag_read,
-                      sample_sheets.NUM_READS: num_reads })
     yield tmp_file
     if os.path.exists(tmp_file):
         os.remove(tmp_file)
@@ -135,107 +106,101 @@ def test_load_sample_sheet_non_sample_sheet(tmp_file, header):
         sample_sheets.load_sample_sheet(tmp_file)
 
 
-def test_load_sample_sheet(sample_sheet_file):
+def test_load_sample_sheet(tmp_file):
     """
     Test :py:func:`riboviz.sample_sheets.load_sample_sheet` with
     a valid sample sheet file.
 
-    :param sample_sheet_file: Sample sheet file
-    :type sample_sheet_file: str or unicode
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
     """
-    df = sample_sheets.load_sample_sheet(sample_sheet_file,
+    list_to_df(TEST_SAMPLES, True).to_csv(
+        tmp_file, mode='w', sep="\t", index=False)
+    df = sample_sheets.load_sample_sheet(tmp_file,
                                          comment="#")
     for column in [sample_sheets.SAMPLE_ID, sample_sheets.TAG_READ]:
         assert column in df.columns,\
             "Missing column {}".format(column)
-    check_samples = TEST_SAMPLES
-    num_rows, _ = df.shape
-    assert num_rows == len(check_samples), \
-        "Unexpected number of rows"
-    # Validate rows
-    for sample_id, tag_read, _ in check_samples:
-        sample_df = df[(df[sample_sheets.SAMPLE_ID] == sample_id) &
-                       (df[sample_sheets.TAG_READ] == tag_read)]
-        assert not sample_df.empty, "Missing row for {}".format(sample_id)
+    # Expect data frame content to be equivalent to that which was
+    # saved.
+    assert_frame_equal(df, list_to_df(TEST_SAMPLES, True))
 
 
-def test_load_deplexed_sample_sheet(deplex_sample_sheet_file):
+def test_load_deplexed_sample_sheet(tmp_file):
     """
     Test :py:func:`riboviz.sample_sheets.load_deplexed_sample_sheet`
     with a valid sample sheet file with information on demultiplexed
     samples.
 
-    :param deplex_sample_sheet_file: Sample sheet file
-    :type deplex_sample_sheet_file: str or unicode
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
     """
+    list_to_df(TEST_SAMPLES_DEPLEX, False).to_csv(
+        tmp_file, mode='w', sep="\t", index=False)
     df = sample_sheets.load_deplexed_sample_sheet(
-        deplex_sample_sheet_file,
-        comment="#").fillna("")
+        tmp_file, comment="#").fillna("")
     for column in [sample_sheets.SAMPLE_ID,
                    sample_sheets.TAG_READ,
                    sample_sheets.NUM_READS]:
         assert column in df.columns,\
             "Missing column {}".format(column)
-    num_rows, _ = df.shape
-    assert num_rows == len(samples), \
-        "Unexpected number of rows"
-    for sample_id, tag_read, num_reads in samples:
-        sample_df = df[(df[sample_sheets.SAMPLE_ID] == sample_id) &
-                       (df[sample_sheets.TAG_READ] == tag_read) &
-                       (df[sample_sheets.NUM_READS] == num_reads)]
-        assert not sample_df.empty, "Missing row for {}".format(sample_id)
+    # Expect data frame content to be equivalent to that which was
+    # saved.
+    assert_frame_equal(df, list_to_df(TEST_SAMPLES_DEPLEX, False))
 
 
-
-def test_save_deplexed_sample_sheet(tmp_file,
-                                    sample_sheet_file,
-                                    deplex_sample_sheet_file):
+def test_save_deplexed_sample_sheet(tmp_file):
     """
     Test :py:func:`riboviz.sample_sheets.save_deplexed_sample_sheet`
-    saves a sample sheet with the expected content validating it
-    against a valid sample sheet file with information on
-    demultiplexed samples.
-
-    :param tmp_file: Temporary file
-    :type tmp_file: str or unicode
-    :param sample_sheet_file: Sample sheet file
-    :type sample_sheet_file: str or unicode
-    :param deplex_sample_sheet_file: Sample sheet file
-    :type deplex_sample_sheet_file: str or unicode
-    """
-    # Load sample sheet.
-    df = sample_sheets.load_sample_sheet(sample_sheet_file,
-                                         comment="#")
-    # Add number of reads for each sample.
-    num_reads_list = [num_reads for _, _, num_reads in TEST_SAMPLES]
-    df[sample_sheets.NUM_READS] = num_reads_list
-    # Save sample sheet with additional information about
-    # demultiplexed samples then reload.
-    sample_sheets.save_deplexed_sample_sheet(df, 9, tmp_file)
-    df = sample_sheets.load_deplexed_sample_sheet(tmp_file,
-                                                  comment="#").fillna("")
-    # Load sample sheet with expected content and compare.
-    check_df = sample_sheets.load_deplexed_sample_sheet(
-        deplex_sample_sheet_file,
-        comment="#").fillna("")
-    assert_frame_equal(df, check_df)
-
-
-def test_get_non_zero_deplexed_samples():
-    """
-    Test :py:func:`riboviz.sample_sheets.get_non_zero_deplexed_samples`
     saves a sample sheet with the expected content.
 
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
-    # def get_non_zero_deplexed_samples(sample_sheet):
-    # The sample sheet is assumed to have columns, ``SampleID``,
-    # ``TagRead`` and ``NumReads``. Rows whose ``SampleID`` values are
-    # ``Unassigned`` or ``Total`` are ignored.
-    #non_zero_samples = sample_sheet[
-    #    ~sample_sheet[SAMPLE_ID].isin([UNASSIGNED_TAG, TOTAL_READS])
-    #    & sample_sheet[NUM_READS] != 0]
-    #return list(non_zero_samples[SAMPLE_ID])
-    # TODO
-    pass
+    df = list_to_df(TEST_SAMPLES, False)
+    # Save sample sheet with additional information about
+    # demultiplexed samples then reload.
+    sample_sheets.save_deplexed_sample_sheet(df, 9, tmp_file)
+    df = sample_sheets.load_deplexed_sample_sheet(tmp_file,
+                                                  comment="#").fillna("")
+    # Validate against expected data frame.
+    check_df = list_to_df(TEST_SAMPLES_DEPLEX, False)
+    assert_frame_equal(df, check_df)
+
+
+def test_get_non_zero_deplexed_samples():
+    """
+    Test :py:func:`riboviz.sample_sheets.get_non_zero_deplexed_samples`.
+    """
+    data = [("A", "CTAGA", 36067201),
+            ("B", "GATCA", 48718085),
+            ("C", "GCATA", 0),
+            ("D", "TAGAC", 30848592),
+            ("E", "TCTAG", 41407639),
+            ("F", "ACTGA", 0),
+            ("G", "CAGTA", 30643912),
+            ("H", "GTACT", 28091942),
+            ("I", "TGCAT", 0),
+            ("Unassigned", "NNNNNNNNN", 8984320),
+            ("Total", "", 264283118)]
+    df = list_to_df(data, False)
+    samples = sample_sheets.get_non_zero_deplexed_samples(df)
+    expected_samples = [sample_id for sample_id, _, num_reads
+                        in data[0:-2] if num_reads > 0]
+    assert expected_samples == samples
+
+
+def test_get_non_zero_deplexed_samples_all_zero():
+    """
+    Test :py:func:`riboviz.sample_sheets.get_non_zero_deplexed_samples`
+    with sample sheet data for which the number of reads for each
+    sample is zero.
+    """
+    data = [("A", "CTAGA", 0),
+            ("B", "GATCA", 0),
+            ("C", "GCATA", 0),
+            ("Unassigned", "NNNNNNNNN", 12345),
+            ("Total", "", 12345)]
+    df = list_to_df(data, False)
+    samples = sample_sheets.get_non_zero_deplexed_samples(df)
+    assert len(samples) == 0
