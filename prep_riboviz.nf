@@ -103,7 +103,7 @@ def helpMessage() {
       (default 'FALSE')
     * If 'dedup_umis' is 'TRUE' but 'extract_umis' is 'FALSE' then a
       warning will be displayed, but processing will continue.
-    * 'trim_5p': Trim mismatched 5' base? (default 'TRUE')
+    * 'trim_5p_mismatches': Trim mismatched 5' base? (default 'TRUE')
 
     Statistics and figure generation input files:
 
@@ -191,7 +191,7 @@ params.dir_out = "output"
 params.dir_tmp = "tmp"
 params.do_pos_sp_nt_freq = true
 params.extract_umis = false
-params.trim_5p = true
+params.trim_5p_mismatches = true
 params.fq_files = [:]
 params.group_umis = false
 params.dedup_stats = true
@@ -709,7 +709,7 @@ process hisat2ORF {
         each file(orf_index_ht2) from orf_index_ht2
     output:
         tuple val(sample_id), file("unaligned.fq") into unaligned_fq
-        tuple val(sample_id), file("orf_map.sam") into trim_5p
+        tuple val(sample_id), file("orf_map.sam") into trim_5p_mismatches
     shell:
         """
         hisat2 --version
@@ -722,9 +722,9 @@ process hisat2ORF {
 
 // Route 'trim_5p_branch' channel outputs depending on whether mismatched
 // 5' base are to be trimmed or not
-trim_5p.branch {
-    trim_5p_fq: params.trim_5p
-    non_trim_5p_fq: ! params.trim_5p
+trim_5p_mismatches.branch {
+    trim_5p_fq: params.trim_5p_mismatches
+    non_trim_5p_fq: ! params.trim_5p_mismatches
 }
 .set { trim_5p_branch }
 
