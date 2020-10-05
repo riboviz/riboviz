@@ -139,6 +139,6 @@ def get_non_zero_deplexed_samples(sample_sheet):
     :rtype samples: list(str or unicode)
     """
     non_zero_samples = sample_sheet[
-        ~sample_sheet[SAMPLE_ID].isin([UNASSIGNED_TAG, TOTAL_READS])
-        & sample_sheet[NUM_READS] != 0]
+        (~sample_sheet[SAMPLE_ID].isin([UNASSIGNED_TAG, TOTAL_READS]))
+        & (sample_sheet[NUM_READS] != 0)]
     return list(non_zero_samples[SAMPLE_ID])
