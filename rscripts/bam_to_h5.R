@@ -32,13 +32,14 @@ reads_to_list <- function(gene_location, bam_file, read_range, left_flank,right_
   { gene_location <- gene_location[1]
   }
   
+
   # Number of read length categories
   read_range_len <- length(read_range)
 
   # Specify output matrix to store read data
   gene_length = sum(sum(coverage(gene_location)))
   output <- matrix(0,nrow=read_range_len,ncol=(gene_length + left_flank + right_flank))
-  
+
   # If CDS is on negative strand
   if(as.character(strand(gene_location)[1])=="-"){
     tmp <- left_flank
@@ -102,7 +103,6 @@ reads_to_list <- function(gene_location, bam_file, read_range, left_flank,right_
       j <- j+1
     }
   }
-  
   # Return the output matrix
   return(output);
 }
@@ -213,6 +213,7 @@ if(is_test_run){
   gff <- gff[ gff_pid %in% genes]
 }
 
+
 ## desirable to check seqlevels here rather than wait for later error
 # get seqinfo from bam_file
 # bam_fileSeqInfo <- seqinfo(scanBamHeader(bam_file))
@@ -220,24 +221,30 @@ if(is_test_run){
 # Map the reads to individual nucleotide position for each gene
 outputList <- 
      mclapply(genes, # parallel version, take out for debugging
-    # lapply(genes,
+     #lapply(genes,
                        function(gene){
                            # select gene location
-                           gene_location=gff[gff_pid==gene]
+                           gene_location <- gff[gff_pid==gene]
                            # restrict seqlevels to avoid scanBam error
-                           geneseqname <- 
-                               as.character(seqnames(gene_location)[1])
-                           seqlevels(gene_location) <- geneseqname
+      
                            # if GFF contains UTR5, CDS, and UTR3 elements
                            if(is_riboviz_gff){
+                            geneseqname <- 
+                               as.character(seqnames(gene_location)[1])
+                            seqlevels(gene_location) <- geneseqname
                              Buffer_l <- width(gene_location[gene_location$type=="UTR5"])
                              Buffer_r <- width(gene_location[gene_location$type=="UTR3"])
                              gene_location <- gene_location[gene_location$type=="CDS"]
                            }else{
+                            ## If CDS has more than one exon, use the first
+                            geneseqname <- 
+                                as.character(mcols(gene_location)[,primary_id][1])
+                            seqlevels(gene_location) <- geneseqname
                              Buffer_l <- buffer
                              Buffer_r <- buffer
                            }
                            # get reads to list
+                  
                          reads_to_list(gene_location=gene_location, 
                                        bam_file=bam_file, 
                                        read_range=read_range, 
@@ -245,7 +252,7 @@ outputList <-
                                        right_flank=Buffer_r, 
                                        mult_exon=TRUE)
                          }
-                    # )
+                     #)
  , 
                         mc.cores=num_processes)
 
@@ -274,21 +281,21 @@ if(!is.null(secondary_id)){
 }
 
 for(gene in genes){
-  # Get the output matrix of read counts by position and length for a gene 
+  # Get the output matrix of read counts by position and length for a gene
   output <- outputList[[gene]]
-  
   # Location of start and stop codon nucleotides in output matrix
-  gene_location=gff[gff_pid==gene]
+  gene_location <- gff[gff_pid==gene]
   if(is_riboviz_gff){
     start_codon_loc <- start(gene_location[gene_location$type=="CDS"])
     start_cod <- start_codon_loc:(start_codon_loc+2)
     stop_codon_loc <- start(gene_location[gene_location$type=="UTR3"])-3
   }else{
+
+    start_codon_loc <- start_cod[1]
     stop_codon_loc <- ncol(output)-buffer-offset
   }
   
   stop_cod <- stop_codon_loc:(stop_codon_loc+2)
-  
   # Create H5 groups for each gene
   h5createGroup(fid,gene)
   h5createGroup(fid,paste(gene,dataset,sep="/"))
