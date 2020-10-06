@@ -326,6 +326,9 @@ This will output the standard output from `prep_riboviz.py` to a file, `riboviz_
 
 The contents of `riboviz_vignette.o[Your-Job-ID]` should be the same as the standard output of [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow) above.
 
+An example job submission script for running the vignette using scratch space for outputs and using system links is available at [`jobs/vignette-submission-script.sh`](../../jobs/vignette-submission-script.sh) and uses a modified .yaml config file [`vignette/remote_vignette_config.yaml`](../../vignette/remote_vignette_config.yaml) as an input. 
+
+
 ### Monitoring jobs
 
 Active jobs (i.e. pending or running) can be monitored with the `qstat` command
