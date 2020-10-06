@@ -215,9 +215,9 @@ def pytest_generate_tests(metafunc):
     }
     if "sample" in metafunc.fixturenames:
         samples = []
-        if params.FQ_FILES in config:
+        if params.FQ_FILES in config and config[params.FQ_FILES]:
             samples = list(config[params.FQ_FILES].keys())
-        elif params.MULTIPLEX_FQ_FILES in config:
+        elif params.MULTIPLEX_FQ_FILES in config and config[params.MULTIPLEX_FQ_FILES]:
             sample_sheet_file = os.path.join(
                 config[params.INPUT_DIR],
                 config[params.SAMPLE_SHEET])

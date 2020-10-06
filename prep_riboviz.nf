@@ -392,29 +392,38 @@ orf_gff = Channel.fromPath(orf_gff_file, checkIfExists: true)
 // inputs.
 // Optional inputs implementation follows pattern
 // https://github.com/nextflow-io/patterns/blob/master/optional-input.nf.
-if (params.containsKey('t_rna_file')
-    && params.containsKey('codon_positions_file')) {
+if (params.containsKey('t_rna_file') && params.t_rna_file) {
     t_rna_file = file(params.t_rna_file)
     if (! t_rna_file.exists()) {
         exit 1, "No such tRNA estimates file (t_rna_file): ${t_rna_file}"
     }
     t_rna_tsv = Channel.fromPath(t_rna_file, checkIfExists: true)
+    is_t_rna_file = true
+} else {
+    t_rna_tsv = file("Missing_t_rna_file")
+    is_t_rna_file = false
+}
+if (params.containsKey('codon_positions_file')
+    && params.codon_positions_file) {
     codon_positions_file = file(params.codon_positions_file)
     if (! codon_positions_file.exists()) {
         exit 1, "No such codon positions file (codon_positions_file): ${codon_positions_file}"
     }
     codon_positions_rdata = Channel.fromPath(codon_positions_file,
                                              checkIfExists: true)
-    is_t_rna_and_codon_positions_file = true
-} else if ((! params.containsKey('t_rna_file'))
-           && (! params.containsKey('codon_positions_file'))) {
-    t_rna_tsv = file("Missing_t_rna_file")
+    is_codon_positions_file = true
+} else {
     codon_positions_rdata = file("Missing_codon_positions_file")
+    is_codon_positions_file = false
+}
+if (is_t_rna_file && is_codon_positions_file) {
+    is_t_rna_and_codon_positions_file = true
+} else if ((! is_t_rna_file) && (! is_codon_positions_file)) {
     is_t_rna_and_codon_positions_file = false
 } else {
     exit 1, "Either both tRNA estimates (t_rna_file) and codon positions (codon_positions_file) must be defined or neither must be defined"
 }
-if (params.containsKey('features_file')) {
+if (params.containsKey('features_file') && params.features_file) {
     features_file = file(params.features_file)
     if (! features_file.exists()) {
         exit 1, "No such features file (features_file): ${features_file}"
@@ -425,7 +434,8 @@ if (params.containsKey('features_file')) {
     features_tsv = file("Missing_features_file")
     is_features_file = false
 }
-if (params.containsKey('asite_disp_length_file')) {
+if (params.containsKey('asite_disp_length_file')
+    && params.asite_disp_length_file) {
     asite_disp_length_file = file(params.asite_disp_length_file)
     if (! asite_disp_length_file.exists()) {
         exit 1, "No such A-site displacement file (asite_disp_length_file): ${asite_disp_length_file}"
@@ -942,7 +952,8 @@ process generateStatsFigs {
         tuple val(sample_id), file("3nt_periodicity.tsv") \
             into nt3_periodicity_tsv
         tuple val(sample_id), file("pos_sp_nt_freq.tsv") \
-            into pos_sp_nt_freq_tsv
+	    optional (! params.do_pos_sp_nt_freq) \
+	    into pos_sp_nt_freq_tsv
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.pdf") \
             into pos_sp_rpf_norm_reads_pdf
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \

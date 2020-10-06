@@ -1,49 +1,57 @@
-# Running riboviz on Eddie (for U. of Edinburgh users)
+# Running the RiboViz workflow on Eddie
 
-This page describes how you can run riboviz on Eddie.
+This page describes how you can run **RiboViz** on [Eddie](https://www.ed.ac.uk/information-services/research-support/research-computing/ecdf/high-performance-computing), The University of Edinburgh ECDF Linux Compute Cluster.
 
-Eddie service documentation is here: https://www.wiki.ed.ac.uk/display/ResearchServices/Eddie
+**Note:** This information is for University of Edinburgh users only.
 
-These guidelines may be useful for running riboviz in other HPC systems.
+The Eddie service documentation is on the University of Edinburgh [wiki](https://www.wiki.ed.ac.uk/display/ResearchServices/Eddie),
 
-All python and R packages required to run riboviz have been installed in `/exports/csce/eddie/biology/groups/wallace_rna` on Eddie
+These guidelines may be useful for running **RiboViz** in other HPC systems.
+
+All Python and R packages required to run **RiboViz** have been installed in `/exports/csce/eddie/biology/groups/wallace_rna` on Eddie
 
 Contents:
 
-* [Logging in](#Logging-in)
-* [Configure anaconda enviroment](#Configure-anaconda-enviroment)
-* [Get Riboviz and example-datasets](#Riboviz-and-example-datasets)
-* [Interactive Sessions](#Interactive-Sessions)
-  - [Set up the environment from scratch (optional)](#Set-up-the-environment-from-scratch)
-* [Create `set-riboviz-env.sh`](#Create-set-riboviz-envsh)
-* [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow)
-* [Job submission](#Job-submission)
-  - [Submitting Jobs](#Submitting-Jobs)
-  - [Monitoring Jobs](#Monitoring-Jobs)
-  - [Cancelling Jobs](#Cancelling-Jobs)
-  - [Job accounting](#Job-accounting)
- * [Run a full-size example dataset on Eddie](#Run-a-full-size-example-dataset-on-Eddie)
-   - [Create directories for input paths](#Create-directories-for-input-paths)
-   - [Download SRR files](#Download-SRR-files)
-   - [Create `qsub` script](#Create-qsub-script)
+* [Logging in](#logging-in)
+* [Configure Anaconda enviroment](#configure-anaconda-enviroment)
+* [Get Riboviz and example-datasets](#get-riboviz-and-example-datasets)
+* [Interactive sessions](#interactive-sessions)
+* [Set up your environment from scratch (optional)](#set-up-your-environment-from-scratch-optional)
+* [Create `set-riboviz-env.sh`](#create-set-riboviz-envsh)
+* [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-riboviz-workflow)
+* [Job submission](#job-submission)
+  - [Submitting jobs](#submitting-jobs)
+  - [Monitoring jobs](#monitoring-jobs)
+  - [Cancelling jobs](#cancelling-jobs)
+  - [Job accounting](#job-accounting)
+ * [Run a full-size example dataset](#run-a-full-size-example-dataset)
+   - [Create directories for input paths](#create-directories-for-input-paths)
+   - [Download SRR files](#download-srr-files)
+   - [Create `qsub` script](#create-qsub-script)
 
 ---
+
 ## Logging in
 
-Connect to the cluster using ssh from a terminal window (Linux and Mac OS) or use a client such as MobaXterm (Windows)
+Connect to the cluster using `ssh` from a terminal window (Linux and Mac OS) or use a client such as MobaXterm (Windows):
 
-`$ ssh -X <YOUR UUN>@eddie.ecdf.ed.ac.uk`
+```console
+$ ssh -X <YOUR_UUN>@eddie.ecdf.ed.ac.uk
+```
 
 In the rest of this document, we shall abbreviate your universal username as `$USER`.
 
-**Note** that access to the cluster is only available from the University network. External users should first connect to the University network using the VPN Service.
+**Note** that access to the cluster is only available from the University network. External users should first connect to the University network using the [VPN service](https://www.ed.ac.uk/information-services/computing/desktop-personal/vpn).
 
 ---
-## Configure anaconda enviroment
+
+## Configure Anaconda enviroment
 
 Configure your `.condarc file` to point to the `anaconda directory` in `/exports/csce/eddie/biology/groups/wallace_rna/`.
 
-If you do not have `.condarc file` in your `home` directory, create it first.
+If you do not have a `.condarc` file in your home directory, create it first.
+
+Add:
 
 ```
 envs_dirs:
@@ -51,36 +59,45 @@ envs_dirs:
 pkgs_dirs:
   - /exports/csce/eddie/biology/groups/wallace_rna/anaconda/pkgs
 ```
+
 ---
-## RiboViz and example-datasets
 
-Get RiboViz and example-datasets:
+## Get **RiboViz** and example-datasets
 
-```
+Get **RiboViz** and example-datasets:
+
+```console
 $ mkdir riboviz
 $ cd riboviz
 $ git clone https://github.com/riboviz/riboviz
 $ git clone https://github.com/riboviz/example-datasets
 ```
 
-**Note** that your home directory space is enough for running a vignette but is not enough for running a full-size dataset.
+**Note:** Your home directory space is enough for running a vignette but is not enough for running a full-size dataset.
 
-We recommend using the cluster filesystem (/exports/[COLLEGE]/eddie/...) for storing riboviz and example-datasets.
+We recommend using the cluster filesystem (`/exports/[COLLEGE]/eddie/...`) for storing **RiboViz** and `example-datasets`.
 
-If you do not have a group space, you can use your scratch directory (/exports/eddie/scratch/UUN)
+If you do not have a group space, you can use your scratch directory (`/exports/eddie/scratch/<YOUR_UUN>`)
 
 ---
-## Interactive Sessions
 
-There are a limited number of nodes that accept interactive login sessions, to allow you to run interactive jobs or graphical
+## Interactive sessions
 
-applications. To start an interactive session run:
+There are a limited number of nodes that accept interactive login sessions, to allow you to run interactive jobs or graphical  applications. To start an interactive session run:
 
-`$ qlogin -l h_vmem=16G`
+```console
+$ qlogin -l h_vmem=16G
+```
 
-This means that I ask for 16GB RAM
+`-l h_vmem` means that you ask for 16GB RAM
 
-Much more info available from: https://www.wiki.ed.ac.uk/display/ResearchServices/Interactive+Sessions
+If you have access to a priority queue then you can use:
+
+```console
+$ qlogin -P <QUEUE_NAME> -l h_vmem=16G
+```
+
+See [Interactive sessions](https://www.wiki.ed.ac.uk/display/ResearchServices/Interactive+Sessions) for more information.
 
 **Troubleshooting: fail to enter interactive node**
 
@@ -92,27 +109,32 @@ waiting for interactive job to be scheduled ...timeout (5 s) expired while waiti
 
 Your "qlogin" request could not be scheduled, try again later.
 ```
-Eddie may be under maintenance. You could check Eddie's status here: https://alerts.is.ed.ac.uk/
 
-Another reason this can fail is that EDDIE is running OK but there are no free nodes at present.
+There may be no free nodes at present. Alternatively, Eddie may be under maintenance. You can check Eddie's status on the [Information Systems Alerts](https://alerts.is.ed.ac.uk/).
 
-You have to wait the service back. It usually won't take too long.
+Either way, you have to wait for a free node to become available or for Eddie to come back up. It usually won't take too long.
 
-### Set up the environment from scratch
+---
 
-#### Activate environment
+## Set up your environment from scratch (optional)
 
-`/exports/csce/eddie/biology/groups/wallace_rna` has Anaconda packages (in `anaconda`) and all the Python packages required by RiboViz are there, accessible as a `riboviz` conda environment.
+### Activate Anaconda
 
-`$ source activate riboviz`
+`/exports/csce/eddie/biology/groups/wallace_rna` has Anaconda packages (in `anaconda`) and all the Python packages required by **RiboViz** are there, accessible as a `riboviz` conda environment.
 
-#### Configure R packages path
+```console
+$ source activate riboviz
+````
 
-`export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary`
+### Configure R packages path
 
-#### Load necessary modules on node
-
+```console
+$ export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
 ```
+
+### Load necessary modules on node
+
+```console
 $ module load igmm/apps/BEDTools
 $ module load igmm/apps/bowtie
 $ module load igmm/apps/hdf5
@@ -121,10 +143,12 @@ $ module load igmm/apps/pigz
 $ module load igmm/apps/R/3.6.3
 $ module load anaconda
 ```
+
 ---
+
 ## Create `set-riboviz-env.sh`
 
-You can create a script named `set-riboviz-env.sh` for above commands
+You can create a script named `set-riboviz-env.sh` for above commands to set up your environment:
 
 ```
 #!/usr/bin/env bash
@@ -138,14 +162,22 @@ module load igmm/apps/R/3.6.3
 module load anaconda
 source activate riboviz
 ```
+
 In future you need only to run:
 
-`$ source set-riboviz-env.sh`
+```console
+$ source set-riboviz-env.sh
+````
 
 ---
-## Run a "vignette" of the RiboViz workflow
 
-Remember to change to the `riboviz/riboviz` directory
+## Run a "vignette" of the **RiboViz** workflow
+
+Change into the **RiboViz** repository:
+
+```console
+$ cd riboviz/riboviz
+```
 
 To run the Python workflow:
 
@@ -230,14 +262,16 @@ Finished processing sample: WTnone
 [d8/a8fcb5] Submitted process > countReads
 Workflow finished! (OK)
 ```
-More information about the vignette : [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./docs/user/run-vignette.md).
+
+For more information about the vignette, see [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md).
 
 ---
+
 ## Job submission
 
-Computational work on Eddie is usually submitted to the cluster as batch jobs initiated from a login node. In order to submit a job you need to write a Grid Engine job submission script containing details of the program to run as well as requests for resources. Then submit this job script to the cluster with the `qsub` command.
+Computational work on Eddie is usually submitted to the cluster as batch jobs initiated from a login node. In order to submit a job you need to write a Grid Engine job submission script containing details of the program to run as well as requests for resources. Then, you submit this job script to the cluster with the `qsub` command.
 
-You can create a job script named `job_riboviz.sh` in your `riboviz` directory to run a riboviz workflow:
+You can create a job script named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
 
 ```
 #!/bin/sh
@@ -278,17 +312,33 @@ source activate riboviz
 nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false
 ```
 
-### Submitting Jobs
+### Submitting jobs
 
-Check that you are in your `riboviz/riboviz` directory
+Change into the **RiboViz** repository:
 
-`$ qsub job_riboviz.sh`
+```console
+$ cd riboviz/riboviz
+```
 
-This will output the result to `riboviz_vignette.o[Your Job-ID]` in the current working directory and errors to `riboviz_vigette.e[Your Job-ID]`
+Run:
 
-The contents of `riboviz_vignette.o[Your Job-ID]` should be the same as [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow)
+```console
+$ qsub job_riboviz.sh
+```
 
-### Monitoring Jobs
+If you have access to a priority queue then you can use:
+
+```console
+$ qsub -P <QUEUE_NAME> job_riboviz.sh
+```
+
+A job ID will be displayed.
+
+This will output the standard output from `prep_riboviz.py` to a file, `riboviz_vignette.o[Your-Job-ID]`, in the current working directory, and errors to a foile, `riboviz_vigette.e[Your-Job-ID]`.
+
+The contents of `riboviz_vignette.o[Your-Job-ID]` should be the same as the standard output of [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow) above.
+
+### Monitoring jobs
 
 Active jobs (i.e. pending or running) can be monitored with the `qstat` command
 
@@ -299,21 +349,25 @@ job-ID     prior   name       user         state submit/start at     queue      
    2701173 0.00000 riboviz_vi $USER     qw    06/11/2020 13:22:28                                                                                               1
 ```
 
-### Cancelling Jobs
+### Cancelling jobs
 
 If you want to kill a job you've submitted to Eddie, use the `qdel` command
 
-`$ qdel [Your Job-ID]`
+```console
+$ qdel [Your-Job-ID]
+```
 
 or
 
-`$ qdel [Your Job-Name]`
+```console
+$ qdel [Your-Job-Name]
+```
 
 ### Job accounting
 
 Detailed information about completed jobs is available with the `qacct` command:
 
-`$ qacct -j [Your Job-ID]`
+`$ qacct -j [Your-Job-ID]`
 
 ```console
 $ qacct -j 2701137
@@ -374,10 +428,9 @@ bound_cores  0,4
 
 ```
 
-More info about job submision： https://www.wiki.ed.ac.uk/display/ResearchServices/Job+Submission
+See [Job submission](https://www.wiki.ed.ac.uk/display/ResearchServices/Job+Submission) for more information.
 
 ---
-## Run a full-size example dataset on Eddie
 
 In this example, we're using the Wallace et al. 2020 *Cryptococcus neoformans* 'JEC21' dataset from the [Example-Datasets repository](https://github.com/riboviz/example-datasets). This example dataset repository contains .yaml config files, annotation files and contaminant files for a range of different publically available datasets across a range of organisms.
 
@@ -420,6 +473,9 @@ $ ln -s /exports/eddie/scratch/$USER/$Wallace_2020_JEC21
 ```
 Now we copy the yaml across from the example-datasets folder, into our main riboviz folder. If you wish to edit the yaml, then it's best to edit this version, in $HOME/riboviz/riboviz/Wallace_2020_JEC21.  
 
+```console
+$ mkdir annotation
+$ cp /exports/eddie/scratch/s1919303/riboviz/example-datasets/fungi/cryptococcus/annotation/JEC21_10p_up12dwn9_CDS_with_120bputrs.fa annotation
 ```
 # copy yaml into the riboviz/Wallace_2020_JEC21 folder, rename it
  # cp [example-datasets version yaml] [our 'local' riboviz folder version]
@@ -432,7 +488,13 @@ We need to make sure we move back into the main riboviz folder, where we will be
 
 ### Download fastq data files from the Short Read Archive (SRA): initial setup
 
-Eddie allows us to load the [SRA Toolkit](https://github.com/ncbi/sra-tools) module, including the utility `fasterq-dump` for downloading data files.  This utility has been included in SRA Toolkit since version 2.9.1. We recommend using `fasterq-dump`. An earlier tool, `fastq-dump`, is also included, but that is too slow to download on datasets about about 10GB.
+Eddie allows us to load the [SRA Toolkit](https://github.com/ncbi/sra-tools) module, including the utility `fasterq-dump` for downloading data files.  This utility has been included in SRA Toolkit since version 2.9.1. We recommend using `fasterq-dump`.
+
+An earlier tool, `fastq-dump`, is also included in SRA Toolkit, however, you may find it is too slow for `fastq-dump` to download a large dataset like `Wallace_2020_JEC21` which is around 50GB uncompressed. Even using the `--gzip` option to directly download the `.gz` file may be too slow.
+
+A faster alternative can be to use `fasterq-dump` and the Aspera client's `prefetch` tool (which is provided as part of the above module), as recommended here.
+
+To get `fasterq-dump`, follow SRA Toolkit's [02. Installing SRA Toolkit](https://github.com/ncbi/sra-tools/wiki/02.-Installing-SRA-Toolkit) to install the latest version of the SRA Toolkit (follow the instructions for CentOS).
 
 Before your initial use of SRA toolkit, configure download and cache settings, by running:
 
@@ -573,9 +635,12 @@ echo "nextflow riboviz ${DATAFOLDER} data run complete"
 
 Check that you are in the same location as your submission script, or remember to add that path to your `qsub` command.
 
-Then run:
+```console
+$ cd /exports/eddie/scratch/s1919303/riboviz/riboviz/
+$ qsub [Your-script]
+```
 
-`$ qsub [Your script]`
+If you run the `example-dataset` in your scratch space, remember to move the output data to DataStore or other persistent storage after the jobs have finished.
 
 ### Checking outputs
 
@@ -589,12 +654,12 @@ Another file worth checking if you are uncertain how a nextflow run performed is
 
 ### Moving and Downloading Outputs
 
- If you run the example-dataset in your scratch space as detailed in these instructions, remember to move the output data to DataStore or other persistent storage after the jobs have finished.  
+If you run the example-dataset in your scratch space as detailed in these instructions, remember to move the output data to DataStore or other persistent storage after the jobs have finished.  
 
- Alternatively, you can use `scp` and `scp -r` to transfer the files and folders via the commandline to a local machine (e.g. `scp -r UUN@eddie.ecdf.ed.ac.uk:/exports/eddie/scratch/$USER/Wallace_2020_JEC21/output/* $HOME/Downloads/` to download all of the output files from the scratch space to the user's local Downloads file).
+Alternatively, you can use `scp` and `scp -r` to transfer the files and folders via the commandline to a local machine (e.g. `scp -r UUN@eddie.ecdf.ed.ac.uk:/exports/eddie/scratch/$USER/Wallace_2020_JEC21/output/* $HOME/Downloads/` to download all of the output files from the scratch space to the user's local Downloads file).
 
- You can check the file sizes using `du -ch` to get an idea of how much space you will need to have available before transferring the files.  The `/input` files for this example dataset total ~18GB, the `/output` files total ~8GB, but the total size of the `Wallace_2020_JEC21` folder on scratch after a successful run currently comes to 551GB!
+You can check the file sizes using `du -ch` to get an idea of how much space you will need to have available before transferring the files.  The `/input` files for this example dataset total ~18GB, the `/output` files total ~8GB, but the total size of the `Wallace_2020_JEC21` folder on scratch after a successful run currently comes to 551GB!
 
- Files older than one month are removed from this directory automatically.
+Files older than one month are removed from this directory automatically.
 
- More info about storage is here: https://www.wiki.ed.ac.uk/display/ResearchServices/Storage
+See [Storage](https://www.wiki.ed.ac.uk/display/ResearchServices/Storage) for more information.

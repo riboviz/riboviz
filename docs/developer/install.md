@@ -2,52 +2,19 @@
 
 ## Install Python packages
 
-### pylint
-
-Web sites:
-
-* [Pylint](https://www.pylint.org/)
-* [BitBucket](https://bitbucket.org/logilab/pylint.org)
+| Package | Links |
+| ------- | ----- |
+| pylint | [Pylint](https://www.pylint.org/), [BitBucket](https://bitbucket.org/logilab/pylint.org) |
+| pycodestyle | [readthedocs](https://pycodestyle.readthedocs.io/), [GitHub](https://github.com/pycqa/pycodestyle) |
+| pytest-cov | [pytest-cov](https://pytest-cov.readthedocs.io), [GitHub](https://github.com/pytest-dev/pytest-cov) |
+| Sphinx | [Sphinx](https://www.sphinx-doc.org/) |
 
 Install:
 
 ```console
 $ conda install -y pylint
-```
-
-### pycodestyle
-
-Web sites:
-
-* [readthedocs](https://pycodestyle.readthedocs.io/)
-* [GitHub](https://github.com/pycqa/pycodestyle)
-
-Install:
-
-```console
 $ conda install -y pycodestyle
-```
-
-### pytest-cov
-
-Web sites:
-
-* [pytest-cov](https://pytest-cov.readthedocs.io)
-* [GitHub](https://github.com/pytest-dev/pytest-cov)
-
-Install:
-
-```console
 $ conda install -y pytest-cov
-```
-
-### Sphinx
-
-Web site:
-
-* [Sphinx](https://www.sphinx-doc.org/)
-
-```console
 $ pip install sphinx
 ```
 
@@ -55,51 +22,36 @@ $ pip install sphinx
 
 ## Install R packages
 
-### lintr
+| Package | Links |
+| ------- | ----- |
+| lintr | [lintr package on CRAN](https://cran.r-project.org/package=lintr), [GitHub](https://github.com/jimhester/lintr) |
+| styleR | [StyleR package documentation](https://styler.r-lib.org/), [GitHub](https://github.com/r-lib/styler) |
 
-Web sites:
-
-* [lintr package on CRAN](https://cran.r-project.org/package=lintr)
-* [GitHub](https://github.com/jimhester/lintr)
-
-Install:
 
 ```console
 $ R
 ```
 ```R
 > install.packages("lintr")
-# load the package before use with:
-# library("lintr")
-```
-
-### styleR
-
-Web sites:
-
-* [StyleR package documentation](https://styler.r-lib.org/)
-* [GitHub](https://github.com/r-lib/styler)
-
-Install:
-
-```console
-$ R
-```
-```R
 > install.packages("styler")
-# load the package before use with:
-# library("styler")
+```
+
+To load the packages before use:
+
+```R
+> library("lintr")
+> library("styler")
 ```
 
 ---
 
 ## Install general packages
 
-### GraphViz
+| Package | Links |
+| ------- | ----- |
+| GraphViz | [GraphViz](https://www.graphviz.org/) |
 
-Web site: [GraphViz](https://www.graphviz.org/)
-
-Install GraphViz:
+Install:
 
 **Ubuntu**
 
@@ -110,7 +62,7 @@ $ sudo apt-get install graphviz
 **CentOS**
 
 ```console
-$ sudo apt-get install graphviz
+$ sudo yum install graphviz
 ```
 
 Check install:
@@ -119,7 +71,9 @@ Check install:
 $ dot -V
 ```
 
-### Editor supporting live preview of GraphViz images (optional)
+---
+
+## Editor supporting live preview of GraphViz images (optional)
 
 The following free editors supporting live preview of GraphViz images when editing dot documents:
 

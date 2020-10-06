@@ -37,7 +37,7 @@ Usage:
 * [Configuring the RiboViz workflow](./docs/user/prep-riboviz-config.md)
 * [Running the RiboViz Python workflow](./docs/user/prep-riboviz-run-python.md)
 * [Running the RiboViz Nextflow workflow](./docs/user/prep-riboviz-run-nextflow.md)
-* [Running the RiboViz workflow on Eddie](./docs/user/run-on-Eddie.md)
+* [Running the RiboViz workflow on Eddie](./docs/user/run-on-eddie.md)
 * [Memory and storage](./docs/user/memory-storage.md). Information and advice relating to **RiboViz**'s memory and storage requirements.
 
 Command-line tools:
@@ -64,6 +64,7 @@ Command-line tools:
 * [Developing and running tests](./docs/developer/testing.md)
 * [Creating a regression test data repository](./docs/developer/create-test-data-repository.md)
 * [Writing and updating documentation](./docs/developer/documentation.md)
+* [Building a release](./docs/developer/releasing.md)
 
 ## Reference
 
@@ -74,7 +75,8 @@ Command-line tools:
 
 | Release | Description |
 | ------- | ----------- |
-| [2.0.beta](https://github.com/riboviz/riboviz/releases/tag/2.0.beta) | Current stable release |
+| [2.0](https://github.com/riboviz/riboviz/releases/tag/2.0) | Current stable release |
+| [2.0.beta](https://github.com/riboviz/riboviz/releases/tag/2.0.beta) | 2.0 beta release |
 | [1.1.0](https://github.com/riboviz/riboviz/releases/tag/1.1.0) | Most recent version prior to commencement of BBSRC/NSF Riboviz project |
 | [1.0.0](https://github.com/riboviz/riboviz/releases/tag/1.0.0) | Associated with Carja et al. (2017) "riboviz: analysis and visualization of ribosome profiling datasets", BMC Bioinformatics, volume 18, article 461 (2017), 25 October 2017, doi: [10.1186/s12859-017-1873-8](https://doi.org/10.1186/s12859-017-1873-8) |
 | [0.9.0](https://github.com/riboviz/riboviz/releases/tag/0.9.0) | Additional code/data associated with the paper below |
@@ -84,9 +86,9 @@ Command-line tools:
 
 To cite **RiboViz**, please use both of the following references:
 
-riboviz: analysis and visualization of ribosome profiling datasets, Carja et al., BMC Bioinformatics 2017. doi:10.1186/s12859-017-1873-8.
+riboviz: analysis and visualization of ribosome profiling datasets, Carja et al., BMC Bioinformatics 2017. doi:[10.1186/s12859-017-1873-8](https://doi.org/10.1186/s12859-017-1873-8).
 
-RiboViz Team (2020) RiboViz: analysis and visualization of ribosome profiling datasets, 2.0.beta, https://github.com/riboviz/riboviz/releases/tag/2.0.beta.
+Wallace, Edward; Anderson, Felicity; Kavousannakis, Kostas; Jackson, Michael; Shah, Premal; Lareau, Liana; et al. (2020): riboviz: software for analysis and visualization of ribosome profiling datasets. figshare. Software. doi: [10.6084/m9.figshare.12624200](https://doi.org/10.6084/m9.figshare.12624200)
 
 ## Acknowledgements
 
