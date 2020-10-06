@@ -244,13 +244,20 @@ You can create a job script named `job_riboviz.sh` in your `riboviz` directory t
 # Grid Engine options (lines prefixed with #$)
 #$ -N riboviz_vignette              
 #$ -cwd                  
-#$ -l h_rt=00:10:00
-#$ -l h_vmem=32G
+#$ -l h_rt=01:00:00
+#$ -l h_vmem=8G
+#$ -pe sharedmem 16
+#$ -o $JOB_NAME-$JOB_ID-$HOSTNAME.o
+#$ -e $JOB_NAME-$JOB_ID-$HOSTNAME.e
 #  These options are:
 #  job name: -N
 #  use the current working directory: -cwd
-#  runtime limit of 10 minutes: -l h_rt
-#  ask for 16 Gbyte RAM: -l h_vmem
+#  runtime limit of 1 hour: -l h_rt
+#  ask for 8 Gbyte RAM: -l h_vmem
+#  use shared memory parallel environment, request 16 CPUs
+#  redirect output with format jobname-jobID-hostname (jobname -N)
+#  redirect error with same format as output
+
 # Initialise the environment modules
 . /etc/profile.d/modules.sh
 
@@ -264,8 +271,11 @@ module load igmm/apps/R/3.6.3
 module load anaconda
 source activate riboviz
 
-# Run the python workflow
-python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
+# Uncomment this to run the python workflow:
+#python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
+
+# Run the Nextflow workflow:
+nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false
 ```
 
 ### Submitting Jobs
