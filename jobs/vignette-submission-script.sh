@@ -76,15 +76,17 @@ cd $HOME/riboviz/riboviz
 # make system link at riboviz folder to folder on scratch
 ln -s /exports/eddie/scratch/$USER/remote-vignette
 
-# copy yaml into the riboviz/scratch folder, rename it
-cp $HOME/local_vignette_config.yaml remote-vignette/local_vignette_config.yaml
+# copy the relevant yaml into the riboviz/scratch folder, rename it
+cp $HOME/riboviz/riboviz/vignette/remote_vignette_config.yaml remote-vignette/local_vignette_config.yaml
+# NOTE: this example uses a separate yaml configured to point to the scratch locations 
+# and is a modified version of vignette/vignette_config.yaml
 
-# YAML NEEDS TO BE EDITED TO POINT TO remote-vignette/input and remote-vignette/index etc
-# YAML CAN POINT TO FILES LIKE:
-  # orf_fasta_file: /home/$USER/riboviz/example-datasets/fungi/saccharomyces/annotation/Saccharomyces_cer$
-  # orf_gff_file: ../../riboviz/example-datasets/fungi/saccharomyces/annotation/Saccharomyces_cerevisiae_yea$
+# This remote_vignette_config.yaml has been edited to point to remote-vignette/input and remote-vignette/index etc
+# The yaml can point to files in these ways:
+#  orf_fasta_file: /home/$USER/riboviz/example-datasets/fungi/saccharomyces/annotation/Saccharomyces_cer$
+#  orf_gff_file: ../../riboviz/example-datasets/fungi/saccharomyces/annotation/Saccharomyces_cerevisiae_yea$
 
-# presuming I'm in correct branch on riboviz
+# presuming you're in correct branch on riboviz
 
 echo "nextflow validation"
 
