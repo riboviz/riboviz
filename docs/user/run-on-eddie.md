@@ -334,9 +334,9 @@ $ qsub -P <QUEUE_NAME> job_riboviz.sh
 
 A job ID will be displayed.
 
-This will output the standard output from `prep_riboviz.py` to a file, `riboviz_vignette.o[Your-Job-ID]`, in the current working directory, and errors to a foile, `riboviz_vigette.e[Your-Job-ID]`.
+This will output the standard output from `prep_riboviz.py` or `prep_riboviz.nf` (depending on which option you are running) to a file, `riboviz_vignette-$JOB_ID-$HOSTNAME.o`, in the current working directory, and errors to a file, `riboviz_vignette-$JOB_ID-$HOSTNAME.e`.
 
-The contents of `riboviz_vignette.o[Your-Job-ID]` should be the same as the standard output of [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow) above.
+The contents of `riboviz_vignette-$JOB_ID-$HOSTNAME.o` should be the same as the standard output of [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow) above.
 
 ### Monitoring jobs
 
@@ -384,7 +384,7 @@ taskid       undefined
 pe_taskid    NONE
 account      sge
 priority     0
-cwd          /home/$USER/riboviz
+cwd          /home/$USER/riboviz/riboviz
 submit_host  login02.ecdf.ed.ac.uk
 submit_cmd   qsub /exports/eddie3_homes_local/$USER/job_riboviz.sh
 qsub_time    06/11/2020 13:22:28.652
@@ -432,6 +432,8 @@ See [Job submission](https://www.wiki.ed.ac.uk/display/ResearchServices/Job+Subm
 
 ---
 
+## Run a Full-size Example Dataset
+
 In this example, we're using the Wallace et al. 2020 *Cryptococcus neoformans* 'JEC21' dataset from the [Example-Datasets repository](https://github.com/riboviz/example-datasets). This example dataset repository contains .yaml config files, annotation files and contaminant files for a range of different publically available datasets across a range of organisms.
 
 To run the `Wallace_2020_JEC21` dataset on Eddie, logout from any interactive node you may be logged into (for example, if you were running the vignette example above) and ensure you are within the `example-datasets` repository at $HOME/riboviz/example-datasets and that you are in the correct git branch for both riboviz and example-datasets repositories.
@@ -476,7 +478,7 @@ Now we copy the yaml across from the example-datasets folder, into our main ribo
 ```console
 $ mkdir annotation
 $ cp /exports/eddie/scratch/s1919303/riboviz/example-datasets/fungi/cryptococcus/annotation/JEC21_10p_up12dwn9_CDS_with_120bputrs.fa annotation
-```
+
 # copy yaml into the riboviz/Wallace_2020_JEC21 folder, rename it
  # cp [example-datasets version yaml] [our 'local' riboviz folder version]
 
