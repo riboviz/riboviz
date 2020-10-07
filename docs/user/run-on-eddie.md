@@ -468,11 +468,13 @@ Move to the main riboviz folder
 ```
 $ cd $HOME/riboviz/riboviz
 ```
-Create a system link between a new folder for our dataset and the folder on scratch which will hold our inputs and outputs:
+Create a symbolic system link between a new folder for our dataset and the folder on scratch which will hold our inputs and outputs:
 ```
-# make system link at riboviz folder to folder on scratch
+# make symbolic system link at riboviz folder to folder on scratch
 $ ln -s /exports/eddie/scratch/$USER/$Wallace_2020_JEC21
 ```
+This means that we can access the files as if they were located at `$HOME/riboviz/riboviz/Wallace_2020_JEC21`, instead of being held on the scratch space location.  This simplifies paths in our yaml and helps us keep things together while not filling up more limited storage space on our group or home directory storage.
+
 Now we copy the yaml across from the example-datasets folder, into our main riboviz folder. If you wish to edit the yaml, then it's best to edit this version, in $HOME/riboviz/riboviz/Wallace_2020_JEC21.  
 
 ```console
@@ -574,18 +576,16 @@ module load igmm/apps/R/3.6.3
 module load anaconda
 source activate riboviz
 
-DATAFOLDER="Wallace_2020_JEC21"
-
-echo "Running riboviz on dataset: ${DATAFOLDER}"
+echo "Running riboviz on dataset: Wallace_2020_JEC21"
 
 # move to scratch space
 cd /exports/eddie/scratch/$USER
 
 # make folder there
-mkdir $DATAFOLDER
-mkdir $DATAFOLDER/input
+mkdir Wallace_2020_JEC21
+mkdir Wallace_2020_JEC21/input
 
-cd $DATAFOLDER/input
+cd Wallace_2020_JEC21/input
 
 echo "${PWD}"
 
@@ -600,20 +600,20 @@ fasterq-dump SRR9620586
 # use pigz to zip .fastq files into .fastq.gz files:
 pigz *.fastq
 
-echo "hopefully downloaded and pigz'd the files into /exports/eddie/scratch/$USER/${DATAFOLDER}/input"
+echo "hopefully downloaded and pigz'd the files into /exports/eddie/scratch/$USER/Wallace_2020_JEC21/input"
 
-# presumes downloaded the SRA files OK & they're in /exports/eddie/scratch/$USER/$DATAFOLDER/input
+# presumes downloaded the SRA files OK & they're in /exports/eddie/scratch/$USER/Wallace_2020_JEC21/input
 
 # move to riboviz folder:
 cd $HOME/riboviz/riboviz
 
 echo "moved to $HOME/riboviz/riboviz"
 
-# make system link at riboviz folder to folder on scratch
-ln -s /exports/eddie/scratch/$USER/$DATAFOLDER
+# make symbolic system link at riboviz folder to folder on scratch
+ln -s /exports/eddie/scratch/$USER/Wallace_2020_JEC21
 
-# copy yaml into the riboviz/$DATAFOLDER folder, rename it
-cp $HOME/riboviz/example-datasets/fungi/cryptococcus/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml $DATAFOLDER/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml
+# copy yaml into the riboviz/Wallace_2020_JEC21 folder, rename it
+cp $HOME/riboviz/example-datasets/fungi/cryptococcus/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml Wallace_2020_JEC21/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml
 
 # presuming I'm in correct branch on riboviz
 
@@ -621,17 +621,21 @@ cp $HOME/riboviz/example-datasets/fungi/cryptococcus/Wallace_2020_JEC21_2-sample
 cd $HOME/riboviz/riboviz
 echo "now in folder: ${PWD} ready to run"
 
-# presuming .yaml config exists in $HOME/riboviz/riboviz/${DATAFOLDER} AND it points to ${DATAFOLDER}/input for files as required
+# presuming .yaml config exists in $HOME/riboviz/riboviz/Wallace_2020_JEC21 AND it points to Wallace_2020_JEC21/input for files as required
 
 # run nextflow validation:
-nextflow run prep_riboviz.nf -params-file ${DATAFOLDER}/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml -work-dir ${DATAFOLDER}/work -ansi-log false --validate_only
+nextflow run prep_riboviz.nf -params-file Wallace_2020_JEC21/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml -work-dir Wallace_2020_JEC21/work -ansi-log false --validate_only
 
 # run nextflow:
-nextflow run prep_riboviz.nf -params-file ${DATAFOLDER}/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml -work-dir ${DATAFOLDER}/work -ansi-log false
+nextflow run prep_riboviz.nf -params-file Wallace_2020_JEC21/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml -work-dir Wallace_2020_JEC21/work -ansi-log false
 
 # hopefully success.
-echo "nextflow riboviz ${DATAFOLDER} data run complete"
+echo "nextflow riboviz Wallace_2020_JEC21 data run complete"
 ```
+
+Here we are running nextflow's validation to check that the input files and parameters are valid, and then we run the actual workflow.  
+
+Note that by default Nextflow uses a local work/ directory (ie. in `$HOME/riboviz/riboviz/work`) to write its intermediate results to, which is relative to the current directory in which Nextflow is invoked. Here, Nextflow's `-work-dir` flag is used to instruct Nextflow where to put these results, in this case within `Wallace_2020_JEC21/work`, but one could use `/exports/eddie/scratch/$USER/Wallace_2020_JEC21/work` here instead too.
 
 ### Job Submission
 
