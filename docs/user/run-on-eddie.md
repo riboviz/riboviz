@@ -77,7 +77,7 @@ $ git clone https://github.com/riboviz/example-datasets
 
 We recommend using the cluster filesystem (`/exports/[COLLEGE]/eddie/...`) for storing **RiboViz** and `example-datasets`.
 
-If you do not have a group space, you can use your scratch directory (`/exports/eddie/scratch/<YOUR_UUN>`)
+If you do not have a group space, you can use your scratch directory (`/exports/eddie/scratch/$USER`)
 
 ---
 
@@ -658,7 +658,7 @@ Another file worth checking if you are uncertain how a nextflow run performed is
 
 If you run the example-dataset in your scratch space as detailed in these instructions, remember to move the output data to DataStore or other persistent storage after the jobs have finished.  
 
-Alternatively, you can use `scp` and `scp -r` to transfer the files and folders via the commandline to a local machine (e.g. `scp -r UUN@eddie.ecdf.ed.ac.uk:/exports/eddie/scratch/$USER/Wallace_2020_JEC21/output/* $HOME/Downloads/` to download all of the output files from the scratch space to the user's local Downloads file).
+Alternatively, you can use `scp` and `scp -r` to transfer the files and folders via the commandline to a local machine (e.g. `scp -r $USER@eddie.ecdf.ed.ac.uk:/exports/eddie/scratch/$USER/Wallace_2020_JEC21/output/* $HOME/Downloads/` to download all of the output files from the scratch space to the user's local Downloads file).
 
 You can check the file sizes using `du -ch` to get an idea of how much space you will need to have available before transferring the files.  The `/input` files for this example dataset total ~18GB, the `/output` files total ~8GB, but the total size of the `Wallace_2020_JEC21` folder on scratch after a successful run currently comes to 551GB!
 
