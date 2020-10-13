@@ -28,7 +28,7 @@ Contents:
    - [Create directories for input paths](#create-directories-for-input-paths)
    - [Download SRR files](#download-srr-files)
    - [Create `qsub` script](#create-qsub-script)
-  
+
 ---
 
 ## Logging in
@@ -39,13 +39,15 @@ Connect to the cluster using `ssh` from a terminal window (Linux and Mac OS) or 
 $ ssh -X <YOUR_UUN>@eddie.ecdf.ed.ac.uk
 ```
 
-**Note:** Access to the cluster is only available from the University network. External users should first connect to the University network using the [VPN service](https://www.ed.ac.uk/information-services/computing/desktop-personal/vpn).
+In the rest of this document, we shall abbreviate your universal username as `$USER`.
+
+**Note** that access to the cluster is only available from the University network. External users should first connect to the University network using the [VPN service](https://www.ed.ac.uk/information-services/computing/desktop-personal/vpn).
 
 ---
 
 ## Configure Anaconda enviroment
 
-Configure your `.condarc file` to point to the `anaconda directory` in `/exports/csce/eddie/biology/groups/wallace_rna/`. 
+Configure your `.condarc file` to point to the `anaconda directory` in `/exports/csce/eddie/biology/groups/wallace_rna/`.
 
 If you do not have a `.condarc` file in your home directory, create it first.
 
@@ -71,11 +73,11 @@ $ git clone https://github.com/riboviz/riboviz
 $ git clone https://github.com/riboviz/example-datasets
 ```
 
-**Note:** Your home directory space is enough for running a vignette but is not enough for running a full-size dataset. 
+**Note:** Your home directory space is enough for running a vignette but is not enough for running a full-size dataset.
 
 We recommend using the cluster filesystem (`/exports/[COLLEGE]/eddie/...`) for storing **RiboViz** and `example-datasets`.
 
-If you do not have a group space, you can use your scratch directory (`/exports/eddie/scratch/<YOUR_UUN>`)
+If you do not have a group space, you can use your scratch directory (`/exports/eddie/scratch/$USER`)
 
 ---
 
@@ -133,9 +135,9 @@ $ export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
 ### Load necessary modules on node
 
 ```console
-$ module load igmm/apps/BEDTools 
+$ module load igmm/apps/BEDTools
 $ module load igmm/apps/bowtie
-$ module load igmm/apps/hdf5 
+$ module load igmm/apps/hdf5
 $ module load igmm/apps/HISAT2
 $ module load igmm/apps/pigz
 $ module load igmm/apps/R/3.6.3
@@ -151,7 +153,7 @@ You can create a script named `set-riboviz-env.sh` for above commands to set up 
 ```
 #!/usr/bin/env bash
 export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
-module load igmm/apps/BEDTools 
+module load igmm/apps/BEDTools
 module load igmm/apps/bowtie
 module load igmm/apps/hdf5
 module load igmm/apps/HISAT2
@@ -276,18 +278,25 @@ You can create a job script named `job_riboviz.sh` in your `riboviz` directory t
 # Grid Engine options (lines prefixed with #$)
 #$ -N riboviz_vignette              
 #$ -cwd                  
-#$ -l h_rt=00:10:00 
-#$ -l h_vmem=32G
+#$ -l h_rt=01:00:00
+#$ -l h_vmem=8G
+#$ -pe sharedmem 16
+#$ -o $JOB_NAME-$JOB_ID-$HOSTNAME.o
+#$ -e $JOB_NAME-$JOB_ID-$HOSTNAME.e
 #  These options are:
 #  job name: -N
 #  use the current working directory: -cwd
-#  runtime limit of 10 minutes: -l h_rt
-#  ask for 16 Gbyte RAM: -l h_vmem
+#  runtime limit of 1 hour: -l h_rt
+#  ask for 8 Gbyte RAM: -l h_vmem
+#  use shared memory parallel environment, request 16 CPUs
+#  redirect output with format jobname-jobID-hostname (jobname -N)
+#  redirect error with same format as output
+
 # Initialise the environment modules
 . /etc/profile.d/modules.sh
- 
+
 export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
-module load igmm/apps/BEDTools 
+module load igmm/apps/BEDTools
 module load igmm/apps/bowtie
 module load igmm/apps/hdf5
 module load igmm/apps/HISAT2
@@ -295,9 +304,12 @@ module load igmm/apps/pigz
 module load igmm/apps/R/3.6.3
 module load anaconda
 source activate riboviz
- 
-# Run the python workflow
-python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
+
+# Uncomment this to run the python workflow:
+#python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
+
+# Run the Nextflow workflow:
+nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false
 ```
 
 ### Submitting jobs
@@ -322,9 +334,9 @@ $ qsub -P <QUEUE_NAME> job_riboviz.sh
 
 A job ID will be displayed.
 
-This will output the standard output from `prep_riboviz.py` to a file, `riboviz_vignette.o[Your-Job-ID]`, in the current working directory, and errors to a foile, `riboviz_vigette.e[Your-Job-ID]`.
+This will output the standard output from `prep_riboviz.py` or `prep_riboviz.nf` (depending on which option you are running) to a file, `riboviz_vignette-$JOB_ID-$HOSTNAME.o`, in the current working directory, and errors to a file, `riboviz_vignette-$JOB_ID-$HOSTNAME.e`.
 
-The contents of `riboviz_vignette.o[Your-Job-ID]` should be the same as the standard output of [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow) above.
+The contents of `riboviz_vignette-$JOB_ID-$HOSTNAME.o` should be the same as the standard output of [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow) above.
 
 An example job submission script for running the vignette using scratch space for outputs and using system links is available at [`jobs/vignette-submission-script.sh`](../../jobs/vignette-submission-script.sh) and uses a modified .yaml config file [`vignette/remote_vignette_config.yaml`](../../vignette/remote_vignette_config.yaml) as an input. 
 
@@ -337,7 +349,7 @@ Active jobs (i.e. pending or running) can be monitored with the `qstat` command
 $ qstat
 job-ID     prior   name       user         state submit/start at     queue                          jclass                                                     slots ja-task-ID
 ----------------------------------------------------------------------------------------------------------------------                            --------------------------
-   2701173 0.00000 riboviz_vi s1919303     qw    06/11/2020 13:22:28                                                                                               1
+   2701173 0.00000 riboviz_vi $USER     qw    06/11/2020 13:22:28                                                                                               1
 ```
 
 ### Cancelling jobs
@@ -366,7 +378,7 @@ $ qacct -j 2701137
 qname        eddie
 hostname     node1c17.ecdf.ed.ac.uk
 group        eddie_users
-owner        s1919303
+owner        $USER
 project      uoe_baseline
 department   defaultdepartment
 jobname      riboviz_vignette
@@ -375,9 +387,9 @@ taskid       undefined
 pe_taskid    NONE
 account      sge
 priority     0
-cwd          /home/s1919303/riboviz
+cwd          /home/$USER/riboviz/riboviz
 submit_host  login02.ecdf.ed.ac.uk
-submit_cmd   qsub /exports/eddie3_homes_local/s1919303/job_riboviz.sh
+submit_cmd   qsub /exports/eddie3_homes_local/$USER/job_riboviz.sh
 qsub_time    06/11/2020 13:22:28.652
 start_time   06/11/2020 13:22:37.680
 end_time     06/11/2020 13:27:51.952
@@ -423,110 +435,142 @@ See [Job submission](https://www.wiki.ed.ac.uk/display/ResearchServices/Job+Subm
 
 ---
 
-## Run a full-size example dataset
+## Run a Full-size Example Dataset
 
-**RiboViz** is complemented with a repository of [example-datasets](https://github.com/riboviz/example-datasets),
+In this example, we're using the Wallace et al. 2020 *Cryptococcus neoformans* 'JEC21' dataset from the [Example-Datasets repository](https://github.com/riboviz/example-datasets). This example dataset repository contains .yaml config files, annotation files and contaminant files for a range of different publically available datasets across a range of organisms.
 
-The paths in the YAML configuration file in `example-datasets` directory is just a reference. You could edit the paths according to your directory structure. For example, if you want to run the `Wallace_2020_JEC21` dataset on Eddie you would do the following.
+To run the `Wallace_2020_JEC21` dataset on Eddie, logout from any interactive node you may be logged into (for example, if you were running the vignette example above) and ensure you are within the `example-datasets` repository at $HOME/riboviz/example-datasets and that you are in the correct git branch for both riboviz and example-datasets repositories.
+
+NOTE: the following sections are here for information as it might be helpful in explaining to new users what these steps do, and how to adjust these steps for your own data.  These steps (except [initial setup of SRA Toolkit](### Download fastq data files from the Short Read Archive (SRA): initial setup)) are included in the sample job submission script for the Wallace_2020_JEC21 dataset, so you don't have to carry out these steps manually if you plan to run the [job submission script](#Create-qsub-script) and you can skip straight there if you want to try running the script.
+
+Please also note the paths in the YAML configuration file we will be using from the `example-datasets` directory are just a reference. You should check and edit the paths according to your directory structure.
+
+```
+cd example-datasets
+git checkout master
+cd ..   # back to $HOME/riboviz
+cd riboviz
+git checkout develop
+
+## check you have this file structure:
+## $HOME/riboviz/riboviz  # (branch: develop)
+## $HOME/riboviz/example-datasets  # (branch: master)
+```
+This will give you access to the correct config.yaml, annotation and contaminants files.
 
 ### Create directories for input paths
 
-Create a directory named `Wallace_2020_JEC21` in `/exports/eddie/scratch/s1919303/riboviz/riboviz`:
-
-```console
-$ cd /exports/eddie/scratch/s1919303/riboviz/riboviz
+Create a directory named `Wallace_2020_JEC21` in `/exports/eddie/scratch/$USER/` and a directory within that called `input`
+```
 $ mkdir Wallace_2020_JEC21
+$ mkdir Wallace_2020_JEC21/input
 ```
+### Set up riboviz dataset folder and create system links to scratch folders
 
-Create a directory named `input` in `Wallace_2020_JEC21`:
+Move to the main riboviz folder
+```
+$ cd $HOME/riboviz/riboviz
+```
+Create a symbolic system link between a new folder for our dataset and the folder on scratch which will hold our inputs and outputs:
+```
+# make symbolic system link at riboviz folder to folder on scratch
+$ ln -s /exports/eddie/scratch/$USER/$Wallace_2020_JEC21
+```
+This means that we can access the files as if they were located at `$HOME/riboviz/riboviz/Wallace_2020_JEC21`, instead of being held on the scratch space location.  This simplifies paths in our yaml and helps us keep things together while not filling up more limited storage space on our group or home directory storage.
+
+Now we copy the yaml across from the example-datasets folder, into our main riboviz folder. If you wish to edit the yaml, then it's best to edit this version, in $HOME/riboviz/riboviz/Wallace_2020_JEC21.  
 
 ```console
-$ cd Wallace_2020_JEC21
-$ mkdir input
-```
-
-Create a directory named `contaminants` in `Wallace_2020_JEC21` and copy the contaminants files in `example-dataset` to the directory:
-
-```console
-$ mkdir contaminants
-$ cp /exports/eddie/scratch/s1919303/riboviz/example-datasets/fungi/cryptococcus/contaminants/JEC21_rrna.fasta contaminants
-```
-
-Create a directory named `annotation` in `Wallace_2020_JEC21` and copy the annotation files in `example-dataset` to the directory:
-
-```console
-$ mkdir annotation 
+$ mkdir annotation
 $ cp /exports/eddie/scratch/s1919303/riboviz/example-datasets/fungi/cryptococcus/annotation/JEC21_10p_up12dwn9_CDS_with_120bputrs.fa annotation
+
+# copy yaml into the riboviz/Wallace_2020_JEC21 folder, rename it
+ # cp [example-datasets version yaml] [our 'local' riboviz folder version]
+
+$ cp $HOME/riboviz/example-datasets/fungi/cryptococcus/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml Wallace_2020_JEC21/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml
+
+cd $HOME/riboviz/riboviz
 ```
+We need to make sure we move back into the main riboviz folder, where we will be ready to run the nextflow commands.
 
-Copy the YAML configuration file to `Wallace_2020_JEC21`:
+### Download fastq data files from the Short Read Archive (SRA): initial setup
 
-```console
-$ cp /exports/eddie/scratch/s1919303/riboviz/example-datasets/fungi/cryptococcus/Wallace_2020_JEC21_NEEDSCOMPLETEOVERHAUL_config.yaml .
-```
+Eddie allows us to load the [SRA Toolkit](https://github.com/ncbi/sra-tools) module, including the utility `fasterq-dump` for downloading data files.  This utility has been included in SRA Toolkit since version 2.9.1. We recommend using `fasterq-dump`.
 
-### Download SRR files
+An earlier tool, `fastq-dump`, is also included in SRA Toolkit, however, you may find it is too slow for `fastq-dump` to download a large dataset like `Wallace_2020_JEC21` which is around 50GB uncompressed. Even using the `--gzip` option to directly download the `.gz` file may be too slow.
 
-Eddie has the [SRA Toolkit](https://github.com/ncbi/sra-tools). Run the following to load its module:
-
-```console
-$ module load igmm/apps/sratoolkit/2.8.2-1
-```
-
-Once loaded, you can use `fastq-dump`.
-
-However, you may find it is too slow for `fastq-dump` to download a large dataset like `Wallace_2020_JEC21` which is around 50GB uncompressed. Even using the `--gzip` option to directly download the `.gz` file may be too slow.
-
-A faster alternative can be to use `fasterq-dump` and the Aspera client's `prefetch` tool (which is provided as part of the above module).
+A faster alternative can be to use `fasterq-dump` and the Aspera client's `prefetch` tool (which is provided as part of the above module), as recommended here.
 
 To get `fasterq-dump`, follow SRA Toolkit's [02. Installing SRA Toolkit](https://github.com/ncbi/sra-tools/wiki/02.-Installing-SRA-Toolkit) to install the latest version of the SRA Toolkit (follow the instructions for CentOS).
 
-Now, get the `Wallace_2020_JEC21` dataset:
+Before your initial use of SRA toolkit, configure download and cache settings, by running:
 
 ```
-$ cd /exports/eddie/scratch/s1919303/riboviz/riboviz/Wallace_2020_JEC21/input
+$ module load igmm/apps/sratoolkit/2.10.8
+$ vdb-config --interactive
 ```
+then follow the interactive prompts (using tab to navigate through the menus) and edit the `CACHE` > `Set Default Import Path` section to change the workspace location.
 
-Prefetch with Aspera client:
+This path adjusts where the tool puts your cache directory, which could get very large (100s of GB). We recommend using your scratch space `/exports/eddie/scratch/$USER/ncbi`, where `$USER` is replaced by your username.
 
-```console
+You may have to repeat the `vdb-config` step periodically, as data on Eddie scratch space is automatically cleared after one month.
+For more information about the configuration utility, see [SRA toolkit installation and configuration Guide](https://ncbi.github.io/sra-tools/install_config.html).
+
+### Download fastq data files from the Short Read Archive (SRA): subsequent uses
+
+To get the Wallace_2020_JEC21 dataset .fastq read files (remember to change to the `Wallace_2020_JEC21/input` directory on scratch first):
+
+```
+cd /exports/eddie/scratch/$USER/Wallace_2020_JEC21/input
+$ module load igmm/apps/sratoolkit/2.10.8
+
+# prefetch with Aspera client
 $ prefetch SRR9620588 SRR9620586
-```
 
-Get the data:
-
-```console
 $ fasterq-dump SRR9620588
 $ fasterq-dump SRR9620586
 ```
 
-`fasterq-dump` does not have a `--gzip` option, so you will have to compress the datasets after you download them:
+These download utilities do not have an option to compress (gzip) the files, nor apparently allow you to pipe their output into another program. So we use the `pigz` utility to compress.
 
-```console
+```
+$ module load igmm/apps/pigz
 $ pigz *.fastq
 ```
 
+It may be helpful to test this functionality with a smaller download file, e.g. [SRR014376](https://trace.ncbi.nlm.nih.gov/Traces/sra/?run=SRR014376) from Ingolia 2009.
+
+Alternatively, it is possible to download `.fastq.gz` format files of SRA data from the European Nucleotide Archive, but we have not tested the speed. For example, from Ingolia 2009 again, [ftp link to SRR014376.fastq.gz](ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR014/SRR014376/SRR014376.fastq.gz).
+
 ### Create `qsub` script
 
-Create the script in `/exports/eddie/scratch/s1919303/riboviz/riboviz/`
+Create the job submission script in `$HOME` or a location of your choosing, and name it something like `run_W-Cn-JEC21_2020.sh`.  
 
 ```
 #!/bin/sh
 # Grid Engine options (lines prefixed with #$)
-#$ -N Wallace_2020_JEC21              
+#$ -N W-Cn-JEC21_2020              
 #$ -cwd                  
-#$ -l h_rt=10:00:00 
-#$ -l h_vmem=32G
+#$ -l h_rt=48:00:00
+#$ -l h_vmem=8G
+#$ -pe sharedmem 16
+#$ -o $JOB_NAME-$JOB_ID-$HOSTNAME.o
+#$ -e $JOB_NAME-$JOB_ID-$HOSTNAME.e
 #  These options are:
 #  job name: -N
 #  use the current working directory: -cwd
-#  runtime limit of 10 hours: -l h_rt
-#  ask for 32 Gbyte RAM: -l h_vmem
+#  runtime limit of 48 hours: -l h_rt
+#  ask for 8 Gbyte RAM: -l h_vmem
+#  use shared memory parallel environment, request 16 CPUs
+#  redirect output with format jobname-jobID-hostname (jobname -N)
+#  redirect error with same format as output
 # Initialise the environment modules
 . /etc/profile.d/modules.sh
- 
+
+#!/usr/bin/env bash
 export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
-module load igmm/apps/BEDTools 
+module load openmpi
+module load igmm/apps/BEDTools
 module load igmm/apps/bowtie
 module load igmm/apps/hdf5
 module load igmm/apps/HISAT2
@@ -534,19 +578,96 @@ module load igmm/apps/pigz
 module load igmm/apps/R/3.6.3
 module load anaconda
 source activate riboviz
- 
-# Run the python workflow
-python -m riboviz.tools.prep_riboviz -c Wallace_2020_JEC21/Wallace_2020_JEC21_NEEDSCOMPLETEOVERHAUL_config.yaml
+
+echo "Running riboviz on dataset: Wallace_2020_JEC21"
+
+# move to scratch space
+cd /exports/eddie/scratch/$USER
+
+# make folder there
+mkdir Wallace_2020_JEC21
+mkdir Wallace_2020_JEC21/input
+
+cd Wallace_2020_JEC21/input
+
+echo "${PWD}"
+
+# get the dataset read files
+module load igmm/apps/sratoolkit/2.10.8
+
+##prefetch with Aspera client
+prefetch SRR9620588 SRR9620586
+fasterq-dump SRR9620588
+fasterq-dump SRR9620586
+
+# use pigz to zip .fastq files into .fastq.gz files:
+pigz *.fastq
+
+echo "hopefully downloaded and pigz'd the files into /exports/eddie/scratch/$USER/Wallace_2020_JEC21/input"
+
+# presumes downloaded the SRA files OK & they're in /exports/eddie/scratch/$USER/Wallace_2020_JEC21/input
+
+# move to riboviz folder:
+cd $HOME/riboviz/riboviz
+
+echo "moved to $HOME/riboviz/riboviz"
+
+# make symbolic system link at riboviz folder to folder on scratch
+ln -s /exports/eddie/scratch/$USER/Wallace_2020_JEC21
+
+# copy yaml into the riboviz/Wallace_2020_JEC21 folder, rename it
+cp $HOME/riboviz/example-datasets/fungi/cryptococcus/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml Wallace_2020_JEC21/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml
+
+# presuming I'm in correct branch on riboviz
+
+# move back up to riboviz folder (or nextflow won't run)
+cd $HOME/riboviz/riboviz
+echo "now in folder: ${PWD} ready to run"
+
+# presuming .yaml config exists in $HOME/riboviz/riboviz/Wallace_2020_JEC21 AND it points to Wallace_2020_JEC21/input for files as required
+
+# run nextflow validation:
+nextflow run prep_riboviz.nf -params-file Wallace_2020_JEC21/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml -work-dir Wallace_2020_JEC21/work -ansi-log false --validate_only
+
+# run nextflow:
+nextflow run prep_riboviz.nf -params-file Wallace_2020_JEC21/Wallace_2020_JEC21_2-samples_10p_up12dwn9_CDS_120bpL_120bpR_config.yaml -work-dir Wallace_2020_JEC21/work -ansi-log false
+
+# hopefully success.
+echo "nextflow riboviz Wallace_2020_JEC21 data run complete"
 ```
 
-Now, run:
+Here we are running nextflow's validation to check that the input files and parameters are valid, and then we run the actual workflow.  
+
+Note that by default Nextflow uses a local work/ directory (ie. in `$HOME/riboviz/riboviz/work`) to write its intermediate results to, which is relative to the current directory in which Nextflow is invoked. Here, Nextflow's `-work-dir` flag is used to instruct Nextflow where to put these results, in this case within `Wallace_2020_JEC21/work`, but one could use `/exports/eddie/scratch/$USER/Wallace_2020_JEC21/work` here instead too.
+
+### Job Submission
+
+Check that you are in the same location as your submission script, or remember to add that path to your `qsub` command.
 
 ```console
 $ cd /exports/eddie/scratch/s1919303/riboviz/riboviz/
 $ qsub [Your-script]
 ```
 
-If you run the `example-dataset` in your scratch space, remember to move the output data to DataStore or other persistent storage after the jobs have finished. 
+If you run the `example-dataset` in your scratch space, remember to move the output data to DataStore or other persistent storage after the jobs have finished.
+
+### Checking outputs
+
+The job submission should create two files: an output file `JOB_NAME-$JOB_ID-$HOSTNAME.o` and an error file `$JOB_NAME-$JOB_ID-$HOSTNAME.e`.  These are the best place to start looking after a job has completed, to check if it has run successfully.
+
+The output file will contain the standard output from the nextflow run, and will give you the locations within `/work` for the folders associated with each process. More information on this can be found in the user documentation for [Debugging and Bash Scripts](../docs/user/prep-riboviz-run-nextflow.md#debugging-and-bash-scripts)
+
+The output files will be in `/exports/eddie/scratch/$USER/Wallace_2020_JEC21/output/`.
+
+Another file worth checking if you are uncertain how a nextflow run performed is the `.nextflow.log` file found in `$HOME/riboviz/riboviz`.
+
+### Moving and Downloading Outputs
+
+If you run the example-dataset in your scratch space as detailed in these instructions, remember to move the output data to DataStore or other persistent storage after the jobs have finished.  
+
+Alternatively, you can use `scp` and `scp -r` to transfer the files and folders via the commandline to a local machine (e.g. `scp -r $USER@eddie.ecdf.ed.ac.uk:/exports/eddie/scratch/$USER/Wallace_2020_JEC21/output/* $HOME/Downloads/` to download all of the output files from the scratch space to the user's local Downloads file).
+
+You can check the file sizes using `du -ch` to get an idea of how much space you will need to have available before transferring the files.  The `/input` files for this example dataset total ~18GB, the `/output` files total ~8GB, but the total size of the `Wallace_2020_JEC21` folder on scratch after a successful run currently comes to 551GB!
 
 Files older than one month are removed from this directory automatically.
 
