@@ -34,7 +34,7 @@ def list_to_df(data, ignore_num_reads=False):
 
     :param data: List
     :type data: list(tuple(str or unicode, str or unicode, int))
-    :param ignore_num_reads: Ignore num_reads when creating data
+    :param ignore_num_reads: Ignore num_reads when creating data \
     frame?
     :type ignore_num_reads: bol
     :return: Data frame
