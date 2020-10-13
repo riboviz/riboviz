@@ -105,6 +105,10 @@ ALIGNER = "aligner"
 
 VALIDATE_ONLY = "validate_only"
 """ Validate configuration only? (Nextflow workflow only). """
+PUBLISH_INDEX_TMP = "publish_index_tmp"
+"""
+Publish index and temporary files? (Nextflow workflow only).
+"""
 SKIP_INPUTS = "skip_inputs"
 """
 When validating configuration skip checks for existence of ribosome
