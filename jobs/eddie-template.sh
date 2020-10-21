@@ -1,25 +1,25 @@
 #!/bin/sh
 # Grid Engine options (lines prefixed with #$)
-#$ -N %%JOB_NAME%%
+# Job name:
+#$ -N %%job_name%%
+# Use the current working directory:
 #$ -cwd
-#$ -l h_rt=%%RUNTIME%
-#$ -l h_vmem=%%MEMORY%%
-#$ -pe sharedmem %%NUM_CPUS%%
+# Runtime limit:
+#$ -l h_rt=%%runtime%%
+# RAM
+#$ -l h_vmem=%%memory%%
+# Use shared memory parallel environment and request number of CPUs:
+#$ -pe sharedmem %%num_cpus%%
+# Redirected output file name format:
 #$ -o $JOB_NAME-$JOB_ID-$HOSTNAME.o
+# Redirected error file name format:
 #$ -e $JOB_NAME-$JOB_ID-$HOSTNAME.e
-#  These options are:
-#  -N: job name: -N
-#  -cwd: use the current working directory
-#  -l h_rt: runtime limit
-#  -l h_vmwm: RAM
-#  -pe: sharedmem use shared memory parallel environment, request CPUs
-#  -o: redirect output with format jobname-jobID-hostname (jobname -N)
-#  -e: redirect error with same format as output
-# Initialise the environment modules
+
+# Initialise the environment modules.
 . /etc/profile.d/modules.sh
 
 #!/usr/bin/env bash
-export R_LIBS=%%R_LIBS%%
+export R_LIBS=%%r_libs%%
 module load openmpi
 module load igmm/apps/BEDTools 
 module load igmm/apps/bowtie
@@ -30,58 +30,50 @@ module load igmm/apps/R/3.6.3
 module load anaconda
 source activate riboviz
 
-DATAFOLDER="%%DATA_FOLDER%%"
+DATAFOLDER="%%data_folder%%"
 
 echo "Running riboviz on dataset: ${DATAFOLDER}"
 
-# move to scratch space
+# Move to scratch space, create and move to $DATAFOLDER.
 cd /exports/eddie/scratch/$USER
-
-# make folder there
-mkdir $DATAFOLDER
-mkdir $DATAFOLDER/input
-
+mkdir -p $DATAFOLDER/input
 cd $DATAFOLDER/input
-
 echo "${PWD}"
 
-## get the dataset read files
+## Get the dataset read files.
 module load igmm/apps/sratoolkit/2.10.8
-
-##prefetch with Aspera client
-%%PREFETCH%%
-
-# use pigz to zip .fastq files into .fastq.gz files:
+## Pre-fetch with Aspera client.
+%%pre_fetch%%
+# Use pigz to zip .fastq files into .fastq.gz files.
 pigz *.fastq
 
-echo "hopefully downloaded and pigz'd the files into /exports/eddie/scratch/$USER/${DATAFOLDER}/input"
+echo "(Hopefully) downloaded and pigz'd files into /exports/eddie/scratch/$USER/${DATAFOLDER}/input"
 
-# presumes I've already downloaded the SRA files & they're in /exports/eddie/scratch/$USER/$DATAFOLDER/input
+# Following presumes SRA files were downloaded and they are in
+# /exports/eddie/scratch/$USER/$DATAFOLDER/input/.
 
-# move to riboviz folder: 
+# Move to riboviz folder.
 cd $HOME/riboviz/riboviz
-
-echo "moved to $HOME/riboviz/riboviz"
-
-# make system link at riboviz folder to folder on scratch
+echo "Moved to ${PWD}"
+# Make system link in riboviz/ scratch folder.
 ln -s /exports/eddie/scratch/$USER/$DATAFOLDER
+# Copy YAML configuration file into riboviz/$DATAFOLDER/.
+cp %%config_path%% $DATAFOLDER/
 
-# copy yaml into the riboviz/$DATAFOLDER folder, rename it
-cp %%CONFIG_PATH%%/%%CONFIG_FILE%% $DATAFOLDER/
-
-# presuming I'm in correct branch on riboviz
-
-# move back up to riboviz folder (or nextflow won't run)
+# Following presumes we are in correct branch on riboviz.
+# Move back up to riboviz folder (or Nextflow won't run).
 cd $HOME/riboviz/riboviz
-echo "now in folder: ${PWD} ready to run"
+echo "Moved to ${PWD}. Ready to run!"
 
-# presuming .yaml config exists in $HOME/riboviz/riboviz/${DATAFOLDER} AND it points to ${DATAFOLDER}/input for files as required
+# Following presumes YAML configuration file exists in
+# $HOME/riboviz/riboviz/${DATAFOLDER} AND it points to
+# ${DATAFOLDER}/input. for files as required.
 
-# run nextflow validation: 
-nextflow run prep_riboviz.nf -params-file ${DATAFOLDER}/%%CONFIG_FILE%% -work-dir ${DATAFOLDER}/work -ansi-log false --validate_only
+# Run Nextflow validation.
+nextflow run prep_riboviz.nf -params-file ${DATAFOLDER}/%%config_file%% -work-dir ${DATAFOLDER}/work -ansi-log false --validate_only
 
-# run nextflow: 
-nextflow run prep_riboviz.nf -params-file ${DATAFOLDER}/%%CONFIG_FILE%% -work-dir ${DATAFOLDER}/work -ansi-log false
+# Run Nextflow.
+nextflow run prep_riboviz.nf -params-file ${DATAFOLDER}/%%config_file%% -work-dir ${DATAFOLDER}/work -ansi-log false
 
-# hopefully success. 
-echo "nextflow riboviz ${DATAFOLDER} data run complete"
+# (Hopefully) success. 
+echo "nextflow riboviz ${DATAFOLDER} data run complete!"
