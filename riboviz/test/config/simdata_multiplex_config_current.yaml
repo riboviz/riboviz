@@ -32,6 +32,7 @@ orf_fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa
 orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 orf_index_prefix: YAL_CDS_w_250
 primary_id: Name
+publish_index_tmp: FALSE
 rpf: TRUE
 rrna_fasta_file: vignette/input/yeast_rRNA_R64-1-1.fa
 rrna_index_prefix: yeast_rRNA
