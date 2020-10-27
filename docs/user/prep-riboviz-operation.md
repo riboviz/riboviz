@@ -78,6 +78,8 @@ If a multiplexed file (`multiplex_fq_files`) is specified, then the workflow pro
 
 Index files (HT2) are produced in the index directory (`dir_index`).
 
+If using Nextflow, then, by default, files in the index directory are symbolic links to files in the [Nextflow work/ directory](#nextflow-work-directory). To request Nextflow copy the index files into this directory set the `publish_index_tmp` parameter to `TRUE` in the workflow configuration file or provide the parameter `--publish_index_tmp` when running the workflow using Nextflow.
+
 ---
 
 ## Temporary files
@@ -125,6 +127,8 @@ If a multiplexed file (`multiplex_fq_files`) is specified, then the following fi
      - Row with `SampleID` with value `Total` and `NumReads` value with the total number of reads processed. 
   - `<SAMPLE_ID>.fastq`: Files with demultiplexed reads, where `<SAMPLE_ID>` is a value in the `SampleID` column of the sample sheet. There will be one file per sample.
   - `Unassigned.fastq`: A FASTQ file with the reads that did not match any `TagRead` (barcode) in the sample sheet.
+
+If using Nextflow, then, by default, files in the temporary directory are symbolic links to files in the [Nextflow work/ directory](#nextflow-work-directory). To request Nextflow copy the index files into this directory set the `publish_index_tmp` parameter to `TRUE` in the workflow configuration file or provide the parameter `--publish_index_tmp` when running the workflow using Nextflow.
 
 ---
 
@@ -342,7 +346,11 @@ yeast_rRNA.8.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yea
 
 The `.ht2` files are symbolic links to the outputs of process `e5/ccf3e6`, an invocation of task `buildIndicesrRNA`.
 
-The Nextflow workflow uses Nextflow's [publishDir](https://www.nextflow.io/docs/latest/process.html#publishdir) directive which allows files to be published to specific directories outwith `work/`. By default, the files in this directory are symlinked to those in `work/`. The Nextflow workflow uses this to publishes files to the index (`dir_index`), temporary (`dir_tmp`), and output (`dir_out`) directories specified in the workflow configuration file.
+The Nextflow workflow uses Nextflow's [publishDir](https://www.nextflow.io/docs/latest/process.html#publishdir) directive which allows files to be published to specific directories outwith `work/`.
+
+For index and temporary files, `publishDir` is configured using the value of the `publish_index_tmp` parameter. If `FALSE` then files in the index (`dir_index`) and temporary (`dir_tmp`) directories are symbolically linked to those in `work/`. If `TRUE` then they are copied. Output files are always copied from `work/` into the output (`dir_out`) directory specified in the workflow configuration file.
+
+If `publish_index_tmp` is false and the `work/` directory is deleted then the index and temporary files will no longer be accessible.
 
 ### `Missing` files
 
