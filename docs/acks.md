@@ -5,7 +5,7 @@
 * Edward Wallace, Felicity Anderson, Siyin Xue: [The Wallace Lab](https://ewallace.github.io/), The University of Edinburgh.
 * Premal Shah, John Favate, Bala Desinghu, Tongji Xing: [The Shah Lab](https://theshahlab.org/), Rutgers University.
 * Liana Lareau, Amanda Mok: [The Lareau Lab](http://www.lareaulab.org/), University of California, Berkeley.
-* Kostas Kavousannakis, Mike Jackson: [EPCC](https://www.epcc.ed.ac.uk/), The University of Edinburgh.
+* Kostas Kavoussanakis, Mike Jackson: [EPCC](https://www.epcc.ed.ac.uk/), The University of Edinburgh.
 * Oana Carja, Joshua Plotkin: The University of Pennsylvania.
 
 ---
