@@ -97,6 +97,8 @@ If you have access to a priority queue then you can use:
 $ qlogin -P <QUEUE_NAME> -l h_vmem=16G
 ```
 
+RiboViz team members have access to the priority queue `bio_wallace_rna_riboviz`.
+
 See [Interactive sessions](https://www.wiki.ed.ac.uk/display/ResearchServices/Interactive+Sessions) for more information.
 
 **Troubleshooting: fail to enter interactive node**
@@ -271,7 +273,7 @@ For more information about the vignette, see [Map mRNA and ribosome protected re
 
 Computational work on Eddie is usually submitted to the cluster as batch jobs initiated from a login node. In order to submit a job you need to write a Grid Engine job submission script containing details of the program to run as well as requests for resources. Then, you submit this job script to the cluster with the `qsub` command.
 
-You can create a job script named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
+Here is an example job script for the vignette, named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
 
 ```
 #!/bin/sh
@@ -326,13 +328,16 @@ Run:
 $ qsub job_riboviz.sh
 ```
 
-If you have access to a priority queue then you can use:
-
+If you have access to a priority queue, then you can add a line to the gridengine in the submission script, (or alternatively in the command line call to qsub)
 ```console
-$ qsub -P <QUEUE_NAME> job_riboviz.sh
+#$ -P <QUEUE_NAME> job_riboviz.sh 
 ```
 
-A job ID will be displayed.
+You will see a message including job ID:
+
+```
+Your job <job-ID> ("jobname") has been submitted
+```
 
 This will output the standard output from `prep_riboviz.py` or `prep_riboviz.nf` (depending on which option you are running) to a file, `riboviz_vignette-$JOB_ID-$HOSTNAME.o`, in the current working directory, and errors to a file, `riboviz_vignette-$JOB_ID-$HOSTNAME.e`.
 
