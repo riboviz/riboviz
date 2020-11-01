@@ -558,6 +558,7 @@ Create the job submission script in `$HOME` or a location of your choosing, and 
 #$ -pe sharedmem 16
 #$ -o $JOB_NAME-$JOB_ID-$HOSTNAME.o
 #$ -e $JOB_NAME-$JOB_ID-$HOSTNAME.e
+#$ -m beas
 #  These options are:
 #  job name: -N
 #  use the current working directory: -cwd
@@ -566,6 +567,7 @@ Create the job submission script in `$HOME` or a location of your choosing, and 
 #  use shared memory parallel environment, request 16 CPUs
 #  redirect output with format jobname-jobID-hostname (jobname -N)
 #  redirect error with same format as output
+#  send email when job starts/ends/aborted/rescheduled
 # Initialise the environment modules
 . /etc/profile.d/modules.sh
 
