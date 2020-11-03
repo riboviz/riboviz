@@ -551,3 +551,14 @@ $ nextflow run <RIBOVIZ>/prep_riboviz.nf -params-file example_config.yaml -ansi-
 ```
 
 Our temporary and output files and the Nextflow work directory will all be written to the current directory.
+
+We could then, for example, run the RiboViz regression tests, again within the current directory:
+
+```console
+$ PYTHONPATH=<RIBOVIZ>/riboviz pytest \
+    <RIBOVIZ>/riboviz/test/regression/test_regression.py \
+    --expected=$HOME/regression-test-data-2.0 \
+     --config-file=example_config.yaml --skip-workflow --nextflow 
+```
+
+`$PYTHONPATH` tells Python where the `riboviz` package can be found.
