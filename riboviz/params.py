@@ -36,6 +36,9 @@ FQ_FILES = "fq_files"
 MULTIPLEX_FQ_FILES = "multiplex_fq_files"
 " Multiplexed fastq files to be processed. """
 
+TRIM_5P_MISMATCHES = "trim_5p_mismatches"
+""" Trim mismatched 5' base? """
+
 SAMPLE_SHEET = "sample_sheet"
 """ Sample sheet. """
 DEDUP_UMIS = "dedup_umis"

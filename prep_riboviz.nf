@@ -18,7 +18,7 @@ def helpMessage() {
 
     where '<CONFIG>' is a YAML configuration file. The YAML
     configuration parameters are as follows (all are mandatory unless
-    stated). 
+    stated).
 
     Configuration parameters can also be provided via the
     command-line in the form '--<PARAMETER>=<VALUE>' (for example
@@ -99,10 +99,11 @@ def helpMessage() {
     * 'dedup_stats': Output UMI deduplication statistics? (default
       'TRUE')
     * 'group_umis': Smmarise UMI groups both pre- and
-      post-deduplication using UMI-tools? Useful for debugging 
+      post-deduplication using UMI-tools? Useful for debugging
       (default 'FALSE')
     * If 'dedup_umis' is 'TRUE' but 'extract_umis' is 'FALSE' then a
       warning will be displayed, but processing will continue.
+    * 'trim_5p_mismatches': Trim mismatched 5' base? (default 'TRUE')
 
     Statistics and figure generation input files:
 
@@ -122,7 +123,7 @@ def helpMessage() {
       either both must be specified or neither must be specified.
 
     Statistics and figure generation parameters:
-    
+
     * 'buffer': Length of flanking region around the CDS (default 250)
     * 'count_reads': Scan input, temporary and output files and
       produce counts of reads in each FASTQ, SAM, and BAM file
@@ -132,11 +133,11 @@ def helpMessage() {
     * 'dataset': Human-readable name of the dataset (default
        'dataset')
     * 'do_pos_sp_nt_freq': Calculate position-specific nucleotide
-      freqeuency? (default 'TRUE') 
+      freqeuency? (default 'TRUE')
     * 'is_riboviz_gff': Does the GFF file contain 3 elements per gene
-      - UTR5, CDS, and UTR3? (default 'TRUE') 
+      - UTR5, CDS, and UTR3? (default 'TRUE')
     * 'make_bedgraph': Output bedgraph data files in addition to H5
-      files? (default 'TRUE') 
+      files? (default 'TRUE')
     * 'max_read_length': Maximum read length in H5 output (default 50)
     * 'min_read_length': Minimum read length in H5 output (default 10)
     * 'primary_id': Primary gene IDs to access the data (YAL001C,
@@ -194,6 +195,7 @@ params.dir_out = "output"
 params.dir_tmp = "tmp"
 params.do_pos_sp_nt_freq = true
 params.extract_umis = false
+params.trim_5p_mismatches = true
 params.fq_files = [:]
 params.group_umis = false
 params.dedup_stats = true
@@ -468,7 +470,7 @@ if (params.validate_only) {
 
 /*
 Indexing.
-*/ 
+*/
 
 // Split channels for use in multiple downstream processes.
 orf_fasta.into { build_indices_orf_fasta; generate_stats_figs_orf_fasta }
@@ -652,7 +654,7 @@ process demultiplex {
 
 // 'demultiplex_fq' outputs a single list with all the output
 // files. Extract sample IDs from file basenames, filter out
-// 'Unassigned' and output tuples of sample IDs and file names as 
+// 'Unassigned' and output tuples of sample IDs and file names as
 // separate items onto a new channel.
 demultiplex_fq
     .flatten()
@@ -731,7 +733,7 @@ process hisat2ORF {
         each file(orf_index_ht2) from orf_index_ht2
     output:
         tuple val(sample_id), file("unaligned.fq") into unaligned_fq
-        tuple val(sample_id), file("orf_map.sam") into orf_map_sam
+        tuple val(sample_id), file("orf_map.sam") into trim_5p_mismatches
     shell:
         """
         hisat2 --version
@@ -741,6 +743,14 @@ process hisat2ORF {
             -S orf_map.sam -U ${sample_fq}
         """
 }
+
+// Route 'trim_5p_branch' channel outputs depending on whether mismatched
+// 5' base are to be trimmed or not
+trim_5p_mismatches.branch {
+    trim_5p_fq: params.trim_5p_mismatches
+    non_trim_5p_fq: ! params.trim_5p_mismatches
+}
+.set { trim_5p_branch }
 
 process trim5pMismatches {
     tag "${sample_id}"
@@ -752,7 +762,7 @@ process trim5pMismatches {
         // 'workflow.projectDir' triggering reexecution of this
         // process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
-        tuple val(sample_id), file(sample_sam) from orf_map_sam
+        tuple val(sample_id), file(sample_sam) from trim_5p_branch.trim_5p_fq
     output:
         tuple val(sample_id), file("orf_map_clean.sam") \
             into trim_orf_map_sam
@@ -765,13 +775,19 @@ process trim5pMismatches {
         """
 }
 
+// Combine channels for downstream processing. By definition of
+// upstream conditions and processes, only one of the channels
+// will have content.
+trimmed_5p_fq = trim_5p_branch.non_trim_5p_fq
+    .mix(trim_orf_map_sam)
+
 process samViewSort {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}", \
         mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(sample_sam) from trim_orf_map_sam
+        tuple val(sample_id), file(sample_sam) from trimmed_5p_fq
     output:
         tuple val(sample_id), file("orf_map_clean.bam"), \
             file("orf_map_clean.bam.bai") into orf_map_bam
@@ -1031,7 +1047,7 @@ finished_sample_id
     .ifEmpty { exit 1, "No sample was processed successfully" }
     .view { "Finished processing sample: ${it}" }
 
-// Prefix sample-specific TPMs files, tpms.tsv, with sample ID so all 
+// Prefix sample-specific TPMs files, tpms.tsv, with sample ID so all
 // sample-specific TPMs files can be staged into the same directory
 // for running collateTpms.
 process renameTpms {
@@ -1100,7 +1116,7 @@ process countReads {
            -i ${file(params.dir_in).toAbsolutePath()} \
            -t ${file(params.dir_tmp).toAbsolutePath()} \
            -o ${file(params.dir_out).toAbsolutePath()} \
-           -r read_counts.tsv  
+           -r read_counts.tsv
         """
 }
 
