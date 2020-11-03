@@ -4,7 +4,7 @@ asite_disp_length_file: data/yeast_standard_asite_disp_length.txt
 buffer: 250
 build_indices: TRUE
 cmd_file: run_riboviz_simdata_multiplex.sh
-codon_positions_file: data/yeast_codon_pos_i200.RData
+codon_positions_file: null
 count_reads: TRUE
 count_threshold: 1
 dataset: simdata_multiplex
@@ -18,6 +18,7 @@ dir_tmp: vignette/simdata_multiplex_tmp
 do_pos_sp_nt_freq: TRUE
 extract_umis: TRUE
 features_file: data/yeast_features.tsv
+fq_files: null
 group_umis: TRUE
 is_riboviz_gff: TRUE
 is_test_run: FALSE
@@ -31,11 +32,12 @@ orf_fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa
 orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 orf_index_prefix: YAL_CDS_w_250
 primary_id: Name
+publish_index_tmp: FALSE
 rpf: TRUE
 rrna_fasta_file: vignette/input/yeast_rRNA_R64-1-1.fa
 rrna_index_prefix: yeast_rRNA
 sample_sheet: multiplex_barcodes.tsv
 secondary_id: NULL
 stop_in_cds: FALSE
-t_rna_file: data/yeast_tRNAs.tsv
+t_rna_file: null
 umi_regexp: ^(?P<umi_1>.{4}).+(?P<umi_2>.{4})(?P<cell_1>.{3})$

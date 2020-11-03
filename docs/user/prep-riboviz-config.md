@@ -76,6 +76,7 @@ The workflow also supports the following configuration parameters. All directory
 | `orf_gff_file` | Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts (GTF/GFF3 file) |
 | `orf_index_prefix` | Prefix for ORF index files, relative to `<dir_index>` |
 | `primary_id` | Primary gene IDs to access the data (YAL001C, YAL003W, etc.) |
+| `publish_index_tmp` | Publish index and temporary files to `<dir_index>` and `<dir_tmp>`? If `TRUE` copy index and temporary files from Nextflow's `work/` directory, else use symbolic links only. (default `FALSE`) (Nextflow workflow only - see [Nextflow `work/` directory](../user/prep-riboviz-operation.md#nextflow-work-directory) |
 | `rpf` | Is the dataset an RPF or mRNA dataset? |
 | `rrna_fasta_file` | Ribosomal rRNA and other contaminant sequences to avoid aligning to (FASTA file) |
 | `rrna_index_prefix` | Prefix for rRNA index files, relative to `<dir_index>` |

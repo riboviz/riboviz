@@ -150,9 +150,13 @@ def helpMessage() {
 
     General:
 
-    * 'validate_only: Validate configuration, check that mandatory
+    * 'validate_only': Validate configuration, check that mandatory
       parameters have been provided and that input files exist, then
       exit without running the workflow? (default 'FALSE')
+    * 'publish_index_tmp': Publish/copy index and temporary files to
+      'dir_index' and 'dir_tmp'. If 'FALSE' then only symbolic links
+      to these files in the Nextflow 'work/' directory are
+      created in 'dir_index' and 'dir_tmp' (default 'FALSE')
     * 'skip_inputs': When validating configuration (see
       'validate_only' above) skip checks for existence of ribosome
       profiling data files ('fq_files', 'multiplexed_fq_files',
@@ -201,6 +205,7 @@ params.max_read_length = 50
 params.min_read_length = 10
 params.multiplex_fq_files = []
 params.num_processes = 1
+params.publish_index_tmp = false
 params.primary_id = "Name"
 params.rpf = true
 params.secondary_id = "NULL"
@@ -208,6 +213,15 @@ params.stop_in_cds = false
 params.samsort_memory = null
 params.validate_only = false
 params.skip_inputs = false
+
+if (params.publish_index_tmp)
+{
+     publish_index_tmp_type = 'copy'
+}
+else
+{
+    publish_index_tmp_type = 'symlink'
+}
 
 if (params.validate_only) {
     println("Validating configuration only")
@@ -394,29 +408,38 @@ orf_gff = Channel.fromPath(orf_gff_file, checkIfExists: true)
 // inputs.
 // Optional inputs implementation follows pattern
 // https://github.com/nextflow-io/patterns/blob/master/optional-input.nf.
-if (params.containsKey('t_rna_file')
-    && params.containsKey('codon_positions_file')) {
+if (params.containsKey('t_rna_file') && params.t_rna_file) {
     t_rna_file = file(params.t_rna_file)
     if (! t_rna_file.exists()) {
         exit 1, "No such tRNA estimates file (t_rna_file): ${t_rna_file}"
     }
     t_rna_tsv = Channel.fromPath(t_rna_file, checkIfExists: true)
+    is_t_rna_file = true
+} else {
+    t_rna_tsv = file("Missing_t_rna_file")
+    is_t_rna_file = false
+}
+if (params.containsKey('codon_positions_file')
+    && params.codon_positions_file) {
     codon_positions_file = file(params.codon_positions_file)
     if (! codon_positions_file.exists()) {
         exit 1, "No such codon positions file (codon_positions_file): ${codon_positions_file}"
     }
     codon_positions_rdata = Channel.fromPath(codon_positions_file,
                                              checkIfExists: true)
-    is_t_rna_and_codon_positions_file = true
-} else if ((! params.containsKey('t_rna_file'))
-           && (! params.containsKey('codon_positions_file'))) {
-    t_rna_tsv = file("Missing_t_rna_file")
+    is_codon_positions_file = true
+} else {
     codon_positions_rdata = file("Missing_codon_positions_file")
+    is_codon_positions_file = false
+}
+if (is_t_rna_file && is_codon_positions_file) {
+    is_t_rna_and_codon_positions_file = true
+} else if ((! is_t_rna_file) && (! is_codon_positions_file)) {
     is_t_rna_and_codon_positions_file = false
 } else {
     exit 1, "Either both tRNA estimates (t_rna_file) and codon positions (codon_positions_file) must be defined or neither must be defined"
 }
-if (params.containsKey('features_file')) {
+if (params.containsKey('features_file') && params.features_file) {
     features_file = file(params.features_file)
     if (! features_file.exists()) {
         exit 1, "No such features file (features_file): ${features_file}"
@@ -427,7 +450,8 @@ if (params.containsKey('features_file')) {
     features_tsv = file("Missing_features_file")
     is_features_file = false
 }
-if (params.containsKey('asite_disp_length_file')) {
+if (params.containsKey('asite_disp_length_file')
+    && params.asite_disp_length_file) {
     asite_disp_length_file = file(params.asite_disp_length_file)
     if (! asite_disp_length_file.exists()) {
         exit 1, "No such A-site displacement file (asite_disp_length_file): ${asite_disp_length_file}"
@@ -454,7 +478,7 @@ orf_gff.into { bam_to_h5_orf_gff; generate_stats_figs_orf_gff }
 
 process buildIndicesrRNA {
     tag "${params.rrna_index_prefix}"
-    publishDir "${params.dir_index}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_index}", mode: publish_index_tmp_type, overwrite: true
     input:
         file rrna_fasta from rrna_fasta
     output:
@@ -470,7 +494,7 @@ process buildIndicesrRNA {
 
 process buildIndicesORF {
     tag "${params.orf_index_prefix}"
-    publishDir "${params.dir_index}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_index}", mode: publish_index_tmp_type, overwrite: true
     input:
         file orf_fasta from build_indices_orf_fasta
     output:
@@ -499,7 +523,7 @@ process cutAdapters {
     tag "${sample_id}"
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_fq) \
             from sample_id_fq.collect{ id, file -> [id, file] }
@@ -526,7 +550,7 @@ process extractUmis {
     tag "${sample_id}"
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_fq) \
             from cut_fq_branch.umi_fq
@@ -550,7 +574,7 @@ Multiplexed files (multiplex_fq_files)-specific processes.
 process cutAdaptersMultiplex {
     tag "${multiplex_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}", mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(multiplex_id), file(multiplex_fq) \
             from multiplex_id_fq.collect{ id, file -> [id, file] }
@@ -577,7 +601,7 @@ cut_multiplex_fq.branch {
 process extractUmisMultiplex {
     tag "${multiplex_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}", mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(multiplex_id), file(multiplex_fq) \
             from cut_multiplex_fq_branch.umi_fq
@@ -608,7 +632,7 @@ multiplex_sample_sheet_tsv.into {
 process demultiplex {
     tag "${multiplex_id}"
     publishDir "${params.dir_tmp}/${multiplex_id}_deplex", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
         // Use '.toString' to prevent changing hashes of
@@ -682,7 +706,7 @@ trimmed_fq = cut_fq_branch.non_umi_fq
 process hisat2rRNA {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(sample_fq) from trimmed_fq
@@ -702,7 +726,7 @@ process hisat2rRNA {
 process hisat2ORF {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(sample_fq) from non_rrna_fq
@@ -731,7 +755,7 @@ trim_5p_mismatches.branch {
 process trim5pMismatches {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
         // Use '.toString' to prevent changing hashes of
@@ -760,7 +784,7 @@ trimmed_5p_fq = trim_5p_branch.non_trim_5p_fq
 process samViewSort {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(sample_sam) from trimmed_5p_fq
@@ -794,7 +818,7 @@ process groupUmisPreDedup {
     tag "${sample_id}"
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
             from pre_dedup_group_bam
@@ -813,7 +837,7 @@ process dedupUmis {
     tag "${sample_id}"
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
             from pre_dedup_bam
@@ -842,7 +866,7 @@ process groupUmisPostDedup {
     tag "${sample_id}"
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
             from post_dedup_group_bam
@@ -958,7 +982,8 @@ process generateStatsFigs {
         tuple val(sample_id), file("3nt_periodicity.tsv") \
             into nt3_periodicity_tsv
         tuple val(sample_id), file("pos_sp_nt_freq.tsv") \
-            into pos_sp_nt_freq_tsv
+	    optional (! params.do_pos_sp_nt_freq) \
+	    into pos_sp_nt_freq_tsv
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.pdf") \
             into pos_sp_rpf_norm_reads_pdf
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \

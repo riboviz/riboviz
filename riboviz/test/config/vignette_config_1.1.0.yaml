@@ -26,5 +26,5 @@ StopInCDS: FALSE
 isTestRun: FALSE
 rpf: TRUE
 ribovizGFF: TRUE
-features_file: scripts/yeast_features.tsv
+features_file: data/yeast_features.tsv
 do_pos_sp_nt_freq: TRUE

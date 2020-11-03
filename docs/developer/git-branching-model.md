@@ -23,8 +23,8 @@ Preferably, all branches should have an associated issue.
 
 To request that a branch be merged into `develop` create a new pull request.
 
-Decisions to merge development branches into `develop` are made by Edward Wallace, Felicity Anderson, Kostas Kavousannakis and Mike Jackon.
+Decisions to merge development branches into `develop` are made by Edward Wallace, Felicity Anderson, Kostas Kavoussanakis and Mike Jackon.
 
 ## Merging `develop` into `master` and tagging releases
 
-Decisions to merge `develop` into `master` and to tag releases are made by Edward Wallace, Felicity Anderson, Kostas Kavousannakis and Mike Jackon.
+Decisions to merge `develop` into `master` and to tag releases are made by Edward Wallace, Felicity Anderson, Kostas Kavoussanakis and Mike Jackon.
