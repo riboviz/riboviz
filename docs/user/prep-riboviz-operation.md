@@ -38,7 +38,7 @@ If sample files (`fq_files`) are specified, then the workflow processes the samp
    2. Extract UMIs using `umi_tools extract`, if requested (if `extract_umis: TRUE`), using a UMI-tools-compliant regular expression pattern (`umi_regexp`). The extracted UMIs are inserted into the read headers of the FASTQ records.
    3. Remove rRNA or other contaminating reads by alignment to rRNA index files (`rrna_index_prefix`) using `hisat2`.
    4. Align remaining reads to ORFs index files (`orf_index_prefix`). using `hisat2`.
-   5. Trim 5' mismatches from reads and remove reads with more than 2 mismatches using `trim_5p_mismatch`.
+   5. Trim 5' mismatches from reads and remove reads with more than 2 mismatches using `trim_5p_mismatch`, if requested (if `trim_5p_mismatches: TRUE`)
    6. Output UMI groups pre-deduplication using `umi_tools group` if requested (if `dedup_umis: TRUE` and `group_umis: TRUE`)
    7. Deduplicate reads using `umi_tools dedup`, if requested (if `dedup_umis: TRUE`), and output deduplication statistics, if requested (if `dedup_stats: TRUE`).  
    8. Output UMI groups post-deduplication using `umi_tools group` if requested (if `dedup_umis: TRUE` and `group_umis: TRUE`)
@@ -92,10 +92,10 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `nonrRNA.fq`: non-rRNA reads.
 * `rRNA_map.sam`: rRNA-mapped reads.
 * `orf_map.sam`: ORF-mapped reads.
-* `orf_map_clean.sam`: ORF-mapped reads with mismatched nt trimmed.
-* `trim_5p_mismatch.tsv`: number of reads processed, discarded, trimmed and written when trimming 5' mismatches from reads and removing reads with more than a set number of mismatches.
+* `orf_map_clean.sam`: ORF-mapped reads with mismatched nt trimmed (if `params.trim_5p_mismatches: TRUE`) (Nextflow workflow only).
+* `trim_5p_mismatch.tsv`: number of reads processed, discarded, trimmed and written when trimming 5' mismatches from reads and removing reads with more than a set number of mismatches (if `params.trim_5p_mismatches: TRUE`) (Nextflow workflow only).
 * `unaligned.sam`: unaligned reads. These files can be used to find common contaminants or translated sequences not in your ORF annotation.
-* `orf_map_clean.bam`: BAM file equivalent of `orf_map_clean.sam`, ORF-mapped reads with mismatched nt trimmed. If deduplication is not enabled (if `dedup_umis: FALSE`) then this is copied to become the output file `<SAMPLE_ID>.bam` (see below). (Nextflow workflow only)
+* `orf_map_clean.bam`: BAM file equivalent of `orf_map_clean.sam`, ORF-mapped reads, and, if trimming is enabled (if `params.trim_5p_mismatches: TRUE`), with 5' mismatches trimmed. If deduplication is not enabled (if `dedup_umis: FALSE`) then this is copied to become the output file `<SAMPLE_ID>.bam` (see below). (Nextflow workflow only)
 * `orf_map_clean.bam.bai`: BAM index file for the above. If deduplication is not enabled (if `dedup_umis: FALSE`) then this is copied to become the output file `<SAMPLE_ID>.bam.bai` (see below). (Nextflow workflow only)
 
 If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specific files are also produced:
@@ -283,7 +283,8 @@ The following information is included:
 * `hisat2`: number of reads in the SAM file and FASTQ file output.
 * `riboviz.tools.trim_5p_mismatch`: number of reads in the SAM file
   output as recorded in the `trim_5p_mismatch.tsv` summary file
-  output, or the SAM file itself, if the TSV file cannot be found.
+  output, or the SAM file itself, if the TSV file cannot be found (if
+  `trim_5p_mismatches: TRUE`)
 * `umi_tools dedup`: number of reads in the BAM file output.
 
 Here is an example of a read counts file produced when running the vignette:
