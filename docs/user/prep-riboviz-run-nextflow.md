@@ -491,65 +491,63 @@ where:
 * `<RIBOVIZ>`: path to RiboViz home directory, which can be relative to the current directory or absolute.
 * `<CONFIG>`: path to a YAML configuration file, which can be relative to the current directory or absolute.
 
-For example, given an `analysis/` directory with contents:
+File and folder paths can be relative or absolute. They can also point to symbolic links to the actua files or folders.
 
-```
-sample_config.yaml
-sample_input/
-  sample.fq.gz
-  yeast_rRNA_R64-1-1.fa
-  yeast_YAL_CDS_w_250utrs.fa
-  yeast_YAL_CDS_w_250utrs.gff3
-```
+### Using relative paths and symbolic links
 
-and assuming that `analysis/` is a sibling of `riboviz/`, then file paths in `sample_config.yaml` can be configured as follows:
+You may have input files and data files in different locations. Rather than copy these all into a single directory you can create symbolic links to these files.
 
-```yaml
-asite_disp_length_file: riboviz/data/yeast_standard_asite_disp_length.txt
-codon_positions_file: riboviz/data/yeast_codon_pos_i200.RData
-dir_in: analysis/input
-dir_index: analysis/index
-dir_out: analysis/output
-dir_tmp: analysis/tmp
-features_file: riboviz/data/yeast_features.tsv
-fq_files:
-  WTnone: SRR1042855_s1mi.fastq.gz
-  WT3AT: SRR1042864_s1mi.fastq.gz
-orf_fasta_file: analysis/input/yeast_YAL_CDS_w_250utrs.fa
-orf_gff_file: analysis/input/yeast_YAL_CDS_w_250utrs.gff3
-rrna_fasta_file: analysis/input/yeast_rRNA_R64-1-1.fa
-t_rna_file: riboviz/data/yeast_tRNAs.tsv
-```
-
-The workflow can then be run in the parent directory of `analysis/` and `riboviz/` as follows:
+For example, imagine we wanted to run the vignette in a new directory, but not copy all the input and data files. We can create an `example` directory:
 
 ```console
-$ nextflow run riboviz/prep_riboviz.nf \
-    -params-file analysis/sample_config.yaml -ansi-log false
+$ cd
+$ mkdir example
+$ cd example
 ```
 
-Absolute paths can also be used. For example, if the file paths were as follows:
-
-```yaml
-asite_disp_length_file: /home/user/riboviz/data/yeast_standard_asite_disp_length.txt
-codon_positions_file: /home/user/riboviz/data/yeast_codon_pos_i200.RData
-dir_in: /home/user/analysis/input
-dir_index: /home/user/analysis/index
-dir_out: /home/user/analysis/output
-dir_tmp: /home/user/analysis/tmp
-features_file: /home/user/riboviz/data/yeast_features.tsv
-fq_files:
-  WTnone: SRR1042855_s1mi.fastq.gz
-  WT3AT: SRR1042864_s1mi.fastq.gz
-orf_fasta_file: /home/user/analysis/input/yeast_YAL_CDS_w_250utrs.fa
-orf_gff_file: /home/user/analysis/input/yeast_YAL_CDS_w_250utrs.gff3
-rrna_fasta_file: /home/user/analysis/input/yeast_rRNA_R64-1-1.fa
-t_rna_file: /home/user/riboviz/data/yeast_tRNAs.tsv
-```
-
-The workflow could then be run from any directory as follows:
+We can then create symbolic links to all the input and data files that the vignette uses:
 
 ```console
-$ nextflow run /home/user/riboviz/prep_riboviz.nf \
-    -params-file /home/user/analysis/sample_config.yaml -ansi-log false
+$ mkdir data
+$ ln -s ../../riboviz/data/yeast_CDS_w_250utrs.fa 
+$ ln -s ../../riboviz/data/yeast_CDS_w_250utrs.gff3 
+$ ln -s ../../riboviz/data/yeast_codon_pos_i200.RData 
+$ ln -s ../../riboviz/data/yeast_features.tsv 
+$ ln -s ../../riboviz/data/yeast_standard_asite_disp_length.txt 
+$ ln -s ../../riboviz/data/yeast_tRNAs.tsv 
+$ cd ..
+$ mkdir input
+$ cd input/
+$ ln -s ../../riboviz/vignette/input/SRR1042855_s1mi.fastq.gz 
+$ ln -s ../../riboviz/vignette/input/SRR1042864_s1mi.fastq.gz 
+$ ln -s ../../riboviz/vignette/input/yeast_rRNA_R64-1-1.fa 
+$ ln -s ../../riboviz/vignette/input/yeast_YAL_CDS_w_250utrs.fa 
+$ ln -s ../../riboviz/vignette/input/yeast_YAL_CDS_w_250utrs.gff3
+$ cd ..
 ```
+
+We can then create `example_config.yaml`, a copy of `vignette_config.yaml` but with file paths updated:
+
+```
+dir_index: index
+dir_in: input
+dir_out: output 
+dir_tmp: tmp
+orf_fasta_file: input/yeast_YAL_CDS_w_250utrs.fa
+orf_gff_file: input/yeast_YAL_CDS_w_250utrs.gff3
+rrna_fasta_file: input/yeast_rRNA_R64-1-1.fa
+```
+
+Now, we can validate our configuration, by running Nextflow from within the current directory (where `<RIBOVIZ>` is the path to RiboViz home directory, which can be relative to the current directory or absolute):
+
+```console
+$ nextflow run <RIBOVIZ>/prep_riboviz.nf -params-file example_config.yaml -ansi-log false --validate_only
+```
+
+Now, we can run our workflow:
+
+```console
+$ nextflow run <RIBOVIZ>/prep_riboviz.nf -params-file example_config.yaml -ansi-log false
+```
+
+Our temporary and output files and the Nextflow work directory will all be written to the current directory.

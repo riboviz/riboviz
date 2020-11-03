@@ -42,7 +42,9 @@ present in the configuration:
 * ``extract_umis: false``
 * ``group_umis: false``
 * ``multiplex_fq_files: null``
+* ``publish_index_tmp: false``
 * ``sample_sheet: null``
+* ``trim_5p_mismatches: true``
 * ``t_rna_file: data/yeast_tRNAs.tsv``
 * ``umi_regexp: null``
 
@@ -106,7 +108,9 @@ UPDATES_11_CURRENT = {
     params.GROUP_UMIS: False,
     params.LOGS_DIR: "vignette/logs",
     params.MULTIPLEX_FQ_FILES: None,
+    params.PUBLISH_INDEX_TMP: False,
     params.SAMPLE_SHEET: None,
+    params.TRIM_5P_MISMATCHES: True,
     params.T_RNA_FILE: "data/yeast_tRNAs.tsv",
     params.UMI_REGEXP: None
 }
