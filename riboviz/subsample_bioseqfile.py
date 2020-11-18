@@ -5,7 +5,7 @@
 ## whose reads are randomly sampled from of the input with a fixed probability
 ## 
 ## example:
-##   python riboviz/tools/subsample_bioseqfile.py -in vignette/input/SRR1042855_s1mi.fastq.gz -prob 0.001 -out /tmp/SRR1042855_s1000.fastq.gz -ftype fastq
+##   python riboviz/subsample_bioseqfile.py -in vignette/input/SRR1042855_s1mi.fastq.gz -prob 0.001 -out /tmp/SRR1042855_s1000.fastq.gz -ftype fastq
 
 import argparse, gzip, os
 from Bio import SeqIO
