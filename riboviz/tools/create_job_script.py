@@ -6,12 +6,20 @@ configuration file and a template job submission script.
 Usage::
 
     python -m riboviz.tools.create_job_script [-h]
-        -c CONFIG_FILE -i [INPUT_FILE]
-         [-o [OUTPUT_FILE]] [-t [TOKEN_TAG]]
+        -i [INPUT_FILE] [-o [OUTPUT_FILE]] [-t [TOKEN_TAG]]
+        --r-libs R_LIBS --config-file CONFIG_FILE
+        [--job-name [JOB_NAME]]
+        [--job-runtime [JOB_RUNTIME]]
+        [--job-memory [JOB_MEMORY]]
+        [--job-num-cpus [JOB_NUM_CPUS]]
+        [--job-email [JOB_EMAIL]]
+        [--job-email-events [JOB_EMAIL_EVENTS]]
+        [--validate-only [VALIDATE_ONLY]]
+        [--nextflow-work-dir [NEXTFLOW_WORK_DIR]]
+        [--create-nextflow-report [CREATE_NEXTFLOW_REPORT]]
+        [--nextflow-report-file [NEXTFLOW_REPORT_FILE]]
 
       -h, --help            show this help message and exit
-      -c CONFIG_FILE, --configuration CONFIG_FILE
-                            Workflow configuration file
       -i INPUT_FILE, --input_file INPUT_FILE
                             Job submission script template
       -o [OUTPUT_FILE], --output [OUTPUT_FILE]
@@ -26,26 +34,39 @@ See :py:mod:`riboviz.create_job_script` for details on the expected
 format of the template and how it is customised.
 """
 import argparse
-import os.path
-import sys
 from riboviz import create_job_script
+from riboviz import params
+
+
+REQUIRED_CONFIG = [
+    params.R_LIBS,
+    params.CONFIG_FILE
+]
+""" Required configuration parameters. """
+OPTIONAL_CONFIG = [
+    params.JOB_NAME,
+    params.JOB_RUNTIME,
+    params.JOB_MEMORY,
+    params.JOB_NUM_CPUS,
+    params.JOB_EMAIL,
+    params.JOB_EMAIL_EVENTS,
+    params.VALIDATE_ONLY,
+    params.NEXTFLOW_WORK_DIR,
+    params.CREATE_NEXTFLOW_REPORT,
+    params.NEXTFLOW_REPORT_FILE
+]
+""" Optional configuration parameters. """
 
 
 def parse_command_line_options():
     """
     Parse command-line options.
 
-    :returns: command-line options and extra configuration values
-    provided at the command-line
-    :rtype: (argparse.Namespace, dict(str or unicode => str or unicode))
+    :returns: command-line options
+    :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
         description="Create a job submission script using values from a workflow configuration file and a template job submission script")
-    parser.add_argument("-c",
-                        "--configuration",
-                        dest="config_file",
-                        required=True,
-                        help="Workflow configuration file")
     parser.add_argument("-i",
                         "--input_file",
                         dest="input_file",
@@ -62,15 +83,16 @@ def parse_command_line_options():
                         nargs='?',
                         default=create_job_script.TOKEN_TAG,
                         help="Tag marking up tokens for replacement in job submission script template")
-    options, extras = parser.parse_known_args()
-    if len(extras) % 2:
-        parser.print_usage(sys.stderr)
-        error_msg = "{}: error: expected every configuration parameters to have a value\n".format(os.path.basename(__file__))
-        sys.stderr.write(error_msg)
-        sys.exit(2)
-    extra_config = dict(zip(extras[::2], extras[1::2]))
-    extra_config = {k.strip("-"): v for k, v in extra_config.items()}
-    return options, extra_config
+    for param in REQUIRED_CONFIG:
+        parser.add_argument("--" + param.replace("_", "-"),
+                            dest=param,
+                            required=True)
+    for param in OPTIONAL_CONFIG:
+        parser.add_argument("--" + param.replace("_", "-"),
+                            dest=param,
+                            nargs='?')
+    options = parser.parse_args()
+    return options
 
 
 def invoke_create_job_script():
@@ -78,20 +100,18 @@ def invoke_create_job_script():
     Parse command-line options then invoke
     :py:mod:`riboviz.create_job_script.create_job_script`.
     """
-    options, extra_config = parse_command_line_options()
+    options = parse_command_line_options()
     config_file = options.config_file
     input_file = options.input_file
     output_file = options.output_file
     token_tag = options.token_tag
+    options_dict = vars(options)
     create_job_script.create_job_script(config_file,
-                                        extra_config,
+                                        options_dict,
                                         input_file,
                                         output_file,
                                         token_tag)
 
 
 if __name__ == "__main__":
-    try:
-        invoke_create_job_script()
-    except Exception as e:
-        print(e)
+    invoke_create_job_script()
