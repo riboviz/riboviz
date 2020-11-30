@@ -41,8 +41,8 @@ def parse_command_line_options():
     """
     Parse command-line options.
 
-    :returns: command-line options
-    :rtype: argparse.Namespace
+    :returns: recognised command-line options and extra arguments supplied
+    :rtype: argparse.Namespace, list(str or unicode)
     """
     parser = argparse.ArgumentParser(
         description="Create a job submission script using values from a workflow configuration file and a template job submission script")
@@ -66,35 +66,46 @@ def parse_command_line_options():
         parser.add_argument("--" + param.replace("_", "-"),
                             dest=param,
                             required=True)
-    for param in list(params.DEFAULT_JOB_CONFIG.keys()):
-        if params.JOB_CONFIG_TYPE[param] is bool:
-            parser.add_argument("--" + param.replace("_", "-"),
-                                dest=param,
-                                default=params.DEFAULT_JOB_CONFIG[param],
-                                action='store_true')
-        else:
-            parser.add_argument("--" + param.replace("_", "-"),
-                                dest=param,
-                                type=params.JOB_CONFIG_TYPE[param],
-                                default=params.DEFAULT_JOB_CONFIG[param],
-                                nargs='?')
-    options = parser.parse_args()
-    return options
+    return parser.parse_known_args()
 
 
 def invoke_create_job_script():
     """
     Parse command-line options then invoke
     :py:mod:`riboviz.create_job_script.create_job_script`.
+
+    :raises AssertionError: if any additional parameter provided
+    by the user is not in
+    :py:const:`riboviz.params.DEFAULT_JOB_CONFIG`.
     """
-    options = parse_command_line_options()
+    options, extras = parse_command_line_options()
     config_file = options.config_file
     input_file = options.input_file
     output_file = options.output_file
     token_tag = options.token_tag
-    options_dict = vars(options)
+    config = {}
+    for param in [params.R_LIBS, params.CONFIG_FILE]:
+        config[param] = vars(options)[param]
+    # Validate additional parameters and cast to relevant type.
+    # Any parameter with value "None" is given value None.
+    while len(extras) > 0:
+        key = extras.pop(0)
+        key = key.strip("-").replace("-", "_")
+        assert key in params.DEFAULT_JOB_CONFIG.keys(), \
+            "Unknown configuration parameter".format(key)
+        value_type = params.JOB_CONFIG_TYPE[key]
+        if value_type is bool:
+            # Booleans are solo flags without associated values
+            config[key] = True
+        else:
+            value = extras.pop(0)
+            if value == "None":
+                value = None
+            else:
+                value = value_type(value)
+            config[key] = value
     create_job_script.create_job_script(config_file,
-                                        options_dict,
+                                        config,
                                         input_file,
                                         output_file,
                                         token_tag)
