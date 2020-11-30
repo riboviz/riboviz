@@ -1,5 +1,5 @@
 """
-Workflow configuration parameter names.
+Configuration parameter names.
 """
 
 INPUT_DIR = "dir_in"
@@ -116,4 +116,34 @@ SKIP_INPUTS = "skip_inputs"
 """
 When validating configuration skip checks for existence of ribosome
 profiling data files.
+"""
+
+R_LIBS = "r_libs"
+""" R libraries directory. """
+CONFIG_FILE = "config_file"
+""" RiboViz YAML configuration file. """
+CREATE_REPORT = "create_report"
+""" Create Nextflow report? (Nextflow workflow only). """
+REPORT_FILE = "nextflow_report_file"
+""" Nextflow report file (Nextflow workflow only). """
+WORK_DIR = "work_dir"
+""" Nextflow work directory (Nextflow workflow only). """
+
+JOB_NAME = "job_name"
+""" Name of batch job (Grid Engine job submission). """
+JOB_RUNTIME = "runtime"
+"""
+Maximum runtime for batch job (Grid Engine job submission).
+"""
+JOB_MEMORY = "memory"
+""" Requested memoty for batch job (Grid Engine job submission). """
+JOB_NUM_CPUS = "num_cpus"
+"""
+Requested number of CPUs for batch job (Grid Engine job submission).
+"""
+JOB_EMAIL = "job_email"
+""" E-mail address for batch job events (Grid Engine job submission). """
+JOB_MAIL_EVENTS = "mail_events"
+"""
+Events triggering emails about batch job (Grid Engine job submission).
 """
