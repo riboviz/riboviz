@@ -7,7 +7,7 @@ Usage::
 
     python -m riboviz.tools.create_job_script [-h]
         -i [INPUT_FILE] [-o [OUTPUT_FILE]] [-t [TOKEN_TAG]]
-        --r-libs R_LIBS --config-file CONFIG_FILE
+        --r-libs R_LIBS --config-file [CONFIG_FILE]
         [--job-name [JOB_NAME]]
         [--job-runtime [JOB_RUNTIME]]
         [--job-memory [JOB_MEMORY]]
@@ -38,26 +38,6 @@ from riboviz import create_job_script
 from riboviz import params
 
 
-REQUIRED_CONFIG = [
-    params.R_LIBS,
-    params.CONFIG_FILE
-]
-""" Required configuration parameters. """
-OPTIONAL_CONFIG = [
-    params.JOB_NAME,
-    params.JOB_RUNTIME,
-    params.JOB_MEMORY,
-    params.JOB_NUM_CPUS,
-    params.JOB_EMAIL,
-    params.JOB_EMAIL_EVENTS,
-    params.VALIDATE_ONLY,
-    params.NEXTFLOW_WORK_DIR,
-    params.CREATE_NEXTFLOW_REPORT,
-    params.NEXTFLOW_REPORT_FILE
-]
-""" Optional configuration parameters. """
-
-
 def parse_command_line_options():
     """
     Parse command-line options.
@@ -83,13 +63,14 @@ def parse_command_line_options():
                         nargs='?',
                         default=create_job_script.TOKEN_TAG,
                         help="Tag marking up tokens for replacement in job submission script template")
-    for param in REQUIRED_CONFIG:
+    for param in [params.R_LIBS, params.CONFIG_FILE]:
         parser.add_argument("--" + param.replace("_", "-"),
                             dest=param,
                             required=True)
-    for param in OPTIONAL_CONFIG:
+    for param in list(create_job_script.JOB_CONFIG.keys()):
         parser.add_argument("--" + param.replace("_", "-"),
                             dest=param,
+                            default=create_job_script.JOB_CONFIG[param],
                             nargs='?')
     options = parser.parse_args()
     return options
