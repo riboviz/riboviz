@@ -16,7 +16,6 @@ Usage::
         [--job-email-events [JOB_EMAIL_EVENTS]]
         [--validate-only [VALIDATE_ONLY]]
         [--nextflow-work-dir [NEXTFLOW_WORK_DIR]]
-        [--create-nextflow-report [CREATE_NEXTFLOW_REPORT]]
         [--nextflow-report-file [NEXTFLOW_REPORT_FILE]]
 
       -h, --help            show this help message and exit

@@ -22,8 +22,7 @@ JOB_CONFIG = {
     params.JOB_EMAIL_EVENTS: "beas",
     params.JOB_EMAIL: None,
     params.NEXTFLOW_WORK_DIR: "work",
-    params.CREATE_NEXTFLOW_REPORT: False,
-    params.NEXTFLOW_REPORT_FILE: "report.html",
+    params.NEXTFLOW_REPORT_FILE: "nextflow-report.html",
     params.VALIDATE_ONLY: False
 }
 """ Default values for job configuration parameters. """

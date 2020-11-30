@@ -122,11 +122,6 @@ R_LIBS = "r_libs"
 """ R libraries directory (Grid Engine job submission). """
 CONFIG_FILE = "config_file"
 """ RiboViz YAML configuration file (Grid Engine job submission). """
-CREATE_NEXTFLOW_REPORT = "create_nextflow_report"
-"""
-Create Nextflow report? (Nextflow workflow only)
-(Grid Engine job submission).
-"""
 NEXTFLOW_REPORT_FILE = "nextflow_report_file"
 """ Nextflow report file (Nextflow workflow only)
 (Grid Engine job submission).
