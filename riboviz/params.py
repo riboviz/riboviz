@@ -119,16 +119,22 @@ profiling data files.
 """
 
 R_LIBS = "r_libs"
-""" R libraries directory. """
+""" R libraries directory (Grid Engine job submission). """
 CONFIG_FILE = "config_file"
-""" RiboViz YAML configuration file. """
+""" RiboViz YAML configuration file (Grid Engine job submission). """
 CREATE_REPORT = "create_nextflow_report"
-""" Create Nextflow report? (Nextflow workflow only). """
+"""
+Create Nextflow report? (Nextflow workflow only)
+(Grid Engine job submission).
+"""
 REPORT_FILE = "nextflow_report_file"
-""" Nextflow report file (Nextflow workflow only). """
+""" Nextflow report file (Nextflow workflow only)
+(Grid Engine job submission).
+"""
 WORK_DIR = "nextflow_work_dir"
-""" Nextflow work directory (Nextflow workflow only). """
-
+""" Nextflow work directory (Nextflow workflow only)
+(Grid Engine job submission).
+"""
 JOB_NAME = "job_name"
 """ Name of batch job (Grid Engine job submission). """
 JOB_RUNTIME = "runtime"
@@ -136,14 +142,14 @@ JOB_RUNTIME = "runtime"
 Maximum runtime for batch job (Grid Engine job submission).
 """
 JOB_MEMORY = "memory"
-""" Requested memoty for batch job (Grid Engine job submission). """
+""" Requested memory for batch job (Grid Engine job submission). """
 JOB_NUM_CPUS = "num_cpus"
 """
 Requested number of CPUs for batch job (Grid Engine job submission).
 """
 JOB_EMAIL = "job_email"
 """ E-mail address for batch job events (Grid Engine job submission). """
-JOB_MAIL_EVENTS = "job_mail_events"
+JOB_MAIL_EVENTS = "job_email_events"
 """
 Events triggering emails about batch job (Grid Engine job submission).
 """
