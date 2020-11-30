@@ -131,7 +131,7 @@ NEXTFLOW_REPORT_FILE = "nextflow_report_file"
 """ Nextflow report file (Nextflow workflow only)
 (Grid Engine job submission).
 """
-NEXTLFOW_WORK_DIR = "nextflow_work_dir"
+NEXTFLOW_WORK_DIR = "nextflow_work_dir"
 """ Nextflow work directory (Nextflow workflow only)
 (Grid Engine job submission).
 """
