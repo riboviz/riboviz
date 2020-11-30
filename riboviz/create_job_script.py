@@ -18,7 +18,7 @@ JOB_CONFIG = {
     params.JOB_NAME: "riboviz",
     params.JOB_RUNTIME: "48:00:00",
     params.JOB_MEMORY: "8GB",
-    params.JOB_NUM_CPUS: 16,
+    params.JOB_NUM_CPUS: 4,
     params.JOB_EMAIL_EVENTS: "beas",
     params.JOB_EMAIL: None,
     params.NEXTFLOW_WORK_DIR: "work",
