@@ -66,17 +66,17 @@ def parse_command_line_options():
         parser.add_argument("--" + param.replace("_", "-"),
                             dest=param,
                             required=True)
-    for param in list(create_job_script.JOB_CONFIG.keys()):
-        if create_job_script.JOB_CONFIG_TYPE[param] is bool:
+    for param in list(params.DEFAULT_JOB_CONFIG.keys()):
+        if params.JOB_CONFIG_TYPE[param] is bool:
             parser.add_argument("--" + param.replace("_", "-"),
                                 dest=param,
-                                default=create_job_script.JOB_CONFIG[param],
+                                default=params.DEFAULT_JOB_CONFIG[param],
                                 action='store_true')
         else:
             parser.add_argument("--" + param.replace("_", "-"),
                                 dest=param,
-                                type=create_job_script.JOB_CONFIG_TYPE[param],
-                                default=create_job_script.JOB_CONFIG[param],
+                                type=params.JOB_CONFIG_TYPE[param],
+                                default=params.DEFAULT_JOB_CONFIG[param],
                                 nargs='?')
     options = parser.parse_args()
     return options

@@ -148,3 +148,28 @@ JOB_EMAIL_EVENTS = "job_email_events"
 """
 Events triggering emails about batch job (Grid Engine job submission).
 """
+
+DEFAULT_JOB_CONFIG = {
+    JOB_NAME: "riboviz",
+    JOB_RUNTIME: "48:00:00",
+    JOB_MEMORY: "8GB",
+    JOB_NUM_CPUS: 4,
+    JOB_EMAIL_EVENTS: "beas",
+    JOB_EMAIL: None,
+    NEXTFLOW_WORK_DIR: "work",
+    NEXTFLOW_REPORT_FILE: "nextflow-report.html",
+    VALIDATE_ONLY: False
+}
+""" Default values for job configuration parameters. """
+JOB_CONFIG_TYPE = {
+    JOB_NAME: str,
+    JOB_RUNTIME: str,
+    JOB_MEMORY: str,
+    JOB_NUM_CPUS: int,
+    JOB_EMAIL_EVENTS: str,
+    JOB_EMAIL: str,
+    NEXTFLOW_WORK_DIR: str,
+    NEXTFLOW_REPORT_FILE: str,
+    VALIDATE_ONLY: bool
+}
+""" Types of job configuration parameters. """

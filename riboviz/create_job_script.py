@@ -14,30 +14,6 @@ TOKEN_TAG = "%%"
 Default tag marking up tokens in template job submission script to be
 replaced by configuration values.
 """
-JOB_CONFIG = {
-    params.JOB_NAME: "riboviz",
-    params.JOB_RUNTIME: "48:00:00",
-    params.JOB_MEMORY: "8GB",
-    params.JOB_NUM_CPUS: 4,
-    params.JOB_EMAIL_EVENTS: "beas",
-    params.JOB_EMAIL: None,
-    params.NEXTFLOW_WORK_DIR: "work",
-    params.NEXTFLOW_REPORT_FILE: "nextflow-report.html",
-    params.VALIDATE_ONLY: False
-}
-""" Default values for job configuration parameters. """
-JOB_CONFIG_TYPE = {
-    params.JOB_NAME: str,
-    params.JOB_RUNTIME: str,
-    params.JOB_MEMORY: str,
-    params.JOB_NUM_CPUS: int,
-    params.JOB_EMAIL_EVENTS: str,
-    params.JOB_EMAIL: str,
-    params.NEXTFLOW_WORK_DIR: str,
-    params.NEXTFLOW_REPORT_FILE: str,
-    params.VALIDATE_ONLY: bool
-}
-""" Types of job configuration parameters. """
 
 
 def create_job_submission_script(config,
@@ -137,7 +113,7 @@ def create_job_script(config_file,
     with open(config_file, 'r') as f:
         file_config = yaml.load(f, yaml.SafeLoader)
 
-    config = JOB_CONFIG.copy()
+    config = params.DEFAULT_JOB_CONFIG.copy()
     config.update(file_config)
     config.update(override_config)
     script = create_job_submission_script(config, template, token_tag)
