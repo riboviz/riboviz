@@ -5,11 +5,11 @@
 # Use the current working directory:
 #$ -cwd
 # Runtime limit:
-#$ -l h_rt=%%runtime%%
+#$ -l h_rt=%%job_runtime%%
 # RAM
-#$ -l h_vmem=%%memory%%
+#$ -l h_vmem=%%job_memory%%
 # Use shared memory parallel environment and request number of CPUs:
-#$ -pe sharedmem %%num_cpus%%
+#$ -pe sharedmem %%job_num_cpus%%
 # Redirected output file name format:
 #$ -o $JOB_NAME-$JOB_ID-$HOSTNAME.o
 # Redirected error file name format:
@@ -33,7 +33,7 @@ source activate riboviz
 
 echo "Running Nextflow riboviz..."
 
-nextflow run prep_riboviz.nf -params-file %%config_file%% -work-dir %%work_dir%% -ansi-log false --validate_only
-nextflow run prep_riboviz.nf -params-file %%config_file%% -work-dir %%work_dir%% -ansi-log false
+nextflow run prep_riboviz.nf -params-file %%config_file%% -work-dir %%nextflow_work_dir%% -ansi-log false --validate_only
+nextflow run prep_riboviz.nf -params-file %%config_file%% -work-dir %%nextflow_work_dir%% -ansi-log false
 
 echo "Nextflow riboviz run complete!"
