@@ -20,16 +20,16 @@ Configuration parameters that have been renamed from 1.x are updated:
 * ``t_rna`` => ``t_rna_file``
 * ``codon_pos`` => ``codon_positions_file``
 
-Expected parameters added between release 1.0.0 and 1.1.0 are added
-along with default values, if they are not already present in the
-configuration:
+Expected parameters added between release 1.0.0, 9 Oct 2017, 83027ef
+and 1.1.0, 31 Jan 2019, 340b9b5, are added along with default values,
+if they are not already present in the configuration:
 
 * ``do_pos_sp_nt_freq: true``
 * ``features_file: data/yeast_features.tsv``
 
-Expected parameters added between release 1.1.0 and the current
-release are added along with default values, if they are not already
-present in the configuration:
+Expected parameters added between release 1.1.0, 31 Jan 2019, 340b9b5
+to pre-commit 8da8071, 18 Dec 2019, are added along with default
+values, if they are not already present in the configuration:
 
 * ``asite_disp_length_file: data/yeast_standard_asite_disp_length.txt``
 * ``cmd_file: run_riboviz_vignette.sh``
@@ -47,6 +47,20 @@ present in the configuration:
 * ``trim_5p_mismatches: true``
 * ``t_rna_file: data/yeast_tRNAs.tsv``
 * ``umi_regexp: null``
+
+Expected parameters added between pre-commit 8da8071, 18 Dec 2019
+to the current commit, are added along with default values, if they
+are not already present in the configuration:
+
+* ``job_name: riboviz``
+* ``job_runtime: '48:00:00'``
+* ``job_memory: 8GB``
+* ``job_num_cpus: 4``
+* ``job_email: null``
+* ``job_email_events: beas``
+* ``nextflow_report_file: nextflow-report.html``
+" ``nextflow_work_dir: work``
+* ``validate_only: false``
 
 The values of parameters ``rrna_index_prefix`` and
 ``orf_index_prefix`` are updated to be file names only, as, these are
@@ -96,7 +110,7 @@ added between release 1.0.0, 9 Oct 2017, 83027ef and 1.1.0, 31 Jan
 2019, 340b9b5.
 """
 
-UPDATES_11_CURRENT = {
+UPDATES_11_20 = {
     params.ASITE_DISP_LENGTH_FILE: "data/yeast_standard_asite_disp_length.txt",
     params.CMD_FILE: "run_riboviz_vignette.sh",
     params.CODON_POSITIONS_FILE: "data/yeast_codon_pos_i200.RData",
@@ -144,7 +158,12 @@ def upgrade_config(config):
 
     # Parameters added between release 1.1.0, 31 Jan 2019, 340b9b5 to
     # pre-commit 8da8071, 18 Dec 2019
-    for (key, value) in list(UPDATES_11_CURRENT.items()):
+    for (key, value) in list(UPDATES_11_20.items()):
+        if key not in config:
+            config[key] = value
+
+    # Parameters added between release 2.0 and present date.
+    for (key, value) in list(params.DEFAULT_JOB_CONFIG.items()):
         if key not in config:
             config[key] = value
 

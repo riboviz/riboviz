@@ -25,10 +25,18 @@ fq_files:
 group_umis: FALSE
 is_riboviz_gff: TRUE
 is_test_run: FALSE
+job_email_events: beas
+job_email: null
+job_memory: 8GB
+job_name: riboviz
+job_num_cpus: 4
+job_runtime: '48:00:00'
 make_bedgraph: TRUE
 max_read_length: 50
 min_read_length: 10
 multiplex_fq_files: null
+nextflow_report_file: nextflow-report.html
+nextflow_work_dir: work
 num_processes: 1
 orf_fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa
 orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3
@@ -44,3 +52,4 @@ stop_in_cds: FALSE
 trim_5p_mismatches: TRUE
 t_rna_file: data/yeast_tRNAs.tsv
 umi_regexp: null
+validate_only: false
