@@ -14,7 +14,7 @@ Usage::
         [--job-num-cpus [JOB_NUM_CPUS]]
         [--job-email [JOB_EMAIL]]
         [--job-email-events [JOB_EMAIL_EVENTS]]
-        [--validate-only [VALIDATE_ONLY]]
+        [--validate-only]
         [--nextflow-work-dir [NEXTFLOW_WORK_DIR]]
         [--nextflow-report-file [NEXTFLOW_REPORT_FILE]]
 
@@ -67,10 +67,17 @@ def parse_command_line_options():
                             dest=param,
                             required=True)
     for param in list(create_job_script.JOB_CONFIG.keys()):
-        parser.add_argument("--" + param.replace("_", "-"),
-                            dest=param,
-                            default=create_job_script.JOB_CONFIG[param],
-                            nargs='?')
+        if create_job_script.JOB_CONFIG_TYPE[param] is bool:
+            parser.add_argument("--" + param.replace("_", "-"),
+                                dest=param,
+                                default=create_job_script.JOB_CONFIG[param],
+                                action='store_true')
+        else:
+            parser.add_argument("--" + param.replace("_", "-"),
+                                dest=param,
+                                type=create_job_script.JOB_CONFIG_TYPE[param],
+                                default=create_job_script.JOB_CONFIG[param],
+                                nargs='?')
     options = parser.parse_args()
     return options
 

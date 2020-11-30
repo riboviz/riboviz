@@ -26,6 +26,18 @@ JOB_CONFIG = {
     params.VALIDATE_ONLY: False
 }
 """ Default values for job configuration parameters. """
+JOB_CONFIG_TYPE = {
+    params.JOB_NAME: str,
+    params.JOB_RUNTIME: str,
+    params.JOB_MEMORY: str,
+    params.JOB_NUM_CPUS: int,
+    params.JOB_EMAIL_EVENTS: str,
+    params.JOB_EMAIL: str,
+    params.NEXTFLOW_WORK_DIR: str,
+    params.NEXTFLOW_REPORT_FILE: str,
+    params.VALIDATE_ONLY: bool
+}
+""" Types of job configuration parameters. """
 
 
 def create_job_submission_script(config,
@@ -34,6 +46,24 @@ def create_job_submission_script(config,
     """
     Create a job submission script using values from a workflow
     configuration and a template job submission script.
+
+    Each line in template is processed in turn.
+
+    Each sub-string of form ``<token_tag><CONFIG<token_tag>`` is
+    extracted.
+
+    A configuration parameter, ``<CONFIG>``, is sought in ``config``.
+
+    If found then the value of ``config[<CONFIG>]`` replaces
+    each sub-string ``<token_tag><CONFIG<token_tag>``.
+
+    If ``<CONFIG>`` is ``job_email`` and ``config['job_email']`` is
+    ``None`` and the line starts with ``#$ -M`` then the first
+    occurrence of ``#$`` in the line is replaced with ``# $``. This,
+    in effect, deactivates the line.
+
+    If ``<CONFIG>`` is ``validate_only`` then the replacement
+    sub-string is ``--validate_only``.
 
     :param config: Workflow configuration
     :type config: str or unicode
@@ -47,14 +77,28 @@ def create_job_submission_script(config,
     """
     token_regex = "{tag}.*?{tag}".format(tag=token_tag)
     script = []
+    no_email = params.JOB_EMAIL in config and \
+        config[params.JOB_EMAIL] is None
     for line in template:
         nu_line = line
         matches = re.finditer(token_regex, line)
         for match in matches:
             tag = match.group(0).strip(token_tag)
+            if (tag == params.JOB_EMAIL) and no_email and \
+               nu_line.startswith("#$ -M"):
+                nu_line = nu_line.replace("#$", "# $")
             if tag in config:
-                nu_line = nu_line.replace(match.group(0), str(config[tag]))
-        script.append(nu_line)
+                value = config[tag]
+                if tag == params.VALIDATE_ONLY:
+                    if value:
+                        replacement = "--" + params.VALIDATE_ONLY
+                    else:
+                        replacement = ""
+                else:
+                    replacement = str(value)
+                nu_line = nu_line.replace(match.group(0), replacement)
+        if nu_line is not None:
+            script.append(nu_line)
     return script
 
 
