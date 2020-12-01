@@ -84,8 +84,8 @@ def invoke_create_job_script():
     Parse command-line options then invoke
     :py:mod:`riboviz.create_job_script.create_job_script`.
 
-    :raises AssertionError: if any additional parameter provided
-    by the user is not in
+    :raises AssertionError: if any additional parameter provided \
+    by the user is not in \
     :py:const:`riboviz.params.DEFAULT_JOB_CONFIG`.
     """
     options = parse_command_line_options()

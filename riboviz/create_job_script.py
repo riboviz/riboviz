@@ -45,8 +45,8 @@ def create_job_submission_script(config,
     :type config: str or unicode
     :param template: Job submission script template
     :type template: list(str or unicode)
-    :param token_tag: Tag marking up tokens in template job submission
-    script to be replaced by configuration values.
+    :param token_tag: Tag marking up tokens in template job \
+    submission script to be replaced by configuration values.
     :type token_tag: str or unicode
     :return: Job submission script
     :rtype: list(str or unicode)
@@ -92,17 +92,17 @@ def create_job_script(config_file,
 
     :param config_file: Workflow configuration file
     :type config_file: str or unicode
-    :param override_config: Extra configuration, overriding that in
+    :param override_config: Extra configuration, overriding that in \
     ``config_file`` (if there are any duplicates between these)
     :type override_config: dict(str or unicode => str or unicode)
     :param input_file: Job submission script template
     :type input_file: str or unicode
     :param output_file: Job submission script
     :type output_file: str or unicode
-    :param token_tag: Tag marking up tokens in template job submission
-    script to be replaced by configuration values.
+    :param token_tag: Tag marking up tokens in template job \
+    submission script to be replaced by configuration values.
     :type token_tag: str or unicode
-    :raises AssertionError: If ``config_file`` or
+    :raises AssertionError: If ``config_file`` or \
     ``input_file`` does not exist or is not a file
     """
     for file_name in [input_file, config_file]:

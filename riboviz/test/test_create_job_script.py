@@ -122,8 +122,8 @@ def test_create_job_submission_script_validate_only(value_flag):
     Test :py:func:`riboviz.create_job_script.create_job_submission_script`
     handling of :py:const:`riboviz.params.VALIDATE_ONLY` parameter.
 
-    :param value_flag: Tuple with (value for
-    :py:const:`riboviz.params.VALIDATE_ONLY`, expected flag in
+    :param value_flag: Tuple with (value for \
+    :py:const:`riboviz.params.VALIDATE_ONLY`, expected flag in \
     customised template)
     :type value_flag: tuple(bool, str or unicode)
     """
@@ -147,8 +147,8 @@ def test_create_job_submission_script_job_email(value_prefix):
     handling of :py:const:`riboviz.params.JOB_EMAIL` parameter in a
     line prefixed by ``#$ -M ...``.
 
-    :param value_prefix: Tuple with (value for
-    :py:const:`riboviz.params.JOB_EMAIL`, expected line prefix in
+    :param value_prefix: Tuple with (value for \
+    :py:const:`riboviz.params.JOB_EMAIL`, expected line prefix in \
     customised template)
     :type value_prefix: tuple(bool, str or unicode)
     """
