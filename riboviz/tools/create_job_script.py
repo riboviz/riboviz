@@ -92,7 +92,7 @@ def invoke_create_job_script():
         key = extras.pop(0)
         key = key.strip("-").replace("-", "_")
         assert key in params.DEFAULT_JOB_CONFIG.keys(), \
-            "Unknown configuration parameter".format(key)
+            "Unknown configuration parameter: {}".format(key)
         value_type = params.JOB_CONFIG_TYPE[key]
         if value_type is bool:
             # Booleans are solo flags without associated values
