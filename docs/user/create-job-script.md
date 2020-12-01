@@ -4,17 +4,17 @@
 
 The following configuration parameters can be specified within the template:
 
-| Parameter | Description | Default |
-| --------- | ----------- | ------- |
-| `job_email_events` | Events triggering emails about batch job. Any combination of `b`(begin), `e` (end), `a` (abort), `s` (suspend). | `beas` |
-| `job_email` | E-mail address for batch job events | `null` |
-| `job_memory` | Requested memory for batch job | `8GB` |
-| `job_name` | Name of batch job | `riboviz` |
-| `job_num_cpus` | Requested number of CPUs for batch job | `4` |
-| `job_runtime` | Maximum runtime for batch job | `48:00:00` |
-| `nextflow_report_file` | Nextflow report file | `nextflow-report.html` |
-| `nextflow_work_dir` | Nextflow work directory | `work` |
-| `validate_only` | Validate configuration, check that mandatory parameters have been provided and that input files exist, then exit without running the workflow? | `FALSE` |
+| Parameter | Description | Mandatory | Default |
+| --------- | ----------- | --------- | ------- |
+| `job_email_events` | Events triggering emails about batch job. Any combination of `b`(begin), `e` (end), `a` (abort), `s` (suspend). | No | `beas` |
+| `job_email` | E-mail address for batch job events | No | `null` |
+| `job_memory` | Requested memory for batch job | No | `8GB` |
+| `job_name` | Name of batch job | No | `riboviz` |
+| `job_num_cpus` | Requested number of CPUs for batch job | No | `4` |
+| `job_runtime` | Maximum runtime for batch job | No | `48:00:00` |
+| `nextflow_report_file` | Nextflow report file | No | `nextflow-report.html` |
+| `nextflow_work_dir` | Nextflow work directory | No | `work` |
+| `validate_only ` | Validate configuration, check that mandatory parameters have been provided and that input files exist, then exit without running the workflow? | No | `false` |
 
 In addition the following parameters can be specified within the template:
 
