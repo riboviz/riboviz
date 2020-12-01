@@ -67,18 +67,18 @@ The workflow also supports the following configuration parameters. All directory
 | `group_umis` | Summarise UMI groups both pre- and post-deduplication, using UMI-tools? Useful for debugging. | No | `false` |
 | `is_riboviz_gff` | Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3? | No | `true` |
 | `is_test_run` | Is this a test run? (unused) | No | |
-| `job_email_events` | Events triggering emails about batch job. Any combination of `b`(begin), `e` (end), `a` (abort), `s` (suspend). (see [Create job submission script from template](./docs/user/create-job-script.md)) | No | `beas` |
-| `job_email` | E-mail address for batch job events (see [Create job submission script from template](./docs/user/create-job-script.md)) | No | `null` |
-| `job_memory` | Requested memory for batch job (see [Create job submission script from template](./docs/user/create-job-script.md)) | No | `8GB` |
-| `job_name` | Name of batch job (see [Create job submission script from template](./docs/user/create-job-script.md)) | No | `riboviz` |
-| `job_num_cpus` | Requested number of CPUs for batch job (see [Create job submission script from template](./docs/user/create-job-script.md)) | No | `4` |
-| `job_runtime` | Maximum runtime for batch job (see [Create job submission script from template](./docs/user/create-job-script.md)) | No | `48:00:00` |
+| `job_email_events` | Events triggering emails about batch job. Any combination of `b`(begin), `e` (end), `a` (abort), `s` (suspend). (see [Create job submission script from template](./create-job-script.md)) | No | `beas` |
+| `job_email` | E-mail address for batch job events (see [Create job submission script from template](./create-job-script.md)) | No | `null` |
+| `job_memory` | Requested memory for batch job (see [Create job submission script from template](./create-job-script.md)) | No | `8GB` |
+| `job_name` | Name of batch job (see [Create job submission script from template](./create-job-script.md)) | No | `riboviz` |
+| `job_num_cpus` | Requested number of CPUs for batch job (see [Create job submission script from template](./create-job-script.md)) | No | `4` |
+| `job_runtime` | Maximum runtime for batch job (see [Create job submission script from template](./create-job-script.md)) | No | `48:00:00` |
 | `make_bedgraph` | Output bedgraph data files in addition to H5 files? | No | `true` |
 | `max_read_length` | Maximum read length in H5 output | No | `50` |
 | `min_read_length` | Minimum read length in H5 output | No | `10` |
 | `multiplex_fq_files` | List with a single multiplexed FASTQ file, relative to `<dir_in>`. If this is provided then the `fq_files` parameter must not be present in the configuration and the `sample_sheet` parameter must be present. | Only if `fq_files` is not provided | |
-| `nextflow_report_file` | Nextflow report file (see [Create job submission script from template](./docs/user/create-job-script.md)) (Nextflow workflow only) | No | `nextflow-report.html` |
-| `nextflow_work_dir` | Nextflow work directory (see [Create job submission script from template](./docs/user/create-job-script.md)) (Nextflow workflow only) | No | `work` |
+| `nextflow_report_file` | Nextflow report file (see [Create job submission script from template](./create-job-script.md)) (Nextflow workflow only) | No | `nextflow-report.html` |
+| `nextflow_work_dir` | Nextflow work directory (see [Create job submission script from template](./create-job-script.md)) (Nextflow workflow only) | No | `work` |
 | `num_processes` | Number of processes to parallelize over, used by specific steps in the workflow | No | `1` |
 | `orf_fasta_file` | Transcript sequences file containing both coding regions and flanking regions (FASTA file) | Yes | |
 | `orf_gff_file` | Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts (GTF/GFF3 file) | Yes | |
@@ -88,7 +88,7 @@ The workflow also supports the following configuration parameters. All directory
 | `rpf` | Is the dataset an RPF or mRNA dataset? | No | `true` |
 | `rrna_fasta_file` | Ribosomal rRNA and other contaminant sequences to avoid aligning to (FASTA file) | Yes | |
 | `rrna_index_prefix` | Prefix for rRNA index files, relative to `<dir_index>` | Yes | |
-| `samsort_memory` | Memory to give to `samtools sort` (Nextflow workflow only) | No | `null` (`samtools sort` uses built-in default `768M`, [samtools sort](http://www.htslib.org/doc/samtools-sort.html) |
+| `samsort_memory` | Memory to give to `samtools sort` (Nextflow workflow only) | No | `null` (`samtools sort` uses built-in default `768M`, [samtools sort](http://www.htslib.org/doc/samtools-sort.html)) |
  | `sample_sheet` | A sample sheet, relative to `<dir_in>` (tab-separated values file) | Only if `multiplex_fq_files` is provided | |
 | `secondary_id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) | No | `NULL` |
 | `skip_inputs` | When validating configuration (see `validate_only` below) skip checks for existence of ribosome profiling data files (`fq_files`, `multiplexed_fq_files`, `sample_sheet`)? (Nextflow workflow only) | No | `false` |
