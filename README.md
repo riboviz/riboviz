@@ -49,6 +49,7 @@ Command-line tools:
 | [riboviz.tools.count_reads](./riboviz/tools/count_reads.py) | Scan input, temporary and output directories and count the number of reads (sequences) processed by specific stages of a workflow (invoked as part of a workflow) |
 | [riboviz.tools.create_barcode_pairs](./riboviz/tools/create_barcode_pairs.py) | Create barcode pairs and write each pair plus the Hamming distance between then to a file of tab-separated values |
 | [riboviz.tools.create_fastq_simdata](./riboviz/tools/create_fastq_simdata.py) | Create simulated FASTQ files to test UMI/deduplication, adaptor trimming, anddemultiplexing. Files in `data/simdata/` were created using this tool |
+| [riboviz.tools.create_job_script](./riboviz/tools/create_job_script.py) | [Create job submission script from template](./docs/user/create-job-script.md) |
 | [riboviz.tools.demultiplex_fastq](./riboviz/tools/demultiplex_fastq.py) | Demultiplex FASTQ files using UMI-tools-compliant barcodes present within the FASTQ headers and a sample sheet file (invoked as part of a workflow) |
 | [riboviz.tools.prep_riboviz](./riboviz/tools/prep_riboviz.py) | Run the workflow |
 | [riboviz.tools.subsample_bioseqfile](./riboviz/tools/subsample_bioseqfile.py) | Subsample an input FASTQ (or other sequencing) file, to produce a smaller file whose reads are randomly sampled from of the input with a fixed probability |
