@@ -54,7 +54,7 @@ are not already present in the configuration:
 
 * ``job_name: riboviz``
 * ``job_runtime: '48:00:00'``
-* ``job_memory: 8GB``
+* ``job_memory: 8G``
 * ``job_num_cpus: 4``
 * ``job_parallel_env: mpi``
 * ``job_email: null``

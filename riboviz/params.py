@@ -163,7 +163,7 @@ Events triggering emails about batch job (job submission).
 DEFAULT_JOB_CONFIG = {
     JOB_NAME: "riboviz",
     JOB_RUNTIME: "48:00:00",
-    JOB_MEMORY: "8GB",
+    JOB_MEMORY: "8G",
     JOB_NUM_CPUS: 4,
     JOB_PARALLEL_ENV: "mpi",
     JOB_EMAIL_EVENTS: "beas",

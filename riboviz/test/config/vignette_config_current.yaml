@@ -27,7 +27,7 @@ is_riboviz_gff: TRUE
 is_test_run: FALSE
 job_email_events: beas
 job_email: null
-job_memory: 8GB
+job_memory: 8G
 job_name: riboviz
 job_num_cpus: 4
 job_parallel_env: mpi

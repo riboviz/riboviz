@@ -8,7 +8,7 @@ The following configuration parameters can be specified within the template:
 | --------- | ----------- | --------- | ------- |
 | `job_email_events` | Events triggering emails about batch job. Any combination of `b`(begin), `e` (end), `a` (abort), `s` (suspend). | No | `beas` |
 | `job_email` | E-mail address for batch job events | No | `null` |
-| `job_memory` | Requested memory for batch job | No | `8GB` |
+| `job_memory` | Requested memory for batch job | No | `8G` |
 | `job_name` | Name of batch job | No | `riboviz` |
 | `job_num_cpus` | Requested number of CPUs for batch job | No | `4` |
 | `job_parallel_env` | Requested parallel environment for batch job. One of `sharedmem`, `mpi`, `scatter`, `gpu`, See University of Edinburgh ECDF Linux Compute Cluster, [parallel environments](https://www.wiki.ed.ac.uk/display/ResearchServices/Parallel+Environments) | No | `mpi` |

@@ -69,7 +69,7 @@ The workflow also supports the following configuration parameters. All directory
 | `is_test_run` | Is this a test run? (unused) | No | |
 | `job_email_events` | Events triggering emails about batch job. Any combination of `b`(begin), `e` (end), `a` (abort), `s` (suspend). (see [Create job submission script from template](./create-job-script.md)) | No | `beas` |
 | `job_email` | E-mail address for batch job events (see [Create job submission script from template](./create-job-script.md)) | No | `null` |
-| `job_memory` | Requested memory for batch job (see [Create job submission script from template](./create-job-script.md)) | No | `8GB` |
+| `job_memory` | Requested memory for batch job (see [Create job submission script from template](./create-job-script.md)) | No | `8G` |
 | `job_name` | Name of batch job (see [Create job submission script from template](./create-job-script.md)) | No | `riboviz` |
 | `job_num_cpus` | Requested number of CPUs for batch job (see [Create job submission script from template](./create-job-script.md)) | No | `4` |
 | `job_parallel_env` | Requested parallel environment for batch job (see [Create job submission script from template](./create-job-script.md)) | No | `mpi` |
