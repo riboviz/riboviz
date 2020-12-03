@@ -66,7 +66,7 @@ def parse_command_line_options():
     parser.add_argument("--cds-feature-format",
                         dest="cds_feature_format",
                         default=CDS_FEATURE_FORMAT,
-                        help="CDS feature name format for CDS features which do not define 'ID'  or 'Name' attributes")
+                        help="CDS feature name format for CDS features which do not define 'ID'  or 'Name' attributes. This format is applied to the sequence ID to create a feature name.")
     options = parser.parse_args()
     return options
 
