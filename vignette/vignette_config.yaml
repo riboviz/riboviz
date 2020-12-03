@@ -25,18 +25,18 @@ fq_files: # fastq files to be processed, relative to dir_in
 group_umis: FALSE # Summarise UMI groups before and after deduplication, if TRUE
 is_riboviz_gff: TRUE # Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3
 is_test_run: FALSE # Is this a test run
-job_email_events: beas # Events triggering emails about batch job (Grid Engine job submission). Any combination of b - begin, e - end, a - abort, s - suspend.
-job_email: null # E-mail address for batch job events (Grid Engine job submission).
-job_memory: 8GB # Requested memory for batch job (Grid Engine job submission).
-job_name: riboviz # Name of batch job (Grid Engine job submission).
-job_num_cpus: 4 # Requested number of CPUs for batch job (Grid Engine job submission).
-job_runtime: '48:00:00' # Maximum runtime for batch job (Grid Engine job submission).
+job_email_events: beas # Events triggering emails about batch job (job submission). Any combination of b - begin, e - end, a - abort, s - suspend.
+job_email: null # E-mail address for batch job events (job submission).
+job_memory: 8GB # Requested memory for batch job (job submission).
+job_name: riboviz # Name of batch job (job submission).
+job_num_cpus: 4 # Requested number of CPUs for batch job (job submission).
+job_runtime: '48:00:00' # Maximum runtime for batch job (job submission).
 make_bedgraph: TRUE # Output bedgraph files, as TSV, in addition to h5?
 max_read_length: 50 # Maximum read length in H5 output
 min_read_length: 10 # Minimum read length in H5 output
 multiplex_fq_files: null # Multiplexed fastq files to be processed, relative to dir_in
-nextflow_report_file: nextflow-report.html # Nextflow report file (Nextflow workflow only) (Grid Engine job submission).
-nextflow_work_dir: work # Nextflow work directory (Nextflow workflow only) (Grid Engine job submission).
+nextflow_report_file: nextflow-report.html # Nextflow report file (Nextflow workflow only) (job submission).
+nextflow_work_dir: work # Nextflow work directory (Nextflow workflow only) (job submission).
 num_processes: 1 # Number of processes to parallelize over
 orf_fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa # ORF file to align to
 orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3 # GFF2/GFF3 file for ORFs
