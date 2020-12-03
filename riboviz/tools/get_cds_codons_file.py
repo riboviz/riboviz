@@ -6,7 +6,8 @@ file.
 Usage::
 
     python -m riboviz.tools.get_cds_codons_file [-h] \
-        -f FASTA -g GFF [-c CDS_CODONS] [-e]
+        -f FASTA -g GFF [-c CDS_CODONS] [-e] \
+        [--cds-feature-format CDS_FEATURE_FORMAT]
 
     -h, --help            show this help message and exit
     -f FASTA, --fasta FASTA
@@ -17,6 +18,10 @@ Usage::
                           (default cds_codons.tsv)
     -e, --exclude-stop-codons
                           Exclude stop codons (default false)
+    --cds-feature-format CDS_FEATURE_FORMAT
+                          CDS feature name format for CDS features
+                          which do not define ``ID`` or
+                          ``Name`` attributes
 
 See :py:func:`riboviz.fasta_gff.get_cds_codons_file` for
 information on the tab-separated values file format.
@@ -55,6 +60,10 @@ def parse_command_line_options():
                         dest="exclude_stop_codons",
                         action='store_true',
                         help="Exclude stop codons (default false)")
+    parser.add_argument("--cds-feature-format",
+                        dest="cds_feature_format",
+                        default=fasta_gff.CDS_FEATURE_FORMAT,
+                        help="CDS feature name format for CDS features which do not define 'ID'  or 'Name' attributes")
     options = parser.parse_args()
     return options
 
@@ -70,8 +79,12 @@ def invoke_get_cds_codons_file():
     gff = options.gff
     cds_codons = options.cds_codons
     exclude_stop_codons = options.exclude_stop_codons
-    fasta_gff.get_cds_codons_file(fasta, gff, cds_codons,
-                                  exclude_stop_codons)
+    cds_feature_format = options.cds_feature_format
+    fasta_gff.get_cds_codons_file(fasta,
+                                  gff,
+                                  cds_codons,
+                                  exclude_stop_codons,
+                                  cds_feature_format)
 
 
 if __name__ == "__main__":
