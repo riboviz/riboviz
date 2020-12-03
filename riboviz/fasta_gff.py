@@ -334,7 +334,7 @@ def get_cds_from_fasta(feature, fasta):
 def get_cds_codons_from_fasta(fasta,
                               gff,
                               exclude_stop_codons=False,
-                              feature_format=CDS_FEATURE_FORMAT):
+                              cds_feature_format=CDS_FEATURE_FORMAT):
     """
     Using CDS entries within a GFF file, get the codons in each coding
     sequence in the complementary FASTA file.
@@ -346,7 +346,7 @@ def get_cds_codons_from_fasta(fasta,
     ignored.
 
     If there is no feature name (no ``ID`` or ``Name``) attribute
-    defined in the feature the the ``feature_format`` is used to
+    defined in the feature the the ``cds_feature_format`` is used to
     format the sequence ID into a feature name. If both ``ID`` and
     ``Name`` are defined then ``ID`` is used.
 
@@ -365,8 +365,9 @@ def get_cds_codons_from_fasta(fasta,
     :param exclude_stop_codons: Should stop codons be excluded from \
     codons returned?
     :type exclude_stop_codons: bool
-    :param feature_format: Feature name format
-    :type feature_format: str or unicode
+    :param cds_feature_format: CDS feature name format for CDS \
+    features which do not define ``ID``  or ``Name`` attributes
+    :type cds_feature_format: str or unicode
     :return: Codons for each coding sequence, keyed by feature name
     :rtype: dict(str or unicode -> list(str or unicode))
     :raises Exception: Exceptions specific to gffutils.create_db \
@@ -390,7 +391,7 @@ def get_cds_codons_from_fasta(fasta,
             continue
         feature_id = get_feature_id(feature)
         if feature_id is None:
-            feature_id = feature_format.format(feature.seqid)
+            feature_id = cds_feature_format.format(feature.seqid)
         if feature_id not in cds_codons:
             same_feature_id_count = 0
         else:
@@ -444,7 +445,7 @@ def get_cds_codons_file(fasta,
                         gff,
                         cds_codons_file,
                         exclude_stop_codons=False,
-                        feature_format=CDS_FEATURE_FORMAT,
+                        cds_feature_format=CDS_FEATURE_FORMAT,
                         delimiter="\t"):
     """
     Using CDS entries within a GFF file, get the codons in each coding
@@ -467,15 +468,16 @@ def get_cds_codons_file(fasta,
     :param exclude_stop_codons: Should stop codons be excluded from \
     codons returned?
     :type exclude_stop_codons: bool
-    :param feature_format: Feature name format
-    :type feature_format: str or unicode
+    :param cds_feature_format: CDS feature name format for CDS \
+    features which do not define ``ID``  or ``Name`` attributes
+    :type cds_feature_format: str or unicode
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
     cds_codons = get_cds_codons_from_fasta(fasta,
                                            gff,
                                            exclude_stop_codons,
-                                           feature_format)
+                                           cds_feature_format)
     cds_codons_df = feature_codons_to_df(cds_codons)
     provenance.write_provenance_header(__file__, cds_codons_file)
     cds_codons_df[list(cds_codons_df.columns)].to_csv(cds_codons_file,
