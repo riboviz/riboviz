@@ -119,9 +119,11 @@ profiling data files.
 """
 
 R_LIBS = "r_libs"
-""" R libraries directory (job submission). """
+""" R libraries directory (job submission) (command-line only). """
 CONFIG_FILE = "config_file"
-""" RiboViz YAML configuration file (job submission). """
+"""
+RiboViz YAML configuration file (job submission) (command-line only).
+"""
 NEXTFLOW_REPORT_FILE = "nextflow_report_file"
 """ Nextflow report file (Nextflow workflow only)
 (job submission).
