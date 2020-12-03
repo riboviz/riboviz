@@ -17,6 +17,7 @@ Usage::
         [--validate-only]
         [--nextflow-work-dir [NEXTFLOW_WORK_DIR]]
         [--nextflow-report-file [NEXTFLOW_REPORT_FILE]]
+        [--nextflow-resume]
 
       -h, --help            show this help message and exit
       -i INPUT_FILE, --input_file INPUT_FILE

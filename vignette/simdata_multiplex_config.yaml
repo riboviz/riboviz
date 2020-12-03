@@ -27,6 +27,7 @@ job_email: null # E-mail address for batch job events (job submission).
 job_memory: 8GB # Requested memory for batch job (job submission).
 job_name: riboviz # Name of batch job (job submission).
 job_num_cpus: 4 # Requested number of CPUs for batch job (job submission).
+job_parallel_env: mpi # Requested parallel environment for batch job (Grid Engine job submission).
 job_runtime: '48:00:00' # Maximum runtime for batch job (job submission).
 make_bedgraph: TRUE # Output bedgraph files, as TSV, in addition to h5?
 max_read_length: 50 # Maximum read length in H5 output

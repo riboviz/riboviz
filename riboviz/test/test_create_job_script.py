@@ -138,6 +138,30 @@ def test_create_job_submission_script_validate_only(value_flag):
     assert custom == ["prefix " + flag + " suffix"]
 
 
+@pytest.mark.parametrize("value_flag",
+                         [(True, "-resume"),
+                          (False, "")])
+def test_create_job_submission_script_nextflow_resume(value_flag):
+    """
+    Test :py:func:`riboviz.create_job_script.create_job_submission_script`
+    handling of :py:const:`riboviz.params.NEXTFLOW_RESUME` parameter.
+
+    :param value_flag: Tuple with (value for \
+    :py:const:`riboviz.params.NEXTFLOW_RESUME`, expected flag in \
+    customised template)
+    :type value_flag: tuple(bool, str or unicode)
+    """
+    value, flag = value_flag
+    config = {params.NEXTFLOW_RESUME: value}
+    template = ["prefix " +
+                create_job_script.TOKEN_TAG +
+                params.NEXTFLOW_RESUME +
+                create_job_script.TOKEN_TAG +
+                " suffix"]
+    custom = create_job_script.create_job_submission_script(config, template)
+    assert custom == ["prefix " + flag + " suffix"]
+
+
 @pytest.mark.parametrize("value_prefix",
                          [("someone@ed.ac.uk", "#$ -M"),
                           (None, "# $ -M")])

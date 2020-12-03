@@ -11,6 +11,7 @@ The following configuration parameters can be specified within the template:
 | `job_memory` | Requested memory for batch job | No | `8GB` |
 | `job_name` | Name of batch job | No | `riboviz` |
 | `job_num_cpus` | Requested number of CPUs for batch job | No | `4` |
+| `job_parallel_env` | Requested parallel environment for batch job. One of `sharedmem`, `mpi`, `scatter`, `gpu`, See University of Edinburgh ECDF Linux Compute Cluster, [parallel environments](https://www.wiki.ed.ac.uk/display/ResearchServices/Parallel+Environments) | No | `mpi` |
 | `job_runtime` | Maximum runtime for batch job | No | `48:00:00` |
 | `nextflow_report_file` | Nextflow report file | No | `nextflow-report.html` |
 | `nextflow_work_dir` | Nextflow work directory | No | `work` |
@@ -39,7 +40,8 @@ $ python -m riboviz.tools.create_job_script [-h]
     [--job-email-events [JOB_EMAIL_EVENTS]] \
     [--validate-only] \
     [--nextflow-work-dir [NEXTFLOW_WORK_DIR]] \
-    [--nextflow-report-file [NEXTFLOW_REPORT_FILE]]
+    [--nextflow-report-file [NEXTFLOW_REPORT_FILE]] \
+    [--nextflow-resume] 
 ```
 
 where:

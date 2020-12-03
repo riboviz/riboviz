@@ -25,21 +25,24 @@ def create_job_submission_script(config,
 
     Each line in template is processed in turn.
 
-    Each sub-string of form ``<token_tag><CONFIG<token_tag>`` is
+    Each sub-string of form ``<token_tag><PARAM<token_tag>`` is
     extracted.
 
-    A configuration parameter, ``<CONFIG>``, is sought in ``config``.
+    A configuration parameter, ``<PARAM>``, is sought in ``config``.
 
-    If found then the value of ``config[<CONFIG>]`` replaces
-    each sub-string ``<token_tag><CONFIG<token_tag>``.
+    If found then the value of ``config[<PARAM>]`` replaces
+    each sub-string ``<token_tag><PARAM<token_tag>``.
 
-    If ``<CONFIG>`` is ``job_email`` and ``config['job_email']`` is
+    If ``<PARAM>`` is ``job_email`` and ``config['job_email']`` is
     ``None`` and the line starts with ``#$ -M`` then the first
     occurrence of ``#$`` in the line is replaced with ``# $``. This,
     in effect, deactivates the line.
 
-    If ``<CONFIG>`` is ``validate_only`` then the replacement
+    If ``<PARAM>`` is ``validate_only`` then the replacement
     sub-string is ``--validate_only``.
+
+    If ``<PARAM>`` is ``nextflow_resume`` then the replacement
+    sub-string is ``-resume``.
 
     :param config: Workflow configuration
     :type config: str or unicode
@@ -65,11 +68,13 @@ def create_job_submission_script(config,
                 nu_line = nu_line.replace("#$", "# $")
             if tag in config:
                 value = config[tag]
+                replacement = ""
                 if tag == params.VALIDATE_ONLY:
                     if value:
                         replacement = "--" + params.VALIDATE_ONLY
-                    else:
-                        replacement = ""
+                elif tag == params.NEXTFLOW_RESUME:
+                    if value:
+                        replacement = "-resume"
                 else:
                     replacement = str(value)
                 nu_line = nu_line.replace(match.group(0), replacement)

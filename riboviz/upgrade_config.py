@@ -56,6 +56,7 @@ are not already present in the configuration:
 * ``job_runtime: '48:00:00'``
 * ``job_memory: 8GB``
 * ``job_num_cpus: 4``
+* ``job_parallel_env: mpi``
 * ``job_email: null``
 * ``job_email_events: beas``
 * ``nextflow_report_file: nextflow-report.html``
@@ -162,8 +163,13 @@ def upgrade_config(config):
         if key not in config:
             config[key] = value
 
-    # Parameters added between release 2.0 and present date.
-    for (key, value) in list(params.DEFAULT_JOB_CONFIG.items()):
+    # Job configuration arameters added between release 2.0 and
+    # present date.
+    # Remove params.NEXTFLOW_RESUME as it is a command-line only
+    # configuration parameter.
+    job_config = params.DEFAULT_JOB_CONFIG.copy()
+    del job_config[params.NEXTFLOW_RESUME]
+    for (key, value) in list(job_config.items()):
         if key not in config:
             config[key] = value
 

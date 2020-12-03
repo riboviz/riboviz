@@ -125,11 +125,18 @@ CONFIG_FILE = "config_file"
 RiboViz YAML configuration file (job submission) (command-line only).
 """
 NEXTFLOW_REPORT_FILE = "nextflow_report_file"
-""" Nextflow report file (Nextflow workflow only)
+"""
+Nextflow report file (Nextflow workflow only)
 (job submission).
 """
 NEXTFLOW_WORK_DIR = "nextflow_work_dir"
-""" Nextflow work directory (Nextflow workflow only)
+"""
+Nextflow work directory (Nextflow workflow only)
+(job submission).
+"""
+NEXTFLOW_RESUME = "nextflow_resume"
+"""
+Resume Nextflow workflow (Nextflow workflow only)
 (job submission).
 """
 JOB_NAME = "job_name"
@@ -144,6 +151,8 @@ JOB_NUM_CPUS = "job_num_cpus"
 """
 Requested number of CPUs for batch job (job submission).
 """
+JOB_PARALLEL_ENV = "job_parallel_env"
+""" Requested parallel environment for batch job (job submission). """
 JOB_EMAIL = "job_email"
 """ E-mail address for batch job events (job submission). """
 JOB_EMAIL_EVENTS = "job_email_events"
@@ -156,10 +165,12 @@ DEFAULT_JOB_CONFIG = {
     JOB_RUNTIME: "48:00:00",
     JOB_MEMORY: "8GB",
     JOB_NUM_CPUS: 4,
+    JOB_PARALLEL_ENV: "mpi",
     JOB_EMAIL_EVENTS: "beas",
     JOB_EMAIL: None,
     NEXTFLOW_WORK_DIR: "work",
     NEXTFLOW_REPORT_FILE: "nextflow-report.html",
+    NEXTFLOW_RESUME: "false",
     VALIDATE_ONLY: False
 }
 """ Default values for job configuration parameters. """
@@ -168,10 +179,12 @@ JOB_CONFIG_TYPE = {
     JOB_RUNTIME: str,
     JOB_MEMORY: str,
     JOB_NUM_CPUS: int,
+    JOB_PARALLEL_ENV: str,
     JOB_EMAIL_EVENTS: str,
     JOB_EMAIL: str,
     NEXTFLOW_WORK_DIR: str,
     NEXTFLOW_REPORT_FILE: str,
+    NEXTFLOW_RESUME: bool,
     VALIDATE_ONLY: bool
 }
 """ Types of job configuration parameters. """

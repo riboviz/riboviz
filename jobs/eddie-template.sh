@@ -8,8 +8,8 @@
 #$ -l h_rt=%%job_runtime%%
 # RAM:
 #$ -l h_vmem=%%job_memory%%
-# Use shared memory parallel environment and request number of CPUs:
-#$ -pe sharedmem %%job_num_cpus%%
+# Request parallel environment and number of CPUs:
+#$ -pe %%job_parallel_env%% %%job_num_cpus%%
 # Redirected output file name format:
 #$ -o $JOB_NAME-$JOB_ID-$HOSTNAME.o
 # Redirected error file name format:
@@ -38,6 +38,6 @@ source activate riboviz
 
 echo "Running Nextflow riboviz..."
 
-nextflow run prep_riboviz.nf -params-file %%config_file%% -work-dir %%nextflow_work_dir%% -ansi-log false -with-report %%nextflow_report_file%% %%validate_only%%
+nextflow run prep_riboviz.nf -params-file %%config_file%% -work-dir %%nextflow_work_dir%% -ansi-log false -with-report %%nextflow_report_file%% %%nextflow_resume%% %%validate_only%%
 
 echo "Nextflow riboviz run complete!"

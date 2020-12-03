@@ -27,6 +27,7 @@ job_email: null
 job_memory: 8GB
 job_name: riboviz
 job_num_cpus: 4
+job_parallel_env: mpi
 job_runtime: '48:00:00'
 make_bedgraph: TRUE
 max_read_length: 50

@@ -72,6 +72,7 @@ The workflow also supports the following configuration parameters. All directory
 | `job_memory` | Requested memory for batch job (see [Create job submission script from template](./create-job-script.md)) | No | `8GB` |
 | `job_name` | Name of batch job (see [Create job submission script from template](./create-job-script.md)) | No | `riboviz` |
 | `job_num_cpus` | Requested number of CPUs for batch job (see [Create job submission script from template](./create-job-script.md)) | No | `4` |
+| `job_parallel_env` | Requested parallel environment for batch job (see [Create job submission script from template](./create-job-script.md)) | No | `mpi` |
 | `job_runtime` | Maximum runtime for batch job (see [Create job submission script from template](./create-job-script.md)) | No | `48:00:00` |
 | `make_bedgraph` | Output bedgraph data files in addition to H5 files? | No | `true` |
 | `max_read_length` | Maximum read length in H5 output | No | `50` |
