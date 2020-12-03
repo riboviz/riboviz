@@ -100,8 +100,9 @@ def get_cds_codons_from_fasta(fasta,
 
     If there is no feature name (no ``ID`` or ``Name``) attribute
     defined in the feature the the ``cds_feature_format`` is used to
-    format the sequence ID into a feature name. If both ``ID`` and
-    ``Name`` are defined then ``ID`` is used.
+    format the sequence ID into a feature name.
+
+    If both ``ID`` and ``Name`` are defined then ``ID`` is used.
 
     If two or more CDSs for the same sequence have the same feature
     name then the first CDS for that sequence has a feature name, as
@@ -119,8 +120,9 @@ def get_cds_codons_from_fasta(fasta,
     codons returned?
     :type exclude_stop_codons: bool
     :param cds_feature_format: CDS feature name format for CDS \
-    features which do not define ``ID``  or ``Name`` attributes
-    :type cds_feature_format: str or unicode
+    features which do not define ``ID``  or ``Name`` attributes. \
+    This format is applied to the sequence ID to create a \
+    feature name.
     :return: Codons for each coding sequence, keyed by feature name
     :rtype: dict(str or unicode -> list(str or unicode))
     :raises Exception: Exceptions specific to gffutils.create_db \
@@ -222,7 +224,9 @@ def get_cds_codons_file(fasta,
     codons returned?
     :type exclude_stop_codons: bool
     :param cds_feature_format: CDS feature name format for CDS \
-    features which do not define ``ID``  or ``Name`` attributes
+    features which do not define ``ID``  or ``Name`` attributes. \
+    This format is applied to the sequence ID to create a \
+    feature name.
     :type cds_feature_format: str or unicode
     :param delimiter: Delimiter
     :type delimiter: str or unicode
