@@ -24,9 +24,9 @@ if (interactive()) {
   # Deduce file name and path using reflection as before.
   this_script <- getopt::get_Rscript_filename()
   path_to_this_script <- this_script
-  source(here::here("rscripts", "provenance.R"))
-  source(here::here("rscripts", "read_count_functions.R"))
-  source(here::here("rscripts", "stats_figs_block_functions.R"))
+  source(file.path(dirname(this_script), "provenance.R"))
+  source(file.path(dirname(this_script), "read_count_functions.R"))
+  source(file.path(dirname(this_script), "stats_figs_block_functions.R"))
 }
 
 # print provenance

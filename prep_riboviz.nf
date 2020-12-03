@@ -18,7 +18,7 @@ def helpMessage() {
 
     where '<CONFIG>' is a YAML configuration file. The YAML
     configuration parameters are as follows (all are mandatory unless
-    stated). 
+    stated).
 
     Configuration parameters can also be provided via the
     command-line in the form '--<PARAMETER>=<VALUE>' (for example
@@ -99,10 +99,11 @@ def helpMessage() {
     * 'dedup_stats': Output UMI deduplication statistics? (default
       'TRUE')
     * 'group_umis': Smmarise UMI groups both pre- and
-      post-deduplication using UMI-tools? Useful for debugging 
+      post-deduplication using UMI-tools? Useful for debugging
       (default 'FALSE')
     * If 'dedup_umis' is 'TRUE' but 'extract_umis' is 'FALSE' then a
       warning will be displayed, but processing will continue.
+    * 'trim_5p_mismatches': Trim mismatched 5' base? (default 'TRUE')
 
     Statistics and figure generation input files:
 
@@ -122,7 +123,7 @@ def helpMessage() {
       either both must be specified or neither must be specified.
 
     Statistics and figure generation parameters:
-    
+
     * 'buffer': Length of flanking region around the CDS (default 250)
     * 'count_reads': Scan input, temporary and output files and
       produce counts of reads in each FASTQ, SAM, and BAM file
@@ -132,11 +133,11 @@ def helpMessage() {
     * 'dataset': Human-readable name of the dataset (default
        'dataset')
     * 'do_pos_sp_nt_freq': Calculate position-specific nucleotide
-      freqeuency? (default 'TRUE') 
+      freqeuency? (default 'TRUE')
     * 'is_riboviz_gff': Does the GFF file contain 3 elements per gene
-      - UTR5, CDS, and UTR3? (default 'TRUE') 
+      - UTR5, CDS, and UTR3? (default 'TRUE')
     * 'make_bedgraph': Output bedgraph data files in addition to H5
-      files? (default 'TRUE') 
+      files? (default 'TRUE')
     * 'max_read_length': Maximum read length in H5 output (default 50)
     * 'min_read_length': Minimum read length in H5 output (default 10)
     * 'primary_id': Primary gene IDs to access the data (YAL001C,
@@ -149,9 +150,13 @@ def helpMessage() {
 
     General:
 
-    * 'validate_only: Validate configuration, check that mandatory
+    * 'validate_only': Validate configuration, check that mandatory
       parameters have been provided and that input files exist, then
       exit without running the workflow? (default 'FALSE')
+    * 'publish_index_tmp': Publish/copy index and temporary files to
+      'dir_index' and 'dir_tmp'. If 'FALSE' then only symbolic links
+      to these files in the Nextflow 'work/' directory are
+      created in 'dir_index' and 'dir_tmp' (default 'FALSE')
     * 'skip_inputs': When validating configuration (see
       'validate_only' above) skip checks for existence of ribosome
       profiling data files ('fq_files', 'multiplexed_fq_files',
@@ -190,6 +195,7 @@ params.dir_out = "output"
 params.dir_tmp = "tmp"
 params.do_pos_sp_nt_freq = true
 params.extract_umis = false
+params.trim_5p_mismatches = true
 params.fq_files = [:]
 params.group_umis = false
 params.dedup_stats = true
@@ -199,6 +205,7 @@ params.max_read_length = 50
 params.min_read_length = 10
 params.multiplex_fq_files = []
 params.num_processes = 1
+params.publish_index_tmp = false
 params.primary_id = "Name"
 params.rpf = true
 params.secondary_id = "NULL"
@@ -206,6 +213,15 @@ params.stop_in_cds = false
 params.samsort_memory = null
 params.validate_only = false
 params.skip_inputs = false
+
+if (params.publish_index_tmp)
+{
+     publish_index_tmp_type = 'copy'
+}
+else
+{
+    publish_index_tmp_type = 'symlink'
+}
 
 if (params.validate_only) {
     println("Validating configuration only")
@@ -454,7 +470,7 @@ if (params.validate_only) {
 
 /*
 Indexing.
-*/ 
+*/
 
 // Split channels for use in multiple downstream processes.
 orf_fasta.into { build_indices_orf_fasta; generate_stats_figs_orf_fasta }
@@ -462,7 +478,7 @@ orf_gff.into { bam_to_h5_orf_gff; generate_stats_figs_orf_gff }
 
 process buildIndicesrRNA {
     tag "${params.rrna_index_prefix}"
-    publishDir "${params.dir_index}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_index}", mode: publish_index_tmp_type, overwrite: true
     input:
         file rrna_fasta from rrna_fasta
     output:
@@ -478,7 +494,7 @@ process buildIndicesrRNA {
 
 process buildIndicesORF {
     tag "${params.orf_index_prefix}"
-    publishDir "${params.dir_index}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_index}", mode: publish_index_tmp_type, overwrite: true
     input:
         file orf_fasta from build_indices_orf_fasta
     output:
@@ -507,7 +523,7 @@ process cutAdapters {
     tag "${sample_id}"
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_fq) \
             from sample_id_fq.collect{ id, file -> [id, file] }
@@ -534,7 +550,7 @@ process extractUmis {
     tag "${sample_id}"
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_fq) \
             from cut_fq_branch.umi_fq
@@ -558,7 +574,7 @@ Multiplexed files (multiplex_fq_files)-specific processes.
 process cutAdaptersMultiplex {
     tag "${multiplex_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}", mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(multiplex_id), file(multiplex_fq) \
             from multiplex_id_fq.collect{ id, file -> [id, file] }
@@ -585,7 +601,7 @@ cut_multiplex_fq.branch {
 process extractUmisMultiplex {
     tag "${multiplex_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}", mode: 'copy', overwrite: true
+    publishDir "${params.dir_tmp}", mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(multiplex_id), file(multiplex_fq) \
             from cut_multiplex_fq_branch.umi_fq
@@ -616,7 +632,7 @@ multiplex_sample_sheet_tsv.into {
 process demultiplex {
     tag "${multiplex_id}"
     publishDir "${params.dir_tmp}/${multiplex_id}_deplex", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
         // Use '.toString' to prevent changing hashes of
@@ -638,7 +654,7 @@ process demultiplex {
 
 // 'demultiplex_fq' outputs a single list with all the output
 // files. Extract sample IDs from file basenames, filter out
-// 'Unassigned' and output tuples of sample IDs and file names as 
+// 'Unassigned' and output tuples of sample IDs and file names as
 // separate items onto a new channel.
 demultiplex_fq
     .flatten()
@@ -690,7 +706,7 @@ trimmed_fq = cut_fq_branch.non_umi_fq
 process hisat2rRNA {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(sample_fq) from trimmed_fq
@@ -710,14 +726,14 @@ process hisat2rRNA {
 process hisat2ORF {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
         tuple val(sample_id), file(sample_fq) from non_rrna_fq
         each file(orf_index_ht2) from orf_index_ht2
     output:
         tuple val(sample_id), file("unaligned.fq") into unaligned_fq
-        tuple val(sample_id), file("orf_map.sam") into orf_map_sam
+        tuple val(sample_id), file("orf_map.sam") into trim_5p_mismatches
     shell:
         """
         hisat2 --version
@@ -728,17 +744,25 @@ process hisat2ORF {
         """
 }
 
+// Route 'trim_5p_branch' channel outputs depending on whether mismatched
+// 5' base are to be trimmed or not
+trim_5p_mismatches.branch {
+    trim_5p_fq: params.trim_5p_mismatches
+    non_trim_5p_fq: ! params.trim_5p_mismatches
+}
+.set { trim_5p_branch }
+
 process trim5pMismatches {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
         // Use '.toString' to prevent changing hashes of
         // 'workflow.projectDir' triggering reexecution of this
         // process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
-        tuple val(sample_id), file(sample_sam) from orf_map_sam
+        tuple val(sample_id), file(sample_sam) from trim_5p_branch.trim_5p_fq
     output:
         tuple val(sample_id), file("orf_map_clean.sam") \
             into trim_orf_map_sam
@@ -751,13 +775,19 @@ process trim5pMismatches {
         """
 }
 
+// Combine channels for downstream processing. By definition of
+// upstream conditions and processes, only one of the channels
+// will have content.
+trimmed_5p_fq = trim_5p_branch.non_trim_5p_fq
+    .mix(trim_orf_map_sam)
+
 process samViewSort {
     tag "${sample_id}"
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(sample_sam) from trim_orf_map_sam
+        tuple val(sample_id), file(sample_sam) from trimmed_5p_fq
     output:
         tuple val(sample_id), file("orf_map_clean.bam"), \
             file("orf_map_clean.bam.bai") into orf_map_bam
@@ -788,7 +818,7 @@ process groupUmisPreDedup {
     tag "${sample_id}"
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
             from pre_dedup_group_bam
@@ -807,7 +837,7 @@ process dedupUmis {
     tag "${sample_id}"
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
             from pre_dedup_bam
@@ -836,7 +866,7 @@ process groupUmisPostDedup {
     tag "${sample_id}"
     errorStrategy 'ignore'
     publishDir "${params.dir_tmp}/${sample_id}", \
-        mode: 'copy', overwrite: true
+        mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
             from post_dedup_group_bam
@@ -952,7 +982,8 @@ process generateStatsFigs {
         tuple val(sample_id), file("3nt_periodicity.tsv") \
             into nt3_periodicity_tsv
         tuple val(sample_id), file("pos_sp_nt_freq.tsv") \
-            into pos_sp_nt_freq_tsv
+	    optional (! params.do_pos_sp_nt_freq) \
+	    into pos_sp_nt_freq_tsv
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.pdf") \
             into pos_sp_rpf_norm_reads_pdf
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
@@ -1016,7 +1047,7 @@ finished_sample_id
     .ifEmpty { exit 1, "No sample was processed successfully" }
     .view { "Finished processing sample: ${it}" }
 
-// Prefix sample-specific TPMs files, tpms.tsv, with sample ID so all 
+// Prefix sample-specific TPMs files, tpms.tsv, with sample ID so all
 // sample-specific TPMs files can be staged into the same directory
 // for running collateTpms.
 process renameTpms {
@@ -1085,7 +1116,7 @@ process countReads {
            -i ${file(params.dir_in).toAbsolutePath()} \
            -t ${file(params.dir_tmp).toAbsolutePath()} \
            -o ${file(params.dir_out).toAbsolutePath()} \
-           -r read_counts.tsv  
+           -r read_counts.tsv
         """
 }
 
