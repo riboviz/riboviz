@@ -23,11 +23,11 @@ Usage::
                           which do not define ``ID`` or
                           ``Name`` attributes
 
-See :py:func:`riboviz.fasta_gff.get_cds_codons_file` for
+See :py:func:`riboviz.get_cds_codons.get_cds_codons_file` for
 information on the tab-separated values file format.
 """
 import argparse
-from riboviz import fasta_gff
+from riboviz import get_cds_codons
 from riboviz import provenance
 
 
@@ -62,7 +62,7 @@ def parse_command_line_options():
                         help="Exclude stop codons (default false)")
     parser.add_argument("--cds-feature-format",
                         dest="cds_feature_format",
-                        default=fasta_gff.CDS_FEATURE_FORMAT,
+                        default=get_cds_codons.CDS_FEATURE_FORMAT,
                         help="CDS feature name format for CDS features which do not define 'ID'  or 'Name' attributes")
     options = parser.parse_args()
     return options
@@ -71,7 +71,7 @@ def parse_command_line_options():
 def invoke_get_cds_codons_file():
     """
     Parse command-line options then invoke
-    :py:func:`riboviz.fasta_gff.get_cds_codons_file`.
+    :py:func:`riboviz.get_cds_codons.get_cds_codons_file`.
     """
     print(provenance.write_provenance_to_str(__file__))
     options = parse_command_line_options()
@@ -80,11 +80,11 @@ def invoke_get_cds_codons_file():
     cds_codons = options.cds_codons
     exclude_stop_codons = options.exclude_stop_codons
     cds_feature_format = options.cds_feature_format
-    fasta_gff.get_cds_codons_file(fasta,
-                                  gff,
-                                  cds_codons,
-                                  exclude_stop_codons,
-                                  cds_feature_format)
+    get_cds_codons.get_cds_codons_file(fasta,
+                                       gff,
+                                       cds_codons,
+                                       exclude_stop_codons,
+                                       cds_feature_format)
 
 
 if __name__ == "__main__":

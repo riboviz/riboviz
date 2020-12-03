@@ -15,10 +15,10 @@ Usage::
                           Features issues file output
                           (default features_issues.tsv)
 
-See :py:func:`riboviz.fasta_gff.check_fasta_gff`.
+See :py:func:`riboviz.check_fasta_gff.check_fasta_gff`.
 """
 import argparse
-from riboviz import fasta_gff
+from riboviz import check_fasta_gff
 from riboviz import provenance
 
 
@@ -53,14 +53,14 @@ def parse_command_line_options():
 def invoke_check_fasta_gff():
     """
     Parse command-line options then invoke
-    :py:func:`riboviz.fasta_gff.check_fasta_gff`.
+    :py:func:`riboviz.check_fasta_gff.check_fasta_gff`.
     """
     print(provenance.write_provenance_to_str(__file__))
     options = parse_command_line_options()
     fasta = options.fasta
     gff = options.gff
     features_issues = options.features_issues
-    fasta_gff.check_fasta_gff(fasta, gff, features_issues)
+    check_fasta_gff.check_fasta_gff(fasta, gff, features_issues)
 
 
 if __name__ == "__main__":
