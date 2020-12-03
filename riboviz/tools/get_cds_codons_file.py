@@ -28,6 +28,7 @@ information on the tab-separated values file format.
 """
 import argparse
 from riboviz import get_cds_codons
+from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 from riboviz import provenance
 
 
@@ -62,7 +63,7 @@ def parse_command_line_options():
                         help="Exclude stop codons (default false)")
     parser.add_argument("--cds-feature-format",
                         dest="cds_feature_format",
-                        default=get_cds_codons.CDS_FEATURE_FORMAT,
+                        default=CDS_FEATURE_FORMAT,
                         help="CDS feature name format for CDS features which do not define 'ID'  or 'Name' attributes")
     options = parser.parse_args()
     return options

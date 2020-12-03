@@ -6,6 +6,7 @@ import warnings
 import gffutils
 import pandas as pd
 from riboviz import provenance
+from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 
 
 GENE = "Gene"
@@ -17,11 +18,6 @@ Codon positions column name (codon position in coding sequence,
 """
 CODON = "Codon"
 """ Codon positions column name (codon). """
-CDS_FEATURE_FORMAT = "{}_CDS"
-"""
-CDS feature name format for CDS features which do not define ``ID``
-or ``Name`` attributes.
-"""
 
 
 def sequence_to_codons(sequence):
