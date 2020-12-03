@@ -50,7 +50,7 @@ where:
 * `-o [OUTPUT_FILE]`, `--output [OUTPUT_FILE]`: Job submission script (if not provided then the job submission script is printed to standard output).
 * `-t [TOKEN_TAG]`, `--token-tag [TOKEN_TAG]`: Tag marking up tokens for replacement in job submission script template. Default `%%`.
 * `--config-file [CONFIG_FILE]`: YAML configuration file.
-* `r_libs R_LIBS: Location of R libraries required by RiboViz.
+* `r_libs R_LIBS`: Location of R libraries required by RiboViz.
 
 Default values, defined in code, are overriden by any values provided in the YAML configuration file. These, in turn, are overridden by any values provided via the command-line.
 
