@@ -482,6 +482,30 @@ def test_get_cds_codons_file(tmp_file):
     check_feature_codons_df(TEST_CDS_CODONS, df)
 
 
+def test_get_cds_codons_file_cds_format(tmp_file):
+    """
+    Test :py:func:`riboviz.fasta_gff.get_cds_codons_file` with
+    FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CODONS_FILE`) and a custom
+    CDS feature name format and validate the TSV file output.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    fasta_gff.get_cds_codons_file(TEST_FASTA_CODONS_FILE,
+                                  TEST_GFF_CODONS_FILE,
+                                  tmp_file,
+                                  cds_feature_format="{}-Custom")
+    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
+    # Delete the test entry that uses the default CDS_FEATURE_FORMAT.
+    test_cds_codons = TEST_CDS_CODONS.copy()
+    codons = test_cds_codons["YAL008CNoIdNameAttr_mRNA_CDS"]
+    del test_cds_codons["YAL008CNoIdNameAttr_mRNA_CDS"]
+    # Add the expected result for the custom entry.
+    test_cds_codons["YAL008CNoIdNameAttr_mRNA-Custom"] = codons
+    check_feature_codons_df(test_cds_codons, df)
+
+
 def test_get_cds_codons_file_exclude_stop_codon(tmp_file):
     """
     Test :py:func:`riboviz.fasta_gff.get_cds_codons_file` with
