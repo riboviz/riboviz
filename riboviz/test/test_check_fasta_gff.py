@@ -16,7 +16,7 @@ TEST_GFF_CHECK_FILE = os.path.join(os.path.dirname(data.__file__),
                                    "test_check_fasta_gff.gff")
 """ Test GFF file in :py:mod:`riboviz.test.data`. """
 TEST_CHECK_GFF_ISSUES = [
-    ("YAL004CNoIDNameAttr_mRNA", "Undefined",
+    ("YAL004CNoIDNameAttr_mRNA", "YAL004CNoIDNameAttr_mRNA_CDS",
      check_fasta_gff.ISSUE_NO_ID_NAME),
     ("YAL006CNonUniqueID_mRNA", "YAL005_7CNonUniqueID_CDS",
      check_fasta_gff.ISSUE_DUPLICATE_FEATURE_ID),
@@ -198,3 +198,29 @@ def test_check_fasta_gff(tmp_file):
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     df = df.fillna("")  # On loading empty strings will be NaN by default.
     check_fasta_gff_issues_df(TEST_CHECK_ISSUES, df)
+
+
+def test_check_fasta_gff_feature_format(tmp_file):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff` with
+    FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`) and a custom feature name
+    format and validate the TSV file output.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,
+                                    TEST_GFF_CHECK_FILE,
+                                    tmp_file,
+                                    feature_format="{}-Custom")
+    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
+    df = df.fillna("")  # On loading empty strings will be NaN by default.
+    test_check_issues = TEST_CHECK_ISSUES.copy()
+    # Delete the test entry that uses the default CDS_FEATURE_FORMAT.
+    test_check_issues.pop(0)
+    # Add the expected result for the custom entry.
+    test_check_issues.insert(
+        0, ("YAL004CNoIDNameAttr_mRNA", "YAL004CNoIDNameAttr_mRNA-Custom",
+            check_fasta_gff.ISSUE_NO_ID_NAME))
+    check_fasta_gff_issues_df(test_check_issues, df)

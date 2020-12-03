@@ -6,17 +6,13 @@ import warnings
 from Bio.Seq import Seq
 import gffutils
 import pandas as pd
+from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 from riboviz import provenance
 
 SEQUENCE = "Sequence"
 """ FASTA-GFF compatibility column name (sequence ID). """
 FEATURE = "Feature"
 """ FASTA-GFF compatibility column name (feature ID). """
-UNDEFINED_FEATURE = "Undefined"
-"""
-FASTA-GFF compatibility feature column value for features with
-undefined names
-"""
 ISSUE = "Issue"
 """ FASTA-GFF compatibility column name (issue). """
 ISSUE_INCOMPLETE = "Incomplete"
@@ -51,7 +47,7 @@ ISSUE_SEQUENCE_FORMATS = {
 """ Format strings for printing FASTA-GFF compatibility issues. """
 
 
-def get_fasta_gff_cds_issues(fasta, gff):
+def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
     """
     Check FASTA and GFF files for compatibility and return a list of
     issues for relating to coding sequences, ``CDS``, features. A list
@@ -93,6 +89,10 @@ def get_fasta_gff_cds_issues(fasta, gff):
     :type fasta: str or unicode
     :param gff: GFF file
     :type gff: str or unicode
+    :param feature_format: Feature name format for features which \
+    do not define ``ID``  or ``Name`` attributes. This format is \
+    applied to the sequence ID to create a feature name.
+    :type feature_format: str or unicode
     :return: List of issues for sequences and features.
     :rtype: list(tuple(str or unicode, str or unicode, str or \
     unicode))
@@ -122,17 +122,15 @@ def get_fasta_gff_cds_issues(fasta, gff):
         feature_name = None
         if "Name" in feature.attributes:
             feature_name = feature.attributes["Name"][0].strip()
-        if not feature_id and not feature_name:
-            issues.append((feature.seqid,
-                           UNDEFINED_FEATURE,
-                           ISSUE_NO_ID_NAME))
         if feature_id:
             feature_id_name = feature_id
         elif feature_name:
             feature_id_name = feature_name
         else:
-            feature_id_name = UNDEFINED_FEATURE
-
+            feature_id = feature_format.format(feature.seqid)
+            issues.append((feature.seqid,
+                           feature_id,
+                           ISSUE_NO_ID_NAME))
         try:
             sequence = feature.sequence(fasta)
         except KeyError as e:
@@ -209,7 +207,9 @@ def fasta_gff_issues_to_df(issues):
     return df
 
 
-def check_fasta_gff(fasta, gff, issues_file, delimiter="\t"):
+def check_fasta_gff(fasta, gff, issues_file,
+                    feature_format=CDS_FEATURE_FORMAT,
+                    delimiter="\t"):
     """
     Check FASTA and GFF files for compatibility and both print and
     save a list of issues for each coding sequence, ``CDS``,
@@ -231,10 +231,14 @@ def check_fasta_gff(fasta, gff, issues_file, delimiter="\t"):
     :param fasta: FASTA file
     :param issues_file: Feature issues file
     :type issues_file: str or unicode
+    :param feature_format: Feature name format for features which \
+    do not define ``ID``  or ``Name`` attributes. This format is \
+    applied to the sequence ID to create a feature name.
+    :type feature_format: str or unicode
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
-    issues = get_fasta_gff_cds_issues(fasta, gff)
+    issues = get_fasta_gff_cds_issues(fasta, gff, feature_format)
     issues_df = fasta_gff_issues_to_df(issues)
     for _, row in issues_df.iterrows():
         issue = row[ISSUE]
