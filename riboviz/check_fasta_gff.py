@@ -142,6 +142,7 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
         except KeyError as e:
             issues.append((feature.seqid, '', ISSUE_MISSING_SEQUENCE,
                            None))
+            continue
         except Exception as e:
             # Log and continue with other CDSs. A typical exception
             # that can be thrown by gffutils.Feature.sequence is
