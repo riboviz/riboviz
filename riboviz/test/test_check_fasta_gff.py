@@ -5,6 +5,9 @@ import os
 import tempfile
 import pytest
 import pandas as pd
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 from riboviz import check_fasta_gff
 from riboviz.test import data
 
@@ -98,6 +101,35 @@ def tmp_file():
     yield tmp_file
     if os.path.exists(tmp_file):
         os.remove(tmp_file)
+
+
+def test_get_fasta_sequence_ids(tmp_file):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.get_fasta_sequence_ids`
+    with a FASTA file and check that the expected sequence IDs
+    are returned.
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    fasta_seq_ids = ["SeqID_{}".format(i) for i in range(0, 5)]
+    with open(tmp_file, "w") as f:
+        for seq_id in fasta_seq_ids:
+            record = SeqRecord(Seq("GATTACCA"),
+                               id=seq_id,
+                               description="test")
+            SeqIO.write(record, f, "fasta")
+    seq_ids = check_fasta_gff.get_fasta_sequence_ids(tmp_file)
+    assert set(fasta_seq_ids) == seq_ids, "Unexpected set of sequence IDs"
+
+
+def test_get_fasta_sequence_ids_empty_fasta(tmp_file):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.get_fasta_sequence_ids`
+    with an empty FASTA file and check that an empty set is
+    returned.
+    """
+    seq_ids = check_fasta_gff.get_fasta_sequence_ids(tmp_file)
+    assert not seq_ids, "Expected empty set of sequence IDs"
 
 
 def test_get_fasta_gff_cds_issues():
