@@ -34,7 +34,7 @@ Expected GFF-specific issues (sequence ID, feature ID, issue type,
 issue data) for GFF file (:py:const:`TEST_GFF_CHECK_FILE`) only.
 """
 TEST_CHECK_FASTA_ISSUES = [
-    ("YAL003CMissingGene_mRNA", "",
+    ("YAL003CMissingSequence_mRNA", "",
      check_fasta_gff.SEQUENCE_NOT_IN_FASTA, None),
     ("YAL008CBadLengthNoStop_mRNA", "YAL008CBadLengthNoStop_CDS",
      check_fasta_gff.INCOMPLETE_FEATURE, None),
@@ -67,6 +67,10 @@ TEST_CHECK_FASTA_ISSUES = [
      check_fasta_gff.INTERNAL_STOP_CODON, None),
     ("YAL016CMissingGFF_mRNA", "",
      check_fasta_gff.SEQUENCE_NOT_IN_GFF, None),
+    ("YAL017CMissingGFF_mRNA", "",
+     check_fasta_gff.SEQUENCE_NOT_IN_GFF, None),
+    ("YAL018CMissingSequence_mRNA", "",
+     check_fasta_gff.SEQUENCE_NOT_IN_FASTA, None),
 ]
 """
 Expected FASTA-specific issues (sequence ID, feature ID, issue type,
