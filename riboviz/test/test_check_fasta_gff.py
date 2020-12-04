@@ -17,15 +17,17 @@ TEST_GFF_CHECK_FILE = os.path.join(os.path.dirname(data.__file__),
 """ Test GFF file in :py:mod:`riboviz.test.data`. """
 TEST_CHECK_GFF_ISSUES = [
     ("YAL004CNoIDNameAttr_mRNA", "YAL004CNoIDNameAttr_mRNA_CDS",
-     check_fasta_gff.ISSUE_NO_ID_NAME, None),
+     check_fasta_gff.NO_ID_NAME, None),
     ("YAL005CNonUniqueID_mRNA", "YAL005_7CNonUniqueID_CDS",
-     check_fasta_gff.ISSUE_DUPLICATE_FEATURE_ID, None),
+     check_fasta_gff.DUPLICATE_FEATURE_ID, None),
     ("YAL006CNonUniqueID_mRNA", "YAL005_7CNonUniqueID_CDS",
-     check_fasta_gff.ISSUE_DUPLICATE_FEATURE_ID, None),
+     check_fasta_gff.DUPLICATE_FEATURE_ID, None),
     ("YAL007CNonUniqueID_mRNA", "YAL005_7CNonUniqueID_CDS",
-     check_fasta_gff.ISSUE_DUPLICATE_FEATURE_ID, None),
-    ("*", "YAL005_7CNonUniqueID_CDS",
-     check_fasta_gff.ISSUE_DUPLICATE_FEATURE_IDS, 3)
+     check_fasta_gff.DUPLICATE_FEATURE_ID, None),
+    (check_fasta_gff.SEQUENCE_WILDCARD, "YAL005_7CNonUniqueID_CDS",
+     check_fasta_gff.DUPLICATE_FEATURE_IDS, 3),
+    ("YAL015CMultiCDS_mRNA", "",
+     check_fasta_gff.MULTIPLE_CDS, None),
 ]
 """
 Expected GFF-specific issues (sequence ID, feature ID, issue type,
@@ -33,37 +35,38 @@ issue data) for GFF file (:py:const:`TEST_GFF_CHECK_FILE`) only.
 """
 TEST_CHECK_FASTA_ISSUES = [
     ("YAL003CMissingGene_mRNA", "",
-     check_fasta_gff.ISSUE_MISSING_SEQUENCE, None),
+     check_fasta_gff.SEQUENCE_NOT_IN_FASTA, None),
     ("YAL008CBadLengthNoStop_mRNA", "YAL008CBadLengthNoStop_CDS",
-     check_fasta_gff.ISSUE_INCOMPLETE, None),
+     check_fasta_gff.INCOMPLETE_FEATURE, None),
     ("YAL008CBadLengthNoStop_mRNA", "YAL008CBadLengthNoStop_CDS",
-     check_fasta_gff.ISSUE_NO_STOP, None),
-    ("YAL009C_NoATGStart_mRNA", "YAL09CNoATGStart_CDS",
-     check_fasta_gff.ISSUE_NO_ATG_START, None),
-    ("YAL010C_NoStop_mRNA", "YAL010CNoStop_CDS",
-     check_fasta_gff.ISSUE_NO_STOP, None),
-    ("YAL011C_InternalStop_mRNA", "YAL011CInternalStop_CDS",
-     check_fasta_gff.ISSUE_INTERNAL_STOP, None),
-    ("YAL012C_NoATGStartNoStop_mRNA", "YAL12CNoATGStartNoStop_CDS",
-     check_fasta_gff.ISSUE_NO_ATG_START, None),
-    ("YAL012C_NoATGStartNoStop_mRNA", "YAL12CNoATGStartNoStop_CDS",
-     check_fasta_gff.ISSUE_NO_STOP, None),
-    ("YAL013C_NoATGStartInternalStop_mRNA",
+     check_fasta_gff.NO_STOP_CODON, None),
+    ("YAL009CNoATGStart_mRNA", "YAL09CNoATGStart_CDS",
+     check_fasta_gff.NO_ATG_START_CODON, None),
+    ("YAL010CNoStop_mRNA", "YAL010CNoStop_CDS",
+     check_fasta_gff.NO_STOP_CODON, None),
+    ("YAL011CInternalStop_mRNA", "YAL011CInternalStop_CDS",
+     check_fasta_gff.INTERNAL_STOP_CODON, None),
+    ("YAL012CNoATGStartNoStop_mRNA", "YAL12CNoATGStartNoStop_CDS",
+     check_fasta_gff.NO_ATG_START_CODON, None),
+    ("YAL012CNoATGStartNoStop_mRNA", "YAL12CNoATGStartNoStop_CDS",
+     check_fasta_gff.NO_STOP_CODON, None),
+    ("YAL013CNoATGStartInternalStop_mRNA",
      "YAL13CNoATGStartInternalStop_CDS",
-     check_fasta_gff.ISSUE_NO_ATG_START, None),
-    ("YAL013C_NoATGStartInternalStop_mRNA",
+     check_fasta_gff.NO_ATG_START_CODON, None),
+    ("YAL013CNoATGStartInternalStop_mRNA",
      "YAL13CNoATGStartInternalStop_CDS",
-     check_fasta_gff.ISSUE_INTERNAL_STOP, None),
-    ("YAL014C_NoATGStartInternalStopNoStop_mRNA",
+     check_fasta_gff.INTERNAL_STOP_CODON, None),
+    ("YAL014CNoATGStartInternalStopNoStop_mRNA",
      "YAL14CNoATGStartInternalStopNoStop_CDS",
-     check_fasta_gff.ISSUE_NO_ATG_START, None),
-    ("YAL014C_NoATGStartInternalStopNoStop_mRNA",
+     check_fasta_gff.NO_ATG_START_CODON, None),
+    ("YAL014CNoATGStartInternalStopNoStop_mRNA",
      "YAL14CNoATGStartInternalStopNoStop_CDS",
-     check_fasta_gff.ISSUE_NO_STOP, None),
-    ("YAL014C_NoATGStartInternalStopNoStop_mRNA",
+     check_fasta_gff.NO_STOP_CODON, None),
+    ("YAL014CNoATGStartInternalStopNoStop_mRNA",
      "YAL14CNoATGStartInternalStopNoStop_CDS",
-     check_fasta_gff.ISSUE_INTERNAL_STOP, None),
-    ("YAL015CMultiCDS_mRNA", "", check_fasta_gff.ISSUE_MULTIPLE_CDS, None),
+     check_fasta_gff.INTERNAL_STOP_CODON, None),
+    ("YAL016CMissingGFF_mRNA", "",
+     check_fasta_gff.SEQUENCE_NOT_IN_GFF, None),
 ]
 """
 Expected FASTA-specific issues (sequence ID, feature ID, issue type,
@@ -107,7 +110,7 @@ def test_get_fasta_gff_cds_issues():
         assert issue in TEST_CHECK_ISSUES
 
 
-def test_get_fasta_gff_cds_issues_empty_fasta():
+def test_get_fasta_gff_cds_issues_empty_fasta(tmp_file):
     """
     Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
     with an empty FASTA file and GFF file
@@ -240,5 +243,5 @@ def test_check_fasta_gff_feature_format(tmp_file):
     # Add the expected result for the custom entry.
     test_check_issues.insert(
         0, ("YAL004CNoIDNameAttr_mRNA", "YAL004CNoIDNameAttr_mRNA-Custom",
-            check_fasta_gff.ISSUE_NO_ID_NAME, None))
+            check_fasta_gff.NO_ID_NAME, None))
     check_fasta_gff_issues_df(test_check_issues, df)

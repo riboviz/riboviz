@@ -3,6 +3,7 @@ Functions to check FASTA and GFF files for compatibility.
 """
 import bisect
 import warnings
+from Bio import SeqIO
 from Bio.Seq import Seq
 import gffutils
 import pandas as pd
@@ -13,40 +14,62 @@ SEQUENCE = "Sequence"
 """ FASTA-GFF compatibility column name (sequence ID). """
 FEATURE = "Feature"
 """ FASTA-GFF compatibility column name (feature ID). """
+SEQUENCE_WILDCARD = "*"
+""" Sequence ID value for issue that applies to multiple sequences. """
 ISSUE_TYPE = "Issue"
 """ FASTA-GFF compatibility column name (issue type). """
 ISSUE_DATA = "Data"
 """ FASTA-GFF compatibility column name (issue data). """
-ISSUE_INCOMPLETE = "Incomplete"
+INCOMPLETE_FEATURE = "IncompleteFeature"
 """ FASTA-GFF compatibility issue column value. """
-ISSUE_NO_ATG_START = "NoATGStart"
+NO_ATG_START_CODON = "NoATGStartCodon"
 """ FASTA-GFF compatibility issue column value. """
-ISSUE_NO_STOP = "NoStop"
+NO_STOP_CODON = "NoStopCodon"
 """ FASTA-GFF compatibility issue column value. """
-ISSUE_INTERNAL_STOP = "InternalStop"
+INTERNAL_STOP_CODON = "InternalStopCodon"
 """ FASTA-GFF compatibility issue column value. """
-ISSUE_NO_ID_NAME = "NoIdName"
+NO_ID_NAME = "NoIdName"
 """ FASTA-GFF compatibility issue column value. """
-ISSUE_DUPLICATE_FEATURE_ID = "DuplicateFeatureId"
+DUPLICATE_FEATURE_ID = "DuplicateFeatureId"
 """ FASTA-GFF compatibility issue column value. """
-ISSUE_DUPLICATE_FEATURE_IDS = "DuplicateFeatureIds"
+DUPLICATE_FEATURE_IDS = "DuplicateFeatureIds"
 """ FASTA-GFF compatibility issue column value. """
-ISSUE_MULTIPLE_CDS = "MultipleCDS"
+MULTIPLE_CDS = "MultipleCDS"
 """ FASTA-GFF compatibility issue column value. """
-ISSUE_MISSING_SEQUENCE = "MissingSequence"
+SEQUENCE_NOT_IN_FASTA = "SequenceNotInFASTA"
+""" FASTA-GFF compatibility issue column value. """
+SEQUENCE_NOT_IN_GFF = "SequenceNotInGFF"
 """ FASTA-GFF compatibility issue column value. """
 ISSUE_FORMATS = {
-    ISSUE_INCOMPLETE: "Sequence {sequence} feature {feature} has length not divisible by 3",
-    ISSUE_NO_ATG_START: "Sequence {sequence} feature {feature} doesn't start with ATG",
-    ISSUE_NO_STOP: "Sequence {sequence} feature {feature} doesn't stop at end",
-    ISSUE_INTERNAL_STOP: "Sequence {sequence} feature {feature} has internal STOP",
-    ISSUE_NO_ID_NAME: "Sequence {sequence} feature {feature} has no 'ID' or 'Name' attribute",
-    ISSUE_DUPLICATE_FEATURE_ID: "Sequence {sequence} has non-unique 'ID' attribute {feature}",
-    ISSUE_MULTIPLE_CDS: "Sequence {sequence} has multiple CDS",
-    ISSUE_MISSING_SEQUENCE: "Sequence {sequence} missing in FASTA file",
-    ISSUE_DUPLICATE_FEATURE_IDS: "Non-unique 'ID' attribute {feature} ({data} occurrences)"
+    INCOMPLETE_FEATURE: "Sequence {sequence} feature {feature} has length not divisible by 3",
+    NO_ATG_START_CODON: "Sequence {sequence} feature {feature} doesn't start with ATG",
+    NO_STOP_CODON: "Sequence {sequence} feature {feature} doesn't stop at end",
+    INTERNAL_STOP_CODON: "Sequence {sequence} feature {feature} has internal STOP",
+    NO_ID_NAME: "Sequence {sequence} feature {feature} has no 'ID' or 'Name' attribute",
+    DUPLICATE_FEATURE_ID: "Sequence {sequence} has non-unique 'ID' attribute {feature}",
+    MULTIPLE_CDS: "Sequence {sequence} has multiple CDS",
+    SEQUENCE_NOT_IN_FASTA: "Sequence {sequence} in GFF file is not in FASTA file",
+    SEQUENCE_NOT_IN_GFF: "Sequence {sequence} in FASTA file is not in GFF file",
+    DUPLICATE_FEATURE_IDS: "Non-unique 'ID' attribute {feature} ({data} occurrences)"
 }
 """ Format strings for printing compatibility issues. """
+
+
+def get_fasta_sequence_ids(fasta):
+    """
+    Get a list of the unique IDs of sequences in a FASTA file.
+
+    :param fasta: FASTA file
+    :type fasta: str or unicode
+    :return: Unique sequence IDs
+    :rtype: set(str or unicode)
+    """
+    seq_ids = set()
+    with open(fasta, "r") as f:
+        # 'fasta' is https://biopython.org/wiki/SeqIO file type.
+        for record in SeqIO.parse(f, "fasta"):
+            seq_ids.add(record.id)
+    return seq_ids
 
 
 def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
@@ -67,27 +90,29 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
 
     Issue types are one of:
 
-    * :py:const:`ISSUE_INCOMPLETE`: The CDS has length not divisible by
-      3.
-    * :py:const:`ISSUE_NO_ATG_START`: The beginning of a CDS does not
-      have a start codon (``ATG``, translates to ``M``)
-    * :py:const:`ISSUE_NO_STOP`: The end codon of the CDS is not a
-      stop codon (``TAG``, ``TGA``, ``TAA``, translates to ``*``).
-    * :py:const:`ISSUE_INTERNAL_STOP`: There are stop codons internal
-      to the CDS.
-    * :py:const:`ISSUE_NO_ID_NAME`: The CDS has no ``ID`` or ``Name``
+    * :py:const:`INCOMPLETE_FEATURE`: The CDS has length not
+      divisible by 3.
+    * :py:const:`NO_ATG_START_CODON`: The beginning of a CDS
+      does not have a start codon (``ATG``, translates to ``M``)
+    * :py:const:`NO_STOP_CODON`: The end codon of the CDS is not
+      a stop codon (``TAG``, ``TGA``, ``TAA``, translates to ``*``).
+    * :py:const:`INTERNAL_STOP_CODON`: There are stop codons
+      internal to the CDS.
+    * :py:const:`NO_ID_NAME`: The CDS has no ``ID`` or ``Name``
       attribute.
-    * :py:const:`ISSUE_DUPLICATE_FEATURE_ID`: The CDS has non-unique
+    * :py:const:`DUPLICATE_FEATURE_ID`: The CDS has non-unique
       ``ID`` attribute.
-    * :py:const:`ISSUE_MULTIPLE_CDS`: Sequence has multiple CDS.
-    * :py:const:`ISSUE_MISSING_SEQUENCE`: Sequence missing in FASTA
-      file.
-    * :py:const:`ISSUE_DUPLICATE_FEATURE_IDS`: CDSs have non-unique
+    * :py:const:`MULTIPLE_CDS`: Sequence has multiple CDS.
+    * :py:const:`SEQUENCE_NOT_IN_FASTA`: Sequence in GFF
+      file is not in FASTA file.
+    * :py:const:`SEQUENCE_NOT_IN_GFF`: Sequence in FASTA
+      file is not in GFF file.
+    * :py:const:`DUPLICATE_FEATURE_IDS`: CDSs have non-unique
       ``ID`` attributes. This summarises the count of all CDSs that
      share a common ``ID`` attribute.
 
     Issue data is supplementary data relating to the issue e.g. for
-    :py:const:`ISSUE_DUPLICATE_FEATURE_ID` the number of features with
+    :py:const:`DUPLICATE_FEATURE_ID` the number of features with
     the same feature ID. This is a string or int or float or ``None``.
 
     Some unusual genes (e.g. frame shifts) might have these issues.
@@ -103,9 +128,9 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
     do not define ``ID``  or ``Name`` attributes. This format is \
     applied to the sequence ID to create a feature name.
     :type feature_format: str or unicode
-    :return: List of issues for sequences and features.
-    :rtype: list(tuple(str or unicode, str or unicode, str or \
-    unicode, *))
+    :return: List of unique sequence IDs in GFF file and list \
+    of issues for sequences and features.
+    :rtype: list(tuple(str or unicode, str or unicode, str or unicode, *))
     """
     gffdb = gffutils.create_db(gff,
                                dbfn='gff.db',
@@ -119,6 +144,10 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
     feature_ids = {}
     sequence_features = {}
     for feature in gffdb.features_of_type('CDS'):
+        if feature.seqid not in sequence_features:
+            sequence_features[feature.seqid] = 0
+        sequence_features[feature.seqid] += 1
+
         feature_id = None
         if "ID" in feature.attributes:
             feature_id = feature.attributes["ID"][0].strip()
@@ -136,11 +165,11 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
         else:
             feature_id = feature_format.format(feature.seqid)
             issues.append((feature.seqid, feature_id,
-                           ISSUE_NO_ID_NAME, None))
+                           NO_ID_NAME, None))
         try:
             sequence = feature.sequence(fasta)
         except KeyError as e:
-            issues.append((feature.seqid, '', ISSUE_MISSING_SEQUENCE,
+            issues.append((feature.seqid, '', SEQUENCE_NOT_IN_FASTA,
                            None))
             continue
         except Exception as e:
@@ -155,38 +184,43 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
         seq_len_remainder = len(sequence) % 3
         if seq_len_remainder != 0:
             issues.append((feature.seqid, feature_id_name,
-                           ISSUE_INCOMPLETE, None))
+                           INCOMPLETE_FEATURE, None))
             sequence += ("N" * (3 - seq_len_remainder))
 
         translation = Seq(sequence).translate()
         if translation[0] != "M":
             issues.append((feature.seqid, feature_id_name,
-                           ISSUE_NO_ATG_START, None))
+                           NO_ATG_START_CODON, None))
 
         if translation[-1] != "*":
             issues.append((feature.seqid, feature_id_name,
-                           ISSUE_NO_STOP, None))
+                           NO_STOP_CODON, None))
 
         if any([L == "*" for L in translation[:-1]]):
             issues.append((feature.seqid, feature_id_name,
-                           ISSUE_INTERNAL_STOP, None))
+                           INTERNAL_STOP_CODON, None))
 
-        if feature.seqid not in sequence_features:
-            sequence_features[feature.seqid] = 0
-        sequence_features[feature.seqid] += 1
     for sequence, num_features in list(sequence_features.items()):
         if num_features > 1:
             # Insert issue, keeping entries grouped by sequence ID.
-            bisect.insort(issues, (sequence, '', ISSUE_MULTIPLE_CDS, None))
+            bisect.insort(issues, (sequence, '', MULTIPLE_CDS, None))
+
     for feature_id, seq_ids in feature_ids.items():
         if len(seq_ids) > 1:
-            issues.append(('*', feature_id, ISSUE_DUPLICATE_FEATURE_IDS,
+            issues.append((SEQUENCE_WILDCARD,
+                           feature_id,
+                           DUPLICATE_FEATURE_IDS,
                            len(seq_ids)))
             for seq_id in seq_ids:
                 # Insert issue, keeping entries grouped by sequence ID.
                 bisect.insort(issues, (seq_id, feature_id,
-                                       ISSUE_DUPLICATE_FEATURE_ID, None))
+                                       DUPLICATE_FEATURE_ID, None))
 
+    gff_seq_ids = set(sequence_features.keys())
+    fasta_seq_ids = get_fasta_sequence_ids(fasta)
+    fasta_only_seq_ids = fasta_seq_ids - gff_seq_ids
+    for seq_id in fasta_only_seq_ids:
+        issues.append((seq_id, '', SEQUENCE_NOT_IN_GFF, None))
     return issues
 
 
