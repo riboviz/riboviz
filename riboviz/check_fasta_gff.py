@@ -29,6 +29,8 @@ ISSUE_NO_ID_NAME = "NoIdName"
 """ FASTA-GFF compatibility issue column value. """
 ISSUE_DUPLICATE_FEATURE_ID = "DuplicateFeatureId"
 """ FASTA-GFF compatibility issue column value. """
+ISSUE_DUPLICATE_FEATURE_IDS = "DuplicateFeatureIds"
+""" FASTA-GFF compatibility issue column value. """
 ISSUE_MULTIPLE_CDS = "MultipleCDS"
 """ FASTA-GFF compatibility issue column value. """
 ISSUE_MISSING_SEQUENCE = "MissingSequence"
@@ -39,7 +41,8 @@ ISSUE_FEATURE_FORMATS = {
     ISSUE_NO_STOP: "Sequence {} feature {} doesn't stop at end",
     ISSUE_INTERNAL_STOP: "Sequence {} feature {} has internal STOP",
     ISSUE_NO_ID_NAME: "Sequence {} feature {} has no 'ID' or 'Name' attribute",
-    ISSUE_DUPLICATE_FEATURE_ID: "Sequence {} has non-unique 'ID' attribute {}"
+    ISSUE_DUPLICATE_FEATURE_ID: "Sequence {} has non-unique 'ID' attribute {}",
+    ISSUE_DUPLICATE_FEATURE_IDS: "Non-unique 'ID' attribute {}"
 }
 """ Format strings for printing FASTA-GFF compatibility issues. """
 ISSUE_SEQUENCE_FORMATS = {
@@ -82,10 +85,13 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
     * :py:const:`ISSUE_MULTIPLE_CDS`: Sequence has multiple CDS.
     * :py:const:`ISSUE_MISSING_SEQUENCE`: Sequence missing in FASTA
       file.
+    * :py:const:`ISSUE_DUPLICATE_FEATURE_IDS`: CDSs have non-unique
+      ``ID`` attributes. This summarises the count of all CDSs that
+     share a common ``ID`` attribute.
 
     Issue data is supplementary data relating to the issue e.g. for
     :py:const:`ISSUE_DUPLICATE_FEATURE_ID` the number of features with
-    the same feature ID. This is a dictionary or ``None``.
+    the same feature ID. This is a string or int or float or ``None``.
 
     Some unusual genes (e.g. frame shifts) might have these issues.
 
@@ -102,7 +108,7 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
     :type feature_format: str or unicode
     :return: List of issues for sequences and features.
     :rtype: list(tuple(str or unicode, str or unicode, str or \
-    unicode, dict or None))
+    unicode, *))
     """
     gffdb = gffutils.create_db(gff,
                                dbfn='gff.db',
@@ -120,9 +126,9 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
         if "ID" in feature.attributes:
             feature_id = feature.attributes["ID"][0].strip()
             if feature_id in feature_ids:
-                feature_ids[feature_id] += 1
+                feature_ids[feature_id].append(feature.seqid)
             else:
-                feature_ids[feature_id] = 1
+                feature_ids[feature_id] = [feature.seqid]
         feature_name = None
         if "Name" in feature.attributes:
             feature_name = feature.attributes["Name"][0].strip()
@@ -170,16 +176,19 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
         if feature.seqid not in sequence_features:
             sequence_features[feature.seqid] = 0
         sequence_features[feature.seqid] += 1
-    for feature_id, count in feature_ids.items():
-        if count > 1:
-            issues.append(('', feature_id, ISSUE_DUPLICATE_FEATURE_ID,
-                           {'count': count}))
-
     for sequence, num_features in list(sequence_features.items()):
         if num_features > 1:
-            # Insert issue into list so entries remain grouped
-            # by sequence.
+            # Insert issue, keeping entries grouped by sequence ID.
             bisect.insort(issues, (sequence, '', ISSUE_MULTIPLE_CDS, None))
+    for feature_id, seq_ids in feature_ids.items():
+        if len(seq_ids) > 1:
+            issues.append(('*', feature_id, ISSUE_DUPLICATE_FEATURE_IDS,
+                           len(seq_ids)))
+            for seq_id in seq_ids:
+                # Insert issue, keeping entries grouped by sequence ID.
+                bisect.insort(issues, (seq_id, feature_id,
+                                       ISSUE_DUPLICATE_FEATURE_ID, None))
+
     return issues
 
 
@@ -198,7 +207,7 @@ def fasta_gff_issues_to_df(issues):
 
     :param issues: List of issues for sequences and features.
     :type issues: list(tuple(str or unicode, str or unicode, \
-    str or unicode, dict))
+    str or unicode, *))
     :return: data frame
     :rtype: pandas.core.frame.DataFrame
     """
