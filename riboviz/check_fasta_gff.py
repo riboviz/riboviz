@@ -143,6 +143,8 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
     # Track IDs of features encountered. Each ID must be unique within
     # a GFF file. See http://gmod.org/wiki/GFF3.
     feature_ids = {}
+    # Track sequences encountered and counts of features for
+    # each.
     sequence_features = {}
     for feature in gffdb.features_of_type('CDS'):
         if feature.seqid not in sequence_features:
@@ -170,15 +172,9 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
         try:
             sequence = feature.sequence(fasta)
         except KeyError as e:
-            issues.append((feature.seqid, '', SEQUENCE_NOT_IN_FASTA,
-                           None))
+            issues.append((feature.seqid, '', SEQUENCE_NOT_IN_FASTA, None))
             continue
         except Exception as e:
-            # Log and continue with other CDSs. A typical exception
-            # that can be thrown by gffutils.Feature.sequence is
-            # KeyError. This can arise if the GFF file contains
-            # information on a sequence that is not in the FASTA
-            # file.
             warnings.warn(str(e))
             continue
 
@@ -200,19 +196,17 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
             issues.append((feature.seqid, feature_id_name,
                            INTERNAL_STOP_CODON, None))
 
-    for sequence, num_features in list(sequence_features.items()):
-        if num_features > 1:
-            # Insert issue, keeping entries grouped by sequence ID.
-            bisect.insort(issues, (sequence, '', MULTIPLE_CDS, None))
+    for sequence, count in list(sequence_features.items()):
+        if count > 1:
+            # Insert issue, respect ordering by sequence ID.
+            bisect.insort(issues, (sequence, '', MULTIPLE_CDS, count))
 
     for feature_id, seq_ids in feature_ids.items():
         if len(seq_ids) > 1:
-            issues.append((SEQUENCE_WILDCARD,
-                           feature_id,
-                           DUPLICATE_FEATURE_IDS,
-                           len(seq_ids)))
+            issues.append((SEQUENCE_WILDCARD, feature_id,
+                           DUPLICATE_FEATURE_IDS, len(seq_ids)))
             for seq_id in seq_ids:
-                # Insert issue, keeping entries grouped by sequence ID.
+                # Insert issue, respect ordering by sequence ID.
                 bisect.insort(issues, (seq_id, feature_id,
                                        DUPLICATE_FEATURE_ID, None))
 

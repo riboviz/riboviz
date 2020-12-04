@@ -30,7 +30,7 @@ TEST_CHECK_GFF_ISSUES = [
     (check_fasta_gff.SEQUENCE_WILDCARD, "YAL005_7CNonUniqueID_CDS",
      check_fasta_gff.DUPLICATE_FEATURE_IDS, 3),
     ("YAL015CMultiCDS_mRNA", "",
-     check_fasta_gff.MULTIPLE_CDS, None),
+     check_fasta_gff.MULTIPLE_CDS, 3),
 ]
 """
 Expected GFF-specific issues (sequence ID, feature ID, issue type,
