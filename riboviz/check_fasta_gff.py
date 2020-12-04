@@ -35,21 +35,18 @@ ISSUE_MULTIPLE_CDS = "MultipleCDS"
 """ FASTA-GFF compatibility issue column value. """
 ISSUE_MISSING_SEQUENCE = "MissingSequence"
 """ FASTA-GFF compatibility issue column value. """
-ISSUE_FEATURE_FORMATS = {
-    ISSUE_INCOMPLETE: "Sequence {} feature {} has length not divisible by 3",
-    ISSUE_NO_ATG_START: "Sequence {} feature {} doesn't start with ATG",
-    ISSUE_NO_STOP: "Sequence {} feature {} doesn't stop at end",
-    ISSUE_INTERNAL_STOP: "Sequence {} feature {} has internal STOP",
-    ISSUE_NO_ID_NAME: "Sequence {} feature {} has no 'ID' or 'Name' attribute",
-    ISSUE_DUPLICATE_FEATURE_ID: "Sequence {} has non-unique 'ID' attribute {}",
-    ISSUE_DUPLICATE_FEATURE_IDS: "Non-unique 'ID' attribute {}"
+ISSUE_FORMATS = {
+    ISSUE_INCOMPLETE: "Sequence {sequence} feature {feature} has length not divisible by 3",
+    ISSUE_NO_ATG_START: "Sequence {sequence} feature {feature} doesn't start with ATG",
+    ISSUE_NO_STOP: "Sequence {sequence} feature {feature} doesn't stop at end",
+    ISSUE_INTERNAL_STOP: "Sequence {sequence} feature {feature} has internal STOP",
+    ISSUE_NO_ID_NAME: "Sequence {sequence} feature {feature} has no 'ID' or 'Name' attribute",
+    ISSUE_DUPLICATE_FEATURE_ID: "Sequence {sequence} has non-unique 'ID' attribute {feature}",
+    ISSUE_MULTIPLE_CDS: "Sequence {sequence} has multiple CDS",
+    ISSUE_MISSING_SEQUENCE: "Sequence {sequence} missing in FASTA file",
+    ISSUE_DUPLICATE_FEATURE_IDS: "Non-unique 'ID' attribute {feature} ({data} occurrences)"
 }
-""" Format strings for printing FASTA-GFF compatibility issues. """
-ISSUE_SEQUENCE_FORMATS = {
-    ISSUE_MULTIPLE_CDS: "Sequence {} has multiple CDS",
-    ISSUE_MISSING_SEQUENCE: "Sequence {} missing in FASTA file"
-}
-""" Format strings for printing FASTA-GFF compatibility issues. """
+""" Format strings for printing compatibility issues. """
 
 
 def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
@@ -261,11 +258,11 @@ def check_fasta_gff(fasta, gff, issues_file,
     issues_df = fasta_gff_issues_to_df(issues)
     for _, row in issues_df.iterrows():
         issue = row[ISSUE_TYPE]
-        if issue in ISSUE_FEATURE_FORMATS:
-            print(ISSUE_FEATURE_FORMATS[issue].format(row[SEQUENCE],
-                                                      row[FEATURE]))
-        elif issue in ISSUE_SEQUENCE_FORMATS:
-            print(ISSUE_SEQUENCE_FORMATS[issue].format(row[SEQUENCE]))
+        if issue in ISSUE_FORMATS:
+            print(ISSUE_FORMATS[issue].format(
+                sequence=row[SEQUENCE],
+                feature=row[FEATURE],
+                data=row[ISSUE_DATA]))
     provenance.write_provenance_header(__file__, issues_file)
     issues_df[list(issues_df.columns)].to_csv(
         issues_file,
