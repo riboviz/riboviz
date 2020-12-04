@@ -8,6 +8,7 @@ from Bio.Seq import Seq
 import gffutils
 import pandas as pd
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
+from riboviz.get_cds_codons import sequence_to_codons
 from riboviz import provenance
 
 SEQUENCE = "Sequence"
@@ -187,16 +188,15 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
                            INCOMPLETE_FEATURE, None))
             sequence += ("N" * (3 - seq_len_remainder))
 
-        translation = Seq(sequence).translate()
-        if translation[0] != "M":
+        sequence_codons = sequence_to_codons(sequence)
+        if sequence_codons[0] != "ATG":
             issues.append((feature.seqid, feature_id_name,
                            NO_ATG_START_CODON, None))
-
-        if translation[-1] != "*":
+        if not sequence_codons[-1] in ["TAA", "TAG", "TGA"]:
             issues.append((feature.seqid, feature_id_name,
                            NO_STOP_CODON, None))
-
-        if any([L == "*" for L in translation[:-1]]):
+        if any([codon in ["TAA", "TAG", "TGA"]
+                for codon in sequence_codons[:-1]]):
             issues.append((feature.seqid, feature_id_name,
                            INTERNAL_STOP_CODON, None))
 
