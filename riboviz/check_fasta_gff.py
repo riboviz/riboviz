@@ -94,9 +94,9 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
     * :py:const:`INCOMPLETE_FEATURE`: The CDS has length not
       divisible by 3.
     * :py:const:`NO_ATG_START_CODON`: The beginning of a CDS
-      does not have a start codon (``ATG``, translates to ``M``)
+      does not have a start codon (``ATG``)
     * :py:const:`NO_STOP_CODON`: The end codon of the CDS is not
-      a stop codon (``TAG``, ``TGA``, ``TAA``, translates to ``*``).
+      a stop codon (``TAG``, ``TGA``, ``TAA``).
     * :py:const:`INTERNAL_STOP_CODON`: There are stop codons
       internal to the CDS.
     * :py:const:`NO_ID_NAME`: The CDS has no ``ID`` or ``Name``
