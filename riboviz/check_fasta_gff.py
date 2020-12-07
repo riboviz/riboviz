@@ -97,6 +97,7 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
 
     * :py:const:`NOT_APPLICABLE` if the issue relates to the sequence,
     * not the feature.
+    * :py:const:`WILDCARD` if the issue relates to multiple features.
     * Value of ``ID`` attribute for feature, if defined.
     * Value of ``Name`` attribute for feature, if defined, and if
       ``ID`` is undefined.
