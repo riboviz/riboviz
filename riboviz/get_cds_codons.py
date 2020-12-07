@@ -39,8 +39,7 @@ def get_feature_id(feature, report_name=False):
     """
     Get the name of a GFF feature. If there is no feature name (no
     ``ID`` or ``Name``) attribute defined in the feature then ``None``
-    is returned. If both are defined then ``ID`` is returned by
-    preference.
+    is returned.
 
     :param feature: GFF feature
     :type feature: gffutils.feature.Feature
@@ -114,8 +113,6 @@ def get_cds_codons_from_fasta(fasta,
     If there is no feature name (no ``ID`` or ``Name``) attribute
     defined in the feature the the ``cds_feature_format`` is used to
     format the sequence ID into a feature name.
-
-    If both ``ID`` and ``Name`` are defined then ``ID`` is used.
 
     If two or more CDSs for the same sequence have the same feature
     name then the first CDS for that sequence has a feature name, as
