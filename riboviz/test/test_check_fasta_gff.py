@@ -170,18 +170,18 @@ def test_get_fasta_gff_cds_issues_feature_format():
         assert issue in test_check_issues
 
 
-def test_get_fasta_gff_cds_issues_report_name_true():
+def test_get_fasta_gff_cds_issues_use_feature_name_true():
     """
     Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
     with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CHECK_FILE`) and ``report_name=True``.
+    (:py:const:`TEST_GFF_CHECK_FILE`) and ``use_feature_name=True``.
     """
     issues = check_fasta_gff.get_fasta_gff_cds_issues(
         TEST_FASTA_CHECK_FILE,
         TEST_GFF_CHECK_FILE,
-        report_name=True)
+        use_feature_name=True)
     # Update TEST_CHECK_ISSUES with the expected result when
-    # report_name=True.
+    # use_feature_name=True.
     test_check_issues = [(s, f, t, d)
                          for (s, f, t, d) in TEST_CHECK_ISSUES
                          if s != "YAL010CNoATGStartIDNameAttr_mRNA"]
@@ -330,11 +330,11 @@ def test_check_fasta_gff_feature_format(tmp_file):
     check_fasta_gff_issues_df(test_check_issues, df)
 
 
-def test_check_fasta_gff_report_name_true(tmp_file):
+def test_check_fasta_gff_use_feature_name_true(tmp_file):
     """
     Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff` with
     FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CHECK_FILE`) and ``report_name=True``.
+    (:py:const:`TEST_GFF_CHECK_FILE`) and ``use_feature_name=True``.
 
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
@@ -342,13 +342,13 @@ def test_check_fasta_gff_report_name_true(tmp_file):
     check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,
                                     TEST_GFF_CHECK_FILE,
                                     tmp_file,
-                                    report_name=True)
+                                    use_feature_name=True)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     df = df.fillna("")  # Force None to "" not "nan"
     # Update TEST_CHECK_ISSUES with the expected result when
     # custom cds_feature_format is used.
     # Update TEST_CHECK_ISSUES with the expected result when
-    # report_name=True.
+    # use_feature_name=True.
     test_check_issues = [(s, f, t, d)
                          for (s, f, t, d) in TEST_CHECK_ISSUES
                          if s != "YAL010CNoATGStartIDNameAttr_mRNA"]

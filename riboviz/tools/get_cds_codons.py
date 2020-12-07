@@ -7,7 +7,7 @@ Usage::
 
     python -m riboviz.tools.get_cds_codons [-h] \
         -f FASTA -g GFF [-c CDS_CODONS] [-e] \
-        [--report-name] \
+        [--use-feature-name] \
         [--cds-feature-format CDS_FEATURE_FORMAT]
 
     -h, --help            show this help message and exit
@@ -18,7 +18,7 @@ Usage::
                           Coding sequence codons file output
     -e, --exclude-stop-codons
                           Exclude stop codons (default false)
-    --report-name         If a CDS feature defines both 'ID' and 'Name'
+    --use-feature-name    If a CDS feature defines both 'ID' and 'Name'
                           attributes then use 'Name' in reporting,
                           otherwise use 'ID' (default 'false')
     --cds-feature-format CDS_FEATURE_FORMAT
@@ -66,11 +66,11 @@ def parse_command_line_options():
                         dest="exclude_stop_codons",
                         action='store_true',
                         help="Exclude stop codons (default false)")
-    parser.add_argument("--report-name",
-                        dest="report_name",
+    parser.add_argument("--use-feature-name",
+                        dest="use_feature_name",
                         action='store_true',
                         default=False,
-                        help="If a CDS feature defines both 'ID' and 'Name' attributes then use 'Name' in reporting, otherwise use 'ID' (default 'false')")
+                        help="If a CDS feature defines both 'ID' and 'Name' attributes then use 'Name` in reporting, otherwise use 'ID' (default false)")
     parser.add_argument("--cds-feature-format",
                         dest="cds_feature_format",
                         default=CDS_FEATURE_FORMAT,
@@ -91,13 +91,13 @@ def invoke_get_cds_codons():
     cds_codons = options.cds_codons
     exclude_stop_codons = options.exclude_stop_codons
     cds_feature_format = options.cds_feature_format
-    report_name = options.report_name
+    use_feature_name = options.use_feature_name
     get_cds_codons.get_cds_codons_file(fasta,
                                        gff,
                                        cds_codons,
                                        exclude_stop_codons,
                                        cds_feature_format,
-                                       report_name)
+                                       use_feature_name)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@
 ```console
 $ python -m riboviz.tools.check_fasta_gff [-h] \
          -f FASTA -g GFF [-o FEATURES_ISSUES] \
+         [--use-feature-name] \
          [--feature-format FEATURE_FORMAT]
 ```
 
@@ -13,6 +14,7 @@ where:
 * `-f FASTA`, `--fasta FASTA`: FASTA file input.
 * `-g GFF`, `--gff GFF`: GFF3 file input.
 * `-o FEATURES_ISSUES`, `--features-issues FEATURES_ISSUES`: Issues file output (default `features_issues.tsv`).
+* `--use-feature-name`: If a CDS feature defines both `ID` and `Name` attributes then use `Name` in reporting, otherwise use `ID` (default `false`).
 * `--feature-format FEATURE_FORMAT`: Feature name format for features which do not define `ID` or `Name` attributes. This format is applied to the sequence ID to create a feature name (default `{}_CDS`).
 
 Issues are both reported to the console and saved in an issues file.
