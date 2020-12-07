@@ -7,17 +7,20 @@ Usage::
 
     python -m riboviz.tools.get_cds_codons_file [-h] \
         -f FASTA -g GFF [-c CDS_CODONS] [-e] \
+        [--report-id] \
         [--cds-feature-format CDS_FEATURE_FORMAT]
 
     -h, --help            show this help message and exit
     -f FASTA, --fasta FASTA
-                          fasta file input
-    -g GFF, --gff GFF     gff3 file input
+                          FASTA file input
+    -g GFF, --gff GFF     GFF3 file input
     -c CDS_CODONS, --cds-codons CDS_CODONS
                           Coding sequence codons file output
-                          (default cds_codons.tsv)
     -e, --exclude-stop-codons
                           Exclude stop codons (default false)
+    --report-id           If a CDS feature defines both 'ID' and 'Name'
+                          attributes then use 'ID' in reporting,
+                          otherwise use 'Name' (default 'true')
     --cds-feature-format CDS_FEATURE_FORMAT
                           CDS feature name format for CDS features
                           which do not define ``ID`` or
@@ -63,6 +66,10 @@ def parse_command_line_options():
                         dest="exclude_stop_codons",
                         action='store_true',
                         help="Exclude stop codons (default false)")
+    parser.add_argument("--report-id",
+                        dest="report_id",
+                        action='store_true',
+                        help="If a CDS feature defines both 'ID' and 'Name' attributes then use 'ID' in reporting, otherwise use 'Name' (default 'true')")
     parser.add_argument("--cds-feature-format",
                         dest="cds_feature_format",
                         default=CDS_FEATURE_FORMAT,
@@ -83,11 +90,13 @@ def invoke_get_cds_codons_file():
     cds_codons = options.cds_codons
     exclude_stop_codons = options.exclude_stop_codons
     cds_feature_format = options.cds_feature_format
+    report_id = options.report_id
     get_cds_codons.get_cds_codons_file(fasta,
                                        gff,
                                        cds_codons,
                                        exclude_stop_codons,
-                                       cds_feature_format)
+                                       cds_feature_format,
+                                       report_id)
 
 
 if __name__ == "__main__":
