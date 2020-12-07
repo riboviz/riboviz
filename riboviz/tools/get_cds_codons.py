@@ -7,7 +7,7 @@ Usage::
 
     python -m riboviz.tools.get_cds_codons [-h] \
         -f FASTA -g GFF [-c CDS_CODONS] [-e] \
-        [--report-id] \
+        [--report-name] \
         [--cds-feature-format CDS_FEATURE_FORMAT]
 
     -h, --help            show this help message and exit
