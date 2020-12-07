@@ -1,6 +1,6 @@
 # Check FASTA and GFF files for compatibility
 
-`riboviz.tools.check_fasta_gff` checks FASTA and GGF files for equality
+`riboviz.tools.check_fasta_gff` checks FASTA and GGF files for equality. It can be run as follows:
 
 ```console
 $ python -m riboviz.tools.check_fasta_gff [-h] \
