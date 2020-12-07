@@ -35,7 +35,7 @@ def sequence_to_codons(sequence):
     return codons
 
 
-def get_feature_id(feature, report_id=True):
+def get_feature_id(feature, report_name=False):
     """
     Get the name of a GFF feature. If there is no feature name (no
     ``ID`` or ``Name``) attribute defined in the feature then ``None``
@@ -44,9 +44,9 @@ def get_feature_id(feature, report_id=True):
 
     :param feature: GFF feature
     :type feature: gffutils.feature.Feature
-    :param report_id: If a feature defines both ``ID`` and ``Name`` \
-    attributes then use ``ID` in reporting, otherwise use ``Name``.
-    :type report_id: bool
+    :param report_name: If a feature defines both ``ID`` and ``Name`` \
+    attributes then use ``Name` in reporting, otherwise use ``ID``.
+    :type report_name: bool
     :return: Feature name or ``None``
     :rtype: str or unicode
     """
@@ -58,10 +58,10 @@ def get_feature_id(feature, report_id=True):
     if "Name" in feature.attributes:
         name_attr = feature.attributes["Name"]
     if id_attr and name_attr:
-        if report_id:
-            name = id_attr
-        else:
+        if report_name:
             name = name_attr
+        else:
+            name = id_attr
     elif id_attr:
         name = id_attr
     elif name_attr:
@@ -100,7 +100,7 @@ def get_cds_codons_from_fasta(fasta,
                               gff,
                               exclude_stop_codons=False,
                               cds_feature_format=CDS_FEATURE_FORMAT,
-                              report_id=True):
+                              report_name=False):
     """
     Using CDS entries within a GFF file, get the codons in each coding
     sequence in the complementary FASTA file.
@@ -136,9 +136,9 @@ def get_cds_codons_from_fasta(fasta,
     features which do not define ``ID``  or ``Name`` attributes. \
     This format is applied to the sequence ID to create a \
     feature name.
-    :param report_id: If a feature defines both ``ID`` and ``Name`` \
-    attributes then use ``ID` in reporting, otherwise use ``Name``.
-    :type report_id: bool
+    :param report_name: If a feature defines both ``ID`` and ``Name`` \
+    attributes then use ``Name` in reporting, otherwise use ``ID``.
+    :type report_name: bool
     :return: Codons for each coding sequence, keyed by feature name
     :rtype: dict(str or unicode -> list(str or unicode))
     :raises Exception: Exceptions specific to gffutils.create_db \
@@ -160,7 +160,7 @@ def get_cds_codons_from_fasta(fasta,
             # Log and continue with other CDSs.
             warnings.warn(str(e))
             continue
-        feature_id = get_feature_id(feature, report_id)
+        feature_id = get_feature_id(feature, report_name)
         if feature_id is None:
             feature_id = cds_feature_format.format(feature.seqid)
         if feature_id not in cds_codons:
@@ -217,7 +217,7 @@ def get_cds_codons_file(fasta,
                         cds_codons_file,
                         exclude_stop_codons=False,
                         cds_feature_format=CDS_FEATURE_FORMAT,
-                        report_id=True,
+                        report_name=False,
                         delimiter="\t"):
     """
     Using CDS entries within a GFF file, get the codons in each coding
@@ -245,9 +245,9 @@ def get_cds_codons_file(fasta,
     This format is applied to the sequence ID to create a \
     feature name.
     :type cds_feature_format: str or unicode
-    :param report_id: If a feature defines both ``ID`` and ``Name`` \
-    attributes then use ``ID` in reporting, otherwise use ``Name``.
-    :type report_id: bool
+    :param report_name: If a feature defines both ``ID`` and ``Name`` \
+    attributes then use ``Name` in reporting, otherwise use ``ID``.
+    :type report_name: bool
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
@@ -255,7 +255,7 @@ def get_cds_codons_file(fasta,
                                            gff,
                                            exclude_stop_codons,
                                            cds_feature_format,
-                                           report_id)
+                                           report_name)
     cds_codons_df = feature_codons_to_df(cds_codons)
     provenance.write_provenance_header(__file__, cds_codons_file)
     cds_codons_df[list(cds_codons_df.columns)].to_csv(cds_codons_file,

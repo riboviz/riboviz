@@ -113,20 +113,20 @@ def test_sequence_to_codons(seq_codons):
 
 
 @pytest.mark.parametrize("feature", [
-    ("SeqID_mRNA", {}, True, None),
-    ("SeqID_mRNA", {"Name": []}, True, None),
-    ("SeqID_mRNA", {"Name": ["SeqName_CDS"]}, True, "SeqName_CDS"),
-    ("SeqID_mRNA", {"ID": []}, True, None),
-    ("SeqID_mRNA", {"ID": ["SeqID_CDS"]}, True, "SeqID_CDS"),
-    ("SeqID_mRNA", {"ID": ["SeqID_CDS"], "Name": ["SeqName_CDS"]},
-     True, "SeqID_CDS"),
     ("SeqID_mRNA", {}, False, None),
     ("SeqID_mRNA", {"Name": []}, False, None),
     ("SeqID_mRNA", {"Name": ["SeqName_CDS"]}, False, "SeqName_CDS"),
     ("SeqID_mRNA", {"ID": []}, False, None),
     ("SeqID_mRNA", {"ID": ["SeqID_CDS"]}, False, "SeqID_CDS"),
     ("SeqID_mRNA", {"ID": ["SeqID_CDS"], "Name": ["SeqName_CDS"]},
-     False, "SeqName_CDS")])
+     False, "SeqID_CDS"),
+    ("SeqID_mRNA", {}, True, None),
+    ("SeqID_mRNA", {"Name": []}, True, None),
+    ("SeqID_mRNA", {"Name": ["SeqName_CDS"]}, True, "SeqName_CDS"),
+    ("SeqID_mRNA", {"ID": []}, True, None),
+    ("SeqID_mRNA", {"ID": ["SeqID_CDS"]}, True, "SeqID_CDS"),
+    ("SeqID_mRNA", {"ID": ["SeqID_CDS"], "Name": ["SeqName_CDS"]},
+     True, "SeqName_CDS")])
 def test_get_feature_id(feature):
     """
     Test :py:func:`riboviz.get_cds_codons.get_feature_id`.
@@ -136,9 +136,9 @@ def test_get_feature_id(feature):
     :type feature: tuple(str or unicode, str or unicode, bool, \
     str or unicode)
     """
-    seq_id, attributes, report_id, feature_id = feature
+    seq_id, attributes, report_name, feature_id = feature
     assert get_cds_codons.get_feature_id(
-        MockFeature(seq_id, "", attributes), report_id) == feature_id
+        MockFeature(seq_id, "", attributes), report_name) == feature_id
 
 
 def test_get_cds_from_fasta():
@@ -210,23 +210,22 @@ def test_get_cds_codons_from_fasta():
     """
     cds_codons = get_cds_codons.get_cds_codons_from_fasta(
         TEST_FASTA_CODONS_FILE,
-        TEST_GFF_CODONS_FILE,
-        report_id=True)
+        TEST_GFF_CODONS_FILE)
     assert cds_codons == TEST_CDS_CODONS
 
 
-def test_get_cds_codons_from_fasta_report_id_false():
+def test_get_cds_codons_from_fasta_report_name_true():
     """
     Test :py:func:`riboviz.get_cds_codons.get_cds_codons_from_fasta`
     with FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CODONS_FILE`) and ``report_id=False``.
+    (:py:const:`TEST_GFF_CODONS_FILE`) and ``report_name=True``.
     """
     cds_codons = get_cds_codons.get_cds_codons_from_fasta(
         TEST_FASTA_CODONS_FILE,
         TEST_GFF_CODONS_FILE,
-        report_id=False)
+        report_name=True)
     # Update TEST_CDS_CODONS with the expected result when
-    # report_id=False.
+    # report_name_True.
     test_cds_codons = TEST_CDS_CODONS.copy()
     codons = test_cds_codons["YAL009CIdNameAttrIdCDS_CDS"]
     del test_cds_codons["YAL009CIdNameAttrIdCDS_CDS"]
@@ -386,11 +385,11 @@ def test_get_cds_codons_file_exclude_stop_codons(tmp_file):
     check_feature_codons_df(cds_codons_minus_stops, df)
 
 
-def test_get_cds_codons_file_report_id_false(tmp_file):
+def test_get_cds_codons_file_report_name_true(tmp_file):
     """
     Test :py:func:`riboviz.get_cds_codons.get_cds_codons_file` with
     FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CODONS_FILE`) and ``report_id=False``.
+    (:py:const:`TEST_GFF_CODONS_FILE`) and ``report_name=True``.
 
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
@@ -398,10 +397,10 @@ def test_get_cds_codons_file_report_id_false(tmp_file):
     get_cds_codons.get_cds_codons_file(TEST_FASTA_CODONS_FILE,
                                        TEST_GFF_CODONS_FILE,
                                        tmp_file,
-                                       report_id=False)
+                                       report_name=True)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     # Update TEST_CDS_CODONS with the expected result when
-    # report_id=False.
+    # report_name=True.
     test_cds_codons = TEST_CDS_CODONS.copy()
     codons = test_cds_codons["YAL009CIdNameAttrIdCDS_CDS"]
     del test_cds_codons["YAL009CIdNameAttrIdCDS_CDS"]
