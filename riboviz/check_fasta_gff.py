@@ -282,11 +282,10 @@ def check_fasta_gff(fasta, gff, issues_file,
                     delimiter="\t"):
     """
     Check FASTA and GFF files for compatibility and both print and
-    save a list of issues for each coding sequence, ``CDS``,
-    feature.
+    save a list of issues for each sequence and coding sequence,
+    ``CDS``, feature.
 
-    A tab-separated values file of the issues for each CDS, keyed by
-    sequence ID and CDS feature name, is saved.
+    A tab-separated values file of the issues identified is saved.
 
     See :py:func:`get_fasta_gff_cds_issues` for information on
     sequences, features, issue types and related data.
