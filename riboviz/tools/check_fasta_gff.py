@@ -8,6 +8,7 @@ Usage::
         -f FASTA -g GFF [-o FEATURES_ISSUES] \
         [--use-feature-name] \
         [--feature-format FEATURE_FORMAT]
+        [--start-codon START_CODON [START_CODON ...]]
 
     -h, --help            show this help message and exit
     -f FASTA, --fasta FASTA
@@ -23,12 +24,15 @@ Usage::
                           not define ``ID`` or ``Name``
                           attributes. This format is applied to the
                           sequence ID to create a feature name.
+    --start-codon START_CODON [START_CODON ...]
+                          Allowable start codons (default 'ATG')
 
 See :py:func:`riboviz.check_fasta_gff.check_fasta_gff`.
 """
 import argparse
 from riboviz import check_fasta_gff
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
+from riboviz.fasta_gff import START_CODON
 from riboviz import provenance
 
 
@@ -65,6 +69,11 @@ def parse_command_line_options():
                         dest="feature_format",
                         default=CDS_FEATURE_FORMAT,
                         help="Feature name format for features which do not define 'ID'  or 'Name' attributes. This format is applied to the sequence ID to create a feature name.")
+    parser.add_argument("--start-codon",
+                        dest="start_codon",
+                        nargs="+",
+                        default=[START_CODON],
+                        help="Allowable start codons (default '{}')".format(START_CODON))
     options = parser.parse_args()
     return options
 
@@ -81,8 +90,13 @@ def invoke_check_fasta_gff():
     features_issues = options.features_issues
     feature_format = options.feature_format
     use_feature_name = options.use_feature_name
-    check_fasta_gff.check_fasta_gff(fasta, gff, features_issues,
-                                    feature_format, use_feature_name)
+    start_codons = options.start_codon
+    check_fasta_gff.check_fasta_gff(fasta,
+                                    gff,
+                                    features_issues,
+                                    feature_format=feature_format,
+                                    use_feature_name=use_feature_name,
+                                    start_codons=start_codons)
 
 
 if __name__ == "__main__":

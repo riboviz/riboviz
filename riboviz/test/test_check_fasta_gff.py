@@ -44,26 +44,26 @@ TEST_CHECK_FASTA_ISSUES = [
     ("YAL008CBadLengthNoStop_mRNA", "YAL008CBadLengthNoStop_CDS",
      check_fasta_gff.NO_STOP_CODON, None),
     ("YAL009CNoATGStart_mRNA", "YAL009CNoATGStart_CDS",
-     check_fasta_gff.NO_ATG_START_CODON, None),
+     check_fasta_gff.NO_START_CODON, None),
     ("YAL010CNoATGStartIDNameAttr_mRNA", "YAL010CNoATGStartID_CDS",
-     check_fasta_gff.NO_ATG_START_CODON, None),
+     check_fasta_gff.NO_START_CODON, None),
     ("YAL011CNoStop_mRNA", "YAL011CNoStop_CDS",
      check_fasta_gff.NO_STOP_CODON, None),
     ("YAL012CInternalStop_mRNA", "YAL012CInternalStop_CDS",
      check_fasta_gff.INTERNAL_STOP_CODON, None),
     ("YAL013CNoATGStartNoStop_mRNA", "YAL013CNoATGStartNoStop_CDS",
-     check_fasta_gff.NO_ATG_START_CODON, None),
+     check_fasta_gff.NO_START_CODON, None),
     ("YAL013CNoATGStartNoStop_mRNA", "YAL013CNoATGStartNoStop_CDS",
      check_fasta_gff.NO_STOP_CODON, None),
     ("YAL014CNoATGStartInternalStop_mRNA",
      "YAL014CNoATGStartInternalStop_CDS",
-     check_fasta_gff.NO_ATG_START_CODON, None),
+     check_fasta_gff.NO_START_CODON, None),
     ("YAL014CNoATGStartInternalStop_mRNA",
      "YAL014CNoATGStartInternalStop_CDS",
      check_fasta_gff.INTERNAL_STOP_CODON, None),
     ("YAL015CNoATGStartInternalStopNoStop_mRNA",
      "YAL015CNoATGStartInternalStopNoStop_CDS",
-     check_fasta_gff.NO_ATG_START_CODON, None),
+     check_fasta_gff.NO_START_CODON, None),
     ("YAL015CNoATGStartInternalStopNoStop_mRNA",
      "YAL015CNoATGStartInternalStopNoStop_CDS",
      check_fasta_gff.NO_STOP_CODON, None),
@@ -187,7 +187,7 @@ def test_get_fasta_gff_cds_issues_use_feature_name_true():
                          if s != "YAL010CNoATGStartIDNameAttr_mRNA"]
     test_check_issues.append(
         ("YAL010CNoATGStartIDNameAttr_mRNA", "YAL010CNoATGStartName_CDS",
-         check_fasta_gff.NO_ATG_START_CODON, None))
+         check_fasta_gff.NO_START_CODON, None))
     for issue in issues:
         assert issue in test_check_issues
 
@@ -354,5 +354,5 @@ def test_check_fasta_gff_use_feature_name_true(tmp_file):
                          if s != "YAL010CNoATGStartIDNameAttr_mRNA"]
     test_check_issues.append(
         ("YAL010CNoATGStartIDNameAttr_mRNA", "YAL010CNoATGStartName_CDS",
-         check_fasta_gff.NO_ATG_START_CODON, None))
+         check_fasta_gff.NO_START_CODON, None))
     check_fasta_gff_issues_df(test_check_issues, df)

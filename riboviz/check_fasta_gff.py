@@ -7,6 +7,8 @@ from Bio import SeqIO
 import gffutils
 import pandas as pd
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
+from riboviz.fasta_gff import START_CODON
+from riboviz.fasta_gff import STOP_CODONS
 from riboviz.get_cds_codons import get_feature_id
 from riboviz.get_cds_codons import sequence_to_codons
 from riboviz import provenance
@@ -31,7 +33,7 @@ ISSUE_DATA = "Data"
 """ FASTA-GFF compatibility column name (issue data). """
 INCOMPLETE_FEATURE = "IncompleteFeature"
 """ FASTA-GFF compatibility issue column value. """
-NO_ATG_START_CODON = "NoATGStartCodon"
+NO_START_CODON = "NoStartCodon"
 """ FASTA-GFF compatibility issue column value. """
 NO_STOP_CODON = "NoStopCodon"
 """ FASTA-GFF compatibility issue column value. """
@@ -51,7 +53,7 @@ SEQUENCE_NOT_IN_GFF = "SequenceNotInGFF"
 """ FASTA-GFF compatibility issue column value. """
 ISSUE_FORMATS = {
     INCOMPLETE_FEATURE: "Sequence {sequence} feature {feature} has length not divisible by 3",
-    NO_ATG_START_CODON: "Sequence {sequence} feature {feature} doesn't start with ATG",
+    NO_START_CODON: "Sequence {sequence} feature {feature} doesn't start with a start codon",
     NO_STOP_CODON: "Sequence {sequence} feature {feature} doesn't stop at end",
     INTERNAL_STOP_CODON: "Sequence {sequence} feature {feature} has internal STOP",
     NO_ID_NAME: "Sequence {sequence} feature {feature} has no 'ID' or 'Name' attribute",
@@ -84,7 +86,8 @@ def get_fasta_sequence_ids(fasta):
 def get_fasta_gff_cds_issues(fasta,
                              gff,
                              feature_format=CDS_FEATURE_FORMAT,
-                             use_feature_name=False):
+                             use_feature_name=False,
+                             start_codons=[START_CODON]):
     """
     Check FASTA and GFF files for compatibility and return a list of
     issues for relating to coding sequences, ``CDS``, features. A list
@@ -117,10 +120,10 @@ def get_fasta_gff_cds_issues(fasta,
 
     * :py:const:`INCOMPLETE_FEATURE`: The CDS has a length not
       divisible by 3.
-    * :py:const:`NO_ATG_START_CODON`: The CDS does not start
-      with a start codon (``ATG``)
-    * :py:const:`NO_STOP_CODON`: The CDS does not end with
-      a stop codon (``TAG``, ``TGA``, ``TAA``).
+    * :py:const:`NO_START_CODON`: The CDS does not start
+      with a start codon (``ATG`` or `start_codons`)).
+.    * :py:const:`NO_STOP_CODON`: The CDS does not end with
+      a stop codon  (``TAG``, ``TGA``, ``TAA``).
     * :py:const:`INTERNAL_STOP_CODON`: The CDS has internal
       stop codons.
     * :py:const:`NO_ID_NAME`: The CDS has no ``ID`` or ``Name``
@@ -163,6 +166,8 @@ def get_fasta_gff_cds_issues(fasta,
     ``Name`` attributes then use ``Name` in reporting, otherwise use \
     ``ID``.
     :type use_feature_name: bool
+    :param start_codons: Allowable start codons.
+    :type start_codons: list(str or unicode)
     :return: List of unique sequence IDs in GFF file and list \
     of issues for sequences and features.
     :rtype: list(tuple(str or unicode, str or unicode, str or unicode, *))
@@ -216,13 +221,13 @@ def get_fasta_gff_cds_issues(fasta,
             sequence += ("N" * (3 - seq_len_remainder))
 
         sequence_codons = sequence_to_codons(sequence)
-        if sequence_codons[0] != "ATG":
+        if sequence_codons[0] not in start_codons:
             issues.append((feature.seqid, feature_id_name,
-                           NO_ATG_START_CODON, None))
-        if not sequence_codons[-1] in ["TAA", "TAG", "TGA"]:
+                           NO_START_CODON, None))
+        if not sequence_codons[-1] in STOP_CODONS:
             issues.append((feature.seqid, feature_id_name,
                            NO_STOP_CODON, None))
-        if any([codon in ["TAA", "TAG", "TGA"]
+        if any([codon in STOP_CODONS
                 for codon in sequence_codons[:-1]]):
             issues.append((feature.seqid, feature_id_name,
                            INTERNAL_STOP_CODON, None))
@@ -286,6 +291,7 @@ def fasta_gff_issues_to_df(issues):
 def check_fasta_gff(fasta, gff, issues_file,
                     feature_format=CDS_FEATURE_FORMAT,
                     use_feature_name=False,
+                    start_codons=[START_CODON],
                     delimiter="\t"):
     """
     Check FASTA and GFF files for compatibility and both print and
@@ -315,13 +321,16 @@ def check_fasta_gff(fasta, gff, issues_file,
     ``Name`` attributes then use ``Name` in reporting, otherwise use \
     ``ID``.
     :type use_feature_name: bool
+    :param start_codons: Allowable start codons.
+    :type start_codons: list(str or unicode)
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
     issues = get_fasta_gff_cds_issues(fasta,
                                       gff,
                                       feature_format=feature_format,
-                                      use_feature_name=use_feature_name)
+                                      use_feature_name=use_feature_name,
+                                      start_codons=start_codons)
     issues_df = fasta_gff_issues_to_df(issues)
     for _, row in issues_df.iterrows():
         issue = row[ISSUE_TYPE]

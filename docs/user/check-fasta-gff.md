@@ -7,6 +7,7 @@ $ python -m riboviz.tools.check_fasta_gff [-h] \
          -f FASTA -g GFF [-o FEATURES_ISSUES] \
          [--use-feature-name] \
          [--feature-format FEATURE_FORMAT]
+         [--start-codon START_CODON [START_CODON ...]] \
 ```
 
 where:
@@ -16,6 +17,7 @@ where:
 * `-o FEATURES_ISSUES`, `--features-issues FEATURES_ISSUES`: Issues file output (default `features_issues.tsv`).
 * `--use-feature-name`: If a CDS feature defines both `ID` and `Name` attributes then use `Name` in reporting, otherwise use `ID` (default `false`).
 * `--feature-format FEATURE_FORMAT`: Feature name format for features which do not define `ID` or `Name` attributes. This format is applied to the sequence ID to create a feature name (default `{}_CDS`).
+* `--start-codon START_CODON [START_CODON ...]`: Allowable start codons (default `ATG`).
 
 Issues are both reported to the console and saved in an issues file.
 
@@ -36,7 +38,7 @@ The issues file is a file of tab-separated values. The file has columns:
 The following issue types are reported for CDSs defined in the GFF file:
 
 * `IncompleteFeature`: The CDS has a length not divisible by 3.
-* `NoATGStartCodon` : The CDS does not start with a start codon (`ATG`).
+* `NoStartCodon` : The CDS does not start with a recognised start codon (`ATG`).
 * `NoStopCodon` : The CDS does not end with a stop codon (`TAG`, `TGA`, `TAA`).
 * `InternalStopCodon`: The CDS has internal stop codons.
 * `NoIdName`: The CDS has no `ID` or `Name` attribute.
@@ -66,6 +68,16 @@ Sequence	Feature	Issue	Data
 YAL001C	YAL001C	NoATGStartCodon	
 YAL001C	YAL001C	NoStopCodon	
 YAL001C	YAL001C	InternalStopCodon	
+```
+```console
+$ python -m riboviz.tools.check_fasta_gff \
+    -f vignette/input/yeast_YAL_CDS_w_250utrs.fa \
+    -g vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
+     -o check_vignette_YAL.tsv \
+     --start-codon ATG AAA
+...
+Sequence YAL001C feature YAL001C doesn't stop at end
+Sequence YAL001C feature YAL001C has internal STOP
 ```
 ```console
 $ python -m riboviz.tools.check_fasta_gff \
