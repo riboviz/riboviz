@@ -6,6 +6,7 @@ Usage::
 
     python -m riboviz.tools.check_fasta_gff [-h] \
         -f FASTA -g GFF [-o FEATURES_ISSUES] \
+        [--report-name] \
         [--feature-format FEATURE_FORMAT]
 
     -h, --help            show this help message and exit
@@ -14,6 +15,9 @@ Usage::
     -g GFF, --gff GFF     GFF3 file input
     -o FEATURES_ISSUES, --features-issues FEATURES_ISSUES
                           Issues file output
+    --report-name         If a CDS feature defines both 'ID' and 'Name'
+                          attributes then use 'Name' in reporting,
+                          otherwise use 'ID' (default 'false')
     --feature-format FEATURE_FORMAT
                           Feature name format for features which do
                           not define ``ID`` or ``Name``
@@ -52,6 +56,11 @@ def parse_command_line_options():
                         dest="features_issues",
                         default="features_issues.tsv",
                         help="Issues file output")
+    parser.add_argument("--report-name",
+                        dest="report_name",
+                        action='store_true',
+                        default=False,
+                        help="If a CDS feature defines both 'ID' and 'Name' attributes then use 'Name' in reporting, otherwise use 'ID' (default 'false')")
     parser.add_argument("--feature-format",
                         dest="feature_format",
                         default=CDS_FEATURE_FORMAT,
@@ -71,8 +80,9 @@ def invoke_check_fasta_gff():
     gff = options.gff
     features_issues = options.features_issues
     feature_format = options.feature_format
+    report_name = options.report_name
     check_fasta_gff.check_fasta_gff(fasta, gff, features_issues,
-                                    feature_format)
+                                    feature_format, report_name)
 
 
 if __name__ == "__main__":

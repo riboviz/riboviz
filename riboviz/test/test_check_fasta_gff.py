@@ -29,7 +29,7 @@ TEST_CHECK_GFF_ISSUES = [
      check_fasta_gff.DUPLICATE_FEATURE_ID, None),
     (check_fasta_gff.WILDCARD, "YAL005_7CNonUniqueID_CDS",
      check_fasta_gff.DUPLICATE_FEATURE_IDS, 3),
-    ("YAL015CMultiCDS_mRNA", check_fasta_gff.WILDCARD,
+    ("YAL016CMultiCDS_mRNA", check_fasta_gff.WILDCARD,
      check_fasta_gff.MULTIPLE_CDS, 3),
 ]
 """
@@ -43,36 +43,38 @@ TEST_CHECK_FASTA_ISSUES = [
      check_fasta_gff.INCOMPLETE_FEATURE, None),
     ("YAL008CBadLengthNoStop_mRNA", "YAL008CBadLengthNoStop_CDS",
      check_fasta_gff.NO_STOP_CODON, None),
-    ("YAL009CNoATGStart_mRNA", "YAL09CNoATGStart_CDS",
+    ("YAL009CNoATGStart_mRNA", "YAL009CNoATGStart_CDS",
      check_fasta_gff.NO_ATG_START_CODON, None),
-    ("YAL010CNoStop_mRNA", "YAL010CNoStop_CDS",
+    ("YAL010CNoATGStartIDNameAttr_mRNA", "YAL010CNoATGStartID_CDS",
+     check_fasta_gff.NO_ATG_START_CODON, None),
+    ("YAL011CNoStop_mRNA", "YAL011CNoStop_CDS",
      check_fasta_gff.NO_STOP_CODON, None),
-    ("YAL011CInternalStop_mRNA", "YAL011CInternalStop_CDS",
+    ("YAL012CInternalStop_mRNA", "YAL012CInternalStop_CDS",
      check_fasta_gff.INTERNAL_STOP_CODON, None),
-    ("YAL012CNoATGStartNoStop_mRNA", "YAL12CNoATGStartNoStop_CDS",
+    ("YAL013CNoATGStartNoStop_mRNA", "YAL013CNoATGStartNoStop_CDS",
      check_fasta_gff.NO_ATG_START_CODON, None),
-    ("YAL012CNoATGStartNoStop_mRNA", "YAL12CNoATGStartNoStop_CDS",
+    ("YAL013CNoATGStartNoStop_mRNA", "YAL013CNoATGStartNoStop_CDS",
      check_fasta_gff.NO_STOP_CODON, None),
-    ("YAL013CNoATGStartInternalStop_mRNA",
-     "YAL13CNoATGStartInternalStop_CDS",
+    ("YAL014CNoATGStartInternalStop_mRNA",
+     "YAL014CNoATGStartInternalStop_CDS",
      check_fasta_gff.NO_ATG_START_CODON, None),
-    ("YAL013CNoATGStartInternalStop_mRNA",
-     "YAL13CNoATGStartInternalStop_CDS",
+    ("YAL014CNoATGStartInternalStop_mRNA",
+     "YAL014CNoATGStartInternalStop_CDS",
      check_fasta_gff.INTERNAL_STOP_CODON, None),
-    ("YAL014CNoATGStartInternalStopNoStop_mRNA",
-     "YAL14CNoATGStartInternalStopNoStop_CDS",
+    ("YAL015CNoATGStartInternalStopNoStop_mRNA",
+     "YAL015CNoATGStartInternalStopNoStop_CDS",
      check_fasta_gff.NO_ATG_START_CODON, None),
-    ("YAL014CNoATGStartInternalStopNoStop_mRNA",
-     "YAL14CNoATGStartInternalStopNoStop_CDS",
+    ("YAL015CNoATGStartInternalStopNoStop_mRNA",
+     "YAL015CNoATGStartInternalStopNoStop_CDS",
      check_fasta_gff.NO_STOP_CODON, None),
-    ("YAL014CNoATGStartInternalStopNoStop_mRNA",
-     "YAL14CNoATGStartInternalStopNoStop_CDS",
+    ("YAL015CNoATGStartInternalStopNoStop_mRNA",
+     "YAL015CNoATGStartInternalStopNoStop_CDS",
      check_fasta_gff.INTERNAL_STOP_CODON, None),
-    ("YAL016CMissingGFF_mRNA", check_fasta_gff.NOT_APPLICABLE,
-     check_fasta_gff.SEQUENCE_NOT_IN_GFF, None),
     ("YAL017CMissingGFF_mRNA", check_fasta_gff.NOT_APPLICABLE,
      check_fasta_gff.SEQUENCE_NOT_IN_GFF, None),
-    ("YAL018CMissingSequence_mRNA", check_fasta_gff.NOT_APPLICABLE,
+    ("YAL018CMissingGFF_mRNA", check_fasta_gff.NOT_APPLICABLE,
+     check_fasta_gff.SEQUENCE_NOT_IN_GFF, None),
+    ("YAL019CMissingSequence_mRNA", check_fasta_gff.NOT_APPLICABLE,
      check_fasta_gff.SEQUENCE_NOT_IN_FASTA, None),
 ]
 """
@@ -146,28 +148,11 @@ def test_get_fasta_gff_cds_issues():
         assert issue in TEST_CHECK_ISSUES
 
 
-def test_get_fasta_gff_cds_issues():
-    """
-    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
-    with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CHECK_FILE`) and check all issues match
-    expected issues in :py:const:`TEST_CHECK_ISSUES`).
-    """
-    issues = check_fasta_gff.get_fasta_gff_cds_issues(
-        TEST_FASTA_CHECK_FILE,
-        TEST_GFF_CHECK_FILE)
-    for issue in issues:
-        assert issue in TEST_CHECK_ISSUES
-
-
-def test_get_fasta_gff_cds_issues_feature_format(tmp_file):
+def test_get_fasta_gff_cds_issues_feature_format():
     """
     Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
     with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
     (:py:const:`TEST_GFF_CHECK_FILE`) and a custom feature name.
-
-    :param tmp_file: Temporary file
-    :type tmp_file: str or unicode
     """
     issues = check_fasta_gff.get_fasta_gff_cds_issues(
         TEST_FASTA_CHECK_FILE,
@@ -175,11 +160,34 @@ def test_get_fasta_gff_cds_issues_feature_format(tmp_file):
         feature_format="{}-Custom")
     # Update TEST_CHECK_ISSUES with the expected result when
     # custom cds_feature_format is used.
-    test_check_issues = TEST_CHECK_ISSUES.copy()
-    test_check_issues.pop(0)  # YAL004CNoIDNameAttr_mRNA
+    test_check_issues = [(s, f, t, d)
+                         for (s, f, t, d) in TEST_CHECK_ISSUES
+                         if s != "YAL004CNoIDNameAttr_mRNA"]
     test_check_issues.insert(
         0, ("YAL004CNoIDNameAttr_mRNA", "YAL004CNoIDNameAttr_mRNA-Custom",
             check_fasta_gff.NO_ID_NAME, None))
+    for issue in issues:
+        assert issue in test_check_issues
+
+
+def test_get_fasta_gff_cds_issues_report_name_true():
+    """
+    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`) and ``report_name=True``.
+    """
+    issues = check_fasta_gff.get_fasta_gff_cds_issues(
+        TEST_FASTA_CHECK_FILE,
+        TEST_GFF_CHECK_FILE,
+        report_name=True)
+    # Update TEST_CHECK_ISSUES with the expected result when
+    # report_name=True.
+    test_check_issues = [(s, f, t, d)
+                         for (s, f, t, d) in TEST_CHECK_ISSUES
+                         if s != "YAL010CNoATGStartIDNameAttr_mRNA"]
+    test_check_issues.append(
+        ("YAL010CNoATGStartIDNameAttr_mRNA", "YAL010CNoATGStartName_CDS",
+         check_fasta_gff.NO_ATG_START_CODON, None))
     for issue in issues:
         assert issue in test_check_issues
 
@@ -313,9 +321,38 @@ def test_check_fasta_gff_feature_format(tmp_file):
     df = df.fillna("")  # Force None to "" not "nan"
     # Update TEST_CHECK_ISSUES with the expected result when
     # custom cds_feature_format is used.
-    test_check_issues = TEST_CHECK_ISSUES.copy()
-    test_check_issues.pop(0)  # YAL004CNoIDNameAttr_mRNA
+    test_check_issues = [(s, f, t, d)
+                         for (s, f, t, d) in TEST_CHECK_ISSUES
+                         if s != "YAL004CNoIDNameAttr_mRNA"]
     test_check_issues.insert(
         0, ("YAL004CNoIDNameAttr_mRNA", "YAL004CNoIDNameAttr_mRNA-Custom",
             check_fasta_gff.NO_ID_NAME, None))
+    check_fasta_gff_issues_df(test_check_issues, df)
+
+
+def test_check_fasta_gff_report_name_true(tmp_file):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff` with
+    FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`) and ``report_name=True``.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,
+                                    TEST_GFF_CHECK_FILE,
+                                    tmp_file,
+                                    report_name=True)
+    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
+    df = df.fillna("")  # Force None to "" not "nan"
+    # Update TEST_CHECK_ISSUES with the expected result when
+    # custom cds_feature_format is used.
+    # Update TEST_CHECK_ISSUES with the expected result when
+    # report_name=True.
+    test_check_issues = [(s, f, t, d)
+                         for (s, f, t, d) in TEST_CHECK_ISSUES
+                         if s != "YAL010CNoATGStartIDNameAttr_mRNA"]
+    test_check_issues.append(
+        ("YAL010CNoATGStartIDNameAttr_mRNA", "YAL010CNoATGStartName_CDS",
+         check_fasta_gff.NO_ATG_START_CODON, None))
     check_fasta_gff_issues_df(test_check_issues, df)

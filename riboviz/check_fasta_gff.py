@@ -7,6 +7,7 @@ from Bio import SeqIO
 import gffutils
 import pandas as pd
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
+from riboviz.get_cds_codons import get_feature_id
 from riboviz.get_cds_codons import sequence_to_codons
 from riboviz import provenance
 
@@ -80,7 +81,10 @@ def get_fasta_sequence_ids(fasta):
     return seq_ids
 
 
-def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
+def get_fasta_gff_cds_issues(fasta,
+                             gff,
+                             feature_format=CDS_FEATURE_FORMAT,
+                             report_name=False):
     """
     Check FASTA and GFF files for compatibility and return a list of
     issues for relating to coding sequences, ``CDS``, features. A list
@@ -98,9 +102,12 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
     * :py:const:`NOT_APPLICABLE` if the issue relates to the sequence,
     * not the feature.
     * :py:const:`WILDCARD` if the issue relates to multiple features.
-    * Value of ``ID`` attribute for feature, if defined.
+    * Value of ``ID`` attribute for feature, if defined and if
+      ``Name`` is not defined, or ``Name`` is defined and
+      ``report_name`` is ``False``.
     * Value of ``Name`` attribute for feature, if defined, and if
-      ``ID`` is undefined.
+      ``ID`` is undefined or if ``ID`` is defined and ``report_name``
+    is ``True``.
     * Sequence ID formatted using ``feature_format`` (default
       py:const:`CDS_FEATURE_FORMAT`) if both ``ID`` and ``Name`` are
       undefined.
@@ -152,6 +159,9 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
     do not define ``ID``  or ``Name`` attributes. This format is \
     applied to the sequence ID to create a feature name.
     :type feature_format: str or unicode
+    :param report_name: If a feature defines both ``ID`` and ``Name`` \
+    attributes then use ``Name` in reporting, otherwise use ``ID``.
+    :type report_name: bool
     :return: List of unique sequence IDs in GFF file and list \
     of issues for sequences and features.
     :rtype: list(tuple(str or unicode, str or unicode, str or unicode, *))
@@ -181,16 +191,10 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
                 feature_ids[feature_id].append(feature.seqid)
             else:
                 feature_ids[feature_id] = [feature.seqid]
-        feature_name = None
-        if "Name" in feature.attributes:
-            feature_name = feature.attributes["Name"][0].strip()
-        if feature_id:
-            feature_id_name = feature_id
-        elif feature_name:
-            feature_id_name = feature_name
-        else:
-            feature_id = feature_format.format(feature.seqid)
-            issues.append((feature.seqid, feature_id,
+        feature_id_name = get_feature_id(feature, report_name)
+        if feature_id_name is None:
+            feature_id_name = feature_format.format(feature.seqid)
+            issues.append((feature.seqid, feature_id_name,
                            NO_ID_NAME, None))
         try:
             sequence = feature.sequence(fasta)
@@ -280,6 +284,7 @@ def fasta_gff_issues_to_df(issues):
 
 def check_fasta_gff(fasta, gff, issues_file,
                     feature_format=CDS_FEATURE_FORMAT,
+                    report_name=False,
                     delimiter="\t"):
     """
     Check FASTA and GFF files for compatibility and both print and
@@ -305,10 +310,16 @@ def check_fasta_gff(fasta, gff, issues_file,
     do not define ``ID``  or ``Name`` attributes. This format is \
     applied to the sequence ID to create a feature name.
     :type feature_format: str or unicode
+    :param report_name: If a feature defines both ``ID`` and ``Name`` \
+    attributes then use ``Name` in reporting, otherwise use ``ID``.
+    :type report_name: bool
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
-    issues = get_fasta_gff_cds_issues(fasta, gff, feature_format)
+    issues = get_fasta_gff_cds_issues(fasta,
+                                      gff,
+                                      feature_format=feature_format,
+                                      report_name=report_name)
     issues_df = fasta_gff_issues_to_df(issues)
     for _, row in issues_df.iterrows():
         issue = row[ISSUE_TYPE]
