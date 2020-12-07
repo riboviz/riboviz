@@ -5,7 +5,7 @@ file.
 
 Usage::
 
-    python -m riboviz.tools.get_cds_codons_file [-h] \
+    python -m riboviz.tools.get_cds_codons [-h] \
         -f FASTA -g GFF [-c CDS_CODONS] [-e] \
         [--report-id] \
         [--cds-feature-format CDS_FEATURE_FORMAT]
@@ -28,7 +28,7 @@ Usage::
                           to the sequence ID to create a feature
                           name.
 
-See :py:func:`riboviz.get_cds_codons.get_cds_codons_file` for
+See :py:func:`riboviz.get_cds_codons.get_cds_codons` for
 information on the tab-separated values file format.
 """
 import argparse
@@ -79,7 +79,7 @@ def parse_command_line_options():
     return options
 
 
-def invoke_get_cds_codons_file():
+def invoke_get_cds_codons():
     """
     Parse command-line options then invoke
     :py:func:`riboviz.get_cds_codons.get_cds_codons_file`.
@@ -101,4 +101,4 @@ def invoke_get_cds_codons_file():
 
 
 if __name__ == "__main__":
-    invoke_get_cds_codons_file()
+    invoke_get_cds_codons()
