@@ -146,6 +146,44 @@ def test_get_fasta_gff_cds_issues():
         assert issue in TEST_CHECK_ISSUES
 
 
+def test_get_fasta_gff_cds_issues():
+    """
+    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`) and check all issues match
+    expected issues in :py:const:`TEST_CHECK_ISSUES`).
+    """
+    issues = check_fasta_gff.get_fasta_gff_cds_issues(
+        TEST_FASTA_CHECK_FILE,
+        TEST_GFF_CHECK_FILE)
+    for issue in issues:
+        assert issue in TEST_CHECK_ISSUES
+
+
+def test_get_fasta_gff_cds_issues_feature_format(tmp_file):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`) and a custom feature name.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    issues = check_fasta_gff.get_fasta_gff_cds_issues(
+        TEST_FASTA_CHECK_FILE,
+        TEST_GFF_CHECK_FILE,
+        feature_format="{}-Custom")
+    # Update TEST_CHECK_ISSUES with the expected result when
+    # custom cds_feature_format is used.
+    test_check_issues = TEST_CHECK_ISSUES.copy()
+    test_check_issues.pop(0)  # YAL004CNoIDNameAttr_mRNA
+    test_check_issues.insert(
+        0, ("YAL004CNoIDNameAttr_mRNA", "YAL004CNoIDNameAttr_mRNA-Custom",
+            check_fasta_gff.NO_ID_NAME, None))
+    for issue in issues:
+        assert issue in test_check_issues
+
+
 def test_get_fasta_gff_cds_issues_empty_fasta(tmp_file):
     """
     Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
@@ -273,10 +311,10 @@ def test_check_fasta_gff_feature_format(tmp_file):
                                     feature_format="{}-Custom")
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     df = df.fillna("")  # Force None to "" not "nan"
+    # Update TEST_CHECK_ISSUES with the expected result when
+    # custom cds_feature_format is used.
     test_check_issues = TEST_CHECK_ISSUES.copy()
-    # Delete the test entry that uses the default CDS_FEATURE_FORMAT.
-    test_check_issues.pop(0)
-    # Add the expected result for the custom entry.
+    test_check_issues.pop(0)  # YAL004CNoIDNameAttr_mRNA
     test_check_issues.insert(
         0, ("YAL004CNoIDNameAttr_mRNA", "YAL004CNoIDNameAttr_mRNA-Custom",
             check_fasta_gff.NO_ID_NAME, None))
