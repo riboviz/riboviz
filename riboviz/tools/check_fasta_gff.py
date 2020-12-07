@@ -10,17 +10,15 @@ Usage::
 
     -h, --help            show this help message and exit
     -f FASTA, --fasta FASTA
-                          fasta file input
-    -g GFF, --gff GFF     gff3 file input
+                          FASTA file input
+    -g GFF, --gff GFF     GFF3 file input
     -o FEATURES_ISSUES, --features-issues FEATURES_ISSUES
-                          Features issues file output
-                          (default features_issues.tsv)
+                          Issues file output
     --feature-format FEATURE_FORMAT
-                          Feature name format for features
-                          which do not define ``ID`` or
-                          ``Name`` attributes. This format is applied
-                          to the sequence ID to create a feature
-                          name.
+                          Feature name format for features which do
+                          not define ``ID`` or ``Name``
+                          attributes. This format is applied to the
+                          sequence ID to create a feature name.
 
 See :py:func:`riboviz.check_fasta_gff.check_fasta_gff`.
 """
@@ -43,17 +41,17 @@ def parse_command_line_options():
                         "--fasta",
                         dest="fasta",
                         required=True,
-                        help="fasta file input")
+                        help="FASTA file input")
     parser.add_argument("-g",
                         "--gff",
                         dest="gff",
                         required=True,
-                        help="gff3 file input")
+                        help="GFF3 file input")
     parser.add_argument("-o",
                         "--features-issues",
                         dest="features_issues",
                         default="features_issues.tsv",
-                        help="Features issues file output")
+                        help="Issues file output")
     parser.add_argument("--feature-format",
                         dest="feature_format",
                         default=CDS_FEATURE_FORMAT,
