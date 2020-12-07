@@ -7,8 +7,8 @@ YAL005CMultiCDS_mRNA	yeastutrgff	CDS	28	39	.	+	0	Name=YAL005CMultiCDS_CDS_2
 YAL005CMultiCDS_mRNA	yeastutrgff	CDS	49	60	.	+	0	ID=YAL005CMultiCDS_CDS_3
 YAL006CEmptyCDS_mRNA	yeastutrgff	CDS	10	15	.	+	0	Name=YAL006CEmptyCDS_CDS
 YAL007CBadLengthCDS_mRNA	yeastutrgff	CDS	10	20	.	+	0	ID=YAL007CBadLength_CDS
-YAL008CNoIdNameAttrCDS_mRNA	yeastutrgff	CDS	10	24	.	+	0
-YAL009CIdNameAttrCDS_mRNA	yeastutrgff	CDS	10	18	.	+	0	ID=YAL009CIdNameAttrIdCDS_CDS;Name=YAL009CIdNameAttrNameCDS_CDS
+YAL008CNoIDNameAttrCDS_mRNA	yeastutrgff	CDS	10	24	.	+	0
+YAL009CIDNameAttrCDS_mRNA	yeastutrgff	CDS	10	18	.	+	0	ID=YAL009CIDNameAttrIDCDS_CDS;Name=YAL009CIDNameAttrNameCDS_CDS
 YAL010CMultiDuplicateCDS_mRNA	yeastutrgff	CDS	10	18	.	+	0	ID=YAL010CMultiDuplicateCDS_CDS
 YAL010CMultiDuplicateCDS_mRNA	yeastutrgff	CDS	28	39	.	+	0	ID=YAL010CMultiDuplicateCDS_CDS
 YAL010CMultiDuplicateCDS_mRNA	yeastutrgff	CDS	49	60	.	+	0	ID=YAL010CMultiDuplicateCDS_CDS

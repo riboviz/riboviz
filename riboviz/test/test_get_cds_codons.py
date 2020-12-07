@@ -26,8 +26,8 @@ TEST_CDS_CODONS = {
     "YAL005CMultiCDS_CDS_2": ["ATG", "GAT", "TAC", "TAG"],
     "YAL005CMultiCDS_CDS_3": ["ATG", "CCA", "ATT", "TGA"],
     "YAL006CEmptyCDS_CDS": ["ATG", "TGA"],
-    "YAL008CNoIdNameAttrCDS_mRNA_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"],
-    "YAL009CIdNameAttrIdCDS_CDS": ["ATG", "AGA", "TGA"],
+    "YAL008CNoIDNameAttrCDS_mRNA_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"],
+    "YAL009CIDNameAttrIDCDS_CDS": ["ATG", "AGA", "TGA"],
     "YAL010CMultiDuplicateCDS_CDS": ["ATG", "AGA", "TGA"],
     "YAL010CMultiDuplicateCDS_CDS.1": ["ATG", "GAT", "TAC", "TAG"],
     "YAL010CMultiDuplicateCDS_CDS.2": ["ATG", "CCA", "ATT", "TGA"]
@@ -244,9 +244,9 @@ def test_get_cds_codons_from_fasta_report_name_true():
     # Update TEST_CDS_CODONS with the expected result when
     # report_name=True.
     test_cds_codons = TEST_CDS_CODONS.copy()
-    codons = test_cds_codons["YAL009CIdNameAttrIdCDS_CDS"]
-    del test_cds_codons["YAL009CIdNameAttrIdCDS_CDS"]
-    test_cds_codons["YAL009CIdNameAttrNameCDS_CDS"] = codons
+    codons = test_cds_codons["YAL009CIDNameAttrIDCDS_CDS"]
+    del test_cds_codons["YAL009CIDNameAttrIDCDS_CDS"]
+    test_cds_codons["YAL009CIDNameAttrNameCDS_CDS"] = codons
     assert cds_codons == test_cds_codons
 
 
@@ -264,9 +264,9 @@ def test_get_cds_codons_from_fasta_cds_format():
     # Update TEST_CDS_CODONS with the expected result when
     # custom cds_feature_format is used.
     test_cds_codons = TEST_CDS_CODONS.copy()
-    codons = test_cds_codons["YAL008CNoIdNameAttrCDS_mRNA_CDS"]
-    del test_cds_codons["YAL008CNoIdNameAttrCDS_mRNA_CDS"]
-    test_cds_codons["YAL008CNoIdNameAttrCDS_mRNA-Custom"] = codons
+    codons = test_cds_codons["YAL008CNoIDNameAttrCDS_mRNA_CDS"]
+    del test_cds_codons["YAL008CNoIDNameAttrCDS_mRNA_CDS"]
+    test_cds_codons["YAL008CNoIDNameAttrCDS_mRNA-Custom"] = codons
     assert cds_codons == test_cds_codons
 
 
@@ -377,9 +377,9 @@ def test_get_cds_codons_file_cds_format(tmp_file):
     # Update TEST_CDS_CODONS with the expected result when
     # custom cds_feature_format is used.
     test_cds_codons = TEST_CDS_CODONS.copy()
-    codons = test_cds_codons["YAL008CNoIdNameAttrCDS_mRNA_CDS"]
-    del test_cds_codons["YAL008CNoIdNameAttrCDS_mRNA_CDS"]
-    test_cds_codons["YAL008CNoIdNameAttrCDS_mRNA-Custom"] = codons
+    codons = test_cds_codons["YAL008CNoIDNameAttrCDS_mRNA_CDS"]
+    del test_cds_codons["YAL008CNoIDNameAttrCDS_mRNA_CDS"]
+    test_cds_codons["YAL008CNoIDNameAttrCDS_mRNA-Custom"] = codons
     check_feature_codons_df(test_cds_codons, df)
 
 
@@ -422,7 +422,7 @@ def test_get_cds_codons_file_report_name_true(tmp_file):
     # Update TEST_CDS_CODONS with the expected result when
     # report_name=True.
     test_cds_codons = TEST_CDS_CODONS.copy()
-    codons = test_cds_codons["YAL009CIdNameAttrIdCDS_CDS"]
-    del test_cds_codons["YAL009CIdNameAttrIdCDS_CDS"]
-    test_cds_codons["YAL009CIdNameAttrNameCDS_CDS"] = codons
+    codons = test_cds_codons["YAL009CIDNameAttrIDCDS_CDS"]
+    del test_cds_codons["YAL009CIDNameAttrIDCDS_CDS"]
+    test_cds_codons["YAL009CIDNameAttrNameCDS_CDS"] = codons
     check_feature_codons_df(test_cds_codons, df)
