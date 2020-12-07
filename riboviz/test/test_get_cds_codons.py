@@ -214,25 +214,6 @@ def test_get_cds_codons_from_fasta():
     assert cds_codons == TEST_CDS_CODONS
 
 
-def test_get_cds_codons_from_fasta_report_name_true():
-    """
-    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_from_fasta`
-    with FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CODONS_FILE`) and ``report_name=True``.
-    """
-    cds_codons = get_cds_codons.get_cds_codons_from_fasta(
-        TEST_FASTA_CODONS_FILE,
-        TEST_GFF_CODONS_FILE,
-        report_name=True)
-    # Update TEST_CDS_CODONS with the expected result when
-    # report_name_True.
-    test_cds_codons = TEST_CDS_CODONS.copy()
-    codons = test_cds_codons["YAL009CIdNameAttrIdCDS_CDS"]
-    del test_cds_codons["YAL009CIdNameAttrIdCDS_CDS"]
-    test_cds_codons["YAL009CIdNameAttrNameCDS_CDS"] = codons
-    assert cds_codons == test_cds_codons
-
-
 def test_get_cds_codons_from_fasta_exclude_stop_codons():
     """
     Test :py:func:`riboviz.get_cds_codons.get_cds_codons_from_fasta`
@@ -248,6 +229,45 @@ def test_get_cds_codons_from_fasta_exclude_stop_codons():
         name: codons[:-1] for name, codons in TEST_CDS_CODONS.items()
     }
     assert cds_codons == cds_codons_minus_stops
+
+
+def test_get_cds_codons_from_fasta_report_name_true():
+    """
+    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_from_fasta`
+    with FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CODONS_FILE`) and ``report_name=True``.
+    """
+    cds_codons = get_cds_codons.get_cds_codons_from_fasta(
+        TEST_FASTA_CODONS_FILE,
+        TEST_GFF_CODONS_FILE,
+        report_name=True)
+    # Update TEST_CDS_CODONS with the expected result when
+    # report_name=True.
+    test_cds_codons = TEST_CDS_CODONS.copy()
+    codons = test_cds_codons["YAL009CIdNameAttrIdCDS_CDS"]
+    del test_cds_codons["YAL009CIdNameAttrIdCDS_CDS"]
+    test_cds_codons["YAL009CIdNameAttrNameCDS_CDS"] = codons
+    assert cds_codons == test_cds_codons
+
+
+def test_get_cds_codons_from_fasta_cds_format():
+    """
+    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_from_fasta`
+    with FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CODONS_FILE`) and a custom CDS feature
+    name format.
+    """
+    cds_codons = get_cds_codons.get_cds_codons_from_fasta(
+        TEST_FASTA_CODONS_FILE,
+        TEST_GFF_CODONS_FILE,
+        cds_feature_format="{}-Custom")
+    # Update TEST_CDS_CODONS with the expected result when
+    # custom cds_feature_format is used.
+    test_cds_codons = TEST_CDS_CODONS.copy()
+    codons = test_cds_codons["YAL008CNoIdNameAttrCDS_mRNA_CDS"]
+    del test_cds_codons["YAL008CNoIdNameAttrCDS_mRNA_CDS"]
+    test_cds_codons["YAL008CNoIdNameAttrCDS_mRNA-Custom"] = codons
+    assert cds_codons == test_cds_codons
 
 
 def check_feature_codons_df(feature_codons, df):
@@ -354,11 +374,11 @@ def test_get_cds_codons_file_cds_format(tmp_file):
                                        tmp_file,
                                        cds_feature_format="{}-Custom")
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    # Delete the test entry that uses the default CDS_FEATURE_FORMAT.
+    # Update TEST_CDS_CODONS with the expected result when
+    # custom cds_feature_format is used.
     test_cds_codons = TEST_CDS_CODONS.copy()
     codons = test_cds_codons["YAL008CNoIdNameAttrCDS_mRNA_CDS"]
     del test_cds_codons["YAL008CNoIdNameAttrCDS_mRNA_CDS"]
-    # Add the expected result for the custom entry.
     test_cds_codons["YAL008CNoIdNameAttrCDS_mRNA-Custom"] = codons
     check_feature_codons_df(test_cds_codons, df)
 
