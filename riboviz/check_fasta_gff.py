@@ -118,7 +118,7 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
       stop codons.
     * :py:const:`NO_ID_NAME`: The CDS has no ``ID`` or ``Name``
       attribute.
-    * :py:const:`DUPLICATE_FEATURE_ID`: The CDS has a non-unique `ID`
+    * :py:const:`DUPLICATE_FEATURE_ID`: The CDS has a non-unique ``ID``
       attribute (attributes are expected to be unique within the scope
       of a GFF file).
     * :py:const:`DUPLICATE_FEATURE_IDS`: Related to the above,
