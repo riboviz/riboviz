@@ -4,7 +4,6 @@ Functions to check FASTA and GFF files for compatibility.
 import bisect
 import warnings
 from Bio import SeqIO
-from Bio.Seq import Seq
 import gffutils
 import pandas as pd
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
@@ -15,8 +14,16 @@ SEQUENCE = "Sequence"
 """ FASTA-GFF compatibility column name (sequence ID). """
 FEATURE = "Feature"
 """ FASTA-GFF compatibility column name (feature ID). """
-SEQUENCE_WILDCARD = "*"
-""" Sequence ID value for issue that applies to multiple sequences. """
+WILDCARD = "*"
+"""
+Name for sequences or features in issues that apply to multiple
+sequences or features.
+"""
+NOT_APPLICABLE = ""
+"""
+Name for sequences or features in issues that apply exclusively
+to features or sequences only.
+"""
 ISSUE_TYPE = "Issue"
 """ FASTA-GFF compatibility column name (issue type). """
 ISSUE_DATA = "Data"
@@ -80,46 +87,61 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
     of tuples of form (sequence ID, feature ID ('' if not applicable
     to the issue), issue type, issue data) is returned.
 
+    The sequence ID is one of:
+
+    * Value of sequence ID.
+    * :py:const:`WILDCARD` if the issue relates to multiple
+      sequences.
+
     The feature ID is one of:
 
-    * ``''`` if the issue relates to the sequence, not the feature.
+    * :py:const:`NOT_APPLICABLE` if the issue relates to the sequence,
+    * not the feature.
     * Value of ``ID`` attribute for feature, if defined.
     * Value of ``Name`` attribute for feature, if defined, and if
       ``ID`` is undefined.
-    * Sequence ID formatted using ``feature_format`` if both ``ID``
-      and ``Name`` are undefined.
+    * Sequence ID formatted using ``feature_format`` (default
+      py:const:`CDS_FEATURE_FORMAT`) if both ``ID`` and ``Name`` are
+      undefined.
 
-    Issue types are one of:
+    The following issue types are reported for CDSs defined in the GFF
+    file:
 
-    * :py:const:`INCOMPLETE_FEATURE`: The CDS has length not
+    * :py:const:`INCOMPLETE_FEATURE`: The CDS has a length not
       divisible by 3.
-    * :py:const:`NO_ATG_START_CODON`: The beginning of a CDS
-      does not have a start codon (``ATG``)
-    * :py:const:`NO_STOP_CODON`: The end codon of the CDS is not
+    * :py:const:`NO_ATG_START_CODON`: The CDS does not start
+      with a start codon (``ATG``)
+    * :py:const:`NO_STOP_CODON`: The CDS does not end with
       a stop codon (``TAG``, ``TGA``, ``TAA``).
-    * :py:const:`INTERNAL_STOP_CODON`: There are stop codons
-      internal to the CDS.
+    * :py:const:`INTERNAL_STOP_CODON`: The CDS has internal
+      stop codons.
     * :py:const:`NO_ID_NAME`: The CDS has no ``ID`` or ``Name``
       attribute.
-    * :py:const:`DUPLICATE_FEATURE_ID`: The CDS has non-unique
-      ``ID`` attribute.
-    * :py:const:`MULTIPLE_CDS`: Sequence has multiple CDS.
-    * :py:const:`SEQUENCE_NOT_IN_FASTA`: Sequence in GFF
-      file is not in FASTA file.
-    * :py:const:`SEQUENCE_NOT_IN_GFF`: Sequence in FASTA
-      file is not in GFF file.
-    * :py:const:`DUPLICATE_FEATURE_IDS`: CDSs have non-unique
-      ``ID`` attributes. This summarises the count of all CDSs that
-     share a common ``ID`` attribute.
+    * :py:const:`DUPLICATE_FEATURE_ID`: The CDS has a non-unique `ID`
+      attribute (attributes are expected to be unique within the scope
+      of a GFF file).
+    * :py:const:`DUPLICATE_FEATURE_IDS`: Related to the above,
+      multiple CDSs have non-unique ``ID`` attributes. This summarises
+      the count of all CDSs that share a common ``ID`` attribute. For
+      this issue, the sequence ``ID`` attribute is
+      :py:const:`WILDCARD`. The supplementary issue data data is a
+      count of the number of features with the same ID.
 
-    Issue data is supplementary data relating to the issue e.g. for
-    :py:const:`DUPLICATE_FEATURE_ID` the number of features with
-    the same feature ID. This is a string or int or float or ``None``.
+    The following issues are reported for sequences defined in the GFF file:
 
-    Some unusual genes (e.g. frame shifts) might have these issues.
+    * :py:const:`MULTIPLE_CDS`: The sequence has multiple CDS.
+      For this issue, the feature ``ID`` attribute is
+      :py:const:`WILDCARD`.
+    * :py:const:`SEQUENCE_NOT_IN_FASTA`: The sequence has a feature in
+      the GFF file but the sequence is not in the FASTA file. For this
+      issue, the feature ``ID`` attribute is
+      py:const:`NOT_APPICABLE`.
+    * :py:const:`SEQUENCE_NOT_IN_GFF`: The sequence is in the FASTA
+      file but has no features in the GFF file. For this issue, the
+      feature ``ID`` attribute is py:const:`NOT_APPICABLE`.
 
-    If a feature has no issues then it has no entry in the
-    issues dictionary.
+    Issue data is supplementary data relating to the issue. Unless
+    already noted above this will be ``None``.
 
     :param fasta: FASTA file
     :type fasta: str or unicode
@@ -172,7 +194,10 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
         try:
             sequence = feature.sequence(fasta)
         except KeyError as e:
-            issues.append((feature.seqid, '', SEQUENCE_NOT_IN_FASTA, None))
+            issues.append((feature.seqid,
+                           NOT_APPLICABLE,
+                           SEQUENCE_NOT_IN_FASTA,
+                           None))
             continue
         except Exception as e:
             warnings.warn(str(e))
@@ -199,11 +224,11 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
     for sequence, count in list(sequence_features.items()):
         if count > 1:
             # Insert issue, respect ordering by sequence ID.
-            bisect.insort(issues, (sequence, '', MULTIPLE_CDS, count))
+            bisect.insort(issues, (sequence, WILDCARD, MULTIPLE_CDS, count))
 
     for feature_id, seq_ids in feature_ids.items():
         if len(seq_ids) > 1:
-            issues.append((SEQUENCE_WILDCARD, feature_id,
+            issues.append((WILDCARD, feature_id,
                            DUPLICATE_FEATURE_IDS, len(seq_ids)))
             for seq_id in seq_ids:
                 # Insert issue, respect ordering by sequence ID.
@@ -214,7 +239,7 @@ def get_fasta_gff_cds_issues(fasta, gff, feature_format=CDS_FEATURE_FORMAT):
     fasta_seq_ids = get_fasta_sequence_ids(fasta)
     fasta_only_seq_ids = fasta_seq_ids - gff_seq_ids
     for seq_id in fasta_only_seq_ids:
-        issues.append((seq_id, '', SEQUENCE_NOT_IN_GFF, None))
+        issues.append((seq_id, NOT_APPLICABLE, SEQUENCE_NOT_IN_GFF, None))
     return issues
 
 
@@ -263,8 +288,8 @@ def check_fasta_gff(fasta, gff, issues_file,
     A tab-separated values file of the issues for each CDS, keyed by
     sequence ID and CDS feature name, is saved.
 
-    See :py:func:`get_fasta_gff_cds_issues` for feature IDs and
-    issues.
+    See :py:func:`get_fasta_gff_cds_issues` for information on
+    sequences, features, issue types and related data.
 
     See :py:func:`fasta_gff_issues_to_df` for tab-separated values
     file columns.

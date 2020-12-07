@@ -27,9 +27,9 @@ TEST_CHECK_GFF_ISSUES = [
      check_fasta_gff.DUPLICATE_FEATURE_ID, None),
     ("YAL007CNonUniqueID_mRNA", "YAL005_7CNonUniqueID_CDS",
      check_fasta_gff.DUPLICATE_FEATURE_ID, None),
-    (check_fasta_gff.SEQUENCE_WILDCARD, "YAL005_7CNonUniqueID_CDS",
+    (check_fasta_gff.WILDCARD, "YAL005_7CNonUniqueID_CDS",
      check_fasta_gff.DUPLICATE_FEATURE_IDS, 3),
-    ("YAL015CMultiCDS_mRNA", "",
+    ("YAL015CMultiCDS_mRNA", check_fasta_gff.WILDCARD,
      check_fasta_gff.MULTIPLE_CDS, 3),
 ]
 """
@@ -37,7 +37,7 @@ Expected GFF-specific issues (sequence ID, feature ID, issue type,
 issue data) for GFF file (:py:const:`TEST_GFF_CHECK_FILE`) only.
 """
 TEST_CHECK_FASTA_ISSUES = [
-    ("YAL003CMissingSequence_mRNA", "",
+    ("YAL003CMissingSequence_mRNA", check_fasta_gff.NOT_APPLICABLE,
      check_fasta_gff.SEQUENCE_NOT_IN_FASTA, None),
     ("YAL008CBadLengthNoStop_mRNA", "YAL008CBadLengthNoStop_CDS",
      check_fasta_gff.INCOMPLETE_FEATURE, None),
@@ -68,11 +68,11 @@ TEST_CHECK_FASTA_ISSUES = [
     ("YAL014CNoATGStartInternalStopNoStop_mRNA",
      "YAL14CNoATGStartInternalStopNoStop_CDS",
      check_fasta_gff.INTERNAL_STOP_CODON, None),
-    ("YAL016CMissingGFF_mRNA", "",
+    ("YAL016CMissingGFF_mRNA", check_fasta_gff.NOT_APPLICABLE,
      check_fasta_gff.SEQUENCE_NOT_IN_GFF, None),
-    ("YAL017CMissingGFF_mRNA", "",
+    ("YAL017CMissingGFF_mRNA", check_fasta_gff.NOT_APPLICABLE,
      check_fasta_gff.SEQUENCE_NOT_IN_GFF, None),
-    ("YAL018CMissingSequence_mRNA", "",
+    ("YAL018CMissingSequence_mRNA", check_fasta_gff.NOT_APPLICABLE,
      check_fasta_gff.SEQUENCE_NOT_IN_FASTA, None),
 ]
 """
