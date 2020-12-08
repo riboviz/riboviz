@@ -42,31 +42,31 @@ TEST_CHECK_FASTA_ISSUES = [
     ("YAL008CBadLengthNoStop_mRNA", "YAL008CBadLengthNoStop_CDS",
      check_fasta_gff.INCOMPLETE_FEATURE, None),
     ("YAL008CBadLengthNoStop_mRNA", "YAL008CBadLengthNoStop_CDS",
-     check_fasta_gff.NO_STOP_CODON, None),
+     check_fasta_gff.NO_STOP_CODON, "TAN"),
     ("YAL009CNoATGStart_mRNA", "YAL009CNoATGStart_CDS",
-     check_fasta_gff.NO_START_CODON, None),
+     check_fasta_gff.NO_START_CODON, "AAG"),
     ("YAL010CNoATGStartIDNameAttr_mRNA", "YAL010CNoATGStartID_CDS",
-     check_fasta_gff.NO_START_CODON, None),
+     check_fasta_gff.NO_START_CODON, "AAG"),
     ("YAL011CNoStop_mRNA", "YAL011CNoStop_CDS",
-     check_fasta_gff.NO_STOP_CODON, None),
+     check_fasta_gff.NO_STOP_CODON, "AAG"),
     ("YAL012CInternalStop_mRNA", "YAL012CInternalStop_CDS",
      check_fasta_gff.INTERNAL_STOP_CODON, None),
     ("YAL013CNoATGStartNoStop_mRNA", "YAL013CNoATGStartNoStop_CDS",
-     check_fasta_gff.NO_START_CODON, None),
+     check_fasta_gff.NO_START_CODON, "AAG"),
     ("YAL013CNoATGStartNoStop_mRNA", "YAL013CNoATGStartNoStop_CDS",
-     check_fasta_gff.NO_STOP_CODON, None),
+     check_fasta_gff.NO_STOP_CODON, "AAG"),
     ("YAL014CNoATGStartInternalStop_mRNA",
      "YAL014CNoATGStartInternalStop_CDS",
-     check_fasta_gff.NO_START_CODON, None),
+     check_fasta_gff.NO_START_CODON, "AAG"),
     ("YAL014CNoATGStartInternalStop_mRNA",
      "YAL014CNoATGStartInternalStop_CDS",
      check_fasta_gff.INTERNAL_STOP_CODON, None),
     ("YAL015CNoATGStartInternalStopNoStop_mRNA",
      "YAL015CNoATGStartInternalStopNoStop_CDS",
-     check_fasta_gff.NO_START_CODON, None),
+     check_fasta_gff.NO_START_CODON, "AAG"),
     ("YAL015CNoATGStartInternalStopNoStop_mRNA",
      "YAL015CNoATGStartInternalStopNoStop_CDS",
-     check_fasta_gff.NO_STOP_CODON, None),
+     check_fasta_gff.NO_STOP_CODON, "AAG"),
     ("YAL015CNoATGStartInternalStopNoStop_mRNA",
      "YAL015CNoATGStartInternalStopNoStop_CDS",
      check_fasta_gff.INTERNAL_STOP_CODON, None),
@@ -187,7 +187,7 @@ def test_get_fasta_gff_cds_issues_use_feature_name_true():
                          if s != "YAL010CNoATGStartIDNameAttr_mRNA"]
     test_check_issues.append(
         ("YAL010CNoATGStartIDNameAttr_mRNA", "YAL010CNoATGStartName_CDS",
-         check_fasta_gff.NO_START_CODON, None))
+         check_fasta_gff.NO_START_CODON, "AAG"))
     for issue in issues:
         assert issue in test_check_issues
 
@@ -242,6 +242,12 @@ def check_fasta_gff_issues_df(issues, df):
         else:
             expected_data = issue_data
         df_issue_data = issue_df.iloc[0][check_fasta_gff.ISSUE_DATA]
+        if type(expected_data) is int:
+            df_issue_data = int(df_issue_data)
+        elif type(expected_data) is float:
+            df_issue_data = float(df_issue_data)
+        else:
+            df_issue_data = str(df_issue_data)
         assert df_issue_data == expected_data, \
             "Unexpected data ({}) for {} {} {}".format(
                 df_issue_data, sequence, feature, issue_type)
@@ -300,6 +306,8 @@ def test_check_fasta_gff(tmp_file):
                                     tmp_file)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     df = df.fillna("")  # Force None to "" not "nan"
+    print(TEST_CHECK_ISSUES)
+    print(df)
     check_fasta_gff_issues_df(TEST_CHECK_ISSUES, df)
 
 
@@ -354,5 +362,5 @@ def test_check_fasta_gff_use_feature_name_true(tmp_file):
                          if s != "YAL010CNoATGStartIDNameAttr_mRNA"]
     test_check_issues.append(
         ("YAL010CNoATGStartIDNameAttr_mRNA", "YAL010CNoATGStartName_CDS",
-         check_fasta_gff.NO_START_CODON, None))
+         check_fasta_gff.NO_START_CODON, "AAG"))
     check_fasta_gff_issues_df(test_check_issues, df)

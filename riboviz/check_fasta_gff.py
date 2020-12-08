@@ -53,12 +53,12 @@ SEQUENCE_NOT_IN_GFF = "SequenceNotInGFF"
 """ FASTA-GFF compatibility issue column value. """
 ISSUE_FORMATS = {
     INCOMPLETE_FEATURE: "Sequence {sequence} feature {feature} has length not divisible by 3",
-    NO_START_CODON: "Sequence {sequence} feature {feature} doesn't start with a start codon",
-    NO_STOP_CODON: "Sequence {sequence} feature {feature} doesn't stop at end",
-    INTERNAL_STOP_CODON: "Sequence {sequence} feature {feature} has internal STOP",
+    NO_START_CODON: "Sequence {sequence} feature {feature} doesn't start with a recognised start codon but with {data}",
+    NO_STOP_CODON: "Sequence {sequence} feature {feature} doesn't end with a recognised stop codon but with {data}",
+    INTERNAL_STOP_CODON: "Sequence {sequence} feature {feature} has an internal stop codon",
     NO_ID_NAME: "Sequence {sequence} feature {feature} has no 'ID' or 'Name' attribute",
     DUPLICATE_FEATURE_ID: "Sequence {sequence} has non-unique 'ID' attribute {feature}",
-    MULTIPLE_CDS: "Sequence {sequence} has multiple CDS",
+    MULTIPLE_CDS: "Sequence {sequence} has multiple CDS ({data} occurrences)",
     SEQUENCE_NOT_IN_FASTA: "Sequence {sequence} in GFF file is not in FASTA file",
     SEQUENCE_NOT_IN_GFF: "Sequence {sequence} in FASTA file is not in GFF file",
     DUPLICATE_FEATURE_IDS: "Non-unique 'ID' attribute {feature} ({data} occurrences)"
@@ -121,9 +121,11 @@ def get_fasta_gff_cds_issues(fasta,
     * :py:const:`INCOMPLETE_FEATURE`: The CDS has a length not
       divisible by 3.
     * :py:const:`NO_START_CODON`: The CDS does not start
-      with a start codon (``ATG`` or `start_codons`)).
+      with a start codon (``ATG`` or those in `start_codons`)). The
+      supplementary issue data is the actual codon found.
 .    * :py:const:`NO_STOP_CODON`: The CDS does not end with
-      a stop codon  (``TAG``, ``TGA``, ``TAA``).
+      a stop codon  (``TAG``, ``TGA``, ``TAA``). The supplementary
+      issue data is the actual codon found.
     * :py:const:`INTERNAL_STOP_CODON`: The CDS has internal
       stop codons.
     * :py:const:`NO_ID_NAME`: The CDS has no ``ID`` or ``Name``
@@ -135,14 +137,15 @@ def get_fasta_gff_cds_issues(fasta,
       multiple CDSs have non-unique ``ID`` attributes. This summarises
       the count of all CDSs that share a common ``ID`` attribute. For
       this issue, the sequence ``ID`` attribute is
-      :py:const:`WILDCARD`. The supplementary issue data data is a
+      :py:const:`WILDCARD`. The supplementary issue data is a
       count of the number of features with the same ID.
 
     The following issues are reported for sequences defined in the GFF file:
 
     * :py:const:`MULTIPLE_CDS`: The sequence has multiple CDS.
       For this issue, the feature ``ID`` attribute is
-      :py:const:`WILDCARD`.
+      :py:const:`WILDCARD`. The supplementary issue data is a count
+      of the number of CDSs found.
     * :py:const:`SEQUENCE_NOT_IN_FASTA`: The sequence has a feature in
       the GFF file but the sequence is not in the FASTA file. For this
       issue, the feature ``ID`` attribute is
@@ -223,10 +226,10 @@ def get_fasta_gff_cds_issues(fasta,
         sequence_codons = sequence_to_codons(sequence)
         if sequence_codons[0] not in start_codons:
             issues.append((feature.seqid, feature_id_name,
-                           NO_START_CODON, None))
+                           NO_START_CODON, sequence_codons[0]))
         if not sequence_codons[-1] in STOP_CODONS:
             issues.append((feature.seqid, feature_id_name,
-                           NO_STOP_CODON, None))
+                           NO_STOP_CODON, sequence_codons[-1]))
         if any([codon in STOP_CODONS
                 for codon in sequence_codons[:-1]]):
             issues.append((feature.seqid, feature_id_name,
