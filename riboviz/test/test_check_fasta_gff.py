@@ -9,6 +9,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from riboviz import check_fasta_gff
+from riboviz.fasta_gff import START_CODON
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 from riboviz.test import data
 
@@ -56,6 +57,8 @@ TEST_CHECK_GFF_ISSUES = [
 Expected GFF-specific issues (sequence ID, feature ID, issue type,
 issue data) for GFF file (:py:const:`TEST_GFF_CHECK_FILE`) only.
 """
+TEST_START_CODONS = [START_CODON, "AAG"]
+""" List of start codons in test data. """
 TEST_CHECK_FASTA_ISSUES = [
     ("YAL003CMissingSequence_mRNA", check_fasta_gff.NOT_APPLICABLE,
      check_fasta_gff.SEQUENCE_NOT_IN_FASTA, None),
@@ -129,6 +132,7 @@ def test_get_fasta_sequence_ids(tmp_file):
     Test :py:func:`riboviz.check_fasta_gff.get_fasta_sequence_ids`
     with a FASTA file and check that the expected sequence IDs
     are returned.
+
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
@@ -143,7 +147,7 @@ def test_get_fasta_sequence_ids(tmp_file):
     assert set(fasta_seq_ids) == seq_ids, "Unexpected set of sequence IDs"
 
 
-def test_get_fasta_sequence_ids_empty_fasta(tmp_file):
+def test_get_fasta_sequence_ids_empty_fasta_file(tmp_file):
     """
     Test :py:func:`riboviz.check_fasta_gff.get_fasta_sequence_ids`
     with an empty FASTA file and check that an empty set is
@@ -151,6 +155,22 @@ def test_get_fasta_sequence_ids_empty_fasta(tmp_file):
     """
     seq_ids = check_fasta_gff.get_fasta_sequence_ids(tmp_file)
     assert not seq_ids, "Expected empty set of sequence IDs"
+
+
+def test_get_fasta_gff_cds_issues_empty_fasta_file(tmp_file):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    with an empty FASTA file and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`)  and check all issues match
+    expected issues in :py:const:`TEST_CHECK_GFF_ISSUES`).
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    issues = check_fasta_gff.get_fasta_gff_cds_issues(
+        tmp_file,
+        TEST_GFF_CHECK_FILE)
+    for issue in issues:
+        assert issue in TEST_CHECK_GFF_ISSUES
 
 
 def test_get_fasta_gff_cds_issues():
@@ -167,29 +187,6 @@ def test_get_fasta_gff_cds_issues():
         assert issue in TEST_CHECK_ISSUES
 
 
-def test_get_fasta_gff_cds_issues_feature_format():
-    """
-    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
-    with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CHECK_FILE`) and a custom feature name.
-    """
-    issues = check_fasta_gff.get_fasta_gff_cds_issues(
-        TEST_FASTA_CHECK_FILE,
-        TEST_GFF_CHECK_FILE,
-        feature_format="{}-Custom")
-    # Update TEST_CHECK_ISSUES with the expected result when
-    # custom cds_feature_format is used.
-    test_check_issues = TEST_CHECK_ISSUES.copy()
-    test_check_issues.remove(TEST_NO_ID_NAME_ATTR_ISSUE)
-    test_check_issues.append(
-        (TEST_NO_ID_NAME_ATTR_ISSUE[0],
-         "{}-Custom".format(TEST_NO_ID_NAME_ATTR_PREFIX),
-         TEST_NO_ID_NAME_ATTR_ISSUE[2],
-         TEST_NO_ID_NAME_ATTR_ISSUE[3]))
-    for issue in issues:
-        assert issue in test_check_issues
-
-
 def test_get_fasta_gff_cds_issues_use_feature_name_true():
     """
     Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
@@ -200,8 +197,7 @@ def test_get_fasta_gff_cds_issues_use_feature_name_true():
         TEST_FASTA_CHECK_FILE,
         TEST_GFF_CHECK_FILE,
         use_feature_name=True)
-    # Update TEST_CHECK_ISSUES with the expected result when
-    # use_feature_name=True.
+    # Create expected results when use_feature_name=True.
     test_check_issues = TEST_CHECK_ISSUES.copy()
     test_check_issues.remove(TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE)
     test_check_issues.append(
@@ -213,20 +209,47 @@ def test_get_fasta_gff_cds_issues_use_feature_name_true():
         assert issue in test_check_issues
 
 
-def test_get_fasta_gff_cds_issues_empty_fasta(tmp_file):
+def test_get_fasta_gff_cds_issues_feature_format():
     """
     Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
-    with an empty FASTA file and GFF file
-    (:py:const:`TEST_GFF_CHECK_FILE`)  and check all issues match
-    expected issues in :py:const:`TEST_CHECK_GFF_ISSUES`).
-    :param tmp_file: Temporary file
-    :type tmp_file: str or unicode
+    with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`) and custom
+    ``cds_feature_format``.
+    """
+    cds_feature_format = "{}-Custom"
+    issues = check_fasta_gff.get_fasta_gff_cds_issues(
+        TEST_FASTA_CHECK_FILE,
+        TEST_GFF_CHECK_FILE,
+        feature_format=cds_feature_format)
+    # Create expected results for custom cds_feature_format.
+    test_check_issues = TEST_CHECK_ISSUES.copy()
+    test_check_issues.remove(TEST_NO_ID_NAME_ATTR_ISSUE)
+    test_check_issues.append(
+        (TEST_NO_ID_NAME_ATTR_ISSUE[0],
+         cds_feature_format.format(TEST_NO_ID_NAME_ATTR_PREFIX),
+         TEST_NO_ID_NAME_ATTR_ISSUE[2],
+         TEST_NO_ID_NAME_ATTR_ISSUE[3]))
+    for issue in issues:
+        assert issue in test_check_issues
+
+
+def test_get_fasta_gff_cds_issues_start_codons():
+    """
+    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`) and custom ``start_codons``.
     """
     issues = check_fasta_gff.get_fasta_gff_cds_issues(
-        tmp_file,
-        TEST_GFF_CHECK_FILE)
+        TEST_FASTA_CHECK_FILE,
+        TEST_GFF_CHECK_FILE,
+        start_codons=TEST_START_CODONS)
+    # TEST_START_CODONS includes all start codons in test data so
+    # expect no NO_START_CODON issues in results.
+    test_check_issues = [(s, f, i, d)
+                         for (s, f, i, d) in TEST_CHECK_ISSUES
+                         if i != check_fasta_gff.NO_START_CODON]
     for issue in issues:
-        assert issue in TEST_CHECK_GFF_ISSUES
+        assert issue in test_check_issues
 
 
 def check_fasta_gff_issues_df(issues, df):
@@ -263,9 +286,9 @@ def check_fasta_gff_issues_df(issues, df):
         else:
             expected_data = issue_data
         df_issue_data = issue_df.iloc[0][check_fasta_gff.ISSUE_DATA]
-        if type(expected_data) is int:
+        if isinstance(expected_data, int):
             df_issue_data = int(df_issue_data)
-        elif type(expected_data) is float:
+        elif isinstance(expected_data, float):
             df_issue_data = float(df_issue_data)
         else:
             df_issue_data = str(df_issue_data)
@@ -277,9 +300,8 @@ def check_fasta_gff_issues_df(issues, df):
 def test_fasta_gff_issues_to_df():
     """
     Test :py:func:`riboviz.check_fasta_gff.fasta_gff_issues_to_df`
-    with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CHECK_FILE`) and check all issues match
-    expected issues in :py:const:`TEST_CHECK_ISSUES`).
+    with values produces a data frame with the expected columns,
+    rows and values.
     """
     df = check_fasta_gff.fasta_gff_issues_to_df(TEST_CHECK_ISSUES)
     df = df.fillna("")  # Force None to "" not "nan"
@@ -295,7 +317,7 @@ def test_fasta_gff_issues_to_df_empty():
     check_fasta_gff_issues_df([], df)
 
 
-def test_check_fasta_gff_empty_fasta(tmp_file):
+def test_check_fasta_gff_empty_fasta_file(tmp_file):
     """
     Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff` with an
     empty FASTA file and GFF file (:py:const:`TEST_GFF_CHECK_FILE`)
@@ -304,8 +326,7 @@ def test_check_fasta_gff_empty_fasta(tmp_file):
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
-    # Use tmp_file as both empty FASTA input file and TSV output
-    # file
+    # Use tmp_file as both empty FASTA input file and TSV output file.
     check_fasta_gff.check_fasta_gff(tmp_file, TEST_GFF_CHECK_FILE, tmp_file)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     df = df.fillna("")  # Force None to "" not "nan"
@@ -330,39 +351,12 @@ def test_check_fasta_gff(tmp_file):
     check_fasta_gff_issues_df(TEST_CHECK_ISSUES, df)
 
 
-def test_check_fasta_gff_feature_format(tmp_file):
-    """
-    Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff` with
-    FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CHECK_FILE`) and a custom feature name
-    format and validate the TSV file output.
-
-    :param tmp_file: Temporary file
-    :type tmp_file: str or unicode
-    """
-    check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,
-                                    TEST_GFF_CHECK_FILE,
-                                    tmp_file,
-                                    feature_format="{}-Custom")
-    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    df = df.fillna("")  # Force None to "" not "nan"
-    # Update TEST_CHECK_ISSUES with the expected result when
-    # custom cds_feature_format is used.
-    test_check_issues = TEST_CHECK_ISSUES.copy()
-    test_check_issues.remove(TEST_NO_ID_NAME_ATTR_ISSUE)
-    test_check_issues.append(
-        (TEST_NO_ID_NAME_ATTR_ISSUE[0],
-         "{}-Custom".format(TEST_NO_ID_NAME_ATTR_PREFIX),
-         TEST_NO_ID_NAME_ATTR_ISSUE[2],
-         TEST_NO_ID_NAME_ATTR_ISSUE[3]))
-    check_fasta_gff_issues_df(test_check_issues, df)
-
-
 def test_check_fasta_gff_use_feature_name_true(tmp_file):
     """
     Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff` with
     FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CHECK_FILE`) and ``use_feature_name=True``.
+    (:py:const:`TEST_GFF_CHECK_FILE`) and ``use_feature_name=True``
+    and validate the TSV file output.
 
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
@@ -373,8 +367,7 @@ def test_check_fasta_gff_use_feature_name_true(tmp_file):
                                     use_feature_name=True)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     df = df.fillna("")  # Force None to "" not "nan"
-    # Update TEST_CHECK_ISSUES with the expected result when
-    # custom cds_feature_format is used.
+    # Create expected results when use_feature_name=True.
     test_check_issues = TEST_CHECK_ISSUES.copy()
     test_check_issues.remove(TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE)
     test_check_issues.append(
@@ -382,4 +375,56 @@ def test_check_fasta_gff_use_feature_name_true(tmp_file):
          TEST_NO_ATG_START_ID_NAME_ATTR_NAME,
          TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE[2],
          TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE[3]))
+    check_fasta_gff_issues_df(test_check_issues, df)
+
+
+def test_check_fasta_gff_feature_format(tmp_file):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff` with
+    FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`) and custom
+    ``cds_feature_format`` and validate the TSV file output.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    cds_feature_format = "{}-Custom"
+    check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,
+                                    TEST_GFF_CHECK_FILE,
+                                    tmp_file,
+                                    feature_format=cds_feature_format)
+    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
+    df = df.fillna("")  # Force None to "" not "nan"
+    # Create expected results for custom cds_feature_format.
+    test_check_issues = TEST_CHECK_ISSUES.copy()
+    test_check_issues.remove(TEST_NO_ID_NAME_ATTR_ISSUE)
+    test_check_issues.append(
+        (TEST_NO_ID_NAME_ATTR_ISSUE[0],
+         cds_feature_format.format(TEST_NO_ID_NAME_ATTR_PREFIX),
+         TEST_NO_ID_NAME_ATTR_ISSUE[2],
+         TEST_NO_ID_NAME_ATTR_ISSUE[3]))
+    check_fasta_gff_issues_df(test_check_issues, df)
+
+
+def test_check_fasta_gff_start_codons(tmp_file):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff` with
+    FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`) and custom
+    ``start_codons`` and validate the TSV file output.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,
+                                    TEST_GFF_CHECK_FILE,
+                                    tmp_file,
+                                    start_codons=TEST_START_CODONS)
+    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
+    df = df.fillna("")  # Force None to "" not "nan"
+    # TEST_START_CODONS includes all start codons in test data so
+    # expect no NO_START_CODON issues in results.
+    test_check_issues = [(s, f, i, d)
+                         for (s, f, i, d) in TEST_CHECK_ISSUES
+                         if i != check_fasta_gff.NO_START_CODON]
     check_fasta_gff_issues_df(test_check_issues, df)
