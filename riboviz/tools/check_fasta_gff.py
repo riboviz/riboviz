@@ -30,6 +30,7 @@ Usage::
 See :py:func:`riboviz.check_fasta_gff.check_fasta_gff`.
 """
 import argparse
+from pyfaidx import FastaIndexingError
 from riboviz import check_fasta_gff
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 from riboviz.fasta_gff import START_CODON
@@ -91,12 +92,19 @@ def invoke_check_fasta_gff():
     feature_format = options.feature_format
     use_feature_name = options.use_feature_name
     start_codons = options.start_codon
-    check_fasta_gff.check_fasta_gff(fasta,
-                                    gff,
-                                    features_issues,
-                                    feature_format=feature_format,
-                                    use_feature_name=use_feature_name,
-                                    start_codons=start_codons)
+    try:
+        check_fasta_gff.check_fasta_gff(fasta,
+                                        gff,
+                                        features_issues,
+                                        feature_format=feature_format,
+                                        use_feature_name=use_feature_name,
+                                        start_codons=start_codons)
+    except FastaIndexingError as e:
+        print("{}: {}".format(type(e).__name__, e))
+    except FileNotFoundError as e:
+        print("{}: {}".format(type(e).__name__, e))
+    except ValueError as e:
+        print("{}: {}".format(type(e).__name__, e))
 
 
 if __name__ == "__main__":

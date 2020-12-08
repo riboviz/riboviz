@@ -8,6 +8,7 @@ import pandas as pd
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+from pyfaidx import FastaIndexingError
 from riboviz import check_fasta_gff
 from riboviz.fasta_gff import START_CODON
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
@@ -147,30 +148,80 @@ def test_get_fasta_sequence_ids(tmp_file):
     assert set(fasta_seq_ids) == seq_ids, "Unexpected set of sequence IDs"
 
 
+def test_get_fasta_sequence_ids_no_such_fasta_file():
+    """
+    Test :py:func:`riboviz.check_fasta_gff.get_fasta_sequence_ids`
+    with a non-existent FASTA raises an exception.
+    """
+    with pytest.raises(FileNotFoundError):
+        check_fasta_gff.get_fasta_sequence_ids("nosuch.fasta")
+
+
 def test_get_fasta_sequence_ids_empty_fasta_file(tmp_file):
     """
     Test :py:func:`riboviz.check_fasta_gff.get_fasta_sequence_ids`
     with an empty FASTA file and check that an empty set is
     returned.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
     """
     seq_ids = check_fasta_gff.get_fasta_sequence_ids(tmp_file)
     assert not seq_ids, "Expected empty set of sequence IDs"
+
+
+def test_get_fasta_gff_cds_issues_no_such_fasta_file():
+    """
+    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    with an empty FASTA file and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`) raises an exception.
+    """
+    with pytest.raises(FileNotFoundError):
+        check_fasta_gff.get_fasta_gff_cds_issues(
+            "nosuch.fasta",
+            TEST_GFF_CHECK_FILE)
+
+
+def test_get_fasta_gff_cds_issues_no_such_gff_file():
+    """
+    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and
+    a non-existent GFF file raises an exception.
+    """
+    with pytest.raises(FileNotFoundError):
+        check_fasta_gff.get_fasta_gff_cds_issues(
+            TEST_FASTA_CHECK_FILE,
+            "nosuch.gff")
 
 
 def test_get_fasta_gff_cds_issues_empty_fasta_file(tmp_file):
     """
     Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
     with an empty FASTA file and GFF file
-    (:py:const:`TEST_GFF_CHECK_FILE`)  and check all issues match
-    expected issues in :py:const:`TEST_CHECK_GFF_ISSUES`).
+    (:py:const:`TEST_GFF_CHECK_FILE`) raises an exception.
+
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
-    issues = check_fasta_gff.get_fasta_gff_cds_issues(
-        tmp_file,
-        TEST_GFF_CHECK_FILE)
-    for issue in issues:
-        assert issue in TEST_CHECK_GFF_ISSUES
+    with pytest.raises(FastaIndexingError):
+        check_fasta_gff.get_fasta_gff_cds_issues(
+            tmp_file,
+            TEST_GFF_CHECK_FILE)
+
+
+def test_get_fasta_gff_cds_issues_empty_gff_file(tmp_file):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and
+    an empty GFF file raises an exception.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    with pytest.raises(ValueError):
+        check_fasta_gff.get_fasta_gff_cds_issues(
+            TEST_FASTA_CHECK_FILE,
+            tmp_file)
 
 
 def test_get_fasta_gff_cds_issues():
@@ -317,7 +368,67 @@ def test_fasta_gff_issues_to_df_empty():
     check_fasta_gff_issues_df([], df)
 
 
+def test_check_fasta_gff_no_such_fasta_file(tmp_file):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff`
+    with an empty FASTA file and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`) raises an exception.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    with pytest.raises(FileNotFoundError):
+        check_fasta_gff.check_fasta_gff("nosuch.fasta",
+                                        TEST_GFF_CHECK_FILE,
+                                        tmp_file)
+
+
+def test_check_fasta_gff_no_such_gff_file(tmp_file):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff`
+    with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and
+    a non-existent GFF file raises an exception.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    with pytest.raises(FileNotFoundError):
+        check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,
+                                        "nosuch.gff",
+                                        tmp_file)
+
+
 def test_check_fasta_gff_empty_fasta_file(tmp_file):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff`
+    with an empty FASTA file and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`) raises an exception.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    with pytest.raises(FastaIndexingError):
+        check_fasta_gff.check_fasta_gff(tmp_file,
+                                        TEST_GFF_CHECK_FILE,
+                                        tmp_file)
+
+
+def test_check_fasta_gff_empty_gff_file(tmp_file):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff`
+    with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and
+    an empty GFF file raises an exception.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    with pytest.raises(ValueError):
+        check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,
+                                        tmp_file,
+                                        tmp_file)
+
+
+def xxx_test_check_fasta_gff_empty_fasta_file(tmp_file):
     """
     Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff` with an
     empty FASTA file and GFF file (:py:const:`TEST_GFF_CHECK_FILE`)

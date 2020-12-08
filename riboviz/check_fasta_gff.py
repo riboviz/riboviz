@@ -2,10 +2,12 @@
 Functions to check FASTA and GFF files for compatibility.
 """
 import bisect
+import os
 import warnings
 from Bio import SeqIO
 import gffutils
 import pandas as pd
+from pyfaidx import FastaIndexingError
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 from riboviz.fasta_gff import START_CODON
 from riboviz.fasta_gff import STOP_CODONS
@@ -74,7 +76,11 @@ def get_fasta_sequence_ids(fasta):
     :type fasta: str or unicode
     :return: Unique sequence IDs
     :rtype: set(str or unicode)
+    :raises FileNotFoundError: If the FASTA or GFF files \
+    cannot be found
     """
+    if not os.path.exists(fasta) or (not os.path.isfile(fasta)):
+        raise FileNotFoundError(fasta)
     seq_ids = set()
     with open(fasta, "r") as f:
         # 'fasta' is https://biopython.org/wiki/SeqIO file type.
@@ -174,13 +180,27 @@ def get_fasta_gff_cds_issues(fasta,
     :return: List of unique sequence IDs in GFF file and list \
     of issues for sequences and features.
     :rtype: list(tuple(str or unicode, str or unicode, str or unicode, *))
+    :raises FileNotFoundError: If the FASTA or GFF files \
+    cannot be found
+    :raises pyfaidx.FastaIndexingError: If the FASTA file has badly \
+    formatted sequences
+    :raises ValueError: If GFF file is empty
+    :raises Exception: Exceptions specific to gffutils.create_db \
+    (these are undocumented in the gffutils documentation)
     """
-    gffdb = gffutils.create_db(gff,
-                               dbfn='gff.db',
-                               force=True,
-                               keep_order=True,
-                               merge_strategy='merge',
-                               sort_attribute_values=True)
+    for f in [fasta, gff]:
+        if not os.path.exists(f) or (not os.path.isfile(f)):
+            raise FileNotFoundError(f)
+    try:
+        gffdb = gffutils.create_db(gff,
+                                   dbfn='gff.db',
+                                   force=True,
+                                   keep_order=True,
+                                   merge_strategy='merge',
+                                   sort_attribute_values=True)
+    except ValueError as e:
+        # Wrap and rethrow exception so file name is included
+        raise ValueError("{} ({})".format(e, gff)) from e
     issues = []
     # Track IDs of features encountered. Each ID must be unique within
     # a GFF file. See http://gmod.org/wiki/GFF3.
@@ -207,16 +227,17 @@ def get_fasta_gff_cds_issues(fasta,
                            NO_ID_NAME, None))
         try:
             sequence = feature.sequence(fasta)
-        except KeyError as e:
+        except KeyError as e:  # Missing sequence.
             issues.append((feature.seqid,
                            NOT_APPLICABLE,
                            SEQUENCE_NOT_IN_FASTA,
                            None))
             continue
+        except FastaIndexingError as e:
+            raise e
         except Exception as e:
             warnings.warn(str(e))
             continue
-
         seq_len_remainder = len(sequence) % 3
         if seq_len_remainder != 0:
             issues.append((feature.seqid, feature_id_name,
@@ -328,6 +349,13 @@ def check_fasta_gff(fasta, gff, issues_file,
     :type start_codons: list(str or unicode)
     :param delimiter: Delimiter
     :type delimiter: str or unicode
+    :raises FileNotFoundError: If the FASTA or GFF files \
+    cannot be found
+    :raises pyfaidx.FastaIndexingError: If the FASTA file has badly \
+    formatted sequences
+    :raises ValueError: If GFF file is empty
+    :raises Exception: Exceptions specific to gffutils.create_db \
+    (these are undocumented in the gffutils documentation)
     """
     issues = get_fasta_gff_cds_issues(fasta,
                                       gff,
