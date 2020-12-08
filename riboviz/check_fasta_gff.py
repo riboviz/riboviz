@@ -103,17 +103,17 @@ def get_fasta_gff_cds_issues(fasta,
     The feature ID is one of:
 
     * :py:const:`NOT_APPLICABLE` if the issue relates to the sequence,
-    * not the feature.
+      not the feature.
     * :py:const:`WILDCARD` if the issue relates to multiple features.
     * Value of ``ID`` attribute for feature, if defined and if
       ``Name`` is not defined, or ``Name`` is defined and
       ``use_feature_name`` is ``False``.
     * Value of ``Name`` attribute for feature, if defined, and if
       ``ID`` is undefined or if ``ID`` is defined and ``use_feature_name``
-    is ``True``.
+      is ``True``.
     * Sequence ID formatted using ``feature_format`` (default
-      py:const:`CDS_FEATURE_FORMAT`) if both ``ID`` and ``Name`` are
-      undefined.
+      :py:const:`riboviz.fasta_gff.CDS_FEATURE_FORMAT`)
+      if both ``ID`` and ``Name`` are undefined.
 
     The following issue types are reported for CDSs defined in the GFF
     file:
@@ -121,10 +121,10 @@ def get_fasta_gff_cds_issues(fasta,
     * :py:const:`INCOMPLETE_FEATURE`: The CDS has a length not
       divisible by 3.
     * :py:const:`NO_START_CODON`: The CDS does not start
-      with a start codon (``ATG`` or those in `start_codons`)). The
+      with a start codon (``ATG`` or those in ``start_codons``). The
       supplementary issue data is the actual codon found.
-.    * :py:const:`NO_STOP_CODON`: The CDS does not end with
-      a stop codon  (``TAG``, ``TGA``, ``TAA``). The supplementary
+    * :py:const:`NO_STOP_CODON`: The CDS does not end with a stop
+      codon  (``TAG``, ``TGA``, ``TAA``). The supplementary
       issue data is the actual codon found.
     * :py:const:`INTERNAL_STOP_CODON`: The CDS has internal
       stop codons.
@@ -166,7 +166,7 @@ def get_fasta_gff_cds_issues(fasta,
     applied to the sequence ID to create a feature name.
     :type feature_format: str or unicode
     :param use_feature_name: If a feature defines both ``ID`` and \
-    ``Name`` attributes then use ``Name` in reporting, otherwise use \
+    ``Name`` attributes then use ``Name`` in reporting, otherwise use \
     ``ID``.
     :type use_feature_name: bool
     :param start_codons: Allowable start codons.
@@ -321,7 +321,7 @@ def check_fasta_gff(fasta, gff, issues_file,
     applied to the sequence ID to create a feature name.
     :type feature_format: str or unicode
     :param use_feature_name: If a feature defines both ``ID`` and \
-    ``Name`` attributes then use ``Name` in reporting, otherwise use \
+    ``Name`` attributes then use ``Name`` in reporting, otherwise use \
     ``ID``.
     :type use_feature_name: bool
     :param start_codons: Allowable start codons.
