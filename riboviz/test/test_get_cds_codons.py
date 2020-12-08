@@ -21,22 +21,22 @@ TEST_GFF_NO_CDS_FILE = os.path.join(
 """ Test GFF file in :py:mod:`riboviz.test.data` with no CDS. """
 TEST_ID_NAME_ATTR_ID = "YAL009CIDNameAttrIDCDS_CDS"
 """
-Expected name of CDS codons entry. Defined as a constant so can be
+Name of CDS codons entry. Defined as a constant so can be
 referred to in tests.
 """
 TEST_ID_NAME_ATTR_NAME = "YAL009CIDNameAttrNameCDS_CDS"
 """
-Expected name of CDS codons entry. Defined as a constant so can be
+Name of CDS codons entry. Defined as a constant so can be
 referred to in tests.
 """
 TEST_NO_ID_NAME_ATTR_PREFIX = "YAL008CNoIDNameAttrCDS_mRNA"
 """
-Expected name of CDS codons entry. Defined as a constant so can be
+Name of CDS codons entry. Defined as a constant so can be
 referred to in tests.
 """
 TEST_NO_ID_NAME_ATTR = CDS_FEATURE_FORMAT.format(TEST_NO_ID_NAME_ATTR_PREFIX)
 """
-Expected name of CDS codons entry. Defined as a constant so can be
+Name of CDS codons entry. Defined as a constant so can be
 referred to in tests.
 """
 TEST_CDS_CODONS = {
