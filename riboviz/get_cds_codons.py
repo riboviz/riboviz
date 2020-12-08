@@ -2,6 +2,7 @@
 Functions use CDS entries within a GFF file to get the codons from
 each coding sequence in a complementary FASTA file.
 """
+import os
 import warnings
 import gffutils
 import pandas as pd
@@ -139,23 +140,37 @@ def get_cds_codons_from_fasta(fasta,
     :type use_feature_name: bool
     :return: Codons for each coding sequence, keyed by feature name
     :rtype: dict(str or unicode -> list(str or unicode))
+    :raises pyfaidx.FastaIndexingError: If the FASTA file has badly \
+    formatted sequences
+    :raises FileNotFoundError: If the FASTA or GFF files \
+    cannot be found
+    :raises ValueError: If GFF file is empty
     :raises Exception: Exceptions specific to gffutils.create_db \
     (these are undocumented in the gffutils documentation)
     """
-    gffdb = gffutils.create_db(gff,
-                               dbfn='gff.db',
-                               force=True,
-                               keep_order=True,
-                               merge_strategy='merge',
-                               sort_attribute_values=True)
+    for f in [fasta, gff]:
+        if not os.path.exists(f) or (not os.path.isfile(f)):
+            raise FileNotFoundError(f)
+    try:
+        gffdb = gffutils.create_db(gff,
+                                   dbfn='gff.db',
+                                   force=True,
+                                   keep_order=True,
+                                   merge_strategy='merge',
+                                   sort_attribute_values=True)
+    except ValueError as e:
+        # Wrap and rethrow exception so file name is included
+        raise ValueError("{} ({})".format(e, gff)) from e
     cds_codons = {}
     same_feature_id_count = 0
     for feature in gffdb.features_of_type('CDS'):
         try:
             sequence = get_cds_from_fasta(feature, fasta)
             codons = sequence_to_codons(sequence)
-        except Exception as e:
-            # Log and continue with other CDSs.
+        except KeyError as e:  # Missing sequence.
+            warnings.warn(str(e))
+            continue
+        except AssertionError as e:  # Sequence length not divisible by 3.
             warnings.warn(str(e))
             continue
         feature_id = get_feature_id(feature, use_feature_name)
@@ -248,6 +263,13 @@ def get_cds_codons_file(fasta,
     ``ID``.
     :param delimiter: Delimiter
     :type delimiter: str or unicode
+    :raises FileNotFoundError: If the FASTA or GFF files \
+    cannot be found
+    :raises pyfaidx.FastaIndexingError: If the FASTA file has badly \
+    formatted sequences
+    :raises ValueError: If GFF file is empty
+    :raises Exception: Exceptions specific to gffutils.create_db \
+    (these are undocumented in the gffutils documentation)
     """
     cds_codons = get_cds_codons_from_fasta(fasta,
                                            gff,

@@ -5,6 +5,7 @@ import os
 import tempfile
 import pytest
 import pandas as pd
+from pyfaidx import FastaIndexingError
 from riboviz import get_cds_codons
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 from riboviz.test import data
@@ -187,19 +188,68 @@ def test_get_cds_from_fasta_bad_length():
         get_cds_codons.get_cds_from_fasta(feature, "test.fasta")
 
 
-def test_get_cds_codons_from_fasta_empty_fasta_file(tmp_file):
+def test_get_cds_codons_from_fasta_no_such_fasta_file(tmp_file):
     """
     Test :py:func:`riboviz.get_cds_codons.get_cds_codons_from_fasta`
-    with an empty FASTA file and GFF file
-    (:py:const:`TEST_GFF_CODONS_FILE`).
+    with a non-existent FASTA file and GFF file
+    (:py:const:`TEST_GFF_CODONS_FILE`) raises an exception.
 
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
-    cds_codons = get_cds_codons.get_cds_codons_from_fasta(
-        tmp_file,
-        TEST_GFF_CODONS_FILE)
-    assert cds_codons == {}
+    with pytest.raises(FileNotFoundError):
+        get_cds_codons.get_cds_codons_from_fasta(
+            "nosuch.fasta",
+            TEST_GFF_CODONS_FILE,
+            tmp_file)
+
+
+def test_get_cds_codons_from_fasta_no_such_gff_file(tmp_file):
+    """
+    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_from_fasta`
+    with FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and a
+    non-existent GFF file raises an exception.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    with pytest.raises(FileNotFoundError):
+        get_cds_codons.get_cds_codons_from_fasta(
+            TEST_FASTA_CODONS_FILE,
+            "nosuch.gff",
+            tmp_file)
+
+
+def test_get_cds_codons_from_fasta_empty_fasta_file(tmp_file):
+    """
+    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_from_fasta`
+    with an empty FASTA file and GFF file
+    (:py:const:`TEST_GFF_CODONS_FILE`) raises an exception.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    with pytest.raises(FastaIndexingError):
+        get_cds_codons.get_cds_codons_from_fasta(
+            tmp_file,
+            TEST_GFF_CODONS_FILE,
+            tmp_file)
+
+
+def test_get_cds_codons_from_fasta_empty_gff_file(tmp_file):
+    """
+    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_from_fasta`
+    with FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and an
+    empty GFF file raises an exception.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    with pytest.raises(ValueError):
+        get_cds_codons.get_cds_codons_from_fasta(
+            TEST_FASTA_CODONS_FILE,
+            tmp_file,
+            tmp_file)
 
 
 def test_get_cds_codons_from_fasta_no_cds():
@@ -339,19 +389,65 @@ def test_feature_codons_to_df_empty():
     check_feature_codons_df({}, df)
 
 
-def test_get_cds_codons_file_empty_fasta_file(tmp_file):
+def test_get_cds_codons_file_no_such_fasta_file(tmp_file):
     """
-    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_file` with an empty
-    FASTA file and GFF file (:py:const:`TEST_GFF_CODONS_FILE`). A
-    header-only TSV file is expected as output.
+    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_file` with a
+    non-existent FASTA file and GFF file
+    (:py:const:`TEST_GFF_CODONS_FILE`) raises an exception.
 
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
-    # Use tmp_file as both empty FASTA input file and TSV output file.
-    get_cds_codons.get_cds_codons_file(tmp_file, TEST_GFF_CODONS_FILE, tmp_file)
-    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    check_feature_codons_df({}, df)
+    with pytest.raises(FileNotFoundError):
+        get_cds_codons.get_cds_codons_file("nosuch.fasta",
+                                           TEST_GFF_CODONS_FILE,
+                                           tmp_file)
+
+
+def test_get_cds_codons_file_no_such_gff_file(tmp_file):
+    """
+    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_file` with
+    FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and a
+    non-existent GFF file raises an exception.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    with pytest.raises(FileNotFoundError):
+        get_cds_codons.get_cds_codons_file(TEST_FASTA_CODONS_FILE,
+                                           "nosuch.gff",
+                                           TEST_GFF_CODONS_FILE,
+                                           tmp_file)
+
+
+def test_get_cds_codons_file_empty_fasta_file(tmp_file):
+    """
+    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_file` with an empty
+    FASTA file and GFF file (:py:const:`TEST_GFF_CODONS_FILE`) raises
+    an exception.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    with pytest.raises(FastaIndexingError):
+        get_cds_codons.get_cds_codons_file(tmp_file,
+                                           TEST_GFF_CODONS_FILE,
+                                           tmp_file)
+
+
+def test_get_cds_codons_file_empty_gff_file(tmp_file):
+    """
+    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_file` with
+    FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and an
+    empty GFF file raises an exception.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    with pytest.raises(ValueError):
+        get_cds_codons.get_cds_codons_file(TEST_FASTA_CODONS_FILE,
+                                           tmp_file,
+                                           tmp_file)
 
 
 def test_get_cds_codons_file(tmp_file):

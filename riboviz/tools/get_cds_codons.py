@@ -32,6 +32,7 @@ See :py:func:`riboviz.get_cds_codons.get_cds_codons` for
 information on the tab-separated values file format.
 """
 import argparse
+from pyfaidx import FastaIndexingError
 from riboviz import get_cds_codons
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 from riboviz import provenance
@@ -92,12 +93,19 @@ def invoke_get_cds_codons():
     exclude_stop_codons = options.exclude_stop_codons
     cds_feature_format = options.cds_feature_format
     use_feature_name = options.use_feature_name
-    get_cds_codons.get_cds_codons_file(fasta,
-                                       gff,
-                                       cds_codons,
-                                       exclude_stop_codons,
-                                       cds_feature_format,
-                                       use_feature_name)
+    try:
+        get_cds_codons.get_cds_codons_file(fasta,
+                                           gff,
+                                           cds_codons,
+                                           exclude_stop_codons,
+                                           cds_feature_format,
+                                           use_feature_name)
+    except FastaIndexingError as e:
+        print("{}: {}".format(type(e).__name__, e))
+    except FileNotFoundError as e:
+        print("{}: {}".format(type(e).__name__, e))
+    except ValueError as e:
+        print("{}: {}".format(type(e).__name__, e))
 
 
 if __name__ == "__main__":
