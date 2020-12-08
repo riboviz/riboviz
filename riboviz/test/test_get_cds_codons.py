@@ -166,7 +166,7 @@ def test_get_cds_from_fasta():
     expected_sequence = "ATGAAATAA"
     feature = MockFeature("SeqID", expected_sequence)
     # Any file name can be used as MockFeature ignores it and returns
-    # the sequence given above.
+    # instead the sequence given above.
     sequence = get_cds_codons.get_cds_from_fasta(feature, "test.fasta")
     assert sequence == expected_sequence
 
@@ -182,8 +182,8 @@ def test_get_cds_from_fasta_bad_length():
     """
     feature = MockFeature("SeqID", "ATGATAA")
     with pytest.raises(AssertionError):
-        # Any file name can be used as MockFeature ignores it
-        # and returns the sequence given above.
+        # Any file name can be used as MockFeature ignores it and
+        # returns instead the sequence given above.
         get_cds_codons.get_cds_from_fasta(feature, "test.fasta")
 
 
@@ -196,7 +196,6 @@ def test_get_cds_codons_from_fasta_empty(tmp_file):
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
-    # Use tmp_file as empty FASTA input file.
     cds_codons = get_cds_codons.get_cds_codons_from_fasta(
         tmp_file,
         TEST_GFF_CODONS_FILE)
@@ -254,8 +253,7 @@ def test_get_cds_codons_from_fasta_use_feature_name_true():
         TEST_FASTA_CODONS_FILE,
         TEST_GFF_CODONS_FILE,
         use_feature_name=True)
-    # Update TEST_CDS_CODONS with the expected result when
-    # use_feature_name=True.
+    # Create expected results when use_feature_name=True.
     test_cds_codons = TEST_CDS_CODONS.copy()
     codons = test_cds_codons[TEST_ID_NAME_ATTR_ID]
     del test_cds_codons[TEST_ID_NAME_ATTR_ID]
@@ -267,19 +265,20 @@ def test_get_cds_codons_from_fasta_cds_format():
     """
     Test :py:func:`riboviz.get_cds_codons.get_cds_codons_from_fasta`
     with FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CODONS_FILE`) and a custom CDS feature
-    name format.
+    (:py:const:`TEST_GFF_CODONS_FILE`) and custom
+    ``cds_feature_format``.
     """
+    cds_feature_format = "{}-Custom"
     cds_codons = get_cds_codons.get_cds_codons_from_fasta(
         TEST_FASTA_CODONS_FILE,
         TEST_GFF_CODONS_FILE,
-        cds_feature_format="{}-Custom")
-    # Update TEST_CDS_CODONS with the expected result when
-    # custom cds_feature_format is used.
+        cds_feature_format=cds_feature_format)
+    # Create expected results for custom cds_feature_format.
     test_cds_codons = TEST_CDS_CODONS.copy()
     codons = test_cds_codons[TEST_NO_ID_NAME_ATTR]
     del test_cds_codons[TEST_NO_ID_NAME_ATTR]
-    test_cds_codons["{}-Custom".format(TEST_NO_ID_NAME_ATTR_PREFIX)] = codons
+    test_cds_codons[
+        cds_feature_format.format(TEST_NO_ID_NAME_ATTR_PREFIX)] = codons
     assert cds_codons == test_cds_codons
 
 
@@ -376,23 +375,24 @@ def test_get_cds_codons_file_cds_format(tmp_file):
     """
     Test :py:func:`riboviz.get_cds_codons.get_cds_codons_file` with
     FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CODONS_FILE`) and a custom
-    CDS feature name format and validate the TSV file output.
+    (:py:const:`TEST_GFF_CODONS_FILE`) and custom
+    ``cds_feature_format`` and validate the TSV file output.
 
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
+    cds_feature_format = "{}-Custom"
     get_cds_codons.get_cds_codons_file(TEST_FASTA_CODONS_FILE,
                                        TEST_GFF_CODONS_FILE,
                                        tmp_file,
-                                       cds_feature_format="{}-Custom")
+                                       cds_feature_format=cds_feature_format)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    # Update TEST_CDS_CODONS with the expected result when
-    # custom cds_feature_format is used.
+    # Create expected results for custom cds_feature_format.
     test_cds_codons = TEST_CDS_CODONS.copy()
     codons = test_cds_codons[TEST_NO_ID_NAME_ATTR]
     del test_cds_codons[TEST_NO_ID_NAME_ATTR]
-    test_cds_codons["{}-Custom".format(TEST_NO_ID_NAME_ATTR_PREFIX)] = codons
+    test_cds_codons[
+        cds_feature_format.format(TEST_NO_ID_NAME_ATTR_PREFIX)] = codons
     check_feature_codons_df(test_cds_codons, df)
 
 
