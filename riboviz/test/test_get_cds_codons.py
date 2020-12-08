@@ -187,7 +187,7 @@ def test_get_cds_from_fasta_bad_length():
         get_cds_codons.get_cds_from_fasta(feature, "test.fasta")
 
 
-def test_get_cds_codons_from_fasta_empty(tmp_file):
+def test_get_cds_codons_from_fasta_empty_fasta_file(tmp_file):
     """
     Test :py:func:`riboviz.get_cds_codons.get_cds_codons_from_fasta`
     with an empty FASTA file and GFF file
@@ -224,23 +224,6 @@ def test_get_cds_codons_from_fasta():
         TEST_FASTA_CODONS_FILE,
         TEST_GFF_CODONS_FILE)
     assert cds_codons == TEST_CDS_CODONS
-
-
-def test_get_cds_codons_from_fasta_exclude_stop_codons():
-    """
-    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_from_fasta`
-    with FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CODONS_FILE`) where stop codons are to be
-    excluded from the codons returned.
-    """
-    cds_codons = get_cds_codons.get_cds_codons_from_fasta(
-        TEST_FASTA_CODONS_FILE,
-        TEST_GFF_CODONS_FILE,
-        exclude_stop_codons=True)
-    cds_codons_minus_stops = {
-        name: codons[:-1] for name, codons in TEST_CDS_CODONS.items()
-    }
-    assert cds_codons == cds_codons_minus_stops
 
 
 def test_get_cds_codons_from_fasta_use_feature_name_true():
@@ -282,6 +265,23 @@ def test_get_cds_codons_from_fasta_cds_format():
     assert cds_codons == test_cds_codons
 
 
+def test_get_cds_codons_from_fasta_exclude_stop_codons():
+    """
+    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_from_fasta`
+    with FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CODONS_FILE`) where stop codons are to be
+    excluded from the codons returned.
+    """
+    cds_codons = get_cds_codons.get_cds_codons_from_fasta(
+        TEST_FASTA_CODONS_FILE,
+        TEST_GFF_CODONS_FILE,
+        exclude_stop_codons=True)
+    cds_codons_minus_stops = {
+        name: codons[:-1] for name, codons in TEST_CDS_CODONS.items()
+    }
+    assert cds_codons == cds_codons_minus_stops
+
+
 def check_feature_codons_df(feature_codons, df):
     """
     Check contents of given dictionary with codons for features
@@ -316,15 +316,6 @@ def check_feature_codons_df(feature_codons, df):
             assert codons[pos - 1] == codon
 
 
-def test_feature_codons_to_df_empty():
-    """
-    Test :py:func:`riboviz.get_cds_codons.feature_codons_to_df`
-    with no values produces an empty data frame.
-    """
-    df = get_cds_codons.feature_codons_to_df({})
-    check_feature_codons_df({}, df)
-
-
 def test_feature_codons_to_df():
     """
     Test :py:func:`riboviz.get_cds_codons.feature_codons_to_df`
@@ -339,7 +330,16 @@ def test_feature_codons_to_df():
     check_feature_codons_df(feature_codons, df)
 
 
-def test_get_cds_codons_file_empty_fasta(tmp_file):
+def test_feature_codons_to_df_empty():
+    """
+    Test :py:func:`riboviz.get_cds_codons.feature_codons_to_df`
+    with no values produces an empty data frame.
+    """
+    df = get_cds_codons.feature_codons_to_df({})
+    check_feature_codons_df({}, df)
+
+
+def test_get_cds_codons_file_empty_fasta_file(tmp_file):
     """
     Test :py:func:`riboviz.get_cds_codons.get_cds_codons_file` with an empty
     FASTA file and GFF file (:py:const:`TEST_GFF_CODONS_FILE`). A
@@ -348,8 +348,7 @@ def test_get_cds_codons_file_empty_fasta(tmp_file):
     :param tmp_file: Temporary file
     :type tmp_file: str or unicode
     """
-    # Use tmp_file as both empty FASTA input file and TSV output
-    # file
+    # Use tmp_file as both empty FASTA input file and TSV output file.
     get_cds_codons.get_cds_codons_file(tmp_file, TEST_GFF_CODONS_FILE, tmp_file)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     check_feature_codons_df({}, df)
@@ -369,6 +368,30 @@ def test_get_cds_codons_file(tmp_file):
                                        tmp_file)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     check_feature_codons_df(TEST_CDS_CODONS, df)
+
+
+def test_get_cds_codons_file_use_feature_name_true(tmp_file):
+    """
+    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_file` with
+    FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CODONS_FILE`) and ``use_feature_name=True``
+    and validate the TSV file output.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    """
+    get_cds_codons.get_cds_codons_file(TEST_FASTA_CODONS_FILE,
+                                       TEST_GFF_CODONS_FILE,
+                                       tmp_file,
+                                       use_feature_name=True)
+    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
+    # Update TEST_CDS_CODONS with the expected result when
+    # use_feature_name=True.
+    test_cds_codons = TEST_CDS_CODONS.copy()
+    codons = test_cds_codons[TEST_ID_NAME_ATTR_ID]
+    del test_cds_codons[TEST_ID_NAME_ATTR_ID]
+    test_cds_codons[TEST_ID_NAME_ATTR_NAME] = codons
+    check_feature_codons_df(test_cds_codons, df)
 
 
 def test_get_cds_codons_file_cds_format(tmp_file):
@@ -416,26 +439,3 @@ def test_get_cds_codons_file_exclude_stop_codons(tmp_file):
         name: codons[:-1] for name, codons in TEST_CDS_CODONS.items()
     }
     check_feature_codons_df(cds_codons_minus_stops, df)
-
-
-def test_get_cds_codons_file_use_feature_name_true(tmp_file):
-    """
-    Test :py:func:`riboviz.get_cds_codons.get_cds_codons_file` with
-    FASTA file (:py:const:`TEST_FASTA_CODONS_FILE`) and GFF file
-    (:py:const:`TEST_GFF_CODONS_FILE`) and ``use_feature_name=True``.
-
-    :param tmp_file: Temporary file
-    :type tmp_file: str or unicode
-    """
-    get_cds_codons.get_cds_codons_file(TEST_FASTA_CODONS_FILE,
-                                       TEST_GFF_CODONS_FILE,
-                                       tmp_file,
-                                       use_feature_name=True)
-    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    # Update TEST_CDS_CODONS with the expected result when
-    # use_feature_name=True.
-    test_cds_codons = TEST_CDS_CODONS.copy()
-    codons = test_cds_codons[TEST_ID_NAME_ATTR_ID]
-    del test_cds_codons[TEST_ID_NAME_ATTR_ID]
-    test_cds_codons[TEST_ID_NAME_ATTR_NAME] = codons
-    check_feature_codons_df(test_cds_codons, df)
