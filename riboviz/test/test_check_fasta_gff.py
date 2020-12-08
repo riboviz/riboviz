@@ -9,6 +9,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from riboviz import check_fasta_gff
+from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 from riboviz.test import data
 
 
@@ -18,9 +19,28 @@ TEST_FASTA_CHECK_FILE = os.path.join(os.path.dirname(data.__file__),
 TEST_GFF_CHECK_FILE = os.path.join(os.path.dirname(data.__file__),
                                    "test_check_fasta_gff.gff")
 """ Test GFF file in :py:mod:`riboviz.test.data`. """
+TEST_NO_ID_NAME_ATTR_PREFIX = "YAL004CNoIDNameAttr_mRNA"
+""" Prefix for name of feature in test issue. """
+TEST_NO_ID_NAME_ATTR_ISSUE = (
+    "YAL004CNoIDNameAttr_mRNA",
+    CDS_FEATURE_FORMAT.format(TEST_NO_ID_NAME_ATTR_PREFIX),
+    check_fasta_gff.NO_ID_NAME, None)
+"""
+Test issue with feature name derived from
+:py:const:`TEST_NO_ID_NAME_ATTR_PREFIX` and
+:py:const:`riboviz.fasta_gff.CDS_FEATURE_FORMAT`.
+"""
+TEST_NO_ATG_START_ID_NAME_ATTR_ID = "YAL010CNoATGStartID_CDS"
+""" Name of feature in test issue, derived from feature ID attribute. """
+TEST_NO_ATG_START_ID_NAME_ATTR_NAME = "YAL010CNoATGStartName_CDS"
+""" Name of feature in test issue, derived from feature Name attribute. """
+TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE = (
+    "YAL010CNoATGStartIDNameAttr_mRNA",
+    TEST_NO_ATG_START_ID_NAME_ATTR_ID,
+    check_fasta_gff.NO_START_CODON, "AAG")
+""" Test issue. """
 TEST_CHECK_GFF_ISSUES = [
-    ("YAL004CNoIDNameAttr_mRNA", "YAL004CNoIDNameAttr_mRNA_CDS",
-     check_fasta_gff.NO_ID_NAME, None),
+    TEST_NO_ID_NAME_ATTR_ISSUE,
     ("YAL005CNonUniqueID_mRNA", "YAL005_7CNonUniqueID_CDS",
      check_fasta_gff.DUPLICATE_FEATURE_ID, None),
     ("YAL006CNonUniqueID_mRNA", "YAL005_7CNonUniqueID_CDS",
@@ -45,8 +65,7 @@ TEST_CHECK_FASTA_ISSUES = [
      check_fasta_gff.NO_STOP_CODON, "TAN"),
     ("YAL009CNoATGStart_mRNA", "YAL009CNoATGStart_CDS",
      check_fasta_gff.NO_START_CODON, "AAG"),
-    ("YAL010CNoATGStartIDNameAttr_mRNA", "YAL010CNoATGStartID_CDS",
-     check_fasta_gff.NO_START_CODON, "AAG"),
+    TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE,
     ("YAL011CNoStop_mRNA", "YAL011CNoStop_CDS",
      check_fasta_gff.NO_STOP_CODON, "AAG"),
     ("YAL012CInternalStop_mRNA", "YAL012CInternalStop_CDS",
@@ -160,12 +179,13 @@ def test_get_fasta_gff_cds_issues_feature_format():
         feature_format="{}-Custom")
     # Update TEST_CHECK_ISSUES with the expected result when
     # custom cds_feature_format is used.
-    test_check_issues = [(s, f, t, d)
-                         for (s, f, t, d) in TEST_CHECK_ISSUES
-                         if s != "YAL004CNoIDNameAttr_mRNA"]
-    test_check_issues.insert(
-        0, ("YAL004CNoIDNameAttr_mRNA", "YAL004CNoIDNameAttr_mRNA-Custom",
-            check_fasta_gff.NO_ID_NAME, None))
+    test_check_issues = TEST_CHECK_ISSUES.copy()
+    test_check_issues.remove(TEST_NO_ID_NAME_ATTR_ISSUE)
+    test_check_issues.append(
+        (TEST_NO_ID_NAME_ATTR_ISSUE[0],
+         "{}-Custom".format(TEST_NO_ID_NAME_ATTR_PREFIX),
+         TEST_NO_ID_NAME_ATTR_ISSUE[2],
+         TEST_NO_ID_NAME_ATTR_ISSUE[3]))
     for issue in issues:
         assert issue in test_check_issues
 
@@ -182,12 +202,13 @@ def test_get_fasta_gff_cds_issues_use_feature_name_true():
         use_feature_name=True)
     # Update TEST_CHECK_ISSUES with the expected result when
     # use_feature_name=True.
-    test_check_issues = [(s, f, t, d)
-                         for (s, f, t, d) in TEST_CHECK_ISSUES
-                         if s != "YAL010CNoATGStartIDNameAttr_mRNA"]
+    test_check_issues = TEST_CHECK_ISSUES.copy()
+    test_check_issues.remove(TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE)
     test_check_issues.append(
-        ("YAL010CNoATGStartIDNameAttr_mRNA", "YAL010CNoATGStartName_CDS",
-         check_fasta_gff.NO_START_CODON, "AAG"))
+        (TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE[0],
+         TEST_NO_ATG_START_ID_NAME_ATTR_NAME,
+         TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE[2],
+         TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE[3]))
     for issue in issues:
         assert issue in test_check_issues
 
@@ -306,8 +327,6 @@ def test_check_fasta_gff(tmp_file):
                                     tmp_file)
     df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     df = df.fillna("")  # Force None to "" not "nan"
-    print(TEST_CHECK_ISSUES)
-    print(df)
     check_fasta_gff_issues_df(TEST_CHECK_ISSUES, df)
 
 
@@ -329,12 +348,13 @@ def test_check_fasta_gff_feature_format(tmp_file):
     df = df.fillna("")  # Force None to "" not "nan"
     # Update TEST_CHECK_ISSUES with the expected result when
     # custom cds_feature_format is used.
-    test_check_issues = [(s, f, t, d)
-                         for (s, f, t, d) in TEST_CHECK_ISSUES
-                         if s != "YAL004CNoIDNameAttr_mRNA"]
-    test_check_issues.insert(
-        0, ("YAL004CNoIDNameAttr_mRNA", "YAL004CNoIDNameAttr_mRNA-Custom",
-            check_fasta_gff.NO_ID_NAME, None))
+    test_check_issues = TEST_CHECK_ISSUES.copy()
+    test_check_issues.remove(TEST_NO_ID_NAME_ATTR_ISSUE)
+    test_check_issues.append(
+        (TEST_NO_ID_NAME_ATTR_ISSUE[0],
+         "{}-Custom".format(TEST_NO_ID_NAME_ATTR_PREFIX),
+         TEST_NO_ID_NAME_ATTR_ISSUE[2],
+         TEST_NO_ID_NAME_ATTR_ISSUE[3]))
     check_fasta_gff_issues_df(test_check_issues, df)
 
 
@@ -355,12 +375,11 @@ def test_check_fasta_gff_use_feature_name_true(tmp_file):
     df = df.fillna("")  # Force None to "" not "nan"
     # Update TEST_CHECK_ISSUES with the expected result when
     # custom cds_feature_format is used.
-    # Update TEST_CHECK_ISSUES with the expected result when
-    # use_feature_name=True.
-    test_check_issues = [(s, f, t, d)
-                         for (s, f, t, d) in TEST_CHECK_ISSUES
-                         if s != "YAL010CNoATGStartIDNameAttr_mRNA"]
+    test_check_issues = TEST_CHECK_ISSUES.copy()
+    test_check_issues.remove(TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE)
     test_check_issues.append(
-        ("YAL010CNoATGStartIDNameAttr_mRNA", "YAL010CNoATGStartName_CDS",
-         check_fasta_gff.NO_START_CODON, "AAG"))
+        (TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE[0],
+         TEST_NO_ATG_START_ID_NAME_ATTR_NAME,
+         TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE[2],
+         TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE[3]))
     check_fasta_gff_issues_df(test_check_issues, df)
