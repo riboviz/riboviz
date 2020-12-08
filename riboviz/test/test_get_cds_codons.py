@@ -3,8 +3,8 @@
 """
 import os
 import tempfile
-import pytest
 import pandas as pd
+import pytest
 from pyfaidx import FastaIndexingError
 from riboviz import get_cds_codons
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
@@ -332,21 +332,24 @@ def test_get_cds_codons_from_fasta_exclude_stop_codons():
     assert cds_codons == cds_codons_minus_stops
 
 
-def check_feature_codons_df(feature_codons, df):
+def check_feature_codons_csv(feature_codons, csv_file):
     """
     Check contents of given dictionary with codons for features
-    those of given DataFrame output by
-    :py:func:`riboviz.get_cds_codons.feature_codons_to_df`.
+    those of a CSV file written by
+    :py:func:`riboviz.get_cds_codons.write_feature_codons_to_csv`.
 
     :param feature_codons: Dictionary keyed by feature name and with \
     values that are lists of codons
     :type feature_codons: dict
-    :param df: Pandas DataFrame
-    :rtype: pandas.core.frame.DataFrame
+    :param csv_file: CSV file
+    :type: str or unicode
     """
+    df = pd.read_csv(csv_file, delimiter="\t", comment="#")
     num_rows, num_columns = df.shape
     assert num_columns == 3, "Unexpected number of columns"
-    for column in [get_cds_codons.GENE, get_cds_codons.POS, get_cds_codons.CODON]:
+    for column in [get_cds_codons.GENE,
+                   get_cds_codons.POS,
+                   get_cds_codons.CODON]:
         assert column in list(df.columns),\
             "Missing column {}".format(column)
     total_codon_length = sum([len(codons)
@@ -366,27 +369,33 @@ def check_feature_codons_df(feature_codons, df):
             assert codons[pos - 1] == codon
 
 
-def test_feature_codons_to_df():
+def test_write_feature_codons_to_csv(tmp_file):
     """
-    Test :py:func:`riboviz.get_cds_codons.feature_codons_to_df`
-    with values produces a data frame with the expected columns,
+    Test :py:func:`riboviz.get_cds_codons.write_feature_codons_to_csv`
+    with values produces a CSV file with the expected header, columns,
     rows and values.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
     """
     feature_codons = {
         "G1": get_cds_codons.sequence_to_codons("ATGAAATAA"),
         "G2": get_cds_codons.sequence_to_codons("ATGGGGCCCTAG")
     }
-    df = get_cds_codons.feature_codons_to_df(feature_codons)
-    check_feature_codons_df(feature_codons, df)
+    get_cds_codons.write_feature_codons_to_csv(feature_codons, tmp_file)
+    check_feature_codons_csv(feature_codons, tmp_file)
 
 
-def test_feature_codons_to_df_empty():
+def test_write_feature_codons_to_csv_empty(tmp_file):
     """
-    Test :py:func:`riboviz.get_cds_codons.feature_codons_to_df`
-    with no values produces an empty data frame.
+    Test :py:func:`riboviz.get_cds_codons.write_feature_codons_to_csv`
+    with no values produces a header-only CSV file.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
     """
-    df = get_cds_codons.feature_codons_to_df({})
-    check_feature_codons_df({}, df)
+    get_cds_codons.write_feature_codons_to_csv({}, tmp_file)
+    check_feature_codons_csv({}, tmp_file)
 
 
 def test_get_cds_codons_file_no_such_fasta_file(tmp_file):
@@ -462,8 +471,7 @@ def test_get_cds_codons_file(tmp_file):
     get_cds_codons.get_cds_codons_file(TEST_FASTA_CODONS_FILE,
                                        TEST_GFF_CODONS_FILE,
                                        tmp_file)
-    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    check_feature_codons_df(TEST_CDS_CODONS, df)
+    check_feature_codons_csv(TEST_CDS_CODONS, tmp_file)
 
 
 def test_get_cds_codons_file_use_feature_name_true(tmp_file):
@@ -480,14 +488,13 @@ def test_get_cds_codons_file_use_feature_name_true(tmp_file):
                                        TEST_GFF_CODONS_FILE,
                                        tmp_file,
                                        use_feature_name=True)
-    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     # Update TEST_CDS_CODONS with the expected result when
     # use_feature_name=True.
     test_cds_codons = TEST_CDS_CODONS.copy()
     codons = test_cds_codons[TEST_ID_NAME_ATTR_ID]
     del test_cds_codons[TEST_ID_NAME_ATTR_ID]
     test_cds_codons[TEST_ID_NAME_ATTR_NAME] = codons
-    check_feature_codons_df(test_cds_codons, df)
+    check_feature_codons_csv(test_cds_codons, tmp_file)
 
 
 def test_get_cds_codons_file_cds_format(tmp_file):
@@ -505,14 +512,13 @@ def test_get_cds_codons_file_cds_format(tmp_file):
                                        TEST_GFF_CODONS_FILE,
                                        tmp_file,
                                        cds_feature_format=cds_feature_format)
-    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     # Create expected results for custom cds_feature_format.
     test_cds_codons = TEST_CDS_CODONS.copy()
     codons = test_cds_codons[TEST_NO_ID_NAME_ATTR]
     del test_cds_codons[TEST_NO_ID_NAME_ATTR]
     test_cds_codons[
         cds_feature_format.format(TEST_NO_ID_NAME_ATTR_PREFIX)] = codons
-    check_feature_codons_df(test_cds_codons, df)
+    check_feature_codons_csv(test_cds_codons, tmp_file)
 
 
 def test_get_cds_codons_file_exclude_stop_codons(tmp_file):
@@ -530,8 +536,7 @@ def test_get_cds_codons_file_exclude_stop_codons(tmp_file):
                                        TEST_GFF_CODONS_FILE,
                                        tmp_file,
                                        exclude_stop_codons=True)
-    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
     cds_codons_minus_stops = {
         name: codons[:-1] for name, codons in TEST_CDS_CODONS.items()
     }
-    check_feature_codons_df(cds_codons_minus_stops, df)
+    check_feature_codons_csv(cds_codons_minus_stops, tmp_file)

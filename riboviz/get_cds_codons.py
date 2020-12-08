@@ -2,10 +2,10 @@
 Functions use CDS entries within a GFF file to get the codons from
 each coding sequence in a complementary FASTA file.
 """
+import csv
 import os
 import warnings
 import gffutils
-import pandas as pd
 from riboviz import provenance
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 
@@ -188,13 +188,12 @@ def get_cds_codons_from_fasta(fasta,
     return cds_codons
 
 
-def feature_codons_to_df(feature_codons):
+def write_feature_codons_to_csv(feature_codons, csv_file, delimiter="\t"):
     """
-    Given dictionary of the codons for features, keyed by feature
-    name, return a Pandas data frame with the codons, also
-    including the position of each codon in its enclosing sequence.
+    Write a dictionary of the codons for features, keyed by feature
+    name into a CSV file, including a header.
 
-    The data frame has columns:
+    The CSV file has columns:
 
     * :py:const:`GENE`: feature name.
     * :py:const:`CODON`: codon.
@@ -203,26 +202,18 @@ def feature_codons_to_df(feature_codons):
     :param feature_codons: Codons for each feature, keyed by feature \
     name
     :type feature_codons: dict(str or unicode -> list(str or unicode))
-    :return: data frame
-    :rtype: pandas.core.frame.DataFrame
+    :param csv_file: CSV file name
+    :type csv_file: str or unicode
+    :param delimiter: Delimiter
+    :type delimiter: str or unicode
     """
-    feature_codons_list = []
-    num_feature_codons = 0
-    for feature_id, codons in list(feature_codons.items()):
-        num_feature_codons += len(codons)
-        for pos, codon in zip(range(0, len(codons)), codons):
-            feature_codons_list.append({GENE: feature_id,
-                                        CODON: codon,
-                                        POS: pos + 1})
-    # Create empty DataFrame so if feature_codons and
-    # feature_codons_list are empty we still have an empty DataFrame
-    # with the column names.
-    df = pd.DataFrame(columns=[GENE, CODON, POS])
-    df = df.append(pd.DataFrame(feature_codons_list),
-                   ignore_index=True)
-    # Validate number of codons
-    assert num_feature_codons == df.shape[0]
-    return df
+    provenance.write_provenance_header(__file__, csv_file)
+    with open(csv_file, "a") as f:
+        writer = csv.writer(f, delimiter=delimiter, lineterminator='\n')
+        writer.writerow([GENE, CODON, POS])
+        for feature_id, codons in list(feature_codons.items()):
+            for pos, codon in zip(range(0, len(codons)), codons):
+                writer.writerow([feature_id, codon, pos+1])
 
 
 def get_cds_codons_file(fasta,
@@ -241,7 +232,7 @@ def get_cds_codons_file(fasta,
 
     See :py:func:`get_cds_codons_from_fasta`.
 
-    See :py:func:`feature_codons_to_df` for tab-separated values
+    See :py:func:`write_feature_codons_to_csv` for tab-separated values
     file columns.
 
     :param fasta: FASTA file
@@ -276,9 +267,4 @@ def get_cds_codons_file(fasta,
                                            exclude_stop_codons,
                                            cds_feature_format,
                                            use_feature_name)
-    cds_codons_df = feature_codons_to_df(cds_codons)
-    provenance.write_provenance_header(__file__, cds_codons_file)
-    cds_codons_df[list(cds_codons_df.columns)].to_csv(cds_codons_file,
-                                                      mode='a',
-                                                      sep=delimiter,
-                                                      index=False)
+    write_feature_codons_to_csv(cds_codons, cds_codons_file, delimiter)

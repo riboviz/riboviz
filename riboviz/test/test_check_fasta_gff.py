@@ -303,18 +303,20 @@ def test_get_fasta_gff_cds_issues_start_codons():
         assert issue in test_check_issues
 
 
-def check_fasta_gff_issues_df(issues, df):
+def check_fasta_gff_issues_csv(issues, csv_file):
     """
     Check contents of given list of tuples with issues held within
-    a DataFrame output by
-    :py:func:`riboviz.check_fasta_gff.fasta_gff_issues_to_df`.
+    a CSV file written by
+    :py:func:`riboviz.check_fasta_gff.write_fasta_gff_issues_to_csv`.
 
     :param issues: List of issues for sequences and features.
     :type issues: list(tuple(str or unicode, str or unicode, \
     str or unicode))
-    :param df: Pandas DataFrame
-    :rtype: pandas.core.frame.DataFrame
+    :param csv_file: CSV file
+    :type: str or unicode
     """
+    df = pd.read_csv(csv_file, delimiter="\t", comment="#")
+    df = df.fillna("")  # Force None to "" not "nan"
     num_rows, num_columns = df.shape
     assert num_columns == 4, "Unexpected number of columns"
     for column in [check_fasta_gff.SEQUENCE,
@@ -348,24 +350,28 @@ def check_fasta_gff_issues_df(issues, df):
                 df_issue_data, sequence, feature, issue_type)
 
 
-def test_fasta_gff_issues_to_df():
+def test_fasta_gff_issues_to_df(tmp_file):
     """
-    Test :py:func:`riboviz.check_fasta_gff.fasta_gff_issues_to_df`
-    with values produces a data frame with the expected columns,
-    rows and values.
+    Test :py:func:`riboviz.check_fasta_gff.write_fasta_gff_issues_to_csv`
+    produces a CSV file with the expected columns, rows and values.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
     """
-    df = check_fasta_gff.fasta_gff_issues_to_df(TEST_CHECK_ISSUES)
-    df = df.fillna("")  # Force None to "" not "nan"
-    check_fasta_gff_issues_df(TEST_CHECK_ISSUES, df)
+    check_fasta_gff.write_fasta_gff_issues_to_csv(TEST_CHECK_ISSUES, tmp_file)
+    check_fasta_gff_issues_csv(TEST_CHECK_ISSUES, tmp_file)
 
 
-def test_fasta_gff_issues_to_df_empty():
+def test_fasta_gff_issues_to_df_empty(tmp_file):
     """
-    Test :py:func:`riboviz.check_fasta_gff.fasta_gff_issues_to_df`
-    with no values produces an empty data frame.
+    Test :py:func:`riboviz.check_fasta_gff.write_fasta_gff_issues_to_csv`
+    with no values produces a header-only CSV file.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
     """
-    df = check_fasta_gff.fasta_gff_issues_to_df([])
-    check_fasta_gff_issues_df([], df)
+    check_fasta_gff.write_fasta_gff_issues_to_csv([], tmp_file)
+    check_fasta_gff_issues_csv([], tmp_file)
 
 
 def test_check_fasta_gff_no_such_fasta_file(tmp_file):
@@ -428,22 +434,6 @@ def test_check_fasta_gff_empty_gff_file(tmp_file):
                                         tmp_file)
 
 
-def xxx_test_check_fasta_gff_empty_fasta_file(tmp_file):
-    """
-    Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff` with an
-    empty FASTA file and GFF file (:py:const:`TEST_GFF_CHECK_FILE`)
-    and validate the TSV file output.
-
-    :param tmp_file: Temporary file
-    :type tmp_file: str or unicode
-    """
-    # Use tmp_file as both empty FASTA input file and TSV output file.
-    check_fasta_gff.check_fasta_gff(tmp_file, TEST_GFF_CHECK_FILE, tmp_file)
-    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    df = df.fillna("")  # Force None to "" not "nan"
-    check_fasta_gff_issues_df(TEST_CHECK_GFF_ISSUES, df)
-
-
 def test_check_fasta_gff(tmp_file):
     """
     Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff` with
@@ -457,9 +447,7 @@ def test_check_fasta_gff(tmp_file):
     check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,
                                     TEST_GFF_CHECK_FILE,
                                     tmp_file)
-    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    df = df.fillna("")  # Force None to "" not "nan"
-    check_fasta_gff_issues_df(TEST_CHECK_ISSUES, df)
+    check_fasta_gff_issues_csv(TEST_CHECK_ISSUES, tmp_file)
 
 
 def test_check_fasta_gff_use_feature_name_true(tmp_file):
@@ -476,8 +464,6 @@ def test_check_fasta_gff_use_feature_name_true(tmp_file):
                                     TEST_GFF_CHECK_FILE,
                                     tmp_file,
                                     use_feature_name=True)
-    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    df = df.fillna("")  # Force None to "" not "nan"
     # Create expected results when use_feature_name=True.
     test_check_issues = TEST_CHECK_ISSUES.copy()
     test_check_issues.remove(TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE)
@@ -486,7 +472,7 @@ def test_check_fasta_gff_use_feature_name_true(tmp_file):
          TEST_NO_ATG_START_ID_NAME_ATTR_NAME,
          TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE[2],
          TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE[3]))
-    check_fasta_gff_issues_df(test_check_issues, df)
+    check_fasta_gff_issues_csv(test_check_issues, tmp_file)
 
 
 def test_check_fasta_gff_feature_format(tmp_file):
@@ -504,8 +490,6 @@ def test_check_fasta_gff_feature_format(tmp_file):
                                     TEST_GFF_CHECK_FILE,
                                     tmp_file,
                                     feature_format=cds_feature_format)
-    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    df = df.fillna("")  # Force None to "" not "nan"
     # Create expected results for custom cds_feature_format.
     test_check_issues = TEST_CHECK_ISSUES.copy()
     test_check_issues.remove(TEST_NO_ID_NAME_ATTR_ISSUE)
@@ -514,7 +498,7 @@ def test_check_fasta_gff_feature_format(tmp_file):
          cds_feature_format.format(TEST_NO_ID_NAME_ATTR_PREFIX),
          TEST_NO_ID_NAME_ATTR_ISSUE[2],
          TEST_NO_ID_NAME_ATTR_ISSUE[3]))
-    check_fasta_gff_issues_df(test_check_issues, df)
+    check_fasta_gff_issues_csv(test_check_issues, tmp_file)
 
 
 def test_check_fasta_gff_start_codons(tmp_file):
@@ -531,11 +515,9 @@ def test_check_fasta_gff_start_codons(tmp_file):
                                     TEST_GFF_CHECK_FILE,
                                     tmp_file,
                                     start_codons=TEST_START_CODONS)
-    df = pd.read_csv(tmp_file, delimiter="\t", comment="#")
-    df = df.fillna("")  # Force None to "" not "nan"
     # TEST_START_CODONS includes all start codons in test data so
     # expect no NO_START_CODON issues in results.
     test_check_issues = [(s, f, i, d)
                          for (s, f, i, d) in TEST_CHECK_ISSUES
                          if i != check_fasta_gff.NO_START_CODON]
-    check_fasta_gff_issues_df(test_check_issues, df)
+    check_fasta_gff_issues_csv(test_check_issues, tmp_file)

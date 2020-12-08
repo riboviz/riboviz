@@ -2,11 +2,11 @@
 Functions to check FASTA and GFF files for compatibility.
 """
 import bisect
+import csv
 import os
 import warnings
 from Bio import SeqIO
 import gffutils
-import pandas as pd
 from pyfaidx import FastaIndexingError
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 from riboviz.fasta_gff import START_CODON
@@ -278,13 +278,12 @@ def get_fasta_gff_cds_issues(fasta,
     return issues
 
 
-def fasta_gff_issues_to_df(issues):
+def write_fasta_gff_issues_to_csv(issues, csv_file, delimiter="\t"):
     """
-    Given dictionary of the issues for features, keyed by feature
-    name, return a Pandas data frame with the issues. The data frame
-    is sorted by sequence ID.
+    Write a dictionary of the issues for features, keyed by feature
+    name into a CSV file, including a header.
 
-    The data frame has columns:
+    The CSV file has columns:
 
     * :py:const:`SEQUENCE`: sequence ID.
     * :py:const:`FEATURE`: feature ID.
@@ -294,22 +293,18 @@ def fasta_gff_issues_to_df(issues):
     :param issues: List of issues for sequences and features.
     :type issues: list(tuple(str or unicode, str or unicode, \
     str or unicode, *))
-    :return: data frame
-    :rtype: pandas.core.frame.DataFrame
+    :param csv_file: CSV file name
+    :type csv_file: str or unicode
+    :param delimiter: Delimiter
+    :type delimiter: str or unicode
     """
-    issues_list = []
-    for (sequence_id, feature_id, issue_type, issue_data) in issues:
-        issues_list.append({SEQUENCE: sequence_id,
-                            FEATURE: feature_id,
-                            ISSUE_TYPE: issue_type,
-                            ISSUE_DATA: issue_data})
-    # Create empty DataFrame so if issues and
-    # issues_list are empty we still have an empty DataFrame
-    # with the column names.
-    df = pd.DataFrame(columns=[SEQUENCE, FEATURE, ISSUE_TYPE, ISSUE_DATA])
-    df = df.append(pd.DataFrame(issues_list),
-                   ignore_index=True)
-    return df
+    provenance.write_provenance_header(__file__, csv_file)
+    with open(csv_file, "a") as f:
+        writer = csv.writer(f, delimiter=delimiter, lineterminator='\n')
+        writer.writerow([SEQUENCE, FEATURE, ISSUE_TYPE, ISSUE_DATA])
+        for (sequence_id, feature_id, issue_type, issue_data) in issues:
+            writer.writerow([sequence_id, feature_id, issue_type,
+                             issue_data])
 
 
 def check_fasta_gff(fasta, gff, issues_file,
@@ -327,7 +322,7 @@ def check_fasta_gff(fasta, gff, issues_file,
     See :py:func:`get_fasta_gff_cds_issues` for information on
     sequences, features, issue types and related data.
 
-    See :py:func:`fasta_gff_issues_to_df` for tab-separated values
+    See :py:func:`write_fasta_gff_issues_to_csv` for tab-separated values
     file columns.
 
     :param fasta: FASTA file
@@ -362,17 +357,9 @@ def check_fasta_gff(fasta, gff, issues_file,
                                       feature_format=feature_format,
                                       use_feature_name=use_feature_name,
                                       start_codons=start_codons)
-    issues_df = fasta_gff_issues_to_df(issues)
-    for _, row in issues_df.iterrows():
-        issue = row[ISSUE_TYPE]
-        if issue in ISSUE_FORMATS:
-            print(ISSUE_FORMATS[issue].format(
-                sequence=row[SEQUENCE],
-                feature=row[FEATURE],
-                data=row[ISSUE_DATA]))
-    provenance.write_provenance_header(__file__, issues_file)
-    issues_df[list(issues_df.columns)].to_csv(
-        issues_file,
-        mode='a',
-        sep=delimiter,
-        index=False)
+    write_fasta_gff_issues_to_csv(issues, issues_file, delimiter)
+    for (sequence_id, feature_id, issue_type, issue_data) in issues:
+        if issue_type in ISSUE_FORMATS:
+            print(ISSUE_FORMATS[issue_type].format(sequence=sequence_id,
+                                                   feature=feature_id,
+                                                   data=issue_data))
