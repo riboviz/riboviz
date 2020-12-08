@@ -28,7 +28,7 @@ Usage::
                           to the sequence ID to create a feature
                           name.
 
-See :py:func:`riboviz.get_cds_codons.get_cds_codons` for
+See :py:func:`riboviz.get_cds_codons.get_cds_codons_file` for
 information on the tab-separated values file format.
 """
 import argparse
