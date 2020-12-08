@@ -44,7 +44,7 @@ def get_feature_id(feature, use_feature_name=False):
     :param feature: GFF feature
     :type feature: gffutils.feature.Feature
     :param use_feature_name: If a feature defines both ``ID`` and ``Name`` \
-    attributes then use ``Name` as its identifier, otherwise use ``ID``.
+    attributes then use ``Name`` as its identifier, otherwise use ``ID``.
     :type use_feature_name: bool
     :return: Feature name or ``None``
     :rtype: str or unicode
@@ -134,7 +134,7 @@ def get_cds_codons_from_fasta(fasta,
     This format is applied to the sequence ID to create a \
     feature name.
     :param use_feature_name: If a feature defines both ``ID`` and \
-    ``Name`` attributes then use ``Name` in reporting, otherwise use \
+    ``Name`` attributes then use ``Name`` in reporting, otherwise use \
     ``ID``.
     :type use_feature_name: bool
     :return: Codons for each coding sequence, keyed by feature name
@@ -244,7 +244,7 @@ def get_cds_codons_file(fasta,
     feature name.
     :type cds_feature_format: str or unicode
     :param use_feature_name: If a feature defines both ``ID`` and \
-    ``Name`` attributes then use ``Name` in reporting, otherwise use \
+    ``Name`` attributes then use ``Name`` in reporting, otherwise use \
     ``ID``.
     :param delimiter: Delimiter
     :type delimiter: str or unicode
