@@ -6,6 +6,7 @@ import tempfile
 import pytest
 import pandas as pd
 from riboviz import get_cds_codons
+from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 from riboviz.test import data
 
 TEST_FASTA_CODONS_FILE = os.path.join(os.path.dirname(data.__file__),
@@ -18,6 +19,26 @@ TEST_GFF_NO_CDS_FILE = os.path.join(
     os.path.dirname(data.__file__),
     "test_get_cds_codons_no_codons.gff")
 """ Test GFF file in :py:mod:`riboviz.test.data` with no CDS. """
+TEST_ID_NAME_ATTR_ID = "YAL009CIDNameAttrIDCDS_CDS"
+"""
+Expected name of CDS codons entry. Defined as a constant so can be
+referred to in tests.
+"""
+TEST_ID_NAME_ATTR_NAME = "YAL009CIDNameAttrNameCDS_CDS"
+"""
+Expected name of CDS codons entry. Defined as a constant so can be
+referred to in tests.
+"""
+TEST_NO_ID_NAME_ATTR_PREFIX = "YAL008CNoIDNameAttrCDS_mRNA"
+"""
+Expected name of CDS codons entry. Defined as a constant so can be
+referred to in tests.
+"""
+TEST_NO_ID_NAME_ATTR = CDS_FEATURE_FORMAT.format(TEST_NO_ID_NAME_ATTR_PREFIX)
+"""
+Expected name of CDS codons entry. Defined as a constant so can be
+referred to in tests.
+"""
 TEST_CDS_CODONS = {
     "YAL001C_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"],
     "YAL002C_CDS": ["ATG", "GTA", "TCA", "GGA", "TAG"],
@@ -26,8 +47,8 @@ TEST_CDS_CODONS = {
     "YAL005CMultiCDS_CDS_2": ["ATG", "GAT", "TAC", "TAG"],
     "YAL005CMultiCDS_CDS_3": ["ATG", "CCA", "ATT", "TGA"],
     "YAL006CEmptyCDS_CDS": ["ATG", "TGA"],
-    "YAL008CNoIDNameAttrCDS_mRNA_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"],
-    "YAL009CIDNameAttrIDCDS_CDS": ["ATG", "AGA", "TGA"],
+    TEST_NO_ID_NAME_ATTR: ["ATG", "GCC", "CAC", "TGT", "TAA"],
+    TEST_ID_NAME_ATTR_ID: ["ATG", "AGA", "TGA"],
     "YAL010CMultiDuplicateCDS_CDS": ["ATG", "AGA", "TGA"],
     "YAL010CMultiDuplicateCDS_CDS.1": ["ATG", "GAT", "TAC", "TAG"],
     "YAL010CMultiDuplicateCDS_CDS.2": ["ATG", "CCA", "ATT", "TGA"]
@@ -244,9 +265,9 @@ def test_get_cds_codons_from_fasta_use_feature_name_true():
     # Update TEST_CDS_CODONS with the expected result when
     # use_feature_name=True.
     test_cds_codons = TEST_CDS_CODONS.copy()
-    codons = test_cds_codons["YAL009CIDNameAttrIDCDS_CDS"]
-    del test_cds_codons["YAL009CIDNameAttrIDCDS_CDS"]
-    test_cds_codons["YAL009CIDNameAttrNameCDS_CDS"] = codons
+    codons = test_cds_codons[TEST_ID_NAME_ATTR_ID]
+    del test_cds_codons[TEST_ID_NAME_ATTR_ID]
+    test_cds_codons[TEST_ID_NAME_ATTR_NAME] = codons
     assert cds_codons == test_cds_codons
 
 
@@ -264,9 +285,9 @@ def test_get_cds_codons_from_fasta_cds_format():
     # Update TEST_CDS_CODONS with the expected result when
     # custom cds_feature_format is used.
     test_cds_codons = TEST_CDS_CODONS.copy()
-    codons = test_cds_codons["YAL008CNoIDNameAttrCDS_mRNA_CDS"]
-    del test_cds_codons["YAL008CNoIDNameAttrCDS_mRNA_CDS"]
-    test_cds_codons["YAL008CNoIDNameAttrCDS_mRNA-Custom"] = codons
+    codons = test_cds_codons[TEST_NO_ID_NAME_ATTR]
+    del test_cds_codons[TEST_NO_ID_NAME_ATTR]
+    test_cds_codons["{}-Custom".format(TEST_NO_ID_NAME_ATTR_PREFIX)] = codons
     assert cds_codons == test_cds_codons
 
 
@@ -377,9 +398,9 @@ def test_get_cds_codons_file_cds_format(tmp_file):
     # Update TEST_CDS_CODONS with the expected result when
     # custom cds_feature_format is used.
     test_cds_codons = TEST_CDS_CODONS.copy()
-    codons = test_cds_codons["YAL008CNoIDNameAttrCDS_mRNA_CDS"]
-    del test_cds_codons["YAL008CNoIDNameAttrCDS_mRNA_CDS"]
-    test_cds_codons["YAL008CNoIDNameAttrCDS_mRNA-Custom"] = codons
+    codons = test_cds_codons[TEST_NO_ID_NAME_ATTR]
+    del test_cds_codons[TEST_NO_ID_NAME_ATTR]
+    test_cds_codons["{}-Custom".format(TEST_NO_ID_NAME_ATTR_PREFIX)] = codons
     check_feature_codons_df(test_cds_codons, df)
 
 
@@ -422,7 +443,7 @@ def test_get_cds_codons_file_use_feature_name_true(tmp_file):
     # Update TEST_CDS_CODONS with the expected result when
     # use_feature_name=True.
     test_cds_codons = TEST_CDS_CODONS.copy()
-    codons = test_cds_codons["YAL009CIDNameAttrIDCDS_CDS"]
-    del test_cds_codons["YAL009CIDNameAttrIDCDS_CDS"]
-    test_cds_codons["YAL009CIDNameAttrNameCDS_CDS"] = codons
+    codons = test_cds_codons[TEST_ID_NAME_ATTR_ID]
+    del test_cds_codons[TEST_ID_NAME_ATTR_ID]
+    test_cds_codons[TEST_ID_NAME_ATTR_NAME] = codons
     check_feature_codons_df(test_cds_codons, df)
