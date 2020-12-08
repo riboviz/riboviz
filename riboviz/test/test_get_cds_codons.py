@@ -20,24 +20,16 @@ TEST_GFF_NO_CDS_FILE = os.path.join(
     "test_get_cds_codons_no_codons.gff")
 """ Test GFF file in :py:mod:`riboviz.test.data` with no CDS. """
 TEST_ID_NAME_ATTR_ID = "YAL009CIDNameAttrIDCDS_CDS"
-"""
-Name of CDS codons entry. Defined as a constant so can be
-referred to in tests.
-"""
+""" Name of test CDS codons entry derived from feature ID attribute. """
 TEST_ID_NAME_ATTR_NAME = "YAL009CIDNameAttrNameCDS_CDS"
-"""
-Name of CDS codons entry. Defined as a constant so can be
-referred to in tests.
-"""
+""" Name of test CDS codons entry derived from feature Name attribute. """
 TEST_NO_ID_NAME_ATTR_PREFIX = "YAL008CNoIDNameAttrCDS_mRNA"
-"""
-Name of CDS codons entry. Defined as a constant so can be
-referred to in tests.
-"""
+""" Prefix for name of test CDS codons entry. """
 TEST_NO_ID_NAME_ATTR = CDS_FEATURE_FORMAT.format(TEST_NO_ID_NAME_ATTR_PREFIX)
 """
-Name of CDS codons entry. Defined as a constant so can be
-referred to in tests.
+Name of test CDS codons entry derived from
+:py:const:`TEST_NO_ID_NAME_ATTR_PREFIX` and
+:py:const:`riboviz.fasta_gff.CDS_FEATURE_FORMAT`.
 """
 TEST_CDS_CODONS = {
     "YAL001C_CDS": ["ATG", "GCC", "CAC", "TGT", "TAA"],
