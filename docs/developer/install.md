@@ -26,6 +26,7 @@ $ pip install sphinx
 | ------- | ----- |
 | lintr | [lintr package on CRAN](https://cran.r-project.org/package=lintr), [GitHub](https://github.com/jimhester/lintr) |
 | styleR | [StyleR package documentation](https://styler.r-lib.org/), [GitHub](https://github.com/r-lib/styler) |
+| roxygen2 | [roxygen2](https://cloud.r-project.org/web/packages/roxygen2/index.html) |
 
 
 ```console
@@ -34,13 +35,15 @@ $ R
 ```R
 > install.packages("lintr")
 > install.packages("styler")
+> install.packages("roxygen2")
 ```
 
 To load the packages before use:
 
 ```R
-> library("lintr")
-> library("styler")
+> library(lintr)
+> library(styler)
+> library(roxygen2)
 ```
 
 ---
