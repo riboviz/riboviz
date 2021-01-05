@@ -32,7 +32,7 @@ suppressMessages(library(here))
 #' @return Tidy data frame (tibble) of GFF data from GFF file 
 #' 
 #' @examples 
-#' readGFFAsDf(orf_gff_file)
+#' readGFFAsDf("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
 #' 
 #' @export
 readGFFAsDf <- purrr::compose(
@@ -41,7 +41,9 @@ readGFFAsDf <- purrr::compose(
   as_tibble,
   .dir = "forward" # functions called from left to right
 )
-#TEST: readGFFAsDf(): creates tidy dataframe (tibble) = TRUE
+#TEST: readGFFAsDf(x): creates tidy dataframe (tibble) = TRUE
+#TEST: names(readGFFAs(x)) in: c("seqnames", "start", "end", "width", "strand", "source", "type", "score", "phase", "Name"), but this may differ between GFFs?
+#TEST: UTR names in 'type' 
 
 #' Get start coordinate for gene in CDS from GFF
 #' 
@@ -99,11 +101,27 @@ GetCDS3end <- function(name, gffdf, ftype="CDS", fstrand="+") {
 
 ### Functions to read data from h5 file ###
 
-# function to get data matrix of read counts for gene and dataset from hd_file
+
+#' Get matrix of read counts for gene from .h5 file
+#' 
+#' function to get data matrix of read counts for given gene and specified dataset from hd_file
+#' 
+#' @param gene gene name to pull out read counts for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#' 
+#' @return numeric matrix of read count data for given gene in given dataset (e.g. vignette)
+#' 
+#' @examples  
+#' GetGeneDatamatrix(gene="YAL068C", dataset="vignette", hd_file="vignette/output/WTnone/WTnone.h5")
+#' 
+#' @export
 GetGeneDatamatrix <- function(gene, dataset, hd_file){
   rhdf5::h5read(file = hd_file, name = paste0("/", gene, "/", dataset, "/reads/data")) %>%
     return()
 }
+#TEST: GetGeneDatamatrix(): 
+
 
 # function to get read length stored as attribute "reads_by_len" of 'reads' in H5 file
 GetGeneReadLength <- function(gene, hd_file){
