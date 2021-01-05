@@ -66,6 +66,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | R Package | Version |
 | --------- | ------- |
 | Biostrings | 2.54.0 |
+| devtools | 2.3.2 |
 | ggplot2 | 3.3.2 |
 | git2r | 0.27.1 |
 | here | 0.1 |
@@ -86,7 +87,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
 * Python pycodestyle, pylint, pytest-cov, sphinx
-* R: lintr, styler, roxygen2
+* R: lintr, styler, roxygen2, devtools
 
 Constraints:
 
@@ -495,6 +496,7 @@ $ sudo apt-get install -y r-base-dev
 $ sudo apt-get install -y libxml2-dev
 $ sudo apt-get install -y libssl-dev
 $ sudo apt-get install -y libcurl4-openssl-dev
+$ sudo apt-get install -y libgit2-dev
 ```
 
 **Install on CentOS**
@@ -507,6 +509,7 @@ $ sudo yum install -y R-devel
 $ sudo yum install -y libxml2-devel
 $ sudo yum install -y openssl-devel
 $ sudo yum install -y libcurl-devel
+$ sudo yum install -y libgit2-devel
 ```
 
 **Troubleshooting: `the most recent version of R is not installed` or `package "..." is not available (for R version ...)`
