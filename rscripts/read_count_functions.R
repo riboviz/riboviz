@@ -15,12 +15,24 @@ suppressMessages(library(dplyr))
 suppressMessages(library(magrittr))
 suppressMessages(library(purrr))
 suppressMessages(library(here))
+#suppressMessages(library(devtools)) # TODO not sure if this needs to be enabled all the time, or just when developing?
+#suppressMessages(library(roxygen2)) # TODO not sure if this needs to be enabled all the time, or just when developing?
 
 #####
 
 ### Functions to read data from GFF ###
 
-# convert GFF to tidy dataframe
+
+#' Convert GFF to tidy dataframe
+#' 
+#' @param orf_gff_file A filepath to a riboviz generated GFF2/GFF3 annotation file
+#' 
+#' @return Tidy data frame (tibble) of GFF data from GFF file 
+#' 
+#' @examples 
+#' readGFFAsDf(orf_gff_file)
+#' 
+#' @export
 readGFFAsDf <- purrr::compose(
   rtracklayer::readGFFAsGRanges,
   data.frame, 
