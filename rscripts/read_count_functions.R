@@ -25,6 +25,8 @@ suppressMessages(library(here))
 
 #' Convert GFF to tidy dataframe
 #' 
+#' Read in positions of all exons/genes in GFF format and convert to tibble data frame
+#' 
 #' @param orf_gff_file A filepath to a riboviz generated GFF2/GFF3 annotation file
 #' 
 #' @return Tidy data frame (tibble) of GFF data from GFF file 
@@ -39,22 +41,59 @@ readGFFAsDf <- purrr::compose(
   as_tibble,
   .dir = "forward" # functions called from left to right
 )
+#TEST: readGFFAsDf(): creates tidy dataframe (tibble) = TRUE
 
-# extract start locations for each gene from GFF tidy dataframe for CDS only
+#' Get start coordinate for gene in CDS from GFF
+#' 
+#' Extract start locations for each gene from GFF tidy dataframe for CDS only
+#' 
+#' @param name character; gene name
+#' @param gffdf object; riboviz-format GFF in tidy data format, as created by readGFFAsDf()
+#' @param ftype character; gene feature to extract start location from GFF object for. Default: "CDS"
+#' @param fstrand character; which strand of GFF file data to use. Default: "+"
+#' 
+#' @return Single 'start' value of transcriptome coordinate for named gene from CDS.
+#' 
+#' @examples 
+#' GetCDS5start(gene, gff_df)
+#' 
+#' @export
 GetCDS5start <- function(name, gffdf, ftype="CDS", fstrand="+") {
   gffdf %>% 
     dplyr::filter(type==ftype, Name == name, strand == fstrand) %>% 
     dplyr::pull(start) %>%  # pull() pulls out single variable
     min 
 }
+#TEST: GetCDS5start(): returns 1 integer value = TRUE
 
-# extract end locations for each gene from GFF tidy dataframe for CDS only
+#' Get end coordinate for each gene in CDS from GFF
+#' 
+#' Extract end locations for each gene from GFF tidy dataframe for CDS only
+#' 
+#' @param name character; gene name
+#' @param gffdf object; riboviz-format GFF in tidy data format, as created by readGFFAsDf()
+#' @param ftype character; gene feature to extract end location from GFF object for. Default: "CDS"
+#' @param fstrand character; which strand of GFF file data to use. Default: "+"
+#' 
+#' @return single 'end' value of transcriptome coordinate for named gene from CDS
+#' 
+#' @examples 
+#' GetCDS3end(gene, gff_df)
+#' 
+#' @export
 GetCDS3end <- function(name, gffdf, ftype="CDS", fstrand="+") {
   gffdf %>% 
     dplyr::filter(type==ftype, Name == name, strand == fstrand) %>% 
     dplyr::pull(end) %>% 
     max 
 }
+#TEST: GetCDS3end(): returns 1 integer value = TRUE
+
+# TODO: could GetCDSstart() and GetCDSstart() be rewritten/renamed/combined to allow 
+# pulling out other features such as UTR5/UTR3 (though would need to ensure 
+# feature naming in the GFF was always consistent!), or using 1 function to do 
+# both ends depending on an extra argument?
+
 
 #####
 
