@@ -8,7 +8,7 @@ RiboViz uses three classes of branch for development:
 
 ## Developing new features, enhancements and bug fixes
 
-When developing new features, enhancements and bug fixes, developers should take create a new development branch from `develop`.
+When developing new features, enhancements and bug fixes, developers should create a new development branch from `develop`.
 
 For branches associated with GitHub issues, the naming scheme `<name>-<#>` is used, where:
 
@@ -23,8 +23,8 @@ Preferably, all branches should have an associated issue.
 
 To request that a branch be merged into `develop` create a new pull request.
 
-Decisions to merge development branches into `develop` are made by Edward Wallace, Felicity Anderson, Kostas Kavousannakis and Mike Jackon.
+Decisions to merge development branches into `develop` are made by Edward Wallace, Felicity Anderson, Kostas Kavoussanakis and Mike Jackon.
 
 ## Merging `develop` into `master` and tagging releases
 
-Decisions to merge `develop` into `master` and to tag releases are made by Edward Wallace, Felicity Anderson, Kostas Kavousannakis and Mike Jackon.
+Decisions to merge `develop` into `master` and to tag releases are made by Edward Wallace, Felicity Anderson, Kostas Kavoussanakis and Mike Jackon.
