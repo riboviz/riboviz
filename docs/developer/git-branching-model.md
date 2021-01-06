@@ -14,8 +14,9 @@ For branches associated with GitHub issues, the naming scheme `<name>-<#>` is us
 
 * `<name>` is a short name for the issue. This should be lower-case, with `-` used as a delimiter if desired.
 * `<#>` is the number of the issue as in the GitHub issue tracker.
+* If multiple developers are working on the same issue branch then a developer may want their own branch off this issue branch. These can be named `<name>-<#>-<user-name>`.
 
-For example, for the issue "Investigate cutadapt -j flag #43" the branch name was `configure-cutadapt-cores-43`.
+For example, for the issue "Investigate cutadapt -j flag #43" the branch name was `configure-cutadapt-cores-43`. If `mikej888` wanted his own branch off this issue branch, then it could be called `configure-cutadapt-cores-43-mikej888`.
 
 Preferably, all branches should have an associated issue.
 
