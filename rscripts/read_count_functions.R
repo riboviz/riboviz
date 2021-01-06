@@ -23,7 +23,7 @@ suppressMessages(library(here))
 ### Functions to read data from GFF ###
 
 
-#' Convert GFF to tidy dataframe
+#' readGFFAsDf(): Convert GFF to tidy dataframe
 #' 
 #' Read in positions of all exons/genes in GFF format and convert to tibble data frame
 #' 
@@ -32,7 +32,7 @@ suppressMessages(library(here))
 #' @return Tidy data frame (tibble) of GFF data from GFF file 
 #' 
 #' @examples 
-#' readGFFAsDf("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
+#' readGFFAsDf(orf_gff_file="vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
 #' 
 #' @export
 readGFFAsDf <- purrr::compose(
@@ -43,9 +43,10 @@ readGFFAsDf <- purrr::compose(
 )
 #TEST: readGFFAsDf(x): creates tidy dataframe (tibble) = TRUE
 #TEST: names(readGFFAs(x)) in: c("seqnames", "start", "end", "width", "strand", "source", "type", "score", "phase", "Name"), but this may differ between GFFs?
-#TEST: UTR names in 'type' 
+#TEST: UTR names in 'type' match expected? (according to GFF definitions this 
+ # should be something like threeprimeUTR or similar? But this isn't what we have in this file, which is UTR3)
 
-#' Get start coordinate for gene in CDS from GFF
+#' GetCDS5start(): Get start coordinate for gene in CDS from GFF
 #' 
 #' Extract start locations for each gene from GFF tidy dataframe for CDS only
 #' 
@@ -57,7 +58,8 @@ readGFFAsDf <- purrr::compose(
 #' @return Single 'start' value of transcriptome coordinate for named gene from CDS.
 #' 
 #' @examples 
-#' GetCDS5start(gene, gff_df)
+#' gff_df <- readGFFAsDf("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
+#' GetCDS5start("YAL068C", gff_df)
 #' 
 #' @export
 GetCDS5start <- function(name, gffdf, ftype="CDS", fstrand="+") {
@@ -68,7 +70,7 @@ GetCDS5start <- function(name, gffdf, ftype="CDS", fstrand="+") {
 }
 #TEST: GetCDS5start(): returns 1 integer value = TRUE
 
-#' Get end coordinate for each gene in CDS from GFF
+#' GetCDS3end(): Get end coordinate for each gene in CDS from GFF
 #' 
 #' Extract end locations for each gene from GFF tidy dataframe for CDS only
 #' 
@@ -80,7 +82,8 @@ GetCDS5start <- function(name, gffdf, ftype="CDS", fstrand="+") {
 #' @return single 'end' value of transcriptome coordinate for named gene from CDS
 #' 
 #' @examples 
-#' GetCDS3end(gene, gff_df)
+#' gff_df <- readGFFAsDf("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
+#' GetCDS3end("YAL068C", gff_df)
 #' 
 #' @export
 GetCDS3end <- function(name, gffdf, ftype="CDS", fstrand="+") {
@@ -91,18 +94,18 @@ GetCDS3end <- function(name, gffdf, ftype="CDS", fstrand="+") {
 }
 #TEST: GetCDS3end(): returns 1 integer value = TRUE
 
-# TODO: could GetCDSstart() and GetCDSstart() be rewritten/renamed/combined to allow 
+# TODO: could GetCDS5start() and GetCDS3end() be rewritten/renamed/combined to allow 
 # pulling out other features such as UTR5/UTR3 (though would need to ensure 
 # feature naming in the GFF was always consistent!), or using 1 function to do 
 # both ends depending on an extra argument?
-
+#TEST: could compare 'width' is same as GetCDS3end - GetCDS5start ?
 
 #####
 
 ### Functions to read data from h5 file ###
 
 
-#' Get matrix of read counts for gene from .h5 file
+#' GetGeneDatamatrix(): Get matrix of read counts for gene from .h5 file
 #' 
 #' function to get data matrix of read counts for given gene and specified dataset from hd_file
 #' 
@@ -120,17 +123,54 @@ GetGeneDatamatrix <- function(gene, dataset, hd_file){
   rhdf5::h5read(file = hd_file, name = paste0("/", gene, "/", dataset, "/reads/data")) %>%
     return()
 }
-#TEST: GetGeneDatamatrix(): 
+#TEST: GetGeneDatamatrix(): returns matrix TRUE
 
-
-# function to get read length stored as attribute "reads_by_len" of 'reads' in H5 file
-GetGeneReadLength <- function(gene, hd_file){
+#' GetGeneReadLength(): Get read length from .h5 file
+#' 
+#' function to get read length stored as attribute "reads_by_len" of 'reads' in H5 file
+#' 
+#' @param gene gene name to get read lengths for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file  name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#' 
+#' @return vector of integer read lengths for specified gene in dataset from hd_file
+#' 
+#' @examples 
+#' GetGeneReadLength(gene="YAL068C", dataset="vignette", hd_file="vignette/output/WTnone/WTnone.h5")
+#' 
+#' @export
+GetGeneReadLength <- function(gene, dataset, hd_file){
   rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["reads_by_len"]]
 }
+#TEST: GetGeneReadLength(): returns numeric vector
 
-# function to get matrix of read counts between specific positions
- # (from n_buffer before start codon to nnt_gene after start codon)
- # for gene and dataset from hd5 file hd_file, using UTR5 annotations in gff
+#' GetGeneDatamatrix5start(): Get matrix of read counts between specific positions at 5' start of gene using .h5 and .gff data
+#' 
+#' function to get matrix of read counts between specific positions 
+#' (from n_buffer before start codon to nnt_gene after start codon)
+#' for gene and dataset from hd5 file hd_file, using UTR5 annotations in gff
+#' 
+#' @param gene gene name to get read lengths for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file  name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#' @param posn_5start numeric value, transcriptome-centric coordinate value for 
+#' 5' location gene feature (e.g. CDS) starts from; ~equivalent to output of GetCDS5start()
+#' @param n_buffer numeric value, number 'n' nucleotides of UTR buffer to include in metagene plots; riboviz default (set in generate_stats_figs.R): 25
+#' @param nnt_gene numeric value, n nucleotides of gene to include in metagene plots; riboviz default (set in generate_stats_figs.R): 50 
+#' 
+#' @return matrix of read counts for specific gene using .h5 and .gff information
+#' 
+#' @examples 
+#' gff_df <- readGFFAsDf("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
+#' GetGeneDatamatrix5start(
+#'   gene="YAL068C", 
+#'   dataset="vignette",
+#'   hd_file="vignette/output/WTnone/WTnone.h5",
+#'   posn_5start = GetCDS5start("YAL068C", gff_df),
+#'   n_buffer = 25,
+#'   nnt_gene = 50)
+#' 
+#' @export
 GetGeneDatamatrix5start <- function(gene, dataset, hd_file, 
                                     posn_5start, n_buffer, nnt_gene) {
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hd_file)
@@ -155,13 +195,40 @@ GetGeneDatamatrix5start <- function(gene, dataset, hd_file,
   data_mat_5start <- data_mat_all[, n_left5:n_right3]
   return(cbind(zeropad5_mat, data_mat_5start))
 }
+#TEST: GetGeneDatamatrix5start(): returns a numeric matrix: TRUE
+#TEST: GetGeneDatamatrix5start() : number of columns in matrix should be same as nnt_gene + n_buffer
 
+#' GetGeneDatamatrix3end(): Get matrix of read counts between specific positions at 3' end of gene using .h5 and .gff data
+#' 
+#' get data matrix of read counts from nnt_gene before stop codon to n_buffer after
+#' for gene and dataset from hd5 file hd_file, using UTR3 annotations in gff
+#' if n_buffer bigger than length n_utr3, pad with zeros.
+#' 
+#' @param gene gene name to get read lengths for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file  name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#' @param posn_3end numeric value, transcriptome-centric coordinate value for 
+#' 3' location gene feature (e.g. CDS) ends at; ~equivalent to output of GetCDS3end()
+#' @param n_buffer numeric value, number 'n' nucleotides of UTR buffer to include in metagene plots; riboviz default (set in generate_stats_figs.R): 25
+#' @param nnt_gene numeric value, 'n' nucleotides of gene to include in metagene plots; riboviz default (set in generate_stats_figs.R): 50 
+#' 
+#' @return matrix of read counts for specific gene using .h5 and .gff information
+#' 
+#' @examples 
+#' gff_df <- readGFFAsDf("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
+#' GetGeneDatamatrix5start(
+#'   gene="YAL068C", 
+#'   dataset="vignette",
+#'   hd_file="vignette/output/WTnone/WTnone.h5",
+#'   posn_3end = GetCDS3end("YAL068C", gff_df),
+#'   n_buffer = 25,
+#'   nnt_gene = 50
+#'  )
+#' 
+#' @export
 GetGeneDatamatrix3end <- function(gene, dataset, hd_file, 
                                   posn_3end,
                                   n_buffer, nnt_gene) {
-  # get data matrix of read counts from nnt_gene before stop codon to n_buffer after
-  # for gene and dataset from hd5 file hd_file, using UTR3 annotations in gff
-  # if n_buffer bigger than length n_utr3, pad with zeros.
   # CHECK startpos/off-by-one
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hd_file)
   n_all <- ncol(data_mat_all)
@@ -181,7 +248,34 @@ GetGeneDatamatrix3end <- function(gene, dataset, hd_file,
   data_mat_3end <- data_mat_all[, n_left5:n_right3]
   return(cbind(data_mat_3end, zeropad3_mat))
 }
+#TEST: GetGeneDatamatrix3end(): returns a numeric matrix: TRUE
+#TEST: GetGeneDatamatrix3end() : number of columns in matrix should be same as nnt_gene + n_buffer
 
+
+#' TidyDatamatrix(): Function to take gene data matrix and return tidy dataframe
+#' 
+#' converts data matrix into readable tidy format with columns: ReadLen, Pos and Counts
+#' to hold read lengths, position (in transcriptome-centric coordinates), and number of reads 
+#' 
+#' @param data_mat single data matrix of gene data in format created by GetGeneDatamatrix5start() and GetGeneDatamatrix3end()
+#' @param startpos numeric value, start position along transcriptome-centric alignment for specific gene 
+#' @param startlen numeric value, value from which to begin counting lengths from (TODO: NOT CERTAIN OF THIS, CONFIRM!)
+#' 
+#' @return 
+#' 
+#' @examples 
+#' gff_df <- readGFFAsDf("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
+#' datamatrix_YAL068C_5start <- GetGeneDatamatrix5start(
+#'   gene="YAL068C", 
+#'   dataset="vignette",
+#'   hd_file="vignette/output/WTnone/WTnone.h5",
+#'   posn_3end = GetCDS3end("YAL068C", gff_df),
+#'   n_buffer = 25,
+#'   nnt_gene = 50
+#' )
+#' TidyDatamatrix(data_mat=datamatrix_YAL068C_5start, startpos=1, startlen=1)
+#'  
+#' @export 
 TidyDatamatrix <- function(data_mat, startpos = 1, startlen = 1) {
   # CHECK startpos/off-by-one
   positions <- startpos:(startpos + ncol(data_mat) - 1)
@@ -193,9 +287,40 @@ TidyDatamatrix <- function(data_mat, startpos = 1, startlen = 1) {
     gather(-ReadLen, key = "Pos", value = "Counts", convert = FALSE) %>%
     mutate(Pos = as.integer(Pos), Counts = as.integer(Counts))
 }
+#TEST: TidyDatamatrix(): returns tidy format data frame (tibble)
+#TEST: TidyDatamatrix() number of rows of output tibble = nrow(data_mat) * ncol(data_mat)
+#TEST: TidyDatamatrix(): column names are %in% c("ReadLen", "Pos", "Counts")
 
+#' AllGenes5StartPositionLengthCountsTibble(): function to get gene/position-specific total counts for all read lengths for ALL genes for 5' end
+#' 
+#' get gene and position specific total counts for all read lengths, from 5' start
+#' 
+#' @param gene_names vector of gene names to pull out data for (created early in generate_stats_figs.R by line: "gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name")
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#' @param gff_df object; riboviz-format GFF in tidy data format, as created by readGFFAsDf()
+#' 
+#' @return tibble (tidy data frame) of metagene data (summed across all genes), 
+#' with three columns: "ReadLen", "Pos", "Counts"
+#' 
+#' @examples
+#'  min_read_length <- 10
+#'  max_read_length <- 50
+#'  n_buffer <- 25
+#'  nnt_buffer <- 25
+#'  nnt_gene <- 50
+#'  
+#'  gff_df <- readGFFAsDf("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
+#'  gene_names <- rhdf5::h5ls(hd_file="vignette/output/WTnone/WTnone.h5", recursive = 1)$name
+#'  AllGenes5StartPositionLengthCountsTibble(
+#'    gene_names=gene_names, 
+#'    dataset="vignette", 
+#'    hd_file="vignette/output/WTnone/WTnone.h5", 
+#'    gff_df
+#'  )
+#' 
+#' @export
 AllGenes5StartPositionLengthCountsTibble <- function(gene_names, dataset, hd_file, gff_df){
-# get gene and position specific total counts for all read lengths
 gene_poslen_counts_5start_df <-
   lapply(gene_names,
          function(gene) 
@@ -210,8 +335,11 @@ gene_poslen_counts_5start_df <-
   TidyDatamatrix(startpos = -nnt_buffer + 1, startlen = min_read_length) 
 
   return(gene_poslen_counts_5start_df)
-} #to run:
-#AllGenes5PrimePositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hd_file = hd_file, gff_df = gff_df)
+} 
+#TEST: AllGenes5StartPositionLengthCountsTibble(): returns tidy format data frame (tibble)
+#TEST: AllGenes5StartPositionLengthCountsTibble(): tibble has 3 columns
+#TEST: AllGenes5StartPositionLengthCountsTibble() number of rows of output tibble = nrow(data_mat) * ncol(data_mat)
+#TEST: AllGenes5StartPositionLengthCountsTibble(): the column names are %in% c("ReadLen", "Pos", "Counts")
 
 # gives: 
 # > str(gene_poslen_counts_5start_df)
@@ -220,7 +348,35 @@ gene_poslen_counts_5start_df <-
 #   $ Pos    : int  -24 -24 -24 -24 -24 -24 -24 -24 -24 -24 ...
 #   $ Counts : int  0 0 0 0 0 0 5 4 6 0 ...
 
-
+#' AllGenes3EndPositionLengthCountsTibble(): function to get gene/position-specific total counts for all read lengths for ALL genes for 3' end
+#' 
+#' get gene and position specific total counts for all read lengths, from 3' end
+#' 
+#' @param gene_names vector of gene names to pull out data for (created early in generate_stats_figs.R by line: "gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name")
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#' @param gff_df object; riboviz-format GFF in tidy data format, as created by readGFFAsDf()
+#' 
+#' @return tibble (tidy data frame) of metagene data (summed across all genes), 
+#' with three columns: "ReadLen", "Pos", "Counts"
+#' 
+#' @examples
+#'  min_read_length <- 10
+#'  max_read_length <- 50
+#'  n_buffer <- 25
+#'  nnt_buffer <- 25
+#'  nnt_gene <- 50
+#'  
+#'  gff_df <- readGFFAsDf("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
+#'  gene_names <- rhdf5::h5ls(hd_file="vignette/output/WTnone/WTnone.h5", recursive = 1)$name
+#'  AllGenes3EndPositionLengthCountsTibble(
+#'    gene_names=gene_names, 
+#'    dataset="vignette", 
+#'    hd_file="vignette/output/WTnone/WTnone.h5", 
+#'    gff_df
+#'  )
+#' 
+#' @export
 AllGenes3EndPositionLengthCountsTibble <- function(gene_names, dataset, hd_file, gff_df){
   gene_poslen_counts_3end_df <-
     lapply(gene_names,
@@ -237,8 +393,11 @@ AllGenes3EndPositionLengthCountsTibble <- function(gene_names, dataset, hd_file,
     TidyDatamatrix(startpos = -nnt_gene + 1, startlen = min_read_length)
   
   return(gene_poslen_counts_3end_df)
-} #to run:
-#AllGenes3EndPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hd_file = hd_file, gff_df = gff_df)
+} 
+#TEST: AllGenes3EndPositionLengthCountsTibble(): returns tidy format data frame (tibble)
+#TEST: AllGenes3EndPositionLengthCountsTibble(): tibble has 3 columns
+#TEST: AllGenes3EndPositionLengthCountsTibble(): number of rows of output tibble = nrow(data_mat) * ncol(data_mat)
+#TEST: AllGenes3EndPositionLengthCountsTibble(): the column names are %in% c("ReadLen", "Pos", "Counts")
 
 # # gives:
 # # > str(gene_poslen_counts_3end_df)
@@ -247,7 +406,35 @@ AllGenes3EndPositionLengthCountsTibble <- function(gene_names, dataset, hd_file,
 # #   $ Pos    : int  -49 -49 -49 -49 -49 -49 -49 -49 -49 -49 ...
 # #   $ Counts : int  0 0 0 0 0 49 62 27 219 50 ...
 
-
+#' plot_ribogrid(): function to plot a ribogrid using position, read length and count data
+#' 
+#' take tidy format data across all genes and plot metagene ribogrid 
+#' 
+#' @param tidymat object, tibble (tidy data frame) of metagene data (summed across all genes), 
+#' with three columns: "ReadLen", "Pos", "Counts" ; as created by 
+#' AllGenes5StartPositionLengthCountsTibble() or AllGenes3EndPositionLengthCountsTibble()
+#' 
+#' @return ggplot object; e.g start_codon_ribogrid_plot
+#' 
+#' @examples 
+#'  min_read_length <- 10
+#'  max_read_length <- 50
+#'  n_buffer <- 25
+#'  nnt_buffer <- 25
+#'  nnt_gene <- 50
+#'  
+#'  gff_df <- readGFFAsDf("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
+#'  gene_names <- rhdf5::h5ls(hd_file="vignette/output/WTnone/WTnone.h5", recursive = 1)$name
+#'  gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(
+#'    gene_names=gene_names, 
+#'    dataset="vignette", 
+#'    hd_file="vignette/output/WTnone/WTnone.h5", 
+#'    gff_df
+#'  )
+#'  
+#' plot_ribogrid(gene_poslen_counts_5start_df)
+#' 
+#' @export
 plot_ribogrid <- function(tidymat) {
   ggplot(data = tidymat, aes(x = Pos, y = ReadLen, fill = Counts)) +
     geom_tile() +
@@ -255,7 +442,39 @@ plot_ribogrid <- function(tidymat) {
     theme(panel.grid = element_blank()) +
     labs(x = "position of read 5' end", y = "read length")
 }
+#TEST: plot_ribogrid(): does this return a ggplot object?
+#TEST: plot_ribogrid(): ? are there any other good 'tests' for plot objects? TODO: Investigate this.
 
+#' barplot_ribogrid(): function to plot ribogrid barplot using position, read length and count data
+#' 
+#' take tidy format data across all genes and plot metagene ribogrid split by read length
+#' 
+#' @param tidymat object, tibble (tidy data frame) of metagene data (summed across all genes), 
+#' with three columns: "ReadLen", "Pos", "Counts" ; as created by 
+#' AllGenes5StartPositionLengthCountsTibble() or AllGenes3EndPositionLengthCountsTibble()
+#' @param small_read_range numeric range of read lengths to plot barplots for (default: 26:32)
+#' 
+#' @return ggplot object; e.g start_codon_ribogrid_bar_plot
+#' 
+#' @examples 
+#'  min_read_length <- 10
+#'  max_read_length <- 50
+#'  n_buffer <- 25
+#'  nnt_buffer <- 25
+#'  nnt_gene <- 50
+#'  
+#'  gff_df <- readGFFAsDf("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
+#'  gene_names <- rhdf5::h5ls(hd_file="vignette/output/WTnone/WTnone.h5", recursive = 1)$name
+#'  gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(
+#'    gene_names=gene_names, 
+#'    dataset="vignette", 
+#'    hd_file="vignette/output/WTnone/WTnone.h5", 
+#'    gff_df
+#'  )
+#'  
+#' barplot_ribogrid(gene_poslen_counts_5start_df)
+#' 
+#' @export
 barplot_ribogrid <- function(tidymat, small_read_range = 26:32) {
   ggplot(
     data = filter(tidymat, ReadLen %in% small_read_range),
@@ -266,22 +485,12 @@ barplot_ribogrid <- function(tidymat, small_read_range = 26:32) {
     scale_y_continuous(expand = c(0, 0)) +
     labs(x = "position of read 5' end", y = "count")
 }
-
-# GetGeneDatamatrix5start(gene="YAL003W",dataset="vignette",hd_file,gff=gff) %>%
-# TidyDatamatrix(startpos=-nnt_buffer,startlen=min_read_length) %>%
-#   plot_ribogrid
-# GetGeneDatamatrix3end(gene="YAL003W",dataset="vignette",hd_file,gff=gff)
-
-GetNTPeriod <- function(gene, dataset, hd_file, left, right) {
-  # previous version of script; not currently used
-  data_mat <- GetGeneDatamatrix(gene, dataset, hd_file)
-  pos_sum <- colSums(data_mat) # Position-specific sum of reads of all lengths
-  pos_sum <- pos_sum[left:(ncol(data_mat) - right)] # Ignore reads in parts of the buffer region defined by left/right
-  return(pos_sum)
-}
+#TEST: barplot_ribogrid(): does this return a ggplot object?
+#TEST: barplot_ribogrid(): ? are there any other good 'tests' for plot objects? TODO: Investigate this.
 
 #####
 ## functions for position specific distribution of reads
+
 # codon-specific reads for RPF datasets
 GetCodonPositionReads <- function(gene, dataset, hd_file, left, right, min_read_length) {
   # @ewallace: this needs documentation of inputs and outputs
