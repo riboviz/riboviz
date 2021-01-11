@@ -20,6 +20,10 @@ For example, for the issue "Investigate cutadapt -j flag #43" the branch name wa
 
 Preferably, all branches should have an associated issue.
 
+Please do **not** commit large (many megabytes or gigabytes) data files into the repository. Data files that are a few megabytes in size *are* permitted if required for test code.
+
+Please be reassured that so long as you do **not** merge branches into `develop` or `master` or commit large data files then any mistakes you make should be relatively straightforward to recover from!
+
 ## Merging development branches into `develop`
 
 To request that a branch be merged into `develop` create a new pull request.
