@@ -161,7 +161,7 @@ CalculateReadLengths <- function(gene_names, dataset, hd_file){
   
   # read length-specific read counts stored as attributes of 'reads' in H5 file
   gene_sp_read_length <- lapply(gene_names, function(gene) {
-    GetGeneReadLength(gene, hd_file)
+    GetGeneReadLength(gene, dataset, hd_file)
   })
   
   # sum reads of each length across all genes
