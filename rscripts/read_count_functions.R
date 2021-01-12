@@ -790,16 +790,32 @@ CombinePValuesFisher <- function(p) {
 }
 #TEST: CombinePValuesFisher(): TODO
 
-combinePValuesStouffer <- function(p) {
-  # Stouffer's “inverse normal” method (1-sided) to combine p-values
+#' CombinePValuesStouffer(): function using Stouffer's "inverse normal" 1-sided method to combine p-values
+#' 
+#' @param p numeric, p-value
+#' 
+#' @return TODO
+#' 
+#' @examples TODO
+#' 
+#' @export
+CombinePValuesStouffer <- function(p) {
   pnorm(sum(qnorm(p)) / sqrt(length(p)))
 }
+#TEST: CombinePValuesStouffer(): TODO
 
+#' WilcoxTestFrame(): function to run Wilcox rank-sum paired test to check frame 0 has more reads
+#' 
+#' @param x vector
+#' @param left integer for starting position, frame 0
+#' @param right integer for ending position
+#' 
+#' @return TODO
+#' 
+#' @examples TODO
+#' 
+#' @export 
 WilcoxTestFrame <- function(x, left, right) {
-  # Wilcoxon rank-sum paired test that frame 0 has more reads
-  #   x:     vector
-  #   left:  integer for starting position, frame 0
-  #   right: integer for ending position
   gathered_by_frame <- GatherByFrameCodon(x, left, right)
 
   wtresults_fr0vs1 <-
@@ -819,13 +835,25 @@ WilcoxTestFrame <- function(x, left, right) {
     pval_fr0vs1 = wtresults_fr0vs1$p.value,
     pval_fr0vs2 = wtresults_fr0vs2$p.value,
     pval_fr0vsboth =
-      combinePValuesStouffer(c(
+      CombinePValuesStouffer(c(
         wtresults_fr0vs1$p.value,
         wtresults_fr0vs2$p.value
       ))
   ))
 }
+#TEST: WilcoxTestFrame(): TODO
 
+#' GetGeneReadFrame(): function to find frame for gene
+#' 
+#' @param gene gene name to get read lengths for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#' 
+#' @return tibble of counts in each frame (0, 1, 2) per gene with combined (via Stouffer's inverse normal method) p-values from Wilcox test
+#' 
+#' @examples TODO
+#' 
+#' @export 
 GetGeneReadFrame <- function(gene, dataset, hd_file, left, right, min_read_length,
                              asite_displacement_length = data.frame(
                                read_length = c(28, 29, 30),
@@ -850,9 +878,19 @@ GetGeneReadFrame <- function(gene, dataset, hd_file, left, right, min_read_lengt
     pval_fr0vsboth = wt_frame[3]
   )
 }
+#TEST: GetGeneReadFrame(): returns tibble; TRUE
+#TEST: GetGeneReadFrame(): column names in c("gene", "Ct_fr0", "Ct_fr1", "Ct_fr2", "pval_fr0vs1", "pval_fr0vs2", "pval_fr0vsboth")
 
+#' CalcReadFrameProportion(): function to calculate read frame proportions from read frame counts
+#' 
+#' @param read_frame_df data frame of read frame counts
+#' 
+#' @return data frame
+#' 
+#' @examples TODO
+#' 
+#' @export
 CalcReadFrameProportion <- function(read_frame_df) {
-  # calculate read frame proportions from data frame with read frame counts,
   stopifnot(all(c("Ct_fr0", "Ct_fr1", "Ct_fr2") %in% names(read_frame_df)))
   read_frame_df %>%
     mutate(
@@ -863,9 +901,19 @@ CalcReadFrameProportion <- function(read_frame_df) {
     ) %>%
     return()
 }
+#TEST: CalcReadFrameProportion(): returns a data frame; TRUE
 
+#' BoxplotReadFrameProportion(): function to plot proportion of read frames as boxplot
+#' 
+#' @param read_frame_df data frame of read frame counts
+#' @param feat_names character, name of feature being plotted
+#' 
+#' @return TODO
+#' 
+#' @examples TODO
+#' 
+#' @export
 BoxplotReadFrameProportion <- function(read_frame_df, feat_names = "gene") {
-  # Plot proportion of read frames as boxplot.
   rf_prop_long <- read_frame_df %>%
     CalcReadFrameProportion() %>%
     select(c(feat_names, "p_fr0", "p_fr1", "p_fr2")) %>%
@@ -883,11 +931,24 @@ BoxplotReadFrameProportion <- function(read_frame_df, feat_names = "gene") {
       panel.grid.major.x = element_blank()
     )
 }
-
+#TEST: BoxplotReadFrameProportion(): returns ggplot object: TRUE
 
 #####
 ## biases in nucleotide composition along mapped read lengths
 
+#' GetNTReadPosition(): function to get nucleotide read positions
+#' 
+#' @param gene gene name to get read lengths for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#' @param length_id numeric value of length id to allow subsetting for reads of particular length
+#' @param min_read_length integer, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
+#' 
+#' @return IRanges object (from IRanges R package)
+#' 
+#' @examples TODO
+#' 
+#' @export
 GetNTReadPosition <- function(gene, dataset, hd_file, length_id, min_read_length) {
   reads_pos_len <- GetGeneDatamatrix(gene, dataset, hd_file)[length_id, ] # Get reads of a particular length
   reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (length_id + min_read_length - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
@@ -895,8 +956,22 @@ GetNTReadPosition <- function(gene, dataset, hd_file, length_id, min_read_length
   pos_IR <- IRanges::IRanges(start = pos, width = (length_id + min_read_length - 1)) # Create an IRanges object for position-specific reads of a particular length
   return(pos_IR)
 }
+#TEST: GetNTReadPosition(): returns IRanges object: TRUE (not sure if this is easily testable?)
 
-cons_mat <- function(gene, pos_IR, type = "count", cframe = 0, length_id) {
+#' PositionSpecificConsensusMatrix(): function to create consensus matrix returning counts or frequencies based on position-specific reads of genes
+#' 
+#' @param gene gene name 
+#' @param pos_IR IRanges object (from IRanges R package) as output by GetNTReadPosition()
+#' @param type character, type of operation to perform; "count" for counts (default), or "freq" for frequencies
+#' @param cframe numeric in c(0, 1, 2), coding frame 
+#' @param length_id numeric value of length id to allow subsetting for reads of particular length
+#' 
+#' @return matrix of counts or frequencies by position for gene
+#' 
+#' @examples TODO
+#' 
+#' @export
+PositionSpecificConsensusMatrix <- function(gene, pos_IR, type = "count", cframe = 0, length_id) {
   pos_IR_frame <- pos_IR[start(pos_IR) %% 3 == cframe] # Get position-specific reads of a particular length and ORF frame
   if (length(pos_IR_frame)) {
     # read in coding sequences
@@ -910,83 +985,82 @@ cons_mat <- function(gene, pos_IR, type = "count", cframe = 0, length_id) {
   }
   return(pos_nt)
 }
+#TEST: PositionSpecificConsensusMatrix(): returns matrix; TRUE
 
-comb_freq <- function(allfr) {
+#' CombineFrequencies(): function to get position-specific frequencies across all genes
+#' 
+#' @param allfr matrix, multi-gene position-specific consensus matrix
+#' 
+#' @return TODO
+#' 
+#' @examples TODO
+#' 
+#' @export
+CombineFrequencies <- function(allfr) {
   alph <- c("A", "C", "G", "T")
   nt_sp_freq <- c()
   for (i in alph) {
-    nt_sp_freq <- rbind(nt_sp_freq, colSums(allfr[rownames(allfr) == i, ])) # Get position-specific counts/freq of a nt across all genes for reads of a poarticular length and frame
+    nt_sp_freq <- rbind(nt_sp_freq, colSums(allfr[rownames(allfr) == i, ])) # Get position-specific counts/freq of a nt across all genes for reads of a particular length and frame
   }
   nt_sp_freq <- t(nt_sp_freq / colSums(nt_sp_freq)) # Convert total counts to freq OR freq to normalized frequencies
   colnames(nt_sp_freq) <- alph
   return(nt_sp_freq)
 }
+#TEST: CombineFrequencies(): TODO
 
 #####
 # read length and density functions
 
-# read length-specific total counts stored as attributes of 'reads_total' in H5 file
+#' GetGeneLength(): function to read length-specific total counts stored as attributes of 'reads_total' in H5 file
+#' 
+#' @param gene gene name to get reads counts for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#' 
+#' @return numeric, length of gene in nucleotides
+#' 
+#' @examples TODO
+#'
+#' @export
 GetGeneLength <- function(gene, dataset, hd_file) {
   start_codon_pos <- rhdf5::h5readAttributes(file = hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["start_codon_pos"]][1]
   stop_codon_pos <- rhdf5::h5readAttributes(file = hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["stop_codon_pos"]][1]
   return(stop_codon_pos - start_codon_pos)
 }
+#TEST: GetGeneLength(): returns integer numeric; TRUE
+#TEST: GetGeneLength(): could possibly check gff 'width' value for gene named against value returned by GetGeneLength()?
+#TEST: GetGeneLength(): returns numeric greater than 0
 
+#' GetGeneReadsTotal(): function to get total reads per gene from .h5 file
+#' 
+#' @param gene gene name to get reads counts for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#' 
+#' @return numeric value, total number of reads per named gene
+#' 
+#' @examples TODO
+#' 
+#' @export
 GetGeneReadsTotal <- function(gene, dataset, hd_file) {
   rhdf5::h5readAttributes(file = hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["reads_total"]]
 }
+#TEST: GetGeneReadsTotal(): returns integer numeric; TRUE
+#TEST: GetGeneReadsTotal(): returns integer >= 0; TRUE
 
-GetGeneReadDensity <- function(gene, dataset, hd_file, buffer = 50) {
-  # buffer
-  GetGeneReadsTotal(gene, dataset, hd_file) / (GetGeneLength(gene, dataset, hd_file) + 50)
+#' GetGeneReadDensity(): function to get density of reads per gene
+#' 
+#' @param gene gene name to get density of reads for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#' @param other_buffer numeric, default: 50. TODO: Rename sensibly. Previously this was named 'buffer' but does not relate to yaml 'buffer' parameter with default of 250. Relevant to riboviz/#83 issue 
+#' 
+#' @return TODO
+#' 
+#' @examples TODO
+#' 
+#' @export 
+GetGeneReadDensity <- function(gene, dataset, hd_file, other_buffer = 50) {
+  GetGeneReadsTotal(gene, dataset, hd_file) / (GetGeneLength(gene, dataset, hd_file) + other_buffer)
 }
-
-
-# codon-specific reads for RPF datasets
-GetCodonPositionReads <- function(hd_file, gene, dataset, left, right, min_read_length) {
-  # @ewallace: this needs documentation of inputs and outputs
-  length_id <- 28 - min_read_length + 1
-  reads_pos <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
-  reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
-  end_reads_pos_subset <- ncol(reads_pos_subset) # Number of columns of the subset
-  
-  l28 <- RcppRoll::roll_suml(reads_pos_subset[length_id, 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[14, 2:end_reads_pos_subset]), 3)] # Map reads of length 28 to codons
-  l29 <- RcppRoll::roll_suml(reads_pos_subset[(length_id + 1), 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[15, 2:end_reads_pos_subset]), 3)] # Map reads of length 29 to codons
-  l30 <- RcppRoll::roll_suml(reads_pos_subset[(length_id + 2), 1:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[16, 1:end_reads_pos_subset]), 3)] # Map reads of length 30 to codons
-  
-  cod_sp_counts <- l28 + l29 + l30 # Sum of reads of lengths 28-30 at each codon
-  cod_sp_counts <- cod_sp_counts[1:(length(cod_sp_counts) - 1)]
-  return(cod_sp_counts)
-}
-
-# Nt-specific coverage for mRNA datasets
-GetMRNACoverage <- function(hd_file, gene, dataset, left, right, read_range, min_read_length, buffer) {
-  reads_pos <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
-  reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS mapped reads are considered
-  
-  nt_IR_list <- lapply(read_range, function(w) {
-    IRanges::IRanges(start = rep(1:ncol(reads_pos_subset), reads_pos_subset[(w - min_read_length + 1), ]), width = w)
-  }) # Create list of IRanges for position-specific reads of all length
-  nt_IR <- unlist(as(nt_IR_list, "IRangesList")) # Combine IRanges from different read lengths
-  nt_cov <- IRanges::coverage(nt_IR) # Estimate nt-specific coverage of mRNA reads
-  
-  # Subset coverage to only CDS
-  nt_counts <- rep.int(S4Vectors::runValue(nt_cov), S4Vectors::runLength(nt_cov))
-  if (length(nt_counts) >= (buffer - left)) {
-    nt_counts <- nt_counts[(buffer - left):length(nt_counts)]
-  } else {
-    nt_counts <- 0
-  }
-  
-  cds_length <- ncol(reads_pos_subset) - (buffer - left - 1) # Length of CDS
-  nt_sp_counts <- rep(0, cds_length)
-  
-  if (length(nt_counts) < cds_length) {
-    if (length(nt_counts) > 0) {
-      nt_sp_counts[1:length(nt_counts)] <- nt_counts
-    }
-  } else {
-    nt_sp_counts <- nt_counts[1:cds_length]
-  }
-  return(nt_sp_counts)
-}
+#TEST: GetGeneReadDensity(): TODO
