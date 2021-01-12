@@ -1,5 +1,5 @@
 """
-Functions to check FASTA and GFF files for compatibility.
+Functions to check FASTA and GFF files for coding sequence (CDS) features.
 """
 import bisect
 import csv
@@ -16,9 +16,9 @@ from riboviz.get_cds_codons import sequence_to_codons
 from riboviz import provenance
 
 SEQUENCE = "Sequence"
-""" FASTA-GFF compatibility column name (sequence ID). """
+""" FASTA-GFF column name (sequence ID). """
 FEATURE = "Feature"
-""" FASTA-GFF compatibility column name (feature ID). """
+""" FASTA-GFF column name (feature ID). """
 WILDCARD = "*"
 """
 Name for sequences or features in issues that apply to multiple
@@ -30,29 +30,29 @@ Name for sequences or features in issues that apply exclusively
 to features or sequences only.
 """
 ISSUE_TYPE = "Issue"
-""" FASTA-GFF compatibility column name (issue type). """
+""" FASTA-GFF column name (issue type). """
 ISSUE_DATA = "Data"
-""" FASTA-GFF compatibility column name (issue data). """
+""" FASTA-GFF column name (issue data). """
 INCOMPLETE_FEATURE = "IncompleteFeature"
-""" FASTA-GFF compatibility issue column value. """
+""" FASTA-GFF issue column value. """
 NO_START_CODON = "NoStartCodon"
-""" FASTA-GFF compatibility issue column value. """
+""" FASTA-GFF issue column value. """
 NO_STOP_CODON = "NoStopCodon"
-""" FASTA-GFF compatibility issue column value. """
+""" FASTA-GFF issue column value. """
 INTERNAL_STOP_CODON = "InternalStopCodon"
-""" FASTA-GFF compatibility issue column value. """
+""" FASTA-GFF issue column value. """
 NO_ID_NAME = "NoIdName"
-""" FASTA-GFF compatibility issue column value. """
+""" FASTA-GFF issue column value. """
 DUPLICATE_FEATURE_ID = "DuplicateFeatureId"
-""" FASTA-GFF compatibility issue column value. """
+""" FASTA-GFF issue column value. """
 DUPLICATE_FEATURE_IDS = "DuplicateFeatureIds"
-""" FASTA-GFF compatibility issue column value. """
+""" FASTA-GFF issue column value. """
 MULTIPLE_CDS = "MultipleCDS"
-""" FASTA-GFF compatibility issue column value. """
+""" FASTA-GFF issue column value. """
 SEQUENCE_NOT_IN_FASTA = "SequenceNotInFASTA"
-""" FASTA-GFF compatibility issue column value. """
+""" FASTA-GFF issue column value. """
 SEQUENCE_NOT_IN_GFF = "SequenceNotInGFF"
-""" FASTA-GFF compatibility issue column value. """
+""" FASTA-GFF issue column value. """
 ISSUE_FORMATS = {
     INCOMPLETE_FEATURE: "Sequence {sequence} feature {feature} has length not divisible by 3",
     NO_START_CODON: "Sequence {sequence} feature {feature} doesn't start with a recognised start codon but with {data}",
@@ -65,7 +65,7 @@ ISSUE_FORMATS = {
     SEQUENCE_NOT_IN_GFF: "Sequence {sequence} in FASTA file is not in GFF file",
     DUPLICATE_FEATURE_IDS: "Non-unique 'ID' attribute {feature} ({data} occurrences)"
 }
-""" Format strings for printing compatibility issues. """
+""" Format strings for printing issues. """
 
 
 def get_fasta_sequence_ids(fasta):
@@ -95,10 +95,11 @@ def get_fasta_gff_cds_issues(fasta,
                              use_feature_name=False,
                              start_codons=[START_CODON]):
     """
-    Check FASTA and GFF files for compatibility and return a list of
-    issues for relating to coding sequences, ``CDS``, features. A list
-    of tuples of form (sequence ID, feature ID ('' if not applicable
-    to the issue), issue type, issue data) is returned.
+    Check FASTA and GFF files' coding sequence (CDS) features and
+    return a list of issues for relating to coding sequences, ``CDS``,
+    features. A list of tuples of form (sequence ID, feature ID ('' if
+    not applicable to the issue), issue type, issue data) is
+    returned. 
 
     The sequence ID is one of:
 
@@ -145,6 +146,18 @@ def get_fasta_gff_cds_issues(fasta,
       this issue, the sequence ``ID`` attribute is
       :py:const:`WILDCARD`. The supplementary issue data is a
       count of the number of features with the same ID.
+=======
+    Check FASTA and GFF files for coding sequence (CDS) features.
+    
+    Check that, for every CDS annotated in the GFF:
+
+    * The CDS has length divisible by 3.
+    * The beginning of the CDS is a start codon (ATG; translates to
+      ``M``).
+    * The stop of the CDS is a stop codon (TAG, TGA, TAA; translates
+      to ``*``)
+    * There are no stop codons internal to the CDS.
+>>>>>>> develop
 
     The following issues are reported for sequences defined in the GFF file:
 
@@ -313,9 +326,9 @@ def check_fasta_gff(fasta, gff, issues_file,
                     start_codons=[START_CODON],
                     delimiter="\t"):
     """
-    Check FASTA and GFF files for compatibility and both print and
-    save a list of issues for each sequence and coding sequence,
-    ``CDS``, feature.
+    Check FASTA and GFF files for coding sequence (CDS) features
+    and both print and save a list of issues for each sequence and
+    coding sequence, ``CDS``, feature.
 
     A tab-separated values file of the issues identified is saved.
 

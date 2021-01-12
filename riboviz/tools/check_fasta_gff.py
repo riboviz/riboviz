@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Check FASTA and GFF files for compatibility.
+Check FASTA and GFF files for coding sequence (CDS) features.
 
 Usage::
 
@@ -45,7 +45,7 @@ def parse_command_line_options():
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
-        description="Check FASTA and GFF files for compatibility")
+        description="Check FASTA and GFF files for coding sequence (CDS) features.")
     parser.add_argument("-f",
                         "--fasta",
                         dest="fasta",
