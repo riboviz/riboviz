@@ -1,6 +1,5 @@
 suppressMessages(library(getopt, quietly = T))
-# Determine location of provenance.R relative to current file
-source(file.path(dirname(getopt::get_Rscript_filename()), "provenance.R"))
+suppressMessages(library(here))
 suppressMessages(library(Rsamtools, quietly = T))
 suppressMessages(library(rtracklayer, quietly = T))
 suppressMessages(library(rhdf5, quietly = T))
@@ -9,6 +8,21 @@ suppressMessages(library(optparse,quietly = T))
 suppressMessages(library(RcppRoll, quietly = T))
 suppressMessages(library(ggplot2, quietly = T))
 suppressMessages(library(tidyr, quietly = T))
+# Handle interactive session behaviours or use get_Rscript_filename():
+if (interactive()) {
+  # Use hard-coded script name and assume script is in "rscripts"
+  # directory. This assumes that interactive R is being run within
+  # the parent of rscripts/ but imposes no other constraints on
+  # where rscripts/ or its parents are located.
+  this_script <- "bam_to_h5.R"
+  path_to_this_script <- here("rscripts", this_script)
+  source(here::here("rscripts", "provenance.R"))
+} else {
+  # Deduce file name and path using reflection as before.
+  this_script <- getopt::get_Rscript_filename()
+  path_to_this_script <- this_script
+  source(file.path(dirname(this_script), "provenance.R"))
+}
 
 reads_to_list <- function(gene_location, bam_file, read_range, left_flank,right_flank, mult_exon=TRUE)
 {
