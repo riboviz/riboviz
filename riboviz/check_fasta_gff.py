@@ -8,11 +8,14 @@ import gffutils
 
 def check_fasta_gff(fasta, gff):
     """
-    Check FASTA and GFF files for compatibility. Check that:
+    Check FASTA and GFF files for coding sequence (CDS) features.
+    
+    Check that, for every CDS annotated in the GFF:
 
-    * The beginning of every CDS is a start codon (ATG; translates to
+    * The CDS has length divisible by 3.
+    * The beginning of the CDS is a start codon (ATG; translates to
       ``M``).
-    * The stop of every CDS is a stop codon (TAG, TGA, TAA; translates
+    * The stop of the CDS is a stop codon (TAG, TGA, TAA; translates
       to ``*``)
     * There are no stop codons internal to the CDS.
 
