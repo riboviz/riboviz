@@ -41,5 +41,6 @@ rrna_index_prefix: yeast_rRNA
 sample_sheet: null
 secondary_id: NULL
 stop_in_cds: FALSE
+trim_5p_mismatches: TRUE
 t_rna_file: data/yeast_tRNAs.tsv
 umi_regexp: null
