@@ -131,7 +131,7 @@ Either way, you have to wait for a free node to become available or for Eddie to
 
 ```console
 $ source activate riboviz
-````
+```
 
 ### Configure R packages path
 
@@ -174,7 +174,7 @@ In future you need only to run:
 
 ```console
 $ source set-riboviz-env.sh
-````
+```
 
 ---
 
@@ -187,7 +187,7 @@ $ cd riboviz/riboviz
 ```
 
 <details>
-  <summary>To run the Python workflow (Deprecated):</summary>
+  <summary>Details on running the Python workflow (Deprecated):</summary>
   
 ```console
 $ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
@@ -235,7 +235,8 @@ Completed
 ```
 </details>
 
-To run the Nextflow workflow:
+
+### To run the Nextflow workflow:
 
 ```console
 $ nextflow run prep_riboviz.nf \
@@ -280,6 +281,9 @@ For more information about the vignette, see [Map mRNA and ribosome protected re
 
 Computational work on Eddie is usually submitted to the cluster as batch jobs initiated from a login node. In order to submit a job you need to write a Grid Engine job submission script containing details of the program to run as well as requests for resources. Then, you submit this job script to the cluster with the `qsub` command.
 
+**Warning** - Jobs need to request appropriate resources (cores, memory) in order to run. We are still working out what riboviz needs, so this may take some trial and error. 
+See "Requesting resources" section below.
+
 Here is an example job script for the vignette, named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
 
 ```
@@ -320,6 +324,30 @@ source activate riboviz
 # Run the Nextflow workflow:
 nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false
 ```
+
+### Requesting resources - work in progress
+
+Jobs on Eddie need to request appropriate resources (cores, memory) in order to run. 
+If the submission script request less than the number of threads they need then jobs fail with strange error messages. If the job uses more memory than the submission script allows for, then the submission system kills the job. If you request too many resources, then the job queues for a long while (days or longer). 
+The memory requirements scale with the data, both genome/transcriptome size and number of reads. We have not yet profiled these or found ideal solutions.
+
+The key point is that requesting fewer cores but more memory makes it less likely that the memory will overflow. Also, nextflow does not actually control how many threads or memory the workflow steps take.
+
+A good start involves reserving available resources (`-R y`) of 4 nodes, 16GB/each:
+ 
+```
+-R y -pe mpi 4 -l h_vmem=16GB
+```
+
+This tended to start within a few hours; but still was killed unpredictably on larger datasets.
+
+If your job is killed, try:
+* requesting fewer cores with more memory each, e.g. `-pe mpi 1 -l h_vmem=32GB`.
+* reducing the requested `num_processes` in the `config_yaml`
+* always start with test runs using a downsampled dataset, which tests every other aspect of your configuration file, quickly.
+
+This is work in progress. A temporary solution involving ringfenced nodes is described at [riboviz#230](https://github.com/riboviz/riboviz/issues/230#issuecomment-758815346).
+
 
 ### Submitting jobs
 
@@ -504,13 +532,12 @@ We need to make sure we move back into the main riboviz folder, where we will be
 
 ### Download fastq data files from the Short Read Archive (SRA): initial setup
 
-Eddie allows us to load the [SRA Toolkit](https://github.com/ncbi/sra-tools) module, including the utility `fasterq-dump` for downloading data files.  This utility has been included in SRA Toolkit since version 2.9.1. We recommend using `fasterq-dump`.
+Eddie allows us to load the [SRA Toolkit](https://github.com/ncbi/sra-tools) module, including the utility `fasterq-dump` for downloading data files.  This utility has been included in SRA Toolkit since version 2.9.1. We recommend using `fasterq-dump` with `prefetch`, described below.
 
-An earlier tool, `fastq-dump`, is also included in SRA Toolkit, however, you may find it is too slow for `fastq-dump` to download a large dataset like `Wallace_2020_JEC21` which is around 50GB uncompressed. Even using the `--gzip` option to directly download the `.gz` file may be too slow.
+<details> <summary> Detils on `fastq-dump` (Deprecated). </summary> 
+An earlier tool, `fastq-dump`, is also included in SRA Toolkit, however, you may find it is too slow for larger datasets, like `Wallace_2020_JEC21` which is around 50GB uncompressed. Even using the `--gzip` option to directly download the `.gz` file may be too slow.
+</details>
 
-A faster alternative can be to use `fasterq-dump` and the Aspera client's `prefetch` tool (which is provided as part of the above module), as recommended here.
-
-To get `fasterq-dump`, follow SRA Toolkit's [02. Installing SRA Toolkit](https://github.com/ncbi/sra-tools/wiki/02.-Installing-SRA-Toolkit) to install the latest version of the SRA Toolkit (follow the instructions for CentOS).
 
 Before your initial use of SRA toolkit, configure download and cache settings, by running:
 
@@ -523,6 +550,7 @@ then follow the interactive prompts (using tab to navigate through the menus) an
 This path adjusts where the tool puts your cache directory, which could get very large (100s of GB). We recommend using your scratch space `/exports/eddie/scratch/$USER/ncbi`, where `$USER` is replaced by your username.
 
 You may have to repeat the `vdb-config` step periodically, as data on Eddie scratch space is automatically cleared after one month.
+
 For more information about the configuration utility, see [SRA toolkit installation and configuration Guide](https://ncbi.github.io/sra-tools/install_config.html).
 
 ### Download fastq data files from the Short Read Archive (SRA): subsequent uses
@@ -551,9 +579,13 @@ It may be helpful to test this functionality with a smaller download file, e.g. 
 
 Alternatively, it is possible to download `.fastq.gz` format files of SRA data from the European Nucleotide Archive, but we have not tested the speed. For example, from Ingolia 2009 again, [ftp link to SRR014376.fastq.gz](ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR014/SRR014376/SRR014376.fastq.gz).
 
-### Create `qsub` script
+### Create `qsub` job submission script
+
+**Note:** we are working on automatically generating job submission scripts, see [riboviz#228](https://github.com/riboviz/riboviz/issues/228). 
+This documentation gives an example and an overview of how they work for riboviz.
 
 Create the job submission script in `$HOME` or a location of your choosing, and name it something like `run_W-Cn-JEC21_2020.sh`.  
+
 
 ```
 #!/bin/sh
