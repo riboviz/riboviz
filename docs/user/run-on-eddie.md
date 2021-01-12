@@ -3,10 +3,9 @@
 This page describes how you can run **RiboViz** on [Eddie](https://www.ed.ac.uk/information-services/research-support/research-computing/ecdf/high-performance-computing), The University of Edinburgh ECDF Linux Compute Cluster.
 
 **Note:** This information is for University of Edinburgh users only.
+However, these guidelines may be useful for running **RiboViz** in other HPC systems.
 
 The Eddie service documentation is on the University of Edinburgh [wiki](https://www.wiki.ed.ac.uk/display/ResearchServices/Eddie),
-
-These guidelines may be useful for running **RiboViz** in other HPC systems.
 
 All Python and R packages required to run **RiboViz** have been installed in `/exports/csce/eddie/biology/groups/wallace_rna` on Eddie
 
@@ -83,18 +82,24 @@ If you do not have a group space, you can use your scratch directory (`/exports/
 
 ## Interactive sessions
 
-There are a limited number of nodes that accept interactive login sessions, to allow you to run interactive jobs or graphical  applications. To start an interactive session run:
+There are a limited number of nodes that accept interactive login sessions, to allow you to run interactive jobs or graphical  applications. To start an interactive session run `qlogin`. For running riboviz using nextflow, we recommend you request multiple cores and more than the default memory, for example:
 
 ```console
-$ qlogin -l h_vmem=16G
+$ qlogin -pe interactivemem 4 -l h_vmem=4G 
 ```
 
-`-l h_vmem` means that you ask for 16GB RAM
+Here, `-pe interactivemem 4` means you ask for 4 cores in an interactive memory parallel environment. Also, `-l h_vmem=4G` means that you ask for 4GB RAM per core (16GB total in this example)
 
-If you have access to a priority queue then you can use:
+We have also succeeded running on one core with 16GB memory, using:
 
 ```console
-$ qlogin -P <QUEUE_NAME> -l h_vmem=16G
+$ qlogin -l h_vmem=16G 
+```
+
+If you have access to a priority queue then you can use option `-P`:
+
+```console
+$ qlogin -pe interactivemem 4 -l h_vmem=4G -P <QUEUE_NAME>
 ```
 
 RiboViz team members have access to the priority queue `bio_wallace_rna_riboviz`.
@@ -181,8 +186,9 @@ Change into the **RiboViz** repository:
 $ cd riboviz/riboviz
 ```
 
-To run the Python workflow:
-
+<details>
+  <summary>To run the Python workflow (Deprecated):</summary>
+  
 ```console
 $ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 Running under Python: 3.7.6 | packaged by conda-forge | (default, Jun  1 2020, 18:57:50)
@@ -227,6 +233,7 @@ Collate TPMs across sample results. Log: vignette/logs/20200606-020931/collate_t
 Count reads. Log: vignette/logs/20200606-020931/count_reads.log
 Completed
 ```
+<details>
 
 To run the Nextflow workflow:
 
@@ -476,7 +483,7 @@ $ cd $HOME/riboviz/riboviz
 Create a symbolic system link between a new folder for our dataset and the folder on scratch which will hold our inputs and outputs:
 ```
 # make symbolic system link at riboviz folder to folder on scratch
-$ ln -s /exports/eddie/scratch/$USER/$Wallace_2020_JEC21
+$ ln -s /exports/eddie/scratch/$USER/Wallace_2020_JEC21
 ```
 This means that we can access the files as if they were located at `$HOME/riboviz/riboviz/Wallace_2020_JEC21`, instead of being held on the scratch space location.  This simplifies paths in our yaml and helps us keep things together while not filling up more limited storage space on our group or home directory storage.
 
