@@ -494,7 +494,7 @@ barplot_ribogrid <- function(tidymat, small_read_range = 26:32) {
 #' GetCodonPositionReads(): function to get codon-specific reads for RPF datasets
 #' 
 #' TODO: more info about what this function does
-#' TODO: consider making buffer an argument of this function, if left and right are always based on "buffer +/- NN" formula
+#' TODO: consider whether buffer should be an argument of this function, if left and right are ALWAYS based on "buffer +/- NN" formula as in CalculatePositionSpecificDistributionOfReads()
 #' #' 
 #' @param gene gene name to get read lengths for
 #' @param dataset name of dataset stored in .h5 file
@@ -532,13 +532,14 @@ GetCodonPositionReads <- function(gene, dataset, hd_file = hd_file, left, right,
 #' GetMRNACoverage(): function to return nucleotide-specific coverage for mRNA datasets
 #' 
 #' Nt-specific coverage for mRNA datasets
+#' TODO: consider whether buffer should be an argument of this function, if left and right are ALWAYS based on "buffer +/- NN" formula as in CalculateNucleotideBasedPositionSpecificReadsMRNA()
 #' 
 #' @param gene gene name to get read lengths for
 #' @param dataset name of dataset stored in .h5 file
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
-#' @param left integer, used in subsetting codon positions; e.g. "left = (buffer - 15)" as in CalculatePositionSpecificDistributionOfReads() usage
-#' @param right integer, used in subsetting codon positions; e.g. "right = (buffer + 11)" as in CalculatePositionSpecificDistributionOfReads() usage
-#' @param read_range numeric range of read length values, set in generate_stats_figs.R from "min_read_length:max_read_length" values from yaml
+#' @param left integer, used in subsetting codon positions; e.g. "left = (buffer - 49)" as in CalculateNucleotideBasedPositionSpecificReadsMRNA() usage
+#' @param right integer, used in subsetting codon positions; e.g. "right = (buffer - 3)" as in CalculateNucleotideBasedPositionSpecificReadsMRNA() usage
+#' @param read_range numeric range of read length values, set in generate_stats_figs.R from "min_read_length:max_read_length" values from yaml; Default: 10:50
 #' @param min_read_length integer, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
 #' @param buffer numeric, length of flanking region around the CDS in nucleotides, set in yaml config file. Default: 250
 #' 
@@ -547,7 +548,10 @@ GetCodonPositionReads <- function(gene, dataset, hd_file = hd_file, left, right,
 #' @examples 
 #' buffer <- 250 # set in yaml arguments
 #' min_read_length <- 10  # set in yaml arguments, default: 10
-#' GetMRNACoverage()
+#' read_range <- 10:50 # read_range set towards start of generate_stats_figs.R from yaml
+#' 
+#' GetMRNACoverage(gene = "YAL068C", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5", left = (buffer - 49), right = (buffer - 3), read_range, min_read_length, buffer)
+#' # returns matrix: num [1:368] 0 0 0 0 0 0 0 0 0 0 ...
 #' 
 #' @export 
 GetMRNACoverage <- function(gene, dataset, hd_file, left, right, read_range, min_read_length, buffer) {
@@ -582,27 +586,56 @@ GetMRNACoverage <- function(gene, dataset, hd_file, left, right, read_range, min
   }
   return(nt_sp_counts)
 }
-#TEST: 
+#TEST: GetMRNACoverage(): does it return a matrix? TRUE
 
 #####
 
 ### functions to calculate read frame etc. ###
 
+#' CalcAsiteFixedOneLength(): function to find a-site for single length read using fixed displacement
+#' 
+#' Calculate read A-site using a fixed displacement for a single read length
+#' 
+#' @param reads_pos_length matrix of read lengths and positions
+#' @param min_read_length integer, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
+#' @param read_range numeric range of read length values, set in generate_stats_figs.R from "min_read_length:max_read_length" values from yaml; Default: 10:50
+#' @param asite_displacement numeric value giving read frame displacement from 5' end to A-site
+#' 
+#' @return TODO
+#' 
+#' @examples TODO
+#' 
+#' @export 
 CalcAsiteFixedOneLength <- function(reads_pos_length, min_read_length,
                                     read_length, asite_displacement) {
-  # Calculate read A-site using a fixed displacement for a single read length
   length_row_choose <- read_length - min_read_length + 1
   reads_pos_length[length_row_choose, ] %>%
     dplyr::lag(n = asite_displacement, default = 0)
 }
+#TEST: CalcAsiteFixedOneLength(): TODO
 
+#' CalcAsiteFixed(): function to find a-site for single length read using fixed displacement
+#' 
+#' Calculate read A-site using a fixed displacement for fixed read lengths
+#' 
+#' @param reads_pos_length matrix of read lengths and positions
+#' @param min_read_length numeric, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
+#' @param asite_displacement_length data frame of 2 columns: read_length default: c(28, 29, 30), and asite_displacement, default: c(15, 15, 15) 
+#' @param read_range numeric range of read length values, set in generate_stats_figs.R from "min_read_length:max_read_length" values from yaml; Default: 10:50
+#' @param asite_displacement numeric value giving read frame displacement from 5' end to A-site
+#' @param colsum_out logical; if true, return summary column of summed a-site lengths; default: TRUE
+#' 
+#' @return TODO
+#' 
+#' @examples TODO
+#' 
+#' @export 
 CalcAsiteFixed <- function(reads_pos_length, min_read_length,
                            asite_displacement_length = data.frame(
                              read_length = c(28, 29, 30),
                              asite_displacement = c(15, 15, 15)
                            ),
                            colsum_out = TRUE) {
-  # Calculate read A-site using a fixed displacement for fixed read lengths
   npos <- ncol(reads_pos_length)
   Asite_counts_bylength <-
     purrr::map2(
@@ -627,12 +660,20 @@ CalcAsiteFixed <- function(reads_pos_length, min_read_length,
     return(Asite_counts_bylengthmat)
   }
 }
+#TEST: CalcAsiteFixed(): TODO
 
+#' SumByFrame(): function to sum vector by 3nt frames 0, 1, 2
+#' 
+#'  @param x
+#'  @param left
+#'  @param right
+#'  
+#'  @return TODO
+#'  
+#'  @examples TODO
+#'  
+#'  @export    
 SumByFrame <- function(x, left, right) {
-  # sum vector by 3nt frames 0,1,2
-  #   x:     vector
-  #   left:  integer for starting position, frame 0
-  #   right: integer for ending position
   positions_frame0 <- seq(left, right, 3) # positions used to pick out frame 0 reads
   sums_byframe <- c(
     x[ positions_frame0 ] %>% sum(),
@@ -641,20 +682,57 @@ SumByFrame <- function(x, left, right) {
   )
   return(sums_byframe)
 }
+#TEST: SumByFrame(): 
 
+#' SnapToCodon(): function to snap nucleotide-aligned reads to codon position
+#' 
+#' @param x vector
+#' @param left integer for starting position, frame 0
+#' @param right integer for ending position
+#' @param snapdisp integer any additional displacement in the snapping
+#' 
+#' @return TODO
+#' 
+#' @examples TODO
+#' 
+#' @export
 SnapToCodon <- function(x, left, right, snapdisp=0L) {
-  # snap nucleotide-aligned reads to codon position
-  #   x:     vector
-  #   left:  integer for starting position, frame 0
-  #   right: integer for ending position
-  #   snapdisp: integer any additional displacement in the snapping
   RcppRoll::roll_suml(x[(left:right) + snapdisp], n=3L, by=3L, fill = NULL)
 }
+#TEST: SnapToCodon(): TODO
 
-NormByMean <- function(x,...) {
-  x / mean(x,...)
+#' NormByMean(): function to normalise data by dividing by mean
+#' 
+#' @param x vector
+#' @param ... other arguments
+#' 
+#' @return TODO
+#' 
+#' @examples TODO
+#'
+#' @export
+NormByMean <- function(x, ...) {
+  x / mean(x, ...)
 }
+#TEST: NormByMean(): min value not below zero, TRUE
+#TEST: NormByMean(): max value not above 1, TRUE
 
+#' GetGeneCodonPosReads1dsnap(): function to get gene codon positions and reads, snapped to codon
+#' 
+#' TODO: explain this function better
+#' 
+#' @param gene gene name to get read lengths for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#' @param left integer for starting position, frame 0
+#' @param right integer for ending position
+#' @param min_read_length integer, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
+#' 
+#' @return TODO
+#' 
+#' @examples TODO
+#' 
+#' @export
 GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right, 
                          min_read_length, 
                          asite_displacement_length = data.frame(
@@ -664,17 +742,26 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
                          snapdisp=0L) {
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
   reads_asitepos <- CalcAsiteFixed(
-    reads_pos_length, min_read_length,
+    reads_pos_length, 
+    min_read_length,
     asite_displacement_length
   )
-  SnapToCodon(reads_asitepos,left,right,snapdisp)
+  SnapToCodon(reads_asitepos, left, right, snapdisp)
 }
+#TEST: GetGeneCodonPosReads1dsnap(): TODO
 
+#' GatherByFrameCodon(): function to gather a vector by 3nt frames 0,1,2 for each codon position
+#' 
+#' @param x vector
+#' @param left integer for starting position, frame 0
+#' @param right integer for ending position
+#' 
+#' @return tidy data frame (tibble) of codon position, counts in frame 0, 1, 2; columns: CodonPos, Ct_fr0, Ct_fr1, Ct_fr2
+#' 
+#' @examples TODO
+#' 
+#' @export 
 GatherByFrameCodon <- function(x, left, right) {
-  # gather vector by 3nt frames 0,1,2 for each position
-  #   x:     vector
-  #   left:  integer for starting position, frame 0
-  #   right: integer for ending position
   positions_frame0 <- seq(left, right, 3) # positions to pick out frame 0 reads
   tibble(
     CodonPos = seq_len(length(positions_frame0)),
@@ -683,11 +770,25 @@ GatherByFrameCodon <- function(x, left, right) {
     Ct_fr2 = x[ positions_frame0 + 2 ]
   )
 }
+#TEST: GatherByFrameCodon(): returns tibble; TRUE
+#TEST: GatherByFrameCodon(): columns of tibble are %in% c("CodonPos", "Ct_fr0", "Ct_fr1", "Ct_fr2"); TRUE
 
-combinePValuesFisher <- function(p) {
+#' CombinePValuesFisher(): function using Fisher's 1-sided method to combine p-values
+#' 
+#' TODO: this function IS NOT USED in riboviz codebase currently: Remove?
+#' 
+#' @param p numeric, p-value
+#' 
+#' @return TODO
+#'  
+#' @examples TODO
+#' 
+#' @export
+CombinePValuesFisher <- function(p) {
   # Fisher's method (1-sided) to combine p-values
   pchisq(-2 * sum(log(p)), 2 * length(p), lower.tail = FALSE)
 }
+#TEST: CombinePValuesFisher(): TODO
 
 combinePValuesStouffer <- function(p) {
   # Stouffer's “inverse normal” method (1-sided) to combine p-values
