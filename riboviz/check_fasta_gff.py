@@ -95,11 +95,11 @@ def get_fasta_gff_cds_issues(fasta,
                              use_feature_name=False,
                              start_codons=[START_CODON]):
     """
-    Check FASTA and GFF files' coding sequence (CDS) features and
+    Check FASTA and GFF files for coding sequence (CDS) features and
     return a list of issues for relating to coding sequences, ``CDS``,
     features. A list of tuples of form (sequence ID, feature ID ('' if
     not applicable to the issue), issue type, issue data) is
-    returned. 
+    returned.
 
     The sequence ID is one of:
 
@@ -122,8 +122,8 @@ def get_fasta_gff_cds_issues(fasta,
       :py:const:`riboviz.fasta_gff.CDS_FEATURE_FORMAT`)
       if both ``ID`` and ``Name`` are undefined.
 
-    The following issue types are reported for CDSs defined in the GFF
-    file:
+    The following issue types are reported for every CDS annotated
+    in the GFF:
 
     * :py:const:`INCOMPLETE_FEATURE`: The CDS has a length not
       divisible by 3.
@@ -146,18 +146,6 @@ def get_fasta_gff_cds_issues(fasta,
       this issue, the sequence ``ID`` attribute is
       :py:const:`WILDCARD`. The supplementary issue data is a
       count of the number of features with the same ID.
-=======
-    Check FASTA and GFF files for coding sequence (CDS) features.
-    
-    Check that, for every CDS annotated in the GFF:
-
-    * The CDS has length divisible by 3.
-    * The beginning of the CDS is a start codon (ATG; translates to
-      ``M``).
-    * The stop of the CDS is a stop codon (TAG, TGA, TAA; translates
-      to ``*``)
-    * There are no stop codons internal to the CDS.
->>>>>>> develop
 
     The following issues are reported for sequences defined in the GFF file:
 

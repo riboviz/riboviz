@@ -1,6 +1,6 @@
-# Check FASTA and GFF files for compatibility
+# Check FASTA and GFF files for coding sequence (CDS) features
 
-`riboviz.tools.check_fasta_gff` checks FASTA and GGF files for equality. It can be run as follows:
+`riboviz.tools.check_fasta_gff` checks FASTA and GGF files for coding sequence (CDS) features. It can be run as follows:
 
 ```console
 $ python -m riboviz.tools.check_fasta_gff [-h] \
@@ -35,7 +35,7 @@ The issues file is a file of tab-separated values. The file has columns:
 * `Issue`: issue type. See below.
 * `Data`: issue data or empty, see below.
 
-The following issue types are reported for CDSs defined in the GFF file:
+The following issue types are reported for every CDS annotated in the GFF:
 
 * `IncompleteFeature`: The CDS has a length not divisible by 3.
 * `NoStartCodon` : The CDS does not start with a start codon (`ATG` or, those provided via `--start_codon`). The supplementary issue data is the actual codon found.
