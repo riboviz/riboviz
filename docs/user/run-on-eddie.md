@@ -233,7 +233,7 @@ Collate TPMs across sample results. Log: vignette/logs/20200606-020931/collate_t
 Count reads. Log: vignette/logs/20200606-020931/count_reads.log
 Completed
 ```
-<details>
+</details>
 
 To run the Nextflow workflow:
 
