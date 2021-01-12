@@ -510,17 +510,18 @@ barplot_ribogrid <- function(tidymat, small_read_range = 26:32) {
 #' min_read_length <- 10  # set in yaml arguments, default: 10
 #'
 #' GetCodonPositionReads(gene = "YAL068C", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5", left = (buffer - 15), right = (buffer + 11), min_read_length = min_read_length)
-#' 
+#' # returns matrix: num [1:122] 0 0 0 0 0 0 0 0 0 0 ...
+#'
 #' @export
-GetCodonPositionReads <- function(gene, dataset, hd_file, left, right, min_read_length) {
-  length_ID <- 28 - min_read_length + 1
+GetCodonPositionReads <- function(gene, dataset, hd_file = hd_file, left, right, min_read_length) {
+  length_id <- 28 - min_read_length + 1
   reads_pos <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
   reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
   end_reads_pos_subset <- ncol(reads_pos_subset) # Number of columns of the subset
 
-  l28 <- RcppRoll::roll_suml(reads_pos_subset[length_ID, 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[14, 2:end_reads_pos_subset]), 3)] # Map reads of length 28 to codons
-  l29 <- RcppRoll::roll_suml(reads_pos_subset[(length_ID + 1), 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[15, 2:end_reads_pos_subset]), 3)] # Map reads of length 29 to codons
-  l30 <- RcppRoll::roll_suml(reads_pos_subset[(length_ID + 2), 1:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[16, 1:end_reads_pos_subset]), 3)] # Map reads of length 30 to codons
+  l28 <- RcppRoll::roll_suml(reads_pos_subset[length_id, 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[14, 2:end_reads_pos_subset]), 3)] # Map reads of length 28 to codons
+  l29 <- RcppRoll::roll_suml(reads_pos_subset[(length_id + 1), 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[15, 2:end_reads_pos_subset]), 3)] # Map reads of length 29 to codons
+  l30 <- RcppRoll::roll_suml(reads_pos_subset[(length_id + 2), 1:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[16, 1:end_reads_pos_subset]), 3)] # Map reads of length 30 to codons
 
   cod_sp_counts <- l28 + l29 + l30 # Sum of reads of lengths 28-30 at each codon
   cod_sp_counts <- cod_sp_counts[1:(length(cod_sp_counts) - 1)]
@@ -528,8 +529,28 @@ GetCodonPositionReads <- function(gene, dataset, hd_file, left, right, min_read_
 }
 #TEST: GetCodonPositionReads(): does it return a matrix? TRUE
 
-# Nt-specific coverage for mRNA datasets
-GetMRNACoverage <- function(gene, dataset, hd_file, left, right, read_range, min_read_length, Buffer) {
+#' GetMRNACoverage(): function to return nucleotide-specific coverage for mRNA datasets
+#' 
+#' Nt-specific coverage for mRNA datasets
+#' 
+#' @param gene gene name to get read lengths for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#' @param left integer, used in subsetting codon positions; e.g. "left = (buffer - 15)" as in CalculatePositionSpecificDistributionOfReads() usage
+#' @param right integer, used in subsetting codon positions; e.g. "right = (buffer + 11)" as in CalculatePositionSpecificDistributionOfReads() usage
+#' @param read_range numeric range of read length values, set in generate_stats_figs.R from "min_read_length:max_read_length" values from yaml
+#' @param min_read_length integer, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
+#' @param buffer numeric, length of flanking region around the CDS in nucleotides, set in yaml config file. Default: 250
+#' 
+#' @return matrix of nucleotide-specific reads for mRNA datasets
+#' 
+#' @examples 
+#' buffer <- 250 # set in yaml arguments
+#' min_read_length <- 10  # set in yaml arguments, default: 10
+#' GetMRNACoverage()
+#' 
+#' @export 
+GetMRNACoverage <- function(gene, dataset, hd_file, left, right, read_range, min_read_length, buffer) {
   # Get the matrix of read counts
   reads_pos <- GetGeneDatamatrix(gene, dataset, hd_file) 
   # Subset positions such that only CDS mapped reads are considered
@@ -543,13 +564,13 @@ GetMRNACoverage <- function(gene, dataset, hd_file, left, right, read_range, min
 
   # Subset coverage to only CDS
   nt_counts <- rep.int(S4Vectors::runValue(nt_cov), S4Vectors::runLength(nt_cov))
-  if (length(nt_counts) >= (Buffer - left)) {
-    nt_counts <- nt_counts[(Buffer - left):length(nt_counts)]
+  if (length(nt_counts) >= (buffer - left)) {
+    nt_counts <- nt_counts[(buffer - left):length(nt_counts)]
   } else {
     nt_counts <- 0
   }
 
-  cds_length <- ncol(reads_pos_subset) - (Buffer - left - 1) # Length of CDS
+  cds_length <- ncol(reads_pos_subset) - (buffer - left - 1) # Length of CDS
   nt_sp_counts <- rep(0, cds_length)
 
   if (length(nt_counts) < cds_length) {
@@ -561,7 +582,7 @@ GetMRNACoverage <- function(gene, dataset, hd_file, left, right, read_range, min
   }
   return(nt_sp_counts)
 }
-
+#TEST: 
 
 #####
 
@@ -766,15 +787,15 @@ BoxplotReadFrameProportion <- function(read_frame_df, feat_names = "gene") {
 #####
 ## biases in nucleotide composition along mapped read lengths
 
-GetNTReadPosition <- function(gene, dataset, hd_file, length_ID, min_read_length) {
-  reads_pos_len <- GetGeneDatamatrix(gene, dataset, hd_file)[length_ID, ] # Get reads of a particular length
-  reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (length_ID + min_read_length - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
+GetNTReadPosition <- function(gene, dataset, hd_file, length_id, min_read_length) {
+  reads_pos_len <- GetGeneDatamatrix(gene, dataset, hd_file)[length_id, ] # Get reads of a particular length
+  reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (length_id + min_read_length - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
   pos <- rep(1:length(reads_pos_len), reads_pos_len) # nt positions weighted by number of reads mapping to it
-  pos_IR <- IRanges::IRanges(start = pos, width = (length_ID + min_read_length - 1)) # Create an IRanges object for position-specific reads of a particular length
+  pos_IR <- IRanges::IRanges(start = pos, width = (length_id + min_read_length - 1)) # Create an IRanges object for position-specific reads of a particular length
   return(pos_IR)
 }
 
-cons_mat <- function(gene, pos_IR, type = "count", cframe = 0, length_ID) {
+cons_mat <- function(gene, pos_IR, type = "count", cframe = 0, length_id) {
   pos_IR_frame <- pos_IR[start(pos_IR) %% 3 == cframe] # Get position-specific reads of a particular length and ORF frame
   if (length(pos_IR_frame)) {
     # read in coding sequences
@@ -784,7 +805,7 @@ cons_mat <- function(gene, pos_IR, type = "count", cframe = 0, length_ID) {
       pos_nt <- pos_nt / colSums(pos_nt) # Select frequencies instead of counts
     }
   } else {
-    pos_nt <- matrix(0, ncol = read_range[length_ID], nrow = 4, dimnames = list(c("A", "C", "G", "T"), NULL))
+    pos_nt <- matrix(0, ncol = read_range[length_id], nrow = 4, dimnames = list(c("A", "C", "G", "T"), NULL))
   }
   return(pos_nt)
 }
@@ -823,14 +844,14 @@ GetGeneReadDensity <- function(gene, dataset, hd_file, buffer = 50) {
 # codon-specific reads for RPF datasets
 GetCodonPositionReads <- function(hd_file, gene, dataset, left, right, min_read_length) {
   # @ewallace: this needs documentation of inputs and outputs
-  length_ID <- 28 - min_read_length + 1
+  length_id <- 28 - min_read_length + 1
   reads_pos <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
   reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
   end_reads_pos_subset <- ncol(reads_pos_subset) # Number of columns of the subset
   
-  l28 <- RcppRoll::roll_suml(reads_pos_subset[length_ID, 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[14, 2:end_reads_pos_subset]), 3)] # Map reads of length 28 to codons
-  l29 <- RcppRoll::roll_suml(reads_pos_subset[(length_ID + 1), 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[15, 2:end_reads_pos_subset]), 3)] # Map reads of length 29 to codons
-  l30 <- RcppRoll::roll_suml(reads_pos_subset[(length_ID + 2), 1:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[16, 1:end_reads_pos_subset]), 3)] # Map reads of length 30 to codons
+  l28 <- RcppRoll::roll_suml(reads_pos_subset[length_id, 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[14, 2:end_reads_pos_subset]), 3)] # Map reads of length 28 to codons
+  l29 <- RcppRoll::roll_suml(reads_pos_subset[(length_id + 1), 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[15, 2:end_reads_pos_subset]), 3)] # Map reads of length 29 to codons
+  l30 <- RcppRoll::roll_suml(reads_pos_subset[(length_id + 2), 1:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[16, 1:end_reads_pos_subset]), 3)] # Map reads of length 30 to codons
   
   cod_sp_counts <- l28 + l29 + l30 # Sum of reads of lengths 28-30 at each codon
   cod_sp_counts <- cod_sp_counts[1:(length(cod_sp_counts) - 1)]
