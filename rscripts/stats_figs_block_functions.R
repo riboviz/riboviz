@@ -237,7 +237,7 @@ CalculateBiasesInNucleotideComposition <- function(gene_names, dataset, hd_file,
   # This is in a conditional loop because it fails for some inputs
   # and has not been debugged. Needs to be rewritten in tidyverse
   all_out <- c() # creates output object set to null
-  for (length_id in seq_len(length(read_range))) { # TODO: WHAT IS length_id
+  for (length_id in seq_len(length(read_range))) { 
     out <- lapply(gene_names, function(x) { # TODO: fix variablename 'out' (also check below for uses)
       # For each read length convert reads to IRanges
       GetNTReadPosition(gene = as.character(x),
@@ -276,33 +276,33 @@ CalculateBiasesInNucleotideComposition <- function(gene_names, dataset, hd_file,
     # # TODO: test this function
     # CalculatePositionSpecificNucleotideCountsByFrame <- function(gene_names, cframe, length_id, num_processes){
     #   mcapply(gene_names, function(gene){
-    #     cons_mat(gene = gene, pos_IR = out[[gene]], cframe = cframe, length_id = length_id)
+    #     PositionSpecificConsensusMatrix(gene = gene, pos_IR = out[[gene]], cframe = cframe, length_id = length_id)
     #   }, mc.cores = num_processes)
     # } # end of function definition CalculatePositionSpecificNucleotideCountsByFrame()
     # test_frame0 <- CalculatePositionSpecificNucleotideCountsByFrame(gene_names, cframe=0, length_id, num_processes)
     
     # frame 0
     fr0 <- mclapply(gene_names, function(gene) {
-      cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 0, length_id = length_id)
+      PositionSpecificConsensusMatrix(gene = gene, pos_IR = out[[gene]], cframe = 0, length_id = length_id)
     }, mc.cores = num_processes)
     allfr0 <- do.call(rbind, fr0)
     
     # frame 1
     fr1 <- mclapply(gene_names, function(gene) {
-      cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 1, length_id = length_id)
+      PositionSpecificConsensusMatrix(gene = gene, pos_IR = out[[gene]], cframe = 1, length_id = length_id)
     }, mc.cores = num_processes)
     allfr1 <- do.call(rbind, fr1)
     
     # frame 2
     fr2 <- mclapply(gene_names, function(gene) {
-      cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 2, length_id = length_id)
+      PositionSpecificConsensusMatrix(gene = gene, pos_IR = out[[gene]], cframe = 2, length_id = length_id)
     }, mc.cores = num_processes)
     allfr2 <- do.call(rbind, fr2)
     
     # Get position-specific freq for all nucleotides
-    cnt_fr0 <- signif(comb_freq(allfr0), 3)
-    cnt_fr1 <- signif(comb_freq(allfr1), 3)
-    cnt_fr2 <- signif(comb_freq(allfr2), 3)
+    cnt_fr0 <- signif(CombineFrequencies(allfr0), 3)
+    cnt_fr1 <- signif(CombineFrequencies(allfr1), 3)
+    cnt_fr2 <- signif(CombineFrequencies(allfr2), 3)
     
     output <- data.frame(rbind(cnt_fr0, cnt_fr1, cnt_fr2)) # TODO: replace variablename 'output'
     all_out <- rbind(all_out, output)
