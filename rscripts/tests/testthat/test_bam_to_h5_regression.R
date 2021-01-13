@@ -1,4 +1,4 @@
-# Example testthat test for bam_to_h5.R
+# Example testthat regression test for bam_to_h5.R
 #
 # This assumes the following files are in the path:
 #
@@ -6,17 +6,19 @@
 # vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 # vignette/output/WTnone/WTnone.bam
 #
-# It runs bam_to_h5.R using the GFF and BAM file then validates it
-# against WTnone.h5, previously created-out-of-band, and expected to
-# be in the current directory.
+# This assumes that a WTnone.h5 file, previously created, is
+# in the current directory.
+#
+# The test runs bam_to_h5.R using the GFF and BAM file then validates
+# it against this WTnone.h5 file in the current directory.
 #
 # To run interactively:
 #
-# test_file("rscripts/tests/testthat/test_bam_to_h5.R")
+# test_file("rscripts/tests/testthat/test_bam_to_h5_regression.R")
 #
 # To run from console:
 #
-# Rscript -e 'library(testthat); test_file("rscripts/tests/testthat/test_bam_to_h5.R")'
+# Rscript -e 'library(testthat); test_file("rscripts/tests/testthat/test_bam_to_h5_regression.R")'
 
 library(glue)
 library(here)
