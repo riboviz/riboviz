@@ -1,3 +1,23 @@
+# Example testthat test for bam_to_h5.R
+#
+# This assumes the following files are in the path:
+#
+# rscripts/bam_to_h5.R
+# vignette/input/yeast_YAL_CDS_w_250utrs.gff3
+# vignette/output/WTnone/WTnone.bam
+#
+# It runs bam_to_h5.R using the GFF and BAM file then validates it
+# against WTnone.h5, previously created-out-of-band, and expected to
+# be in the current directory.
+#
+# To run interactively:
+#
+# test_file("rscripts/tests/testthat/test_bam_to_h5.R")
+#
+# To run from console:
+#
+# Rscript -e 'library(testthat); test_file("rscripts/tests/testthat/test_bam_to_h5.R")'
+
 library(glue)
 library(here)
 library(testthat)
@@ -6,13 +26,13 @@ library(withr)
 print(here())
 bam_to_h5 <- here::here("rscripts/bam_to_h5.R")
 print(bam_to_h5)
-bam_file = here::here("test-bam-to-h5/WTnone/WTnone.bam")
-print(bam_file)
 gff_file = here::here("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
 print(gff_file)
-h5_file = here::here("WTnone.h5")
+bam_file = here::here("vignette/output/WTnone/WTnone.bam")
+print(bam_file)
+h5_file = here::here("test.h5")
 print(h5_file)
-expected_h5_file = here::here("test-bam-to-h5/WTnone/WTnone.h5")
+expected_h5_file = here::here("WTnone.h5")
 print(expected_h5_file)
 
 context("test_bam_to_h5.R")
