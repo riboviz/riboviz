@@ -160,7 +160,7 @@ If you are using other distributions of Python you will need to consult the rele
 
 ### Install Miniconda Python 3.6+
 
-Install:
+On Linux, install:
 
 ```console
 $ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda3.sh
@@ -169,7 +169,9 @@ $ bash miniconda3.sh -b -p $HOME/miniconda3
 
 **Note:** make sure you use `-O`, which provides a name for the downloaded file, and not `-o`, which provides the name of a file for messages about the download.
 
-Activate environment:
+For MacOS and Windows installers, go to [Miniconda installation page](https://docs.conda.io/en/latest/miniconda.html).
+
+When miniconda is installed, activate the environment:
 
 ```console
 $ source $HOME/miniconda3/bin/activate

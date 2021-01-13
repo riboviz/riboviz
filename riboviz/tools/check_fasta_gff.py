@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
-Check FASTA and GFF files for compatibility.
+Check FASTA and GFF files for coding sequence (CDS) features.
 
 Usage::
 
-    python -m riboviz.tools.check_fasta_gff.py [-h] -f FASTA -g GFF
+    python -m riboviz.tools.check_fasta_gff [-h] -f FASTA -g GFF
 
     -h, --help            show this help message and exit
     -f FASTA, --fasta FASTA

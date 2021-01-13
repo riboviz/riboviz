@@ -20,3 +20,5 @@ code-docs/modules.rst
 code-docs/riboviz*.rst
 .nextflow*
 work
+*.bai
+*.fai
