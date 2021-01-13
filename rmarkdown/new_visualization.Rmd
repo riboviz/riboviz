@@ -20,6 +20,7 @@ library(flexdashboard)
 library(tidyverse)
 library(patchwork)
 library(scales)
+library(yaml)
 ```
 
 <!-- The issue here is that I'm uncertain as to how to point this code to the output directories that riboviz makes for each sample. The names of those directories, i.e. the sample names, are required for the graphs to be correctly labeled. Also, A bit work will have to be done on grouping related samples, because unless they're something sensible like wt_1, wt_2, etc., the current method won't find them. For example, mouse_1, mouse_2, mouse_3, ..., might be the file names and the experimenter knows which mouse is which sample but as far as this code goes, that will all get labeled as one group. Hence the groups are currently hard coded in at line 179, meaning that it only works with the Gupta data right now. -->
@@ -32,152 +33,182 @@ plot_theme <- theme_bw()+
         text = element_text(size = 14))
 ```
 
-<!-- Read length distribution section -->
+<!-- Parse info from the config YAML -->
 
 ```{r}
-# Load the various files necessary for this tab, namely, the read length distribution files from each sample.
-# find the locations of the files
-rl_file_locs <- dir("/data2/john/projects/riboviz/output_nf", 
-                    pattern = "read_lengths.tsv", 
-                    recursive = TRUE, 
-                    full.names = TRUE)
+# ideally, this is the only place that needs to read a command line arg, it should take whatever is given to
+# -params-file when you start a riboviz run
+yaml1 <- "/data2/john/projects/riboviz/riboviz/vignette/simdata_multiplex_config.yaml"
+yaml2 <- "/data2/john/projects/riboviz/riboviz/vignette/vignette_config.yaml"
+```
 
-# name the locations with the directory names, i.e. the samples
-names(rl_file_locs) <- lapply(rl_file_locs, function(x){
-  str_split(x, "/") %>% # separate each file path
-    unlist() %>%        # convert to vector
-    .[length(.) - 1]    # grab 2nd to last element, i.e. sample name
-  })
+```{r}
+# this function constructs the location of the sample directories
+# from info in the yaml, it needs to know the path to the yaml
+# which can be pulled from the command line input perhaps? 
+find_sample_names <- function(path_to_yaml){
+  # read in the yaml
+  yaml <- read_yaml(path_to_yaml)
+  
+  # if fq_files is NULL
+  if (is.null(yaml$fq_files)){
+    # then it is multiplexed, get the names from the barcodes file
+    # this is the location of the sample sheet
+    sample_sheet_loc <- paste0("../", yaml$dir_in, yaml$sample_sheet)
+  
+    # get the sample names from it
+    sample_names <- read_tsv(sample_sheet_loc)$SampleID
+  } else {
+    # it is not multiplexed, read the names from the yaml
+    sample_names <- names(yaml$fq_files)
+  }
+  
+  # construct the paths to the dirs
+  sample_dir_paths <- paste0("../", yaml$dir_out, "/", sample_names)
+  
+  names(sample_dir_paths) <- sample_names
+  
+  # in the case where reads are not demultiplexed, as in Tag3
+  # remove that from the vector
+  do_dirs_exist <- unlist(lapply(sample_dir_paths, dir.exists))
+  
+  # retain only sample names for dirs that exist
+  these_dirs_exist <- names(do_dirs_exist[do_dirs_exist == TRUE])
+  
+  sample_dir_paths_that_exist <- sample_dir_paths[names(sample_dir_paths) %in% these_dirs_exist]
+  
+  # load read_counts.tsv into it's own global variable
+  read_counts_df <<- read_tsv(paste0("../", yaml$dir_out, "/read_counts.tsv"), skip = 5)
+  
+  return(sample_dir_paths_that_exist)
+}
+```
 
-# read them in and combine to a single data frame
-rl_df <- lapply(rl_file_locs, read_tsv, skip = 4) %>% 
+```{r}
+# apply the function
+sample_dir_names <- find_sample_names(yaml1)
+sample_names <- names(sample_dir_names)
+```
+
+<!-- Load the files necessary for the graphs -->
+
+```{r}
+# get read length dists into one data frame
+read_length_df <- lapply(sample_dir_names, function(x){
+  # path to the read length file
+  file_loc <- paste0(x, "/read_lengths.tsv")
+  # read it in
+  return(read_tsv(file_loc, skip = 4))
+}) %>% 
+  bind_rows(.id = "sample")
+
+# get the 3nt periodicity into one df
+three_nt_per_df <- lapply(sample_dir_names, function(x){
+  # path to the read length file
+  file_loc <- paste0(x, "/3nt_periodicity.tsv")
+  # read it in
+  return(read_tsv(file_loc, skip = 4))
+}) %>% 
+  bind_rows(.id = "sample") %>% 
+  mutate(End = factor(End, levels  = c("5'", "3'")))
+
+# get the frame by gene into one df
+frame_by_gene_df <- lapply(sample_dir_names, function(x){
+  # path to the read length file
+  file_loc <- paste0(x, "/3ntframe_bygene.tsv")
+  # read it in
+  return(read_tsv(file_loc, skip = 4))
+}) %>% 
   bind_rows(.id = "sample")
 ```
+
+<!-- Create the plotting functions -->
 
 ```{r}
 # Make the read length dists plot function
 read_length_dists_plot <- reactive({
-  rl_df %>% 
-    filter(grepl(samp(), sample)) %>%                   # pick samples containing a string
-    ggplot(., aes(Length, Counts, fill = sample))+      #
-    geom_col(width = 1)+                                #
-    facet_wrap(~sample)+                                #
-    scale_fill_discrete(name = NULL, guide = FALSE)+    #
-    plot_theme+                                         #
-    labs(title = "Read length distributions",           #
-         x = "Read length")+                            #
-    scale_x_continuous(breaks = seq(10, 50, 5))+        #
-    scale_y_continuous(breaks = breaks_pretty(n = 4))   # try for 4 y axis breaks
-})
-```
-
-<!-- 3nt peridicity section -->
-
-```{r}
-# load the necessary files, namely the 3nt periodicity data files from each samples folder
-per_file_locs <- dir("/data2/john/projects/riboviz/output_nf", pattern = "3nt_periodicity.tsv", recursive = TRUE, full.names = TRUE)
-
-# name the vector with the sample names
-names(per_file_locs) <- lapply(per_file_locs, function(x){
-  str_split(x, "/") %>% # separate each file path
-    unlist() %>%        # convert to vector
-    .[length(.) - 1]    # grab 2nd to last element, i.e. sample name
-  })
-
-# read them in and combine to a single data frame
-per_df <- lapply(per_file_locs, read_tsv, skip = 4) %>% 
-  bind_rows(.id = "sample")
-```
-```{r}
-# Make the 3nt periodicity plot function
-periodicity_plot <- reactive({
-  per_df %>% 
-    filter(grepl(samp(), sample)) %>%
-    ggplot(., aes(x = Pos, y = Counts, color = sample)) + 
-    geom_line(size = 1) + 
-    scale_color_discrete(guide = FALSE)+
-    facet_grid(cols = vars(sample), rows = vars(End)) +
-    labs(title = "3-nucleotide periodicity",
-         x = "Position")+
+  read_length_df %>% 
+    filter(sample %in% samp()) %>%
+    ggplot(., aes(Length, Counts, fill = sample))+
+    geom_col(width = 1)+
+    facet_wrap(~sample, scales = "free_y")+
+    scale_fill_discrete(name = NULL, guide = FALSE)+
     plot_theme+
+    labs(title = "Read length distributions",
+         x = "Read length")+
+    scale_x_continuous(breaks = seq(10, 50, 5))+
     scale_y_continuous(breaks = breaks_pretty(n = 4))
 })
 ```
 
-<!-- Frame proportions by gene boxplot section -->
-
 ```{r}
-# load the necessary files, namely the 3nt periodicity data files from each samples folder
-frame_file_locs <- dir("/data2/john/projects/riboviz/output_nf", pattern = "3ntframe_bygene.tsv", recursive = TRUE, full.names = TRUE)
+# Make the 3nt periodicity plot function
+three_nt_per_5p_plot <- reactive({
+  three_nt_per_df %>% 
+    filter(sample %in% samp() & End == "5'") %>%
+    ggplot(., aes(x = Pos, y = Counts, color = sample))+ 
+    geom_line(size = 1)+ 
+    scale_color_discrete(guide = FALSE)+
+    facet_wrap(~sample, scales = "free")+
+    labs(title = "3-nucleotide periodicity, 5' end mapping",
+         x = "Position",
+         y = "Read count")+
+    plot_theme+
+    scale_y_continuous(breaks = breaks_pretty(n = 3))
+})
 
-# name the vector with the sample names
-names(frame_file_locs) <- lapply(frame_file_locs, function(x){
-  str_split(x, "/") %>% # separate each file path
-    unlist() %>%        # convert to vector
-    .[length(.) - 1]    # grab 2nd to last element, i.e. sample name
-  })
-
-# read them in and combine to a single data frame
-frame_df <- lapply(frame_file_locs, read_tsv, skip = 4) %>%  # read each file in 
-  bind_rows(.id = "sample") %>%                              # make a single data frame
-  mutate(`Frame 0` = Ct_fr0/(Ct_fr0 + Ct_fr1 + Ct_fr2),      # get proportion of reads per frame
-         `Frame 1` = Ct_fr1/(Ct_fr0 + Ct_fr1 + Ct_fr2),      #
-         `Frame 2` = Ct_fr2/(Ct_fr0 + Ct_fr1 + Ct_fr2)) %>%  #
-  select(sample, gene, `Frame 0`, `Frame 1`, `Frame 2`) %>%  # retain these cols
-  pivot_longer(cols = where(is.numeric), names_to = "Frame") # reshape to long format
+# a separate one for 3' ends
+three_nt_per_3p_plot <- reactive({
+  three_nt_per_df %>% 
+    filter(sample %in% samp() & End == "3'") %>%
+    ggplot(., aes(x = Pos, y = Counts, color = sample))+ 
+    geom_line(size = 1)+ 
+    scale_color_discrete(guide = FALSE)+
+    facet_wrap(~sample, scales = "free")+
+    labs(title = "3-nucleotide periodicity, 3' end mapping",
+         x = "Position",
+         y = "Read count")+
+    plot_theme+
+    scale_y_continuous(breaks = breaks_pretty(n = 3))
+})
 ```
 
 ```{r}
-# Make the frame boxplot function
+# Make the read counts by frame boxplot
 frame_by_gene_plot <- reactive({
-  frame_df %>% 
-    filter(grepl(samp(), sample)) %>%
-    ggplot(., aes(x=Frame, y=value, fill=sample))+
-    labs(y="Proportion of reads per gene", 
-         title = "Genewise reading frame",
+  frame_by_gene_df %>% 
+    rename("Frame 0" = "Ct_fr0", "Frame 1" = "Ct_fr1", "Frame 2" = "Ct_fr2") %>% 
+    select(sample, gene, starts_with("Frame")) %>% 
+    pivot_longer(where(is.numeric)) %>% 
+    filter(sample %in% samp()) %>%
+    ggplot(., aes(x=name, y=value, fill=sample))+
+    labs(y="Reads per gene", 
+         title = "Reads per frame per gene",
          x = NULL)+
     scale_fill_discrete(guide = FALSE)+
     geom_boxplot(outlier.size = 1)+
     plot_theme
 })
 ```
-
-<!-- Frame counts total section -->
-
 ```{r}
-# read them in and combine to a single data frame
-frame_sums_df <- lapply(frame_file_locs, read_tsv, skip = 4) %>%  # read each file in 
-  bind_rows(.id = "sample") %>%                              # make a single data frame
-  group_by(sample) %>%                                       # for each sample
-  summarise(`Frame 0` = sum(Ct_fr0),                         # sum the reads per frame
-            `Frame 1` = sum(Ct_fr1),                         #
-            `Frame 2` = sum(Ct_fr2)) %>%                     #
-  pivot_longer(cols = where(is.numeric),                     # reshape to long format
-               names_to = "Frame",                           #
-               values_to = "Count")                          #
-```
-
-```{r}
-# Make the frame boxplot function
-frame_sums_plot <- reactive({
-  frame_sums_df %>% 
-    filter(grepl(samp(), sample)) %>%
-    ggplot(., aes(x = Frame, y = Count, fill=sample))+ 
-    geom_bar(stat="identity", pos = "dodge")+ 
+# Make the total read counts by frame plot function
+total_reads_per_frame <- reactive({
+  frame_by_gene_df %>% 
+    rename("Frame 0" = "Ct_fr0", "Frame 1" = "Ct_fr1", "Frame 2" = "Ct_fr2") %>% 
+    select(sample, gene, starts_with("Frame")) %>% 
+    pivot_longer(where(is.numeric)) %>% 
+    group_by(sample, name) %>% 
+    summarise(total_reads = sum(value)) %>% 
+    filter(sample %in% samp()) %>%
+    ggplot(., aes(x=name, y=total_reads, fill=sample))+
+    labs(y="Total reads", 
+         title = "Reads per frame",
+         x = NULL)+
     scale_fill_discrete(name = NULL)+
-    labs(title = "Total reads per frame",
-         y = "Total reads")+
+    geom_col(position = position_dodge())+
     plot_theme+
-    labs(x = NULL)
+    guides(guide_legend(ncol = 1))
 })
-```
-
-<!-- Visual options section -->
-
-```{r}
-# the group names are currently hardcoded here, I'm not sure how to determine them dynamically
-# one way would be to pull the names from the barcodes sheet but what if it's not multiplexed data.
-group_names <- c("WT", "ncs2", "uba4")
 ```
 
 ```{r reactive}
@@ -201,7 +232,7 @@ output$input_ui <- renderUI({
    
    # UI for "Single Group"
    if (is.null(sel) || sel == 0) {
-      radioButtons("samp", "Group Name:", group_names, group_names[1])
+      checkboxGroupInput("samp", "Sample name:", sample_names, sample_names[1])
    
    } else if (sel == 1) {
       # Future tab
@@ -217,9 +248,9 @@ uiOutput("input_ui")
 
 ## Data {.tabset}
 
-### Single Group
-```{r output_singlegroup}
+### By Sample
+```{r output_bysample}
 renderPlot({
-  plot((read_length_dists_plot() / periodicity_plot() / (frame_by_gene_plot() | frame_sums_plot())) + plot_layout(guides = "collect"))
+  plot((read_length_dists_plot() / three_nt_per_5p_plot() / three_nt_per_3p_plot() / (frame_by_gene_plot() | total_reads_per_frame())))
 })
 ```
