@@ -1,0 +1,225 @@
+---
+title: "RiboViz Visualization"
+output: 
+  flexdashboard::flex_dashboard:
+    theme: yeti
+    orientation: rows
+    vertical_layout: fill
+runtime: shiny
+---
+
+<!-- Use a JS hack to store the currently selected tab into a reactive value -->
+<script>
+$("body").on("shown.bs.tab", "a[data-toggle='tab']", function(e) {
+   Shiny.setInputValue("active_tab", $(e.target).parent().index());
+})
+</script>
+
+```{r}
+library(flexdashboard)
+library(tidyverse)
+library(patchwork)
+library(scales)
+```
+
+<!-- The issue here is that I'm uncertain as to how to point this code to the output directories that riboviz makes for each sample. The names of those directories, i.e. the sample names, are required for the graphs to be correctly labeled. Also, A bit work will have to be done on grouping related samples, because unless they're something sensible like wt_1, wt_2, etc., the current method won't find them. For example, mouse_1, mouse_2, mouse_3, ..., might be the file names and the experimenter knows which mouse is which sample but as far as this code goes, that will all get labeled as one group. Hence the groups are currently hard coded in at line 179, meaning that it only works with the Gupta data right now. -->
+
+```{r}
+# Define a unified plot theme
+plot_theme <- theme_bw()+
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        text = element_text(size = 14))
+```
+
+<!-- Read length distribution section -->
+
+```{r}
+# Load the various files necessary for this tab, namely, the read length distribution files from each sample.
+# find the locations of the files
+rl_file_locs <- dir("/data2/john/projects/riboviz/output_nf", 
+                    pattern = "read_lengths.tsv", 
+                    recursive = TRUE, 
+                    full.names = TRUE)
+
+# name the locations with the directory names, i.e. the samples
+names(rl_file_locs) <- lapply(rl_file_locs, function(x){
+  str_split(x, "/") %>% # separate each file path
+    unlist() %>%        # convert to vector
+    .[length(.) - 1]    # grab 2nd to last element, i.e. sample name
+  })
+
+# read them in and combine to a single data frame
+rl_df <- lapply(rl_file_locs, read_tsv, skip = 4) %>% 
+  bind_rows(.id = "sample")
+```
+
+```{r}
+# Make the read length dists plot function
+read_length_dists_plot <- reactive({
+  rl_df %>% 
+    filter(grepl(samp(), sample)) %>%                   # pick samples containing a string
+    ggplot(., aes(Length, Counts, fill = sample))+      #
+    geom_col(width = 1)+                                #
+    facet_wrap(~sample)+                                #
+    scale_fill_discrete(name = NULL, guide = FALSE)+    #
+    plot_theme+                                         #
+    labs(title = "Read length distributions",           #
+         x = "Read length")+                            #
+    scale_x_continuous(breaks = seq(10, 50, 5))+        #
+    scale_y_continuous(breaks = breaks_pretty(n = 4))   # try for 4 y axis breaks
+})
+```
+
+<!-- 3nt peridicity section -->
+
+```{r}
+# load the necessary files, namely the 3nt periodicity data files from each samples folder
+per_file_locs <- dir("/data2/john/projects/riboviz/output_nf", pattern = "3nt_periodicity.tsv", recursive = TRUE, full.names = TRUE)
+
+# name the vector with the sample names
+names(per_file_locs) <- lapply(per_file_locs, function(x){
+  str_split(x, "/") %>% # separate each file path
+    unlist() %>%        # convert to vector
+    .[length(.) - 1]    # grab 2nd to last element, i.e. sample name
+  })
+
+# read them in and combine to a single data frame
+per_df <- lapply(per_file_locs, read_tsv, skip = 4) %>% 
+  bind_rows(.id = "sample")
+```
+```{r}
+# Make the 3nt periodicity plot function
+periodicity_plot <- reactive({
+  per_df %>% 
+    filter(grepl(samp(), sample)) %>%
+    ggplot(., aes(x = Pos, y = Counts, color = sample)) + 
+    geom_line(size = 1) + 
+    scale_color_discrete(guide = FALSE)+
+    facet_grid(cols = vars(sample), rows = vars(End)) +
+    labs(title = "3-nucleotide periodicity",
+         x = "Position")+
+    plot_theme+
+    scale_y_continuous(breaks = breaks_pretty(n = 4))
+})
+```
+
+<!-- Frame proportions by gene boxplot section -->
+
+```{r}
+# load the necessary files, namely the 3nt periodicity data files from each samples folder
+frame_file_locs <- dir("/data2/john/projects/riboviz/output_nf", pattern = "3ntframe_bygene.tsv", recursive = TRUE, full.names = TRUE)
+
+# name the vector with the sample names
+names(frame_file_locs) <- lapply(frame_file_locs, function(x){
+  str_split(x, "/") %>% # separate each file path
+    unlist() %>%        # convert to vector
+    .[length(.) - 1]    # grab 2nd to last element, i.e. sample name
+  })
+
+# read them in and combine to a single data frame
+frame_df <- lapply(frame_file_locs, read_tsv, skip = 4) %>%  # read each file in 
+  bind_rows(.id = "sample") %>%                              # make a single data frame
+  mutate(`Frame 0` = Ct_fr0/(Ct_fr0 + Ct_fr1 + Ct_fr2),      # get proportion of reads per frame
+         `Frame 1` = Ct_fr1/(Ct_fr0 + Ct_fr1 + Ct_fr2),      #
+         `Frame 2` = Ct_fr2/(Ct_fr0 + Ct_fr1 + Ct_fr2)) %>%  #
+  select(sample, gene, `Frame 0`, `Frame 1`, `Frame 2`) %>%  # retain these cols
+  pivot_longer(cols = where(is.numeric), names_to = "Frame") # reshape to long format
+```
+
+```{r}
+# Make the frame boxplot function
+frame_by_gene_plot <- reactive({
+  frame_df %>% 
+    filter(grepl(samp(), sample)) %>%
+    ggplot(., aes(x=Frame, y=value, fill=sample))+
+    labs(y="Proportion of reads per gene", 
+         title = "Genewise reading frame",
+         x = NULL)+
+    scale_fill_discrete(guide = FALSE)+
+    geom_boxplot(outlier.size = 1)+
+    plot_theme
+})
+```
+
+<!-- Frame counts total section -->
+
+```{r}
+# read them in and combine to a single data frame
+frame_sums_df <- lapply(frame_file_locs, read_tsv, skip = 4) %>%  # read each file in 
+  bind_rows(.id = "sample") %>%                              # make a single data frame
+  group_by(sample) %>%                                       # for each sample
+  summarise(`Frame 0` = sum(Ct_fr0),                         # sum the reads per frame
+            `Frame 1` = sum(Ct_fr1),                         #
+            `Frame 2` = sum(Ct_fr2)) %>%                     #
+  pivot_longer(cols = where(is.numeric),                     # reshape to long format
+               names_to = "Frame",                           #
+               values_to = "Count")                          #
+```
+
+```{r}
+# Make the frame boxplot function
+frame_sums_plot <- reactive({
+  frame_sums_df %>% 
+    filter(grepl(samp(), sample)) %>%
+    ggplot(., aes(x = Frame, y = Count, fill=sample))+ 
+    geom_bar(stat="identity", pos = "dodge")+ 
+    scale_fill_discrete(name = NULL)+
+    labs(title = "Total reads per frame",
+         y = "Total reads")+
+    plot_theme+
+    labs(x = NULL)
+})
+```
+
+<!-- Visual options section -->
+
+```{r}
+# the group names are currently hardcoded here, I'm not sure how to determine them dynamically
+# one way would be to pull the names from the barcodes sheet but what if it's not multiplexed data.
+group_names <- c("WT", "ncs2", "uba4")
+```
+
+```{r reactive}
+# Getting the desired sample name
+samp <- reactive({
+  if(is.na(input$samp)) {
+    "*"
+  } else {
+    paste(input$samp)  
+  }
+})
+```
+
+## Input {.sidebar}
+
+```{r input}
+# Display UI depending on selected output tab
+output$input_ui <- renderUI({
+   # See JS code at top to see where active_tab comes from
+   sel <- input$active_tab
+   
+   # UI for "Single Group"
+   if (is.null(sel) || sel == 0) {
+      radioButtons("samp", "Group Name:", group_names, group_names[1])
+   
+   } else if (sel == 1) {
+      # Future tab
+    
+   } else {
+      # Future tab     
+   }
+})
+
+# Show the prepared UI
+uiOutput("input_ui")
+```
+
+## Data {.tabset}
+
+### Single Group
+```{r output_singlegroup}
+renderPlot({
+  plot((read_length_dists_plot() / periodicity_plot() / (frame_by_gene_plot() | frame_sums_plot())) + plot_layout(guides = "collect"))
+})
+```
