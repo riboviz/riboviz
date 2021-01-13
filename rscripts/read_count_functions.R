@@ -286,6 +286,8 @@ TidyDatamatrix <- function(data_mat, startpos = 1, startlen = 1) {
 #' 
 #' get gene and position specific total counts for all read lengths, from 5' start
 #' 
+#' TODO Variables needed for internal function GetGeneDatamatrix5start() in AllGenes5StartPositionLengthCountsTibble() aren't passed through using `...` function, but perhaps could be. 
+#' 
 #' @param gene_names vector of gene names to pull out data for (created early in generate_stats_figs.R by line: "gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name")
 #' @param dataset name of dataset stored in .h5 file
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
@@ -295,6 +297,7 @@ TidyDatamatrix <- function(data_mat, startpos = 1, startlen = 1) {
 #' with three columns: "ReadLen", "Pos", "Counts"
 #' 
 #' @examples
+#' # Variables needed for internal function GetGeneDatamatrix5start() in AllGenes5StartPositionLengthCountsTibble() aren't passed through using `...` function, but perhaps could be. See issue riboviz/#248
 #'  min_read_length <- 10
 #'  max_read_length <- 50
 #'  n_buffer <- 25
@@ -484,9 +487,9 @@ barplot_ribogrid <- function(tidymat, small_read_range = 26:32) {
 
 #' GetCodonPositionReads(): function to get codon-specific reads for RPF datasets
 #' 
-#' TODO: more info about what this function does
+#' Assigns reads of lengths 28, 29, 30 to codons based on heuristic approach. NOTE: this function needs to be addressed/improved and replaced by using a-site calculations.
 #' TODO: consider whether buffer should be an argument of this function, if left and right are ALWAYS based on "buffer +/- NN" formula as in CalculatePositionSpecificDistributionOfReads()
-#' #' 
+#'  
 #' @param gene gene name to get read lengths for
 #' @param dataset name of dataset stored in .h5 file
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
@@ -624,7 +627,7 @@ CalcAsiteFixedOneLength <- function(reads_pos_length, min_read_length,
 #' @return numeric vector if colsum_out = TRUE; matrix with number of rows equivalent to number of rows in asite_displacement_length if colsum_out=FALSE
 #' 
 #' @examples 
-#' #' reads_pos_length <- GetGeneDatamatrix(gene = "YAL068C", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5")
+#' reads_pos_length <- GetGeneDatamatrix(gene = "YAL068C", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5")
 #'  # int [1:41, 1:863] 0 0 0 0 0 0 0 0 0 0 ...
 #'  
 #' CalcAsiteFixed(reads_pos_length, min_read_length = 10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)), colsum_out = TRUE) 
@@ -771,7 +774,7 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
 #' @return tidy data frame (tibble) of codon position, counts in frame 0, 1, 2; columns: CodonPos, Ct_fr0, Ct_fr1, Ct_fr2
 #' 
 #' @examples 
-#' #' reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5")
+#' reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5")
 #'  # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
 #' reads_asitepos <- CalcAsiteFixed(reads_pos_length, min_read_length = 10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)), colsum_out = TRUE) 
 #'  # num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
@@ -831,7 +834,7 @@ CombinePValuesStouffer <- function(p) {
 #' @return named numeric vector with 3 values: "pval_fr0vs1" "pval_fr0vs2" "pval_fr0vsboth"
 #' 
 #' @examples 
-#' #' reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5")
+#' reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5")
 #'  # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
 #' reads_asitepos <- CalcAsiteFixed(reads_pos_length, min_read_length = 10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)), colsum_out = TRUE) 
 #'  # num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...#' 
