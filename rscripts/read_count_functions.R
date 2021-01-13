@@ -93,11 +93,6 @@ GetCDS3end <- function(name, gffdf, ftype="CDS", fstrand="+") {
     max 
 }
 #TEST: GetCDS3end(): returns 1 integer value = TRUE
-
-# TODO: could GetCDS5start() and GetCDS3end() be rewritten/renamed/combined to allow 
-# pulling out other features such as UTR5/UTR3 (though would need to ensure 
-# feature naming in the GFF was always consistent!), or using 1 function to do 
-# both ends depending on an extra argument?
 #TEST: could compare 'width' is same as GetCDS3end - GetCDS5start ?
 
 #####
@@ -174,8 +169,6 @@ GetGeneReadLength <- function(gene, dataset, hd_file){
 GetGeneDatamatrix5start <- function(gene, dataset, hd_file, 
                                     posn_5start, n_buffer, nnt_gene) {
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hd_file)
-  # @ewallace: replace this by gff_df?
-  # n_utr5 <- BiocGenerics::width(gff[gff$type == "UTR5" & gff$Name == gene])
   
   # if n_buffer bigger than length n_utr5, pad with zeros:
   if (posn_5start > n_buffer) {
@@ -232,8 +225,6 @@ GetGeneDatamatrix3end <- function(gene, dataset, hd_file,
   # CHECK startpos/off-by-one
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hd_file)
   n_all <- ncol(data_mat_all)
-  # @ewallace: replace this by gff_df?
-  # n_utr3 <- BiocGenerics::width(gff[gff$type == "UTR3" & gff$Name == gene])
   n_left5 <- posn_3end - nnt_gene + 1 # column to start from (5'end)
   n_utr3  <- n_all - posn_3end
   if (n_utr3 >= n_buffer) {
@@ -257,9 +248,9 @@ GetGeneDatamatrix3end <- function(gene, dataset, hd_file,
 #' converts data matrix into readable tidy format with columns: ReadLen, Pos and Counts
 #' to hold read lengths, position (in transcriptome-centric coordinates), and number of reads 
 #' 
-#' @param data_mat single data matrix of gene data in format created by GetGeneDatamatrix5start() and GetGeneDatamatrix3end()
+#' @param data_mat single data matrix of gene data in format created by GetGeneDatamatrix5start() and GetGeneDatamatrix3end().
 #' @param startpos numeric value, start position along transcriptome-centric alignment for specific gene 
-#' @param startlen numeric value, value from which to begin counting lengths from (TODO: NOT CERTAIN OF THIS, CONFIRM!)
+#' @param startlen numeric value, value from which to begin counting lengths from (ie equivalent to '10' in read_lengths= 10:50)
 #' 
 #' @return tidy format data frame (tibble), with columns: ReadLen, Pos and Counts
 #' 
@@ -800,6 +791,23 @@ GatherByFrameCodon <- function(x, left, right) {
 #TEST: GatherByFrameCodon(): returns tibble; TRUE
 #TEST: GatherByFrameCodon(): columns of tibble are %in% c("CodonPos", "Ct_fr0", "Ct_fr1", "Ct_fr2"); TRUE
 
+#' CombinePValuesFisher(): function using Fisher's 1-sided method to combine p-values
+#' 
+#' This function IS NOT USED in riboviz codebase currently, but previously had been used during test; in discussion 2021-01-13 @ewallace suggested to leave it in.
+#'  
+#' @param p numeric, p-value
+#' 
+#' @return TODO
+#'  
+#' @examples TODO
+#' 
+#' @export
+CombinePValuesFisher <- function(p) {
+  # Fisher's method (1-sided) to combine p-values
+  pchisq(-2 * sum(log(p)), 2 * length(p), lower.tail = FALSE)
+}
+#TEST: CombinePValuesFisher(): Unnecessary to test as not currently used in codebase. 
+
 #' CombinePValuesStouffer(): function using Stouffer's "inverse normal" 1-sided method to combine p-values
 #' 
 #' @param p numeric, p-value
@@ -1104,42 +1112,3 @@ GetGeneReadDensity <- function(gene, dataset, hd_file, other_buffer = 50) {
   GetGeneReadsTotal(gene, dataset, hd_file) / (GetGeneLength(gene, dataset, hd_file) + other_buffer)
 }
 #TEST: GetGeneReadDensity(): returns numeric; TRUE
-
-
-# Unused function definitions: TODO: TO REMOVE?
-
-#' CombinePValuesFisher(): function using Fisher's 1-sided method to combine p-values
-#' 
-#' TODO: this function IS NOT USED in riboviz codebase currently: TO REMOVE?
-#' 
-#' @param p numeric, p-value
-#' 
-#' @return TODO
-#'  
-#' @examples TODO
-#' 
-#' @export
-CombinePValuesFisher <- function(p) {
-  # Fisher's method (1-sided) to combine p-values
-  pchisq(-2 * sum(log(p)), 2 * length(p), lower.tail = FALSE)
-}
-#TEST: CombinePValuesFisher(): TODO OR TO REMOVE
-
-
-#' NormByMean(): function to normalise data by dividing by mean
-#' 
-#' #TODO: this function is not used in codebase. TO REMOVE?
-#' 
-#' @param x vector
-#' @param ... other arguments
-#' 
-#' @return TODO
-#' 
-#' @examples TODO
-#'
-#' @export
-NormByMean <- function(x, ...) {
-  x / mean(x, ...)
-}
-#TEST: NormByMean(): min value not below zero, TRUE
-#TEST: NormByMean(): max value not above 1, TRUE
