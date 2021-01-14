@@ -17,7 +17,7 @@ Contents:
 * [Multiplexed files](#multiplexed-files)
 * [Debugging and bash scripts](#debugging-and-bash-scripts)
 * [Generating reports](#generating-reports)
-  - [Troubleshooting: WARN: To render the execution DAG in the required format it is required to install Graphviz](#troubleshooting-warn-to-render-the-execution-dag-in-the-required-format-it-is-required-to-install-graphviz)
+  - [Troubleshooting: WARN To render the execution DAG in the required format it is required to install Graphviz](#troubleshooting-warn-to-render-the-execution-dag-in-the-required-format-it-is-required-to-install-graphviz)
 * [Invoking the workflow from outwith the RiboViz home directory](#invoking-the-workflow-from-outwith-the-riboviz-home-directory)
 
 ---
@@ -459,7 +459,7 @@ $ nextflow run prep_riboviz.nf \
     -with-dag workflow.svg
 ```
 
-### Troubleshooting: `WARN: To render the execution DAG in the required format it is required to install Graphviz`
+### Troubleshooting: `WARN To render the execution DAG in the required format it is required to install Graphviz`
 
 If you do not have Graphviz available then requesting `-with-dag workflow.svg` will cause Nextflow to show this warning on completion of the workflow.
 
