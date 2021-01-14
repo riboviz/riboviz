@@ -43,7 +43,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | Hisat2 | 2.1.0 |
 | Bowtie | 1.2.2 |
 | R | 3.6.3 |
- 
+
 | Python Package | Version | Package Manager |
 | -------------- | ------- | --------------- |
 | biopython | 1.77 | conda | |
@@ -62,10 +62,11 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | umi_tools | 1.0.1 | conda | |
 | gffutils | 0.10.1 | pip |
 | sphinx |  | pip |
- 
+
 | R Package | Version |
 | --------- | ------- |
 | Biostrings | 2.54.0 |
+| devtools | 2.3.2 |
 | ggplot2 | 3.3.2 |
 | git2r | 0.27.1 |
 | here | 0.1 |
@@ -75,6 +76,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | RcppRoll | 0.3.0 |
 | readr | 1.3.1 |
 | rhdf5 | 2.30.1 |
+| roxygen2 | 7.1.1 |
 | Rsamtools | 2.2.3 |
 | rtracklayer | 1.46.0 |
 | shiny | 1.5.0 |
@@ -85,7 +87,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
 * Python pycodestyle, pylint, pytest-cov, sphinx
-* R: lintr, styler
+* R: lintr, styler, roxygen2, devtools
 
 Constraints:
 
@@ -158,7 +160,7 @@ If you are using other distributions of Python you will need to consult the rele
 
 ### Install Miniconda Python 3.6+
 
-Install:
+On Linux, install:
 
 ```console
 $ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda3.sh
@@ -167,7 +169,9 @@ $ bash miniconda3.sh -b -p $HOME/miniconda3
 
 **Note:** make sure you use `-O`, which provides a name for the downloaded file, and not `-o`, which provides the name of a file for messages about the download.
 
-Activate environment:
+For MacOS and Windows installers, go to [Miniconda installation page](https://docs.conda.io/en/latest/miniconda.html).
+
+When miniconda is installed, activate the environment:
 
 ```console
 $ source $HOME/miniconda3/bin/activate
@@ -494,6 +498,7 @@ $ sudo apt-get install -y r-base-dev
 $ sudo apt-get install -y libxml2-dev
 $ sudo apt-get install -y libssl-dev
 $ sudo apt-get install -y libcurl4-openssl-dev
+$ sudo apt-get install -y libgit2-dev
 ```
 
 **Install on CentOS**
@@ -506,6 +511,7 @@ $ sudo yum install -y R-devel
 $ sudo yum install -y libxml2-devel
 $ sudo yum install -y openssl-devel
 $ sudo yum install -y libcurl-devel
+$ sudo yum install -y libgit2-devel
 ```
 
 **Troubleshooting: `the most recent version of R is not installed` or `package "..." is not available (for R version ...)`
@@ -692,7 +698,7 @@ In install.packagees(pkgs = doing, lib = lib, ...) :
 
 You may need to assign more memory to R or your machine.
 
-### Troubleshooting: package "XML" is not available (for R version 3.6.3) 
+### Troubleshooting: package "XML" is not available (for R version 3.6.3)
 
 If you get this errort when running:
 
