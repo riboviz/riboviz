@@ -7,7 +7,9 @@
 # vignette/output/WTnone/WTnone.bam
 #
 # The test runs bam_to_h5.R using the GFF and BAM file then validates
-# the .h5 file created based upon its expected qualities.
+# the .h5 file created based upon its expected qualities given those
+# of the input GFF and BAM files and the bam_to_h5.R command-line
+# parameters.
 #
 # Note: for rapid development this does not currently run bam_to_h5.R
 # but validates vignette/output/WTnone/WTnone.h5. TODO remove this
@@ -27,7 +29,6 @@ library(testthat)
 library(withr)
 
 source(here::here("rscripts", "read_count_functions.R"))
-
 print(here())
 bam_to_h5 <- here::here("rscripts/bam_to_h5.R")
 print(bam_to_h5)
@@ -48,33 +49,33 @@ delete_file <- function(file_name) {
   }
 }
 
-# TODO fix read_count_functions.R
-# GetGeneReadLength <- function(gene, hd_file)
-# =>
-# GetGeneReadLength <- function(gene, dataset, hd_file)
-
 # TODO add to read_count_functions.R
 GetBufferLeft <- function(gene, dataset, hd_file){
   # Returns double
   # Up to ...[["buffer_left"]] is an "array", [1] returns first, only value.
-  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["buffer_left"]][1]
+  rhdf5::h5readAttributes(hd_file,
+    name=paste0("/", gene, "/", dataset, "/reads"))[["buffer_left"]][1]
 }
 GetBufferRight <- function(gene, dataset, hd_file){
   # Returns integer
   # Up to ...[["buffer_left"]] is an "array", [1] returns first, only value.
-  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["buffer_right"]][1]
+  rhdf5::h5readAttributes(hd_file,
+    name=paste0("/", gene, "/", dataset, "/reads"))[["buffer_right"]][1]
 }
 GetStartCodonPos <- function(gene, dataset, hd_file){
   # Returns 1D array of 3 integer
-  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["start_codon_pos"]]
+  rhdf5::h5readAttributes(hd_file,
+    name=paste0("/", gene, "/", dataset, "/reads"))[["start_codon_pos"]]
 }
 GetStopCodonPos <- function(gene, dataset, hd_file){
   # Returns 1D array of 3 integer
-  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["stop_codon_pos"]]
+  rhdf5::h5readAttributes(hd_file,
+    name=paste0("/", gene, "/", dataset, "/reads"))[["stop_codon_pos"]]
 }
 GetMappedReadLengths <- function(gene, dataset, hd_file){
   # Returns 1D array of <max_read_length - min_read_length + 1> integer
-  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["lengths"]]
+  rhdf5::h5readAttributes(hd_file,
+    name=paste0("/", gene, "/", dataset, "/reads"))[["lengths"]]
 }
 
 test_that("Run bam_to_h5.R and validate H5 file", {
@@ -93,12 +94,12 @@ test_that("Run bam_to_h5.R and validate H5 file", {
 
   num_read_counts <- max_read_length - min_read_length + 1
 
-  if (FALSE) # TODO uncomment
-  {
   bam_to_h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}"
   print(bam_to_h5_cmd_template)
   cmd <- glue(bam_to_h5_cmd_template)
   print(cmd)
+  if (FALSE) # TODO uncomment
+  {
   exit_code <- system(cmd)
   print(glue("bam_to_h5.R exit code: {exit_code}"))
   expect_equal(exit_code, 0, info = "Unexpected exit code from bam_to_h5.R")
@@ -106,6 +107,8 @@ test_that("Run bam_to_h5.R and validate H5 file", {
 
   ##### EXTRACT GFF #####
 
+  ## bam_to_h5.R-style
+  
   print("========== GFF - bam_to_h5.R-style ==========")
   gff <- rtracklayer::readGFFAsGRanges(gff_file)
   print(gff)
@@ -146,6 +149,8 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   gene_location <- gff["Name" == gene]
   print(gene_location)
 
+  ## read_count_functions.R-style
+
   print("========== GFF ==========")
   gff_df <- readGFFAsDf(gff_file)
   print(gff_df)
@@ -163,11 +168,11 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print(dim(gff_names)) # NULL
 
   # TODO
-
+ 
   ##### EXTRACT BAM #####
-
-  # TODO
   
+  # TODO
+
   ##### EXTRACT AND VALIDATE H5 #####
 
   print("========== H5 ==========")
@@ -193,10 +198,14 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   #  ...
   # [67] "YAL067W-A" "YAL068C"  
 
-  expect_equal(length(gff_names), length(h5_names), info = "Mismatch in number of sequence names between GFF and H5")
-  expect_equal(as.factor(sort(h5_names)), sort(gff_names), info = "Mismatch in sequence names between GFF and H5")
+  expect_equal(length(h5_names), length(gff_names),
+    info = "Mismatch in number of sequence names between GFF and H5")
+  expect_equal(as.factor(sort(h5_names)), sort(gff_names),
+    info = "Mismatch in sequence names between GFF and H5")
 
+  #
   # Validate values for YAL062W
+  #
 
   gene <- "YAL062W"
 
@@ -218,9 +227,9 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   h5_start_codon_pos <- GetStartCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
   print(h5_start_codon_pos) # 251 252 253
   expect_equal(length(h5_start_codon_pos), 3,
-               info = "Unexpected number of start_codon_pos")
+    info = "Unexpected number of start_codon_pos")
   expect_equal(h5_start_codon_pos, expected_start_codons,
-               info = "Unexpected start_codon_pos")
+    info = "Unexpected start_codon_pos")
 
   # 'stop_codon_pos': Positions corresponding to stop codon of CDS in organism sequence (from GFF)
   expected_stop_codons = array(c(1622, 1623, 1624))
@@ -228,9 +237,9 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   h5_stop_codon_pos <- GetStopCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
   print(h5_stop_codon_pos) # 1622 1623 1624
   expect_equal(length(h5_stop_codon_pos), 3,
-               info = "Unexpected number of stop_codon_pos")
+    info = "Unexpected number of stop_codon_pos")
   expect_equal(h5_stop_codon_pos, expected_stop_codons,
-               info = "Unexpected stop_codon_pos")
+    info = "Unexpected stop_codon_pos")
 
   # 'lengths' : Lengths of mapped reads.
   print("lengths:")
@@ -249,15 +258,14 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   # [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
   # [39] 0 0 0
   expect_equal(length(h5_reads_by_len), num_read_counts,
-               info = "Unexpected number of reads_by_len")
+    info = "Unexpected number of reads_by_len")
   # TODO check all 0s except for two specific values
 
   # 'reads_total': Total number of ribosome sequences (from BAM, equal to number of non-zero reads in 'reads_by_len').
   print("reads_total:")
   h5_reads_total <- GetGeneReadsTotal(gene, dataset, h5_file) # 1D array of 1 double
   print(h5_reads_total) # 2
-  expect_equal(length(h5_reads_total), 1,
-               info = "Unexpected number of reads_total")
+  expect_equal(length(h5_reads_total), 1, info = "Unexpected number of reads_total")
   expect_equal(h5_reads_total[1], 2, info = "Unexpected reads_total")
   # TODO cross-check against non-zero values in reads_by_len
 
@@ -274,12 +282,10 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print(nrow(h5_data)) # 41
   print(ncol(h5_data)) # 1874
   print(h5_stop_codon_pos[3] + buffer) # 1874
-
 })
 
 # How H5 template is populated - basis for tests TODO
 #
-# * Sequence names in H5 equal sequence names in GFF
 # * Every sequence in H5 equal or are superset of sequence names in BAM
 # * Every sequence in BAM has "non-zero" DATA sequence in H5
 # * Every sequence not in BAM has "zero" DATA sequence in H5
