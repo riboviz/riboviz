@@ -222,7 +222,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   expect_equal(h5_buffer_right, buffer, info = "Unexpected buffer_right")
 
   # 'start_codon_pos': Positions corresponding to start codon of CDS in organism sequence (from GFF)
-  expected_start_codons = array(c(251, 252, 253))
+  expected_start_codons = array(c(251, 252, 253)) # TODO get from GFF
   print("start_codon_pos:")
   h5_start_codon_pos <- GetStartCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
   print(h5_start_codon_pos) # 251 252 253
@@ -232,7 +232,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
     info = "Unexpected start_codon_pos")
 
   # 'stop_codon_pos': Positions corresponding to stop codon of CDS in organism sequence (from GFF)
-  expected_stop_codons = array(c(1622, 1623, 1624))
+  expected_stop_codons <- array(c(1622, 1623, 1624)) # TODO get from GFF
   print("stop_codon_pos:")
   h5_stop_codon_pos <- GetStopCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
   print(h5_stop_codon_pos) # 1622 1623 1624
@@ -243,7 +243,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
 
   # 'lengths' : Lengths of mapped reads.
   print("lengths:")
-  expected_lengths = as.array(seq(min_read_length, max_read_length))
+  expected_lengths <- as.array(seq(min_read_length, max_read_length))
   h5_lengths <- GetMappedReadLengths(gene, dataset, h5_file) # 1D array of <max_read_length - min_read_length + 1> integer
   print(h5_lengths)
   # [1] 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
@@ -259,15 +259,25 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   # [39] 0 0 0
   expect_equal(length(h5_reads_by_len), num_read_counts,
     info = "Unexpected number of reads_by_len")
-  # TODO check all 0s except for two specific values
+  h5_reads_len_total <- Reduce("+", h5_reads_by_len)
+  print("SUM(reads_by_len):")
+  print(h5_reads_len_total)
+  # TODO Deduce positions of non-zero values from BAM.
+  
+  expect_equal(h5_reads_by_len[18], 1,
+    info = "Unexpected value for reads_by_len[17]") # 1-indexed R vs 0-indexed H5
+  expect_equal(h5_reads_by_len[19], 1,
+    info = "Unexpected value for reads_by_len[18]") # 1-indexed R vs 0-indexed H5
 
   # 'reads_total': Total number of ribosome sequences (from BAM, equal to number of non-zero reads in 'reads_by_len').
+  expected_reads_total = 2 # TODO extract from BAM
   print("reads_total:")
   h5_reads_total <- GetGeneReadsTotal(gene, dataset, h5_file) # 1D array of 1 double
   print(h5_reads_total) # 2
   expect_equal(length(h5_reads_total), 1, info = "Unexpected number of reads_total")
-  expect_equal(h5_reads_total[1], 2, info = "Unexpected reads_total")
-  # TODO cross-check against non-zero values in reads_by_len
+  expect_equal(h5_reads_total[1], expected_reads_total, info = "Unexpected reads_total")
+  expect_equal(h5_reads_total[1], h5_reads_len_total,
+    info = "reads_total does not equal sum of totals in reads_by_len ")
 
   # 'data': Positions and lengths of ribosome sequences within the organism data (from BAM).
   print("data:")
@@ -291,20 +301,31 @@ test_that("Run bam_to_h5.R and validate H5 file", {
 # * Every sequence not in BAM has "zero" DATA sequence in H5
 # 
 # * H5 has '<sequence ID from FASTA|GFF|reference sequence name from BAM>' GROUP for each sequence
+#
 # * Each sequence GROUP has '<dataset> sub-GROUP # vignette default
+#
 # * '<dataset> sub-GROUP has 'reads' sub-GROUP
+#
 # * 'reads sub-GROUP has attributes:
+#
 #   - 'buffer_left': '<buffer|GFF UTR5 length>' # 250 default
+#
 #   - 'buffer_right': '<buffer|GFF UTR5 length>' # 250 default
+#
 #   - 'lengths':
 #      - Length: <max-read-length>-<min-read-length>+1) / (<max-read-length>-<min-read-length>+1
 #      - Values: <min-read-length>, <min-read-length>+1, ... ,<min-read-length>+<m>-1, <min-read-length>+<m>, <min-read-length>+<m>+1, ... ,<min-read-length>+<n>-1, <min-read-length>+<n>, <min-read-length>+<n>+1, ... ,<min-read-length>+<max-read-length>
+#
 #   - 'reads_by_len':
 #      - Length: '<max-read-length>-<min-read-length>+1' # Default, 50-10+1=41
 #      - Values: 'reads_by_len[i]' = sum of sequences in BAM which have length equal to 'lengths[i]'. Also equals sum of 'DATA[*, i]' i.e. sum across all positions for a specific length.
+#
 #   - 'reads_total': <number of non-zero values in reads_by_len>
+#
 #   - 'start_codon_pos>': <position of 1st nt of CDS start codon from GFF>,...,<position of 3rd nt of CDS start codon from GFF>
+#
 #   - 'stop_codon_pos': <position of 1st nt of CDS stop codon from GFF>,...,<position of 3rd nt of CDS stop codon from GFF>
+#
 # * 'reads sub-GROUP has DATA 'data':
 #    - Dimensions: '<position of final codon of UTR3 from GFF|Length of sequence from BAM header LN value>' x '<max-read-length>-<min-read-length>+1' ) /
 #    - Values:
