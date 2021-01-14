@@ -350,6 +350,9 @@ ribosome_fqs.fq_files = params.fq_files
 ribosome_fqs.multiplex_fq_files = params.multiplex_fq_files
 ribosome_fqs_yaml = new Yaml().dump(ribosome_fqs)
 
+// Split channel for use in multiple downstream processes.
+ribosome_fqs_yaml.into {count_reads_ribosome_fqs_yaml; dashboard_ribosome_fqs_yaml}
+
 // Non-sample-specific input files.
 if (! params.build_indices) {
     rrna_index_prefix = file("${params.dir_index}/${params.rrna_index_prefix}.*.ht2")
@@ -1053,15 +1056,17 @@ process generateStatsFigs {
 
 process dashboard {
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
-  // input:
-  //  file ?
 
-  // this is not the correct output, but I'm still not clear on what output new_visualization.Rmd produces?
+    input:
+      val ribosome_fqs_yaml from dashboard_ribosome_fqs_yaml
+
+    // this is a temporary output, as @FlicAnderson still not clear on what output new_visualization.Rmd produces?
     output:
       file 'tmp.txt'
 
-      shell:
+    shell:
       """
+      echo "${ribosome_fqs_yaml}" > ribosome_fqs.yaml
       Rscript --vanilla -e "rmarkdown::render('$HOME/riboviz/riboviz/rmarkdown/new_visualization.Rmd')"
       touch tmp.txt
       """
@@ -1114,7 +1119,7 @@ process countReads {
         // 'workflow.projectDir' triggering reexecution of this
         // process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
-        val ribosome_fqs_yaml from ribosome_fqs_yaml
+        val ribosome_fqs_yaml from count_reads_ribosome_fqs_yaml
         // Force dependency on output of 'collateTpms' so this process
         // is only run when all other processing has completed.
         val samples_ids from collate_tpms_sample_ids
