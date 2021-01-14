@@ -335,7 +335,7 @@ print("Starting: Position specific distribution of reads")
 # For RPF datasets, generate codon-based position-specific reads
 if (rpf) {
   
-  pos_sp_rpf_norm_reads_data <- CalculatePositionSpecificDistributionOfReads(hd_file, gene_names, dataset, buffer, min_read_length, count_threshold)
+  pos_sp_rpf_norm_reads_data <- CalculatePositionSpecificDistributionOfReads(gene_names, dataset, hd_file, buffer, min_read_length, count_threshold)
   
   pos_sp_rpf_norm_reads_plot <- PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
   
