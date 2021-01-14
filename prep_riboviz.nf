@@ -7,7 +7,6 @@ import org.yaml.snakeyaml.Yaml
 RiboViz ribosome profiling workflow
 ===================================
 */
-
 def helpMessage() {
     log.info """
 
@@ -238,6 +237,7 @@ params.stop_in_cds = false
 params.samsort_memory = null
 params.validate_only = false
 params.skip_inputs = false
+
 
 if (params.publish_index_tmp)
 {
