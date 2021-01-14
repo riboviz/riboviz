@@ -48,6 +48,28 @@ delete_file <- function(file_name) {
   }
 }
 
+# TODO fix read_count_functions.R
+# GetGeneReadLength <- function(gene, hd_file)
+# =>
+# GetGeneReadLength <- function(gene, dataset, hd_file)
+
+# TODO add to read_count_functions.R
+GetBufferLeft <- function(gene, dataset, hd_file){
+  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["buffer_left"]]
+}
+GetBufferRight <- function(gene, dataset, hd_file){
+  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["buffer_right"]]
+}
+GetStartCodonPos <- function(gene, dataset, hd_file){
+  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["start_codon_pos"]]
+}
+GetStopCodonPos <- function(gene, dataset, hd_file){
+  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["stop_codon_pos"]]
+}
+GetMappedReadLengths <- function(gene, dataset, hd_file){
+  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["lengths"]]
+}
+
 test_that("Run bam_to_h5.R and validate H5 file", {
   withr::defer(delete_file(h5_file))
 
@@ -72,9 +94,10 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print(glue("bam_to_h5.R exit code: {exit_code}"))
   expect_equal(exit_code, 0, info = "Unexpected exit code from bam_to_h5.R")
   }
-  
-  # GFF - bam_to_h5.R
-  print("========== GFF - bam_to_h5.R ==========")
+
+  ##### EXTRACT GFF #####
+
+  print("========== GFF - bam_to_h5.R-style ==========")
   gff <- rtracklayer::readGFFAsGRanges(gff_file)
   print(gff)
   gff_names <- mcols(gff)
@@ -95,42 +118,91 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   gene_location <- gff["Name" == gene]
   print(gene_location)
 
-  # GFF - read_count_functions.R
-  print("========== GFF - read_count_functions.R ==========")
-
+  print("========== GFF - generate_stats_figs.R/read_count_functions.R-style ==========")
+  # From generate_stats_figs.R calling read_count_functions.R
   gff_df <- readGFFAsDf(gff_file)
   print(gff_df)
-  # TODO how to extract content from gff_df?
-
-  gff_names_2 <- unique(gff_df$seqnames)
+  gff_names_2 <- unique(gff_df$seqnames) # Tibble data frame
   print(gff_names_2)
   print(length(gff_names_2)) # 68
 
+  # TODO
 
-  # BAM
+  ##### EXTRACT BAM #####
 
-#  bam_what <- c("strand", "pos", "qwidth")
-#  bam_param <- ScanBamParam(which = gene_location, what = bam_what)
-#  bam_data <- scanBam(bam_file, param=bam_param)
-#  bam_data <- scanBam(bam_file)
-#  print(bam_data)
+  # TODO
+  
+  ##### EXTRACT AND VALIDATE H5 #####
 
-  # H5
+  print("========== H5 ==========")
 
-  print("========== H5 - read_count_functions.R ==========")
-
-  from_h5 <- rhdf5::h5ls(h5_file, recursive = 1)
-  print(from_h5)
-# TODO how to extract content from from_h5?
-
-  h5_names <- from_h5$name
+  # From generate_stats_figs.R
+  h5_data <- rhdf5::h5ls(h5_file, recursive = 1)
+  print(class(h5_data)) # data.frame
+  print(typeof(h5_data)) # list
+  print(h5_data)
+  #  group      name     otype dclass dim
+  # 0      /   YAL001C H5I_GROUP           
+  # 58     /   YAL062W H5I_GROUP
+  h5_names <- h5_data$name
+  print(class(h5_names)) # character
+  print(typeof(h5_names)) # character
   print(h5_names)
+  #  [1] "YAL001C"   "YAL002W"   ...
+  #  ...
+  # [67] "YAL067W-A" "YAL068C"  
   print(length(h5_names)) # 68
 
-  expect_equal(length(gff_names_2), length(h5_names), info = "Mismatch in sequence names")
+  expect_equal(length(gff_names_2), length(h5_names), info = "Mismatch in sequence names between GFF and H5")
 
+  # From read_count_functions.R
+  gene <- "YAL062W"
 
+  print("--- H5 'data' ---")
+  h5_data <- GetGeneDatamatrix(gene, dataset, h5_file)
+  # print(h5_data) # Verbose
+  # TODO print rows which were expected to have 1s
+  print(dim(h5_data)) # 41 1874
 
+  print("--- H5 'reads_by_len' ---")
+  h5_reads_by_len <- GetGeneReadLength(gene, h5_file)
+  print(h5_reads_by_len)
+  # [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  # [39] 0 0 0
+  print(length(h5_reads_by_len)) # 41
+
+  print("--- H5 length ('stop_codon_pos' - 'start_codon_pos') ---")
+  h5_gene_length <- GetGeneLength(gene, dataset, h5_file)
+  print(h5_gene_length) # 1371
+
+  print("--- H5 'reads_total' ---")
+  h5_reads_total <- GetGeneReadsTotal(gene, dataset, h5_file)
+  print(h5_reads_total) # 2
+
+  print("--- H5 density ('reads_total' / length) ---")
+  h5_density <- GetGeneReadDensity(gene, dataset, h5_file, buffer = buffer)
+  print(h5_density) # 0.00140746
+
+  print("--- H5 'buffer_left' ---")
+  h5_buffer_left <- GetBufferLeft(gene, dataset, h5_file)
+  print(h5_buffer_left) # 250
+  print("--- H5 'buffer_right' ---")
+  h5_buffer_right <- GetBufferRight(gene, dataset, h5_file)
+  print(h5_buffer_right) # 250
+  print("--- H5 'start_codon_pos' ---")
+  h5_start_codon_pos <- GetStartCodonPos(gene, dataset, h5_file)
+  print(h5_start_codon_pos) # 251 252 253
+  print(length(h5_start_codon_pos)) # 3
+  print("--- H5 'stop_codon_pos' ---")
+  h5_stop_codon_pos <- GetStopCodonPos(gene, dataset, h5_file)
+  print(h5_stop_codon_pos) # 1622 1623 1624
+  print(length(h5_stop_codon_pos)) # 3
+  print("--- H5 'lengths' ---")
+  h5_lengths <- GetMappedReadLengths(gene, dataset, h5_file)
+  print(h5_lengths)
+  # [1] 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
+  # [26] 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+  print(length(h5_lengths)) # 41
 })
 
 # How H5 template is populated - basis for tests
