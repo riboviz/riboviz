@@ -1043,6 +1043,29 @@ process generateStatsFigs {
         """
 }
 
+
+// visualization process goes here.
+// run new_visualization.Rmd to generate interactive output report.
+// riboviz/#239
+// ideally take params.??? to get `-params-file` argument from Nextflow call.
+// This would give us path of config.yaml file to input to the .Rmd, replacing
+// find_sample_names(yaml1) and allowing report from the yaml being run.
+
+process dashboard {
+    publishDir "${params.dir_out}", mode: 'copy', overwrite: true
+  // input:
+  //  file ?
+
+  // this is not the correct output, but I'm still not clear on what output new_visualization.Rmd produces?
+    output:
+      file x
+
+      shell:
+      """
+      Rscript --vanilla -e "rmarkdown::render('$HOME/riboviz/riboviz/rmarkdown/new_visualization.Rmd')"
+      """
+}
+
 finished_sample_id
     .ifEmpty { exit 1, "No sample was processed successfully" }
     .view { "Finished processing sample: ${it}" }
