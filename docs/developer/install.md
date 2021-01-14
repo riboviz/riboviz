@@ -51,34 +51,6 @@ To load the packages before use:
 
 ---
 
-## Install general packages
-
-| Package | Links |
-| ------- | ----- |
-| GraphViz | [GraphViz](https://www.graphviz.org/) |
-
-Install:
-
-**Ubuntu**
-
-```console
-$ sudo apt-get install graphviz
-```
-
-**CentOS**
-
-```console
-$ sudo yum install graphviz
-```
-
-Check install:
-
-```console
-$ dot -V
-```
-
----
-
 ## Editor supporting live preview of GraphViz images (optional)
 
 The following free editors supporting live preview of GraphViz images when editing dot documents:
