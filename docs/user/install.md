@@ -110,6 +110,8 @@ Constraints:
 | bedtools | [bedtools](http://bedtools.readthedocs.io/en/latest/), [GitHub](https://github.com/arq5x/bedtools2) |
 | hdf5tools | [HDF5](https://portal.hdfgroup.org/display/HDF5) |
 | pigz | [pigz](http://zlib.net/pigz/) |
+| GraphViz | [GraphViz](https://www.graphviz.org/) |
+
 
 ### Install on Ubuntu
 
@@ -119,6 +121,7 @@ $ sudo apt-get install -y curl
 $ sudo apt-get install -y bedtools
 $ sudo apt-get install -y hdf5-tools
 $ sudo apt-get install -y pigz
+$ sudo apt-get install -y graphviz
 ```
 
 ### Install on CentOS
@@ -130,6 +133,7 @@ $ sudo yum install -y epel-release
 $ sudo yum install -y BEDTools
 $ sudo yum install -y hdf5-devel
 $ sudo yum install -y pigz
+$ sudo yum install -y graphviz
 ```
 
 ### Check packages have installed
@@ -140,6 +144,7 @@ $ curl --version
 $ bedtools -version
 $ h5diff -version
 $ pigz --version
+$ dot -V
 ```
 
 `h5diff` is one of the hdf5tools.

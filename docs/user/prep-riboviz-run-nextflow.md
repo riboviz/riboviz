@@ -458,6 +458,18 @@ $ nextflow run prep_riboviz.nf \
     -with-dag workflow.svg
 ```
 
+### Troubleshooting: `WARN: To render the execution DAG in the required format it is required to install Graphviz`
+
+If you do not have Graphiviz available then requesting `-with-dag workflow.svg` will cause Nextflow to show this warning on completion of the workflow.
+
+If this happens then Nextflow will, instead, create a `nextflow.dot`, file. This can be converted to an image on a system that does have Graphviz as follows:
+
+```console
+$ dot -T svg workflow.dot -o workflow.svg
+```
+
+Alternatively you could run Nextflow using `-with-dag workflow.html`, which creates an HTML/JavaScript visualisation of the workflow.
+
 ---
 
 ## Invoking the workflow from outwith the RiboViz home directory
