@@ -17,6 +17,7 @@ $("body").on("shown.bs.tab", "a[data-toggle='tab']", function(e) {
 
 ```{r}
 library(flexdashboard)
+library(shiny)
 library(tidyverse)
 library(patchwork)
 library(scales)
@@ -317,7 +318,7 @@ frame_by_gene_df <- lapply(sample_dir_names, function(x){
 
 ```{r}
 # Make the read length dists plot function
-read_length_dists_plot <- reactive({
+read_length_dists_plot <- shiny::reactive({
   read_length_df %>% 
     filter(sample %in% samp()) %>%
     ggplot(., aes(Length, Counts, fill = sample))+
@@ -334,7 +335,7 @@ read_length_dists_plot <- reactive({
 
 ```{r}
 # Make the 3nt periodicity plot function
-three_nt_per_5p_plot <- reactive({
+three_nt_per_5p_plot <- shiny::reactive({
   three_nt_per_df %>% 
     filter(sample %in% samp() & End == "5'") %>%
     ggplot(., aes(x = Pos, y = Counts, color = sample))+ 
@@ -349,7 +350,7 @@ three_nt_per_5p_plot <- reactive({
 })
 
 # a separate one for 3' ends
-three_nt_per_3p_plot <- reactive({
+three_nt_per_3p_plot <- shiny::reactive({
   three_nt_per_df %>% 
     filter(sample %in% samp() & End == "3'") %>%
     ggplot(., aes(x = Pos, y = Counts, color = sample))+ 
@@ -366,7 +367,7 @@ three_nt_per_3p_plot <- reactive({
 
 ```{r}
 # Make the read counts by frame boxplot
-frame_by_gene_plot <- reactive({
+frame_by_gene_plot <- shiny::reactive({
   frame_by_gene_df %>% 
     rename("Frame 0" = "Ct_fr0", "Frame 1" = "Ct_fr1", "Frame 2" = "Ct_fr2") %>% 
     select(sample, gene, starts_with("Frame")) %>% 
@@ -383,7 +384,7 @@ frame_by_gene_plot <- reactive({
 ```
 ```{r}
 # Make the total read counts by frame plot function
-total_reads_per_frame <- reactive({
+total_reads_per_frame <- shiny::reactive({
   frame_by_gene_df %>% 
     rename("Frame 0" = "Ct_fr0", "Frame 1" = "Ct_fr1", "Frame 2" = "Ct_fr2") %>% 
     select(sample, gene, starts_with("Frame")) %>% 
@@ -404,7 +405,7 @@ total_reads_per_frame <- reactive({
 
 ```{r reactive}
 # Getting the desired sample name
-samp <- reactive({
+samp <- shiny::reactive({
   if(is.na(input$samp)) {
     "*"
   } else {
