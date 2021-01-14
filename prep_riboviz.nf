@@ -437,7 +437,7 @@ process SRA_IDS_TO_RUNINFO {
       // Based on call to hisat2, seems like we are only concerned with single-end reads. For now, don't worry about paired-end.
       if (single.toBoolean()){
         """
-        curl -L ${fastq[0]} -O
+        curl -L ${fastq} -O
         """
       } else{
         """
@@ -460,7 +460,7 @@ process SRA_FASTQ_FTP_Multiplexed {
       val(sample_name) from multiplex_sample_info
 
       output:
-      tuple val(sample_name), path("*fastq.gz") into multiplex_id_fq
+      tuple val(sample_name), path("*fastq.gz") optional true into multiplex_id_fq
 
       when:
       (is_multiplexed)
@@ -468,7 +468,7 @@ process SRA_FASTQ_FTP_Multiplexed {
       // Based on call to hisat2, seems like we are only concerned with single-end reads. For now, don't worry about paired-end.
       if (single.toBoolean()){
         """
-        curl -L ${fastq[0]} -O
+        curl -L ${fastq} -O
         """
       } else{
         """
