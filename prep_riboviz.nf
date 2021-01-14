@@ -285,6 +285,7 @@ Validate input files.
 */
 
 if (params.download) {
+  multiplex_sample_sheet_tsv = Channel.empty()
   to_download = []
   for (entry in params.download){
     to_download.add([entry.key,entry.value])
@@ -311,7 +312,7 @@ if (params.download) {
   sample_id_fq = []
   multiplex_id_fq = []
 
-  multiplex_sample_sheet_tsv = Channel.empty()
+  
   is_multiplexed = false
   if (params.validate_only && params.skip_inputs) {
       println("Skipping checks for existence of of ribosome profiling input files (fq_files|multiplex_fq_files|sample_sheet)")
