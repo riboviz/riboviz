@@ -586,13 +586,13 @@ GetMRNACoverage <- function(gene, dataset, hd_file, left, right, read_range, min
 
 ### functions to calculate read frame etc. ###
 
-#' CalcAsiteFixedOneLength(): function to find a-site for single length read using fixed displacement
+#' CalcAsiteFixedOneLength(): Calculate read A-site using a fixed displacement for a single read length
 #' 
-#' Calculate read A-site using a fixed displacement for a single read length
+#' This is a helper function for `CalcAsiteFixed`.
 #' 
 #' @param reads_pos_length matrix of read lengths and positions (e.g. as given by GetGeneDatamatrix(gene, dataset, hd_file) )
 #' @param min_read_length integer, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
-#' @param read_range numeric range of read length values, set in generate_stats_figs.R from "min_read_length:max_read_length" values from yaml; Default: 10:50
+#' @param read_range numeric range of read length values, set in generate_stats_figs.R from `min_read_length:max_read_length` values from yaml; Default: 10:50
 #' @param asite_displacement numeric value giving read frame displacement from 5' end to A-site
 #' 
 #' @return matrix
@@ -613,15 +613,14 @@ CalcAsiteFixedOneLength <- function(reads_pos_length, min_read_length,
 }
 #TEST: CalcAsiteFixedOneLength(): TODO
 
-#' CalcAsiteFixed(): function to find a-site for single length read using fixed displacement
+#' CalcAsiteFixed(): Calculate read A-site using a fixed displacement for fixed read lengths
 #' 
-#' Calculate read A-site using a fixed displacement for fixed read lengths
+#' The assignment rules are specified in a user-supplied data frame, `asite_displacement_length`.
 #' 
 #' @param reads_pos_length matrix of read lengths and positions (e.g. as given by GetGeneDatamatrix(gene, dataset, hd_file) )
 #' @param min_read_length numeric, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
-#' @param asite_displacement_length data frame of 2 columns: read_length default: c(28, 29, 30), and asite_displacement, default: c(15, 15, 15) 
-#' @param read_range numeric range of read length values, set in generate_stats_figs.R from "min_read_length:max_read_length" values from yaml; Default: 10:50
-#' @param asite_displacement numeric value giving read frame displacement from 5' end to A-site
+#' @param asite_displacement_length data frame with columns `read_length` and `asite_displacement`
+#'  default: read_length = c(28, 29, 30), and asite_displacement = c(15, 15, 15). 
 #' @param colsum_out logical; if true, return summary column of summed a-site lengths; default: TRUE
 #' 
 #' @return numeric vector if colsum_out = TRUE; matrix with number of rows equivalent to number of rows in asite_displacement_length if colsum_out=FALSE
@@ -636,8 +635,8 @@ CalcAsiteFixedOneLength <- function(reads_pos_length, min_read_length,
 #' @export 
 CalcAsiteFixed <- function(reads_pos_length, min_read_length,
                            asite_displacement_length = data.frame(
-                             read_length = c(28, 29, 30),
-                             asite_displacement = c(15, 15, 15)
+                             read_length = c(28L, 29L, 30L),
+                             asite_displacement = c(15L, 15L, 15L)
                            ),
                            colsum_out = TRUE) {
   npos <- ncol(reads_pos_length)
@@ -669,7 +668,7 @@ CalcAsiteFixed <- function(reads_pos_length, min_read_length,
 #TEST: CalcAsiteFixed(): if col_sum=TRUE, return numeric vector? TRUE
 #TEST: CalcAsiteFixed(): if col_sum=FALSE, return matrix? TRUE
 
-#' SumByFrame(): function to sum vector by 3nt frames 0, 1, 2
+#' SumByFrame(): Calculate sums of vector by 3nt frames 0, 1, 2
 #' 
 #' Note: this function will not operate correctly if used on outputs for CalcAsiteFixed() where col_sum=FALSE, as this would create a matrix, and input to x should be a vector.
 #' 
@@ -680,6 +679,10 @@ CalcAsiteFixed <- function(reads_pos_length, min_read_length,
 #' @return numeric vector of 3 values, sum of values for each of frame 0, 1, 2.
 #'  
 #' @examples 
+#' SumByFrame(rep(1,9),1,9)
+#' SumByFrame(rep(c(1,0,0),3),1,9)
+#' SumByFrame(1:9,1,9)
+#' 
 #' reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5")
 #'  # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
 #' reads_asitepos <- CalcAsiteFixed(reads_pos_length, min_read_length = 10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)), colsum_out = TRUE) 
@@ -701,18 +704,25 @@ SumByFrame <- function(x, left, right) {
 #TEST: SumByFrame(): length of numeric vector returned is 3 (ie frame 0, 1, 2); TRUE
 #TODO: perhaps create a test on argument input for x to check it is vector, not matrix, (Note: this function will not operate correctly if used on outputs for CalcAsiteFixed() where col_sum=FALSE, as this would create a matrix, and input to x should be a vector.)
 
-#' SnapToCodon(): function to snap nucleotide-aligned reads to codon position
+#' SnapToCodon(): Snap nucleotide-aligned reads to codon position
+#' 
+#' This takes a numeric vector (usually of read counts), and returns a numeric vector summed in groups of 3.
+#' It is a thin wrapper of the rolling sum function, `RcppRoll::roll_suml`.
 #' 
 #' #TODO: clarify inclusion/exclusion of start/stop codon in left/right documentation, especially right. 
 #' 
-#' @param x vector
+#' @param x numeric vector
 #' @param left integer for starting position, frame 0; (e.g. 251 for gene YAL003W in S.cerevisiae in vignette dataset, as this is first NT of CDS)
 #' @param right integer for ending position; (e.g. 871 for gene YAL003W in S.cerevisiae in vignette dataset, as this is last NT of CDS)
 #' @param snapdisp integer any additional displacement in the snapping
 #' 
-#' @return vector of summed read values per codon for a gene
+#' @return numeric vector of summed read values per codon for specified region (left to right)
 #' 
 #' @examples 
+#' SnapToCodon(rep(1,9),1,9)
+#' SnapToCodon(rep(c(1,0,0),3),1,9)
+#' SnapToCodon(1:9,1,9)
+#'
 #' reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5")
 #'  # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
 #' reads_asitepos <- CalcAsiteFixed(reads_pos_length, min_read_length = 10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)), colsum_out = TRUE) 
@@ -726,10 +736,16 @@ SnapToCodon <- function(x, left, right, snapdisp=0L) {
 }
 #TEST: SnapToCodon(): returns numeric vector; TRUE
 #TEST: SnapToCodon(): number of values (length of vector) returned is ~ (right - left)/3; TRUE
+#TEST: SnapToCodon(rep(1,6),1,6) == c(3,3)
 
-#' GetGeneCodonPosReads1dsnap(): function to get gene codon positions and reads, snapped to codon
+#' GetGeneCodonPosReads1dsnap(): Get codon positions and reads, snapped to codon, for one gene
+#' 
+#' This uses fixed A-site displacement from `CalcAsiteFixed`, then wraps `SnapToCodon`.
 #' 
 #' TODO: explain this function better
+#' 
+#' Note: GetGeneCodonPosReads1dsnap is not used in the riboviz pipeline (as of Jan 2021), 
+#' but might be useful to test CalcAsiteFixed/SnapToCodon or for alternative visualizations.
 #' 
 #' @param gene gene name to get read lengths for
 #' @param dataset name of dataset stored in .h5 file
@@ -765,7 +781,9 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
 #TEST: GetGeneCodonPosReads1dsnap(): returns numeric vector; TRUE
 #TEST: GetGeneCodonPosReads1dsnap(): number of values (length of vector) returned is ~ (right - left)/3; TRUE
 
-#' GatherByFrameCodon(): function to gather a vector by 3nt frames 0,1,2 for each codon position
+#' GatherByFrameCodon(): Gather a vector by 3nt frames 0, 1, 2, for each codon position
+#' 
+#' Note: there may be a better tidyverse-style implementation
 #' 
 #' @param x vector (e.g. reads_asitepos, as created by CalcAsiteFixed())
 #' @param left integer for starting position, frame 0; (e.g. 251 for gene YAL003W in S.cerevisiae in vignette dataset, as this is first NT of CDS)
@@ -774,6 +792,8 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
 #' @return tidy data frame (tibble) of codon position, counts in frame 0, 1, 2; columns: CodonPos, Ct_fr0, Ct_fr1, Ct_fr2
 #' 
 #' @examples 
+#' GatherByFrameCodon(1:9,1,9)
+#' 
 #' reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5")
 #'  # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
 #' reads_asitepos <- CalcAsiteFixed(reads_pos_length, min_read_length = 10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)), colsum_out = TRUE) 
@@ -793,39 +813,63 @@ GatherByFrameCodon <- function(x, left, right) {
 }
 #TEST: GatherByFrameCodon(): returns tibble; TRUE
 #TEST: GatherByFrameCodon(): columns of tibble are %in% c("CodonPos", "Ct_fr0", "Ct_fr1", "Ct_fr2"); TRUE
+#TEST: GatherByFrameCodon(1:9,1,9): output is expected data frame.
 
-#' CombinePValuesFisher(): function using Fisher's 1-sided method to combine p-values
+#' CombinePValuesFisher(): Combine p-values using Fisher's 1-sided method 
 #' 
-#' This function IS NOT USED in riboviz codebase currently, but previously had been used during test; in discussion 2021-01-13 @ewallace suggested to leave it in.
+#' This function is not used in riboviz codebase currently, we instead use the higher-powered `CombinePValuesStouffer`.
 #'  
-#' @param p numeric, p-value
+#' @param p numeric vector of input p-values.
 #' 
-#' @return TODO
+#' @return combined p-value, numeric vector of length 1.
 #'  
-#' @examples TODO
+#' @examples
+#' CombinePValuesFisher(0.1) 
+#' CombinePValuesFisher(c(0.5,0.5)) 
+#' CombinePValuesFisher(c(0.1,0.1)) 
+#' CombinePValuesFisher(rep(0.1,10)) 
 #' 
 #' @export
+#' @seealso CombinePValuesStouffer
 CombinePValuesFisher <- function(p) {
   # Fisher's method (1-sided) to combine p-values
   pchisq(-2 * sum(log(p)), 2 * length(p), lower.tail = FALSE)
 }
-#TEST: CombinePValuesFisher(): Unnecessary to test as not currently used in codebase. 
+#TEST: CombinePValuesFisher(0.1) == 0.1
+#TEST: CombinePValuesFisher(rep(0.5,10)) == 0.5
 
-#' CombinePValuesStouffer(): function using Stouffer's "inverse normal" 1-sided method to combine p-values
+#' CombinePValuesStouffer(): Combine p-values using Stouffer's "inverse normal" 1-sided method.
 #' 
-#' @param p numeric, p-value
+#' @param p numeric vector of input p-values.
 #' 
-#' @return numeric, p-value
+#' @return combined p-value, numeric vector of length 1.
 #' 
-#' @examples TODO
+#' @examples 
+#' CombinePValuesStouffer(0.1) 
+#' CombinePValuesStouffer(c(0.5,0.5)) 
+#' CombinePValuesStouffer(c(0.1,0.1)) 
+#' CombinePValuesStouffer(rep(0.1,10)) 
 #' 
 #' @export
+#' @seealso CombinePValuesFisher
 CombinePValuesStouffer <- function(p) {
   pnorm(sum(qnorm(p)) / sqrt(length(p)))
 }
-#TEST: CombinePValuesStouffer(): returns numeric value; TRUE
+#TEST: CombinePValuesStouffer(0.1) == 0.1
+#TEST: CombinePValuesStouffer(rep(0.5,10)) == 0.5
 
-#' WilcoxTestFrame(): function to run Wilcox rank-sum paired test to check frame 0 has more reads
+#' WilcoxTestFrame(): Calculate Wilcoxon rank-sum paired test of reads in frame 0 compared to 1 and 2.
+#' 
+#' This calculates p-values for a Wilcoxon rank-sum paired test of reads.
+#' We compare reads in frame 0 with same-codon-paired frame 1, and respectively frame 2.
+#' Then we combine p-values for frame 0 vs both frames 1 and 2, using Stoufer's method.
+#' 
+#' The test is based on that presented in the RiboCode paper:
+#' 
+#'   Xiao Z., Huang R., Xing X., Chen Y., Deng H., Yang X. De novo annotation and characterization of the translatome with ribosome profiling data. Nucleic Acids Res. 2018; 46:e61.
+#' 
+#' Unlike RiboCode, this function calculates the test values for fixed left/start and right/end positions.
+#' RiboCode additionally searches for alternative start codons, which this function does not do.
 #' 
 #' @param x vector (e.g. reads_asitepos, as created by CalcAsiteFixed())
 #' @param left integer for starting position, frame 0; (e.g. 251 for gene YAL003W in S.cerevisiae in vignette dataset, as this is first NT of CDS)
@@ -873,7 +917,12 @@ WilcoxTestFrame <- function(x, left, right) {
 #TEST: WilcoxTestFrame(): check for named numeric vector; TRUE
 #TEST: WilcoxTestFrame(): length of returned vector is 3; TRUE
 
-#' GetGeneReadFrame(): function to find frame for gene
+#' GetGeneReadFrame(): Calculate read frame statistics for one CDS or gene.
+#' 
+#' This:
+#' * Assigns reads to A-sites by `CalcAsiteFixed`, using rules supplied in `asite_displacement_length`.
+#' * Counts of reads in each frame, by calling `SumByFrame`.
+#' * Calculates Wilcoxon rank-sum paired test p-values of reads in frame 0 vs 1, 2, or both, by calling `WilcoxTestFrame`
 #' 
 #' @param gene gene name to get read lengths for
 #' @param dataset name of dataset stored in .h5 file
@@ -889,6 +938,7 @@ WilcoxTestFrame <- function(x, left, right) {
 #' GetGeneReadFrame("YAL003W", dataset= "vignette", hd_file = "vignette/output/WTnone/WTnone.h5", left=251, right=871, min_read_length=10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)))
 #' 
 #' @export 
+#' @seealso [WilcoxTestFrame()], [CalcAsiteFixed()], [SumByFrame()]
 GetGeneReadFrame <- function(gene, dataset, hd_file, left, right, min_read_length,
                              asite_displacement_length = data.frame(
                                read_length = c(28, 29, 30),
@@ -914,11 +964,17 @@ GetGeneReadFrame <- function(gene, dataset, hd_file, left, right, min_read_lengt
 #TEST: GetGeneReadFrame(): returns tibble; TRUE
 #TEST: GetGeneReadFrame(): column names in c("gene", "Ct_fr0", "Ct_fr1", "Ct_fr2", "pval_fr0vs1", "pval_fr0vs2", "pval_fr0vsboth")
 
-#' CalcReadFrameProportion(): function to calculate read frame proportions from read frame counts
+#' CalcReadFrameProportion(): Calculate read frame proportions from read frame counts
 #' 
-#' @param read_frame_df data frame of read frame counts, as output by GetGeneReadFrame()
+#' @param read_frame_df data frame of read frame counts per gene or feature, as output by GetGeneReadFrame().
+#' This must have columns of the counts in each frame, `Ct_fr0, Ct_fr1, Ct_fr2.
+#' It may additionally have any other columns, to desribe gene, CDS, or other features.
 #' 
-#' @return data frame in tidy format (tibble)
+#' @return data frame, with additional columns for total counts and proportions.
+#' * `Ct_all = Ct_fr0 + Ct_fr1 + Ct_fr2`
+#' * `p_fr0 = Ct_fr0 / Ct_all`
+#' * `p_fr1 = Ct_fr1 / Ct_all`
+#' * `p_fr2 = Ct_fr2 / Ct_all`
 #' 
 #' @examples 
 #' read_frame_df <- GetGeneReadFrame("YAL003W", dataset= "vignette", hd_file = "vignette/output/WTnone/WTnone.h5", left=251, right=871, min_read_length=10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)))
@@ -941,12 +997,14 @@ CalcReadFrameProportion <- function(read_frame_df) {
 #TEST: CalcReadFrameProportion(): returns a tibble (TODO: test this, probably only returns tibble if read_frame_df is tibble?); TRUE
 #TEST: CalcReadFrameProportion(): returned data frame contains these columns: c(Ct_all, p_fr0, p_fr1, p_fr2); TRUE
 
-#' BoxplotReadFrameProportion(): function to plot proportion of read frames as boxplot
+#' BoxplotReadFrameProportion(): Plot boxplot of proportion of reads in each frame, for each feature.
 #' 
-#' @param read_frame_df data frame of read frame counts, as output by GetGeneReadFrame()
+#' @param read_frame_df data frame of read frame proportions, with columns `p_fr0,p_fr1,p_fr2` 
+#' and the value of `feat_names`.
+#' For example, the output of [GetGeneReadFrame()].
 #' @param feat_names character, name of feature being plotted, default: "gene"
 #' 
-#' @return List, ggplot plotting object
+#' @return ggplot object
 #' 
 #' @examples 
 #' read_frame_df <- GetGeneReadFrame("YAL003W", dataset= "vignette", hd_file = "vignette/output/WTnone/WTnone.h5", left=251, right=871, min_read_length=10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)))
@@ -971,17 +1029,24 @@ BoxplotReadFrameProportion <- function(read_frame_df, feat_names = "gene") {
       panel.grid.major.x = element_blank()
     )
 }
-#TEST: BoxplotReadFrameProportion(): returns ggplot object: TRUE (TODO: actually returns List, with lots of plotting attributes)
+#TEST: BoxplotReadFrameProportion(): returns ggplot object: TRUE
 
 #####
 ## biases in nucleotide composition along mapped read lengths
 
-#' GetNTReadPosition(): function to get nucleotide read positions
+#' GetNTReadPosition(): Get a range of nucleotide read positions as IRanges object.
+#' 
+#' This function is only used as input to:
+#' * `PositionSpecificConsensusMatrix`
+#' * `CalculateBiasesInNucleotideComposition`
+#' 
+#' TODO: rewriting `CalculateBiasesInNucleotideComposition` in tidyverse will probably make this obsolete.
 #' 
 #' @param gene gene name to get read lengths for
 #' @param dataset name of dataset stored in .h5 file
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
-#' @param length_id numeric value of length id to allow subsetting for reads of particular length
+#' @param length_id integer vector of read length ids, allows subsetting for reads of particular length(s).
+#' This is "length_id" not literal "length", because read lengths start at `min_read_length` not at 1. 
 #' @param min_read_length integer, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
 #' 
 #' @return IRanges class object (from IRanges R package)
@@ -997,14 +1062,18 @@ GetNTReadPosition <- function(gene, dataset, hd_file, length_id, min_read_length
   pos_IR <- IRanges::IRanges(start = pos, width = (length_id + min_read_length - 1)) # Create an IRanges object for position-specific reads of a particular length
   return(pos_IR)
 }
-#TEST: GetNTReadPosition(): returns IRanges object: TRUE (not sure if this is easily testable?) (TODO: how to tell if it's got any data in IRanges object?)
+#TEST: GetNTReadPosition(): returns IRanges object: TRUE (`class(IRanges::IRanges())`) 
 
-#' PositionSpecificConsensusMatrix(): function to create consensus matrix returning counts or frequencies based on position-specific reads of genes
+#' PositionSpecificConsensusMatrix(): Create consensus matrix returning counts or frequencies based on position-specific reads of genes
+#' 
+#' This function is only used by `CalculateBiasesInNucleotideComposition`.
+#' 
+#' TODO: rewriting `CalculateBiasesInNucleotideComposition` in tidyverse will probably make this obsolete.
 #' 
 #' @param gene gene name 
 #' @param pos_IR IRanges object (from IRanges R package) as output by GetNTReadPosition()
 #' @param type character, type of operation to perform; "count" for counts (default), or "freq" for frequencies
-#' @param cframe numeric in c(0, 1, 2), coding frame 
+#' @param cframe integer in c(0, 1, 2), coding frame 
 #' @param length_id numeric value of length id to allow subsetting for reads of particular length
 #' 
 #' @return matrix of counts or frequencies by position for gene
@@ -1014,8 +1083,8 @@ GetNTReadPosition <- function(gene, dataset, hd_file, length_id, min_read_length
 #' PositionSpecificConsensusMatrix(gene ="YAL003W", pos_IR, type = "count", cframe = 0, length_id = 30)
 #' 
 #' @export
-PositionSpecificConsensusMatrix <- function(gene, pos_IR, type = "count", cframe = 0, length_id) {
-  pos_IR_frame <- pos_IR[start(pos_IR) %% 3 == cframe] # Get position-specific reads of a particular length and ORF frame
+PositionSpecificConsensusMatrix <- function(gene, pos_IR, type = "count", cframe = 0L, length_id) {
+  pos_IR_frame <- pos_IR[start(pos_IR) %% 3L == cframe] # Get position-specific reads of a particular length and ORF frame
   if (length(pos_IR_frame)) {
     # read in coding sequences
     coding_seqs <- readDNAStringSet(orf_fasta_file)
@@ -1031,7 +1100,10 @@ PositionSpecificConsensusMatrix <- function(gene, pos_IR, type = "count", cframe
 #TEST: PositionSpecificConsensusMatrix(): returns matrix; TRUE
 #TEST: PositionSpecificConsensusMatrix(): number of rows = 4 (A, C, G, T); TRUE
 
-#' CombineFrequencies(): function to get position-specific frequencies across all genes
+#' CombineFrequencies(): Calculate normalized position-specific counts/freq of 
+#' nucleotides A,C,G,T, across all genes, for reads of a particular length and frame.
+#' 
+#' TODO: Test and rewrite.
 #' 
 #' @param allfr matrix, multi-gene position-specific consensus matrix
 #' 
@@ -1060,13 +1132,15 @@ CombineFrequencies <- function(allfr) {
 #####
 # read length and density functions
 
-#' GetGeneLength(): function to read length-specific total counts stored as attributes of 'reads_total' in H5 file
+#' GetGeneLength(): Get read coding sequence (CDS) length for a gene, as stored in H5 file
 #' 
-#' @param gene gene name to get reads counts for
+#' TODO: this value is redundant with CDS length provided by the gff3 file.
+#' 
+#' @param gene gene name to get CDS length for
 #' @param dataset name of dataset stored in .h5 file
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
 #' 
-#' @return numeric, length of gene in nucleotides
+#' @return integer, length of gene in nucleotides
 #' 
 #' @examples GetGeneLength(gene ="YAL003W", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5")
 #'
@@ -1076,17 +1150,18 @@ GetGeneLength <- function(gene, dataset, hd_file) {
   stop_codon_pos <- rhdf5::h5readAttributes(file = hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["stop_codon_pos"]][1]
   return(stop_codon_pos - start_codon_pos)
 }
-#TEST: GetGeneLength(): returns integer numeric; TRUE
+#TEST: GetGeneLength(): returns integer > 0; TRUE
 #TEST: GetGeneLength(): could possibly check gff 'width' value for gene named against value returned by GetGeneLength()?
-#TEST: GetGeneLength(): returns numeric greater than 0
 
-#' GetGeneReadsTotal(): function to get total reads per gene from .h5 file
-#' 
+#' GetGeneReadsTotal(): Get total reads per gene from .h5 file
+#'
+#' Note, this just accesses the total value as stored in the .h5 file, it does not filter for a specific region.
+#'
 #' @param gene gene name to get reads counts for
 #' @param dataset name of dataset stored in .h5 file
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
 #' 
-#' @return numeric value, total number of reads per named gene
+#' @return Total number of reads on `gene`, integer vector of length one.
 #' 
 #' @examples 
 #' GetGeneReadsTotal(gene ="YAL003W", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5")
@@ -1095,23 +1170,27 @@ GetGeneLength <- function(gene, dataset, hd_file) {
 GetGeneReadsTotal <- function(gene, dataset, hd_file) {
   rhdf5::h5readAttributes(file = hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["reads_total"]]
 }
-#TEST: GetGeneReadsTotal(): returns integer numeric; TRUE
+#TEST: GetGeneReadsTotal(): returns numeric; TRUE
 #TEST: GetGeneReadsTotal(): returns integer >= 0; TRUE
 
-#' GetGeneReadDensity(): function to get density of reads per gene
+#' GetGeneReadDensity(): Calculate density of reads per gene
+#' 
+#' TODO: It is ambiguous if this calculates reads per CDS, or reads per transcript. 
+#' The argument `other_buffer` is ambiguous. This needs fixing.
 #' 
 #' @param gene gene name to get density of reads for
 #' @param dataset name of dataset stored in .h5 file
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
-#' @param other_buffer numeric, default: 50. TODO: Rename sensibly. Previously this was named 'buffer' but does not relate to yaml 'buffer' parameter with default of 250. Relevant to riboviz/#83 issue 
+#' @param other_buffer integer, default: 50. 
+#' TODO: Fix this. Previously this was named 'buffer' but is not the same as yaml 'buffer' parameter with default of 250. Relevant to riboviz/#83 issue 
 #' 
-#' @return numeric value
+#' @return The density of reads on `gene`, total counts / length, a numeric vector of length one.
 #' 
 #' @examples 
 #' GetGeneReadDensity(gene ="YAL003W", dataset = "vignette", hd_file = "vignette/output/WTnone/WTnone.h5", other_buffer = 50)
 #' 
 #' @export 
-GetGeneReadDensity <- function(gene, dataset, hd_file, other_buffer = 50) {
+GetGeneReadDensity <- function(gene, dataset, hd_file, other_buffer = 50L) {
   GetGeneReadsTotal(gene, dataset, hd_file) / (GetGeneLength(gene, dataset, hd_file) + other_buffer)
 }
 #TEST: GetGeneReadDensity(): returns numeric; TRUE
