@@ -1058,11 +1058,12 @@ process dashboard {
 
   // this is not the correct output, but I'm still not clear on what output new_visualization.Rmd produces?
     output:
-      file x
+      file 'tmp.txt'
 
       shell:
       """
       Rscript --vanilla -e "rmarkdown::render('$HOME/riboviz/riboviz/rmarkdown/new_visualization.Rmd')"
+      touch tmp.txt
       """
 }
 
