@@ -253,7 +253,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
 
   # 'reads_by_len': Counts of number of ribosome sequences of each length (from BAM).
   print("reads_by_len:")
-  h5_reads_by_len <- GetGeneReadLength(gene, h5_file) # 1D array of <max_read_length - min_read_length + 1> double
+  h5_reads_by_len <- GetGeneReadLength(gene, dataset, h5_file) # 1D array of <max_read_length - min_read_length + 1> double
   print(h5_reads_by_len)
   # [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
   # [39] 0 0 0
