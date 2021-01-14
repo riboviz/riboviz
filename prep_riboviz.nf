@@ -7,7 +7,6 @@ import org.yaml.snakeyaml.Yaml
 RiboViz ribosome profiling workflow
 ===================================
 */
-
 def helpMessage() {
     log.info """
 
@@ -66,6 +65,20 @@ def helpMessage() {
         mandatory if 'multiplex_fq_files' is used (tab-separated
         values file with, at least, 'SampleID' and 'TagRead' (barcode)
         columns)
+    * Or:
+      -'download' Optional dictionary of SRA accession numbers to
+        download data directly from SRA. Downloaded data will be placed in 
+        directory specified as the input directory. Each item consists of a sample
+        name with a filenmae value (e.g. 'WT3AT: SRR1042864'). 
+        In the case of multiplexed data, the choice of sample name is arbitrary,
+        as the true sample names will be taken from the 'sample_sheet'.
+        Note that code has only been tested for accessions starting with the 
+        run accession number starting with SRR.
+      - 'sample_sheet': A sample sheet, relative to '<dir_in>',
+        mandatory if 'multiplex_fq_files' is used (tab-separated
+        values file with, at least, 'SampleID' and 'TagRead' (barcode)
+        columns). This must still be provided when using 'download' for
+        multiplexed data. 
     * If neither or both of 'fq_files' and 'multiplex_fq_files'
       parameters are provided then the workflow will exit.
 
@@ -214,6 +227,7 @@ params.make_bedgraph = true
 params.max_read_length = 50
 params.min_read_length = 10
 params.multiplex_fq_files = []
+params.download = []
 params.num_processes = 1
 params.publish_index_tmp = false
 params.primary_id = "Name"
@@ -223,6 +237,7 @@ params.stop_in_cds = false
 params.samsort_memory = null
 params.validate_only = false
 params.skip_inputs = false
+
 
 if (params.publish_index_tmp)
 {
