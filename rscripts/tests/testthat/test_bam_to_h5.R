@@ -53,9 +53,18 @@ test_that("Run bam_to_h5.R and validate H5 file", {
 
   expect_equal(0, 0, info = "Example assertion") # TODO remove
 
+  min_read_length <- 10
+  max_read_length <- 50
+  buffer <- 250
+  primary_id <- "Name"
+  secondary_id <- "NULL"
+  dataset <- "vignette"
+  is_riboviz_gff <- TRUE
+  stop_in_cds <- FALSE
+  
   if (FALSE) # TODO uncomment
   {
-  bam_to_h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --secondary-id=NULL --dataset=vignette --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff=true --stop-in-cds=false"
+  bam_to_h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}"
   print(bam_to_h5_cmd_template)
   cmd <- glue(bam_to_h5_cmd_template)
   print(cmd)
@@ -68,22 +77,22 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print("========== GFF - bam_to_h5.R ==========")
   gff <- rtracklayer::readGFFAsGRanges(gff_file)
   print(gff)
-  gff_names = mcols(gff)
+  gff_names <- mcols(gff)
   print(gff_names)
-  gff_names = gff_names["Name"] # --primary_id  
+  gff_names <- gff_names["Name"] # --primary_id  
   print(gff_names)
-  gff_names = gff_names[,1] 
+  gff_names <- gff_names[,1] 
   print(gff_names)
-  gff_names = unique(gff_names)
+  gff_names <- unique(gff_names)
   print(gff_names)
   print(length(gff_names)) # 68
-  gff_pid = mcols(gff)["Name"][,1]
+  gff_pid <- mcols(gff)["Name"][,1]
   print(gff_pid)
 
-  gene = "YAL062W"
-  gene_location = gff[gff_pid == gene]
+  gene <- "YAL062W"
+  gene_location <- gff[gff_pid == gene]
   print(gene_location)
-  gene_location = gff["Name" == gene]
+  gene_location <- gff["Name" == gene]
   print(gene_location)
 
   # GFF - read_count_functions.R
@@ -93,7 +102,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print(gff_df)
   # TODO how to extract content from gff_df?
 
-  gff_names_2 = unique(gff_df$seqnames)
+  gff_names_2 <- unique(gff_df$seqnames)
   print(gff_names_2)
   print(length(gff_names_2)) # 68
 
