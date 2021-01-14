@@ -42,6 +42,16 @@ def helpMessage() {
     Ribosome profiling data:
 
     * 'dir_in': Input directory.
+    * 'download' Optional dictionary of SRA accession numbers to
+      download data directly from SRA. Downloaded data will be placed in 
+      directory specified as the input directory. Each item consists of a sample
+      name with a filenmae value (e.g. 'WT3AT: SRR1042864'). 
+      In the case of multiplexed data, the choice of sample name is arbitrary,
+      as the true sample names will be taken from the 'sample_sheet'.
+      Currently, user must still provide 'fq_files' or 'multiplex_fq_files'
+      as specified, which can be simply named as <ACCESSION>.fastq.gz. Note that
+      code has only been tested for accessions starting with the run accession number
+      starting with SRR. 
     * Either:
       - 'fq_files': Dictionary of FASTQ files to be processed,
         relative to '<dir_in>'. Each item consists of a sample name
@@ -413,36 +423,39 @@ process SRA_IDS_TO_RUNINFO {
         mode: 'copy', overwrite: true
       
       input:
-      tuple val(single), val(fastq) from single_fastq_info.splitCsv(header:true,sep:'\t').map{ row -> [row.single_end, [row.fastq_1,row.fastq_2]]}
+      tuple val(single), val(fastq) from single_fastq_info.splitCsv(header:true,sep:'\t').map{ row -> [row.single_end,row.fastq_1]}
       val(sample_name) from single_sample_info
 
       output:
-      //@acope3 TO DO: test with paired end reads, will only matter for RNA-Seq 
-      tuple val(sample_name), path("*fastq.gz") into sample_id_fq
+      
+      tuple val(sample_name), path("*fastq.gz") optional true into sample_id_fq
 
       when:
       (! is_multiplexed)
       script:
-
-      if (single.toBoolean()) {
-          """
-          curl -L ${fastq[0]} -O
-          """
-      } else {
-          """
-          curl -L ${fastq[0]} -O
-          curl -L ${fastq[1]} -O
-          """
+      // Based on call to hisat2, seems like we are only concerned with single-end reads. For now, don't worry about paired-end.
+      if (single.toBoolean()){
+        """
+        curl -L ${fastq[0]} -O
+        """
+      } else{
+        """
+        echo 'WARNING: Provided SRA dataset is paired-end read data. Riboviz currently only handles single-end read data. These reads will not be downloaded.'
+        """
       }
+
+      
   }
 
-
+/*TODO: @acope3 I don't know if we need this separate process for multiplexed data. I think we can just have SRA_FASTQ_FTP output 
+to both sample_id_fq and multiplex_id_fq channels, with the appropriate cutAdapt process being called based on value of is_multiplexed.
+*/
 process SRA_FASTQ_FTP_Multiplexed {
       publishDir "${params.dir_in}", \
         mode: 'copy', overwrite: true
       
       input:
-      tuple val(single), val(fastq) from multiplex_fastq_info.splitCsv(header:true,sep:'\t').map{ row -> [row.single_end, [row.fastq_1,row.fastq_2]]}
+      tuple val(single), val(fastq) from multiplex_fastq_info.splitCsv(header:true,sep:'\t').map{ row -> [row.single_end,row.fastq_1]}
       val(sample_name) from multiplex_sample_info
 
       output:
@@ -451,17 +464,17 @@ process SRA_FASTQ_FTP_Multiplexed {
       when:
       (is_multiplexed)
       script:
-
-      if (single.toBoolean()) {
-          """
-          curl -L ${fastq[0]} -O
-          """
-      } else {
-          """
-          curl -L ${fastq[0]} -O
-          curl -L ${fastq[1]} -O
-          """
+      // Based on call to hisat2, seems like we are only concerned with single-end reads. For now, don't worry about paired-end.
+      if (single.toBoolean()){
+        """
+        curl -L ${fastq[0]} -O
+        """
+      } else{
+        """
+        echo 'WARNING: Provided SRA dataset is paired-end read data. Riboviz currently only handles single-end read data. These reads will not be downloaded.'
+        """
       }
+      
   }
 
 // Create YAML fragment including 'params.fq_files' and
