@@ -6,6 +6,8 @@ output:
     orientation: rows
     vertical_layout: fill
 runtime: shiny
+params: 
+  yamlfile: NA
 ---
 
 <!-- Use a JS hack to store the currently selected tab into a reactive value -->
@@ -15,7 +17,7 @@ $("body").on("shown.bs.tab", "a[data-toggle='tab']", function(e) {
 })
 </script>
 
-```{r}
+```{r setup, include=FALSE}
 library(flexdashboard)
 library(shiny)
 library(tidyverse)
@@ -23,6 +25,8 @@ library(patchwork)
 library(scales)
 library(yaml)
 library(here)
+
+yamlfilepath <- here::here(params$yamlfile)
 ```
 
 <!-- The issue here is that I'm uncertain as to how to point this code to the output directories that riboviz makes for each sample. The names of those directories, i.e. the sample names, are required for the graphs to be correctly labeled. Also, A bit work will have to be done on grouping related samples, because unless they're something sensible like wt_1, wt_2, etc., the current method won't find them. For example, mouse_1, mouse_2, mouse_3, ..., might be the file names and the experimenter knows which mouse is which sample but as far as this code goes, that will all get labeled as one group. Hence the groups are currently hard coded in at line 179, meaning that it only works with the Gupta data right now. -->
@@ -42,6 +46,12 @@ plot_theme <- theme_bw()+
 # -params-file when you start a riboviz run
 yaml1 <- here("vignette", "simdata_multiplex_config.yaml")
 yaml2 <- here("vignette", "vignette_config.yaml")
+yaml3 <- yamlfilepath
+
+print(params$yamlfile)
+print(yaml1)
+print(yaml2)
+print(yaml3)
 ```
 
 ```{r}
@@ -416,7 +426,7 @@ samp <- shiny::reactive({
 
 ## Input {.sidebar}
 
-```{r input}
+```{r input, eval=FALSE}
 # Display UI depending on selected output tab
 output$input_ui <- renderUI({
    # See JS code at top to see where active_tab comes from
