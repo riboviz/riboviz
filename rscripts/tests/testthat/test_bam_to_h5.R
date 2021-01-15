@@ -210,20 +210,24 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print("buffer_left:")
   h5_buffer_left <- GetGeneBufferLeft(gene, dataset, h5_file) # double
   print(h5_buffer_left) # 250
-  expect_equal(h5_buffer_left, buffer, info = "Unexpected buffer_left")
-  # TODO Alternative, check against GFF UTR5 length
+  expect_equal(h5_buffer_left, buffer,
+    info = "Unexpected buffer_left (versus bam_to_h5.R command-line)")
+  expect_equal(h5_buffer_left, gff_utr5_length,
+    info = "Unexpected buffer_left (versus GFF UTR5 length)")
 
   # 'buffer_right': number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) (from bam_to_h5.R command-line)
   print("buffer_right:")
   h5_buffer_right <- GetGeneBufferRight(gene, dataset, h5_file) # integer
   print(h5_buffer_right) # 250
-  expect_equal(h5_buffer_right, buffer, info = "Unexpected buffer_right")
-  # TODO Alternative, check against GFF UTR3 length
+  expect_equal(h5_buffer_right, buffer,
+    info = "Unexpected buffer_right (versus bam_to_h5.R command-line)")
+  expect_equal(h5_buffer_left, gff_utr3_length,
+    info = "Unexpected buffer_left (versus GFF UTR3 length)")
 
-  # TODO generalise
   # 'start_codon_pos': Positions corresponding to start codon of CDS in organism sequence (from GFF)
-  # TODO Get position of 1st nt to 3rd nt of CDS start codon from GFF
-  expected_start_codons = array(c(251, 252, 253))
+  expected_start_codons <- as.array(seq(gff_cds_start, gff_cds_start + 2))
+  print("expected_start_codons:")
+  print(expected_start_codons) # 251, 252, 253
   print("start_codon_pos:")
   h5_start_codon_pos <- GetGeneStartCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
   print(h5_start_codon_pos) # 251 252 253
@@ -232,10 +236,10 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   expect_equal(h5_start_codon_pos, expected_start_codons,
     info = "Unexpected start_codon_pos")
 
-  # TODO generalise
   # 'stop_codon_pos': Positions corresponding to stop codon of CDS in organism sequence (from GFF)
-  # TODO Get position of 1st nt to 3rd nt of CDS stop codon from GFF
-  expected_stop_codons <- array(c(1622, 1623, 1624))
+  expected_stop_codons <- as.array(seq(gff_cds_end - 2, gff_cds_end))
+  print("expected_stop_codons:")
+  print(expected_stop_codons)  # 1622 1623 1624
   print("stop_codon_pos:")
   h5_stop_codon_pos <- GetGeneStopCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
   print(h5_stop_codon_pos) # 1622 1623 1624
