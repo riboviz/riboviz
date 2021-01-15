@@ -297,6 +297,7 @@ multiplex_id_fq = []
 to_download = []
 download_files = false
 is_multiplexed = false
+multiplex_sample_sheet_tsv = Channel.empty()
 if (params.download && params.download_multiplex){
   exit 1, "Both download and download_multiplex are provided - only one or the other should be defined"
 }
