@@ -298,10 +298,13 @@ if (params.extract_umis) {
 /*
 Validate input files.
 */
-
+sample_id_fq = []
+multiplex_id_fq = []
+to_download = []
 if (params.download) {
   multiplex_sample_sheet_tsv = Channel.empty()
-  to_download = []
+  download_files = true
+  
   for (entry in params.download){
     to_download.add([entry.key,entry.value])
   }
@@ -324,9 +327,7 @@ if (params.download) {
   
 } else {
 
-  sample_id_fq = []
-  multiplex_id_fq = []
-
+  download_files = false
   
   is_multiplexed = false
   if (params.validate_only && params.skip_inputs) {
@@ -393,7 +394,8 @@ if (params.download) {
   } 
 }
 
-
+println to_download
+println download_files
 process SRA_IDS_TO_RUNINFO {
     publishDir "${params.dir_tmp}/", \
           mode: 'copy', overwrite: true
@@ -404,7 +406,7 @@ process SRA_IDS_TO_RUNINFO {
     tuple val(sample_name), path("*.tsv") into runinfo
 
     when:
-    params.download
+    download_files
 
     script:
     """
@@ -425,6 +427,9 @@ process SRA_IDS_TO_RUNINFO {
       path("*.tsv") into (single_fastq_info,multiplex_fastq_info) 
       val(sample_name) into (single_sample_info,multiplex_sample_info)
 
+      when:
+      download_files
+
       script:
       """
       ${workflow.projectDir}/riboviz/sra_runinfo_to_ftp.py ${run_id.join(',')} ${run_id.toString().tokenize(".")[0]}.runinfo_ftp.tsv
@@ -444,10 +449,10 @@ process SRA_IDS_TO_RUNINFO {
 
       output:
       
-      tuple val(sample_name), path("*fastq.gz") optional true into sample_id_fq
+      tuple val(sample_name), path("*fastq.gz") optional true into sample_id_fq_download
 
       when:
-      (! is_multiplexed)
+      (! is_multiplexed) && download_files
       script:
       // Based on call to hisat2, seems like we are only concerned with single-end reads. For now, don't worry about paired-end.
       if (single.toBoolean()){
@@ -475,10 +480,10 @@ process SRA_FASTQ_FTP_Multiplexed {
       val(sample_name) from multiplex_sample_info
 
       output:
-      tuple val(sample_name), path("*fastq.gz") optional true into multiplex_id_fq
+      tuple val(sample_name), path("*fastq.gz") optional true into multiplex_id_fq_download
 
       when:
-      (is_multiplexed)
+      (is_multiplexed) && download_files
       script:
       // Based on call to hisat2, seems like we are only concerned with single-end reads. For now, don't worry about paired-end.
       if (single.toBoolean()){
@@ -504,6 +509,10 @@ ribosome_fqs.multiplex_fq_files = params.multiplex_fq_files
 ribosome_fqs_yaml = new Yaml().dump(ribosome_fqs)
 
 // Non-sample-specific input files.
+
+
+
+
 if (! params.build_indices) {
     rrna_index_prefix = file("${params.dir_index}/${params.rrna_index_prefix}.*.ht2")
     if (! rrna_index_prefix) {
@@ -672,6 +681,10 @@ orf_index_ht2 = pre_built_orf_index_ht2.mix(built_orf_index_ht2)
 Sample file (fq_files)-specific processes.
 */
 
+Channel.from(sample_id_fq).mix(sample_id_fq_download).set{sample_id_fq_present}
+Channel.from(multiplex_id_fq).mix(multiplex_id_fq_download).set{multiplex_id_fq_present}
+
+
 process cutAdapters {
     tag "${sample_id}"
     errorStrategy 'ignore'
@@ -679,7 +692,7 @@ process cutAdapters {
         mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_fq) \
-            from sample_id_fq//.collect{ id, file -> [id, file] }
+            from sample_id_fq_present//.collect{ id, file -> [id, file] }
     output:
         tuple val(sample_id), file("trim.fq") into cut_fq
     when:
@@ -730,7 +743,7 @@ process cutAdaptersMultiplex {
     publishDir "${params.dir_tmp}", mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(multiplex_id), file(multiplex_fq) \
-            from multiplex_id_fq//.collect{ id, file -> [id, file] }
+            from multiplex_id_fq_present//.collect{ id, file -> [id, file] }
     output:
         tuple val(multiplex_id), file("${multiplex_id}_trim.fq") \
             into cut_multiplex_fq
