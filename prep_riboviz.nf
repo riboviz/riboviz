@@ -56,29 +56,19 @@ def helpMessage() {
         relative to '<dir_in>'. Each item consists of a sample name
         with a file name value
         (e.g. 'WT3AT: SRR1042864_s1mi.fastq.gz')
+      - 'download': Dictionary of SRA run accessions (i.e. begins with SRR) to
+        be downloaded from SRA provided as an alternative to 'fq_files'. Format is same as 'fq_files'
     * Or:
       - 'multiplex_fq_files': List with a multiplexed FASTQ file,
         relative to '<dir_in>'. If this is provided then the
         'fq_files' parameter must not be present in the configuration
         and the 'sample_sheet' parameter must be present.
+      - 'download_multiplex': List of multiplexed SRA run accession to be downloaded as 
+        an alternative to 'multiplex_fq_files'
       - 'sample_sheet': A sample sheet, relative to '<dir_in>',
         mandatory if 'multiplex_fq_files' is used (tab-separated
         values file with, at least, 'SampleID' and 'TagRead' (barcode)
         columns)
-    * Or:
-      -'download' Optional dictionary of SRA accession numbers to
-        download data directly from SRA. Downloaded data will be placed in 
-        directory specified as the input directory. Each item consists of a sample
-        name with a filenmae value (e.g. 'WT3AT: SRR1042864'). 
-        In the case of multiplexed data, the choice of sample name is arbitrary,
-        as the true sample names will be taken from the 'sample_sheet'.
-        Note that code has only been tested for accessions starting with the 
-        run accession number starting with SRR.
-      - 'sample_sheet': A sample sheet, relative to '<dir_in>',
-        mandatory if 'multiplex_fq_files' is used (tab-separated
-        values file with, at least, 'SampleID' and 'TagRead' (barcode)
-        columns). This must still be provided when using 'download' for
-        multiplexed data. 
     * If neither or both of 'fq_files' and 'multiplex_fq_files'
       parameters are provided then the workflow will exit.
 
@@ -228,6 +218,7 @@ params.max_read_length = 50
 params.min_read_length = 10
 params.multiplex_fq_files = []
 params.download = []
+params.download_multiplex = []
 params.num_processes = 1
 params.publish_index_tmp = false
 params.primary_id = "Name"
@@ -298,20 +289,97 @@ if (params.extract_umis) {
 /*
 Validate input files.
 */
+
+
+
 sample_id_fq = []
 multiplex_id_fq = []
 to_download = []
-if (params.download) {
-  multiplex_sample_sheet_tsv = Channel.empty()
+download_files = false
+is_multiplexed = false
+multiplex_sample_sheet_tsv = Channel.empty()
+if (params.download && params.download_multiplex){
+  exit 1, "Both download and download_multiplex are provided - only one or the other should be defined"
+}
+if (params.download){
   download_files = true
-  
   for (entry in params.download){
     to_download.add([entry.key,entry.value])
   }
-  if (params.multiplex_fq_files){
-    is_multiplexed = true
+} else if (params.download_multiplex) {
+  download_files = true
+  for (entry in params.download_multiplex){
+    to_download.add([entry,entry])
+  }
+  if (! params.containsKey('sample_sheet')) {
+        exit 1, "Undefined sample sheet (sample_sheet)"
+  }
+  sample_sheet = file("${params.dir_in}/${params.sample_sheet}")
+  if ((! params.validate_only) || (! params.skip_inputs)) {
+      if (! sample_sheet.exists()) {
+          exit 1, "No such sample sheet (sample_sheet): ${sample_sheet}"
+      }
+      multiplex_sample_sheet_tsv = Channel.fromPath(sample_sheet,
+                                                    checkIfExists: true)
+  }
+  is_multiplexed = true
+}else {
+  download_files = false
+}
+
+  
+
+if (params.validate_only && params.skip_inputs) {
+    println("Skipping checks for existence of of ribosome profiling input files (fq_files|multiplex_fq_files|sample_sheet)")
+}
+if (! params.containsKey('dir_in')) {
+    exit 1, "Undefined input directory (dir_in)"
+} else if ((! params.fq_files) && (! params.multiplex_fq_files) && (!params.download) && (!params.download_multiplex)) {
+    exit 1, "No sample files (fq_files), multiplexed files (multiplex_fq_files), or SRA accessions for downloading (download) provided"
+} else if (params.fq_files && params.multiplex_fq_files) {
+    exit 1, "Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are defined - only one or the other should be defined"
+} else if (params.fq_files) {
+    if ((! params.validate_only) || (! params.skip_inputs)) {
+        // Filter 'params.fq_files' down to those samples that exist.
+        for (entry in params.fq_files) {
+            sample_fq = file("${params.dir_in}/${entry.value}")
+            if (sample_fq.exists()) {
+                //sample_id_fq[entry.key] = sample_fq
+                sample_id_fq.add([entry.key,sample_fq])
+            } else {
+              println("No such sample file ($entry.key): $entry.value")
+            }
+        }
+        if (! sample_id_fq) {
+          exit 1, "None of the defined sample files (fq_files) exist"
+        }
+    }
+} else if (params.multiplex_fq_files) {
+    if ((! params.validate_only) || (! params.skip_inputs)) {
+        // Filter 'params.multiplex_fq_files' down to those files that exist.
+        for (entry in params.multiplex_fq_files) {
+            multiplex_fq = file("${params.dir_in}/${entry}")
+            if (multiplex_fq.exists()) {
+                // Use file base name as key, ensuring that if file
+                // has extension '.fastq.gz' or '.fq.gz' then both
+                // extensions are removed from the name.
+                multiplex_id = multiplex_fq.baseName
+                if (multiplex_id.endsWith(".fastq")) {
+                    multiplex_id = multiplex_id - '.fastq'
+                } else if (multiplex_id.endsWith(".fq")) {
+                    multiplex_id = multiplex_id - '.fq'
+                }
+                multiplex_id_fq.add([multiplex_id,multiplex_fq])
+            } else {
+                println("No such multiplexed file: $entry")
+            }
+        }
+        if (! multiplex_id_fq) {
+            exit 1, "None of the defined multiplexed files (multiplex_fq_files) exist"
+        }
+    }
     if (! params.containsKey('sample_sheet')) {
-      exit 1, "Undefined sample sheet (sample_sheet)"
+        exit 1, "Undefined sample sheet (sample_sheet)"
     }
     sample_sheet = file("${params.dir_in}/${params.sample_sheet}")
     if ((! params.validate_only) || (! params.skip_inputs)) {
@@ -321,81 +389,10 @@ if (params.download) {
         multiplex_sample_sheet_tsv = Channel.fromPath(sample_sheet,
                                                       checkIfExists: true)
     }
-  } else{
-    is_multiplexed = false
-  }
-  
-} else {
+    is_multiplexed = true
+} 
 
-  download_files = false
-  
-  is_multiplexed = false
-  if (params.validate_only && params.skip_inputs) {
-      println("Skipping checks for existence of of ribosome profiling input files (fq_files|multiplex_fq_files|sample_sheet)")
-  }
-  if (! params.containsKey('dir_in')) {
-      exit 1, "Undefined input directory (dir_in)"
-  } else if ((! params.fq_files) && (! params.multiplex_fq_files)) {
-      exit 1, "No sample files (fq_files), multiplexed files (multiplex_fq_files)"
-  } else if (params.fq_files && params.multiplex_fq_files) {
-      exit 1, "Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are defined - only one or the other should be defined"
-  } else if (params.fq_files) {
-      if ((! params.validate_only) || (! params.skip_inputs)) {
-          // Filter 'params.fq_files' down to those samples that exist.
-          for (entry in params.fq_files) {
-              sample_fq = file("${params.dir_in}/${entry.value}")
-              if (sample_fq.exists()) {
-                  //sample_id_fq[entry.key] = sample_fq
-                  sample_id_fq.add([entry.key,sample_fq])
-              } else {
-                println("No such sample file ($entry.key): $entry.value")
-              }
-          }
-          if (! sample_id_fq) {
-            exit 1, "None of the defined sample files (fq_files) exist"
-          }
-      }
-  } else if (params.multiplex_fq_files) {
-      if ((! params.validate_only) || (! params.skip_inputs)) {
-          // Filter 'params.multiplex_fq_files' down to those files that exist.
-          for (entry in params.multiplex_fq_files) {
-              multiplex_fq = file("${params.dir_in}/${entry}")
-              if (multiplex_fq.exists()) {
-                  // Use file base name as key, ensuring that if file
-                  // has extension '.fastq.gz' or '.fq.gz' then both
-                  // extensions are removed from the name.
-                  multiplex_id = multiplex_fq.baseName
-                  if (multiplex_id.endsWith(".fastq")) {
-                      multiplex_id = multiplex_id - '.fastq'
-                  } else if (multiplex_id.endsWith(".fq")) {
-                      multiplex_id = multiplex_id - '.fq'
-                  }
-                  multiplex_id_fq.add([multiplex_id,multiplex_fq])
-              } else {
-                  println("No such multiplexed file: $entry")
-              }
-          }
-          if (! multiplex_id_fq) {
-              exit 1, "None of the defined multiplexed files (multiplex_fq_files) exist"
-          }
-      }
-      if (! params.containsKey('sample_sheet')) {
-          exit 1, "Undefined sample sheet (sample_sheet)"
-      }
-      sample_sheet = file("${params.dir_in}/${params.sample_sheet}")
-      if ((! params.validate_only) || (! params.skip_inputs)) {
-          if (! sample_sheet.exists()) {
-              exit 1, "No such sample sheet (sample_sheet): ${sample_sheet}"
-          }
-          multiplex_sample_sheet_tsv = Channel.fromPath(sample_sheet,
-                                                        checkIfExists: true)
-      }
-      is_multiplexed = true
-  } 
-}
-
-println to_download
-println download_files
+// Process slightly modified from https://github.com/nf-core/rnaseq.
 process SRA_IDS_TO_RUNINFO {
     publishDir "${params.dir_tmp}/", \
           mode: 'copy', overwrite: true
@@ -413,7 +410,7 @@ process SRA_IDS_TO_RUNINFO {
     ${workflow.projectDir}/riboviz/sra_ids_to_runinfo.py ${run_id} ${run_id}.runinfo.tsv
     """
   }
-
+// Process slightly modified from https://github.com/nf-core/rnaseq.
   process SRA_RUNINFO_TO_FTP {
       publishDir "${params.dir_tmp}", \
         mode: 'copy', overwrite: true
@@ -438,7 +435,7 @@ process SRA_IDS_TO_RUNINFO {
 
 
 
-
+// Process slightly modified from https://github.com/nf-core/rnaseq.
   process SRA_FASTQ_FTP {
       publishDir "${params.dir_in}", \
         mode: 'copy', overwrite: true
@@ -468,6 +465,7 @@ process SRA_IDS_TO_RUNINFO {
       
   }
 
+// Process slightly modified from https://github.com/nf-core/rnaseq.
 /*TODO: @acope3 I don't know if we need this separate process for multiplexed data. I think we can just have SRA_FASTQ_FTP output 
 to both sample_id_fq and multiplex_id_fq channels, with the appropriate cutAdapt process being called based on value of is_multiplexed.
 */
