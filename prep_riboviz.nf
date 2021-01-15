@@ -148,6 +148,9 @@ def helpMessage() {
     * 'stop_in_cds': Are stop codons part of the CDS annotations in
       GFF? (default 'FALSE')
 
+    visualization parameters:
+    * 'run_dashboard': run visualization dashboard? (default 'TRUE')
+
     General:
 
     * 'validate_only': Validate configuration, check that mandatory
@@ -208,6 +211,7 @@ params.num_processes = 1
 params.publish_index_tmp = false
 params.primary_id = "Name"
 params.rpf = true
+params.run_dashboard = true
 params.secondary_id = "NULL"
 params.stop_in_cds = false
 params.samsort_memory = null
@@ -349,9 +353,6 @@ Map ribosome_fqs = [:]
 ribosome_fqs.fq_files = params.fq_files
 ribosome_fqs.multiplex_fq_files = params.multiplex_fq_files
 ribosome_fqs_yaml = new Yaml().dump(ribosome_fqs)
-
-// Split channel for use in multiple downstream processes.
-ribosome_fqs_yaml.into {count_reads_ribosome_fqs_yaml; dashboard_ribosome_fqs_yaml}
 
 // Non-sample-specific input files.
 if (! params.build_indices) {
@@ -1047,31 +1048,6 @@ process generateStatsFigs {
 }
 
 
-// visualization process goes here.
-// run new_visualization.Rmd to generate interactive output report.
-// riboviz/#239
-// ideally take params.??? to get `-params-file` argument from Nextflow call.
-// This would give us path of config.yaml file to input to the .Rmd, replacing
-// find_sample_names(yaml1) and allowing report from the yaml being run.
-
-process dashboard {
-    publishDir "${params.dir_out}", mode: 'copy', overwrite: true
-
-    input:
-      val ribosome_fqs_yaml from dashboard_ribosome_fqs_yaml
-
-    // this is a temporary output, as @FlicAnderson still not clear on what output new_visualization.Rmd produces?
-    output:
-      file 'tmp.txt'
-
-    shell:
-      """
-      echo "${ribosome_fqs_yaml}" > ribosome_fqs.yaml
-      Rscript --vanilla -e "rmarkdown::render('$HOME/riboviz/riboviz/rmarkdown/new_visualization.Rmd')"
-      touch tmp.txt
-      """
-}
-
 finished_sample_id
     .ifEmpty { exit 1, "No sample was processed successfully" }
     .view { "Finished processing sample: ${it}" }
@@ -1119,7 +1095,7 @@ process countReads {
         // 'workflow.projectDir' triggering reexecution of this
         // process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
-        val ribosome_fqs_yaml from count_reads_ribosome_fqs_yaml
+        val ribosome_fqs_yaml from ribosome_fqs_yaml
         // Force dependency on output of 'collateTpms' so this process
         // is only run when all other processing has completed.
         val samples_ids from collate_tpms_sample_ids
@@ -1148,6 +1124,39 @@ process countReads {
            -r read_counts.tsv
         """
 }
+
+// create 'new' yaml for use in dashboard process
+config_yaml = new Yaml().dump(params)
+
+// visualization process goes here.
+// run new_visualization.Rmd to generate interactive output report.
+// riboviz/#239
+// ideally take params.??? to get `-params-file` argument from Nextflow call.
+// This would give us path of config.yaml file to input to the .Rmd, replacing
+// find_sample_names(yaml1) and allowing report from the yaml being run.
+
+process dashboard {
+    publishDir "${params.dir_out}", mode: 'copy', overwrite: true
+
+    input:
+      val config_yaml from config_yaml
+
+    // this is a temporary output, as @FlicAnderson still not clear on what output new_visualization.Rmd produces?
+    output:
+      file 'tmp.txt' into dashboard_output
+
+    when:
+      params.run_dashboard
+
+    shell:
+      """
+      echo "${config_yaml}" > config.yaml
+      #Rscript --vanilla -e "rmarkdown::render('$HOME/riboviz/riboviz/rmarkdown/new_visualization.Rmd')"
+      touch tmp.txt
+      """
+}
+
+dashboard_output.subscribe { println "Received from 'dashboard': $it" }
 
 workflow.onComplete {
     println "Workflow finished! (${workflow.success ? 'OK' : 'failed'})"
