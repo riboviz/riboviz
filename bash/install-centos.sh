@@ -9,3 +9,5 @@ bedtools -version
 sudo yum install -y hdf5-devel
 sudo yum install -y pigz
 pigz --version
+sudo yum install -y graphviz
+dot -V
