@@ -26,7 +26,7 @@ library(scales)
 library(yaml)
 library(here)
 
-yamlfilepath <- here::here(params$yamlfile)
+yamlfilepath <- params$yamlfile
 ```
 
 <!-- The issue here is that I'm uncertain as to how to point this code to the output directories that riboviz makes for each sample. The names of those directories, i.e. the sample names, are required for the graphs to be correctly labeled. Also, A bit work will have to be done on grouping related samples, because unless they're something sensible like wt_1, wt_2, etc., the current method won't find them. For example, mouse_1, mouse_2, mouse_3, ..., might be the file names and the experimenter knows which mouse is which sample but as far as this code goes, that will all get labeled as one group. Hence the groups are currently hard coded in at line 179, meaning that it only works with the Gupta data right now. -->
@@ -257,7 +257,7 @@ find_sample_names <- function(path_to_yaml){
 
 ```{r}
 # apply the function
-sample_dir_names <- find_sample_names(yaml1)  # @John Q: should this be a more generic value, or is yaml1 hardcoded for a reason?
+sample_dir_names <- find_sample_names(yamlfilepath)  # @John Q: should this be a more generic value, or is yaml1 hardcoded for a reason?
 sample_names <- names(sample_dir_names)
 
 # >  find_sample_names(yaml1)
