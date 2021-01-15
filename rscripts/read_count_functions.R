@@ -151,7 +151,8 @@ GetGeneReadLength <- function(gene, dataset, hd_file){
 #' @param posn_5start numeric value, transcript-centric coordinate value for 
 #' 5' location gene feature (e.g. CDS) starts from; ~equivalent to output of GetCDS5start()
 #' @param n_buffer numeric value, number 'n' nucleotides of UTR buffer to include in metagene plots; riboviz default (set in generate_stats_figs.R): 25
-#' @param nnt_gene numeric value, n nucleotides of gene to include in metagene plots; riboviz default (set in generate_stats_figs.R): 50 
+#' @param nnt_gene numeric value, n nucleotides of gene to include in metagene plots; riboviz default (set in generate_stats_figs.R): 50
+#' @param posn_3end numeric value, the 3'-end of the protein-coding sequence for rare situations where nnt_gene may lead to indexing error; default: -Inf
 #' 
 #' @return matrix of read counts for specific gene using .h5 and .gff information
 #' 
@@ -167,7 +168,7 @@ GetGeneReadLength <- function(gene, dataset, hd_file){
 #' 
 #' @export
 GetGeneDatamatrix5start <- function(gene, dataset, hd_file, 
-                                    posn_5start, n_buffer, nnt_gene) {
+                                    posn_5start, n_buffer, nnt_gene,posn_3end=Inf) {
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hd_file)
   
   # if n_buffer bigger than length n_utr5, pad with zeros:
@@ -185,8 +186,17 @@ GetGeneDatamatrix5start <- function(gene, dataset, hd_file,
     )
   }
   n_right3 <- posn_5start + nnt_gene - 1 # column to end with (3'end)
+  if (n_right3 > posn_3end) {
+  
+    zeropad3_mat <- matrix(0, nrow = nrow(data_mat_all), ncol = n_right3 - posn_3end)
+    n_right3 <- posn_3end
+  } else{
+    zeropad3_mat <- matrix(0, nrow = nrow(data_mat_all), ncol = 0)
+  }
+
   data_mat_5start <- data_mat_all[, n_left5:n_right3]
-  return(cbind(zeropad5_mat, data_mat_5start))
+  x<-do.call("cbind",list(zeropad5_mat, data_mat_5start,zeropad3_mat))
+  return(x)
 }
 #TEST: GetGeneDatamatrix5start(): returns a numeric matrix: TRUE
 #TEST: GetGeneDatamatrix5start() : number of columns in matrix should be same as nnt_gene + n_buffer
@@ -204,7 +214,7 @@ GetGeneDatamatrix5start <- function(gene, dataset, hd_file,
 #' 3' location gene feature (e.g. CDS) ends at; ~equivalent to output of GetCDS3end()
 #' @param n_buffer numeric value, number 'n' nucleotides of UTR buffer to include in metagene plots; riboviz default (set in generate_stats_figs.R): 25
 #' @param nnt_gene numeric value, 'n' nucleotides of gene to include in metagene plots; riboviz default (set in generate_stats_figs.R): 50 
-#' 
+#' @param posn_5start numeric value, the 5'-end of the protein-coding sequence for rare situations where nnt_gene may lead to indexing error; default: -Inf
 #' @return matrix of read counts for specific gene using .h5 and .gff information
 #' 
 #' @examples 
@@ -221,11 +231,19 @@ GetGeneDatamatrix5start <- function(gene, dataset, hd_file,
 #' @export
 GetGeneDatamatrix3end <- function(gene, dataset, hd_file, 
                                   posn_3end,
-                                  n_buffer, nnt_gene) {
+
+                                  n_buffer, nnt_gene,posn_5start=-Inf) {
+
   # TODO: CHECK startpos/off-by-one
   data_mat_all <- GetGeneDatamatrix(gene, dataset, hd_file)
   n_all <- ncol(data_mat_all)
   n_left5 <- posn_3end - nnt_gene + 1 # column to start from (5'end)
+  if (n_left5 < posn_5start) {
+    zeropad5_mat <- matrix(0, nrow = nrow(data_mat_all), ncol = posn_5start - n_left5)
+    n_left5 <- posn_5start
+  } else {
+    zeropad5_mat <- matrix(0, nrow = nrow(data_mat_all), ncol = 0)
+  }
   n_utr3  <- n_all - posn_3end
   if (n_utr3 >= n_buffer) {
     # length n_utr3 bigger than n_buffer
@@ -237,7 +255,8 @@ GetGeneDatamatrix3end <- function(gene, dataset, hd_file,
     zeropad3_mat <- matrix(0, nrow = nrow(data_mat_all), ncol = n_buffer - n_utr3)
   }
   data_mat_3end <- data_mat_all[, n_left5:n_right3]
-  return(cbind(data_mat_3end, zeropad3_mat))
+  x<-do.call("cbind",list(zeropad5_mat, data_mat_3end,zeropad3_mat))
+  return(x)
 }
 #TEST: GetGeneDatamatrix3end(): returns a numeric matrix: TRUE
 #TEST: GetGeneDatamatrix3end() : number of columns in matrix should be same as nnt_gene + n_buffer
@@ -320,6 +339,7 @@ gene_poslen_counts_5start_df <-
                                    dataset,
                                    hd_file,
                                    posn_5start = GetCDS5start(gene, gff_df),
+                                   posn_3end = GetCDS3end(gene,gff_df),
                                    n_buffer = nnt_buffer,
                                    nnt_gene = nnt_gene)
   ) %>%
@@ -375,6 +395,7 @@ AllGenes3EndPositionLengthCountsTibble <- function(gene_names, dataset, hd_file,
                dataset,
                hd_file,
                posn_3end = GetCDS3end(gene, gff_df),
+               posn_5start = GetCDS5start(gene,gff_df),
                n_buffer = nnt_buffer,
                nnt_gene = nnt_gene
              )) %>%
