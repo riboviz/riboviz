@@ -49,35 +49,6 @@ delete_file <- function(file_name) {
   }
 }
 
-# TODO add to read_count_functions.R
-GetBufferLeft <- function(gene, dataset, hd_file){
-  # Returns double
-  # Up to ...[["buffer_left"]] is an "array", [1] returns first, only value.
-  rhdf5::h5readAttributes(hd_file,
-    name=paste0("/", gene, "/", dataset, "/reads"))[["buffer_left"]][1]
-}
-GetBufferRight <- function(gene, dataset, hd_file){
-  # Returns integer
-  # Up to ...[["buffer_left"]] is an "array", [1] returns first, only value.
-  rhdf5::h5readAttributes(hd_file,
-    name=paste0("/", gene, "/", dataset, "/reads"))[["buffer_right"]][1]
-}
-GetStartCodonPos <- function(gene, dataset, hd_file){
-  # Returns 1D array of 3 integer
-  rhdf5::h5readAttributes(hd_file,
-    name=paste0("/", gene, "/", dataset, "/reads"))[["start_codon_pos"]]
-}
-GetStopCodonPos <- function(gene, dataset, hd_file){
-  # Returns 1D array of 3 integer
-  rhdf5::h5readAttributes(hd_file,
-    name=paste0("/", gene, "/", dataset, "/reads"))[["stop_codon_pos"]]
-}
-GetMappedReadLengths <- function(gene, dataset, hd_file){
-  # Returns 1D array of <max_read_length - min_read_length + 1> integer
-  rhdf5::h5readAttributes(hd_file,
-    name=paste0("/", gene, "/", dataset, "/reads"))[["lengths"]]
-}
-
 test_that("Run bam_to_h5.R and validate H5 file", {
   withr::defer(delete_file(h5_file))
 
@@ -213,14 +184,14 @@ test_that("Run bam_to_h5.R and validate H5 file", {
 
   # 'buffer_left': number of nucleotides upstream of the start codon (ATG) (UTR5 length) (from bam_to_h5.R command-line)
   print("buffer_left:")
-  h5_buffer_left <- GetBufferLeft(gene, dataset, h5_file) # double
+  h5_buffer_left <- GetGeneBufferLeft(gene, dataset, h5_file) # double
   print(h5_buffer_left) # 250
   expect_equal(h5_buffer_left, buffer, info = "Unexpected buffer_left")
   # TODO Alternative, check against GFF UTR5 length
 
   # 'buffer_right': number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) (from bam_to_h5.R command-line)
   print("buffer_right:")
-  h5_buffer_right <- GetBufferRight(gene, dataset, h5_file) # integer
+  h5_buffer_right <- GetGeneBufferRight(gene, dataset, h5_file) # integer
   print(h5_buffer_right) # 250
   expect_equal(h5_buffer_right, buffer, info = "Unexpected buffer_right")
   # TODO Alternative, check against GFF UTR3 length
@@ -230,7 +201,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   # TODO Get position of 1st nt to 3rd nt of CDS start codon from GFF
   expected_start_codons = array(c(251, 252, 253))
   print("start_codon_pos:")
-  h5_start_codon_pos <- GetStartCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
+  h5_start_codon_pos <- GetGeneStartCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
   print(h5_start_codon_pos) # 251 252 253
   expect_equal(length(h5_start_codon_pos), 3,
     info = "Unexpected number of start_codon_pos")
@@ -242,7 +213,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   # TODO Get position of 1st nt to 3rd nt of CDS stop codon from GFF
   expected_stop_codons <- array(c(1622, 1623, 1624))
   print("stop_codon_pos:")
-  h5_stop_codon_pos <- GetStopCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
+  h5_stop_codon_pos <- GetGeneStopCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
   print(h5_stop_codon_pos) # 1622 1623 1624
   expect_equal(length(h5_stop_codon_pos), 3,
     info = "Unexpected number of stop_codon_pos")
@@ -252,7 +223,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   # 'lengths' : Lengths of mapped reads.
   print("lengths:")
   expected_lengths <- as.array(seq(min_read_length, max_read_length))
-  h5_lengths <- GetMappedReadLengths(gene, dataset, h5_file) # 1D array of <max_read_length - min_read_length + 1> integer
+  h5_lengths <- GetGeneMappedReadLengths(gene, dataset, h5_file) # 1D array of <max_read_length - min_read_length + 1> integer
   print(h5_lengths)
   # [1] 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
   # [26] 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50

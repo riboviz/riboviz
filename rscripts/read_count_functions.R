@@ -139,6 +139,106 @@ GetGeneReadLength <- function(gene, dataset, hd_file){
 }
 #TEST: GetGeneReadLength(): returns numeric vector
 
+#' GetGeneBufferLeft(): Get left-hand buffer length (UTR5 length) for one gene and dataset from .h5 file
+#'
+#' This accesses the attribute `reads/buffer_left` in .h5 file.
+#'
+#' @param gene gene name to pull out left-hand buffer length for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#'
+#' @return double buffer_left value
+#'
+#' @examples
+#' GetGeneBufferLeft(gene="YAL068C", dataset="vignette", hd_file="vignette/output/WTnone/WTnone.h5")
+#'
+#' @export
+GetGeneBufferLeft <- function(gene, dataset, hd_file){
+  rhdf5::h5readAttributes(hd_file,
+    name=paste0("/", gene, "/", dataset, "/reads"))[["buffer_left"]][1]
+}
+#TEST: GetGeneBufferLeft(): returns double value
+
+#' GetGeneBufferRight(): Get right-hand buffer length (UTR3 length) for one gene and dataset from .h5 file
+#'
+#' This accesses the attribute `reads/buffer_right` in .h5 file.
+#'
+#' @param gene gene name to pull out right-hand buffer length for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#'
+#' @return integer buffer_right value
+#'
+#' @examples
+#' GetGeneBufferRight(gene="YAL068C", dataset="vignette", hd_file="vignette/output/WTnone/WTnone.h5")
+#'
+#' @export
+GetGeneBufferRight <- function(gene, dataset, hd_file){
+  rhdf5::h5readAttributes(hd_file,
+    name=paste0("/", gene, "/", dataset, "/reads"))[["buffer_right"]][1]
+}
+#TEST: GetGeneBufferRight(): returns integer value
+
+#' GetGeneStartCodonPos(): Get positions corresponding to start codon of CDS in organism sequence for one gene and dataset from .h5 file
+#'
+#' This accesses the attribute `reads/start_codon_pos` in .h5 file.
+#'
+#' @param gene gene name to pull out start codon positions for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#'
+#' @return 1-dimensional array of 3 integers with positions of the 3 nucleotides of the start codon
+#'
+#' @examples
+#' GetGeneStartCodonPos(gene="YAL068C", dataset="vignette", hd_file="vignette/output/WTnone/WTnone.h5")
+#'
+#' @export
+GetGeneStartCodonPos <- function(gene, dataset, hd_file){
+  rhdf5::h5readAttributes(hd_file,
+    name=paste0("/", gene, "/", dataset, "/reads"))[["start_codon_pos"]]
+}
+#TEST: GetGeneStartCodonPos(): returns 1d array of 3 integers
+
+#' GetGeneStopCodonPos(): Get positions corresponding to stop codon of CDS in organism sequence for one gene and dataset from .h5 file
+#'
+#' This accesses the attribute `reads/stop_codon_pos` in .h5 file.
+#'
+#' @param gene gene name to pull out stop codon positions for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#'
+#' @return 1-dimensional array of 3 integers with positions of the 3 nucleotides of the stop codon
+#'
+#' @examples
+#' GetGeneStopCodonPos(gene="YAL068C", dataset="vignette", hd_file="vignette/output/WTnone/WTnone.h5")
+#'
+#' @export
+GetGeneStopCodonPos <- function(gene, dataset, hd_file){
+  rhdf5::h5readAttributes(hd_file,
+    name=paste0("/", gene, "/", dataset, "/reads"))[["stop_codon_pos"]]
+}
+#TEST: GetGeneStopCodonPos(): returns 1d array of 3 integers
+
+#' GetGeneMappedReadLengths(): Get lengths of mapped reads of organism sequence for one gene and dataset from .h5 file
+#'
+#' This accesses the attribute `reads/stop_codon_pos` in .h5 file.
+#'
+#' @param gene gene name to pull out mapped reads for
+#' @param dataset name of dataset stored in .h5 file
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples
+#'
+#' @return 1-dimensional array of integers with lengths of the mapped reads
+#'
+#' @examples
+#' GetGeneMappedReadLengths(gene="YAL068C", dataset="vignette", hd_file="vignette/output/WTnone/WTnone.h5")
+#'
+#' @export
+GetGeneMappedReadLengths <- function(gene, dataset, hd_file){
+  rhdf5::h5readAttributes(hd_file,
+    name=paste0("/", gene, "/", dataset, "/reads"))[["lengths"]]
+}
+#TEST: GetGeneMappedReadLengths(): returns 1d array of integers
+
 #' GetGeneDatamatrix5start(): Get matrix of read counts by length between specific positions at 5' start for one gene and dataset from .h5 file and GFF data
 #' 
 #' Get matrix of read counts between specific positions 
