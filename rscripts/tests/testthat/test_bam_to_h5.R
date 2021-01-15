@@ -76,7 +76,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   expect_equal(exit_code, 0, info = "Unexpected exit code from bam_to_h5.R")
   }
 
-  ##### EXTRACT GFF #####
+  ##### EXTRACT GFF (generic) #####
 
   ## bam_to_h5.R-style
   
@@ -114,11 +114,11 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print(levels(gff_names)) # NULL
   print(dim(gff_pid)) # NULL
 
-  gene <- "YAL062W"
-  gene_location <- gff[gff_pid == gene]
-  print(gene_location)
-  gene_location <- gff["Name" == gene]
-  print(gene_location)
+  # gene <- "YAL062W"
+  # gene_location <- gff[gff_pid == gene]
+  # print(gene_location)
+  # gene_location <- gff["Name" == gene]
+  # print(gene_location)
 
   ## read_count_functions.R-style
 
@@ -137,14 +137,12 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   # [1] "YAL068C" "YAL067W-A" "YAL067C" "YAL065C" "YAL064W-B" "YAL064C-A" ...
   # [67] "YAL067W-A" "YAL068C"  
   print(dim(gff_names)) # NULL
-
-  # TODO
  
   ##### EXTRACT BAM #####
   
   # TODO
 
-  ##### EXTRACT AND VALIDATE H5 #####
+  ##### EXTRACT AND VALIDATE H5 (generic) #####
 
   print("========== H5 ==========")
 
@@ -175,12 +173,38 @@ test_that("Run bam_to_h5.R and validate H5 file", {
     info = "Mismatch in sequence names between GFF and H5")
 
   # TODO check h5_names superset of names in BAM.
-  
-  #
-  # Validate values for YAL062W
-  #
+
+  ##### EXTRACT GFF (gene-specific) #####
 
   gene <- "YAL062W"
+  print(gene)
+  print(gff_df)
+  print(class(gff_df)) # tbl_df tbl data.frame
+  print(typeof(gff_df)) # list
+  print(dim(gff_df)) # 204 10
+  gff_utr5_start = GetCDS5start(gene, gff_df, ftype="UTR5")
+  gff_utr5_end = GetCDS3end(gene, gff_df, ftype="UTR5")
+  gff_utr5_length = gff_utr5_end - gff_utr5_start + 1
+  gff_cds_start = GetCDS5start(gene, gff_df, ftype="CDS")
+  gff_cds_end = GetCDS3end(gene, gff_df, ftype="CDS")
+  gff_cds_length = gff_cds_end - gff_cds_start + 1
+  gff_utr3_start = GetCDS5start(gene, gff_df, ftype="UTR3")
+  gff_utr3_end = GetCDS3end(gene, gff_df, ftype="UTR3")
+  gff_utr3_length = gff_utr3_end - gff_utr3_start + 1
+  print("UTR5 start/end:")
+  print(gff_utr5_start) # 1
+  print(gff_utr5_end) # 250
+  print(gff_utr5_length) # 250
+  print("CDS start/end:")
+  print(gff_cds_start) # 251
+  print(gff_cds_end) # 1624 
+  print(gff_cds_length) # 1374
+  print("UTR3 start/end:")
+  print(gff_utr3_start) # 1625
+  print(gff_utr3_end) # 1874
+  print(gff_utr3_length) # 250
+
+  ##### EXTRACT AND VALIDATE H5 (gene-specific) #####
 
   # 'buffer_left': number of nucleotides upstream of the start codon (ATG) (UTR5 length) (from bam_to_h5.R command-line)
   print("buffer_left:")
@@ -301,4 +325,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   expect_equal(row, expected_row, info = "Unexpected data[752]")
 
   # TODO Cross-check reads_by_len[i] = sum of DATA[*, i] i.e. sum across all positions for a specific length.
+
+
 })
+
