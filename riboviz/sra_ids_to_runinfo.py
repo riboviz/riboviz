@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+## Script taken from https://github.com/nf-core/rnaseq.
+
 import os
 import re
 import sys

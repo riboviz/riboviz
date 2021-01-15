@@ -391,6 +391,7 @@ if (! params.containsKey('dir_in')) {
     is_multiplexed = true
 } 
 
+// Process slightly modified from https://github.com/nf-core/rnaseq.
 process SRA_IDS_TO_RUNINFO {
     publishDir "${params.dir_tmp}/", \
           mode: 'copy', overwrite: true
@@ -408,7 +409,7 @@ process SRA_IDS_TO_RUNINFO {
     ${workflow.projectDir}/riboviz/sra_ids_to_runinfo.py ${run_id} ${run_id}.runinfo.tsv
     """
   }
-
+// Process slightly modified from https://github.com/nf-core/rnaseq.
   process SRA_RUNINFO_TO_FTP {
       publishDir "${params.dir_tmp}", \
         mode: 'copy', overwrite: true
@@ -433,7 +434,7 @@ process SRA_IDS_TO_RUNINFO {
 
 
 
-
+// Process slightly modified from https://github.com/nf-core/rnaseq.
   process SRA_FASTQ_FTP {
       publishDir "${params.dir_in}", \
         mode: 'copy', overwrite: true
@@ -463,6 +464,7 @@ process SRA_IDS_TO_RUNINFO {
       
   }
 
+// Process slightly modified from https://github.com/nf-core/rnaseq.
 /*TODO: @acope3 I don't know if we need this separate process for multiplexed data. I think we can just have SRA_FASTQ_FTP output 
 to both sample_id_fq and multiplex_id_fq channels, with the appropriate cutAdapt process being called based on value of is_multiplexed.
 */
