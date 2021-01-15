@@ -17,6 +17,7 @@ Contents:
 * [Multiplexed files](#multiplexed-files)
 * [Debugging and bash scripts](#debugging-and-bash-scripts)
 * [Generating reports](#generating-reports)
+  - [Troubleshooting: WARN To render the execution DAG in the required format it is required to install Graphviz](#troubleshooting-warn-to-render-the-execution-dag-in-the-required-format-it-is-required-to-install-graphviz)
 * [Invoking the workflow from outwith the RiboViz home directory](#invoking-the-workflow-from-outwith-the-riboviz-home-directory)
 
 ---
@@ -449,7 +450,7 @@ Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 
 ## Generating reports
 
-Nextflow's `-with-report`, `-with-timeline` and `-with-dag` flags allow you to reques that Nextflow create reports on a run and an image of the task execution workflow. For example:
+Nextflow's `-with-report`, `-with-timeline` and `-with-dag` flags allow you to request that Nextflow create reports on a run and an image of the task execution workflow. For example:
 
 ```console
 $ nextflow run prep_riboviz.nf \
@@ -457,6 +458,20 @@ $ nextflow run prep_riboviz.nf \
     -with-report report.html -with-timeline timeline.html \
     -with-dag workflow.svg
 ```
+
+### Troubleshooting: `WARN To render the execution DAG in the required format it is required to install Graphviz`
+
+If you do not have Graphviz available then requesting `-with-dag workflow.svg` will cause Nextflow to show this warning on completion of the workflow.
+
+If this happens then Nextflow will, instead, create a `nextflow.dot`, file. This can be converted to an image on a system that does have Graphviz as follows:
+
+```console
+$ dot -T svg workflow.dot -o workflow.svg
+```
+
+Alternatively you could run Nextflow using `-with-dag workflow.html`, which creates an HTML/JavaScript visualisation of the workflow.
+
+For more information see [DAG visualisation](https://www.nextflow.io/docs/latest/tracing.html#dag-visualisation) in the Nextflow documentation.
 
 ---
 
