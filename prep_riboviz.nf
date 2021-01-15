@@ -1162,7 +1162,7 @@ process dashboard {
 
     shell:
       """
-      Rscript -e "rmarkdown::render('$HOME/riboviz/riboviz/rmarkdown/new_visualization.Rmd', params = list(yamlfile='${config_file_yaml}'))"
+      Rscript -e "rmarkdown::render('${workflow.projectDir}/rmarkdown/new_visualization.Rmd', params = list(yamlfile='${config_file_yaml}'))"
       touch tmp.txt
       """
 }
