@@ -1128,6 +1128,18 @@ process countReads {
 // create 'new' yaml for use in dashboard process
 config_yaml = new Yaml().dump(params)
 
+// fun with config yamls
+process createConfigFile {
+    input:
+      val config_yaml from config_yaml
+     output:
+      file "config.yaml" into config_file_yaml
+    shell:
+      """
+      echo "${config_yaml}" > "config.yaml"
+      """
+}
+
 // visualization process goes here.
 // run new_visualization.Rmd to generate interactive output report.
 // riboviz/#239
@@ -1139,7 +1151,7 @@ process dashboard {
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
 
     input:
-      val config_yaml from config_yaml
+      file config_file_yaml from config_file_yaml
 
     // this is a temporary output, as @FlicAnderson still not clear on what output new_visualization.Rmd produces?
     output:
@@ -1150,9 +1162,7 @@ process dashboard {
 
     shell:
       """
-      echo "${config_yaml}" > config.yaml
-      #Rscript --vanilla -e "rmarkdown::render('$HOME/riboviz/riboviz/rmarkdown/new_visualization.Rmd')"
-      Rscript -e "rmarkdown::render('$HOME/riboviz/riboviz/rmarkdown/new_visualization.Rmd', params = list(yamlfile='config.yaml'))"
+      Rscript -e "rmarkdown::render('$HOME/riboviz/riboviz/rmarkdown/new_visualization.Rmd', params = list(yamlfile='${config_file_yaml}'))"
       touch tmp.txt
       """
 }
