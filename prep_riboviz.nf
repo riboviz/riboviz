@@ -1152,6 +1152,7 @@ process dashboard {
       """
       echo "${config_yaml}" > config.yaml
       #Rscript --vanilla -e "rmarkdown::render('$HOME/riboviz/riboviz/rmarkdown/new_visualization.Rmd')"
+      Rscript -e "rmarkdown::render('$HOME/riboviz/riboviz/rmarkdown/new_visualization.Rmd', params = list(yamlfile='config.yaml'))"
       touch tmp.txt
       """
 }
