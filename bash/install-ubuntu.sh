@@ -8,3 +8,5 @@ bedtools -version
 sudo apt-get install -y hdf5-tools
 sudo apt-get install -y pigz
 pigz --version
+sudo apt-get install -y graphviz
+dot -V
