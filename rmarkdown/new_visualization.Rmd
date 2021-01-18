@@ -257,7 +257,7 @@ find_sample_names <- function(path_to_yaml){
 
 ```{r}
 # apply the function
-sample_dir_names <- find_sample_names(yamlfilepath)  # @John Q: should this be a more generic value, or is yaml1 hardcoded for a reason?
+sample_dir_names <- find_sample_names(yamlfilepath) 
 sample_names <- names(sample_dir_names)
 
 # >  find_sample_names(yaml1)
