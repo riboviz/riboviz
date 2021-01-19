@@ -1152,8 +1152,10 @@ process dashboard {
 
     input:
       file config_file_yaml from config_file_yaml
+      file "read_counts.tsv" from read_counts_tsv
 
-    // this is a temporary output, as @FlicAnderson still not clear on what output new_visualization.Rmd produces?
+    // this is a temporary output, as we're still not clear on what output
+    // new_visualization.Rmd produces?
     output:
       file 'tmp.txt' into dashboard_output
 
