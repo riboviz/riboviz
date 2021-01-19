@@ -350,7 +350,7 @@ def check_fasta_gff_issues_csv(issues, csv_file):
                 df_issue_data, sequence, feature, issue_type)
 
 
-def test_fasta_gff_issues_to_df(tmp_file):
+def test_write_fasta_gff_issues_to_csv(tmp_file):
     """
     Test :py:func:`riboviz.check_fasta_gff.write_fasta_gff_issues_to_csv`
     produces a CSV file with the expected columns, rows and values.
@@ -362,7 +362,7 @@ def test_fasta_gff_issues_to_df(tmp_file):
     check_fasta_gff_issues_csv(TEST_CHECK_ISSUES, tmp_file)
 
 
-def test_fasta_gff_issues_to_df_empty(tmp_file):
+def test_write_fasta_gff_issues_to_csv_empty(tmp_file):
     """
     Test :py:func:`riboviz.check_fasta_gff.write_fasta_gff_issues_to_csv`
     with no values produces a header-only CSV file.
@@ -372,6 +372,33 @@ def test_fasta_gff_issues_to_df_empty(tmp_file):
     """
     check_fasta_gff.write_fasta_gff_issues_to_csv([], tmp_file)
     check_fasta_gff_issues_csv([], tmp_file)
+
+
+def test_count_issues_empty():
+    """
+    Test :py:func:`riboviz.check_fasta_gff.count_issues`
+    with no values produces an empty dictionary.
+    """
+    assert check_fasta_gff.count_issues({}) == {}
+
+
+def test_count_issues():
+    """
+    Test :py:func:`riboviz.check_fasta_gff.count_issues`
+    with values produces the expected dictionary.
+    """
+    issues = {
+        ("s1", "f1", check_fasta_gff.NO_START_CODON, None),
+        ("s2", "f2", check_fasta_gff.NO_STOP_CODON, None),
+        ("s3", "f3", check_fasta_gff.NO_STOP_CODON, None),
+        ("s4", "f4", check_fasta_gff.NO_START_CODON, None),
+        ("s5", "f5", check_fasta_gff.NO_START_CODON, None)
+    }
+    expected_issues = {
+        check_fasta_gff.NO_STOP_CODON: 2,
+        check_fasta_gff.NO_START_CODON: 3
+    }
+    assert check_fasta_gff.count_issues(issues) == expected_issues
 
 
 def test_check_fasta_gff_no_such_fasta_file(tmp_file):

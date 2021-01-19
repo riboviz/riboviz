@@ -66,6 +66,12 @@ ISSUE_FORMATS = {
     DUPLICATE_FEATURE_IDS: "Non-unique 'ID' attribute {feature} ({data} occurrences)"
 }
 """ Format strings for printing issues. """
+FASTA_FILE = "fasta_file"
+""" TSV file header tag. """
+GFF_FILE = "gff_file"
+""" TSV file header tag. """
+START_CODONS = "start_codons"
+""" TSV file header tag. """
 
 
 def get_fasta_sequence_ids(fasta):
@@ -279,7 +285,7 @@ def get_fasta_gff_cds_issues(fasta,
     return issues
 
 
-def write_fasta_gff_issues_to_csv(issues, csv_file, delimiter="\t"):
+def write_fasta_gff_issues_to_csv(issues, csv_file, header={}, delimiter="\t"):
     """
     Write a dictionary of the issues for features, keyed by feature
     name into a CSV file, including a header.
@@ -291,21 +297,47 @@ def write_fasta_gff_issues_to_csv(issues, csv_file, delimiter="\t"):
     * :py:const:`ISSUE_TYPE`: issue type.
     * :py:const:`ISSUE_DATA`: issue data or ``None``.
 
-    :param issues: List of issues for sequences and features.
+    :param issues: List of tuples of form (sequence ID, feature ID ('' if \
+    not applicable to the issue), issue type, issue data).
     :type issues: list(tuple(str or unicode, str or unicode, \
     str or unicode, *))
     :param csv_file: CSV file name
     :type csv_file: str or unicode
+    :param header: Tags-values to be put into a header, prefixed by `#`
+    :type header: dict
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     """
     provenance.write_provenance_header(__file__, csv_file)
+    with open(csv_file, "a") as f:
+        for key, value in header.items():
+            f.write("# {}: {}\n".format(key, value))
     with open(csv_file, "a") as f:
         writer = csv.writer(f, delimiter=delimiter, lineterminator='\n')
         writer.writerow([SEQUENCE, FEATURE, ISSUE_TYPE, ISSUE_DATA])
         for (sequence_id, feature_id, issue_type, issue_data) in issues:
             writer.writerow([sequence_id, feature_id, issue_type,
                              issue_data])
+
+
+def count_issues(issues):
+    """
+    Iterate through issues and count number of unique issues of each type.
+
+    :param issues: List of tuples of form (sequence ID, feature ID ('' if \
+    not applicable to the issue), issue type, issue data).
+    :type issues: list(tuple(str or unicode, str or unicode, \
+    str or unicode, *))
+    :return: List of tuples of form (issue type, count).
+    :type issues: list(tuple(str or unicode, int))
+    """
+    counts = {}
+    for (_, _, issue_type, _) in issues:
+        if issue_type not in counts:
+            counts[issue_type] = 1
+        else:
+            counts[issue_type] += 1
+    return counts
 
 
 def check_fasta_gff(fasta, gff, issues_file,
@@ -358,7 +390,19 @@ def check_fasta_gff(fasta, gff, issues_file,
                                       feature_format=feature_format,
                                       use_feature_name=use_feature_name,
                                       start_codons=start_codons)
-    write_fasta_gff_issues_to_csv(issues, issues_file, delimiter)
+    issue_counts = count_issues(issues)
+    # Create header with summary of execution.
+    header = {}
+    header[FASTA_FILE] = fasta
+    header[GFF_FILE] = gff
+    header[START_CODONS] = start_codons
+    header.update(issue_counts)
+    write_fasta_gff_issues_to_csv(issues, issues_file, header, delimiter)
+    print("Issue summary:")
+    print("{}\t{}".format("Issue", "Count"))
+    for (issue_type, issue_count) in issue_counts.items():
+        print("{}\t{}".format(issue_type, issue_count))
+    print("\nIssue details:")
     for (sequence_id, feature_id, issue_type, issue_data) in issues:
         if issue_type in ISSUE_FORMATS:
             print(ISSUE_FORMATS[issue_type].format(sequence=sequence_id,
