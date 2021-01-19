@@ -8,7 +8,7 @@ Usage::
         -f FASTA -g GFF [-o FEATURES_ISSUES] \
         [--use-feature-name] \
         [--feature-format FEATURE_FORMAT]
-        [--start-codon START_CODON [START_CODON ...]]
+        [--start-codon START_CODON [START_CODON ...]] [-v]
 
     -h, --help            show this help message and exit
     -f FASTA, --fasta FASTA
@@ -26,6 +26,8 @@ Usage::
                           sequence ID to create a feature name.
     --start-codon START_CODON [START_CODON ...]
                           Allowable start codons (default 'ATG')
+    -v, --verbose         Print information on each issue (if omitted
+                          only issue counts are printed)
 
 See :py:func:`riboviz.check_fasta_gff.check_fasta_gff`.
 """
@@ -75,6 +77,12 @@ def parse_command_line_options():
                         nargs="+",
                         default=[START_CODON],
                         help="Allowable start codons (default '{}')".format(START_CODON))
+    parser.add_argument("-v",
+                        "--verbose",
+                        dest="is_verbose",
+                        action='store_true',
+                        default=False,
+                        help="Print information on each issue (if omitted only issue counts are printed)")
     options = parser.parse_args()
     return options
 
@@ -92,13 +100,15 @@ def invoke_check_fasta_gff():
     feature_format = options.feature_format
     use_feature_name = options.use_feature_name
     start_codons = options.start_codon
+    is_verbose = options.is_verbose
     try:
         check_fasta_gff.check_fasta_gff(fasta,
                                         gff,
                                         features_issues,
                                         feature_format=feature_format,
                                         use_feature_name=use_feature_name,
-                                        start_codons=start_codons)
+                                        start_codons=start_codons,
+                                        is_verbose=is_verbose)
     except FastaIndexingError as e:
         print("{}: {}".format(type(e).__name__, e))
     except FileNotFoundError as e:

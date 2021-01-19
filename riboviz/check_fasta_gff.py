@@ -344,6 +344,7 @@ def check_fasta_gff(fasta, gff, issues_file,
                     feature_format=CDS_FEATURE_FORMAT,
                     use_feature_name=False,
                     start_codons=[START_CODON],
+                    is_verbose=False,
                     delimiter="\t"):
     """
     Check FASTA and GFF files for coding sequence (CDS) features
@@ -375,6 +376,9 @@ def check_fasta_gff(fasta, gff, issues_file,
     :type use_feature_name: bool
     :param start_codons: Allowable start codons.
     :type start_codons: list(str or unicode)
+    :param is_verbose: Print information on each issue (if ``false`` \
+    only issue counts are printed)
+    :type is_verbose: bool
     :param delimiter: Delimiter
     :type delimiter: str or unicode
     :raises FileNotFoundError: If the FASTA or GFF files \
@@ -405,9 +409,10 @@ def check_fasta_gff(fasta, gff, issues_file,
     print("{}\t{}".format("Issue", "Count"))
     for (tag, value) in issue_counts.items():
         print("{}\t{}".format(tag, value))
-    print("\nIssue details:")
-    for (sequence_id, feature_id, issue_type, issue_data) in issues:
-        if issue_type in ISSUE_FORMATS:
-            print(ISSUE_FORMATS[issue_type].format(sequence=sequence_id,
-                                                   feature=feature_id,
-                                                   data=issue_data))
+    if is_verbose:
+        print("\nIssue details:")
+        for (sequence_id, feature_id, issue_type, issue_data) in issues:
+            if issue_type in ISSUE_FORMATS:
+                print(ISSUE_FORMATS[issue_type].format(sequence=sequence_id,
+                                                       feature=feature_id,
+                                                       data=issue_data))
