@@ -176,6 +176,11 @@ test_that("Run bam_to_h5.R and validate H5 file", {
 
   ##### EXTRACT GFF (gene-specific) #####
 
+  print("Genes")
+  for (gene in h5_names)
+  {
+    print(gene)
+  }
   gene <- "YAL062W"
   print(gene)
   print(gff_df)
@@ -308,7 +313,9 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print(expected_num_data_cols) # 1874
   expect_equal(ncol(h5_data), expected_num_data_cols,
     info = "Unexpected number of data columns")
-  # TODO Alternative, get position of final codon of UTR3 from GFF3
+  expect_equal(ncol(h5_data), gff_utr3_end,
+    info = "Unexpected number of data columns") # Alternative, use position of final codon of UTR3 from GFF3
+
   # TODO Alternative, get number of columns from length of sequence from BAM header LN value
   # TODO Check DATA[p, i] = 1 if there is a sequence from BAM at position p+1 which has length equal to lengths[i], else 0.
   
