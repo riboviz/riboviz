@@ -8,6 +8,7 @@ $ python -m riboviz.tools.check_fasta_gff [-h] \
          [--use-feature-name] \
          [--feature-format FEATURE_FORMAT]
          [--start-codon START_CODON [START_CODON ...]] \
+	 [-v]
 ```
 
 where:
@@ -18,6 +19,7 @@ where:
 * `--use-feature-name`: If a CDS feature defines both `ID` and `Name` attributes then use `Name` in reporting, otherwise use `ID` (default `false`).
 * `--feature-format FEATURE_FORMAT`: Feature name format for features which do not define `ID` or `Name` attributes. This format is applied to the sequence ID to create a feature name (default `{}_CDS`).
 * `--start-codon START_CODON [START_CODON ...]`: Allowable start codons (default `ATG`).
+* `-v`: Print information on each issue (default `false`)
 
 Issues are both reported to the console and saved in an issues file.
 
@@ -51,40 +53,112 @@ The following issues are reported for sequences defined in the GFF file:
 * `SequenceNotInFASTA` : The sequence has a feature in the GFF file but the sequence is not in the FASTA file. For this issue, the feature `ID` attribute is rmpty.
 * `SequenceNotInGFF`: The sequence is in the FASTA file but has no features in the GFF file. For this issue, the feature `ID` attribute is empty.
 
-Examples:
+Example:
 
 ```console
 $ python -m riboviz.tools.check_fasta_gff \
     -f vignette/input/yeast_YAL_CDS_w_250utrs.fa \
     -g vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
-     -o check_vignette_YAL.tsv
-...
-Sequence YAL001C feature YAL001C doesn't start with a recognised start codon but with AAA
-Sequence YAL001C feature YAL001C doesn't end with a recognised stop codon but with TTT
-Sequence YAL001C feature YAL001C has an internal stop codon
+    -o check_vignette_YAL.tsv
+Created by: RiboViz
+Date: 2021-01-19 05:15:38.788325
+Command-line tool: /home/ubuntu/riboviz/riboviz/tools/check_fasta_gff.py
+File: /home/ubuntu/riboviz/riboviz/tools/check_fasta_gff.py
+Version: commit f3d3194e2cad8e1924fc8462fff7808a46dc8784 date 2021-01-19 04:28:06-08:00
 
+Configuration:
+fasta_file	vignette/input/yeast_YAL_CDS_w_250utrs.fa
+gff_file	vignette/input/yeast_YAL_CDS_w_250utrs.gff3
+start_codons	['ATG']
+
+Issue summary:
+Issue	Count
+NoStartCodon	1
+NoStopCodon	1
+InternalStopCodon	1
+```
+```console
 $ cat check_vignette_YAL.tsv 
-...
+# Created by: RiboViz
+# Date: 2021-01-19 05:15:38.942793
+# Command-line tool: /home/ubuntu/riboviz/riboviz/tools/check_fasta_gff.py
+# File: /home/ubuntu/riboviz/riboviz/check_fasta_gff.py
+# Version: commit f3d3194e2cad8e1924fc8462fff7808a46dc8784 date 2021-01-19 04:28:06-08:00
+# fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa
+# gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3
+# start_codons: ['ATG']
+# NoStartCodon: 1
+# NoStopCodon: 1
+# InternalStopCodon: 1
 Sequence	Feature	Issue	Data
 YAL001C	YAL001C	NoStartCodon	AAA
 YAL001C	YAL001C	NoStopCodon	TTT
 YAL001C	YAL001C	InternalStopCodon
 ```
+
+Example with `-v` verbose mode:
+
 ```console
 $ python -m riboviz.tools.check_fasta_gff \
     -f vignette/input/yeast_YAL_CDS_w_250utrs.fa \
     -g vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
-     -o check_vignette_YAL.tsv \
-     --start-codon ATG AAA
+    -o check_vignette_YAL.tsv -v
 ...
+Issue summary:
+Issue	Count
+NoStartCodon	1
+NoStopCodon	1
+InternalStopCodon	1
+
+Issue details:
+Sequence YAL001C feature YAL001C doesn't start with a recognised start codon but with AAA
 Sequence YAL001C feature YAL001C doesn't end with a recognised stop codon but with TTT
 Sequence YAL001C feature YAL001C has an internal stop codon
 ```
+
+Example with `--start-codon`:
+
+```console
+$ python -m riboviz.tools.check_fasta_gff \
+    -f vignette/input/yeast_YAL_CDS_w_250utrs.fa \
+    -g vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
+    -o check_vignette_YAL.tsv \
+    --start-codon ATG AAA -v
+...
+Configuration:
+fasta_file	vignette/input/yeast_YAL_CDS_w_250utrs.fa
+gff_file	vignette/input/yeast_YAL_CDS_w_250utrs.gff3
+start_codons	['ATG', 'AAA']
+
+Issue summary:
+Issue	Count
+NoStopCodon	1
+InternalStopCodon	1
+
+Issue details:
+Sequence YAL001C feature YAL001C doesn't end with a recognised stop codon but with TTT
+Sequence YAL001C feature YAL001C has an internal stop codon
+```
+
+An example with more issues:
+
 ```console
 $ python -m riboviz.tools.check_fasta_gff \
     -f data/yeast_CDS_w_250utrs.fa \
     -g data/yeast_CDS_w_250utrs.gff3 \
-    -o check_data_CDS.tsv
+    -o check_data_CDS.tsv -v
+...
+Configuration:
+fasta_file	data/yeast_CDS_w_250utrs.fa
+gff_file	data/yeast_CDS_w_250utrs.gff3
+start_codons	['ATG']
+
+Issue summary:
+Issue	Count
+InternalStopCodon	17
+NoStartCodon	1
+
+Issue details:
 Sequence Q0050 feature Q0050 has an internal stop codon
 Sequence Q0055 feature Q0055 has an internal stop codon
 Sequence Q0060 feature Q0060 has an internal stop codon
@@ -103,4 +177,31 @@ Sequence Q0160 feature Q0160 has an internal stop codon
 Sequence Q0250 feature Q0250 has an internal stop codon
 Sequence Q0255 feature Q0255 has an internal stop codon
 Sequence Q0275 feature Q0275 has an internal stop codon
+```console
+$ cat check_data_CDS.tsv
+...
+# fasta_file: data/yeast_CDS_w_250utrs.fa
+# gff_file: data/yeast_CDS_w_250utrs.gff3
+# start_codons: ['ATG']
+# InternalStopCodon: 17
+# NoStartCodon: 1
+Sequence	Feature	Issue	Data
+Q0050	Q0050	InternalStopCodon	
+Q0055	Q0055	InternalStopCodon	
+Q0060	Q0060	InternalStopCodon	
+Q0065	Q0065	InternalStopCodon	
+Q0070	Q0070	InternalStopCodon	
+Q0045	Q0045	InternalStopCodon	
+Q0075	Q0075	NoStartCodon	ATA
+Q0075	Q0075	InternalStopCodon	
+Q0085	Q0085	InternalStopCodon	
+Q0110	Q0110	InternalStopCodon	
+Q0115	Q0115	InternalStopCodon	
+Q0120	Q0120	InternalStopCodon	
+Q0105	Q0105	InternalStopCodon	
+Q0140	Q0140	InternalStopCodon	
+Q0160	Q0160	InternalStopCodon	
+Q0250	Q0250	InternalStopCodon	
+Q0255	Q0255	InternalStopCodon	
+Q0275	Q0275	InternalStopCodon	
 ```
