@@ -1164,7 +1164,7 @@ process dashboard {
       """
       Rscript -e "rmarkdown::render( \
       '${workflow.projectDir}/rmarkdown/new_visualization.Rmd', \
-      params = list(yamlfile='${config_file_yaml.getParent()}'))"
+      params = list(yamlfile='\$PWD/${config_file_yaml}'))"
 
       touch tmp.txt
       """
