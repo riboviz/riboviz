@@ -391,17 +391,20 @@ def check_fasta_gff(fasta, gff, issues_file,
                                       use_feature_name=use_feature_name,
                                       start_codons=start_codons)
     issue_counts = count_issues(issues)
-    # Create header with summary of execution.
-    header = {}
-    header[FASTA_FILE] = fasta
-    header[GFF_FILE] = gff
-    header[START_CODONS] = start_codons
+    config = {}
+    config[FASTA_FILE] = fasta
+    config[GFF_FILE] = gff
+    config[START_CODONS] = start_codons
+    header = dict(config)
     header.update(issue_counts)
     write_fasta_gff_issues_to_csv(issues, issues_file, header, delimiter)
-    print("Issue summary:")
+    print("Configuration:")
+    for (tag, value) in config.items():
+        print("{}\t{}".format(tag, value))
+    print("\nIssue summary:")
     print("{}\t{}".format("Issue", "Count"))
-    for (issue_type, issue_count) in issue_counts.items():
-        print("{}\t{}".format(issue_type, issue_count))
+    for (tag, value) in issue_counts.items():
+        print("{}\t{}".format(tag, value))
     print("\nIssue details:")
     for (sequence_id, feature_id, issue_type, issue_data) in issues:
         if issue_type in ISSUE_FORMATS:
