@@ -23,10 +23,11 @@
 #
 # Rscript -e 'library(testthat); test_file("rscripts/tests/testthat/test_bam_to_h5.R")'
 
-library(glue)
-library(here)
-library(testthat)
-library(withr)
+suppressMessages(library(glue, quietly = T))
+suppressMessages(library(here, quietly = T))
+suppressMessages(library(testthat, quietly = T))
+suppressMessages(library(withr, quietly = T))
+suppressMessages(library(Rsamtools, quietly = T))
 
 source(here::here("rscripts", "read_count_functions.R"))
 print(here())
@@ -138,9 +139,10 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   # [67] "YAL067W-A" "YAL068C"  
   print(dim(gff_names)) # NULL
  
-  ##### EXTRACT BAM #####
-  
+  ##### EXTRACT BAM (generic) #####
+
   # TODO
+  # TODO check h5_names superset of names in BAM - get BAM names, 
 
   ##### EXTRACT AND VALIDATE H5 (generic) #####
 
@@ -208,6 +210,21 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print(gff_utr3_start) # 1625
   print(gff_utr3_end) # 1874
   print(gff_utr3_length) # 250
+
+  ##### EXTRACT BAM (gene-specific) #####
+  
+  # TODO
+
+  # TODO Alternative, get number of columns from length of sequence from BAM header LN value
+
+# 'reads_by_len': Counts of number of ribosome sequences of each length (from BAM).
+  # TODO Deduce positions of non-zero values from BAM (reads_by_len[i] = sum of sequences in BAM which have length equal to lengths[i])
+  # 'reads_total': Total number of ribosome sequences (from BAM, equal to number of non-zero reads in 'reads_by_len').
+  # TODO Cross-check against count of BAM sequences which have Flag = 0
+  # 'data': Positions and lengths of ribosome sequences within the organism data (from BAM).
+  # TODO Check DATA[p, i] = 1 if there is a sequence from BAM at position p+1 which has length equal to lengths[i], else 0.
+  # TODO check sequence with "non-zeros" is in BAM.
+  # TODO check sequence with "zeros" only is not in BAM.
 
   ##### EXTRACT AND VALIDATE H5 (gene-specific) #####
 
