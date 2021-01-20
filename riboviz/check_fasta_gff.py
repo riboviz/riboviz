@@ -53,6 +53,13 @@ SEQUENCE_NOT_IN_FASTA = "SequenceNotInFASTA"
 """ FASTA-GFF issue column value. """
 SEQUENCE_NOT_IN_GFF = "SequenceNotInGFF"
 """ FASTA-GFF issue column value. """
+ISSUE_TYPES = {
+    INCOMPLETE_FEATURE, NO_START_CODON, NO_STOP_CODON,
+    INTERNAL_STOP_CODON, NO_ID_NAME, DUPLICATE_FEATURE_ID,
+    MULTIPLE_CDS, SEQUENCE_NOT_IN_FASTA, SEQUENCE_NOT_IN_GFF,
+    DUPLICATE_FEATURE_IDS
+}
+""" List of possible FASTA-GFF issues. """
 ISSUE_FORMATS = {
     INCOMPLETE_FEATURE: "Sequence {sequence} feature {feature} has length not divisible by 3",
     NO_START_CODON: "Sequence {sequence} feature {feature} doesn't start with a recognised start codon but with {data}",
@@ -331,12 +338,9 @@ def count_issues(issues):
     :return: List of tuples of form (issue type, count).
     :type issues: list(tuple(str or unicode, int))
     """
-    counts = {}
+    counts = {issue: 0 for issue in ISSUE_TYPES}
     for (_, _, issue_type, _) in issues:
-        if issue_type not in counts:
-            counts[issue_type] = 1
-        else:
-            counts[issue_type] += 1
+        counts[issue_type] += 1
     return counts
 
 

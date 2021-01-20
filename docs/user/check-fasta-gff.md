@@ -73,9 +73,16 @@ start_codons	['ATG']
 
 Issue summary:
 Issue	Count
-NoStartCodon	1
-NoStopCodon	1
 InternalStopCodon	1
+NoStartCodon	1
+SequenceNotInFASTA	0
+IncompleteFeature	0
+SequenceNotInGFF	0
+MultipleCDS	0
+DuplicateFeatureId	0
+NoIdName	0
+NoStopCodon	1
+DuplicateFeatureIds	0
 ```
 ```console
 $ cat check_vignette_YAL.tsv 
@@ -87,9 +94,16 @@ $ cat check_vignette_YAL.tsv
 # fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa
 # gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 # start_codons: ['ATG']
-# NoStartCodon: 1
-# NoStopCodon: 1
 # InternalStopCodon: 1
+# DuplicateFeatureId: 0
+# SequenceNotInFASTA: 0
+# IncompleteFeature: 0
+# NoStopCodon: 1
+# SequenceNotInGFF: 0
+# NoStartCodon: 1
+# NoIdName: 0
+# MultipleCDS: 0
+# DuplicateFeatureIds: 0
 Sequence	Feature	Issue	Data
 YAL001C	YAL001C	NoStartCodon	AAA
 YAL001C	YAL001C	NoStopCodon	TTT
@@ -106,9 +120,16 @@ $ python -m riboviz.tools.check_fasta_gff \
 ...
 Issue summary:
 Issue	Count
-NoStartCodon	1
-NoStopCodon	1
 InternalStopCodon	1
+NoStartCodon	1
+SequenceNotInFASTA	0
+IncompleteFeature	0
+SequenceNotInGFF	0
+MultipleCDS	0
+DuplicateFeatureId	0
+NoIdName	0
+NoStopCodon	1
+DuplicateFeatureIds	0
 
 Issue details:
 Sequence YAL001C feature YAL001C doesn't start with a recognised start codon but with AAA
@@ -132,8 +153,16 @@ start_codons	['ATG', 'AAA']
 
 Issue summary:
 Issue	Count
-NoStopCodon	1
+NoStartCodon	0
+IncompleteFeature	0
+DuplicateFeatureIds	0
 InternalStopCodon	1
+MultipleCDS	0
+SequenceNotInGFF	0
+DuplicateFeatureId	0
+SequenceNotInFASTA	0
+NoIdName	0
+NoStopCodon	1
 
 Issue details:
 Sequence YAL001C feature YAL001C doesn't end with a recognised stop codon but with TTT
@@ -155,8 +184,16 @@ start_codons	['ATG']
 
 Issue summary:
 Issue	Count
-InternalStopCodon	17
+DuplicateFeatureId	0
+MultipleCDS	0
+SequenceNotInGFF	0
+IncompleteFeature	0
+DuplicateFeatureIds	0
+SequenceNotInFASTA	0
+NoStopCodon	0
+NoIdName	0
 NoStartCodon	1
+InternalStopCodon	17
 
 Issue details:
 Sequence Q0050 feature Q0050 has an internal stop codon
@@ -177,14 +214,23 @@ Sequence Q0160 feature Q0160 has an internal stop codon
 Sequence Q0250 feature Q0250 has an internal stop codon
 Sequence Q0255 feature Q0255 has an internal stop codon
 Sequence Q0275 feature Q0275 has an internal stop codon
+```
 ```console
 $ cat check_data_CDS.tsv
 ...
 # fasta_file: data/yeast_CDS_w_250utrs.fa
 # gff_file: data/yeast_CDS_w_250utrs.gff3
 # start_codons: ['ATG']
-# InternalStopCodon: 17
+# DuplicateFeatureId: 0
+# MultipleCDS: 0
+# SequenceNotInGFF: 0
+# IncompleteFeature: 0
+# DuplicateFeatureIds: 0
+# SequenceNotInFASTA: 0
+# NoStopCodon: 0
+# NoIdName: 0
 # NoStartCodon: 1
+# InternalStopCodon: 17
 Sequence	Feature	Issue	Data
 Q0050	Q0050	InternalStopCodon	
 Q0055	Q0055	InternalStopCodon	
