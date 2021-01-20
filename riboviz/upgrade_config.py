@@ -155,8 +155,8 @@ def upgrade_config(config):
         if key not in config:
             config[key] = value
 
-    # Parameters added between release 1.1.0, 31 Jan 2019, 340b9b5 to
-    # pre-commit 8da8071, 18 Dec 2019
+    # Parameters added between between release 2.0, 08 Jul 2020,
+    # 03a4f13 to current date.
     for (key, value) in list(UPDATES_20_CURRENT.items()):
         if key not in config:
             config[key] = value
