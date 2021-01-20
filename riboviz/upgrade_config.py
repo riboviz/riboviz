@@ -48,6 +48,12 @@ present in the configuration:
 * ``t_rna_file: data/yeast_tRNAs.tsv``
 * ``umi_regexp: null``
 
+Expected parameters added between release 2.0 and the current
+release are added along with default values, if they are not
+already present in the configuration:
+
+* 
+
 The values of parameters ``rrna_index_prefix`` and
 ``orf_index_prefix`` are updated to be file names only, as, these are
 now assumed to be relative to ``<dir_index>``. For example the
