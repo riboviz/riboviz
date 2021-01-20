@@ -27,9 +27,9 @@ if they are not already present in the configuration:
 * ``do_pos_sp_nt_freq: true``
 * ``features_file: data/yeast_features.tsv``
 
-Expected parameters added between release 1.1.0, 31 Jan 2019, 340b9b5
-to pre-commit 8da8071, 18 Dec 2019, are added along with default
-values, if they are not already present in the configuration:
+Expected parameters added between release 1.1.0 and 2.0 are added
+along with default values, if they are not already present in the
+configuration:
 
 * ``asite_disp_length_file: data/yeast_standard_asite_disp_length.txt``
 * ``cmd_file: run_riboviz_vignette.sh``
@@ -48,9 +48,9 @@ values, if they are not already present in the configuration:
 * ``t_rna_file: data/yeast_tRNAs.tsv``
 * ``umi_regexp: null``
 
-Expected parameters added between pre-commit 8da8071, 18 Dec 2019
-to the current commit, are added along with default values, if they
-are not already present in the configuration:
+Expected parameters added between release 2.0 and the current
+release are added along with default values, if they are not
+already present in the configuration:
 
 * ``job_name: riboviz``
 * ``job_runtime: '48:00:00'``
@@ -62,12 +62,6 @@ are not already present in the configuration:
 * ``nextflow_report_file: nextflow-report.html``
 " ``nextflow_work_dir: work``
 * ``validate_only: false``
-
-Expected parameters added between release 2.0 and the current
-release are added along with default values, if they are not
-already present in the configuration:
-
-*
 
 The values of parameters ``rrna_index_prefix`` and
 ``orf_index_prefix`` are updated to be file names only, as, these are
@@ -113,8 +107,7 @@ UPDATES_10_11 = {
 }
 """
 Map from configuration parameters to default values for parameters
-added between release 1.0.0, 9 Oct 2017, 83027ef and 1.1.0, 31 Jan
-2019, 340b9b5.
+added between release 1.0.0 and 1.1.0.
 """
 
 UPDATES_11_20 = {
@@ -137,15 +130,14 @@ UPDATES_11_20 = {
 }
 """
 Map from configuration parameters to default values for parameters
-added between release 1.1.0, 31 Jan 2019, 340b9b5 to 2.0,
-08 Jul 2020, 03a4f13.
+added between release 1.1.0 and 2.0.
 """
 
 UPDATES_20_CURRENT = {
 }
 """
 Map from configuration parameters to default values for parameters
-added between release 2.0, 08 Jul 2020, 03a4f13 to current.
+added between release 2.0 and the current release.
 """
 
 
@@ -164,20 +156,14 @@ def upgrade_config(config):
             del config[old_key]
             config[new_key] = value
 
-    # Parameters added between release 1.0.0, 9 Oct 2017, 83027ef and
-    # 1.1.0, 31 Jan 2019, 340b9b5.
     for (key, value) in list(UPDATES_10_11.items()):
         if key not in config:
             config[key] = value
 
-    # Parameters added between release 1.1.0, 31 Jan 2019, 340b9b5 to
-    # pre-commit 8da8071, 18 Dec 2019
     for (key, value) in list(UPDATES_11_20.items()):
         if key not in config:
             config[key] = value
 
-    # Job configuration arameters added between release 2.0 and
-    # present date.
     # Remove params.NEXTFLOW_RESUME as it is a command-line only
     # configuration parameter.
     job_config = params.DEFAULT_JOB_CONFIG.copy()
@@ -186,8 +172,6 @@ def upgrade_config(config):
         if key not in config:
             config[key] = value
 
-    # Parameters added between between release 2.0, 08 Jul 2020,
-    # 03a4f13 to current date.
     for (key, value) in list(UPDATES_20_CURRENT.items()):
         if key not in config:
             config[key] = value
