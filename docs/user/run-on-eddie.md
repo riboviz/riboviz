@@ -285,6 +285,47 @@ Computational work on Eddie is usually submitted to the cluster as batch jobs in
 
 See "Requesting resources" section below.
 
+Here is an example job script for the vignette, named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
+
+```
+#!/bin/sh
+# Grid Engine options (lines prefixed with #$)
+#$ -N riboviz_vignette
+#$ -cwd
+#$ -l h_rt=01:00:00
+#$ -l h_vmem=8G
+#$ -pe sharedmem 16
+#$ -o $JOB_NAME-$JOB_ID-$HOSTNAME.o
+#$ -e $JOB_NAME-$JOB_ID-$HOSTNAME.e
+#  These options are:
+#  job name: -N
+#  use the current working directory: -cwd
+#  runtime limit of 1 hour: -l h_rt
+#  ask for 8 Gbyte RAM: -l h_vmem
+#  use shared memory parallel environment, request 16 CPUs
+#  redirect output with format jobname-jobID-hostname (jobname -N)
+#  redirect error with same format as output
+
+# Initialise the environment modules
+. /etc/profile.d/modules.sh
+
+export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
+module load igmm/apps/BEDTools
+module load igmm/apps/bowtie
+module load igmm/apps/hdf5
+module load igmm/apps/HISAT2
+module load igmm/apps/pigz
+module load igmm/apps/R/3.6.3
+module load anaconda
+source activate riboviz
+
+# Uncomment this to run the python workflow:
+#python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
+
+# Run the Nextflow workflow:
+nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false
+```
+
 We provide a Python script, `riboviz.tools.create_job_script`, which creates a job submission script using the template in [jobs/eddie-template.sh](../../jobs/eddie-template.sh).
 
 You can run this to create a job script named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
@@ -312,12 +353,6 @@ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 
 For full details on how to use `riboviz.tools.create_job_script`, see [Create job submission script from template](./create-job-script.md).
 
-Here is an example job script for the vignette, named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
-
-```
-TODO
-```
-
 ### Requesting resources - work in progress
 
 Jobs on Eddie need to request appropriate resources (cores, memory) in order to run. 
@@ -340,8 +375,6 @@ If your job is killed, try:
 * always start with test runs using a downsampled dataset, which tests every other aspect of your configuration file, quickly.
 
 This is work in progress. A temporary solution involving ringfenced nodes is described at [riboviz#230](https://github.com/riboviz/riboviz/issues/230#issuecomment-758815346).
-
->>>>>>> develop
 
 ### Submitting jobs
 
@@ -530,7 +563,7 @@ We need to make sure we move back into the main riboviz folder, where we will be
 
 Eddie allows us to load the [SRA Toolkit](https://github.com/ncbi/sra-tools) module, including the utility `fasterq-dump` for downloading data files.  This utility has been included in SRA Toolkit since version 2.9.1. We recommend using `fasterq-dump` with `prefetch`, described below.
 
-<details> <summary> Detils on `fastq-dump` (Deprecated). </summary> 
+<details> <summary> Details on `fastq-dump` (Deprecated). </summary> 
 An earlier tool, `fastq-dump`, is also included in SRA Toolkit, however, you may find it is too slow for larger datasets, like `Wallace_2020_JEC21` which is around 50GB uncompressed. Even using the `--gzip` option to directly download the `.gz` file may be too slow.
 </details>
 
