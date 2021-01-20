@@ -252,7 +252,7 @@ GetGeneMappedReadLengths <- function(gene, dataset, hd_file){
 #' 5' location gene feature (e.g. CDS) starts from; ~equivalent to output of GetCDS5start()
 #' @param n_buffer numeric value, number 'n' nucleotides of UTR buffer to include in metagene plots; riboviz default (set in generate_stats_figs.R): 25
 #' @param nnt_gene numeric value, n nucleotides of gene to include in metagene plots; riboviz default (set in generate_stats_figs.R): 50
-#' @param posn_3end numeric value, the 3'-end of the protein-coding sequence for rare situations where nnt_gene may lead to indexing error; default: -Inf
+#' @param posn_3end numeric value, the 3'-end of the protein-coding sequence for rare situations where nnt_gene may lead to indexing error; default: Inf
 #' 
 #' @return matrix of read counts for specific gene using .h5 and .gff information
 #' 
