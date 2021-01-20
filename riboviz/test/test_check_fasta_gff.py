@@ -377,16 +377,20 @@ def test_write_fasta_gff_issues_to_csv_empty(tmp_file):
 def test_count_issues_empty():
     """
     Test :py:func:`riboviz.check_fasta_gff.count_issues`
-    with no values produces an empty dictionary.
+    with no values produces a list of issues with 0 counts
+    for each issue.
     """
-    expected_counts = {issue: 0 for issue in check_fasta_gff.ISSUE_TYPES}
-    assert check_fasta_gff.count_issues({}) == expected_counts
+    counts = check_fasta_gff.count_issues({})
+    assert len(counts) == len(check_fasta_gff.ISSUE_TYPES)
+    for issue in check_fasta_gff.ISSUE_TYPES:
+        assert (issue, 0) in counts
 
 
 def test_count_issues():
     """
     Test :py:func:`riboviz.check_fasta_gff.count_issues`
-    with values produces the expected dictionary.
+    with values produces the expected list of issues and
+    counts.
     """
     issues = {
         ("s1", "f1", check_fasta_gff.NO_START_CODON, None),
@@ -395,10 +399,17 @@ def test_count_issues():
         ("s4", "f4", check_fasta_gff.NO_START_CODON, None),
         ("s5", "f5", check_fasta_gff.NO_START_CODON, None)
     }
-    expected_counts = {issue: 0 for issue in check_fasta_gff.ISSUE_TYPES}
-    expected_counts[check_fasta_gff.NO_STOP_CODON] = 2
-    expected_counts[check_fasta_gff.NO_START_CODON] = 3
-    assert check_fasta_gff.count_issues(issues) == expected_counts
+    counts = check_fasta_gff.count_issues(issues)
+    assert len(counts) == len(check_fasta_gff.ISSUE_TYPES)
+
+    zero_issues = list(check_fasta_gff.ISSUE_TYPES)
+    zero_issues.remove(check_fasta_gff.NO_START_CODON)
+    zero_issues.remove(check_fasta_gff.NO_STOP_CODON)
+    for issue in zero_issues:
+        assert (issue, 0) in counts
+    # counts should be in sorted order.
+    assert counts[0] == (check_fasta_gff.NO_START_CODON, 3)
+    assert counts[1] == (check_fasta_gff.NO_STOP_CODON, 2)
 
 
 def test_check_fasta_gff_no_such_fasta_file(tmp_file):

@@ -61,10 +61,10 @@ $ python -m riboviz.tools.check_fasta_gff \
     -g vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
     -o check_vignette_YAL.tsv
 Created by: RiboViz
-Date: 2021-01-19 05:15:38.788325
+Date: 2021-01-20 03:12:29.703631
 Command-line tool: /home/ubuntu/riboviz/riboviz/tools/check_fasta_gff.py
 File: /home/ubuntu/riboviz/riboviz/tools/check_fasta_gff.py
-Version: commit f3d3194e2cad8e1924fc8462fff7808a46dc8784 date 2021-01-19 04:28:06-08:00
+Version: commit 79782c99efc427c734cd906e463143d624b9306f date 2021-01-20 02:52:57-08:00
 
 Configuration:
 fasta_file	vignette/input/yeast_YAL_CDS_w_250utrs.fa
@@ -75,34 +75,34 @@ Issue summary:
 Issue	Count
 InternalStopCodon	1
 NoStartCodon	1
-SequenceNotInFASTA	0
+NoStopCodon	1
+DuplicateFeatureId	0
+MultipleCDS	0
+NoIdName	0
 IncompleteFeature	0
 SequenceNotInGFF	0
-MultipleCDS	0
-DuplicateFeatureId	0
-NoIdName	0
-NoStopCodon	1
+SequenceNotInFASTA	0
 DuplicateFeatureIds	0
 ```
 ```console
 $ cat check_vignette_YAL.tsv 
 # Created by: RiboViz
-# Date: 2021-01-19 05:15:38.942793
+# Date: 2021-01-20 03:12:29.833527
 # Command-line tool: /home/ubuntu/riboviz/riboviz/tools/check_fasta_gff.py
 # File: /home/ubuntu/riboviz/riboviz/check_fasta_gff.py
-# Version: commit f3d3194e2cad8e1924fc8462fff7808a46dc8784 date 2021-01-19 04:28:06-08:00
+# Version: commit 79782c99efc427c734cd906e463143d624b9306f date 2021-01-20 02:52:57-08:00
 # fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa
 # gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 # start_codons: ['ATG']
 # InternalStopCodon: 1
-# DuplicateFeatureId: 0
-# SequenceNotInFASTA: 0
-# IncompleteFeature: 0
-# NoStopCodon: 1
-# SequenceNotInGFF: 0
 # NoStartCodon: 1
-# NoIdName: 0
+# NoStopCodon: 1
+# DuplicateFeatureId: 0
 # MultipleCDS: 0
+# NoIdName: 0
+# IncompleteFeature: 0
+# SequenceNotInGFF: 0
+# SequenceNotInFASTA: 0
 # DuplicateFeatureIds: 0
 Sequence	Feature	Issue	Data
 YAL001C	YAL001C	NoStartCodon	AAA
@@ -120,16 +120,16 @@ $ python -m riboviz.tools.check_fasta_gff \
 ...
 Issue summary:
 Issue	Count
-InternalStopCodon	1
 NoStartCodon	1
+NoStopCodon	1
+InternalStopCodon	1
+SequenceNotInGFF	0
+DuplicateFeatureIds	0
+NoIdName	0
 SequenceNotInFASTA	0
 IncompleteFeature	0
-SequenceNotInGFF	0
 MultipleCDS	0
 DuplicateFeatureId	0
-NoIdName	0
-NoStopCodon	1
-DuplicateFeatureIds	0
 
 Issue details:
 Sequence YAL001C feature YAL001C doesn't start with a recognised start codon but with AAA
@@ -153,16 +153,16 @@ start_codons	['ATG', 'AAA']
 
 Issue summary:
 Issue	Count
-NoStartCodon	0
-IncompleteFeature	0
-DuplicateFeatureIds	0
 InternalStopCodon	1
-MultipleCDS	0
-SequenceNotInGFF	0
-DuplicateFeatureId	0
-SequenceNotInFASTA	0
-NoIdName	0
 NoStopCodon	1
+SequenceNotInFASTA	0
+DuplicateFeatureIds	0
+DuplicateFeatureId	0
+IncompleteFeature	0
+NoStartCodon	0
+MultipleCDS	0
+NoIdName	0
+SequenceNotInGFF	0
 
 Issue details:
 Sequence YAL001C feature YAL001C doesn't end with a recognised stop codon but with TTT
@@ -184,16 +184,16 @@ start_codons	['ATG']
 
 Issue summary:
 Issue	Count
-DuplicateFeatureId	0
+InternalStopCodon	17
+NoStartCodon	1
 MultipleCDS	0
 SequenceNotInGFF	0
 IncompleteFeature	0
+NoStopCodon	0
+DuplicateFeatureId	0
+NoIdName	0
 DuplicateFeatureIds	0
 SequenceNotInFASTA	0
-NoStopCodon	0
-NoIdName	0
-NoStartCodon	1
-InternalStopCodon	17
 
 Issue details:
 Sequence Q0050 feature Q0050 has an internal stop codon
@@ -221,16 +221,16 @@ $ cat check_data_CDS.tsv
 # fasta_file: data/yeast_CDS_w_250utrs.fa
 # gff_file: data/yeast_CDS_w_250utrs.gff3
 # start_codons: ['ATG']
-# DuplicateFeatureId: 0
+# InternalStopCodon: 17
+# NoStartCodon: 1
 # MultipleCDS: 0
 # SequenceNotInGFF: 0
 # IncompleteFeature: 0
+# NoStopCodon: 0
+# DuplicateFeatureId: 0
+# NoIdName: 0
 # DuplicateFeatureIds: 0
 # SequenceNotInFASTA: 0
-# NoStopCodon: 0
-# NoIdName: 0
-# NoStartCodon: 1
-# InternalStopCodon: 17
 Sequence	Feature	Issue	Data
 Q0050	Q0050	InternalStopCodon	
 Q0055	Q0055	InternalStopCodon	
@@ -249,5 +249,5 @@ Q0140	Q0140	InternalStopCodon
 Q0160	Q0160	InternalStopCodon	
 Q0250	Q0250	InternalStopCodon	
 Q0255	Q0255	InternalStopCodon	
-Q0275	Q0275	InternalStopCodon	
+Q0275	Q0275	InternalStopCodon
 ```

@@ -335,12 +335,15 @@ def count_issues(issues):
     not applicable to the issue), issue type, issue data).
     :type issues: list(tuple(str or unicode, str or unicode, \
     str or unicode, *))
-    :return: List of tuples of form (issue type, count).
+    :return: List of tuples of form (issue type, count) sorted by 'count'
     :type issues: list(tuple(str or unicode, int))
     """
     counts = {issue: 0 for issue in ISSUE_TYPES}
     for (_, _, issue_type, _) in issues:
         counts[issue_type] += 1
+    counts = sorted(counts.items(),
+                    key=lambda item: item[1],
+                    reverse=True)
     return counts
 
 
@@ -411,7 +414,7 @@ def check_fasta_gff(fasta, gff, issues_file,
         print("{}\t{}".format(tag, value))
     print("\nIssue summary:")
     print("{}\t{}".format("Issue", "Count"))
-    for (tag, value) in issue_counts.items():
+    for (tag, value) in issue_counts:
         print("{}\t{}".format(tag, value))
     if is_verbose:
         print("\nIssue details:")
