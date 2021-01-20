@@ -3,10 +3,9 @@
 This page describes how you can run **RiboViz** on [Eddie](https://www.ed.ac.uk/information-services/research-support/research-computing/ecdf/high-performance-computing), The University of Edinburgh ECDF Linux Compute Cluster.
 
 **Note:** This information is for University of Edinburgh users only.
+However, these guidelines may be useful for running **RiboViz** in other HPC systems.
 
 The Eddie service documentation is on the University of Edinburgh [wiki](https://www.wiki.ed.ac.uk/display/ResearchServices/Eddie),
-
-These guidelines may be useful for running **RiboViz** in other HPC systems.
 
 All Python and R packages required to run **RiboViz** have been installed in `/exports/csce/eddie/biology/groups/wallace_rna` on Eddie
 
@@ -83,19 +82,27 @@ If you do not have a group space, you can use your scratch directory (`/exports/
 
 ## Interactive sessions
 
-There are a limited number of nodes that accept interactive login sessions, to allow you to run interactive jobs or graphical  applications. To start an interactive session run:
+There are a limited number of nodes that accept interactive login sessions, to allow you to run interactive jobs or graphical  applications. To start an interactive session run `qlogin`. For running riboviz using nextflow, we recommend you request multiple cores and more than the default memory, for example:
 
 ```console
-$ qlogin -l h_vmem=16G
+$ qlogin -pe interactivemem 4 -l h_vmem=4G 
 ```
 
-`-l h_vmem` means that you ask for 16GB RAM
+Here, `-pe interactivemem 4` means you ask for 4 cores in an interactive memory parallel environment. Also, `-l h_vmem=4G` means that you ask for 4GB RAM per core (16GB total in this example)
 
-If you have access to a priority queue then you can use:
+We have also succeeded running on one core with 16GB memory, using:
 
 ```console
-$ qlogin -P <QUEUE_NAME> -l h_vmem=16G
+$ qlogin -l h_vmem=16G 
 ```
+
+If you have access to a priority queue then you can use option `-P`:
+
+```console
+$ qlogin -pe interactivemem 4 -l h_vmem=4G -P <QUEUE_NAME>
+```
+
+RiboViz team members have access to the priority queue `bio_wallace_rna_riboviz`.
 
 See [Interactive sessions](https://www.wiki.ed.ac.uk/display/ResearchServices/Interactive+Sessions) for more information.
 
@@ -124,7 +131,7 @@ Either way, you have to wait for a free node to become available or for Eddie to
 
 ```console
 $ source activate riboviz
-````
+```
 
 ### Configure R packages path
 
@@ -167,7 +174,7 @@ In future you need only to run:
 
 ```console
 $ source set-riboviz-env.sh
-````
+```
 
 ---
 
@@ -179,8 +186,9 @@ Change into the **RiboViz** repository:
 $ cd riboviz/riboviz
 ```
 
-To run the Python workflow:
-
+<details>
+  <summary>Details on running the Python workflow (Deprecated):</summary>
+  
 ```console
 $ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 Running under Python: 3.7.6 | packaged by conda-forge | (default, Jun  1 2020, 18:57:50)
@@ -225,8 +233,10 @@ Collate TPMs across sample results. Log: vignette/logs/20200606-020931/collate_t
 Count reads. Log: vignette/logs/20200606-020931/count_reads.log
 Completed
 ```
+</details>
 
-To run the Nextflow workflow:
+
+### To run the Nextflow workflow:
 
 ```console
 $ nextflow run prep_riboviz.nf \
@@ -271,6 +281,10 @@ For more information about the vignette, see [Map mRNA and ribosome protected re
 
 Computational work on Eddie is usually submitted to the cluster as batch jobs initiated from a login node. In order to submit a job you need to write a Grid Engine job submission script containing details of the program to run as well as requests for resources. Then, you submit this job script to the cluster with the `qsub` command.
 
+**Warning** - Jobs need to request appropriate resources (cores, memory) in order to run. We are still working out what riboviz needs, so this may take some trial and error. 
+
+See "Requesting resources" section below.
+
 We provide a Python script, `riboviz.tools.create_job_script`, which creates a job submission script using the template in [jobs/eddie-template.sh](../../jobs/eddie-template.sh).
 
 You can run this to create a job script named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
@@ -298,6 +312,37 @@ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 
 For full details on how to use `riboviz.tools.create_job_script`, see [Create job submission script from template](./create-job-script.md).
 
+Here is an example job script for the vignette, named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
+
+```
+TODO
+```
+
+### Requesting resources - work in progress
+
+Jobs on Eddie need to request appropriate resources (cores, memory) in order to run. 
+If the submission script request less than the number of threads they need then jobs fail with strange error messages. If the job uses more memory than the submission script allows for, then the submission system kills the job. If you request too many resources, then the job queues for a long while (days or longer). 
+The memory requirements scale with the data, both genome/transcriptome size and number of reads. We have not yet profiled these or found ideal solutions.
+
+The key point is that requesting fewer cores but more memory makes it less likely that the memory will overflow. Also, nextflow does not actually control how many threads or memory the workflow steps take.
+
+A good start involves reserving available resources (`-R y`) of 4 nodes, 16GB/each:
+ 
+```
+-R y -pe mpi 4 -l h_vmem=16GB
+```
+
+This tended to start within a few hours; but still was killed unpredictably on larger datasets.
+
+If your job is killed, try:
+* requesting fewer cores with more memory each, e.g. `-pe mpi 1 -l h_vmem=32GB`.
+* reducing the requested `num_processes` in the `config_yaml`
+* always start with test runs using a downsampled dataset, which tests every other aspect of your configuration file, quickly.
+
+This is work in progress. A temporary solution involving ringfenced nodes is described at [riboviz#230](https://github.com/riboviz/riboviz/issues/230#issuecomment-758815346).
+
+>>>>>>> develop
+
 ### Submitting jobs
 
 Change into the **RiboViz** repository:
@@ -312,13 +357,16 @@ Run:
 $ qsub job_riboviz.sh
 ```
 
-If you have access to a priority queue then you can use:
-
+If you have access to a priority queue, then you can add a line to the gridengine in the submission script, (or alternatively in the command line call to qsub)
 ```console
-$ qsub -P <QUEUE_NAME> job_riboviz.sh
+#$ -P <QUEUE_NAME> job_riboviz.sh 
 ```
 
-A job ID will be displayed.
+You will see a message including job ID:
+
+```
+Your job <job-ID> ("jobname") has been submitted
+```
 
 This will output the standard output from `prep_riboviz.nf` to a file, `riboviz-$JOB_ID-$HOSTNAME.o`, in the current working directory, and errors to a file, `riboviz_vignette-$JOB_ID-$HOSTNAME.e`.
 
@@ -459,7 +507,7 @@ $ cd $HOME/riboviz/riboviz
 Create a symbolic system link between a new folder for our dataset and the folder on scratch which will hold our inputs and outputs:
 ```
 # make symbolic system link at riboviz folder to folder on scratch
-$ ln -s /exports/eddie/scratch/$USER/$Wallace_2020_JEC21
+$ ln -s /exports/eddie/scratch/$USER/Wallace_2020_JEC21
 ```
 This means that we can access the files as if they were located at `$HOME/riboviz/riboviz/Wallace_2020_JEC21`, instead of being held on the scratch space location.  This simplifies paths in our yaml and helps us keep things together while not filling up more limited storage space on our group or home directory storage.
 
@@ -480,13 +528,12 @@ We need to make sure we move back into the main riboviz folder, where we will be
 
 ### Download fastq data files from the Short Read Archive (SRA): initial setup
 
-Eddie allows us to load the [SRA Toolkit](https://github.com/ncbi/sra-tools) module, including the utility `fasterq-dump` for downloading data files.  This utility has been included in SRA Toolkit since version 2.9.1. We recommend using `fasterq-dump`.
+Eddie allows us to load the [SRA Toolkit](https://github.com/ncbi/sra-tools) module, including the utility `fasterq-dump` for downloading data files.  This utility has been included in SRA Toolkit since version 2.9.1. We recommend using `fasterq-dump` with `prefetch`, described below.
 
-An earlier tool, `fastq-dump`, is also included in SRA Toolkit, however, you may find it is too slow for `fastq-dump` to download a large dataset like `Wallace_2020_JEC21` which is around 50GB uncompressed. Even using the `--gzip` option to directly download the `.gz` file may be too slow.
+<details> <summary> Detils on `fastq-dump` (Deprecated). </summary> 
+An earlier tool, `fastq-dump`, is also included in SRA Toolkit, however, you may find it is too slow for larger datasets, like `Wallace_2020_JEC21` which is around 50GB uncompressed. Even using the `--gzip` option to directly download the `.gz` file may be too slow.
+</details>
 
-A faster alternative can be to use `fasterq-dump` and the Aspera client's `prefetch` tool (which is provided as part of the above module), as recommended here.
-
-To get `fasterq-dump`, follow SRA Toolkit's [02. Installing SRA Toolkit](https://github.com/ncbi/sra-tools/wiki/02.-Installing-SRA-Toolkit) to install the latest version of the SRA Toolkit (follow the instructions for CentOS).
 
 Before your initial use of SRA toolkit, configure download and cache settings, by running:
 
@@ -499,6 +546,7 @@ then follow the interactive prompts (using tab to navigate through the menus) an
 This path adjusts where the tool puts your cache directory, which could get very large (100s of GB). We recommend using your scratch space `/exports/eddie/scratch/$USER/ncbi`, where `$USER` is replaced by your username.
 
 You may have to repeat the `vdb-config` step periodically, as data on Eddie scratch space is automatically cleared after one month.
+
 For more information about the configuration utility, see [SRA toolkit installation and configuration Guide](https://ncbi.github.io/sra-tools/install_config.html).
 
 ### Download fastq data files from the Short Read Archive (SRA): subsequent uses
@@ -527,9 +575,13 @@ It may be helpful to test this functionality with a smaller download file, e.g. 
 
 Alternatively, it is possible to download `.fastq.gz` format files of SRA data from the European Nucleotide Archive, but we have not tested the speed. For example, from Ingolia 2009 again, [ftp link to SRR014376.fastq.gz](ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR014/SRR014376/SRR014376.fastq.gz).
 
-### Create `qsub` script
+### Create `qsub` job submission script
+
+**Note:** we are working on automatically generating job submission scripts, see [riboviz#228](https://github.com/riboviz/riboviz/issues/228). 
+This documentation gives an example and an overview of how they work for riboviz.
 
 Create the job submission script in `$HOME` or a location of your choosing, and name it something like `run_W-Cn-JEC21_2020.sh`.  
+
 
 ```
 #!/bin/sh
@@ -541,6 +593,7 @@ Create the job submission script in `$HOME` or a location of your choosing, and 
 #$ -pe sharedmem 16
 #$ -o $JOB_NAME-$JOB_ID-$HOSTNAME.o
 #$ -e $JOB_NAME-$JOB_ID-$HOSTNAME.e
+#$ -m beas
 #  These options are:
 #  job name: -N
 #  use the current working directory: -cwd
@@ -549,6 +602,7 @@ Create the job submission script in `$HOME` or a location of your choosing, and 
 #  use shared memory parallel environment, request 16 CPUs
 #  redirect output with format jobname-jobID-hostname (jobname -N)
 #  redirect error with same format as output
+#  send email when job starts/ends/aborted/rescheduled
 # Initialise the environment modules
 . /etc/profile.d/modules.sh
 

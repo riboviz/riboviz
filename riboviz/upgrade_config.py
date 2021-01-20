@@ -63,6 +63,12 @@ are not already present in the configuration:
 " ``nextflow_work_dir: work``
 * ``validate_only: false``
 
+Expected parameters added between release 2.0 and the current
+release are added along with default values, if they are not
+already present in the configuration:
+
+* 
+
 The values of parameters ``rrna_index_prefix`` and
 ``orf_index_prefix`` are updated to be file names only, as, these are
 now assumed to be relative to ``<dir_index>``. For example the
@@ -131,8 +137,15 @@ UPDATES_11_20 = {
 }
 """
 Map from configuration parameters to default values for parameters
-added between release 1.1.0, 31 Jan 2019, 340b9b5 to pre-commit
-8da8071, 18 Dec 2019.
+added between release 1.1.0, 31 Jan 2019, 340b9b5 to 2.0,
+08 Jul 2020, 03a4f13.
+"""
+
+UPDATES_20_CURRENT = {
+}
+"""
+Map from configuration parameters to default values for parameters
+added between release 2.0, 08 Jul 2020, 03a4f13 to current.
 """
 
 
@@ -170,6 +183,12 @@ def upgrade_config(config):
     job_config = params.DEFAULT_JOB_CONFIG.copy()
     del job_config[params.NEXTFLOW_RESUME]
     for (key, value) in list(job_config.items()):
+        if key not in config:
+            config[key] = value
+
+    # Parameters added between between release 2.0, 08 Jul 2020,
+    # 03a4f13 to current date.
+    for (key, value) in list(UPDATES_20_CURRENT.items()):
         if key not in config:
             config[key] = value
 

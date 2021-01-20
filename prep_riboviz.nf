@@ -718,7 +718,8 @@ process hisat2rRNA {
         """
         hisat2 --version
         hisat2 -p ${params.num_processes} -N 1 -k 1 \
-            --un nonrRNA.fq -x ${params.rrna_index_prefix} \
+            --un nonrRNA.fq --no-unal \
+            -x ${params.rrna_index_prefix} \
             -S rRNA_map.sam -U ${sample_fq}
         """
 }
