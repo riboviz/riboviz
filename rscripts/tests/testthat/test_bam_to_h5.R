@@ -35,10 +35,12 @@ bam_to_h5 <- here::here("rscripts/bam_to_h5.R")
 print(bam_to_h5)
 gff_file <- here::here("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
 print(gff_file)
-bam_file <- here::here("vignette/output/WTnone/WTnone.bam")
+bam_file <- here::here("vignette/output/WTnone/WTnone.bam") # TODO remove
+bam_file <- here::here("WTnone.bam") # TODO remove
 print(bam_file)
 h5_file <- here::here("test.h5")
 h5_file <- here::here("vignette/output/WTnone/WTnone.h5") # TODO remove
+h5_file <- here::here("WTnone.h5") # TODO remove
 print(h5_file)
 
 context("test_bam_to_h5.R")
@@ -141,8 +143,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
  
   ##### EXTRACT BAM (generic) #####
 
-  # TODO
-  # TODO check h5_names superset of names in BAM - get BAM names, 
+  # TODO See below
 
   ##### EXTRACT AND VALIDATE H5 (generic) #####
 
@@ -213,18 +214,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
 
   ##### EXTRACT BAM (gene-specific) #####
   
-  # TODO
-
-  # TODO Alternative, get number of columns from length of sequence from BAM header LN value
-
-# 'reads_by_len': Counts of number of ribosome sequences of each length (from BAM).
-  # TODO Deduce positions of non-zero values from BAM (reads_by_len[i] = sum of sequences in BAM which have length equal to lengths[i])
-  # 'reads_total': Total number of ribosome sequences (from BAM, equal to number of non-zero reads in 'reads_by_len').
-  # TODO Cross-check against count of BAM sequences which have Flag = 0
-  # 'data': Positions and lengths of ribosome sequences within the organism data (from BAM).
-  # TODO Check DATA[p, i] = 1 if there is a sequence from BAM at position p+1 which has length equal to lengths[i], else 0.
-  # TODO check sequence with "non-zeros" is in BAM.
-  # TODO check sequence with "zeros" only is not in BAM.
+  # TODO See below
 
   ##### EXTRACT AND VALIDATE H5 (gene-specific) #####
 
@@ -354,6 +344,56 @@ test_that("Run bam_to_h5.R and validate H5 file", {
 
   # TODO Cross-check reads_by_len[i] = sum of DATA[*, i] i.e. sum across all positions for a specific length.
 
+  ##### EXTRACT BAM WIP #####
+
+  # TODO check h5_names superset of names in BAM - get BAM names.
+  # TODO Alternative, get number of columns from length of sequence from BAM header LN value
+
+
+  # https://kasperdanielhansen.github.io/genbioconductor/html/Rsamtools.html
+  bam_file_f <- BamFile(bam_file)
+  print(bam_file_f)
+  bam_seq_info = seqinfo(bam_file_f)
+  print(bam_seq_info)
+  #Seqinfo object with 68 sequences from an unspecified genome:
+  #seqnames  seqlengths isCircular genome
+  #YAL068C          863       <NA>   <NA>
+  # ...
+  #YAL001C         3983       <NA>   <NA>
+  print(length(bam_seq_info)) # 68
+  print(countBam(bam_file_f))
+  # All alignments
+  aln <- scanBam(bam_file_f)
+  print(length(aln))
+  print(length(aln[[1]]))
+  print(names(aln[[1]]))
+  #  [1] "qname"  "flag"   "rname"  "strand" "pos"    "qwidth" "mapq"  
+  #  [8] "cigar"  "mrnm"   "mpos"   "isize"  "seq"    "qual"
+
+#  gr <- GRanges(seqnames = gene,
+#              ranges = IRanges(start = c(1, 10000), end = c(2,2000)))
+#  params <- ScanBamParam(which = gr, what = scanBamWhat())
+#  aln <- scanBam(bam_file_f, param = params)
+#  print(names(aln))
+
+   # Search 
+
+   # p2 <- ScanBamParam(what=c("rname", "strand", "pos", "qwidth"))
+   # res2 <- scanBam(bam_file_f, param=p2)
+   # print(res2)
+
+  # 'reads_by_len': Counts of number of ribosome sequences of each length (from BAM).
+  # TODO Deduce positions of non-zero values from BAM (reads_by_len[i] = sum of sequences in BAM which have length equal to lengths[i])
+  # 'reads_total': Total number of ribosome sequences (from BAM, equal to number of non-zero reads in 'reads_by_len').
+  # TODO Cross-check against count of BAM sequences which have Flag = 0
+  # 'data': Positions and lengths of ribosome sequences within the organism data (from BAM).
+  # TODO Check DATA[p, i] = 1 if there is a sequence from BAM at position p+1 which has length equal to lengths[i], else 0.
+  # TODO check sequence with "non-zeros" is in BAM.
+  # TODO check sequence with "zeros" only is not in BAM.
+
+  # Example from bam_to_h5.R
+  # bam_what <- c("strand", "pos", "qwidth")
+  # bam_param <- ScanBamParam(which = gene_location, what = bam_what)
+  # bam_data <- scanBam(bam_file, param=bam_param)
 
 })
-
