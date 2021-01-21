@@ -3,30 +3,31 @@ library(yaml)
 library(tidyverse)
 library(scales)
 library(here)
+library(optparse)
 
 
-# # define input options for optparse package
-# option_list <- list(
-#   make_option("--output-dir",
-#               type = "character", default = "./",
-#               help = "Output directory"
-#   ),
-#   make_option("--yamlfile",
-#               type = "character", default = "config.yaml",
-#               help = "Name of the dataset"
-#   )
-# )
-# 
-# # read in commandline arguments
-# opt <- optparse::parse_args(OptionParser(option_list = option_list),
-#                             convert_hyphens_to_underscores=TRUE)
-# 
-# # attach opt list to be able to refer to variables in the list by names alone
-# # ie `height` rather than `women$height`
-# attach(opt)
-# 
-# print("shiny_test.R running with parameters:")
-# opt
+# define input options for optparse package
+option_list <- list(
+  # make_option("--output-dir",
+  #             type = "character", default = "./",
+  #             help = "Output directory"
+  # ),
+  optparse::make_option("--yamlfile",
+              type = "character", default = "config.yaml",
+              help = "Name of the dataset"
+  )
+)
+
+# read in commandline arguments
+opt <- optparse::parse_args(OptionParser(option_list = option_list),
+                            convert_hyphens_to_underscores=TRUE)
+
+# attach opt list to be able to refer to variables in the list by names alone
+# ie `height` rather than `women$height`
+attach(opt)
+
+print("shiny_test.R running with parameters:")
+opt
 
 # define the universal plots theme
 plot_theme <- theme_bw()+
@@ -38,8 +39,8 @@ plot_theme <- theme_bw()+
 # unless we want to get the sample names themselves from nextflow too
 # probably it will be better to get necessary files straight from nextflow because the ribogrid,
 # among other plots, will require that. 
-yaml_loc <- here::here("vignette", "simdata_multiplex_config.yaml")
-#yaml_loc <- here::here(yamlfile)
+#yaml_loc <- here::here("vignette", "simdata_multiplex_config.yaml")
+yaml_loc <- here::here(yamlfile)
 
 # the find sample names function
 find_sample_names <- function(path_to_yaml){
