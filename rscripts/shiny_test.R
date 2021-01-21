@@ -40,7 +40,7 @@ plot_theme <- theme_bw()+
 # probably it will be better to get necessary files straight from nextflow because the ribogrid,
 # among other plots, will require that. 
 #yaml_loc <- here::here("vignette", "simdata_multiplex_config.yaml")
-yaml_loc <- here::here(yamlfile)
+yaml_loc <- yamlfile
 
 # the find sample names function
 find_sample_names <- function(path_to_yaml){
