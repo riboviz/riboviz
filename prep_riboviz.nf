@@ -1140,13 +1140,7 @@ process createConfigFile {
       """
 }
 
-// visualization process goes here.
-// run new_visualization.Rmd to generate interactive output report.
-// riboviz/#239
-// ideally take params.??? to get `-params-file` argument from Nextflow call.
-// This would give us path of config.yaml file to input to the .Rmd, replacing
-// find_sample_names(yaml1) and allowing report from the yaml being run.
-
+// run visualization system to generate interactive output report: riboviz/#239
 process dashboard {
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
 
@@ -1154,8 +1148,7 @@ process dashboard {
       file config_file_yaml from config_file_yaml
       file "read_counts.tsv" from read_counts_tsv
 
-    // this is a temporary output, as we're still not clear on what output
-    // new_visualization.Rmd produces?
+    // this is a temporary output, still not clear on what output is produced:
     output:
       file 'tmp.txt' into dashboard_output
 
@@ -1171,7 +1164,7 @@ process dashboard {
 
       # R shiny method
       Rscript --vanilla ${workflow.projectDir}/rscripts/shiny_test.R \
-         --yamlfile='\$PWD/${config_file_yaml}'
+         --yamlfile=\$PWD/${config_file_yaml}
 
       touch tmp.txt
       """
