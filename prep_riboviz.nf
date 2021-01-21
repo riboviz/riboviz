@@ -1164,9 +1164,14 @@ process dashboard {
 
     shell:
       """
-      Rscript -e "rmarkdown::render( \
-      '${workflow.projectDir}/rmarkdown/new_visualization.Rmd', \
-      params = list(yamlfile='\$PWD/${config_file_yaml}'))"
+      # RMarkdown flexdashboard method
+      #Rscript -e "rmarkdown::render( \
+      #'${workflow.projectDir}/rmarkdown/new_visualization.Rmd', \
+      #params = list(yamlfile='\$PWD/${config_file_yaml}'))"
+
+      # R shiny method
+      Rscript --vanilla ${workflow.projectDir}/rscripts/shiny_test.R \
+         --yamlfile='\$PWD/${config_file_yaml}'
 
       touch tmp.txt
       """
