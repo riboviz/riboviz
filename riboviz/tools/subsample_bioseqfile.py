@@ -15,12 +15,16 @@ Usage::
     -o seqfileout, --output seqfileout  SeqIO file output
     -t FILE_TYPE, --type FILE_TYPE      SeqIO file type (default 'fastq')
     -p PROB, --probability PROB         proportion to sample (default 0.01)
-    -f overwrite, --overwrite overwrite overwrite output file if it already exists (default store_true)
+    -f overwrite, --overwrite           overwrite output if file exists
+                                        (default store_true)
     -v, --verbose                       print progress statements
 
 Examples::
 
-    python -m riboviz.tools.subsample_bioseqfile -i vignette/input/SRR1042855_s1mi.fastq.gz -o vignette/tmp/subsamplefile.fastq.gz -p 0.001
+    python -m riboviz.tools.subsample_bioseqfile
+        -i vignette/input/SRR1042855_s1mi.fastq.gz
+        -o vignette/tmp/subsamplefile.fastq.gz
+        -p 0.001
 
     python -m riboviz.tools.subsample_bioseqfile
         -i vignette/input/SRR1042855_s1mi.fastq
@@ -43,7 +47,7 @@ def parse_command_line_options():
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
-        description="Subsample an input FASTQ (or other sequencing) file, to produce a smaller file whose reads are randomly sampled from of the input with a fixed probability")
+        description="Randomly subsample sequencing file with probability -p")
     parser.add_argument("-i",
                         "--seqfilein",
                         dest="seqfilein",
