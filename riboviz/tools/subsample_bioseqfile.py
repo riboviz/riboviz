@@ -90,7 +90,7 @@ def invoke_subsample_bioseqfile():
     Parse command-line options then invoke
     See :py:func:`riboviz.subsample_bioseqfile.subsample_bioseqfile` for information ...
     """
-    print(provenance.write_provenance_to_str(__file__))
+    print((provenance.write_provenance_to_str(__file__)))
     options = parse_command_line_options()
     seqfilein = options.seqfilein
     seqfileout = options.seqfileout
