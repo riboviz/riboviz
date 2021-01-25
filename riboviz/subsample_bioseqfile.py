@@ -1,15 +1,18 @@
 """
 Subsample .fastq, .fastq.gz or other sequence file.
 """
-import argparse, gzip, os
-from Bio import SeqIO
+import gzip
+import os
 from random import random
+from Bio import SeqIO
 
 
-def subsample_bioseqfile(seqfilein, seqfileout, filetype, prob, overwrite, verbose):
+def subsample_bioseqfile(
+        seqfilein, seqfileout, filetype, prob, overwrite, verbose
+):
     """
     Subsample a *gzipped* biological sequence file using Bio.SeqIO
-    See https://biopython.org/wiki/SeqIO for description of valid filetypes (fastq, etc)
+    See https://biopython.org/wiki/SeqIO for description of valid filetypes
 
     :param seqfilein: File name of input sequence file
     :type seqfilein: str or unicode
@@ -19,7 +22,7 @@ def subsample_bioseqfile(seqfilein, seqfileout, filetype, prob, overwrite, verbo
     :type filetype: str or unicode
     :param prob: probability / proportion to sample (default 0.01)
     :type prob: float
-    :param overwrite: overwrite output file if it already exists? (default store_true)
+    :param overwrite: overwrite if output file exists? (default store_true)
     :type overwrite: bool
     :param verbose: print progress statements (default False)
     :type verbose: bool
@@ -30,7 +33,7 @@ def subsample_bioseqfile(seqfilein, seqfileout, filetype, prob, overwrite, verbo
     """
     filein_ext = os.path.splitext(seqfilein)[1]
 
-    if filein_ext == ".gz" or filein_ext == ".gzip":
+    if filein_ext in ('.gz', '.gzip'):
         in_handle = gzip.open(seqfilein, "rt")
         out_handle = gzip.open(seqfileout, "wt")
     else:
@@ -42,12 +45,13 @@ def subsample_bioseqfile(seqfilein, seqfileout, filetype, prob, overwrite, verbo
     for record in SeqIO.parse(in_handle, filetype):
         row_count += 1
         if row_count % 100000 == 0:
-            print("read {rowcount}".format(rowcount=row_count))
+            print(("read {rowcount}".format(rowcount=row_count)))
         if random() < prob:
             row_count_out += 1
             if verbose:
-                print(record.id)
+                print((record.id))
             SeqIO.write(record, out_handle, filetype)
-    print("subsampling complete; read {} records from {}, wrote {} records to {}".format(
-        row_count, seqfilein, row_count_out, seqfileout
-    ))
+    print(("subsampling complete; read {} records from {}, \
+        wrote {} records to {}".format(
+            row_count, seqfilein, row_count_out, seqfileout
+        )))
