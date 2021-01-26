@@ -22,7 +22,7 @@ def subsample_bioseqfile(
     :type filetype: str or unicode
     :param prob: probability / proportion to sample (default 0.01)
     :type prob: float
-    :param overwrite: overwrite if output file exists? (default store_true)
+    :param overwrite: overwrite if output file exists? (default False)
     :type overwrite: bool
     :param verbose: print progress statements (default False)
     :type verbose: bool
@@ -35,10 +35,18 @@ def subsample_bioseqfile(
 
     if filein_ext in ('.gz', '.gzip'):
         in_handle = gzip.open(seqfilein, "rt")
-        out_handle = gzip.open(seqfileout, "wt")
+        if overwrite:
+            out_handle = gzip.open(seqfileout, "wt")
+        else:
+            print(("appending output in existing file {}".format(seqfileout)))
+            out_handle = gzip.open(seqfileout, "at")
     else:
         in_handle = open(seqfilein, "r")
-        out_handle = open(seqfileout, "w")
+        if overwrite:
+            out_handle = open(seqfileout, "w")
+        else:
+            print(("appending output in existing file {}".format(seqfileout)))
+            out_handle = open(seqfileout, "a")
 
     row_count = 0
     row_count_out = 0

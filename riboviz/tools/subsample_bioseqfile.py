@@ -16,7 +16,7 @@ Usage::
     -t FILE_TYPE, --type FILE_TYPE      SeqIO file type (default 'fastq')
     -p PROB, --probability PROB         proportion to sample (default 0.01)
     -f overwrite, --overwrite           overwrite output if file exists
-                                        (default store_true)
+                                        (default False)
     -v, --verbose                       print progress statements
 
 Examples::
@@ -35,6 +35,7 @@ Examples::
 See :py:func:`riboviz.subsample_bioseqfile.subsample_bioseqfile`.
 """
 import argparse
+import os
 from riboviz import subsample_bioseqfile
 from riboviz import provenance
 
@@ -72,7 +73,7 @@ def parse_command_line_options():
     parser.add_argument("-f",
                         "--overwrite",
                         dest="overwrite",
-                        action='store_true',
+                        default=False,
                         help="forces overwrite of output file if it exists")
     parser.add_argument("-v",
                         "--verbose",
@@ -83,16 +84,20 @@ def parse_command_line_options():
     return options
 
     # files exist, overwrite output?
-    if not options.overwrite and os.path.exists(options.seqfileout):
-        raise ValueError("output file {} already exists, use '-overwrite' to overwrite".format(options.seqfileout))
+    if os.path.exists(options.seqfileout) and not options.overwrite:
+        raise ValueError(
+            "output file {} already exists, use '-overwrite' to replace"
+            .format(options.seqfileout))
     if not os.path.exists(options.seqfilein):
-        raise ValueError("input file {} doesn't exist".format(options.seqfilein))
+        raise ValueError(
+            "input file {} doesn't exist".format(options.seqfilein))
 
 
 def invoke_subsample_bioseqfile():
     """
     Parse command-line options then invoke
-    See :py:func:`riboviz.subsample_bioseqfile.subsample_bioseqfile` for information ...
+    See :py:func:`riboviz.subsample_bioseqfile.subsample_bioseqfile`
+    for information ...
     """
     print((provenance.write_provenance_to_str(__file__)))
     options = parse_command_line_options()
