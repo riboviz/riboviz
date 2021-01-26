@@ -33,20 +33,13 @@ def subsample_bioseqfile(
     """
     filein_ext = os.path.splitext(seqfilein)[1]
 
+    # TODO there needs to be some conditional with 'overwrite' here
     if filein_ext in ('.gz', '.gzip'):
         in_handle = gzip.open(seqfilein, "rt")
-        if overwrite:
-            out_handle = gzip.open(seqfileout, "wt")
-        else:
-            print(("appending output in existing file {}".format(seqfileout)))
-            out_handle = gzip.open(seqfileout, "at")
+        out_handle = gzip.open(seqfileout, "wt")
     else:
         in_handle = open(seqfilein, "r")
-        if overwrite:
-            out_handle = open(seqfileout, "w")
-        else:
-            print(("appending output in existing file {}".format(seqfileout)))
-            out_handle = open(seqfileout, "a")
+        out_handle = open(seqfileout, "w")
 
     row_count = 0
     row_count_out = 0
