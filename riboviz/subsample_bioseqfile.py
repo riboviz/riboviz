@@ -33,7 +33,15 @@ def subsample_bioseqfile(
     """
     filein_ext = os.path.splitext(seqfilein)[1]
 
-    # TODO there needs to be some conditional with 'overwrite' here
+    # files exist, overwrite output?
+    if os.path.exists(seqfileout) and not overwrite:
+        raise ValueError(
+            "output file {} already exists, use '-overwrite' to replace"
+            .format(seqfileout))
+    if not os.path.exists(seqfilein):
+        raise ValueError(
+            "input file {} doesn't exist".format(seqfilein))
+
     if filein_ext in ('.gz', '.gzip'):
         in_handle = gzip.open(seqfilein, "rt")
         out_handle = gzip.open(seqfileout, "wt")
