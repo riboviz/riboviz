@@ -35,7 +35,6 @@ Examples::
 See :py:func:`riboviz.subsample_bioseqfile.subsample_bioseqfile`.
 """
 import argparse
-import os
 from riboviz import subsample_bioseqfile
 from riboviz import provenance
 
@@ -82,16 +81,6 @@ def parse_command_line_options():
                         help="print progress statements")
     options = parser.parse_args()
     return options
-
-    # files exist, overwrite output?
-    if os.path.exists(options.seqfileout) and not options.overwrite:
-        raise ValueError(
-            "output file {} already exists, use '-overwrite' to replace"
-            .format(options.seqfileout))
-    if not os.path.exists(options.seqfilein):
-        raise ValueError(
-            "input file {} doesn't exist".format(options.seqfilein))
-
 
 def invoke_subsample_bioseqfile():
     """
