@@ -27,9 +27,9 @@ configuration:
 * ``do_pos_sp_nt_freq: true``
 * ``features_file: data/yeast_features.tsv``
 
-Expected parameters added between release 1.1.0 and the current
-release are added along with default values, if they are not already
-present in the configuration:
+Expected parameters added between release 1.1.0 and 2.0 are added
+along with default values, if they are not already present in the
+configuration:
 
 * ``asite_disp_length_file: data/yeast_standard_asite_disp_length.txt``
 * ``cmd_file: run_riboviz_vignette.sh``
@@ -42,9 +42,17 @@ present in the configuration:
 * ``extract_umis: false``
 * ``group_umis: false``
 * ``multiplex_fq_files: null``
+* ``publish_index_tmp: false``
 * ``sample_sheet: null``
+* ``trim_5p_mismatches: true``
 * ``t_rna_file: data/yeast_tRNAs.tsv``
 * ``umi_regexp: null``
+
+Expected parameters added between release 2.0 and current are added
+along with default values, if they are not already present in the
+configuration:
+
+* 
 
 The values of parameters ``rrna_index_prefix`` and
 ``orf_index_prefix`` are updated to be file names only, as, these are
@@ -90,11 +98,10 @@ UPDATES_10_11 = {
 }
 """
 Map from configuration parameters to default values for parameters
-added between release 1.0.0, 9 Oct 2017, 83027ef and 1.1.0, 31 Jan
-2019, 340b9b5.
+added between release 1.0.0 and 1.1.0.
 """
 
-UPDATES_11_CURRENT = {
+UPDATES_11_20 = {
     params.ASITE_DISP_LENGTH_FILE: "data/yeast_standard_asite_disp_length.txt",
     params.CMD_FILE: "run_riboviz_vignette.sh",
     params.CODON_POSITIONS_FILE: "data/yeast_codon_pos_i200.RData",
@@ -106,14 +113,22 @@ UPDATES_11_CURRENT = {
     params.GROUP_UMIS: False,
     params.LOGS_DIR: "vignette/logs",
     params.MULTIPLEX_FQ_FILES: None,
+    params.PUBLISH_INDEX_TMP: False,
     params.SAMPLE_SHEET: None,
+    params.TRIM_5P_MISMATCHES: True,
     params.T_RNA_FILE: "data/yeast_tRNAs.tsv",
     params.UMI_REGEXP: None
 }
 """
 Map from configuration parameters to default values for parameters
-added between release 1.1.0, 31 Jan 2019, 340b9b5 to pre-commit
-8da8071, 18 Dec 2019.
+added between release 1.1.0 and 2.0.
+"""
+
+UPDATES_20_CURRENT = {
+}
+"""
+Map from configuration parameters to default values for parameters
+added between release 2.0 and the current release.
 """
 
 
@@ -132,15 +147,15 @@ def upgrade_config(config):
             del config[old_key]
             config[new_key] = value
 
-    # Parameters added between release 1.0.0, 9 Oct 2017, 83027ef and
-    # 1.1.0, 31 Jan 2019, 340b9b5.
     for (key, value) in list(UPDATES_10_11.items()):
         if key not in config:
             config[key] = value
 
-    # Parameters added between release 1.1.0, 31 Jan 2019, 340b9b5 to
-    # pre-commit 8da8071, 18 Dec 2019
-    for (key, value) in list(UPDATES_11_CURRENT.items()):
+    for (key, value) in list(UPDATES_11_20.items()):
+        if key not in config:
+            config[key] = value
+
+    for (key, value) in list(UPDATES_20_CURRENT.items()):
         if key not in config:
             config[key] = value
 

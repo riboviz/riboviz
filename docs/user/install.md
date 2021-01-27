@@ -67,6 +67,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | R Package | Version |
 | --------- | ------- |
 | Biostrings | 2.54.0 |
+| devtools | 2.3.2 |
 | ggplot2 | 3.3.2 |
 | git2r | 0.27.1 |
 | here | 0.1 |
@@ -78,6 +79,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | readr | 1.3.1 |
 | rhdf5 | 2.30.1 |
 | rmarkdown | 2.3 |
+| roxygen2 | 7.1.1 |
 | Rsamtools | 2.2.3 |
 | rtracklayer | 1.46.0 |
 | shiny | 1.5.0 |
@@ -88,7 +90,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
 * Python pycodestyle, pylint, pytest-cov, sphinx
-* R: lintr, styler
+* R: lintr, styler, roxygen2, devtools
 
 Constraints:
 
@@ -112,6 +114,7 @@ Constraints:
 | hdf5tools | [HDF5](https://portal.hdfgroup.org/display/HDF5) |
 | pigz | [pigz](http://zlib.net/pigz/) |
 | pandoc | [pandoc](https://pandoc.org) |
+| GraphViz | [GraphViz](https://www.graphviz.org/) |
 
 ### Install on Ubuntu
 
@@ -122,6 +125,7 @@ $ sudo apt-get install -y bedtools
 $ sudo apt-get install -y hdf5-tools
 $ sudo apt-get install -y pigz
 $ sudo apt-get install -y pandoc
+$ sudo apt-get install -y graphviz
 ```
 
 ### Install on CentOS
@@ -134,6 +138,7 @@ $ sudo yum install -y BEDTools
 $ sudo yum install -y hdf5-devel
 $ sudo yum install -y pigz
 $ sudo yum install -y pandoc
+$ sudo yum install -y graphviz
 ```
 
 ### Check packages have installed
@@ -145,6 +150,7 @@ $ bedtools -version
 $ h5diff -version
 $ pigz --version
 $ pandoc -version
+$ dot -V
 ```
 
 `h5diff` is one of the hdf5tools.
@@ -161,11 +167,11 @@ Either [Miniconda](https://conda.io/miniconda.html) Python 3.6, or later, or [An
 
 The instructions which follow have been written under the assumption that you are using Miniconda Python. If using Anaconda then, when installing some packages, you will be told that they are already available. This is because Anaconda comes with a wide range of common Python packages.
 
-If you are using other distributions of Python you will need to consult the relevant documentation for each package for installation information.
+If you are using other distributions of Python you will need to consult the relevant documentation for each package for installation information. See also the section on [python and python3](#python-and-python3) below.
 
 ### Install Miniconda Python 3.6+
 
-Install:
+On Linux, install:
 
 ```console
 $ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda3.sh
@@ -174,7 +180,9 @@ $ bash miniconda3.sh -b -p $HOME/miniconda3
 
 **Note:** make sure you use `-O`, which provides a name for the downloaded file, and not `-o`, which provides the name of a file for messages about the download.
 
-Activate environment:
+For MacOS and Windows installers, go to [Miniconda installation page](https://docs.conda.io/en/latest/miniconda.html).
+
+When miniconda is installed, activate the environment:
 
 ```console
 $ source $HOME/miniconda3/bin/activate
@@ -219,6 +227,32 @@ $ conda create --name riboviz python=<VERSION>
 ```console
 $ conda create --name riboviz python=3.7
 ```
+
+### `python` and `python3`
+
+If you have an environment which has both `python` and `python3`, such as can arise when you are using a system that has both native Python 2 and Python 3 packages installed, then please note the following.
+
+The RiboViz workflow invokes both Python and R scripts. It invokes Python scripts using the command `python`. If you have a system that has both `python`, which invokes Python 2, and `python3`, which invokes Python 3, then the workflow will fail as RiboViz's Python scripts are Python 3-compatible only.
+
+A workaround is to create a local `bin` directory with a symbolic link called `python` which points to Python 3 (and similarly for `pip` and `pip3`). This can be done as follows:
+
+```console
+$ mkdir ~/bin
+$ cd ~/bin
+$ ln -s $(which python3) python
+$ ln -s $(which pip3) pip
+$ cd
+```
+
+Now, when you run `python`, `python3` should be invoked. If the symlinks aren't picked up then you may need to add ~/bin to your PATH:
+
+```console
+$ export PATH=~/bin:$PATH
+```
+
+This approach was suggested in a [comment](https://stackoverflow.com/a/55295939) on StackOverflow's [Unable to set default python version to python3 in ubuntu](https://stackoverflow.com/questions/41986507/unable-to-set-default-python-version-to-python3-in-ubuntu).
+
+We would recommend using Miniconda, Anaconda or some other virtual environment solution for Python which provide a more usable means of managing multiple environments (including Python 2 and Python 3).
 
 ---
 
@@ -475,6 +509,7 @@ $ sudo apt-get install -y r-base-dev
 $ sudo apt-get install -y libxml2-dev
 $ sudo apt-get install -y libssl-dev
 $ sudo apt-get install -y libcurl4-openssl-dev
+$ sudo apt-get install -y libgit2-dev
 ```
 
 **Install on CentOS**
@@ -487,6 +522,7 @@ $ sudo yum install -y R-devel
 $ sudo yum install -y libxml2-devel
 $ sudo yum install -y openssl-devel
 $ sudo yum install -y libcurl-devel
+$ sudo yum install -y libgit2-devel
 ```
 
 **Troubleshooting: `the most recent version of R is not installed` or `package "..." is not available (for R version ...)`

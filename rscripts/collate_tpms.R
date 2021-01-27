@@ -1,11 +1,25 @@
 suppressMessages(library(getopt, quietly = T))
-# Determine location of	provenance.R relative to current file
-source(file.path(dirname(getopt::get_Rscript_filename()), "provenance.R"))
+suppressMessages(library(here))
 suppressMessages(library(tidyr, quietly = T))
 suppressMessages(library(dplyr, quietly = T))
 suppressMessages(library(readr, quietly = T))
 suppressMessages(library(purrr, quietly = T))
 suppressMessages(library(optparse, quietly = T))
+# Handle interactive session behaviours or use get_Rscript_filename():
+if (interactive()) {
+  # Use hard-coded script name and assume script is in "rscripts"
+  # directory. This assumes that interactive R is being run within
+  # the parent of rscripts/ but imposes no other constraints on
+  # where rscripts/ or its parents are located.
+  this_script <- "collate_tpms.R"
+  path_to_this_script <- here("rscripts", this_script)
+  source(here::here("rscripts", "provenance.R"))
+} else {
+  # Deduce file name and path using reflection as before.
+  this_script <- getopt::get_Rscript_filename()
+  path_to_this_script <- this_script
+  source(file.path(dirname(this_script), "provenance.R"))
+}
 
 option_list <- list(
   make_option("--output-dir",
