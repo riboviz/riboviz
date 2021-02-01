@@ -226,23 +226,23 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print(class(h5_names)) # character
   print(typeof(h5_names)) # character
 
-  # Validate against GFF
+  # Validate against GFF.
   expect_equal(length(h5_names), length(gff_names),
     info = "Unexpected number of sequence names when compared to GFF")
   expect_equal(as.factor(sort(h5_names)), sort(gff_names),
     info = "Unexpected sequence names when compared to GFF")
 
-  # Validate against BAM header
+  # Validate against BAM header.
   expect_equal(length(h5_names), length(bam_hdr_seq_names),
     info = "Unexpected number of sequence names when compared to BAM header")
   expect_equal(sort(h5_names), sort(bam_hdr_seq_names),
     info = "Unexpected sequence names when compared to BAM header")
 
-  # Validate againt BAM content
+  # Validate againt BAM content.
   expect_true(length(bam_hdr_seq_names) <= length(h5_names),
-    info = "Expected number of sequence names to be greater or equal to those in BAM")
+    info = "Expected number of sequence names to be greater or equal to those in BAM body")
   expect_true(all(sort(bam_seq_names) %in% as.factor(sort(h5_names))),
-    info = "Expected sequence names superset of those in BAM")
+    info = "Expected sequence names to be superset of those in BAM body")
 
   ##### EXTRACT GFF (gene-specific) #####
 
@@ -252,7 +252,9 @@ test_that("Run bam_to_h5.R and validate H5 file", {
     print(gene)
   }
   gene <- "YAL062W"
-  # gene <- "YAL001C"
+  # gene <- "YAL001C" # Gene has 6 BAM (4 Flag=0, 2 Flag != 0), 4 HDF5
+  # gene <- "YAL018C" # GFF, BAM header, H5, no BAM body.
+
   print(gene)
   print(gff_df)
   print(class(gff_df)) # tbl_df tbl data.frame
@@ -293,7 +295,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
 
   # https://www.rdocumentation.org/packages/GenomicAlignments/versions/1.8.4/topics/readGAlignments
   bam_gene = bam[(seqnames(bam) == gene)]
-  bam_gene = bam[(seqnames(bam) == gene)]
+  print("BAM gene:")
   print(bam_gene)
   # GAlignments object with 2 alignments and 1 metadata column:
   #       seqnames strand       cigar    qwidth     start       end     width
@@ -318,10 +320,11 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   #   SRR1042855.38021801        27         0 |         0
   #   SRR1042855.35349348        28         0 |       272
   #   SRR1042855.43963789        12         0 |        16
+  print("Number of sequences:")
+  print(length(bam_gene)) # 2. For YAL001C 6. For YAL018C 0.
   print(names(bam_gene)) # "SRR1042855.5473767" "SRR1042855.1850623"
   print(class(bam_gene)) # GAlignments attr(,"package") GenomicAlignments
   print(typeof(bam_gene)) # S4
-  print(length(bam_gene)) # 2. For YAL001C 6
   print(mcols(bam_gene))
   #  DataFrame with 2 rows and 1 column
   #                        flag
@@ -351,7 +354,8 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   #   SRR1042855.43554901        26         0 |         0
   #   SRR1042855.18823368        15         0 |         0
   #   SRR1042855.38021801        27         0 |         0
-  print(length(bam_gene_flag_zero)) # 2. For YAL001C 4
+  print("Number of sequences:")
+  print(length(bam_gene_flag_zero)) # 2. For YAL001C 4. For YAL018C 0.
   print("Sequences with flag != 0")
   bam_gene_flag_non_zero = bam[(seqnames(bam) == gene) & (mcols(bam)$flag != 0)]
   print(bam_gene_flag_non_zero)
@@ -365,7 +369,8 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   #   SRR1042855.43963789  YAL001C      -       1S12M        13      3562      3573
   #   SRR1042855.35349348        28         0 |       272
   #   SRR1042855.43963789        12         0 |        16
-  print(length(bam_gene_flag_non_zero)) # 0. For YAL001C 2
+  print("Number of sequences:")
+  print(length(bam_gene_flag_non_zero)) # 0. For YAL001C 2. For YAL018C 0.
 
   ##### EXTRACT AND VALIDATE H5 (gene-specific) #####
 
@@ -432,21 +437,21 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   expect_equal(length(h5_reads_by_len), num_read_counts,
     info = "Number of reads_by_len does not equal max_read_length - min_read_length + 1")
   # Calculate expected reads_by_len based on information from BAM
-  expected_reads_by_len <- as.array(replicate(num_read_counts, 0))
-  print(expected_reads_by_len)
+  expected_reads_by_len_from_bam <- as.array(integer(num_read_counts))
+  print(expected_reads_by_len_from_bam)
   # [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
   # [39] 0 0 0
-  print(length(expected_reads_by_len)) # 41
+  print(length(expected_reads_by_len_from_bam)) # 41
   for (width in sort(qwidth(bam_gene_flag_zero)))
   {
       width_index <- width - min_read_length + 1
-      expected_reads_by_len[width_index] <- expected_reads_by_len[width_index] + 1
+      expected_reads_by_len_from_bam[width_index] <- expected_reads_by_len_from_bam[width_index] + 1
   }
-  print(expected_reads_by_len)
+  print(expected_reads_by_len_from_bam)
   # [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
   # [39] 0 0 0
-  expect_equal(h5_reads_by_len, expected_reads_by_len,
-    info = "reads_by_len does not correspond with widths in BAM")
+  expect_equal(h5_reads_by_len, expected_reads_by_len_from_bam,
+    info = "reads_by_len is not consistent with widths in BAM")
 
   # 'reads_total': Total number of ribosome sequences (from BAM, equal to number of non-zero reads in 'reads_by_len').
   h5_reads_total <- GetGeneReadsTotal(gene, dataset, h5_file) # 1D array of 1 double
@@ -486,56 +491,48 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   expect_equal(ncol(h5_data), bam_hdr_gene_seq_length,
     info = "Number of data columns does not equal sequence lengths from BAM header")
 
-  # TODO Generalise - see below.
-  expected_row <- integer(num_read_counts)
-  expected_row[19] <- 1 #  1-indexed R vs 0-indexed H5 (18)
-  row <- h5_data[,752] # 1-indexed R vs 0-indexed H5
-  print(row)
-  expect_equal(row, expected_row, info = "Unexpected data[751]")
+  h5_reads_by_len_data <- rowSums(h5_data)
+  expect_equal(h5_reads_by_len, as.array(h5_reads_by_len_data),
+    info = "reads_by_len is not consistent with data")
 
-  expected_row <- integer(num_read_counts)
-  expected_row[18] <- 1 #  1-indexed R vs 0-indexed H5 (17)
-  row <- h5_data[,753] # 1-indexed R vs 0-indexed H5
-  print(row)
-  expect_equal(row, expected_row, info = "Unexpected data[752]")
+  print("Expected data (zeros):")
+  expected_data <- matrix(0, nrow = num_read_counts,
+    ncol = expected_num_data_cols)
 
-  ##### EXTRACT BAM WIP #####
-  ##### EXTRACT BAM WIP #####
-  ##### EXTRACT BAM WIP #####
+  print("YAL062W" %in% seqnames(bam)) # TRUE
+  print("YAL001C" %in% seqnames(bam)) # TRUE
+  print("YAL018C" %in% seqnames(bam)) # FALSE
+  if (gene %in% seqnames(bam))
+  {
+    for (seq in names(bam_gene_flag_zero))
+    {
+      print("Gene in BAM - expect H5 'data' to be non-zero:")
+      print(seq)
+      seq_start <- start(bam_gene_flag_zero[seq])
+      print(seq_start)
+      seq_qwidth <- qwidth(bam_gene_flag_zero[seq])
+      print(seq_qwidth)
+      seq_qwidth <- seq_qwidth - min_read_length + 1
+      print(seq_qwidth)
+      expected_data[seq_qwidth, seq_start] = expected_data[seq_qwidth, seq_start] + 1
+    }
+    expect_equal(h5_data, expected_data,
+      info = "H5 data is not as expected given content of BAM records")
+  }
+  else
+  {
+      print("Gene not in BAM - expect H5 'data' to be zero:")
+      expect_equal(h5_data, expected_data,
+        info = "Expected H5 data to be zero for sequence with no BAM record")
+  }
+  expected_reads_by_len_data = rowSums(expected_data)
+  expect_equal(h5_reads_by_len_data, expected_reads_by_len_data,
+    info = "reads_by_len calculated from data is not as expected given content of BAM records")
+  expect_equal(h5_reads_by_len, as.array(expected_reads_by_len_data),
+    info = "reads_by_len calculated from data is not as expected given content of BAM records")
 
-  # TODO
-  # TODO
-  # TODO
-  
-  print(gene)
-  print(bam_hdr_gene)
-  print(bam_gene_flag_zero)
-  #                     seqnames strand       cigar    qwidth     start       end
-  #                        <Rle>  <Rle> <character> <integer> <integer> <integer>
-  #  SRR1042855.5473767  YAL062W      +       26M2S        28       752       777
-  #  SRR1042855.1850623  YAL062W      +       25M2S        27       753       777
-  #                         width     njunc |      flag
-  #                     <integer> <integer> | <integer>
-  #  SRR1042855.5473767        26         0 |         0
-  #  SRR1042855.1850623        25         0 |         0
-
-  # TODO Use bam_gene_flag_zero, start, qwidth
-
-  # SRR1042855.5473767	0	YAL062W	752	60	26M2S	*	0	0	TCATACAAGAACTCCTGGGAAGGTGTCT	CCCFFFFFHHHHHJJJJJJJJJJEGHIJ	AS:i:-2XN:i:0	XM:i:0	XO:i:0	XG:i:0	NM:i:0	MD:Z:26	YT:Z:UU	XS:A:+	NH:i:1
-  # Position 752 Length 28
-  # SRR1042855.1850623	0	YAL062W	753	60	25M2S	*	0	0CATACAAGAACTCCTGGGAAGGTGTCT	@@@DDDDDHHH?FGFIIDHGII+ACDH	AS:i:-2	XN:i:0	XM:i:0	XO:i:0	XG:i:0	NM:i:0	MD:Z:25	YT:Z:UU	XS:A:+	NH:i:1
- # Position 753 Length 27
-
-  # 'data': Positions and lengths of ribosome sequences within the organism data (from BAM).
-  # TODO create expected "data"
-  # TODO reads_by_len[i] sum of DATA[*, i] sum over all positions for a specific length.
-  # TODO Check DATA[p, i] = 1 if there is a sequence from BAM at position p+1 which has length equal to lengths[i], else 0.
-  # TODO check sequence with "non-zeros" is in BAM.
-  # TODO check sequence with "zeros" only is not in BAM.
-  # TODO Cross-check reads_by_len[i] = sum of DATA[*, i] i.e. sum across all positions for a specific length.
-
-  # TODO Try YAL001C
+  # TODO Clean up
   # TODO Extend to iterate through all sequences in H5.
-
+  # TODO Uncomment bam_to_h5.R run and try.
   expect_equal(0, 0, info = "Example assertion") # TODO remove
 })
