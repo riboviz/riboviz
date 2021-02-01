@@ -83,7 +83,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   ##### EXTRACT GFF (generic) #####
 
   ## bam_to_h5.R-style
-  
+
   print("========== GFF - bam_to_h5.R-style ==========")
   gff <- rtracklayer::readGFFAsGRanges(gff_file)
   print(gff)
@@ -163,6 +163,9 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   # [1] "YAL068C"   "YAL067W-A"  ...
   # [67] "YAL002W" "YAL001C"  
 
+  # Alternative approach
+  # https://www.rdocumentation.org/packages/GenomicAlignments/versions/1.8.4/topics/readGAlignments
+  # Uses bam <- readGAlignments(bam_file)
   # By default readGAlignments extracts:
   # seqnames, strand, cigar, qwidth, start, end, width
   # We also want "flag" so need to specify it explicitly.
@@ -249,6 +252,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
     print(gene)
   }
   gene <- "YAL062W"
+  # gene <- "YAL001C"
   print(gene)
   print(gff_df)
   print(class(gff_df)) # tbl_df tbl data.frame
@@ -287,168 +291,8 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   bam_hdr_gene_seq_length <- bam_hdr_gene@seqlengths
   print(bam_hdr_gene_seq_length) # 1874
 
-  # TODO See below.
-
-  ##### EXTRACT AND VALIDATE H5 (gene-specific) #####
-
-  # 'buffer_left': number of nucleotides upstream of the start codon (ATG) (UTR5 length) (from bam_to_h5.R command-line)
-  print("buffer_left:")
-  h5_buffer_left <- GetGeneBufferLeft(gene, dataset, h5_file) # double
-  print(h5_buffer_left) # 250
-  expect_equal(h5_buffer_left, buffer,
-    info = "Unexpected buffer_left when compared to bam_to_h5.R parameter")
-  expect_equal(h5_buffer_left, gff_utr5_length,
-    info = "Unexpected buffer_left when compared to GFF UTR5 length")
-
-  # 'buffer_right': number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) (from bam_to_h5.R command-line)
-  print("buffer_right:")
-  h5_buffer_right <- GetGeneBufferRight(gene, dataset, h5_file) # integer
-  print(h5_buffer_right) # 250
-  expect_equal(h5_buffer_right, buffer,
-    info = "Unexpected buffer_right when compared to bam_to_h5.R parameter")
-  expect_equal(h5_buffer_left, gff_utr3_length,
-    info = "Unexpected buffer_left when compared to GFF UTR3 length")
-
-  # 'start_codon_pos': Positions corresponding to start codon of CDS in organism sequence (from GFF)
-  expected_start_codons <- as.array(seq(gff_cds_start, gff_cds_start + 2))
-  print("expected_start_codons:")
-  print(expected_start_codons) # 251, 252, 253
-  print("start_codon_pos:")
-  h5_start_codon_pos <- GetGeneStartCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
-  print(h5_start_codon_pos) # 251 252 253
-  expect_equal(length(h5_start_codon_pos), 3,
-    info = "Unexpected number of start_codon_pos, expected 3")
-  expect_equal(h5_start_codon_pos, expected_start_codons,
-    info = "Unexpected start_codon_pos when compared to GFF CDS start codon positions")
-
-  # 'stop_codon_pos': Positions corresponding to stop codon of CDS in organism sequence (from GFF)
-  expected_stop_codons <- as.array(seq(gff_cds_end - 2, gff_cds_end))
-  print("expected_stop_codons:")
-  print(expected_stop_codons) # 1622 1623 1624
-  print("stop_codon_pos:")
-  h5_stop_codon_pos <- GetGeneStopCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
-  print(h5_stop_codon_pos) # 1622 1623 1624
-  expect_equal(length(h5_stop_codon_pos), 3,
-    info = "Unexpected number of stop_codon_pos, expected 3")
-  expect_equal(h5_stop_codon_pos, expected_stop_codons,
-    info = "Unexpected stop_codon_pos when compared to GFF CDS stop codon positions")
-
-  # 'lengths' : Lengths of mapped reads.
-  print("lengths:")
-  expected_lengths <- as.array(seq(min_read_length, max_read_length))
-  h5_lengths <- GetGeneMappedReadLengths(gene, dataset, h5_file) # 1D array of <max_read_length - min_read_length + 1> integer
-  print(h5_lengths)
-  # [1] 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
-  # [26] 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
-  expect_equal(length(h5_lengths), num_read_counts,
-    info = "Number of lengths does not equal max_read_length - min_read_length + 1")
-  expect_equal(h5_lengths, expected_lengths,
-      info = "Unexpected lengths")
-
-  # 'reads_by_len': Counts of number of ribosome sequences of each length (from BAM).
-  print("reads_by_len:")
-  h5_reads_by_len <- GetGeneReadLength(gene, dataset, h5_file) # 1D array of <max_read_length - min_read_length + 1> double
-  print(h5_reads_by_len)
-  # [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-  # [39] 0 0 0
-  expect_equal(length(h5_reads_by_len), num_read_counts,
-    info = "Number of reads_by_len does not equal max_read_length - min_read_length + 1")
-  # TODO Generalise - see below.
-  expect_equal(h5_reads_by_len[18], 1,
-    info = "Unexpected value for reads_by_len[17]") # 1-indexed R vs 0-indexed H5
-  expect_equal(h5_reads_by_len[19], 1,
-    info = "Unexpected value for reads_by_len[18]") # 1-indexed R vs 0-indexed H5
-
-  # 'reads_total': Total number of ribosome sequences (from BAM, equal to number of non-zero reads in 'reads_by_len').
-  h5_reads_total <- GetGeneReadsTotal(gene, dataset, h5_file) # 1D array of 1 double
-  print("reads_total:")
-  print(h5_reads_total) # 2
-  h5_reads_len_total <- Reduce("+", h5_reads_by_len)
-  print("SUM(reads_by_len):")
-  print(h5_reads_len_total)
-  expect_equal(h5_reads_total[1], h5_reads_len_total,
-    info = "reads_total does not equal sum of totals in reads_by_len")
-  # TODO Generalise - see below.
-  expected_reads_total <- 2
-  expect_equal(length(h5_reads_total), 1,
-      info = "Unexpected number of reads_total")
-  expect_equal(h5_reads_total[1], expected_reads_total,
-      info = "Unexpected reads_total")
-
-  # 'data': Positions and lengths of ribosome sequences within the organism data (from BAM).
-  print("data:")
-  h5_data <- GetGeneDatamatrix(gene, dataset, h5_file)
-  # print(h5_data) # Verbose
-  print(length(h5_data)) # 76384
-  print(class(h5_data)) # matrix
-  print(typeof(h5_data)) # integer
-  print(dim(h5_data)) # 41 1874
-  print(nrow(h5_data)) # 41
-  print(ncol(h5_data)) # 1874
-  expect_equal(nrow(h5_data), num_read_counts,
-    info = "Number of data rows does not equal max_read_length - min_read_length + 1")
-  expected_num_data_cols <- h5_stop_codon_pos[3] + buffer
-  print(expected_num_data_cols) # 1874
-  expect_equal(ncol(h5_data), expected_num_data_cols,
-    info = "Number of data columns does not equal stop_codon_pos[3] + buffer")
-  expect_equal(ncol(h5_data), gff_utr3_end,
-    info = "Number of data columns does not equal GFF UTR3 final nt position")
-  expect_equal(ncol(h5_data), bam_hdr_gene_seq_length,
-    info = "Number of data columns does not equal sequence lengths from BAM header")
-
-  # TODO Generalise - see below.
-  expected_row <- integer(num_read_counts)
-  expected_row[19] <- 1 #  1-indexed R vs 0-indexed H5 (18)
-  row <- h5_data[,752] # 1-indexed R vs 0-indexed H5
-  print(row)
-  expect_equal(row, expected_row, info = "Unexpected data[751]")
-
-  expected_row <- integer(num_read_counts)
-  expected_row[18] <- 1 #  1-indexed R vs 0-indexed H5 (17)
-  row <- h5_data[,753] # 1-indexed R vs 0-indexed H5
-  print(row)
-  expect_equal(row, expected_row, info = "Unexpected data[752]")
-
-  ##### EXTRACT BAM WIP #####
-  ##### EXTRACT BAM WIP #####
-  ##### EXTRACT BAM WIP #####
-
-  print(gene)
-  print(bam_hdr_gene)
-  print(bam_hdr_gene_seq_length) # 1874
-
-  bam_what <- c("qname", "rname", "pos", "qwidth")
-  bam_params <- ScanBamParam(what=bam_what)
-  result <- scanBam(bam_file_f, param=bam_params)
-  print(typeof(result)) # list
-  print(class(result)) # list
-  print(length(result)) # 1
-  # Each element of result corresponds to range specified in "which"
-  # parameter to ScanBamParam. We specified no range so defaults to
-  # 1 range.
-  result <- result[[1]]
-  print(class(result)) # list
-  print(typeof(result)) # list
-  print(length(result)) # 4
-  print(names(result)) # "qname" "rname" "pos" "qwidth"
-  print(sapply(result, class)) # "character" "factor" "integer" "integer" 
-  print(sapply(result, length)) # 14516 14516 14516 14516 
-  # Recall WTnone_no_header.sam has 14516 rows.
-  # Recall print(countBam(bam_file_f))
-  #  space start end width       file records nucleotides
-  # 1    NA    NA  NA    NA WTnone.bam   14516      399027
-  # print(countBam(bam_file_f)$records) # 14516
-  #
-  # TODO how to turn this into a DataFrame with columns qname, rname, pos, qwidth?
-
-  # Alternative approach
   # https://www.rdocumentation.org/packages/GenomicAlignments/versions/1.8.4/topics/readGAlignments
-  # Uses bam <- readGAlignments(bam_file)
-  print("--------")
-  print("--------")
-  print("--------")
-  # gene <- "YAL001C"
-  print(gene) # YAL062W
+  bam_gene = bam[(seqnames(bam) == gene)]
   bam_gene = bam[(seqnames(bam) == gene)]
   print(bam_gene)
   # GAlignments object with 2 alignments and 1 metadata column:
@@ -522,29 +366,163 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   #   SRR1042855.35349348        28         0 |       272
   #   SRR1042855.43963789        12         0 |        16
   print(length(bam_gene_flag_non_zero)) # 0. For YAL001C 2
-  # 'reads_total': Total number of ribosome sequences (from BAM, equal to number of non-zero reads in 'reads_by_len').
-  expected_reads_total = length(bam_gene_flag_zero)
-  expect_equal(h5_reads_total[1], expected_reads_total,
-      info = "reads_total does not equal number of BAM records with Flag = 0")
-  # TODO move up.
 
-  # TODO
+  ##### EXTRACT AND VALIDATE H5 (gene-specific) #####
+
+  # 'buffer_left': number of nucleotides upstream of the start codon (ATG) (UTR5 length) (from bam_to_h5.R command-line)
+  print("buffer_left:")
+  h5_buffer_left <- GetGeneBufferLeft(gene, dataset, h5_file) # double
+  print(h5_buffer_left) # 250
+  expect_equal(h5_buffer_left, buffer,
+    info = "Unexpected buffer_left when compared to bam_to_h5.R parameter")
+  expect_equal(h5_buffer_left, gff_utr5_length,
+    info = "Unexpected buffer_left when compared to GFF UTR5 length")
+
+  # 'buffer_right': number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) (from bam_to_h5.R command-line)
+  print("buffer_right:")
+  h5_buffer_right <- GetGeneBufferRight(gene, dataset, h5_file) # integer
+  print(h5_buffer_right) # 250
+  expect_equal(h5_buffer_right, buffer,
+    info = "Unexpected buffer_right when compared to bam_to_h5.R parameter")
+  expect_equal(h5_buffer_left, gff_utr3_length,
+    info = "Unexpected buffer_left when compared to GFF UTR3 length")
+
+  # 'start_codon_pos': Positions corresponding to start codon of CDS in organism sequence (from GFF)
+  expected_start_codons <- as.array(seq(gff_cds_start, gff_cds_start + 2))
+  print("expected_start_codons:")
+  print(expected_start_codons) # 251, 252, 253
+  print("start_codon_pos:")
+  h5_start_codon_pos <- GetGeneStartCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
+  print(h5_start_codon_pos) # 251 252 253
+  expect_equal(length(h5_start_codon_pos), 3,
+    info = "Unexpected number of start_codon_pos, expected 3")
+  expect_equal(h5_start_codon_pos, expected_start_codons,
+    info = "Unexpected start_codon_pos when compared to GFF CDS start codon positions")
+
+  # 'stop_codon_pos': Positions corresponding to stop codon of CDS in organism sequence (from GFF)
+  expected_stop_codons <- as.array(seq(gff_cds_end - 2, gff_cds_end))
+  print("expected_stop_codons:")
+  print(expected_stop_codons) # 1622 1623 1624
+  print("stop_codon_pos:")
+  h5_stop_codon_pos <- GetGeneStopCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
+  print(h5_stop_codon_pos) # 1622 1623 1624
+  expect_equal(length(h5_stop_codon_pos), 3,
+    info = "Unexpected number of stop_codon_pos, expected 3")
+  expect_equal(h5_stop_codon_pos, expected_stop_codons,
+    info = "Unexpected stop_codon_pos when compared to GFF CDS stop codon positions")
+
+  # 'lengths' : Lengths of mapped reads.
+  print("lengths:")
+  expected_lengths <- as.array(seq(min_read_length, max_read_length))
+  h5_lengths <- GetGeneMappedReadLengths(gene, dataset, h5_file) # 1D array of <max_read_length - min_read_length + 1> integer
+  print(h5_lengths)
+  # [1] 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
+  # [26] 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+  expect_equal(length(h5_lengths), num_read_counts,
+    info = "Number of lengths does not equal max_read_length - min_read_length + 1")
+  expect_equal(h5_lengths, expected_lengths,
+      info = "Unexpected lengths")
 
   # 'reads_by_len': Counts of number of ribosome sequences of each length (from BAM).
-  #  Equals sum of DATA[*, i] sum over all positions for a specific length.
-  # TODO Use seqnames, start, qwidth, flag
-  # TODO Deduce positions of non-zero values from BAM (reads_by_len[i] = sum of sequences in BAM which have length equal to lengths[i])
-  # Expected reads_by_len
-  expected_reads_by_len <- as.array(seq(min_read_length, max_read_length))
+  print("reads_by_len:")
+  h5_reads_by_len <- GetGeneReadLength(gene, dataset, h5_file) # 1D array of <max_read_length - min_read_length + 1> double
+  print(h5_reads_by_len)
+  # [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  # [39] 0 0 0
+  expect_equal(length(h5_reads_by_len), num_read_counts,
+    info = "Number of reads_by_len does not equal max_read_length - min_read_length + 1")
+  # Calculate expected reads_by_len based on information from BAM
+  expected_reads_by_len <- as.array(replicate(num_read_counts, 0))
   print(expected_reads_by_len)
-  # TODO iterate through entries for sequence and increment expected_reads_by_len[qwidth] for each occurrence
-  # TODO reads_by_len[i] equals sum of sequences in BAM which have length equal to lengths[i].
+  # [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  # [39] 0 0 0
+  print(length(expected_reads_by_len)) # 41
+  for (width in sort(qwidth(bam_gene_flag_zero)))
+  {
+      width_index <- width - min_read_length + 1
+      expected_reads_by_len[width_index] <- expected_reads_by_len[width_index] + 1
+  }
+  print(expected_reads_by_len)
+  # [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  # [39] 0 0 0
+  expect_equal(h5_reads_by_len, expected_reads_by_len,
+    info = "reads_by_len does not correspond with widths in BAM")
 
-  # @SQ	SN:YAL062W	LN:1874
-  #
+  # 'reads_total': Total number of ribosome sequences (from BAM, equal to number of non-zero reads in 'reads_by_len').
+  h5_reads_total <- GetGeneReadsTotal(gene, dataset, h5_file) # 1D array of 1 double
+  print("reads_total:")
+  print(h5_reads_total) # 2
+  h5_reads_len_total <- Reduce("+", h5_reads_by_len)
+  print("SUM(reads_by_len):")
+  print(h5_reads_len_total)
+  expect_equal(h5_reads_total[1], h5_reads_len_total,
+    info = "reads_total does not equal sum of totals in reads_by_len")
+  expected_reads_total = length(bam_gene_flag_zero)
+  print("Number of Flag = 0 BAM records:")
+  print(expected_reads_total) # 2
+  expect_equal(length(h5_reads_total), 1,
+      info = "Unexpected number of reads_total")
+  expect_equal(h5_reads_total[1], expected_reads_total,
+      info = "reads_total does not equal number of BAM records with Flag = 0")
+
+  # 'data': Positions and lengths of ribosome sequences within the organism data (from BAM).
+  print("data:")
+  h5_data <- GetGeneDatamatrix(gene, dataset, h5_file)
+  # print(h5_data) # Verbose
+  print(length(h5_data)) # 76384
+  print(class(h5_data)) # matrix
+  print(typeof(h5_data)) # integer
+  print(dim(h5_data)) # 41 1874
+  print(nrow(h5_data)) # 41
+  print(ncol(h5_data)) # 1874
+  expect_equal(nrow(h5_data), num_read_counts,
+    info = "Number of data rows does not equal max_read_length - min_read_length + 1")
+  expected_num_data_cols <- h5_stop_codon_pos[3] + buffer
+  print(expected_num_data_cols) # 1874
+  expect_equal(ncol(h5_data), expected_num_data_cols,
+    info = "Number of data columns does not equal stop_codon_pos[3] + buffer")
+  expect_equal(ncol(h5_data), gff_utr3_end,
+    info = "Number of data columns does not equal GFF UTR3 final nt position")
+  expect_equal(ncol(h5_data), bam_hdr_gene_seq_length,
+    info = "Number of data columns does not equal sequence lengths from BAM header")
+
+  # TODO Generalise - see below.
+  expected_row <- integer(num_read_counts)
+  expected_row[19] <- 1 #  1-indexed R vs 0-indexed H5 (18)
+  row <- h5_data[,752] # 1-indexed R vs 0-indexed H5
+  print(row)
+  expect_equal(row, expected_row, info = "Unexpected data[751]")
+
+  expected_row <- integer(num_read_counts)
+  expected_row[18] <- 1 #  1-indexed R vs 0-indexed H5 (17)
+  row <- h5_data[,753] # 1-indexed R vs 0-indexed H5
+  print(row)
+  expect_equal(row, expected_row, info = "Unexpected data[752]")
+
+  ##### EXTRACT BAM WIP #####
+  ##### EXTRACT BAM WIP #####
+  ##### EXTRACT BAM WIP #####
+
+  # TODO
+  # TODO
+  # TODO
+  
+  print(gene)
+  print(bam_hdr_gene)
+  print(bam_gene_flag_zero)
+  #                     seqnames strand       cigar    qwidth     start       end
+  #                        <Rle>  <Rle> <character> <integer> <integer> <integer>
+  #  SRR1042855.5473767  YAL062W      +       26M2S        28       752       777
+  #  SRR1042855.1850623  YAL062W      +       25M2S        27       753       777
+  #                         width     njunc |      flag
+  #                     <integer> <integer> | <integer>
+  #  SRR1042855.5473767        26         0 |         0
+  #  SRR1042855.1850623        25         0 |         0
+
+  # TODO Use bam_gene_flag_zero, start, qwidth
+
   # SRR1042855.5473767	0	YAL062W	752	60	26M2S	*	0	0	TCATACAAGAACTCCTGGGAAGGTGTCT	CCCFFFFFHHHHHJJJJJJJJJJEGHIJ	AS:i:-2XN:i:0	XM:i:0	XO:i:0	XG:i:0	NM:i:0	MD:Z:26	YT:Z:UU	XS:A:+	NH:i:1
   # Position 752 Length 28
-  #
   # SRR1042855.1850623	0	YAL062W	753	60	25M2S	*	0	0CATACAAGAACTCCTGGGAAGGTGTCT	@@@DDDDDHHH?FGFIIDHGII+ACDH	AS:i:-2	XN:i:0	XM:i:0	XO:i:0	XG:i:0	NM:i:0	MD:Z:25	YT:Z:UU	XS:A:+	NH:i:1
  # Position 753 Length 27
 
