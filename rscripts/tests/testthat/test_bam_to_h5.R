@@ -130,20 +130,48 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print(gff_df)
   gff_names <- unique(gff_df$seqnames) # Tibble data frame
   print(gff_names)
-  # [1] YAL068C YAL067W-A YAL067C YAL065C YAL064W-B YAL064C-A YAL064W ...
-  # [64] YAL007C YAL005C   YAL003W YAL002W YAL001C  
+  # [1] YAL068C YAL067W-A ...
+  # [64] ... YAL002W YAL001C  
   # 68 Levels: YAL001C YAL002W YAL003W YAL005C YAL007C YAL008W YAL009W ... YAL068C
   print(length(gff_names)) # 68
   print(class(gff_names)) # factor
   print(typeof(gff_names)) # integer
   print(levels(gff_names))
-  # [1] "YAL068C" "YAL067W-A" "YAL067C" "YAL065C" "YAL064W-B" "YAL064C-A" ...
+  # [1] "YAL001C"   "YAL002W"  ...
   # [67] "YAL067W-A" "YAL068C"  
   print(dim(gff_names)) # NULL
  
   ##### EXTRACT BAM (generic) #####
 
-  # TODO See below
+  print("========== BAM ==========")
+
+  # https://kasperdanielhansen.github.io/genbioconductor/html/Rsamtools.html
+  bam_file_f <- BamFile(bam_file)
+  print(bam_file_f)
+  bam_seq_info = seqinfo(bam_file_f)
+  print(bam_seq_info)
+  #Seqinfo object with 68 sequences from an unspecified genome:
+  #seqnames  seqlengths isCircular genome
+  #YAL068C          863       <NA>   <NA>
+  # ...
+  #YAL001C         3983       <NA>   <NA>
+  print(class(bam_seq_info)) # SeqInfo. attr(,"package"), GenomeInfoDb
+  print(typeof(bam_seq_info)) # S4
+  print(levels(bam_seq_info)) # NULL
+  print(length(bam_seq_info)) # 68
+  print(countBam(bam_file_f))
+  #  space start end width       file records nucleotides
+  # 1    NA    NA  NA    NA WTnone.bam   14516      399027
+
+  bam_seq_names <- bam_seq_info@seqnames
+  print(bam_seq_names)
+  print(length(bam_seq_names)) # 68
+  print(class(bam_seq_names)) # character
+  print(typeof(bam_seq_names)) # character
+  print(levels(bam_seq_names)) # NULL
+  print(dim(bam_seq_names)) # NULL
+  # [1] "YAL068C"   "YAL067W-A"  ...
+  # [67] "YAL002W" "YAL001C"  
 
   ##### EXTRACT AND VALIDATE H5 (generic) #####
 
@@ -161,21 +189,25 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print(dim(h5_data)) # 68 5
   h5_names <- h5_data$name
   print(h5_names)
+  # [1] "YAL001C"   "YAL002W"  ...
+  # [67] "YAL067W-A" "YAL068C"  
   print(length(h5_names)) # 68
   print(class(h5_names)) # character
   print(typeof(h5_names)) # character
   print(levels(h5_names)) # NULL
   print(dim(h5_names)) # NULL
-  #  [1] "YAL001C"   "YAL002W"   ...
-  #  ...
-  # [67] "YAL067W-A" "YAL068C"  
 
+  # Validate against GFF
   expect_equal(length(h5_names), length(gff_names),
     info = "Mismatch in number of sequence names between GFF and H5")
   expect_equal(as.factor(sort(h5_names)), sort(gff_names),
     info = "Mismatch in sequence names between GFF and H5")
 
-  # TODO check h5_names superset of names in BAM.
+  # Validate against BAM
+  expect_equal(length(h5_names), length(bam_seq_names),
+    info = "Mismatch in number of sequence names between BAM and H5")
+  expect_equal(sort(h5_names), sort(bam_seq_names),
+    info = "Mismatch in sequence names between BAM and H5")
 
   ##### EXTRACT GFF (gene-specific) #####
 
@@ -213,8 +245,18 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print(gff_utr3_length) # 250
 
   ##### EXTRACT BAM (gene-specific) #####
-  
-  # TODO See below
+
+  bam_gene <- bam_seq_info[gene]
+  print(bam_gene)
+  # seqnames seqlengths isCircular genome
+  # YAL062W        1874         NA   <NA>
+  print(class(bam_gene)) # SeqInfo. attr(,"package"), GenomeInfoDb
+  print(typeof(bam_gene)) # S4
+  print(levels(bam_gene)) # NULL
+  bam_gene_seq_lengths <-  bam_gene@seqlengths
+  print(bam_gene_seq_lengths) # 1874
+
+  # TODO See below.
 
   ##### EXTRACT AND VALIDATE H5 (gene-specific) #####
 
@@ -251,7 +293,7 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   # 'stop_codon_pos': Positions corresponding to stop codon of CDS in organism sequence (from GFF)
   expected_stop_codons <- as.array(seq(gff_cds_end - 2, gff_cds_end))
   print("expected_stop_codons:")
-  print(expected_stop_codons)  # 1622 1623 1624
+  print(expected_stop_codons) # 1622 1623 1624
   print("stop_codon_pos:")
   h5_stop_codon_pos <- GetGeneStopCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
   print(h5_stop_codon_pos) # 1622 1623 1624
@@ -270,7 +312,6 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   expect_equal(length(h5_lengths), num_read_counts, info = "Unexpected number of lengths")
   expect_equal(h5_lengths, expected_lengths, info = "Unexpected lengths")
 
-  # TODO generalise
   # 'reads_by_len': Counts of number of ribosome sequences of each length (from BAM).
   print("reads_by_len:")
   h5_reads_by_len <- GetGeneReadLength(gene, dataset, h5_file) # 1D array of <max_read_length - min_read_length + 1> double
@@ -279,9 +320,8 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   # [39] 0 0 0
   expect_equal(length(h5_reads_by_len), num_read_counts,
     info = "Unexpected number of reads_by_len")
-  # TODO Deduce positions of non-zero values from BAM (reads_by_len[i] = sum of sequences in BAM which have length equal to lengths[i])
-
-  # TODO generalise
+  # TODO See below.
+  # TODO Generalise:
   expect_equal(h5_reads_by_len[18], 1,
     info = "Unexpected value for reads_by_len[17]") # 1-indexed R vs 0-indexed H5
   expect_equal(h5_reads_by_len[19], 1,
@@ -296,9 +336,8 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print(h5_reads_len_total)
   expect_equal(h5_reads_total[1], h5_reads_len_total,
     info = "reads_total does not equal sum of totals in reads_by_len ")
-
-  # TODO generalise
-  # TODO Cross-check against count of BAM sequences which have Flag = 0
+  # TODO See below.
+  # TODO Generalise:
   expected_reads_total = 2
   expect_equal(length(h5_reads_total), 1, info = "Unexpected number of reads_total")
   expect_equal(h5_reads_total[1], expected_reads_total, info = "Unexpected reads_total")
@@ -321,15 +360,12 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   expect_equal(ncol(h5_data), expected_num_data_cols,
     info = "Unexpected number of data columns")
   expect_equal(ncol(h5_data), gff_utr3_end,
-    info = "Unexpected number of data columns") # Alternative, use position of final codon of UTR3 from GFF3
+    info = "Unexpected number of data columns") # Use position of final codon of UTR3 from GFF3
+  expect_equal(ncol(h5_data), bam_gene_seq_lengths,
+    info = "Unexpected number of data columns") # Use sequence length from BAM .
 
-  # TODO Alternative, get number of columns from length of sequence from BAM header LN value
-  # TODO Check DATA[p, i] = 1 if there is a sequence from BAM at position p+1 which has length equal to lengths[i], else 0.
-  
-  # TODO check sequence with "non-zeros" is in BAM.
-  # TODO check sequence with "zeros" only is not in BAM.
-
-  # TODO generalise
+  # TODO See below.
+  # TODO Generalise:
   expected_row <- integer(num_read_counts)
   expected_row[19] = 1 #  1-indexed R vs 0-indexed H5 (18)
   row = h5_data[,752] # 1-indexed R vs 0-indexed H5
@@ -342,58 +378,62 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   print(row)
   expect_equal(row, expected_row, info = "Unexpected data[752]")
 
-  # TODO Cross-check reads_by_len[i] = sum of DATA[*, i] i.e. sum across all positions for a specific length.
-
   ##### EXTRACT BAM WIP #####
 
-  # TODO check h5_names superset of names in BAM - get BAM names.
-  # TODO Alternative, get number of columns from length of sequence from BAM header LN value
+  # @SQ	SN:YAL062W	LN:1874
+  # SRR1042855.5473767	0	YAL062W	752	60	26M2S	*	0	0	TCATACAAGAACTCCTGGGAAGGTGTCT	CCCFFFFFHHHHHJJJJJJJJJJEGHIJ	AS:i:-2XN:i:0	XM:i:0	XO:i:0	XG:i:0	NM:i:0	MD:Z:26	YT:Z:UU	XS:A:+	NH:i:1
+  # Position 752 Length 28
+  # SRR1042855.1850623	0	YAL062W	753	60	25M2S	*	0	0CATACAAGAACTCCTGGGAAGGTGTCT	@@@DDDDDHHH?FGFIIDHGII+ACDH	AS:i:-2	XN:i:0	XM:i:0	XO:i:0	XG:i:0	NM:i:0	MD:Z:25	YT:Z:UU	XS:A:+	NH:i:1
+  # Position 753 Length 27
 
+  print(gene)
+  bam_gene <- bam_seq_info[gene]
+  print(bam_gene)
+  # seqnames seqlengths isCircular genome
+  # YAL062W        1874         NA   <NA>
+  bam_gene_seq_lengths <-  bam_gene@seqlengths
 
-  # https://kasperdanielhansen.github.io/genbioconductor/html/Rsamtools.html
-  bam_file_f <- BamFile(bam_file)
-  print(bam_file_f)
-  bam_seq_info = seqinfo(bam_file_f)
-  print(bam_seq_info)
-  #Seqinfo object with 68 sequences from an unspecified genome:
-  #seqnames  seqlengths isCircular genome
-  #YAL068C          863       <NA>   <NA>
-  # ...
-  #YAL001C         3983       <NA>   <NA>
-  print(length(bam_seq_info)) # 68
-  print(countBam(bam_file_f))
+  # 'reads_by_len': Counts of number of ribosome sequences of each length (from BAM).
+  # reads_by_len[i]:
+  #  Equals sum of sequences in BAM which have length equal to lengths[i].
+  #  Equals sum of DATA[*, i] sum over all positions for a specific length.
+  # TODO Deduce positions of non-zero values from BAM (reads_by_len[i] = sum of sequences in BAM which have length equal to lengths[i])
+
+  # 'reads_total': Total number of ribosome sequences (from BAM, equal to number of non-zero reads in 'reads_by_len').
+  # TODO Cross-check against count of BAM sequences which have Flag = 0
+
+  # 'data': Positions and lengths of ribosome sequences within the organism data (from BAM).
+  # TODO Check DATA[p, i] = 1 if there is a sequence from BAM at position p+1 which has length equal to lengths[i], else 0.
+  # TODO check sequence with "non-zeros" is in BAM.
+  # TODO check sequence with "zeros" only is not in BAM.
+  # TODO Cross-check reads_by_len[i] = sum of DATA[*, i] i.e. sum across all positions for a specific length.
+
   # All alignments
   aln <- scanBam(bam_file_f)
+  # print(aln)
   print(length(aln))
   print(length(aln[[1]]))
   print(names(aln[[1]]))
   #  [1] "qname"  "flag"   "rname"  "strand" "pos"    "qwidth" "mapq"  
   #  [8] "cigar"  "mrnm"   "mpos"   "isize"  "seq"    "qual"
 
-#  gr <- GRanges(seqnames = gene,
-#              ranges = IRanges(start = c(1, 10000), end = c(2,2000)))
-#  params <- ScanBamParam(which = gr, what = scanBamWhat())
-#  aln <- scanBam(bam_file_f, param = params)
-#  print(names(aln))
+  #  gr <- GRanges(seqnames = gene,
+  #              ranges = IRanges(start = c(1, 10000), end = c(2,2000)))
+  #  params <- ScanBamParam(which = gr, what = scanBamWhat())
+  #  aln <- scanBam(bam_file_f, param = params)
+  #  print(names(aln))
 
-   # Search 
+  # Search 
+  # p2 <- ScanBamParam(what=c("rname"))
+  # res2 <- scanBam(bam_file_f, param=p2)
+  # print(res2)
 
-   # p2 <- ScanBamParam(what=c("rname", "strand", "pos", "qwidth"))
-   # res2 <- scanBam(bam_file_f, param=p2)
-   # print(res2)
-
-  # 'reads_by_len': Counts of number of ribosome sequences of each length (from BAM).
-  # TODO Deduce positions of non-zero values from BAM (reads_by_len[i] = sum of sequences in BAM which have length equal to lengths[i])
-  # 'reads_total': Total number of ribosome sequences (from BAM, equal to number of non-zero reads in 'reads_by_len').
-  # TODO Cross-check against count of BAM sequences which have Flag = 0
-  # 'data': Positions and lengths of ribosome sequences within the organism data (from BAM).
-  # TODO Check DATA[p, i] = 1 if there is a sequence from BAM at position p+1 which has length equal to lengths[i], else 0.
-  # TODO check sequence with "non-zeros" is in BAM.
-  # TODO check sequence with "zeros" only is not in BAM.
+  # p2 <- ScanBamParam(what=c("rname", "strand", "pos", "qwidth"))
+  # res2 <- scanBam(bam_file_f, param=p2)
+  # print(res2)
 
   # Example from bam_to_h5.R
   # bam_what <- c("strand", "pos", "qwidth")
   # bam_param <- ScanBamParam(which = gene_location, what = bam_what)
   # bam_data <- scanBam(bam_file, param=bam_param)
-
 })
