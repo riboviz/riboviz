@@ -45,111 +45,41 @@ print(paste0("HDF5: ", h5_file))
 
 context("test_bam_to_h5.R")
 
-delete_file <- function(file_name) {
+#' delete_file(): Delete a file.
+#' 
+#' Delete a file if it exists.
+#' @param file_name File name.
+#' @export
+delete_file <- function(file_name)
+{
   # print(paste("Deleting ", file_name)) # TODO uncomment
-  if (file.exists(file_name)) {
+  if (file.exists(file_name))
+  {
     # file.remove(file_name) # TODO uncomment
   }
 }
 
-testthat::test_that("Run bam_to_h5.R and validate H5 file", {
-  withr::defer(delete_file(h5_file))
-
-  min_read_length <- 10
-  max_read_length <- 50
-  buffer <- 250
-  primary_id <- "Name"
-  secondary_id <- "NULL"
-  dataset <- "vignette"
-  is_riboviz_gff <- TRUE
-  stop_in_cds <- FALSE
-
-  bam_to_h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}"
-  print(bam_to_h5_cmd_template)
-  cmd <- glue(bam_to_h5_cmd_template)
-  print(cmd)
-  if (FALSE) # TODO uncomment
-  {
-  exit_code <- system(cmd)
-  print(paste0("bam_to_h5.R exit code: ", exit_code))
-  expect_equal(exit_code, 0, info = "Unexpected exit code from bam_to_h5.R")
-  }
+#' validate_h5_sequence(): Validate H5 data for a specific sequence.
+#' 
+#' @param sequence: Sequence name (character, character)
+#' @param h5_file: H5 file with data on sequence to be validated
+#' (character, character)
+#' @param gff: GFF data (tbl_df tbl data.frame, list)
+#' @param bam_hdr_seq_info: Data on sequences from BAM file header
+#' (GenomeInfoDb::Seqinfo, S4) 
+#' @param bam: Data on alignments from BAM file
+#' (GenomicAlignments::GAlignments, S4) 
+#' @param dataset: Dataset name (character, character)
+#' @param buffer: Buffer size (numeric, double)
+#' @param min_read_length: Minimum read length (numeric, double)
+#' @param max_read_length: Maximum read length (numeric, double)
+#' @export
+validate_h5_sequence <- function(sequence, h5_file, gff,
+  bam_hdr_seq_info, bam, dataset, buffer, min_read_length,
+  max_read_length) 
+{
 
   num_read_counts <- max_read_length - min_read_length + 1
-
-  ##
-  ## READ GFF
-  ##
-  
-  print("========== GFF ==========")
-  gff <- readGFFAsDf(gff_file) # class: tbl_df tbl data.frame, typeof: list
-  gff_names <- unique(gff$seqnames) # class: factor, typeof: integer, levels: 68
-  print(paste0("GFF sequence names (", length(gff_names), "):"))
-  print(gff_names)
-
-  ##
-  ## READ BAM
-  ##
-  
-  print("========== BAM ==========")
-  bam_file_f <- Rsamtools::BamFile(bam_file)
-  bam_hdr_seq_info <- Rsamtools::seqinfo(bam_file_f) # class SeqInfo attr(,"package") GenomeInfoDb, typeof S4
-  bam_hdr_names <- bam_hdr_seq_info@seqnames # class character, typeof character
-  print(paste0("BAM header sequence names (", length(bam_hdr_names), "):"))
-  print(bam_hdr_names)
-
-  # By default readGAlignments returns: seqnames, strand, cigar,
-  # qwidth, start, end, width. Also want "flag" so specify
-  # explicitly.
-  bam_params <- Rsamtools::ScanBamParam(what = c("flag"))
-  bam <- GenomicAlignments::readGAlignments(bam_file,
-    param = bam_params, use.names = T) # class GAlignments attr(,"package") GenomicAlignments, typeof S4
-  print(paste0("Number of BAM alignments: ", length(bam)))
-  bam_names <- unique(sort(GenomicAlignments::seqnames(bam))) # class factor, typeof integer
-  print(paste0("BAM sequence names (", length(bam_names), "):"))
-  print(bam_names)
-
-  ##
-  ## READ H5
-  ##
-
-  print("========== H5 ==========")
-  h5_data <- rhdf5::h5ls(h5_file, recursive = 1) # class data.frame, typeof list
-  h5_names <- h5_data$name # class character, typeof character
-  print(paste0("H5 sequence names (", length(h5_names), "):"))
-  print(h5_names)
-
-  ##
-  ## VALIDATE H5
-  ##
-
-  expect_equal(length(h5_names), length(gff_names),
-    info = "Unexpected number of sequence names, compared to GFF")
-  expect_equal(as.factor(sort(h5_names)), sort(gff_names),
-    info = "Unexpected sequence names, compared to GFF")
-
-  expect_equal(length(h5_names), length(bam_hdr_names),
-    info = "Unexpected number of sequence names, compared to BAM header")
-  expect_equal(sort(h5_names), sort(bam_hdr_names),
-    info = "Unexpected sequence names, compared to BAM header")
-
-  expect_true(length(bam_hdr_names) <= length(h5_names),
-    info = "Number of sequence names should be >= to those in BAM")
-  expect_true(all(sort(bam_names) %in% as.factor(sort(h5_names))),
-    info = "Sequence names should be superset of those in BAM")
-
-  ##
-  ## VALIDATE H5 (sequence-specific)
-  ##
-
-  for (sequence in h5_names)
-  {
-  #  print(sequence)
-  }
-  sequence <- "YAL062W"
-  # sequence <- "YAL001C" # 6 BAM (4 Flag = 0, 2 Flag != 0), 4 HDF5
-  # sequence <- "YAL018C" # GFF, BAM header, H5, no BAM body.
-  print(paste0("Sequence: ", sequence))
 
   # Get sequence positions from GFF
   gff_utr5_start <- GetCDS5start(sequence, gff, ftype="UTR5")
@@ -169,12 +99,12 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
     gff_utr3_length, " ", gff_utr3_end))
 
   # Get sequence length from BAM header
-  bam_hdr_sequence <- bam_hdr_seq_info[sequence] # class SeqInfo attr(,"package"), GenomeInfoDb, typeof S4
+  bam_hdr_sequence <- bam_hdr_seq_info[sequence] # GenomeInfoDb::Seqinfo, S4
   bam_hdr_sequence_seq_length <- bam_hdr_sequence@seqlengths
   print(paste0("Sequence length: ", bam_hdr_sequence_seq_length))
 
   # Get sequence entries from BAM
-  bam_sequence = bam[(GenomicAlignments::seqnames(bam) == sequence)] # class GAlignments attr(,"package") GenomicAlignments, typeof S4
+  bam_sequence = bam[(GenomicAlignments::seqnames(bam) == sequence)] # GenomicAlignments::GAlignments, S4
   print(paste0("Number of alignments: ", length(bam_sequence)))
   bam_sequence_flag_zero = bam[(GenomicAlignments::seqnames(bam) == sequence)
     & (mcols(bam)$flag == 0)]
@@ -260,7 +190,7 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
 
   # Validate data: Positions and lengths of ribosome sequences within
   # the organism data
-  h5_data <- GetGeneDatamatrix(sequence, dataset, h5_file) # class matrix, typeof integer
+  h5_data <- GetGeneDatamatrix(sequence, dataset, h5_file) # matrix, integer
   print(paste0("data rows/columns: ", toString(dim(h5_data))))
   num_data_cols <- h5_stop_codon_pos[3] + buffer
   expect_equal(nrow(h5_data), num_read_counts,
@@ -302,4 +232,110 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
     info = "Unexpected reads_by_len length, compared to those computed from data computed from BAM")
   expect_equal(h5_reads_by_len, as.array(reads_by_len_data),
     info = "Unexpected reads_by_len, compared to those computed from data computed from BAM")
+
+}
+
+testthat::test_that("Run bam_to_h5.R and validate H5 file", {
+  withr::defer(delete_file(h5_file))
+
+  min_read_length <- 10
+  max_read_length <- 50
+  buffer <- 250
+  primary_id <- "Name"
+  secondary_id <- "NULL"
+  dataset <- "vignette"
+  is_riboviz_gff <- TRUE
+  stop_in_cds <- FALSE
+
+  bam_to_h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}"
+  print(bam_to_h5_cmd_template)
+  cmd <- glue(bam_to_h5_cmd_template)
+  print(cmd)
+  if (FALSE) # TODO uncomment
+  {
+  exit_code <- system(cmd)
+  print(paste0("bam_to_h5.R exit code: ", exit_code))
+  expect_equal(exit_code, 0, info = "Unexpected exit code from bam_to_h5.R")
+  }
+
+  ##
+  ## READ GFF
+  ##
+  
+  print("========== GFF ==========")
+  gff <- readGFFAsDf(gff_file) # tbl_df tbl data.frame, list
+  gff_names <- unique(gff$seqnames) # factor, integer
+  print(paste0("GFF sequence names (", length(gff_names), "):"))
+  print(gff_names)
+
+  ##
+  ## READ BAM
+  ##
+  
+  print("========== BAM ==========")
+  bam_file_f <- Rsamtools::BamFile(bam_file)
+  bam_hdr_seq_info <- Rsamtools::seqinfo(bam_file_f) # GenomeInfoDb::Seqinfo, S4
+  bam_hdr_names <- bam_hdr_seq_info@seqnames # character, character
+  print(paste0("BAM header sequence names (", length(bam_hdr_names), "):"))
+  print(bam_hdr_names)
+
+  # By default readGAlignments returns: seqnames, strand, cigar,
+  # qwidth, start, end, width. Also want "flag" so specify
+  # explicitly.
+  bam_params <- Rsamtools::ScanBamParam(what = c("flag"))
+  bam <- GenomicAlignments::readGAlignments(bam_file,
+    param = bam_params, use.names = T) # GenomicAlignments::GAlignments, S4
+  print(paste0("Number of BAM alignments: ", length(bam)))
+  bam_names <- unique(sort(GenomicAlignments::seqnames(bam))) # factor, integer
+  print(paste0("BAM sequence names (", length(bam_names), "):"))
+  print(bam_names)
+
+  ##
+  ## READ H5
+  ##
+
+  print("========== H5 ==========")
+  h5_data <- rhdf5::h5ls(h5_file, recursive = 1) # data.frame, list
+  h5_names <- h5_data$name # character, character
+  print(paste0("H5 sequence names (", length(h5_names), "):"))
+  print(h5_names)
+
+  ##
+  ## VALIDATE H5
+  ##
+
+  expect_equal(length(h5_names), length(gff_names),
+    info = "Unexpected number of sequence names, compared to GFF")
+  expect_equal(as.factor(sort(h5_names)), sort(gff_names),
+    info = "Unexpected sequence names, compared to GFF")
+
+  expect_equal(length(h5_names), length(bam_hdr_names),
+    info = "Unexpected number of sequence names, compared to BAM header")
+  expect_equal(sort(h5_names), sort(bam_hdr_names),
+    info = "Unexpected sequence names, compared to BAM header")
+
+  expect_true(length(bam_hdr_names) <= length(h5_names),
+    info = "Number of sequence names should be >= to those in BAM")
+  expect_true(all(sort(bam_names) %in% as.factor(sort(h5_names))),
+    info = "Sequence names should be superset of those in BAM")
+
+  ##
+  ## VALIDATE H5 (sequence-specific)
+  ##
+
+  for (sequence in h5_names)
+  {
+  # print(paste0("Sequence: ", sequence))
+  # validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam, 
+  # dataset, buffer, min_read_length, max_read_length)
+  }
+  sequence <- "YAL062W"
+  validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
+    dataset, buffer, min_read_length, max_read_length)
+  sequence <- "YAL001C" # 6 BAM (4 Flag = 0, 2 Flag != 0), 4 HDF5
+  validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
+    dataset, buffer, min_read_length, max_read_length)
+  sequence <- "YAL018C" # GFF, BAM header, H5, no BAM body.
+  validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
+    dataset, buffer, min_read_length, max_read_length)
 })
