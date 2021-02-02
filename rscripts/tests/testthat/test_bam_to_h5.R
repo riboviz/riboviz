@@ -31,32 +31,29 @@ suppressMessages(library(GenomicAlignments, quietly = T))
 suppressMessages(library(Rsamtools, quietly = T))
 
 source(here::here("rscripts", "read_count_functions.R"))
-print(here())
+print(paste0("here: ", here()))
 bam_to_h5 <- here::here("rscripts/bam_to_h5.R")
-print(bam_to_h5)
+print(paste0("bam_to_h5.R: ", bam_to_h5))
 gff_file <- here::here("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
-print(gff_file)
+print(paste0("GFF: ", gff_file))
 bam_file <- here::here("vignette/output/WTnone/WTnone.bam") # TODO remove
 bam_file <- here::here("WTnone.bam") # TODO remove
-print(bam_file)
-h5_file <- here::here("test.h5")
+print(paste0("BAM: ", bam_file))
 h5_file <- here::here("vignette/output/WTnone/WTnone.h5") # TODO remove
 h5_file <- here::here("WTnone.h5") # TODO remove
-print(h5_file)
+print(paste0("HDF5: ", h5_file))
 
 context("test_bam_to_h5.R")
 
 delete_file <- function(file_name) {
-  print("Invoking delete_file fixture...")
+  # print(paste("Deleting ", file_name)) # TODO uncomment
   if (file.exists(file_name)) {
     # file.remove(file_name) # TODO uncomment
   }
 }
 
-test_that("Run bam_to_h5.R and validate H5 file", {
+testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   withr::defer(delete_file(h5_file))
-
-  expect_equal(0, 0, info = "Example assertion") # TODO remove
 
   min_read_length <- 10
   max_read_length <- 50
@@ -67,8 +64,6 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   is_riboviz_gff <- TRUE
   stop_in_cds <- FALSE
 
-  num_read_counts <- max_read_length - min_read_length + 1
-
   bam_to_h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}"
   print(bam_to_h5_cmd_template)
   cmd <- glue(bam_to_h5_cmd_template)
@@ -76,463 +71,235 @@ test_that("Run bam_to_h5.R and validate H5 file", {
   if (FALSE) # TODO uncomment
   {
   exit_code <- system(cmd)
-  print(glue("bam_to_h5.R exit code: {exit_code}"))
+  print(paste0("bam_to_h5.R exit code: ", exit_code))
   expect_equal(exit_code, 0, info = "Unexpected exit code from bam_to_h5.R")
   }
 
-  ##### EXTRACT GFF (generic) #####
+  num_read_counts <- max_read_length - min_read_length + 1
 
-  ## bam_to_h5.R-style
-
-  print("========== GFF - bam_to_h5.R-style ==========")
-  gff <- rtracklayer::readGFFAsGRanges(gff_file)
-  print(gff)
-  print(length(gff)) # 204
-  print(class(gff)) # GRanges attr(,"package") GenomicRanges
-  print(typeof(gff)) # S4
-  gff_names <- mcols(gff)
-  print(gff_names)
-  print(length(gff_names)) # 5 
-  print(class(gff_names)) # DFrame attr(,"package") S4Vectors
-  print(typeof(gff_names)) # S4
-  print(dim(gff_names)) # 204 5
-  gff_names <- gff_names["Name"] # --primary_id  
-  print(gff_names)
-  gff_names <- gff_names[,1] 
-  print(gff_names)
-  gff_names <- unique(gff_names)
-  print(gff_names)
-  print(length(gff_names)) # 68
-  print(class(gff_names)) # character
-  print(typeof(gff_names)) # character
-  gff_pid <- mcols(gff)["Name"][,1]
-  print(gff_pid)
-  print(length(gff_pid)) # 204
-  print(class(gff_pid)) # character
-  print(typeof(gff_pid)) # character
-
-  # gene <- "YAL062W"
-  # gene_location <- gff[gff_pid == gene]
-  # print(gene_location)
-  # gene_location <- gff["Name" == gene]
-  # print(gene_location)
-
-  ## read_count_functions.R-style
-
+  ##
+  ## READ GFF
+  ##
+  
   print("========== GFF ==========")
-  gff_df <- readGFFAsDf(gff_file)
-  print(gff_df)
-  gff_names <- unique(gff_df$seqnames) # Tibble data frame
+  gff <- readGFFAsDf(gff_file) # class: tbl_df tbl data.frame, typeof: list
+  gff_names <- unique(gff$seqnames) # class: factor, typeof: integer, levels: 68
+  print(paste0("GFF sequence names (", length(gff_names), "):"))
   print(gff_names)
-  # [1] YAL068C YAL067W-A ...
-  # [64] ... YAL002W YAL001C  
-  # 68 Levels: YAL001C YAL002W YAL003W YAL005C YAL007C YAL008W YAL009W ... YAL068C
-  print(length(gff_names)) # 68
-  print(class(gff_names)) # factor
-  print(typeof(gff_names)) # integer
-  print(levels(gff_names))
-  # [1] "YAL001C"   "YAL002W"  ...
-  # [67] "YAL067W-A" "YAL068C"  
- 
-  ##### EXTRACT BAM (generic) #####
 
+  ##
+  ## READ BAM
+  ##
+  
   print("========== BAM ==========")
+  bam_file_f <- Rsamtools::BamFile(bam_file)
+  bam_hdr_seq_info <- Rsamtools::seqinfo(bam_file_f) # class SeqInfo attr(,"package") GenomeInfoDb, typeof S4
+  bam_hdr_names <- bam_hdr_seq_info@seqnames # class character, typeof character
+  print(paste0("BAM header sequence names (", length(bam_hdr_names), "):"))
+  print(bam_hdr_names)
 
-  # https://kasperdanielhansen.github.io/genbioconductor/html/Rsamtools.html
-  bam_file_f <- BamFile(bam_file)
-  print(bam_file_f)
-  bam_hdr_seq_info <- seqinfo(bam_file_f)
-  print(bam_hdr_seq_info)
-  #Seqinfo object with 68 sequences from an unspecified genome:
-  #seqnames  seqlengths isCircular genome
-  #YAL068C          863       <NA>   <NA>
-  # ...
-  #YAL001C         3983       <NA>   <NA>
-  print(class(bam_hdr_seq_info)) # SeqInfo. attr(,"package"), GenomeInfoDb
-  print(typeof(bam_hdr_seq_info)) # S4
-  print(length(bam_hdr_seq_info)) # 68
-  print(countBam(bam_file_f))
-  #  space start end width       file records nucleotides
-  # 1    NA    NA  NA    NA WTnone.bam   14516      399027
+  # By default readGAlignments returns: seqnames, strand, cigar,
+  # qwidth, start, end, width. Also want "flag" so specify
+  # explicitly.
+  bam_params <- Rsamtools::ScanBamParam(what = c("flag"))
+  bam <- GenomicAlignments::readGAlignments(bam_file,
+    param = bam_params, use.names = T) # class GAlignments attr(,"package") GenomicAlignments, typeof S4
+  print(paste0("Number of BAM alignments: ", length(bam)))
+  bam_names <- unique(sort(GenomicAlignments::seqnames(bam))) # class factor, typeof integer
+  print(paste0("BAM sequence names (", length(bam_names), "):"))
+  print(bam_names)
 
-  bam_hdr_seq_names <- bam_hdr_seq_info@seqnames
-  print(bam_hdr_seq_names)
-  print(length(bam_hdr_seq_names)) # 68
-  print(class(bam_hdr_seq_names)) # character
-  print(typeof(bam_hdr_seq_names)) # character
-  # [1] "YAL068C"   "YAL067W-A"  ...
-  # [67] "YAL002W" "YAL001C"  
-
-  # Alternative approach
-  # https://www.rdocumentation.org/packages/GenomicAlignments/versions/1.8.4/topics/readGAlignments
-  # Uses bam <- readGAlignments(bam_file)
-  # By default readGAlignments extracts:
-  # seqnames, strand, cigar, qwidth, start, end, width
-  # We also want "flag" so need to specify it explicitly.
-  bam_what <- c("flag")
-  bam_params <- ScanBamParam(what=bam_what)
-  bam <- readGAlignments(bam_file, param=bam_params, use.names=T)
-  print(class(bam)) # GAlignments attr(,"package") GenomicAlignments
-  print(typeof(bam)) # S4
-  print(length(bam)) # 14516
-  print(bam)
-  # GAlignments object with 14516 alignments and 1 metadata column:
-  #          seqnames strand       cigar    qwidth     start       end     width
-  #             <Rle>  <Rle> <character> <integer> <integer> <integer> <integer>
-  #      [1]  YAL062W      +       26M2S        28       752       777        26
-  #      [2]  YAL062W      +       25M2S        27       753       777        25
-  #      ...       ... .       ...
-  #  [14512]  YAL001C      +         26M        26       539       564        26
-  #  [14513]  YAL001C      +         15M        15      1753      1767        15
-  #  [14514]  YAL001C      +       1S27M        28      3007      3033        27
-  #  [14515]  YAL001C      -       28M1S        29      3559      3586        28
-  #  [14516]  YAL001C      -       1S12M        13      3562      3573        12
-  #              njunc |      flag
-  #          <integer> | <integer>
-  #      [1]         0 |         0
-  #      [2]         0 |         0
-  #      ...       ... .       ...
-  #  [14512]         0 |         0
-  #  [14513]         0 |         0
-  #  [14514]         0 |         0
-  #  [14515]         0 |       272
-  #  [14516]         0 |        16
-  print(seqnames(bam))
-  print(length(seqnames(bam))) # 14516
-  print(length(sort(seqnames(bam)))) # 14516
-  bam_seq_names <- unique(sort(seqnames(bam)))
-  print(class(bam_seq_names)) #  factor
-  print(typeof(bam_seq_names)) # integer
-  print(length(bam_seq_names)) # 57
-
-  ##### EXTRACT AND VALIDATE H5 (generic) #####
+  ##
+  ## READ H5
+  ##
 
   print("========== H5 ==========")
-
-  h5_data <- rhdf5::h5ls(h5_file, recursive = 1)
-  print(h5_data)
-  #  group      name     otype dclass dim
-  # 0      /   YAL001C H5I_GROUP           
-  # 58     /   YAL062W H5I_GROUP
-  print(length(h5_data)) # 5
-  print(class(h5_data)) # data.frame
-  print(typeof(h5_data)) # list
-  print(dim(h5_data)) # 68 5
-  h5_names <- h5_data$name
+  h5_data <- rhdf5::h5ls(h5_file, recursive = 1) # class data.frame, typeof list
+  h5_names <- h5_data$name # class character, typeof character
+  print(paste0("H5 sequence names (", length(h5_names), "):"))
   print(h5_names)
-  # [1] "YAL001C"   "YAL002W"  ...
-  # [67] "YAL067W-A" "YAL068C"  
-  print(length(h5_names)) # 68
-  print(class(h5_names)) # character
-  print(typeof(h5_names)) # character
 
-  # Validate against GFF.
+  ##
+  ## VALIDATE H5
+  ##
+
   expect_equal(length(h5_names), length(gff_names),
-    info = "Unexpected number of sequence names when compared to GFF")
+    info = "Unexpected number of sequence names, compared to GFF")
   expect_equal(as.factor(sort(h5_names)), sort(gff_names),
-    info = "Unexpected sequence names when compared to GFF")
+    info = "Unexpected sequence names, compared to GFF")
 
-  # Validate against BAM header.
-  expect_equal(length(h5_names), length(bam_hdr_seq_names),
-    info = "Unexpected number of sequence names when compared to BAM header")
-  expect_equal(sort(h5_names), sort(bam_hdr_seq_names),
-    info = "Unexpected sequence names when compared to BAM header")
+  expect_equal(length(h5_names), length(bam_hdr_names),
+    info = "Unexpected number of sequence names, compared to BAM header")
+  expect_equal(sort(h5_names), sort(bam_hdr_names),
+    info = "Unexpected sequence names, compared to BAM header")
 
-  # Validate againt BAM content.
-  expect_true(length(bam_hdr_seq_names) <= length(h5_names),
-    info = "Expected number of sequence names to be greater or equal to those in BAM body")
-  expect_true(all(sort(bam_seq_names) %in% as.factor(sort(h5_names))),
-    info = "Expected sequence names to be superset of those in BAM body")
+  expect_true(length(bam_hdr_names) <= length(h5_names),
+    info = "Number of sequence names should be >= to those in BAM")
+  expect_true(all(sort(bam_names) %in% as.factor(sort(h5_names))),
+    info = "Sequence names should be superset of those in BAM")
 
-  ##### EXTRACT GFF (gene-specific) #####
+  ##
+  ## VALIDATE H5 (sequence-specific)
+  ##
 
-  print("Genes")
-  for (gene in h5_names)
+  for (sequence in h5_names)
   {
-    print(gene)
+  #  print(sequence)
   }
-  gene <- "YAL062W"
-  # gene <- "YAL001C" # Gene has 6 BAM (4 Flag=0, 2 Flag != 0), 4 HDF5
-  # gene <- "YAL018C" # GFF, BAM header, H5, no BAM body.
+  sequence <- "YAL062W"
+  # sequence <- "YAL001C" # 6 BAM (4 Flag = 0, 2 Flag != 0), 4 HDF5
+  # sequence <- "YAL018C" # GFF, BAM header, H5, no BAM body.
+  print(paste0("Sequence: ", sequence))
 
-  print(gene)
-  print(gff_df)
-  print(class(gff_df)) # tbl_df tbl data.frame
-  print(typeof(gff_df)) # list
-  print(dim(gff_df)) # 204 10
-  gff_utr5_start <- GetCDS5start(gene, gff_df, ftype="UTR5")
-  gff_utr5_end <- GetCDS3end(gene, gff_df, ftype="UTR5")
+  # Get sequence positions from GFF
+  gff_utr5_start <- GetCDS5start(sequence, gff, ftype="UTR5")
+  gff_utr5_end <- GetCDS3end(sequence, gff, ftype="UTR5")
   gff_utr5_length <- gff_utr5_end - gff_utr5_start + 1
-  gff_cds_start <- GetCDS5start(gene, gff_df, ftype="CDS")
-  gff_cds_end <- GetCDS3end(gene, gff_df, ftype="CDS")
+  gff_cds_start <- GetCDS5start(sequence, gff, ftype="CDS")
+  gff_cds_end <- GetCDS3end(sequence, gff, ftype="CDS")
   gff_cds_length <- gff_cds_end - gff_cds_start + 1
-  gff_utr3_start <- GetCDS5start(gene, gff_df, ftype="UTR3")
-  gff_utr3_end <- GetCDS3end(gene, gff_df, ftype="UTR3")
+  gff_utr3_start <- GetCDS5start(sequence, gff, ftype="UTR3")
+  gff_utr3_end <- GetCDS3end(sequence, gff, ftype="UTR3")
   gff_utr3_length <- gff_utr3_end - gff_utr3_start + 1
-  print("UTR5 start/end:")
-  print(gff_utr5_start) # 1
-  print(gff_utr5_end) # 250
-  print(gff_utr5_length) # 250
-  print("CDS start/end:")
-  print(gff_cds_start) # 251
-  print(gff_cds_end) # 1624 
-  print(gff_cds_length) # 1374
-  print("UTR3 start/end:")
-  print(gff_utr3_start) # 1625
-  print(gff_utr3_end) # 1874
-  print(gff_utr3_length) # 250
+  print(paste0("UTR5 start/length/end: ", gff_utr5_start, " ",
+    gff_utr5_length, " ", gff_utr5_end))
+  print(paste0("CDS start/length/end: ", gff_cds_start, " ",
+    gff_cds_length, " ", gff_cds_end))
+  print(paste0("UTR3 start/length/end: ", gff_utr3_start, " ",
+    gff_utr3_length, " ", gff_utr3_end))
 
-  ##### EXTRACT BAM (gene-specific) #####
+  # Get sequence length from BAM header
+  bam_hdr_sequence <- bam_hdr_seq_info[sequence] # class SeqInfo attr(,"package"), GenomeInfoDb, typeof S4
+  bam_hdr_sequence_seq_length <- bam_hdr_sequence@seqlengths
+  print(paste0("Sequence length: ", bam_hdr_sequence_seq_length))
 
-  bam_hdr_gene <- bam_hdr_seq_info[gene]
-  print(bam_hdr_gene)
-  # seqnames seqlengths isCircular genome
-  # YAL062W        1874         NA   <NA>
-  print(class(bam_hdr_gene)) # SeqInfo. attr(,"package"), GenomeInfoDb
-  print(typeof(bam_hdr_gene)) # S4
-  bam_hdr_gene_seq_length <- bam_hdr_gene@seqlengths
-  print(bam_hdr_gene_seq_length) # 1874
-
-  # https://www.rdocumentation.org/packages/GenomicAlignments/versions/1.8.4/topics/readGAlignments
-  bam_gene = bam[(seqnames(bam) == gene)]
-  print("BAM gene:")
-  print(bam_gene)
-  # GAlignments object with 2 alignments and 1 metadata column:
-  #       seqnames strand       cigar    qwidth     start       end     width
-  #          <Rle>  <Rle> <character> <integer> <integer> <integer> <integer>
-  #   [1]  YAL062W      +       26M2S        28       752       777        26
-  #   [2]  YAL062W      +       25M2S        27       753       777        25
-  #           njunc |      flag
-  #       <integer> | <integer>
-  #   [1]         0 |         0
-  #   [2]         0 |         0
-  #   seqinfo: 68 sequences from an unspecified genome
-  # For YAL001C:
-  #   SRR1042855.35576357  YAL001C      +       2S28M        30       162       189
-  #   SRR1042855.43554901  YAL001C      +         26M        26       539       564
-  #   SRR1042855.18823368  YAL001C      +         15M        15      1753      1767
-  #   SRR1042855.38021801  YAL001C      +       1S27M        28      3007      3033
-  #   SRR1042855.35349348  YAL001C      -       28M1S        29      3559      3586
-  #   SRR1042855.43963789  YAL001C      -       1S12M        13      3562      3573
-  #   SRR1042855.35576357        28         0 |         0
-  #   SRR1042855.43554901        26         0 |         0
-  #   SRR1042855.18823368        15         0 |         0
-  #   SRR1042855.38021801        27         0 |         0
-  #   SRR1042855.35349348        28         0 |       272
-  #   SRR1042855.43963789        12         0 |        16
-  print("Number of sequences:")
-  print(length(bam_gene)) # 2. For YAL001C 6. For YAL018C 0.
-  print(names(bam_gene)) # "SRR1042855.5473767" "SRR1042855.1850623"
-  print(class(bam_gene)) # GAlignments attr(,"package") GenomicAlignments
-  print(typeof(bam_gene)) # S4
-  print(mcols(bam_gene))
-  #  DataFrame with 2 rows and 1 column
-  #                        flag
-  #                   <integer>
-  # SRR1042855.5473767         0
-  # SRR1042855.1850623         0
-  print(mcols(bam_gene)$flag) # 0 0. For YAL001C 0 0 0 0 272 16
-  print("Sequences with flag == 0")
-  bam_gene_flag_zero = bam[(seqnames(bam) == gene) & (mcols(bam)$flag == 0)]
-  print(bam_gene_flag_zero)
-  # GAlignments object with 2 alignments and 1 metadata column:
-  #       seqnames strand       cigar    qwidth     start       end     width
-  #          <Rle>  <Rle> <character> <integer> <integer> <integer> <integer>
-  #   [1]  YAL062W      +       26M2S        28       752       777        26
-  #   [2]  YAL062W      +       25M2S        27       753       777        25
-  #           njunc |      flag
-  #       <integer> | <integer>
-  #   [1]         0 |         0
-  #   [2]         0 |         0
-  #   seqinfo: 68 sequences from an unspecified genome
-  # For YAL001C:
-  #   SRR1042855.35576357  YAL001C      +       2S28M        30       162       189
-  #   SRR1042855.43554901  YAL001C      +         26M        26       539       564
-  #   SRR1042855.18823368  YAL001C      +         15M        15      1753      1767
-  #   SRR1042855.38021801  YAL001C      +       1S27M        28      3007      3033
-  #   SRR1042855.35576357        28         0 |         0
-  #   SRR1042855.43554901        26         0 |         0
-  #   SRR1042855.18823368        15         0 |         0
-  #   SRR1042855.38021801        27         0 |         0
-  print("Number of sequences:")
-  print(length(bam_gene_flag_zero)) # 2. For YAL001C 4. For YAL018C 0.
-  print("Sequences with flag != 0")
-  bam_gene_flag_non_zero = bam[(seqnames(bam) == gene) & (mcols(bam)$flag != 0)]
-  print(bam_gene_flag_non_zero)
-  # GAlignments object with 0 alignments and 1 metadata column:
-  #    seqnames strand       cigar    qwidth     start       end     width
-  #       <Rle>  <Rle> <character> <integer> <integer> <integer> <integer>
-  #        njunc |      flag
-  #    <integer> | <integer>
-  # For YAL001C:
-  #   SRR1042855.35349348  YAL001C      -       28M1S        29      3559      3586
-  #   SRR1042855.43963789  YAL001C      -       1S12M        13      3562      3573
-  #   SRR1042855.35349348        28         0 |       272
-  #   SRR1042855.43963789        12         0 |        16
-  print("Number of sequences:")
-  print(length(bam_gene_flag_non_zero)) # 0. For YAL001C 2. For YAL018C 0.
-
-  ##### EXTRACT AND VALIDATE H5 (gene-specific) #####
-
-  # 'buffer_left': number of nucleotides upstream of the start codon (ATG) (UTR5 length) (from bam_to_h5.R command-line)
-  print("buffer_left:")
-  h5_buffer_left <- GetGeneBufferLeft(gene, dataset, h5_file) # double
-  print(h5_buffer_left) # 250
+  # Get sequence entries from BAM
+  bam_sequence = bam[(GenomicAlignments::seqnames(bam) == sequence)] # class GAlignments attr(,"package") GenomicAlignments, typeof S4
+  print(paste0("Number of alignments: ", length(bam_sequence)))
+  bam_sequence_flag_zero = bam[(GenomicAlignments::seqnames(bam) == sequence)
+    & (mcols(bam)$flag == 0)]
+  print(paste0("Number of alignments (Flag = 0): ", length(bam_sequence_flag_zero)))
+  bam_sequence_flag_non_zero =
+    bam[(GenomicAlignments::seqnames(bam) == sequence)
+    & (mcols(bam)$flag != 0)]
+  print(paste0("Number of alignment (Flag != 0): ", length(bam_sequence_flag_non_zero)))
+ 
+  # Validate buffer_left: number of nucleotides upstream of the start
+  # codon (ATG) (UTR5 length)
+  h5_buffer_left <- GetGeneBufferLeft(sequence, dataset, h5_file) # double
+  print(paste0("buffer_left: ", h5_buffer_left))
   expect_equal(h5_buffer_left, buffer,
-    info = "Unexpected buffer_left when compared to bam_to_h5.R parameter")
+    info = "Unexpected buffer_left, compared to bam_to_h5.R parameter")
   expect_equal(h5_buffer_left, gff_utr5_length,
-    info = "Unexpected buffer_left when compared to GFF UTR5 length")
+    info = "Unexpected buffer_left, compared to GFF UTR5 length")
 
-  # 'buffer_right': number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) (from bam_to_h5.R command-line)
-  print("buffer_right:")
-  h5_buffer_right <- GetGeneBufferRight(gene, dataset, h5_file) # integer
-  print(h5_buffer_right) # 250
+  # Validate buffer_right: number of nucleotides downstream of the
+  # stop codon (TAA/TAG/TGA) (UTR3 length) 
+  h5_buffer_right <- GetGeneBufferRight(sequence, dataset, h5_file) # integer
+  print(paste0("buffer_right: ", h5_buffer_right))
   expect_equal(h5_buffer_right, buffer,
-    info = "Unexpected buffer_right when compared to bam_to_h5.R parameter")
+    info = "Unexpected buffer_right, compared to bam_to_h5.R parameter")
   expect_equal(h5_buffer_left, gff_utr3_length,
-    info = "Unexpected buffer_left when compared to GFF UTR3 length")
+    info = "Unexpected buffer_left, compared to GFF UTR3 length")
 
-  # 'start_codon_pos': Positions corresponding to start codon of CDS in organism sequence (from GFF)
-  expected_start_codons <- as.array(seq(gff_cds_start, gff_cds_start + 2))
-  print("expected_start_codons:")
-  print(expected_start_codons) # 251, 252, 253
-  print("start_codon_pos:")
-  h5_start_codon_pos <- GetGeneStartCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
-  print(h5_start_codon_pos) # 251 252 253
+  # Validate start_codon_pos: Positions corresponding to start codon
+  # of CDS in organism sequence
+  gff_start_codon_pos <- as.array(seq(gff_cds_start, gff_cds_start + 2))
+  h5_start_codon_pos <- GetGeneStartCodonPos(sequence, dataset, h5_file) # 1D array of 3 integer
+  print(paste0("start_codon_pos: ", toString(h5_start_codon_pos)))
   expect_equal(length(h5_start_codon_pos), 3,
-    info = "Unexpected number of start_codon_pos, expected 3")
-  expect_equal(h5_start_codon_pos, expected_start_codons,
-    info = "Unexpected start_codon_pos when compared to GFF CDS start codon positions")
+    info = "Unexpected start_codon_pos length")
+  expect_equal(h5_start_codon_pos, gff_start_codon_pos,
+    info = "Unexpected start_codon_pos, compared to GFF CDS start codon positions")
 
-  # 'stop_codon_pos': Positions corresponding to stop codon of CDS in organism sequence (from GFF)
-  expected_stop_codons <- as.array(seq(gff_cds_end - 2, gff_cds_end))
-  print("expected_stop_codons:")
-  print(expected_stop_codons) # 1622 1623 1624
-  print("stop_codon_pos:")
-  h5_stop_codon_pos <- GetGeneStopCodonPos(gene, dataset, h5_file) # 1D array of 3 integer
-  print(h5_stop_codon_pos) # 1622 1623 1624
+  # Validate stop_codon_pos: Positions corresponding to stop codon of
+  # CDS in organism sequence
+  gff_stop_codon_pos <- as.array(seq(gff_cds_end - 2, gff_cds_end))
+  h5_stop_codon_pos <- GetGeneStopCodonPos(sequence, dataset, h5_file) # 1D array of 3 integer
+  print(paste0("stop_codon_pos: ", toString(h5_stop_codon_pos)))
   expect_equal(length(h5_stop_codon_pos), 3,
-    info = "Unexpected number of stop_codon_pos, expected 3")
-  expect_equal(h5_stop_codon_pos, expected_stop_codons,
-    info = "Unexpected stop_codon_pos when compared to GFF CDS stop codon positions")
+    info = "Unexpected stop_codon_pos length")
+  expect_equal(h5_stop_codon_pos, gff_stop_codon_pos,
+    info = "Unexpected stop_codon_pos, compared to GFF CDS stop codon positions")
 
-  # 'lengths' : Lengths of mapped reads.
-  print("lengths:")
-  expected_lengths <- as.array(seq(min_read_length, max_read_length))
-  h5_lengths <- GetGeneMappedReadLengths(gene, dataset, h5_file) # 1D array of <max_read_length - min_read_length + 1> integer
-  print(h5_lengths)
-  # [1] 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
-  # [26] 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+  # Validate lengths: Lengths of mapped reads.
+  lengths <- as.array(seq(min_read_length, max_read_length))
+  h5_lengths <- GetGeneMappedReadLengths(sequence, dataset, h5_file) # 1D array of <max_read_length - min_read_length + 1> integer
+  print(paste0("lengths: ", toString(h5_lengths)))
   expect_equal(length(h5_lengths), num_read_counts,
-    info = "Number of lengths does not equal max_read_length - min_read_length + 1")
-  expect_equal(h5_lengths, expected_lengths,
-      info = "Unexpected lengths")
+    info = "lengths length does not equal max_read_length - min_read_length + 1")
+  expect_equal(h5_lengths, lengths, info = "Unexpected lengths")
 
-  # 'reads_by_len': Counts of number of ribosome sequences of each length (from BAM).
-  print("reads_by_len:")
-  h5_reads_by_len <- GetGeneReadLength(gene, dataset, h5_file) # 1D array of <max_read_length - min_read_length + 1> double
-  print(h5_reads_by_len)
-  # [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-  # [39] 0 0 0
+  # Validate reads_by_len: Counts of number of ribosome sequences of
+  # each length
+  h5_reads_by_len <- GetGeneReadLength(sequence, dataset, h5_file) # 1D array of <max_read_length - min_read_length + 1> double
+  print(paste0("reads_by_len: ", toString(h5_reads_by_len)))
   expect_equal(length(h5_reads_by_len), num_read_counts,
-    info = "Number of reads_by_len does not equal max_read_length - min_read_length + 1")
-  # Calculate expected reads_by_len based on information from BAM
-  expected_reads_by_len_from_bam <- as.array(integer(num_read_counts))
-  print(expected_reads_by_len_from_bam)
-  # [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-  # [39] 0 0 0
-  print(length(expected_reads_by_len_from_bam)) # 41
-  for (width in sort(qwidth(bam_gene_flag_zero)))
-  {
-      width_index <- width - min_read_length + 1
-      expected_reads_by_len_from_bam[width_index] <- expected_reads_by_len_from_bam[width_index] + 1
-  }
-  print(expected_reads_by_len_from_bam)
-  # [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-  # [39] 0 0 0
-  expect_equal(h5_reads_by_len, expected_reads_by_len_from_bam,
-    info = "reads_by_len is not consistent with widths in BAM")
+    info = "reads_by_len length does not equal max_read_length - min_read_length + 1")
 
-  # 'reads_total': Total number of ribosome sequences (from BAM, equal to number of non-zero reads in 'reads_by_len').
-  h5_reads_total <- GetGeneReadsTotal(gene, dataset, h5_file) # 1D array of 1 double
-  print("reads_total:")
-  print(h5_reads_total) # 2
-  h5_reads_len_total <- Reduce("+", h5_reads_by_len)
-  print("SUM(reads_by_len):")
-  print(h5_reads_len_total)
+  # Calculate expected reads_by_len based on information from BAM
+  reads_by_len_bam <- as.array(integer(num_read_counts))
+  for (width in sort(GenomicAlignments::qwidth(bam_sequence_flag_zero)))
+  {
+    index <- width - min_read_length + 1
+    reads_by_len_bam[index] <- reads_by_len_bam[index] + 1
+  }
+  expect_equal(h5_reads_by_len, reads_by_len_bam,
+    info = "Unexpected reads_by_len, compared to those computed from BAM")
+
+  # Validate reads_total: Total number of ribosome sequences
+  h5_reads_total <- GetGeneReadsTotal(sequence, dataset, h5_file) # 1D array of 1 double
+  print(paste0("reads_total: ", h5_reads_total))
+  expect_equal(length(h5_reads_total), 1,
+    info = "Unexpected reads_total length")
+  h5_reads_len_total <- Reduce("+", h5_reads_total)
   expect_equal(h5_reads_total[1], h5_reads_len_total,
     info = "reads_total does not equal sum of totals in reads_by_len")
-  expected_reads_total = length(bam_gene_flag_zero)
-  print("Number of Flag = 0 BAM records:")
-  print(expected_reads_total) # 2
-  expect_equal(length(h5_reads_total), 1,
-      info = "Unexpected number of reads_total")
-  expect_equal(h5_reads_total[1], expected_reads_total,
-      info = "reads_total does not equal number of BAM records with Flag = 0")
+  expect_equal(h5_reads_total[1], length(bam_sequence_flag_zero),
+    info = "reads_total does not equal number of BAM alignments with Flag = 0")
 
-  # 'data': Positions and lengths of ribosome sequences within the organism data (from BAM).
-  print("data:")
-  h5_data <- GetGeneDatamatrix(gene, dataset, h5_file)
-  # print(h5_data) # Verbose
-  print(length(h5_data)) # 76384
-  print(class(h5_data)) # matrix
-  print(typeof(h5_data)) # integer
-  print(dim(h5_data)) # 41 1874
-  print(nrow(h5_data)) # 41
-  print(ncol(h5_data)) # 1874
+  # Validate data: Positions and lengths of ribosome sequences within
+  # the organism data
+  h5_data <- GetGeneDatamatrix(sequence, dataset, h5_file) # class matrix, typeof integer
+  print(paste0("data rows/columns: ", toString(dim(h5_data))))
+  num_data_cols <- h5_stop_codon_pos[3] + buffer
   expect_equal(nrow(h5_data), num_read_counts,
     info = "Number of data rows does not equal max_read_length - min_read_length + 1")
-  expected_num_data_cols <- h5_stop_codon_pos[3] + buffer
-  print(expected_num_data_cols) # 1874
-  expect_equal(ncol(h5_data), expected_num_data_cols,
+  expect_equal(ncol(h5_data), num_data_cols,
     info = "Number of data columns does not equal stop_codon_pos[3] + buffer")
   expect_equal(ncol(h5_data), gff_utr3_end,
     info = "Number of data columns does not equal GFF UTR3 final nt position")
-  expect_equal(ncol(h5_data), bam_hdr_gene_seq_length,
-    info = "Number of data columns does not equal sequence lengths from BAM header")
-
+  expect_equal(ncol(h5_data), bam_hdr_sequence_seq_length,
+    info = "Number of data columns does not equal BAM sequence length")
   h5_reads_by_len_data <- rowSums(h5_data)
   expect_equal(h5_reads_by_len, as.array(h5_reads_by_len_data),
     info = "reads_by_len is not consistent with data")
 
-  print("Expected data (zeros):")
-  expected_data <- matrix(0, nrow = num_read_counts,
-    ncol = expected_num_data_cols)
-
-  print("YAL062W" %in% seqnames(bam)) # TRUE
-  print("YAL001C" %in% seqnames(bam)) # TRUE
-  print("YAL018C" %in% seqnames(bam)) # FALSE
-  if (gene %in% seqnames(bam))
+  # Calculate expected data based on information from BAM
+  data <- matrix(0, nrow = num_read_counts, ncol = num_data_cols)
+  if (sequence %in% GenomicAlignments::seqnames(bam))
   {
-    for (seq in names(bam_gene_flag_zero))
+    print("Sequence has alignments in BAM.")
+    for (align in names(bam_sequence_flag_zero))
     {
-      print("Gene in BAM - expect H5 'data' to be non-zero:")
-      print(seq)
-      seq_start <- start(bam_gene_flag_zero[seq])
-      print(seq_start)
-      seq_qwidth <- qwidth(bam_gene_flag_zero[seq])
-      print(seq_qwidth)
-      seq_qwidth <- seq_qwidth - min_read_length + 1
-      print(seq_qwidth)
-      expected_data[seq_qwidth, seq_start] = expected_data[seq_qwidth, seq_start] + 1
+      start <- GenomicAlignments::start(bam_sequence_flag_zero[align])
+      width <- GenomicAlignments::qwidth(bam_sequence_flag_zero[align])
+      width <- width - min_read_length + 1
+      data[width, start] = data[width, start] + 1
     }
-    expect_equal(h5_data, expected_data,
-      info = "H5 data is not as expected given content of BAM records")
+    expect_equal(h5_data, data,
+      info = "Unexpected data, compared to that computed from BAM")
   }
   else
   {
-      print("Gene not in BAM - expect H5 'data' to be zero:")
-      expect_equal(h5_data, expected_data,
-        info = "Expected H5 data to be zero for sequence with no BAM record")
+      print("Sequence has no alignments in BAM.")
+      expect_equal(h5_data, data,
+        info = "Unexpected data, expected 0s as no alignments in BAM")
   }
-  expected_reads_by_len_data = rowSums(expected_data)
-  expect_equal(h5_reads_by_len_data, expected_reads_by_len_data,
-    info = "reads_by_len calculated from data is not as expected given content of BAM records")
-  expect_equal(h5_reads_by_len, as.array(expected_reads_by_len_data),
-    info = "reads_by_len calculated from data is not as expected given content of BAM records")
 
-  # TODO Clean up
-  # TODO Extend to iterate through all sequences in H5.
-  # TODO Uncomment bam_to_h5.R run and try.
-  expect_equal(0, 0, info = "Example assertion") # TODO remove
+  reads_by_len_data = rowSums(data)
+  expect_equal(h5_reads_by_len_data, reads_by_len_data,
+    info = "Unexpected reads_by_len length, compared to those computed from data computed from BAM")
+  expect_equal(h5_reads_by_len, as.array(reads_by_len_data),
+    info = "Unexpected reads_by_len, compared to those computed from data computed from BAM")
 })
