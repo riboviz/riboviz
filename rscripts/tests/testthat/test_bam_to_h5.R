@@ -41,6 +41,9 @@ print(paste0("BAM: ", bam_file))
 h5_file <- here::here("vignette/output/WTnone/WTnone.h5") # TODO remove
 print(paste0("HDF5: ", h5_file))
 
+# bam_file <- here::here("vignette/output/WT3AT/WT3AT.bam") # TODO remove
+# h5_file <- here::here("vignette/output/WT3AT/WT3AT.h5") # TODO remove
+
 context("test_bam_to_h5.R")
 
 #' delete_file(): Delete a file.
@@ -324,8 +327,8 @@ validate_h5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
   for (sequence in h5_names)
   {
     print(paste0("Sequence: ", sequence))
-#    validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam, 
-#      dataset, buffer, min_read_length, max_read_length)
+    validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
+      dataset, buffer, min_read_length, max_read_length)
   }
 
   # TODO remove
