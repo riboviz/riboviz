@@ -232,45 +232,32 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
     info = "Unexpected reads_by_len length, compared to those computed from data computed from BAM")
   expect_equal(h5_reads_by_len, as.array(reads_by_len_data),
     info = "Unexpected reads_by_len, compared to those computed from data computed from BAM")
-
 }
 
-testthat::test_that("Run bam_to_h5.R and validate H5 file", {
-  withr::defer(delete_file(h5_file))
+#' validate_h5(): Validate H5 data.
+#' 
+#' @param h5_file: H5 file with data on sequence to be validated
+#' (character, character)
+#' @param gff_file: GFF file (character, character)
+#' @param bam_file: BAM file (character, character)
+#' @param dataset: Dataset name (character, character)
+#' @param buffer: Buffer size (numeric, double)
+#' @param min_read_length: Minimum read length (numeric, double)
+#' @param max_read_length: Maximum read length (numeric, double)
+#' @export
+validate_h5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
+  min_read_length, max_read_length)
+{
 
-  min_read_length <- 10
-  max_read_length <- 50
-  buffer <- 250
-  primary_id <- "Name"
-  secondary_id <- "NULL"
-  dataset <- "vignette"
-  is_riboviz_gff <- TRUE
-  stop_in_cds <- FALSE
-
-  bam_to_h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}"
-  print(bam_to_h5_cmd_template)
-  cmd <- glue(bam_to_h5_cmd_template)
-  print(cmd)
-  if (FALSE) # TODO uncomment
-  {
-  exit_code <- system(cmd)
-  print(paste0("bam_to_h5.R exit code: ", exit_code))
-  expect_equal(exit_code, 0, info = "Unexpected exit code from bam_to_h5.R")
-  }
-
-  ##
-  ## READ GFF
-  ##
+  # READ GFF
   
   print("========== GFF ==========")
   gff <- readGFFAsDf(gff_file) # tbl_df tbl data.frame, list
   gff_names <- unique(gff$seqnames) # factor, integer
   print(paste0("GFF sequence names (", length(gff_names), "):"))
   print(gff_names)
-
-  ##
-  ## READ BAM
-  ##
+  
+  # READ BAM
   
   print("========== BAM ==========")
   bam_file_f <- Rsamtools::BamFile(bam_file)
@@ -290,9 +277,7 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   print(paste0("BAM sequence names (", length(bam_names), "):"))
   print(bam_names)
 
-  ##
-  ## READ H5
-  ##
+  # READ H5
 
   print("========== H5 ==========")
   h5_data <- rhdf5::h5ls(h5_file, recursive = 1) # data.frame, list
@@ -300,9 +285,7 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   print(paste0("H5 sequence names (", length(h5_names), "):"))
   print(h5_names)
 
-  ##
   ## VALIDATE H5
-  ##
 
   expect_equal(length(h5_names), length(gff_names),
     info = "Unexpected number of sequence names, compared to GFF")
@@ -319,9 +302,7 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   expect_true(all(sort(bam_names) %in% as.factor(sort(h5_names))),
     info = "Sequence names should be superset of those in BAM")
 
-  ##
   ## VALIDATE H5 (sequence-specific)
-  ##
 
   for (sequence in h5_names)
   {
@@ -338,4 +319,33 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   sequence <- "YAL018C" # GFF, BAM header, H5, no BAM body.
   validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
     dataset, buffer, min_read_length, max_read_length)
+}
+
+testthat::test_that("Run bam_to_h5.R and validate H5 file", {
+  withr::defer(delete_file(h5_file))
+
+  run_bam_to_h5 = FALSE # TODO remove
+
+  min_read_length <- 10
+  max_read_length <- 50
+  buffer <- 250
+  primary_id <- "Name"
+  secondary_id <- "NULL"
+  dataset <- "vignette"
+  is_riboviz_gff <- TRUE
+  stop_in_cds <- FALSE
+
+  bam_to_h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}"
+  print(bam_to_h5_cmd_template)
+  cmd <- glue(bam_to_h5_cmd_template)
+  print(cmd)
+
+  if (run_bam_to_h5) # TODO remove condition
+  {
+    exit_code <- system(cmd)
+    print(paste0("bam_to_h5.R exit code: ", exit_code))
+    expect_equal(exit_code, 0, info = "Unexpected exit code from bam_to_h5.R")
+  }
+  validate_h5(h5_file, gff_file, bam_file, dataset, buffer,
+    min_read_length, max_read_length) 
 })
