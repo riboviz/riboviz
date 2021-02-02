@@ -37,10 +37,10 @@ print(paste0("bam_to_h5.R: ", bam_to_h5))
 gff_file <- here::here("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
 print(paste0("GFF: ", gff_file))
 bam_file <- here::here("vignette/output/WTnone/WTnone.bam") # TODO remove
-bam_file <- here::here("WTnone.bam") # TODO remove
+#bam_file <- here::here("WTnone.bam") # TODO remove
 print(paste0("BAM: ", bam_file))
 h5_file <- here::here("vignette/output/WTnone/WTnone.h5") # TODO remove
-h5_file <- here::here("WTnone.h5") # TODO remove
+#h5_file <- here::here("WTnone.h5") # TODO remove
 print(paste0("HDF5: ", h5_file))
 
 context("test_bam_to_h5.R")
@@ -76,9 +76,8 @@ delete_file <- function(file_name)
 #' @export
 validate_h5_sequence <- function(sequence, h5_file, gff,
   bam_hdr_seq_info, bam, dataset, buffer, min_read_length,
-  max_read_length) 
+  max_read_length)
 {
-
   num_read_counts <- max_read_length - min_read_length + 1
 
   # Get sequence positions from GFF
@@ -106,14 +105,13 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
   # Get sequence entries from BAM
   bam_sequence = bam[(GenomicAlignments::seqnames(bam) == sequence)] # GenomicAlignments::GAlignments, S4
   print(paste0("Number of alignments: ", length(bam_sequence)))
-  bam_sequence_flag_zero = bam[(GenomicAlignments::seqnames(bam) == sequence)
-    & (mcols(bam)$flag == 0)]
-  print(paste0("Number of alignments (Flag = 0): ", length(bam_sequence_flag_zero)))
-  bam_sequence_flag_non_zero =
-    bam[(GenomicAlignments::seqnames(bam) == sequence)
-    & (mcols(bam)$flag != 0)]
-  print(paste0("Number of alignment (Flag != 0): ", length(bam_sequence_flag_non_zero)))
- 
+  bam_sequence_kept = bam_sequence[
+    (mcols(bam_sequence)$flag %in% c(0, 256))]
+  print(paste0("Number of alignments (Flag = 0|256): ", length(bam_sequence_kept)))
+  bam_sequence_discard = bam_sequence[
+    (!(mcols(bam_sequence)$flag %in% c(0, 256)))]
+  print(paste0("Number of alignments (Flag != 0|256): ", length(bam_sequence_discard)))
+
   # Validate buffer_left: number of nucleotides upstream of the start
   # codon (ATG) (UTR5 length)
   h5_buffer_left <- GetGeneBufferLeft(sequence, dataset, h5_file) # double
@@ -169,14 +167,15 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
 
   # Calculate expected reads_by_len based on information from BAM
   reads_by_len_bam <- as.array(integer(num_read_counts))
-  for (width in sort(GenomicAlignments::qwidth(bam_sequence_flag_zero)))
+  for (width in sort(GenomicAlignments::qwidth(bam_sequence_kept)))
   {
     index <- width - min_read_length + 1
     reads_by_len_bam[index] <- reads_by_len_bam[index] + 1
   }
+  print(paste0("reads_by_len_bam: ", toString(reads_by_len_bam)))
   expect_equal(h5_reads_by_len, reads_by_len_bam,
     info = "Unexpected reads_by_len, compared to those computed from BAM")
-
+  
   # Validate reads_total: Total number of ribosome sequences
   h5_reads_total <- GetGeneReadsTotal(sequence, dataset, h5_file) # 1D array of 1 double
   print(paste0("reads_total: ", h5_reads_total))
@@ -185,7 +184,7 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
   h5_reads_len_total <- Reduce("+", h5_reads_total)
   expect_equal(h5_reads_total[1], h5_reads_len_total,
     info = "reads_total does not equal sum of totals in reads_by_len")
-  expect_equal(h5_reads_total[1], length(bam_sequence_flag_zero),
+  expect_equal(h5_reads_total[1], length(bam_sequence_kept),
     info = "reads_total does not equal number of BAM alignments with Flag = 0")
 
   # Validate data: Positions and lengths of ribosome sequences within
@@ -210,10 +209,10 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
   if (sequence %in% GenomicAlignments::seqnames(bam))
   {
     print("Sequence has alignments in BAM.")
-    for (align in names(bam_sequence_flag_zero))
+    for (align in names(bam_sequence_kept))
     {
-      start <- GenomicAlignments::start(bam_sequence_flag_zero[align])
-      width <- GenomicAlignments::qwidth(bam_sequence_flag_zero[align])
+      start <- GenomicAlignments::start(bam_sequence_kept[align])
+      width <- GenomicAlignments::qwidth(bam_sequence_kept[align])
       width <- width - min_read_length + 1
       data[width, start] = data[width, start] + 1
     }
@@ -226,7 +225,6 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
       expect_equal(h5_data, data,
         info = "Unexpected data, expected 0s as no alignments in BAM")
   }
-
   reads_by_len_data = rowSums(data)
   expect_equal(h5_reads_by_len_data, reads_by_len_data,
     info = "Unexpected reads_by_len length, compared to those computed from data computed from BAM")
@@ -306,19 +304,21 @@ validate_h5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
 
   for (sequence in h5_names)
   {
-  # print(paste0("Sequence: ", sequence))
-  # validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam, 
-  # dataset, buffer, min_read_length, max_read_length)
+    print(paste0("Sequence: ", sequence))
+    validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam, 
+      dataset, buffer, min_read_length, max_read_length)
   }
-  sequence <- "YAL062W"
+
+  # TODO remove
+  # Pass using flag filtered tests:
+  sequence <- "YAL062W" # 2 BAM (2 Flag = 0), H5 reads 2. Pass flag filter. Pass no flag filter.
+  # sequence <- "YAL001C" # 6 BAM (4 Flag = 0, 2 Flag != 0), H5 reads 4. Pass flag filter. Fail no flag filter.
+  # sequence <- "YAL018C" # 0 BAM, 0 H5 reads. Pass flag filter. Pass no flag filter.
+  # sequence <- "YAL059W" # 17 BAM (15 Flag = 0, 2 Flag != 0), H5 reads 17. Fail flag filter. Pass no flag filter.
+  # sequence <- "YAL011W" # 17 BAM (12 Flag = 0, 5 Flag != 0), H5 reads 16. Fail flag filter. Fail no flag filter.
+
   validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
-    dataset, buffer, min_read_length, max_read_length)
-  sequence <- "YAL001C" # 6 BAM (4 Flag = 0, 2 Flag != 0), 4 HDF5
-  validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
-    dataset, buffer, min_read_length, max_read_length)
-  sequence <- "YAL018C" # GFF, BAM header, H5, no BAM body.
-  validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
-    dataset, buffer, min_read_length, max_read_length)
+     dataset, buffer, min_read_length, max_read_length)
 }
 
 testthat::test_that("Run bam_to_h5.R and validate H5 file", {
@@ -347,5 +347,5 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
     expect_equal(exit_code, 0, info = "Unexpected exit code from bam_to_h5.R")
   }
   validate_h5(h5_file, gff_file, bam_file, dataset, buffer,
-    min_read_length, max_read_length) 
+    min_read_length, max_read_length)
 })
