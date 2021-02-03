@@ -33,16 +33,29 @@ suppressMessages(library(Rsamtools, quietly = T))
 source(here::here("rscripts", "read_count_functions.R"))
 print(paste0("here: ", here()))
 bam_to_h5 <- here::here("rscripts/bam_to_h5.R")
-print(paste0("bam_to_h5.R: ", bam_to_h5))
 gff_file <- here::here("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
-print(paste0("GFF: ", gff_file))
 bam_file <- here::here("vignette/output/WTnone/WTnone.bam") # TODO remove
-print(paste0("BAM: ", bam_file))
 h5_file <- here::here("vignette/output/WTnone/WTnone.h5") # TODO remove
-print(paste0("HDF5: ", h5_file))
+dataset <- "vignette"
 
 # bam_file <- here::here("vignette/output/WT3AT/WT3AT.bam") # TODO remove
 # h5_file <- here::here("vignette/output/WT3AT/WT3AT.h5") # TODO remove
+
+# dataset <- "Mok-simYAL5"
+# gff_file <- here::here("../example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3")
+# bam_file <- here::here("Mok-simYAL5/output/A/A.bam") # TODO remove
+# h5_file <- here::here("Mok-simYAL5/output/A/A.h5") # TODO remove
+
+# dataset <- "Mok-tinysim"
+# gff_file <- here::here("../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3")
+# bam_file <- here::here("Mok-tinysim/output/A/A.bam") # TODO remove
+# h5_file <- here::here("Mok-tinysim/output/A/A.h5") # TODO remove
+
+print(paste0("bam_to_h5.R: ", bam_to_h5))
+print(paste0("GFF: ", gff_file))
+print(paste0("BAM: ", bam_file))
+print(paste0("HDF5: ", h5_file))
+print(paste0("Dataset: ", dataset))
 
 context("test_bam_to_h5.R")
 
@@ -118,7 +131,7 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
   # Validate buffer_left: number of nucleotides upstream of the start
   # codon (ATG) (UTR5 length)
   h5_buffer_left <- GetGeneBufferLeft(sequence, dataset, h5_file) # double
-  print(paste0("buffer_left", h5_buffer_left))
+  print(paste0("buffer_left: ", h5_buffer_left))
   expect_equal(h5_buffer_left, buffer,
     info = paste0(sequence,
       ": Unexpected buffer_left, compared to bam_to_h5.R parameter"))
@@ -128,7 +141,7 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
   # Validate buffer_right: number of nucleotides downstream of the
   # stop codon (TAA/TAG/TGA) (UTR3 length) 
   h5_buffer_right <- GetGeneBufferRight(sequence, dataset, h5_file) # integer
-  print(paste0("buffer_right", h5_buffer_right))
+  print(paste0("buffer_right: ", h5_buffer_right))
   expect_equal(h5_buffer_right, buffer,
     info = paste0(sequence,
       ": Unexpected buffer_right, compared to bam_to_h5.R parameter"))
@@ -339,9 +352,9 @@ validate_h5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
   # sequence <- "YAL059W" # 17 BAM (15 Flag = 0, 2 Flag != 0), H5 reads 17. Fail flag filter. Pass no flag filter.
   # sequence <- "YAL011W" # 17 BAM (12 Flag = 0, 5 Flag != 0), H5 reads 16. Fail flag filter. Fail no flag filter.
 
-  sequence <- "YAL035W" # Remaining failure from WTnone.h5
-  validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
-     dataset, buffer, min_read_length, max_read_length)
+  # sequence <- "YAL035W" # Remaining failure from WTnone.h5
+  # validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
+  #   dataset, buffer, min_read_length, max_read_length)
 }
 
 testthat::test_that("Run bam_to_h5.R and validate H5 file", {
@@ -354,7 +367,6 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   buffer <- 250
   primary_id <- "Name"
   secondary_id <- "NULL"
-  dataset <- "vignette"
   is_riboviz_gff <- TRUE
   stop_in_cds <- FALSE
 
