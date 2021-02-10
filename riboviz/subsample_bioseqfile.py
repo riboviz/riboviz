@@ -3,7 +3,7 @@ Subsample .fastq, .fastq.gz or other sequence file.
 """
 import gzip
 import os
-from random import random
+import random
 from Bio import SeqIO
 
 
@@ -57,17 +57,19 @@ def subsample_bioseqfile(
     row_count = 0
     row_count_out = 0
 
+    random.seed(42)
+
     with open_file(seqfilein, open_r) as in_handle, \
             open_file(seqfileout, open_w) as out_handle:
         for record in SeqIO.parse(in_handle, filetype):
             row_count += 1
             if row_count % 100000 == 0:
                 print(("read {rowcount}".format(rowcount=row_count)))
-                if random() < prob:
-                    row_count_out += 1
-                    if verbose:
-                        print((record.id))
-                    SeqIO.write(record, out_handle, filetype)
+            if random.random() < prob:
+                row_count_out += 1
+                if verbose:
+                    print((record.id))
+                SeqIO.write(record, out_handle, filetype)
     print(("subsampling complete; read {} records from {}, wrote {} records \
   to {}".format(row_count, seqfilein, row_count_out, seqfileout)
           ))
