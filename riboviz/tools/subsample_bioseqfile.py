@@ -82,6 +82,7 @@ def parse_command_line_options():
     options = parser.parse_args()
     return options
 
+
 def invoke_subsample_bioseqfile():
     """
     Parse command-line options then invoke
