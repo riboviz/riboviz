@@ -6,16 +6,16 @@ fixed probability.
 
 Usage::
 
-    python -m riboviz.tools.subsample_bioseqfile [-h]
-        -i seqfilein -o seqfileout
-        [-t FILE_TYPE] [-p PROB] [-f overwrite] [-v verbose]
+    subsample_bioseqfile.py [-h] -i SEQFILEIN -o SEQFILEOUT [-t FILE_TYPE]
+                                [-p PROB] [-f OVERWRITE] [-v]
+
 
     -h, --help                          show this help message and exit
-    -i seqfilein, --input seqfilein     SeqIO file input
-    -o seqfileout, --output seqfileout  SeqIO file output
+    -i SEQFILEIN, --input SEQFILEIN     SeqIO file input
+    -o SEQFILEOUT, --output SEQFILEOUT  SeqIO file output
     -t FILE_TYPE, --type FILE_TYPE      SeqIO file type (default 'fastq')
     -p PROB, --probability PROB         proportion to sample (default 0.01)
-    -f overwrite, --overwrite           overwrite output if file exists
+    -f OVERWRITE, --overwrite           overwrite output if file exists
                                         (default False)
     -v, --verbose                       print progress statements
 
