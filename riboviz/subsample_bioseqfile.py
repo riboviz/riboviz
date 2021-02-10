@@ -71,5 +71,5 @@ def subsample_bioseqfile(
                     print((record.id))
                 SeqIO.write(record, out_handle, filetype)
     print(("subsampling complete; read {} records from {}, wrote {} records \
-  to {}".format(row_count, seqfilein, row_count_out, seqfileout)
+        to {}".format(row_count, seqfilein, row_count_out, seqfileout)
           ))
