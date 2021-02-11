@@ -3,8 +3,6 @@
 # This assumes the following files are in the path:
 #
 # rscripts/bam_to_h5.R
-# vignette/input/yeast_YAL_CDS_w_250utrs.gff3
-# vignette/output/WTnone/WTnone.bam
 #
 # The test runs bam_to_h5.R using the GFF and BAM file then validates
 # the .h5 file created based upon its expected qualities given those
@@ -19,10 +17,13 @@
 #
 # Rscript -e 'library(testthat); test_file("rscripts/tests/testthat/test_bam_to_h5.R")'
 #
-# To use the test to validate an existing H5 file using a GFF and BAM
-# file:
-# * Set run_bam_to_h5 to FALSE (see above)
-# * Edit test_that("Run bam_to_h5.R and validate H5 file"...) (see below)
+# This test assumes the following test data files exist:
+#
+# data/Mok-tinysim-gffsam/A.sam
+# data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3
+#
+# To use this test with other data files see comments on
+# test_that("Run bam_to_h5.R and validate H5 file"...) below.
 
 suppressMessages(library(glue, quietly = T))
 suppressMessages(library(here, quietly = T))
@@ -35,8 +36,6 @@ source(here::here("rscripts", "read_count_functions.R"))
 print(paste0("here: ", here()))
 bam_to_h5 <- here::here("rscripts/bam_to_h5.R")
 
-run_bam_to_h5 <- TRUE
-
 context("test_bam_to_h5.R")
 
 #' delete_file(): Delete a file.
@@ -47,7 +46,7 @@ context("test_bam_to_h5.R")
 delete_file <- function(file_name)
 {
   print(paste0("Deleting ", file_name))
-  if (file.exists(file_name) & run_bam_to_h5)
+  if (file.exists(file_name))
   {
       file.remove(file_name)
   }
@@ -328,17 +327,23 @@ validate_h5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
 
 testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   withr::defer(delete_file(h5_file)) # Delete H5 when test completes.
+  withr::defer(delete_file(bam_file)) # Delete H5 when test completes.
+  withr::defer(delete_file(bam_bai_file)) # Delete H5 when test completes.
 
-  # To use this test to validate an existing H5 file using a GFF and BAM
-  # file:
-  # * Set run_bam_to_h5 to FALSE (see above)
+  # To use this test with other data files:
+  # * Edit gff_file.
+  # * If you have a SAM file, edit sam_file, set create_bam <- TRUE.
+  # * If you have a BAM file, comment out sam_file, edit bam_file,
+  #   edit_bam_bai_file, set create_bam <- FALSE.
   # * Edit variables to consistent with the configuration used to
-  #  create the H5 file. 
+  #   create the H5 file. 
 
-  gff_file <- here::here("../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3")
-  bam_file <- here::here("Mok-tinysim/output/A/A.bam")
-  # h5_file <- here::here("Mok-tinysim/output/A/A.h5")
-  h5_file <- here::here("test_bam_to_h5_data.h5")
+  create_bam <- TRUE
+
+  gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
+  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
+  bam_file <- here::here("test_bam_to_h5_data.bam")
+  bam_bai_file <- here::here("test_bam_to_h5_data.bam.bai")
   dataset <- "Mok-tinysim"
   buffer <- 20
   min_read_length <- 10
@@ -348,30 +353,41 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   is_riboviz_gff <- TRUE
   stop_in_cds <- FALSE
 
-  # gff_file <- here::here("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
-  # bam_file <- here::here("vignette/output/WTnone/WTnone.bam")
-  # h5_file <- here::here("vignette/output/WTnone/WTnone.h5")
-  # bam_file <- here::here("vignette/output/WT3AT/WT3AT.bam")
-  # h5_file <- here::here("vignette/output/WT3AT/WT3AT.h5")
-  # dataset <- "vignette"
-  # buffer <- 250
+  h5_file <- here::here("test_bam_to_h5_data.h5")
 
   print(paste0("bam_to_h5.R: ", bam_to_h5))
   print(paste0("GFF: ", gff_file))
+
+  if (create_bam)
+  {
+    print(paste0("SAM: ", sam_file))
+    bam_cmd_template <- "samtools view -S -b {sam_file} > {bam_file}"
+    bam_cmd <- glue(bam_cmd_template)
+    exit_code <- system(bam_cmd)
+    print(paste0("samtools view exit code: ", exit_code))
+    expect_equal(exit_code, 0,
+                 info = "Unexpected exit code from 'samtools view'")
+
+    bai_cmd_template <- "samtools index {bam_file}"
+    bai_cmd <- glue(bai_cmd_template)
+    exit_code <- system(bai_cmd)
+    print(paste0("samtools index exit code: ", exit_code))
+    expect_equal(exit_code, 0,
+        info = "Unexpected exit code from 'samtools index'")
+  }
+
   print(paste0("BAM: ", bam_file))
   print(paste0("HDF5: ", h5_file))
 
-  bam_to_h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}"
-  print(bam_to_h5_cmd_template)
-  cmd <- glue(bam_to_h5_cmd_template)
-  print(cmd)
+  h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}"
+  print(h5_cmd_template)
+  h5_cmd <- glue(h5_cmd_template)
+  print(h5_cmd)
 
-  if (run_bam_to_h5)
-  {
-    exit_code <- system(cmd)
-    print(paste0("bam_to_h5.R exit code: ", exit_code))
-    expect_equal(exit_code, 0, info = "Unexpected exit code from bam_to_h5.R")
-  }
+  exit_code <- system(h5_cmd)
+  print(paste0("bam_to_h5.R exit code: ", exit_code))
+  expect_equal(exit_code, 0,
+    info = "Unexpected exit code from bam_to_h5.R")
 
   validate_h5(h5_file, gff_file, bam_file, dataset, buffer,
     min_read_length, max_read_length)
