@@ -219,7 +219,7 @@ Used by `rscripts/tests/testthat/test_bam_to_h5.R`.
 
 Created using:
 
-* `riboviz`, `test-bam-to-h5-238` branch, 7b944eb, Wed Feb 3 07:57:11 2021.
+* [riboviz](https://github.com/riboviz/riboviz), `test-bam-to-h5-238` branch, 7b944eb, Wed Feb 3 07:57:11 2021.
 * [example-datasets](https://github.com/riboviz/example-datasets/), `origin` branch, commit 24c2fe4, Mon Jan 18 17:21:17 2021.
 * [amandamok/simRiboSeq](https://github.com/amandamok/simRiboSeq), `master` branch, commit 8367709, Wed Jan 13 13:51:18 2021.
 
