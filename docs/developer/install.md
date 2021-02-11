@@ -29,7 +29,7 @@ $ pip install sphinx
 | roxygen2 | [roxygen2](https://cloud.r-project.org/web/packages/roxygen2/index.html) |
 | devtools | [devtools](https://cran.r-project.org/web/packages/devtools/index.html) |
 | glue | [glue package on CRAN](https://cran.r-project.org/web/packages/glue/index.html) |
-| testthat | [testthat package on CRAN](https://cran.r-project.org/web/packages/testthat/index.html), [testthat package documentation](https://testthat.r-lib.org/), [
+| testthat | [testthat package on CRAN](https://cran.r-project.org/web/packages/testthat/index.html), [testthat package documentation](https://testthat.r-lib.org/) |
 | withr | [withr package on CRAN](https://cran.r-project.org/web/packages/withr/index.html) |
 
 ```console
