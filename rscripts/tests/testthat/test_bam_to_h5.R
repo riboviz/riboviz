@@ -11,10 +11,6 @@
 # of the input GFF and BAM files and the bam_to_h5.R command-line
 # parameters.
 #
-# Note: for rapid development this does not currently run bam_to_h5.R
-# but validates vignette/output/WTnone/WTnone.h5. TODO remove this
-# comment when development is complete.
-#
 # To run interactively:
 #
 # test_file("rscripts/tests/testthat/test_bam_to_h5.R")
@@ -22,6 +18,10 @@
 # To run from console:
 #
 # Rscript -e 'library(testthat); test_file("rscripts/tests/testthat/test_bam_to_h5.R")'
+#
+# To use the test to validate an existing H5 file using a GFF and BAM
+# file, set run_bam_to_h5 to FALSE then edit the variables below to be
+# consistent with the configuration used to create the H5 file.
 
 suppressMessages(library(glue, quietly = T))
 suppressMessages(library(here, quietly = T))
@@ -33,29 +33,34 @@ suppressMessages(library(Rsamtools, quietly = T))
 source(here::here("rscripts", "read_count_functions.R"))
 print(paste0("here: ", here()))
 bam_to_h5 <- here::here("rscripts/bam_to_h5.R")
-gff_file <- here::here("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
-bam_file <- here::here("vignette/output/WTnone/WTnone.bam") # TODO remove
-h5_file <- here::here("vignette/output/WTnone/WTnone.h5") # TODO remove
-dataset <- "vignette"
 
-# bam_file <- here::here("vignette/output/WT3AT/WT3AT.bam") # TODO remove
-# h5_file <- here::here("vignette/output/WT3AT/WT3AT.h5") # TODO remove
+run_bam_to_h5 <- TRUE
 
-# dataset <- "Mok-simYAL5"
-# gff_file <- here::here("../example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3")
-# bam_file <- here::here("Mok-simYAL5/output/A/A.bam") # TODO remove
-# h5_file <- here::here("Mok-simYAL5/output/A/A.h5") # TODO remove
+gff_file <- here::here("../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3")
+bam_file <- here::here("Mok-tinysim/output/A/A.bam")
+# h5_file <- here::here("Mok-tinysim/output/A/A.h5")
+h5_file <- here::here("test_bam_to_h5_data.h5")
+dataset <- "Mok-tinysim"
+buffer <- 20
+min_read_length <- 10
+max_read_length <- 50
+primary_id <- "Name"
+secondary_id <- "NULL"
+is_riboviz_gff <- TRUE
+stop_in_cds <- FALSE
 
-# dataset <- "Mok-tinysim"
-# gff_file <- here::here("../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3")
-# bam_file <- here::here("Mok-tinysim/output/A/A.bam") # TODO remove
-# h5_file <- here::here("Mok-tinysim/output/A/A.h5") # TODO remove
+# gff_file <- here::here("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
+# bam_file <- here::here("vignette/output/WTnone/WTnone.bam")
+# h5_file <- here::here("vignette/output/WTnone/WTnone.h5")
+# bam_file <- here::here("vignette/output/WT3AT/WT3AT.bam")
+# h5_file <- here::here("vignette/output/WT3AT/WT3AT.h5")
+# dataset <- "vignette"
+# buffer <- 250
 
 print(paste0("bam_to_h5.R: ", bam_to_h5))
 print(paste0("GFF: ", gff_file))
 print(paste0("BAM: ", bam_file))
 print(paste0("HDF5: ", h5_file))
-print(paste0("Dataset: ", dataset))
 
 context("test_bam_to_h5.R")
 
@@ -67,9 +72,9 @@ context("test_bam_to_h5.R")
 delete_file <- function(file_name)
 {
   print(paste0("Deleting ", file_name))
-  if (file.exists(file_name))
+  if (file.exists(file_name) & run_bam_to_h5)
   {
-    # file.remove(file_name) # TODO uncomment
+      file.remove(file_name)
   }
 }
 
@@ -343,44 +348,24 @@ validate_h5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
     validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
       dataset, buffer, min_read_length, max_read_length)
   }
-
-  # TODO remove
-  # Pass using flag filtered tests:
-  sequence <- "YAL062W" # 2 BAM (2 Flag = 0), H5 reads 2. Pass flag filter. Pass no flag filter.
-  # sequence <- "YAL001C" # 6 BAM (4 Flag = 0, 2 Flag != 0), H5 reads 4. Pass flag filter. Fail no flag filter.
-  # sequence <- "YAL018C" # 0 BAM, 0 H5 reads. Pass flag filter. Pass no flag filter.
-  # sequence <- "YAL059W" # 17 BAM (15 Flag = 0, 2 Flag != 0), H5 reads 17. Fail flag filter. Pass no flag filter.
-  # sequence <- "YAL011W" # 17 BAM (12 Flag = 0, 5 Flag != 0), H5 reads 16. Fail flag filter. Fail no flag filter.
-
-  # sequence <- "YAL035W" # Remaining failure from WTnone.h5
-  # validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
-  #   dataset, buffer, min_read_length, max_read_length)
 }
 
+
 testthat::test_that("Run bam_to_h5.R and validate H5 file", {
-  withr::defer(delete_file(h5_file))
-
-  run_bam_to_h5 <- FALSE # TODO remove
-
-  min_read_length <- 10
-  max_read_length <- 50
-  buffer <- 250
-  primary_id <- "Name"
-  secondary_id <- "NULL"
-  is_riboviz_gff <- TRUE
-  stop_in_cds <- FALSE
+  withr::defer(delete_file(h5_file)) # Delete H5 when test completes.
 
   bam_to_h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}"
   print(bam_to_h5_cmd_template)
   cmd <- glue(bam_to_h5_cmd_template)
   print(cmd)
 
-  if (run_bam_to_h5) # TODO remove condition
+  if (run_bam_to_h5)
   {
     exit_code <- system(cmd)
     print(paste0("bam_to_h5.R exit code: ", exit_code))
     expect_equal(exit_code, 0, info = "Unexpected exit code from bam_to_h5.R")
   }
+
   validate_h5(h5_file, gff_file, bam_file, dataset, buffer,
     min_read_length, max_read_length)
 })
