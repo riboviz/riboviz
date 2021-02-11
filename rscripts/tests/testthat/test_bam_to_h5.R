@@ -20,8 +20,9 @@
 # Rscript -e 'library(testthat); test_file("rscripts/tests/testthat/test_bam_to_h5.R")'
 #
 # To use the test to validate an existing H5 file using a GFF and BAM
-# file, set run_bam_to_h5 to FALSE then edit the variables below to be
-# consistent with the configuration used to create the H5 file.
+# file:
+# * Set run_bam_to_h5 to FALSE (see above)
+# * Edit test_that("Run bam_to_h5.R and validate H5 file"...) (see below)
 
 suppressMessages(library(glue, quietly = T))
 suppressMessages(library(here, quietly = T))
@@ -35,32 +36,6 @@ print(paste0("here: ", here()))
 bam_to_h5 <- here::here("rscripts/bam_to_h5.R")
 
 run_bam_to_h5 <- TRUE
-
-gff_file <- here::here("../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3")
-bam_file <- here::here("Mok-tinysim/output/A/A.bam")
-# h5_file <- here::here("Mok-tinysim/output/A/A.h5")
-h5_file <- here::here("test_bam_to_h5_data.h5")
-dataset <- "Mok-tinysim"
-buffer <- 20
-min_read_length <- 10
-max_read_length <- 50
-primary_id <- "Name"
-secondary_id <- "NULL"
-is_riboviz_gff <- TRUE
-stop_in_cds <- FALSE
-
-# gff_file <- here::here("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
-# bam_file <- here::here("vignette/output/WTnone/WTnone.bam")
-# h5_file <- here::here("vignette/output/WTnone/WTnone.h5")
-# bam_file <- here::here("vignette/output/WT3AT/WT3AT.bam")
-# h5_file <- here::here("vignette/output/WT3AT/WT3AT.h5")
-# dataset <- "vignette"
-# buffer <- 250
-
-print(paste0("bam_to_h5.R: ", bam_to_h5))
-print(paste0("GFF: ", gff_file))
-print(paste0("BAM: ", bam_file))
-print(paste0("HDF5: ", h5_file))
 
 context("test_bam_to_h5.R")
 
@@ -353,6 +328,38 @@ validate_h5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
 
 testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   withr::defer(delete_file(h5_file)) # Delete H5 when test completes.
+
+  # To use this test to validate an existing H5 file using a GFF and BAM
+  # file:
+  # * Set run_bam_to_h5 to FALSE (see above)
+  # * Edit variables to consistent with the configuration used to
+  #  create the H5 file. 
+
+  gff_file <- here::here("../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3")
+  bam_file <- here::here("Mok-tinysim/output/A/A.bam")
+  # h5_file <- here::here("Mok-tinysim/output/A/A.h5")
+  h5_file <- here::here("test_bam_to_h5_data.h5")
+  dataset <- "Mok-tinysim"
+  buffer <- 20
+  min_read_length <- 10
+  max_read_length <- 50
+  primary_id <- "Name"
+  secondary_id <- "NULL"
+  is_riboviz_gff <- TRUE
+  stop_in_cds <- FALSE
+
+  # gff_file <- here::here("vignette/input/yeast_YAL_CDS_w_250utrs.gff3")
+  # bam_file <- here::here("vignette/output/WTnone/WTnone.bam")
+  # h5_file <- here::here("vignette/output/WTnone/WTnone.h5")
+  # bam_file <- here::here("vignette/output/WT3AT/WT3AT.bam")
+  # h5_file <- here::here("vignette/output/WT3AT/WT3AT.h5")
+  # dataset <- "vignette"
+  # buffer <- 250
+
+  print(paste0("bam_to_h5.R: ", bam_to_h5))
+  print(paste0("GFF: ", gff_file))
+  print(paste0("BAM: ", bam_file))
+  print(paste0("HDF5: ", h5_file))
 
   bam_to_h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}"
   print(bam_to_h5_cmd_template)
