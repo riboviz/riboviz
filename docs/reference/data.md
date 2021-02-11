@@ -227,8 +227,6 @@ Get `example-datasets`:
 
 ```console
 $ git clone https://github.com/riboviz/example-datasets/
-$ cd example-datasets
-$ head simulated/mok/Mok-tinysim_config.yaml
 ```
 
 Get `amandamok/simRiboSeq`:
