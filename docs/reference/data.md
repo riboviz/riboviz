@@ -232,8 +232,7 @@ $ git clone https://github.com/riboviz/example-datasets/
 Get `amandamok/simRiboSeq`:
 
 ```console
-$ git clone https://github.com/amandamok/simRiboSeq
-$ ls -1 simulation_runs/riboviz/
+$ git clone https://github.com/amandamok/simRiboSeq/simulation_runs/riboviz/
 ...
 tiny_2genes.fq
 ```
