@@ -213,6 +213,67 @@ Data was imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb
 
 ---
 
+# GFF and BAM files for testing `bam_to_h5.R`
+
+Used by `rscripts/tests/testthat/test_bam_to_h5.R`.
+
+Created using:
+
+* `riboviz`, `test-bam-to-h5-238` branch, 7b944eb, Wed Feb 3 07:57:11 2021.
+* [example-datasets](https://github.com/riboviz/example-datasets/), `origin` branch, commit 24c2fe4, Mon Jan 18 17:21:17 2021.
+* [amandamok/simRiboSeq](https://github.com/amandamok/simRiboSeq), `master` branch, commit 8367709, Wed Jan 13 13:51:18 2021.
+
+Get `example-datasets`:
+
+```console
+$ git clone https://github.com/riboviz/example-datasets/
+$ cd example-datasets
+$ head simulated/mok/Mok-tinysim_config.yaml
+```
+
+Get `amandamok/simRiboSeq`:
+
+```console
+$ git clone https://github.com/amandamok/simRiboSeq
+$ ls -1 simulation_runs/riboviz/
+...
+tiny_2genes.fq
+```
+
+Create configuration files directory in `riboviz`:
+
+```console
+$ cd riboviz
+$ mkdir -p Mok-tinysim/input
+$ cp ../simRiboSeq/simulation_runs/riboviz/tiny_2genes.fq Mok-tinysim/input/
+$ cp ../example-datasets/simulated/mok/Mok-tinysim_config.yaml .
+```
+
+Edit `.yaml `and change `../../riboviz/` to `../`:
+
+```
+orf_fasta_file: ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa
+orf_gff_file: ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3
+rrna_fasta_file: ../example-datasets/simulated/mok/contaminants/Sc_rRNA_example.fa
+```
+
+Run RiboViz:
+
+```console
+$ nextflow run prep_riboviz.nf  -params-file Mok-tinysim_config.yaml -ansi-log false
+```
+
+Create and populate `data/Mok-tinysim-gffsam`:
+
+```console
+$ mkdir data/Mok-tinysim-gffsam
+$ cp ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 data/Mok-tinysim-gffsam/
+$ samtools view -h Mok-tinysim/output/A/A.bam > data/Mok-tinysim-gffsam/A.sam
+```
+
+---
+
+
 ## `riboviz/test/` test data files
 
 ### `riboviz.test.test_trim_5p_mismatch` test data files
