@@ -213,7 +213,7 @@ Data was imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb
 
 ---
 
-# GFF and BAM files for testing `bam_to_h5.R`
+## GFF and BAM files for testing `bam_to_h5.R`
 
 Used by `rscripts/tests/testthat/test_bam_to_h5.R`.
 
