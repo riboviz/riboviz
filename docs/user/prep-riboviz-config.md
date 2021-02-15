@@ -109,6 +109,7 @@ Example `umi_regexp` are:
 
 * `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$` extracts a 4nt UMI from the 5' end of a read and a 4nt UMI from the 3' end.
 * `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})(?P<cell_1>.{3})$` extracts a 3nt barcode from the 3' end of a read then extracts a 4nt UMI from the 5' end and a 4nt UMI from the 3' end.
+* `(?P<umi_1>.{8})` extracts an 8nt UMI from the 5' end of the read.  
 
 ### Constraints
 
