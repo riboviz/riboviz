@@ -326,10 +326,6 @@ validate_h5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
 
 
 testthat::test_that("Run bam_to_h5.R and validate H5 file", {
-  withr::defer(delete_file(h5_file)) # Delete H5 when test completes.
-  withr::defer(delete_file(bam_file)) # Delete H5 when test completes.
-  withr::defer(delete_file(bam_bai_file)) # Delete H5 when test completes.
-
   # To use this test with other data files:
   # * Edit gff_file.
   # * If you have a SAM file, edit sam_file, set create_bam <- TRUE.
@@ -339,6 +335,13 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   #   create the H5 file. 
 
   create_bam <- TRUE
+
+  withr::defer(delete_file(h5_file)) # Delete H5 when test completes.
+  if (create_bam)
+  {
+    withr::defer(delete_file(bam_file)) # Delete H5 when test completes.
+    withr::defer(delete_file(bam_bai_file)) # Delete H5 when test completes.
+  }
 
   gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
