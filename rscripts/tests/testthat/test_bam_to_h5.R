@@ -63,32 +63,52 @@ delete_file <- function(file_name)
 #' @param bam: Data on alignments from BAM file
 #' (GenomicAlignments::GAlignments, S4) 
 #' @param dataset: Dataset name (character, character)
-#' @param buffer: Buffer size (numeric, double)
+#' @param buffer: Buffer size (used if is_riboviz_gff is TRUE)
+#  (numeric, double)
 #' @param min_read_length: Minimum read length (numeric, double)
 #' @param max_read_length: Maximum read length (numeric, double)
+#' @param is_riboviz_gff: Is the GFF file with UTR5, CDS, and UTR3
+#' elements per gene?" (logical, logical)
 #' @export
 validate_h5_sequence <- function(sequence, h5_file, gff,
   bam_hdr_seq_info, bam, dataset, buffer, min_read_length,
-  max_read_length)
+  max_read_length, is_riboviz_gff)
 {
   num_read_counts <- max_read_length - min_read_length + 1
 
   # Get sequence positions from GFF
-  gff_utr5_start <- GetCDS5start(sequence, gff, ftype="UTR5")
-  gff_utr5_end <- GetCDS3end(sequence, gff, ftype="UTR5")
-  gff_utr5_length <- gff_utr5_end - gff_utr5_start + 1
   gff_cds_start <- GetCDS5start(sequence, gff, ftype="CDS")
   gff_cds_end <- GetCDS3end(sequence, gff, ftype="CDS")
   gff_cds_length <- gff_cds_end - gff_cds_start + 1
-  gff_utr3_start <- GetCDS5start(sequence, gff, ftype="UTR3")
-  gff_utr3_end <- GetCDS3end(sequence, gff, ftype="UTR3")
-  gff_utr3_length <- gff_utr3_end - gff_utr3_start + 1
-  print(paste0("UTR5 start/length/end: ", gff_utr5_start, " ",
-    gff_utr5_length, " ", gff_utr5_end))
+  # Get sequence positions from GFF or use buffer
+  if (is_riboviz_gff)
+  {
+    utr5_start <- GetCDS5start(sequence, gff, ftype="UTR5")
+    utr5_end <- GetCDS3end(sequence, gff, ftype="UTR5")
+    utr5_length <- utr5_end - utr5_start + 1
+    utr3_start <- GetCDS5start(sequence, gff, ftype="UTR3")
+    utr3_end <- GetCDS3end(sequence, gff, ftype="UTR3")
+    utr3_length <- utr3_end - utr3_start + 1
+    h5_buffer_left_info <- "Unexpected buffer_left, compared to GFF UTR5 length"
+    h5_buffer_right_info <- "Unexpected buffer_right, compared to GFF UTR5 length"
+  }
+  else
+  {
+    utr5_start <- 1
+    utr5_length <- buffer
+    utr5_end <- utr5_start + buffer - 1
+    utr3_start <- gff_cds_end + 1
+    utr3_length <- buffer
+    utr3_end <- utr3_start + buffer - 1
+    h5_buffer_left_info <- "Unexpected buffer_left, compared to bam_to_h5.R parameter"
+    h5_buffer_right_info <- "Unexpected buffer_right, compared to bam_to_h5.R parameter"
+  }
+  print(paste0("UTR5 start/length/end: ", utr5_start, " ",
+    utr5_length, " ", utr5_end))
   print(paste0("CDS start/length/end: ", gff_cds_start, " ",
     gff_cds_length, " ", gff_cds_end))
-  print(paste0("UTR3 start/length/end: ", gff_utr3_start, " ",
-    gff_utr3_length, " ", gff_utr3_end))
+  print(paste0("UTR3 start/length/end: ", utr3_start, " ",
+    utr3_length, " ", utr3_end))
 
   # Get sequence length from BAM header
   bam_hdr_sequence <- bam_hdr_seq_info[sequence] # GenomeInfoDb::Seqinfo, S4
@@ -111,11 +131,8 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
   # codon (ATG) (UTR5 length)
   h5_buffer_left <- GetGeneBufferLeft(sequence, dataset, h5_file) # double
   print(paste0("buffer_left: ", h5_buffer_left))
-  expect_equal(h5_buffer_left, buffer,
-    info = paste0(sequence,
-      ": Unexpected buffer_left, compared to bam_to_h5.R parameter"))
-  expect_equal(h5_buffer_left, gff_utr5_length,
-    info = "Unexpected buffer_left, compared to GFF UTR5 length")
+  expect_equal(h5_buffer_left, utr5_length,
+    info = paste0(sequence, ": ", h5_buffer_left_info))
 
   # Validate buffer_right: number of nucleotides downstream of the
   # stop codon (TAA/TAG/TGA) (UTR3 length) 
@@ -124,9 +141,8 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
   expect_equal(h5_buffer_right, buffer,
     info = paste0(sequence,
       ": Unexpected buffer_right, compared to bam_to_h5.R parameter"))
-  expect_equal(h5_buffer_right, gff_utr3_length,
-    info = paste0(sequence,
-      ": Unexpected buffer_right, compared to GFF UTR3 length"))
+  expect_equal(h5_buffer_right, utr3_length,
+    info = paste0(sequence, ": ", h5_buffer_right_info))
 
   # Validate start_codon_pos: Positions corresponding to start codon
   # of CDS in organism sequence
@@ -204,7 +220,7 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
   expect_equal(ncol(h5_data), num_data_cols,
     info = paste0(sequence,
       ": Number of data columns does not equal stop_codon_pos[3] + buffer"))
-  expect_equal(ncol(h5_data), gff_utr3_end,
+  expect_equal(ncol(h5_data), utr3_end,
     info = paste0(sequence,
       ": Number of data columns does not equal GFF UTR3 final nt position"))
   expect_equal(ncol(h5_data), bam_hdr_sequence_seq_length,
@@ -253,12 +269,15 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
 #' @param gff_file: GFF file (character, character)
 #' @param bam_file: BAM file (character, character)
 #' @param dataset: Dataset name (character, character)
-#' @param buffer: Buffer size (numeric, double)
+#' @param buffer: Buffer size (used if is_riboviz_gff is TRUE)
+#  (numeric, double)
 #' @param min_read_length: Minimum read length (numeric, double)
 #' @param max_read_length: Maximum read length (numeric, double)
+#' @param is_riboviz_gff: Is the GFF file with UTR5, CDS, and UTR3
+#' elements per gene?" (logical, logical)
 #' @export
 validate_h5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
-  min_read_length, max_read_length)
+  min_read_length, max_read_length, is_riboviz_gff)
 {
 
   # READ GFF
@@ -320,7 +339,7 @@ validate_h5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
   {
     print(paste0("Sequence: ", sequence))
     validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
-      dataset, buffer, min_read_length, max_read_length)
+      dataset, buffer, min_read_length, max_read_length, is_riboviz_gff)
   }
 }
 
@@ -392,5 +411,5 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
     info = "Unexpected exit code from bam_to_h5.R")
 
   validate_h5(h5_file, gff_file, bam_file, dataset, buffer,
-    min_read_length, max_read_length)
+    min_read_length, max_read_length, is_riboviz_gff)
 })
