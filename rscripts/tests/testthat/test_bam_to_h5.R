@@ -124,9 +124,9 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
   expect_equal(h5_buffer_right, buffer,
     info = paste0(sequence,
       ": Unexpected buffer_right, compared to bam_to_h5.R parameter"))
-  expect_equal(h5_buffer_left, gff_utr3_length,
+  expect_equal(h5_buffer_right, gff_utr3_length,
     info = paste0(sequence,
-      ": Unexpected buffer_left, compared to GFF UTR3 length"))
+      ": Unexpected buffer_right, compared to GFF UTR3 length"))
 
   # Validate start_codon_pos: Positions corresponding to start codon
   # of CDS in organism sequence
