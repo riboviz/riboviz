@@ -37,8 +37,8 @@ The `reads` group, `/<gene>/<dataset>/reads`, for a `<gene>` has several attribu
 
 | Attribute | Description | Origin |
 | --------- |------------ | ------ |
-| `buffer_left` | Number of nucleotides upstream of the start codon (ATG) (UTR5 length) | GFF file OR `buffer` configuration parameter |
-| `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | GFF file OR `buffer` configuration parameter |
+| `buffer_left` | Number of nucleotides upstream of the start codon (ATG) (UTR5 length) | GFF file OR `buffer` configuration parameter (if `is_riboviz_gff` is false) |
+| `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | GFF file OR `buffer` configuration parameter  (if `is_riboviz_gff` is false) |
 | `start_codon_pos` | Positions corresponding to start codon of CDS (typically 251, 252, 253) | GFF file |
 | `stop_codon_pos` | Positions corresponding to stop codon of CDS | GFF file |
 | `lengths` | Lengths of mapped reads | Range from `buffer_left` configuration parameter to `buffer_right` configuration parameter (e.g. 10,...,50) |
@@ -59,14 +59,14 @@ GROUP "/" {
 	       DATATYPE  H5T_IEEE_F64LE
 	       DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
 	       DATA {
-	       (0): <buffer OR CDS UTR5 length from GFF file>
+	       (0): <CDS UTR5 length from GFF file OR buffer (if is_riboviz_gff is false)>
 	       }
 	    }
 	    ATTRIBUTE "buffer_right" {
 	       DATATYPE  H5T_STD_I32LE
 	       DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
 	       DATA {
-	       (0): <buffer OR CDS UTR3 length from GFF file>
+	       (0): <CDS UTR3 length from GFF file OR buffer (if is_riboviz_gff is false)>
 	       }
 	    }
 	    ATTRIBUTE "lengths" {
@@ -139,12 +139,12 @@ GROUP "/" {
 
 where:
 
-* `gene`: Gene ID from GFF file OR reference sequence name from BAM file.
+* `gene`: Gene ID from GFF file (equal to reference sequence name from BAM file).
 * `read_length`: `max_read_length` - `min_read_length` + 1
 * 0 < `m` < `n` < `read_length`. Exact values of `m` and `n` may differ across specific `ATTRIBUTE` and `DATA` items.
 * `reads_by_len`:
   - `reads_by_len[i]` = number of alignments in BAM which have Flag equal to 0 or 256 and length equal to `lengths[i]`. This equals the sum of `DATA[*, i]` i.e. sum across all positions for a specific read length.
-* `sequence_length`: position of final nt of UTR3 from GFF file OR Length of sequence from BAM file header `LN` value.
+* `sequence_length`: position of final nt of UTR3 from GFF file (equal to length of sequence from BAM file header `LN` value).
 * `DATASET "data"`:
   - 0 <= `p` <= `sequence_length - 1`
   - `DATA[p, i]` equals 1 if there is an alignment in the BAM file at position `p`+1 which has length equal to `lengths[i]` and BAM alignment has Flag 0 or 256 (see [Understanding the BAM flags](https://davetang.org/muse/2014/03/06/understanding-bam-flags/) and [Decoding SAM flags](https://broadinstitute.github.io/picard/explain-flags.html)); 0 otherwise.
