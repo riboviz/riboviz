@@ -380,7 +380,6 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   print(paste0("HDF5: ", h5_file))
 
   h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}"
-  print(h5_cmd_template)
   h5_cmd <- glue(h5_cmd_template)
   print(h5_cmd)
 
