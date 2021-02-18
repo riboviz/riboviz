@@ -1,16 +1,14 @@
 
 ---
 title: "AnalysisOutputs"
-author: "FlicAnderson"
-date: "19/08/2020"
 output: html_document
 params: 
   yamlfile: NA
   sampleid: NA
+  three_nucleotide_periodicity_data_file: NA
   read_length_data_file: NA
+  pos_sp_rpf_norm_reads_data_file: NA
 ---
-
-### SETUP
 
 NOTE: installed & added yaml, knitr & rmarkdown to the library() calls! Need to update documentation/installation etc too. 
 
@@ -19,26 +17,42 @@ knitr::opts_chunk$set(echo = TRUE)
 
 suppressMessages(library(here))
 #suppressMessages(library(magrittr))
+suppressMessages(library(getopt))
 suppressMessages(library(knitr)) 
 suppressMessages(library(yaml))
 suppressMessages(library(tidyverse))
-
-
-yamlfilepath <- params$yamlfile
-sampleid <- params$sampleid
-read_length_data_file <- params$read_length_data_file
 ```
 
-```{r printparams}
-print(yamlfilepath)
+```{r optional_params, eval=FALSE, include=FALSE}
 
-print(sampleid)
+### handling optional outputs parameters: 
 
-print(read_length_data_file)
+# put these into the yaml section: 
+  gene_read_frames_data_file: NA
+
+## put this into the load data section: 
+
+# read frame
+gene_read_frames_data <- read_tsv(
+  file = params$gene_read_frames_data_file, 
+  skip = 4, # this avoids the provenance info
+  col_names = TRUE)
+
+## put this into the plot section
+
+# plot read frame
+PlotGeneReadFrames(params$gene_read_frames_data)
 ```
 
+## Sample Name: `r params$sampleid`
 
-```{r source_script, eval=FALSE, include=FALSE}
+```{r printparams, eval=FALSE, include=FALSE}
+#print(params$yamlfile)
+print(params$sampleid)
+print(params$three_nucleotide_periodicity_data_file)
+```
+
+```{r source_script, include=FALSE}
 
 source(here::here("rscripts", "provenance.R"), local = knitr::knit_global())
 source(here::here("rscripts", "read_count_functions.R"), local = knitr::knit_global())
@@ -46,19 +60,14 @@ source(here::here("rscripts", "stats_figs_block_functions.R"), local = knitr::kn
 # or sys.source("your-script.R", envir = knitr::knit_global())
 ```
 
-```{r close_connections_1, include=FALSE}
-# close any open hdf5 file connection
-rhdf5::h5closeAll()
-```
+### Provenance
 
-### PROVENANCE
-
-```{r provenance, eval=FALSE, warning=FALSE, include=FALSE}
+```{r provenance, echo=FALSE, warning=FALSE}
 # handle interactive vs standard running
 
 if(is.na(getopt::get_Rscript_filename())){
   this_script <- "AnalysisOutputs.Rmd"
-  path_to_this_script <- here("rmarkdown", this_script)
+  path_to_this_script <- here::here("rmarkdown", this_script)
 } else {
   this_script <- getopt::get_Rscript_filename()
   path_to_this_script <- this_script
@@ -68,25 +77,54 @@ if(is.na(getopt::get_Rscript_filename())){
 print_provenance(path_to_this_script)
 ```
 
-## Sample Name: `r params$sampleid`
+```{r message=FALSE, include=FALSE}
 
 ### Load Data: 
 
-```{r}
-read_length_data <- read_tsv(file = params$read_length_data_file, skip = 4, col_names = TRUE)
+# three nucleotide periodicity
+three_nucleotide_periodicity_data <- read_tsv(
+  file = params$three_nucleotide_periodicity_data_file, 
+  skip = 4, # this avoids the provenance info
+  col_names = TRUE)
 
-print(str(read_length_data))
+  
+# read length
+read_length_data <- read_tsv(
+  file = params$read_length_data_file, 
+  skip = 4, # this avoids the provenance info
+  col_names = TRUE)
+
+# position specific distribution of reads 
+pos_sp_rpf_norm_reads_data <- read_tsv(
+  file = params$pos_sp_rpf_norm_reads_data_file, 
+  skip = 4, # this avoids the provenance info
+  col_names = TRUE)
 
 ```
 
+#### Plotting three nucleotide periodicity. 
 
-### Plot: 
+```{r plot_threenucleotideperiodicity, echo=FALSE}
 
-Plotting read lengths from input file. 
+# three nucleotide periodicity
+PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
 
-```{r plot_readlength}
+```
 
-#PlotReadLengths(read_length_data)
+#### Plotting read lengths.
 
-ggplot(read_length_data, aes(x = Length, y = Counts)) + geom_bar(stat = "identity")
+```{r plot_readlength, echo=FALSE}
+
+# read length
+PlotReadLengths(read_length_data)
+
+```
+
+#### Plotting read lengths.
+
+```{r plot_positionspecificdistribution, echo=FALSE}
+
+# position specific distribution of reads
+PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
+
 ```
