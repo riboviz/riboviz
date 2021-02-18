@@ -148,6 +148,10 @@ def helpMessage() {
     * 'stop_in_cds': Are stop codons part of the CDS annotations in
       GFF? (default 'FALSE')
 
+    Visualization parameters:
+    
+    * 'run_static_html': run visualization dashboard? (default 'TRUE')
+
     General:
 
     * 'validate_only': Validate configuration, check that mandatory
@@ -208,7 +212,7 @@ params.num_processes = 1
 params.publish_index_tmp = false
 params.primary_id = "Name"
 params.rpf = true
-params.run_dashboard = true
+params.run_static_html = true
 params.secondary_id = "NULL"
 params.stop_in_cds = false
 params.samsort_memory = null
@@ -1122,7 +1126,7 @@ process countReads {
         """
 }
 
-// create 'new' yaml for use in dashboard process
+// create 'new' yaml for use in static_html process
 config_yaml = new Yaml().dump(params)
 
 // fun with config yamls
@@ -1138,7 +1142,7 @@ process createConfigFile {
 }
 
 // run visualization system to generate interactive output report: riboviz/#239
-process dashboard {
+process static_html {
     tag "${sample_id}"
     publishDir "${params.dir_out}/${sample_id}", \
     mode: 'copy', overwrite: true
@@ -1149,27 +1153,24 @@ process dashboard {
       file "read_counts.tsv" from read_counts_tsv
       tuple val(sample_id), file("read_lengths.tsv") \
           from read_lengths_tsv
-      // think the read_lengths needs to be more like this format:
-      //tuple val(sample_id), file(sample_h5) from h5s
 
     output:
-      file("${html_output}") into dashboard_output
+      file "${sample_id}_output_report.html" into static_html_output
 
     when:
-      params.run_dashboard
+      params.run_static_html
 
     shell:
       """
-      # RMarkdown flexdashboard method
       Rscript -e "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd', \
       params = list(yamlfile='\$PWD/${config_file_yaml}', sampleid='${sample_id}', read_length_data_file='\$PWD/read_lengths.tsv'), \
-      output_format = 'html_document')
+      output_format = 'html_document', output_file = '${sample_id}_output_report.html')
       "
 
       """
 }
 
-dashboard_output.subscribe { println "Received from 'dashboard': $it" }
+static_html_output.subscribe { println "Received from 'static_html': $it" }
 
 workflow.onComplete {
     println "Workflow finished! (${workflow.success ? 'OK' : 'failed'})"
