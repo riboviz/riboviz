@@ -4,118 +4,41 @@ title: "AnalysisOutputs"
 author: "FlicAnderson"
 date: "19/08/2020"
 output: html_document
-params:
-  output_dir: "./"  # Output directory
-  orf_fasta_file: FALSE  # FASTA file with nt seq
-  orf_gff_file: NA  # riboviz generated GFF2/GFF3 annotation file
-  num_processes: 1  # Number of cores for parallelization
-  min_read_length: 10  # Minimum read length in H5 output
-  max_read_length: 50  # Maximum read length in H5 output
-  buffer: 250  # Length of flanking region around the CDS
-  primary_id: "gene_id"  # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
-  dataset: "vignette"  # Name of the dataset
-  rpf: TRUE  # Is the dataset an RPF or mRNA dataset?
-  features_file: NA  # features file, columns are gene features and rows are genes
-  do_pos_sp_nt_freq: TRUE  # do calculate the position-specific nucleotide frequency
-  t_rna_file: NA  # tRNA estimates in .tsv file
-  codon_positions_file: NA  # Codon positions in each gene in .Rdata file
-  count_threshold: 64  # threshold for count of reads per gene to be included in plot
-  length_threshold: 500  # threshold for length of genes to be included in metagene plots
-  output_prefix: ""  # Prefix for output files
-  hd_file: "output.h5"  # Location of H5 output file
-  nnt_buffer: 25  # n nucleotides of UTR buffer to include in metagene plots
-  nnt_gene: 50  # n nucleotides of gene to include in metagene plots
-  asite_disp_length_file: NA  # asite displacement file table with one displacement per read length
+params: 
+  yamlfile: NA
+  sampleid: NA
+  read_length_data_file: NA
 ---
-
-To run this, now run generate_stats_figs_markdown.R R script. From commandline, this is: 
-```
-Rscript --vanilla rscripts/generate_stats_figs_markdown.R --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WT3AT/WT3AT.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WT3AT --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
-```
-```{r asanaside, eval=FALSE, echo=FALSE}
-# This was built from the **python call** to generate_stats_figs.R (for sample WT3AT from vignette):
-# > Rscript --vanilla /home/flic/riboviz/rscripts/generate_stats_figs.R --num-processes=1 --min-read-length=10 --max-read-length=50 --buffer=250 --primary-id=Name --dataset=vignette --hd-file=vignette/output/WT3AT/WT3AT.h5 --orf-fasta-file=vignette/input/yeast_YAL_CDS_w_250utrs.fa --rpf=True --output-dir=vignette/output/WT3AT --do-pos-sp-nt-freq=True --t-rna-file=data/yeast_tRNAs.tsv --codon-positions-file=data/yeast_codon_pos_i200.RData --features-file=data/yeast_features.tsv --orf-gff-file=vignette/input/yeast_YAL_CDS_w_250utrs.gff3 --asite-disp-length-file=data/yeast_standard_asite_disp_length.txt --count-threshold=64
-```
-
-```{r exampleRun, eval=FALSE, echo=FALSE}
-
-# To run this RMARKDOWN FILE ONLY from **inside** R (for WT3AT sample from vignette), use:
-rmarkdown::render(
-  "rmarkdown/AnalysisOutputs.Rmd", 
-  params=list(
-    output_dir="vignette/output/WT3AT", 
-    orf_fasta_file="vignette/input/yeast_YAL_CDS_w_250utrs.fa", 
-    orf_gff_file="vignette/input/yeast_YAL_CDS_w_250utrs.gff3", 
-    num_processes=1, 
-    min_read_length=10, 
-    max_read_length=50, 
-    buffer=250, 
-    primary_id="Name", 
-    dataset="vignette", 
-    rpf=TRUE, 
-    features_file="data/yeast_features.tsv", 
-    do_pos_sp_nt_freq=TRUE, 
-    t_rna_file="data/yeast_tRNAs.tsv", 
-    codon_positions_file="data/yeast_codon_pos_i200.RData", 
-    count_threshold=64, 
-    length_threshold=500, 
-    output_prefix="", 
-    hd_file="vignette/output/WT3AT/WT3AT.h5", 
-    nnt_buffer=25, 
-    nnt_gene=50, 
-    asite_disp_length_file="data/yeast_standard_asite_disp_length.txt"
-  )
-)
-```
 
 ### SETUP
 
-NOTE: installed & added knitr & rmarkdown to the library() calls! Need to update documentation/installation etc too. 
+NOTE: installed & added yaml, knitr & rmarkdown to the library() calls! Need to update documentation/installation etc too. 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-suppressMessages(library(getopt, quietly=T))
 suppressMessages(library(here))
-suppressMessages(library(Rsamtools))
-suppressMessages(library(rtracklayer))
-suppressMessages(library(rhdf5))
-suppressMessages(library(parallel))
-suppressMessages(library(optparse))
-suppressMessages(library(RcppRoll))
-suppressMessages(library(ggplot2))
-suppressMessages(library(tidyr))
-suppressMessages(library(dplyr))
-suppressMessages(library(magrittr))
-suppressMessages(library(purrr))
-suppressMessages(library(here))
+#suppressMessages(library(magrittr))
 suppressMessages(library(knitr)) 
+suppressMessages(library(yaml))
+suppressMessages(library(tidyverse))
 
-output_dir <- here::here(params$output_dir)
-orf_fasta_file <- here::here(params$orf_fasta_file)
-orf_gff_file <- here::here(params$orf_gff_file)
-num_processes <- params$num_processes
-min_read_length <- params$min_read_length
-max_read_length <- params$max_read_length
-buffer <- params$buffer
-primary_id <- params$primary_id
-dataset <- params$dataset
-rpf <- params$rpf
-features_file <- here::here(params$features_file)
-do_pos_sp_nt_freq <- params$do_pos_sp_nt_freq
-t_rna_file <- here::here(params$t_rna_file)
-codon_positions_file <- here::here(params$codon_positions_file)
-count_threshold <- params$count_threshold
-length_threshold <- params$length_threshold
-output_prefix <- params$output_prefix
-hd_file <- here::here(params$hd_file)
-nnt_buffer <- params$nnt_buffer
-nnt_gene <- params$nnt_gene
-asite_disp_length_file <- here::here(params$asite_disp_length_file)
 
+yamlfilepath <- params$yamlfile
+sampleid <- params$sampleid
+read_length_data_file <- params$read_length_data_file
 ```
 
-```{r source_script, include=FALSE}
+```{r printparams}
+print(yamlfilepath)
+
+print(sampleid)
+
+print(read_length_data_file)
+```
+
+
+```{r source_script, eval=FALSE, include=FALSE}
 
 source(here::here("rscripts", "provenance.R"), local = knitr::knit_global())
 source(here::here("rscripts", "read_count_functions.R"), local = knitr::knit_global())
@@ -130,7 +53,7 @@ rhdf5::h5closeAll()
 
 ### PROVENANCE
 
-```{r provenance, echo=FALSE, warning=FALSE}
+```{r provenance, eval=FALSE, warning=FALSE, include=FALSE}
 # handle interactive vs standard running
 
 if(is.na(getopt::get_Rscript_filename())){
@@ -145,145 +68,25 @@ if(is.na(getopt::get_Rscript_filename())){
 print_provenance(path_to_this_script)
 ```
 
-```{r echo=FALSE, cache=FALSE}
-knitr::read_chunk(here("rscripts","generate_stats_figs_markdown.R"))
-```
+## Sample Name: `r params$sampleid`
 
-## Sample Name: `r unlist(strsplit(hd_file, "[.|/]"))[length(unlist(strsplit(hd_file, "[.|/]")))-1]`
+### Load Data: 
 
-```{r samplename, echo=FALSE}
-paste("Dataset:", dataset)
-paste("Sample Name:",  unlist(strsplit(hd_file, "[.|/]"))[length(unlist(strsplit(hd_file, "[.|/]")))-1])
+```{r}
+read_length_data <- read_tsv(file = params$read_length_data_file, skip = 4, col_names = TRUE)
 
-```
-
-
-### OPTIONS LIST STUFF: 
-
-```{r optionstlistthings, echo=FALSE, warning=FALSE, message=FALSE}
-<<options_params>>
-```
-
-#### CHECK PARAMS AFTER READ_CHUNK CALL
-
-```{r check_params2, echo=FALSE, warning=FALSE}
-
-<<check_params>>
-
-paste("These are post knitr::read_chunk() parameters")
-
-opt
+print(str(read_length_data))
 
 ```
 
-### 3NT PERIODICITY
 
-```{r 3NTplot, echo=FALSE, warning=FALSE, message=FALSE}
+### Plot: 
 
-<<ThreeNucleotidePeriodicityPlotChunk>>
+Plotting read lengths from input file. 
 
-three_nucleotide_periodicity_plot
-  
+```{r plot_readlength}
+
+#PlotReadLengths(read_length_data)
+
+ggplot(read_length_data, aes(x = Length, y = Counts)) + geom_bar(stat = "identity")
 ```
-
-```{r 3NTribogridplot, echo=FALSE, warning=FALSE}
-
-<<ThreeNucleotidePeriodicityPlotRibogrids>>
-  
-start_codon_ribogrid_plot
-
-start_codon_ribogrid_bar_plot
-```
-
-
-### LENGTHS OF ALL MAPPED READS
-
-```{r DistribReadLength, echo=FALSE, warning=FALSE}
-
-<<DistributionOfLengthsMappedReadsPlotChunk>>
-  
-read_len_plot
-   
-```
-
-## BIASES IN NUCLEOTIDE COMPOSITION
-
-No plot for this.
-
-```{r BiasesInNucleotideComposition, eval=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
-
-<<BiasesInNucleotideCompositionAlongMappedReadLengthsChunk>>
-  
-  print("No plot for this")
-
-```
-
-## CALCULATE READ FRAME FOR EVERY ORF
-
-```{r CalculateReadFramePerAnnotatedOrf, echo=FALSE, warning=FALSE, message=FALSE}
-
-<<CalculateReadFramePerOrfPlotChunk>>
-
-gene_read_frame_plot
-```
-
-### POSITION SPECIFIC DISTRIBUTION OF READS
-
-```{r PositionSpecificDistributionOfReads_rpf, echo=FALSE, warning=FALSE}
-
-<<PositionSpecificDistributionOfReadsRPFPlotChunk>>
-  
-if(rpf){
-    pos_sp_rpf_norm_reads_plot
-  }
-
-```
-
-```{r PositionSpecificDistributionOfReads_mrna, echo=FALSE, warning=FALSE}
-
-<<PositionSpecificDistributionOfReadsMRNAPlotChunk>>
-  
-if(!rpf){
-  pos_sp_mrna_norm_coverage_plot
-}
-
-```
-
-### TPMS OF GENES
-
-No plot for this.
-
-```{r TranscriptsPerMillion, eval=FALSE, echo=FALSE, warning=FALSE}
-<<GeneTranscriptsPerMillionChunk>>
-  
-print("No plot for this")
-
-```
-
-### TPMS CORRELATIONS WITH FEATURES
-
-```{r TPMsAndFeaturesCorrelation, echo=FALSE, warning=FALSE, message=FALSE}
-<<TPMsWithFeaturesPlotChunk>>
-  
-if (!is.na(features_file)) { 
-  features_plot
-}
-```
-
-```{r CodonSpecificRibosomeDensityWithTRNAs, echo=FALSE, warning=FALSE, message=FALSE}
-
-<<CodonSpecificRibosomeDensityTRNAsPlotChunk>>
-  
-if (!is.na(t_rna_file) & !is.na(codon_positions_file) & (rpf)) {
-  cod_dens_tRNA_plot
-}
-```
-
-
-
-TO DO: 
-
-* Alter .html output name according to samplename somehow
-* Add titles, captions to plots
-* facet plots nicely?
-* run with full-size datasets (Saccharomyces cerevisiae AND non-S. cerevisiae)
