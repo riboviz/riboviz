@@ -149,7 +149,7 @@ def helpMessage() {
       GFF? (default 'FALSE')
 
     Visualization parameters:
-    
+
     * 'run_static_html': run visualization dashboard? (default 'TRUE')
 
     General:
@@ -1126,7 +1126,7 @@ process countReads {
         """
 }
 
-// create 'new' yaml for use in static_html process
+// create 'new' yaml for use in staticHTML process
 config_yaml = new Yaml().dump(params)
 
 // fun with config yamls
@@ -1142,20 +1142,24 @@ process createConfigFile {
 }
 
 // run visualization system to generate interactive output report: riboviz/#239
-process static_html {
+process staticHTML {
     tag "${sample_id}"
     publishDir "${params.dir_out}/${sample_id}", \
     mode: 'copy', overwrite: true
 
     input:
-
       file config_file_yaml from config_file_yaml
       file "read_counts.tsv" from read_counts_tsv
+      tuple val(sample_id), file("3nt_periodicity.tsv") \
+          from nt3_periodicity_tsv
       tuple val(sample_id), file("read_lengths.tsv") \
           from read_lengths_tsv
+      tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
+          from pos_sp_rpf_norm_reads_tsv
 
     output:
-      file "${sample_id}_output_report.html" into static_html_output
+      val sample_id into finished_viz_sample_id
+      file "${sample_id}_output_report.html" into static_html_html
 
     when:
       params.run_static_html
@@ -1163,14 +1167,22 @@ process static_html {
     shell:
       """
       Rscript -e "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd', \
-      params = list(yamlfile='\$PWD/${config_file_yaml}', sampleid='${sample_id}', read_length_data_file='\$PWD/read_lengths.tsv'), \
-      output_format = 'html_document', output_file = '${sample_id}_output_report.html')
+      params = list(
+        yamlfile='\$PWD/${config_file_yaml}', \
+        sampleid='${sample_id}', \
+        three_nucleotide_periodicity_data_file = '\$PWD/3nt_periodicity.tsv', \
+        read_length_data_file='\$PWD/read_lengths.tsv', \
+        pos_sp_rpf_norm_reads_data_file='\$PWD/pos_sp_rpf_norm_reads.tsv'
+      ), \
+      output_format = 'html_document', \
+      output_file = '\$PWD/${sample_id}_output_report.html')
       "
-
       """
 }
 
-static_html_output.subscribe { println "Received from 'static_html': $it" }
+finished_viz_sample_id
+    .ifEmpty { exit 1, "No sample was visualised successfully" }
+    .view { "Finished visualising sample: ${it}" }
 
 workflow.onComplete {
     println "Workflow finished! (${workflow.success ? 'OK' : 'failed'})"
