@@ -8,6 +8,8 @@ params:
   three_nucleotide_periodicity_data_file: NA
   read_length_data_file: NA
   pos_sp_rpf_norm_reads_data_file: NA
+  gene_read_frames_data_file: NA
+  asite_disp_length_file: NA
 ---
 
 NOTE: installed & added yaml, knitr & rmarkdown to the library() calls! Need to update documentation/installation etc too. 
@@ -23,33 +25,36 @@ suppressMessages(library(yaml))
 suppressMessages(library(tidyverse))
 ```
 
-```{r optional_params, eval=FALSE, include=FALSE}
+```{r optional_params, echo=TRUE}
 
 ### handling optional outputs parameters: 
 
-# put these into the yaml section: 
-  gene_read_frames_data_file: NA
+yaml <- read_yaml(params$yamlfile)
 
-## put this into the load data section: 
+# show yaml params
+print(str(yaml))
 
-# read frame
-gene_read_frames_data <- read_tsv(
-  file = params$gene_read_frames_data_file, 
-  skip = 4, # this avoids the provenance info
-  col_names = TRUE)
+if (is.null(yaml$asite_disp_length_file)){
+  asite_disp_length <- NA
+} else {
+  asite_disp_length <- "present"
+}
 
-## put this into the plot section
 
-# plot read frame
-PlotGeneReadFrames(params$gene_read_frames_data)
 ```
 
 ## Sample Name: `r params$sampleid`
 
-```{r printparams, eval=FALSE, include=FALSE}
+```{r printparams, echo=TRUE}
 #print(params$yamlfile)
+
 print(params$sampleid)
 print(params$three_nucleotide_periodicity_data_file)
+
+#print(params$asite_disp_length_file)
+#print(params$gene_read_frames_data_file)
+print(asite_disp_length)
+
 ```
 
 ```{r source_script, include=FALSE}
@@ -87,7 +92,6 @@ three_nucleotide_periodicity_data <- read_tsv(
   skip = 4, # this avoids the provenance info
   col_names = TRUE)
 
-  
 # read length
 read_length_data <- read_tsv(
   file = params$read_length_data_file, 
@@ -99,6 +103,14 @@ pos_sp_rpf_norm_reads_data <- read_tsv(
   file = params$pos_sp_rpf_norm_reads_data_file, 
   skip = 4, # this avoids the provenance info
   col_names = TRUE)
+
+# read frame (conditional on --asite-disp-length-file)
+if (!is.na(asite_disp_length)){
+  gene_read_frames_data <- read_tsv(
+    file = params$gene_read_frames_data_file, 
+    skip = 4, # this avoids the provenance info
+    col_names = TRUE)
+}
 
 ```
 
@@ -127,4 +139,16 @@ PlotReadLengths(read_length_data)
 # position specific distribution of reads
 PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
 
+```
+
+```{r proportionframe, echo=FALSE}
+
+# plot read frame
+if (!is.na(asite_disp_length)){
+  #PlotGeneReadFrames(gene_read_frames_data)
+  # TODO currently running str() because the PlotGeneReadFrames() needs an extra parameter
+  # and it doesn't just PLOT, it does something extra to the gene_read_frames_data object first
+  # so loading & plotting won't work just now
+  str(gene_read_frames_data)
+}
 ```
