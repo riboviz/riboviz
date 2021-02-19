@@ -63,7 +63,7 @@ The workflow also supports the following configuration parameters. All directory
 | `do_pos_sp_nt_freq` | Calculate position-specific nucleotide freqeuency? |
 | `extract_umis` | Extract UMIs after adapter trimming? |
 | `features_file` | Features to correlate with ORFs (tab-separated values file)  (optional) |
-| `fq_files` |  List of FASTQ files to be processed, relative to `<dir_in>`. Each list member consists of identifier key with a file name value (e.g. `WT3AT: SRR1042864_s1mi.fastq.gz`). | 
+| `fq_files` |  List of FASTQ files to be processed, relative to `<dir_in>`. Each list member consists of identifier key with a file name value (e.g. `WT3AT: SRR1042864_s1mi.fastq.gz`). |
 | `group_umis` | Summarise UMI groups both pre- and post-deduplication, using UMI-tools? Useful for debugging. |
 | `is_riboviz_gff` | Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3? |
 | `is_test_run` | Is this a test run? (unused) |
@@ -80,6 +80,7 @@ The workflow also supports the following configuration parameters. All directory
 | `rpf` | Is the dataset an RPF or mRNA dataset? |
 | `rrna_fasta_file` | Ribosomal rRNA and other contaminant sequences to avoid aligning to (FASTA file) |
 | `rrna_index_prefix` | Prefix for rRNA index files, relative to `<dir_index>` |
+| `run_static_html` | Create static html visualization per sample? (default `TRUE`) |
 | `samsort_memory` | Memory to give to `samtools sort` (default `768M`, [samtools sort](http://www.htslib.org/doc/samtools-sort.html) built-in default) (Nextflow workflow only) |
 | `sample_sheet` | A sample sheet, relative to `<dir_in>`, mandatory if `multiplex_fq_files` is used (tab-separated values file) |
 | `secondary_id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) |
