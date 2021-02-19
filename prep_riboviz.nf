@@ -150,7 +150,7 @@ def helpMessage() {
 
     Visualization parameters:
 
-    * 'run_static_html': run visualization dashboard? (default 'TRUE')
+    * 'run_static_html': run static html visualization per sample? (default 'TRUE')
 
     General:
 
@@ -463,6 +463,10 @@ if (params.containsKey('asite_disp_length_file')
     }
     asite_disp_length_txt = Channel.fromPath(asite_disp_length_file,
                                              checkIfExists: true)
+    asite_disp_length_txt.into{
+      asite_disp_length_txt1
+      asite_disp_length_txt2
+    }
     is_asite_disp_length_file = true
 } else {
     asite_disp_length_txt = file("Missing_aside_disp_length_file")
@@ -979,7 +983,7 @@ process generateStatsFigs {
         each file(t_rna_tsv) from t_rna_tsv
         each file(codon_positions_rdata) from codon_positions_rdata
         each file(features_tsv) from features_tsv
-        each file(asite_disp_length_txt) from asite_disp_length_txt
+        each file(asite_disp_length_txt) from asite_disp_length_txt1
     output:
         val sample_id into finished_sample_id
         tuple val(sample_id), file("tpms.tsv") into tpms_tsv
@@ -1141,6 +1145,9 @@ process createConfigFile {
       """
 }
 
+
+
+
 // run visualization system to generate interactive output report: riboviz/#239
 process staticHTML {
     tag "${sample_id}"
@@ -1156,6 +1163,9 @@ process staticHTML {
           from read_lengths_tsv
       tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
           from pos_sp_rpf_norm_reads_tsv
+      tuple val(sample_id), file("3ntframe_bygene.tsv") \
+          from nt3frame_bygene_tsv
+      each file(asite_disp_length_txt) from asite_disp_length_txt2
 
     output:
       val sample_id into finished_viz_sample_id
@@ -1165,6 +1175,9 @@ process staticHTML {
       params.run_static_html
 
     shell:
+//      asite_disp_length_flag = is_asite_disp_length_file \
+//      ? "--asite-disp-length-file=${asite_disp_length_txt}" : ''
+
       """
       Rscript -e "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd', \
       params = list(
@@ -1172,7 +1185,9 @@ process staticHTML {
         sampleid='${sample_id}', \
         three_nucleotide_periodicity_data_file = '\$PWD/3nt_periodicity.tsv', \
         read_length_data_file='\$PWD/read_lengths.tsv', \
-        pos_sp_rpf_norm_reads_data_file='\$PWD/pos_sp_rpf_norm_reads.tsv'
+        pos_sp_rpf_norm_reads_data_file='\$PWD/pos_sp_rpf_norm_reads.tsv', \
+        gene_read_frames_data_file='\$PWD/3ntframe_bygene.tsv', \
+        asite_disp_length_file='\$PWD/${asite_disp_length_txt}' \
       ), \
       output_format = 'html_document', \
       output_file = '\$PWD/${sample_id}_output_report.html')
