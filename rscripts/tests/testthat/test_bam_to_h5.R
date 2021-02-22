@@ -43,19 +43,21 @@ bam_to_h5 <- here::here("rscripts/bam_to_h5.R")
 
 context("test_bam_to_h5.R")
 
-#' delete_file(): Delete a file.
+
+#' DeleteFile(): Delete a file.
 #'
 #' Delete a file if it exists.
 #' @param file_name File name.
 #' @export
-delete_file <- function(file_name) {
+DeleteFile <- function(file_name) {
   print(paste0("Deleting ", file_name))
   if (file.exists(file_name)) {
       file.remove(file_name)
   }
 }
 
-#' validate_h5_sequence(): Validate H5 data for a specific sequence.
+
+#' ValidateH5Sequence(): Validate H5 data for a specific sequence.
 #'
 #' @param sequence: Sequence name (character, character)
 #' @param h5_file: H5 file with data on sequence to be validated
@@ -73,7 +75,7 @@ delete_file <- function(file_name) {
 #' @param is_riboviz_gff: Is the GFF file with UTR5, CDS, and UTR3
 #'   elements per gene?" (logical, logical)
 #' @export
-validate_h5_sequence <- function(sequence, h5_file, gff,
+ValidateH5Sequence <- function(sequence, h5_file, gff,
   bam_hdr_seq_info, bam, dataset, buffer, min_read_length,
   max_read_length, is_riboviz_gff) {
   num_read_counts <- max_read_length - min_read_length + 1
@@ -266,7 +268,8 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
       ": Unexpected reads_by_len, compared to those computed from BAM"))
 }
 
-#' validate_h5(): Validate H5 data.
+
+#' ValidateH5(): Validate H5 data.
 #'
 #' @param h5_file: H5 file with data on sequence to be validated
 #'   (character, character)
@@ -280,20 +283,14 @@ validate_h5_sequence <- function(sequence, h5_file, gff,
 #' @param is_riboviz_gff: Is the GFF file with UTR5, CDS, and UTR3
 #'   elements per gene?" (logical, logical)
 #' @export
-validate_h5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
+ValidateH5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
   min_read_length, max_read_length, is_riboviz_gff) {
 
-  # READ GFF
-
-  print("========== GFF ==========")
   gff <- readGFFAsDf(gff_file) # tbl_df tbl data.frame, list
   gff_names <- unique(gff$seqnames) # factor, integer
   print(paste0("GFF sequence names (", length(gff_names), "):"))
   print(gff_names)
 
-  # READ BAM
-
-  print("========== BAM ==========")
   bam_file_f <- Rsamtools::BamFile(bam_file)
   bam_hdr_seq_info <- Rsamtools::seqinfo(bam_file_f) # GenomeInfoDb::Seqinfo, S4
   bam_hdr_names <- bam_hdr_seq_info@seqnames # character, character
@@ -311,9 +308,6 @@ validate_h5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
   print(paste0("BAM sequence names (", length(bam_names), "):"))
   print(bam_names)
 
-  # READ H5
-
-  print("========== H5 ==========")
   h5_data <- rhdf5::h5ls(h5_file, recursive = 1) # data.frame, list
   h5_names <- h5_data$name # character, character
   print(paste0("H5 sequence names (", length(h5_names), "):"))
@@ -340,7 +334,7 @@ validate_h5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
 
   for (sequence in h5_names) {
     print(paste0("Sequence: ", sequence))
-    validate_h5_sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
+    ValidateH5Sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
       dataset, buffer, min_read_length, max_read_length, is_riboviz_gff)
   }
 }
@@ -357,10 +351,10 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
 
   create_bam <- TRUE
 
-  withr::defer(delete_file(h5_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(h5_file)) # Delete H5 when test completes.
   if (create_bam) {
-    withr::defer(delete_file(bam_file)) # Delete H5 when test completes.
-    withr::defer(delete_file(bam_bai_file)) # Delete H5 when test completes.
+    withr::defer(DeleteFile(bam_file)) # Delete H5 when test completes.
+    withr::defer(DeleteFile(bam_bai_file)) # Delete H5 when test completes.
   }
 
   gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
@@ -385,15 +379,17 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
     print(paste0("SAM: ", sam_file))
     bam_cmd_template <- "samtools view -S -b {sam_file} > {bam_file}"
     bam_cmd <- glue(bam_cmd_template)
+    print(bam_cmd)
     exit_code <- system(bam_cmd)
-    print(paste0("samtools view exit code: ", exit_code))
+    print(paste0("'samtools view' exit code: ", exit_code))
     expect_equal(exit_code, 0,
                  info = "Unexpected exit code from 'samtools view'")
 
     bai_cmd_template <- "samtools index {bam_file}"
     bai_cmd <- glue(bai_cmd_template)
+    print(bai_cmd)
     exit_code <- system(bai_cmd)
-    print(paste0("samtools index exit code: ", exit_code))
+    print(paste0("'samtools index' exit code: ", exit_code))
     expect_equal(exit_code, 0,
         info = "Unexpected exit code from 'samtools index'")
   }
@@ -406,10 +402,10 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   print(h5_cmd)
 
   exit_code <- system(h5_cmd)
-  print(paste0("bam_to_h5.R exit code: ", exit_code))
+  print(paste0("'bam_to_h5.R' exit code: ", exit_code))
   expect_equal(exit_code, 0,
-    info = "Unexpected exit code from bam_to_h5.R")
+    info = "Unexpected exit code from 'bam_to_h5.R'")
 
-  validate_h5(h5_file, gff_file, bam_file, dataset, buffer,
+  ValidateH5(h5_file, gff_file, bam_file, dataset, buffer,
     min_read_length, max_read_length, is_riboviz_gff)
 })
