@@ -381,10 +381,18 @@ CalculateGeneReadFrames <- function(dataset, hd_file, gff_df, min_read_length, a
 # gives:
 # TODO
 
-PlotGeneReadFrames <- function(gene_read_frames_data){
-  gene_read_frame_plot <- gene_read_frames_data %>%
-    filter(Ct_fr0 + Ct_fr1 + Ct_fr2 > count_threshold) %>%
-    BoxplotReadFrameProportion()
+FilterGeneReadFrames <- function(gene_read_frames_data, count_threshold){
+  gene_read_frame_data_filtered <- gene_read_frames_data %>%
+    filter(Ct_fr0 + Ct_fr1 + Ct_fr2 > count_threshold)
+  
+  return(gene_read_frame_data_filtered)
+} # end FilterGeneReadFrames() definition
+# gives:
+# TODO
+
+PlotGeneReadFrames <- function(gene_read_frame_data_filtered){
+  
+  gene_read_frame_plot <- BoxplotReadFrameProportion(gene_read_frame_data_filtered)
   
   return(gene_read_frame_plot)
 } # end PlotGeneReadFrames() definition
