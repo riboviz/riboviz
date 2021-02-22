@@ -28,6 +28,11 @@
 #'
 #' To use thse tests with other data files see comments on
 #' test_that("Run bam_to_h5.R and validate H5 file"...).
+#'
+#' At present, the following behaviours are not tested:
+#' `is_riboviz_gff = FALSE` when `stop_in_cds = TRUE`; a BAM file
+#' specifies -ve strands; there are multiple exon genes.
+#'
 #' @export
 
 suppressMessages(library(glue, quietly = T))
