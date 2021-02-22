@@ -1,0 +1,244 @@
+2021-01-13 14:43:25,550:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:25,572:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:25.551518 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:25,572:riboviz.tools.prep_riboviz:INFO: Configuration file: nosuch.yaml
+2021-01-13 14:43:25,573:riboviz.tools.prep_riboviz:ERROR: File not found: nosuch.yaml
+2021-01-13 14:43:25,600:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:25,620:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:25.600376 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:25,621:riboviz.tools.prep_riboviz:INFO: Configuration file: /tmp/tmp8zqxjch7.yaml
+2021-01-13 14:43:25,630:riboviz.tools.prep_riboviz:INFO: Command file: /tmp/tmp9bf8do_6.sh
+2021-01-13 14:43:25,630:riboviz.tools.prep_riboviz:INFO: Number of processes: 1
+2021-01-13 14:43:25,631:riboviz.tools.prep_riboviz:INFO: Build indices for alignment, if necessary/requested
+2021-01-13 14:43:25,631:riboviz.workflow:INFO: Build indices for alignment (vignette/input/yeast_rRNA_R64-1-1.fa). Log: /tmp/tmp2xugbl7etmp_riboviz_test_tools_logs/20210113-144325/hisat2_build_r_rna.log
+2021-01-13 14:43:25,631:riboviz.workflow:INFO: Build indices for alignment (vignette/input/yeast_YAL_CDS_w_250utrs.fa). Log: /tmp/tmp2xugbl7etmp_riboviz_test_tools_logs/20210113-144325/hisat2_build_orf.log
+2021-01-13 14:43:25,632:riboviz.tools.prep_riboviz:ERROR: Configuration parameter error: No sample files (fq_files) or multiplexed files (multiplex_fq_files) are specified
+2021-01-13 14:43:25,657:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:25,675:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:25.658248 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:25,676:riboviz.tools.prep_riboviz:INFO: Configuration file: /tmp/tmptp6m79pl.yaml
+2021-01-13 14:43:25,686:riboviz.tools.prep_riboviz:INFO: Command file: /tmp/tmp9ehj_gln.sh
+2021-01-13 14:43:25,686:riboviz.tools.prep_riboviz:INFO: Number of processes: 1
+2021-01-13 14:43:25,687:riboviz.tools.prep_riboviz:INFO: Build indices for alignment, if necessary/requested
+2021-01-13 14:43:25,687:riboviz.workflow:INFO: Build indices for alignment (vignette/input/yeast_rRNA_R64-1-1.fa). Log: /tmp/tmps7a7e9wytmp_riboviz_test_tools_logs/20210113-144325/hisat2_build_r_rna.log
+2021-01-13 14:43:25,687:riboviz.workflow:INFO: Build indices for alignment (vignette/input/yeast_YAL_CDS_w_250utrs.fa). Log: /tmp/tmps7a7e9wytmp_riboviz_test_tools_logs/20210113-144325/hisat2_build_orf.log
+2021-01-13 14:43:25,687:riboviz.tools.prep_riboviz:ERROR: Configuration parameter error: Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are specified
+2021-01-13 14:43:25,710:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:25,730:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:25.710312 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:25,731:riboviz.tools.prep_riboviz:INFO: Configuration file: /tmp/tmpoy2v5vgs.yaml
+2021-01-13 14:43:25,741:riboviz.tools.prep_riboviz:INFO: Command file: /tmp/tmp5htw11or.sh
+2021-01-13 14:43:25,741:riboviz.tools.prep_riboviz:INFO: Number of processes: 1
+2021-01-13 14:43:25,742:riboviz.tools.prep_riboviz:INFO: Build indices for alignment, if necessary/requested
+2021-01-13 14:43:25,742:riboviz.workflow:INFO: Build indices for alignment (vignette/input/yeast_rRNA_R64-1-1.fa). Log: /tmp/tmpws5bp8j8tmp_riboviz_test_tools_logs/20210113-144325/hisat2_build_r_rna.log
+2021-01-13 14:43:25,742:riboviz.workflow:INFO: Build indices for alignment (vignette/input/yeast_YAL_CDS_w_250utrs.fa). Log: /tmp/tmpws5bp8j8tmp_riboviz_test_tools_logs/20210113-144325/hisat2_build_orf.log
+2021-01-13 14:43:25,743:riboviz.tools.prep_riboviz:ERROR: File not found: vignette/input/noSuchFile.tsv
+2021-01-13 14:43:25,766:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:25,785:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:25.766325 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:25,785:riboviz.tools.prep_riboviz:INFO: Configuration file: /tmp/tmp4a3ze2bf.yaml
+2021-01-13 14:43:25,799:riboviz.tools.prep_riboviz:INFO: Command file: /tmp/tmpgk1c0doo.sh
+2021-01-13 14:43:25,800:riboviz.tools.prep_riboviz:INFO: Number of processes: 1
+2021-01-13 14:43:25,800:riboviz.tools.prep_riboviz:INFO: Build indices for alignment, if necessary/requested
+2021-01-13 14:43:25,800:riboviz.workflow:INFO: Build indices for alignment (vignette/input/yeast_rRNA_R64-1-1.fa). Log: /tmp/tmpjd3gtxv4tmp_riboviz_test_tools_logs/20210113-144325/hisat2_build_r_rna.log
+2021-01-13 14:43:25,801:riboviz.workflow:INFO: Build indices for alignment (vignette/input/yeast_YAL_CDS_w_250utrs.fa). Log: /tmp/tmpjd3gtxv4tmp_riboviz_test_tools_logs/20210113-144325/hisat2_build_orf.log
+2021-01-13 14:43:25,801:riboviz.tools.prep_riboviz:INFO: Processing samples
+2021-01-13 14:43:25,801:riboviz.tools.prep_riboviz:ERROR: File not found: vignette/input/nosuch.fastq.gz
+2021-01-13 14:43:25,801:riboviz.tools.prep_riboviz:ERROR: File not found: vignette/input/nosuch.fastq.gz
+2021-01-13 14:43:25,801:riboviz.tools.prep_riboviz:INFO: Finished processing 2 samples, 2 failed
+2021-01-13 14:43:25,801:riboviz.tools.prep_riboviz:ERROR: Processing error: /tmp/tmp4a3ze2bf.yaml
+2021-01-13 14:43:25,801:riboviz.tools.prep_riboviz:ERROR: Exception
+Traceback (most recent call last):
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 832, in prep_riboviz
+    run_workflow(config_file, is_dry_run)
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 711, in run_workflow
+    raise Exception("No samples were processed successfully")
+Exception: No samples were processed successfully
+2021-01-13 14:43:25,825:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:25,846:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:25.825976 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:25,846:riboviz.tools.prep_riboviz:INFO: Configuration file: /tmp/tmpt3o6ip2m.yaml
+2021-01-13 14:43:25,861:riboviz.tools.prep_riboviz:INFO: Command file: /tmp/tmpu8r9mriy.sh
+2021-01-13 14:43:25,861:riboviz.tools.prep_riboviz:INFO: Number of processes: 1
+2021-01-13 14:43:25,861:riboviz.tools.prep_riboviz:ERROR: Missing configuration parameter: dir_in
+2021-01-13 14:43:25,884:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:25,905:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:25.885152 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:25,906:riboviz.tools.prep_riboviz:INFO: Configuration file: /tmp/tmpxkh84uc5.yaml
+2021-01-13 14:43:25,919:riboviz.tools.prep_riboviz:INFO: Command file: /tmp/tmplqxvm_ml.sh
+2021-01-13 14:43:25,919:riboviz.tools.prep_riboviz:INFO: Number of processes: 1
+2021-01-13 14:43:25,920:riboviz.tools.prep_riboviz:ERROR: File not found: noSuchFile.txt
+2021-01-13 14:43:25,943:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:25,963:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:25.943447 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:25,963:riboviz.tools.prep_riboviz:INFO: Configuration file: /tmp/tmpm5hkch82.yaml
+2021-01-13 14:43:25,975:riboviz.tools.prep_riboviz:INFO: Command file: /tmp/tmpgwylr_v2.sh
+2021-01-13 14:43:25,975:riboviz.tools.prep_riboviz:INFO: Number of processes: 1
+2021-01-13 14:43:25,975:riboviz.tools.prep_riboviz:ERROR: File not found: noSuchFile.txt
+2021-01-13 14:43:25,999:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:26,019:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:25.999531 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:26,020:riboviz.tools.prep_riboviz:INFO: Configuration file: /tmp/tmp9gr18uq0.yaml
+2021-01-13 14:43:26,033:riboviz.tools.prep_riboviz:INFO: Command file: /tmp/tmp6cnwxrcv.sh
+2021-01-13 14:43:26,033:riboviz.tools.prep_riboviz:INFO: Number of processes: 1
+2021-01-13 14:43:26,034:riboviz.tools.prep_riboviz:ERROR: File not found: noSuchFile.txt
+2021-01-13 14:43:26,057:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:26,077:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:26.057892 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:26,078:riboviz.tools.prep_riboviz:INFO: Configuration file: /tmp/tmpib6sucr2.yaml
+2021-01-13 14:43:26,090:riboviz.tools.prep_riboviz:INFO: Command file: /tmp/tmpf6w57e1o.sh
+2021-01-13 14:43:26,090:riboviz.tools.prep_riboviz:INFO: Number of processes: 1
+2021-01-13 14:43:26,091:riboviz.tools.prep_riboviz:ERROR: File not found: noSuchFile.txt
+2021-01-13 14:43:26,114:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:26,135:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:26.115219 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:26,135:riboviz.tools.prep_riboviz:INFO: Configuration file: /tmp/tmpuzrk7rjz.yaml
+2021-01-13 14:43:26,148:riboviz.tools.prep_riboviz:INFO: Command file: /tmp/tmpf6sbnrh2.sh
+2021-01-13 14:43:26,148:riboviz.tools.prep_riboviz:INFO: Number of processes: 1
+2021-01-13 14:43:26,148:riboviz.tools.prep_riboviz:ERROR: File not found: noSuchFile.txt
+2021-01-13 14:43:26,182:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:26,204:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:26.182709 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:26,205:riboviz.tools.prep_riboviz:INFO: Configuration file: /tmp/tmpfaxw6hhb.yaml
+2021-01-13 14:43:26,215:riboviz.tools.prep_riboviz:INFO: Command file: /tmp/tmpes1imnb0.sh
+2021-01-13 14:43:26,215:riboviz.tools.prep_riboviz:INFO: Number of processes: 1
+2021-01-13 14:43:26,216:riboviz.tools.prep_riboviz:ERROR: File not found: noSuchFile.txt
+2021-01-13 14:43:26,233:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:26,254:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:26.234103 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:26,255:riboviz.tools.prep_riboviz:INFO: Configuration file: /tmp/tmp5w38ga1g.yaml
+2021-01-13 14:43:26,266:riboviz.tools.prep_riboviz:INFO: Command file: /tmp/tmp6meflqik.sh
+2021-01-13 14:43:26,266:riboviz.tools.prep_riboviz:INFO: Number of processes: 1
+2021-01-13 14:43:26,266:riboviz.tools.prep_riboviz:INFO: Build indices for alignment, if necessary/requested
+2021-01-13 14:43:26,267:riboviz.workflow:INFO: Build indices for alignment (vignette/input/yeast_rRNA_R64-1-1.fa). Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/hisat2_build_r_rna.log
+2021-01-13 14:43:26,560:riboviz.workflow:INFO: Build indices for alignment (vignette/input/yeast_YAL_CDS_w_250utrs.fa). Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/hisat2_build_orf.log
+2021-01-13 14:43:26,930:riboviz.tools.prep_riboviz:INFO: Processing file: data/simdata/multiplex_umi_barcode_adaptor.fastq
+2021-01-13 14:43:26,931:riboviz.workflow:INFO: Cut out sequencing library adapters. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/cutadapt.log
+2021-01-13 14:43:27,157:riboviz.workflow:INFO: Extract barcodes and UMIs. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/umi_tools_extract.log
+2021-01-13 14:43:29,360:riboviz.workflow:INFO: Demultiplex reads. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/demultiplex_fastq.log
+2021-01-13 14:43:30,260:riboviz.tools.prep_riboviz:INFO: Processing samples
+2021-01-13 14:43:30,261:riboviz.tools.prep_riboviz:INFO: Processing sample: Tag0
+2021-01-13 14:43:30,261:riboviz.tools.prep_riboviz:INFO: Processing file: /tmp/tmpcqk9bngjtmp_riboviz_test_tools_tmp/multiplex_umi_barcode_adaptor_deplex/Tag0.fq
+2021-01-13 14:43:30,261:riboviz.tools.prep_riboviz:INFO: Skipping adaptor trimming and barcode/UMI extraction
+2021-01-13 14:43:30,261:riboviz.workflow:INFO: Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag0/01_hisat2_rrna.log
+2021-01-13 14:43:30,409:riboviz.workflow:INFO: Align remaining reads to ORFs index files using hisat2. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag0/02_hisat2_orf.log
+2021-01-13 14:43:30,563:riboviz.workflow:INFO: Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag0/03_trim_5p_mismatch.log
+2021-01-13 14:43:31,255:riboviz.workflow:INFO: Convert SAM to BAM and sort on genome. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag0/04_samtools_view_sort.log
+2021-01-13 14:43:31,293:riboviz.workflow:INFO: Index BAM file. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag0/05_samtools_index.log
+2021-01-13 14:43:31,322:riboviz.workflow:INFO: Idenfity UMI groups. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag0/06_umi_tools_group.log
+2021-01-13 14:43:32,090:riboviz.workflow:INFO: Deduplicate UMIs. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag0/07_umi_tools_dedup.log
+2021-01-13 14:43:33,022:riboviz.tools.prep_riboviz:ERROR: Problem processing sample: Tag0
+2021-01-13 14:43:33,022:riboviz.tools.prep_riboviz:ERROR: AssertionError
+Traceback (most recent call last):
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 524, in process_samples
+    sample_logs_dir, run_config)
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 397, in process_sample
+    log_file, run_config)
+  File "/shah/riboviz/riboviz/workflow.py", line 447, in deduplicate_umis
+    run_config.is_dry_run)
+  File "/shah/riboviz/riboviz/process_utils.py", line 130, in run_logged_command
+    run_command(cmd, f, f)
+  File "/shah/riboviz/riboviz/process_utils.py", line 22, in run_command
+    assert exit_code == 0, "%s failed with exit code %d" % (cmd, exit_code)
+AssertionError: ['umi_tools', 'dedup', '-I', '/tmp/tmpcqk9bngjtmp_riboviz_test_tools_tmp/Tag0/pre_dedup.bam', '-S', '/tmp/tmpdbf4_h9jtmp_riboviz_test_tools_out/Tag0/Tag0.bam', '--output-stats=/tmp/tmpcqk9bngjtmp_riboviz_test_tools_tmp/Tag0/dedup_stats'] failed with exit code 1
+2021-01-13 14:43:33,025:riboviz.tools.prep_riboviz:INFO: Processing sample: Tag1
+2021-01-13 14:43:33,025:riboviz.tools.prep_riboviz:INFO: Processing file: /tmp/tmpcqk9bngjtmp_riboviz_test_tools_tmp/multiplex_umi_barcode_adaptor_deplex/Tag1.fq
+2021-01-13 14:43:33,025:riboviz.tools.prep_riboviz:INFO: Skipping adaptor trimming and barcode/UMI extraction
+2021-01-13 14:43:33,025:riboviz.workflow:INFO: Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag1/01_hisat2_rrna.log
+2021-01-13 14:43:33,176:riboviz.workflow:INFO: Align remaining reads to ORFs index files using hisat2. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag1/02_hisat2_orf.log
+2021-01-13 14:43:33,340:riboviz.workflow:INFO: Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag1/03_trim_5p_mismatch.log
+2021-01-13 14:43:34,048:riboviz.workflow:INFO: Convert SAM to BAM and sort on genome. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag1/04_samtools_view_sort.log
+2021-01-13 14:43:34,086:riboviz.workflow:INFO: Index BAM file. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag1/05_samtools_index.log
+2021-01-13 14:43:34,114:riboviz.workflow:INFO: Idenfity UMI groups. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag1/06_umi_tools_group.log
+2021-01-13 14:43:35,062:riboviz.workflow:INFO: Deduplicate UMIs. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag1/07_umi_tools_dedup.log
+2021-01-13 14:43:36,174:riboviz.tools.prep_riboviz:ERROR: Problem processing sample: Tag1
+2021-01-13 14:43:36,175:riboviz.tools.prep_riboviz:ERROR: AssertionError
+Traceback (most recent call last):
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 524, in process_samples
+    sample_logs_dir, run_config)
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 397, in process_sample
+    log_file, run_config)
+  File "/shah/riboviz/riboviz/workflow.py", line 447, in deduplicate_umis
+    run_config.is_dry_run)
+  File "/shah/riboviz/riboviz/process_utils.py", line 130, in run_logged_command
+    run_command(cmd, f, f)
+  File "/shah/riboviz/riboviz/process_utils.py", line 22, in run_command
+    assert exit_code == 0, "%s failed with exit code %d" % (cmd, exit_code)
+AssertionError: ['umi_tools', 'dedup', '-I', '/tmp/tmpcqk9bngjtmp_riboviz_test_tools_tmp/Tag1/pre_dedup.bam', '-S', '/tmp/tmpdbf4_h9jtmp_riboviz_test_tools_out/Tag1/Tag1.bam', '--output-stats=/tmp/tmpcqk9bngjtmp_riboviz_test_tools_tmp/Tag1/dedup_stats'] failed with exit code 1
+2021-01-13 14:43:36,176:riboviz.tools.prep_riboviz:INFO: Processing sample: Tag2
+2021-01-13 14:43:36,176:riboviz.tools.prep_riboviz:INFO: Processing file: /tmp/tmpcqk9bngjtmp_riboviz_test_tools_tmp/multiplex_umi_barcode_adaptor_deplex/Tag2.fq
+2021-01-13 14:43:36,176:riboviz.tools.prep_riboviz:INFO: Skipping adaptor trimming and barcode/UMI extraction
+2021-01-13 14:43:36,177:riboviz.workflow:INFO: Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag2/01_hisat2_rrna.log
+2021-01-13 14:43:36,334:riboviz.workflow:INFO: Align remaining reads to ORFs index files using hisat2. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag2/02_hisat2_orf.log
+2021-01-13 14:43:36,484:riboviz.workflow:INFO: Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag2/03_trim_5p_mismatch.log
+2021-01-13 14:43:37,235:riboviz.workflow:INFO: Convert SAM to BAM and sort on genome. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag2/04_samtools_view_sort.log
+2021-01-13 14:43:37,274:riboviz.workflow:INFO: Index BAM file. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag2/05_samtools_index.log
+2021-01-13 14:43:37,303:riboviz.workflow:INFO: Idenfity UMI groups. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag2/06_umi_tools_group.log
+2021-01-13 14:43:38,189:riboviz.workflow:INFO: Deduplicate UMIs. Log: /tmp/tmp0j5dkgdktmp_riboviz_test_tools_logs/20210113-144326/Tag2/07_umi_tools_dedup.log
+2021-01-13 14:43:39,307:riboviz.tools.prep_riboviz:ERROR: Problem processing sample: Tag2
+2021-01-13 14:43:39,308:riboviz.tools.prep_riboviz:ERROR: AssertionError
+Traceback (most recent call last):
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 524, in process_samples
+    sample_logs_dir, run_config)
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 397, in process_sample
+    log_file, run_config)
+  File "/shah/riboviz/riboviz/workflow.py", line 447, in deduplicate_umis
+    run_config.is_dry_run)
+  File "/shah/riboviz/riboviz/process_utils.py", line 130, in run_logged_command
+    run_command(cmd, f, f)
+  File "/shah/riboviz/riboviz/process_utils.py", line 22, in run_command
+    assert exit_code == 0, "%s failed with exit code %d" % (cmd, exit_code)
+AssertionError: ['umi_tools', 'dedup', '-I', '/tmp/tmpcqk9bngjtmp_riboviz_test_tools_tmp/Tag2/pre_dedup.bam', '-S', '/tmp/tmpdbf4_h9jtmp_riboviz_test_tools_out/Tag2/Tag2.bam', '--output-stats=/tmp/tmpcqk9bngjtmp_riboviz_test_tools_tmp/Tag2/dedup_stats'] failed with exit code 1
+2021-01-13 14:43:39,309:riboviz.tools.prep_riboviz:INFO: Finished processing 3 samples, 3 failed
+2021-01-13 14:43:39,309:riboviz.tools.prep_riboviz:ERROR: Processing error: /tmp/tmp5w38ga1g.yaml
+2021-01-13 14:43:39,309:riboviz.tools.prep_riboviz:ERROR: Exception
+Traceback (most recent call last):
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 832, in prep_riboviz
+    run_workflow(config_file, is_dry_run)
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 782, in run_workflow
+    raise Exception("No samples were processed successfully")
+Exception: No samples were processed successfully
+2021-01-13 14:43:39,535:riboviz.tools.prep_riboviz:INFO: Running under Python: 3.7.9 | packaged by conda-forge | (default, Dec  9 2020, 21:08:20) 
+[GCC 9.3.0]
+2021-01-13 14:43:39,557:riboviz.tools.prep_riboviz:INFO: Created by: RiboViz Date: 2021-01-13 14:43:39.536339 Command-line tool: /home/prshah/Software/pckgs/miniconda3/envs/riboviz/bin/pytest File: /shah/riboviz/riboviz/tools/prep_riboviz.py Version: commit e9bdce6764f6fa3f8b2d3e5c6f2eff9216083ca9 date 2021-01-12 15:14:56+00:00 
+2021-01-13 14:43:39,558:riboviz.tools.prep_riboviz:INFO: Configuration file: /tmp/tmp0esjgcbw.yaml
+2021-01-13 14:43:39,568:riboviz.tools.prep_riboviz:INFO: Command file: /tmp/tmpja04_15m.sh
+2021-01-13 14:43:39,569:riboviz.tools.prep_riboviz:INFO: Number of processes: 1
+2021-01-13 14:43:39,569:riboviz.tools.prep_riboviz:INFO: Build indices for alignment, if necessary/requested
+2021-01-13 14:43:39,570:riboviz.workflow:INFO: Build indices for alignment (vignette/input/yeast_rRNA_R64-1-1.fa). Log: /tmp/tmpeeap__d_tmp_riboviz_test_tools_logs/20210113-144339/hisat2_build_r_rna.log
+2021-01-13 14:43:39,859:riboviz.workflow:INFO: Build indices for alignment (vignette/input/yeast_YAL_CDS_w_250utrs.fa). Log: /tmp/tmpeeap__d_tmp_riboviz_test_tools_logs/20210113-144339/hisat2_build_orf.log
+2021-01-13 14:43:40,202:riboviz.tools.prep_riboviz:INFO: Processing samples
+2021-01-13 14:43:40,204:riboviz.tools.prep_riboviz:INFO: Processing sample: umi5_umi3
+2021-01-13 14:43:40,204:riboviz.tools.prep_riboviz:INFO: Processing file: data/simdata/umi5_umi3_umi_adaptor.fastq
+2021-01-13 14:43:40,204:riboviz.workflow:INFO: Cut out sequencing library adapters. Log: /tmp/tmpeeap__d_tmp_riboviz_test_tools_logs/20210113-144339/umi5_umi3/01_cutadapt.log
+2021-01-13 14:43:40,433:riboviz.workflow:INFO: Extract barcodes and UMIs. Log: /tmp/tmpeeap__d_tmp_riboviz_test_tools_logs/20210113-144339/umi5_umi3/02_umi_tools_extract.log
+2021-01-13 14:43:41,318:riboviz.workflow:INFO: Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: /tmp/tmpeeap__d_tmp_riboviz_test_tools_logs/20210113-144339/umi5_umi3/03_hisat2_rrna.log
+2021-01-13 14:43:41,472:riboviz.workflow:INFO: Align remaining reads to ORFs index files using hisat2. Log: /tmp/tmpeeap__d_tmp_riboviz_test_tools_logs/20210113-144339/umi5_umi3/04_hisat2_orf.log
+2021-01-13 14:43:41,627:riboviz.workflow:INFO: Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: /tmp/tmpeeap__d_tmp_riboviz_test_tools_logs/20210113-144339/umi5_umi3/05_trim_5p_mismatch.log
+2021-01-13 14:43:42,270:riboviz.workflow:INFO: Convert SAM to BAM and sort on genome. Log: /tmp/tmpeeap__d_tmp_riboviz_test_tools_logs/20210113-144339/umi5_umi3/06_samtools_view_sort.log
+2021-01-13 14:43:42,308:riboviz.workflow:INFO: Index BAM file. Log: /tmp/tmpeeap__d_tmp_riboviz_test_tools_logs/20210113-144339/umi5_umi3/07_samtools_index.log
+2021-01-13 14:43:42,337:riboviz.workflow:INFO: Idenfity UMI groups. Log: /tmp/tmpeeap__d_tmp_riboviz_test_tools_logs/20210113-144339/umi5_umi3/08_umi_tools_group.log
+2021-01-13 14:43:43,075:riboviz.workflow:INFO: Deduplicate UMIs. Log: /tmp/tmpeeap__d_tmp_riboviz_test_tools_logs/20210113-144339/umi5_umi3/09_umi_tools_dedup.log
+2021-01-13 14:43:44,006:riboviz.tools.prep_riboviz:ERROR: Problem processing sample: umi5_umi3
+2021-01-13 14:43:44,007:riboviz.tools.prep_riboviz:ERROR: AssertionError
+Traceback (most recent call last):
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 524, in process_samples
+    sample_logs_dir, run_config)
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 397, in process_sample
+    log_file, run_config)
+  File "/shah/riboviz/riboviz/workflow.py", line 447, in deduplicate_umis
+    run_config.is_dry_run)
+  File "/shah/riboviz/riboviz/process_utils.py", line 130, in run_logged_command
+    run_command(cmd, f, f)
+  File "/shah/riboviz/riboviz/process_utils.py", line 22, in run_command
+    assert exit_code == 0, "%s failed with exit code %d" % (cmd, exit_code)
+AssertionError: ['umi_tools', 'dedup', '-I', '/tmp/tmpoi780wsbtmp_riboviz_test_tools_tmp/umi5_umi3/pre_dedup.bam', '-S', '/tmp/tmptcr8psd4tmp_riboviz_test_tools_out/umi5_umi3/umi5_umi3.bam', '--output-stats=/tmp/tmpoi780wsbtmp_riboviz_test_tools_tmp/umi5_umi3/dedup_stats'] failed with exit code 1
+2021-01-13 14:43:44,008:riboviz.tools.prep_riboviz:INFO: Finished processing 1 samples, 1 failed
+2021-01-13 14:43:44,008:riboviz.tools.prep_riboviz:ERROR: Processing error: /tmp/tmp0esjgcbw.yaml
+2021-01-13 14:43:44,008:riboviz.tools.prep_riboviz:ERROR: Exception
+Traceback (most recent call last):
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 832, in prep_riboviz
+    run_workflow(config_file, is_dry_run)
+  File "/shah/riboviz/riboviz/tools/prep_riboviz.py", line 711, in run_workflow
+    raise Exception("No samples were processed successfully")
+Exception: No samples were processed successfully
