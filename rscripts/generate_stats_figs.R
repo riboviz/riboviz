@@ -309,8 +309,11 @@ if (!is.na(asite_disp_length_file)) {
   # run CalculateGeneReadFrames() to create data object
   gene_read_frames_data <- CalculateGeneReadFrames(dataset, hd_file, gff_df, min_read_length, asite_displacement_length)
 
+  # filter gene_read_frames_data to remove counts over the count_threshold
+  gene_read_frame_data_filtered <- FilterGeneReadFrames(gene_read_frames_data, count_threshold)
+  
   # run PlotGeneReadFrames():
-  gene_read_frame_plot <- PlotGeneReadFrames(gene_read_frames_data)
+  gene_read_frame_plot <- PlotGeneReadFrames(gene_read_frame_data_filtered)
   # creates plot object
 
   # run SaveGeneReadFrames():
