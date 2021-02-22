@@ -145,10 +145,12 @@ PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
 
 # plot read frame
 if (!is.na(asite_disp_length)){
-  #PlotGeneReadFrames(gene_read_frames_data)
-  # TODO currently running str() because the PlotGeneReadFrames() needs an extra parameter
-  # and it doesn't just PLOT, it does something extra to the gene_read_frames_data object first
-  # so loading & plotting won't work just now
-  str(gene_read_frames_data)
+  
+  # filter gene_read_frames_data to remove counts over the count_threshold
+  gene_read_frame_data_filtered <- 
+    FilterGeneReadFrames(gene_read_frames_data, yaml$count_threshold)
+  
+  # run PlotGeneReadFrames():
+  PlotGeneReadFrames(gene_read_frame_data_filtered)
 }
 ```
