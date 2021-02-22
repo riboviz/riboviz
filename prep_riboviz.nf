@@ -1145,8 +1145,7 @@ process createConfigFile {
       """
 }
 
-
-// run visualization system to generate interactive output report: riboviz/#239
+// run visualization system to generate interactive output report: riboviz/#193
 process staticHTML {
     tag "${sample_id}"
     publishDir "${params.dir_out}/${sample_id}", \
