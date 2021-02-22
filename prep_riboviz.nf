@@ -1146,8 +1146,6 @@ process createConfigFile {
 }
 
 
-
-
 // run visualization system to generate interactive output report: riboviz/#239
 process staticHTML {
     tag "${sample_id}"
@@ -1175,9 +1173,6 @@ process staticHTML {
       params.run_static_html
 
     shell:
-//      asite_disp_length_flag = is_asite_disp_length_file \
-//      ? "--asite-disp-length-file=${asite_disp_length_txt}" : ''
-
       """
       Rscript -e "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd', \
       params = list(
