@@ -25,21 +25,17 @@ suppressMessages(library(yaml))
 suppressMessages(library(tidyverse))
 ```
 
-```{r optional_params, echo=TRUE}
+```{r optional_params, echo=FALSE}
 
 ### handling optional outputs parameters: 
 
 yaml <- read_yaml(params$yamlfile)
-
-# show yaml params
-print(str(yaml))
 
 if (is.null(yaml$asite_disp_length_file)){
   asite_disp_length <- NA
 } else {
   asite_disp_length <- "present"
 }
-
 
 ```
 
@@ -54,6 +50,10 @@ print(params$three_nucleotide_periodicity_data_file)
 #print(params$asite_disp_length_file)
 #print(params$gene_read_frames_data_file)
 print(asite_disp_length)
+
+# show yaml params
+print(str(yaml))
+
 
 ```
 
@@ -132,7 +132,7 @@ PlotReadLengths(read_length_data)
 
 ```
 
-#### Plotting read lengths.
+#### Plotting position specific distribution of reads.
 
 ```{r plot_positionspecificdistribution, echo=FALSE}
 
@@ -141,10 +141,12 @@ PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
 
 ```
 
-```{r proportionframe, echo=FALSE}
+```{r proportionframe, echo=FALSE, warning=FALSE}
 
 # plot read frame
 if (!is.na(asite_disp_length)){
+  
+  print("Plotting read frame.")
   
   # filter gene_read_frames_data to remove counts over the count_threshold
   gene_read_frame_data_filtered <- 
