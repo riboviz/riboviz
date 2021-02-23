@@ -8,7 +8,8 @@ params:
   three_nucleotide_periodicity_data_file: NA
   read_length_data_file: NA
   pos_sp_rpf_norm_reads_data_file: NA
-  gene_read_frames_data_file: NA
+  gene_read_frames_filtered_data_file: NA
+  sequence_features_file: NA
   asite_disp_length_file: NA
 ---
 
@@ -31,10 +32,36 @@ suppressMessages(library(tidyverse))
 
 yaml <- read_yaml(params$yamlfile)
 
+
+# 3ntframe_propbygene.pdf plot: read frame (conditional on `asite_disp_length_file`) 
 if (is.null(yaml$asite_disp_length_file)){
-  asite_disp_length <- NA
+  readframe_plot <- NA
 } else {
-  asite_disp_length <- "present"
+  readframe_plot <- "present"
+}
+
+# features.pdf plot: gene features (conditional on `features_file`)
+if (is.null(yaml$features_file)){
+  features_plot <- NA
+} else {
+  features_plot <- "present"
+}
+
+# codon_ribodens.pdf plot: (conditional on `t_rna_file` and `codon_positions_file`)
+if (is.null(yaml$t_rna_file)){
+  trna_file <- NA
+} else {
+  trna_file <- "present"
+}
+
+if (is.null(yaml$codon_positions_file)){
+  codonposition_file <- NA
+} else {
+  codonposition_file <- "present"
+}
+
+if (!is.na(trna_file) & !is.na(codonposition_file)){
+  codonspecificribosomedensitytrnacorrelation_plot <- "present"
 }
 
 ```
@@ -44,12 +71,8 @@ if (is.null(yaml$asite_disp_length_file)){
 ```{r printparams, echo=TRUE}
 #print(params$yamlfile)
 
+# show sample ID
 print(params$sampleid)
-print(params$three_nucleotide_periodicity_data_file)
-
-#print(params$asite_disp_length_file)
-#print(params$gene_read_frames_data_file)
-print(asite_disp_length)
 
 # show yaml params
 print(str(yaml))
@@ -104,13 +127,30 @@ pos_sp_rpf_norm_reads_data <- read_tsv(
   skip = 4, # this avoids the provenance info
   col_names = TRUE)
 
-# read frame (conditional on --asite-disp-length-file)
-if (!is.na(asite_disp_length)){
-  gene_read_frames_data <- read_tsv(
-    file = params$gene_read_frames_data_file, 
+### Load Data for conditional plots:
+
+# 3ntframe_propbygene.pdf plot: read frame (conditional on `asite_disp_length_file`) 
+if (!is.na(readframe_plot)){
+  gene_read_frame_data_filtered <- read_tsv(
+    file = params$gene_read_frames_filtered_data_file, 
     skip = 4, # this avoids the provenance info
     col_names = TRUE)
 }
+
+# features.pdf plot: gene features (conditional on `features-file`)
+if(!is.na(features_plot)){
+  # load data sequence_features_file
+  features_plot_data <- read_tsv(
+    file = params$sequence_features_file, 
+    skip = 4, # this avoids the provenance info
+    col_names = TRUE)
+}
+
+# codon_ribodens.pdf plot: (conditional on `t_rna_file` and `codon_positions_file`)
+if(!is.na(codonspecificribosomedensitytrnacorrelation_plot)){
+  # load data
+}
+
 
 ```
 
@@ -141,18 +181,38 @@ PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
 
 ```
 
+#### Conditional Plots
+
 ```{r proportionframe, echo=FALSE, warning=FALSE}
 
 # plot read frame
-if (!is.na(asite_disp_length)){
+if (!is.na(readframe_plot)){
   
   print("Plotting read frame.")
   
-  # filter gene_read_frames_data to remove counts over the count_threshold
-  gene_read_frame_data_filtered <- 
-    FilterGeneReadFrames(gene_read_frames_data, yaml$count_threshold)
-  
   # run PlotGeneReadFrames():
   PlotGeneReadFrames(gene_read_frame_data_filtered)
+}
+```
+
+```{r featuresplot, echo=FALSE, warning=FALSE}
+
+# plot 
+if (!is.na(features_plot)) {
+  # 
+  print("Plot gene features.")
+  # conditional on `features-file`
+  PlotSequenceBasedFeatures(features_plot_data)
+ }
+```
+
+```{r ribosomedensitytrna_plot, echo=FALSE, warning=FALSE}
+
+# plot 
+if (!is.na(codonspecificribosomedensitytrnacorrelation_plot)) {
+  # 
+  print("Plot codon-specific ribosome density and tRNA correlation.")
+  # conditional on `t_rna_file` and `codon_positions_file`
+  #
 }
 ```
