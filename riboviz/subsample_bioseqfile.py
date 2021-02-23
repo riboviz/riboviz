@@ -8,7 +8,7 @@ from Bio import SeqIO
 
 
 def subsample_bioseqfile(
-        seqfilein, seqfileout, filetype, prob, overwrite, verbose
+        seqfilein, seqfileout, filetype, prob, overwrite, seedvalue, verbose
 ):
     """
     Subsample a *gzipped* biological sequence file using Bio.SeqIO
@@ -24,6 +24,8 @@ def subsample_bioseqfile(
     :type prob: float
     :param overwrite: overwrite if output file exists? (default False)
     :type overwrite: bool
+    :param seedvalue: set random seed value (default 1)
+    :type seedvalue: int
     :param verbose: print progress statements (default False)
     :type verbose: bool
     :return: Bio.SeqIO
@@ -57,7 +59,8 @@ def subsample_bioseqfile(
     row_count = 0
     row_count_out = 0
 
-    random.seed(42)
+    if seedvalue is not None:
+        random.seed(seedvalue)
 
     with open_file(seqfilein, open_r) as in_handle, \
             open_file(seqfileout, open_w) as out_handle:
@@ -70,6 +73,5 @@ def subsample_bioseqfile(
                 if verbose:
                     print((record.id))
                 SeqIO.write(record, out_handle, filetype)
-    print((("subsampling complete; read {} records from {}, wrote {} records \
-to {}".format(row_count, seqfilein, row_count_out, seqfileout))
-          ))
+    print(("subsampling complete; read {} records from {}, wrote {} records \
+to {}".format(row_count, seqfilein, row_count_out, seqfileout)))
