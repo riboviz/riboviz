@@ -1014,9 +1014,14 @@ process generateStatsFigs {
             into codon_ribodens_tsv
         tuple val(sample_id), file("features.pdf") \
             optional (! is_features_file) into features_pdf
+        tuple val(sample_id), file("sequence_features.tsv") \
+            optional (! is_features_file) into sequence_features_tsv
         tuple val(sample_id), file("3ntframe_bygene.tsv") \
             optional (! is_asite_disp_length_file) \
             into nt3frame_bygene_tsv
+        tuple val(sample_id), file("3ntframe_bygene_filtered.tsv") \
+            optional (! is_asite_disp_length_file) \
+            into nt3frame_bygene_filtered_tsv
         tuple val(sample_id), file("3ntframe_propbygene.pdf") \
             optional (! is_asite_disp_length_file) \
             into nt3frame_propbygene_pdf
@@ -1160,8 +1165,10 @@ process staticHTML {
           from read_lengths_tsv
       tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
           from pos_sp_rpf_norm_reads_tsv
-      tuple val(sample_id), file("3ntframe_bygene.tsv") \
-          from nt3frame_bygene_tsv
+      tuple val(sample_id), file("3ntframe_bygene_filtered.tsv") \
+          from nt3frame_bygene_filtered_tsv
+      tuple val(sample_id), file("sequence_features.tsv") \
+          from sequence_features_tsv
       each file(asite_disp_length_txt) from asite_disp_length_txt2
 
     output:
@@ -1176,11 +1183,12 @@ process staticHTML {
       Rscript -e "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd', \
       params = list(
         yamlfile='\$PWD/${config_file_yaml}', \
-        sampleid='${sample_id}', \
+        sampleid='!{sample_id}', \
         three_nucleotide_periodicity_data_file = '\$PWD/3nt_periodicity.tsv', \
         read_length_data_file='\$PWD/read_lengths.tsv', \
         pos_sp_rpf_norm_reads_data_file='\$PWD/pos_sp_rpf_norm_reads.tsv', \
-        gene_read_frames_data_file='\$PWD/3ntframe_bygene.tsv', \
+        gene_read_frames_filtered_data_file='\$PWD/3ntframe_bygene_filtered.tsv', \
+        sequence_features_file='\$PWD/sequence_features.tsv', \
         asite_disp_length_file='\$PWD/${asite_disp_length_txt}' \
       ), \
       output_format = 'html_document', \
