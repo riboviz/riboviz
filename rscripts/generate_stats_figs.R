@@ -319,6 +319,9 @@ if (!is.na(asite_disp_length_file)) {
   # run SaveGeneReadFrames():
   SaveGeneReadFrames(gene_read_frame_plot)
 
+  # run WriteFilteredGeneReadFrames():
+  WriteFilteredGeneReadFrames(gene_read_frame_data_filtered)
+  
   # run WriteGeneReadFrames():
   WriteGeneReadFrames(gene_read_frames_data)
 
@@ -434,8 +437,10 @@ if (!is.na(features_file)) { # do correlating
   features_plot_data <- CalculateSequenceBasedFeatures(features, tpms)
 
   features_plot <- PlotSequenceBasedFeatures(features_plot_data)
+  
+  SaveSequenceBasedFeatures(features_plot)
 
-  WriteSequenceBasedFeatures(features_plot)
+  WriteSequenceBasedFeatures(features_plot_data)
 
   print("Completed: Correlations between TPMs of genes with their sequence-based features")
 
