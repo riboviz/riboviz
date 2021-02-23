@@ -390,6 +390,23 @@ FilterGeneReadFrames <- function(gene_read_frames_data, count_threshold){
 # gives:
 # TODO
 
+WriteFilteredGeneReadFrames <- function(gene_read_frame_data_filtered){
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3ntframe_bygene_filtered.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    gene_read_frame_data_filtered,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+  #return() # no return as writing-out
+} # end WriteFilteredGeneReadFrames() definition
+# gives:
+# TODO
+
 PlotGeneReadFrames <- function(gene_read_frame_data_filtered){
   
   gene_read_frame_plot <- BoxplotReadFrameProportion(gene_read_frame_data_filtered)
@@ -736,13 +753,29 @@ PlotSequenceBasedFeatures <- function(features_plot_data){
 } # end PlotSequenceBasedFeatures() definition
 
 
-WriteSequenceBasedFeatures <- function(features_plot) {
+SaveSequenceBasedFeatures <- function(features_plot) {
   # Save plot and file
   ggsave(features_plot, filename = file.path(output_dir, paste0(output_prefix, "features.pdf")))
-  
   # return() NO RETURN as writing out
   
-} # end WriteSequenceBasedFeatures() definition
+} # end SaveSequenceBasedFeatures() definition
+
+
+WriteSequenceBasedFeatures <- function(features_plot_data){
+  # Save file
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "sequence_features.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    features_plot_data,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+  # return() # NO RETURN as writing out
+} # end of WriteSequenceBasedFeatures() definition
 
 
 ## Codon-specific ribosome densities for correlations with tRNAs
