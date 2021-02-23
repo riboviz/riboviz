@@ -74,6 +74,12 @@ def parse_command_line_options():
                         dest="overwrite",
                         default=False,
                         help="forces overwrite of output file if it exists")
+    parser.add_argument("-s",
+                        "--seedvalue",
+                        dest="seedvalue",
+                        type=int,
+                        default=1,
+                        help="proportion to sample (default 1)")
     parser.add_argument("-v",
                         "--verbose",
                         dest="verbose",
@@ -96,12 +102,14 @@ def invoke_subsample_bioseqfile():
     file_type = options.file_type
     prob = options.prob
     overwrite = options.overwrite
+    seedvalue = options.seedvalue
     verbose = options.verbose
     subsample_bioseqfile.subsample_bioseqfile(seqfilein,
                                               seqfileout,
                                               file_type,
                                               prob,
                                               overwrite,
+                                              seedvalue,
                                               verbose)
 
 
