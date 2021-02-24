@@ -991,9 +991,11 @@ process generateStatsFigs {
             into nt3_periodicity_pdf
         tuple val(sample_id), file("3nt_periodicity.tsv") \
             into nt3_periodicity_tsv
+        tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
+            into gene_position_length_counts_5start_tsv
         tuple val(sample_id), file("pos_sp_nt_freq.tsv") \
-	    optional (! params.do_pos_sp_nt_freq) \
-	    into pos_sp_nt_freq_tsv
+            optional (! params.do_pos_sp_nt_freq) \
+            into pos_sp_nt_freq_tsv
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.pdf") \
             into pos_sp_rpf_norm_reads_pdf
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
@@ -1161,6 +1163,8 @@ process staticHTML {
       file "read_counts.tsv" from read_counts_tsv
       tuple val(sample_id), file("3nt_periodicity.tsv") \
           from nt3_periodicity_tsv
+      tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
+          from gene_position_length_counts_5start_tsv
       tuple val(sample_id), file("read_lengths.tsv") \
           from read_lengths_tsv
       tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
@@ -1185,11 +1189,11 @@ process staticHTML {
         yamlfile='\$PWD/${config_file_yaml}', \
         sampleid='!{sample_id}', \
         three_nucleotide_periodicity_data_file = '\$PWD/3nt_periodicity.tsv', \
+        gene_position_length_counts_5start_file = '\$PWD/gene_position_length_counts_5start.tsv', \
         read_length_data_file='\$PWD/read_lengths.tsv', \
         pos_sp_rpf_norm_reads_data_file='\$PWD/pos_sp_rpf_norm_reads.tsv', \
         gene_read_frames_filtered_data_file='\$PWD/3ntframe_bygene_filtered.tsv', \
-        sequence_features_file='\$PWD/sequence_features.tsv', \
-        asite_disp_length_file='\$PWD/${asite_disp_length_txt}' \
+        sequence_features_file='\$PWD/sequence_features.tsv' \
       ), \
       output_format = 'html_document', \
       output_file = '\$PWD/${sample_id}_output_report.html')
