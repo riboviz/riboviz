@@ -867,12 +867,16 @@ CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_fi
 } # end of CalculateCodonSpecificRibosomeDensity() definition
 
 
-PlotCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_data) {
-
+GatherCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_data) {
   # Prepare data for plot
   cod_dens_tRNA_wide <- cod_dens_tRNA_data %>%
     gather(tRNA_type, tRNA_value, 3:6) %>%
     gather(Site, Ribodens, 3:5)
+  
+  return(cod_dens_tRNA_wide)
+} 
+
+PlotCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_wide) {
 
   # Plot
   cod_dens_tRNA_plot <- ggplot(cod_dens_tRNA_wide, aes(x = tRNA_value, y = Ribodens)) +
@@ -893,6 +897,22 @@ SaveCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_plot){
   # return() # NO RETURN as writing out
 
 } # end of SaveCodonSpecificRibosomeDensityTRNACorrelation() definition
+
+WriteGatheredCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_wide){
+  # Save file
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "codon_ribodens_gathered.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    cod_dens_tRNA_wide,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+  # return() # NO RETURN as writing out
+} # end of WriteCodonSpecificRibosomeDensityTRNACorrelation() definition
 
 
 WriteCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_data){
