@@ -10,6 +10,7 @@ params:
   read_length_data_file: NA
   pos_sp_rpf_norm_reads_data_file: NA
   gene_read_frames_filtered_data_file: NA
+  codon_ribodens_gathered_file: NA
   sequence_features_file: NA
 ---
 
@@ -155,7 +156,11 @@ if(!is.na(features_plot)){
 
 # codon_ribodens.pdf plot: (conditional on `t_rna_file` and `codon_positions_file`)
 if(!is.na(codonspecificribosomedensitytrnacorrelation_plot)){
-  # load data
+  # load data 
+  cod_dens_tRNA_wide <- read_tsv(
+    file = params$codon_ribodens_gathered_file, 
+    skip = 4, # this avoids the provenance info
+    col_names = TRUE)
 }
 
 
@@ -234,6 +239,6 @@ if (!is.na(codonspecificribosomedensitytrnacorrelation_plot)) {
   # 
   print("Plot codon-specific ribosome density and tRNA correlation.")
   # conditional on `t_rna_file` and `codon_positions_file`
-  #
+  PlotCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_wide)
 }
 ```
