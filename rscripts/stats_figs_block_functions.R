@@ -86,6 +86,33 @@ PlotThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data){
   
 } # end PlotThreeNucleotidePeriodicity() definition
 
+
+CalculateGenePositionLengthCounts5Start <- function(gene_names, dataset, hd_file, gff_df){
+  # create intermediate data object
+  gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(
+    gene_names = gene_names, 
+    dataset= dataset, 
+    hd_file = hd_file, 
+    gff_df = gff_df
+  )
+  return(gene_poslen_counts_5start_df)
+}
+
+WriteGenePositionLengthCounts5Start <- function(gene_poslen_counts_5start_df){
+  # write out intermediate object
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "gene_position_length_counts_5start.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    gene_poslen_counts_5start_df,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+}
+
 # potentially replace/tweak plot_ribogrid() to follow StyleGuide
 PlotStartCodonRiboGrid <- function(gene_poslen_counts_5start_df){
   # function to do the ribogrid & ribogridbar plots?
