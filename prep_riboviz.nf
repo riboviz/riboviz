@@ -1014,6 +1014,9 @@ process generateStatsFigs {
         tuple val(sample_id), file("codon_ribodens.tsv") \
             optional (! is_t_rna_and_codon_positions_file) \
             into codon_ribodens_tsv
+        tuple val(sample_id), file("codon_ribodens_gathered.tsv") \
+            optional (! is_t_rna_and_codon_positions_file) \
+            into codon_ribodens_gathered_tsv
         tuple val(sample_id), file("features.pdf") \
             optional (! is_features_file) into features_pdf
         tuple val(sample_id), file("sequence_features.tsv") \
@@ -1173,7 +1176,8 @@ process staticHTML {
           from nt3frame_bygene_filtered_tsv
       tuple val(sample_id), file("sequence_features.tsv") \
           from sequence_features_tsv
-      each file(asite_disp_length_txt) from asite_disp_length_txt2
+      tuple val(sample_id), file("codon_ribodens_gathered.tsv") \
+          from codon_ribodens_gathered_tsv
 
     output:
       val sample_id into finished_viz_sample_id
@@ -1193,6 +1197,7 @@ process staticHTML {
         read_length_data_file='\$PWD/read_lengths.tsv', \
         pos_sp_rpf_norm_reads_data_file='\$PWD/pos_sp_rpf_norm_reads.tsv', \
         gene_read_frames_filtered_data_file='\$PWD/3ntframe_bygene_filtered.tsv', \
+        codon_ribodens_gathered_file='\$PWD/codon_ribodens_gathered.tsv', \
         sequence_features_file='\$PWD/sequence_features.tsv' \
       ), \
       output_format = 'html_document', \
