@@ -184,11 +184,11 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hd_file, gff_df) {
   # CalculateThreeNucleotidePeriodicity():
   three_nucleotide_periodicity_data <- CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
 
+  # CalculateGenePositionLengthCounts5Start():
+  gene_poslen_counts_5start_df <- CalculateGenePositionLengthCounts5Start(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
+  
   # PlotThreeNucleotidePeriodicity()
   three_nucleotide_periodicity_plot <- PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
-
-  # NOTE: repeated from inside CalculateThreeNucleotidePeriodicity() as preferred not to return multiple objects in list (hassle :S)
-  gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(gene_names = gene_names, dataset= dataset, hd_file = hd_file, gff_df = gff_df)
 
   # run PlotStartCodonRiboGrid()
   start_codon_ribogrid_plot <- PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
@@ -209,6 +209,9 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hd_file, gff_df) {
 
   # run WriteThreeNucleotidePeriodicity():
   WriteThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
+  
+  # WriteGenePositionLengthCounts5Start(): 
+  WriteGenePositionLengthCounts5Start(gene_poslen_counts_5start_df)
 
   print("Completed: Check for 3nt periodicity globally")
 
