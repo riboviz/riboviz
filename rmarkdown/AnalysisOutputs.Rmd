@@ -6,11 +6,11 @@ params:
   yamlfile: NA
   sampleid: NA
   three_nucleotide_periodicity_data_file: NA
+  gene_position_length_counts_5start_file: NA
   read_length_data_file: NA
   pos_sp_rpf_norm_reads_data_file: NA
   gene_read_frames_filtered_data_file: NA
   sequence_features_file: NA
-  asite_disp_length_file: NA
 ---
 
 NOTE: installed & added yaml, knitr & rmarkdown to the library() calls! Need to update documentation/installation etc too. 
@@ -115,6 +115,13 @@ three_nucleotide_periodicity_data <- read_tsv(
   skip = 4, # this avoids the provenance info
   col_names = TRUE)
 
+# codon ribogrid & codon ribogrid bar
+gene_poslen_counts_5start_df <- read_tsv(
+  file = params$gene_position_length_counts_5start_file, 
+  skip = 4, # this avoids the provenance info
+  col_names = TRUE
+)
+
 # read length
 read_length_data <- read_tsv(
   file = params$read_length_data_file, 
@@ -160,6 +167,20 @@ if(!is.na(codonspecificribosomedensitytrnacorrelation_plot)){
 
 # three nucleotide periodicity
 PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
+
+```
+
+```{r codonribogrid, echo=FALSE}
+
+# codonribogrid
+PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
+
+```
+
+```{r codonribogridbar, echo=FALSE}
+
+# codonribogridbar
+PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
 
 ```
 
