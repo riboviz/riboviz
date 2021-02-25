@@ -1163,7 +1163,6 @@ process staticHTML {
 
     input:
       file config_file_yaml from config_file_yaml
-      file "read_counts.tsv" from read_counts_tsv
       tuple val(sample_id), file("3nt_periodicity.tsv") \
           from nt3_periodicity_tsv
       tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
