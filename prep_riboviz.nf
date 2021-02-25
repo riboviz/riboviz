@@ -1163,19 +1163,19 @@ process staticHTML {
 
     input:
       file config_file_yaml from config_file_yaml
-      tuple val(sample_id), file("3nt_periodicity.tsv") \
+      tuple val(sample_id), file(sample_nt3_periodicity_tsv) \
           from nt3_periodicity_tsv
-      tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
+      tuple val(sample_id), file(sample_gene_position_length_counts_5start_tsv) \
           from gene_position_length_counts_5start_tsv
-      tuple val(sample_id), file("read_lengths.tsv") \
+      tuple val(sample_id), file(sample_read_lengths_tsv) \
           from read_lengths_tsv
-      tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
+      tuple val(sample_id), file(sample_pos_sp_rpf_norm_reads_tsv) \
           from pos_sp_rpf_norm_reads_tsv
-      tuple val(sample_id), file("3ntframe_bygene_filtered.tsv") \
+      tuple val(sample_id), file(sample_nt3frame_bygene_filtered_tsv) \
           from nt3frame_bygene_filtered_tsv
-      tuple val(sample_id), file("sequence_features.tsv") \
+      tuple val(sample_id), file(sample_sequence_features_tsv) \
           from sequence_features_tsv
-      tuple val(sample_id), file("codon_ribodens_gathered.tsv") \
+      tuple val(sample_id), file(sample_codon_ribodens_gathered_tsv) \
           from codon_ribodens_gathered_tsv
 
     output:
@@ -1191,13 +1191,13 @@ process staticHTML {
       params = list(
         yamlfile='\$PWD/${config_file_yaml}', \
         sampleid='!{sample_id}', \
-        three_nucleotide_periodicity_data_file = '\$PWD/3nt_periodicity.tsv', \
-        gene_position_length_counts_5start_file = '\$PWD/gene_position_length_counts_5start.tsv', \
-        read_length_data_file='\$PWD/read_lengths.tsv', \
-        pos_sp_rpf_norm_reads_data_file='\$PWD/pos_sp_rpf_norm_reads.tsv', \
-        gene_read_frames_filtered_data_file='\$PWD/3ntframe_bygene_filtered.tsv', \
-        codon_ribodens_gathered_file='\$PWD/codon_ribodens_gathered.tsv', \
-        sequence_features_file='\$PWD/sequence_features.tsv' \
+        three_nucleotide_periodicity_data_file = '\$PWD/${sample_nt3_periodicity_tsv}', \
+        gene_position_length_counts_5start_file = '\$PWD/${sample_gene_position_length_counts_5start_tsv}', \
+        read_length_data_file='\$PWD/${sample_read_lengths_tsv}', \
+        pos_sp_rpf_norm_reads_data_file='\$PWD/${sample_pos_sp_rpf_norm_reads_tsv}', \
+        gene_read_frames_filtered_data_file='\$PWD/${sample_nt3frame_bygene_filtered_tsv}', \
+        codon_ribodens_gathered_file='\$PWD/${sample_codon_ribodens_gathered_tsv}', \
+        sequence_features_file='\$PWD/${sample_sequence_features_tsv}' \
       ), \
       output_format = 'html_document', \
       output_file = '\$PWD/${sample_id}_output_report.html')
