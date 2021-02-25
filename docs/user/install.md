@@ -86,8 +86,8 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
-* Python pycodestyle, pylint, pytest-cov, sphinx
-* R: lintr, styler, roxygen2, devtools
+* Python pycodestyle, pylint, pytest-cov, sphinx.
+* R: lintr, styler, roxygen2, devtools, glue, testthat, withr.
 
 Constraints:
 

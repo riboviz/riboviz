@@ -146,6 +146,31 @@ If you have installed Nextflow, run:
 $ pytest --ignore-glob="*regression*"
 ```
 
+See also [Run R tests](#run-r-tests) below.
+
+---
+
+## Run R tests
+
+All testthat-compliant R tests can be run as follows:
+
+```console
+$ Rscript rscripts/tests/testthat.R
+```
+
+Individual test scripts can be run as follows (for example):
+
+```console
+$ Rscript rscripts/tests/testthat/test_bam_to_h5.R 
+```
+
+Test scripts can also be run within R as follows (for example):
+
+```R
+> library(testthat)
+> test_file("rscripts/tests/testthat/test_bam_to_h5.R")
+```
+
 ---
 
 ## Useful pytest flags
@@ -154,3 +179,4 @@ $ pytest --ignore-glob="*regression*"
 * `-v`: verbose mode, displays names of test functions run.
 * `-k`: run a specific test function.
 * `--cov-config=.coveragerc --cov-report term-missing --cov=riboviz`: create a test coverage report which includes the line numbers of statements that were not executed.
+
