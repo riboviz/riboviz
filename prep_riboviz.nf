@@ -990,6 +990,7 @@ process generateStatsFigs {
         tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
             into gene_position_length_counts_5start_tsv
         tuple val(sample_id), file("pos_sp_nt_freq.tsv") \
+            optional (! params.do_pos_sp_nt_freq) \
             into pos_sp_nt_freq_tsv
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.pdf") \
             into pos_sp_rpf_norm_reads_pdf
@@ -1007,16 +1008,20 @@ process generateStatsFigs {
             optional (! is_t_rna_and_codon_positions_file) \
             into codon_ribodens_pdf
         tuple val(sample_id), file("codon_ribodens.tsv") \
+            optional (! is_t_rna_and_codon_positions_file) \
             into codon_ribodens_tsv
         tuple val(sample_id), file("codon_ribodens_gathered.tsv") \
+            optional (! is_t_rna_and_codon_positions_file) \
             into codon_ribodens_gathered_tsv
         tuple val(sample_id), file("features.pdf") \
             optional (! is_features_file) into features_pdf
         tuple val(sample_id), file("sequence_features.tsv") \
-            into sequence_features_tsv
+            optional (! is_features_file) into sequence_features_tsv
         tuple val(sample_id), file("3ntframe_bygene.tsv") \
+            optional (! is_asite_disp_length_file) \
             into nt3frame_bygene_tsv
         tuple val(sample_id), file("3ntframe_bygene_filtered.tsv") \
+            optional (! is_asite_disp_length_file) \
             into nt3frame_bygene_filtered_tsv
         tuple val(sample_id), file("3ntframe_propbygene.pdf") \
             optional (! is_asite_disp_length_file) \
@@ -1051,14 +1056,19 @@ process generateStatsFigs {
            --orf-gff-file=${orf_gff} \
            ${asite_disp_length_flag} \
            ${count_threshold_flag}
-        touch "pos_sp_nt_freq.tsv"
-        touch "codon_ribodens.tsv"
-        touch "codon_ribodens_gathered.tsv"
-        touch "sequence_features.tsv"
-        touch "3ntframe_bygene.tsv"
-        touch "3ntframe_bygene_filtered.tsv"
         """
 }
+
+// Join outputs from generateStatsFigs for staticHTML.
+// Join is done on first value of each tuple i.e. sample ID.
+generate_stats_figs_static_html =
+    nt3_periodicity_tsv
+    .join(gene_position_length_counts_5start_tsv, remainder: true)
+    .join(read_lengths_tsv, remainder: true)
+    .join(pos_sp_rpf_norm_reads_tsv, remainder: true)
+    .join(nt3frame_bygene_filtered_tsv, remainder: true)
+    .join(sequence_features_tsv, remainder: true)
+    .join(codon_ribodens_gathered_tsv, remainder: true)
 
 finished_sample_id
     .ifEmpty { exit 1, "No sample was processed successfully" }
@@ -1154,34 +1164,25 @@ process createConfigFile {
 
 // run visualization system to generate interactive output report: riboviz/#193
 process staticHTML {
-    tag "${sample_id} ${sample_id_gpl} ${sample_id_rl} ${sample_id_psrnr} ${sample_id_nt3} ${sample_id_sf} ${sample_id_crg}"
+    tag "${sample_id}"
     publishDir "${params.dir_out}/${sample_id}", \
     mode: 'copy', overwrite: true
-
     input:
       file config_file_yaml from config_file_yaml
-      tuple val(sample_id), file(sample_nt3_periodicity_tsv) \
-          from nt3_periodicity_tsv
-      tuple val(sample_id_gpl), file(sample_gene_position_length_counts_5start_tsv) \
-          from gene_position_length_counts_5start_tsv
-      tuple val(sample_id_rl), file(sample_read_lengths_tsv) \
-          from read_lengths_tsv
-      tuple val(sample_id_psrnr), file(sample_pos_sp_rpf_norm_reads_tsv) \
-          from pos_sp_rpf_norm_reads_tsv
-      tuple val(sample_id_nt3), file(sample_nt3frame_bygene_filtered_tsv) \
-          from nt3frame_bygene_filtered_tsv
-      tuple val(sample_id_sf), file(sample_sequence_features_tsv) \
-          from sequence_features_tsv
-      tuple val(sample_id_crg), file(sample_codon_ribodens_gathered_tsv) \
-          from codon_ribodens_gathered_tsv
-
+      tuple val(sample_id), \
+        file(sample_nt3_periodicity_tsv), \
+        file(sample_gene_position_length_counts_5start_tsv), \
+        file(sample_read_lengths_tsv), \
+        file(sample_pos_sp_rpf_norm_reads_tsv), \
+        file(sample_nt3frame_bygene_filtered_tsv), \
+        file(sample_sequence_features_tsv), \
+        file(sample_codon_ribodens_gathered_tsv) \
+	from generate_stats_figs_static_html
     output:
       val sample_id into finished_viz_sample_id
       file "${sample_id}_output_report.html" into static_html_html
-
     when:
       params.run_static_html
-
     shell:
       script = "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd',"
       script += "params = list("
