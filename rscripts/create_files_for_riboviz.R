@@ -12,36 +12,37 @@ library(GenomicRanges)
 library(parallel)
 library(rhdf5)
 
-parser <- ArgumentParser()
-parser$add_argument("-i","--input",help="Input DNA sequences. Should contain genome (i.e. sequence of each chromosome) or transcripts. Should be file path",type="character")
-parser$add_argument("-g","--gff",help="GFF3 file corresponding to input DNA sequences.",type="character")
-parser$add_argument("--out_dir",help="Output directory for Riboviz-style CDS and GFF files. Will be created if does not exist.",type="character",default="./")
-parser$add_argument("--out_cds",help="Name of Riboviz-style CDS file",type="character",default="riboviz_cds.fasta")
-parser$add_argument("--out_gff",help="Name of Riboviz-style GFF3 file",type="character",default="riboviz_gff.gff3")
-parser$add_argument("-s","--seq_id",help="GFF column to use as the sequence ids",type="character",default="Name")
-parser$add_argument("-b","--buffer",help="Buffer to use for UTRs",type="integer",default=250)
-parser$add_argument("--h5_file",help="File name for createing H5 file. If not initialized, file will not be created.",type="character",default=NULL)
-parser$add_argument("--codon_data_file",help="File name for codon position .Rdata file. If not initialized, file will not be created.",type="character",default=NULL)
-parser$add_argument("--num_cores",help="Number of cores to use for parallelizable processes.",type="integer",default=1)
-parser$add_argument("--codons_exclude",help="Exclude the first n codons when creating codon_data_file, where n is specified by this argument",default=0)
-parser$add_argument("--remove_trailing",help="Remove trailing info from names to be used for CDS, e.g. remove anything after '_' or '.'",type="character",default="_|\\.")
-parser$add_argument("--filter_seq",help="A comma-separated list of filtering criteria to apply to the GFF3 file, e.g. 'type:CDS,orf_classification:Verified,orf_classification:Uncharacterized'. Use 'notNA' to filter values that are NA, e.g. 'orf_classification:!NA'.",type="character",default="type:CDS")
-
-
-args <- parser$parse_args()
-input <- args$input
-gff <- args$gff
-output_dir <- args$out_dir
-output_cds <- args$out_cds
-output_gff <- args$out_gff
-dna_type <- args$dna_type
-buffer <- args$buffer
-h5_file <- args$h5_file
-codon_data_file <- args$codon_data_file
-num_cores <- args$num_cores
-codons_exclude <- args$codons_exclude
-remove_trailing <- args$remove_trailing
-filter_seq <- args$filter_seq
+# parser <- ArgumentParser()
+# parser$add_argument("-i","--input",help="Input DNA sequences. Should contain genome (i.e. sequence of each chromosome) or transcripts. Should be file path",type="character")
+# parser$add_argument("-g","--gff",help="GFF3 file corresponding to input DNA sequences.",type="character")
+# parser$add_argument("--out_dir",help="Output directory for Riboviz-style CDS and GFF files. Will be created if does not exist.",type="character",default="./")
+# parser$add_argument("--out_cds",help="Name of Riboviz-style CDS file",type="character",default="riboviz_cds.fasta")
+# parser$add_argument("--out_gff",help="Name of Riboviz-style GFF3 file",type="character",default="riboviz_gff.gff3")
+# parser$add_argument("-s","--seq_id",help="GFF column to use as the sequence ids",type="character",default="Name")
+# parser$add_argument("-b","--buffer",help="Buffer to use for UTRs",type="integer",default=250)
+# parser$add_argument("--h5_file",help="File name for createing H5 file. If not initialized, file will not be created.",type="character",default=NULL)
+# parser$add_argument("--codon_data_file",help="File name for codon position .Rdata file. If not initialized, file will not be created.",type="character",default=NULL)
+# parser$add_argument("--num_cores",help="Number of cores to use for parallelizable processes.",type="integer",default=1)
+# parser$add_argument("--codons_exclude",help="Exclude the first n codons when creating codon_data_file, where n is specified by this argument",default=0)
+# parser$add_argument("--remove_trailing",help="Remove trailing info from names to be used for CDS, e.g. remove anything after '_' or '.'",type="character",default="_|\\.")
+# parser$add_argument("--filter_seq",help="A comma-separated list of filtering criteria to apply to the GFF3 file, e.g. 'type:CDS,orf_classification:Verified,orf_classification:Uncharacterized'. Use 'notNA' to filter values that are NA, e.g. 'orf_classification:!NA'.",type="character",default="type:CDS")
+# parser$add_argument("--exons_preordered",help="Some GFF3 files have exons pre-ordered such that exon with start codon is listed first. Effects how multi-exon genes will be combined.",action="store_true")
+# 
+# args <- parser$parse_args()
+# input <- args$input
+# gff <- args$gff
+# output_dir <- args$out_dir
+# output_cds <- args$out_cds
+# output_gff <- args$out_gff
+# seq_id <- args$seq_id
+# buffer <- args$buffer
+# h5_file <- args$h5_file
+# codon_data_file <- args$codon_data_file
+# num_cores <- args$num_cores
+# codons_exclude <- args$codons_exclude
+# remove_trailing <- args$remove_trailing
+# filter_seq <- args$filter_seq
+# exons_preordered <- args$exons_preordered
 
 ##### Helper functions #########################################################
 
@@ -173,8 +174,10 @@ renameGenome <- function(genome,new.names)
 #' @param genome DNAStringSet object with genome
 #' @param gff A GRanges object from a GFF3 file
 #' @param buffer Size of buffers for UTRs
+#' @param exons_preordered Do exons need to be reordered? Some GFF3 files have exons for multi-exon genes pre-ordered such that the exon with the start codon is first in the file.
+#'                          How the code handles this situation will be different if 
 #' @return CDS as DNAStringSet object
-convertGenomeToCDSFile <- function(genome,gff_annot,buffer)
+convertGenomeToCDSFile <- function(genome,gff_annot,buffer,exons_preordered = FALSE)
 {
   tmp_gff <- sapply(unique(gff_annot$Name),
                    function(x){
@@ -191,9 +194,20 @@ convertGenomeToCDSFile <- function(genome,gff_annot,buffer)
   output_seqlist <- list()
   cc <- 1
   for(i in unique(names(cds_flank_seq))){
-    output_seqlist[[cc]] <- c(unlist(cds_flank_seq[names(cds_flank_seq)==i]))
-    if(any(strand(cds_flank_annot[cds_flank_annot$Name==i])=="-")){
-      output_seqlist[[cc]] <- reverseComplement(output_seqlist[[cc]])
+    if (!exons_preordered) {
+      output_seqlist[[cc]] <- c(unlist(cds_flank_seq[names(cds_flank_seq)==i]))
+      if(any(strand(cds_flank_annot[cds_flank_annot$Name==i])=="-")){
+        ## In the case of exons not preordered, can just apply reverseComplement to entire sequence. 
+        output_seqlist[[cc]] <- reverseComplement(output_seqlist[[cc]])
+      }
+    } else{
+      tmp.seq.list <- cds_flank_seq[names(cds_flank_seq)==i]
+      if (any(strand(cds_flank_annot[cds_flank_annot$Name==i])=="-")){
+        ## In the case of preordered exons, apply reverseComplement to all exons individually and then merge
+        output_seqlist[[cc]] <- c(unlist(reverseComplement(tmp.seq.list)))
+      } else {
+        output_seqlist[[cc]] <- c(unlist(tmp.seq.list))
+      }
     }
     cc <- cc+1
   }
@@ -320,6 +334,21 @@ createH5File <- function(seq,gff,hdfile,output_dir)
 }
 
 
+input <- "~/Schizosaccharomyces_pombe_all_chromosomes.fa"
+gff <- "~/Schizosaccharomyces_pombe_all_chromosomes.gff3"
+output_dir <- "/data/cope/example-datasets/fungi/schizosaccharomyces/annotation/"
+output_cds <- "Schizosaccharomyces_pombe_CDS_w_250utrs.fasta"
+output_gff <- "Schizosaccharomyces_pombe_CDS_w_250utrs.gff3"
+buffer <- 250
+h5_file <-NULL
+seq_id <- "ID"
+codon_data_file <- NULL
+num_cores <- 1
+codons_exclude <- 0
+remove_trailing <- "\\:"
+filter_seq <- "type:CDS"
+exons_preordered <- TRUE
+
 
 if (!file.exists(input)){
   stop("FASTA file specified by --input argument not found.")
@@ -354,11 +383,48 @@ print("Done")
 if (!is.null(remove_trailing))
 {
   print("Removing trailing values on gene ids...")
-  annot <- removeTrailing(gff = annot, column="ID", regex = remove_trailing)
+  annot <- removeTrailing(gff = annot, column=seq_id, regex = remove_trailing)
   print("Done")
 }
 print("Creating riboviz-style CDS...")
-cds <- convertGenomeToCDSFile(genome,annot,buffer)
+gff_annot <- annot
+
+#cds <- convertGenomeToCDSFile(genome,annot,buffer,exons_preordered)
+tmp_gff <- sapply(unique(gff_annot$Name),
+                  function(x){
+                    gene_location <- gff_annot[gff_annot$Name==x]; 
+                    resize_gff_flank(gene_location = gene_location, flank=buffer)
+                  })
+cds_flank_annot <- unlist(GRangesList(tmp_gff))
+
+# Obtain sequences of CDS+UTRs from genome
+cds_flank_seq <- genome[cds_flank_annot]
+names(cds_flank_seq) <- cds_flank_annot$Name
+
+# Combine multi-exon genes into a single transcript
+output_seqlist <- list()
+cc <- 1
+for(i in unique(names(cds_flank_seq))){
+  if (!exons_preordered) {
+    output_seqlist[[cc]] <- c(unlist(cds_flank_seq[names(cds_flank_seq)==i]))
+    if(any(strand(cds_flank_annot[cds_flank_annot$Name==i])=="-")){
+      ## In the case of exons not preordered, can just apply reverseComplement to entire sequence. 
+      output_seqlist[[cc]] <- reverseComplement(output_seqlist[[cc]])
+    }
+  } else{
+    tmp.seq.list <- cds_flank_seq[names(cds_flank_seq)==i]
+    if (any(strand(cds_flank_annot[cds_flank_annot$Name==i])=="-")){
+      ## In the case of preordered exons, apply reverseComplement to all exons individually and then merge
+      output_seqlist[[cc]] <- c(unlist(reverseComplement(tmp.seq.list)))
+    } else {
+      output_seqlist[[cc]] <- c(unlist(tmp.seq.list))
+    }
+  }
+  cc <- cc+1
+}
+output_seq <- DNAStringSet(output_seqlist)
+names(output_seq) <- unique(names(cds_flank_seq))
+cds <- output_seq
 print("Done")
 print("Writing riboviz-style CDS to file...")
 writeRibovizStyleCDS(cds,output_dir,output_cds)
