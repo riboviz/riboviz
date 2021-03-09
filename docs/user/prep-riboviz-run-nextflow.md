@@ -461,6 +461,8 @@ $ nextflow run prep_riboviz.nf \
 
 For more information on Nextflow's reports, see Nextflow [Tracing & visualisation](https://www.nextflow.io/docs/latest/tracing.html).
 
+**Note:** If the `--validate_only` flag is provided (see [Validate configuration](#validate-configuration)) then the execution report, timeline report and DAG files will be empty and the trace report will consist of a header only, but no data.
+
 ### Troubleshooting: `WARN To render the execution DAG in the required format it is required to install Graphviz`
 
 If you do not have Graphviz available then requesting `-with-dag workflow.svg` will cause Nextflow to show this warning on completion of the workflow.
