@@ -74,7 +74,7 @@ echo " "
 echo "| Python Package | Version | Package Manager |"
 echo "| -------------- | ------- | --------------- |"
 CONDA_PKGS=$(conda list)
-CONDA_LIST=(biopython cutadapt gitpython h5py nextflow pandas pycodestyle pylint pysam pytest pytest-cov pyyaml samtools umi_tools)
+CONDA_LIST=(biopython cutadapt gitpython h5py nextflow pandas pycodestyle pylint pysam pytest pytest-cov pyyaml samtools sphinx umi_tools)
 for pkg in ${CONDA_LIST[@]}; do
     PKG_VERSION=$(echo "$CONDA_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
     # pkg     M.N    ...
@@ -96,7 +96,7 @@ echo " "
 echo "| R Package | Version |"
 echo "| --------- | ------- |"
 R_PKGS=$(Rscript rscripts/list-r-packages.R)
-R_LIST=(Biostrings ggplot2 git2r here lintr optparse plotly RcppRoll readr rhdf5 Rsamtools rtracklayer shiny tidyr ShortRead styler)
+R_LIST=(Biostrings devtools ggplot2 git2r glue here lintr optparse plotly RcppRoll readr rhdf5 roxygen2 Rsamtools rtracklayer shiny ShortRead styler testthat tidyr withr)
 for pkg in ${R_LIST[@]}; do
     PKG_VERSION=$(echo "$R_PKGS" | grep -iw "$pkg " | tr -s " ")
     PKG_VERSION=$(echo $PKG_VERSION | cut -d" " -f2)

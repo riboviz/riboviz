@@ -63,6 +63,7 @@ Command-line tools:
 * [Git branching model](./docs/developer/git-branching-model.md)
 * [Coding style](./docs/developer/coding-style.md)
 * [Debugging](./docs/developer/debugging.md)
+* [Adding configuration parameters](./docs/developer/adding-config.md)
 * [Developing and running tests](./docs/developer/testing.md)
 * [Creating a regression test data repository](./docs/developer/create-test-data-repository.md)
 * [Writing and updating documentation](./docs/developer/documentation.md)
@@ -71,7 +72,7 @@ Command-line tools:
 ## Reference
 
 * [Content and provenance of repository data files](./docs/reference/data.md)
-* [Structure of HDF5 data](./docs/reference/hdf5-data.md)
+* [Structure of HDF5 data](./docs/reference/hdf5-data.md). Structure of HDF5 data files produced by `bam_to_h5.R`.
 
 ## Releases
 
@@ -103,3 +104,4 @@ For citations of third-party software used by **RiboViz**, see [References](./do
 **RiboViz** is Copyright (2016-2020) The University of Edinburgh; Rutgers University; University of California, Berkeley; The University of Pennsylvania.
 
 **RiboViz** is released under the [Apache License 2.0](./LICENSE).
+>>>>>>> develop
