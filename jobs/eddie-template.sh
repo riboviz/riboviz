@@ -38,6 +38,6 @@ source activate riboviz
 
 echo "Running Nextflow riboviz..."
 
-nextflow run prep_riboviz.nf -params-file %%config_file%% -work-dir %%nextflow_work_dir%% -ansi-log false -with-report %%nextflow_report_file%% %%nextflow_resume%% %%validate_only%%
+nextflow run prep_riboviz.nf -params-file %%config_file%% -work-dir %%nextflow_work_dir%% -ansi-log false -with-report %%nextflow_report_file%% -with-timeline %%nextflow_timeline_file%% -with-trace %%nextflow_trace_file%% -with-dag %%nextflow_dag_file%% %%nextflow_resume%% %%validate_only%%
 
 echo "Nextflow riboviz run complete!"

@@ -124,9 +124,24 @@ CONFIG_FILE = "config_file"
 """
 RiboViz YAML configuration file (job submission) (command-line only).
 """
+NEXTFLOW_DAG_FILE = "nextflow_dag_file"
+"""
+Nextflow DAG file (Nextflow workflow only)
+(job submission).
+"""
 NEXTFLOW_REPORT_FILE = "nextflow_report_file"
 """
 Nextflow report file (Nextflow workflow only)
+(job submission).
+"""
+NEXTFLOW_TIMELINE_FILE = "nextflow_timeline_file"
+"""
+Nextflow timeline file (Nextflow workflow only)
+(job submission).
+"""
+NEXTFLOW_TRACE_FILE = "nextflow_trace_file"
+"""
+Nextflow trace file (Nextflow workflow only)
 (job submission).
 """
 NEXTFLOW_WORK_DIR = "nextflow_work_dir"
@@ -161,30 +176,36 @@ Events triggering emails about batch job (job submission).
 """
 
 DEFAULT_JOB_CONFIG = {
-    JOB_NAME: "riboviz",
-    JOB_RUNTIME: "48:00:00",
-    JOB_MEMORY: "8G",
-    JOB_NUM_CPUS: 4,
-    JOB_PARALLEL_ENV: "mpi",
-    JOB_EMAIL_EVENTS: "beas",
     JOB_EMAIL: None,
-    NEXTFLOW_WORK_DIR: "work",
+    JOB_EMAIL_EVENTS: "beas",
+    JOB_MEMORY: "8G",
+    JOB_NAME: "riboviz",
+    JOB_NUM_CPUS: 4,
+    JOB_RUNTIME: "48:00:00",
+    JOB_PARALLEL_ENV: "mpi",
+    NEXTFLOW_DAG_FILE: "nextflow-dag.html",
     NEXTFLOW_REPORT_FILE: "nextflow-report.html",
     NEXTFLOW_RESUME: "false",
+    NEXTFLOW_TIMELINE_FILE: "nextflow-timeline.html",
+    NEXTFLOW_TRACE_FILE: "nextflow-trace.tsv",
+    NEXTFLOW_WORK_DIR: "work",
     VALIDATE_ONLY: False
 }
 """ Default values for job configuration parameters. """
 JOB_CONFIG_TYPE = {
-    JOB_NAME: str,
-    JOB_RUNTIME: str,
-    JOB_MEMORY: str,
-    JOB_NUM_CPUS: int,
-    JOB_PARALLEL_ENV: str,
-    JOB_EMAIL_EVENTS: str,
     JOB_EMAIL: str,
-    NEXTFLOW_WORK_DIR: str,
+    JOB_EMAIL_EVENTS: str,
+    JOB_MEMORY: str,
+    JOB_NAME: str,
+    JOB_PARALLEL_ENV: str,
+    JOB_RUNTIME: str,
+    JOB_NUM_CPUS: int,
+    NEXTFLOW_DAG_FILE: str,
     NEXTFLOW_REPORT_FILE: str,
     NEXTFLOW_RESUME: bool,
+    NEXTFLOW_TIMELINE_FILE: str,
+    NEXTFLOW_TRACE_FILE: str,
+    NEXTFLOW_WORK_DIR: str,
     VALIDATE_ONLY: bool
 }
 """ Types of job configuration parameters. """

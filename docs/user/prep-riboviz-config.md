@@ -78,7 +78,10 @@ The workflow also supports the following configuration parameters. All directory
 | `max_read_length` | Maximum read length in H5 output | No | `50` |
 | `min_read_length` | Minimum read length in H5 output | No | `10` |
 | `multiplex_fq_files` | List with a single multiplexed FASTQ file, relative to `<dir_in>`. If this is provided then the `fq_files` parameter must not be present in the configuration and the `sample_sheet` parameter must be present. | Only if `fq_files` is not provided | |
-| `nextflow_report_file` | Nextflow report file (see [Create job submission script from template](./create-job-script.md)) (Nextflow workflow only) | No | `nextflow-report.html` |
+| `nextflow_dag_file` | Nextflow DAG file (see [Create job submission script from template](./create-job-script.md) and Nextflow's [DAG visualisation](https://www.nextflow.io/docs/latest/tracing.html#dag-visualisation)) (Nextflow workflow only) | No | `nextflow-dag.html` |
+| `nextflow_report_file` | Nextflow report file (see [Create job submission script from template](./create-job-script.md) and Nextflow's [Execution report](https://www.nextflow.io/docs/latest/tracing.html#execution-report)) (Nextflow workflow only) | No | `nextflow-report.html` |
+| `nextflow_timeline_file` | Nextflow timeline file (see [Create job submission script from template](./create-job-script.md) and Nextflow's [Timeline report](https://www.nextflow.io/docs/latest/tracing.html#timeline-report)) (Nextflow workflow only) | No | `nextflow-timeline.html` |
+| `nextflow_trace_file` | Nextflow trace file (see [Create job submission script from template](./create-job-script.md) and Nextflow's [Trace report](https://www.nextflow.io/docs/latest/tracing.html#trace-report)) (Nextflow workflow only) | No | `nextflow-trace.tsv` |
 | `nextflow_work_dir` | Nextflow work directory (see [Create job submission script from template](./create-job-script.md)) (Nextflow workflow only) | No | `work` |
 | `num_processes` | Number of processes to parallelize over, used by specific steps in the workflow | No | `1` |
 | `orf_fasta_file` | Transcript sequences file containing both coding regions and flanking regions (FASTA file) | Yes | |

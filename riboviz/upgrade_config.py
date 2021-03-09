@@ -52,15 +52,18 @@ Expected parameters added between release 2.0 and the current
 release are added along with default values, if they are not
 already present in the configuration:
 
-* ``job_name: riboviz``
-* ``job_runtime: '48:00:00'``
-* ``job_memory: 8G``
-* ``job_num_cpus: 4``
-* ``job_parallel_env: mpi``
 * ``job_email: null``
 * ``job_email_events: beas``
+* ``job_memory: 8G``
+* ``job_name: riboviz``
+* ``job_num_cpus: 4``
+* ``job_parallel_env: mpi``
+* ``job_runtime: '48:00:00'``
+* ``nextflow_dag_file: nextflow-dag.html``
 * ``nextflow_report_file: nextflow-report.html``
-" ``nextflow_work_dir: work``
+* ``nextflow_timeline_file: nextflow-timeline.html``
+* ``nextflow_trace_file: nextflow-trace.tsv``
+* ``nextflow_work_dir: work``
 * ``validate_only: false``
 
 The values of parameters ``rrna_index_prefix`` and

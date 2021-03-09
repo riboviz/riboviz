@@ -36,7 +36,10 @@ make_bedgraph: TRUE # Output bedgraph files, as TSV, in addition to h5?
 max_read_length: 50 # Maximum read length in H5 output
 min_read_length: 10 # Minimum read length in H5 output
 multiplex_fq_files: null # Multiplexed fastq files to be processed, relative to dir_in
+nextflow_dag_file: nextflow-dag.html # Nextflow DAG file (Nextflow workflow only) (job submission).
 nextflow_report_file: nextflow-report.html # Nextflow report file (Nextflow workflow only) (job submission).
+nextflow_timeline_file: nextflow-timeline.html # Nextflow timeline file (Nextflow workflow only) (job submission).
+nextflow_trace_file: nextflow-trace.tsv # Nextflow trace file (Nextflow workflow only) (job submission).
 nextflow_work_dir: work # Nextflow work directory (Nextflow workflow only) (job submission).
 num_processes: 1 # Number of processes to parallelize over
 orf_fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa # ORF file to align to

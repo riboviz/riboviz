@@ -342,7 +342,7 @@ $ python -m riboviz.tools.create_job_script \
 **Note:** If you want to run the Python workflow you should edit `job_riboviz.sh` and replace the line:
 
 ```
-nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -work-dir work -ansi-log false -with-report nextflow-report.html  
+nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -work-dir work -ansi-log false -with-report nextflow-report.html -with-timeline nextflow-timeline.html -with-trace nextflow-trace.tsv -with-dag nextflow-dag.html  
 ```
 
 with:

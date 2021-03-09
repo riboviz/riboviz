@@ -13,7 +13,10 @@ The following configuration parameters can be specified within the template:
 | `job_num_cpus` | Requested number of CPUs for batch job | No | `4` |
 | `job_parallel_env` | Requested parallel environment for batch job. One of `sharedmem`, `mpi`, `scatter`, `gpu`, See University of Edinburgh ECDF Linux Compute Cluster, [parallel environments](https://www.wiki.ed.ac.uk/display/ResearchServices/Parallel+Environments) | No | `mpi` |
 | `job_runtime` | Maximum runtime for batch job | No | `48:00:00` |
+| `nextflow_dag_file` | Nextflow DAG file | No | `nextflow-dag.html` |
 | `nextflow_report_file` | Nextflow report file | No | `nextflow-report.html` |
+| `nextflow_timeline_file` | Nextflow timeline file | No | `nextflow-timeline.html` |
+| `nextflow_trace_file` | Nextflow trace file | No | `nextflow-trace.tsv` |
 | `nextflow_work_dir` | Nextflow work directory | No | `work` |
 | `validate_only ` | Validate configuration, check that mandatory parameters have been provided and that input files exist, then exit without running the workflow? | No | `false` |
 
@@ -29,19 +32,22 @@ As an example, a template job submission script for [Eddie](https://www.ed.ac.uk
 `riboviz.tools.create_job_script` can be used to customise a template as follows:
 
 ```console
-$ python -m riboviz.tools.create_job_script [-h]
-    -i [INPUT_FILE] [-o [OUTPUT_FILE]] [-t [TOKEN_TAG]] \
-    --r-libs R_LIBS --config-file [CONFIG_FILE] \
-    [--job-name [JOB_NAME]] \
-    [--job-runtime [JOB_RUNTIME]] \
-    [--job-memory [JOB_MEMORY]] \
-    [--job-num-cpus [JOB_NUM_CPUS]] \
-    [--job-email [JOB_EMAIL]] \
-    [--job-email-events [JOB_EMAIL_EVENTS]] \
-    [--validate-only] \
-    [--nextflow-work-dir [NEXTFLOW_WORK_DIR]] \
-    [--nextflow-report-file [NEXTFLOW_REPORT_FILE]] \
-    [--nextflow-resume] 
+$ python -m riboviz.tools.create_job_script [-h] \
+  -i [INPUT_FILE] [-o [OUTPUT_FILE]] [-t [TOKEN_TAG]] \
+  --r-libs R_LIBS --config-file [CONFIG_FILE] \
+  [--job-email JOB_EMAIL] \
+  [--job-email-events JOB_EMAIL_EVENTS] \
+  [--job-memory JOB_MEMORY] \
+  [--job-name JOB_NAME] \
+  [--job-num-cpus JOB_NUM_CPUS] \
+  [--job-runtime JOB_RUNTIME] \
+  [--nextflow-dag-file NEXTFLOW_DAG_FILE] \
+  [--nextflow-report-file NEXTFLOW_REPORT_FILE] \
+  [--nextflow-resume] \
+  [--nextflow-timeline-file NEXTFLOW_TIMELINE_FILE] \
+  [--nextflow-trace-file NEXTFLOW_TRACE_FILE]
+  [--nextflow-work-dir NEXTFLOW_WORK_DIR] \
+  [--validate-only]
 ```
 
 where:
