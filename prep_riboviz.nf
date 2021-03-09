@@ -8,6 +8,9 @@ RiboViz ribosome profiling workflow
 ===================================
 */
 
+/**
+ * Log a help message.
+ */
 def helpMessage() {
     log.info """
 
@@ -166,7 +169,64 @@ def helpMessage() {
     * 'samsort_memory': Memory to give to 'samtools sort' (
       default '768M', 'samtools sort' built-in default,
       see http://www.htslib.org/doc/samtools-sort.html)
+
+    Use of environment variables:
+
+    * The following three tokens can be provided in values for the
+      file and directory parameters listed below:
+      - '${RIBOVIZ_SAMPLES}'
+      - '${RIBOVIZ_ORGANISMS}'
+      - '${RIBOVIZ_DATA}'
+    * If a token is encountered in the value of each of these
+      parameters then the value of the associated environment
+      variable ('RIBOVIZ_SAMPLES', 'RIBOVIZ_ORGANISMS',
+      'RIBOVIZ_DATA') is substituted into the value of these
+      parameter. If the token is encountered but the corresponding
+      environment variable is undefined, then the path '.' is
+      substituted.
+    * For example, if the value of 'asite_disp_length_file; is
+      '${RIBOVIZ_ORGANISM_FILES}/other/yeast_standard_asite_disp_length.txt'
+      and environment variable 'RIBOVIZ_ORGANISM_FILES' has value
+      '$HOME/riboviz/example-datasets/fungi/saccharomyces/' then
+      the path used for the A-site file is:
+      '$HOME/riboviz/example-datasets/fungi/saccharomyces/other/yeast_standard_asite_disp_length.txt'
+    * If, in the above example, 'RIBOVIZ_ORGANISM_FILES' is undefined
+      then the path used for the A-site file is:
+      './other/yeast_standard_asite_disp_length.txt'
+    * These tokens can be used in the following parameters:
+      - 'asite_disp_length_file'
+      - 'codon_positions_file'
+      - 'dir_in'
+      - 'dir_index'
+      - 'dir_out'
+      - 'dir_tmp'
+      - 'features_file'
+      - 'orf_fasta_file'
+      - 'orf_gff_file'
+      - 'rrna_fasta_file'
+      - 'sample_sheet'
+      - 't_rna_file'
     """.stripIndent()
+}
+
+/**
+ * Customise string. Given a string and mapping from tokens to
+ * substrings, iterate through the tokens and when a match is
+ * found replace the token with substring in the original string,
+ * returning the new string. Only the first matching token
+ * is replaced.
+ * @param string String
+ * @param token_replacements Mapping from tokens to substrings
+ */
+def replace_tokens(string, token_replacements)
+{
+    for (token_replace in token_replacements)
+    {
+        if (string.indexOf(token_replace.key) >= 0)
+	{
+            return string.replace(token_replace.key, token_replace.value)
+        }
+    }
 }
 
 // Help message implementation, following
@@ -269,6 +329,45 @@ if (params.extract_umis) {
         exit 1, "Undefined barcode/UMI regular expression (umi_regexp) when UMI extraction is requested (extract_umis: TRUE)"
     }
 }
+
+/*
+Get and validate environment variables
+*/
+
+samples_dir = System.getenv('RIBOVIZ_SAMPLES') ?: "."
+println("samples_dir: " + samples_dir)
+if (! file(samples_dir).exists())
+{
+    exit 1, "No such RIBOVIZ_SAMPLES directory: $samples_dir"
+}
+organisms_dir = System.getenv('RIBOVIZ_ORGANISMS') ?: "."
+println("organisms_dir: " + organisms_dir)
+if (! file(organisms_dir).exists())
+{
+    exit 1, "No such RIBOVIZ_ORGANISMS directory: $organisms_dir"
+}
+data_dir = System.getenv('RIBOVIZ_DATA') ?: "."
+println("data_dir: " + data_dir)
+if (! file(data_dir).exists())
+{
+    exit 1, "No such RIBOVIZ_DATA directory: $data_dir"
+}
+// Create mapping from environment variable tokens to directories.
+riboviz_env_paths = [:]
+riboviz_env_paths['${RIBOVIZ_SAMPLES}'] = samples_dir
+riboviz_env_paths['${RIBOVIZ_ORGANISMS}'] = organisms_dir
+riboviz_env_paths['${RIBOVIZ_DATA}'] = data_dir
+
+/*
+TODO
+examples = ["example_samples", "example_organisms", "example_data"]
+for (example in examples)
+{
+    println(example + ": " + params[example])
+    example_path = replace_tokens(params[example], riboviz_env_paths)
+    println(example + " path: " + example_path)
+}
+*/
 
 /*
 Validate input files.
