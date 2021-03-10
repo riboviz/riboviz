@@ -379,11 +379,13 @@ multiplex_id_fq = [:]
 multiplex_sample_sheet_tsv = Channel.empty()
 is_multiplexed = false
 if (params.validate_only && params.skip_inputs) {
-    println("Skipping checks for existence of of ribosome profiling input files (fq_files|multiplex_fq_files|sample_sheet)")
+    println("Skipping checks for existence of of ribosome profiling input files (dir_in|fq_files|multiplex_fq_files|sample_sheet)")
 }
-if (! file(dir_in).exists())
-{
-    exit 1, "No such directory (dir_in): $dir_in"
+if ((! params.validate_only) || (! params.skip_inputs)) {
+    if (! file(dir_in).exists())
+    {
+        exit 1, "No such directory (dir_in): $dir_in"
+    }
 }
 if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     exit 1, "No sample files (fq_files) or multiplexed files (multiplex_fq_files) are defined"
