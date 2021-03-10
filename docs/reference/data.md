@@ -97,7 +97,9 @@ data/yeast_codon_pos_i200.RData
 
 This file was produced using version 1.0 of [script_for_transcript_annotation.Rmd](../../rmarkdown/script_for_transcript_annotation.Rmd).
 
-It is obsolete as of March 2021, and will be removed once we have updated the code that uses it to calculate features.
+The file contains data identical from codon position 201 onwards of the data in `data/yeast_codon_table.tsv`.
+
+The `.Rdata` file is obsolete as of March 2021, and will be removed once we have updated the code section `CalculateCodonSpecificRibosomeDensity` to use input data formatted from `data/yeast_codon_table.tsv` instead
 
 
 ### Features to correlate with ORFs:
