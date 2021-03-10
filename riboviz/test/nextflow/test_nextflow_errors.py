@@ -82,6 +82,24 @@ def test_both_sample_multiplex_fq_files(tmp_file):
         "Unexpected exit code %d" % exit_code
 
 
+def test_dir_in_not_found(tmp_file):
+    """
+    Test that a non-existent :py:const:`riboviz.params.INPUT_DIR`
+    directory raises a non-zero exit code.
+
+    :param tmp_file: Path to temporary file, to write configuration to
+    :type tmp_file: str or unicode
+    """
+    with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    config[params.INPUT_DIR] = "foo"
+    with open(tmp_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = run_nextflow(tmp_file)
+    assert exit_code != 0, \
+        "Unexpected exit code %d" % exit_code
+
+
 def test_fq_files_not_found(tmp_file):
     """
     Test that non-existent :py:const:`riboviz.params.FQ_FILES` files
@@ -482,6 +500,28 @@ def test_build_indices_false_no_such_rrna_index_prefix(tmp_file, tmp_dir):
         yaml.dump(config, f)
     exit_code = run_nextflow(tmp_file)
     assert exit_code != 0, \
+        "Unexpected exit code %d" % exit_code
+
+
+def test_validate_skip_inputs_dir_in_not_found(tmp_file):
+    """
+    Test that a non-existent :py:const:`riboviz.params.INPUT_DIR`
+    directory #in the presence of both
+    :py:const:`riboviz.params.VALIDATE_ONLY` and
+    :py:const:`riboviz.params.SKIP_INPUTS` returns a zero exit code.
+
+    :param tmp_file: Path to temporary file, to write configuration to
+    :type tmp_file: str or unicode
+    """
+    with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    config[params.INPUT_DIR] = "foo"
+    config[params.VALIDATE_ONLY] = True
+    config[params.SKIP_INPUTS] = True
+    with open(tmp_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = run_nextflow(tmp_file)
+    assert exit_code == 0, \
         "Unexpected exit code %d" % exit_code
 
 
