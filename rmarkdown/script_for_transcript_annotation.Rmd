@@ -106,8 +106,8 @@ cds_seq <- output_seq[output_gff[output_gff$type=="CDS"]] # Get the coding seque
 codon_table <- sapply(cds_seq, function(x){
   cods <- codons(x) %>%
     as.data.frame()
-  tibble(Pos = 1:nrow(cods),
-         Codons = cods[,1])}, simplify = F) %>% 
+  tibble(PosCodon = 1:nrow(cods),
+         Codon = cods[,1])}, simplify = F) %>% 
   bind_rows(.id = "Gene")
 
 write_delim(codon_table, "yeast_codon_table.tsv", delim = "\t")
@@ -265,8 +265,8 @@ codon_table <- mclapply(cds_seq, function(x){
   cods <- codons(x) %>%
     as.data.frame()
   
-  tibble(Pos = 1:nrow(cods),
-         Codons = cods[,1])}, mc.cores = 40) %>% 
+  tibble(PosCodon = 1:nrow(cods),
+         Codon = cods[,1])}, mc.cores = 40) %>% 
   bind_rows(.id = "Gene")
 
 # Save output as a tsv file
@@ -427,8 +427,8 @@ codon_table <- mclapply(cds_seq, function(x){
   cods <- codons(x) %>%
     as.data.frame()
   
-  tibble(Pos = 1:nrow(cods),
-         Codons = cods[,1])}, mc.cores = 40) %>% 
+  tibble(PosCodon = 1:nrow(cods),
+         Codon = cods[,1])}, mc.cores = 40) %>% 
   bind_rows(.id = "Gene")
 
 # Save output as a tsv file
