@@ -343,6 +343,12 @@ $ rm -rf vignette/output
 $ rm -rf vignette/logs  # Python workflow only
 ```
 
+Delete the working directories (nextflow workflow only):
+
+```console
+$ rm -rf work
+```
+
 Delete the log files and the bash script (Python workflow only):
 
 ```console
@@ -350,7 +356,7 @@ $ rm riboviz.*.log
 $ rm run_riboviz_vignette.sh
 ```
 
-You might also want to do this if you have run the vignette with a missing R package, and then want to run it again from scratch.
+You might also want to do this if you have run the vignette with an error (for example, a missing R package), and then want to run it again from scratch.
 
 ---
 

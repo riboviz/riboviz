@@ -111,6 +111,8 @@ Example `umi_regexp` are:
 
 * `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$` extracts a 4nt UMI from the 5' end of a read and a 4nt UMI from the 3' end.
 * `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})(?P<cell_1>.{3})$` extracts a 3nt barcode from the 3' end of a read then extracts a 4nt UMI from the 5' end and a 4nt UMI from the 3' end.
+* `^(?P<umi_1>.{4}).+(?P<umi_2>.{5})(?P<cell_1>.{5})$` extracts a 4nt umi from the 5' end, 5nt umi from the 3' end, and a 5nt barcode from the 3' end. This expression is used in the [Favate et al 2020 E. coli example dataset](https://github.com/riboviz/example-datasets/blob/master/bacteria/ecoli/Favate_2020_unpublished.yaml) and the [Gupta et al 2018 saccharomyces example dataset](https://github.com/riboviz/example-datasets/blob/master/fungi/saccharomyces/Gupta_2018_tRNA_Modification_Carbon_Nitrogen_Metabolism_RPF_9-samples_CDS_w_250utrs_config.yaml).
+* `(?P<umi_1>.{8})` extracts an 8nt UMI from the 5' end of the read. This expression is used in the [Weinberg et al 2016 Saccharomyces example dataset](https://github.com/riboviz/example-datasets/blob/weinberg_2016_dataset-20/fungi/saccharomyces/Weinberg_2016_RPF_3_samples_CDS_w_250utrs_config.yaml).
 
 ### Constraints
 
