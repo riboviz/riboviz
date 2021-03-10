@@ -282,6 +282,7 @@ For more information about the vignette, see [Map mRNA and ribosome protected re
 Computational work on Eddie is usually submitted to the cluster as batch jobs initiated from a login node. In order to submit a job you need to write a Grid Engine job submission script containing details of the program to run as well as requests for resources. Then, you submit this job script to the cluster with the `qsub` command.
 
 **Warning** - Jobs need to request appropriate resources (cores, memory) in order to run. We are still working out what riboviz needs, so this may take some trial and error. 
+
 See "Requesting resources" section below.
 
 Here is an example job script for the vignette, named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
@@ -289,8 +290,8 @@ Here is an example job script for the vignette, named `job_riboviz.sh` in your `
 ```
 #!/bin/sh
 # Grid Engine options (lines prefixed with #$)
-#$ -N riboviz_vignette              
-#$ -cwd                  
+#$ -N riboviz_vignette
+#$ -cwd
 #$ -l h_rt=01:00:00
 #$ -l h_vmem=8G
 #$ -pe sharedmem 16
@@ -325,6 +326,33 @@ source activate riboviz
 nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false
 ```
 
+We provide a Python script, `riboviz.tools.create_job_script`, which creates a job submission script using the template in [jobs/eddie-template.sh](../../jobs/eddie-template.sh).
+
+You can run this to create a job script named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
+
+```console
+$ python -m riboviz.tools.create_job_script \
+    -i jobs/eddie-template.sh \
+    -o job_riboviz.sh \
+    --config-file vignette/vignette_config.yaml \
+    --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary \
+    --job-runtime "01:00:00"
+```
+
+**Note:** If you want to run the Python workflow you should edit `job_riboviz.sh` and replace the line:
+
+```
+nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -work-dir work -ansi-log false -with-report nextflow-report.html -with-timeline nextflow-timeline.html -with-trace nextflow-trace.tsv -with-dag nextflow-dag.html  
+```
+
+with:
+
+```
+python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
+```
+
+For full details on how to use `riboviz.tools.create_job_script`, see [Create job submission script from template](./create-job-script.md).
+
 ### Requesting resources - work in progress
 
 Jobs on Eddie need to request appropriate resources (cores, memory) in order to run. 
@@ -347,7 +375,6 @@ If your job is killed, try:
 * always start with test runs using a downsampled dataset, which tests every other aspect of your configuration file, quickly.
 
 This is work in progress. A temporary solution involving ringfenced nodes is described at [riboviz#230](https://github.com/riboviz/riboviz/issues/230#issuecomment-758815346).
-
 
 ### Submitting jobs
 
@@ -374,9 +401,11 @@ You will see a message including job ID:
 Your job <job-ID> ("jobname") has been submitted
 ```
 
-This will output the standard output from `prep_riboviz.py` or `prep_riboviz.nf` (depending on which option you are running) to a file, `riboviz_vignette-$JOB_ID-$HOSTNAME.o`, in the current working directory, and errors to a file, `riboviz_vignette-$JOB_ID-$HOSTNAME.e`.
+This will output the standard output from `prep_riboviz.nf` to a file, `riboviz-$JOB_ID-$HOSTNAME.o`, in the current working directory, and errors to a file, `riboviz_vignette-$JOB_ID-$HOSTNAME.e`.
 
-The contents of `riboviz_vignette-$JOB_ID-$HOSTNAME.o` should be the same as the standard output of [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow) above.
+The contents of `riboviz-$JOB_ID-$HOSTNAME.o` should be the same as the standard output of [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow) above.
+
+An example job submission script for running the vignette using scratch space for outputs and using system links is available at [`jobs/vignette-submission-script.sh`](../../jobs/vignette-submission-script.sh) and uses a modified .yaml config file [`vignette/remote_vignette_config.yaml`](../../vignette/remote_vignette_config.yaml) as an input. 
 
 ### Monitoring jobs
 
@@ -418,7 +447,7 @@ group        eddie_users
 owner        $USER
 project      uoe_baseline
 department   defaultdepartment
-jobname      riboviz_vignette
+jobname      riboviz
 jobnumber    2701173
 taskid       undefined
 pe_taskid    NONE
@@ -534,7 +563,7 @@ We need to make sure we move back into the main riboviz folder, where we will be
 
 Eddie allows us to load the [SRA Toolkit](https://github.com/ncbi/sra-tools) module, including the utility `fasterq-dump` for downloading data files.  This utility has been included in SRA Toolkit since version 2.9.1. We recommend using `fasterq-dump` with `prefetch`, described below.
 
-<details> <summary> Detils on `fastq-dump` (Deprecated). </summary> 
+<details> <summary> Details on `fastq-dump` (Deprecated). </summary> 
 An earlier tool, `fastq-dump`, is also included in SRA Toolkit, however, you may find it is too slow for larger datasets, like `Wallace_2020_JEC21` which is around 50GB uncompressed. Even using the `--gzip` option to directly download the `.gz` file may be too slow.
 </details>
 
