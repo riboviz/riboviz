@@ -213,7 +213,7 @@ def write_feature_codons_to_csv(feature_codons, csv_file, delimiter="\t"):
         writer.writerow([GENE, POS, CODON])
         for feature_id, codons in list(feature_codons.items()):
             for pos, codon in zip(range(0, len(codons)), codons):
-                writer.writerow([feature_id, codon, pos+1])
+                writer.writerow([feature_id, pos+1, codon])
 
 
 def get_cds_codons_file(fasta,
