@@ -28,6 +28,7 @@ pass onto regression test modules:
 import os.path
 import pytest
 import yaml
+from riboviz import environment
 from riboviz import params
 from riboviz import sample_sheets
 from riboviz import test
@@ -202,6 +203,13 @@ def pytest_generate_tests(metafunc):
         "No such file: %s" % config_file
     with open(config_file, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
+
+    # Replace environment variable tokens with environment variables
+    # in configuration parameter values that support environment
+    # variables
+    print(config)
+    environment.apply_env_to_config(config)
+    print(config)
     fixtures = {
         "index_prefix": [config[params.ORF_INDEX_PREFIX],
                          config[params.RRNA_INDEX_PREFIX]],
