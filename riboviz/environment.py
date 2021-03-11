@@ -28,13 +28,20 @@ def apply_env_to_config(config):
     """
     Replace environment variable tokens with environment variables
     in configuration parameter values that support environment
-    variables. See :py:const:`riboviz.params.ENV_PARAMS` for the
-    relevant parameters. All other parameters are left unchanged.
+    variables. If any environment variable is undefined then the
+    variable ``.`` is inserted. See
+    :py:const:`riboviz.params.ENV_PARAMS` for the relevant
+    parameters. All other parameters are left unchanged.
 
     :param config: Configuration
     :type config: dict
     """
     env_vars = get_environment_vars()
+    undefined_vars = {env: "." for env in
+                      [params.ENV_RIBOVIZ_SAMPLES,
+                       params.ENV_RIBOVIZ_ORGANISMS,
+                       params.ENV_RIBOVIZ_DATA] if env not in os.environ}
+    env_vars.update(undefined_vars)
     env_tokens = {"${{{0}}}".format(env): value
                   for env, value in env_vars.items()}
     for param in params.ENV_PARAMS:
