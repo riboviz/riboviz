@@ -207,9 +207,7 @@ def pytest_generate_tests(metafunc):
     # Replace environment variable tokens with environment variables
     # in configuration parameter values that support environment
     # variables
-    print(config)
     environment.apply_env_to_config(config)
-    print(config)
     fixtures = {
         "index_prefix": [config[params.ORF_INDEX_PREFIX],
                          config[params.RRNA_INDEX_PREFIX]],
