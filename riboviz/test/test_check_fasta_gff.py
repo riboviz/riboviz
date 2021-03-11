@@ -488,6 +488,66 @@ def test_check_fasta_gff(tmp_file):
     check_fasta_gff_issues_csv(TEST_CHECK_ISSUES, tmp_file)
 
 
+def test_check_fasta_gff_stdout(tmp_file, capsys):
+    """
+    Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff` with
+    FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
+    (:py:const:`TEST_GFF_CHECK_FILE`) and validate the standard
+    output.
+
+    :param tmp_file: Temporary file
+    :type tmp_file: str or unicode
+    :param capsys: Capture standard output (pytest built-in fixture)
+    :type capsys:_pytest.capture.CaptureFixture
+    """
+    check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,
+                                    TEST_GFF_CHECK_FILE,
+                                    tmp_file,
+                                    is_verbose=True)
+    lines = capsys.readouterr()[0].split("\n")
+    expected_config = [
+        "Configuration:",
+        "{}\t{}".format(check_fasta_gff.FASTA_FILE, TEST_FASTA_CHECK_FILE),
+        "{}\t{}".format(check_fasta_gff.GFF_FILE, TEST_GFF_CHECK_FILE),
+        "{}\t{}".format(check_fasta_gff.START_CODONS, [START_CODON]),
+        ""]
+    assert lines[0:len(expected_config)] == expected_config,\
+        "Unexpected Configuration header"
+    lines = lines[len(expected_config):]
+    expected_summary = ["Issue summary:", "{}\t{}".format("Issue", "Count")]
+    assert lines[0:len(expected_summary)] == expected_summary,\
+        "Unexpected Issue summary header"
+    lines = lines[len(expected_summary):]
+    counts = check_fasta_gff.count_issues(TEST_CHECK_ISSUES)
+    expected_counts = [
+        "{}\t{}".format(issue, count) for issue, count in counts]
+    actual_counts = lines[0:len(expected_counts)]
+    # Sort so test passes if same counts are reported but in
+    # different order.
+    expected_counts.sort()
+    actual_counts.sort()
+    assert actual_counts == expected_counts, "Unexpected counts"
+    lines = lines[len(expected_counts):]
+    line = lines.pop(0)
+    assert line == "", "Missing blank line"
+    line = lines.pop(0)
+    assert line == "Issue details:", "Unexpected Issue details header"
+    expected_details = [
+        check_fasta_gff.ISSUE_FORMATS[issue_type].format(
+            sequence=seq_id,
+            feature=feature_id,
+            data=issue_data)
+        for seq_id, feature_id, issue_type, issue_data in TEST_CHECK_ISSUES]
+    actual_details = lines[0:len(expected_details)]
+    # Sort so test passes if same details are reported but in
+    # different order.
+    expected_details.sort()
+    actual_details.sort()
+    assert actual_details == expected_details, "Unexpected details"
+    lines = lines[len(expected_details):]
+    assert lines == [""], "Missing blank line"
+
+
 def test_check_fasta_gff_use_feature_name_true(tmp_file):
     """
     Test :py:func:`riboviz.check_fasta_gff.check_fasta_gff` with
