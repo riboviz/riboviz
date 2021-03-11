@@ -3,6 +3,7 @@ Environment-related functions.
 """
 import os
 from riboviz import params
+from riboviz import utils
 
 
 def get_environment_vars():
@@ -23,21 +24,20 @@ def get_environment_vars():
              params.ENV_RIBOVIZ_DATA] if env in os.environ}
 
 
-def get_environment_tokens():
+def apply_env_to_config(config):
     """
-    Get all RiboViz environment variable tokens, to the
-    values of the corresponding environment variables,
-    if defined. The environment variables are:
+    Replace environment variable tokens with environment variables
+    in configuration parameter values that support environment
+    variables. See :py:const:`riboviz.params.ENV_PARAMS` for the
+    relevant parameters. All other parameters are left unchanged.
 
-    * :py:const:`riboviz.params.ENV_RIBOVIZ_SAMPLES`
-    * :py:const:`riboviz.params.ENV_RIBOVIZ_ORGANISMS`
-    * :py:const:`riboviz.params.ENV_RIBOVIZ_DATA`
-
-    The tokens are of form ``${ENVIRONMENT_VARIABLE}``.
-
-    :return: Map from environment variable tokens to values
-    :rtype: dict
+    :param config: Configuration
+    :type config: dict
     """
-    env_values = get_environment_vars()
-    return {"${{{0}}}".format(env): value
-            for env, value in env_values.items()}
+    env_vars = get_environment_vars()
+    env_tokens = {"${{{0}}}".format(env): value
+                  for env, value in env_vars.items()}
+    for param in params.ENV_PARAMS:
+        if param in config and config[param]:
+            config[param] = utils.replace_tokens(
+                config[param], env_tokens)
