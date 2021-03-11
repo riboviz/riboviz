@@ -209,3 +209,10 @@ JOB_CONFIG_TYPE = {
     VALIDATE_ONLY: bool
 }
 """ Types of job configuration parameters. """
+
+ENV_RIBOVIZ_SAMPLES = "RIBOVIZ_SAMPLES"
+""" Samples directory environment variable name (Nextflow workflow only). """
+ENV_RIBOVIZ_ORGANISMS = "RIBOVIZ_ORGANISMS"
+""" Organisms directory environment variable name (Nextflow workflow only). """
+ENV_RIBOVIZ_DATA = "RIBOVIZ_DATA"
+""" Data directory environment variable name (Nextflow workflow only). """
