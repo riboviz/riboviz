@@ -100,7 +100,6 @@ fixtures used by these tests.
 """
 import os
 import shutil
-import subprocess
 import tempfile
 import pytest
 import pysam
@@ -112,6 +111,7 @@ from riboviz import count_reads
 from riboviz import workflow_files
 from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
+from riboviz.test import nextflow
 from riboviz import test
 
 
@@ -133,9 +133,7 @@ def prep_riboviz_fixture(skip_workflow_fixture, config_fixture,
         if not nextflow_fixture:
             exit_code = prep_riboviz.prep_riboviz(config_fixture)
         else:
-            cmd = ["nextflow", "run", test.NEXTFLOW_WORKFLOW,
-                   "-params-file", config_fixture, "-ansi-log", "false"]
-            exit_code = subprocess.call(cmd)
+            exit_code = nextflow.run_nextflow(config_fixture)
         assert exit_code == 0, \
             "prep_riboviz returned non-zero exit code %d" % exit_code
 
