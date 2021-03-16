@@ -450,14 +450,18 @@ Sizeof {int, long, long long, void*, size_t, off_t}: {4, 8, 8, 8, 8, 8}
 
 ## Generating reports
 
-Nextflow's `-with-report`, `-with-timeline` and `-with-dag` flags allow you to request that Nextflow create reports on a run and an image of the task execution workflow. For example:
+Nextflow's `-with-report`, `-with-timeline`, `with-trace` and `-with-dag` flags allow you to request that Nextflow create reports on a run and an image of the task execution workflow. For example:
 
 ```console
 $ nextflow run prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false \
     -with-report report.html -with-timeline timeline.html \
-    -with-dag workflow.svg
+    -with-trace trace.tsv -with-dag workflow.svg
 ```
+
+For more information on Nextflow's reports, see Nextflow [Tracing & visualisation](https://www.nextflow.io/docs/latest/tracing.html).
+
+**Note:** If the `--validate_only` flag is provided (see [Validate configuration](#validate-configuration)) then the execution report, timeline report and DAG files will be empty and the trace report will consist of a header only, but no data.
 
 ### Troubleshooting: `WARN To render the execution DAG in the required format it is required to install Graphviz`
 
