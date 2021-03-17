@@ -1,5 +1,5 @@
 """
-Nextflow error handling and exit code tests.
+Nextflow validation, error handling and exit code tests.
 
 The test suite runs ``nextflow run prep_riboviz.nf``.
 """
