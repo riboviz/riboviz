@@ -12,22 +12,37 @@ RiboViz ribosome profiling workflow
  * Log a help message.
  */
 def helpMessage() {
-    log.info """
-
+    help = """
     Usage
     -----
 
-        nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml [--help]
+    Run:
 
-    where '<CONFIG>' is a YAML configuration file. The YAML
-    configuration parameters are as follows (all are mandatory unless
-    stated).
+    \$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE> [--help]
 
-    Configuration parameters can also be provided via the
-    command-line in the form '--<PARAMETER>=<VALUE>' (for example
-    '--make_bedgraph=FALSE').
+    where:
 
-    '--help' displays this help information and exits.
+    * '<CONFIG_FILE>' is a YAML configuration file. The YAML
+      configuration parameters are described below (all are mandatory
+      unless otherwise stated).
+    * '--help' displays this help information and exits.
+    * Configuration parameters can also be provided via the
+      command-line in the form '--<PARAMETER>=<VALUE>' (for example
+      '--make_bedgraph=FALSE').
+
+    To specify values for environment variables (see Environment
+    variable and configuration tokens), you can run:
+
+    \$ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \\
+      RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY> \\
+      RIBOVIZ_DATA=<DATA_DIRECTORY> \\
+      nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml [--help]
+
+    where:
+
+    * '<SAMPLES_DIRECTORY>' is a directory with input files.
+    * '<ORGANISMS_DIRECTORY>' is a directory with input files.
+    * '<DATA_DIRECTORY>' is a directory with input files.
 
     Configuration
     -------------
@@ -170,30 +185,10 @@ def helpMessage() {
       default '768M', 'samtools sort' built-in default,
       see http://www.htslib.org/doc/samtools-sort.html)
 
-    Use of environment variables:
+    Environment variable and configuration tokens:
 
-    * The following three tokens can be provided in values for the
-      file and directory parameters listed below:
-      - '${RIBOVIZ_SAMPLES}'
-      - '${RIBOVIZ_ORGANISMS}'
-      - '${RIBOVIZ_DATA}'
-    * If a token is encountered in the value of each of these
-      parameters then the value of the associated environment
-      variable ('RIBOVIZ_SAMPLES', 'RIBOVIZ_ORGANISMS',
-      'RIBOVIZ_DATA') is substituted into the value of these
-      parameter. If the token is encountered but the corresponding
-      environment variable is undefined, then the path '.' is
-      substituted.
-    * For example, if the value of 'asite_disp_length_file; is
-      '${RIBOVIZ_ORGANISM_FILES}/other/yeast_standard_asite_disp_length.txt'
-      and environment variable 'RIBOVIZ_ORGANISM_FILES' has value
-      '$HOME/riboviz/example-datasets/fungi/saccharomyces/' then
-      the path used for the A-site file is:
-      '$HOME/riboviz/example-datasets/fungi/saccharomyces/other/yeast_standard_asite_disp_length.txt'
-    * If, in the above example, 'RIBOVIZ_ORGANISM_FILES' is undefined
-      then the path used for the A-site file is:
-      './other/yeast_standard_asite_disp_length.txt'
-    * These tokens can be used in the following parameters:
+    * The following configuration parameters take values that are
+      absolute or relative paths to files or directories:
       - 'asite_disp_length_file'
       - 'codon_positions_file'
       - 'dir_in'
@@ -205,7 +200,37 @@ def helpMessage() {
       - 'orf_gff_file'
       - 'rrna_fasta_file'
       - 't_rna_file'
+    * To give you flexibility in how and where you locate these input
+      files and directories, the values for these paths can each
+      include, as a prefix, one of the following three tokens:
+      - '\${RIBOVIZ_SAMPLES}'
+      - '\${RIBOVIZ_ORGANISMS}'
+      - '\${RIBOVIZ_DATA}'
+    * At runtime, these tokens will be replaced with the names of the
+      corresponding environment variables. The environment variables
+      are:
+      - 'RIBOVIZ_SAMPLES'
+      - 'RIBOVIZ_ORGANISMS'
+      - 'RIBOVIZ_DATA'
+    * If a token is present in a value but the corresponding
+      environment variable is undefined, then the path '.' is
+      substituted.
+    * Which if any token you use in each of the configuration
+      parameters is entirely up to you. No checks are made to see
+      which specific token is used with which configuration
+      parameter.
+    * The following configuration parameters also take values that are
+      relative paths to files or directories, but the use of tokens in
+      their values is *not supported*, as these paths are assumed to
+      be relative to paths defined by the configuration parameters
+      stated above:
+      -'fq_files',' relative to 'dir_in'.
+      - 'multiplex_fq_files', relative to 'dir_in'.
+      - 'orf_index_prefix', relative to 'dir_index'.
+      - 'sample_sheet', relative to 'dir_in'.
+      - 'rrna_index_prefix', relative to 'dir_index'.
     """.stripIndent()
+    print(help)
 }
 
 /**
