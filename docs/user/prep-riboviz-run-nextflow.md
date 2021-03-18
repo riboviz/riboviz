@@ -512,12 +512,10 @@ For more information see [DAG visualisation](https://www.nextflow.io/docs/latest
 The workflow can be invoked from any directory, by providing the path to the workflow. For example:
 
 ```console
-$ nextflow run <RIBOVIZ>/prep_riboviz.nf -params-file <CONFIG_FILE> \
-    -ansi-log false
+$ nextflow run <RIBOVIZ>/prep_riboviz.nf -params-file <CONFIG_FILE> -ansi-log false
 ```
 ```console
-$ nextflow run ../riboviz/prep_riboviz.nf -params-file <CONFIG_FILE> \
-    -ansi-log false
+$ nextflow run ../riboviz/prep_riboviz.nf -params-file <CONFIG_FILE> -ansi-log false
 ```
 
 Note that if `<CONFIG_FILE>` has relative paths then these will be relative to the current directory, not `<CONFIG_FILE>` or `prep_riboviz.nf`.
