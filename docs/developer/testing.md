@@ -23,7 +23,7 @@ The test suite accepts the following command-line parameters:
 * `--config-file`: Configuration file. If provided then the index, temporary and output directories specified in this file will be validated against those specified by `--expected`. If not provided then the file `vignette/vignette_config.yaml` will be used.
 * `--nextflow`: Run the tests for the Nextflow workflow instead of the Python workflow. Some tests differ for Nextflow due to differences in naming of some temporary files.
 
-To specify values for environment variables cited as tokens in configuration parameters, (see [Environment variables and configuration tokens](../user//prep-riboviz-config.md#environment-variables-and-configuration-tokens)), then these should be defined in the bash shell within which the tests are run. Alternatively, they can be provided when running the tests:
+To specify values for environment variables cited as tokens in configuration parameters (see [Environment variables and configuration tokens](../user//prep-riboviz-config.md#environment-variables-and-configuration-tokens)) (Nextflow workflow only), then these should be defined in the bash shell within which the tests are run. Alternatively, they can be provided when running the tests:
 
 ```console
 $ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \
