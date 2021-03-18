@@ -158,7 +158,7 @@ The following configuration parameters take values that are absolute or relative
 
 To give you flexibility in how and where you locate these input files and directories, both the use of configuration tokens representing environment variables with their paths, and the use of symbolic links are supported. These are described in the following sections.
 
-### Environment variable and configuration tokens
+### Environment variables and configuration tokens
 
 To give you flexibility in how and where you locate these input files and directories, the values for these paths can each include, as a prefix, one of the following three tokens:
 
