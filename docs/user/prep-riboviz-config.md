@@ -255,12 +255,13 @@ data/
   yeast_features.tsv 
   yeast_standard_asite_disp_length.txt 
   yeast_tRNAs.tsv 
-vignette/input/
-  SRR1042855_s1mi.fastq.gz 
-  SRR1042864_s1mi.fastq.gz 
-  yeast_rRNA_R64-1-1.fa 
-  yeast_YAL_CDS_w_250utrs.fa 
-  yeast_YAL_CDS_w_250utrs.gff3
+vignette/
+  input/
+    SRR1042855_s1mi.fastq.gz 
+    SRR1042864_s1mi.fastq.gz 
+    yeast_rRNA_R64-1-1.fa 
+    yeast_YAL_CDS_w_250utrs.fa 
+    yeast_YAL_CDS_w_250utrs.gff3
 ```
 
 So, if you wanted to run the workflow represented by `vignette_config.yaml` in a different directory you could create a directory structure and populate it with symbolic links to the input files. This could be done as follows
