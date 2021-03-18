@@ -174,7 +174,7 @@ At runtime, these tokens will be replaced with the names of the corresponding en
 
 If a token is present in a value but the corresponding environment variable is undefined, then the path `.` is substituted.
 
-For example, if your configuration defines:
+As an example, if your configuration defines:
 
 ```
 asite_disp_length_file: ${RIBOVIZ_ORGANISM_FILES}/other/yeast_standard_asite_disp_length.txt
@@ -185,7 +185,7 @@ and you set an environment variable `RIBOVIZ_ORGANISM_FILES` with value `/home/u
 If, however, you leave `RIBOVIZ_ORGANISM_FILES` undefined, then the value of `asite_disp_length_file` used at runtime is `./other/yeast_standard_asite_disp_le
 ngth.txt`.
 
-As an example, imagine your input files were laid out as follows:
+As another example, imagine your input files were laid out as follows:
 
 ```console
 /home/user/dataset/
@@ -204,9 +204,11 @@ As an example, imagine your input files were laid out as follows:
       SRR1042864_s1mi.fastq.gz
 ```
 
-You could define the following configuration parameters, in `config.yaml`, for example (other configuration parameters have been omitted for brevity):
+As an aside, there is no requirement for the three directories to be colocated under a common `dataset` directory. They can be located anywhere within your file system.
 
-```
+You could define the following configuration parameters, in `config.yaml` (other configuration parameters have been omitted for brevity):
+
+```yaml
 asite_disp_length_file: ${RIBOVIZ_DATA}/yeast_standard_asite_disp_length.txt
 codon_positions_file: ${RIBOVIZ_DATA}/yeast_codon_pos_i200.RData
 dir_index: ${RIBOVIZ_SAMPLES}/index
@@ -220,7 +222,7 @@ rrna_fasta_file: ${RIBOVIZ_ORGANISMS}/yeast_rRNA_R64-1-1.fa
 t_rna_file: ${RIBOVIZ_DATA}/yeast_tRNAs.tsv
 ```
 
-When [Running the RiboViz Nextflow workflow](./user/prep-riboviz-run-nextflow.md) you would specify environment variables with the paths to the directories e.g.
+When [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md) you would specify environment variables with the paths to the directories e.g.
 
 ```console
 $ RIBOVIZ_SAMPLES=/home/user/dataset/samples \
@@ -229,13 +231,11 @@ $ RIBOVIZ_SAMPLES=/home/user/dataset/samples \
   nextflow run prep_riboviz.nf -ansi-log false -params-file config.yaml
 ```
 
-Note that there is no requirement for the three directories to be colocated under a common `dataset` directory. They can be located anywhere within your file system.
-
 Which, if any, token you use in each of the configuration parameters is entirely up to you. No checks are made to see which specific token is used with which configuration parameter.
 
 **Note:** The following configuration parameters also take values that are relative paths to files or directories, but the use of tokens in their values is **not supported**, as these paths are assumed to be relative to paths defined by the configuration parameters stated above:
 
-* `fq_files`,` relative to `dir_in`.
+* `fq_files`, relative to `dir_in`.
 * `multiplex_fq_files`, relative to `dir_in`.
 * `orf_index_prefix`, relative to `dir_index`.
 * `sample_sheet`, relative to `dir_in`.
@@ -245,7 +245,7 @@ Which, if any, token you use in each of the configuration parameters is entirely
 
 If a configuration file specifies paths that are relative within the current directory or its descendants (i.e. no absolute paths and no paths to parent directories via `..`), then you can create a directory structure that reflects that expected by the configuration and populate this directory structure with symbolic links to the actual input files, wherever they may be located.
 
-For example, `vignette/vignette_config.yaml` assumes the following directory structure exists relative to the current directory:
+For example, `vignette/vignette_config.yaml` assumes the following structure of directories and files relative to the current directory:
 
 ```
 data/
@@ -263,11 +263,11 @@ vignette/input/
   yeast_YAL_CDS_w_250utrs.gff3
 ```
 
-So, if you wanted to run the workflow represented by `vignette_config.yaml` in a different directory you could create a directory structure and populate it with symbolic links to the input files as follows.
+So, if you wanted to run the workflow represented by `vignette_config.yaml` in a different directory you could create a directory structure and populate it with symbolic links to the input files. This could be done as follows
 
-Note: In the following it is assumed that the `riboviz` directory is in `$HOME` i.e. `$HOME/riboviz`. If your `riboviz` directory is located elsewhere then `$HOME` accordingly.
+**Note:** It is assumed that the `riboviz` directory is in `$HOME` i.e. `$HOME/riboviz`. If your `riboviz` directory is located elsewhere then `$HOME` accordingly.
 
-Create a directory structure matching that represented by `vignette_config.yaml:
+Create a directory structure matching that represented by `vignette_config.yaml`:
 
 ```console
 $ cd
@@ -277,7 +277,7 @@ $ mkdir -p example/vignette
 $ mkdir -p example/vignette/input
 ```
 
-You can then create symbolic links to all the input and data files that the vignette uses, where `$HOME/riboviz` is the path to RiboViz home directory, which can be relative to the current directory or absolute:
+Create symbolic links to all the input files, where `$HOME/riboviz` is the path to RiboViz home directory, which can be relative to the current directory or absolute:
 
 ```console
 $ cd example/data
@@ -298,7 +298,7 @@ $ ls
 data vignette
 ```
 
-Now, in your `example` directory, you can validate the configuration:
+In your `example` directory, validate the configuration:
 
 ```console
 $ nextflow run $HOME/riboviz/prep_riboviz.nf \
@@ -331,5 +331,6 @@ You could then, for example, run the RiboViz regression tests, again within the 
 $ pytest $HOME/riboviz/riboviz/test/regression/test_regression.py \
  --expected=$HOME/regression-test-data-2.0 \
  --config-file=$HOME/riboviz/vignette/vignette_config.yaml \
-  --skip-workflow --nextflow 
+  --skip-workflow \
+  --nextflow 
 ```
