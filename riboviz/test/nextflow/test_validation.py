@@ -3,7 +3,6 @@ Nextflow validation, error handling and exit code tests.
 
 The test suite runs ``nextflow run prep_riboviz.nf``.
 """
-import os.path
 import yaml
 import pytest
 import riboviz.test
@@ -442,13 +441,17 @@ def test_build_indices_false_no_such_orf_index_prefix(tmpdir):
     with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
     config[params.BUILD_INDICES] = False
-    config[params.INDEX_DIR] = index_dir
-    # Create empty file with rRNA index prefix, so check for that
+    # Cast index_dir to string. If not done, then, when config is saved
+    # the value will be
+    # !!python/object:py._path.local.LocalPath
+    #   strpath: /tmp/.../index
+    # Casting to string gives the value /tmp/.../index/ as desired.
+    config[params.INDEX_DIR] = str(index_dir)
+    # Create empty file for rRNA index prefix, so check for that
     # file will succeed.
-    with open(os.path.join(index_dir,
-                           hisat2.HT2_FORMAT.format(
-                               config[params.RRNA_INDEX_PREFIX],
-                               1)), 'w') as f:
+    index_file = index_dir.join(hisat2.HT2_FORMAT.format(
+        config[params.RRNA_INDEX_PREFIX], 1))
+    with open(index_file, 'w') as f:
         pass
     config[params.ORF_INDEX_PREFIX] = "NoSuchOrfPrefix"
     config_file = tmpdir.join("config.yaml")
@@ -473,13 +476,17 @@ def test_build_indices_false_no_such_rrna_index_prefix(tmpdir):
     with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
     config[params.BUILD_INDICES] = False
-    config[params.INDEX_DIR] = index_dir
-    # Create empty file with ORF index prefix, so check for that
+    # Cast index_dir to string. If not done, then, when config is saved
+    # the value will be
+    # !!python/object:py._path.local.LocalPath
+    #   strpath: /tmp/.../index
+    # Casting to string gives the value /tmp/.../index/ as desired.
+    config[params.INDEX_DIR] = str(index_dir)
+    # Create empty file for ORF index prefix, so check for that
     # file will succeed.
-    with open(os.path.join(index_dir,
-                           hisat2.HT2_FORMAT.format(
-                               config[params.ORF_INDEX_PREFIX],
-                               1)), 'w') as f:
+    index_file = index_dir.join(hisat2.HT2_FORMAT.format(
+        config[params.ORF_INDEX_PREFIX], 1))
+    with open(index_file, 'w') as f:
         pass
     config[params.RRNA_INDEX_PREFIX] = "NoSuchRrnaPrefix"
     config_file = tmpdir.join("config.yaml")
@@ -607,13 +614,11 @@ def test_environment_vars(tmpdir):
                          [params.ENV_RIBOVIZ_SAMPLES,
                           params.ENV_RIBOVIZ_ORGANISMS,
                           params.ENV_RIBOVIZ_DATA])
-def test_environment_var_not_found(tmpdir, env):
+def test_environment_var_not_found(env):
     """
     Test that a workflow with an environment variable pointing
     to a non-existent path raises a non-zero exit code.
 
-    :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
     :param env: Environment variable
     :type env: str or unicode
     """
