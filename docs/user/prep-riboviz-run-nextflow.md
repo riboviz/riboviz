@@ -121,7 +121,7 @@ The workflow supports a `--validate_only` command-line parameter which allows fo
 
 **Tip:** we strongly recommend validating the configuration before doing a live run on data you have not processed before.
 
-Validate configuration:
+Validate configuration, by running:
 
 ```console
 $ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE> --validate_only
@@ -129,7 +129,22 @@ $ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE> --validate_only
 
 where:
 
-* `<CONFIG_FILE>`: path to a YAML configuration file.
+* `<CONFIG_FILE>`: is a YAML configuration file.
+
+To specify values for environment variables cited as tokens in configuration parameters, (see [Environment variables and configuration tokens](./prep-riboviz-config.md#environment-variables-and-configuration-tokens)), then these should be defined in the bash shell within which the workflow is run. Alternatively, they can be provided when running the workflow:
+
+```console
+$ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \
+  RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY> \
+  RIBOVIZ_DATA=<DATA_DIRECTORY> \
+  nextflow run prep_riboviz.nf -params-file <CONFIG_FILE> --validate_only
+```
+
+where:
+
+* `<SAMPLES_DIRECTORY>` is a directory with input files.
+* `<ORGANISMS_DIRECTORY>` is a directory with input files.
+* `<DATA_DIRECTORY>` is a directory with input files.
 
 ### Skip checks for ribosome profiling data files parameter
 
@@ -137,8 +152,7 @@ where:
 
 ```console
 $ nextflow run prep_riboviz.nf -params-file vignette/experiment_config.yaml -ansi-log false --validate_only 
-N E X T F L O W  ~  version 20.01.0
-Launching `prep_riboviz.nf` [elated_bartik] - revision: e6bda28069
+...
 Validating configuration only
 No such sample file (WTone): SRR1234_s1mi.fastq.gz
 No such sample file (WTtwo): SRR5678_s1mi.fastq.gz
@@ -149,8 +163,7 @@ And with `--skip_inputs` this might appear as:
 
 ```console
 $ nextflow run prep_riboviz.nf -params-file vignette/experiment_config.yaml -ansi-log false --validate_only --skip_inputs
-N E X T F L O W  ~  version 20.01.0
-Launching `prep_riboviz.nf` [compassionate_galileo] - revision: e6bda28069
+...
 Validating configuration only
 Skipping checks of ribosome profiling input files (fq_files|multiplex_fq_files
 Validated configuration
@@ -165,21 +178,36 @@ This can be useful if you want to check that a configuration file you have recei
 Run:
 
 ```console
-$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE> -ansi-log false
+$ nextflow run prep_riboviz.nf -ansi-log false -params-file <CONFIG_FILE>
 ```
 
 where:
 
-* `<CONFIG_FILE>`: path to a YAML configuration file.
 * `-ansi-log false`: requests that each invocation of a Nextflow task is displayed on a separate line.
+* `<CONFIG_FILE>`: is a YAML configuration file.
+* Configuration parameters can also be provided via the command-line in the form `--<PARAMETER>=<VALUE>` (for example `--make_bedgraph=FALSE`).
 
-Configuration parameters can also be provided via the command-line in the form `--<PARAMETER>=<VALUE>` (for example `--make_bedgraph=FALSE`).
+To specify values for environment variables cited as tokens in configuration parameters, (see [Environment variables and configuration tokens](./prep-riboviz-config.md#environment-variables-and-configuration-tokens)), then these should be defined in the bash shell within which the workflow is run. Alternatively, they can be provided when running the workflow:
 
-Information on the key steps during processing is displayed.
+```console
+$ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \
+  RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY> \
+  RIBOVIZ_DATA=<DATA_DIRECTORY> \
+  nextflow run prep_riboviz.nf -ansi-log false -params-file <CONFIG_FILE>
+```
 
-Each sample-specific process is labelled with the sample ID, indexing processes are labelled with the index prefix, and multiplexed file-specific processes are labelled with the file name (minus extension).
+where:
 
-The `collateTpms` process displays the names of all the samples that are collated.
+* `<SAMPLES_DIRECTORY>` is a directory with input files.
+* `<ORGANISMS_DIRECTORY>` is a directory with input files.
+* `<DATA_DIRECTORY>` is a directory with input files.
+
+The workflow will then execute, displaying information on each step as it is executed:
+
+* Indexing steps are labelled with the index prefix
+* Sample-specific steps are labelled with the sample ID.
+* Multiplexed file-specific steps are labelled with the file name (minus extension).
+* `collateTpms` is labelled with the IDs of all the samples that are collated.
 
 ### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
 
@@ -228,7 +256,7 @@ Usage and configuration information can be viewed via use of the `--help` flag:
 $ nextflow run prep_riboviz.nf --help
 ```
 
-Note that `--help` displays workflow help, whereas `-help` display's the `nextflow run` command's in-built help.
+Note that `--help` displays RiboViz-specific workflow help, whereas `-help` display's the `nextflow run` command's in-built help.
 
 ---
 
@@ -481,103 +509,15 @@ For more information see [DAG visualisation](https://www.nextflow.io/docs/latest
 
 ## Invoking the workflow from outwith the RiboViz home directory
 
-To invoke the workflow from outwith the RiboViz home directory:
-
-* Ensure that all the input paths in the YAML configuration file are correctly configured:
-  - `dir_in`
-  - `orf_fasta_file`
-  - `orf_gff_file`
-  - `rrna_fasta_file`
-* Ensure that all the output paths in the YAML configuration file are correctly configured:
-  - `dir_index`
-  - `dir_out`
-  - `dir_tmp`
-* Ensure that all the data paths in the YAML configuration file are correctly configured:
-  - `asite_disp_length_file`
-  - `codon_positions_file`
-  - `features_file`
-  - `t_rna_file`
-
-* Run:
+The workflow can be invoked from any directory, by providing the path to the workflow. For example:
 
 ```console
 $ nextflow run <RIBOVIZ>/prep_riboviz.nf -params-file <CONFIG_FILE> \
     -ansi-log false
 ```
-
-where:
-
-* `<RIBOVIZ>`: path to RiboViz home directory, which can be relative to the current directory or absolute.
-* `<CONFIG>`: path to a YAML configuration file, which can be relative to the current directory or absolute.
-
-File and folder paths can be relative or absolute. They can also point to symbolic links to the actua files or folders.
-
-### Using relative paths and symbolic links
-
-You may have input files and data files in different locations. Rather than copy these all into a single directory you can create symbolic links to these files.
-
-For example, imagine we wanted to run the vignette in a new directory, but not copy all the input and data files. We can create an `example` directory:
-
 ```console
-$ cd
-$ mkdir example
-$ cd example
+$ nextflow run ../riboviz/prep_riboviz.nf -params-file <CONFIG_FILE> \
+    -ansi-log false
 ```
 
-We can then create symbolic links to all the input and data files that the vignette uses:
-
-```console
-$ mkdir data
-$ ln -s ../../riboviz/data/yeast_CDS_w_250utrs.fa 
-$ ln -s ../../riboviz/data/yeast_CDS_w_250utrs.gff3 
-$ ln -s ../../riboviz/data/yeast_codon_pos_i200.RData 
-$ ln -s ../../riboviz/data/yeast_features.tsv 
-$ ln -s ../../riboviz/data/yeast_standard_asite_disp_length.txt 
-$ ln -s ../../riboviz/data/yeast_tRNAs.tsv 
-$ cd ..
-$ mkdir input
-$ cd input/
-$ ln -s ../../riboviz/vignette/input/SRR1042855_s1mi.fastq.gz 
-$ ln -s ../../riboviz/vignette/input/SRR1042864_s1mi.fastq.gz 
-$ ln -s ../../riboviz/vignette/input/yeast_rRNA_R64-1-1.fa 
-$ ln -s ../../riboviz/vignette/input/yeast_YAL_CDS_w_250utrs.fa 
-$ ln -s ../../riboviz/vignette/input/yeast_YAL_CDS_w_250utrs.gff3
-$ cd ..
-```
-
-We can then create `example_config.yaml`, a copy of `vignette_config.yaml` but with file paths updated:
-
-```
-dir_index: index
-dir_in: input
-dir_out: output 
-dir_tmp: tmp
-orf_fasta_file: input/yeast_YAL_CDS_w_250utrs.fa
-orf_gff_file: input/yeast_YAL_CDS_w_250utrs.gff3
-rrna_fasta_file: input/yeast_rRNA_R64-1-1.fa
-```
-
-Now, we can validate our configuration, by running Nextflow from within the current directory (where `<RIBOVIZ>` is the path to RiboViz home directory, which can be relative to the current directory or absolute):
-
-```console
-$ nextflow run <RIBOVIZ>/prep_riboviz.nf -params-file example_config.yaml -ansi-log false --validate_only
-```
-
-Now, we can run our workflow:
-
-```console
-$ nextflow run <RIBOVIZ>/prep_riboviz.nf -params-file example_config.yaml -ansi-log false
-```
-
-Our temporary and output files and the Nextflow work directory will all be written to the current directory.
-
-We could then, for example, run the RiboViz regression tests, again within the current directory:
-
-```console
-$ PYTHONPATH=<RIBOVIZ>/riboviz pytest \
-    <RIBOVIZ>/riboviz/test/regression/test_regression.py \
-    --expected=$HOME/regression-test-data-2.0 \
-     --config-file=example_config.yaml --skip-workflow --nextflow 
-```
-
-`$PYTHONPATH` tells Python where the `riboviz` package can be found.
+Note that if `<CONFIG_FILE>` has relative paths then these will be relative to the current directory, not `<CONFIG_FILE>` or `prep_riboviz.nf`.
