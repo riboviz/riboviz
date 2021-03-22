@@ -34,15 +34,10 @@ The test suite accepts the following command-line parameters:
   Nextflow). Note that some regression tests differ for Nextflow due
   to differences in naming of some temporary files.
 
-If the configuration uses environment variable tokens:
-
-* :py:const:`riboviz.params.ENV_RIBOVIZ_SAMPLES`
-* :py:const:`riboviz.params.ENV_RIBOVIZ_ORGANISMS`
-* :py:const:`riboviz.params.ENV_RIBOVIZ_DATA`
-
-then these should be defined in the bash shell within which ``pytest``
-is run. Alternatively, they can be provided when running ``pytest``,
-for example::
+If the configuration uses environment variable tokens, then these
+should be defined in the bash shell within which ``pytest`` is
+run. Alternatively, they can be provided when running ``pytest``, for
+example::
 
     $ RIBOVIZ_SAMPLES=data/ RIBOVIZ_ORGANISMS=vignette/input/ \
       RIBOVIZ_DATA=data/ pytest ...
