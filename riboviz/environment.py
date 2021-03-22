@@ -31,7 +31,7 @@ def get_environment_vars():
             params.ENV_DIRS if env in os.environ}
 
 
-def apply_env_to_config(config):
+def update_config_with_env(env_vars, config):
     """
     Replace environment variable tokens with their complementary
     environment variable values in configuration parameter values that
@@ -49,10 +49,11 @@ def apply_env_to_config(config):
     If any environment variable is undefined then the
     value :py:const.`DEFAULT_ENV_DIR` is inserted.
 
+    :param env_vars: Environment variables and values
+    :type env_vars: dict
     :param config: Configuration
     :type config: dict
     """
-    env_vars = get_environment_vars()
     undefined_vars = {env: DEFAULT_ENV_DIR for env in
                       params.ENV_DIRS if env not in os.environ}
     env_vars.update(undefined_vars)
@@ -62,3 +63,20 @@ def apply_env_to_config(config):
         if param in config and config[param]:
             config[param] = utils.replace_tokens(
                 config[param], env_tokens)
+
+
+def apply_env_to_config(config):
+    """
+    Replace environment variable tokens with their complementary
+    environment variable values in configuration parameter values that
+    support environment variable tokens. All other parameters are left
+    unchanged.
+
+    See :py:func:`get_environment_vars` and
+    :py:func:`update_config_with_env`.
+
+    :param config: Configuration
+    :type config: dict
+    """
+    env_vars = get_environment_vars()
+    update_config_with_env(env_vars, config)
