@@ -1189,6 +1189,7 @@ process staticHTML {
       """
       Rscript -e "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd', \
       params = list(
+        verbose='FALSE', \
         yamlfile='\$PWD/${config_file_yaml}', \
         sampleid='!{sample_id}', \
         three_nucleotide_periodicity_data_file = '\$PWD/${sample_nt3_periodicity_tsv}', \
