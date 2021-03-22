@@ -4,7 +4,9 @@ Test constants.
 import os.path
 import riboviz
 
-SIMDATA_DIR = os.path.join(riboviz.DATA_DIR, "simdata")
+DATA_DIR = os.path.join(riboviz.BASE_PATH, "data")
+""" Path to ``data/`` directory. """
+SIMDATA_DIR = os.path.join(DATA_DIR, "simdata")
 """ Path to ``data/simdata/``. """
 VIGNETTE_DIR = os.path.join(riboviz.BASE_PATH, "vignette")
 """ Path to ``vignette/``. """
