@@ -216,6 +216,15 @@ ENV_RIBOVIZ_ORGANISMS = "RIBOVIZ_ORGANISMS"
 """ Organisms directory environment variable name (Nextflow workflow only). """
 ENV_RIBOVIZ_DATA = "RIBOVIZ_DATA"
 """ Data directory environment variable name (Nextflow workflow only). """
+ENV_DIRS = [
+    ENV_RIBOVIZ_SAMPLES,
+    ENV_RIBOVIZ_ORGANISMS,
+    ENV_RIBOVIZ_DATA
+]
+"""
+Environment variables which can be used to define directories
+(Nextflow workflow only).
+"""
 
 ENV_PARAMS = [ASITE_DISP_LENGTH_FILE,
               CODON_POSITIONS_FILE,
