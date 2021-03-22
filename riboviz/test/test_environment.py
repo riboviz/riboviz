@@ -35,12 +35,8 @@ def test_get_environment_vars(envs_values, monkeypatch):
             "Unexpected nexpected value for environment variable {}".format(e)
 
 
-@pytest.mark.parametrize("env",
-                         [params.ENV_RIBOVIZ_SAMPLES,
-                          params.ENV_RIBOVIZ_ORGANISMS,
-                          params.ENV_RIBOVIZ_DATA])
-@pytest.mark.parametrize("param",
-                         params.ENV_PARAMS)
+@pytest.mark.parametrize("env", params.ENV_DIRS)
+@pytest.mark.parametrize("param", params.ENV_PARAMS)
 def test_apply_env_to_config(env, param, monkeypatch):
     """
     Test :py:func:`riboviz.environment.apply_env_to_config` with
@@ -59,7 +55,8 @@ def test_apply_env_to_config(env, param, monkeypatch):
     # won't be updated.
     config = {
         params.ADAPTERS: "CTGTAGGCACC",
-        param: "${{{0}}}/subdirectory/somefile.txt".format(env)
+        param: "{}/subdirectory/somefile.txt".format(
+            environment.ENV_TOKEN_FORMAT.format(env))
     }
     environment.apply_env_to_config(config)
     expected_config = {
@@ -69,12 +66,8 @@ def test_apply_env_to_config(env, param, monkeypatch):
     assert config == expected_config, "Unexpected configuration"
 
 
-@pytest.mark.parametrize("env",
-                         [params.ENV_RIBOVIZ_SAMPLES,
-                          params.ENV_RIBOVIZ_ORGANISMS,
-                          params.ENV_RIBOVIZ_DATA])
-@pytest.mark.parametrize("param",
-                         params.ENV_PARAMS)
+@pytest.mark.parametrize("env", params.ENV_DIRS)
+@pytest.mark.parametrize("param", params.ENV_PARAMS)
 def test_apply_default_env_to_config(env, param):
     """
     Test :py:func:`riboviz.environment.apply_env_to_config` with
@@ -92,11 +85,13 @@ def test_apply_default_env_to_config(env, param):
     """
     config = {
         params.ADAPTERS: "CTGTAGGCACC",
-        param: "${{{0}}}/subdirectory/somefile.txt".format(env)
+        param: "{}/subdirectory/somefile.txt".format(
+            environment.ENV_TOKEN_FORMAT.format(env))
     }
     environment.apply_env_to_config(config)
     expected_config = {
         params.ADAPTERS: "CTGTAGGCACC",
-        param: "./subdirectory/somefile.txt"
+        param: "{}/subdirectory/somefile.txt".format(
+            environment.DEFAULT_ENV_DIR)
     }
     assert config == expected_config, "Unexpected configuration"

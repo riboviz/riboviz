@@ -595,25 +595,19 @@ def test_validate_skip_inputs_sample_sheet_not_found(tmpdir):
 def test_environment_vars(tmpdir):
     """
     Test that a workflow with environment variables,
-    :py:const:`riboviz.params.ENV_RIBOVIZ_SAMPLES`,
-    :py:const:`riboviz.params.ENV_RIBOVIZ_ORGANISMS`,
-    :py:const:`riboviz.params.ENV_RIBOVIZ_DATA` validates.
+    :py:const:`riboviz.params.ENV_DIRS`, validates.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir py._path.local.LocalPath
     """
+    envs = {env: tmpdir for env in params.ENV_DIRS}
     exit_code = run_nextflow(riboviz.test.VIGNETTE_CONFIG,
-                             envs={params.ENV_RIBOVIZ_SAMPLES: tmpdir,
-                                   params.ENV_RIBOVIZ_ORGANISMS: tmpdir,
-                                   params.ENV_RIBOVIZ_DATA: tmpdir},
+                             envs=envs,
                              validate_only=True)
     assert exit_code == 0, "Unexpected exit code %d" % exit_code
 
 
-@pytest.mark.parametrize("env",
-                         [params.ENV_RIBOVIZ_SAMPLES,
-                          params.ENV_RIBOVIZ_ORGANISMS,
-                          params.ENV_RIBOVIZ_DATA])
+@pytest.mark.parametrize("env", params.ENV_DIRS)
 def test_environment_var_not_found(env):
     """
     Test that a workflow with an environment variable pointing

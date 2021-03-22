@@ -5,44 +5,58 @@ import os
 from riboviz import params
 from riboviz import utils
 
+ENV_TOKEN_FORMAT = "${{{0}}}"
+"""
+Format string for environment variable tokens used as values
+for configuration parameters.
+"""
+DEFAULT_ENV_DIR = "."
+"""
+Default directory value used for environment variable tokens
+if no value for the environment variable corresponding to the
+token is provided.
+"""
+
 
 def get_environment_vars():
     """
     Get map from RiboViz environment variables, to their values,
-    if defined. The environment variables are:
-
-    * :py:const:`riboviz.params.ENV_RIBOVIZ_SAMPLES`
-    * :py:const:`riboviz.params.ENV_RIBOVIZ_ORGANISMS`
-    * :py:const:`riboviz.params.ENV_RIBOVIZ_DATA`
+    if defined. The environment variables are listed in
+    :py:const:`riboviz.params.ENV_DIRS`,
 
     :return: Map from environment variables to values
     :rtype: dict
     """
     return {env: os.environ[env] for env in
-            [params.ENV_RIBOVIZ_SAMPLES,
-             params.ENV_RIBOVIZ_ORGANISMS,
-             params.ENV_RIBOVIZ_DATA] if env in os.environ}
+            params.ENV_DIRS if env in os.environ}
 
 
 def apply_env_to_config(config):
     """
-    Replace environment variable tokens with environment variables
-    in configuration parameter values that support environment
-    variables. If any environment variable is undefined then the
-    variable ``.`` is inserted. See
-    :py:const:`riboviz.params.ENV_PARAMS` for the relevant
-    parameters. All other parameters are left unchanged.
+    Replace environment variable tokens with their complementary
+    environment variable values in configuration parameter values that
+    support environment variable tokens. All other parameters are left
+    unchanged.
+
+    :py:const:`riboviz.params.ENV_DIRS` lists parameters whose
+    values can include environment variable token
+    parameters.
+
+    Tokens are of form ``${<environment_variable>}`` where
+    ``<environment_variable>`` is the name of the complementary
+    environment variable.
+
+    If any environment variable is undefined then the
+    value :py:const.`DEFAULT_ENV_DIR` is inserted.
 
     :param config: Configuration
     :type config: dict
     """
     env_vars = get_environment_vars()
-    undefined_vars = {env: "." for env in
-                      [params.ENV_RIBOVIZ_SAMPLES,
-                       params.ENV_RIBOVIZ_ORGANISMS,
-                       params.ENV_RIBOVIZ_DATA] if env not in os.environ}
+    undefined_vars = {env: DEFAULT_ENV_DIR for env in
+                      params.ENV_DIRS if env not in os.environ}
     env_vars.update(undefined_vars)
-    env_tokens = {"${{{0}}}".format(env): value
+    env_tokens = {ENV_TOKEN_FORMAT.format(env): value
                   for env, value in env_vars.items()}
     for param in params.ENV_PARAMS:
         if param in config and config[param]:
