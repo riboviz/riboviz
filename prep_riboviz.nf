@@ -463,10 +463,6 @@ if (params.containsKey('asite_disp_length_file')
     }
     asite_disp_length_txt = Channel.fromPath(asite_disp_length_file,
                                              checkIfExists: true)
-    asite_disp_length_txt.into{
-      asite_disp_length_txt1
-      asite_disp_length_txt2
-    }
     is_asite_disp_length_file = true
 } else {
     asite_disp_length_txt = file("Missing_aside_disp_length_file")
@@ -983,7 +979,7 @@ process generateStatsFigs {
         each file(t_rna_tsv) from t_rna_tsv
         each file(codon_positions_rdata) from codon_positions_rdata
         each file(features_tsv) from features_tsv
-        each file(asite_disp_length_txt) from asite_disp_length_txt1
+        each file(asite_disp_length_txt) from asite_disp_length_txt
     output:
         val sample_id into finished_sample_id
         tuple val(sample_id), file("tpms.tsv") into tpms_tsv
@@ -1062,6 +1058,17 @@ process generateStatsFigs {
            ${count_threshold_flag}
         """
 }
+
+// Join outputs from generateStatsFigs for staticHTML.
+// Join is done on first value of each tuple i.e. sample ID.
+generate_stats_figs_static_html =
+    nt3_periodicity_tsv
+    .join(gene_position_length_counts_5start_tsv, remainder: true)
+    .join(read_lengths_tsv, remainder: true)
+    .join(pos_sp_rpf_norm_reads_tsv, remainder: true)
+    .join(nt3frame_bygene_filtered_tsv, remainder: true)
+    .join(sequence_features_tsv, remainder: true)
+    .join(codon_ribodens_gathered_tsv, remainder: true)
 
 finished_sample_id
     .ifEmpty { exit 1, "No sample was processed successfully" }
@@ -1160,49 +1167,46 @@ process staticHTML {
     tag "${sample_id}"
     publishDir "${params.dir_out}/${sample_id}", \
     mode: 'copy', overwrite: true
-
     input:
       file config_file_yaml from config_file_yaml
-      tuple val(sample_id), file(sample_nt3_periodicity_tsv) \
-          from nt3_periodicity_tsv
-      tuple val(sample_id), file(sample_gene_position_length_counts_5start_tsv) \
-          from gene_position_length_counts_5start_tsv
-      tuple val(sample_id), file(sample_read_lengths_tsv) \
-          from read_lengths_tsv
-      tuple val(sample_id), file(sample_pos_sp_rpf_norm_reads_tsv) \
-          from pos_sp_rpf_norm_reads_tsv
-      tuple val(sample_id), file(sample_nt3frame_bygene_filtered_tsv) \
-          from nt3frame_bygene_filtered_tsv
-      tuple val(sample_id), file(sample_sequence_features_tsv) \
-          from sequence_features_tsv
-      tuple val(sample_id), file(sample_codon_ribodens_gathered_tsv) \
-          from codon_ribodens_gathered_tsv
-
+      tuple val(sample_id), \
+        file(sample_nt3_periodicity_tsv), \
+        file(sample_gene_position_length_counts_5start_tsv), \
+        file(sample_read_lengths_tsv), \
+        file(sample_pos_sp_rpf_norm_reads_tsv), \
+        file(sample_nt3frame_bygene_filtered_tsv), \
+        file(sample_sequence_features_tsv), \
+        file(sample_codon_ribodens_gathered_tsv) \
+	from generate_stats_figs_static_html
     output:
       val sample_id into finished_viz_sample_id
       file "${sample_id}_output_report.html" into static_html_html
-
     when:
       params.run_static_html
-
     shell:
+      script = "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd',"
+      script += "params = list("
+      script += "verbose='FALSE', "
+      script += "yamlfile='\$PWD/${config_file_yaml}', "
+      script += "sampleid='!{sample_id}', "
+      script += "three_nucleotide_periodicity_data_file = '\$PWD/${sample_nt3_periodicity_tsv}', "
+      script += "gene_position_length_counts_5start_file = '\$PWD/${sample_gene_position_length_counts_5start_tsv}', "
+      script += "read_length_data_file='\$PWD/${sample_read_lengths_tsv}', "
+      script += "pos_sp_rpf_norm_reads_data_file='\$PWD/${sample_pos_sp_rpf_norm_reads_tsv}' "
+      if (is_asite_disp_length_file) {
+          script += ", gene_read_frames_filtered_data_file='\$PWD/${sample_nt3frame_bygene_filtered_tsv}'"
+      }
+      if (is_t_rna_and_codon_positions_file) {
+          script += ", codon_ribodens_gathered_file='\$PWD/${sample_codon_ribodens_gathered_tsv}'"
+      }
+      if (is_features_file) {
+          script += ", sequence_features_file='\$PWD/${sample_sequence_features_tsv}' "
+      }
+      script += "), "
+      script += "output_format = 'html_document', "
+      script += "output_file = '\$PWD/${sample_id}_output_report.html')"
       """
-      Rscript -e "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd', \
-      params = list(
-        verbose='FALSE', \
-        yamlfile='\$PWD/${config_file_yaml}', \
-        sampleid='!{sample_id}', \
-        three_nucleotide_periodicity_data_file = '\$PWD/${sample_nt3_periodicity_tsv}', \
-        gene_position_length_counts_5start_file = '\$PWD/${sample_gene_position_length_counts_5start_tsv}', \
-        read_length_data_file='\$PWD/${sample_read_lengths_tsv}', \
-        pos_sp_rpf_norm_reads_data_file='\$PWD/${sample_pos_sp_rpf_norm_reads_tsv}', \
-        gene_read_frames_filtered_data_file='\$PWD/${sample_nt3frame_bygene_filtered_tsv}', \
-        codon_ribodens_gathered_file='\$PWD/${sample_codon_ribodens_gathered_tsv}', \
-        sequence_features_file='\$PWD/${sample_sequence_features_tsv}' \
-      ), \
-      output_format = 'html_document', \
-      output_file = '\$PWD/${sample_id}_output_report.html')
-      "
+      Rscript -e "${script}"
       """
 }
 
