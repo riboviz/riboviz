@@ -54,11 +54,12 @@ def update_config_with_env(env_vars, config):
     :param config: Configuration
     :type config: dict
     """
+    env_vars_copy = dict(env_vars)  # Leave original as-is.
     undefined_vars = {env: DEFAULT_ENV_DIR for env in
-                      params.ENV_DIRS if env not in os.environ}
-    env_vars.update(undefined_vars)
+                      params.ENV_DIRS if env not in env_vars}
+    env_vars_copy.update(undefined_vars)
     env_tokens = {ENV_TOKEN_FORMAT.format(env): value
-                  for env, value in env_vars.items()}
+                  for env, value in env_vars_copy.items()}
     for param in params.ENV_PARAMS:
         if param in config and config[param]:
             config[param] = utils.replace_tokens(
