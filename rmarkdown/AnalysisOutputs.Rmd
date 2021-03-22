@@ -5,8 +5,10 @@ output:
   html_document:
     toc: true
     toc_depth: 3
-    toc_float: true
+    toc_float:
+      collapsed: false
 params: 
+  verbose: FALSE
   yamlfile: NA
   sampleid: NA
   three_nucleotide_periodicity_data_file: NA
@@ -18,13 +20,10 @@ params:
   sequence_features_file: NA
 ---
 
-NOTE: installed & added yaml, knitr & rmarkdown to the library() calls! Need to update documentation/installation etc too. 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 suppressMessages(library(here))
-#suppressMessages(library(magrittr))
 suppressMessages(library(getopt))
 suppressMessages(library(knitr)) 
 suppressMessages(library(yaml))
@@ -36,7 +35,6 @@ suppressMessages(library(tidyverse))
 ### handling optional outputs parameters: 
 
 yaml <- read_yaml(params$yamlfile)
-
 
 # 3ntframe_propbygene.pdf plot: read frame (conditional on `asite_disp_length_file`) 
 if (is.null(yaml$asite_disp_length_file)){
@@ -68,21 +66,22 @@ if (is.null(yaml$codon_positions_file)){
 if (!is.na(trna_file) & !is.na(codonposition_file)){
   codonspecificribosomedensitytrnacorrelation_plot <- "present"
 }
-
 ```
 
 ## Sample Name: `r params$sampleid`
 
-```{r printparams, echo=TRUE}
-#print(params$yamlfile)
+```{r printparams, echo=FALSE}
 
-# show sample ID
-print(params$sampleid)
-
-# show yaml params
-print(str(yaml))
-
-
+if(params$verbose == TRUE){
+  # show yaml file info
+  print(params$yamlfile)
+  
+  # show sample ID
+  print(params$sampleid)
+  
+  # show yaml params
+  print(str(yaml))
+}
 ```
 
 ```{r source_script, include=FALSE}
@@ -93,7 +92,7 @@ source(here::here("rscripts", "stats_figs_block_functions.R"), local = knitr::kn
 # or sys.source("your-script.R", envir = knitr::knit_global())
 ```
 
-### Provenance
+## Provenance
 
 ```{r provenance, echo=FALSE, warning=FALSE}
 # handle interactive vs standard running
@@ -166,83 +165,85 @@ if(!is.na(codonspecificribosomedensitytrnacorrelation_plot)){
     skip = 4, # this avoids the provenance info
     col_names = TRUE)
 }
-
-
 ```
 
-#### Plotting three nucleotide periodicity. 
+## Plots:
+
+### Three nucleotide periodicity: 
 
 ```{r plot_threenucleotideperiodicity, echo=FALSE}
 
 # three nucleotide periodicity
 PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
-
 ```
+
+### Ribogrid: 
 
 ```{r codonribogrid, echo=FALSE}
 
 # codonribogrid
 PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
-
 ```
+
+### Ribogridbar: 
 
 ```{r codonribogridbar, echo=FALSE}
 
 # codonribogridbar
 PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
-
 ```
 
-#### Plotting read lengths.
+### Read lengths:
 
 ```{r plot_readlength, echo=FALSE}
 
 # read length
 PlotReadLengths(read_length_data)
-
 ```
 
-#### Plotting position specific distribution of reads.
+### Position specific distribution of reads:
 
-```{r plot_positionspecificdistribution, echo=FALSE}
+```{r plot_positionspecificdistribution, echo=FALSE, message=FALSE}
 
 # position specific distribution of reads
 PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
-
 ```
 
-#### Conditional Plots
+### Read frame proportion by gene: 
 
-```{r proportionframe, echo=FALSE, warning=FALSE}
+```{r proportionframe, echo=FALSE, message=FALSE, warning=FALSE}
 
 # plot read frame
 if (!is.na(readframe_plot)){
-  
-  print("Plotting read frame.")
-  
   # run PlotGeneReadFrames():
   PlotGeneReadFrames(gene_read_frame_data_filtered)
+} else {
+  print("read frame proportion by gene NOT plotted: required input files not provided")
 }
 ```
 
-```{r featuresplot, echo=FALSE, warning=FALSE}
+### Sequence features: 
+
+```{r featuresplot, echo=FALSE, message=FALSE, warning=FALSE}
 
 # plot 
 if (!is.na(features_plot)) {
-  # 
-  print("Plot gene features.")
   # conditional on `features-file`
   PlotSequenceBasedFeatures(features_plot_data)
- }
+} else {
+  print("features NOT plotted: required input files not provided")
+}
 ```
 
-```{r ribosomedensitytrna_plot, echo=FALSE, warning=FALSE}
+### Codon-specific ribosome density and tRNA correlation:
+
+```{r ribosomedensitytrna_plot, echo=FALSE, message=FALSE, warning=FALSE}
 
 # plot 
 if (!is.na(codonspecificribosomedensitytrnacorrelation_plot)) {
-  # 
-  print("Plot codon-specific ribosome density and tRNA correlation.")
   # conditional on `t_rna_file` and `codon_positions_file`
   PlotCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_wide)
+} else {
+  print("codon-specific ribosome density and tRNA correlation NOT plotted: required input files not provided")
 }
 ```
