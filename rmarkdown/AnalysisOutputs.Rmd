@@ -34,7 +34,7 @@ suppressMessages(library(tidyverse))
 
 ### handling optional outputs parameters: 
 
-yaml <- read_yaml(params$yamlfile)
+yaml <- yaml::read_yaml(params$yamlfile)
 
 # 3ntframe_propbygene.pdf plot: read frame (conditional on `asite_disp_length_file`) 
 if (is.null(yaml$asite_disp_length_file)){
