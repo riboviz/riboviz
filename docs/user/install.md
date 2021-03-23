@@ -68,7 +68,6 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | --------- | ------- |
 | Biostrings | 2.54.0 |
 | devtools | 2.3.2 |
-| ggplot2 | 3.3.2 |
 | git2r | 0.27.1 |
 | here | 0.1 |
 | knitr | 1.29 |
@@ -76,16 +75,17 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | optparse | 1.6.6 |
 | plotly | 4.9.2.1 |
 | RcppRoll | 0.3.0 |
-| readr | 1.3.1 |
 | rhdf5 | 2.30.1 |
 | rmarkdown | 2.3 |
 | roxygen2 | 7.1.1 |
 | Rsamtools | 2.2.3 |
 | rtracklayer | 1.46.0 |
 | shiny | 1.5.0 |
-| tidyr | 1.1.0 |
 | ShortRead | 1.44.3 |
 | styler | 1.3.2 |
+| tidyverse | 1.3.0 |
+
+Note: R packages ggplot2, dplyr, tidyr, and readr are used within the R metapackage 'tidyverse'.
 
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
@@ -98,7 +98,7 @@ Constraints:
 * Either [Miniconda](https://conda.io/miniconda.html) Python 3.6, or later, or [Anaconda Distribution](https://www.anaconda.com/distribution/) Python 3.6, or later, are strongly recommended.
 * Cutadapt v1.18 (2018-09-07), or later, is required.
 * Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
-* R 2.14.0, or later, is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
+* R 3.2, or later, is required as it includes the [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) (meta-)package.
 * R 3.6, or later, is strongly recommended.
 
 ---
@@ -596,11 +596,9 @@ Your version of R may differ from that shown.
 | ------- | ----- |
 | RcppRoll | [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html) |
 | optparse | [optparse](https://cran.r-project.org/web/packages/optparse/index.html) |
-| tidyr | [tidyr](https://cran.r-project.org/web/packages/tidyr/index.html) |
-| ggplot2 | [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html) |
+| tidyverse | [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) |
 | shiny | [shiny](https://cran.r-project.org/web/packages/shiny/index.html) |
 | plotly | [plotly](https://cran.r-project.org/web/packages/plotly/index.html) |
-| readr | [readr](https://cran.r-project.org/web/packages/readr/index.html) |
 | git2r |  [git2r](https://docs.ropensci.org/git2r), [GitHub](https://github.com/ropensci/git2r) |
 | here | [here](https://here.r-lib.org/), [CRAN](https://cran.r-project.org/package=here), [GitHub](https://github.com/r-lib/here) |
 | rmarkdown | [rmarkdown](https://cran.r-project.org/web/packages/rmarkdown/index.html) |
