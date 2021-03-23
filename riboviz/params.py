@@ -209,3 +209,5 @@ JOB_CONFIG_TYPE = {
     VALIDATE_ONLY: bool
 }
 """ Types of job configuration parameters. """
+RUN_STATIC_HTML = "run_static_html"
+""" Create static html visualization per sample? """

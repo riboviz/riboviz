@@ -48,6 +48,7 @@ publish_index_tmp: FALSE
 rpf: TRUE
 rrna_fasta_file: vignette/input/yeast_rRNA_R64-1-1.fa
 rrna_index_prefix: yeast_rRNA
+run_static_html: TRUE
 sample_sheet: null
 secondary_id: NULL
 stop_in_cds: FALSE
