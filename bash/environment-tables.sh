@@ -65,7 +65,7 @@ HISAT2_VERSION=$(echo "$HISAT2_VERSION" | head -n 1  | cut -d" " -f3)
 echo "| Hisat2 | $HISAT2_VERSION |"
 BOWTIE_VERSION=$(bowtie --version | head -n 1 | cut -d" " -f3)
 echo "| Bowtie | $BOWTIE_VERSION |"
-# /home/ubuntu/bowtie-1.2.2-linux-x86_64/bowtie-align-s version 1.2.2 
+# /home/ubuntu/bowtie-1.2.2-linux-x86_64/bowtie-align-s version 1.2.2
 R_VERSION=$(R --version | head -n 1 | cut -d" " -f3)
 # R version 3.4.4 (2018-03-15) -- "Someone to Lean On"
 echo "| R | $R_VERSION |"
@@ -74,7 +74,7 @@ echo " "
 echo "| Python Package | Version | Package Manager |"
 echo "| -------------- | ------- | --------------- |"
 CONDA_PKGS=$(conda list)
-CONDA_LIST=(biopython cutadapt gitpython h5py nextflow pandas pycodestyle pylint pysam pytest pytest-cov pyyaml samtools umi_tools)
+CONDA_LIST=(biopython cutadapt gitpython h5py nextflow pandas pycodestyle pylint pysam pytest pytest-cov pyyaml samtools sphinx umi_tools)
 for pkg in ${CONDA_LIST[@]}; do
     PKG_VERSION=$(echo "$CONDA_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
     # pkg     M.N    ...

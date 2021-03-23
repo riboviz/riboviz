@@ -4,7 +4,9 @@ Test constants.
 import os.path
 import riboviz
 
-SIMDATA_DIR = os.path.join(riboviz.DATA_DIR, "simdata")
+DATA_DIR = os.path.join(riboviz.BASE_PATH, "data")
+""" Path to ``data/`` directory. """
+SIMDATA_DIR = os.path.join(DATA_DIR, "simdata")
 """ Path to ``data/simdata/``. """
 VIGNETTE_DIR = os.path.join(riboviz.BASE_PATH, "vignette")
 """ Path to ``vignette/``. """
@@ -16,18 +18,6 @@ VIGNETTE_MISSING_SAMPLE = "NotHere"
 """
 Name of missing sample in ``vignette/vignette_config.yaml`` for tests.
 """
-VIGNETTE_INDEX_DIR_NAME = "index"
-""" Index directory name. """
-VIGNETTE_INDEX_DIR = os.path.join(VIGNETTE_DIR, VIGNETTE_INDEX_DIR_NAME)
-""" Path to ``vignette/index/``. """
-VIGNETTE_TMP_DIR_NAME = "tmp"
-""" Temporary directory name. """
-VIGNETTE_TMP_DIR = os.path.join(VIGNETTE_DIR, VIGNETTE_TMP_DIR_NAME)
-""" Path to ``vignette/tmp/``. """
-VIGNETTE_OUTPUT_DIR_NAME = "output"
-""" Output directory name. """
-VIGNETTE_OUTPUT_DIR = os.path.join(VIGNETTE_DIR, VIGNETTE_OUTPUT_DIR_NAME)
-""" Path to ``vignette/output/``. """
 INDEX_PREFIXES = ["YAL_CDS_w_250", "yeast_rRNA"]
 """ Index file prefixes. """
 NUM_INDICES = 9

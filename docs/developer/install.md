@@ -28,7 +28,9 @@ $ pip install sphinx
 | styleR | [StyleR package documentation](https://styler.r-lib.org/), [GitHub](https://github.com/r-lib/styler) |
 | roxygen2 | [roxygen2](https://cloud.r-project.org/web/packages/roxygen2/index.html) |
 | devtools | [devtools](https://cran.r-project.org/web/packages/devtools/index.html) |
-
+| glue | [glue package on CRAN](https://cran.r-project.org/web/packages/glue/index.html) |
+| testthat | [testthat package on CRAN](https://cran.r-project.org/web/packages/testthat/index.html), [testthat package documentation](https://testthat.r-lib.org/) |
+| withr | [withr package on CRAN](https://cran.r-project.org/web/packages/withr/index.html) |
 
 ```console
 $ R
@@ -38,6 +40,9 @@ $ R
 > install.packages("styler")
 > install.packages("roxygen2")
 > install.packages("devtools")
+> install.packages("glue")
+> install.packages("testthat")
+> install.packages("withr")
 ```
 
 To load the packages before use:
@@ -47,6 +52,9 @@ To load the packages before use:
 > library(styler)
 > library(roxygen2)
 > library(devtools)
+> library(glue)
+> library(testthat)
+> library(withr)
 ```
 
 ---
