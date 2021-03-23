@@ -89,7 +89,10 @@ if(params$verbose == TRUE){
 source(here::here("rscripts", "provenance.R"), local = knitr::knit_global())
 source(here::here("rscripts", "read_count_functions.R"), local = knitr::knit_global())
 source(here::here("rscripts", "stats_figs_block_functions.R"), local = knitr::knit_global())
-# or sys.source("your-script.R", envir = knitr::knit_global())
+# o?r sys.source("your-script.R", envir = knitr::knit_global())
+
+# set theme for plotting
+ggplot2::theme_set(theme_bw(base_size=11.5))
 ```
 
 ## Provenance
