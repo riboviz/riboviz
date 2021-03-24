@@ -9,6 +9,7 @@ provided).
 Each test runs ``nextflow run prep_riboviz.nf``.
 """
 import yaml
+import pytest
 from riboviz import environment
 from riboviz import params
 from riboviz import test
@@ -220,17 +221,26 @@ def create_simdata_default_token_test_dir(tmpdir):
     return str(organisms_dir), str(samples_dir), str(data_dir)
 
 
-def test_config():
+@pytest.mark.parametrize(
+    "config_file",
+    [test.SIMDATA_UMI_CONFIG, test.SIMDATA_MULTIPLEX_CONFIG])
+def test_config(config_file):
     """
     Test that a workflow configuration validates.
     The workflow is run in the current, ``riboviz``, directory.
+
+    :param config_file: Configuration file
+    :type config_file: str or unicode
     """
-    exit_code = nextflow.run_nextflow(test.SIMDATA_UMI_CONFIG,
+    exit_code = nextflow.run_nextflow(config_file,
                                       validate_only=True)
     assert exit_code == 0, "Unexpected exit code %d" % exit_code
 
 
-def test_config_test_dir(tmpdir):
+@pytest.mark.parametrize(
+    "config_file",
+    [test.SIMDATA_UMI_CONFIG, test.SIMDATA_MULTIPLEX_CONFIG])
+def test_config_test_dir(tmpdir, config_file):
     """
     Test that a workflow configuration validates in a test
     directory whose structure matches that expected by the workflow
@@ -240,15 +250,20 @@ def test_config_test_dir(tmpdir):
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir py._path.local.LocalPath
+    :param config_file: Configuration file
+    :type config_file: str or unicode
     """
     _ = create_simdata_test_dir(tmpdir)
-    exit_code = nextflow.run_nextflow(test.SIMDATA_UMI_CONFIG,
+    exit_code = nextflow.run_nextflow(config_file,
                                       validate_only=True,
                                       cwd=tmpdir)
     assert exit_code == 0, "Unexpected exit code %d" % exit_code
 
 
-def test_environment_token_config(tmpdir):
+@pytest.mark.parametrize(
+    "config_file",
+    [test.SIMDATA_UMI_CONFIG, test.SIMDATA_MULTIPLEX_CONFIG])
+def test_environment_token_config(tmpdir, config_file):
     """
     Test that a workflow configuration with environment variable
     tokens validates when the user provides values for the environment
@@ -259,9 +274,11 @@ def test_environment_token_config(tmpdir):
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir py._path.local.LocalPath
+    :param config_file: Configuration file
+    :type config_file: str or unicode
     """
     organisms_dir, samples_dir, data_dir = create_simdata_token_test_dir(tmpdir)
-    with open(test.SIMDATA_UMI_CONFIG, 'r') as f:
+    with open(config_file, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
     tokenize_config(config)
     test_config_file = tmpdir.join("test-config.yaml")
@@ -276,7 +293,10 @@ def test_environment_token_config(tmpdir):
     assert exit_code == 0, "Unexpected exit code %d" % exit_code
 
 
-def test_default_environment_token_config(tmpdir):
+@pytest.mark.parametrize(
+    "config_file",
+    [test.SIMDATA_UMI_CONFIG, test.SIMDATA_MULTIPLEX_CONFIG])
+def test_default_environment_token_config(tmpdir, config_file):
     """
     Test that a workflow configuration with environment variable
     tokens validates when the user does not provide values for the
@@ -289,9 +309,11 @@ def test_default_environment_token_config(tmpdir):
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir py._path.local.LocalPath
+    :param config_file: Configuration file
+    :type config_file: str or unicode
     """
     _ = create_simdata_default_token_test_dir(tmpdir)
-    with open(test.SIMDATA_UMI_CONFIG, 'r') as f:
+    with open(config_file, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
     tokenize_config(config)
     test_config_file = tmpdir.join("test-config.yaml")
@@ -305,7 +327,10 @@ def test_default_environment_token_config(tmpdir):
     assert exit_code == 0, "Unexpected exit code %d" % exit_code
 
 
-def test_relative_paths_config(tmpdir):
+@pytest.mark.parametrize(
+    "config_file",
+    [test.SIMDATA_UMI_CONFIG, test.SIMDATA_MULTIPLEX_CONFIG])
+def test_relative_paths_config(tmpdir, config_file):
     """
     Test that a workflow configuration with relative paths to input
     and output files validates.
@@ -314,6 +339,8 @@ def test_relative_paths_config(tmpdir):
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir py._path.local.LocalPath
+    :param config_file: Configuration file
+    :type config_file: str or unicode
     """
     _ = create_simdata_default_token_test_dir(tmpdir)
     # Tokenise configuration then update configuration with no
@@ -321,7 +348,7 @@ def test_relative_paths_config(tmpdir):
     # relative.
     # This is a convenience. Note that no environment variables are
     # passed to run_nextflow below.
-    with open(test.SIMDATA_UMI_CONFIG, 'r') as f:
+    with open(config_file, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
     tokenize_config(config)
     environment.update_config_with_env({}, config)
@@ -334,7 +361,10 @@ def test_relative_paths_config(tmpdir):
     assert exit_code == 0, "Unexpected exit code %d" % exit_code
 
 
-def test_absolute_paths_config(tmpdir):
+@pytest.mark.parametrize(
+    "config_file",
+    [test.SIMDATA_UMI_CONFIG, test.SIMDATA_MULTIPLEX_CONFIG])
+def test_absolute_paths_config(tmpdir, config_file):
     """
     Test that a workflow with absolute paths to input and output files
     validates.
@@ -344,6 +374,8 @@ def test_absolute_paths_config(tmpdir):
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir py._path.local.LocalPath
+    :param config_file: Configuration file
+    :type config_file: str or unicode
     """
     organisms_dir, samples_dir, data_dir = create_simdata_token_test_dir(tmpdir)
     # Tokenise configuration then update configuration with
@@ -351,7 +383,7 @@ def test_absolute_paths_config(tmpdir):
     # absolute.
     # This is a convenience. Note that no environment variables are
     # passed to run_nextflow below.
-    with open(test.SIMDATA_UMI_CONFIG, 'r') as f:
+    with open(config_file, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
     tokenize_config(config)
     envs = {params.ENV_RIBOVIZ_SAMPLES: samples_dir,
