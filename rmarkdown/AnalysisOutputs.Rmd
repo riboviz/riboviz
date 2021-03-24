@@ -34,6 +34,7 @@ suppressMessages(library(tidyverse))
 
 ### handling optional outputs parameters: 
 
+# get contents of config yaml file to check for missing conditional files
 yaml <- yaml::read_yaml(params$yamlfile)
 
 # 3ntframe_propbygene.pdf plot: read frame (conditional on `asite_disp_length_file`) 
@@ -51,19 +52,22 @@ if (is.null(yaml$features_file)){
 }
 
 # codon_ribodens.pdf plot: (conditional on `t_rna_file` and `codon_positions_file`)
+# check trna file config yaml parameter for file presence/absence
 if (is.null(yaml$t_rna_file)){
   trna_file <- NA
 } else {
   trna_file <- "present"
 }
-
+# check codon positions file config yaml parameter for file presence/absence
 if (is.null(yaml$codon_positions_file)){
-  codonposition_file <- NA
+  codonpos_file <- NA
 } else {
-  codonposition_file <- "present"
+  codonpos_file <- "present"
 }
 
-if (is.null(yaml$trna_file) & is.null(yaml$codonposition_file)){
+# use result of absence/presence yaml-config-checking for both files 
+# to determine whether to plot codon_ribodens:
+if (is.na(trna_file) & is.na(codonpos_file)){
   codonspecificribosomedensitytrnacorrelation_plot <- NA
 } else {
   codonspecificribosomedensitytrnacorrelation_plot <- "present"
@@ -75,6 +79,7 @@ if (is.null(yaml$trna_file) & is.null(yaml$codonposition_file)){
 ```{r printparams, echo=FALSE}
 
 if(params$verbose == TRUE){
+  print(codonspecificribosomedensitytrnacorrelation_plot)
   # show yaml file info
   print(params$yamlfile)
   
@@ -231,7 +236,7 @@ if (!is.na(readframe_plot)){
 
 ```{r featuresplot, echo=FALSE, message=FALSE, warning=FALSE}
 
-# plot 
+# plot sequence features
 if (!is.na(features_plot)) {
   # conditional on `features-file`
   PlotSequenceBasedFeatures(features_plot_data)
@@ -242,9 +247,9 @@ if (!is.na(features_plot)) {
 
 ### Codon-specific ribosome density and tRNA correlation:
 
-```{r ribosomedensitytrna_plot, echo=FALSE, message=FALSE, warning=FALSE}
+```{r ribosomedensitytrna_plot, echo=TRUE, message=FALSE, warning=FALSE}
 
-# plot 
+# plot codon specific ribosome density 
 if (!is.na(codonspecificribosomedensitytrnacorrelation_plot)) {
   # conditional on `t_rna_file` and `codon_positions_file`
   PlotCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_wide)
