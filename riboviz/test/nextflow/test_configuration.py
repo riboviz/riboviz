@@ -104,6 +104,24 @@ def tokenize_config(config):
     print(config)
 
 
+def symlink_organism_files(src, dst):
+    files = ["yeast_rRNA_R64-1-1.fa",
+             "yeast_YAL_CDS_w_250utrs.fa",
+             "yeast_YAL_CDS_w_250utrs.gff3"]
+    for f in files:
+        os.symlink(os.path.join(src_dir, f),
+                   os.path.join(dst_dir, f))
+    
+def symlink_data_files(src, dst):
+    files = ["yeast_codon_pos_i200.RData",
+             "yeast_features.tsv",
+             "yeast_standard_asite_disp_length.txt",
+             "yeast_tRNAs.tsv"]
+    for f in files:
+        os.symlink(os.path.join(src_dir, f),
+                   os.path.join(dst_dir, f))
+    
+
 # TODO refector out commonality, pass in subdirectories
 # as arguments.
 def create_test_dirs_envs(tmpdir):
@@ -154,24 +172,22 @@ def create_test_dirs_envs(tmpdir):
     print(str(data_dir))
     src_vignette_input_dir = os.path.join(test.VIGNETTE_DIR, "input")
     src_simdata_dir = os.path.join(test.DATA_DIR, "simdata")
-    os.symlink(
-        os.path.join(src_vignette_input_dir, "yeast_rRNA_R64-1-1.fa"),
-        organisms_dir.join("yeast_rRNA_R64-1-1.fa"))
-    os.symlink(
-        os.path.join(src_vignette_input_dir, "yeast_YAL_CDS_w_250utrs.fa"),
-        organisms_dir.join("yeast_YAL_CDS_w_250utrs.fa"))
-    os.symlink(
-        os.path.join(src_vignette_input_dir, "yeast_YAL_CDS_w_250utrs.gff3"),
-        organisms_dir.join("yeast_YAL_CDS_w_250utrs.gff3"))
-    os.symlink(
-        os.path.join(src_simdata_dir, "umi5_umi3_umi_adaptor.fastq"),
-        simdata_dir.join("umi5_umi3_umi_adaptor.fastq"))
-    os.symlink(
-        os.path.join(src_simdata_dir, "multiplex_umi_barcode_adaptor.fastq"),
-        simdata_dir.join("multiplex_umi_barcode_adaptor.fastq"))
-    os.symlink(
-        os.path.join(src_simdata_dir, "multiplex_barcodes.tsv"),
-        simdata_dir.join("multiplex_barcodes.tsv"))
+
+    symlink_organism_files(src_vignette_input_dir, organisms_dir)
+    symlink_data_files(test.DATA_DIR, data_dir)
+
+    if False:
+        os.symlink(
+            os.path.join(src_vignette_input_dir, "yeast_rRNA_R64-1-1.fa"),
+            organisms_dir.join("yeast_rRNA_R64-1-1.fa"))
+        os.symlink(
+            os.path.join(src_vignette_input_dir, "yeast_YAL_CDS_w_250utrs.fa"),
+            organisms_dir.join("yeast_YAL_CDS_w_250utrs.fa"))
+        os.symlink(
+            os.path.join(src_vignette_input_dir, "yeast_YAL_CDS_w_250utrs.gff3"),
+            organisms_dir.join("yeast_YAL_CDS_w_250utrs.gff3"))
+
+
     os.symlink(os.path.join(test.DATA_DIR, "yeast_codon_pos_i200.RData"),
                data_dir.join("yeast_codon_pos_i200.RData"))
     os.symlink(os.path.join(test.DATA_DIR, "yeast_features.tsv"),
@@ -181,6 +197,17 @@ def create_test_dirs_envs(tmpdir):
         data_dir.join("yeast_standard_asite_disp_length.txt"))
     os.symlink(os.path.join(test.DATA_DIR, "yeast_tRNAs.tsv"),
                data_dir.join("yeast_tRNAs.tsv"))
+
+        
+    os.symlink(
+        os.path.join(src_simdata_dir, "umi5_umi3_umi_adaptor.fastq"),
+        simdata_dir.join("umi5_umi3_umi_adaptor.fastq"))
+    os.symlink(
+        os.path.join(src_simdata_dir, "multiplex_umi_barcode_adaptor.fastq"),
+        simdata_dir.join("multiplex_umi_barcode_adaptor.fastq"))
+    os.symlink(
+        os.path.join(src_simdata_dir, "multiplex_barcodes.tsv"),
+        simdata_dir.join("multiplex_barcodes.tsv"))
     return str(organisms_dir), str(samples_dir), str(data_dir)
 
 
