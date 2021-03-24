@@ -224,25 +224,9 @@ def create_simdata_default_token_test_dir(tmpdir):
 @pytest.mark.parametrize(
     "config_file",
     [test.SIMDATA_UMI_CONFIG, test.SIMDATA_MULTIPLEX_CONFIG])
-def test_config(config_file):
-    """
-    Test that a workflow configuration validates.
-    The workflow is run in the current, ``riboviz``, directory.
-
-    :param config_file: Configuration file
-    :type config_file: str or unicode
-    """
-    exit_code = nextflow.run_nextflow(config_file,
-                                      validate_only=True)
-    assert exit_code == 0, "Unexpected exit code %d" % exit_code
-
-
-@pytest.mark.parametrize(
-    "config_file",
-    [test.SIMDATA_UMI_CONFIG, test.SIMDATA_MULTIPLEX_CONFIG])
 def test_config_test_dir(tmpdir, config_file):
     """
-    Test that a workflow configuration validates in a test
+    Test that workflow configuration validates in a test
     directory whose structure matches that expected by the workflow
     configuration.
     The workflow is run in a test directory (see
@@ -268,9 +252,9 @@ def test_environment_token_config(tmpdir, config_file):
     Test that a workflow configuration with environment variable
     tokens validates when the user provides values for the environment
     variables (:py:const:`riboviz.params.ENV_DIRS`).
-    The workflow is run in the current, ``riboviz``, directory, with
-    the environment variables specifying paths in a test directory,
-    (see :py:func:'create_simdata_token_test_dir`).
+    The workflow is run in the default, :py.const:`riboviz.BASE_PATH`,
+    directory, with the environment variables specifying paths in a
+    test directory, (see :py:func:'create_simdata_token_test_dir`).
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir py._path.local.LocalPath
@@ -368,9 +352,9 @@ def test_absolute_paths_config(tmpdir, config_file):
     """
     Test that a workflow with absolute paths to input and output files
     validates.
-    The workflow is run in the current, ``riboviz``, directory, with
-    the configuration specifying paths in a test directory (see
-    :py:func:'create_simdata_token_test_dir`).
+    The workflow is run in the default, :py.const:`riboviz.BASE_PATH`,
+    directory with the configuration specifying paths in a test
+    directory (see :py:func:'create_simdata_token_test_dir`).
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir py._path.local.LocalPath
@@ -395,4 +379,101 @@ def test_absolute_paths_config(tmpdir, config_file):
         yaml.dump(config, f)
     exit_code = nextflow.run_nextflow(test_config_file,
                                       validate_only=True)
+    assert exit_code == 0, "Unexpected exit code %d" % exit_code
+
+
+@pytest.mark.parametrize(
+    "config_file",
+    [test.VIGNETTE_CONFIG,
+     test.SIMDATA_UMI_CONFIG,
+     test.SIMDATA_MULTIPLEX_CONFIG])
+def test_config_riboviz_dir(config_file):
+    """
+    Test that a workflow configuration validates.
+    The workflow is run in the default,
+    :py.const:`riboviz.BASE_PATH`, directory.
+
+    :param config_file: Configuration file
+    :type config_file: str or unicode
+    """
+    exit_code = nextflow.run_nextflow(config_file,
+                                      validate_only=True)
+    assert exit_code == 0, "Unexpected exit code %d" % exit_code
+
+
+@pytest.mark.parametrize(
+    "config_file, samples_dir",
+    [(test.VIGNETTE_CONFIG, test.VIGNETTE_DIR),
+     (test.SIMDATA_UMI_CONFIG, test.DATA_DIR),
+     (test.SIMDATA_MULTIPLEX_CONFIG, test.DATA_DIR)])
+def test_environment_token_config_riboviz_dir(
+        tmpdir, config_file, samples_dir):
+    """
+    Test that a workflow configuration with environment variable
+    tokens validates when the user provides values for the environment
+    variables (:py:const:`riboviz.params.ENV_DIRS`).
+    The workflow is run in ``tmpdir``, with the configuration, with
+    the environment variables specifying paths in the default,
+    :py:const:`riboviz.BASE_PATH`, directory.
+
+    :param tmpdir: Temporary directory (pytest built-in fixture)
+    :type tmpdir py._path.local.LocalPath
+    :param config_file: Configuration file
+    :type config_file: str or unicode
+    :param samples_dir: Samples directory
+    :type samples_dir: str or unicode
+    """
+    with open(config_file, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    tokenize_config(config)
+    test_config_file = tmpdir.join("test-config.yaml")
+    with open(test_config_file, 'w') as f:
+        yaml.dump(config, f)
+    envs = {params.ENV_RIBOVIZ_SAMPLES: samples_dir,
+            params.ENV_RIBOVIZ_ORGANISMS: test.VIGNETTE_INPUT_DIR,
+            params.ENV_RIBOVIZ_DATA: test.DATA_DIR}
+    exit_code = nextflow.run_nextflow(test_config_file,
+                                      envs=envs,
+                                      validate_only=True)
+    assert exit_code == 0, "Unexpected exit code %d" % exit_code
+
+
+@pytest.mark.parametrize(
+    "config_file, samples_dir",
+    [(test.VIGNETTE_CONFIG, test.VIGNETTE_DIR),
+     (test.SIMDATA_UMI_CONFIG, test.DATA_DIR),
+     (test.SIMDATA_MULTIPLEX_CONFIG, test.DATA_DIR)])
+def test_absolute_paths_config_riboviz_dir(tmpdir, config_file, samples_dir):
+    """
+    Test that a workflow with absolute paths to input and output files
+    validates.
+    The workflow is run in ``tmpdir``, with the configuration
+    specifying paths in the default, :py.const:`riboviz.BASE_PATH`,
+    directory.
+
+    :param tmpdir: Temporary directory (pytest built-in fixture)
+    :type tmpdir py._path.local.LocalPath
+    :param config_file: Configuration file
+    :type config_file: str or unicode
+    :param samples_dir: Samples directory
+    :type samples_dir: str or unicode
+    """
+    # Tokenise configuration then update configuration with
+    # values for environment variable tokens provided so paths become
+    # absolute.
+    # This is a convenience. Note that no environment variables are
+    # passed to run_nextflow below.
+    with open(config_file, 'r') as f:
+        config = yaml.load(f, yaml.SafeLoader)
+    tokenize_config(config)
+    envs = {params.ENV_RIBOVIZ_SAMPLES: samples_dir,
+            params.ENV_RIBOVIZ_ORGANISMS: test.VIGNETTE_INPUT_DIR,
+            params.ENV_RIBOVIZ_DATA: test.DATA_DIR}
+    environment.update_config_with_env(envs, config)
+    test_config_file = tmpdir.join("test-config.yaml")
+    with open(test_config_file, 'w') as f:
+        yaml.dump(config, f)
+    exit_code = nextflow.run_nextflow(test_config_file,
+                                      validate_only=True,
+                                      cwd=tmpdir)
     assert exit_code == 0, "Unexpected exit code %d" % exit_code

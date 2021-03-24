@@ -89,6 +89,8 @@ def run_nextflow(config_file, envs={}, validate_only=False, cwd=None):
     env = dict(os.environ)
     for variable, value in envs.items():
         env[variable] = value
+    print("Working directory:")
+    exit_code = subprocess.call("pwd", cwd=cwd)
     exit_code = subprocess.call(cmd, env=env, cwd=cwd)
     return exit_code
 
