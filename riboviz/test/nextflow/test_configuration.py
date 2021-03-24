@@ -8,41 +8,11 @@ provided).
 
 Each test runs ``nextflow run prep_riboviz.nf``.
 """
-import os
-import os.path
 import yaml
 from riboviz import environment
 from riboviz import params
 from riboviz import test
 from riboviz.test import nextflow
-
-
-def customise_path(prefix, path):
-    """
-    Customise a file path. Get the basename of the path, and create a
-    new path, formed from that and ``prefix``.
-
-    If the original path ends with ``/`` then this is first removed to
-    allow the correct basepath to be extracted.
-
-    Examples, assuming prefix is ``${RIBOVIZ_SAMPLES}``:
-
-    * ``data/simdata/`` => ``${RIBOVIZ_SAMPLES}/simdata``
-    * ``data/simdata`` => ``${RIBOVIZ_SAMPLES}/simdata``
-
-    :param prefix: Prefix
-    :type prefix: str or unicode
-    :param path: Path
-    :type path: str or unicode
-    :return: Updated path
-    :rtype: str or unicode
-    """
-    nu_path = path
-    if path:
-        if path.endswith("/"):
-            nu_path = path[:-1]
-        nu_path = os.path.join(prefix, os.path.basename(nu_path))
-    return nu_path
 
 
 def tokenize_config(config):
@@ -78,7 +48,7 @@ def tokenize_config(config):
       updated to
       ``${RIBOVIZ_ORGANISMS}/yeast_YAL_CDS_w_250utrs.gff3``.
 
-    See also :py:`func:customise_path`.
+    See also :py:`func:riboviz.test.customise_path`.
 
     :param config: Configuration
     :type config: dict
@@ -98,197 +68,18 @@ def tokenize_config(config):
     }
     for env, parameters in envs_params.items():
         for param in parameters:
-            config[param] = customise_path(
+            config[param] = test.customise_path(
                 environment.ENV_TOKEN_FORMAT.format(env),
                 config[param])
-    print(config)
 
 
-def symlink_organism_files(src, dst):
-    files = ["yeast_rRNA_R64-1-1.fa",
-             "yeast_YAL_CDS_w_250utrs.fa",
-             "yeast_YAL_CDS_w_250utrs.gff3"]
-    for f in files:
-        os.symlink(os.path.join(src_dir, f),
-                   os.path.join(dst_dir, f))
-    
-def symlink_data_files(src, dst):
-    files = ["yeast_codon_pos_i200.RData",
-             "yeast_features.tsv",
-             "yeast_standard_asite_disp_length.txt",
-             "yeast_tRNAs.tsv"]
-    for f in files:
-        os.symlink(os.path.join(src_dir, f),
-                   os.path.join(dst_dir, f))
-    
-
-# TODO refector out commonality, pass in subdirectories
-# as arguments.
-def create_test_dirs_envs(tmpdir):
+def create_simdata_test_dir(tmpdir):
     """
     Create temporary test directories. The directory structure is of
-    form::
-
-        <tmpdir>
-          data/
-            # Symholic links to <riboviz>/data/ files:
-            yeast_codon_pos_i200.RData
-            yeast_features.tsv
-            yeast_standard_asite_disp_length.txt
-            yeast_tRNAs.tsv
-          organisms/
-            # Symholic links to <riboviz>/vignette/input/ files:
-            yeast_rRNA_R64-1-1.fa
-            yeast_YAL_CDS_w_250utrs.fa
-            yeast_YAL_CDS_w_250utrs.gff3
-          samples/
-            simdata/
-              # Symholic links to <riboviz>/data/simdata/ files:
-              umi5_umi3_umi_adaptor.fastq
-              multiplex_umi_barcode_adaptor.fastq
-              multiplex_barcodes.tsv
-
-    The directories returned are as follows:
-
-    * organisms: ``<tmpdir>/organisms/``
-    * samples: ``<tmpdir>/samples/``
-    * data: ``<tmpdir>/data/``
-
-    :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
-    :return: organisms directory, samples directory, data directory
-    :rtype: tuple(str or unicode, str or unicode, str or unicode)
-    """
-    print("---create-test-dirs---")
-    organisms_dir = tmpdir.mkdir("organisms")
-    samples_dir = tmpdir.mkdir("samples")
-
-    simdata_dir = samples_dir.mkdir("simdata")
-
-    data_dir = tmpdir.mkdir("data")
-    print(str(tmpdir))
-    print(str(organisms_dir))
-    print(str(samples_dir))
-    print(str(data_dir))
-    src_vignette_input_dir = os.path.join(test.VIGNETTE_DIR, "input")
-    src_simdata_dir = os.path.join(test.DATA_DIR, "simdata")
-
-    symlink_organism_files(src_vignette_input_dir, organisms_dir)
-    symlink_data_files(test.DATA_DIR, data_dir)
-
-    if False:
-        os.symlink(
-            os.path.join(src_vignette_input_dir, "yeast_rRNA_R64-1-1.fa"),
-            organisms_dir.join("yeast_rRNA_R64-1-1.fa"))
-        os.symlink(
-            os.path.join(src_vignette_input_dir, "yeast_YAL_CDS_w_250utrs.fa"),
-            organisms_dir.join("yeast_YAL_CDS_w_250utrs.fa"))
-        os.symlink(
-            os.path.join(src_vignette_input_dir, "yeast_YAL_CDS_w_250utrs.gff3"),
-            organisms_dir.join("yeast_YAL_CDS_w_250utrs.gff3"))
-
-
-    os.symlink(os.path.join(test.DATA_DIR, "yeast_codon_pos_i200.RData"),
-               data_dir.join("yeast_codon_pos_i200.RData"))
-    os.symlink(os.path.join(test.DATA_DIR, "yeast_features.tsv"),
-               data_dir.join("yeast_features.tsv"))
-    os.symlink(
-        os.path.join(test.DATA_DIR, "yeast_standard_asite_disp_length.txt"),
-        data_dir.join("yeast_standard_asite_disp_length.txt"))
-    os.symlink(os.path.join(test.DATA_DIR, "yeast_tRNAs.tsv"),
-               data_dir.join("yeast_tRNAs.tsv"))
-
-        
-    os.symlink(
-        os.path.join(src_simdata_dir, "umi5_umi3_umi_adaptor.fastq"),
-        simdata_dir.join("umi5_umi3_umi_adaptor.fastq"))
-    os.symlink(
-        os.path.join(src_simdata_dir, "multiplex_umi_barcode_adaptor.fastq"),
-        simdata_dir.join("multiplex_umi_barcode_adaptor.fastq"))
-    os.symlink(
-        os.path.join(src_simdata_dir, "multiplex_barcodes.tsv"),
-        simdata_dir.join("multiplex_barcodes.tsv"))
-    return str(organisms_dir), str(samples_dir), str(data_dir)
-
-
-def create_test_dirs_envs_default(tmpdir):
-    """
-    Create temporary test directories. The directory structure is of
-    form::
-
-        <tmpdir>
-          # Symholic links to <riboviz>/data/ files:
-          yeast_codon_pos_i200.RData
-          yeast_features.tsv
-          yeast_standard_asite_disp_length.txt
-          yeast_tRNAs.tsv
-          # Symholic links to <riboviz>/vignette/input/ files:
-          yeast_rRNA_R64-1-1.fa
-          yeast_YAL_CDS_w_250utrs.fa
-          yeast_YAL_CDS_w_250utrs.gff3
-          simdata/
-            # Symholic links to <riboviz>/data/simdata/ files:
-            umi5_umi3_umi_adaptor.fastq
-            multiplex_umi_barcode_adaptor.fastq
-            multiplex_barcodes.tsv
-
-    The directories returned are as follows:
-
-    * organisms: ``<tmpdir>/``
-    * samples: ``<tmpdir>/input/``
-    * data: ``<tmpdir>``
-
-    :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
-    :return: organisms directory, samples directory, data directory
-    :rtype: tuple(str or unicode, str or unicode, str or unicode)
-    """
-    print("---create-test-dirs---")
-    organisms_dir = tmpdir
-    samples_dir = tmpdir.mkdir("simdata")
-    data_dir = tmpdir
-    print(str(tmpdir))
-    print(str(organisms_dir))
-    print(str(samples_dir))
-    print(str(data_dir))
-    src_vignette_input_dir = os.path.join(test.VIGNETTE_DIR, "input")
-    src_simdata_dir = os.path.join(test.DATA_DIR, "simdata")
-    os.symlink(
-        os.path.join(src_vignette_input_dir, "yeast_rRNA_R64-1-1.fa"),
-        organisms_dir.join("yeast_rRNA_R64-1-1.fa"))
-    os.symlink(
-        os.path.join(src_vignette_input_dir, "yeast_YAL_CDS_w_250utrs.fa"),
-        organisms_dir.join("yeast_YAL_CDS_w_250utrs.fa"))
-    os.symlink(
-        os.path.join(src_vignette_input_dir, "yeast_YAL_CDS_w_250utrs.gff3"),
-        organisms_dir.join("yeast_YAL_CDS_w_250utrs.gff3"))
-
-    os.symlink(
-        os.path.join(src_simdata_dir, "umi5_umi3_umi_adaptor.fastq"),
-        samples_dir.join("umi5_umi3_umi_adaptor.fastq"))
-    os.symlink(
-        os.path.join(src_simdata_dir, "multiplex_umi_barcode_adaptor.fastq"),
-        samples_dir.join("multiplex_umi_barcode_adaptor.fastq"))
-    os.symlink(
-        os.path.join(src_simdata_dir, "multiplex_barcodes.tsv"),
-        samples_dir.join("multiplex_barcodes.tsv"))
-
-    os.symlink(os.path.join(test.DATA_DIR, "yeast_codon_pos_i200.RData"),
-               data_dir.join("yeast_codon_pos_i200.RData"))
-    os.symlink(os.path.join(test.DATA_DIR, "yeast_features.tsv"),
-               data_dir.join("yeast_features.tsv"))
-    os.symlink(
-        os.path.join(test.DATA_DIR, "yeast_standard_asite_disp_length.txt"),
-        data_dir.join("yeast_standard_asite_disp_length.txt"))
-    os.symlink(os.path.join(test.DATA_DIR, "yeast_tRNAs.tsv"),
-               data_dir.join("yeast_tRNAs.tsv"))
-    return str(organisms_dir), str(samples_dir), str(data_dir)
-
-
-def create_test_dirs(tmpdir):
-    """
-    Create temporary test directories. The directory structure is of
-    form::
+    consistent with that expected by
+    :py:const:`riboviz.test.SIMDATA_UMI_CONFIG`
+    and :py:const:`riboviz.test.SIMDATA_MULTIPLEX_CONFIG`. The
+    directory is structured as follows::
 
         <tmpdir>
           data/
@@ -320,57 +111,156 @@ def create_test_dirs(tmpdir):
     :return: organisms directory, samples directory, data directory
     :rtype: tuple(str or unicode, str or unicode, str or unicode)
     """
-    print("---create-test-dirs---")
     organisms_dir = tmpdir.mkdir("vignette").mkdir("input")
+    test.symlink_files(organisms_dir, test.ORGANISM_FILES)
     samples_dir = tmpdir.mkdir("data")
     simdata_dir = samples_dir.mkdir("simdata")
+    test.symlink_files(simdata_dir, test.SIMDATA_INPUT_FILES)
     data_dir = samples_dir
-    print(str(tmpdir))
-    print(str(organisms_dir))
-    print(str(samples_dir))
-    print(str(data_dir))
-    src_vignette_input_dir = os.path.join(test.VIGNETTE_DIR, "input")
-    src_simdata_dir = os.path.join(test.DATA_DIR, "simdata")
-    os.symlink(
-        os.path.join(src_vignette_input_dir, "yeast_rRNA_R64-1-1.fa"),
-        organisms_dir.join("yeast_rRNA_R64-1-1.fa"))
-    os.symlink(
-        os.path.join(src_vignette_input_dir, "yeast_YAL_CDS_w_250utrs.fa"),
-        organisms_dir.join("yeast_YAL_CDS_w_250utrs.fa"))
-    os.symlink(
-        os.path.join(src_vignette_input_dir, "yeast_YAL_CDS_w_250utrs.gff3"),
-        organisms_dir.join("yeast_YAL_CDS_w_250utrs.gff3"))
-    os.symlink(
-        os.path.join(src_simdata_dir, "umi5_umi3_umi_adaptor.fastq"),
-        simdata_dir.join("umi5_umi3_umi_adaptor.fastq"))
-    os.symlink(
-        os.path.join(src_simdata_dir, "multiplex_umi_barcode_adaptor.fastq"),
-        simdata_dir.join("multiplex_umi_barcode_adaptor.fastq"))
-    os.symlink(
-        os.path.join(src_simdata_dir, "multiplex_barcodes.tsv"),
-        simdata_dir.join("multiplex_barcodes.tsv"))
-    os.symlink(os.path.join(test.DATA_DIR, "yeast_codon_pos_i200.RData"),
-               data_dir.join("yeast_codon_pos_i200.RData"))
-    os.symlink(os.path.join(test.DATA_DIR, "yeast_features.tsv"),
-               data_dir.join("yeast_features.tsv"))
-    os.symlink(
-        os.path.join(test.DATA_DIR, "yeast_standard_asite_disp_length.txt"),
-        data_dir.join("yeast_standard_asite_disp_length.txt"))
-    os.symlink(os.path.join(test.DATA_DIR, "yeast_tRNAs.tsv"),
-               data_dir.join("yeast_tRNAs.tsv"))
+    test.symlink_files(data_dir, test.DATA_FILES)
     return str(organisms_dir), str(samples_dir), str(data_dir)
 
 
-def test_environment_vars(tmpdir):
+def create_simdata_token_test_dir(tmpdir):
     """
-    Test that a workflow with environment variables,
-    :py:const:`riboviz.params.ENV_DIRS`, validates.
+    Create temporary test directories. The directory structure is of
+    consistent with that expected by
+    :py:const:`riboviz.test.SIMDATA_UMI_CONFIG`
+    and :py:const:`riboviz.test.SIMDATA_MULTIPLEX_CONFIG` after
+    application of :py:func:`tokenize_config` and assuming when
+    a workflow is run the user provides values for the environment
+    variable (:py:const:`riboviz.params.ENV_DIRS`) corresponding to
+    the tokens. The directory is structured as follows::
+
+        <tmpdir>
+          data/
+            # Symholic links to <riboviz>/data/ files:
+            yeast_codon_pos_i200.RData
+            yeast_features.tsv
+            yeast_standard_asite_disp_length.txt
+            yeast_tRNAs.tsv
+          organisms/
+            # Symholic links to <riboviz>/vignette/input/ files:
+            yeast_rRNA_R64-1-1.fa
+            yeast_YAL_CDS_w_250utrs.fa
+            yeast_YAL_CDS_w_250utrs.gff3
+          samples/
+            simdata/
+              # Symholic links to <riboviz>/data/simdata/ files:
+              umi5_umi3_umi_adaptor.fastq
+              multiplex_umi_barcode_adaptor.fastq
+              multiplex_barcodes.tsv
+
+    The directories returned are as follows:
+
+    * organisms: ``<tmpdir>/organisms/``
+    * samples: ``<tmpdir>/samples/``
+    * data: ``<tmpdir>/data/``
+
+    :param tmpdir: Temporary directory (pytest built-in fixture)
+    :type tmpdir py._path.local.LocalPath
+    :return: organisms directory, samples directory, data directory
+    :rtype: tuple(str or unicode, str or unicode, str or unicode)
+    """
+    organisms_dir = tmpdir.mkdir("organisms")
+    test.symlink_files(organisms_dir, test.ORGANISM_FILES)
+    samples_dir = tmpdir.mkdir("samples")
+    simdata_dir = samples_dir.mkdir("simdata")
+    test.symlink_files(simdata_dir, test.SIMDATA_INPUT_FILES)
+    data_dir = tmpdir.mkdir("data")
+    test.symlink_files(data_dir, test.DATA_FILES)
+    return str(organisms_dir), str(samples_dir), str(data_dir)
+
+
+def create_simdata_default_token_test_dir(tmpdir):
+    """
+    Create temporary test directories. The directory structure is of
+    consistent with that expected by
+    :py:const:`riboviz.test.SIMDATA_UMI_CONFIG`
+    and :py:const:`riboviz.test.SIMDATA_MULTIPLEX_CONFIG` after
+    application of :py:func:`tokenize_config` and assuming when
+    a workflow is run the user does not provide values for the
+    environment variable (:py:const:`riboviz.params.ENV_DIRS`)
+    corresponding to the tokens. The directory is structured as
+    follows::
+
+        <tmpdir>
+          # Symholic links to <riboviz>/data/ files:
+          yeast_codon_pos_i200.RData
+          yeast_features.tsv
+          yeast_standard_asite_disp_length.txt
+          yeast_tRNAs.tsv
+          # Symholic links to <riboviz>/vignette/input/ files:
+          yeast_rRNA_R64-1-1.fa
+          yeast_YAL_CDS_w_250utrs.fa
+          yeast_YAL_CDS_w_250utrs.gff3
+          simdata/
+            # Symholic links to <riboviz>/data/simdata/ files:
+            umi5_umi3_umi_adaptor.fastq
+            multiplex_umi_barcode_adaptor.fastq
+            multiplex_barcodes.tsv
+
+    The directories returned are as follows:
+
+    * organisms: ``<tmpdir>/``
+    * samples: ``<tmpdir>/simdata/``
+    * data: ``<tmpdir>/``
+
+    :param tmpdir: Temporary directory (pytest built-in fixture)
+    :type tmpdir py._path.local.LocalPath
+    :return: organisms directory, samples directory, data directory
+    :rtype: tuple(str or unicode, str or unicode, str or unicode)
+    """
+    organisms_dir = tmpdir
+    test.symlink_files(organisms_dir, test.ORGANISM_FILES)
+    samples_dir = tmpdir.mkdir("simdata")
+    test.symlink_files(samples_dir, test.SIMDATA_INPUT_FILES)
+    data_dir = tmpdir
+    test.symlink_files(data_dir, test.DATA_FILES)
+    return str(organisms_dir), str(samples_dir), str(data_dir)
+
+
+def test_config():
+    """
+    Test that a workflow configuration validates.
+    The workflow is run in the current, ``riboviz``, directory.
+    """
+    exit_code = nextflow.run_nextflow(test.SIMDATA_UMI_CONFIG,
+                                      validate_only=True)
+    assert exit_code == 0, "Unexpected exit code %d" % exit_code
+
+
+def test_config_test_dir(tmpdir):
+    """
+    Test that a workflow configuration validates in a test
+    directory whose structure matches that expected by the workflow
+    configuration.
+    The workflow is run in a test directory (see
+    :py:func:`create_simdata_test_dir`).
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir py._path.local.LocalPath
     """
-    organisms_dir, samples_dir, data_dir = create_test_dirs_envs(tmpdir)
+    _ = create_simdata_test_dir(tmpdir)
+    exit_code = nextflow.run_nextflow(test.SIMDATA_UMI_CONFIG,
+                                      validate_only=True,
+                                      cwd=tmpdir)
+    assert exit_code == 0, "Unexpected exit code %d" % exit_code
 
+
+def test_environment_token_config(tmpdir):
+    """
+    Test that a workflow configuration with environment variable
+    tokens validates when the user provides values for the environment
+    variables (:py:const:`riboviz.params.ENV_DIRS`).
+    The workflow is run in the current, ``riboviz``, directory, with
+    the environment variables specifying paths in a test directory,
+    (see :py:func:'create_simdata_token_test_dir`).
+
+    :param tmpdir: Temporary directory (pytest built-in fixture)
+    :type tmpdir py._path.local.LocalPath
+    """
+    organisms_dir, samples_dir, data_dir = create_simdata_token_test_dir(tmpdir)
     with open(test.SIMDATA_UMI_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
     tokenize_config(config)
@@ -386,16 +276,21 @@ def test_environment_vars(tmpdir):
     assert exit_code == 0, "Unexpected exit code %d" % exit_code
 
 
-def test_default_environment_vars(tmpdir):
+def test_default_environment_token_config(tmpdir):
     """
-    Test that a workflow with no environment variables,
-    :py:const:`riboviz.params.ENV_DIRS`, validates using the
-    default value ``.`` for the environment variables.
+    Test that a workflow configuration with environment variable
+    tokens validates when the user does not provide values for the
+    environment  variables (:py:const:`riboviz.params.ENV_DIRS`), and
+    so the default value
+    (:py:const:`riboviz.environment.DEFAULT_ENV_DIR`)
+     is used for the environment variables.
+    The workflow is run in a test directory (see
+    :py:func:'create_simdata_default_token_test_dir`).
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir py._path.local.LocalPath
     """
-    _ = create_test_dirs_envs_default(tmpdir)
+    _ = create_simdata_default_token_test_dir(tmpdir)
     with open(test.SIMDATA_UMI_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
     tokenize_config(config)
@@ -410,21 +305,26 @@ def test_default_environment_vars(tmpdir):
     assert exit_code == 0, "Unexpected exit code %d" % exit_code
 
 
-def test_relative_paths_template_config(tmpdir):
+def test_relative_paths_config(tmpdir):
     """
-    Test that a workflow with relative paths to input and output files
-    validates.
+    Test that a workflow configuration with relative paths to input
+    and output files validates.
+    The workflow is run in a test directory (see
+    :py:func:'create_simdata_default_token_test_dir`).
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir py._path.local.LocalPath
     """
-    _ = create_test_dirs_envs_default(tmpdir)
+    _ = create_simdata_default_token_test_dir(tmpdir)
+    # Tokenise configuration then update configuration with no
+    # values for environment variable tokens provided so paths become
+    # relative.
+    # This is a convenience. Note that no environment variables are
+    # passed to run_nextflow below.
     with open(test.SIMDATA_UMI_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
     tokenize_config(config)
-    # Make paths relative
     environment.update_config_with_env({}, config)
-    print(config)
     test_config_file = tmpdir.join("test-config.yaml")
     with open(test_config_file, 'w') as f:
         yaml.dump(config, f)
@@ -434,40 +334,30 @@ def test_relative_paths_template_config(tmpdir):
     assert exit_code == 0, "Unexpected exit code %d" % exit_code
 
 
-def test_relative_paths_default_config(tmpdir):
-    """
-    Test that a workflow with relative paths to input and output files
-    validates.
-
-    :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
-    """
-    # TODO remove and remove cwd and run in current directory?
-    _ = create_test_dirs(tmpdir)
-    exit_code = nextflow.run_nextflow(test.SIMDATA_UMI_CONFIG,
-                                      validate_only=True,
-                                      cwd=tmpdir)
-    assert exit_code == 0, "Unexpected exit code %d" % exit_code
-
-
-def test_absolute_paths_template_config(tmpdir):
+def test_absolute_paths_config(tmpdir):
     """
     Test that a workflow with absolute paths to input and output files
     validates.
+    The workflow is run in the current, ``riboviz``, directory, with
+    the configuration specifying paths in a test directory (see
+    :py:func:'create_simdata_token_test_dir`).
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir py._path.local.LocalPath
     """
-    organisms_dir, samples_dir, data_dir = create_test_dirs_envs(tmpdir)
+    organisms_dir, samples_dir, data_dir = create_simdata_token_test_dir(tmpdir)
+    # Tokenise configuration then update configuration with
+    # values for environment variable tokens provided so paths become
+    # absolute.
+    # This is a convenience. Note that no environment variables are
+    # passed to run_nextflow below.
     with open(test.SIMDATA_UMI_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
     tokenize_config(config)
-    # Make paths absolute
     envs = {params.ENV_RIBOVIZ_SAMPLES: samples_dir,
             params.ENV_RIBOVIZ_ORGANISMS: organisms_dir,
             params.ENV_RIBOVIZ_DATA: data_dir}
     environment.update_config_with_env(envs, config)
-    print(config)
     test_config_file = tmpdir.join("test-config.yaml")
     with open(test_config_file, 'w') as f:
         yaml.dump(config, f)
