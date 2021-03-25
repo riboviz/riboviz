@@ -247,7 +247,7 @@ if (!is.na(features_plot)) {
 
 ### Codon-specific ribosome density and tRNA correlation:
 
-```{r ribosomedensitytrna_plot, echo=TRUE, message=FALSE, warning=FALSE}
+```{r ribosomedensitytrna_plot, echo=FALSE, message=FALSE, warning=FALSE}
 
 # plot codon specific ribosome density 
 if (!is.na(codonspecificribosomedensitytrnacorrelation_plot)) {
