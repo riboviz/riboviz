@@ -1,6 +1,6 @@
 
 ---
-title: "AnalysisOutputs"
+title: "Riboviz Analysis Outputs"
 output: 
   html_document:
     toc: true
@@ -127,7 +127,8 @@ print_provenance(path_to_this_script)
 three_nucleotide_periodicity_data <- read_tsv(
   file = params$three_nucleotide_periodicity_data_file, 
   skip = 4, # this avoids the provenance info
-  col_names = TRUE)
+  col_names = TRUE) %>%
+  mutate(End = factor(End, levels = c("5'", "3'")))
 
 # codon ribogrid & codon ribogrid bar
 gene_poslen_counts_5start_df <- read_tsv(
@@ -146,7 +147,8 @@ read_length_data <- read_tsv(
 pos_sp_rpf_norm_reads_data <- read_tsv(
   file = params$pos_sp_rpf_norm_reads_data_file, 
   skip = 4, # this avoids the provenance info
-  col_names = TRUE)
+  col_names = TRUE) %>%
+  mutate(End = factor(End, levels = c("5'", "3'")))
 
 ### Load Data for conditional plots:
 
