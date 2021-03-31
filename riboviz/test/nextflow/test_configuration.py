@@ -1,18 +1,20 @@
 """
-Nextflow configuration tests. These test the Nextflow workflow
-validates configurations that include relative paths, absolute paths,
-paths specifying environment variables (when values for the
-environment variables are provided) and paths specifying environment
-variables (when values for the environment variables are not
-provided).
+Nextflow configuration tests. These test that the Nextflow workflow
+validates and runs configurations that include paths specifying
+environment variables (when values for the environment variables are
+provided) and paths specifying environment variables (when values for
+the environment variables are not provided), relative paths, and
+absolute paths.
 
 Each test runs ``nextflow run prep_riboviz.nf``.
 """
+import os.path
 import yaml
 import pytest
 from riboviz import environment
 from riboviz import params
 from riboviz import test
+from riboviz import workflow_r
 from riboviz.test import nextflow
 
 
@@ -23,28 +25,28 @@ def tokenize_config_in_place(config):
 
     The following replacements are done:
 
-    * :py:const.`riboviz.params.ENV_RIBOVIZ_DATA` replaces paths in:
-      - :py:const.`riboviz.params.ASITE_DISP_LENGTH_FILE`
-      - :py:const.`riboviz.params.CODON_POSITIONS_FILE`
-      - :py:const.`riboviz.params.FEATURES_FILE`
-      - :py:const.`riboviz.params.T_RNA_FILE`
-    * :py:const.`riboviz.params.ENV_RIBOVIZ_ORGANISMS` replaces paths
+    * :py:const:`riboviz.params.ENV_RIBOVIZ_DATA` replaces paths in:
+      - :py:const:`riboviz.params.ASITE_DISP_LENGTH_FILE`
+      - :py:const:`riboviz.params.CODON_POSITIONS_FILE`
+      - :py:const:`riboviz.params.FEATURES_FILE`
+      - :py:const:`riboviz.params.T_RNA_FILE`
+    * :py:const:`riboviz.params.ENV_RIBOVIZ_ORGANISMS` replaces paths
       in:
-      - :py:const.`riboviz.params.ORF_FASTA_FILE`
-      - :py:const.`riboviz.params.ORF_GFF_FILE`
-      - :py:const.`riboviz.params.RRNA_FASTA_FILE`
-    * :py:const.`riboviz.params.ENV_RIBOVIZ_SAMPLES`replaces paths in:
-      - :py:const.`riboviz.params.INDEX_DIR`
-      - :py:const.`riboviz.params.INPUT_DIR`
-      - :py:const.`riboviz.params.OUTPUT_DIR`
-      - :py:const.`riboviz.params.TMP_DIR`
+      - :py:const:`riboviz.params.ORF_FASTA_FILE`
+      - :py:const:`riboviz.params.ORF_GFF_FILE`
+      - :py:const:`riboviz.params.RRNA_FASTA_FILE`
+    * :py:const:`riboviz.params.ENV_RIBOVIZ_SAMPLES`replaces paths in:
+      - :py:const:`riboviz.params.INDEX_DIR`
+      - :py:const:`riboviz.params.INPUT_DIR`
+      - :py:const:`riboviz.params.OUTPUT_DIR`
+      - :py:const:`riboviz.params.TMP_DIR`
 
     For example:
 
     * If :py:const:`riboviz.params.INPUT_DIR` has value
       ``data/simdata``, then it is updated to
       ``${RIBOVIZ_SAMPLES}/simdata``.
-    * If :py:const.`riboviz.params.ORF_GFF_FILE` has value
+    * If :py:const:`riboviz.params.ORF_GFF_FILE` has value
       ``vignette/input/yeast_YAL_CDS_w_250utrs.gff3``, then it is
       updated to
       ``${RIBOVIZ_ORGANISMS}/yeast_YAL_CDS_w_250utrs.gff3``.
@@ -416,9 +418,9 @@ def get_env_directory_map(organisms_dir, samples_dir, data_dir):
     (:py:const:`riboviz.params.ENV_DIRS`) to directories.
     Returns:
 
-    * :py:const.`riboviz.params.ENV_RIBOVIZ_SAMPLES` ``samples_dir``.
-    * :py:const.`riboviz.params.ENV_RIBOVIZ_ORGANISMS` ``organisms_dir``.
-    * :py:const.`riboviz.params.ENV_RIBOVIZ_DATA`: ``data_dir``.
+    * :py:const:`riboviz.params.ENV_RIBOVIZ_SAMPLES` ``samples_dir``.
+    * :py:const:`riboviz.params.ENV_RIBOVIZ_ORGANISMS` ``organisms_dir``.
+    * :py:const:`riboviz.params.ENV_RIBOVIZ_DATA`: ``data_dir``.
 
     :param organisms_dir: Organisms directory
     :type organisms_dir: str or unicode
@@ -502,24 +504,24 @@ def relative_config(config, organisms_dir, samples_dir, data_dir):
 
     `""` replaces the relative paths in:
 
-    * :py:const.`riboviz.params.ASITE_DISP_LENGTH_FILE`
-    * :py:const.`riboviz.params.CODON_POSITIONS_FILE`
-    * :py:const.`riboviz.params.FEATURES_FILE`
-    * :py:const.`riboviz.params.T_RNA_FILE`
-    * :py:const.`riboviz.params.ORF_FASTA_FILE`
-    * :py:const.`riboviz.params.ORF_GFF_FILE`
-    * :py:const.`riboviz.params.RRNA_FASTA_FILE`
-    * :py:const.`riboviz.params.INDEX_DIR`
-    * :py:const.`riboviz.params.INPUT_DIR`
-    * :py:const.`riboviz.params.OUTPUT_DIR`
-    * :py:const.`riboviz.params.TMP_DIR`
+    * :py:const:`riboviz.params.ASITE_DISP_LENGTH_FILE`
+    * :py:const:`riboviz.params.CODON_POSITIONS_FILE`
+    * :py:const:`riboviz.params.FEATURES_FILE`
+    * :py:const:`riboviz.params.T_RNA_FILE`
+    * :py:const:`riboviz.params.ORF_FASTA_FILE`
+    * :py:const:`riboviz.params.ORF_GFF_FILE`
+    * :py:const:`riboviz.params.RRNA_FASTA_FILE`
+    * :py:const:`riboviz.params.INDEX_DIR`
+    * :py:const:`riboviz.params.INPUT_DIR`
+    * :py:const:`riboviz.params.OUTPUT_DIR`
+    * :py:const:`riboviz.params.TMP_DIR`
 
     For example:
 
     * If :py:const:`riboviz.params.INPUT_DIR` has value
       ``data/simdata``, then it is updated to
       ``simdata``.
-    * If :py:const.`riboviz.params.ORF_GFF_FILE` has value
+    * If :py:const:`riboviz.params.ORF_GFF_FILE` has value
       ``vignette/input/yeast_YAL_CDS_w_250utrs.gff3``, then it is
       updated to ``yeast_YAL_CDS_w_250utrs.gff3``.
 
@@ -546,26 +548,26 @@ def absolute_config(config, organisms_dir, samples_dir, data_dir):
     The following replacements are done:
 
     * ``<data_dir>`` replaces paths in:
-      - :py:const.`riboviz.params.ASITE_DISP_LENGTH_FILE`
-      - :py:const.`riboviz.params.CODON_POSITIONS_FILE`
-      - :py:const.`riboviz.params.FEATURES_FILE`
-      - :py:const.`riboviz.params.T_RNA_FILE`
+      - :py:const:`riboviz.params.ASITE_DISP_LENGTH_FILE`
+      - :py:const:`riboviz.params.CODON_POSITIONS_FILE`
+      - :py:const:`riboviz.params.FEATURES_FILE`
+      - :py:const:`riboviz.params.T_RNA_FILE`
     * ``<organisms_dir>`` replaces paths in:
-      - :py:const.`riboviz.params.ORF_FASTA_FILE`
-      - :py:const.`riboviz.params.ORF_GFF_FILE`
-      - :py:const.`riboviz.params.RRNA_FASTA_FILE`
+      - :py:const:`riboviz.params.ORF_FASTA_FILE`
+      - :py:const:`riboviz.params.ORF_GFF_FILE`
+      - :py:const:`riboviz.params.RRNA_FASTA_FILE`
     * ``<samples_dir>`` replaces paths in:
-      - :py:const.`riboviz.params.INDEX_DIR`
-      - :py:const.`riboviz.params.INPUT_DIR`
-      - :py:const.`riboviz.params.OUTPUT_DIR`
-      - :py:const.`riboviz.params.TMP_DIR`
+      - :py:const:`riboviz.params.INDEX_DIR`
+      - :py:const:`riboviz.params.INPUT_DIR`
+      - :py:const:`riboviz.params.OUTPUT_DIR`
+      - :py:const:`riboviz.params.TMP_DIR`
 
     For example:
 
     * If :py:const:`riboviz.params.INPUT_DIR` has value
       ``data/simdata``, then it is updated to
       ``<samples>/simdata``.
-    * If :py:const.`riboviz.params.ORF_GFF_FILE` has value
+    * If :py:const:`riboviz.params.ORF_GFF_FILE` has value
       ``vignette/input/yeast_YAL_CDS_w_250utrs.gff3``, then it is
       updated to ``<organisms>/yeast_YAL_CDS_w_250utrs.gff3``.
 
@@ -659,19 +661,23 @@ CONFIG_TEST_CASE_IDS = [
 @pytest.mark.parametrize(CONFIG_TEST_CASE_ITEMS,
                          CONFIG_TEST_CASES,
                          ids=CONFIG_TEST_CASE_IDS)
-@pytest.mark.parametrize("config_file",
-                         [test.VIGNETTE_CONFIG,
-                          test.SIMDATA_UMI_CONFIG,
-                          test.SIMDATA_MULTIPLEX_CONFIG])
-def test_validate_config(tmpdir, config_file, test_dir_lookup,
-                         get_envs, update_config, get_run_dir):
+@pytest.mark.parametrize("config_file, validate_only",
+                         [(test.VIGNETTE_CONFIG, True),
+                          (test.SIMDATA_UMI_CONFIG, False),
+                          (test.SIMDATA_MULTIPLEX_CONFIG, True)])
+def test_run(tmpdir, config_file, validate_only, test_dir_lookup,
+             get_envs, update_config, get_run_dir):
     """
-    Run workflow to validate configuration.
+    Validate and then, optionally, run workflow. If the workflow is
+    run then check output directories and
+    :py:const:`riboviz.workflow_r.TPMS_COLLATED_TSV` exist.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir py._path.local.LocalPath
     :param config_file: Configuration file
     :type config_file: str or unicode
+    :param validate_only: Validate only?
+    :type validate_only: bool
     :param test_dir_lookup: Dictionary from configuration files to \
     functions that create directory structures compatible with \
     configuration files.
@@ -696,7 +702,27 @@ def test_validate_config(tmpdir, config_file, test_dir_lookup,
         yaml.dump(config, f)
     cwd = get_run_dir(tmpdir)
     exit_code = nextflow.run_nextflow(test_config_file,
-                                      validate_only=True,
+                                      validate_only=validate_only,
                                       envs=envs,
                                       cwd=cwd)
     assert exit_code == 0, "Unexpected exit code %d" % exit_code
+    if validate_only:
+        return
+    # Update environment variable tokens in configuration with
+    # environment variable values. If no environment variable tokens
+    # are in the configuration values then this is a no-op.
+    environment.update_config_with_env(envs, config)
+    # Get parameters that relate to output files and directories, as
+    # specified in the configuration, converting any relative paths
+    # into absolute paths, using "cwd" as the path. If a path is
+    # already absolute then this is a no-op.
+    outputs = {}
+    for param in params.ENV_OUTPUT_PARAMS:
+        output = config[param]
+        if not os.path.isabs(output) and cwd:
+            output = os.path.join(str(cwd), output)
+        outputs[param] = output
+        assert os.path.exists(output), "{} does not exist".format(output)
+    tpms_tsv = os.path.join(outputs[params.OUTPUT_DIR],
+                            workflow_r.TPMS_COLLATED_TSV)
+    assert os.path.exists(tpms_tsv), "{} does not exist".format(tpms_tsv)
