@@ -534,20 +534,7 @@ def relative_config(config, organisms_dir, samples_dir, data_dir):
     :param data_dir: Data directory
     :type data_dir: str or unicode
     """
-    parameters = [
-        params.ASITE_DISP_LENGTH_FILE,
-        params.CODON_POSITIONS_FILE,
-        params.FEATURES_FILE,
-        params.T_RNA_FILE,
-        params.ORF_FASTA_FILE,
-        params.ORF_GFF_FILE,
-        params.RRNA_FASTA_FILE,
-        params.INDEX_DIR,
-        params.INPUT_DIR,
-        params.OUTPUT_DIR,
-        params.TMP_DIR
-    ]
-    for param in parameters:
+    for param in params.ENV_PARAMS:
         config[param] = test.customise_path("", config[param])
 
 
