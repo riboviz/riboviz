@@ -225,18 +225,26 @@ ENV_DIRS = [
 Environment variables which can be used to define directories
 (Nextflow workflow only).
 """
-
-ENV_PARAMS = [ASITE_DISP_LENGTH_FILE,
-              CODON_POSITIONS_FILE,
-              FEATURES_FILE,
-              INDEX_DIR,
-              INPUT_DIR,
-              OUTPUT_DIR,
-              ORF_FASTA_FILE,
-              ORF_GFF_FILE,
-              RRNA_FASTA_FILE,
-              T_RNA_FILE,
-              TMP_DIR]
+ENV_INPUT_PARAMS = [ASITE_DISP_LENGTH_FILE,
+                    CODON_POSITIONS_FILE,
+                    FEATURES_FILE,
+                    INPUT_DIR,
+                    ORF_FASTA_FILE,
+                    ORF_GFF_FILE,
+                    RRNA_FASTA_FILE,
+                    T_RNA_FILE]
+"""
+Names of input parameters whose values can include RiboViz environment
+variables (Nextflow workflow only).
+"""
+ENV_OUTPUT_PARAMS = [INDEX_DIR,
+                     OUTPUT_DIR,
+                     TMP_DIR]
+"""
+Names of output parameters whose values can include RiboViz environment
+variables (Nextflow workflow only).
+"""
+ENV_PARAMS = ENV_INPUT_PARAMS + ENV_OUTPUT_PARAMS
 """
 Names of parameters whose values can include RiboViz environment
 variables (Nextflow workflow only).
