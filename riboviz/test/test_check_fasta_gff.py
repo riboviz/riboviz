@@ -126,7 +126,7 @@ def test_get_fasta_sequence_ids(tmpdir):
     are returned.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     fasta_file = tmpdir.join("fasta.fasta")
     fasta_seq_ids = ["SeqID_{}".format(i) for i in range(0, 5)]
@@ -156,7 +156,7 @@ def test_get_fasta_sequence_ids_empty_fasta_file(tmpdir):
     returned.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     fasta_file = tmpdir.join("fasta.fasta")
     open(fasta_file, 'a').close()
@@ -191,7 +191,7 @@ def test_get_issues_empty_fasta_file(tmpdir):
     (:py:const:`TEST_GFF_CHECK_FILE`) raises an exception.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     # Cast to str to avoid "'LocalPath' object is not subscriptable"
     # error from gff library.
@@ -208,7 +208,7 @@ def test_get_issues_empty_gff_file(tmpdir):
     an empty GFF file raises an exception.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     # Cast to str to avoid "'LocalPath' object is not subscriptable"
     # error from gff library.
@@ -331,7 +331,7 @@ def check_fasta_gff_issues_csv(issues, csv_file):
     :type issues: list(tuple(str or unicode, str or unicode, \
     str or unicode))
     :param csv_file: CSV file
-    :type: str or unicode
+    :type csv_file: str or unicode
     """
     df = pd.read_csv(csv_file, delimiter="\t", comment="#")
     df = df.fillna("")  # Force None to "" not "nan"
@@ -374,7 +374,7 @@ def test_write_issues_to_csv(tmpdir):
     produces a CSV file with the expected columns, rows and values.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     issues_file = tmpdir.join("issues.tsv")
     check_fasta_gff.write_issues_to_csv(
@@ -388,7 +388,7 @@ def test_write_issues_to_csv_empty(tmpdir):
     with no values produces a header-only CSV file.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     issues_file = tmpdir.join("issues.tsv")
     check_fasta_gff.write_issues_to_csv([], issues_file)
@@ -440,7 +440,7 @@ def test_check_fasta_gff_no_such_fasta_file(tmpdir):
     (:py:const:`TEST_GFF_CHECK_FILE`) raises an exception.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     issues_file = tmpdir.join("issues.tsv")
     with pytest.raises(FileNotFoundError):
@@ -456,7 +456,7 @@ def test_check_fasta_gff_no_such_gff_file(tmpdir):
     a non-existent GFF file raises an exception.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     issues_file = tmpdir.join("issues.tsv")
     with pytest.raises(FileNotFoundError):
@@ -472,7 +472,7 @@ def test_check_fasta_gff_empty_fasta_file(tmpdir):
     (:py:const:`TEST_GFF_CHECK_FILE`) raises an exception.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     # Cast to str to avoid "'LocalPath' object is not subscriptable"
     # error from gff library.
@@ -492,7 +492,7 @@ def test_check_fasta_gff_empty_gff_file(tmpdir):
     an empty GFF file raises an exception.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     # Cast to str to avoid "'LocalPath' object is not subscriptable"
     # error from gff library.
@@ -513,7 +513,7 @@ def test_check_fasta_gff(tmpdir):
     output.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     issues_file = tmpdir.join("issues.tsv")
     check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,
@@ -530,9 +530,9 @@ def test_check_fasta_gff_stdout(tmpdir, capsys):
     output.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     :param capsys: Capture standard output (pytest built-in fixture)
-    :type capsys:_pytest.capture.CaptureFixture
+    :type capsys: _pytest.capture.CaptureFixture
     """
     issues_file = tmpdir.join("issues.tsv")
     check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,
@@ -601,7 +601,7 @@ def test_check_fasta_gff_use_feature_name_true(tmpdir):
     and validate the TSV file output.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     issues_file = tmpdir.join("issues.tsv")
     check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,
@@ -627,7 +627,7 @@ def test_check_fasta_gff_feature_format(tmpdir):
     ``cds_feature_format`` and validate the TSV file output.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     issues_file = tmpdir.join("issues.tsv")
     cds_feature_format = "{}-Custom"
@@ -654,7 +654,7 @@ def test_check_fasta_gff_start_codons(tmpdir):
     ``start_codons`` and validate the TSV file output.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     issues_file = tmpdir.join("issues.tsv")
     check_fasta_gff.check_fasta_gff(TEST_FASTA_CHECK_FILE,

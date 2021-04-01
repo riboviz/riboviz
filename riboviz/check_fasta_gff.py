@@ -374,14 +374,14 @@ def run_fasta_gff_check(fasta,
     The following is also returned:
 
     * Configuration information - a dictionary with:
-      - :py:const:`FASTA_FILE`: ``fasta`` value.
-      - :py:const:`GFF_FILE`: ``gff`` value.
-      - :py:const:`START_CODONS`: ``start_codons`` value.
+        - :py:const:`FASTA_FILE`: ``fasta`` value.
+        - :py:const:`GFF_FILE`: ``gff`` value.
+        - :py:const:`START_CODONS`: ``start_codons`` value.
     * Metadata:
-      - :py:const:`NUM_SEQUENCES`: number of sequences in ``fasta``.
-      - :py:const:`NUM_FEATURES`: number of features in ``gff``.
-      - :py:const:`NUM_CDS_FEATURE`: number of ``CDS`` features in
-        ``gff``.
+        - :py:const:`NUM_SEQUENCES`: number of sequences in ``fasta``.
+        - :py:const:`NUM_FEATURES`: number of features in ``gff``.
+        - :py:const:`NUM_CDS_FEATURE`: number of ``CDS`` features in 
+          ``gff``.
 
     :param fasta: FASTA file
     :type fasta: str or unicode
@@ -439,7 +439,7 @@ def check_fasta_gff(fasta,
     and both print and save a list of issues for each sequence and
     coding sequence, ``CDS``, feature.
 
-    See :py:func:`get_fasta_gff_cds_data``
+    See :py:func:`run_fasta_gff_check`.
 
     A tab-separated values file of the issues identified is saved.
 
