@@ -60,76 +60,81 @@ $ python -m riboviz.tools.check_fasta_gff \
     -f vignette/input/yeast_YAL_CDS_w_250utrs.fa \
     -g vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
     -o check_vignette_YAL.tsv
-Created by: RiboViz
-Date: 2021-01-20 03:12:29.703631
-Command-line tool: /home/ubuntu/riboviz/riboviz/tools/check_fasta_gff.py
-File: /home/ubuntu/riboviz/riboviz/tools/check_fasta_gff.py
-Version: commit 79782c99efc427c734cd906e463143d624b9306f date 2021-01-20 02:52:57-08:00
-
+...
 Configuration:
 fasta_file	vignette/input/yeast_YAL_CDS_w_250utrs.fa
 gff_file	vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 start_codons	['ATG']
+NumSequences:	68
+NumFeatures:	204
+NumCDSFeatures:	68
 
 Issue summary:
 Issue	Count
+NoStopCodon	1
 InternalStopCodon	1
 NoStartCodon	1
-NoStopCodon	1
 DuplicateFeatureId	0
-MultipleCDS	0
-NoIdName	0
-IncompleteFeature	0
-SequenceNotInGFF	0
 SequenceNotInFASTA	0
+MultipleCDS	0
 DuplicateFeatureIds	0
-```
-```console
-$ cat check_vignette_YAL.tsv 
-# Created by: RiboViz
-# Date: 2021-01-20 03:12:29.833527
-# Command-line tool: /home/ubuntu/riboviz/riboviz/tools/check_fasta_gff.py
-# File: /home/ubuntu/riboviz/riboviz/check_fasta_gff.py
-# Version: commit 79782c99efc427c734cd906e463143d624b9306f date 2021-01-20 02:52:57-08:00
+IncompleteFeature	0
+NoIdName	0
+SequenceNotInGFF	0
+
+$ cat check_vignette_YAL.tsv
+...
 # fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa
 # gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 # start_codons: ['ATG']
+# NumSequences: 68
+# NumFeatures: 204
+# NumCDSFeatures: 68
+# NoStopCodon: 1
 # InternalStopCodon: 1
 # NoStartCodon: 1
-# NoStopCodon: 1
 # DuplicateFeatureId: 0
-# MultipleCDS: 0
-# NoIdName: 0
-# IncompleteFeature: 0
-# SequenceNotInGFF: 0
 # SequenceNotInFASTA: 0
+# MultipleCDS: 0
 # DuplicateFeatureIds: 0
+# IncompleteFeature: 0
+# NoIdName: 0
+# SequenceNotInGFF: 0
 Sequence	Feature	Issue	Data
 YAL001C	YAL001C	NoStartCodon	AAA
 YAL001C	YAL001C	NoStopCodon	TTT
-YAL001C	YAL001C	InternalStopCodon
+YAL001C	YAL001C	InternalStopCodon	
 ```
 
 Example with `-v` verbose mode:
 
 ```console
+
 $ python -m riboviz.tools.check_fasta_gff \
     -f vignette/input/yeast_YAL_CDS_w_250utrs.fa \
     -g vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
     -o check_vignette_YAL.tsv -v
 ...
+Configuration:
+fasta_file	vignette/input/yeast_YAL_CDS_w_250utrs.fa
+gff_file	vignette/input/yeast_YAL_CDS_w_250utrs.gff3
+start_codons	['ATG']
+NumSequences:	68
+NumFeatures:	204
+NumCDSFeatures:	68
+
 Issue summary:
 Issue	Count
-NoStartCodon	1
-NoStopCodon	1
 InternalStopCodon	1
+NoStopCodon	1
+NoStartCodon	1
+DuplicateFeatureId	0
 SequenceNotInGFF	0
-DuplicateFeatureIds	0
-NoIdName	0
-SequenceNotInFASTA	0
 IncompleteFeature	0
 MultipleCDS	0
-DuplicateFeatureId	0
+SequenceNotInFASTA	0
+DuplicateFeatureIds	0
+NoIdName	0
 
 Issue details:
 Sequence YAL001C feature YAL001C doesn't start with a recognised start codon but with AAA
@@ -141,26 +146,29 @@ Example with `--start-codon`:
 
 ```console
 $ python -m riboviz.tools.check_fasta_gff \
-    -f vignette/input/yeast_YAL_CDS_w_250utrs.fa \
-    -g vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
-    -o check_vignette_YAL.tsv \
-    --start-codon ATG AAA -v
+     -f vignette/input/yeast_YAL_CDS_w_250utrs.fa \
+     -g vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
+     -o check_vignette_YAL.tsv \
+     --start-codon ATG AAA -v
 ...
 Configuration:
 fasta_file	vignette/input/yeast_YAL_CDS_w_250utrs.fa
 gff_file	vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 start_codons	['ATG', 'AAA']
+NumSequences:	68
+NumFeatures:	204
+NumCDSFeatures:	68
 
 Issue summary:
 Issue	Count
-InternalStopCodon	1
 NoStopCodon	1
-SequenceNotInFASTA	0
-DuplicateFeatureIds	0
+InternalStopCodon	1
 DuplicateFeatureId	0
-IncompleteFeature	0
 NoStartCodon	0
+SequenceNotInFASTA	0
+IncompleteFeature	0
 MultipleCDS	0
+DuplicateFeatureIds	0
 NoIdName	0
 SequenceNotInGFF	0
 
@@ -172,28 +180,32 @@ Sequence YAL001C feature YAL001C has an internal stop codon
 An example with more issues:
 
 ```console
+
 $ python -m riboviz.tools.check_fasta_gff \
-    -f data/yeast_CDS_w_250utrs.fa \
-    -g data/yeast_CDS_w_250utrs.gff3 \
-    -o check_data_CDS.tsv -v
+     -f data/yeast_CDS_w_250utrs.fa \
+     -g data/yeast_CDS_w_250utrs.gff3 \
+     -o check_data_CDS.tsv -v
 ...
 Configuration:
 fasta_file	data/yeast_CDS_w_250utrs.fa
 gff_file	data/yeast_CDS_w_250utrs.gff3
 start_codons	['ATG']
+NumSequences:	5812
+NumFeatures:	17436
+NumCDSFeatures:	5812
 
 Issue summary:
 Issue	Count
 InternalStopCodon	17
 NoStartCodon	1
-MultipleCDS	0
+NoIdName	0
 SequenceNotInGFF	0
+MultipleCDS	0
+SequenceNotInFASTA	0
+DuplicateFeatureId	0
 IncompleteFeature	0
 NoStopCodon	0
-DuplicateFeatureId	0
-NoIdName	0
 DuplicateFeatureIds	0
-SequenceNotInFASTA	0
 
 Issue details:
 Sequence Q0050 feature Q0050 has an internal stop codon
@@ -221,6 +233,9 @@ $ cat check_data_CDS.tsv
 # fasta_file: data/yeast_CDS_w_250utrs.fa
 # gff_file: data/yeast_CDS_w_250utrs.gff3
 # start_codons: ['ATG']
+# NumSequences: 5812
+# NumFeatures: 17436
+# NumCDSFeatures: 5812
 # InternalStopCodon: 17
 # NoStartCodon: 1
 # MultipleCDS: 0

@@ -79,6 +79,12 @@ GFF_FILE = "gff_file"
 """ TSV file header tag. """
 START_CODONS = "start_codons"
 """ TSV file header tag. """
+NUM_SEQUENCES = "NumSequences"
+""" TSV file header tag. """
+NUM_FEATURES = "NumFeatures"
+""" TSV file header tag. """
+NUM_CDS_FEATURES = "NumCDSFeatures"
+""" TSV file header tag. """
 
 
 def get_fasta_sequence_ids(fasta):
@@ -191,9 +197,11 @@ def get_fasta_gff_cds_issues(fasta,
     :type use_feature_name: bool
     :param start_codons: Allowable start codons.
     :type start_codons: list(str or unicode)
-    :return: List of unique sequence IDs in GFF file and list \
-    of issues for sequences and features.
-    :rtype: list(tuple(str or unicode, str or unicode, str or unicode, *))
+    :return: Number of FASTA sequences, number of GFF features, \
+    number of GFF CDS features, list of unique sequence IDs in GFF \
+    file and list of issues for sequences and features.
+    :rtype: tuple(int, int, int, list(tuple(str or unicode, \
+    str or unicode, str or unicode, *))
     :raises FileNotFoundError: If the FASTA or GFF files \
     cannot be found
     :raises pyfaidx.FastaIndexingError: If the FASTA file has badly \
@@ -289,7 +297,10 @@ def get_fasta_gff_cds_issues(fasta,
     fasta_only_seq_ids = fasta_seq_ids - gff_seq_ids
     for seq_id in fasta_only_seq_ids:
         issues.append((seq_id, NOT_APPLICABLE, SEQUENCE_NOT_IN_GFF, None))
-    return issues
+    num_sequences = len(fasta_seq_ids)
+    num_features = len(list(gffdb.all_features()))
+    num_cds_features = len(list(gffdb.features_of_type('CDS')))
+    return num_sequences, num_features, num_cds_features, issues
 
 
 def write_fasta_gff_issues_to_csv(issues, csv_file, header={}, delimiter="\t"):
@@ -396,16 +407,20 @@ def check_fasta_gff(fasta, gff, issues_file,
     :raises Exception: Exceptions specific to gffutils.create_db \
     (these are undocumented in the gffutils documentation)
     """
-    issues = get_fasta_gff_cds_issues(fasta,
-                                      gff,
-                                      feature_format=feature_format,
-                                      use_feature_name=use_feature_name,
-                                      start_codons=start_codons)
+    num_sequences, num_features, num_cds_features, issues = \
+        get_fasta_gff_cds_issues(fasta,
+                                 gff,
+                                 feature_format=feature_format,
+                                 use_feature_name=use_feature_name,
+                                 start_codons=start_codons)
     issue_counts = count_issues(issues)
     config = {}
     config[FASTA_FILE] = fasta
     config[GFF_FILE] = gff
     config[START_CODONS] = start_codons
+    config[NUM_SEQUENCES] = num_sequences
+    config[NUM_FEATURES] = num_features
+    config[NUM_CDS_FEATURES] = num_cds_features
     header = dict(config)
     header.update(issue_counts)
     write_fasta_gff_issues_to_csv(issues, issues_file, header, delimiter)

@@ -20,6 +20,12 @@ TEST_FASTA_CHECK_FILE = os.path.join(os.path.dirname(data.__file__),
 TEST_GFF_CHECK_FILE = os.path.join(os.path.dirname(data.__file__),
                                    "test_check_fasta_gff.gff")
 """ Test GFF file in :py:mod:`riboviz.test.data`. """
+TEST_NUM_SEQUENCES = 17
+""" Number of sequences in :py:const:`TEST_FASTA_CHECK_FILE`. """
+TEST_NUM_FEATURES = 19
+""" Number of features in :py:const:`TEST_GFF_CHECK_FILE`. """
+TEST_NUM_CDS_FEATURES = 19
+""" Number of CDS features in :py:const:`TEST_GFF_CHECK_FILE`. """
 TEST_NO_ID_NAME_ATTR_PREFIX = "YAL004CNoIDNameAttr_mRNA"
 """ Prefix for name of feature in test issue. """
 TEST_NO_ID_NAME_ATTR_ISSUE = (
@@ -227,9 +233,16 @@ def test_get_fasta_gff_cds_issues():
     (:py:const:`TEST_GFF_CHECK_FILE`) and check all issues match
     expected issues in :py:const:`TEST_CHECK_ISSUES`).
     """
-    issues = check_fasta_gff.get_fasta_gff_cds_issues(
-        TEST_FASTA_CHECK_FILE,
-        TEST_GFF_CHECK_FILE)
+    num_sequences, num_features, num_cds_features, issues = \
+        check_fasta_gff.get_fasta_gff_cds_issues(
+            TEST_FASTA_CHECK_FILE,
+            TEST_GFF_CHECK_FILE)
+    assert num_sequences == TEST_NUM_SEQUENCES, \
+        "Unexpected number of sequences"
+    assert num_features == TEST_NUM_FEATURES, \
+        "Unexpected number of features"
+    assert num_cds_features == TEST_NUM_CDS_FEATURES, \
+        "Unexpected number of CDS features"
     for issue in issues:
         assert issue in TEST_CHECK_ISSUES
 
@@ -240,10 +253,17 @@ def test_get_fasta_gff_cds_issues_use_feature_name_true():
     with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
     (:py:const:`TEST_GFF_CHECK_FILE`) and ``use_feature_name=True``.
     """
-    issues = check_fasta_gff.get_fasta_gff_cds_issues(
-        TEST_FASTA_CHECK_FILE,
-        TEST_GFF_CHECK_FILE,
-        use_feature_name=True)
+    num_sequences, num_features, num_cds_features, issues = \
+        check_fasta_gff.get_fasta_gff_cds_issues(
+            TEST_FASTA_CHECK_FILE,
+            TEST_GFF_CHECK_FILE,
+            use_feature_name=True)
+    assert num_sequences == TEST_NUM_SEQUENCES, \
+        "Unexpected number of sequences"
+    assert num_features == TEST_NUM_FEATURES, \
+        "Unexpected number of features"
+    assert num_cds_features == TEST_NUM_CDS_FEATURES, \
+        "Unexpected number of CDS features"
     # Create expected results when use_feature_name=True.
     test_check_issues = TEST_CHECK_ISSUES.copy()
     test_check_issues.remove(TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE)
@@ -264,10 +284,17 @@ def test_get_fasta_gff_cds_issues_feature_format():
     ``cds_feature_format``.
     """
     cds_feature_format = "{}-Custom"
-    issues = check_fasta_gff.get_fasta_gff_cds_issues(
-        TEST_FASTA_CHECK_FILE,
-        TEST_GFF_CHECK_FILE,
-        feature_format=cds_feature_format)
+    num_sequences, num_features, num_cds_features, issues = \
+        check_fasta_gff.get_fasta_gff_cds_issues(
+            TEST_FASTA_CHECK_FILE,
+            TEST_GFF_CHECK_FILE,
+            feature_format=cds_feature_format)
+    assert num_sequences == TEST_NUM_SEQUENCES, \
+        "Unexpected number of sequences"
+    assert num_features == TEST_NUM_FEATURES, \
+        "Unexpected number of features"
+    assert num_cds_features == TEST_NUM_CDS_FEATURES, \
+        "Unexpected number of CDS features"
     # Create expected results for custom cds_feature_format.
     test_check_issues = TEST_CHECK_ISSUES.copy()
     test_check_issues.remove(TEST_NO_ID_NAME_ATTR_ISSUE)
@@ -286,10 +313,17 @@ def test_get_fasta_gff_cds_issues_start_codons():
     with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
     (:py:const:`TEST_GFF_CHECK_FILE`) and custom ``start_codons``.
     """
-    issues = check_fasta_gff.get_fasta_gff_cds_issues(
-        TEST_FASTA_CHECK_FILE,
-        TEST_GFF_CHECK_FILE,
-        start_codons=TEST_START_CODONS)
+    num_sequences, num_features, num_cds_features, issues = \
+        check_fasta_gff.get_fasta_gff_cds_issues(
+            TEST_FASTA_CHECK_FILE,
+            TEST_GFF_CHECK_FILE,
+            start_codons=TEST_START_CODONS)
+    assert num_sequences == TEST_NUM_SEQUENCES, \
+        "Unexpected number of sequences"
+    assert num_features == TEST_NUM_FEATURES, \
+        "Unexpected number of features"
+    assert num_cds_features == TEST_NUM_CDS_FEATURES, \
+        "Unexpected number of CDS features"
     # TEST_START_CODONS includes all start codons in test data so
     # expect no NO_START_CODON issues in results.
     test_check_issues = [(s, f, i, d)
@@ -523,6 +557,10 @@ def test_check_fasta_gff_stdout(tmpdir, capsys):
         "{}\t{}".format(check_fasta_gff.FASTA_FILE, TEST_FASTA_CHECK_FILE),
         "{}\t{}".format(check_fasta_gff.GFF_FILE, TEST_GFF_CHECK_FILE),
         "{}\t{}".format(check_fasta_gff.START_CODONS, [START_CODON]),
+        "{}\t{}".format(check_fasta_gff.NUM_SEQUENCES, TEST_NUM_SEQUENCES),
+        "{}\t{}".format(check_fasta_gff.NUM_FEATURES, TEST_NUM_FEATURES),
+        "{}\t{}".format(check_fasta_gff.NUM_CDS_FEATURES,
+                        TEST_NUM_CDS_FEATURES),
         ""]
     assert lines[0:len(expected_config)] == expected_config,\
         "Unexpected Configuration header"
