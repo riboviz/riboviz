@@ -65,6 +65,8 @@ Configuration:
 fasta_file	vignette/input/yeast_YAL_CDS_w_250utrs.fa
 gff_file	vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 start_codons	['ATG']
+
+Metadata:
 NumSequences:	68
 NumFeatures:	204
 NumCDSFeatures:	68
@@ -119,6 +121,8 @@ Configuration:
 fasta_file	vignette/input/yeast_YAL_CDS_w_250utrs.fa
 gff_file	vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 start_codons	['ATG']
+
+Metadata:
 NumSequences:	68
 NumFeatures:	204
 NumCDSFeatures:	68
@@ -155,6 +159,8 @@ Configuration:
 fasta_file	vignette/input/yeast_YAL_CDS_w_250utrs.fa
 gff_file	vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 start_codons	['ATG', 'AAA']
+
+Metadata:
 NumSequences:	68
 NumFeatures:	204
 NumCDSFeatures:	68
@@ -190,6 +196,8 @@ Configuration:
 fasta_file	data/yeast_CDS_w_250utrs.fa
 gff_file	data/yeast_CDS_w_250utrs.gff3
 start_codons	['ATG']
+
+Metadata:
 NumSequences:	5812
 NumFeatures:	17436
 NumCDSFeatures:	5812

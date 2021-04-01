@@ -557,14 +557,20 @@ def test_check_fasta_gff_stdout(tmpdir, capsys):
         "{}\t{}".format(check_fasta_gff.FASTA_FILE, TEST_FASTA_CHECK_FILE),
         "{}\t{}".format(check_fasta_gff.GFF_FILE, TEST_GFF_CHECK_FILE),
         "{}\t{}".format(check_fasta_gff.START_CODONS, [START_CODON]),
+        ""]
+    assert lines[0:len(expected_config)] == expected_config,\
+        "Unexpected Configuration header"
+    lines = lines[len(expected_config):]
+    expected_metadata = [
+        "Metadata:",
         "{}\t{}".format(check_fasta_gff.NUM_SEQUENCES, TEST_NUM_SEQUENCES),
         "{}\t{}".format(check_fasta_gff.NUM_FEATURES, TEST_NUM_FEATURES),
         "{}\t{}".format(check_fasta_gff.NUM_CDS_FEATURES,
                         TEST_NUM_CDS_FEATURES),
         ""]
-    assert lines[0:len(expected_config)] == expected_config,\
-        "Unexpected Configuration header"
-    lines = lines[len(expected_config):]
+    assert lines[0:len(expected_metadata)] == expected_metadata,\
+        "Unexpected Metadata header"
+    lines = lines[len(expected_metadata):]
     expected_summary = ["Issue summary:", "{}\t{}".format("Issue", "Count")]
     assert lines[0:len(expected_summary)] == expected_summary,\
         "Unexpected Issue summary header"

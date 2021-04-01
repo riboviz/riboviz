@@ -418,14 +418,19 @@ def check_fasta_gff(fasta, gff, issues_file,
     config[FASTA_FILE] = fasta
     config[GFF_FILE] = gff
     config[START_CODONS] = start_codons
-    config[NUM_SEQUENCES] = num_sequences
-    config[NUM_FEATURES] = num_features
-    config[NUM_CDS_FEATURES] = num_cds_features
+    metadata = {}
+    metadata[NUM_SEQUENCES] = num_sequences
+    metadata[NUM_FEATURES] = num_features
+    metadata[NUM_CDS_FEATURES] = num_cds_features
     header = dict(config)
+    header.update(metadata)
     header.update(issue_counts)
     write_fasta_gff_issues_to_csv(issues, issues_file, header, delimiter)
     print("Configuration:")
     for (tag, value) in config.items():
+        print("{}\t{}".format(tag, value))
+    print("\nMetadata:")
+    for (tag, value) in metadata.items():
         print("{}\t{}".format(tag, value))
     print("\nIssue summary:")
     print("{}\t{}".format("Issue", "Count"))
