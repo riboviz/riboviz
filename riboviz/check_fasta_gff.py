@@ -108,11 +108,11 @@ def get_fasta_sequence_ids(fasta):
     return seq_ids
 
 
-def get_fasta_gff_cds_issues(fasta,
-                             gff,
-                             feature_format=CDS_FEATURE_FORMAT,
-                             use_feature_name=False,
-                             start_codons=[START_CODON]):
+def get_issues(fasta,
+               gff,
+               feature_format=CDS_FEATURE_FORMAT,
+               use_feature_name=False,
+               start_codons=[START_CODON]):
     """
     Check FASTA and GFF files for coding sequence (CDS) features and
     return a list of issues for relating to coding sequences, ``CDS``,
@@ -303,7 +303,7 @@ def get_fasta_gff_cds_issues(fasta,
     return num_sequences, num_features, num_cds_features, issues
 
 
-def write_fasta_gff_issues_to_csv(issues, csv_file, header={}, delimiter="\t"):
+def write_issues_to_csv(issues, csv_file, header={}, delimiter="\t"):
     """
     Write a dictionary of the issues for features, keyed by feature
     name into a CSV file, including a header.
@@ -358,7 +358,77 @@ def count_issues(issues):
     return counts
 
 
-def check_fasta_gff(fasta, gff, issues_file,
+def run_fasta_gff_check(fasta,
+                        gff,
+                        feature_format=CDS_FEATURE_FORMAT,
+                        use_feature_name=False,
+                        start_codons=[START_CODON]):
+    """
+    Check FASTA and GFF files for coding sequence (CDS) features
+    and get a list of issues for each sequence and coding sequence,
+    ``CDS``, feature.
+
+    See :py:func:`get_issues` for information on sequences, features,
+    issue types and related data.
+
+    The following is also returned:
+
+    * Configuration information - a dictionary with:
+      - :py:const:`FASTA_FILE`: ``fasta`` value.
+      - :py:const:`GFF_FILE`: ``gff`` value.
+      - :py:const:`START_CODONS`: ``start_codons`` value.
+    * Metadata:
+      - :py:const:`NUM_SEQUENCES`: number of sequences in ``fasta``.
+      - :py:const:`NUM_FEATURES`: number of features in ``gff``.
+      - :py:const:`NUM_CDS_FEATURE`: number of ``CDS`` features in
+        ``gff``.
+
+    :param fasta: FASTA file
+    :type fasta: str or unicode
+    :param gff: GFF file
+    :type gff: str or unicode
+    :param fasta: FASTA file
+    :param issues_file: Feature issues file
+    :type issues_file: str or unicode
+    :param feature_format: Feature name format for features which \
+    do not define ``ID``  or ``Name`` attributes. This format is \
+    applied to the sequence ID to create a feature name.
+    :type feature_format: str or unicode
+    :param use_feature_name: If a feature defines both ``ID`` and \
+    ``Name`` attributes then use ``Name`` in reporting, otherwise use \
+    ``ID``.
+    :type use_feature_name: bool
+    :param start_codons: Allowable start codons.
+    :type start_codons: list(str or unicode)
+    :return: Configuration, metadata, issues
+    :raises FileNotFoundError: If the FASTA or GFF files \
+    cannot be found
+    :raises pyfaidx.FastaIndexingError: If the FASTA file has badly \
+    formatted sequences
+    :raises ValueError: If GFF file is empty
+    :raises Exception: Exceptions specific to gffutils.create_db \
+    (these are undocumented in the gffutils documentation)
+    """
+    num_sequences, num_features, num_cds_features, issues = \
+        get_issues(fasta,
+                   gff,
+                   feature_format=feature_format,
+                   use_feature_name=use_feature_name,
+                   start_codons=start_codons)
+    config = {}
+    config[FASTA_FILE] = fasta
+    config[GFF_FILE] = gff
+    config[START_CODONS] = start_codons
+    metadata = {}
+    metadata[NUM_SEQUENCES] = num_sequences
+    metadata[NUM_FEATURES] = num_features
+    metadata[NUM_CDS_FEATURES] = num_cds_features
+    return config, metadata, issues
+
+
+def check_fasta_gff(fasta,
+                    gff,
+                    issues_file,
                     feature_format=CDS_FEATURE_FORMAT,
                     use_feature_name=False,
                     start_codons=[START_CODON],
@@ -369,12 +439,14 @@ def check_fasta_gff(fasta, gff, issues_file,
     and both print and save a list of issues for each sequence and
     coding sequence, ``CDS``, feature.
 
+    See :py:func:`get_fasta_gff_cds_data``
+
     A tab-separated values file of the issues identified is saved.
 
-    See :py:func:`get_fasta_gff_cds_issues` for information on
+    See :py:func:`get_issues` for information on
     sequences, features, issue types and related data.
 
-    See :py:func:`write_fasta_gff_issues_to_csv` for tab-separated values
+    See :py:func:`write_issues_to_csv` for tab-separated values
     file columns.
 
     :param fasta: FASTA file
@@ -407,25 +479,13 @@ def check_fasta_gff(fasta, gff, issues_file,
     :raises Exception: Exceptions specific to gffutils.create_db \
     (these are undocumented in the gffutils documentation)
     """
-    num_sequences, num_features, num_cds_features, issues = \
-        get_fasta_gff_cds_issues(fasta,
-                                 gff,
-                                 feature_format=feature_format,
-                                 use_feature_name=use_feature_name,
-                                 start_codons=start_codons)
+    config, metadata, issues = run_fasta_gff_check(
+        fasta, gff, feature_format, use_feature_name, start_codons)
     issue_counts = count_issues(issues)
-    config = {}
-    config[FASTA_FILE] = fasta
-    config[GFF_FILE] = gff
-    config[START_CODONS] = start_codons
-    metadata = {}
-    metadata[NUM_SEQUENCES] = num_sequences
-    metadata[NUM_FEATURES] = num_features
-    metadata[NUM_CDS_FEATURES] = num_cds_features
     header = dict(config)
     header.update(metadata)
     header.update(issue_counts)
-    write_fasta_gff_issues_to_csv(issues, issues_file, header, delimiter)
+    write_issues_to_csv(issues, issues_file, header, delimiter)
     print("Configuration:")
     for (tag, value) in config.items():
         print("{}\t{}".format(tag, value))
