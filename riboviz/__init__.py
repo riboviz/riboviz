@@ -9,5 +9,3 @@ PY_SCRIPTS = os.path.join(BASE_PATH, "riboviz/tools")
 """ Path to ``riboviz/tools/`` directory. """
 R_SCRIPTS = os.path.join(BASE_PATH, "rscripts")
 """ Path to ``rscripts/`` directory. """
-DATA_DIR = os.path.join(BASE_PATH, "data")
-""" Path to ``data/`` directory. """
