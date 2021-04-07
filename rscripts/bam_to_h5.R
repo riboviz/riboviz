@@ -17,14 +17,14 @@ if (interactive()) {
   # directory. This assumes that interactive R is being run within
   # the parent of rscripts/ but imposes no other constraints on
   # where rscripts/ or its parents are located.
-  this_script <- "bam_to_h5.R"
-  path_to_this_script <- here("rscripts", this_script)
+  self <- "bam_to_h5.R"
+  path_to_self <- here("rscripts", self)
   source(here::here("rscripts", "provenance.R"))
 } else {
   # Deduce file name and path using reflection as before.
-  this_script <- getopt::get_Rscript_filename()
-  path_to_this_script <- this_script
-  source(file.path(dirname(this_script), "provenance.R"))
+  self <- getopt::get_Rscript_filename()
+  path_to_self <- self
+  source(file.path(dirname(self), "provenance.R"))
 }
 
 #' Compute matrix of read counts with start position and read length
