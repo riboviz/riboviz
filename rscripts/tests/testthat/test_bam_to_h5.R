@@ -49,10 +49,10 @@ bam_to_h5 <- here::here("rscripts/bam_to_h5.R")
 context("test_bam_to_h5.R")
 
 
-#' DeleteFile(): Delete a file.
+#' Delete a file.
 #'
 #' Delete a file if it exists.
-#' @param file_name File name.
+#' @param file_name File name (character).
 #' @export
 DeleteFile <- function(file_name) {
   print(paste0("Deleting ", file_name))
@@ -62,23 +62,23 @@ DeleteFile <- function(file_name) {
 }
 
 
-#' ValidateH5Sequence(): Validate H5 data for a specific sequence.
+#' Validate H5 data for a specific sequence.
 #'
-#' @param sequence: Sequence name (character, character)
+#' @param sequence: Sequence name (character).
 #' @param h5_file: H5 file with data on sequence to be validated
-#'   (character, character)
-#' @param gff: GFF data (tbl_df tbl data.frame, list)
+#' (character).
+#' @param gff: GFF data (tbl_df tbl data.frame).
 #' @param bam_hdr_seq_info: Data on sequences from BAM file header
-#'   (GenomeInfoDb::Seqinfo, S4)
+#' (GenomeInfoDb::Seqinfo).
 #' @param bam: Data on alignments from BAM file
-#'   (GenomicAlignments::GAlignments, S4)
-#' @param dataset: Dataset name (character, character)
+#' (GenomicAlignments::GAlignments).
+#' @param dataset: Dataset name (character).
 #' @param buffer: Buffer size (used if `is_riboviz_gff` is TRUE)
-#    (numeric, double)
-#' @param min_read_length: Minimum read length (numeric, double)
-#' @param max_read_length: Maximum read length (numeric, double)
+#  (double).
+#' @param min_read_length: Minimum read length (double).
+#' @param max_read_length: Maximum read length (double).
 #' @param is_riboviz_gff: Is the GFF file with UTR5, CDS, and UTR3
-#'   elements per gene?" (logical, logical)
+#' elements per gene" (logical).
 #' @export
 ValidateH5Sequence <- function(sequence, h5_file, gff,
   bam_hdr_seq_info, bam, dataset, buffer, min_read_length,
@@ -274,19 +274,19 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
 }
 
 
-#' ValidateH5(): Validate H5 data.
+#' Validate H5 data within a RiboViz H5 data file.
 #'
 #' @param h5_file: H5 file with data on sequence to be validated
-#'   (character, character)
-#' @param gff_file: GFF file (character, character)
-#' @param bam_file: BAM file (character, character)
-#' @param dataset: Dataset name (character, character)
+#' (character).
+#' @param gff_file: GFF file (character).
+#' @param bam_file: BAM file (character).
+#' @param dataset: Dataset name (character).
 #' @param buffer: Buffer size (used if `is_riboviz_gff` is TRUE)
-#    (numeric, double)
-#' @param min_read_length: Minimum read length (numeric, double)
-#' @param max_read_length: Maximum read length (numeric, double)
+#  (numeric).
+#' @param min_read_length: Minimum read length (double).
+#' @param max_read_length: Maximum read length (double).
 #' @param is_riboviz_gff: Is the GFF file with UTR5, CDS, and UTR3
-#'   elements per gene?" (logical, logical)
+#' elements per gene? (logical).
 #' @export
 ValidateH5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
   min_read_length, max_read_length, is_riboviz_gff) {
