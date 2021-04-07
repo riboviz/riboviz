@@ -164,21 +164,6 @@ attach(opt)
 print("bam_to_h5.R running with parameters:")
 opt
 
-debugVignette <- FALSE
-if (debugVignette) {
-    # to debug bam_to_h5.R in Riboviz vignette
-    # supplies non-default options needed.
-    bam_file <- 'vignette/output/SRR1042855_s1mi.bam'
-    hd_file <- 'vignette/output/SRR1042855_s1mi.h5'
-    orf_gff_file <- 'vignette/input/yeast_YAL_CDS_w_250utrs.gff3'
-    num_processes <- 4
-    is_test_run <- TRUE
-    primary_id <- "Name"
-    secondary_id <- NULL
-}
-
-
-
 # Range of read lengths 
 read_range <- min_read_length:max_read_length
 
@@ -198,11 +183,6 @@ if(!is.null(secondary_id)){
 gff_pid <- mcols(gff)[primary_id][,1]
 
 print("Mapping reads to CDS")
-
-if(is_test_run){
-  genes <- genes[1:50]
-  gff <- gff[ gff_pid %in% genes]
-}
 
 # Map the reads to individual nucleotide position for each gene
 outputList <- 
