@@ -22,7 +22,7 @@ if (interactive()) {
   source(file.path(dirname(this_script), "provenance.R"))
 }
 
-reads_to_list <- function(gene_location, bam_file, read_range, left_flank, right_flank, mult_exon = TRUE) {
+ReadsToList <- function(gene_location, bam_file, read_range, left_flank, right_flank, mult_exon = TRUE) {
   # Computes matrix of read counts with starting position and read length
   # on a signle gene whose co-ordinates are supplied as arguments
   #
@@ -184,7 +184,7 @@ gff_pid <- mcols(gff)[primary_id][, 1]
 print("Mapping reads to CDS")
 
 # Map the reads to individual nucleotide position for each gene
-outputList <-
+output_list <-
      mclapply(genes, # parallel version
                        function(gene) {
                            # select gene location
@@ -195,24 +195,24 @@ outputList <-
                            seqlevels(gene_location) <- geneseqname
                            # if GFF contains UTR5, CDS, and UTR3 elements
                            if (is_riboviz_gff) {
-                             Buffer_l <- width(gene_location[gene_location$type == "UTR5"])
-                             Buffer_r <- width(gene_location[gene_location$type == "UTR3"])
+                             buffer_l <- width(gene_location[gene_location$type == "UTR5"])
+                             buffer_r <- width(gene_location[gene_location$type == "UTR3"])
                              gene_location <- gene_location[gene_location$type == "CDS"]
                            } else {
-                             Buffer_l <- buffer
-                             Buffer_r <- buffer
+                             buffer_l <- buffer
+                             buffer_r <- buffer
                            }
                            # get reads to list
-                         reads_to_list(gene_location = gene_location,
+                           ReadsToList(gene_location = gene_location,
                                        bam_file = bam_file,
                                        read_range = read_range,
-                                       left_flank = Buffer_l,
-                                       right_flank = Buffer_r,
+                                       left_flank = buffer_l,
+                                       right_flank = buffer_r,
                                        mult_exon = TRUE)
                          },
                         mc.cores = num_processes)
 
-names(outputList) <- genes
+names(output_list) <- genes
 
 # HDF5 section
 print("Saving mapped reads in a H5 file")
@@ -238,7 +238,7 @@ if (!is.null(secondary_id)) {
 
 for (gene in genes) {
   # Get the output matrix of read counts by position and length for a gene
-  output <- outputList[[gene]]
+  output <- output_list[[gene]]
 
   # Location of start and stop codon nucleotides in output matrix
   gene_location <- gff[gff_pid == gene]
