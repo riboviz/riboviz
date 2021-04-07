@@ -32,7 +32,7 @@ if (interactive()) {
 #'
 #' @param gene_location Gene coordinates from GFF (GRanges).
 #' @param bam_file BAM file (character).
-#' @param read_range List of read lengths (integer).
+#' @param read_lengths List of read lengths (integer).
 #' @param left_flank Length of left-hand flanking region (integer).
 #' @param right_flank Length of right-hand flanking region (integer).
 #' @param mult_exon If `TRUE` use only the first supplied exon for
@@ -41,7 +41,7 @@ if (interactive()) {
 #' and read length (columns) (double).
 #'
 #' @export
-ReadsToCountMatrix <- function(gene_location, bam_file, read_range,
+ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
   left_flank, right_flank, mult_exon = TRUE) {
 
   if (!mult_exon) {
@@ -50,17 +50,11 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_range,
     gene_location <- gene_location[1]
   }
 
-  # Number of read length categories.
-  read_range_len <- length(read_range)
-
-  # Specify output matrix to store read data.
+  num_read_lengths <- length(read_lengths)
   gene_length <- sum(sum(coverage(gene_location)))
-  output <- matrix(0,
-                   nrow = read_range_len,
-                   ncol = (gene_length + left_flank + right_flank))
 
-  # If CDS is on negative strand.
   if (as.character(strand(gene_location)[1]) == "-") {
+    # CDS is on negative strand.
     tmp <- left_flank
     left_flank <- right_flank
     right_flank <- tmp
@@ -68,11 +62,11 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_range,
 
   # Expand genomic locations to include flanking region positions.
   if (length(gene_location) == 1) {
-    # For single exon genes.
+    # Single exon gene.
     start(gene_location) <- start(gene_location) - left_flank
     end(gene_location) <- end(gene_location) + right_flank
   } else {
-    # For multiple exon genes.
+    # Multiple exon gene.
     start(gene_location)[start(gene_location) == min(start(gene_location))] <-
       start(gene_location)[start(gene_location) == min(start(gene_location))]
       - left_flank
@@ -81,12 +75,9 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_range,
       + right_flank
   }
 
-  # Specify variables to read in and create a parameter file for bam
-  # data.
+  # Read gene's strand, pos, qwidth data from BAM file.
   bam_what <- c("strand", "pos", "qwidth")
   bam_param <- ScanBamParam(which = gene_location, what = bam_what)
-
-  # Read in bam data.
   bam_data <- scanBam(bam_file, param = bam_param)
 
   # Subset reads that are on the same strand at the genomic location.
@@ -107,41 +98,40 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_range,
     nucleotide_pos <- c(min(start(gene_location)):0, nucleotide_pos)
   }
 
-  # Count reads whose 5' ends map to each nucleotide and save them in
-  # output matrix.
+  # Count reads whose 5' ends map to each nucleotide.
+  read_counts <- matrix(0,
+                        nrow = num_read_lengths,
+                        ncol = (gene_length + left_flank + right_flank))
   if (all(strand(gene_location) == "+")) {
-    # For genes on positive strands.
-    j <- 1 # Counter for output row.
-    for (i in read_range) {
-      # Subset reads of a particular length.
+    # Genes on positive strands.
+    row <- 1
+    for (i in read_lengths) {
+      # Subset reads of length i.
       read_loc_len_i <- read_location[read_width == i]
-      # Count reads of a particular length.
+      print(i)
+      # Count reads of length i.
       count_reads_len_i <- table(factor(read_loc_len_i,
                                         levels = nucleotide_pos))
-      output[j, ] <- c(count_reads_len_i)
-      j <- j + 1
+      read_counts[row, ] <- c(count_reads_len_i)
+      row <- row + 1
     }
   }
-
   if (all(strand(gene_location) == "-")) {
-    # For genes on negative strands.
-    j <- 1 # Counter for output row.
-    for (i in read_range) {
-      # Subset reads of a particular length.
+    # Genes on negative strands.
+    row <- 1
+    for (i in read_lengths) {
+      # Subset reads of length i.
       read_loc_len_i <- read_width[read_width == i]
           + read_location[read_width == i] - 1
-      # Count reads of a particular length.
+      # Count reads of length i.
       count_reads_len_i <- table(factor(read_loc_len_i,
                                         levels = nucleotide_pos))
-      output[j, ] <- c(rev(count_reads_len_i))
-      j <- j + 1
+      read_counts[row, ] <- c(rev(count_reads_len_i))
+      row <- row + 1
     }
   }
-
-  # Return the output matrix.
-  return(output);
+  return(read_counts);
 }
-
 
 # Define input options for optparse package.
 option_list <- list(
@@ -188,7 +178,7 @@ print("bam_to_h5.R running with parameters:")
 opt
 
 # Range of read lengths.
-read_range <- min_read_length:max_read_length
+read_lengths <- min_read_length:max_read_length
 
 # Read in the positions of all exons/genes in GFF format and subset
 # CDS locations.
@@ -229,7 +219,7 @@ output_list <- mclapply(
    # Get reads to list.
    ReadsToCountMatrix(gene_location = gene_location,
                       bam_file = bam_file,
-                      read_range = read_range,
+                      read_lengths = read_lengths,
                       left_flank = buffer_l,
                       right_flank = buffer_r,
                       mult_exon = TRUE)
@@ -300,8 +290,8 @@ for (gene in genes) {
   h5createAttribute(gid, "buffer_right", c(1, 1))
   h5createAttribute(gid, "start_codon_pos", c(1, 3))
   h5createAttribute(gid, "stop_codon_pos", c(1, 3))
-  h5createAttribute(gid, "reads_by_len", c(1, length(read_range)))
-  h5createAttribute(gid, "lengths", c(1, length(read_range)))
+  h5createAttribute(gid, "reads_by_len", c(1, length(read_lengths)))
+  h5createAttribute(gid, "lengths", c(1, length(read_lengths)))
 
   # Write the attributes of the gene group.
   h5writeAttribute.integer(sum(output), gid, name = "reads_total")
@@ -311,7 +301,7 @@ for (gene in genes) {
                            name = "buffer_right")
   h5writeAttribute.integer(start_cod, gid, name = "start_codon_pos")
   h5writeAttribute.integer(stop_cod, gid, name = "stop_codon_pos")
-  h5writeAttribute.integer(read_range, gid, name = "lengths")
+  h5writeAttribute.integer(read_lengths, gid, name = "lengths")
   h5writeAttribute.integer(apply(output, 1, sum), gid, name = "reads_by_len")
 
   # Specify a dataset within the gene group to store the values and
