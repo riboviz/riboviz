@@ -1,5 +1,184 @@
 #' Convert BAM files to RiboViz HDF5 files.
 #'
+#' This script accepts the following command-line parameters:
+#'
+#' | Parameter | Description |
+#' | --------- | ----------- |
+#' | `bam-file` | BAM input file |
+#' | `orf-gff-file` | Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts (GTF/GFF3 file) |
+#' | `min-read-length` | Minimum read length in H5 output |
+#' | `max-read-length` | Maximum read length in H5 output |
+#' | `buffer` | Length of flanking region around the CDS |
+#' | `primary-id` | Primary gene IDs to access the data (YAL001C, YAL003W, etc.) |
+#' | `secondary-id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) |
+#' | `dataset` | Human-readable name of the dataset |
+#' | `stop-in-cds` | Are stop codons part of the CDS annotations in GFF? |
+#' | `is-riboviz-gff` | Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3? |
+#' | `num-processes` | Number of processes to parallelize over |
+#' | `hd-file` | H5 output file |
+#'
+#' All reads are mapped to their 5' ends.
+#'
+#' If `is_riboviz_gff == TRUE` then:
+#'
+#' * `CDS`, `UTR5` and `UTR3` entries in GFF are used.
+#' * `buffer` is ignored.
+#' * `stop_cds` is used to compute `offset` but `offset` itself is unused.
+#'
+#' If `is_riboviz_gff == FALSE` then:
+#'
+#' * `CDS` entries in GFF are used.
+#' * `UTR`5 and `UTR3` entries in GFF are ignored.
+#' * `buffer` is used as width of left and right flanks, and to
+#'   calculate atart and stop codon locations for genes.
+#' * `stop_cds` is used to compute `offset which is used to determine
+#'   stop codon locations.
+#'
+#' `primary_id` is used as GFF column e.g. "Name".
+#'
+#' `secondary_id` is used as a GFF column to get `alt_genes` which are
+#' associated with gene names. These are used to create symbolic links
+#' in the H5 file to the entries for the original genes.
+#'
+#' The HDF5 file is organized in the following hierarchy
+#' `/<gene>/<dataset>/reads/data`, where `<gene>` is each gene name in
+#' the GFF and BAM files provided as input.
+#'
+#' The `reads` group, `/<gene>/<dataset>/reads`, for a `<gene>` has
+#' several attributes associated with it. These are summary statistics
+#' and other information about the gene and dataset within the `reads`
+#' group. The list of attributes are as follows.
+#'
+#' | Attribute | Description | Origin |
+#' | --------- |------------ | ------ |
+#' | `buffer_left` | Number of nucleotides upstream of the start codon (ATG) (UTR5  length) | GFF file OR `buffer` parameter (if `is-riboviz-gff` is false) |
+#' | `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | GFF file OR `buffer` parameter  (if `is-riboviz-gff` is false) |
+#' | `start_codon_pos` | Positions corresponding to start codon of CDS (typically 251, 252, 253) | GFF file |
+#' | `stop_codon_pos` | Positions corresponding to stop codon of CDS | GFF file |
+#' | `lengths` | Lengths of mapped reads | Range from `min-read-length` parameter to `max-read-length` parameter (e.g. 10,...,50) |
+#' | `reads_by_len` | Counts of number of ribosome sequences of each length | BAM file |
+#' | `reads_total` | Total number of ribosome sequences | BAM file. Equal to numberof non-zero reads in `reads_by_len`. |
+#'
+#' The `data` table in `/<gene>/<dataset>/reads/data`, for a `<gene>`,
+#' has the positions and lengths of ribosome sequences within the
+#' organism data (determined from the BAM file). It is an integer table
+#' with each row representing a read length and columns representing
+#' nucleotide positions. The first row corresponds to reads of length
+#' `min-read-length` and the last row corresponds to reads of length
+#' `max-read-length`.
+#'
+#' A template HDF5 file, showing how the HDF5 file relates to
+#' information provided as command-line parameters, GFF and BAM files
+#' is as follows:
+#'
+#' ```
+#' HDF5 "<file>.h5" {
+#' GROUP "/" {
+#'   GROUP "<gene>" {
+#'     GROUP "<dataset>" {
+#' 	 GROUP "reads" {
+#' 	    ATTRIBUTE "buffer_left" {
+#' 	       DATATYPE  H5T_IEEE_F64LE
+#' 	       DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+#' 	       DATA {
+#' 	       (0): <CDS UTR5 length from GFF file OR buffer (if is-riboviz-gff is false)>
+#' 	       }
+#' 	    }
+#' 	    ATTRIBUTE "buffer_right" {
+#' 	       DATATYPE  H5T_STD_I32LE
+#' 	       DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+#' 	       DATA {
+#' 	       (0): <CDS UTR3 length from GFF file OR buffer (if is-riboviz-gff is false)>
+#' 	       }
+#' 	    }
+#' 	    ATTRIBUTE "lengths" {
+#'                DATATYPE  H5T_STD_I32LE
+#'                DATASPACE  SIMPLE { (<read_length>) / (<read_length>) }
+#'                DATA {
+#'                (0): <min-read-length>, <min-read-length> + 1, ... , <min-read-length> + <m> - 1,
+#'                (<m>): <min-read-length>+<m>, <min-read-length> + <m> + 1, ... , <min-read-length> + <n> - 1,
+#'                (<n>): <min-read-length>+<n>, <min-read-length> + <n> + 1, ... , <min-read-length> + <max-read-length>
+#'                }
+#'             }
+#'             ATTRIBUTE "reads_by_len" {
+#'                DATATYPE  H5T_IEEE_F64LE
+#'                DATASPACE  SIMPLE { (<read_length>) / (<read_length>) }
+#'                DATA {
+#'                (0): <see below>
+#'                (<m>): <see below>
+#'                (<n>): <see below>
+#'                }
+#'             }
+#'            ATTRIBUTE "reads_total" {
+#'                DATATYPE  H5T_IEEE_F64LE
+#'                DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+#'                DATA {
+#'                (0): <number of non-zero values in reads_by_len>
+#'                }
+#'             }
+#'             ATTRIBUTE "start_codon_pos" {
+#'                DATATYPE  H5T_STD_I32LE
+#'                DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+#'                DATA {
+#'                (0): <position of 1st nt of CDS start codon from GFF file>,
+#' 		    <position of 2nd nt of CDS start codon from GFF file>,
+#' 		    <position of 3rd nt of CDS start codon from GFF file>
+#'                }
+#'             }
+#'             ATTRIBUTE "stop_codon_pos" {
+#'                DATATYPE  H5T_STD_I32LE
+#'                DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+#'                DATA {
+#'                (0): <position of 1st nt of CDS stop codon from GFF file>,
+#' 	            <position of 2nd nt of CDS stop codon from GFF file>,
+#' 	            <position of 3rd nt of CDS stop codon from GFF file>
+#'                }
+#'             }
+#'             DATASET "data" {
+#'                DATATYPE  H5T_STD_I32LE
+#'                DATASPACE  SIMPLE { ( <sequence_length>, <read_length> ) /
+#' 	                           ( <sequence_length>, <read_length> ) }
+#'                DATA {
+#'                (0, 0): <see below>
+#'                (0, <m>): <see below>
+#'                (0, <n>): <see below>
+#'                ...
+#'                (<p>, 0): <see below>
+#'                (<p>, <m>): <see below>
+#'                (<p>, <n>): <see below>
+#'                ...
+#'                (<sequence_length - 1>, 0): <see below>
+#'                (<sequence_length - 1>, <m>): <see below>
+#'                (<sequence_length - 1>, <n>): <see below>
+#'                }
+#'             }
+#'          }
+#'       }
+#'    }
+#'    ...
+#' }
+#' ```
+#'
+#' where:
+#'
+#' * `gene`: Gene ID from GFF file (equal to reference sequence name
+#'   from BAM file) .
+#' * `read_length`: `max-read-length` - `min-read-length` + 1
+#' * 0 < `m` < `n` < `read_length`. Exact values of `m` and `n` may
+#'   differ across specific `ATTRIBUTE` and `DATA` items.
+#' * `reads_by_len`:
+#'   - `reads_by_len[i]` = number of alignments in BAM which have Flag
+#'     equal to 0 or 256 and length equal to `lengths[i]`. This equals
+#'     the sum of `DATA[*, i]` i.e. sum across all positions for a
+#'     specific read length.
+#' * `sequence_length`: position of final nt of UTR3 from GFF file
+#'   (equal to length  of sequence from BAM file header `LN` value).
+#' * `DATASET "data"`:
+#'   - 0 <= `p` <= `sequence_length - 1`
+#'   - `DATA[p, i]` equals 1 if there is an alignment in the BAM file
+#'     at position ` p`+1 which has length equal to `lengths[i]` and
+#'     BAM alignment has Flag 0 or 256; 0 otherwise.
+#'
 #' @export
 
 suppressMessages(library(getopt, quietly = T))
@@ -135,19 +314,21 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
 #' Convert BAM file to RiboViz HDF5 file.
 #'
 #' @param bam_file BAM input file (character).
-#' @param orf_gff_file GFF2/GFF3 annotation input file (character).
+#' @param orf_gff_file GFF2/GFF3 Matched genome feature file,
+#' specifying coding sequences locations (start and stop coordinates)
+#' within the transcripts (GTF/GFF3 file) (character).
 #' @param min_read_length Minimum read length in H5 output (integer).
 #' @param max_read_length Maximum read length in H5 output (integer).
 #' @param buffer Length of flanking region around the CDS (integer).
 #' @param primary_id Primary gene IDs to access the data (character).
 #' @param secondary_id Secondary gene IDs to access the data (character).
-#' @param dataset Dataset name (character).
+#' @param dataset Human-readable name of the dataset (character).
 #' @param stop_in_cds Are stop codons part of the CDS annotations in
 #' GFF? (logical).
-#' @param is_riboviz_gff Is the GFF file with UTR5, CDS, and UTR3
-#' elements per gene? (logical).
+#' @param is_riboviz_gff Does the GFF file contain 3 elements per gene
+#' - UTR5, CDS, and UTR3? (logical).
 #' @param hd_file H5 output file (character).
-#' @param num_processes Number of parallel processes to use
+#' @param num_processes Number of processes to parallelize over
 #' (integer).
 #'
 #' @export
@@ -301,8 +482,10 @@ BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
 }
 
 option_list <- list(
-    make_option("--num-processes", type = "integer", default = 1,
-      help = "Number of parallel processes to use"),
+    make_option("--bam-file", type = "character", default = "input.bam",
+      help = "BAM input file"),
+    make_option("--orf-gff-file", type = "character", default = NULL,
+      help = "GFF2/GFF3 Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts"),
     make_option("--min-read-length", type = "integer", default = 10,
       help = "Minimum read length in H5 output"),
     make_option("--max-read-length", type = "integer", default = 50,
@@ -313,19 +496,17 @@ option_list <- list(
       help = "Primary gene IDs to access the data (YAL001C, YAL003W, etc.)"),
     make_option("--secondary-id", type = "character", default = NULL,
       help = "Secondary gene IDs to access the data (COX1, EFB1, etc.)"),
-    make_option("--bam-file", type = "character", default = "input.bam",
-      help = "BAM input file"),
-    make_option("--hd-file", type = "character", default = "output.h5",
-      help = "H5 output file"),
-    make_option("--orf-gff-file", type = "character", default = NULL,
-      help = "GFF2/GFF3 annotation input file"),
     make_option("--dataset", type = "character", default = "data",
-      help = "Dataset name"),
+      help = "Human-readable name of the dataset"),
     make_option("--stop-in-cds", type = "logical", default = FALSE,
       help = "Are stop codons part of the CDS annotations in GFF?"),
     make_option("--is-riboviz-gff", type = "logical", default = TRUE,
-      help = "Is the GFF file with UTR5, CDS, and UTR3 elements per gene?")
-    )
+      help = "Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3?"),
+    make_option("--hd-file", type = "character", default = "output.h5",
+      help = "H5 output file"),
+    make_option("--num-processes", type = "integer", default = 1,
+      help = "Number of processes to parallelize over")
+)
 
 print_provenance(get_Rscript_filename())
 
