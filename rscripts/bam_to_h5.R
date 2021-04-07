@@ -6,8 +6,6 @@ suppressMessages(library(rhdf5, quietly = T))
 suppressMessages(library(parallel, quietly = T))
 suppressMessages(library(optparse,quietly = T))
 suppressMessages(library(RcppRoll, quietly = T))
-suppressMessages(library(ggplot2, quietly = T))
-suppressMessages(library(tidyr, quietly = T))
 # Handle interactive session behaviours or use get_Rscript_filename():
 if (interactive()) {
   # Use hard-coded script name and assume script is in "rscripts"
