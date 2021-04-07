@@ -164,26 +164,6 @@ attach(opt)
 print("bam_to_h5.R running with parameters:")
 opt
 
-#####
-# defunct alternative options for command line input
-# comargs=(commandArgs(TRUE))
-# 
-# if(length(comargs)==0){
-#   print("No arguments supplied.")
-#   quit(status=1)
-# } else if(length(comargs)==1 & endsWith(comargs[[1]],".yaml")){
-#   library(yaml,quietly=T)
-#   print("Arguments supplied in yaml file.")
-#   configopts <- yaml.load_file(comargs[[1]])
-#   attach(configopts)
-# } else {
-#   print("Arguments supplied in command line.")
-#   for(i in 1:length(comargs)){
-#     eval(parse(text=comargs[[i]]))
-#   }
-# }
-#####
-
 debugVignette <- FALSE
 if (debugVignette) {
     # to debug bam_to_h5.R in Riboviz vignette
@@ -195,7 +175,6 @@ if (debugVignette) {
     is_test_run <- TRUE
     primary_id <- "Name"
     secondary_id <- NULL
-    # gene <- "YAL038W" # use this to debug single gene for reads_to_list
 }
 
 
@@ -225,14 +204,9 @@ if(is_test_run){
   gff <- gff[ gff_pid %in% genes]
 }
 
-## desirable to check seqlevels here rather than wait for later error
-# get seqinfo from bam_file
-# bam_fileSeqInfo <- seqinfo(scanBamHeader(bam_file))
-
 # Map the reads to individual nucleotide position for each gene
 outputList <- 
-     mclapply(genes, # parallel version, take out for debugging
-    # lapply(genes,
+     mclapply(genes, # parallel version
                        function(gene){
                            # select gene location
                            gene_location=gff[gff_pid==gene]
@@ -257,7 +231,6 @@ outputList <-
                                        right_flank=Buffer_r, 
                                        mult_exon=TRUE)
                          }
-                    # )
  , 
                         mc.cores=num_processes)
 
@@ -326,13 +299,6 @@ for(gene in genes){
   h5createAttribute(gid,"stop_codon_pos",c(1,3))
   h5createAttribute(gid,"reads_by_len",c(1,length(read_range)))
   h5createAttribute(gid,"lengths",c(1,length(read_range)))
-  
-  # # Count number of reads that map to the CDS of a gene
-  # # We include reads mapping to 25 bases up/downstream of CDS in this count
-  # ifelse(start_cod[1]>25, up_atg <- (start_cod[1]-25), up_atg <- start_cod[1])
-  # ifelse(ncol(output)>(stop_cod[3]+25), down_taa <- (stop_cod[3]+25), down_taa <- stop_cod[3])
-  # 
-  # cod_total <- output[,up_atg:down_taa]
   
   # Write the attributes of the gene group
   h5writeAttribute.integer(sum(output),gid,name="reads_total")
