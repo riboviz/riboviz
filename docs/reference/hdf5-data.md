@@ -27,6 +27,23 @@ It also takes a BAM file as input and the name of the HDF5 file to create as out
 
 All reads are mapped to their 5' ends.
 
+If `is_riboviz_gff == TRUE` then:
+
+* `CDS`, `UTR5` and `UTR3` entries in GFF are used.
+* `buffer` is ignored.
+* `stop_cds` is used to compute `offset` but `offset` itself is unused.
+
+If `is_riboviz_gff == FALSE` then:
+
+* `CDS` entries in GFF are used.
+* `UTR`5 and `UTR3` entries in GFF are ignored.
+* `buffer` is used as width of left and right flanks, and to calculate atart and stop codon locations for genes.
+* `stop_cds` is used to compute `offset which is used to determine stop codon locations.
+
+`primary_id` is used as GFF column e.g. "Name".
+
+`secondary_id` is used as a GFF column to get `alt_genes` which are associated with gene names. These are used to create symbolic links in the H5 file to the entries for the original genes.
+
 ---
 
 ## HDF5 file structure
@@ -41,7 +58,7 @@ The `reads` group, `/<gene>/<dataset>/reads`, for a `<gene>` has several attribu
 | `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | GFF file OR `buffer` configuration parameter  (if `is_riboviz_gff` is false) |
 | `start_codon_pos` | Positions corresponding to start codon of CDS (typically 251, 252, 253) | GFF file |
 | `stop_codon_pos` | Positions corresponding to stop codon of CDS | GFF file |
-| `lengths` | Lengths of mapped reads | Range from `buffer_left` configuration parameter to `buffer_right` configuration parameter (e.g. 10,...,50) |
+| `lengths` | Lengths of mapped reads | Range from `min_read_length` configuration parameter to `max_read_length` configuration parameter (e.g. 10,...,50) |
 | `reads_by_len` | Counts of number of ribosome sequences of each length | BAM file |
 | `reads_total` | Total number of ribosome sequences | BAM file. Equal to number of non-zero reads in `reads_by_len`. |
 
