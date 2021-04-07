@@ -158,9 +158,7 @@ option_list <- list(
     make_option("--stop-in-cds", type = "logical", default = FALSE,
       help = "Are stop codons part of the CDS annotations in GFF?"),
     make_option("--is-riboviz-gff", type = "logical", default = TRUE,
-      help = "Is the GFF file with UTR5, CDS, and UTR3 elements per gene?"),
-    make_option("--is-test-run", type = "logical", default = FALSE,
-      help = "Is this a test run?")
+      help = "Is the GFF file with UTR5, CDS, and UTR3 elements per gene?")
     )
 
 print_provenance(get_Rscript_filename())
