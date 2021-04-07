@@ -1,3 +1,7 @@
+#' Convert BAM files to RiboViz HDF5 files.
+#'
+#' @export
+
 suppressMessages(library(getopt, quietly = T))
 suppressMessages(library(here))
 suppressMessages(library(Rsamtools, quietly = T))
@@ -6,7 +10,8 @@ suppressMessages(library(rhdf5, quietly = T))
 suppressMessages(library(parallel, quietly = T))
 suppressMessages(library(optparse, quietly = T))
 suppressMessages(library(RcppRoll, quietly = T))
-# Handle interactive session behaviours or use get_Rscript_filename():
+
+# Load local dependencies.
 if (interactive()) {
   # Use hard-coded script name and assume script is in "rscripts"
   # directory. This assumes that interactive R is being run within
@@ -22,23 +27,22 @@ if (interactive()) {
   source(file.path(dirname(this_script), "provenance.R"))
 }
 
-ReadsToList <- function(gene_location, bam_file, read_range,
+#' Compute matrix of read counts with start position and read length
+#' on a single gene.
+#'
+#' @param gene_location Gene coordinates from GFF (GRanges).
+#' @param bam_file BAM file (character).
+#' @param read_range List of read lengths (integer).
+#' @param left_flank Length of left-hand flanking region (integer).
+#' @param right_flank Length of right-hand flanking region (integer).
+#' @param mult_exon If `TRUE` use only the first supplied exon for
+#' gene coordinates (logical).
+#' @return matrix of integer counts for each start position (rows)
+#' and read length (columns) (double).
+#'
+#' @export
+ReadsToCountMatrix <- function(gene_location, bam_file, read_range,
   left_flank, right_flank, mult_exon = TRUE) {
-  # Computes matrix of read counts with starting position and read length
-  # on a single gene whose co-ordinates are supplied as arguments.
-  #
-  # Args:
-  #   gene_location: (list) gff line containing gene co-ordinates.
-  #   bam_file: (string) name of bam_file with reads in it.
-  #   read_range: (int) vector of integer read lengths, e.g. 15:50.
-  #   flank: (int) width of flanking region to include outside gene
-  #   body|CDS.
-  #   mult_exon: If TRUE, uses only the first supplied exon for gene
-  #   co-ordinates.
-  #
-  # Returns:
-  #   output: matrix of integer counts for each row/start position and
-  #   column/read length.
 
   if (!mult_exon) {
     # If the gene is a single exon gene but multiple GRanges specified
@@ -223,12 +227,12 @@ output_list <- mclapply(
       buffer_r <- buffer
    }
    # Get reads to list.
-   ReadsToList(gene_location = gene_location,
-               bam_file = bam_file,
-               read_range = read_range,
-               left_flank = buffer_l,
-               right_flank = buffer_r,
-               mult_exon = TRUE)
+   ReadsToCountMatrix(gene_location = gene_location,
+                      bam_file = bam_file,
+                      read_range = read_range,
+                      left_flank = buffer_l,
+                      right_flank = buffer_r,
+                      mult_exon = TRUE)
    },
    mc.cores = num_processes)
 
