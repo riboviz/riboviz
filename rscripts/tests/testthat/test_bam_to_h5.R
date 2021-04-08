@@ -225,13 +225,9 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
   # the organism data
   h5_data <- GetGeneDatamatrix(sequence, dataset, h5_file) # matrix, integer
   print(paste0("data rows/columns: ", toString(dim(h5_data))))
-  num_data_cols <- h5_stop_codon_pos[3] + buffer
   expect_equal(nrow(h5_data), num_read_counts,
     info = paste0(sequence,
       ": Number of data rows != max_read_length - min_read_length + 1"))
-  expect_equal(ncol(h5_data), num_data_cols,
-    info = paste0(sequence,
-      ": Number of data columns != stop_codon_pos[3] + buffer"))
   expect_equal(ncol(h5_data), utr3_end,
     info = paste0(sequence,
       ": Number of data columns != GFF UTR3 final nt position"))
@@ -243,7 +239,7 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
     info = paste0(sequence, ": reads_by_len is not consistent with data"))
 
   # Calculate expected data based on information from BAM
-  data <- matrix(0, nrow = num_read_counts, ncol = num_data_cols)
+  data <- matrix(0, nrow = num_read_counts, ncol = utr3_end)
   if (sequence %in% GenomicAlignments::seqnames(bam)) {
     print("Sequence has alignments in BAM.")
     for (align in names(bam_sequence_kept)) {
