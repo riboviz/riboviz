@@ -31,14 +31,13 @@ If `is_riboviz_gff == TRUE` then:
 
 * `CDS`, `UTR5` and `UTR3` entries in GFF are used.
 * `buffer` is ignored.
-* `stop_in_cds` is used to compute `offset` but `offset` itself is unused.
 
 If `is_riboviz_gff == FALSE` then:
 
 * `CDS` entries in GFF are used.
 * `UTR`5 and `UTR3` entries in GFF are ignored.
 * `buffer` is used as width of left and right flanks, and to calculate atart and stop codon locations for genes.
-* `stop_in_cds` is used to compute `offset which is used to determine stop codon locations.
+* `stop_in_cds` is used to determine stop codon locations.
 
 `primary_id` is used as GFF column e.g. "Name".
 
@@ -162,6 +161,7 @@ where:
 * `reads_by_len`:
   - `reads_by_len[i]` = number of alignments in BAM which have Flag equal to 0 or 256 and length equal to `lengths[i]`. This equals the sum of `DATA[*, i]` i.e. sum across all positions for a specific read length.
 * `sequence_length`: position of final nt of UTR3 from GFF file (equal to length of sequence from BAM file header `LN` value).
+  - If `is_riboviz_gff` is `false` when this is equal to `buffer` + CDS length + `buffer`.
 * `DATASET "data"`:
   - 0 <= `p` <= `sequence_length - 1`
   - `DATA[p, i]` equals 1 if there is an alignment in the BAM file at position `p`+1 which has length equal to `lengths[i]` and BAM alignment has Flag 0 or 256 (see [Understanding the BAM flags](https://davetang.org/muse/2014/03/06/understanding-bam-flags/) and [Decoding SAM flags](https://broadinstitute.github.io/picard/explain-flags.html)); 0 otherwise.
