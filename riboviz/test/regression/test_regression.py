@@ -105,6 +105,7 @@ import tempfile
 import pytest
 import pysam
 from riboviz import h5
+from riboviz import html
 from riboviz import hisat2
 from riboviz import sam_bam
 from riboviz import compare_files
@@ -731,6 +732,29 @@ def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
     :param file_name: file name
     :type file_name: str or unicode
     """
+    output_dir_name = os.path.basename(os.path.normpath(output_dir))
+    expected_file = os.path.join(expected_fixture, output_dir_name,
+                                 sample, file_name)
+    if not os.path.exists(expected_file):
+        pytest.skip('Skipped as expected file does not exist')
+    compare_files.compare_files(
+        expected_file,
+        os.path.join(output_dir, sample, file_name))
+
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_analysis_outputs_html(expected_fixture, output_dir, sample):
+    """
+    Test ``AnalysisOutputs.Rmd`` html files for equality. See
+    :py:func:`riboviz.compare_files.compare_files`.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param output_dir: Output directory, from configuration file
+    :type output_dir: str or unicode
+    :param sample: sample name
+    :type sample: str or unicode
+    """
+    file_name = html.HTML_FORMAT.format(sample)
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
     expected_file = os.path.join(expected_fixture, output_dir_name,
                                  sample, file_name)
