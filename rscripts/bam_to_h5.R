@@ -19,45 +19,35 @@
 #'
 #' All reads are mapped to their 5' ends.
 #'
-#' If `is-riboviz-gff == TRUE` then:
-#'
-#' * `CDS`, `UTR5` and `UTR3` entries in GFF are used.
-#' * `buffer` is ignored.
-#' * `stop-cds` is used to compute `offset` but `offset` itself is unused.
-#'
-#' If `is-riboviz-gff == FALSE` then:
-#'
-#' * `CDS` entries in GFF are used.
-#' * `UTR`5 and `UTR3` entries in GFF are ignored.
-#' * `buffer` is used as width of left and right flanks, and to
-#'   calculate atart and stop codon locations for genes.
-#' * `stop-cds` is used to compute `offset which is used to determine
-#'   stop codon locations.
-#'
 #' `primary-id` is used as GFF column e.g. "Name".
 #'
 #' `secondary-id` is used as a GFF column to get `alt-genes` which are
 #' associated with gene names. These are used to create symbolic links
 #' in the H5 file to the entries for the original genes.
 #'
-#' The HDF5 file is organized in the following hierarchy
-#' `/<gene>/<dataset>/reads/data`, where `<gene>` is each gene name in
-#' the GFF and BAM files provided as input.
+#' If `is-riboviz-gff == TRUE` then:
 #'
-#' The `reads` group, `/<gene>/<dataset>/reads`, for a `<gene>` has
-#' several attributes associated with it. These are summary statistics
-#' and other information about the gene and dataset within the `reads`
-#' group. The list of attributes are as follows.
+#' * `CDS`, `UTR5` and `UTR3` entries from the GFF are used.
+#' * `buffer` is ignored.
+#'
+#' If `is-riboviz-gff == FALSE` then:
+#'
+#' * `CDS` entries in GFF are used.
+#' * `UTR5` and `UTR3` entries from the GFF are ignored.
+#' * `buffer` is used as the width of left and right flanks, and to
+#'   calculate start and stop codon locations for genes. 
+#' * Whether `stop_in_cds` is `TRUE` or `FALSE` also affects the
+#'   calculations for stop codon locations. 
 #'
 #' | Attribute | Description | Origin |
 #' | --------- |------------ | ------ |
-#' | `buffer_left` | Number of nucleotides upstream of the start codon (ATG) (UTR5  length) | GFF file OR `buffer` parameter (if `is-riboviz-gff` is false) |
-#' | `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | GFF file OR `buffer` parameter  (if `is-riboviz-gff` is false) |
-#' | `start_codon_pos` | Positions corresponding to start codon of CDS (typically 251, 252, 253) | GFF file |
-#' | `stop_codon_pos` | Positions corresponding to stop codon of CDS | GFF file |
-#' | `lengths` | Lengths of mapped reads | Range from `min-read-length` parameter to `max-read-length` parameter (e.g. 10,...,50) |
+#' | `buffer_left` | Number of nucleotides upstream of the start codon (ATG) (UTR5 length) | EITHER position of start codon (from GFF file) - 1 OR, if `is-riboviz-gff` is false, `buffer` |
+#' | `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | GFF file OR, if `is-riboviz-gff` is false, `buffer` + CDS length from GFF file + `buffer` - `stop_codon_pos[3]` (see below) |
+#' | `start_codon_pos` | Positions corresponding to start codon of CDS (typically 251, 252, 253) | EITHER positions from GFF file OR, if `is-riboviz-gff` is false, `buffer+1,...,buffer+3` |
+#' | `stop_codon_pos` | Positions corresponding to stop codon of CDS | EITHER positions from GFF file OR, if `is-riboviz-gff` is false, `p,...,p+2` where `p` is `buffer` + CDS length from GFF file - `offset` where `offset` is 2 if `stop-in-cds` is true or -1 otherwise |
+#' | `lengths` | Lengths of mapped reads | Range from `min-read-length` to `max-read-length` (e.g. 10,...,50) |
 #' | `reads_by_len` | Counts of number of ribosome sequences of each length | BAM file |
-#' | `reads_total` | Total number of ribosome sequences | BAM file. Equal to numberof non-zero reads in `reads_by_len`. |
+#' | `reads_total` | Total number of ribosome sequences | BAM file. Equal to number of non-zero reads in `reads_by_len` |
 #'
 #' The `data` table in `/<gene>/<dataset>/reads/data`, for a `<gene>`,
 #' has the positions and lengths of ribosome sequences within the
