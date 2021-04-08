@@ -73,7 +73,7 @@ DeleteFile <- function(file_name) {
 #' @param bam: Data on alignments from BAM file
 #'   (GenomicAlignments::GAlignments, S4)
 #' @param dataset: Dataset name (character, character)
-#' @param buffer: Buffer size (used if `is_riboviz_gff` is TRUE)
+#' @param buffer: Buffer size (used if `is_riboviz_gff` is FALSE)
 #    (numeric, double)
 #' @param min_read_length: Minimum read length (numeric, double)
 #' @param max_read_length: Maximum read length (numeric, double)
@@ -149,9 +149,6 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
   # stop codon (TAA/TAG/TGA) (UTR3 length)
   h5_buffer_right <- GetGeneBufferRight(sequence, dataset, h5_file) # integer
   print(paste0("buffer_right: ", h5_buffer_right))
-  expect_equal(h5_buffer_right, buffer,
-    info = paste0(sequence,
-      ": Unexpected buffer_right, compared to bam_to_h5.R parameter"))
   expect_equal(h5_buffer_right, utr3_length,
     info = paste0(sequence, ": ", h5_buffer_right_info))
 
