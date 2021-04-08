@@ -742,10 +742,12 @@ def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
         os.path.join(output_dir, sample, file_name))
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_analysis_outputs_html(expected_fixture, output_dir, sample):
+def test_analysis_outputs_html(expected_fixture, output_dir, sample, nextflow_fixture):
     """
     Test ``AnalysisOutputs.Rmd`` html files for equality. See
     :py:func:`riboviz.compare_files.compare_files`.
+
+    If Nextflow tests were requested then this test is run.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
@@ -753,13 +755,18 @@ def test_analysis_outputs_html(expected_fixture, output_dir, sample):
     :type output_dir: str or unicode
     :param sample: sample name
     :type sample: str or unicode
+    :param nextflow_fixture: Should Nextflow tests be run?
+    :type nextflow_fixture: bool
     """
     file_name = html.HTML_FORMAT.format(sample)
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
     expected_file = os.path.join(expected_fixture, output_dir_name,
                                  sample, file_name)
+    assert os.path.exists(os.path.join(output_dir, sample, file_name))
     if not os.path.exists(expected_file):
-        pytest.skip('Skipped as expected file does not exist')
+       pytest.skip('Skipped as expected file does not exist')
+    if not nextflow_fixture:
+        pytest.skip('Skipped test not applicable to Nextflow')
     compare_files.compare_files(
         expected_file,
         os.path.join(output_dir, sample, file_name))
