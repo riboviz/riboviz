@@ -5,7 +5,7 @@ import subprocess
 
 HTML_EXT = "html"
 """ File extension. """
-HTML_FORMAT = "{}." + HTML_EXT
+HTML_FORMAT = "{}_output_report." + HTML_EXT
 """ File name format. """
 
 
