@@ -6,6 +6,7 @@ import os.path
 from riboviz import bedgraph
 from riboviz import fastq
 from riboviz import h5
+from riboviz import html
 from riboviz import hisat2
 from riboviz import sam_bam
 from riboviz import utils
@@ -23,6 +24,7 @@ def compare_files(file1, file2, compare_names=True):
     * ``h5``: :py:func:`riboviz.h5.equal_h5`
     * ``ht2``: :py:func:`riboviz.utils.equal_file_sizes`
     * ``pdf``: :py:func:`riboviz.utils.equal_file_names`
+    * ``html``: :py:func:`riboviz.utils.equal_file_names`
     * ``sam``: :py:func:`riboviz.sam_bam.equal_sam`
     * ``tsv``: :py:func:`riboviz.utils.equal_tsv`
 
@@ -43,6 +45,8 @@ def compare_files(file1, file2, compare_names=True):
         utils.equal_file_names(file1, file2)
     ext = utils.get_file_ext(file1)
     if ext.endswith(tuple(["pdf"])):
+        utils.equal_file_names(file1, file2)
+    elif ext.endswith(tuple([html.HTML_EXT])):
         utils.equal_file_names(file1, file2)
     elif ext.endswith(tuple([hisat2.HT2_EXT, sam_bam.BAI_EXT])):
         utils.equal_file_sizes(file1, file2)
