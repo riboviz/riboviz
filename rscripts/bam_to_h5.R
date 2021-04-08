@@ -335,7 +335,6 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
 BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
   max_read_length, buffer, primary_id, secondary_id, dataset,
   stop_in_cds, is_riboviz_gff, hd_file, num_processes) {
-
   read_lengths <- min_read_length:max_read_length
 
   # Read in the positions of all exons/genes from GFF and subset
@@ -347,6 +346,7 @@ BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
 
   # Read in the list of genes from GFF.
   genes <- unique(mcols(gff)[primary_id][, 1])
+
   if (!is.null(secondary_id)) {
     alt_genes <- as.list(unique(mcols(gff)[secondary_id][, 1]))
     names(alt_genes) <- genes
@@ -512,16 +512,18 @@ print_provenance(get_Rscript_filename())
 
 opt <- parse_args(OptionParser(option_list = option_list),
                   convert_hyphens_to_underscores = TRUE)
+print("bam_to_h5.R running with parameters:")
+print(opt)
+
 if (opt$secondary_id  ==  "NULL") {
   # Unquote NULL option.
   secondary_id <- NULL
 }
-attach(opt)
-print("bam_to_h5.R running with parameters:")
-opt
 
-BamToH5(bam_file, orf_gff_file, min_read_length, max_read_length,
-        buffer, primary_id, secondary_id, dataset, stop_in_cds,
-        is_riboviz_gff, hd_file, num_processes)
+BamToH5(opt$bam_file, opt$orf_gff_file,
+        opt$min_read_length, opt$max_read_length,
+        opt$buffer, opt$primary_id, secondary_id, opt$dataset,
+        opt$stop_in_cds, opt$is_riboviz_gff, opt$hd_file,
+        opt$num_processes)
 
 print("bam_to_h5.R done")
