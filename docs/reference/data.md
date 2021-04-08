@@ -72,15 +72,37 @@ The file can be used as an input to RiboViz.
 
 ## Additional yeast-specific data
 
-Position of codons within each gene (the numbering ignores the first 200 codons):
+### Position of codons within each gene 
+
+```
+data/yeast_codon_table.tsv
+```
+
+This file was produced using  [script_for_transcript_annotation.Rmd](../../rmarkdown/script_for_transcript_annotation.Rmd) as part of the preparation described in [Saccharomyces cerevisiae (yeast) genome and annotation data](#saccharomyces-cerevisiae-yeast-genome-and-annotation-data) above.
+
+An identical table (differing only in the commented lines in the header) is produced by:
+
+```
+python -m riboviz.tools.get_cds_codons \
+        -f data/yeast_CDS_w_250utrs.fa \
+        -g data/yeast_CDS_w_250utrs.gff3 \
+        -c data/yeast_codon_table_alternative.tsv
+```
+
+#### Obsolete version whose numbering ignores the first 200 codons
 
 ```
 data/yeast_codon_pos_i200.RData
 ```
 
-This file was produced using [script_for_transcript_annotation.Rmd](../../rmarkdown/script_for_transcript_annotation.Rmd) as part of the preparation described in [Saccharomyces cerevisiae (yeast) genome and annotation data](#saccharomyces-cerevisiae-yeast-genome-and-annotation-data) above.
+This file was produced using version 1.0 of [script_for_transcript_annotation.Rmd](../../rmarkdown/script_for_transcript_annotation.Rmd).
 
-Features to correlate with ORFs:
+The file contains data identical from codon position 201 onwards of the data in `data/yeast_codon_table.tsv`.
+
+The `.Rdata` file is obsolete as of March 2021, and will be removed once we have updated the code section `CalculateCodonSpecificRibosomeDensity` to use input data formatted from `data/yeast_codon_table.tsv` instead
+
+
+### Features to correlate with ORFs:
 
 ```
 data/yeast_features.tsv
@@ -96,7 +118,7 @@ Data within this file was derived as follows:
 6. `FE_cap`: Estimated from 2. using sequences of length 70 nts from the 5' end of the mRNA transcript with folding energies calculated at 37 degress Centigrade following [Supplementary Methods](https://www.cell.com/cms/10.1016/j.celrep.2016.01.043/attachment/257faf34-ff8f-4071-a642-bfdb531c75b8/mmc1) for Weinberg et al. 2016 "Improved Ribosome-Footprint and mRNA Measurements Provide Insights into Dynamics and Regulation of Yeast Translation", Cell Reports, 14(7), 23 February 2016, 1787-1799 doi: [10.1016/j.celrep.2016.01.043](https://doi.org/10.1016/j.celrep.2016.01.043). Calculations were done using [RNAfold](https://www.tbi.univie.ac.at/RNA/RNAfold.1.html) in the [ViennaRNA](https://www.tbi.univie.ac.at/RNA/) package.
 7. `FE_atg`: Estimated from 30 nt upstream from ATG.
 
-tRNA estimates:
+### tRNA estimates:
 
 ```
 data/yeast_tRNAs.tsv
