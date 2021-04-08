@@ -79,39 +79,53 @@ DeleteFile <- function(file_name) {
 #' @param max_read_length: Maximum read length (numeric, double)
 #' @param is_riboviz_gff: Is the GFF file with UTR5, CDS, and UTR3
 #'   elements per gene?" (logical, logical)
+#' @param stop_in_cds: Are stop codons part of the CDS annotations in
+#'   GFF? Only used if `is_riboviz_gff` is `FALSE` (logical, logical)
 #' @export
 ValidateH5Sequence <- function(sequence, h5_file, gff,
   bam_hdr_seq_info, bam, dataset, buffer, min_read_length,
-  max_read_length, is_riboviz_gff) {
+  max_read_length, is_riboviz_gff, stop_in_cds) {
   num_read_counts <- max_read_length - min_read_length + 1
-
   # Get sequence positions from GFF
   gff_cds_start <- GetCDS5start(sequence, gff, ftype = "CDS")
   gff_cds_end <- GetCDS3end(sequence, gff, ftype = "CDS")
   gff_cds_length <- gff_cds_end - gff_cds_start + 1
-  # Get sequence positions from GFF or use buffer
   if (is_riboviz_gff) {
+    # Get sequence positions from GFF
     utr5_start <- GetCDS5start(sequence, gff, ftype = "UTR5")
     utr5_end <- GetCDS3end(sequence, gff, ftype = "UTR5")
     utr5_length <- utr5_end - utr5_start + 1
     utr3_start <- GetCDS5start(sequence, gff, ftype = "UTR3")
     utr3_end <- GetCDS3end(sequence, gff, ftype = "UTR3")
     utr3_length <- utr3_end - utr3_start + 1
+    stop_codon_pos <- as.array(seq(gff_cds_end - 2, gff_cds_end))
     h5_buffer_left_info <-
       "Unexpected buffer_left, compared to GFF UTR5 length"
     h5_buffer_right_info <-
       "Unexpected buffer_right, compared to GFF UTR5 length"
+    h5_stop_codon_info <-
+      "Unexpected stop_codon_pos, compared to GFF CDS positions"
   } else {
+    # Get sequence positions from GFF and buffer
     utr5_start <- 1
     utr5_length <- buffer
     utr5_end <- utr5_start + buffer - 1
     utr3_start <- gff_cds_end + 1
     utr3_length <- buffer
     utr3_end <- utr3_start + buffer - 1
+    if (stop_in_cds) {
+      offset <- 2
+    } else {
+      offset <- -1
+    }
+    stop_codon_loc <- utr3_end - buffer - offset
+    stop_codon_pos <- as.array(seq(stop_codon_loc, stop_codon_loc + 2))
     h5_buffer_left_info <-
-      "Unexpected buffer_left, compared to bam_to_h5.R parameter"
+      "Unexpected buffer_left, compared to 'buffer' parameter"
     h5_buffer_right_info <-
-      "Unexpected buffer_right, compared to bam_to_h5.R parameter"
+      "Unexpected buffer_right, compared to 'buffer' parameter"
+    h5_stop_codon_info <-
+      "Unexpected stop_codon_pos, compared to that derived from 'buffer' parameter"
   }
   print(paste0("UTR5 start/length/end: ", utr5_start, " ",
     utr5_length, " ", utr5_end))
@@ -149,7 +163,8 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
   # stop codon (TAA/TAG/TGA) (UTR3 length)
   h5_buffer_right <- GetGeneBufferRight(sequence, dataset, h5_file) # integer
   print(paste0("buffer_right: ", h5_buffer_right))
-  expect_equal(h5_buffer_right, utr3_length,
+  buffer_right <- utr3_end - stop_codon_pos[3]
+  expect_equal(h5_buffer_right, buffer_right,
     info = paste0(sequence, ": ", h5_buffer_right_info))
 
   # Validate start_codon_pos: Positions corresponding to start codon
@@ -166,15 +181,13 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
 
   # Validate stop_codon_pos: Positions corresponding to stop codon of
   # CDS in organism sequence
-  gff_stop_codon_pos <- as.array(seq(gff_cds_end - 2, gff_cds_end))
   h5_stop_codon_pos <-
     GetGeneStopCodonPos(sequence, dataset, h5_file) # 1D array of 3 integer
   print(paste0("stop_codon_pos: ", toString(h5_stop_codon_pos)))
   expect_equal(length(h5_stop_codon_pos), 3,
     info = paste0(sequence, ": Unexpected stop_codon_pos length"))
-  expect_equal(h5_stop_codon_pos, gff_stop_codon_pos,
-    info = paste0(sequence,
-      ": Unexpected stop_codon_pos, compared to GFF CDS positions"))
+  expect_equal(h5_stop_codon_pos, stop_codon_pos,
+    info = paste0(sequence, ": ", h5_stop_codon_info))
 
   # Validate lengths: Lengths of mapped reads.
   lengths <- as.array(seq(min_read_length, max_read_length))
@@ -280,9 +293,11 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
 #' @param max_read_length: Maximum read length (numeric, double)
 #' @param is_riboviz_gff: Is the GFF file with UTR5, CDS, and UTR3
 #'   elements per gene?" (logical, logical)
+#' @param stop_in_cds: Are stop codons part of the CDS annotations in
+#'   GFF? Only used if `is_riboviz_gff` is `FALSE` (logical, logical)
 #' @export
 ValidateH5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
-  min_read_length, max_read_length, is_riboviz_gff) {
+  min_read_length, max_read_length, is_riboviz_gff, stop_in_cds) {
 
   gff <- readGFFAsDf(gff_file) # tbl_df tbl data.frame, list
   gff_names <- unique(gff$seqnames) # factor, integer
@@ -333,7 +348,8 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
   for (sequence in h5_names) {
     print(paste0("Sequence: ", sequence))
     ValidateH5Sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
-      dataset, buffer, min_read_length, max_read_length, is_riboviz_gff)
+      dataset, buffer, min_read_length, max_read_length,
+      is_riboviz_gff, stop_in_cds)
   }
 }
 
@@ -405,5 +421,5 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
     info = "Unexpected exit code from 'bam_to_h5.R'")
 
   ValidateH5(h5_file, gff_file, bam_file, dataset, buffer,
-    min_read_length, max_read_length, is_riboviz_gff)
+    min_read_length, max_read_length, is_riboviz_gff, stop_in_cds)
 })
