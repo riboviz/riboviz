@@ -31,18 +31,18 @@ If `is_riboviz_gff == TRUE` then:
 
 * `CDS`, `UTR5` and `UTR3` entries in GFF are used.
 * `buffer` is ignored.
-* `stop_cds` is used to compute `offset` but `offset` itself is unused.
+* `stop_in_cds` is used to compute `offset` but `offset` itself is unused.
 
 If `is_riboviz_gff == FALSE` then:
 
 * `CDS` entries in GFF are used.
 * `UTR`5 and `UTR3` entries in GFF are ignored.
 * `buffer` is used as width of left and right flanks, and to calculate atart and stop codon locations for genes.
-* `stop_cds` is used to compute `offset which is used to determine stop codon locations.
+* `stop_in_cds` is used to compute `offset which is used to determine stop codon locations.
 
 `primary_id` is used as GFF column e.g. "Name".
 
-`secondary_id` is used as a GFF column to get `alt_genes` which are associated with gene names. These are used to create symbolic links in the H5 file to the entries for the original genes.
+`secondary_id` is used as a GFF column to get alternative gene names which are associated with gene names. These are used to create symbolic links in the H5 file to the entries for the original genes.
 
 ---
 
