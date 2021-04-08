@@ -372,9 +372,6 @@ BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
         buffer_left <- buffer
         buffer_right <- buffer
       }
-      print(paste0("gene: ", gene))
-      print(paste0("buffer_left: ", buffer_left))
-      print(paste0("buffer_right: ", buffer_right))
       # Get reads to list.
       ReadsToCountMatrix(gene_location = gene_location,
                          bam_file = bam_file,
@@ -396,7 +393,6 @@ BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
   # Adjust start codon position.
   if (!is_riboviz_gff) {
     start_cod <- (buffer + 1):(buffer + 3)
-    print(paste0("start_cod: ", start_cod))
   }
 
   # Set stop codon offset.
@@ -405,8 +401,7 @@ BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
   } else {
     offset <- -1
   }
-  print(paste0("offset: ", offset))
-  
+
   # Create symbolic links for alternate gene IDs, if required.
   if (!is.null(secondary_id)) {
     base_gid <- H5Gopen(fid, "/")
@@ -422,15 +417,10 @@ BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
       start_codon_loc <- start(gene_location[gene_location$type == "CDS"])
       start_cod <- start_codon_loc:(start_codon_loc + 2)
       stop_codon_loc <- start(gene_location[gene_location$type == "UTR3"]) - 3
-      print(paste0("start_codon_loc: ", start_codon_loc))
-      print(paste0("start_cod: ", start_cod))
-      print(paste0("stop_codon_loc: ", stop_codon_loc))
     } else {
       stop_codon_loc <- ncol(gene_read_counts) - buffer - offset
-      print(paste0("stop_codon_loc: ", stop_codon_loc))
     }
     stop_cod <- stop_codon_loc:(stop_codon_loc + 2)
-    print(paste0("stop_cod: ", stop_cod))
 
     # Create H5 groups for gene.
     h5createGroup(fid, gene)
