@@ -371,16 +371,17 @@ BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
       } else {
         buffer_left <- buffer
         buffer_right <- buffer
-     }
-     # Get reads to list.
-     ReadsToCountMatrix(gene_location = gene_location,
-                        bam_file = bam_file,
-                        read_lengths = read_lengths,
-                        left_flank = buffer_left,
-                        right_flank = buffer_right,
-                        mult_exon = TRUE)
-     },
-     mc.cores = num_processes)
+      }
+      # Get reads to list.
+      ReadsToCountMatrix(gene_location = gene_location,
+                         bam_file = bam_file,
+                         read_lengths = read_lengths,
+                         left_flank = buffer_left,
+                         right_flank = buffer_right,
+                         mult_exon = TRUE)
+      },
+    mc.cores = num_processes
+  )
   names(read_counts) <- genes
 
   # Save HDF5.
