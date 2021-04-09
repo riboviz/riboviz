@@ -48,7 +48,6 @@ bam_to_h5 <- here::here("rscripts/bam_to_h5.R")
 
 context("test_bam_to_h5.R")
 
-
 #' Delete a file.
 #'
 #' Delete a file if it exists.
@@ -61,26 +60,25 @@ DeleteFile <- function(file_name) {
   }
 }
 
-
 #' Validate H5 data for a specific sequence.
 #'
-#' @param sequence: Sequence name (character).
-#' @param h5_file: H5 file with data on sequence to be validated
+#' @param sequence Sequence name (character).
+#' @param h5_file H5 file with sequence data to be validated
 #' (character).
-#' @param gff: GFF data (tbl_df tbl data.frame).
-#' @param bam_hdr_seq_info: Data on sequences from BAM file header
+#' @param gff GFF data (tbl_df tbl data.frame).
+#' @param bam_hdr_seq_info Data on sequences from BAM file header
 #' (GenomeInfoDb::Seqinfo).
-#' @param bam: Data on alignments from BAM file
+#' @param bam Data on alignments from BAM file
 #' (GenomicAlignments::GAlignments).
-#' @param dataset: Dataset name (character).
-#' @param buffer: Buffer size (used if `is_riboviz_gff` is TRUE)
-#  (double).
-#' @param min_read_length: Minimum read length (double).
-#' @param max_read_length: Maximum read length (double).
-#' @param is_riboviz_gff: Is the GFF file with UTR5, CDS, and UTR3
-#' elements per gene" (logical).
-#' @param stop_in_cds: Are stop codons part of the CDS annotations in
-#' GFF? Only used if `is_riboviz_gff` is `FALSE` (logical).
+#' @param dataset Human-readable name of the dataset (character).
+#' @param buffer Length of flanking region around the CDS (integer).
+#' @param min_read_length Minimum read length in H5 output (integer).
+#' @param max_read_length Maximum read length in H5 output (integer).
+#' @param is_riboviz_gff Does the GFF file contain 3 elements per gene
+#' - UTR5, CDS, and UTR3? (logical).
+#' @param stop_in_cds Are stop codons part of the CDS annotations in
+#' GFF? (logical).
+#'
 #' @export
 ValidateH5Sequence <- function(sequence, h5_file, gff,
   bam_hdr_seq_info, bam, dataset, buffer, min_read_length,
@@ -279,22 +277,20 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
       ": Unexpected reads_by_len, compared to those computed from BAM"))
 }
 
-
 #' Validate H5 data within a RiboViz H5 data file.
 #'
-#' @param h5_file: H5 file with data on sequence to be validated
+#' @param h5_file H5 file with data on sequence to be validated
 #' (character).
-#' @param gff_file: GFF file (character).
-#' @param bam_file: BAM file (character).
-#' @param dataset: Dataset name (character).
-#' @param buffer: Buffer size (used if `is_riboviz_gff` is TRUE)
-#  (numeric).
-#' @param min_read_length: Minimum read length (double).
-#' @param max_read_length: Maximum read length (double).
-#' @param is_riboviz_gff: Is the GFF file with UTR5, CDS, and UTR3
-#' elements per gene? (logical).
-#' @param stop_in_cds: Are stop codons part of the CDS annotations in
-#' GFF? Only used if `is_riboviz_gff` is `FALSE` (logical).
+#' @param gff_file GFF file (character).
+#' @param bam_file BAM file (character).
+#' @param dataset Human-readable name of the dataset (character).
+#' @param buffer Length of flanking region around the CDS (integer).
+#' @param min_read_length Minimum read length in H5 output (integer).
+#' @param max_read_length Maximum read length in H5 output (integer).
+#' @param is_riboviz_gff Does the GFF file contain 3 elements per gene
+#' - UTR5, CDS, and UTR3? (logical).
+#' @param stop_in_cds Are stop codons part of the CDS annotations in
+#' GFF? (logical).
 #' @export
 ValidateH5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
   min_read_length, max_read_length, is_riboviz_gff, stop_in_cds) {
@@ -352,7 +348,6 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
       is_riboviz_gff, stop_in_cds)
   }
 }
-
 
 testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   # To use this test with other data files:

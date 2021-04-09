@@ -35,9 +35,9 @@
 #' * `CDS` entries in GFF are used.
 #' * `UTR5` and `UTR3` entries from the GFF are ignored.
 #' * `buffer` is used as the width of left and right flanks, and to
-#'   calculate start and stop codon locations for genes. 
+#'   calculate start and stop codon locations for genes.
 #' * Whether `stop_in_cds` is `TRUE` or `FALSE` also affects the
-#'   calculations for stop codon locations. 
+#'   calculations for stop codon locations.
 #'
 #' | Attribute | Description | Origin |
 #' | --------- |------------ | ------ |
@@ -321,6 +321,20 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
 #' @param num_processes Number of processes to parallelize over
 #' (integer).
 #'
+#' If `is-riboviz-gff == TRUE` then:
+#'
+#' * `CDS`, `UTR5` and `UTR3` entries from `orf_gff_file` are used.
+#' * `buffer` is ignored.
+#'
+#' If `is-riboviz-gff == FALSE` then:
+#'
+#' * `CDS` entries from `orf_gff_file` are used.
+#' * `UTR5` and `UTR3` entries from `orf_gff_file` are ignored.
+#' * `buffer` is used as the width of left and right flanks, and to
+#'   calculate start and stop codon locations for genes.
+#' * Whether `stop_in_cds` is `TRUE` or `FALSE` also affects the
+#'   calculations for stop codon locations.
+#'
 #' @export
 BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
   max_read_length, buffer, primary_id, secondary_id, dataset,
@@ -380,8 +394,12 @@ BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
   h5createFile(hd_file)
   fid <- H5Fopen(hd_file)
 
-  # Adjust start codon position.
+  # GFF does not have UTR5 or UTR3 elements so define start codon
+  # location and nucleotide positions using buffer parameter.
+
+  # Define start codon position in terms of buffer.
   if (!is_riboviz_gff) {
+    start_codon_loc <- (buffer + 1)
     start_cod <- (buffer + 1):(buffer + 3)
   }
 
