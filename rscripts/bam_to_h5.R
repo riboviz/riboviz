@@ -66,85 +66,85 @@
 #' GROUP "/" {
 #'   GROUP "<gene>" {
 #'     GROUP "<dataset>" {
-#' 	 GROUP "reads" {
-#' 	    ATTRIBUTE "buffer_left" {
-#' 	       DATATYPE  H5T_IEEE_F64LE
-#' 	       DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
-#' 	       DATA {
-#' 	       (0): <CDS UTR5 length from GFF file OR buffer (if is-riboviz-gff is false)>
-#' 	       }
-#' 	    }
-#' 	    ATTRIBUTE "buffer_right" {
-#' 	       DATATYPE  H5T_STD_I32LE
-#' 	       DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
-#' 	       DATA {
-#' 	       (0): <CDS UTR3 length from GFF file OR buffer (if is-riboviz-gff is false)>
-#' 	       }
-#' 	    }
-#' 	    ATTRIBUTE "lengths" {
-#'                DATATYPE  H5T_STD_I32LE
-#'                DATASPACE  SIMPLE { (<read_length>) / (<read_length>) }
-#'                DATA {
-#'                (0): <min-read-length>, <min-read-length> + 1, ... , <min-read-length> + <m> - 1,
-#'                (<m>): <min-read-length>+<m>, <min-read-length> + <m> + 1, ... , <min-read-length> + <n> - 1,
-#'                (<n>): <min-read-length>+<n>, <min-read-length> + <n> + 1, ... , <min-read-length> + <max-read-length>
-#'                }
-#'             }
-#'             ATTRIBUTE "reads_by_len" {
-#'                DATATYPE  H5T_IEEE_F64LE
-#'                DATASPACE  SIMPLE { (<read_length>) / (<read_length>) }
-#'                DATA {
-#'                (0): <see below>
-#'                (<m>): <see below>
-#'                (<n>): <see below>
-#'                }
-#'             }
-#'            ATTRIBUTE "reads_total" {
-#'                DATATYPE  H5T_IEEE_F64LE
-#'                DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
-#'                DATA {
-#'                (0): <number of non-zero values in reads_by_len>
-#'                }
-#'             }
-#'             ATTRIBUTE "start_codon_pos" {
-#'                DATATYPE  H5T_STD_I32LE
-#'                DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
-#'                DATA {
-#'                (0): <position of 1st nt of CDS start codon from GFF file>,
-#' 		    <position of 2nd nt of CDS start codon from GFF file>,
-#' 		    <position of 3rd nt of CDS start codon from GFF file>
-#'                }
-#'             }
-#'             ATTRIBUTE "stop_codon_pos" {
-#'                DATATYPE  H5T_STD_I32LE
-#'                DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
-#'                DATA {
-#'                (0): <position of 1st nt of CDS stop codon from GFF file>,
-#' 	            <position of 2nd nt of CDS stop codon from GFF file>,
-#' 	            <position of 3rd nt of CDS stop codon from GFF file>
-#'                }
-#'             }
-#'             DATASET "data" {
-#'                DATATYPE  H5T_STD_I32LE
-#'                DATASPACE  SIMPLE { ( <sequence_length>, <read_length> ) /
-#' 	                           ( <sequence_length>, <read_length> ) }
-#'                DATA {
-#'                (0, 0): <see below>
-#'                (0, <m>): <see below>
-#'                (0, <n>): <see below>
-#'                ...
-#'                (<p>, 0): <see below>
-#'                (<p>, <m>): <see below>
-#'                (<p>, <n>): <see below>
-#'                ...
-#'                (<sequence_length - 1>, 0): <see below>
-#'                (<sequence_length - 1>, <m>): <see below>
-#'                (<sequence_length - 1>, <n>): <see below>
-#'                }
-#'             }
-#'          }
+#'       GROUP "reads" {
+#'         ATTRIBUTE "buffer_left" {
+#'            DATATYPE  H5T_IEEE_F64LE
+#'            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+#'            DATA {
+#'              (0): <CDS UTR5 length from GFF file OR buffer (if is-riboviz-gff is false)>
+#'            }
+#'         }
+#'         ATTRIBUTE "buffer_right" {
+#'            DATATYPE  H5T_STD_I32LE
+#'            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+#'            DATA {
+#'              (0): <CDS UTR3 length from GFF file OR buffer (if is-riboviz-gff is false)>
+#'            }
+#'         }
+#'         ATTRIBUTE "lengths" {
+#'            DATATYPE  H5T_STD_I32LE
+#'            DATASPACE  SIMPLE { (<read_length>) / (<read_length>) }
+#'            DATA {
+#'              (0): <min-read-length>, <min-read-length> + 1, ... , <min-read-length> + <m> - 1,
+#'              (<m>): <min-read-length>+<m>, <min-read-length> + <m> + 1, ... , <min-read-length> + <n> - 1,
+#'              (<n>): <min-read-length>+<n>, <min-read-length> + <n> + 1, ... , <min-read-length> + <max-read-length>
+#'            }
+#'         }
+#'         ATTRIBUTE "reads_by_len" {
+#'           DATATYPE  H5T_IEEE_F64LE
+#'           DATASPACE  SIMPLE { (<read_length>) / (<read_length>) }
+#'           DATA {
+#'             (0): <see below>
+#'             (<m>): <see below>
+#'             (<n>): <see below>
+#'           }
+#'         }
+#'         ATTRIBUTE "reads_total" {
+#'           DATATYPE  H5T_IEEE_F64LE
+#'           DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+#'           DATA {
+#'             (0): <number of non-zero values in reads_by_len>
+#'           }
+#'         }
+#'         ATTRIBUTE "start_codon_pos" {
+#'           DATATYPE  H5T_STD_I32LE
+#'           DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+#'           DATA {
+#'             (0): <position of 1st nt of CDS start codon from GFF file>,
+#'                  <position of 2nd nt of CDS start codon from GFF file>,
+#'                  <position of 3rd nt of CDS start codon from GFF file>
+#'           }
+#'         }
+#'         ATTRIBUTE "stop_codon_pos" {
+#'           DATATYPE  H5T_STD_I32LE
+#'           DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+#'           DATA {
+#'             (0): <position of 1st nt of CDS stop codon from GFF file>,
+#'                  <position of 2nd nt of CDS stop codon from GFF file>,
+#'                  <position of 3rd nt of CDS stop codon from GFF file>
+#'           }
+#'         }
+#'         DATASET "data" {
+#'           DATATYPE  H5T_STD_I32LE
+#'           DATASPACE  SIMPLE { ( <sequence_length>, <read_length> ) /
+#' 	                         ( <sequence_length>, <read_length> ) }
+#'           DATA {
+#'             (0, 0): <see below>
+#'             (0, <m>): <see below>
+#'             (0, <n>): <see below>
+#'             ...
+#'             (<p>, 0): <see below>
+#'             (<p>, <m>): <see below>
+#'             (<p>, <n>): <see below>
+#'             ...
+#'             (<sequence_length - 1>, 0): <see below>
+#'             (<sequence_length - 1>, <m>): <see below>
+#'             (<sequence_length - 1>, <n>): <see below>
+#'           }
+#'         }
 #'       }
-#'    }
+#'     }
+#'   }
 #'    ...
 #' }
 #' ```
@@ -345,6 +345,7 @@ BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
   # CDS locations.
   gff <- readGFFAsGRanges(orf_gff_file)
   if (!is_riboviz_gff) {
+    # GFF does not contain UTR5 or UTR3 elements.
     gff <- gff[gff$type == "CDS"]
   }
 
@@ -368,11 +369,12 @@ BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
       gene_seq_name <- as.character(seqnames(gene_location)[1])
       seqlevels(gene_location) <- gene_seq_name
       if (is_riboviz_gff) {
-        # If GFF contains UTR5, CDS, and UTR3 elements.
+        # GFF contains UTR5, CDS, and UTR3 elements.
         buffer_left <- width(gene_location[gene_location$type == "UTR5"])
         buffer_right <- width(gene_location[gene_location$type == "UTR3"])
         gene_location <- gene_location[gene_location$type == "CDS"]
       } else {
+        # GFF does not contain UTR5 or UTR3 elements.
         buffer_left <- buffer
         buffer_right <- buffer
       }
@@ -394,20 +396,11 @@ BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
   h5createFile(hd_file)
   fid <- H5Fopen(hd_file)
 
-  # GFF does not have UTR5 or UTR3 elements so define start codon
-  # location and nucleotide positions using buffer parameter.
-
-  # Define start codon position in terms of buffer.
   if (!is_riboviz_gff) {
+    # GFF does not contain UTR5 or UTR3 elements. Define start codon
+    # location and nucleotide positions using buffer.
     start_codon_loc <- (buffer + 1)
     start_cod <- (buffer + 1):(buffer + 3)
-  }
-
-  # Set stop codon offset.
-  if (stop_in_cds) {
-    offset <- 2
-  } else {
-    offset <- -1
   }
 
   # Create symbolic links for alternate gene IDs, if required.
@@ -422,10 +415,21 @@ BamToH5 <- function(bam_file, orf_gff_file, min_read_length,
     gene_location <- gff[gff_pid == gene]
     # Get location of start and stop codon nucleotides from matrix.
     if (is_riboviz_gff) {
+      # GFF contains UTR5 or UTR3 elements.
       start_codon_loc <- start(gene_location[gene_location$type == "CDS"])
       start_cod <- start_codon_loc:(start_codon_loc + 2)
       stop_codon_loc <- start(gene_location[gene_location$type == "UTR3"]) - 3
     } else {
+      # GFF does not contain UTR5 or UTR3 elements.
+      # Define stop codon offset.
+      if (stop_in_cds) {
+        offset <- 2
+      } else {
+        offset <- -1
+      }
+      # Define stop codon location and nucleotide positions using
+      # length of CDS, buffer and whether or not stop codon is in
+      # CDS.
       stop_codon_loc <- ncol(gene_read_counts) - buffer - offset
     }
     stop_cod <- stop_codon_loc:(stop_codon_loc + 2)
