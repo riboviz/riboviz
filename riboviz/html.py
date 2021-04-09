@@ -5,9 +5,6 @@ import subprocess
 
 HTML_EXT = "html"
 """ File extension. """
-HTML_FORMAT = "{}_output_report." + HTML_EXT
-""" File name format. """
-
 
 def equal_html(file1, file2):
     """
