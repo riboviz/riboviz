@@ -742,7 +742,8 @@ def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
         os.path.join(output_dir, sample, file_name))
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_analysis_outputs_html(expected_fixture, output_dir, sample, nextflow_fixture):
+@pytest.mark.parametrize("file_name", [workflow_files.STATIC_HTML_FILE])
+def test_analysis_outputs_html(expected_fixture, output_dir, sample, file_name, nextflow_fixture):
     """
     Test ``AnalysisOutputs.Rmd`` html files for equality. See
     :py:func:`riboviz.compare_files.compare_files`.
@@ -755,10 +756,12 @@ def test_analysis_outputs_html(expected_fixture, output_dir, sample, nextflow_fi
     :type output_dir: str or unicode
     :param sample: sample name
     :type sample: str or unicode
+    :param file_name: file name
+    :type file_name: str or unicode
     :param nextflow_fixture: Should Nextflow tests be run?
     :type nextflow_fixture: bool
     """
-    file_name = html.HTML_FORMAT.format(sample)
+    file_name = workflow_files.STATIC_HTML_FILE.format(sample)
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
     expected_file = os.path.join(expected_fixture, output_dir_name,
                                  sample, file_name)
