@@ -70,85 +70,120 @@ Mok_YAL5_data <- GetAllGeneDatamatrix(dataset="Mok-simYAL5", hd_file = YAL5_h5,
 
 
 
-# GetGeneDatamatrix for each of the genes contained within the Mok-simYAL5
+# # GetGeneDatamatrix for each of the genes contained within the Mok-simYAL5
+# 
+# YAL003W_datamatrix <- GetGeneDatamatrix(gene="YAL003W", dataset="Mok-simYAL5", 
+#                                   hd_file = YAL5_h5) #data_mat
+# 
+# # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+# # where 1:41 represents read lengths 10:50 and 1:1121 represents the 1121 
+# # nucleotides including UTRs and CDS
+# 
+# 
+# # The GetGeneDatamatrix contains the CDS as well as the UTRs, results in 1121 
+# # observations instead of the 207 which consists of the CDS
+# 
+# # YAL005C_data <- GetGeneDatamatrix(gene="YAL005C", dataset="Mok-simYAL5", 
+# #                                   hd_file = YAL5_h5)
+# # YAL012W_data <- GetGeneDatamatrix(gene="YAL012W", dataset="Mok-simYAL5", 
+# #                                   hd_file = YAL5_h5)
+# # YAL035W_data <- GetGeneDatamatrix(gene="YAL035W", dataset="Mok-simYAL5", 
+# #                                   hd_file = YAL5_h5)
+# # YAL038W_data <- GetGeneDatamatrix(gene="YAL038W", dataset="Mok-simYAL5", 
+# #                                   hd_file = YAL5_h5)
+# 
+# 
+# 
+# # Make a table which contains the datamatrix from the h5 file, in this case only 
+# # carried out for a single gene YAL003W
+# 
+# 
+# 
+#                                         
+#   #   reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5)
+#   #           print(reads_pos_length)
+#   #   reads_asitepos <- CalcAsiteFixed(reads_pos_length, min_read_length = 10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)), colsum_out = TRUE) 
+#   #           print(reads_asitepos)
+#   #   SumByFrame(reads_asitepos, left =251, right =871)
+#   #   SnapToCodonList <- SnapToCodon(reads_asitepos, left=251, right=871, snapdisp = 0L)                                         
+#   #                                        
+#   # print(SnapToCodonList)                                       
+# 
+# # buffer <- 250
+# # min_read_length <- 10
+# # Codon_Pos_Reads <- GetCodonPositionReads(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, left = (buffer - 15), right = (buffer + 11), min_read_length = min_read_length)
+# 
+# 
+# YAL003W_tidy <- TidyDatamatrix(data_mat = YAL003W_datamatrix, startpos = 1, startlen=10)
+# 
+# # A tibble: 45,961 x 3
+# # ReadLen   Pos Counts
+# # <int> <int>  <int>
+# #   1      10     1      0
+# # 2      11     1      0
+# # 3      12     1      0
+# # 4      13     1      0
+# # 5      14     1      0
+# # 6      15     1      0
+# # 7      16     1      0
+# # 8      17     1      0
+# # 9      18     1      0
+# # 10     19     1      0
+# # # ... with 45,951 more rows
+# 
+# # Tibble contains the read lengths 10:50 for position 1-1121 
+# # The number of observations (45,961) is equal to 41 read lengths multiplied by 1121 nucleotides
+# 
+# # Summaried the table so that the total count is shown for each of the positions 
+# # summary_counts_for_positions <- summarise(group_by(YAL003W_tidy, Pos), Total_counts = sum(Counts))
+# # A tibble: 1,121 x 2
+# # Pos Total_counts
+# # * <int>        <int>
+# #   1     1            0
+# # 2     2            0
+# # 3     3            0
+# # 4     4            0
+# # 5     5            0
+# # 6     6            0
+# # 7     7            0
+# # 8     8            0
+# # 9     9            0
+# # 10    10            0
+# # ... with 1,111 more rows
+# 
+# # Tidydatamatrix is grouped by position, removes read lengths
+# 
+# 
+# # start_codon_pos <- GetGeneStartCodonPos(gene="YAL003W", dataset="Mok-simYAL5", # 251 252 253
+# #                      hd_file = YAL5_h5) 
+# # 
+# # stop_codon_pos <- GetGeneStopCodonPos(gene="YAL003W", dataset="Mok-simYAL5",  # 869, 870, 871
+# #                     hd_file=YAL5_h5)
+# 
+# 
+# # CDS start 251, CDS end 871 - CDS total: 621 nt -> 207 codons
+# # 250 UTRs at each end for a total of 1121 nt
 
-YAL003W_datamatrix <- GetGeneDatamatrix(gene="YAL003W", dataset="Mok-simYAL5", 
-                                  hd_file = YAL5_h5) #data_mat
+KeepGeneCDS <- function(gene, dataset, hd_file, startpos = 1, startlen = 10){
+  
+  tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene, dataset, hd_file), startpos, startlen) 
+  
+  summary_counts_for_positions <- dplyr::summarise(dplyr::group_by(tidy_gene_datamatrix, Pos), Total_counts = sum(Counts))
+  
+  start_codon_pos <- GetGeneStartCodonPos(gene, dataset, hd_file)
+  stop_codon_pos <- GetGeneStopCodonPos(gene, dataset, hd_file)
+  
+  summary_counts_for_positions_CDS <- summary_counts_for_positions %>%
+    dplyr::filter(dplyr::between(Pos, min(start_codon_pos), max(stop_codon_pos))) 
 
-# int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
-# where 1:41 represents read lengths 10:50 and 1:1121 represents the 1121 
-# nucleotides including UTRs and CDS
+  return(summary_counts_for_positions_CDS)
+  
+}
 
-
-# The GetGeneDatamatrix contains the CDS as well as the UTRs, results in 1121 
-# observations instead of the 207 which consists of the CDS
-
-# YAL005C_data <- GetGeneDatamatrix(gene="YAL005C", dataset="Mok-simYAL5", 
-#                                   hd_file = YAL5_h5)
-# YAL012W_data <- GetGeneDatamatrix(gene="YAL012W", dataset="Mok-simYAL5", 
-#                                   hd_file = YAL5_h5)
-# YAL035W_data <- GetGeneDatamatrix(gene="YAL035W", dataset="Mok-simYAL5", 
-#                                   hd_file = YAL5_h5)
-# YAL038W_data <- GetGeneDatamatrix(gene="YAL038W", dataset="Mok-simYAL5", 
-#                                   hd_file = YAL5_h5)
+KeepGeneCDS(gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
 
 
 
-# Make a table which contains the datamatrix from the h5 file, in this case only 
-# carried out for a single gene YAL003W
-
-
-
-GetGeneStartCodonPos(gene="YAL003W", dataset="Mok-simYAL5", # 251 252 253
-                     hd_file = YAL5_h5) 
-
-GetGeneStopCodonPos(gene="YAL003W", dataset="Mok-simYAL5",  # 869, 870, 871
-                    hd_file=YAL5_h5)
-
-# CDS start 251, CDS end 871 - CDS total: 621 nt -> 207 codons
-# 250 UTRs at each end for a total of 1121 nt
-
-
-
-                                        
-  #   reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5)
-  #           print(reads_pos_length)
-  #   reads_asitepos <- CalcAsiteFixed(reads_pos_length, min_read_length = 10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)), colsum_out = TRUE) 
-  #           print(reads_asitepos)
-  #   SumByFrame(reads_asitepos, left =251, right =871)
-  #   SnapToCodonList <- SnapToCodon(reads_asitepos, left=251, right=871, snapdisp = 0L)                                         
-  #                                        
-  # print(SnapToCodonList)                                       
-
-# buffer <- 250
-# min_read_length <- 10
-# Codon_Pos_Reads <- GetCodonPositionReads(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, left = (buffer - 15), right = (buffer + 11), min_read_length = min_read_length)
-
-
-YAL003W_tidy <- TidyDatamatrix(data_mat = YAL003W_datamatrix, startpos = 1, startlen=10)
-
-# A tibble: 45,961 x 3
-# ReadLen   Pos Counts
-# <int> <int>  <int>
-#   1      10     1      0
-# 2      11     1      0
-# 3      12     1      0
-# 4      13     1      0
-# 5      14     1      0
-# 6      15     1      0
-# 7      16     1      0
-# 8      17     1      0
-# 9      18     1      0
-# 10     19     1      0
-# # ... with 45,951 more rows
-
-# Tibble contains the read lengths 10:50 for position 1-1121 
-# The number of observations (45,961) is equal to 41 read lengths multiplied by 1121 nucleotides
-
-# Summaried the table so that the total count is shown for each of the positions 
-Tidy_sum  <- summarise(group_by(YAL003W_tidy, Pos), sum(Counts))
-Tidy_remove_UTR5 <- Tidy_sum [-c(1:250), ]
-Tidy_remove_UTR3 <- Tidy_remove_UTR5[c(1:621), ]
 #Tidy_nnt_to_codons <- 
   
 
