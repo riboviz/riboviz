@@ -74,7 +74,7 @@
 #'     GROUP "<dataset>" {
 #'       GROUP "reads" {
 #'         ATTRIBUTE "buffer_left" {
-#'            DATATYPE  H5T_IEEE_F64LE
+#'            DATATYPE  H5T_STD_I32LE
 #'            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
 #'            DATA {
 #'              (0): <Feature UTR5 length from GFF file OR buffer (if is-riboviz-gff is false)>
@@ -97,7 +97,7 @@
 #'            }
 #'         }
 #'         ATTRIBUTE "reads_by_len" {
-#'           DATATYPE  H5T_IEEE_F64LE
+#'           DATATYPE  H5T_STD_I32LE
 #'           DATASPACE  SIMPLE { (<read_length>) / (<read_length>) }
 #'           DATA {
 #'             (0): <see below>
@@ -106,7 +106,7 @@
 #'           }
 #'         }
 #'         ATTRIBUTE "reads_total" {
-#'           DATATYPE  H5T_IEEE_F64LE
+#'           DATATYPE  H5T_STD_I32LE
 #'           DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
 #'           DATA {
 #'             (0): <number of non-zero values in reads_by_len>
@@ -277,6 +277,8 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
   read_counts <- matrix(0,
                         nrow = num_read_lengths,
                         ncol = (gene_length + left_flank + right_flank))
+  # Cast to be matrix of integer.
+  mode(read_counts) <- "integer"
   if (all(strand(gene_location) == "+")) {
     # Genes on positive strands.
     row <- 1
@@ -411,12 +413,10 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
     start_codon_loc <- (buffer + 1)
     start_cod <- (buffer + 1):(buffer + 3)
   }
-
   # Create symbolic links for alternate gene IDs, if required.
   if (!is.null(secondary_id)) {
     base_gid <- H5Gopen(fid, "/")
   }
-
   for (gene in genes) {
     # Get matrix of read counts by position and length for the gene.
     gene_read_counts <- read_counts[[gene]]
@@ -469,7 +469,10 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
     h5writeAttribute.integer(sum(gene_read_counts),
                              gid,
                              name = "reads_total")
-    h5writeAttribute.integer((start_codon_loc - 1),
+    # Though start_codon_loc is an integer, start_codon_loc - 1
+    # is a double, so cast back to integer so H5 type is
+    # H5T_STD_I32LE and not H5T_IEEE_F64LE.
+    h5writeAttribute.integer(as.integer(start_codon_loc - 1),
                              gid,
                              name = "buffer_left")
     h5writeAttribute.integer((ncol(gene_read_counts) - stop_cod[3]),

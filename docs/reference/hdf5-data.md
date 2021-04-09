@@ -74,7 +74,7 @@ GROUP "/" {
       GROUP "<dataset>" {
 	 GROUP "reads" {
 	    ATTRIBUTE "buffer_left" {
-	       DATATYPE  H5T_IEEE_F64LE
+	       DATATYPE  H5T_STD_I32LE
 	       DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
 	       DATA {
 	       (0): <Feature UTR5 length from GFF file OR buffer (if is_riboviz_gff is false)>
@@ -97,7 +97,7 @@ GROUP "/" {
                }
             }
             ATTRIBUTE "reads_by_len" {
-               DATATYPE  H5T_IEEE_F64LE
+               DATATYPE  H5T_STD_I32LE
                DATASPACE  SIMPLE { (<read_length>) / (<read_length>) }
                DATA {
                (0): <see below>
@@ -106,7 +106,7 @@ GROUP "/" {
                }
             }
            ATTRIBUTE "reads_total" {
-               DATATYPE  H5T_IEEE_F64LE
+               DATATYPE  H5T_STD_I32LE
                DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
                DATA {
                (0): <number of non-zero values in reads_by_len>
