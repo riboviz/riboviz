@@ -1,13 +1,16 @@
-#' testthat tests for bam_to_h5.R
+#' testthat tests for `bam_to_h5.R`.
 #'
-#' These tests run bam_to_h5.R using the GFF and BAM file then
-#' validates the .h5 file created based upon its expected qualities
-#' given those of the input GFF and BAM files and the bam_to_h5.R
-#' command-line parameters.
+#' These tests run `bam_to_h5.R` using a GFF and SAM file (which is
+#' converted into a BAM file as part of the tests), validates the HDF5
+#' files created based upon its expected qualities  given those of the
+#' input GFF and BAM files and the `bam_to_h5.R` command-line
+#' parameters.
 #'
 #' The tests assumes the following files are in the path:
 #'
-#' * `rscripts/bam_to_h5.R`
+#' ```
+#' rscripts/bam_to_h5.R
+#' ```
 #'
 #' To run the tests interactively from within R:
 #'
@@ -23,15 +26,15 @@
 #'
 #' These tests assumes the following test data files exist:
 #'
-#' * `data/Mok-tinysim-gffsam/A.sam`
-#' * `data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3`
-#'
-#' To use thse tests with other data files see comments on
-#' test_that("Run bam_to_h5.R and validate H5 file"...).
+#' ```
+#' data/Mok-tinysim-gffsam/A.sam
+#' data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3
+#' ```
 #'
 #' At present, the following behaviours are not tested:
-#' `is_riboviz_gff = FALSE` when `stop_in_cds = TRUE`; a BAM file
-#' specifies -ve strands; there are multiple exon genes.
+#'
+#' * BAM file specifies -ve strands.
+#' * There are multiple exon genes.
 #'
 #' @export
 
@@ -83,6 +86,7 @@ DeleteFile <- function(file_name) {
 ValidateH5Sequence <- function(sequence, h5_file, gff,
   bam_hdr_seq_info, bam, dataset, buffer, min_read_length,
   max_read_length, is_riboviz_gff, stop_in_cds) {
+
   num_read_counts <- max_read_length - min_read_length + 1
   # Get sequence positions from GFF
   gff_cds_start <- GetCDS5start(sequence, gff, ftype = "CDS")
@@ -349,64 +353,61 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
   }
 }
 
-testthat::test_that("Run bam_to_h5.R and validate H5 file", {
-  # To use this test with other data files:
-  # * Edit gff_file.
-  # * If you have a SAM file, edit sam_file, set create_bam <- TRUE.
-  # * If you have a BAM file, comment out sam_file, edit bam_file,
-  #   edit_bam_bai_file, set create_bam <- FALSE.
-  # * Edit variables to consistent with the configuration used to
-  #   create the H5 file.
-
-  create_bam <- TRUE
-
-  withr::defer(DeleteFile(h5_file)) # Delete H5 when test completes.
-  if (create_bam) {
-    withr::defer(DeleteFile(bam_file)) # Delete H5 when test completes.
-    withr::defer(DeleteFile(bam_bai_file)) # Delete H5 when test completes.
-  }
-
-  gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
-  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  bam_file <- here::here("test_bam_to_h5_data.bam")
-  bam_bai_file <- here::here("test_bam_to_h5_data.bam.bai")
-  dataset <- "Mok-tinysim"
-  buffer <- 20
-  min_read_length <- 10
-  max_read_length <- 50
-  primary_id <- "Name"
-  secondary_id <- "NULL"
-  is_riboviz_gff <- TRUE
-  stop_in_cds <- FALSE
-
-  h5_file <- here::here("test_bam_to_h5_data.h5")
+#' Run `bam_to_h5.R` on a SAM file.
+#' 
+#' `samtools view` and `samtools index` are first run to convert
+#' the SAM file into a BAM file.
+#'
+#' @param bam_to_h5 `bam_to_h5.R` path (character).
+#' @param sam_file SAM input file (character).
+#' @param bam_file BAM file (character).
+#' @param orf_gff_file GFF2/GFF3 Matched genome feature file,
+#' specifying coding sequences locations (start and stop coordinates)
+#' within the transcripts (GTF/GFF3 file) (character).
+#' @param h5_file H5 output file (character).
+#' @param min_read_length Minimum read length in H5 output (integer).
+#' @param max_read_length Maximum read length in H5 output (integer).
+#' @param buffer Length of flanking region around the CDS (integer).
+#' @param primary_id Primary gene IDs to access the data (character).
+#' @param secondary_id Secondary gene IDs to access the data (character).
+#' @param dataset Human-readable name of the dataset (character).
+#' @param is_riboviz_gff Does the GFF file contain 3 elements per gene
+#' - UTR5, CDS, and UTR3? (logical).
+#' @param stop_in_cds Are stop codons part of the CDS annotations in
+#' GFF? (logical).
+#' @param num_processes Number of processes to parallelize over
+#' (integer).
+#'
+#' @export
+RunSamToBamToH5 <- function(bam_to_h5, sam_file, bam_file,
+  orf_gff_file, h5_file, min_read_length, max_read_length, buffer,
+  primary_id, secondary_id, dataset, is_riboviz_gff, stop_in_cds,
+  num_processes = 1) {
 
   print(paste0("bam_to_h5.R: ", bam_to_h5))
-  print(paste0("GFF: ", gff_file))
+  print(paste0("GFF: ", orf_gff_file))
+  print(paste0("SAM: ", sam_file))
 
-  if (create_bam) {
-    print(paste0("SAM: ", sam_file))
-    bam_cmd_template <- "samtools view -S -b {sam_file} > {bam_file}"
-    bam_cmd <- glue(bam_cmd_template)
-    print(bam_cmd)
-    exit_code <- system(bam_cmd)
-    print(paste0("'samtools view' exit code: ", exit_code))
-    expect_equal(exit_code, 0,
-                 info = "Unexpected exit code from 'samtools view'")
+  bam_cmd_template <- "samtools view -S -b {sam_file} > {bam_file}"
+  bam_cmd <- glue(bam_cmd_template)
+  print(bam_cmd)
+  exit_code <- system(bam_cmd)
+  print(paste0("'samtools view' exit code: ", exit_code))
+  expect_equal(exit_code, 0,
+               info = "Unexpected exit code from 'samtools view'")
 
-    bai_cmd_template <- "samtools index {bam_file}"
-    bai_cmd <- glue(bai_cmd_template)
-    print(bai_cmd)
-    exit_code <- system(bai_cmd)
-    print(paste0("'samtools index' exit code: ", exit_code))
-    expect_equal(exit_code, 0,
-        info = "Unexpected exit code from 'samtools index'")
-  }
+  bai_cmd_template <- "samtools index {bam_file}"
+  bai_cmd <- glue(bai_cmd_template)
+  print(bai_cmd)
+  exit_code <- system(bai_cmd)
+  print(paste0("'samtools index' exit code: ", exit_code))
+  expect_equal(exit_code, 0,
+      info = "Unexpected exit code from 'samtools index'")
 
   print(paste0("BAM: ", bam_file))
   print(paste0("HDF5: ", h5_file))
 
-  h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes=1 --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}" # nolint
+  h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes={num_processes} --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={orf_gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}" # nolint
   h5_cmd <- glue(h5_cmd_template)
   print(h5_cmd)
 
@@ -414,7 +415,98 @@ testthat::test_that("Run bam_to_h5.R and validate H5 file", {
   print(paste0("'bam_to_h5.R' exit code: ", exit_code))
   expect_equal(exit_code, 0,
     info = "Unexpected exit code from 'bam_to_h5.R'")
+}
 
-  ValidateH5(h5_file, gff_file, bam_file, dataset, buffer,
+testthat::test_that(
+  "Test bam_to_h5.R (is_riboviz_gff=TRUE)", {
+
+  withr::defer(DeleteFile(h5_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_bai_file)) # Delete H5 when test completes.
+
+  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
+  bam_file <- here::here("test_bam_to_h5_data.bam")
+  bam_bai_file <- here::here("test_bam_to_h5_data.bam.bai")
+  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
+
+  min_read_length <- 10
+  max_read_length <- 50
+  buffer <- 20
+  primary_id <- "Name"
+  secondary_id <- "NULL"
+  dataset <- "Mok-tinysim"
+  is_riboviz_gff <- TRUE
+  stop_in_cds <- FALSE
+  h5_file <- here::here("test_bam_to_h5_data.h5")
+  num_processes <- 1
+
+  RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
+    min_read_length, max_read_length, buffer, primary_id, secondary_id,
+    dataset, is_riboviz_gff, stop_in_cds, num_processes)
+
+  ValidateH5(h5_file, orf_gff_file, bam_file, dataset, buffer,
+    min_read_length, max_read_length, is_riboviz_gff, stop_in_cds)
+})
+
+
+testthat::test_that(
+  "Test bam_to_h5.R (is_riboviz_gff=FALSE, stop_in_CDS=FALSE)", {
+
+  withr::defer(DeleteFile(h5_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_bai_file)) # Delete H5 when test completes.
+
+  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
+  bam_file <- here::here("test_bam_to_h5_data.bam")
+  bam_bai_file <- here::here("test_bam_to_h5_data.bam.bai")
+  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
+
+  min_read_length <- 10
+  max_read_length <- 50
+  buffer <- 20
+  primary_id <- "Name"
+  secondary_id <- "NULL"
+  dataset <- "Mok-tinysim"
+  is_riboviz_gff <- FALSE
+  stop_in_cds <- FALSE
+  h5_file <- here::here("test_bam_to_h5_data.h5")
+  num_processes <- 1
+
+  RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
+    min_read_length, max_read_length, buffer, primary_id, secondary_id,
+    dataset, is_riboviz_gff, stop_in_cds, num_processes)
+
+  ValidateH5(h5_file, orf_gff_file, bam_file, dataset, buffer,
+    min_read_length, max_read_length, is_riboviz_gff, stop_in_cds)
+})
+
+testthat::test_that(
+  "Test bam_to_h5.R (is_riboviz_gff=FALSE, stop_in_CDS=TRUE)", {
+
+  withr::defer(DeleteFile(h5_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_bai_file)) # Delete H5 when test completes.
+
+  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
+  bam_file <- here::here("test_bam_to_h5_data.bam")
+  bam_bai_file <- here::here("test_bam_to_h5_data.bam.bai")
+  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
+
+  min_read_length <- 10
+  max_read_length <- 50
+  buffer <- 20
+  primary_id <- "Name"
+  secondary_id <- "NULL"
+  dataset <- "Mok-tinysim"
+  is_riboviz_gff <- FALSE
+  stop_in_cds <- TRUE
+  h5_file <- here::here("test_bam_to_h5_data.h5")
+  num_processes <- 1
+
+  RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
+    min_read_length, max_read_length, buffer, primary_id, secondary_id,
+    dataset, is_riboviz_gff, stop_in_cds, num_processes)
+
+  ValidateH5(h5_file, orf_gff_file, bam_file, dataset, buffer,
     min_read_length, max_read_length, is_riboviz_gff, stop_in_cds)
 })
