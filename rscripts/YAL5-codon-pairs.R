@@ -1,5 +1,5 @@
 
-# YAL5 is at location $HOME/riboviz/riboviz/Mok-simYAL5/output/A/A.h5
+# YAL5_h5 is at location $HOME/riboviz/riboviz/Mok-simYAL5/output/A/A.h5
 
 # source packages and functions from rscripts 
 source(here::here("rscripts", "read_count_functions.R"))
@@ -9,8 +9,11 @@ source(here::here("rscripts", "stats_figs_block_functions.R"))
 # other packages I loaded that I used 
 library(tidyverse)
 
-YAL5 <- here::here("Mok-simYAL5", "output", "A", "A.h5")
+YAL5_h5 <- here::here("Mok-simYAL5", "output", "A", "A.h5")
 
+YAL5_gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
+
+gff_df <- readGFFAsDf(YAL5_gff)
 
 # Import the .tsv file: (used the updated file which contains the first 
 # 200 codons of each gene)
@@ -31,13 +34,13 @@ print(YAL003W_pos)
 
 
 # read the structure of the h5 file 
-h5ls(YAL5)
+h5ls(YAL5_h5)
 
 
 
 ### NOT DIRECTLY USED YET ###
 
-# GetDatamatrix: Function to get the datamatrix for each of the genes 
+# GetAllGeneDatamatrix: Function to get the datamatrix for each of the genes 
 # contained within the h5 file
 
 # Loop list of gene names through GetGeneDatamatrix to extract all the 
@@ -45,12 +48,12 @@ h5ls(YAL5)
 
 # Required parameters: gene_names, dataset, hd_file)
 
-gene_names <- rhdf5::h5ls(YAL5, recursive = 1)$name
+gene_names <- rhdf5::h5ls(YAL5_h5, recursive = 1)$name
 
-GetDatamatrix <- function(dataset, hd_file, gene_names){
+GetAllGeneDatamatrix <- function(dataset, hd_file, gene_names){
   for (gene in gene_names){
-    GetDatamatrixList <- GetGeneDatamatrix(gene, dataset, hd_file)
-    print(GetDatamatrixList)
+    get_datamatrix_list <- GetGeneDatamatrix(gene, dataset, hd_file)
+    return(get_datamatrix_list)
   }
 }
 
@@ -59,7 +62,7 @@ GetDatamatrix <- function(dataset, hd_file, gene_names){
 
 
 # Extract the datamatrix for the five genes 
-Mok_YAL5_data <- GetDatamatrix(dataset="Mok-simYAL5", hd_file = "~/R/YAL5.h5", 
+Mok_YAL5_data <- GetAllGeneDatamatrix(dataset="Mok-simYAL5", hd_file = YAL5_h5, 
                                gene_names)
 
 ### ###
@@ -69,20 +72,25 @@ Mok_YAL5_data <- GetDatamatrix(dataset="Mok-simYAL5", hd_file = "~/R/YAL5.h5",
 
 # GetGeneDatamatrix for each of the genes contained within the Mok-simYAL5
 
-YAL003W_data <- GetGeneDatamatrix(gene="YAL003W", dataset="Mok-simYAL5", 
-                                  hd_file = "~/R/YAL5.h5") #data_mat
+YAL003W_datamatrix <- GetGeneDatamatrix(gene="YAL003W", dataset="Mok-simYAL5", 
+                                  hd_file = YAL5_h5) #data_mat
+
+# int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+# where 1:41 represents read lengths 10:50 and 1:1121 represents the 1121 
+# nucleotides including UTRs and CDS
+
 
 # The GetGeneDatamatrix contains the CDS as well as the UTRs, results in 1121 
 # observations instead of the 207 which consists of the CDS
 
 # YAL005C_data <- GetGeneDatamatrix(gene="YAL005C", dataset="Mok-simYAL5", 
-#                                   hd_file = "~/R/YAL5.h5")
+#                                   hd_file = YAL5_h5)
 # YAL012W_data <- GetGeneDatamatrix(gene="YAL012W", dataset="Mok-simYAL5", 
-#                                   hd_file = "~/R/YAL5.h5")
+#                                   hd_file = YAL5_h5)
 # YAL035W_data <- GetGeneDatamatrix(gene="YAL035W", dataset="Mok-simYAL5", 
-#                                   hd_file = "~/R/YAL5.h5")
+#                                   hd_file = YAL5_h5)
 # YAL038W_data <- GetGeneDatamatrix(gene="YAL038W", dataset="Mok-simYAL5", 
-#                                   hd_file = "~/R/YAL5.h5")
+#                                   hd_file = YAL5_h5)
 
 
 
@@ -92,19 +100,18 @@ YAL003W_data <- GetGeneDatamatrix(gene="YAL003W", dataset="Mok-simYAL5",
 
 
 GetGeneStartCodonPos(gene="YAL003W", dataset="Mok-simYAL5", # 251 252 253
-                     hd_file = "~/R/YAL5.h5") 
+                     hd_file = YAL5_h5) 
 
 GetGeneStopCodonPos(gene="YAL003W", dataset="Mok-simYAL5",  # 869, 870, 871
-                    hd_file="~/R/YAL5.h5")
+                    hd_file=YAL5_h5)
 
 # CDS start 251, CDS end 871 - CDS total: 621 nt -> 207 codons
 # 250 UTRs at each end for a total of 1121 nt
 
 
-gff_df<-readGFFAsDf("~/R/Scer_YAL_5genes_w_250utrs.gff3")
 
                                         
-  #   reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = "~/R/YAL5.h5")
+  #   reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5)
   #           print(reads_pos_length)
   #   reads_asitepos <- CalcAsiteFixed(reads_pos_length, min_read_length = 10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)), colsum_out = TRUE) 
   #           print(reads_asitepos)
@@ -115,10 +122,28 @@ gff_df<-readGFFAsDf("~/R/Scer_YAL_5genes_w_250utrs.gff3")
 
 # buffer <- 250
 # min_read_length <- 10
-# Codon_Pos_Reads <- GetCodonPositionReads(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = "~/R/YAL5.h5", left = (buffer - 15), right = (buffer + 11), min_read_length = min_read_length)
+# Codon_Pos_Reads <- GetCodonPositionReads(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, left = (buffer - 15), right = (buffer + 11), min_read_length = min_read_length)
 
 
 YAL003W_tidy <- TidyDatamatrix(data_mat = YAL003W_datamatrix, startpos = 1, startlen=10)
+
+# A tibble: 45,961 x 3
+# ReadLen   Pos Counts
+# <int> <int>  <int>
+#   1      10     1      0
+# 2      11     1      0
+# 3      12     1      0
+# 4      13     1      0
+# 5      14     1      0
+# 6      15     1      0
+# 7      16     1      0
+# 8      17     1      0
+# 9      18     1      0
+# 10     19     1      0
+# # ... with 45,951 more rows
+
+# Tibble contains the read lengths 10:50 for position 1-1121 
+# The number of observations (45,961) is equal to 41 read lengths multiplied by 1121 nucleotides
 
 # Summaried the table so that the total count is shown for each of the positions 
 Tidy_sum  <- summarise(group_by(YAL003W_tidy, Pos), sum(Counts))
