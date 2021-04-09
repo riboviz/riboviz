@@ -8,22 +8,24 @@ To learn more about accessing and manipulating HDF5 files in R, see Bioconductor
 
 ## `bam_to_h5.R`
 
-`bam_to_h5.R` creates HDF5 files. It uses the following configuration parameters from the RiboViz configuration (see [Configuring the RiboViz workflow](../user/prep-riboviz-config.md)):
+Given a GFF file and a BAM file, `bam_to_h5.R` creates an HDF5 file with information about a feature (e.g. CDS, ORF, or uORF).
+
+It is passed the following configuration parameters from the RiboViz configuration (see [Configuring the RiboViz workflow](../user/prep-riboviz-config.md)):
 
 | Parameter | Description |
 | --------- | ----------- |
-| `buffer` | Length of flanking region around the CDS |
+| `buffer` | Length of flanking region around the feature |
 | `dataset` | Human-readable name of the dataset |
-| `is_riboviz_gff` | Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3? |
+| `is_riboviz_gff` | Does the GFF file contain 3 elements per gene - UTR5, feature, and UTR3? |
 | `max_read_length` | Maximum read length in H5 output |
 | `min_read_length` | Minimum read length in H5 output |
 | `num_processes` | Number of processes to parallelize over, used by specific steps in the workflow |
 | `orf_gff_file` | Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts (GTF/GFF3 file) |
 | `primary_id` | Primary gene IDs to access the data (YAL001C, YAL003W, etc.) |
 | `secondary_id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) |
-| `stop_in_cds` | Are stop codons part of the CDS annotations in GFF? |
+| `stop_in_cds` | Are stop codons part of the feature annotations in GFF? |
 
-It also takes a BAM file as input and the name of the HDF5 file to create as output.
+At present, the default feature is assumed to be `CDS`.
 
 All reads are mapped to their 5' ends.
 
@@ -33,12 +35,12 @@ All reads are mapped to their 5' ends.
 
 If `is_riboviz_gff == TRUE` then:
 
-* `CDS`, `UTR5` and `UTR3` entries from the GFF are used.
+* Feature (e.g. `CDS`, `ORF`, or `uORF`), `UTR5` and `UTR3` entries from the GFF are used.
 * `buffer` is ignored.
 
 If `is_riboviz_gff == FALSE` then:
 
-* `CDS` entries from the GFF are used.
+* Feature (e.g. `CDS`, `ORF`, or `uORF`), `UTR5` and `UTR3` entries from the GFF are used.
 * `UTR5` and `UTR3` entries from the GFF are ignored.
 * `buffer` is used as the width of left and right flanks, and to calculate start and stop codon locations for genes.
 * Whether `stop_in_cds` is `TRUE` or `FALSE` also affects the calculations for stop codon locations.
@@ -54,9 +56,9 @@ The `reads` group, `/<gene>/<dataset>/reads`, for a `<gene>` has several attribu
 | Attribute | Description | Origin |
 | --------- |------------ | ------ |
 | `buffer_left` | Number of nucleotides upstream of the start codon (ATG) (UTR5 length) | EITHER position of start codon (from GFF file) - 1 OR, if `is_riboviz_gff` is false, `buffer` |
-| `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | GFF file OR, if `is_riboviz_gff` is false, `buffer` + CDS length from GFF file + `buffer` - `stop_codon_pos[3]` (see below) |
-| `start_codon_pos` | Positions corresponding to start codon of CDS (typically 251, 252, 253) | EITHER positions from GFF file OR, if `is_riboviz_gff` is false, `buffer+1,...,buffer+3` |
-| `stop_codon_pos` | Positions corresponding to stop codon of CDS | EITHER positions from GFF file OR, if `is_riboviz_gff` is false, `p,...,p+2` where `p` is `buffer` + CDS length from GFF file - `offset` where `offset` is 2 if `stop_in_cds` is true or -1 otherwise |
+| `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | GFF file OR, if `is_riboviz_gff` is false, `buffer` + feature length from GFF file + `buffer` - `stop_codon_pos[3]` (see below) |
+| `start_codon_pos` | Positions corresponding to start codon of feature (typically 251, 252, 253) | EITHER positions from GFF file OR, if `is_riboviz_gff` is false, `buffer+1,...,buffer+3` |
+| `stop_codon_pos` | Positions corresponding to stop codon of feature | EITHER positions from GFF file OR, if `is_riboviz_gff` is false, `p,...,p+2` where `p` is `buffer` + feature length from GFF file - `offset` where `offset` is 2 if `stop_in_cds` is true or -1 otherwise |
 | `lengths` | Lengths of mapped reads | Range from `min_read_length` to `max_read_length` (e.g. 10,...,50) |
 | `reads_by_len` | Counts of number of ribosome sequences of each length | BAM file |
 | `reads_total` | Total number of ribosome sequences | BAM file. Equal to number of non-zero reads in `reads_by_len` |
@@ -75,14 +77,14 @@ GROUP "/" {
 	       DATATYPE  H5T_IEEE_F64LE
 	       DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
 	       DATA {
-	       (0): <CDS UTR5 length from GFF file OR buffer (if is_riboviz_gff is false)>
+	       (0): <Feature UTR5 length from GFF file OR buffer (if is_riboviz_gff is false)>
 	       }
 	    }
 	    ATTRIBUTE "buffer_right" {
 	       DATATYPE  H5T_STD_I32LE
 	       DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
 	       DATA {
-	       (0): <CDS UTR3 length from GFF file OR buffer (if is_riboviz_gff is false)>
+	       (0): <Feature UTR3 length from GFF file OR buffer (if is_riboviz_gff is false)>
 	       }
 	    }
 	    ATTRIBUTE "lengths" {
@@ -114,18 +116,18 @@ GROUP "/" {
                DATATYPE  H5T_STD_I32LE
                DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
                DATA {
-               (0): <position of 1st nt of CDS start codon from GFF file>,
-		    <position of 2nd nt of CDS start codon from GFF file>,
-		    <position of 3rd nt of CDS start codon from GFF file>
+               (0): <position of 1st nt of feature start codon from GFF file>,
+		    <position of 2nd nt of feature start codon from GFF file>,
+		    <position of 3rd nt of feature start codon from GFF file>
                }
             }
             ATTRIBUTE "stop_codon_pos" {
                DATATYPE  H5T_STD_I32LE
                DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
                DATA {
-               (0): <position of 1st nt of CDS stop codon from GFF file>,
-	            <position of 2nd nt of CDS stop codon from GFF file>,
-	            <position of 3rd nt of CDS stop codon from GFF file>
+               (0): <position of 1st nt of feature stop codon from GFF file>,
+	            <position of 2nd nt of feature stop codon from GFF file>,
+	            <position of 3rd nt of feature stop codon from GFF file>
                }
             }
             DATASET "data" {
@@ -161,7 +163,7 @@ where:
 * `reads_by_len`:
   - `reads_by_len[i]` = number of alignments in BAM which have Flag equal to 0 or 256 and length equal to `lengths[i]`. This equals the sum of `DATA[*, i]` i.e. sum across all positions for a specific read length.
 * `sequence_length`: position of final nt of UTR3 from GFF file (equal to length of sequence from BAM file header `LN` value).
-  - If `is_riboviz_gff` is `false` when this is equal to `buffer` + CDS length + `buffer`.
+  - If `is_riboviz_gff` is `false` when this is equal to `buffer` + feature length + `buffer`.
 * `DATASET "data"`:
   - 0 <= `p` <= `sequence_length - 1`
   - `DATA[p, i]` equals 1 if there is an alignment in the BAM file at position `p`+1 which has length equal to `lengths[i]` and BAM alignment has Flag 0 or 256 (see [Understanding the BAM flags](https://davetang.org/muse/2014/03/06/understanding-bam-flags/) and [Decoding SAM flags](https://broadinstitute.github.io/picard/explain-flags.html)); 0 otherwise.

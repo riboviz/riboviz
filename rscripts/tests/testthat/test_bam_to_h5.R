@@ -74,23 +74,24 @@ DeleteFile <- function(file_name) {
 #' @param bam Data on alignments from BAM file
 #' (GenomicAlignments::GAlignments).
 #' @param dataset Human-readable name of the dataset (character).
-#' @param buffer Length of flanking region around the CDS (integer).
+#' @param buffer Length of flanking region around the feature (integer).
 #' @param min_read_length Minimum read length in H5 output (integer).
 #' @param max_read_length Maximum read length in H5 output (integer).
 #' @param is_riboviz_gff Does the GFF file contain 3 elements per gene
-#' - UTR5, CDS, and UTR3? (logical).
-#' @param stop_in_cds Are stop codons part of the CDS annotations in
+#' - UTR5, feature, and UTR3? (logical).
+#' @param stop_in_cds Are stop codons part of the feature annotations in
 #' GFF? (logical).
+#' @param feature Feature e.g. `CDS`, `ORF`, or `uORF` (character).
 #'
 #' @export
 ValidateH5Sequence <- function(sequence, h5_file, gff,
   bam_hdr_seq_info, bam, dataset, buffer, min_read_length,
-  max_read_length, is_riboviz_gff, stop_in_cds) {
+  max_read_length, is_riboviz_gff, stop_in_cds, feature = "CDS") {
 
   num_read_counts <- max_read_length - min_read_length + 1
   # Get sequence positions from GFF
-  gff_cds_start <- GetCDS5start(sequence, gff, ftype = "CDS")
-  gff_cds_end <- GetCDS3end(sequence, gff, ftype = "CDS")
+  gff_cds_start <- GetCDS5start(sequence, gff, ftype = feature)
+  gff_cds_end <- GetCDS3end(sequence, gff, ftype = feature)
   gff_cds_length <- gff_cds_end - gff_cds_start + 1
   if (is_riboviz_gff) {
     # Get sequence positions from GFF
@@ -106,7 +107,7 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
     h5_buffer_right_info <-
       "Unexpected buffer_right, compared to GFF UTR5 length"
     h5_stop_codon_info <-
-      "Unexpected stop_codon_pos, compared to GFF CDS positions"
+      "Unexpected stop_codon_pos, compared to GFF feature positions"
   } else {
     # Get sequence positions from GFF and buffer
     utr5_start <- 1
@@ -131,7 +132,7 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
   }
   print(paste0("UTR5 start/length/end: ", utr5_start, " ",
     utr5_length, " ", utr5_end))
-  print(paste0("CDS start/length/end: ", gff_cds_start, " ",
+  print(paste0(feature, " start/length/end: ", gff_cds_start, " ",
     gff_cds_length, " ", gff_cds_end))
   print(paste0("UTR3 start/length/end: ", utr3_start, " ",
     utr3_length, " ", utr3_end))
@@ -170,7 +171,7 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
     info = paste0(sequence, ": ", h5_buffer_right_info))
 
   # Validate start_codon_pos: Positions corresponding to start codon
-  # of CDS in organism sequence
+  # of feature in organism sequence
   gff_start_codon_pos <- as.array(seq(gff_cds_start, gff_cds_start + 2))
   h5_start_codon_pos <-
     GetGeneStartCodonPos(sequence, dataset, h5_file) # 1D array of 3 integer
@@ -179,10 +180,10 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
     info = paste0(sequence, ": Unexpected start_codon_pos length"))
   expect_equal(h5_start_codon_pos, gff_start_codon_pos,
     info = paste0(sequence,
-      ": Unexpected start_codon_pos, compared to GFF CDS positions"))
+      ": Unexpected start_codon_pos, compared to GFF feature positions"))
 
   # Validate stop_codon_pos: Positions corresponding to stop codon of
-  # CDS in organism sequence
+  # feature in organism sequence
   h5_stop_codon_pos <-
     GetGeneStopCodonPos(sequence, dataset, h5_file) # 1D array of 3 integer
   print(paste0("stop_codon_pos: ", toString(h5_stop_codon_pos)))
@@ -288,16 +289,18 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
 #' @param gff_file GFF file (character).
 #' @param bam_file BAM file (character).
 #' @param dataset Human-readable name of the dataset (character).
-#' @param buffer Length of flanking region around the CDS (integer).
+#' @param buffer Length of flanking region around the feature (integer).
 #' @param min_read_length Minimum read length in H5 output (integer).
 #' @param max_read_length Maximum read length in H5 output (integer).
 #' @param is_riboviz_gff Does the GFF file contain 3 elements per gene
-#' - UTR5, CDS, and UTR3? (logical).
-#' @param stop_in_cds Are stop codons part of the CDS annotations in
+#' - UTR5, feature, and UTR3? (logical).
+#' @param stop_in_cds Are stop codons part of the feature annotations in
 #' GFF? (logical).
+#' @param feature Feature e.g. `CDS`, `ORF`, or `uORF` (character).
 #' @export
 ValidateH5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
-  min_read_length, max_read_length, is_riboviz_gff, stop_in_cds) {
+  min_read_length, max_read_length, is_riboviz_gff, stop_in_cds,
+  feature = "CDS") {
 
   gff <- readGFFAsDf(gff_file) # tbl_df tbl data.frame, list
   gff_names <- unique(gff$seqnames) # factor, integer
@@ -349,7 +352,7 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
     print(paste0("Sequence: ", sequence))
     ValidateH5Sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
       dataset, buffer, min_read_length, max_read_length,
-      is_riboviz_gff, stop_in_cds)
+      is_riboviz_gff, stop_in_cds, feature)
   }
 }
 
@@ -367,14 +370,15 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
 #' @param h5_file H5 output file (character).
 #' @param min_read_length Minimum read length in H5 output (integer).
 #' @param max_read_length Maximum read length in H5 output (integer).
-#' @param buffer Length of flanking region around the CDS (integer).
+#' @param buffer Length of flanking region around the feature (integer).
 #' @param primary_id Primary gene IDs to access the data (character).
 #' @param secondary_id Secondary gene IDs to access the data (character).
 #' @param dataset Human-readable name of the dataset (character).
 #' @param is_riboviz_gff Does the GFF file contain 3 elements per gene
-#' - UTR5, CDS, and UTR3? (logical).
-#' @param stop_in_cds Are stop codons part of the CDS annotations in
+#' - UTR5, feature, and UTR3? (logical).
+#' @param stop_in_cds Are stop codons part of the feature annotations in
 #' GFF? (logical).
+#' @param feature Feature e.g. `CDS`, `ORF`, or `uORF` (character).
 #' @param num_processes Number of processes to parallelize over
 #' (integer).
 #'
@@ -382,7 +386,7 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, dataset, buffer,
 RunSamToBamToH5 <- function(bam_to_h5, sam_file, bam_file,
   orf_gff_file, h5_file, min_read_length, max_read_length, buffer,
   primary_id, secondary_id, dataset, is_riboviz_gff, stop_in_cds,
-  num_processes = 1) {
+  feature = "CDS", num_processes = 1) {
 
   print(paste0("bam_to_h5.R: ", bam_to_h5))
   print(paste0("GFF: ", orf_gff_file))
@@ -407,7 +411,7 @@ RunSamToBamToH5 <- function(bam_to_h5, sam_file, bam_file,
   print(paste0("BAM: ", bam_file))
   print(paste0("HDF5: ", h5_file))
 
-  h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes={num_processes} --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={orf_gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds}" # nolint
+  h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes={num_processes} --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={orf_gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds} --feature={feature}" # nolint
   h5_cmd <- glue(h5_cmd_template)
   print(h5_cmd)
 
@@ -438,16 +442,14 @@ testthat::test_that(
   is_riboviz_gff <- TRUE
   stop_in_cds <- FALSE
   h5_file <- here::here("test_bam_to_h5_data.h5")
-  num_processes <- 1
 
   RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
     min_read_length, max_read_length, buffer, primary_id, secondary_id,
-    dataset, is_riboviz_gff, stop_in_cds, num_processes)
+    dataset, is_riboviz_gff, stop_in_cds)
 
   ValidateH5(h5_file, orf_gff_file, bam_file, dataset, buffer,
     min_read_length, max_read_length, is_riboviz_gff, stop_in_cds)
 })
-
 
 testthat::test_that(
   "Test bam_to_h5.R (is_riboviz_gff=FALSE, stop_in_CDS=FALSE)", {
@@ -470,18 +472,17 @@ testthat::test_that(
   is_riboviz_gff <- FALSE
   stop_in_cds <- FALSE
   h5_file <- here::here("test_bam_to_h5_data.h5")
-  num_processes <- 1
 
   RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
     min_read_length, max_read_length, buffer, primary_id, secondary_id,
-    dataset, is_riboviz_gff, stop_in_cds, num_processes)
+    dataset, is_riboviz_gff, stop_in_cds)
 
   ValidateH5(h5_file, orf_gff_file, bam_file, dataset, buffer,
     min_read_length, max_read_length, is_riboviz_gff, stop_in_cds)
 })
 
 testthat::test_that(
-  "Test bam_to_h5.R (is_riboviz_gff=FALSE, stop_in_CDS=TRUE)", {
+  "Test bam_to_h5.R (is_riboviz_gff=FALSE, stop_in_cds=TRUE)", {
 
   withr::defer(DeleteFile(h5_file)) # Delete H5 when test completes.
   withr::defer(DeleteFile(bam_file)) # Delete H5 when test completes.
@@ -501,12 +502,45 @@ testthat::test_that(
   is_riboviz_gff <- FALSE
   stop_in_cds <- TRUE
   h5_file <- here::here("test_bam_to_h5_data.h5")
-  num_processes <- 1
 
   RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
     min_read_length, max_read_length, buffer, primary_id, secondary_id,
-    dataset, is_riboviz_gff, stop_in_cds, num_processes)
+    dataset, is_riboviz_gff, stop_in_cds)
 
   ValidateH5(h5_file, orf_gff_file, bam_file, dataset, buffer,
     min_read_length, max_read_length, is_riboviz_gff, stop_in_cds)
 })
+
+testthat::test_that(
+  "Test bam_to_h5.R (is_riboviz=TRUE, feature=ORF)", {
+
+  withr::defer(DeleteFile(h5_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_bai_file)) # Delete H5 when test completes.
+
+  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
+  bam_file <- here::here("test_bam_to_h5_data.bam")
+  bam_bai_file <- here::here("test_bam_to_h5_data.bam.bai")
+  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs_orf.gff3")
+
+  min_read_length <- 10
+  max_read_length <- 50
+  buffer <- 20
+  primary_id <- "Name"
+  secondary_id <- "NULL"
+  dataset <- "Mok-tinysim"
+  is_riboviz_gff <- TRUE
+  stop_in_cds <- FALSE
+  feature <- "ORF"
+  h5_file <- here::here("test_bam_to_h5_data.h5")
+
+  RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
+    min_read_length, max_read_length, buffer, primary_id, secondary_id,
+    dataset, is_riboviz_gff, stop_in_cds, feature)
+
+  ValidateH5(h5_file, orf_gff_file, bam_file, dataset, buffer,
+    min_read_length, max_read_length, is_riboviz_gff, stop_in_cds,
+    feature)
+})
+
+

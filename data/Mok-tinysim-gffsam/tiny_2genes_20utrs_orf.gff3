@@ -1,0 +1,9 @@
+##gff-version 3
+##ewallace - Edward.Wallace@ed.ac.uk
+##date 2021-01-13
+MAT	ewallace	UTR5	1	20	.	+	.	Name=MAT
+MAT	ewallace	ORF	21	32	.	+	.	Name=MAT
+MAT	ewallace	UTR3	33	52	.	+	.	Name=MAT
+MIKE	ewallace	UTR5	1	20	.	+	.	Name=MIKE
+MIKE	ewallace	ORF	21	35	.	+	.	Name=MIKE
+MIKE	ewallace	UTR3	36	55	.	+	.	Name=MIKE

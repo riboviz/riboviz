@@ -287,9 +287,12 @@ Create and populate `data/Mok-tinysim-gffsam`:
 
 ```console
 $ mkdir data/Mok-tinysim-gffsam
-$ cp ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 data/Mok-tinysim-gffsam/
 $ samtools view -h Mok-tinysim/output/A/A.bam > data/Mok-tinysim-gffsam/A.sam
+$ cp ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 data/Mok-tinysim-gffsam/
+$ cp data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3 data/Mok-tinysim-gffsam/tiny_2genes_20utrs_orf.gff3
 ```
+
+Edit `data/Mok-tinysim-gffsam/tiny_2genes_20utrs_orf.gff3` and replace `CDS` with `ORF`.
 
 ---
 
