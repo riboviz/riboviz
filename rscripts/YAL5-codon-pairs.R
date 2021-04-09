@@ -8,6 +8,8 @@ source(here::here("rscripts", "stats_figs_block_functions.R"))
 
 # other packages I loaded that I used 
 library(tidyverse)
+# install.packages("zoo") - new package required for function rollapply
+library(zoo)
 
 YAL5_h5 <- here::here("Mok-simYAL5", "output", "A", "A.h5")
 
@@ -180,19 +182,22 @@ KeepGeneCDS <- function(gene, dataset, hd_file, startpos = 1, startlen = 10){
   
 }
 
-KeepGeneCDS(gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
+gene_CDS <- KeepGeneCDS(gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
 
-
-
-#Tidy_nnt_to_codons <- 
-  
-
-
-# Tidy_sum still contains 1121 nucleotides, so still contains the UTRs as well
-# Format is still then in the nucleotide format so need to divide by three to get codons 
-# The YAL003W_pos table has the positions as 1,2,3... while Tidy is from 251
-
-
+# A tibble: 621 x 2
+# Pos Total_counts
+# <int>        <int>
+#   1   251          225
+# 2   252           90
+# 3   253           77
+# 4   254          246
+# 5   255          291
+# 6   256         1151
+# 7   257         1272
+# 8   258            8
+# 9   259            9
+# 10   260           25
+# ... with 611 more rows
 
 
 
@@ -204,16 +209,42 @@ CodonTable$Codon<-YAL003W_pos$Codon
 Codon_table <- as_tibble(CodonTable)
 print(Codon_table)
 
-Merged_table <- inner_join(Codon_table, Tidy_sum ) # Table which contains the columns Gene, Pos, Codon, Counts
-print(Merged_table)
 
-# the column of counts has the wrong name 
+
+# Codon_table needs to be a function that creates a codon table for each gene, rename so that it is more consistent
+
+NucleotideToCodonPosition <- function(Codon_table, gene, dataset, hd_file, startpos = 1, startlen = 10){
+  
+  gene_CDS <- KeepGeneCDS(gene, dataset, hd_file, startpos = 1, startlen = 10)
+  
+  per_codon_counts <- zoo::rollapply(data=gene_CDS$Total_counts, width = 3, sum, by = 3)
+  
+  gene_per_codon_counts <- tibble::tibble(
+    CodonPos = seq_len(length(per_codon_counts)), 
+    PerCodonCounts = per_codon_counts
+  )
+  
+  joined_gene_per_codon_counts <- dplyr::full_join(
+    x = gene_per_codon_counts, 
+    y = Codon_table,  
+    by = c("CodonPos" = "Pos")
+  ) %>% 
+    dplyr::select(Gene, CodonPos, Codon, PerCodonCounts) 
+  
+  
+  return(joined_gene_per_codon_counts)
+  
+}
+
+
+joined_gene_per_codon_counts_YAL003W <- NucleotideToCodonPosition(Codon_table, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
+
 
 
 
 # Filter down to the desired codon 
-AAG_table <- dplyr::filter(MergedTable, Codon=="AAG")
-AAG_df<-as.data.frame(AAG_table)
+AAG_table <- dplyr::filter(joined_gene_per_codon_counts_YAL003W, Codon=="AAG")
+# AAG_df<-as.data.frame(AAG_table) worth investigating removing this 
 
 
 # Normalization - when? 
