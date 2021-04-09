@@ -9,7 +9,7 @@ source(here::here("rscripts", "stats_figs_block_functions.R"))
 # other packages I loaded that I used 
 library(tidyverse)
 
-YAL5 <- "$HOME/riboviz/riboviz/Mok-simYAL5/output/A/A.h5"
+YAL5 <- here::here("Mok-simYAL5", "output", "A", "A.h5")
 
 
 # Import the .tsv file: (used the updated file which contains the first 
@@ -30,12 +30,8 @@ print(YAL003W_pos)
 
 
 
-
 # read the structure of the h5 file 
-h5ls("~/R/YAL5.h5")
-
-# pathway to the h5 file 
-YAL5 <- "~/R/YAL5.h5"
+h5ls(YAL5)
 
 
 
