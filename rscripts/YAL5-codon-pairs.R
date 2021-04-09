@@ -1,18 +1,21 @@
 
+# YAL5 is at location $HOME/riboviz/riboviz/Mok-simYAL5/output/A/A.h5
+
 # source packages and functions from rscripts 
 source(here::here("rscripts", "read_count_functions.R"))
 source(here::here("rscripts", "stats_figs_block_functions.R"))
-source(here::here("rscripts", "provenance.R"))
 
 
 # other packages I loaded that I used 
 library(tidyverse)
-library(data.table) #used to load .tsv file 
+
+YAL5 <- "$HOME/riboviz/riboviz/Mok-simYAL5/output/A/A.h5"
 
 
 # Import the .tsv file: (used the updated file which contains the first 
 # 200 codons of each gene)
-yeast_codon_pos_i200.tsv <- data.table::fread('https://github.com/riboviz/riboviz/raw/change-yeast_codon_pos_i200-194/data/yeast_codon_table.tsv')
+
+yeast_codon_pos_i200.tsv <- readr::read_tsv(file = here::here("data", "yeast_codon_table.tsv"))
 
 # Confirm that the .tsv file has been imported and check structure:
 head(yeast_codon_pos_i200.tsv) 
