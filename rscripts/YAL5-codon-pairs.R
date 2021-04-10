@@ -142,15 +142,15 @@ Mok_YAL5_data <- GetAllGeneDatamatrix(dataset="Mok-simYAL5", hd_file = YAL5_h5,
 # # Pos Total_counts
 # # * <int>        <int>
 # #   1     1            0
-# # 2     2            0
-# # 3     3            0
-# # 4     4            0
-# # 5     5            0
-# # 6     6            0
-# # 7     7            0
-# # 8     8            0
-# # 9     9            0
-# # 10    10            0
+# #   2     2            0
+# #   3     3            0
+# #   4     4            0
+# #   5     5            0
+# #   6     6            0
+# #   7     7            0
+# #   8     8            0
+# #   9     9            0
+# #  10    10            0
 # # ... with 1,111 more rows
 # 
 # # Tidydatamatrix is grouped by position, removes read lengths
@@ -165,6 +165,9 @@ Mok_YAL5_data <- GetAllGeneDatamatrix(dataset="Mok-simYAL5", hd_file = YAL5_h5,
 # 
 # # CDS start 251, CDS end 871 - CDS total: 621 nt -> 207 codons
 # # 250 UTRs at each end for a total of 1121 nt
+
+
+# KeepGeneCDS function: remove the UTRs at the 5' and 3' end, keep the CDS
 
 KeepGeneCDS <- function(gene, dataset, hd_file, startpos = 1, startlen = 10){
   
@@ -184,36 +187,32 @@ KeepGeneCDS <- function(gene, dataset, hd_file, startpos = 1, startlen = 10){
 
 gene_CDS <- KeepGeneCDS(gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
 
+# KeepGeneCDS generates as an output:
+
 # A tibble: 621 x 2
 # Pos Total_counts
 # <int>        <int>
 #   1   251          225
-# 2   252           90
-# 3   253           77
-# 4   254          246
-# 5   255          291
-# 6   256         1151
-# 7   257         1272
-# 8   258            8
-# 9   259            9
-# 10   260           25
+#   2   252           90
+#   3   253           77
+#   4   254          246
+#   5   255          291
+#   6   256         1151
+#   7   257         1272
+#   8   258            8
+#   9   259            9
+#  10   260           25
 # ... with 611 more rows
 
 
 
-# Make final table which contains Gene, Pos, Codon, Counts  
-CodonTable=c()
-CodonTable$Gene<-YAL003W_pos$Gene
-CodonTable$Pos<-YAL003W_pos$PosCodon
-CodonTable$Codon<-YAL003W_pos$Codon
-Codon_table <- as_tibble(CodonTable)
-print(Codon_table)
 
+# NucleotideToCodonPosition function: change format from nucleotides to codons,
+# combine the generated codon table and the yeast_codon_pos_i200.tsv file  
 
-
-# Codon_table needs to be a function that creates a codon table for each gene, rename so that it is more consistent
-
-NucleotideToCodonPosition <- function(Codon_table, gene, dataset, hd_file, startpos = 1, startlen = 10){
+NucleotideToCodonPosition <- function(yeast_codon_pos_i200.tsv, gene, dataset, hd_file, startpos = 1, startlen = 10){
+  
+  codon_table <- dplyr::filter(yeast_codon_pos_i200.tsv, Gene==gene)
   
   gene_CDS <- KeepGeneCDS(gene, dataset, hd_file, startpos = 1, startlen = 10)
   
@@ -226,8 +225,8 @@ NucleotideToCodonPosition <- function(Codon_table, gene, dataset, hd_file, start
   
   joined_gene_per_codon_counts <- dplyr::full_join(
     x = gene_per_codon_counts, 
-    y = Codon_table,  
-    by = c("CodonPos" = "Pos")
+    y = codon_table,  
+    by = c("CodonPos" = "PosCodon")
   ) %>% 
     dplyr::select(Gene, CodonPos, Codon, PerCodonCounts) 
   
@@ -237,8 +236,25 @@ NucleotideToCodonPosition <- function(Codon_table, gene, dataset, hd_file, start
 }
 
 
-joined_gene_per_codon_counts_YAL003W <- NucleotideToCodonPosition(Codon_table, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
+joined_gene_per_codon_counts_YAL003W <- NucleotideToCodonPosition(yeast_codon_pos_i200.tsv, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
 
+
+# Output generated from NucleotideToCodonPosition function:
+# 
+# # A tibble: 207 x 4
+#     Gene    CodonPos Codon PerCodonCounts
+#     <chr>      <dbl> <chr>          <int>
+#   1 YAL003W        1 ATG              392
+#   2 YAL003W        2 GCA             1688
+#   3 YAL003W        3 TCC             1289
+#   4 YAL003W        4 ACC              678
+#   5 YAL003W        5 GAT              605
+#   6 YAL003W        6 TTC              364
+#   7 YAL003W        7 TCC             1154
+#   8 YAL003W        8 AAG             1159
+#   9 YAL003W        9 ATT             1058
+#  10 YAL003W       10 GAA              500
+# # ... with 197 more rows
 
 
 
@@ -248,7 +264,7 @@ AAG_table <- dplyr::filter(joined_gene_per_codon_counts_YAL003W, Codon=="AAG")
 
 
 # Normalization - when? 
-dplyr::mutate(RelCount = Count / sum(Count) * ( 2 * width + 1))
+dplyr::mutate(RelCount = Count / sum(Count) * (2 * width + 1))
 # goes from Pos_Codon - width to Pos_Codon + width
 
 
