@@ -267,22 +267,103 @@ AAG_table <- dplyr::filter(joined_gene_per_codon_counts_YAL003W, Codon=="AAG")
 dplyr::mutate(RelCount = Count / sum(Count) * (2 * width + 1))
 # goes from Pos_Codon - width to Pos_Codon + width
 
+interesting_codon_table <- dplyr::filter(joined_gene_per_codon_counts_YAL003W, Codon = codon_of_interest)
+interesting_codon_positions <- interesting_codon_table$CodonPos
+# Pos_Codon selected from interesting_codon_positions
+
+# Position <- AAG_df$Pos
+# ExpandList <- dplyr::slice(MergedTable, (Position-width):(Position+width), each = FALSE)
+
+FilterForCodonOfInterestPositions <- function(yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, codon_of_interest){
+  
+  joined_gene_per_codon_counts <- NucleotideToCodonPosition(yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10)
+  
+  interesting_codon_table <- dplyr::filter(joined_gene_per_codon_counts, Codon == codon_of_interest) 
+  
+  interesting_codon_positions <- interesting_codon_table$CodonPos
+  
+  return(interesting_codon_positions)
+}
+
+interesting_codon_positions <- FilterForCodonOfInterestPositions(yeast_codon_pos_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, codon_of_interest = "AAG")
 
 
 # Function needed to go from one position to a region.
-ExpandCodonRegion <- function(gene, Pos_Codon, gff_df, width = 5L, remove_overhang = TRUE) {
+# This function will be using codon position values, not nucleotide position values
+ExpandCodonRegion <- function(interesting_codon_positions, yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, gff_df, expand_width = 5L, remove_overhang = TRUE) {
+  
+  # don't remove this, it's crucial :D
+  joined_gene_per_codon_counts <- NucleotideToCodonPosition(yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10)
+  
   gene_length <- GetGeneLength(gene, dataset, hd_file)
-  if (remove_overhang) {
+  
+  Pos_codon <- interesting_codon_positions
+  
+    #if (remove_overhang) {
+  
     # return an empty tibble if the desired region hangs over the edge of the coding region
-    if (Pos_codon < width | Pos_codon + width > gene_length ) {
+    if (Pos_codon < expand_width | Pos_codon + expand_width > gene_length ) {
       return( tibble() )
+    } else {
+    # tibble(Gene      = rep(Gene, 2 * expand_width ),
+    #        Pos_Codon = seq(Pos_codon - expand_width, Pos_codon + expand_width),
+    #        Rel_Pos   = seq(- expand_width, expand_width) )
+      
+    output_codon_info <- tibble( 
+      dplyr::slice(joined_gene_per_codon_counts, (Pos_codon - expand_width):(Pos_codon + expand_width), each = FALSE), 
+      Rel_Pos =  seq(- expand_width, expand_width)
+    )
+    
+    return(output_codon_info)
+    
     }
-    tibble(Gene      = rep(Gene, 2 * width ),
-           Pos_Codon = seq(Pos_Codon - width, Pos_Codon + width),
-           Rel_Pos   = seq(- width, width + 1L ) )
-  }
+  
+#  } # if(remove_overhang)
 }
+# potential test: length of output_codon_info == (2x expand_width + 1)
 
+ExpandCodonRegionOutput <- ExpandCodonRegion(interesting_codon_positions, yeast_codon_pos_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, gff_df, expand_width = 5L)
+# > ExpandCodonRegionOutput
+# # A tibble: 11 x 5
+# Gene    CodonPos Codon PerCodonCounts Rel_Pos
+# <chr>      <dbl> <chr>          <int>   <int>
+#   1 YAL003W        3 TCC             1289      -5
+# 2 YAL003W        4 ACC              678      -4
+# 3 YAL003W        5 GAT              605      -3
+# 4 YAL003W        6 TTC              364      -2
+# 5 YAL003W        7 TCC             1154      -1
+# 6 YAL003W        8 AAG             1159       0
+# 7 YAL003W        9 ATT             1058       1
+# 8 YAL003W       10 GAA              500       2
+# 9 YAL003W       11 ACT              974       3
+# 10 YAL003W       12 TTG              199       4
+# 11 YAL003W       13 AAA             1053       5
+
+# NOT YET WORKING
+ExpandList <- purrr::map(
+  .x = interesting_codon_positions, # vector of codon positions to iterate over
+  .f = ExpandCodonRegion(    # function to use at each codon position of interest
+    interesting_codon_positions, 
+    yeast_codon_pos_i200, 
+    gene="YAL003W", 
+    dataset="Mok-simYAL5", 
+    hd_file=YAL5_h5, 
+    startpos = 1, 
+    startlen = 10, 
+    gff_df, 
+    expand_width = 5L
+  )
+)
+# `summarise()` ungrouping output (override with `.groups` argument)
+# Error: Can't convert a `tbl_df/tbl/data.frame` object to function
+# Run `rlang::last_error()` to see where the error occurred.
+# In addition: Warning messages:
+# 1: In if (Pos_codon < expand_width | Pos_codon + expand_width > gene_length) { :
+#   the condition has length > 1 and only the first element will be used
+# 2: In (Pos_codon - expand_width):(Pos_codon + expand_width) :
+#   numerical expression has 16 elements: only the first used
+# 3: In (Pos_codon - expand_width):(Pos_codon + expand_width) :
+#   numerical expression has 16 elements: only the first used
 
 
 # Gives you four tibble tables, one for each of the Pos in AAG_df, where width
