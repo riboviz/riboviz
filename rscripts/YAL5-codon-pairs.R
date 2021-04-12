@@ -258,22 +258,8 @@ joined_gene_per_codon_counts_YAL003W <- NucleotideToCodonPosition(yeast_codon_po
 
 
 
-# Filter down to the desired codon 
-AAG_table <- dplyr::filter(joined_gene_per_codon_counts_YAL003W, Codon=="AAG")
-# AAG_df<-as.data.frame(AAG_table) worth investigating removing this 
 
-
-# Normalization - when? 
-dplyr::mutate(RelCount = Count / sum(Count) * (2 * width + 1))
-# goes from Pos_Codon - width to Pos_Codon + width
-
-interesting_codon_table <- dplyr::filter(joined_gene_per_codon_counts_YAL003W, Codon = codon_of_interest)
-interesting_codon_positions <- interesting_codon_table$CodonPos
-# Pos_Codon selected from interesting_codon_positions
-
-# Position <- AAG_df$Pos
-# ExpandList <- dplyr::slice(MergedTable, (Position-width):(Position+width), each = FALSE)
-
+# Function to filter for codons of interest, generates a list of the positions of the codon of interest
 FilterForCodonOfInterestPositions <- function(yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, codon_of_interest){
   
   joined_gene_per_codon_counts <- NucleotideToCodonPosition(yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10)
@@ -287,42 +273,41 @@ FilterForCodonOfInterestPositions <- function(yeast_codon_pos_i200, gene, datase
 
 interesting_codon_positions <- FilterForCodonOfInterestPositions(yeast_codon_pos_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, codon_of_interest = "AAG")
 
+# Output from FilterForCodonOfInterestPositions
+# [1]   8  22  39  58  97  99 109 110 113 116 120 128 144 166 167 178
+
+
+
 
 # Function needed to go from one position to a region.
 # This function will be using codon position values, not nucleotide position values
-ExpandCodonRegion <- function(interesting_codon_positions, yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, gff_df, expand_width = 5L, remove_overhang = TRUE) {
+ExpandCodonRegion <- function(.x, yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, gff_df, expand_width = 5L, remove_overhang = TRUE) {
   
-  # don't remove this, it's crucial :D
   joined_gene_per_codon_counts <- NucleotideToCodonPosition(yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10)
   
   gene_length <- GetGeneLength(gene, dataset, hd_file)
   
-  Pos_codon <- interesting_codon_positions
+  #if (remove_overhang) {
+  # return an empty tibble if the desired region hangs over the edge of the coding region
   
-    #if (remove_overhang) {
-  
-    # return an empty tibble if the desired region hangs over the edge of the coding region
-    if (Pos_codon < expand_width | Pos_codon + expand_width > gene_length ) {
-      return( tibble() )
-    } else {
-    # tibble(Gene      = rep(Gene, 2 * expand_width ),
-    #        Pos_Codon = seq(Pos_codon - expand_width, Pos_codon + expand_width),
-    #        Rel_Pos   = seq(- expand_width, expand_width) )
-      
-    output_codon_info <- tibble( 
-      dplyr::slice(joined_gene_per_codon_counts, (Pos_codon - expand_width):(Pos_codon + expand_width), each = FALSE), 
+  if (.x < expand_width | .x + expand_width > gene_length ) {
+    return( tibble() )
+  } else {
+    output_codon_info <- tibble(
+      dplyr::slice(joined_gene_per_codon_counts, (.x - expand_width):(.x + expand_width), each = FALSE),
       Rel_Pos =  seq(- expand_width, expand_width)
     )
-    
     return(output_codon_info)
-    
-    }
-  
-#  } # if(remove_overhang)
+  }
+  #  } # if(remove_overhang)
 }
 # potential test: length of output_codon_info == (2x expand_width + 1)
 
-ExpandCodonRegionOutput <- ExpandCodonRegion(interesting_codon_positions, yeast_codon_pos_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, gff_df, expand_width = 5L)
+
+ExpandCodonRegionOutput <- ExpandCodonRegion(.x = interesting_codon_positions[1], yeast_codon_pos_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, gff_df, expand_width = 5L)
+
+# Gives the output:
+
 # > ExpandCodonRegionOutput
 # # A tibble: 11 x 5
 # Gene    CodonPos Codon PerCodonCounts Rel_Pos
@@ -339,58 +324,68 @@ ExpandCodonRegionOutput <- ExpandCodonRegion(interesting_codon_positions, yeast_
 # 10 YAL003W       12 TTG              199       4
 # 11 YAL003W       13 AAA             1053       5
 
-# NOT YET WORKING
+
+# Apply the ExpandCodonRegion function to the codons of interest to generate expanded tibbles for each position 
+
 ExpandList <- purrr::map(
   .x = interesting_codon_positions, # vector of codon positions to iterate over
-  .f = ExpandCodonRegion(    # function to use at each codon position of interest
-    interesting_codon_positions, 
-    yeast_codon_pos_i200, 
-    gene="YAL003W", 
-    dataset="Mok-simYAL5", 
-    hd_file=YAL5_h5, 
-    startpos = 1, 
-    startlen = 10, 
-    gff_df, 
-    expand_width = 5L
-  )
+  .f = ExpandCodonRegion,   # function to use at each codon position of interest
+  yeast_codon_pos_i200,
+  gene="YAL003W",
+  dataset="Mok-simYAL5",
+  hd_file=YAL5_h5,
+  startpos = 1,
+  startlen = 10,
+  gff_df,
+  expand_width = 5L
 )
-# `summarise()` ungrouping output (override with `.groups` argument)
-# Error: Can't convert a `tbl_df/tbl/data.frame` object to function
-# Run `rlang::last_error()` to see where the error occurred.
-# In addition: Warning messages:
-# 1: In if (Pos_codon < expand_width | Pos_codon + expand_width > gene_length) { :
-#   the condition has length > 1 and only the first element will be used
-# 2: In (Pos_codon - expand_width):(Pos_codon + expand_width) :
-#   numerical expression has 16 elements: only the first used
-# 3: In (Pos_codon - expand_width):(Pos_codon + expand_width) :
-#   numerical expression has 16 elements: only the first used
 
 
-# Gives you four tibble tables, one for each of the Pos in AAG_df, where width
-# has been pre-set. However, it seems as though it is repeating the loop for
-# the first position of AAG_df and not moving on to the next row. 
 
-width <- 5L
 
-for (Pos in AAG_df){
-  Position <- AAG_df$Pos
-  ExpandList <- dplyr::slice(MergedTable, (Position-width):(Position+width), each = FALSE)
-  print(ExpandList)
+# Normalization carried out within each expanded frame so that they are comparable 
+# Normalizes the ExpandCodonRegion list generating a RelCount column with the normalization values
+ExpandedCodonRegionNormalization <- function(.x, expand_width = 5L){
+  
+  dplyr::mutate(.x, RelCount = PerCodonCounts / sum(PerCodonCounts) * (2 * expand_width + 1))
+  
 }
 
 
+ExpandedCodonRegionNormalization(ExpandList[[1]], expand_width = 5L)
+
+# # A tibble: 11 x 6
+# Gene    CodonPos Codon PerCodonCounts Rel_Pos RelCount
+# <chr>      <dbl> <chr>          <int>   <int>    <dbl>
+#   1 YAL003W        3 TCC             1289      -5    1.57 
+# 2 YAL003W        4 ACC              678      -4    0.826
+# 3 YAL003W        5 GAT              605      -3    0.737
+# 4 YAL003W        6 TTC              364      -2    0.443
+# 5 YAL003W        7 TCC             1154      -1    1.41 
+# 6 YAL003W        8 AAG             1159       0    1.41 
+# 7 YAL003W        9 ATT             1058       1    1.29 
+# 8 YAL003W       10 GAA              500       2    0.609
+# 9 YAL003W       11 ACT              974       3    1.19 
+# 10 YAL003W       12 TTG              199       4    0.242
+# 11 YAL003W       13 AAA             1053       5    1.28 
 
 
-# Assign reads to A-sites:
-GetGeneReadFrame(gene, dataset, hd_file, left, right, min_read_length,
-                 asite_displacement_length = data.frame(
-                   read_length = c(28, 29, 30),
-                   asite_displacement = c(15, 15, 15)
-                 )) 
-or 
 
-CalculateGeneReadFrames(dataset, hd_file, gff_df, min_read_length, asite_displacement_length_from_file)
 
+# Normalization carried out for all the tibbles within ExpandList 
+NormalizedExpandList <- purrr::map(
+  .x = ExpandList,
+  .f = ExpandedCodonRegionNormalization,
+  expand_width = 5L
+)
+
+
+
+# how to apply to all genes?
+# make some plots 
+    # write some code to make a plot for a summarised version 
+
+# when does overlay happen 
 
 
 
