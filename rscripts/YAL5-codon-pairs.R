@@ -20,17 +20,17 @@ gff_df <- readGFFAsDf(YAL5_gff)
 # Import the .tsv file: (used the updated file which contains the first 
 # 200 codons of each gene)
 
-yeast_codon_pos_i200.tsv <- readr::read_tsv(file = here::here("data", "yeast_codon_table.tsv"))
+yeast_codon_pos_i200 <- readr::read_tsv(file = here::here("data", "yeast_codon_table.tsv"))
 
 # Confirm that the .tsv file has been imported and check structure:
-head(yeast_codon_pos_i200.tsv) 
+head(yeast_codon_pos_i200) 
 
 
 
-# Filter down the yeast_codon_pos_i200.tsv file to the gene that you are 
+# Filter down the yeast_codon_pos_i200 file to the gene that you are 
 # working with, in this case YAL003W
 
-YAL003W_pos <- dplyr::filter(yeast_codon_pos_i200.tsv, Gene=="YAL003W")
+YAL003W_pos <- dplyr::filter(yeast_codon_pos_i200, Gene=="YAL003W")
 print(YAL003W_pos)
 
 
@@ -208,11 +208,11 @@ gene_CDS <- KeepGeneCDS(gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, 
 
 
 # NucleotideToCodonPosition function: change format from nucleotides to codons,
-# combine the generated codon table and the yeast_codon_pos_i200.tsv file  
+# combine the generated codon table and the yeast_codon_pos_i200 file  
 
-NucleotideToCodonPosition <- function(yeast_codon_pos_i200.tsv, gene, dataset, hd_file, startpos = 1, startlen = 10){
+NucleotideToCodonPosition <- function(yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10){
   
-  codon_table <- dplyr::filter(yeast_codon_pos_i200.tsv, Gene==gene)
+  codon_table <- dplyr::filter(yeast_codon_pos_i200, Gene==gene)
   
   gene_CDS <- KeepGeneCDS(gene, dataset, hd_file, startpos = 1, startlen = 10)
   
@@ -236,7 +236,7 @@ NucleotideToCodonPosition <- function(yeast_codon_pos_i200.tsv, gene, dataset, h
 }
 
 
-joined_gene_per_codon_counts_YAL003W <- NucleotideToCodonPosition(yeast_codon_pos_i200.tsv, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
+joined_gene_per_codon_counts_YAL003W <- NucleotideToCodonPosition(yeast_codon_pos_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
 
 
 # Output generated from NucleotideToCodonPosition function:
