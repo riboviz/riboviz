@@ -10,6 +10,11 @@ source(here::here("rscripts", "stats_figs_block_functions.R"))
 library(tidyverse)
 # install.packages("zoo") - new package required for function rollapply
 library(zoo)
+# install.packages("ggplot2")
+library(ggplot2)
+install.packages("plotly")
+library(plotly)
+library(purrr)
 
 YAL5_h5 <- here::here("Mok-simYAL5", "output", "A", "A.h5")
 
@@ -352,7 +357,7 @@ ExpandedCodonRegionNormalization <- function(.x, expand_width = 5L){
 }
 
 
-ExpandedCodonRegionNormalization(ExpandList[[1]], expand_width = 5L)
+table_a <- ExpandedCodonRegionNormalization(ExpandList[[1]], expand_width = 5L)
 
 # # A tibble: 11 x 6
 # Gene    CodonPos Codon PerCodonCounts Rel_Pos RelCount
@@ -378,6 +383,29 @@ NormalizedExpandList <- purrr::map(
   .f = ExpandedCodonRegionNormalization,
   expand_width = 5L
 )
+
+
+
+# Function to generate a plot for the expanded list of the codon
+GenerateGraphs <- function(.x){
+  
+  plot <- ggplot(.x, mapping = aes(x = Rel_Pos, y = RelCount)) + geom_line()
+  
+}
+
+fig <- ggplotly(plot)
+
+
+
+
+# Function to generate a plot for each of the tibbles within NormalizedExpandList
+GenerateAllGraphs <- purrr::map(
+  .x = NormalizedExpandList,
+  .f = GenerateGraphs
+)
+
+fig <- ggplot(GenerateAllGraphs)
+
 
 
 
