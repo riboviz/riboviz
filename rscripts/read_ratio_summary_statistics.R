@@ -1,15 +1,5 @@
-suppressMessages(library(Rsamtools))
-suppressMessages(library(rtracklayer))
-suppressMessages(library(rhdf5))
-suppressMessages(library(parallel))
-suppressMessages(library(optparse))
-suppressMessages(library(RcppRoll))
-suppressMessages(library(ggplot2))
-suppressMessages(library(tidyr))
-suppressMessages(library(dplyr))
-suppressMessages(library(magrittr))
-suppressMessages(library(purrr))
 suppressMessages(library(here))
+
 #make summary statistics. Compare how the ratio of reads in the UTRs:CDS changes
 # between conditions for Fil1
 # compare this to the global ratio change
@@ -28,30 +18,7 @@ suppressMessages(library(here))
 # get all reads in CDS, add to dataframe 
 # do reads per base to account for different lenghts of CDS and UTRs 
 
-readGFFAsDf <- purrr::compose(
-  rtracklayer::readGFFAsGRanges,
-  data.frame, 
-  as_tibble,
-  .dir = "forward" # functions called from left to right
-)
-
-GetGeneDatamatrix <- function(gene, dataset, hd_file){
-  rhdf5::h5read(file = hd_file, name = paste0("/", gene, "/", dataset, "/reads/data")) %>%
-    return()
-}
-
-TidyDatamatrix <- function(data_mat, startpos = 1, startlen = 1) {
-  # CHECK startpos/off-by-one
-  positions <- startpos:(startpos + ncol(data_mat) - 1)
-  readlengths <- startlen:(startlen + nrow(data_mat) - 1)
-  data_mat %>%
-    set_colnames(positions) %>%
-    as_tibble() %>%
-    mutate(ReadLen = readlengths) %>%
-    gather(-ReadLen, key = "Pos", value = "Counts", convert = FALSE) %>%
-    mutate(Pos = as.integer(Pos), Counts = as.integer(Counts))
-}
-
+source(here::here('rscripts','read_count_functions.R'))
 
 # get inputs, gene names, and paths to h5 files 
 gff_in <- 'wt.AT.ribo.4_s/S_pombe_full_UTR_or_50nt_buffer.gff3'
