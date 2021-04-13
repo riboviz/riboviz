@@ -761,15 +761,15 @@ def test_analysis_outputs_html(expected_fixture, output_dir, sample, file_name, 
     :param nextflow_fixture: Should Nextflow tests be run?
     :type nextflow_fixture: bool
     """
+    if not nextflow_fixture:
+        pytest.skip('Skipped test not applicable to Nextflow')
     file_name = workflow_files.STATIC_HTML_FILE.format(sample)
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
     expected_file = os.path.join(expected_fixture, output_dir_name,
                                  sample, file_name)
-    assert os.path.exists(os.path.join(output_dir, sample, file_name))
     if not os.path.exists(expected_file):
        pytest.skip('Skipped as expected file does not exist')
-    if not nextflow_fixture:
-        pytest.skip('Skipped test not applicable to Nextflow')
+    assert os.path.exists(os.path.join(output_dir, sample, file_name))
     compare_files.compare_files(
         expected_file,
         os.path.join(output_dir, sample, file_name))
