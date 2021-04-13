@@ -12,9 +12,15 @@ library(tidyverse)
 library(zoo)
 # install.packages("ggplot2")
 library(ggplot2)
-install.packages("plotly")
+# install.packages("plotly")
 library(plotly)
 library(purrr)
+
+
+# IF SINGLE CODONS: USE yeast_codon_pos_i200 THROUGHOUT
+# IF CODON PAIRS: USE gene_poscodon_codon_i200 THROUGHOUT (derived from yeast_codon_pos_i200)
+
+
 
 YAL5_h5 <- here::here("Mok-simYAL5", "output", "A", "A.h5")
 
@@ -22,26 +28,91 @@ YAL5_gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation
 
 gff_df <- readGFFAsDf(YAL5_gff)
 
+
+
 # Import the .tsv file: (used the updated file which contains the first 
 # 200 codons of each gene)
 
 yeast_codon_pos_i200 <- readr::read_tsv(file = here::here("data", "yeast_codon_table.tsv"))
 
 # Confirm that the .tsv file has been imported and check structure:
-head(yeast_codon_pos_i200) 
+# head(yeast_codon_pos_i200) 
+# 
+# # A tibble: 6 x 3
+# Gene    PosCodon Codon
+# <chr>      <dbl> <chr>
+#   1 YAL068C        1 ATG  
+# 2 YAL068C        2 GTC  
+# 3 YAL068C        3 AAA  
+# 4 YAL068C        4 TTA  
+# 5 YAL068C        5 ACT  
+# 6 YAL068C        6 TCA
 
 
 
-# Filter down the yeast_codon_pos_i200 file to the gene that you are 
+# Configured the yeast_codon_pos_i200 to show the positions lead and lag positions 
+# for each PosCodon and configured the Codon column to CodonPair so that the outputs 
+# looks like this: 
+#   
+#   # A tibble: 2,826,757 x 3
+#   Gene    PosCodon CodonPair
+# <chr>   <chr>    <chr>    
+#   1 YAL068C 1 2      ATG GTC  
+#   2 YAL068C 2 3      GTC AAA  
+# 3 YAL068C 3 4      AAA TTA  
+# 4 YAL068C 4 5      TTA ACT  
+# 5 YAL068C 5 6      ACT TCA  
+# 6 YAL068C 6 7      TCA ATC  
+# 7 YAL068C 7 8      ATC GCC  
+# 8 YAL068C 8 9      GCC GCT  
+# 9 YAL068C 9 10     GCT GGT  
+# 10 YAL068C 10 11    GGT GTC  
+# # ... with 2,826,747 more rows
+
+gene_poscodon_codon_i200 <- tibble::tibble(
+  Gene = yeast_codon_pos_i200$Gene,
+  PosCodon = paste(yeast_codon_pos_i200$PosCodon, dplyr::lead(yeast_codon_pos_i200$PosCodon)),
+  CodonPair = paste(yeast_codon_pos_i200$Codon, dplyr::lead(yeast_codon_pos_i200$Codon))
+)
+
+# Replaced yeast_codon_pos_i200 with gene_poscodon_codon_i200 throughout the script
+
+
+
+# Filter down the gene_poscodon_codon_i200 file to the gene that you are 
 # working with, in this case YAL003W
 
-YAL003W_pos <- dplyr::filter(yeast_codon_pos_i200, Gene=="YAL003W")
+# For codon pairs yeast_codon_pos_i200 input was changed to gene_poscodon_codon_i200
+
+YAL003W_pos <- dplyr::filter(gene_poscodon_codon_i200, Gene=="YAL003W")
 print(YAL003W_pos)
 
 
 
 # read the structure of the h5 file 
 h5ls(YAL5_h5)
+
+# group        name       otype  dclass       dim
+# 0                           /     YAL003W   H5I_GROUP                  
+# 1                    /YAL003W Mok-simYAL5   H5I_GROUP                  
+# 2        /YAL003W/Mok-simYAL5       reads   H5I_GROUP                  
+# 3  /YAL003W/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 1121
+# 4                           /     YAL005C   H5I_GROUP                  
+# 5                    /YAL005C Mok-simYAL5   H5I_GROUP                  
+# 6        /YAL005C/Mok-simYAL5       reads   H5I_GROUP                  
+# 7  /YAL005C/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 2429
+# 8                           /     YAL012W   H5I_GROUP                  
+# 9                    /YAL012W Mok-simYAL5   H5I_GROUP                  
+# 10       /YAL012W/Mok-simYAL5       reads   H5I_GROUP                  
+# 11 /YAL012W/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 1685
+# 12                          /     YAL035W   H5I_GROUP                  
+# 13                   /YAL035W Mok-simYAL5   H5I_GROUP                  
+# 14       /YAL035W/Mok-simYAL5       reads   H5I_GROUP                  
+# 15 /YAL035W/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 3509
+# 16                          /     YAL038W   H5I_GROUP                  
+# 17                   /YAL038W Mok-simYAL5   H5I_GROUP                  
+# 18       /YAL038W/Mok-simYAL5       reads   H5I_GROUP                  
+# 19 /YAL038W/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 2003
 
 
 
@@ -77,11 +148,11 @@ Mok_YAL5_data <- GetAllGeneDatamatrix(dataset="Mok-simYAL5", hd_file = YAL5_h5,
 
 
 
-# # GetGeneDatamatrix for each of the genes contained within the Mok-simYAL5
-# 
-# YAL003W_datamatrix <- GetGeneDatamatrix(gene="YAL003W", dataset="Mok-simYAL5", 
-#                                   hd_file = YAL5_h5) #data_mat
-# 
+# GetGeneDatamatrix for each of the genes contained within the Mok-simYAL5
+#
+# YAL003W_datamatrix <- GetGeneDatamatrix(gene="YAL003W", dataset="Mok-simYAL5",
+#                                  hd_file = YAL5_h5) #data_mat
+#
 # # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
 # # where 1:41 represents read lengths 10:50 and 1:1121 represents the 1121 
 # # nucleotides including UTRs and CDS
@@ -172,6 +243,7 @@ Mok_YAL5_data <- GetAllGeneDatamatrix(dataset="Mok-simYAL5", hd_file = YAL5_h5,
 # # 250 UTRs at each end for a total of 1121 nt
 
 
+
 # KeepGeneCDS function: remove the UTRs at the 5' and 3' end, keep the CDS
 
 KeepGeneCDS <- function(gene, dataset, hd_file, startpos = 1, startlen = 10){
@@ -189,6 +261,7 @@ KeepGeneCDS <- function(gene, dataset, hd_file, startpos = 1, startlen = 10){
   return(summary_counts_for_positions_CDS)
   
 }
+
 
 gene_CDS <- KeepGeneCDS(gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
 
@@ -215,17 +288,22 @@ gene_CDS <- KeepGeneCDS(gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, 
 # NucleotideToCodonPosition function: change format from nucleotides to codons,
 # combine the generated codon table and the yeast_codon_pos_i200 file  
 
-NucleotideToCodonPosition <- function(yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10){
+NucleotideToCodonPosition <- function(gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10){
   
-  codon_table <- dplyr::filter(yeast_codon_pos_i200, Gene==gene)
+  codon_table <- dplyr::filter(gene_poscodon_codon_i200, Gene==gene)
   
   gene_CDS <- KeepGeneCDS(gene, dataset, hd_file, startpos = 1, startlen = 10)
   
-  per_codon_counts <- zoo::rollapply(data=gene_CDS$Total_counts, width = 3, sum, by = 3)
+  # per_codon_counts <- zoo::rollapply(data=gene_CDS$Total_counts, width = 3, sum, by = 3)
+  
+  per_codonpair_counts <- zoo::rollapply(data=gene_CDS$Total_counts, width = 6, sum, by = 3)
+  # configured the code for per_codon_counts so that it sums 1+2, 2+3, 3+4...
   
   gene_per_codon_counts <- tibble::tibble(
-    CodonPos = seq_len(length(per_codon_counts)), 
-    PerCodonCounts = per_codon_counts
+    # CodonPos = paste(seq_len(length(per_codon_counts)), 
+    CodonPos = paste(seq_len(length(per_codonpair_counts)), seq_len(length(per_codonpair_counts)) +1),
+        # Changed CodonPos so that the CodonPos gives 1+2, 2+3, 3+4
+    PerCodonCounts = per_codonpair_counts
   )
   
   joined_gene_per_codon_counts <- dplyr::full_join(
@@ -233,7 +311,7 @@ NucleotideToCodonPosition <- function(yeast_codon_pos_i200, gene, dataset, hd_fi
     y = codon_table,  
     by = c("CodonPos" = "PosCodon")
   ) %>% 
-    dplyr::select(Gene, CodonPos, Codon, PerCodonCounts) 
+    dplyr::select(Gene, CodonPos, CodonPair, PerCodonCounts) 
   
   
   return(joined_gene_per_codon_counts)
@@ -241,10 +319,10 @@ NucleotideToCodonPosition <- function(yeast_codon_pos_i200, gene, dataset, hd_fi
 }
 
 
-joined_gene_per_codon_counts_YAL003W <- NucleotideToCodonPosition(yeast_codon_pos_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
+joined_gene_per_codon_counts_YAL003W <- NucleotideToCodonPosition(gene_poscodon_codon_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
 
 
-# Output generated from NucleotideToCodonPosition function:
+# Output generated from NucleotideToCodonPosition function for single codons:
 # 
 # # A tibble: 207 x 4
 #     Gene    CodonPos Codon PerCodonCounts
@@ -260,35 +338,61 @@ joined_gene_per_codon_counts_YAL003W <- NucleotideToCodonPosition(yeast_codon_po
 #   9 YAL003W        9 ATT             1058
 #  10 YAL003W       10 GAA              500
 # # ... with 197 more rows
-
+# 
+# 
+# Output generated from NucleotideToCodonPosition function for codon pairs:
+# 
+#   # A tibble: 207 x 4
+#   Gene    CodonPos CodonPair PerCodonCounts
+# <chr>   <chr>    <chr>              <int>
+#   1 YAL003W 1 2      ATG GCA             2080
+# 2 YAL003W 2 3      GCA TCC             2977
+# 3 YAL003W 3 4      TCC ACC             1967
+# 4 YAL003W 4 5      ACC GAT             1283
+# 5 YAL003W 5 6      GAT TTC              969
+# 6 YAL003W 6 7      TTC TCC             1518
+# 7 YAL003W 7 8      TCC AAG             2313
+# 8 YAL003W 8 9      AAG ATT             2217
+# 9 YAL003W 9 10     ATT GAA             1558
+# 10 YAL003W 10 11    GAA ACT             1474
+# # ... with 197 more rows
 
 
 
 # Function to filter for codons of interest, generates a list of the positions of the codon of interest
-FilterForCodonOfInterestPositions <- function(yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, codon_of_interest){
+FilterForCodonOfInterestPositions <- function(gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, codon_of_interest){
   
-  joined_gene_per_codon_counts <- NucleotideToCodonPosition(yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10)
+  joined_gene_per_codon_counts <- NucleotideToCodonPosition(gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10)
   
-  interesting_codon_table <- dplyr::filter(joined_gene_per_codon_counts, Codon == codon_of_interest) 
+  interesting_codon_table <- dplyr::filter(joined_gene_per_codon_counts, CodonPair == codon_of_interest) 
+  # Changed Codon == codon_of_interest to CodonPair = codon_of_interest
+    
+          # # A tibble: 2 x 4
+          #      Gene    CodonPos CodonPair PerCodonCounts
+          #      <chr>   <chr>      <chr>              <int>
+          #   1 YAL003W   7 8      TCC AAG             2313
+          #   2 YAL003W  57 58     TCC AAG             2193
   
   interesting_codon_positions <- interesting_codon_table$CodonPos
   
   return(interesting_codon_positions)
 }
 
-interesting_codon_positions <- FilterForCodonOfInterestPositions(yeast_codon_pos_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, codon_of_interest = "AAG")
+# interesting_codon_positions <- FilterForCodonOfInterestPositions(gene_poscodon_codon_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, codon_of_interest = "TCC AAG")
 
 # Output from FilterForCodonOfInterestPositions
 # [1]   8  22  39  58  97  99 109 110 113 116 120 128 144 166 167 178
 
+# Output from FilterForCodonOfInterestPositions
+# [1] "7 8"   "57 58"
 
 
 
 # Function needed to go from one position to a region.
 # This function will be using codon position values, not nucleotide position values
-ExpandCodonRegion <- function(.x, yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, gff_df, expand_width = 5L, remove_overhang = TRUE) {
+ExpandCodonRegion <- function(.x = interesting_codon_positions, gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, gff_df, expand_width = 5L, remove_overhang = TRUE) {
   
-  joined_gene_per_codon_counts <- NucleotideToCodonPosition(yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10)
+  joined_gene_per_codon_counts <- NucleotideToCodonPosition(gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10)
   
   gene_length <- GetGeneLength(gene, dataset, hd_file)
   
@@ -309,7 +413,15 @@ ExpandCodonRegion <- function(.x, yeast_codon_pos_i200, gene, dataset, hd_file, 
 # potential test: length of output_codon_info == (2x expand_width + 1)
 
 
-ExpandCodonRegionOutput <- ExpandCodonRegion(.x = interesting_codon_positions[1], yeast_codon_pos_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, gff_df, expand_width = 5L)
+
+# running into an error when trying to carry out this function:
+#   Error in .x + expand_width : non-numeric argument to binary operator
+# 
+# Likely due to the input being in the format "7 8" instead of a numeric. 
+
+
+
+ExpandCodonRegionOutput <- ExpandCodonRegion(.x = interesting_codon_positions, gene_poscodon_codon_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, gff_df, expand_width = 5L)
 
 # Gives the output:
 
@@ -330,12 +442,13 @@ ExpandCodonRegionOutput <- ExpandCodonRegion(.x = interesting_codon_positions[1]
 # 11 YAL003W       13 AAA             1053       5
 
 
+
 # Apply the ExpandCodonRegion function to the codons of interest to generate expanded tibbles for each position 
 
 ExpandList <- purrr::map(
   .x = interesting_codon_positions, # vector of codon positions to iterate over
   .f = ExpandCodonRegion,   # function to use at each codon position of interest
-  yeast_codon_pos_i200,
+  gene_poscodon_codon_i200,
   gene="YAL003W",
   dataset="Mok-simYAL5",
   hd_file=YAL5_h5,
@@ -344,7 +457,6 @@ ExpandList <- purrr::map(
   gff_df,
   expand_width = 5L
 )
-
 
 
 
@@ -393,7 +505,7 @@ GenerateGraphs <- function(.x){
   
 }
 
-fig <- ggplotly(plot)
+plot <- GenerateGraphs(.x = table_a)
 
 
 
@@ -404,7 +516,8 @@ GenerateAllGraphs <- purrr::map(
   .f = GenerateGraphs
 )
 
-fig <- ggplot(GenerateAllGraphs)
+# Generates a list consisting of all of the graphs, by running e.g. "GenerateAllGraphs[[3]]" 
+# from the console you can open its graph 
 
 
 
