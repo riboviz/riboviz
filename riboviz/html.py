@@ -2,6 +2,7 @@
 html-related constants and functions.
 """
 import subprocess
+from riboviz import utils
 
 HTML_EXT = "html"
 """ File extension. """
@@ -19,8 +20,4 @@ def equal_html(file1, file2):
     running ``utils.equal_file_names``
     """
     # TODO implement in-Python comparison.
-    cmd = [utils.equal_file_names(file1, file2)]
-    return_code = subprocess.call(cmd)
-    assert return_code == 0,\
-        "Non-zero return code (%d) from %s" % (
-            return_code, ' '.join(map(str, cmd)))
+    utils.equal_file_names(file1, file2)
