@@ -12,7 +12,7 @@ from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 
 GENE = "Gene"
 """ Codon positions column name (gene name). """
-POS = "Pos"
+POS = "PosCodon"
 """
 Codon positions column name (codon position in coding sequence,
 1-indexed by codon).
@@ -196,9 +196,9 @@ def write_feature_codons_to_csv(feature_codons, csv_file, delimiter="\t"):
     The CSV file has columns:
 
     * :py:const:`GENE`: feature name.
-    * :py:const:`CODON`: codon.
     * :py:const:`POS`: codon position in coding sequence (1-indexed).
-
+    * :py:const:`CODON`: codon.
+    
     :param feature_codons: Codons for each feature, keyed by feature \
     name
     :type feature_codons: dict(str or unicode -> list(str or unicode))
@@ -210,10 +210,10 @@ def write_feature_codons_to_csv(feature_codons, csv_file, delimiter="\t"):
     provenance.write_provenance_header(__file__, csv_file)
     with open(csv_file, "a") as f:
         writer = csv.writer(f, delimiter=delimiter, lineterminator='\n')
-        writer.writerow([GENE, CODON, POS])
+        writer.writerow([GENE, POS, CODON])
         for feature_id, codons in list(feature_codons.items()):
             for pos, codon in zip(range(0, len(codons)), codons):
-                writer.writerow([feature_id, codon, pos+1])
+                writer.writerow([feature_id, pos+1, codon])
 
 
 def get_cds_codons_file(fasta,
