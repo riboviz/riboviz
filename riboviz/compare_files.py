@@ -47,7 +47,7 @@ def compare_files(file1, file2, compare_names=True):
     if ext.endswith(tuple(["pdf"])):
         utils.equal_file_names(file1, file2)
     elif ext.endswith(tuple([html.HTML_EXT])):
-        utils.equal_file_names(file1, file2)
+        html.equal_html(file1, file2)
     elif ext.endswith(tuple([hisat2.HT2_EXT, sam_bam.BAI_EXT])):
         utils.equal_file_sizes(file1, file2)
     elif ext.endswith(tuple([h5.H5_EXT])):
