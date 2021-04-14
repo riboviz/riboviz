@@ -411,7 +411,11 @@ RunSamToBamToH5 <- function(bam_to_h5, sam_file, bam_file,
   print(paste0("BAM: ", bam_file))
   print(paste0("HDF5: ", h5_file))
 
-  h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes={num_processes} --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --secondary-id={secondary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={orf_gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds} --feature={feature}" # nolint
+  h5_cmd_template <- "Rscript --vanilla {bam_to_h5} --num-processes={num_processes} --min-read-length={min_read_length} --max-read-length={max_read_length} --buffer={buffer} --primary-id={primary_id} --dataset={dataset} --bam-file={bam_file} --hd-file={h5_file} --orf-gff-file={orf_gff_file} --is-riboviz-gff={is_riboviz_gff} --stop-in-cds={stop_in_cds} --feature={feature}" # nolint
+  if (!is.na(secondary_id)) {
+      h5_cmd_template <- paste(h5_cmd_template,
+                               "--secondary-id={secondary_id}")
+  }
   h5_cmd <- glue(h5_cmd_template)
   print(h5_cmd)
 
@@ -437,7 +441,7 @@ testthat::test_that(
   max_read_length <- 50
   buffer <- 20
   primary_id <- "Name"
-  secondary_id <- "NULL"
+  secondary_id <- NA
   dataset <- "Mok-tinysim"
   is_riboviz_gff <- TRUE
   stop_in_cds <- FALSE
@@ -467,7 +471,7 @@ testthat::test_that(
   max_read_length <- 50
   buffer <- 20
   primary_id <- "Name"
-  secondary_id <- "NULL"
+  secondary_id <- NA
   dataset <- "Mok-tinysim"
   is_riboviz_gff <- FALSE
   stop_in_cds <- FALSE
@@ -497,7 +501,7 @@ testthat::test_that(
   max_read_length <- 50
   buffer <- 20
   primary_id <- "Name"
-  secondary_id <- "NULL"
+  secondary_id <- NA
   dataset <- "Mok-tinysim"
   is_riboviz_gff <- FALSE
   stop_in_cds <- TRUE
@@ -527,7 +531,7 @@ testthat::test_that(
   max_read_length <- 50
   buffer <- 20
   primary_id <- "Name"
-  secondary_id <- "NULL"
+  secondary_id <- NA
   dataset <- "Mok-tinysim"
   is_riboviz_gff <- TRUE
   stop_in_cds <- FALSE
