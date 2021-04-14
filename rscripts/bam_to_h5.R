@@ -549,7 +549,10 @@ if (is.na(opt$orf_gff_file)) {
 if (opt$secondary_id  ==  "NULL") {
   # Unquote NULL option.
   secondary_id <- NULL
+} else {
+  secondary_id <- opt$secondary_id
 }
+print(secondary_id)
 BamToH5(opt$bam_file, opt$orf_gff_file, opt$feature,
         opt$min_read_length, opt$max_read_length,
         opt$buffer, opt$primary_id, secondary_id, opt$dataset,
