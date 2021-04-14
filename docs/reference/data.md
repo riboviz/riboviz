@@ -290,12 +290,17 @@ $ mkdir data/Mok-tinysim-gffsam
 $ samtools view -h Mok-tinysim/output/A/A.bam > data/Mok-tinysim-gffsam/A.sam
 $ cp ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 data/Mok-tinysim-gffsam/
 $ cp data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3 data/Mok-tinysim-gffsam/tiny_2genes_20utrs_orf.gff3
+$ cp data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3 data/Mok-tinysim-gffsam/tiny_2genes_20utrs_secondary_id.gff3
 ```
 
 Edit `data/Mok-tinysim-gffsam/tiny_2genes_20utrs_orf.gff3` and replace `CDS` with `ORF`.
 
----
+Edit `data/Mok-tinysim-gffsam/tiny_2genes_20utrs_secondary_id.gff3` and update attributes as follows:
 
+* `Name=MAT` => `Name=MAT;ID=TAM`
+* `Name=MIKE` => `Name=MIKE;ID=EKIM`
+
+---
 
 ## `riboviz/test/` test data files
 

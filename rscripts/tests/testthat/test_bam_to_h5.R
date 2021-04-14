@@ -65,11 +65,11 @@ DeleteFile <- function(file_name) {
   }
 }
 
-#' Validate H5 data for a specific sequence.
+#' Validate H5 data for a specific sequence and feature.
 #'
 #' @param sequence Sequence name (character).
-#' @param h5_file H5 file with sequence data to be validated
-#' (character).
+#' @param feature_name Feature name (character).
+#' @param h5_file H5 file with data to be validated (character).
 #' @param gff GFF data (tbl_df tbl data.frame).
 #' @param bam_hdr_seq_info Data on sequences from BAM file header
 #' (GenomeInfoDb::Seqinfo).
@@ -86,22 +86,22 @@ DeleteFile <- function(file_name) {
 #' @param feature Feature e.g. `CDS`, `ORF`, or `uORF` (character).
 #'
 #' @export
-ValidateH5Sequence <- function(sequence, h5_file, gff,
-  bam_hdr_seq_info, bam, dataset, min_read_length,
+ValidateH5SequenceFeature <- function(sequence, feature_name,
+  h5_file, gff, bam_hdr_seq_info, bam, dataset, min_read_length,
   max_read_length, buffer, is_riboviz_gff, stop_in_cds,
   feature = "CDS") {
   num_read_counts <- max_read_length - min_read_length + 1
-  # Get sequence positions from GFF
-  gff_cds_start <- GetCDS5start(sequence, gff, ftype = feature)
-  gff_cds_end <- GetCDS3end(sequence, gff, ftype = feature)
+  # Get positions from GFF
+  gff_cds_start <- GetCDS5start(feature_name, gff, ftype = feature)
+  gff_cds_end <- GetCDS3end(feature_name, gff, ftype = feature)
   gff_cds_length <- gff_cds_end - gff_cds_start + 1
   if (is_riboviz_gff) {
-    # Get sequence positions from GFF
-    utr5_start <- GetCDS5start(sequence, gff, ftype = "UTR5")
-    utr5_end <- GetCDS3end(sequence, gff, ftype = "UTR5")
+    # Get positions from GFF
+    utr5_start <- GetCDS5start(feature_name, gff, ftype = "UTR5")
+    utr5_end <- GetCDS3end(feature_name, gff, ftype = "UTR5")
     utr5_length <- utr5_end - utr5_start + 1
-    utr3_start <- GetCDS5start(sequence, gff, ftype = "UTR3")
-    utr3_end <- GetCDS3end(sequence, gff, ftype = "UTR3")
+    utr3_start <- GetCDS5start(feature_name, gff, ftype = "UTR3")
+    utr3_end <- GetCDS3end(feature_name, gff, ftype = "UTR3")
     utr3_length <- utr3_end - utr3_start + 1
     stop_codon_pos <- as.array(seq(gff_cds_end - 2, gff_cds_end))
     h5_buffer_left_info <-
@@ -111,7 +111,7 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
     h5_stop_codon_info <-
       "Unexpected stop_codon_pos, compared to GFF feature positions"
   } else {
-    # Get sequence positions from GFF and buffer
+    # Get positions from GFF and buffer
     utr5_start <- 1
     utr5_length <- buffer
     utr5_end <- utr5_start + buffer - 1
@@ -159,59 +159,61 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
 
   # Validate buffer_left: number of nucleotides upstream of the start
   # codon (ATG) (UTR5 length)
-  h5_buffer_left <- GetGeneBufferLeft(sequence, dataset, h5_file) # double
+  h5_buffer_left <- GetGeneBufferLeft(feature_name, dataset,
+                                      h5_file) # double
   print(paste0("buffer_left: ", h5_buffer_left))
   expect_equal(h5_buffer_left, utr5_length,
-    info = paste0(sequence, ": ", h5_buffer_left_info))
+    info = paste0(feature_name, ": ", h5_buffer_left_info))
 
   # Validate buffer_right: number of nucleotides downstream of the
   # stop codon (TAA/TAG/TGA) (UTR3 length)
-  h5_buffer_right <- GetGeneBufferRight(sequence, dataset, h5_file) # integer
+  h5_buffer_right <- GetGeneBufferRight(feature_name, dataset,
+                                        h5_file) # integer
   print(paste0("buffer_right: ", h5_buffer_right))
   buffer_right <- utr3_end - stop_codon_pos[3]
   expect_equal(h5_buffer_right, buffer_right,
-    info = paste0(sequence, ": ", h5_buffer_right_info))
+    info = paste0(feature_name, ": ", h5_buffer_right_info))
 
   # Validate start_codon_pos: Positions corresponding to start codon
   # of feature in organism sequence
   gff_start_codon_pos <- as.array(seq(gff_cds_start, gff_cds_start + 2))
   h5_start_codon_pos <-
-    GetGeneStartCodonPos(sequence, dataset, h5_file) # 1D array of 3 integer
+    GetGeneStartCodonPos(feature_name, dataset, h5_file) # 1D array of 3 integer
   print(paste0("start_codon_pos: ", toString(h5_start_codon_pos)))
   expect_equal(length(h5_start_codon_pos), 3,
-    info = paste0(sequence, ": Unexpected start_codon_pos length"))
+    info = paste0(feature_name, ": Unexpected start_codon_pos length"))
   expect_equal(h5_start_codon_pos, gff_start_codon_pos,
-    info = paste0(sequence,
+    info = paste0(feature_name,
       ": Unexpected start_codon_pos, compared to GFF feature positions"))
 
   # Validate stop_codon_pos: Positions corresponding to stop codon of
   # feature in organism sequence
   h5_stop_codon_pos <-
-    GetGeneStopCodonPos(sequence, dataset, h5_file) # 1D array of 3 integer
+    GetGeneStopCodonPos(feature_name, dataset, h5_file) # 1D array of 3 integer
   print(paste0("stop_codon_pos: ", toString(h5_stop_codon_pos)))
   expect_equal(length(h5_stop_codon_pos), 3,
-    info = paste0(sequence, ": Unexpected stop_codon_pos length"))
+    info = paste0(feature_name, ": Unexpected stop_codon_pos length"))
   expect_equal(h5_stop_codon_pos, stop_codon_pos,
-    info = paste0(sequence, ": ", h5_stop_codon_info))
+    info = paste0(feature_name, ": ", h5_stop_codon_info))
 
   # Validate lengths: Lengths of mapped reads.
   lengths <- as.array(seq(min_read_length, max_read_length))
   # 1D array of <max_read_length - min_read_length + 1> integer
-  h5_lengths <- GetGeneMappedReadLengths(sequence, dataset, h5_file)
+  h5_lengths <- GetGeneMappedReadLengths(feature_name, dataset, h5_file)
   print(paste0("lengths: ", toString(h5_lengths)))
   expect_equal(length(h5_lengths), num_read_counts,
-    info = paste0(sequence,
+    info = paste0(feature_name,
       ": lengths length != max_read_length - min_read_length + 1"))
   expect_equal(h5_lengths, lengths,
-    info = paste0(sequence, ": Unexpected lengths"))
+    info = paste0(feature_name, ": Unexpected lengths"))
 
   # Validate reads_by_len: Counts of number of ribosome sequences of
   # each length
   # 1D array of <max_read_length - min_read_length + 1> double
-  h5_reads_by_len <- GetGeneReadLength(sequence, dataset, h5_file)
+  h5_reads_by_len <- GetGeneReadLength(feature_name, dataset, h5_file)
   print(paste0("reads_by_len: ", toString(h5_reads_by_len)))
   expect_equal(length(h5_reads_by_len), num_read_counts,
-    info = paste0(sequence,
+    info = paste0(feature_name,
       ": reads_by_len length != max_read_length - min_read_length + 1"))
 
   # Calculate expected reads_by_len based on information from BAM
@@ -222,39 +224,39 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
   }
   print(paste0("reads_by_len_bam: ", toString(reads_by_len_bam)))
   expect_equal(h5_reads_by_len, reads_by_len_bam,
-    info = paste0(sequence,
+    info = paste0(feature_name,
       ": Unexpected reads_by_len, compared to those computed from BAM"))
 
   # Validate reads_total: Total number of ribosome sequences
   h5_reads_total <-
-    GetGeneReadsTotal(sequence, dataset, h5_file) # 1D array of 1 double
+    GetGeneReadsTotal(feature_name, dataset, h5_file) # 1D array of 1 double
   print(paste0("reads_total: ", h5_reads_total))
   expect_equal(length(h5_reads_total), 1,
-    info = paste0(sequence, ": Unexpected reads_total length"))
+    info = paste0(feature_name, ": Unexpected reads_total length"))
   h5_reads_len_total <- Reduce("+", h5_reads_total)
   expect_equal(h5_reads_total[1], h5_reads_len_total,
-    info = paste0(sequence,
+    info = paste0(feature_name,
       ": reads_total != sum of totals in reads_by_len"))
   expect_equal(h5_reads_total[1], length(bam_sequence_kept),
-    info = paste0(sequence,
+    info = paste0(feature_name,
       ": reads_total != number of BAM alignments with Flag = 0"))
 
   # Validate data: Positions and lengths of ribosome sequences within
   # the organism data
-  h5_data <- GetGeneDatamatrix(sequence, dataset, h5_file) # matrix, integer
+  h5_data <- GetGeneDatamatrix(feature_name, dataset, h5_file) # matrix, integer
   print(paste0("data rows/columns: ", toString(dim(h5_data))))
   expect_equal(nrow(h5_data), num_read_counts,
-    info = paste0(sequence,
+    info = paste0(feature_name,
       ": Number of data rows != max_read_length - min_read_length + 1"))
   expect_equal(ncol(h5_data), utr3_end,
-    info = paste0(sequence,
+    info = paste0(feature_name,
       ": Number of data columns != GFF UTR3 final nt position"))
   expect_equal(ncol(h5_data), bam_hdr_sequence_seq_length,
-    info = paste0(sequence,
+    info = paste0(feature_name,
       ": Number of data columns != BAM sequence length"))
   h5_reads_by_len_data <- rowSums(h5_data)
   expect_equal(h5_reads_by_len, as.array(h5_reads_by_len_data),
-    info = paste0(sequence, ": reads_by_len is not consistent with data"))
+    info = paste0(feature_name, ": reads_by_len is not consistent with data"))
 
   # Calculate expected data based on information from BAM
   data <- matrix(0, nrow = num_read_counts, ncol = utr3_end)
@@ -267,26 +269,26 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
       data[width, start] <- data[width, start] + 1
     }
     expect_equal(h5_data, data,
-      info = paste0(sequence,
+      info = paste0(feature_name,
         ": Unexpected data, compared to that computed from BAM"))
   } else {
       print("Sequence has no alignments in BAM.")
       expect_equal(h5_data, data,
-        info = paste0(sequence,
+        info = paste0(feature_name,
           ": Unexpected data, expected 0s as no alignments in BAM"))
   }
   reads_by_len_data <- rowSums(data)
   expect_equal(h5_reads_by_len_data, reads_by_len_data,
-    info = paste0(sequence,
+    info = paste0(feature_name,
       ": Unexpected reads_by_len length, compared to those computed from BAM"))
   expect_equal(h5_reads_by_len, as.array(reads_by_len_data),
-    info = paste0(sequence,
+    info = paste0(feature_name,
       ": Unexpected reads_by_len, compared to those computed from BAM"))
 }
 
 #' Validate H5 data within a RiboViz H5 data file.
 #'
-#' @param h5_file H5 file with data on sequence to be validated
+#' @param h5_file H5 file with data to be validated
 #' (character).
 #' @param gff_file GFF file (character).
 #' @param bam_file BAM file (character).
@@ -311,6 +313,16 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, primary_id,
   gff_names <- unique(gff$seqnames) # factor, integer
   print(paste0("GFF sequence names (", length(gff_names), "):"))
   print(gff_names)
+  gff_primary_ids <- unique(gff[[primary_id]])
+  print(paste0("GFF primary feature IDs (", length(gff_primary_ids), "):"))
+  print(gff_primary_ids)
+  gff_secondary_ids <- c()
+  if (!is.na(secondary_id)) {
+    gff_secondary_ids <- unique(gff[[secondary_id]])
+    print(paste0("GFF secondary feature IDs (",
+                 length(gff_secondary_ids), "):"))
+    print(gff_secondary_ids)
+  }
 
   bam_file_f <- Rsamtools::BamFile(bam_file)
   bam_hdr_seq_info <- Rsamtools::seqinfo(bam_file_f) # GenomeInfoDb::Seqinfo, S4
@@ -336,28 +348,44 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, primary_id,
 
   ## VALIDATE H5
 
-  expect_equal(length(h5_names), length(gff_names),
+  expected_h5_names <- append(gff_primary_ids, gff_secondary_ids)
+
+  expect_equal(length(h5_names), length(expected_h5_names),
     info = "Unexpected number of sequence names, compared to GFF")
-  expect_equal(as.factor(sort(h5_names)), sort(gff_names),
+  expect_equal(as.factor(sort(h5_names)), as.factor(sort(expected_h5_names)),
     info = "Unexpected sequence names, compared to GFF")
 
-  expect_equal(length(h5_names), length(bam_hdr_names),
-    info = "Unexpected number of sequence names, compared to BAM header")
-  expect_equal(sort(h5_names), sort(bam_hdr_names),
-    info = "Unexpected sequence names, compared to BAM header")
+  # TODO: The following code currently assumes that the sequence
+  # names and primary IDs in the GFF file are the same for each
+  # feature (as that was the case in all the GFF files consulted
+  # when writing the test).
+  # In fact, the H5 file has entries named after the feature names,
+  # but we need the sequence names to access information about the
+  # feature from the BAM file. So, from the GFF above we need a map
+  # from feature name to sequence name, for example, which we can
+  # both get the unique sequence names and for cross-checking against
+  # the BAM file then iterating through to validate each
+  # sequence/feature pair in turn.
 
-  expect_true(length(bam_hdr_names) <= length(h5_names),
-    info = "Number of sequence names should be >= to those in BAM")
-  expect_true(all(sort(bam_names) %in% as.factor(sort(h5_names))),
-    info = "Sequence names should be superset of those in BAM")
+#  expect_equal(length(h5_names), length(bam_hdr_names),
+#    info = "Unexpected number of sequence names, compared to BAM header")
+#  expect_equal(sort(h5_names), sort(bam_hdr_names),
+#    info = "Unexpected sequence names, compared to BAM header")
+
+#  expect_true(length(bam_hdr_names) <= length(h5_names),
+#    info = "Number of sequence names should be >= to those in BAM")
+#  expect_true(all(sort(bam_names) %in% as.factor(sort(h5_names))),
+#    info = "Sequence names should be superset of those in BAM")
 
   ## VALIDATE H5 (sequence-specific)
 
-  for (sequence in h5_names) {
+  for (feature_name in gff_primary_ids) {
+    sequence <- feature_name
     print(paste0("Sequence: ", sequence))
-    ValidateH5Sequence(sequence, h5_file, gff, bam_hdr_seq_info, bam,
-      dataset, min_read_length, max_read_length, buffer,
-      is_riboviz_gff, stop_in_cds, feature)
+    print(paste0("Feature name: ", feature_name))
+    ValidateH5SequenceFeature(sequence, feature_name, h5_file, gff,
+      bam_hdr_seq_info, bam, dataset, min_read_length,
+      max_read_length, buffer, is_riboviz_gff, stop_in_cds, feature)
   }
 }
 
@@ -553,4 +581,35 @@ testthat::test_that(
   ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
     dataset, min_read_length, max_read_length, buffer,
     is_riboviz_gff, stop_in_cds, feature)
+})
+
+testthat::test_that(
+  "Test bam_to_h5.R (secondary_id)", {
+
+  withr::defer(DeleteFile(h5_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_bai_file)) # Delete H5 when test completes.
+
+  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
+  bam_file <- here::here("test_bam_to_h5_data.bam")
+  bam_bai_file <- here::here("test_bam_to_h5_data.bam.bai")
+  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs_secondary_id.gff3")
+
+  min_read_length <- 10
+  max_read_length <- 50
+  buffer <- 20
+  primary_id <- "Name"
+  secondary_id <- "ID"
+  dataset <- "Mok-tinysim"
+  is_riboviz_gff <- TRUE
+  stop_in_cds <- FALSE
+  h5_file <- here::here("test_bam_to_h5_data.h5")
+
+  RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
+    primary_id, secondary_id, dataset, min_read_length, max_read_length,
+    buffer, is_riboviz_gff, stop_in_cds)
+
+  ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
+    dataset, min_read_length, max_read_length, buffer,
+    is_riboviz_gff, stop_in_cds)
 })
