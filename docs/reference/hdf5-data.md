@@ -33,17 +33,17 @@ All reads are mapped to their 5' ends.
 
 `secondary_id` is used as a GFF column to get alternative gene names which are associated with gene names. These are used to create symbolic links in the H5 file to the entries for the original genes.
 
-If `is_riboviz_gff == TRUE` then:
+If `is_riboviz_gff` then:
 
 * Feature (e.g. `CDS`, `ORF`, or `uORF`), `UTR5` and `UTR3` entries from the GFF are used.
 * `buffer` is ignored.
 
-If `is_riboviz_gff == FALSE` then:
+If not `is_riboviz_gff` then:
 
-* Feature (e.g. `CDS`, `ORF`, or `uORF`), `UTR5` and `UTR3` entries from the GFF are used.
+* Feature (e.g. `CDS`, `ORF`, or `uORF`) entries from the GFF are used.
 * `UTR5` and `UTR3` entries from the GFF are ignored.
 * `buffer` is used as the width of left and right flanks, and to calculate start and stop codon locations for genes.
-* `stop_in_cds` states where the stop codon is located (`TRUE` if within the feature, `FALSE` otherwise).
+* `stop_in_cds` states where the stop codon is located (true if within the feature, false otherwise).
 
 ---
 
@@ -163,7 +163,7 @@ where:
 * `reads_by_len`:
   - `reads_by_len[i]` = number of alignments in BAM which have Flag equal to 0 or 256 and length equal to `lengths[i]`. This equals the sum of `DATA[*, i]` i.e. sum across all positions for a specific read length.
 * `sequence_length`: position of final nt of UTR3 from GFF file (equal to length of sequence from BAM file header `LN` value).
-  - If `is_riboviz_gff` is `false` when this is equal to `buffer` + feature length + `buffer`.
+  - If `is_riboviz_gff` is false when this is equal to `buffer` + feature length + `buffer`.
 * `DATASET "data"`:
   - 0 <= `p` <= `sequence_length - 1`
   - `DATA[p, i]` equals 1 if there is an alignment in the BAM file at position `p`+1 which has length equal to `lengths[i]` and BAM alignment has Flag 0 or 256 (see [Understanding the BAM flags](https://davetang.org/muse/2014/03/06/understanding-bam-flags/) and [Decoding SAM flags](https://broadinstitute.github.io/picard/explain-flags.html)); 0 otherwise.
