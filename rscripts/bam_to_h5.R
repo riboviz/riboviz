@@ -42,8 +42,8 @@
 #' * `UTR5` and `UTR3` entries from the GFF are ignored.
 #' * `buffer` is used as the width of left and right flanks, and to
 #'   calculate start and stop codon locations for genes.
-#' * Whether `stop_in_cds` is `TRUE` or `FALSE` also affects the
-#'   calculations for stop codon locations.
+#' * `stop_in_cds` states where the stop codon is located (`TRUE` if
+#'   within the feature, `FALSE` otherwise).
 #'
 #' | Attribute | Description | Origin |
 #' | --------- |------------ | ------ |
@@ -133,7 +133,7 @@
 #'         DATASET "data" {
 #'           DATATYPE  H5T_STD_I32LE
 #'           DATASPACE  SIMPLE { ( <sequence_length>, <read_length> ) /
-#' 	                         ( <sequence_length>, <read_length> ) }
+#'                               ( <sequence_length>, <read_length> ) }
 #'           DATA {
 #'             (0, 0): <see below>
 #'             (0, <m>): <see below>

@@ -43,7 +43,7 @@ If `is_riboviz_gff == FALSE` then:
 * Feature (e.g. `CDS`, `ORF`, or `uORF`), `UTR5` and `UTR3` entries from the GFF are used.
 * `UTR5` and `UTR3` entries from the GFF are ignored.
 * `buffer` is used as the width of left and right flanks, and to calculate start and stop codon locations for genes.
-* Whether `stop_in_cds` is `TRUE` or `FALSE` also affects the calculations for stop codon locations.
+* `stop_in_cds` states where the stop codon is located (`TRUE` if within the feature, `FALSE` otherwise).
 
 ---
 
