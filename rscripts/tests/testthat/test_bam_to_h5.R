@@ -34,7 +34,6 @@
 #' At present, the following behaviours are not tested:
 #'
 #' * BAM file specifies -ve strands.
-#' * Use of secondary gene IDs, ``secondary_id``.
 #' * BAM file with multiple exon genes.
 #'
 #' @export
@@ -354,34 +353,21 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, primary_id,
   expect_equal(as.factor(sort(h5_names)), as.factor(sort(expected_h5_names)),
     info = "Unexpected sequence names, compared to GFF")
 
-  # TODO: The following code currently assumes that the sequence
-  # names and primary IDs in the GFF file are the same for each
-  # feature (as that was the case in all the GFF files consulted
-  # when writing the test).
-  # In fact, the H5 file has entries named after the feature names,
-  # but we need the sequence names to access information about the
-  # feature from the BAM file. So, from the GFF above we need a map
-  # from feature name to sequence name, for example, which we can
-  # both get the unique sequence names and for cross-checking against
-  # the BAM file then iterating through to validate each
-  # sequence/feature pair in turn.
-
-#  expect_equal(length(h5_names), length(bam_hdr_names),
-#    info = "Unexpected number of sequence names, compared to BAM header")
-#  expect_equal(sort(h5_names), sort(bam_hdr_names),
-#    info = "Unexpected sequence names, compared to BAM header")
-
-#  expect_true(length(bam_hdr_names) <= length(h5_names),
-#    info = "Number of sequence names should be >= to those in BAM")
-#  expect_true(all(sort(bam_names) %in% as.factor(sort(h5_names))),
-#    info = "Sequence names should be superset of those in BAM")
-
   ## VALIDATE H5 (sequence-specific)
 
   for (feature_name in gff_primary_ids) {
-    sequence <- feature_name
-    print(paste0("Sequence: ", sequence))
     print(paste0("Feature name: ", feature_name))
+    # Get sequence corresponding to feature.
+    gff_feature <- gff %>%
+      filter(.[[primary_id]] == feature_name) %>%
+      filter(type == feature)
+    seq_names <- unique(gff_feature$seqnames)
+    sequence = (as.character(seq_names))[1] # Expect only one.
+    print(paste0("Sequence: ", sequence))
+    expect_true(sequence %in% bam_hdr_names,
+        info = "Sequence name should be BAM header")
+    expect_true(sequence %in% bam_names,
+        info = "Sequence name should be BAM body")
     ValidateH5SequenceFeature(sequence, feature_name, h5_file, gff,
       bam_hdr_seq_info, bam, dataset, min_read_length,
       max_read_length, buffer, is_riboviz_gff, stop_in_cds, feature)
