@@ -14,48 +14,51 @@ suppressMessages(library(here))
 # input: gff or fasta for names, h5 file
 # create a dataframe with 6 columns; gene names, number of reads 5UTR per base, number of reads CDS per base, ratio of 5UTR to CDS in control, Treatment, Sample
 # to do that need: for each condition dataframe of gene, reads CDS, read 5'UTR 
-# make that; for i in genenames, get all of the reads up to position buffer left, add to dataframe
+# make that; for gene in genenames, get all of the reads up to position buffer left, add to dataframe
 # get all reads in CDS, add to dataframe 
 # do reads per base to account for different lenghts of CDS and UTRs 
 
 source(here::here('rscripts','read_count_functions.R'))
 
 # get inputs, gene names, and paths to h5 files 
-gff_in <- 'wt.AT.ribo.4_s/S_pombe_full_UTR_or_50nt_buffer.gff3'
+# expecting example-datasets to be on same level as main riboviz repo, currently using branch Pombe_annotation_full_UTR-70
+gff_in <- here::here('..','example-datasets','fungi', 'schizosaccharomyces','annotation','Schizosaccharomyces_pombe_full_UTR_or_50nt_buffer.gff3')
 GFF <- readGFFAsDf(gff_in)
 # get the name of genes 
-genes <- levels(GFF$seqnames)
+gene_names <- levels(GFF$seqnames)
 # file is a list of paths to h5 files, files needed to be read
-file <- c('wt.AT.ribo.4_s/wt.AT.ribo.4_s.h5',
-          'wt.AT.ribo.3_s/8c5f643d83fe7ce08246d386e8303f/wt.AT.ribo.3_s.h5',
-          'wt.AT.CHX.ribo.11_s/wt.AT.CHX.ribo.11_s.h5',
-          'wt.AT.CHX.ribo.13/ec18ef21336806402ba541b8f12717/wt.AT.CHX.ribo.13_s.h5',
-          'wt.AT.noCHX.ribo.11_s/wt.AT.noCHX.ribo.11_s.h5',
-          'wt.AT.noCHX.ribo.13_s/6c237de3fe552baf04b30fdb08bbcc/wt.AT.noCHX.ribo.13_s.h5',
-          'wt.noAT.ribo.4_s/4c7158e339494e80dadcfd1a859f62/wt.noAT.ribo.4_s.h5',
-          'wt.noAT.ribo.3_s/dc0ac21aa1b8dfab77ec9366797b4e/wt.noAT.ribo.3_s.h5',
-          'wt.noAT.CHX.ribo.11_s/wt.noAT.CHX.ribo.11_s.h5',
-          'wt.noAT.CHX.ribo.13_s/wt.noAT.CHX.ribo.13_s.h5',
-          'wt.noAT.noCHX.ribo.11_s/wt.noAT.noCHX.ribo.11_s.h5',
-          'wt.noAT.noCHX.ribo.13_s/wt.noAT.noCHX.ribo.13_s.h5')
+h5_file_path <- c(here::here('D-Sp_2018','output','wt.AT.ribo.4_s','wt.AT.ribo.4_s.h5'),
+          #'wt.AT.ribo.3_s/8c5f643d83fe7ce08246d386e8303f/wt.AT.ribo.3_s.h5',
+          #'wt.AT.CHX.ribo.11_s/wt.AT.CHX.ribo.11_s.h5',
+          #'wt.AT.CHX.ribo.13/ec18ef21336806402ba541b8f12717/wt.AT.CHX.ribo.13_s.h5',
+          #'wt.AT.noCHX.ribo.11_s/wt.AT.noCHX.ribo.11_s.h5',
+          #'wt.AT.noCHX.ribo.13_s/6c237de3fe552baf04b30fdb08bbcc/wt.AT.noCHX.ribo.13_s.h5',
+          here::here('D-Sp_2018','output','wt.noAT.ribo.4_s','wt.noAT.ribo.4_s.h5')
+          #'wt.noAT.ribo.3_s/dc0ac21aa1b8dfab77ec9366797b4e/wt.noAT.ribo.3_s.h5',
+          #'wt.noAT.CHX.ribo.11_s/wt.noAT.CHX.ribo.11_s.h5',
+          #'wt.noAT.CHX.ribo.13_s/wt.noAT.CHX.ribo.13_s.h5',
+          #'wt.noAT.noCHX.ribo.11_s/wt.noAT.noCHX.ribo.11_s.h5',
+          #'wt.noAT.noCHX.ribo.13_s/wt.noAT.noCHX.ribo.13_s.h5'
+          )
+# could use yaml parameter in the future to be integrated 
 dataset <- 'D-Sp_2018'
 
 
 # create a tibble for each sample, marked with sample name, and get total reads per base 5UTR and CDS
 # reads per base is used to allow comparison no matter the length of the 5UTR or CDS 
 
-for(j in file){
+for(hd_file in h5_file_path){
   #for each h5 file listed, make an  
    condition_df <- tibble(Gene = character(),
           fiveUTR_reads_per_base = integer(),
           CDS_reads_per_base = integer())
 
-  for(i in genes){
+  for(gene in gene_names){
     #make a matric to be processed for each gene
-    tmp_mat <- GetGeneDatamatrix(i, dataset = dataset, hd_file = j)
+    tmp_mat <- GetGeneDatamatrix(gene, dataset = dataset, hd_file = hd_file)
     #get the start and stop codons
-    start <- h5readAttributes(j,base::paste('/',i,'/',dataset,'/reads', sep = ''))[['start_codon_pos']]
-    stop <- h5readAttributes(j, base::paste('/',i,'/',dataset,'/reads', sep = ''))[['stop_codon_pos']]
+    start <- h5readAttributes(hd_file,base::paste('/',gene,'/',dataset,'/reads', sep = ''))[['start_codon_pos']]
+    stop <- h5readAttributes(hd_file, base::paste('/',gene,'/',dataset,'/reads', sep = ''))[['stop_codon_pos']]
     # turn matric into a tidy datamatrix 
     tmp_tidy <- TidyDatamatrix(tmp_mat, 
                              startpos = 1 )
@@ -66,7 +69,7 @@ for(j in file){
     CDS <- filter(tmp_CDS,tmp_CDS$Pos <= max(stop))
     # for the premade tibble for the 5 file, add the number of counts per base for 5UTRs and CDS for each gene 
     # doing counts per base allows comparison even if 5UTRs are super short/CDS is long
-    new_row <- tibble(Gene = i, 
+    new_row <- tibble(Gene = gene, 
                     fiveUTR_reads_per_base = sum(FiveUTR$Counts)/length(unique(FiveUTR$Pos)),
                     CDS_reads_per_base = sum(CDS$Counts)/length(unique(CDS$Pos)))
     # add row to the dataframe for the condition  
@@ -78,12 +81,65 @@ for(j in file){
    # create new column 'Treatment' by exracting the treatment
   # create column Sample to get the sample origin of the data 
    condition_df <- condition_df %>% mutate(ratio = fiveUTR_reads_per_base/CDS_reads_per_base,
-            Treatment = paste(unlist(strsplit(basename(j), split = "[.]"))[2:3], collapse = '.'),
-            Sample = basename(j),
+            Treatment = paste(unlist(strsplit(basename(hd_file), split = "[.]"))[2:3], collapse = '.'),
+            Sample = basename(hd_file),
             .keep = 'all')
-   assign(paste('gene_reads_5UTR_CDS.',basename(j), sep = ''),condition_df) 
+   assign(paste('gene_reads_5UTR_CDS.',basename(hd_file), sep = ''),condition_df) 
      
 }
+
+condition_df <- tibble(Gene = character(),
+                       fiveUTR_reads_per_base = integer(),
+                       CDS_reads_per_base = integer())
+
+# GeneFeatureTotalCountsPerBase takes a gene, splits it into features (5UTR and CDS),
+# and returns the reads per base in the features of that gene in the form of a tibble
+GeneFeatureTotalCountsPerBase <- function(gene = gene, dataset = dataset, hd_file = h5_file_path, startpos = 1, condition_df = condition_df){
+  
+  #get the start and stop codons
+  start <- rhdf5::h5readAttributes(hd_file, paste0('/', gene,'/', dataset, '/reads'))[['start_codon_pos']]
+  stop <- rhdf5::h5readAttributes(hd_file, paste0('/', gene,'/', dataset, '/reads'))[['stop_codon_pos']]
+  
+  #make a matric to be processed for each gene
+  # turn matric into a tidy datamatrix 
+  tmp_tidy <- TidyDatamatrix(
+    GetGeneDatamatrix(gene = gene, dataset = dataset, hd_file = hd_file), 
+    startpos = 1
+  )
+  
+  # filter the tmp_tidy matric into two new matrixes, on with 5UTR positions
+  # and one with the CDS positions and reads, had to do CDS in two steps
+  
+  FiveUTR <- filter(tmp_tidy, tmp_tidy$Pos < min(start))
+  tmp_CDS <- filter(tmp_tidy, tmp_tidy$Pos >= min(start)) 
+  CDS <- filter(tmp_CDS,tmp_CDS$Pos <= max(stop))
+  
+  # for the premade tibble for the h5 file, add the number of counts per base for 5UTRs and CDS for each .x 
+  # doing counts per base allows comparison even if 5UTRs are super short/CDS is long
+  
+  new_row <- tibble(Gene = gene, 
+                    fiveUTR_reads_per_base = sum(FiveUTR$Counts)/length(unique(FiveUTR$Pos)),
+                    CDS_reads_per_base = sum(CDS$Counts)/length(unique(CDS$Pos)))
+ 
+   # add row to the dataframe for the condition  
+  condition_df<- condition_df %>% bind_rows(new_row)
+  
+  return(condition_df)
+}
+
+#test <- GeneFeatureTotalCountsPerBase(gene = gene_names[1], dataset = dataset, hd_file = h5_file_path[1], startpos = 1, condition_df = condition_df)
+
+# > test
+# # A tibble: 1 x 3
+# Gene          fiveUTR_reads_per_base CDS_reads_per_base
+# <chr>                          <dbl>              <dbl>
+#   1 SPAC1002.01.1                      0              0.202
+
+
+test<- purrr::map(.x = gene_names, .f = GeneFeatureTotalCountsPerBase, gene = gene_names, dataset = dataset, hd_file = h5_file_path[1], startpos = 1, condition_df = condition_df )
+
+
+
 
 # combine all of the dataframes into one, so I can make a box plot 
 # needs to be automated
