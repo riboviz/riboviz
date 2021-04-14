@@ -505,9 +505,9 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
 }
 
 option_list <- list(
-    make_option("--bam-file", type = "character", default = "input.bam",
+    make_option("--bam-file", type = "character", default = NA,
       help = "BAM input file"),
-    make_option("--orf-gff-file", type = "character", default = NULL,
+    make_option("--orf-gff-file", type = "character", default = NA,
       help = "GFF2/GFF3 Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts"),
     make_option("--feature", type = "character", default = "CDS",
       help = "Feature e.g. CDS, ORF, or uORF"),
@@ -540,11 +540,16 @@ opt <- parse_args(OptionParser(option_list = option_list),
 print("bam_to_h5.R running with parameters:")
 print(opt)
 
+if (is.na(opt$bam_file)) {
+  stop("--bam-file parameter must be provided. See usage (--help)")
+}
+if (is.na(opt$orf_gff_file)) {
+  stop("--orf_gff_file parameter must be provided. See usage (--help)")
+}
 if (opt$secondary_id  ==  "NULL") {
   # Unquote NULL option.
   secondary_id <- NULL
 }
-
 BamToH5(opt$bam_file, opt$orf_gff_file, opt$feature,
         opt$min_read_length, opt$max_read_length,
         opt$buffer, opt$primary_id, secondary_id, opt$dataset,
