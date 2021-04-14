@@ -41,7 +41,7 @@
 #' * `UTR5` and `UTR3` entries from the GFF are ignored.
 #' * `buffer` is used as the width of left and right flanks, and to
 #'   calculate start and stop codon locations for genes.
-#' * `stop_in_cds` states where the stop codon is located (true if
+#' * `stop-in-cds` states where the stop codon is located (true if
 #'   within the feature, false otherwise).
 #'
 #' | Attribute | Description | Origin |
@@ -168,7 +168,7 @@
 #'     specific read length.
 #' * `sequence_length`: position of final nt of UTR3 from GFF file
 #'   (equal to length  of sequence from BAM file header `LN` value).
-#'   - If `is_riboviz_gff` is false when this is equal to `buffer` +
+#'   - If `is-riboviz-gff` is false when this is equal to `buffer` +
 #'     feature length + `buffer`.
 #' * `DATASET "data"`:
 #'   - 0 <= `p` <= `sequence_length - 1`
@@ -331,21 +331,20 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
 #' @param num_processes Number of processes to parallelize over
 #' (integer).
 #'
-#' If `is-riboviz-gff == TRUE` then:
+#' If `is_riboviz_gff` then:
 #'
 #' * Feature (e.g. `CDS`, `ORF`, or `uORF`), `UTR5` and `UTR3` entries
 #'   from the GFF are used.
 #' * `buffer` is ignored.
 #'
-#' If `is-riboviz-gff == FALSE` then:
+#' If not `is_riboviz_gff` then:
 #'
-#' * Feature (e.g. `CDS`, `ORF`, or `uORF`), `UTR5` and `UTR3` entries
-#'   from the GFF are used.
-#' * `UTR5` and `UTR3` entries from `orf_gff_file` are ignored.
+#' * Feature (e.g. `CDS`, `ORF`, or `uORF`) entries from the GFF are used.
+#' * `UTR5` and `UTR3` entries from the GFF are ignored.
 #' * `buffer` is used as the width of left and right flanks, and to
 #'   calculate start and stop codon locations for genes.
-#' * Whether `stop_in_cds` is `TRUE` or `FALSE` also affects the
-#'   calculations for stop codon locations.
+#' * `stop_in_cds` states where the stop codon is located (true if
+#'   within the feature, false otherwise).
 #'
 #' @export
 BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
