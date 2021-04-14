@@ -58,7 +58,7 @@ The `reads` group, `/<gene>/<dataset>/reads`, for a `<gene>` has several attribu
 | `buffer_left` | Number of nucleotides upstream of the start codon (ATG) (UTR5 length) | EITHER position of start codon (from GFF file) - 1 OR, if `is_riboviz_gff` is false, `buffer` |
 | `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | GFF file OR, if `is_riboviz_gff` is false, `buffer` + feature length from GFF file + `buffer` - `stop_codon_pos[3]` (see below) |
 | `start_codon_pos` | Positions corresponding to start codon of feature (typically 251, 252, 253) | EITHER positions from GFF file OR, if `is_riboviz_gff` is false, `buffer+1,...,buffer+3` |
-| `stop_codon_pos` | Positions corresponding to stop codon of feature | EITHER positions from GFF file OR, if `is_riboviz_gff` is false, `p,...,p+2` where `p` is `buffer` + feature length from GFF file - `offset` where `offset` is 2 if `stop_in_cds` is true or -1 otherwise |
+| `stop_codon_pos` | Positions corresponding to stop codon of feature | EITHER positions from GFF file OR, if `is_riboviz_gff` is false, `p,...,p+2` where `p` is `buffer` + feature length from GFF file - `stop_codon_offset` where `stop_codon_offset` is 2 if `stop_in_cds` is true or -1 otherwise |
 | `lengths` | Lengths of mapped reads | Range from `min_read_length` to `max_read_length` (e.g. 10,...,50) |
 | `reads_by_len` | Counts of number of ribosome sequences of each length | BAM file |
 | `reads_total` | Total number of ribosome sequences | BAM file. Equal to number of non-zero reads in `reads_by_len` |
