@@ -362,7 +362,7 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
   # Read in the list of genes from GFF.
   genes <- unique(mcols(gff)[primary_id][, 1])
 
-  if (!is.null(secondary_id)) {
+  if (!is.na(secondary_id)) {
     alt_genes <- as.list(unique(mcols(gff)[secondary_id][, 1]))
     names(alt_genes) <- genes
   }
@@ -413,7 +413,7 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
     start_cod <- (buffer + 1):(buffer + 3)
   }
   # Create symbolic links for alternate gene IDs, if required.
-  if (!is.null(secondary_id)) {
+  if (!is.na(secondary_id)) {
     base_gid <- H5Gopen(fid, "/")
   }
   for (gene in genes) {
@@ -447,7 +447,7 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
     h5createGroup(fid, paste(gene, dataset, "reads", sep = "/"))
     mapped_reads <- paste(gene, dataset, "reads", sep = "/")
     # Create symbolic link with alternate IDs, if required.
-    if (!is.null(secondary_id)) {
+    if (!is.na(secondary_id)) {
       if (alt_genes[[gene]] != gene) {
         H5Lcreate_external(hd_file, gene, base_gid, alt_genes[[gene]])
       }
@@ -497,7 +497,7 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
     H5Gclose(gid)
   }
 
-  if (!is.null(secondary_id)) {
+  if (!is.na(secondary_id)) {
     H5Gclose(base_gid)
   }
 
@@ -519,7 +519,7 @@ option_list <- list(
       help = "Length of flanking region around the feature"),
     make_option("--primary-id", type = "character", default = "gene_id",
       help = "Primary gene IDs to access the data (YAL001C, YAL003W, etc.)"),
-    make_option("--secondary-id", type = "character", default = NULL,
+    make_option("--secondary-id", type = "character", default = NA,
       help = "Secondary gene IDs to access the data (COX1, EFB1, etc.)"),
     make_option("--dataset", type = "character", default = "data",
       help = "Human-readable name of the dataset"),
@@ -546,13 +546,11 @@ if (is.na(opt$bam_file)) {
 if (is.na(opt$orf_gff_file)) {
   stop("--orf_gff_file parameter must be provided. See usage (--help)")
 }
-if (opt$secondary_id  ==  "NULL") {
-  # Unquote NULL option.
-  secondary_id <- NULL
-} else {
+secondary_id <- NA
+if (!is.na(opt$secondary_id)) {
   secondary_id <- opt$secondary_id
 }
-print(secondary_id)
+
 BamToH5(opt$bam_file, opt$orf_gff_file, opt$feature,
         opt$min_read_length, opt$max_read_length,
         opt$buffer, opt$primary_id, secondary_id, opt$dataset,

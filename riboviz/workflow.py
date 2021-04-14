@@ -516,8 +516,6 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config,
     LOGGER.info("Make length-sensitive alignments in H5 format. Log: %s",
                 log_file)
     secondary_id = config[params.SECONDARY_ID]
-    if secondary_id is None:
-        secondary_id = "NULL"
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts,
                         workflow_r.BAM_TO_H5_R),
@@ -526,13 +524,14 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config,
            "--max-read-length=" + str(config[params.MAX_READ_LENGTH]),
            "--buffer=" + str(config[params.BUFFER]),
            "--primary-id=" + config[params.PRIMARY_ID],
-           "--secondary-id=" + secondary_id,
            "--dataset=" + config[params.DATASET],
            "--bam-file=" + bam_file,
            "--hd-file=" + h5_file,
            "--orf-gff-file=" + orf_gff_file,
            "--is-riboviz-gff=" + str(config[params.IS_RIBOVIZ_GFF]),
            "--stop-in-cds=" + str(config[params.STOP_IN_CDS])]
+    if secondary_id is not None:
+      cmd.append("--secondary-id=" + secondary_id)
     process_utils.run_logged_command(cmd, log_file,
                                      run_config.cmd_file,
                                      run_config.is_dry_run)

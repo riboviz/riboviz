@@ -208,7 +208,7 @@ params.num_processes = 1
 params.publish_index_tmp = false
 params.primary_id = "Name"
 params.rpf = true
-params.secondary_id = "NULL"
+params.secondary_id = null
 params.stop_in_cds = false
 params.samsort_memory = null
 params.validate_only = false
@@ -255,7 +255,7 @@ if (params.max_read_length < params.min_read_length) {
     exit 1, "Maximum read length in H5 output (max_read_length) must be >= minimum read length (min_read_length)"
 }
 if (! params.secondary_id) {
-    secondary_id = "NULL"
+    secondary_id = null
 } else {
     secondary_id = params.secondary_id
 }
@@ -943,6 +943,8 @@ process bamToH5 {
     output:
         tuple val(sample_id), file("${sample_id}.h5") into h5s
     shell:
+        secondary_id_flag = (secondary_id != null) \
+            ? "--secondary-id=${secondary_id}" : ''
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/bam_to_h5.R \
            --num-processes=${params.num_processes} \
@@ -950,7 +952,7 @@ process bamToH5 {
            --max-read-length=${params.max_read_length} \
            --buffer=${params.buffer} \
            --primary-id=${params.primary_id} \
-           --secondary-id=${secondary_id} \
+           ${secondary_id_flag} \
            --dataset=${params.dataset} \
            --bam-file=${sample_bam} \
            --hd-file=${sample_id}.h5 \
