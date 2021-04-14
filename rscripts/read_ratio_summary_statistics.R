@@ -84,17 +84,16 @@ for(hd_file in h5_file_path){
             Treatment = paste(unlist(strsplit(basename(hd_file), split = "[.]"))[2:3], collapse = '.'),
             Sample = basename(hd_file),
             .keep = 'all')
+   
    assign(paste('gene_reads_5UTR_CDS.',basename(hd_file), sep = ''),condition_df) 
      
 }
 
-condition_df <- tibble(Gene = character(),
-                       fiveUTR_reads_per_base = integer(),
-                       CDS_reads_per_base = integer())
+
 
 # GeneFeatureTotalCountsPerBase takes a gene, splits it into features (5UTR and CDS),
 # and returns the reads per base in the features of that gene in the form of a tibble
-GeneFeatureTotalCountsPerBase <- function(gene = gene, dataset = dataset, hd_file = h5_file_path, startpos = 1, condition_df = condition_df){
+GeneFeatureTotalCountsPerBase <- function(gene = gene, dataset = dataset, hd_file = h5_file_path, startpos = 1){
   
   #get the start and stop codons
   start <- rhdf5::h5readAttributes(hd_file, paste0('/', gene,'/', dataset, '/reads'))[['start_codon_pos']]
@@ -117,14 +116,14 @@ GeneFeatureTotalCountsPerBase <- function(gene = gene, dataset = dataset, hd_fil
   # for the premade tibble for the h5 file, add the number of counts per base for 5UTRs and CDS for each .x 
   # doing counts per base allows comparison even if 5UTRs are super short/CDS is long
   
-  new_row <- tibble(Gene = gene, 
-                    fiveUTR_reads_per_base = sum(FiveUTR$Counts)/length(unique(FiveUTR$Pos)),
-                    CDS_reads_per_base = sum(CDS$Counts)/length(unique(CDS$Pos)))
- 
-   # add row to the dataframe for the condition  
-  condition_df<- condition_df %>% bind_rows(new_row)
-  
-  return(condition_df)
+  gene_feature_reads_per_base <- tibble(
+    Gene = gene, 
+    fiveUTR_reads_per_base = sum(FiveUTR$Counts)/length(unique(FiveUTR$Pos)),
+    CDS_reads_per_base = sum(CDS$Counts)/length(unique(CDS$Pos))
+  ) %>%
+    mutate(ratio = fiveUTR_reads_per_base/CDS_reads_per_base)
+    
+  return(gene_feature_reads_per_base)
 }
 
 #test <- GeneFeatureTotalCountsPerBase(gene = gene_names[1], dataset = dataset, hd_file = h5_file_path[1], startpos = 1, condition_df = condition_df)
@@ -135,10 +134,23 @@ GeneFeatureTotalCountsPerBase <- function(gene = gene, dataset = dataset, hd_fil
 # <chr>                          <dbl>              <dbl>
 #   1 SPAC1002.01.1                      0              0.202
 
+gene_names_less <- gene_names[1:3]
 
-test<- purrr::map(.x = gene_names, .f = GeneFeatureTotalCountsPerBase, gene = gene_names, dataset = dataset, hd_file = h5_file_path[1], startpos = 1, condition_df = condition_df )
+All_genes_sample1 <- purrr::map_dfr(.x = gene_names_less, .f = GeneFeatureTotalCountsPerBase, dataset = dataset, hd_file = h5_file_path[1], startpos = 1) %>%
+  mutate(Sample = basename(h5_file_path[1]))
+All_genes_sample2 <- purrr::map_dfr(.x = gene_names_less, .f = GeneFeatureTotalCountsPerBase, dataset = dataset, hd_file = h5_file_path[2], startpos = 1) %>%
+  mutate(Sample = basename(h5_file_path[2]))
 
-
+All_samples_all_genes <- bind_rows(All_genes_sample1, All_genes_sample2)
+#ApplyGeneFeatureTotalCountsPerBaseToSamples <- function(.x = gene_names_less, dataset = dataset, hd_file = .y, startpos = 1){
+#   
+#   all_genes_one_sample <- purrr::map_dfr(.x = gene_names_less, .f = GeneFeatureTotalCountsPerBase, hd_file = hd_file, dataset = dataset, startpos = 1)
+#   
+#   return(all_genes_one_sample)
+#   
+# } 
+# trying
+#test <- purrr::map_dfr(.x = gene_names_less, .y = h5_file_path, .f =ApplyGeneFeatureTotalCountsPerBaseToSamples, dataset = dataset, startpos = 1)
 
 
 # combine all of the dataframes into one, so I can make a box plot 
