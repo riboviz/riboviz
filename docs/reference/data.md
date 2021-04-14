@@ -297,8 +297,8 @@ Edit `data/Mok-tinysim-gffsam/tiny_2genes_20utrs_orf.gff3` and replace `CDS` wit
 
 Edit `data/Mok-tinysim-gffsam/tiny_2genes_20utrs_secondary_id.gff3` and update attributes as follows:
 
-* `Name=MAT` => `Name=MAT;ID=TAM`
-* `Name=MIKE` => `Name=MIKE;ID=EKIM`
+* `Name=MAT` => `Name=XMAT;ID=XTAM`
+* `Name=MIKE` => `Name=XMIKE;ID=XEKIM`
 
 ---
 
