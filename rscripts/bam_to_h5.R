@@ -185,7 +185,6 @@ suppressMessages(library(rtracklayer, quietly = T))
 suppressMessages(library(rhdf5, quietly = T))
 suppressMessages(library(parallel, quietly = T))
 suppressMessages(library(optparse, quietly = T))
-suppressMessages(library(RcppRoll, quietly = T))
 
 # Load local dependencies.
 if (interactive()) {
