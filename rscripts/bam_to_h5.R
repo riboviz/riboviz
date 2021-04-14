@@ -39,8 +39,7 @@
 #'
 #' * Feature (e.g. `CDS`, `ORF`, or `uORF`) entries from the GFF are used.
 #' * `UTR5` and `UTR3` entries from the GFF are ignored.
-#' * `buffer` is used as the width of left and right flanks, and to
-#'   calculate start and stop codon locations for genes.
+#' * `buffer` is used as the width of left and right flanks.
 #' * `stop-in-cds` states where the stop codon is located (true if
 #'   within the feature, false otherwise).
 #'
@@ -48,8 +47,8 @@
 #' | --------- |------------ | ------ |
 #' | `buffer_left` | Number of nucleotides upstream of the start codon (ATG) (UTR5 length) | EITHER position of start codon (from GFF file) - 1 OR, if `is-riboviz-gff` is false, `buffer` |
 #' | `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | GFF file OR, if `is-riboviz-gff` is false, `buffer` + feature length from GFF file + `buffer` - `stop_codon_pos[3]` (see below) |
-#' | `start_codon_pos` | Positions corresponding to start codon of feature (typically 251, 252, 253) | EITHER positions from GFF file OR, if `is-riboviz-gff` is false, `buffer+1,...,buffer+3` |
-#' | `stop_codon_pos` | Positions corresponding to stop codon of feature | EITHER positions from GFF file OR, if `is-riboviz-gff` is false, `p,...,p+2` where `p` is `buffer` + feature length from GFF file - `stop_codon_offset` where `stop_codon_offset` is 2 if `stop-in-cds` is true or -1 otherwise |
+#' | `start_codon_pos` | Positions corresponding to start codon of feature (typically 251, 252, 253) | Positions from GFF file |
+#' | `stop_codon_pos` | Positions corresponding to stop codon of feature | EITHER positions from GFF file. If `is-riboviz-gff` is false and `stop-in-cds` is false, position position is last nucleotide of feature + 1 |
 #' | `lengths` | Lengths of mapped reads | Range from `min-read-length` to `max-read-length` (e.g. 10,...,50) |
 #' | `reads_by_len` | Counts of number of ribosome sequences of each length | BAM file |
 #' | `reads_total` | Total number of ribosome sequences | BAM file. Equal to number of non-zero reads in `reads_by_len` |
@@ -341,8 +340,7 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
 #'
 #' * Feature (e.g. `CDS`, `ORF`, or `uORF`) entries from the GFF are used.
 #' * `UTR5` and `UTR3` entries from the GFF are ignored.
-#' * `buffer` is used as the width of left and right flanks, and to
-#'   calculate start and stop codon locations for genes.
+#' * `buffer` is used as the width of left and right flanks.
 #' * `stop_in_cds` states where the stop codon is located (true if
 #'   within the feature, false otherwise).
 #'
@@ -407,12 +405,6 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
   h5createFile(hd_file)
   fid <- H5Fopen(hd_file)
 
-  if (!is_riboviz_gff) {
-    # GFF does not contain UTR5 or UTR3 elements. Define start codon
-    # location and nucleotide positions using buffer.
-    start_codon_loc <- (buffer + 1)
-    start_cod <- (buffer + 1):(buffer + 3)
-  }
   # Create symbolic links for alternate gene IDs, if required.
   if (!is.null(secondary_id)) {
     base_gid <- H5Gopen(fid, "/")
@@ -422,24 +414,15 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
     gene_read_counts <- read_counts[[gene]]
     # Get gene location from GFF.
     gene_location <- gff[gff_pid == gene]
-    # Get location of start and stop codon nucleotides from matrix.
-    if (is_riboviz_gff) {
-      # GFF contains UTR5 or UTR3 elements.
-      start_codon_loc <- start(gene_location[gene_location$type == feature])
-      start_cod <- start_codon_loc:(start_codon_loc + 2)
-      stop_codon_loc <- start(gene_location[gene_location$type == "UTR3"]) - 3
-    } else {
+    # Get location of start and stop codon nucleotides.
+    start_codon_loc <- start(gene_location[gene_location$type == feature])
+    start_cod <- start_codon_loc:(start_codon_loc + 2)
+    stop_codon_offset <- 2
+    if ((!is_riboviz_gff) && (! stop_in_cds)) {
       # GFF does not contain UTR5 or UTR3 elements.
-      if (stop_in_cds) {
-        stop_codon_offset <- 2
-      } else {
-        stop_codon_offset <- -1
-      }
-      # Define stop codon location and nucleotide positions using
-      # length of feature, buffer and whether or not stop codon is in
-      # feature.
-      stop_codon_loc <- ncol(gene_read_counts) - buffer - stop_codon_offset
+      stop_codon_offset <- -1
     }
+    stop_codon_loc <- end(gene_location[gene_location$type == feature]) - stop_codon_offset
     stop_cod <- stop_codon_loc:(stop_codon_loc + 2)
 
     # Create H5 groups for gene.
