@@ -34,7 +34,8 @@
 #' At present, the following behaviours are not tested:
 #'
 #' * BAM file specifies -ve strands.
-#' * There are multiple exon genes.
+#' * Use of secondary gene IDs, ``secondary_id``.
+#' * BAM file with multiple exon genes.
 #'
 #' @export
 
@@ -542,5 +543,3 @@ testthat::test_that(
     min_read_length, max_read_length, is_riboviz_gff, stop_in_cds,
     feature)
 })
-
-
