@@ -94,6 +94,7 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
   gff_cds_start <- GetCDS5start(sequence, gff, ftype = feature)
   gff_cds_end <- GetCDS3end(sequence, gff, ftype = feature)
   gff_cds_length <- gff_cds_end - gff_cds_start + 1
+  stop_codon_offset <- 2
   if (is_riboviz_gff) {
     # Get sequence positions from GFF
     utr5_start <- GetCDS5start(sequence, gff, ftype = "UTR5")
@@ -102,7 +103,6 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
     utr3_start <- GetCDS5start(sequence, gff, ftype = "UTR3")
     utr3_end <- GetCDS3end(sequence, gff, ftype = "UTR3")
     utr3_length <- utr3_end - utr3_start + 1
-    stop_codon_pos <- as.array(seq(gff_cds_end - 2, gff_cds_end))
     h5_buffer_left_info <-
       "Unexpected buffer_left, compared to GFF UTR5 length"
     h5_buffer_right_info <-
@@ -117,13 +117,9 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
     utr3_start <- gff_cds_end + 1
     utr3_length <- buffer
     utr3_end <- utr3_start + buffer - 1
-    if (stop_in_cds) {
-      offset <- 2
-    } else {
-      offset <- -1
+    if (! stop_in_cds) {
+      stop_codon_offset <- -1
     }
-    stop_codon_loc <- utr3_end - buffer - offset
-    stop_codon_pos <- as.array(seq(stop_codon_loc, stop_codon_loc + 2))
     h5_buffer_left_info <-
       "Unexpected buffer_left, compared to 'buffer' parameter"
     h5_buffer_right_info <-
@@ -131,6 +127,9 @@ ValidateH5Sequence <- function(sequence, h5_file, gff,
     h5_stop_codon_info <-
       "Unexpected stop_codon_pos, compared to that derived from 'buffer' parameter"
   }
+  stop_codon_loc <- gff_cds_end - stop_codon_offset
+  stop_codon_pos <- as.array(seq(stop_codon_loc, stop_codon_loc + 2))
+
   print(paste0("UTR5 start/length/end: ", utr5_start, " ",
     utr5_length, " ", utr5_end))
   print(paste0(feature, " start/length/end: ", gff_cds_start, " ",
