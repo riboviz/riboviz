@@ -55,7 +55,7 @@ GetTpms <- function(fstem, ddir, fend, sample_subdirs, orfs) {
 MakeTpmTable <- function(output_dir, sample_subdirs, samples,
                          orf_fasta, fend="tpms.tsv") {
   # Collate TPMs into a table
-  if (is.null(orf_fasta)) {
+  if (is.na(orf_fasta)) {
     orf_file <- GetTpmsFileName(output_dir,
                                 samples[1],
                                 fend,
@@ -66,7 +66,7 @@ MakeTpmTable <- function(output_dir, sample_subdirs, samples,
     print(paste("Loading ORFs from:", orf_fasta))
     # TODO untested
     library(Biostrings)
-    orfs <- readDNAStringSet(orf_fasta) %>% names
+    orfs <- Biostrings::readDNAStringSet(orf_fasta) %>% names
   }
   tpm_list <- lapply(samples,
                      GetTpms,
@@ -98,7 +98,7 @@ option_list <- list(
               help = "Output file, relative to output directory"),
   make_option("--sample-subdirs", type = "logical", default = FALSE,
               help = "Are samples in sample-specific subdirectories of output directory?"),
-  make_option("--orf-fasta", type = "character", default = NULL,
+  make_option("--orf-fasta", type = "character", default = NA,
               help = "ORF file that was aligned to")
 )
 
