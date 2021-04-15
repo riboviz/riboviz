@@ -46,48 +46,48 @@ dataset <- 'D-Sp_2018'
 
 # create a tibble for each sample, marked with sample name, and get total reads per base 5UTR and CDS
 # reads per base is used to allow comparison no matter the length of the 5UTR or CDS 
-
-for(hd_file in h5_file_path){
-  #for each h5 file listed, make an  
-   condition_df <- tibble(Gene = character(),
-          fiveUTR_reads_per_base = integer(),
-          CDS_reads_per_base = integer())
-
-  for(gene in gene_names){
-    #make a matric to be processed for each gene
-    tmp_mat <- GetGeneDatamatrix(gene, dataset = dataset, hd_file = hd_file)
-    #get the start and stop codons
-    start <- h5readAttributes(hd_file,base::paste('/',gene,'/',dataset,'/reads', sep = ''))[['start_codon_pos']]
-    stop <- h5readAttributes(hd_file, base::paste('/',gene,'/',dataset,'/reads', sep = ''))[['stop_codon_pos']]
-    # turn matric into a tidy datamatrix 
-    tmp_tidy <- TidyDatamatrix(tmp_mat, 
-                             startpos = 1 )
-    # filter the tmp_tidy matric into two new matrixes, on with 5UTR positions
-    # and one with the CDS positions and reads, had to do CDS in two steps 
-    FiveUTR <- filter(tmp_tidy, tmp_tidy$Pos < min(start))
-    tmp_CDS <- filter(tmp_tidy, tmp_tidy$Pos >= min(start)) 
-    CDS <- filter(tmp_CDS,tmp_CDS$Pos <= max(stop))
-    # for the premade tibble for the 5 file, add the number of counts per base for 5UTRs and CDS for each gene 
-    # doing counts per base allows comparison even if 5UTRs are super short/CDS is long
-    new_row <- tibble(Gene = gene, 
-                    fiveUTR_reads_per_base = sum(FiveUTR$Counts)/length(unique(FiveUTR$Pos)),
-                    CDS_reads_per_base = sum(CDS$Counts)/length(unique(CDS$Pos)))
-    # add row to the dataframe for the condition  
-    condition_df<- condition_df %>% bind_rows(new_row)
-     
-  }
-   # save the condition_df into an object with the condition name 
-   # create a column 'ratio' by dividing the 5UTR counts per base by CDS counts per base
-   # create new column 'Treatment' by exracting the treatment
-  # create column Sample to get the sample origin of the data 
-   condition_df <- condition_df %>% mutate(ratio = fiveUTR_reads_per_base/CDS_reads_per_base,
-            Treatment = paste(unlist(strsplit(basename(hd_file), split = "[.]"))[2:3], collapse = '.'),
-            Sample = basename(hd_file),
-            .keep = 'all')
-   
-   assign(paste('gene_reads_5UTR_CDS.',basename(hd_file), sep = ''),condition_df) 
-     
-}
+# 
+# for(hd_file in h5_file_path){
+#   #for each h5 file listed, make an  
+#    condition_df <- tibble(Gene = character(),
+#           fiveUTR_reads_per_base = integer(),
+#           CDS_reads_per_base = integer())
+# 
+#   for(gene in gene_names){
+#     #make a matric to be processed for each gene
+#     tmp_mat <- GetGeneDatamatrix(gene, dataset = dataset, hd_file = hd_file)
+#     #get the start and stop codons
+#     start <- h5readAttributes(hd_file,base::paste('/',gene,'/',dataset,'/reads', sep = ''))[['start_codon_pos']]
+#     stop <- h5readAttributes(hd_file, base::paste('/',gene,'/',dataset,'/reads', sep = ''))[['stop_codon_pos']]
+#     # turn matric into a tidy datamatrix 
+#     tmp_tidy <- TidyDatamatrix(tmp_mat, 
+#                              startpos = 1 )
+#     # filter the tmp_tidy matric into two new matrixes, on with 5UTR positions
+#     # and one with the CDS positions and reads, had to do CDS in two steps 
+#     FiveUTR <- filter(tmp_tidy, tmp_tidy$Pos < min(start))
+#     tmp_CDS <- filter(tmp_tidy, tmp_tidy$Pos >= min(start)) 
+#     CDS <- filter(tmp_CDS,tmp_CDS$Pos <= max(stop))
+#     # for the premade tibble for the 5 file, add the number of counts per base for 5UTRs and CDS for each gene 
+#     # doing counts per base allows comparison even if 5UTRs are super short/CDS is long
+#     new_row <- tibble(Gene = gene, 
+#                     fiveUTR_reads_per_base = sum(FiveUTR$Counts)/length(unique(FiveUTR$Pos)),
+#                     CDS_reads_per_base = sum(CDS$Counts)/length(unique(CDS$Pos)))
+#     # add row to the dataframe for the condition  
+#     condition_df<- condition_df %>% bind_rows(new_row)
+#      
+#   }
+#    # save the condition_df into an object with the condition name 
+#    # create a column 'ratio' by dividing the 5UTR counts per base by CDS counts per base
+#    # create new column 'Treatment' by exracting the treatment
+#   # create column Sample to get the sample origin of the data 
+#    condition_df <- condition_df %>% mutate(ratio = fiveUTR_reads_per_base/CDS_reads_per_base,
+#             Treatment = paste(unlist(strsplit(basename(hd_file), split = "[.]"))[2:3], collapse = '.'),
+#             Sample = basename(hd_file),
+#             .keep = 'all')
+#    
+#    assign(paste('gene_reads_5UTR_CDS.',basename(hd_file), sep = ''),condition_df) 
+#      
+# }
 
 
 
@@ -121,7 +121,8 @@ GeneFeatureTotalCountsPerBase <- function(gene = gene, dataset = dataset, hd_fil
     fiveUTR_reads_per_base = sum(FiveUTR$Counts)/length(unique(FiveUTR$Pos)),
     CDS_reads_per_base = sum(CDS$Counts)/length(unique(CDS$Pos))
   ) %>%
-    mutate(ratio = fiveUTR_reads_per_base/CDS_reads_per_base)
+    mutate(ratio = fiveUTR_reads_per_base/CDS_reads_per_base) %>%
+    mutate(Sample = basename(hd_file))
     
   return(gene_feature_reads_per_base)
 }
@@ -136,40 +137,39 @@ GeneFeatureTotalCountsPerBase <- function(gene = gene, dataset = dataset, hd_fil
 
 gene_names_less <- gene_names[1:3]
 
-All_genes_sample1 <- purrr::map_dfr(.x = gene_names_less, .f = GeneFeatureTotalCountsPerBase, dataset = dataset, hd_file = h5_file_path[1], startpos = 1) %>%
-  mutate(Sample = basename(h5_file_path[1]))
-All_genes_sample2 <- purrr::map_dfr(.x = gene_names_less, .f = GeneFeatureTotalCountsPerBase, dataset = dataset, hd_file = h5_file_path[2], startpos = 1) %>%
-  mutate(Sample = basename(h5_file_path[2]))
+# Create function of applying GeneFeatureTotalCountsPerBase to genes,
+# so it can be used in a nested map() function to apple to all datasets listed
 
-All_samples_all_genes <- bind_rows(All_genes_sample1, All_genes_sample2)
-#ApplyGeneFeatureTotalCountsPerBaseToSamples <- function(.x = gene_names_less, dataset = dataset, hd_file = .y, startpos = 1){
-#   
-#   all_genes_one_sample <- purrr::map_dfr(.x = gene_names_less, .f = GeneFeatureTotalCountsPerBase, hd_file = hd_file, dataset = dataset, startpos = 1)
-#   
-#   return(all_genes_one_sample)
-#   
-# } 
-# trying
-#test <- purrr::map_dfr(.x = gene_names_less, .y = h5_file_path, .f =ApplyGeneFeatureTotalCountsPerBaseToSamples, dataset = dataset, startpos = 1)
+ApplyGeneFeatureTotalCountsPerBaseToSamples <- function(gene = gene_names, dataset = dataset, hd_file = .x, startpos = 1){
+  
+  all_genes_one_sample <- purrr::map_dfr(.x = gene_names, .f = GeneFeatureTotalCountsPerBase, hd_file = hd_file, dataset = dataset, startpos = 1)
+   
+  return(all_genes_one_sample)
+  
+} 
+
+All_samples_all_genes <- purrr::map_dfr(.x = h5_file_path, .f =ApplyGeneFeatureTotalCountsPerBaseToSamples, gene = gene_names, dataset = dataset, startpos = 1)
+
+#trying
+# test <- purrr::map_dfr(.x = h5_file_path, .f =ApplyGeneFeatureTotalCountsPerBaseToSamples, gene = gene_names_less, dataset = dataset, startpos = 1)
+# test
+# # A tibble: 6 x 4
+# Gene           fiveUTR_reads_per_base CDS_reads_per_base  ratio
+# <chr>                           <dbl>              <dbl>  <dbl>
+#   1 SPAC1002.01.1                   0                  0.202 0     
+# 2 SPAC1002.02.1                   0.212              1.13  0.187 
+# 3 SPAC1002.03c.1                  0.140              1.76  0.0794
+# 4 SPAC1002.01.1                   0                  0.131 0     
+# 5 SPAC1002.02.1                   0.121              0.599 0.203 
+# 6 SPAC1002.03c.1                  0.115              0.967 0.119 
+
 
 
 # combine all of the dataframes into one, so I can make a box plot 
 # needs to be automated
-All_samples_one_df <- rbind(gene_reads_5UTR_CDS.wt.AT.CHX.ribo.11_s.h5,
-                            gene_reads_5UTR_CDS.wt.AT.CHX.ribo.13_s.h5,
-                            gene_reads_5UTR_CDS.wt.AT.noCHX.ribo.11_s.h5,
-                            gene_reads_5UTR_CDS.wt.AT.noCHX.ribo.13_s.h5,
-                            gene_reads_5UTR_CDS.wt.AT.ribo.3_s.h5, 
-                            gene_reads_5UTR_CDS.wt.AT.ribo.4_s.h5, 
-                            gene_reads_5UTR_CDS.wt.noAT.CHX.ribo.11_s.h5,
-                            gene_reads_5UTR_CDS.wt.noAT.CHX.ribo.13_s.h5,
-                            gene_reads_5UTR_CDS.wt.noAT.noCHX.ribo.11_s.h5,
-                            gene_reads_5UTR_CDS.wt.noAT.noCHX.ribo.13_s.h5,
-                            gene_reads_5UTR_CDS.wt.noAT.ribo.3_s.h5,
-                            gene_reads_5UTR_CDS.wt.noAT.ribo.4_s.h5)
 
 # get gene of interest information, so can highlight Fil1, or any other 
-genes_of_interest <- All_samples_one_df %>% filter(All_samples_one_df$Gene %in% c('SPCC1393.08.1',))
+genes_of_interest <- All_samples_all_genes %>% filter(All_samples_all_genes$Gene %in% c('SPCC1393.08.1'))
 
 # create box plots comparing overall ratios of no AT and AT treated sample 
 # create a box plot 
@@ -177,7 +177,7 @@ genes_of_interest <- All_samples_one_df %>% filter(All_samples_one_df$Gene %in% 
 # If the number of reads in the 5UTR increases between conditions, then use of 5UTR (and degredation) increases compared to that in the CDS
 # if 5UTR use compared to CDS increases between conditions then the point for that gene will be higher on the graph. 
 # boxplot seems to automatically remove any values where one of the values is 0, but may need to do this earlier. 
-ggplot(All_samples_one_df, aes(x = Treatment, y = ratio))+
+ggplot(All_samples_all_genes, aes(x = Sample, y = ratio))+
   geom_boxplot()+
   scale_y_log10()+
   geom_point(data = genes_of_interest,aes(col = Gene) )+
