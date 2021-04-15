@@ -1,4 +1,6 @@
 #' Collate TPMs
+#'
+#' @export
 
 suppressMessages(library(dplyr, quietly = T))
 suppressMessages(library(getopt, quietly = T))
@@ -24,6 +26,13 @@ if (interactive()) {
   source(file.path(dirname(self), "provenance.R"))
 }
 
+#' TODO
+#'
+#' @param ffile (character).
+#' @param orfs (character).
+#' @return TODO (TODO).
+#'
+#' @export
 LoadTpms <- function(ffile, orfs) {
   # Load data from ffile, check that gene names in 'ORF' column
   # equal orfs and return 'tpm' column.
@@ -39,6 +48,15 @@ LoadTpms <- function(ffile, orfs) {
   return(features$tpm)
 }
 
+#' TODO
+#'
+#' @param ddir (character).
+#' @param fstem (character).
+#' @param fend (character).
+#' @param sample_subdirs (logical).
+#' @return TODO (TODO).
+#'
+#' @export
 GetTpmsFileName <- function(ddir, fstem, fend, sample_subdirs) {
   if (sample_subdirs) {
     file_name <- file.path(ddir, fstem, fend)
@@ -48,10 +66,30 @@ GetTpmsFileName <- function(ddir, fstem, fend, sample_subdirs) {
   return(file_name)
 }
 
+#' TODO
+#'
+#' @param fstem (character).
+#' @param ddir (character).
+#' @param fend (character).
+#' @param sample_subdirs (logical).
+#' @param orfs (character).
+#' @return TODO (TODO).
+#'
+#' @export
 GetTpms <- function(fstem, ddir, fend, sample_subdirs, orfs) {
   LoadTpms(GetTpmsFileName(ddir, fstem, fend, sample_subdirs), orfs)
 }
 
+#' TODO
+#'
+#' @param output_dir (character).
+#' @param sample_subdirs (logival)
+#' @param samples (character).
+#' @param orf_fasta (character).
+#' @param fend (character).
+#' @return TODO (TODO).
+#'
+#' @export
 MakeTpmTable <- function(output_dir, sample_subdirs, samples,
                          orf_fasta, fend="tpms.tsv") {
   # Collate TPMs into a table
@@ -79,9 +117,18 @@ MakeTpmTable <- function(output_dir, sample_subdirs, samples,
   dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])
 }
 
+#' TODO
+#'
+#' @param output_dir (character).
+#' @param tpms_file (character).
+#' @param sample_subdirs (logival)
+#' @param orf_fasta (character).
+#' @param samples (character).
+#' @return TODO (TODO).
+#'
+#' @export
 CollateTpms <- function(
   output_dir, tpms_file, sample_subdirs, orf_fasta, samples) {
-
   round1 <- function(x) round(x, digits = 1)
   tpms_file_path <- file.path(output_dir, tpms_file)
   write_provenance_header(get_Rscript_filename(), tpms_file_path)
