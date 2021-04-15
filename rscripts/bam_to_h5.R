@@ -177,8 +177,10 @@
 #'
 #' @export
 
+suppressMessages(library(GenomeInfoDb, quietly = T))
 suppressMessages(library(getopt, quietly = T))
 suppressMessages(library(here))
+suppressMessages(library(IRanges, quietly = T))
 suppressMessages(library(Rsamtools, quietly = T))
 suppressMessages(library(rtracklayer, quietly = T))
 suppressMessages(library(rhdf5, quietly = T))
@@ -225,7 +227,7 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
   }
 
   num_read_lengths <- length(read_lengths)
-  gene_length <- sum(sum(coverage(gene_location)))
+  gene_length <- sum(sum(IRanges::coverage(gene_location)))
 
   if (as.character(strand(gene_location)[1]) == "-") {
     # feature is on negative strand.
@@ -237,22 +239,23 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
   # Expand genomic locations to include flanking region positions.
   if (length(gene_location) == 1) {
     # Single exon gene.
-    start(gene_location) <- start(gene_location) - left_flank
-    end(gene_location) <- end(gene_location) + right_flank
+    rtracklayer::start(gene_location) <-
+      rtracklayer::start(gene_location) - left_flank
+    rtracklayer::end(gene_location) <-
+      rtracklayer::end(gene_location) + right_flank
   } else {
     # Multiple exon gene.
-    start(gene_location)[start(gene_location) == min(start(gene_location))] <-
-      start(gene_location)[start(gene_location) == min(start(gene_location))]
-      - left_flank
-    end(gene_location)[end(gene_location) == max(end(gene_location))] <-
-      end(gene_location)[end(gene_location) == max(end(gene_location))]
-      + right_flank
+    rtracklayer::start(gene_location)[rtracklayer::start(gene_location) == min(rtracklayer::start(gene_location))] <-
+      rtracklayer::start(gene_location)[rtracklayer::start(gene_location) == min(rtracklayer::start(gene_location))] - left_flank
+    rtracklayer::end(gene_location)[rtracklayer::end(gene_location) == max(rtracklayer::end(gene_location))] <-
+      rtracklayer::end(gene_location)[rtracklayer::end(gene_location) == max(rtracklayer::end(gene_location))] + right_flank
   }
 
   # Read gene's strand, pos, qwidth data from BAM file.
   bam_what <- c("strand", "pos", "qwidth")
-  bam_param <- ScanBamParam(which = gene_location, what = bam_what)
-  bam_data <- scanBam(bam_file, param = bam_param)
+  bam_param <- Rsamtools::ScanBamParam(
+    which = gene_location, what = bam_what)
+  bam_data <- Rsamtools::scanBam(bam_file, param = bam_param)
 
   # Subset reads that are on the same strand at the genomic location.
   read_strand <- unlist(lapply(bam_data, function(x) x$strand))
@@ -268,8 +271,9 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
   # If the specified flanking regions of a gene end up outside the
   # chromosome locations (<0), add pseudo columns with negative
   # numbers.
-  if (min(start(gene_location)) < min(nucleotide_pos)) {
-    nucleotide_pos <- c(min(start(gene_location)):0, nucleotide_pos)
+  if (min(rtracklayer::start(gene_location)) < min(nucleotide_pos)) {
+    nucleotide_pos <- c(min(rtracklayer::start(gene_location)):0,
+                            nucleotide_pos)
   }
 
   # Count reads whose 5' ends map to each nucleotide.
@@ -296,8 +300,7 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
     row <- 1
     for (i in read_lengths) {
       # Subset reads of length i.
-      read_loc_len_i <- read_width[read_width == i]
-          + read_location[read_width == i] - 1
+      read_loc_len_i <- read_width[read_width == i] + read_location[read_width == i] - 1
       # Count reads of length i.
       count_reads_len_i <- table(factor(read_loc_len_i,
                                         levels = nucleotide_pos))
@@ -351,13 +354,14 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
 
   # Read in the positions of all exons/genes from GFF and subset
   # feature locations.
-  gff <- readGFFAsGRanges(orf_gff_file)
+  gff <- rtracklayer::readGFFAsGRanges(orf_gff_file)
   if (!is_riboviz_gff) {
     # GFF does not contain UTR5 or UTR3 elements.
     gff <- gff[gff$type == feature]
   }
 
-  gff_col_names = colnames(mcols(gff))
+  # Check primary_id and secondary_id exist.
+  gff_col_names <- colnames(rtracklayer::mcols(gff))
   if (!(primary_id %in% gff_col_names)) {
     stop(paste0("primary_id ", primary_id, " is not a GFF attribute"))
   }
@@ -369,13 +373,13 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
   }
 
   # Read in the list of genes from GFF.
-  genes <- unique(mcols(gff)[primary_id][, 1])
+  genes <- unique(rtracklayer::mcols(gff)[primary_id][, 1])
 
   if (!is.na(secondary_id)) {
-    alt_genes <- as.list(unique(mcols(gff)[secondary_id][, 1]))
+    alt_genes <- as.list(unique(rtracklayer::mcols(gff)[secondary_id][, 1]))
     names(alt_genes) <- genes
   }
-  gff_pid <- mcols(gff)[primary_id][, 1]
+  gff_pid <- rtracklayer::mcols(gff)[primary_id][, 1]
 
   # Map the reads to individual nucleotide position for each gene.
   print("Mapping reads to feature")
@@ -386,11 +390,13 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
       gene_location <- gff[gff_pid == gene]
       # Restrict seqlevels to avoid scanBam error.
       gene_seq_name <- as.character(seqnames(gene_location)[1])
-      seqlevels(gene_location) <- gene_seq_name
+      GenomeInfoDb::seqlevels(gene_location) <- gene_seq_name
       if (is_riboviz_gff) {
         # GFF contains UTR5, feature, and UTR3 elements.
-        buffer_left <- width(gene_location[gene_location$type == "UTR5"])
-        buffer_right <- width(gene_location[gene_location$type == "UTR3"])
+        buffer_left <- rtracklayer::width(
+          gene_location[gene_location$type == "UTR5"])
+        buffer_right <- rtracklayer::width(
+          gene_location[gene_location$type == "UTR3"])
         gene_location <- gene_location[gene_location$type == feature]
       } else {
         # GFF does not contain UTR5 or UTR3 elements.
@@ -412,20 +418,16 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
   # Save HDF5.
   print("Saving mapped reads in a H5 file")
 
-  h5createFile(hd_file)
-  fid <- H5Fopen(hd_file)
+  rhdf5::h5createFile(hd_file)
+  fid <- rhdf5::H5Fopen(hd_file)
 
   # Create symbolic links for alternate gene IDs, if required.
   if (!is.na(secondary_id)) {
-    base_gid <- H5Gopen(fid, "/")
+    base_gid <- rhdf5::H5Gopen(fid, "/")
   }
   for (gene in genes) {
-    # Get matrix of read counts by position and length for the gene.
-    gene_read_counts <- read_counts[[gene]]
-    # Get gene location from GFF.
-    gene_location <- gff[gff_pid == gene]
     # Get location of start and stop codon nucleotides.
-    start_codon_loc <- start(gene_location[gene_location$type == feature])
+    start_codon_loc <- rtracklayer::start(gene_location[gene_location$type == feature])
     start_cod <- start_codon_loc:(start_codon_loc + 2)
     stop_codon_offset <- 2
     if ((!is_riboviz_gff) && (! stop_in_cds)) {
@@ -436,95 +438,88 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
     stop_cod <- stop_codon_loc:(stop_codon_loc + 2)
 
     # Create H5 groups for gene.
-    h5createGroup(fid, gene)
-    h5createGroup(fid, paste(gene, dataset, sep = "/"))
-    h5createGroup(fid, paste(gene, dataset, "reads", sep = "/"))
+    rhdf5::h5createGroup(fid, gene)
+    rhdf5::h5createGroup(fid, paste(gene, dataset, sep = "/"))
+    rhdf5::h5createGroup(fid, paste(gene, dataset, "reads", sep = "/"))
     mapped_reads <- paste(gene, dataset, "reads", sep = "/")
     # Create symbolic link with alternate IDs, if required.
     if (!is.na(secondary_id)) {
       if (alt_genes[[gene]] != gene) {
-        H5Lcreate_external(hd_file, gene, base_gid, alt_genes[[gene]])
+        rhdf5::H5Lcreate_external(hd_file, gene, base_gid, alt_genes[[gene]])
       }
     }
-
-    gid <- H5Gopen(fid, mapped_reads)
-
+    gid <- rhdf5::H5Gopen(fid, mapped_reads)
     # Specify then write gene attributes.
-    h5createAttribute(gid, "reads_total", c(1, 1))
-    h5createAttribute(gid, "buffer_left", c(1, 1))
-    h5createAttribute(gid, "buffer_right", c(1, 1))
-    h5createAttribute(gid, "start_codon_pos", c(1, 3))
-    h5createAttribute(gid, "stop_codon_pos", c(1, 3))
-    h5createAttribute(gid, "reads_by_len", c(1, length(read_lengths)))
-    h5createAttribute(gid, "lengths", c(1, length(read_lengths)))
-
-    h5writeAttribute.integer(sum(gene_read_counts),
-                             gid,
-                             name = "reads_total")
+    rhdf5::h5createAttribute(gid, "reads_total", c(1, 1))
+    rhdf5::h5createAttribute(gid, "buffer_left", c(1, 1))
+    rhdf5::h5createAttribute(gid, "buffer_right", c(1, 1))
+    rhdf5::h5createAttribute(gid, "start_codon_pos", c(1, 3))
+    rhdf5::h5createAttribute(gid, "stop_codon_pos", c(1, 3))
+    rhdf5::h5createAttribute(gid, "reads_by_len", c(1, length(read_lengths)))
+    rhdf5::h5createAttribute(gid, "lengths", c(1, length(read_lengths)))
+    rhdf5::h5writeAttribute.integer(sum(gene_read_counts),
+                                    gid,
+                                    name = "reads_total")
     # Though start_codon_loc is an integer, start_codon_loc - 1
     # is a double, so cast back to integer so H5 type is
     # H5T_STD_I32LE and not H5T_IEEE_F64LE.
-    h5writeAttribute.integer(as.integer(start_codon_loc - 1),
-                             gid,
-                             name = "buffer_left")
-    h5writeAttribute.integer((ncol(gene_read_counts) - stop_cod[3]),
-                             gid,
-                             name = "buffer_right")
-    h5writeAttribute.integer(start_cod, gid, name = "start_codon_pos")
-    h5writeAttribute.integer(stop_cod, gid, name = "stop_codon_pos")
-    h5writeAttribute.integer(read_lengths, gid, name = "lengths")
-    h5writeAttribute.integer(apply(gene_read_counts, 1, sum),
+    rhdf5::h5writeAttribute.integer(as.integer(start_codon_loc - 1),
+                                    gid,
+                                    name = "buffer_left")
+    rhdf5::h5writeAttribute.integer((ncol(gene_read_counts) - stop_cod[3]),
+                                    gid,
+                                    name = "buffer_right")
+    rhdf5::h5writeAttribute.integer(start_cod, gid, name = "start_codon_pos")
+    rhdf5::h5writeAttribute.integer(stop_cod, gid, name = "stop_codon_pos")
+    rhdf5::h5writeAttribute.integer(read_lengths, gid, name = "lengths")
+    rhdf5::h5writeAttribute.integer(apply(gene_read_counts, 1, sum),
                              gid,
                              name = "reads_by_len")
-
     # Specify a dataset within the gene group to store the values and
     # degree of compression, then write the dataset.
     read_data <- paste(mapped_reads, "data", sep = "/")
-    h5createDataset(fid,
+    rhdf5::h5createDataset(fid,
                     read_data,
                     dim(gene_read_counts),
                     storage.mode = "integer",
                     chunk = c(1, ncol(gene_read_counts)),
                     level = 7)
-    h5write(gene_read_counts, fid, name = read_data, start = c(1, 1))
-
-    H5Gclose(gid)
+    rhdf5::h5write(gene_read_counts, fid, name = read_data, start = c(1, 1))
+    rhdf5::H5Gclose(gid)
   }
-
   if (!is.na(secondary_id)) {
-    H5Gclose(base_gid)
+    rhdf5::H5Gclose(base_gid)
   }
-
-  H5close()
+  rhdf5::H5close()
 }
 
 option_list <- list(
-    make_option("--bam-file", type = "character", default = NA,
-      help = "BAM input file"),
-    make_option("--orf-gff-file", type = "character", default = NA,
-      help = "GFF2/GFF3 Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts"),
-    make_option("--feature", type = "character", default = "CDS",
-      help = "Feature e.g. CDS, ORF, or uORF"),
-    make_option("--min-read-length", type = "integer", default = 10,
-      help = "Minimum read length in H5 output"),
-    make_option("--max-read-length", type = "integer", default = 50,
-      help = "Maximum read length in H5 output"),
-    make_option("--buffer", type = "integer", default = 250,
-      help = "Length of flanking region around the feature"),
-    make_option("--primary-id", type = "character", default = "gene_id",
-      help = "Primary gene IDs to access the data (YAL001C, YAL003W, etc.)"),
-    make_option("--secondary-id", type = "character", default = NA,
-      help = "Secondary gene IDs to access the data (COX1, EFB1, etc.)"),
-    make_option("--dataset", type = "character", default = "data",
-      help = "Human-readable name of the dataset"),
-    make_option("--stop-in-cds", type = "logical", default = FALSE,
-      help = "Are stop codons part of the feature annotations in GFF?"),
-    make_option("--is-riboviz-gff", type = "logical", default = TRUE,
-      help = "Does the GFF file contain 3 elements per gene - UTR5, feature, and UTR3?"),
-    make_option("--hd-file", type = "character", default = "output.h5",
-      help = "H5 output file"),
-    make_option("--num-processes", type = "integer", default = 1,
-      help = "Number of processes to parallelize over")
+  make_option("--bam-file", type = "character", default = NA,
+    help = "BAM input file"),
+  make_option("--orf-gff-file", type = "character", default = NA,
+    help = "GFF2/GFF3 Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts"),
+  make_option("--feature", type = "character", default = "CDS",
+    help = "Feature e.g. CDS, ORF, or uORF"),
+  make_option("--min-read-length", type = "integer", default = 10,
+    help = "Minimum read length in H5 output"),
+  make_option("--max-read-length", type = "integer", default = 50,
+    help = "Maximum read length in H5 output"),
+  make_option("--buffer", type = "integer", default = 250,
+    help = "Length of flanking region around the feature"),
+  make_option("--primary-id", type = "character", default = "gene_id",
+    help = "Primary gene IDs to access the data (YAL001C, YAL003W, etc.)"),
+  make_option("--secondary-id", type = "character", default = NA,
+    help = "Secondary gene IDs to access the data (COX1, EFB1, etc.)"),
+  make_option("--dataset", type = "character", default = "data",
+    help = "Human-readable name of the dataset"),
+  make_option("--stop-in-cds", type = "logical", default = FALSE,
+    help = "Are stop codons part of the feature annotations in GFF?"),
+  make_option("--is-riboviz-gff", type = "logical", default = TRUE,
+    help = "Does the GFF file contain 3 elements per gene - UTR5, feature, and UTR3?"),
+  make_option("--hd-file", type = "character", default = "output.h5",
+    help = "H5 output file"),
+  make_option("--num-processes", type = "integer", default = 1,
+    help = "Number of processes to parallelize over")
 )
 
 print_provenance(get_Rscript_filename())

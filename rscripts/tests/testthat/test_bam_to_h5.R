@@ -160,7 +160,7 @@ ValidateH5SequenceFeature <- function(sequence, feature_name,
   h5_buffer_left <- GetGeneBufferLeft(feature_name, dataset,
                                       h5_file) # double
   print(paste0("buffer_left: ", h5_buffer_left))
-  expect_equal(h5_buffer_left, utr5_length,
+  testthat::expect_equal(h5_buffer_left, utr5_length,
     info = paste0(feature_name, ": ", h5_buffer_left_info))
 
   # Validate buffer_right: number of nucleotides downstream of the
@@ -169,7 +169,7 @@ ValidateH5SequenceFeature <- function(sequence, feature_name,
                                         h5_file) # integer
   print(paste0("buffer_right: ", h5_buffer_right))
   buffer_right <- utr3_end - stop_codon_pos[3]
-  expect_equal(h5_buffer_right, buffer_right,
+  testthat::expect_equal(h5_buffer_right, buffer_right,
     info = paste0(feature_name, ": ", h5_buffer_right_info))
 
   # Validate start_codon_pos: Positions corresponding to start codon
@@ -178,9 +178,9 @@ ValidateH5SequenceFeature <- function(sequence, feature_name,
   h5_start_codon_pos <-
     GetGeneStartCodonPos(feature_name, dataset, h5_file) # 1D array of 3 integer
   print(paste0("start_codon_pos: ", toString(h5_start_codon_pos)))
-  expect_equal(length(h5_start_codon_pos), 3,
+  testthat::expect_equal(length(h5_start_codon_pos), 3,
     info = paste0(feature_name, ": Unexpected start_codon_pos length"))
-  expect_equal(h5_start_codon_pos, gff_start_codon_pos,
+  testthat::expect_equal(h5_start_codon_pos, gff_start_codon_pos,
     info = paste0(feature_name,
       ": Unexpected start_codon_pos, compared to GFF feature positions"))
 
@@ -189,9 +189,9 @@ ValidateH5SequenceFeature <- function(sequence, feature_name,
   h5_stop_codon_pos <-
     GetGeneStopCodonPos(feature_name, dataset, h5_file) # 1D array of 3 integer
   print(paste0("stop_codon_pos: ", toString(h5_stop_codon_pos)))
-  expect_equal(length(h5_stop_codon_pos), 3,
+  testthat::expect_equal(length(h5_stop_codon_pos), 3,
     info = paste0(feature_name, ": Unexpected stop_codon_pos length"))
-  expect_equal(h5_stop_codon_pos, stop_codon_pos,
+  testthat::expect_equal(h5_stop_codon_pos, stop_codon_pos,
     info = paste0(feature_name, ": ", h5_stop_codon_info))
 
   # Validate lengths: Lengths of mapped reads.
@@ -199,10 +199,10 @@ ValidateH5SequenceFeature <- function(sequence, feature_name,
   # 1D array of <max_read_length - min_read_length + 1> integer
   h5_lengths <- GetGeneMappedReadLengths(feature_name, dataset, h5_file)
   print(paste0("lengths: ", toString(h5_lengths)))
-  expect_equal(length(h5_lengths), num_read_counts,
+  testthat::expect_equal(length(h5_lengths), num_read_counts,
     info = paste0(feature_name,
       ": lengths length != max_read_length - min_read_length + 1"))
-  expect_equal(h5_lengths, lengths,
+  testthat::expect_equal(h5_lengths, lengths,
     info = paste0(feature_name, ": Unexpected lengths"))
 
   # Validate reads_by_len: Counts of number of ribosome sequences of
@@ -210,7 +210,7 @@ ValidateH5SequenceFeature <- function(sequence, feature_name,
   # 1D array of <max_read_length - min_read_length + 1> double
   h5_reads_by_len <- GetGeneReadLength(feature_name, dataset, h5_file)
   print(paste0("reads_by_len: ", toString(h5_reads_by_len)))
-  expect_equal(length(h5_reads_by_len), num_read_counts,
+  testthat::expect_equal(length(h5_reads_by_len), num_read_counts,
     info = paste0(feature_name,
       ": reads_by_len length != max_read_length - min_read_length + 1"))
 
@@ -221,7 +221,7 @@ ValidateH5SequenceFeature <- function(sequence, feature_name,
     reads_by_len_bam[index] <- reads_by_len_bam[index] + 1
   }
   print(paste0("reads_by_len_bam: ", toString(reads_by_len_bam)))
-  expect_equal(h5_reads_by_len, reads_by_len_bam,
+  testthat::expect_equal(h5_reads_by_len, reads_by_len_bam,
     info = paste0(feature_name,
       ": Unexpected reads_by_len, compared to those computed from BAM"))
 
@@ -229,13 +229,13 @@ ValidateH5SequenceFeature <- function(sequence, feature_name,
   h5_reads_total <-
     GetGeneReadsTotal(feature_name, dataset, h5_file) # 1D array of 1 double
   print(paste0("reads_total: ", h5_reads_total))
-  expect_equal(length(h5_reads_total), 1,
+  testthat::expect_equal(length(h5_reads_total), 1,
     info = paste0(feature_name, ": Unexpected reads_total length"))
   h5_reads_len_total <- Reduce("+", h5_reads_total)
-  expect_equal(h5_reads_total[1], h5_reads_len_total,
+  testthat::expect_equal(h5_reads_total[1], h5_reads_len_total,
     info = paste0(feature_name,
       ": reads_total != sum of totals in reads_by_len"))
-  expect_equal(h5_reads_total[1], length(bam_sequence_kept),
+  testthat::expect_equal(h5_reads_total[1], length(bam_sequence_kept),
     info = paste0(feature_name,
       ": reads_total != number of BAM alignments with Flag = 0"))
 
@@ -243,17 +243,17 @@ ValidateH5SequenceFeature <- function(sequence, feature_name,
   # the organism data
   h5_data <- GetGeneDatamatrix(feature_name, dataset, h5_file) # matrix, integer
   print(paste0("data rows/columns: ", toString(dim(h5_data))))
-  expect_equal(nrow(h5_data), num_read_counts,
+  testthat::expect_equal(nrow(h5_data), num_read_counts,
     info = paste0(feature_name,
       ": Number of data rows != max_read_length - min_read_length + 1"))
-  expect_equal(ncol(h5_data), utr3_end,
+  testthat::expect_equal(ncol(h5_data), utr3_end,
     info = paste0(feature_name,
       ": Number of data columns != GFF UTR3 final nt position"))
-  expect_equal(ncol(h5_data), bam_hdr_sequence_seq_length,
+  testthat::expect_equal(ncol(h5_data), bam_hdr_sequence_seq_length,
     info = paste0(feature_name,
       ": Number of data columns != BAM sequence length"))
   h5_reads_by_len_data <- rowSums(h5_data)
-  expect_equal(h5_reads_by_len, as.array(h5_reads_by_len_data),
+  testthat::expect_equal(h5_reads_by_len, as.array(h5_reads_by_len_data),
     info = paste0(feature_name, ": reads_by_len is not consistent with data"))
 
   # Calculate expected data based on information from BAM
@@ -266,20 +266,20 @@ ValidateH5SequenceFeature <- function(sequence, feature_name,
       width <- width - min_read_length + 1
       data[width, start] <- data[width, start] + 1
     }
-    expect_equal(h5_data, data,
+    testthat::expect_equal(h5_data, data,
       info = paste0(feature_name,
         ": Unexpected data, compared to that computed from BAM"))
   } else {
       print("Sequence has no alignments in BAM.")
-      expect_equal(h5_data, data,
+      testthat::expect_equal(h5_data, data,
         info = paste0(feature_name,
           ": Unexpected data, expected 0s as no alignments in BAM"))
   }
   reads_by_len_data <- rowSums(data)
-  expect_equal(h5_reads_by_len_data, reads_by_len_data,
+  testthat::expect_equal(h5_reads_by_len_data, reads_by_len_data,
     info = paste0(feature_name,
       ": Unexpected reads_by_len length, compared to those computed from BAM"))
-  expect_equal(h5_reads_by_len, as.array(reads_by_len_data),
+  testthat::expect_equal(h5_reads_by_len, as.array(reads_by_len_data),
     info = paste0(feature_name,
       ": Unexpected reads_by_len, compared to those computed from BAM"))
 }
@@ -303,11 +303,11 @@ ValidateSecondaryLink <- function(h5_file, primary_name, secondary_name) {
   fid <- rhdf5::H5Fopen(h5_file)
   link_exists <- rhdf5::H5Lexists(fid, link)
   rhdf5::H5Fclose(fid)
-  expect_true(link_exists, info = "Missing link")
+  testthat::expect_true(link_exists, info = "Missing link")
   fid <- rhdf5::H5Fopen(h5_file)
   info <- rhdf5::H5Lget_info(fid, link)
   rhdf5::H5Fclose(fid)
-  expect_equal(info$type, "H5L_TYPE_EXTERNAL",
+  testthat::expect_equal(info$type, "H5L_TYPE_EXTERNAL",
     info = "Expected link type to be H5L_TYPE_EXTERNAL")
   # Check data accessible via secondary_name is equal to that
   # accessible via primary_name.
@@ -315,7 +315,7 @@ ValidateSecondaryLink <- function(h5_file, primary_name, secondary_name) {
                           name = paste0("/", primary_name))
   data_s <- rhdf5::h5read(file = h5_file,
                           name = paste0("/", secondary_name))
-  expect_true(identical(data_p, data_s),
+  testthat::expect_true(identical(data_p, data_s),
     info = "Primary data does not equal secondary data")
 }
 
@@ -383,9 +383,10 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, primary_id,
 
   expected_h5_names <- append(gff_primary_ids, gff_secondary_ids)
 
-  expect_equal(length(h5_names), length(expected_h5_names),
+  testthat::expect_equal(length(h5_names), length(expected_h5_names),
     info = "Unexpected number of sequence names, compared to GFF")
-  expect_equal(as.factor(sort(h5_names)), as.factor(sort(expected_h5_names)),
+  testthat::expect_equal(as.factor(sort(h5_names)),
+                         as.factor(sort(expected_h5_names)),
     info = "Unexpected sequence names, compared to GFF")
 
   ## VALIDATE H5 (sequence-specific)
@@ -398,9 +399,9 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, primary_id,
       filter(type == feature)
     sequence <- (as.character(gff_feature$seqnames))[1] # Expect only one.
     print(paste0("Sequence: ", sequence))
-    expect_true(sequence %in% bam_hdr_names,
+    testthat::expect_true(sequence %in% bam_hdr_names,
         info = "Sequence name should be BAM header")
-    expect_true(sequence %in% bam_names,
+    testthat::expect_true(sequence %in% bam_names,
         info = "Sequence name should be BAM body")
     ValidateH5SequenceFeature(sequence, feature_name, h5_file, gff,
       bam_hdr_seq_info, bam, dataset, min_read_length,
@@ -451,19 +452,19 @@ RunSamToBamToH5 <- function(bam_to_h5, sam_file, bam_file,
   print(paste0("SAM: ", sam_file))
 
   bam_cmd_template <- "samtools view -S -b {sam_file} > {bam_file}"
-  bam_cmd <- glue(bam_cmd_template)
+  bam_cmd <- glue::glue(bam_cmd_template)
   print(bam_cmd)
   exit_code <- system(bam_cmd)
   print(paste0("'samtools view' exit code: ", exit_code))
-  expect_equal(exit_code, 0,
+  testthat::expect_equal(exit_code, 0,
                info = "Unexpected exit code from 'samtools view'")
 
   bai_cmd_template <- "samtools index {bam_file}"
-  bai_cmd <- glue(bai_cmd_template)
+  bai_cmd <- glue::glue(bai_cmd_template)
   print(bai_cmd)
   exit_code <- system(bai_cmd)
   print(paste0("'samtools index' exit code: ", exit_code))
-  expect_equal(exit_code, 0,
+  testthat::expect_equal(exit_code, 0,
       info = "Unexpected exit code from 'samtools index'")
 
   print(paste0("BAM: ", bam_file))
@@ -474,21 +475,20 @@ RunSamToBamToH5 <- function(bam_to_h5, sam_file, bam_file,
       h5_cmd_template <- paste(h5_cmd_template,
                                "--secondary-id={secondary_id}")
   }
-  h5_cmd <- glue(h5_cmd_template)
+  h5_cmd <- glue::glue(h5_cmd_template)
   print(h5_cmd)
 
   exit_code <- system(h5_cmd)
   print(paste0("'bam_to_h5.R' exit code: ", exit_code))
-  expect_equal(exit_code, 0,
+  testthat::expect_equal(exit_code, 0,
     info = "Unexpected exit code from 'bam_to_h5.R'")
 }
 
-testthat::test_that(
-  "Test bam_to_h5.R (is_riboviz_gff=TRUE)", {
+testthat::test_that("bam_to_h5.R: default", {
 
-  withr::defer(DeleteFile(h5_file)) # Delete H5 when test completes.
-  withr::defer(DeleteFile(bam_file)) # Delete H5 when test completes.
-  withr::defer(DeleteFile(bam_bai_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_file))
+  withr::defer(DeleteFile(bam_bai_file))
+  withr::defer(DeleteFile(h5_file))
 
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
   bam_file <- here::here("test_bam_to_h5_data.bam")
@@ -514,12 +514,11 @@ testthat::test_that(
     is_riboviz_gff, stop_in_cds)
 })
 
-testthat::test_that(
-  "Test bam_to_h5.R (is_riboviz_gff=FALSE, stop_in_CDS=FALSE)", {
+testthat::test_that("bam_to_h5.R: is_riboviz_gff=FALSE", {
 
-  withr::defer(DeleteFile(h5_file)) # Delete H5 when test completes.
-  withr::defer(DeleteFile(bam_file)) # Delete H5 when test completes.
-  withr::defer(DeleteFile(bam_bai_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_file))
+  withr::defer(DeleteFile(bam_bai_file))
+  withr::defer(DeleteFile(h5_file))
 
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
   bam_file <- here::here("test_bam_to_h5_data.bam")
@@ -545,12 +544,11 @@ testthat::test_that(
     is_riboviz_gff, stop_in_cds)
 })
 
-testthat::test_that(
-  "Test bam_to_h5.R (is_riboviz_gff=FALSE, stop_in_cds=TRUE)", {
+testthat::test_that("bam_to_h5.R: is_riboviz_gff=FALSE, stop_in_cds=TRUE", {
 
-  withr::defer(DeleteFile(h5_file)) # Delete H5 when test completes.
-  withr::defer(DeleteFile(bam_file)) # Delete H5 when test completes.
-  withr::defer(DeleteFile(bam_bai_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_file))
+  withr::defer(DeleteFile(bam_bai_file))
+  withr::defer(DeleteFile(h5_file))
 
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
   bam_file <- here::here("test_bam_to_h5_data.bam")
@@ -576,12 +574,11 @@ testthat::test_that(
     is_riboviz_gff, stop_in_cds)
 })
 
-testthat::test_that(
-  "Test bam_to_h5.R (is_riboviz=TRUE, feature=ORF)", {
+testthat::test_that("bam_to_h5.R: feature=ORF", {
 
-  withr::defer(DeleteFile(h5_file)) # Delete H5 when test completes.
-  withr::defer(DeleteFile(bam_file)) # Delete H5 when test completes.
-  withr::defer(DeleteFile(bam_bai_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_file))
+  withr::defer(DeleteFile(bam_bai_file))
+  withr::defer(DeleteFile(h5_file))
 
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
   bam_file <- here::here("test_bam_to_h5_data.bam")
@@ -608,12 +605,11 @@ testthat::test_that(
     is_riboviz_gff, stop_in_cds, feature)
 })
 
-testthat::test_that(
-  "Test bam_to_h5.R (secondary_id)", {
+testthat::test_that("bam_to_h5.R: secondary_id=ID", {
 
-  withr::defer(DeleteFile(h5_file)) # Delete H5 when test completes.
-  withr::defer(DeleteFile(bam_file)) # Delete H5 when test completes.
-  withr::defer(DeleteFile(bam_bai_file)) # Delete H5 when test completes.
+  withr::defer(DeleteFile(bam_file))
+  withr::defer(DeleteFile(bam_bai_file))
+  withr::defer(DeleteFile(h5_file))
 
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
   bam_file <- here::here("test_bam_to_h5_data.bam")
