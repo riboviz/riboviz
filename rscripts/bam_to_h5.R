@@ -426,6 +426,10 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
     base_gid <- rhdf5::H5Gopen(fid, "/")
   }
   for (gene in genes) {
+    # Get matrix of read counts by position and length for the gene.
+    gene_read_counts <- read_counts[[gene]]
+    # Get gene location from GFF.
+    gene_location <- gff[gff_pid == gene]
     # Get location of start and stop codon nucleotides.
     start_codon_loc <- rtracklayer::start(gene_location[gene_location$type == feature])
     start_cod <- start_codon_loc:(start_codon_loc + 2)
@@ -434,7 +438,7 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
       # GFF does not contain UTR5 or UTR3 elements.
       stop_codon_offset <- -1
     }
-    stop_codon_loc <- end(gene_location[gene_location$type == feature]) - stop_codon_offset
+    stop_codon_loc <- rtracklayer::end(gene_location[gene_location$type == feature]) - stop_codon_offset
     stop_cod <- stop_codon_loc:(stop_codon_loc + 2)
 
     # Create H5 groups for gene.
