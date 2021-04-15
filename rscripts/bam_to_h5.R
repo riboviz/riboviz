@@ -529,14 +529,10 @@ if (is.na(opt$bam_file)) {
 if (is.na(opt$orf_gff_file)) {
   stop("--orf_gff_file parameter must be provided. See usage (--help)")
 }
-secondary_id <- NA
-if (!is.na(opt$secondary_id)) {
-  secondary_id <- opt$secondary_id
-}
 
 BamToH5(opt$bam_file, opt$orf_gff_file, opt$feature,
         opt$min_read_length, opt$max_read_length,
-        opt$buffer, opt$primary_id, secondary_id, opt$dataset,
+        opt$buffer, opt$primary_id, opt$secondary_id, opt$dataset,
         opt$stop_in_cds, opt$is_riboviz_gff, opt$hd_file,
         opt$num_processes)
 
