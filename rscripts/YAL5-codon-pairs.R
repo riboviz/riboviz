@@ -609,3 +609,230 @@ GenerateAllGraphs <- purrr::map(
 
 
 
+
+
+################################################################################
+
+# Need to do asite assignment. This will likley need to be carried out either as
+# part of the tidydatamatrix function or right after? 
+
+
+Reads_pos_length <- GetGeneDatamatrix(gene="YAL003W", 
+                                      dataset="Mok-simYAL5", 
+                                      hd_file=YAL5_h5)
+
+tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene="YAL003W", 
+                                                         dataset="Mok-simYAL5", 
+                                                         hd_file=YAL5_h5), 
+                                       startpos = 1, 
+                                       startlen = 10) 
+
+# format generated from the tidy_gene_datamatrix - either need asite assignment to
+# occur within that function or to give an output in the same format?
+
+# > tidy_gene_datamatrix
+# # A tibble: 45,961 x 3
+# ReadLen   Pos Counts
+# <int> <int>  <int>
+#   1      10     1      0
+# 2      11     1      0
+# 3      12     1      0
+# 4      13     1      0
+# 5      14     1      0
+# 6      15     1      0
+# 7      16     1      0
+# 8      17     1      0
+# 9      18     1      0
+# 10      19     1      0
+# # ... with 45,951 more rows
+
+matrix <- GetGeneDatamatrix(gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5)
+
+
+
+
+### CalcAsiteFixedOneLength
+
+fixed_one_length <- CalcAsiteFixedOneLength(Reads_pos_length, 
+                                            min_read_length = 10, 
+                                            read_length = 10:50, 
+                                            asite_displacement = 15)
+
+tidy_gene_datamatrix_fixed <- TidyDatamatrix(fixed_one_length, 
+                                             startpos = 1, 
+                                             startlen = 10)
+
+# > tidy_gene_datamatrix_fixed
+# # A tibble: 45,961 x 3
+# ReadLen   Pos Counts
+# <int> <int>  <int>
+#   1      10     1      0
+# 2      11     1      0
+# 3      12     1      0
+# 4      13     1      0
+# 5      14     1      0
+# 6      15     1      0
+# 7      16     1      0
+# 8      17     1      0
+# 9      18     1      0
+# 10      19     1      0
+# # ... with 45,951 more rows
+
+# Seems to be compatible with tidydatamatrix - might be the best option?
+
+
+
+### CalcAsiteFixed
+
+Asite <- CalcAsiteFixed(Reads_pos_length, 
+                        min_read_length = 10, 
+                        asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
+                                                               asite_displacement = c(15, 15, 15)), 
+                        colsum_out = TRUE)
+
+tidy_gene_datamatrix_asite <- TidyDatamatrix(Asite, startpos = 1, startlen = 10) 
+
+# Error in startpos:(startpos + ncol(data_mat) - 1) : argument of length 0
+
+
+
+### SnapToCodon
+
+# reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", 
+#                                       dataset = "vignette", 
+#                                       hd_file = "vignette/output/WTnone/WTnone.h5")
+#'  # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+
+reads_asitepos <- CalcAsiteFixed(Reads_pos_length, 
+                                 min_read_length = 10, 
+                                 asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
+                                                                        asite_displacement = c(15, 15, 15)), 
+                                 colsum_out = TRUE) 
+
+#'  # num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+SnapToCodon(reads_asitepos, left=251, right=871, snapdisp=0L)
+#'  # num [1:207] 0 9 0 0 0 3 0 0 0 0 ...
+
+# > SnapToCodon(reads_asitepos, left=251, right=871, snapdisp=0L)
+# [1] 4249  825 1017 1176 1116  284 1553  776  607  491  260  876  837  648  421  739  149
+# [18]  941  514  603 1442 1101 1917  233  623 1289  622  660   94  130  567  279 1004  328
+# [35]  283  625  218  832  592  287  549  456  366  594 1051 1659  843  463  885 4259 1690
+# [52]  437  857 1050  807  373 1147  816 1085 1312  318  982  757  277 1575  924  330  364
+# [69]  440  409  427  282  843 1262  820 1024  781 1083  727  358  877  416  354 1824  667
+# [86] 1092  992 1531  923  277 1072  464 1010  349 1035 1165  664  933  530  773 1098  521
+# [103]   99 1055 1005  567  460  826 1460 1030  399 1792 1454 1069  679 1294  747  355 1188
+# [120]  599  172  225  301  694 1020  950  977 1904 4744 1806  779 1083  805  554  245  887
+# [137]  743  674  906  404  221  213  978 1340  285  666  725  765 1421 1171  843 2475 3188
+# [154]  406  443  498  996  198 1104  900 1421  670  687 1891 1103 1514  311  953  199  314
+# [171]  482  306  106  992 1618 1433 1090  547  469  503  797 1160  676  350 1069  924  452
+# [188] 1161  693 2231 1062  938 1335  371  654  294  453 1096  274  357  489  508  955 1287
+# [205] 1496   75    0
+
+
+# Potential issue: the values generated from SnapToCodon does not match the values 
+# generated from NucleotideToCodonPosition - why? 
+# These values should be the same as far as I can tell - is one or the other taking 
+# an extra input/output?
+
+
+NucleotideToCodonPosition <- function(gene_poscodon_codon_i200, 
+                                      gene="YAL003W", 
+                                      dataset="Mok-simYAL5", 
+                                      hd_file=YAL5_h5, 
+                                      startpos = 1, 
+                                      startlen = 10){
+  
+  codon_table <- dplyr::filter(gene_poscodon_codon_i200, Gene=="YAL003W")
+  
+  gene_CDS <- KeepGeneCDS(gene="YAL003W", 
+                          dataset="Mok-simYAL5", 
+                          hd_file=YAL5_h5, 
+                          startpos = 1, 
+                          startlen = 10)
+  
+  per_codon_counts <- zoo::rollapply(data=gene_CDS$Total_counts, 
+                                     width = 3, sum, by = 3)
+  
+  # > per_codon_counts
+  # [1]  392 1688 1289  678  605  364 1154 1159 1058  500  974  199 1053  634  690 1685 1420
+  # [18] 2454  468  744 1659  918  822  136  146  681  384 1231  541  334  833  272  974  835
+  # [35]  351  773  602  427  771 1416 2031  999  660 1037 5206 2951  473 1032 1514  967  451
+  # [52] 1369 1176 1304 2050  460 1218  975  340 1995 1066  429  460  575  495  511  357  971
+  # [69] 1581 1086 1374 1103 1302  957  475  954  587  428 1877  984 1360 1089 1716 1078  383
+  # [86] 1217  649 1182  486 1181 1369  955 1138  713  912 1274  762  118 1122 1562  742  581
+  # [103] 1006 1915 1339  442 2237 1871 1393  760 1690 1141  471 1348  855  284  242  388  850
+  # [120] 1383 1245 1143 2309 6613 2485  984 1412 1027  691  299 1130  819  853 1359  494  296
+  # [137]  266 1105 2010  353  777 1280 1041 1804 1596 1228 2730 5230  560  524  665 1394  226
+  # [154] 1428 1154 1717  871  773 2890 1327 2147  431 1159  289  386  642  442  112 1164 2238
+  # [171] 1783 1311  795  533  619  934 1570  898  424 1339 1128  662 1354  833 2570 1312 1229
+  # [188] 1881  500  745  473  520 1317  454  412  568  668 1298 1528 2133  132    0    0    0
+  # [205]    0    0    0
+  
+  per_codonpair_counts <- zoo::rollapply(data=gene_CDS$Total_counts, width = 6, sum, by = 3)
+  # configured the code for per_codon_counts so that it sums 1+2, 2+3, 3+4...
+  
+  # > per_codon_counts
+  # [1]  392 1688 1289  678  605  364 1154 1159 1058  500  974  199 1053  634  690 1685 1420
+  # [18] 2454  468  744 1659  918  822  136  146  681  384 1231  541  334  833  272  974  835
+  # [35]  351  773  602  427  771 1416 2031  999  660 1037 5206 2951  473 1032 1514  967  451
+  # [52] 1369 1176 1304 2050  460 1218  975  340 1995 1066  429  460  575  495  511  357  971
+  # [69] 1581 1086 1374 1103 1302  957  475  954  587  428 1877  984 1360 1089 1716 1078  383
+  # [86] 1217  649 1182  486 1181 1369  955 1138  713  912 1274  762  118 1122 1562  742  581
+  # [103] 1006 1915 1339  442 2237 1871 1393  760 1690 1141  471 1348  855  284  242  388  850
+  # [120] 1383 1245 1143 2309 6613 2485  984 1412 1027  691  299 1130  819  853 1359  494  296
+  # [137]  266 1105 2010  353  777 1280 1041 1804 1596 1228 2730 5230  560  524  665 1394  226
+  # [154] 1428 1154 1717  871  773 2890 1327 2147  431 1159  289  386  642  442  112 1164 2238
+  # [171] 1783 1311  795  533  619  934 1570  898  424 1339 1128  662 1354  833 2570 1312 1229
+  # [188] 1881  500  745  473  520 1317  454  412  568  668 1298 1528 2133  132    0    0    0
+  # [205]    0    0    0
+  
+  
+  
+  
+  ### GetGeneCodonPosReads1dsnap
+  
+  GetGeneCodonPosReads1dsnap(gene = "YAL003W", 
+                             dataset = "Mok-simYAL5", 
+                             hd_file = YAL5_h5, 
+                             left=251, right=871, 
+                             min_read_length=10, 
+                             asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
+                                                                    asite_displacement = c(15, 15, 15)), 
+                             snapdisp=0L)
+  
+  # > GetGeneCodonPosReads1dsnap(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, 
+  #   left=251, right=871, min_read_length=10, asite_displacement_length = data.frame(read_length 
+  #   = c(28, 29, 30), asite_displacement = c(15, 15, 15)), snapdisp=0L)
+  # [1] 4249  825 1017 1176 1116  284 1553  776  607  491  260  876  837  648  421  739  149
+  # [18]  941  514  603 1442 1101 1917  233  623 1289  622  660   94  130  567  279 1004  328
+  # [35]  283  625  218  832  592  287  549  456  366  594 1051 1659  843  463  885 4259 1690
+  # [52]  437  857 1050  807  373 1147  816 1085 1312  318  982  757  277 1575  924  330  364
+  # [69]  440  409  427  282  843 1262  820 1024  781 1083  727  358  877  416  354 1824  667
+  # [86] 1092  992 1531  923  277 1072  464 1010  349 1035 1165  664  933  530  773 1098  521
+  # [103]   99 1055 1005  567  460  826 1460 1030  399 1792 1454 1069  679 1294  747  355 1188
+  # [120]  599  172  225  301  694 1020  950  977 1904 4744 1806  779 1083  805  554  245  887
+  # [137]  743  674  906  404  221  213  978 1340  285  666  725  765 1421 1171  843 2475 3188
+  # [154]  406  443  498  996  198 1104  900 1421  670  687 1891 1103 1514  311  953  199  314
+  # [171]  482  306  106  992 1618 1433 1090  547  469  503  797 1160  676  350 1069  924  452
+  # [188] 1161  693 2231 1062  938 1335  371  654  294  453 1096  274  357  489  508  955 1287
+  # [205] 1496   75    0
+  
+  
+  
+  ### GetGeneReadFrame
+  
+  GetGeneReadFrame(gene = "YAL003W", 
+                   dataset = "Mok-simYAL5", 
+                   hd_file = YAL5_h5, 
+                   left=251, right=871, 
+                   min_read_length=10, 
+                   asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
+                                                          asite_displacement = c(15, 15, 15)))
+  
+  # # A tibble: 1 x 7
+  # gene    Ct_fr0 Ct_fr1 Ct_fr2 pval_fr0vs1 pval_fr0vs2 pval_fr0vsboth
+  # <chr>    <dbl>  <dbl>  <dbl>       <dbl>       <dbl>          <dbl>
+  #   1 YAL003W  61847  50043  65120       0.160       0.943          0.659
+  
+  
+  # Not likely to be a useful function as it does not give you the reads 
