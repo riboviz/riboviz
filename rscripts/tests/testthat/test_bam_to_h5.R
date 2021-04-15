@@ -284,6 +284,41 @@ ValidateH5SequenceFeature <- function(sequence, feature_name,
       ": Unexpected reads_by_len, compared to those computed from BAM"))
 }
 
+#' Validate H5 link for secondary feature names. This function checks
+#' that a link for `secondary_name` exists, is of type
+#' `H5L_TYPE_EXTERNAL` and the data accessible via that link equals
+#' that of `primary_name` in the same file.
+#'
+#' @param h5_file H5 file with data to be validated
+#' (character).
+#' @param primary_name Primary feature name to access the data
+#' (character).
+#' @param secondary_name Secondary feature name to access the data
+#' (character).
+#'
+#' @export
+ValidateSecondaryLink <- function(h5_file, primary_name, secondary_name) {
+  link <- paste0("/", secondary_name)
+  # Check link.
+  fid <- rhdf5::H5Fopen(h5_file)
+  link_exists <- rhdf5::H5Lexists(fid, link)
+  rhdf5::H5Fclose(fid)
+  expect_true(link_exists, info = "Missing link")
+  fid <- rhdf5::H5Fopen(h5_file)
+  info <- rhdf5::H5Lget_info(fid, link)
+  rhdf5::H5Fclose(fid)
+  expect_equal(info$type, "H5L_TYPE_EXTERNAL",
+    info = "Expected link type to be H5L_TYPE_EXTERNAL")
+  # Check data accessible via secondary_name is equal to that
+  # accessible via primary_name.
+  data_p <- rhdf5::h5read(file = h5_file,
+                          name = paste0("/", primary_name))
+  data_s <- rhdf5::h5read(file = h5_file,
+                          name = paste0("/", secondary_name))
+  expect_true(identical(data_p, data_s),
+    info = "Primary data does not equal secondary data")
+}
+
 #' Validate H5 data within a RiboViz H5 data file.
 #'
 #' @param h5_file H5 file with data to be validated
@@ -356,13 +391,12 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, primary_id,
   ## VALIDATE H5 (sequence-specific)
 
   for (feature_name in gff_primary_ids) {
-    print(paste0("Feature name: ", feature_name))
+    print(paste0("Feature name (", primary_id, "): ", feature_name))
     # Get sequence corresponding to feature.
     gff_feature <- gff %>%
       filter(.[[primary_id]] == feature_name) %>%
       filter(type == feature)
-    seq_names <- unique(gff_feature$seqnames)
-    sequence = (as.character(seq_names))[1] # Expect only one.
+    sequence <- (as.character(gff_feature$seqnames))[1] # Expect only one.
     print(paste0("Sequence: ", sequence))
     expect_true(sequence %in% bam_hdr_names,
         info = "Sequence name should be BAM header")
@@ -371,6 +405,12 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, primary_id,
     ValidateH5SequenceFeature(sequence, feature_name, h5_file, gff,
       bam_hdr_seq_info, bam, dataset, min_read_length,
       max_read_length, buffer, is_riboviz_gff, stop_in_cds, feature)
+    if (!is.na(secondary_id)) {
+      secondary_name <- (as.character(gff_feature[[secondary_id]]))[1]
+      print(paste0("Feature name (secondary) (",
+                   secondary_id, "): ", secondary_name))
+      ValidateSecondaryLink(h5_file, feature_name, secondary_name)
+    }
   }
 }
 
