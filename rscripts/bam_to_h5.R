@@ -359,6 +359,17 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
     gff <- gff[gff$type == feature]
   }
 
+  gff_col_names = colnames(mcols(gff))
+  if (!(primary_id %in% gff_col_names)) {
+    stop(paste0("primary_id ", primary_id, " is not a GFF attribute"))
+  }
+  if (!is.na(secondary_id)) {
+    if (!(secondary_id %in% gff_col_names)) {
+      stop(paste0("Attribute secondary_id ", secondary_id,
+           " is not a GFF attribute"))
+    }
+  }
+
   # Read in the list of genes from GFF.
   genes <- unique(mcols(gff)[primary_id][, 1])
 
