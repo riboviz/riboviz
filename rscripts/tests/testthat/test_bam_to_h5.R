@@ -51,19 +51,6 @@ bam_to_h5 <- here::here("rscripts/bam_to_h5.R")
 
 context("test_bam_to_h5.R")
 
-#' Delete a file.
-#'
-#' Delete a file if it exists.
-#' @param file_name File name (character).
-#'
-#' @export
-DeleteFile <- function(file_name) {
-  print(paste0("Deleting ", file_name))
-  if (file.exists(file_name)) {
-      file.remove(file_name)
-  }
-}
-
 #' Validate H5 data for a specific sequence and feature.
 #'
 #' @param sequence Sequence name (character).
@@ -487,15 +474,8 @@ RunSamToBamToH5 <- function(bam_to_h5, sam_file, bam_file,
 
 testthat::test_that("bam_to_h5.R: default", {
 
-  withr::defer(DeleteFile(bam_file))
-  withr::defer(DeleteFile(bam_bai_file))
-  withr::defer(DeleteFile(h5_file))
-
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  bam_file <- here::here("test_bam_to_h5_data.bam")
-  bam_bai_file <- here::here("test_bam_to_h5_data.bam.bai")
   orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
-
   min_read_length <- 10
   max_read_length <- 50
   buffer <- 20
@@ -504,28 +484,25 @@ testthat::test_that("bam_to_h5.R: default", {
   dataset <- "Mok-tinysim"
   is_riboviz_gff <- TRUE
   stop_in_cds <- FALSE
-  h5_file <- here::here("test_bam_to_h5_data.h5")
 
-  RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
-    primary_id, secondary_id, dataset, min_read_length, max_read_length,
-    buffer, is_riboviz_gff, stop_in_cds)
+  withr::with_tempdir({
+    bam_file <- file.path(getwd(), "test_bam_to_h5_data.bam")
+    bam_bai_file <- file.path(getwd(), "test_bam_to_h5_data.bam.bai")
+    h5_file <- file.path(getwd(), "test_bam_to_h5_data.h5")
 
-  ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
-    dataset, min_read_length, max_read_length, buffer,
-    is_riboviz_gff, stop_in_cds)
+    RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
+      primary_id, secondary_id, dataset, min_read_length, max_read_length,
+      buffer, is_riboviz_gff, stop_in_cds)
+    ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
+      dataset, min_read_length, max_read_length, buffer,
+      is_riboviz_gff, stop_in_cds)
+  })
 })
 
 testthat::test_that("bam_to_h5.R: is_riboviz_gff=FALSE", {
 
-  withr::defer(DeleteFile(bam_file))
-  withr::defer(DeleteFile(bam_bai_file))
-  withr::defer(DeleteFile(h5_file))
-
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  bam_file <- here::here("test_bam_to_h5_data.bam")
-  bam_bai_file <- here::here("test_bam_to_h5_data.bam.bai")
   orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
-
   min_read_length <- 10
   max_read_length <- 50
   buffer <- 20
@@ -534,28 +511,25 @@ testthat::test_that("bam_to_h5.R: is_riboviz_gff=FALSE", {
   dataset <- "Mok-tinysim"
   is_riboviz_gff <- FALSE
   stop_in_cds <- FALSE
-  h5_file <- here::here("test_bam_to_h5_data.h5")
 
-  RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
-    primary_id, secondary_id, dataset, min_read_length, max_read_length,
-    buffer, is_riboviz_gff, stop_in_cds)
+  withr::with_tempdir({
+    bam_file <- file.path(getwd(), "test_bam_to_h5_data.bam")
+    bam_bai_file <- file.path(getwd(), "test_bam_to_h5_data.bam.bai")
+    h5_file <- file.path(getwd(), "test_bam_to_h5_data.h5")
 
-  ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
-    dataset, min_read_length, max_read_length, buffer,
-    is_riboviz_gff, stop_in_cds)
+    RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
+      primary_id, secondary_id, dataset, min_read_length, max_read_length,
+      buffer, is_riboviz_gff, stop_in_cds)
+    ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
+      dataset, min_read_length, max_read_length, buffer,
+      is_riboviz_gff, stop_in_cds)
+  })
 })
 
 testthat::test_that("bam_to_h5.R: is_riboviz_gff=FALSE, stop_in_cds=TRUE", {
 
-  withr::defer(DeleteFile(bam_file))
-  withr::defer(DeleteFile(bam_bai_file))
-  withr::defer(DeleteFile(h5_file))
-
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  bam_file <- here::here("test_bam_to_h5_data.bam")
-  bam_bai_file <- here::here("test_bam_to_h5_data.bam.bai")
   orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
-
   min_read_length <- 10
   max_read_length <- 50
   buffer <- 20
@@ -564,28 +538,25 @@ testthat::test_that("bam_to_h5.R: is_riboviz_gff=FALSE, stop_in_cds=TRUE", {
   dataset <- "Mok-tinysim"
   is_riboviz_gff <- FALSE
   stop_in_cds <- TRUE
-  h5_file <- here::here("test_bam_to_h5_data.h5")
 
-  RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
-    primary_id, secondary_id, dataset, min_read_length, max_read_length,
-    buffer, is_riboviz_gff, stop_in_cds)
+  withr::with_tempdir({
+    bam_file <- file.path(getwd(), "test_bam_to_h5_data.bam")
+    bam_bai_file <- file.path(getwd(), "test_bam_to_h5_data.bam.bai")
+    h5_file <- file.path(getwd(), "test_bam_to_h5_data.h5")
 
-  ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
-    dataset, min_read_length, max_read_length, buffer,
-    is_riboviz_gff, stop_in_cds)
+    RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
+      primary_id, secondary_id, dataset, min_read_length, max_read_length,
+      buffer, is_riboviz_gff, stop_in_cds)
+    ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
+      dataset, min_read_length, max_read_length, buffer,
+      is_riboviz_gff, stop_in_cds)
+  })
 })
 
 testthat::test_that("bam_to_h5.R: feature=ORF", {
 
-  withr::defer(DeleteFile(bam_file))
-  withr::defer(DeleteFile(bam_bai_file))
-  withr::defer(DeleteFile(h5_file))
-
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  bam_file <- here::here("test_bam_to_h5_data.bam")
-  bam_bai_file <- here::here("test_bam_to_h5_data.bam.bai")
   orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs_orf.gff3")
-
   min_read_length <- 10
   max_read_length <- 50
   buffer <- 20
@@ -595,28 +566,25 @@ testthat::test_that("bam_to_h5.R: feature=ORF", {
   is_riboviz_gff <- TRUE
   stop_in_cds <- FALSE
   feature <- "ORF"
-  h5_file <- here::here("test_bam_to_h5_data.h5")
 
-  RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
-    primary_id, secondary_id, dataset, min_read_length, max_read_length,
-    buffer, is_riboviz_gff, stop_in_cds, feature)
+  withr::with_tempdir({
+    bam_file <- file.path(getwd(), "test_bam_to_h5_data.bam")
+    bam_bai_file <- file.path(getwd(), "test_bam_to_h5_data.bam.bai")
+    h5_file <- file.path(getwd(), "test_bam_to_h5_data.h5")
 
-  ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
-    dataset, min_read_length, max_read_length, buffer,
-    is_riboviz_gff, stop_in_cds, feature)
+    RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
+      primary_id, secondary_id, dataset, min_read_length, max_read_length,
+      buffer, is_riboviz_gff, stop_in_cds, feature)
+    ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
+      dataset, min_read_length, max_read_length, buffer,
+      is_riboviz_gff, stop_in_cds, feature)
+  })
 })
 
 testthat::test_that("bam_to_h5.R: secondary_id=ID", {
 
-  withr::defer(DeleteFile(bam_file))
-  withr::defer(DeleteFile(bam_bai_file))
-  withr::defer(DeleteFile(h5_file))
-
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  bam_file <- here::here("test_bam_to_h5_data.bam")
-  bam_bai_file <- here::here("test_bam_to_h5_data.bam.bai")
   orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs_secondary_id.gff3")
-
   min_read_length <- 10
   max_read_length <- 50
   buffer <- 20
@@ -625,13 +593,17 @@ testthat::test_that("bam_to_h5.R: secondary_id=ID", {
   dataset <- "Mok-tinysim"
   is_riboviz_gff <- TRUE
   stop_in_cds <- FALSE
-  h5_file <- here::here("test_bam_to_h5_data.h5")
 
-  RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
-    primary_id, secondary_id, dataset, min_read_length, max_read_length,
-    buffer, is_riboviz_gff, stop_in_cds)
+  withr::with_tempdir({
+    bam_file <- file.path(getwd(), "test_bam_to_h5_data.bam")
+    bam_bai_file <- file.path(getwd(), "test_bam_to_h5_data.bam.bai")
+    h5_file <- file.path(getwd(), "test_bam_to_h5_data.h5")
 
-  ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
-    dataset, min_read_length, max_read_length, buffer,
-    is_riboviz_gff, stop_in_cds)
+    RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
+      primary_id, secondary_id, dataset, min_read_length, max_read_length,
+      buffer, is_riboviz_gff, stop_in_cds)
+    ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
+      dataset, min_read_length, max_read_length, buffer,
+      is_riboviz_gff, stop_in_cds)
+  })
 })
