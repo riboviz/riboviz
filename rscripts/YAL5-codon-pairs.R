@@ -53,7 +53,8 @@ yeast_codon_pos_i200 <- readr::read_tsv(file = here::here("data", "yeast_codon_t
 # Configured the yeast_codon_pos_i200 to show the positions lead and lag positions 
 # for each PosCodon and configured the Codon column to CodonPair so that the outputs 
 # looks like this: 
-#   
+# 
+# > gene_poscodon_codon_i200
 #   # A tibble: 2,826,757 x 3
 #   Gene    PosCodon CodonPair
 # <chr>   <chr>    <chr>    
@@ -418,9 +419,22 @@ FilterForCodonPairOfInterestPositions <- function(gene_poscodon_codon_i200, gene
 
     interesting_codon_table <- dplyr::filter(joined_gene_per_codon_counts, CodonPair == codon_of_interest)
     # Changed Codon == codon_of_interest to CodonPair = codon_of_interest
+    
+    interesting_first_codon_positions <- interesting_codon_table$CodonPos_1
+    
+    # return(interesting_codon_positions)
+    return(interesting_first_codon_positions)
 }
   
-interesting_codonpair_positions <- FilterForCodonPairOfInterestPositions(gene_poscodon_codon_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, codon_of_interest = "TCC AAG")
+interesting_first_codon_positions <- FilterForCodonPairOfInterestPositions(gene_poscodon_codon_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, codon_of_interest = "TCC AAG")
+
+# Returns: 
+# > interesting_first_codon_position
+# [1]  7 57
+# 
+# Which refers to the position of the first codon in the codon pair as the second codon
+# in the pair is the first codon position + 1
+
 
 
 # # Function needed to go from one position to a region.
@@ -469,7 +483,7 @@ interesting_codonpair_positions <- FilterForCodonPairOfInterestPositions(gene_po
 # # 11 YAL003W       13 AAA             1053       5
 
 
-ExpandCodonPairRegion <- function(.x = interesting_codonpair_positions, gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, gff_df, expand_width = 5L, remove_overhang = TRUE) {
+ExpandCodonPairRegion <- function(.x = interesting_first_codon_positions, gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, gff_df, expand_width = 5L, remove_overhang = TRUE) {
   
   joined_gene_per_codon_counts <- NucleotideToCodonPosition(gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10)
   
@@ -478,11 +492,11 @@ ExpandCodonPairRegion <- function(.x = interesting_codonpair_positions, gene_pos
   #if (remove_overhang) {
   # return an empty tibble if the desired region hangs over the edge of the coding region
   
-  if (.x$CodonPos_1 < expand_width | .x$CodonPos_2 + expand_width > gene_length ) {
+  if (.x < expand_width | .x + expand_width > gene_length ) {
     return( tibble() )
   } else {
     output_codon_info <- tibble(
-      dplyr::slice(joined_gene_per_codon_counts, (.x$CodonPos_1 - expand_width):(.x$CodonPos_2 + expand_width -1), each = FALSE),
+      dplyr::slice(joined_gene_per_codon_counts, (.x - expand_width):(.x + expand_width), each = FALSE),
       Rel_Pos =  seq(- expand_width, expand_width)
     )
     return(output_codon_info)
@@ -493,32 +507,83 @@ ExpandCodonPairRegion <- function(.x = interesting_codonpair_positions, gene_pos
 
 ExpandCodonPairRegionOutput <- ExpandCodonPairRegion(.x = interesting_codonpair_positions, gene_poscodon_codon_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, gff_df, expand_width = 5L, remove_overhang = TRUE)
 
-
+# > ExpandCodonPairRegionOutput
+# # A tibble: 11 x 6
+# Gene    CodonPos_1 CodonPos_2 CodonPair PerCodonCounts Rel_Pos
+# <chr>        <dbl>      <dbl> <chr>              <int>   <int>
+#   1 YAL003W          2          3 GCA TCC             2977      -5
+# 2 YAL003W          3          4 TCC ACC             1967      -4
+# 3 YAL003W          4          5 ACC GAT             1283      -3
+# 4 YAL003W          5          6 GAT TTC              969      -2
+# 5 YAL003W          6          7 TTC TCC             1518      -1
+# 6 YAL003W          7          8 TCC AAG             2313       0
+# 7 YAL003W          8          9 AAG ATT             2217       1
+# 8 YAL003W          9         10 ATT GAA             1558       2
+# 9 YAL003W         10         11 GAA ACT             1474       3
+# 10 YAL003W         11         12 ACT TTG             1173       4
+# 11 YAL003W         12         13 TTG AAA             1252       5
 
 
 
 
 # Apply the ExpandCodonRegion function to the codons of interest to generate expanded tibbles for each position 
 
-ExpandList <- purrr::map(
-  # .x = interesting_codon_positions, # vector of codon positions to iterate over for single codons
-  .x = interesting_codonpair_positions,
-  # .f = ExpandCodonRegion,   # function to use at each codon position of interest for single codons
-  .f = ExpandCodonPairRegion(),
-  gene_poscodon_codon_i200,
-  gene="YAL003W",
-  dataset="Mok-simYAL5",
-  hd_file=YAL5_h5,
-  startpos = 1,
-  startlen = 10,
-  gff_df,
-  expand_width = 5L
-)
+ExpandCodonPairRegionForList <- function(gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, codon_of_interest, gff_df, expand_width = 5L){
+  
+  interesting_first_codon_positions <- FilterForCodonPairOfInterestPositions(gene_poscodon_codon_i200, 
+                                        gene, dataset, hd_file, startpos = 1, startlen = 10, codon_of_interest)
+  
+  ExpandList <- purrr::map(
+    # .x = interesting_codon_positions, # vector of codon positions to iterate over for single codons
+    .x = interesting_first_codon_positions,
+    # .f = ExpandCodonRegion,   # function to use at each codon position of interest for single codons
+    .f = ExpandCodonPairRegion,
+    gene_poscodon_codon_i200,
+    gene,
+    dataset,
+    hd_file,
+    startpos = 1,
+    startlen = 10,
+    gff_df,
+    expand_width = 5L
+  )
+  
+}
 
+ExpandList <- ExpandCodonPairRegionForList(gene_poscodon_codon_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, codon_of_interest = "TCC AAG", gff_df, expand_width = 5L)
 
-# error:
-#   Error in NucleotideToCodonPosition(gene_poscodon_codon_i200, gene, dataset,  : 
-#                                        argument "gene_poscodon_codon_i200" is missing, with no default 
+# > ExpandList
+# [[1]]
+# # A tibble: 11 x 6
+# Gene    CodonPos_1 CodonPos_2 CodonPair PerCodonCounts Rel_Pos
+# <chr>        <dbl>      <dbl> <chr>              <int>   <int>
+#   1 YAL003W          2          3 GCA TCC             2977      -5
+# 2 YAL003W          3          4 TCC ACC             1967      -4
+# 3 YAL003W          4          5 ACC GAT             1283      -3
+# 4 YAL003W          5          6 GAT TTC              969      -2
+# 5 YAL003W          6          7 TTC TCC             1518      -1
+# 6 YAL003W          7          8 TCC AAG             2313       0
+# 7 YAL003W          8          9 AAG ATT             2217       1
+# 8 YAL003W          9         10 ATT GAA             1558       2
+# 9 YAL003W         10         11 GAA ACT             1474       3
+# 10 YAL003W         11         12 ACT TTG             1173       4
+# 11 YAL003W         12         13 TTG AAA             1252       5
+# 
+# [[2]]
+# # A tibble: 11 x 6
+# Gene    CodonPos_1 CodonPos_2 CodonPair PerCodonCounts Rel_Pos
+# <chr>        <dbl>      <dbl> <chr>              <int>   <int>
+#   1 YAL003W         52         53 TTC AAC             2545      -5
+# 2 YAL003W         53         54 AAC CAC             2480      -4
+# 3 YAL003W         54         55 CAC ATC             3354      -3
+# 4 YAL003W         55         56 ATC GCT             2510      -2
+# 5 YAL003W         56         57 GCT TCC             1678      -1
+# 6 YAL003W         57         58 TCC AAG             2193       0
+# 7 YAL003W         58         59 AAG GCC             1315       1
+# 8 YAL003W         59         60 GCC GAT             2335       2
+# 9 YAL003W         60         61 GAT GAA             3061       3
+# 10 YAL003W         61         62 GAA TTC             1495       4
+# 11 YAL003W         62         63 TTC GAC              889       5
 
 
 
