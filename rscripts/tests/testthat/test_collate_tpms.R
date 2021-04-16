@@ -52,10 +52,10 @@ context("test_collate_tpms.R")
 #'
 #' @param collate_tpms `collate_tpms.R` path (character).
 #' @param output_dir Output directory in which to find sample-specific
-#' TPMs files and into which to write collated TPMs file (character).
+#' TPMs files and into which to write the collated TPMs file (character).
 #' @param tpms_file Name of collated TPMs file, relative to
 #' `output_dir` (character).
-#' @param sample_subdirs Are samples-specific TPMs files in
+#' @param sample_subdirs Are sample-specific TPMs files in
 #' sample-specific sub-directories, in files
 #' `<output_dir>/<sample>/tpms.tsv`? If not then it is assumed
 #' they are in files `<output_dir>/<sample>_tpms.tsv` (logical).
