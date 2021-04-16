@@ -1,6 +1,6 @@
 #' testthat tests for `collate_tpms.R`.
 #'
-#' These tests run `bam_to_h5.R` using a sample-specific TPMs files
+#' These tests run `collate_tpms.R` using a sample-specific TPMs files
 #' then validate the collated TPMs file output.
 #'
 #' The tests assumes the following files are in the path:
