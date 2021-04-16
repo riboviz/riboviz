@@ -1,5 +1,26 @@
 #' Collate TPMs
 #'
+#' Collate sample-specific TPMs files into a single file with data
+#' for all the samples.
+#'
+#' Each sample-specific TPMs file is assumed to be a tab-separated
+#' values (TSV) file with `ORF` and `tpm` columns (other columns
+#' are ignored.
+#'
+#' The collated TPMs file is a TSV file with an `ORF` column and
+#' sample-specific columns, named by sample name, with the `tpm`
+#' values from the sample-specific files.
+#'
+#' This script accepts the following command-line parameters:
+#'
+#' | Parameter | Description |
+#' | --------- | ----------- |
+#' | `--output-dir ` | Output directory in which to find sample-specific TPMs files and into which to write the collated TPMs file |
+#' | `--tpms-file` | Name of collated TPMs file, relative to `output-dir` |
+#' | `--sample-subdirs` | Are sample-specific TPMs files in sample-specific sub-directories, in files `<output_dir>/<sample>/tpms.tsv`? If not then it is assumed they are in files `<output_dir>/<sample>_tpms.tsv` |
+#' | `--orf-fasta` | ORF FASTA file that was aligned to and from which ORF names are to be retrieved |
+#' | `<sample>` | Space-delimited list of one or more sample names |
+#'
 #' @export
 
 suppressMessages(library(dplyr, quietly = T))
@@ -26,128 +47,160 @@ if (interactive()) {
   source(file.path(dirname(self), "provenance.R"))
 }
 
-#' TODO
+#' Load TPMs, check that gene names in `ORF` column is consistent
+#' with `orfs` and return `tpm` column.
 #'
-#' @param ffile (character).
-#' @param orfs (character).
-#' @return TODO (TODO).
+#' Warnings are printed if `tpms_file` does not exist or the ORFs
+#' are inconsistent.
+#'
+#' @param tpms_file TPMs file (character).
+#' @param orfs List of ORFs (character).
+#' @return List of TPMs (double).
 #'
 #' @export
-LoadTpms <- function(ffile, orfs) {
-  # Load data from ffile, check that gene names in 'ORF' column
-  # equal orfs and return 'tpm' column.
-  print(paste0("Loading TPMs from: ", ffile))
-  if (!file.exists(ffile)) {
-    warning(paste(ffile, "does not exist, returning empty list"))
+LoadTpms <- function(tpms_file, orfs) {
+  print(paste0("Loading TPMs from: ", tpms_file))
+  if (!file.exists(tpms_file)) {
+    warning(paste(tpms_file, "does not exist, returning empty list"))
     return(NULL)
   }
-  features <- readr::read_tsv(ffile, comment = "#")
+  features <- readr::read_tsv(tpms_file, comment = "#")
   if (!all.equal(features$ORF, orfs)) {
-    warning(paste("ORF names are not right in ", ffile))
+    warning(paste("ORF names are not right in ", tpms_file))
   }
   return(features$tpm)
 }
 
-#' TODO
+#' Get name of sample-specific TPMs file.
 #'
-#' @param ddir (character).
-#' @param fstem (character).
-#' @param fend (character).
-#' @param sample_subdirs (logical).
-#' @return TODO (TODO).
+#' @param samples_dir Directory in which to find sample-specific TPMs
+#' files (character).
+#' @param sample Sample ID, used to access sample-specific TPMs files
+#' (character).
+#' @param tpms_suffix Suffix for sample-specific TPMs files (character).
+#' @param sample_subdirs Are sample-specific TPMs files in
+#' sample-specific sub-directories, in files
+#' `<samples_dir>/<sample>/<tpms_suffix>`? If not then it is assumed
+#' they are in files `<samples_dir>/<sample>_<tpms_suffix>` (logical).
+#' @return `<samples_dir>/<sample>/<tpms_suffix>` (if `sample_subdirs`
+#' is true) else `<samples_dir>/<sample>_<tpms_suffix>` (character).
 #'
 #' @export
-GetTpmsFileName <- function(ddir, fstem, fend, sample_subdirs) {
+GetTpmsFileName <- function(
+  samples_dir, sample, tpms_suffix, sample_subdirs) {
   if (sample_subdirs) {
-    file_name <- file.path(ddir, fstem, fend)
+    file_name <- file.path(samples_dir, sample, tpms_suffix)
   } else {
-    file_name <- file.path(ddir, paste0(fstem, "_", fend))
+    file_name <- file.path(samples_dir, paste0(sample, "_", tpms_suffix))
   }
   return(file_name)
 }
 
-#' TODO
+#' Get TPMs for a specific sample.
 #'
-#' @param fstem (character).
-#' @param ddir (character).
-#' @param fend (character).
-#' @param sample_subdirs (logical).
-#' @param orfs (character).
-#' @return TODO (TODO).
+#' @param sample Sample ID, used to access sample-specific TPMs files
+#' (character).
+#' @param samples_dir Directory in which to find sample-specific TPMs
+#' files (character).
+#' @param tpms_suffix Suffix for sample-specific TPMs files (character).
+#' @param sample_subdirs Are sample-specific TPMs files in
+#' sample-specific sub-directories, in files
+#' `<samples_dir>/<sample>/<tpms_suffix>`? If not then it is assumed
+#' they are in files `<samples_dir>/<sample>_<tpms_suffix>` (logical).
+#' @param orfs List of ORFs (character).
+#' @return List of TPMs (double).
 #'
 #' @export
-GetTpms <- function(fstem, ddir, fend, sample_subdirs, orfs) {
-  LoadTpms(GetTpmsFileName(ddir, fstem, fend, sample_subdirs), orfs)
+GetTpms <- function(sample, samples_dir, tpms_suffix, sample_subdirs, orfs) {
+  tpms <- LoadTpms(
+    GetTpmsFileName(samples_dir, sample, tpms_suffix, sample_subdirs), orfs)
+  return(tpms)
 }
 
-#' TODO
+#' Collate TPMs from sample-specific files and return collated TPMs.
 #'
-#' @param output_dir (character).
-#' @param sample_subdirs (logival)
-#' @param samples (character).
-#' @param orf_fasta (character).
-#' @param fend (character).
-#' @return TODO (TODO).
+#' If `orf_fasta` is provided then gene names are loaded from this
+#' file, else they are loaded from the first sample-specific TPMs
+#' file's `orfs` column.
+#'
+#' @param samples_dir Directory in which to find sample-specific TPMs
+#' files (character).
+#' @param sample_subdirs Are sample-specific TPMs files in
+#' sample-specific sub-directories, in files
+#' `<samples_dir>/<sample>/tpms.tsv`? If not then it is assumed
+#' they are in files `<samples_dir>/<sample>_tpms.tsv` (logical).
+#' @param orf_fasta ORF FASTA file that was aligned to and from which
+#' ORF names are to be retrieved (character).
+#' @param samples List of sample names (character).
+#' @param tpms_suffix Suffix for sample-specific TPMs files (character).
+#' @return Collated TPMs with an `ORF` column and sample-specific
+#' columns, named by sample name, with the TPMs values for each sample
+#' (data.frame).
 #'
 #' @export
-MakeTpmTable <- function(output_dir, sample_subdirs, samples,
-                         orf_fasta, fend="tpms.tsv") {
-  # Collate TPMs into a table
+MakeTpmTable <- function(samples_dir, sample_subdirs, orf_fasta,
+                         samples, tpms_suffix="tpms.tsv") {
   if (is.na(orf_fasta)) {
-    orf_file <- GetTpmsFileName(output_dir,
-                                samples[1],
-                                fend,
-                                sample_subdirs)
-    print(paste("Loading ORFs from:", orf_file))
-    orfs <- orf_file %>% readr::read_tsv(comment = "#") %>% .$ORF
+    tpms_file <- GetTpmsFileName(samples_dir,
+                                 samples[1],
+                                 tpms_suffix,
+                                 sample_subdirs)
+    print(paste("Loading ORFs from:", tpms_file))
+    orfs <- tpms_file %>% readr::read_tsv(comment = "#") %>% .$ORF
   } else {
-    print(paste("Loading ORFs from:", orf_fasta))
     # TODO untested
     library(Biostrings)
+    print(paste("Loading ORFs from:", orf_fasta))
     orfs <- Biostrings::readDNAStringSet(orf_fasta) %>% names
   }
   tpm_list <- lapply(samples,
                      GetTpms,
-                     ddir = output_dir,
-                     fend = fend,
+                     samples_dir = samples_dir,
+                     tpms_suffix = tpms_suffix,
                      sample_subdirs = sample_subdirs,
                      orfs = orfs)
   non_null_elts <- sapply(tpm_list, function(elt) !is.null(elt))
   names(tpm_list) <- samples
-  dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])
+  collated_tpms <- dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])
+  return(collated_tpms)
 }
 
-#' TODO
+#' Collate TPMs from sample-specific files and saved collated TPMs.
 #'
-#' @param output_dir (character).
-#' @param tpms_file (character).
-#' @param sample_subdirs (logival)
-#' @param orf_fasta (character).
-#' @param samples (character).
-#' @return TODO (TODO).
+#' @param output_dir Output directory in which to find sample-specific
+#' TPMs files and into which to write the collated TPMs file (character).
+#' @param tpms_file Name of collated TPMs file, relative to
+#' `output_dir` (character).
+#' @param sample_subdirs Are sample-specific TPMs files in
+#' sample-specific sub-directories, in files
+#' `<output_dir>/<sample>/tpms.tsv`? If not then it is assumed
+#' they are in files `<output_dir>/<sample>_tpms.tsv` (logical).
+#' @param orf_fasta ORF FASTA file that was aligned to and from which
+#' ORF names are to be retrieved (character).
+#' @param samples List of sample names (character).
 #'
 #' @export
 CollateTpms <- function(
   output_dir, tpms_file, sample_subdirs, orf_fasta, samples) {
+
   round1 <- function(x) round(x, digits = 1)
   tpms_file_path <- file.path(output_dir, tpms_file)
   write_provenance_header(get_Rscript_filename(), tpms_file_path)
-  MakeTpmTable(output_dir, sample_subdirs, samples, orf_fasta) %>%
+  MakeTpmTable(output_dir, sample_subdirs, orf_fasta, samples) %>%
     mutate_if(is.numeric, round1) %>%
     write_tsv(tpms_file_path, col_names = TRUE, append = TRUE)
 }
 
 option_list <- list(
   make_option("--output-dir", type = "character", default = "./",
-              help = "Output directory"),
+    help = "Output directory"),
   make_option("--tpms-file", type = "character",
-              default = "TPMs_collated.tsv",
-              help = "Output file, relative to output directory"),
+    default = "TPMs_collated.tsv",
+    help = "Name of collated TPMs file, relative to `output-dir`"),
   make_option("--sample-subdirs", type = "logical", default = FALSE,
-              help = "Are samples in sample-specific subdirectories of output directory?"),
+    help = "Are samples in sample-specific subdirectories of `output-dir`?"),
   make_option("--orf-fasta", type = "character", default = NA,
-              help = "ORF file that was aligned to")
-)
+    help = "ORF FASTA file that was aligned to and from which ORF names are to be retrieved"))
 
 print_provenance(get_Rscript_filename())
 
