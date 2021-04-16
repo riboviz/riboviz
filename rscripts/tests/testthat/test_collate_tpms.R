@@ -59,8 +59,8 @@ context("test_collate_tpms.R")
 #' sample-specific sub-directories, in files
 #' `<output_dir>/<sample>/tpms.tsv`? If not then it is assumed
 #' they are in files `<output_dir>/<sample>_tpms.tsv` (logical).
-#' @param orf_fasta FASTA file from which ORF names are to be
-#' retrieved (character).
+#' @param orf_fasta ORF FASTA file that was aligned to and from which
+#' ORF names are to be retrieved (character).
 #' @param samples List of sample names (character).
 #'
 #' @export
