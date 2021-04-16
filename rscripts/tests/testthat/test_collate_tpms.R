@@ -27,14 +27,10 @@
 #' data/
 #'   tpms/
 #'     TPMs_collated.tsv
-#'     nextflow/
-#'       WT3AT_tpms.tsv
-#'       WTnone_tpms.tsv
-#'     python/
-#'       WT3AT/
-#'         tpms.tsv
-#'       WTnone/
-#'         tpms.tsv
+#'     WT3AT/
+#'       tpms.tsv
+#'     WTnone/
+#'       tpms.tsv
 #' ```
 #'
 #' @export
@@ -47,6 +43,8 @@ suppressMessages(library(withr, quietly = T))
 
 print(paste0("here: ", here()))
 collate_tpms <- here::here(file.path("rscripts", "collate_tpms.R"))
+data_dir <- here::here(file.path("data", "tpms"))
+samples <- c("WTnone", "WT3AT")
 
 context("test_collate_tpms.R")
 
@@ -104,14 +102,19 @@ CompareTsv <- function(expected_tsv, actual_tsv) {
 }
 
 testthat::test_that("collate_tpms.R: Python workflow", {
-  output_dir <- here::here(file.path("data", "tpms", "python"))
   sample_subdirs <- TRUE
-  tpms_file <- NA # "TPMs_collated.tsv"
+  tpms_file <- NA
   orf_fasta <- NA
-  samples <- c("WTnone", "WT3AT")
-  expected_tpms_file <- here::here(
-    file.path("data", "tpms", "TPMs_collated.tsv"))
+  expected_tpms_file <- file.path(data_dir, "TPMs_collated.tsv")
   withr::with_tempdir({
+    for (sample in samples) {
+      sample_dir <- file.path(getwd(), sample)
+      dir.create(sample_dir)
+      sample_file <- file.path(sample_dir, "tpms.tsv")
+      file.symlink(file.path(data_dir, sample, "tpms.tsv"),
+                   sample_file)
+    }
+    output_dir <- getwd()
     RunCollateTpms(collate_tpms, output_dir, tpms_file,
       sample_subdirs, orf_fasta, samples)
     actual_tpms_file <- file.path(output_dir, "TPMs_collated.tsv")
@@ -120,14 +123,17 @@ testthat::test_that("collate_tpms.R: Python workflow", {
 })
 
 testthat::test_that("collate_tpms.R: Nextflow workflow", {
-  output_dir <- here::here(file.path("data", "tpms", "nextflow"))
   sample_subdirs <- FALSE
-  tpms_file <- NA # "TPMs_collated.tsv"
+  tpms_file <- NA
   orf_fasta <- NA
-  samples <- c("WTnone", "WT3AT")
-  expected_tpms_file <- here::here(
-    file.path("data", "tpms", "TPMs_collated.tsv"))
+  expected_tpms_file <- file.path(data_dir, "TPMs_collated.tsv")
   withr::with_tempdir({
+    for (sample in samples) {
+      sample_file <- file.path(getwd(), paste0(sample, "_", "tpms.tsv"))
+      file.symlink(file.path(data_dir, sample, "tpms.tsv"),
+                   sample_file)
+    }
+    output_dir <- getwd()
     RunCollateTpms(collate_tpms, output_dir, tpms_file,
       sample_subdirs, orf_fasta, samples)
     actual_tpms_file <- file.path(output_dir, "TPMs_collated.tsv")
