@@ -1210,6 +1210,27 @@ process staticHTML {
       """
 }
 
+// create helper script to generate interactive visusaliation command: riboviz/#275
+process helperViz {
+    tag "${sample_id}"
+    publishDir "${params.dir_out}/${sample_id}", \
+    mode: 'copy', overwrite: true
+    input:
+      file config_file_yaml from config_file_yaml
+      tuple val(sample_id)
+	from generate_stats_figs_static_html
+    output:
+      file "${sample_id}_interactive_viz.sh" into interactive_viz_sh
+    when:
+      params.create_helper_script // NEED TO ADD THIS PARAM ABOVE, TO CONFIG FILE & ASSOCIATED LOCATIONS
+    shell:
+      script = "'${workflow.projectDir}/rscripts/make_shiny_server.R', "
+      script += "'\$PWD/${config_file_yaml}'"
+      """
+      Rscript -e "${script}"
+      """
+}
+
 finished_viz_sample_id
     .ifEmpty { exit 1, "No sample was visualised successfully" }
     .view { "Finished visualising sample: ${it}" }
