@@ -1,9 +1,0 @@
-#1;5201;0c##gff-version 3
-##ewallace - Edward.Wallace@ed.ac.uk
-##date 2021-01-13
-MAT	ewallace	UTR5	1	20	.	+	.	Name=XMAT;ID=XTAM
-MAT	ewallace	CDS	21	32	.	+	.	Name=XMAT;ID=XTAM
-MAT	ewallace	UTR3	33	52	.	+	.	Name=XMAT;ID=XTAM
-MIKE	ewallace	UTR5	1	20	.	+	.	Name=XMIKE;ID=XEKIM
-MIKE	ewallace	CDS	21	35	.	+	.	Name=XMIKE;ID=XEKIM
-MIKE	ewallace	UTR3	36	55	.	+	.	Name=XMIKE;ID=XEKIM

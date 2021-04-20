@@ -42,6 +42,7 @@ suppressMessages(library(glue, quietly = T))
 suppressMessages(library(here, quietly = T))
 suppressMessages(library(testthat, quietly = T))
 suppressMessages(library(withr, quietly = T))
+suppressMessages(library(Biostrings, quietly = T))
 suppressMessages(library(GenomicAlignments, quietly = T))
 suppressMessages(library(Rsamtools, quietly = T))
 
@@ -555,7 +556,7 @@ testthat::test_that("bam_to_h5.R: is_riboviz_gff=FALSE, stop_in_cds=TRUE", {
 testthat::test_that("bam_to_h5.R: feature=ORF", {
 
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs_orf.gff3")
+  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
   min_read_length <- 10
   max_read_length <- 50
   buffer <- 20
@@ -567,14 +568,23 @@ testthat::test_that("bam_to_h5.R: feature=ORF", {
   feature <- "ORF"
 
   withr::with_tempdir({
+    test_gff_file <- file.path(getwd(), "test_bam_to_h5_data.gff3")
     bam_file <- file.path(getwd(), "test_bam_to_h5_data.bam")
     bam_bai_file <- file.path(getwd(), "test_bam_to_h5_data.bam.bai")
     h5_file <- file.path(getwd(), "test_bam_to_h5_data.h5")
 
-    RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
+    gff <- rtracklayer::import(orf_gff_file)
+    levels(gff$type)[levels(gff$type) == "CDS"] <- "ORF"
+    # Set phase to avoid export warning:
+    # The phase information is missing for some CDS. The written file
+    # will contain some CDS with no phase information.
+    gff$phase <- numeric(length(gff$Name))
+    rtracklayer::export(gff, test_gff_file)
+
+    RunSamToBamToH5(bam_to_h5, sam_file, bam_file, test_gff_file, h5_file,
       primary_id, secondary_id, dataset, min_read_length, max_read_length,
       buffer, is_riboviz_gff, stop_in_cds, feature)
-    ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
+    ValidateH5(h5_file, test_gff_file, bam_file, primary_id, secondary_id,
       dataset, min_read_length, max_read_length, buffer,
       is_riboviz_gff, stop_in_cds, feature)
   })
@@ -583,7 +593,7 @@ testthat::test_that("bam_to_h5.R: feature=ORF", {
 testthat::test_that("bam_to_h5.R: secondary_id=ID", {
 
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs_secondary_id.gff3")
+  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
   min_read_length <- 10
   max_read_length <- 50
   buffer <- 20
@@ -594,14 +604,24 @@ testthat::test_that("bam_to_h5.R: secondary_id=ID", {
   stop_in_cds <- FALSE
 
   withr::with_tempdir({
+    test_gff_file <- file.path(getwd(), "test_bam_to_h5_data.gff3")
     bam_file <- file.path(getwd(), "test_bam_to_h5_data.bam")
     bam_bai_file <- file.path(getwd(), "test_bam_to_h5_data.bam.bai")
     h5_file <- file.path(getwd(), "test_bam_to_h5_data.h5")
 
-    RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
+    gff <- rtracklayer::import(orf_gff_file)
+    gff$Name <- replace(gff$Name, TRUE, paste0("X", gff$Name))
+    gff$ID <- replace(gff$Name, TRUE, paste0("X", reverse(gff$Name)))
+    # Set phase to avoid export warning:
+    # The phase information is missing for some CDS. The written file
+    # will contain some CDS with no phase information.
+    gff$phase <- numeric(length(gff$Name))
+    rtracklayer::export(gff, test_gff_file)
+
+    RunSamToBamToH5(bam_to_h5, sam_file, bam_file, test_gff_file, h5_file,
       primary_id, secondary_id, dataset, min_read_length, max_read_length,
       buffer, is_riboviz_gff, stop_in_cds)
-    ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
+    ValidateH5(h5_file, test_gff_file, bam_file, primary_id, secondary_id,
       dataset, min_read_length, max_read_length, buffer,
       is_riboviz_gff, stop_in_cds)
   })
