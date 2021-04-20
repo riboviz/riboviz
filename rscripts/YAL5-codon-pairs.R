@@ -151,6 +151,50 @@ Mok_YAL5_data <- GetAllGeneDatamatrix(dataset="Mok-simYAL5", hd_file = YAL5_h5,
 
 
 
+Reads_pos_length <- GetGeneDatamatrix(gene="YAL003W", 
+                                      dataset="Mok-simYAL5", 
+                                      hd_file=YAL5_h5)
+
+tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene="YAL003W", 
+                                                         dataset="Mok-simYAL5", 
+                                                         hd_file=YAL5_h5), 
+                                       startpos = 1, 
+                                       startlen = 10) 
+
+### CalcAsiteFixed
+
+asite_counts_by_position <- CalcAsiteFixed(Reads_pos_length, 
+                        min_read_length = 10, 
+                        asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
+                                                               asite_displacement = c(15, 15, 15)), 
+                        colsum_out = TRUE)
+
+# > str(Asite)
+# num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+
+
+TidyAsiteCountsByPosition <- function(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
+  
+  asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", "yeast_standard_asite_disp_length.txt"))
+  
+  reads_pos_length <- GetGeneDatamatrix(gene, dataset, hd_file)
+  
+  asite_counts_by_position <- CalcAsiteFixed(reads_pos_length, 
+                                             min_read_length = min_read_length, 
+                                             asite_displacement_length = asite_displacement_length,
+                                             colsum_out = colsum_out)
+  
+  tidy_asite_counts <- tibble(Pos = 1:length(asite_counts_by_position), Count = asite_counts_by_position)
+  
+  return(tidy_asite_counts)
+  
+}
+
+
+tidy_asite_count_output <- TidyAsiteCountsByPosition(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE)
+
+
+
 # GetGeneDatamatrix for each of the genes contained within the Mok-simYAL5
 #
 # YAL003W_datamatrix <- GetGeneDatamatrix(gene="YAL003W", dataset="Mok-simYAL5",
@@ -799,13 +843,18 @@ Asite <- CalcAsiteFixed(Reads_pos_length,
                         min_read_length = 10, 
                         asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
                                                                asite_displacement = c(15, 15, 15)), 
-                        colsum_out = FALSE)
+                        colsum_out = TRUE)
+
+# > str(Asite)
+# num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
 
 tidy_gene_datamatrix_asite <- TidyDatamatrix(Asite, startpos = 1, startlen = 10) 
 
 # Error in startpos:(startpos + ncol(data_mat) - 1) : argument of length 0
   # set colsum_out = FALSE which seemed to solve the problem 
   # however, only 3363 observations compared to 45961 observations in tidydatamatrix
+
+
 
 # # A tibble: 3,363 x 3
 # ReadLen   Pos Counts
