@@ -195,6 +195,67 @@ tidy_asite_count_output <- TidyAsiteCountsByPosition(gene = "YAL003W", dataset =
 
 
 
+
+TranscriptPosToCodonPos <- function(gene, gff_df){
+  
+  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene) 
+  
+  UTR5_width <- dplyr::filter(.data = subset_gff_df_by_gene, type == "UTR5") %>% select(width)
+    
+  CDS_width <- dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(width)
+    
+  UTR3_width <- dplyr::filter(.data = subset_gff_df_by_gene, type == "UTR3") %>%  select(width) 
+  
+  transcript_length <- dplyr::filter(.data = subset_gff_df_by_gene, type == "UTR3") %>%  select(end)
+  
+  CDS_start <- dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(start)
+  
+  CDS_end <- dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(end)
+  
+  CDS_codon_positions <- rep(1:(CDS_width$width/3), each = 3)
+  
+  NA_UTR5_width <- rep(NA, times = UTR5_width$width)
+  
+  NA_UTR3_width <- rep(NA, times = UTR3_width$width)
+  
+  NA_CDS_NA <- tibble(
+    Gene = gene,
+    Pos = 1:transcript_length$end,
+    Pos_Codon = c(rep(NA, times = UTR5_width$width), CDS_codon_positions, rep(NA, times = UTR3_width$width)),
+    Frame = seq(from = 2L, to = (transcript_length$end + 1L)) %% 3 # works as UTRS are 250, might not work with UTRS of others values
+    # add the count column, likely something we want here 
+  )
+  
+  # frame filter zero 
+  
+  return(NA_CDS_NA)
+}
+
+
+TranscriptPosToCodonPosOutput <- TranscriptPosToCodonPos(gene = "YAL003W", gff_df)
+# 
+# # output:
+# > TranscriptPosToCodonPosOutput
+# # A tibble: 1,121 x 4
+# Gene      Pos Pos_Codon Frame
+# <chr>   <int>     <int> <dbl>
+#   1 YAL003W     1        NA     2
+# 2 YAL003W     2        NA     0
+# 3 YAL003W     3        NA     1
+# 4 YAL003W     4        NA     2
+# 5 YAL003W     5        NA     0
+# 6 YAL003W     6        NA     1
+# 7 YAL003W     7        NA     2
+# 8 YAL003W     8        NA     0
+# 9 YAL003W     9        NA     1
+# 10 YAL003W    10        NA     2
+# # ... with 1,111 more rows
+
+# create a codon_per_codons_count_table
+
+
+
+
 # GetGeneDatamatrix for each of the genes contained within the Mok-simYAL5
 #
 # YAL003W_datamatrix <- GetGeneDatamatrix(gene="YAL003W", dataset="Mok-simYAL5",
