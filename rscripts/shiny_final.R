@@ -22,7 +22,7 @@ yaml <- read_yaml("/data2/john/projects/riboviz/riboviz/vignette/simdata_multipl
 # use this function to pull the sample names and directories from the yaml
 # the sample names and dirs will be used to find data files.
 find_sample_names <- function(yaml_file){
- # if there are no entries in fq_files, data is multiplexed
+  # if there are no entries in fq_files, data is multiplexed
   if (is.null(yaml_file$fq_files)){
     # get the names from the barcodes file, this is the location of the sample sheet
     sample_sheet_loc <- paste0("../", yaml_file$dir_in, yaml_file$sample_sheet)
@@ -201,7 +201,7 @@ server <- function(input, output, session) {
   # convert to a df and reshape
   cor.df2 <- as_tibble(cor.df, rownames = "samp1") %>% 
     pivot_longer(cols = where(is.numeric), names_to = "samp2", values_to = "R")
-    
+  
   # plot it
   output$sample_cors_plot <- renderPlot({
     ggplot(cor.df2, aes(samp1, samp2, fill = R, label = signif(R,2)))+
@@ -272,7 +272,7 @@ server <- function(input, output, session) {
       geom_boxplot()+
       plot_theme
   })
-
+  
   # Position specific normalized reads, barplot
   # Requires pos_sp_rpf_norm_reads.tsv
   output$pos_sp_plot3 <- renderPlot({
@@ -320,10 +320,10 @@ server <- function(input, output, session) {
   output$ribogrid_plot <- renderPlot({
     ribogrid_df %>%
       ggplot(., aes(Pos, ReadLen, fill=Counts))+
-               geom_raster()+
-               scale_fill_gradient(low="white", high="navy")+
-               plot_theme+
-               labs(title="Ribogrid", x="Read position", y="Read length")
+      geom_raster()+
+      scale_fill_gradient(low="white", high="navy")+
+      plot_theme+
+      labs(title="Ribogrid", x="Read position", y="Read length")
   })
   
   # Ribogrid bar plot
@@ -357,7 +357,7 @@ server <- function(input, output, session) {
 ui <- fluidPage(
   
   # App title
-  headerPanel("Riboviz: selective data visualization"),
+  headerPanel("riboviz2"),
   
   # Sidebar panel for inputs
   fluidRow(
@@ -379,7 +379,7 @@ ui <- fluidPage(
                                           value = c(20,25)),
                               sliderInput("ribogrid_pos_range", "Ribogrid read position range:",
                                           min = -24, max = 50,
-                                          value = c(-10,10)),
+                                          value = c(-10,10))
              )
              
            )
@@ -421,33 +421,31 @@ ui <- fluidPage(
                  plotOutput("frame_proportions_boxplot")
         ),
         
-        tabPanel("Ribogrids",
+        tabPanel("Ribogrid",
+                 wellPanel(
+                   textInput(inputId = "gene",
+                             label = "Gene:",
+                             width = "100%"),
+                   sliderInput("ribogrid_len_range", "Ribogrid read length range:",
+                               min = 0, max = 50,
+                               value = c(20,25)),
+                   sliderInput("ribogrid_pos_range", "Ribogrid read position range:",
+                               min = -24, max = 50,
+                               value = c(-10,10)),
+                 ),
                  headerPanel(""),
                  plotOutput("ribogrid_plot"),
                  headerPanel(""),
                  plotOutput("ribogridbar_plot", height = "1000px")
+        )
         
-        tabPanel("Position Specific read densities",
-                 headerPanel(""),
-                 plotOutput("pos_sp_plot3"),
-                 headerPanel(""),
-                 plotOutput("pos_sp_plot5")
-        ),
-        
-        tabPanel("Gene specific plots",
-                 headerPanel(""),
-                 plotOutput("tpm_density_plot"),
-                 
-        ),
-        id = "panelId"
       )
     )
   )
-)
-
-#
-# END UI FUNCTION
-#
-
-# I cast spell, ~run shiny app~
-shinyApp(ui, server)
+  
+  #
+  # END UI FUNCTION
+  #
+  
+  # I cast spell, ~run shiny app~
+  shinyApp(ui, server)
