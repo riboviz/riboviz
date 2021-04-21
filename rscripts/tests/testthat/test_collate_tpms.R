@@ -199,7 +199,7 @@ testthat::test_that("collate_tpms.R: Single sample", {
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
 
-testthat::test_that("collate_tpms.R: tpms_file", {
+testthat::test_that("collate_tpms.R: tpms_file parameter", {
   orfs <- c("YAL001C", "YAL002W", "YAL003W")
   samples <- c("WTnone", "WT3AT")
   sample_data <- GetSampleTpms(orfs, samples)
@@ -226,3 +226,29 @@ testthat::test_that("collate_tpms.R: tpms_file", {
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
 
+testthat::test_that("collate_tpms.R: Header-only sample files", {
+  samples <- c("WTnone", "WT3AT")
+  expected <- tibble(ORF = character())
+  withr::with_tempdir({
+   for (sample in samples) {
+     data <- tibble(ORF = character(), tpm = double())
+     sample_file <- file.path(getwd(), paste0(sample, "_", "tpms.tsv"))
+     readr::write_tsv(data, sample_file, col_names = TRUE)
+     # Expected column types are character as collated TPMs TSV file
+     # will have only a header.
+     expected <- add_column(expected, "{sample}" := character())
+    }
+    output_dir <- getwd()
+    RunCollateTpms(
+      collate_tpms = collate_tpms,
+      output_dir = output_dir,
+      tpms_file = NA,
+      sample_subdirs = FALSE,
+      orf_fasta = NA,
+      samples = samples)
+    actual_tpms_file <- file.path(output_dir, "TPMs_collated.tsv")
+    actual <- readr::read_tsv(actual_tpms_file, comment = "#")
+  })
+  actual <- tibble::as_tibble(actual)
+  testthat::expect_equal(expected, actual, info = "Data differs'")
+})
