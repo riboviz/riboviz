@@ -295,37 +295,6 @@ $ samtools view -h Mok-tinysim/output/A/A.bam > data/Mok-tinysim-gffsam/A.sam
 
 ---
 
-## TPMs files for testing `collate_tpms.R`
-
-`data/tpms` folder.
-
-Used by `rscripts/tests/testthat/test_collate_tpms.R`.
-
-From:
-
-* [regression-test-data-20210119](https://github.com/riboviz/regression-test-data-20210119)
-* Produced from [riboviz](https://github.com/riboviz/riboviz), `develop` branch, 7aad0d0, 19/01/2021.
-
-
-Get test data:
-```console
-$ git clone https://github.com/riboviz/regression-test-data-20210119
-```
-
-Create and populate `data/tpms`:
-
-```console
-$ cd riboviz
-$ mkdir data/tpms
-$ mkdir data/tpms/WTnone
-$ mkdir data/tpms/WT3AT
-$ cp ../regression-test-data-20210119/output/WTnone/tpms.tsv data/tpms/WTnone/tpms.tsv 
-$ cp ../regression-test-data-20210119/output/WT3AT/tpms.tsv data/tpms/WT3AT/tpms.tsv 
-$ cp ../regression-test-data-20210119/output/TPMs_collated.tsv data/tpms/TPMs_collated.tsv 
-```
-
----
-
 ## `riboviz/test/` test data files
 
 ### `riboviz.test.test_trim_5p_mismatch` test data files
