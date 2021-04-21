@@ -29,6 +29,7 @@ suppressMessages(library(here, quietly = T))
 suppressMessages(library(optparse, quietly = T))
 suppressMessages(library(purrr, quietly = T))
 suppressMessages(library(readr, quietly = T))
+suppressMessages(library(tibble, quietly = T))
 suppressMessages(library(tidyr, quietly = T))
 
 # Load local dependencies.
@@ -187,8 +188,8 @@ CollateTpms <- function(
   tpms_file_path <- file.path(output_dir, tpms_file)
   write_provenance_header(get_Rscript_filename(), tpms_file_path)
   MakeTpmTable(output_dir, sample_subdirs, orf_fasta, samples) %>%
-    mutate_if(is.numeric, round1) %>%
-    write_tsv(tpms_file_path, col_names = TRUE, append = TRUE)
+    dplyr::mutate_if(is.numeric, round1) %>%
+    readr::write_tsv(tpms_file_path, col_names = TRUE, append = TRUE)
 }
 
 option_list <- list(
