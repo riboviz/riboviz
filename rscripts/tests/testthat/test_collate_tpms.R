@@ -198,3 +198,31 @@ testthat::test_that("collate_tpms.R: Single sample", {
   actual <- tibble::as_tibble(actual)
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
+
+testthat::test_that("collate_tpms.R: tpms_file", {
+  orfs <- c("YAL001C", "YAL002W", "YAL003W")
+  samples <- c("WTnone", "WT3AT")
+  sample_data <- GetSampleTpms(orfs, samples)
+  expected <- GetCollatedTpms(orfs, sample_data)
+  withr::with_tempdir({
+   for (sample in names(sample_data)) {
+      data <- tibble(ORF = orfs, tpm = sample_data[[sample]])
+      sample_file <- file.path(getwd(), paste0(sample, "_", "tpms.tsv"))
+      readr::write_tsv(data, sample_file, col_names = TRUE)
+    }
+    output_dir <- getwd()
+    tpms_file <- "collated_tpms.tsv"
+    RunCollateTpms(
+      collate_tpms = collate_tpms,
+      output_dir = output_dir,
+      tpms_file = tpms_file,
+      sample_subdirs = FALSE,
+      orf_fasta = NA,
+      samples = samples)
+    actual_tpms_file <- file.path(output_dir, tpms_file)
+    actual <- readr::read_tsv(actual_tpms_file, comment = "#")
+  })
+  actual <- tibble::as_tibble(actual)
+  testthat::expect_equal(expected, actual, info = "Data differs'")
+})
+
