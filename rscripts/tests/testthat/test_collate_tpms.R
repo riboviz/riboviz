@@ -77,67 +77,91 @@ RunCollateTpms <- function(collate_tpms, output_dir, tpms_file,
     info = "Unexpected exit code from 'collate_tpms.R'")
 }
 
+#' Get sample-specific TPMs.
+#'
+#' @param orfs List of ORFs (character).
+#' @param samples List of sample names (character).
+#' @return List of sample data (lists of integer of length `orfs`),
+#' keyed by sample name (list).
+#'
+#' @export
+GetSampleTpms <- function(orfs, samples) {
+  offset <- 1
+  sample_data <- list()
+  for (sample in samples) {
+    new_offset <- offset + length(orfs)
+    data <- offset:(new_offset - 1)
+    offset <- new_offset
+    sample_data[[sample]] <- data
+  }
+  return(sample_data)
+}
+
+#' Get expected collated TPMs.
+#'
+#' @param orfs List of ORFs (character).
+#' @param sample_data List of sample data (lists of integer of length
+#' `orfs`),  keyed by sample name (list).
+#' @return Tibble with an `ORF` column and one column for each
+#' sample in `sample_data` with the sample name as column name
+#' (tbl_df).
+#'
+#' @export
+GetCollatedTpms <- function(orfs, sample_data) {
+  expected <- tibble(ORF = orfs)
+  for (sample in names(sample_data)) {
+    expected <- add_column(expected, "{sample}" := sample_data[[sample]])
+  }
+  return(expected)
+}
+
 testthat::test_that("collate_tpms.R: Python workflow", {
-  sample_subdirs <- TRUE
-  tpms_file <- NA
-  orf_fasta <- NA
   orfs <- c("YAL001C", "YAL002W", "YAL003W")
   samples <- c("WTnone", "WT3AT")
-  expected <- tibble(ORF = orfs)
-  offset <- 1
+  sample_data <- GetSampleTpms(orfs, samples)
+  expected <- GetCollatedTpms(orfs, sample_data)
   withr::with_tempdir({
-   for (sample in samples) {
-      new_offset <- offset + length(orfs)
-      data <- offset:(new_offset - 1)
-      offset <- new_offset
-      sample_tpms <- tibble(ORF = orfs, tpm = data)
-
+   for (sample in names(sample_data)) {
+      data <- tibble(ORF = orfs, tpm = sample_data[[sample]])
       sample_dir <- file.path(getwd(), sample)
       dir.create(sample_dir)
       sample_file <- file.path(sample_dir, "tpms.tsv")
-      readr::write_tsv(sample_tpms, sample_file, col_names = TRUE)
-
-      expected <- add_column(expected, "{sample}" := data)
+      readr::write_tsv(data, sample_file, col_names = TRUE)
     }
     output_dir <- getwd()
-    RunCollateTpms(collate_tpms, output_dir, tpms_file,
-      sample_subdirs, orf_fasta, samples)
-
+    RunCollateTpms(
+      collate_tpms = collate_tpms,
+      output_dir = output_dir,
+      tpms_file = NA,
+      sample_subdirs = TRUE,
+      orf_fasta = NA,
+      samples = samples)
     actual_tpms_file <- file.path(output_dir, "TPMs_collated.tsv")
     actual <- readr::read_tsv(actual_tpms_file, comment = "#")
   })
-  # read_tsv returns spec_tbl_df subclass so cast.
-  # Suggested by https://github.com/tidyverse/dplyr/issues/5126
-  # Alternative is to subset with no arguments e.g. actual[]
-  # https://www.tidyverse.org/blog/2018/12/readr-1-3-1/
   actual <- tibble::as_tibble(actual)
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
 
 testthat::test_that("collate_tpms.R: Nextflow workflow", {
-  sample_subdirs <- FALSE
-  tpms_file <- NA
-  orf_fasta <- NA
   orfs <- c("YAL001C", "YAL002W", "YAL003W")
   samples <- c("WTnone", "WT3AT")
-  expected <- tibble(ORF = orfs)
-  offset <- 1
+  sample_data <- GetSampleTpms(orfs, samples)
+  expected <- GetCollatedTpms(orfs, sample_data)
   withr::with_tempdir({
-   for (sample in samples) {
-      new_offset <- offset + length(orfs)
-      data <- offset:(new_offset - 1)
-      offset <- new_offset
-      sample_tpms <- tibble(ORF = orfs, tpm = data)
-
+   for (sample in names(sample_data)) {
+      data <- tibble(ORF = orfs, tpm = sample_data[[sample]])
       sample_file <- file.path(getwd(), paste0(sample, "_", "tpms.tsv"))
-      readr::write_tsv(sample_tpms, sample_file, col_names = TRUE)
-
-      expected <- add_column(expected, "{sample}" := data)
+      readr::write_tsv(data, sample_file, col_names = TRUE)
     }
     output_dir <- getwd()
-    RunCollateTpms(collate_tpms, output_dir, tpms_file,
-      sample_subdirs, orf_fasta, samples)
-
+    RunCollateTpms(
+      collate_tpms = collate_tpms,
+      output_dir = output_dir,
+      tpms_file = NA,
+      sample_subdirs = FALSE,
+      orf_fasta = NA,
+      samples = samples)
     actual_tpms_file <- file.path(output_dir, "TPMs_collated.tsv")
     actual <- readr::read_tsv(actual_tpms_file, comment = "#")
   })
@@ -149,24 +173,25 @@ testthat::test_that("collate_tpms.R: Nextflow workflow", {
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
 
-testthat::test_that("collate_tpms.R: Single column", {
-  sample_subdirs <- FALSE
-  tpms_file <- NA
-  orf_fasta <- NA
-
-  sample <- "WTnone"
+testthat::test_that("collate_tpms.R: Single sample", {
   orfs <- c("YAL001C", "YAL002W", "YAL003W")
-  data <- seq_len(length(orfs))
-  sample_tpms <- tibble(ORF = orfs, tpm = data)
-  expected <- tibble(ORF = orfs, "{sample}" := data)
+  samples <- c("WTnone")
+  sample_data <- GetSampleTpms(orfs, samples)
+  expected <- GetCollatedTpms(orfs, sample_data)
   withr::with_tempdir({
-    sample_file <- file.path(getwd(), paste0(sample, "_", "tpms.tsv"))
-    readr::write_tsv(sample_tpms, sample_file, col_names = TRUE)
-
+   for (sample in names(sample_data)) {
+      data <- tibble(ORF = orfs, tpm = sample_data[[sample]])
+      sample_file <- file.path(getwd(), paste0(sample, "_", "tpms.tsv"))
+      readr::write_tsv(data, sample_file, col_names = TRUE)
+    }
     output_dir <- getwd()
-    RunCollateTpms(collate_tpms, output_dir, tpms_file,
-      sample_subdirs, orf_fasta, c(sample))
-
+    RunCollateTpms(
+      collate_tpms = collate_tpms,
+      output_dir = output_dir,
+      tpms_file = NA,
+      sample_subdirs = FALSE,
+      orf_fasta = NA,
+      samples = samples)
     actual_tpms_file <- file.path(output_dir, "TPMs_collated.tsv")
     actual <- readr::read_tsv(actual_tpms_file, comment = "#")
   })
