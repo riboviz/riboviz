@@ -66,7 +66,7 @@ LoadTpms <- function(tpms_file, orfs) {
     return(NULL)
   }
   features <- readr::read_tsv(tpms_file, comment = "#")
-  if (!all.equal(features$ORF, orfs)) {
+  if (isFALSE(all.equal(features$ORF, orfs))) {
     warning(paste("ORF names are not right in ", tpms_file))
   }
   return(features$tpm)
@@ -150,7 +150,7 @@ MakeTpmTable <- function(samples_dir, sample_subdirs, orf_fasta,
     orfs <- tpms_file %>% readr::read_tsv(comment = "#") %>% .$ORF
   } else {
     # TODO untested
-    library(Biostrings)
+    suppressMessages(library(Biostrings, quietly = T))
     print(paste("Loading ORFs from:", orf_fasta))
     orfs <- Biostrings::readDNAStringSet(orf_fasta) %>% names
   }
