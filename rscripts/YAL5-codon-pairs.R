@@ -194,6 +194,11 @@ TidyAsiteCountsByPosition <- function(gene, dataset, hd_file, min_read_length = 
 tidy_asite_count_output <- TidyAsiteCountsByPosition(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE)
 
 
+# > str(tidy_asite_count_output)
+# tibble [1,121 x 2] (S3: tbl_df/tbl/data.frame)
+# $ Pos  : int [1:1121] 1 2 3 4 5 6 7 8 9 10 ...
+# $ Count: num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+
 
 
 TranscriptPosToCodonPos <- function(gene, gff_df){
@@ -218,7 +223,7 @@ TranscriptPosToCodonPos <- function(gene, gff_df){
   
   NA_UTR3_width <- rep(NA, times = UTR3_width$width)
   
-  NA_CDS_NA <- tibble(
+  transcript_gene_pos_poscodon_frame <- tibble(
     Gene = gene,
     Pos = 1:transcript_length$end,
     Pos_Codon = c(rep(NA, times = UTR5_width$width), CDS_codon_positions, rep(NA, times = UTR3_width$width)),
@@ -228,11 +233,11 @@ TranscriptPosToCodonPos <- function(gene, gff_df){
   
   # frame filter zero 
   
-  return(NA_CDS_NA)
+  return(transcript_gene_pos_poscodon_frame)
 }
 
 
-TranscriptPosToCodonPosOutput <- TranscriptPosToCodonPos(gene = "YAL003W", gff_df)
+transcript_pos_to_codon_pos_output <- TranscriptPosToCodonPos(gene = "YAL003W", gff_df)
 # 
 # # output:
 # > TranscriptPosToCodonPosOutput
@@ -254,217 +259,82 @@ TranscriptPosToCodonPosOutput <- TranscriptPosToCodonPos(gene = "YAL003W", gff_d
 # create a codon_per_codons_count_table
 
 
-
-
-# GetGeneDatamatrix for each of the genes contained within the Mok-simYAL5
-#
-# YAL003W_datamatrix <- GetGeneDatamatrix(gene="YAL003W", dataset="Mok-simYAL5",
-#                                  hd_file = YAL5_h5) #data_mat
-#
-# # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
-# # where 1:41 represents read lengths 10:50 and 1:1121 represents the 1121 
-# # nucleotides including UTRs and CDS
-# 
-# 
-# # The GetGeneDatamatrix contains the CDS as well as the UTRs, results in 1121 
-# # observations instead of the 207 which consists of the CDS
-# 
-# # YAL005C_data <- GetGeneDatamatrix(gene="YAL005C", dataset="Mok-simYAL5", 
-# #                                   hd_file = YAL5_h5)
-# # YAL012W_data <- GetGeneDatamatrix(gene="YAL012W", dataset="Mok-simYAL5", 
-# #                                   hd_file = YAL5_h5)
-# # YAL035W_data <- GetGeneDatamatrix(gene="YAL035W", dataset="Mok-simYAL5", 
-# #                                   hd_file = YAL5_h5)
-# # YAL038W_data <- GetGeneDatamatrix(gene="YAL038W", dataset="Mok-simYAL5", 
-# #                                   hd_file = YAL5_h5)
-# 
-# 
-# 
-# # Make a table which contains the datamatrix from the h5 file, in this case only 
-# # carried out for a single gene YAL003W
-# 
-# 
-# 
-#                                         
-#   #   reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5)
-#   #           print(reads_pos_length)
-#   #   reads_asitepos <- CalcAsiteFixed(reads_pos_length, min_read_length = 10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)), colsum_out = TRUE) 
-#   #           print(reads_asitepos)
-#   #   SumByFrame(reads_asitepos, left =251, right =871)
-#   #   SnapToCodonList <- SnapToCodon(reads_asitepos, left=251, right=871, snapdisp = 0L)                                         
-#   #                                        
-#   # print(SnapToCodonList)                                       
-# 
-# # buffer <- 250
-# # min_read_length <- 10
-# # Codon_Pos_Reads <- GetCodonPositionReads(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, left = (buffer - 15), right = (buffer + 11), min_read_length = min_read_length)
-# 
-# 
-# YAL003W_tidy <- TidyDatamatrix(data_mat = YAL003W_datamatrix, startpos = 1, startlen=10)
-# 
-# # A tibble: 45,961 x 3
-# # ReadLen   Pos Counts
-# # <int> <int>  <int>
-# #   1      10     1      0
-# # 2      11     1      0
-# # 3      12     1      0
-# # 4      13     1      0
-# # 5      14     1      0
-# # 6      15     1      0
-# # 7      16     1      0
-# # 8      17     1      0
-# # 9      18     1      0
-# # 10     19     1      0
-# # # ... with 45,951 more rows
-# 
-# # Tibble contains the read lengths 10:50 for position 1-1121 
-# # The number of observations (45,961) is equal to 41 read lengths multiplied by 1121 nucleotides
-# 
-# # Summaried the table so that the total count is shown for each of the positions 
-# # summary_counts_for_positions <- summarise(group_by(YAL003W_tidy, Pos), Total_counts = sum(Counts))
-# # A tibble: 1,121 x 2
-# # Pos Total_counts
-# # * <int>        <int>
-# #   1     1            0
-# #   2     2            0
-# #   3     3            0
-# #   4     4            0
-# #   5     5            0
-# #   6     6            0
-# #   7     7            0
-# #   8     8            0
-# #   9     9            0
-# #  10    10            0
-# # ... with 1,111 more rows
-# 
-# # Tidydatamatrix is grouped by position, removes read lengths
-# 
-# 
-# # start_codon_pos <- GetGeneStartCodonPos(gene="YAL003W", dataset="Mok-simYAL5", # 251 252 253
-# #                      hd_file = YAL5_h5) 
-# # 
-# # stop_codon_pos <- GetGeneStopCodonPos(gene="YAL003W", dataset="Mok-simYAL5",  # 869, 870, 871
-# #                     hd_file=YAL5_h5)
-# 
-# 
-# # CDS start 251, CDS end 871 - CDS total: 621 nt -> 207 codons
-# # 250 UTRs at each end for a total of 1121 nt
-
-
-
-# KeepGeneCDS function: remove the UTRs at the 5' and 3' end, keep the CDS
-
-KeepGeneCDS <- function(gene, dataset, hd_file, startpos = 1, startlen = 10){
+AddAsiteCountsToTranscriptPosToCodonPos <- function(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE, gff_df){
   
-  tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene, dataset, hd_file), startpos, startlen) 
+  tidy_asite_count_output <- TidyAsiteCountsByPosition(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE)
   
-  summary_counts_for_positions <- dplyr::summarise(dplyr::group_by(tidy_gene_datamatrix, Pos), Total_counts = sum(Counts))
+  transcript_pos_to_codon_pos_output <- TranscriptPosToCodonPos(gene, gff_df)
   
-  start_codon_pos <- GetGeneStartCodonPos(gene, dataset, hd_file)
-  stop_codon_pos <- GetGeneStopCodonPos(gene, dataset, hd_file)
+  transcript_info_tibble <- dplyr::left_join(transcript_pos_to_codon_pos_output, tidy_asite_count_output, by = "Pos")
   
-  summary_counts_for_positions_CDS <- summary_counts_for_positions %>%
-    dplyr::filter(dplyr::between(Pos, min(start_codon_pos), max(stop_codon_pos))) 
+  return(transcript_info_tibble)
+  
+}
+ 
 
-  return(summary_counts_for_positions_CDS)
+
+transcript_info_tibble <- AddAsiteCountsToTranscriptPosToCodonPos(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE, gff_df)
+
+
+AddCodonNamesToTranscriptInfoTibble <- function(yeast_codon_pos_i200, gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE, gff_df){
+  
+  codon_table <- dplyr::filter(yeast_codon_pos_i200, Gene == "YAL003W") %>% 
+    dplyr::select("PosCodon", "Codon")
+  
+  transcript_info_tibble <- AddAsiteCountsToTranscriptPosToCodonPos(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE, gff_df)
+  
+  transcript_info_tibble <- left_join(transcript_info_tibble, codon_table, by = c("Pos_Codon" = "PosCodon"), keep = FALSE)
+  
+  return(transcript_info_tibble)
+    
+}
+
+transcript_info_tibble <- AddCodonNamesToTranscriptInfoTibble(yeast_codon_pos_i200, gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE, gff_df)
+
+ 
+
+FilterForFrame <- function(transcript_info_tibble, filtering_frame = 0){
+  
+  transcript_info_tibble <- dplyr::filter(transcript_info_tibble, Frame == filtering_frame)
+  
+  return(transcript_info_tibble)
   
 }
 
+transcript_info_tibble <- FilterForFrame(transcript_info_tibble, filtering_frame = 0)
 
-gene_CDS <- KeepGeneCDS(gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
-
-# KeepGeneCDS generates as an output:
-
-# A tibble: 621 x 2
-# Pos Total_counts
-# <int>        <int>
-#   1   251          225
-#   2   252           90
-#   3   253           77
-#   4   254          246
-#   5   255          291
-#   6   256         1151
-#   7   257         1272
-#   8   258            8
-#   9   259            9
-#  10   260           25
-# ... with 611 more rows
+# > transcript_info_tibble
+# # A tibble: 374 x 6
+# Gene      Pos Pos_Codon Frame Count Codon
+# <chr>   <int>     <dbl> <dbl> <dbl> <chr>
+#   1 YAL003W     2        NA     0     0 NA   
+# 2 YAL003W     5        NA     0     0 NA   
+# 3 YAL003W     8        NA     0     0 NA   
+# 4 YAL003W    11        NA     0     0 NA   
+# 5 YAL003W    14        NA     0     0 NA   
+# 6 YAL003W    17        NA     0     0 NA   
+# 7 YAL003W    20        NA     0     0 NA   
+# 8 YAL003W    23        NA     0     0 NA   
+# 9 YAL003W    26        NA     0     0 NA   
+# 10 YAL003W    29        NA     0     0 NA   
+# # ... with 364 more rows
 
 
 
-
-# NucleotideToCodonPosition function: change format from nucleotides to codons,
-# combine the generated codon table and the yeast_codon_pos_i200 file  
-
-NucleotideToCodonPosition <- function(gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10){
-  
-  codon_table <- dplyr::filter(gene_poscodon_codon_i200, Gene==gene)
-  
-  gene_CDS <- KeepGeneCDS(gene, dataset, hd_file, startpos = 1, startlen = 10)
-  
-  # per_codon_counts <- zoo::rollapply(data=gene_CDS$Total_counts, width = 3, sum, by = 3)
-  
-  per_codonpair_counts <- zoo::rollapply(data=gene_CDS$Total_counts, width = 6, sum, by = 3)
-  # configured the code for per_codon_counts so that it sums 1+2, 2+3, 3+4...
-  
-  gene_per_codon_counts <- tibble::tibble(
-    # CodonPos = paste(seq_len(length(per_codon_counts)), 
-    CodonPos_1 = seq_len(length(per_codonpair_counts)),
-    CodonPos_2 = seq_len(length(per_codonpair_counts)) +1,
-        # Line 304 was replaced, so CodonPos became CodonPos_1 and CodonPos_2
-    PerCodonCounts = per_codonpair_counts
-  )
-  
-  joined_gene_per_codon_counts <- dplyr::full_join(
-    x = gene_per_codon_counts, 
-    y = codon_table,  
-    by = c("CodonPos_1" = "CodonPos_1", "CodonPos_2" = "CodonPos_2")
-  ) %>% 
-    dplyr::select(Gene, CodonPos_1, CodonPos_2, CodonPair, PerCodonCounts) 
-  
-  
-  return(joined_gene_per_codon_counts)
-  
-}
-
-
-joined_gene_per_codon_counts_YAL003W <- NucleotideToCodonPosition(gene_poscodon_codon_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
-
-
-# Output generated from NucleotideToCodonPosition function for single codons:
-# 
-# # A tibble: 207 x 4
-#     Gene    CodonPos Codon PerCodonCounts
-#     <chr>      <dbl> <chr>          <int>
-#   1 YAL003W        1 ATG              392
-#   2 YAL003W        2 GCA             1688
-#   3 YAL003W        3 TCC             1289
-#   4 YAL003W        4 ACC              678
-#   5 YAL003W        5 GAT              605
-#   6 YAL003W        6 TTC              364
-#   7 YAL003W        7 TCC             1154
-#   8 YAL003W        8 AAG             1159
-#   9 YAL003W        9 ATT             1058
-#  10 YAL003W       10 GAA              500
-# # ... with 197 more rows
-# 
-# 
-# Output generated from NucleotideToCodonPosition function for codon pairs:
-
-#   # A tibble: 207 x 5
-#   Gene    CodonPos_1 CodonPos_2 CodonPair PerCodonCounts
-# <chr>        <dbl>      <dbl> <chr>              <int>
-#   1 YAL003W          1          2 ATG GCA             2080
-# 2 YAL003W          2          3 GCA TCC             2977
-# 3 YAL003W          3          4 TCC ACC             1967
-# 4 YAL003W          4          5 ACC GAT             1283
-# 5 YAL003W          5          6 GAT TTC              969
-# 6 YAL003W          6          7 TTC TCC             1518
-# 7 YAL003W          7          8 TCC AAG             2313
-# 8 YAL003W          8          9 AAG ATT             2217
-# 9 YAL003W          9         10 ATT GAA             1558
-# 10 YAL003W         10         11 GAA ACT             1474
-# # ... with 197 more rows
+# CalculateCountsPerCodonPos <- function(transcript_info_tibble){
+#   
+#   counts_per_codon_pos <- dplyr::group_by(transcript_info_tibble, Pos_Codon) %>% 
+#     summarise(Count = sum(Count))
+#   
+#   
+#   return(counts_per_codon_pos)
+#   
+#   
+# }
+#
+# Because we have run the FilterForFrame function the CalculateCountsPerCodonPos 
+# function gives you the counts per codon which are already present in Counts in 
+# the filtered transcript_info_tibble
 
 
 
@@ -821,294 +691,5 @@ Over <- Overlayed(NormalizedExpandList, expand_width = 5L)
 # make some plots 
     # write some code to make a plot for a summarised version 
 
-# when does overlay happen 
 
 
-
-
-
-################################################################################
-
-# Need to do asite assignment. This will likley need to be carried out either as
-# part of the tidydatamatrix function or right after? 
-
-
-Reads_pos_length <- GetGeneDatamatrix(gene="YAL003W", 
-                                      dataset="Mok-simYAL5", 
-                                      hd_file=YAL5_h5)
-
-tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene="YAL003W", 
-                                                         dataset="Mok-simYAL5", 
-                                                         hd_file=YAL5_h5), 
-                                       startpos = 1, 
-                                       startlen = 10) 
-
-# format generated from the tidy_gene_datamatrix - either need asite assignment to
-# occur within that function or to give an output in the same format?
-
-# > tidy_gene_datamatrix
-# # A tibble: 45,961 x 3
-# ReadLen   Pos Counts
-# <int> <int>  <int>
-#   1      10     1      0
-# 2      11     1      0
-# 3      12     1      0
-# 4      13     1      0
-# 5      14     1      0
-# 6      15     1      0
-# 7      16     1      0
-# 8      17     1      0
-# 9      18     1      0
-# 10      19     1      0
-# # ... with 45,951 more rows
-
-matrix <- GetGeneDatamatrix(gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5)
-
-
-
-
-### CalcAsiteFixedOneLength
-
-fixed_one_length <- CalcAsiteFixedOneLength(Reads_pos_length, 
-                                            min_read_length = 10, 
-                                            read_length = 10:50, 
-                                            asite_displacement = 15)
-
-tidy_gene_datamatrix_fixed <- TidyDatamatrix(fixed_one_length, 
-                                             startpos = 1, 
-                                             startlen = 10)
-
-# > tidy_gene_datamatrix_fixed
-# # A tibble: 45,961 x 3
-# ReadLen   Pos Counts
-# <int> <int>  <int>
-#   1      10     1      0
-# 2      11     1      0
-# 3      12     1      0
-# 4      13     1      0
-# 5      14     1      0
-# 6      15     1      0
-# 7      16     1      0
-# 8      17     1      0
-# 9      18     1      0
-# 10      19     1      0
-# # ... with 45,951 more rows
-
-# Seems to be compatible with tidydatamatrix - might be the best option?
-
-
-
-### CalcAsiteFixed
-
-Asite <- CalcAsiteFixed(Reads_pos_length, 
-                        min_read_length = 10, 
-                        asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
-                                                               asite_displacement = c(15, 15, 15)), 
-                        colsum_out = TRUE)
-
-# > str(Asite)
-# num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
-
-tidy_gene_datamatrix_asite <- TidyDatamatrix(Asite, startpos = 1, startlen = 10) 
-
-# Error in startpos:(startpos + ncol(data_mat) - 1) : argument of length 0
-  # set colsum_out = FALSE which seemed to solve the problem 
-  # however, only 3363 observations compared to 45961 observations in tidydatamatrix
-
-
-
-# # A tibble: 3,363 x 3
-# ReadLen   Pos Counts
-# <int> <int>  <int>
-#   1      10     1      0
-# 2      11     1      0
-# 3      12     1      0
-# 4      10     2      0
-# 5      11     2      0
-# 6      12     2      0
-# 7      10     3      0
-# 8      11     3      0
-# 9      12     3      0
-# 10      10     4      0
-# # ... with 3,353 more rows
-
-
-
-### SnapToCodon
-
-# reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", 
-#                                       dataset = "vignette", 
-#                                       hd_file = "vignette/output/WTnone/WTnone.h5")
-#'  # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
-
-reads_asitepos <- CalcAsiteFixed(Reads_pos_length, 
-                                 min_read_length = 10, 
-                                 asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
-                                                                        asite_displacement = c(15, 15, 15)), 
-                                 colsum_out = TRUE) 
-
-#'  # num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
-SnapToCodon(reads_asitepos, left=251, right=871, snapdisp=0L)
-#'  # num [1:207] 0 9 0 0 0 3 0 0 0 0 ...
-
-# > SnapToCodon(reads_asitepos, left=251, right=871, snapdisp=0L)
-# [1] 4249  825 1017 1176 1116  284 1553  776  607  491  260  876  837  648  421  739  149
-# [18]  941  514  603 1442 1101 1917  233  623 1289  622  660   94  130  567  279 1004  328
-# [35]  283  625  218  832  592  287  549  456  366  594 1051 1659  843  463  885 4259 1690
-# [52]  437  857 1050  807  373 1147  816 1085 1312  318  982  757  277 1575  924  330  364
-# [69]  440  409  427  282  843 1262  820 1024  781 1083  727  358  877  416  354 1824  667
-# [86] 1092  992 1531  923  277 1072  464 1010  349 1035 1165  664  933  530  773 1098  521
-# [103]   99 1055 1005  567  460  826 1460 1030  399 1792 1454 1069  679 1294  747  355 1188
-# [120]  599  172  225  301  694 1020  950  977 1904 4744 1806  779 1083  805  554  245  887
-# [137]  743  674  906  404  221  213  978 1340  285  666  725  765 1421 1171  843 2475 3188
-# [154]  406  443  498  996  198 1104  900 1421  670  687 1891 1103 1514  311  953  199  314
-# [171]  482  306  106  992 1618 1433 1090  547  469  503  797 1160  676  350 1069  924  452
-# [188] 1161  693 2231 1062  938 1335  371  654  294  453 1096  274  357  489  508  955 1287
-# [205] 1496   75    0
-
-
-# Potential issue: the values generated from SnapToCodon do not match the values 
-# generated from NucleotideToCodonPosition - why? 
-# These values should be the same as far as I can tell - is one or the other taking 
-# an extra input/output?
-
-
-
-
-NucleotideToCodonPosition <- function(gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10){
-  
-  codon_table <- dplyr::filter(gene_poscodon_codon_i200, Gene==gene)
-  
-  gene_CDS <- KeepGeneCDS(gene, dataset, hd_file, startpos = 1, startlen = 10)
-  
-  # per_codon_counts <- zoo::rollapply(data=gene_CDS$Total_counts, width = 3, sum, by = 3)
-  
-  per_codonpair_counts <- zoo::rollapply(data=gene_CDS$Total_counts, width = 6, sum, by = 3)
-  # configured the code for per_codon_counts so that it sums 1+2, 2+3, 3+4...
-  
-  gene_per_codon_counts <- tibble::tibble(
-    # CodonPos = paste(seq_len(length(per_codon_counts)), 
-    CodonPos_1 = seq_len(length(per_codonpair_counts)),
-    CodonPos_2 = seq_len(length(per_codonpair_counts)) +1,
-    # Line 304 was replaced, so CodonPos became CodonPos_1 and CodonPos_2
-    PerCodonCounts = per_codonpair_counts
-  )
-  
-  joined_gene_per_codon_counts <- dplyr::full_join(
-    x = gene_per_codon_counts, 
-    y = codon_table,  
-    by = c("CodonPos_1" = "CodonPos_1", "CodonPos_2" = "CodonPos_2")
-  ) %>% 
-    dplyr::select(Gene, CodonPos_1, CodonPos_2, CodonPair, PerCodonCounts) 
-  
-  
-  return(joined_gene_per_codon_counts)
-  
-}
-
-
-joined_gene_per_codon_counts_YAL003W <- NucleotideToCodonPosition(gene_poscodon_codon_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10)
-
-
-
-NucleotideToCodonPosition <- function(gene_poscodon_codon_i200, 
-                                      gene="YAL003W", 
-                                      dataset="Mok-simYAL5", 
-                                      hd_file=YAL5_h5, 
-                                      startpos = 1, 
-                                      startlen = 10)
-  
-  codon_table <- dplyr::filter(gene_poscodon_codon_i200, Gene=="YAL003W")
-  
-  gene_CDS <- KeepGeneCDS(gene="YAL003W", 
-                          dataset="Mok-simYAL5", 
-                          hd_file=YAL5_h5, 
-                          startpos = 1, 
-                          startlen = 10)
-  
-  per_codon_counts <- zoo::rollapply(data=gene_CDS$Total_counts, 
-                                     width = 3, sum, by = 3)
-  
-  # > per_codon_counts
-  # [1]  392 1688 1289  678  605  364 1154 1159 1058  500  974  199 1053  634  690 1685 1420
-  # [18] 2454  468  744 1659  918  822  136  146  681  384 1231  541  334  833  272  974  835
-  # [35]  351  773  602  427  771 1416 2031  999  660 1037 5206 2951  473 1032 1514  967  451
-  # [52] 1369 1176 1304 2050  460 1218  975  340 1995 1066  429  460  575  495  511  357  971
-  # [69] 1581 1086 1374 1103 1302  957  475  954  587  428 1877  984 1360 1089 1716 1078  383
-  # [86] 1217  649 1182  486 1181 1369  955 1138  713  912 1274  762  118 1122 1562  742  581
-  # [103] 1006 1915 1339  442 2237 1871 1393  760 1690 1141  471 1348  855  284  242  388  850
-  # [120] 1383 1245 1143 2309 6613 2485  984 1412 1027  691  299 1130  819  853 1359  494  296
-  # [137]  266 1105 2010  353  777 1280 1041 1804 1596 1228 2730 5230  560  524  665 1394  226
-  # [154] 1428 1154 1717  871  773 2890 1327 2147  431 1159  289  386  642  442  112 1164 2238
-  # [171] 1783 1311  795  533  619  934 1570  898  424 1339 1128  662 1354  833 2570 1312 1229
-  # [188] 1881  500  745  473  520 1317  454  412  568  668 1298 1528 2133  132    0    0    0
-  # [205]    0    0    0
-  
-  per_codonpair_counts <- zoo::rollapply(data=gene_CDS$Total_counts, width = 6, sum, by = 3)
-  # configured the code for per_codon_counts so that it sums 1+2, 2+3, 3+4...
-  
-  # > per_codonpair_counts
-  # [1] 2080 2977 1967 1283  969 1518 2313 2217 1558 1474 1173 1252 1687 1324 2375 3105 3874
-  # [18] 2922 1212 2403 2577 1740  958  282  827 1065 1615 1772  875 1167 1105 1246 1809 1186
-  # [35] 1124 1375 1029 1198 2187 3447 3030 1659 1697 6243 8157 3424 1505 2546 2481 1418 1820
-  # [52] 2545 2480 3354 2510 1678 2193 1315 2335 3061 1495  889 1035 1070 1006  868 1328 2552
-  # [69] 2667 2460 2477 2405 2259 1432 1429 1541 1015 2305 2861 2344 2449 2805 2794 1461 1600
-  # [86] 1866 1831 1668 1667 2550 2324 2093 1851 1625 2186 2036  880 1240 2684 2304 1323 1587
-  # [103] 2921 3254 1781 2679 4108 3264 2153 2450 2831 1612 1819 2203 1139  526  630 1238 2233
-  # [120] 2628 2388 3452 8922 9098 3469 2396 2439 1718  990 1429 1949 1672 2212 1853  790  562
-  # [137] 1371 3115 2363 1130 2057 2321 2845 3400 2824 3958 7960 5790 1084 1189 2059 1620 1654
-  # [154] 2582 2871 2588 1644 3663 4217 3474 2578 1590 1448  675 1028 1084  554 1276 3402 4021
-  # [171] 3094 2106 1328 1152 1553 2504 2468 1322 1763 2467 1790 2016 2187 3403 3882 2541 3110
-  # [188] 2381 1245 1218  993 1837 1771  866  980 1236 1966 2826 3661 2265  132    0    0    0
-  # [205]    0    0
-  # 
-  
-  
-  
-  ### GetGeneCodonPosReads1dsnap
-  
-  GetGeneCodonPosReads1dsnap(gene = "YAL003W", 
-                             dataset = "Mok-simYAL5", 
-                             hd_file = YAL5_h5, 
-                             left=251, right=871, 
-                             min_read_length=10, 
-                             asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
-                                                                    asite_displacement = c(15, 15, 15)), 
-                             snapdisp=0L)
-  
-  # > GetGeneCodonPosReads1dsnap(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, 
-  #   left=251, right=871, min_read_length=10, asite_displacement_length = data.frame(read_length 
-  #   = c(28, 29, 30), asite_displacement = c(15, 15, 15)), snapdisp=0L)
-  # [1] 4249  825 1017 1176 1116  284 1553  776  607  491  260  876  837  648  421  739  149
-  # [18]  941  514  603 1442 1101 1917  233  623 1289  622  660   94  130  567  279 1004  328
-  # [35]  283  625  218  832  592  287  549  456  366  594 1051 1659  843  463  885 4259 1690
-  # [52]  437  857 1050  807  373 1147  816 1085 1312  318  982  757  277 1575  924  330  364
-  # [69]  440  409  427  282  843 1262  820 1024  781 1083  727  358  877  416  354 1824  667
-  # [86] 1092  992 1531  923  277 1072  464 1010  349 1035 1165  664  933  530  773 1098  521
-  # [103]   99 1055 1005  567  460  826 1460 1030  399 1792 1454 1069  679 1294  747  355 1188
-  # [120]  599  172  225  301  694 1020  950  977 1904 4744 1806  779 1083  805  554  245  887
-  # [137]  743  674  906  404  221  213  978 1340  285  666  725  765 1421 1171  843 2475 3188
-  # [154]  406  443  498  996  198 1104  900 1421  670  687 1891 1103 1514  311  953  199  314
-  # [171]  482  306  106  992 1618 1433 1090  547  469  503  797 1160  676  350 1069  924  452
-  # [188] 1161  693 2231 1062  938 1335  371  654  294  453 1096  274  357  489  508  955 1287
-  # [205] 1496   75    0
-  
-  
-  
-  ### GetGeneReadFrame
-  
-  GetGeneReadFrame(gene = "YAL003W", 
-                   dataset = "Mok-simYAL5", 
-                   hd_file = YAL5_h5, 
-                   left=251, right=871, 
-                   min_read_length=10, 
-                   asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
-                                                          asite_displacement = c(15, 15, 15)))
-  
-  # # A tibble: 1 x 7
-  # gene    Ct_fr0 Ct_fr1 Ct_fr2 pval_fr0vs1 pval_fr0vs2 pval_fr0vsboth
-  # <chr>    <dbl>  <dbl>  <dbl>       <dbl>       <dbl>          <dbl>
-  #   1 YAL003W  61847  50043  65120       0.160       0.943          0.659
-  
-  
-  # Not likely to be a useful function as it does not give you the reads 
