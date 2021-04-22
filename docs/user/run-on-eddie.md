@@ -30,7 +30,7 @@ Contents:
    - [Download fastq data files from the Short Read Archive (SRA): initial setup](#download-fastq-data-files-from-the-short-read-archive-sra-initial-setup)
    - [Download fastq data files from the Short Read Archive (SRA): subsequent uses](#download-fastq-data-files-from-the-short-read-archive-sra-subsequent-uses)
    - [Create `qsub` job submission script](#create-qsub-job-submission-script)
-   - [Job submission](#job-submission)
+   - [Submit job](#submit-job)
    - [Checking outputs](#checking-outputs)
    - [Moving and downloading outputs](#moving-and-downloading-outputs)
 
@@ -728,7 +728,7 @@ Here we are running nextflow's validation to check that the input files and para
 
 Note that by default Nextflow uses a local work/ directory (ie. in `$HOME/riboviz/riboviz/work`) to write its intermediate results to, which is relative to the current directory in which Nextflow is invoked. Here, Nextflow's `-work-dir` flag is used to instruct Nextflow where to put these results, in this case within `Wallace_2020_JEC21/work`, but one could use `/exports/eddie/scratch/$USER/Wallace_2020_JEC21/work` here instead too.
 
-### Job submission
+### Submit job
 
 Check that you are in the same location as your submission script, or remember to add that path to your `qsub` command.
 
