@@ -16,7 +16,7 @@
 #' | Parameter | Description |
 #' | --------- | ----------- |
 #' | `--output-dir ` | Output directory in which to find sample-specific TPMs files and into which to write the collated TPMs file |
-#' | `--tpms-file` | Name of collated TPMs file, relative to `output-dir` |
+#' | `--tpms-file` | Name of collated TPMs file |
 #' | `--sample-subdirs` | Are sample-specific TPMs files in sample-specific sub-directories, in files `<output_dir>/<sample>/tpms.tsv`? If not then it is assumed they are in files `<output_dir>/<sample>_tpms.tsv` |
 #' | `--orf-fasta` | ORF FASTA file that was aligned to and from which ORF names are to be retrieved |
 #' | `<sample>` | Space-delimited list of one or more sample names |
@@ -172,8 +172,7 @@ MakeTpmTable <- function(samples_dir, sample_subdirs, orf_fasta,
 #'
 #' @param output_dir Output directory in which to find sample-specific
 #' TPMs files and into which to write the collated TPMs file (character).
-#' @param tpms_file Name of collated TPMs file, relative to
-#' `output_dir` (character).
+#' @param tpms_file Name of collated TPMs file (character).
 #' @param sample_subdirs Are sample-specific TPMs files in
 #' sample-specific sub-directories, in files
 #' `<output_dir>/<sample>/tpms.tsv`? If not then it is assumed
@@ -187,11 +186,10 @@ CollateTpms <- function(
   output_dir, tpms_file, sample_subdirs, orf_fasta, samples) {
 
   round1 <- function(x) round(x, digits = 1)
-  tpms_file_path <- file.path(output_dir, tpms_file)
-  write_provenance_header(get_Rscript_filename(), tpms_file_path)
+  write_provenance_header(get_Rscript_filename(), tpms_file)
   MakeTpmTable(output_dir, sample_subdirs, orf_fasta, samples) %>%
     dplyr::mutate_if(is.numeric, round1) %>%
-    readr::write_tsv(tpms_file_path, col_names = TRUE, append = TRUE)
+    readr::write_tsv(tpms_file, col_names = TRUE, append = TRUE)
 }
 
 option_list <- list(
@@ -199,7 +197,7 @@ option_list <- list(
     help = "Output directory"),
   make_option("--tpms-file", type = "character",
     default = "TPMs_collated.tsv",
-    help = "Name of collated TPMs file, relative to `output-dir`"),
+    help = "Name of collated TPMs file"),
   make_option("--sample-subdirs", type = "logical", default = FALSE,
     help = "Are samples in sample-specific subdirectories of `output-dir`?"),
   make_option("--orf-fasta", type = "character", default = NA,
