@@ -29,7 +29,7 @@ Contents:
    - [Set up riboviz dataset folder and create system links to scratch folders](#set-up-riboviz-dataset-folder-and-create-system-links-to-scratch-folders)
    - [Download fastq data files from the Short Read Archive (SRA): initial setup](#download-fastq-data-files-from-the-short-read-archive-sra-initial-setup)
    - [Download fastq data files from the Short Read Archive (SRA): subsequent uses](#download-fastq-data-files-from-the-short-read-archive-sra-subsequent-uses)
-   - [Create `qsub` script](#create-qsub-script)
+   - [Create `qsub` job submission script](#create-qsub-job-submission-script)
    - [Job submission](#job-submission)
    - [Checking outputs](#checking-outputs)
    - [Moving and downloading outputs](#moving-and-downloading-outputs)
