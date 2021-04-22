@@ -142,7 +142,7 @@ GetCollatedTpms <- function(orfs, sample_data) {
 SaveTpms <- function(orfs, sample_data, output_dir, shuffle = FALSE) {
   orf_decreasing <- FALSE
   for (sample in names(sample_data)) {
-    data <- tibble(ORF = orfs, tpm = sample_data[[sample]])
+    data <- tibble::tibble(ORF = orfs, tpm = sample_data[[sample]])
     if (shuffle) {
       data <- data[order(data$ORF, decreasing = orf_decreasing), ]
     }
@@ -172,7 +172,7 @@ testthat::test_that("--sample-subdirs = TRUE", {
   sample_data <- GetSampleTpms(orfs, samples)
   withr::with_tempdir({
     for (sample in names(sample_data)) {
-      data <- tibble(ORF = orfs, tpm = sample_data[[sample]])
+      data <- tibble::tibble(ORF = orfs, tpm = sample_data[[sample]])
       sample_dir <- file.path(getwd(), sample)
       dir.create(sample_dir)
       sample_file <- file.path(sample_dir, "tpms.tsv")
@@ -217,10 +217,10 @@ testthat::test_that("--tpms-file", {
 
 testthat::test_that("Header-only sample files", {
   samples <- c("WTone", "WTtwo")
-  expected_tpms <- tibble(ORF = character())
+  expected_tpms <- tibble::tibble(ORF = character())
   withr::with_tempdir({
     for (sample in samples) {
-      data <- tibble(ORF = character(), tpm = double())
+      data <- tibble::tibble(ORF = character(), tpm = double())
       sample_file <- file.path(getwd(), paste0(sample, "_", "tpms.tsv"))
       readr::write_tsv(data, sample_file, col_names = TRUE)
       # Expected_tpms column types are `character` as collated TPMs TSV
