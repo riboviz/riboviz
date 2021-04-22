@@ -23,6 +23,7 @@
 #'
 #' @export
 
+suppressMessages(library(Biostrings, quietly = T))
 suppressMessages(library(dplyr, quietly = T))
 suppressMessages(library(glue, quietly = T))
 suppressMessages(library(here, quietly = T))
@@ -264,7 +265,7 @@ testthat::test_that("collate_tpms.R: Consistent ORFs, inconsistent order", {
     orf_decreasing <- FALSE
     for (sample in names(sample_data)) {
       data <- tibble(ORF = orfs, tpm = sample_data[[sample]])
-      data <- data[order(data$ORF, decreasing=orf_decreasing),]
+      data <- data[order(data$ORF, decreasing = orf_decreasing), ]
       sample_file <- file.path(getwd(), paste0(sample, "_", "tpms.tsv"))
       readr::write_tsv(data, sample_file, col_names = TRUE)
       orf_decreasing <- ! orf_decreasing
@@ -288,3 +289,41 @@ testthat::test_that("collate_tpms.R: Consistent ORFs, inconsistent order", {
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
 
+testthat::test_that("collate_tpms.R: orf_fasta parameter", {
+  orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
+  fasta <- Biostrings::DNAStringSet(x = replicate(length(orfs), "GATTACCA"))
+  names(fasta) <- orfs
+  samples <- c("WTnone", "WT3AT", "WTother")
+  sample_data <- GetSampleTpms(orfs, samples)
+  expected <- GetCollatedTpms(orfs, sample_data)
+  withr::with_tempdir({
+    orf_fasta <- "test.fasta"
+    Biostrings::writeXStringSet(fasta, orf_fasta, format = "fasta")
+    # For every 2nd sample reverse the order of ORFs/TPMs rows.
+    # Results consistent with `expected` are sill expected.
+    orf_decreasing <- FALSE
+    for (sample in names(sample_data)) {
+      data <- tibble(ORF = orfs, tpm = sample_data[[sample]])
+      data <- data[order(data$ORF, decreasing = orf_decreasing), ]
+      sample_file <- file.path(getwd(), paste0(sample, "_", "tpms.tsv"))
+      readr::write_tsv(data, sample_file, col_names = TRUE)
+      orf_decreasing <- ! orf_decreasing
+    }
+    output_dir <- getwd()
+    RunCollateTpms(
+      collate_tpms = collate_tpms,
+      output_dir = output_dir,
+      tpms_file = NA,
+      sample_subdirs = FALSE,
+      orf_fasta = orf_fasta,
+      samples = samples)
+    actual_tpms_file <- file.path(output_dir, "TPMs_collated.tsv")
+    actual <- readr::read_tsv(actual_tpms_file, comment = "#")
+  })
+  # read_tsv returns spec_tbl_df subclass so cast.
+  # Suggested by https://github.com/tidyverse/dplyr/issues/5126
+  # Alternative is to subset with no arguments e.g. actual[]
+  # https://www.tidyverse.org/blog/2018/12/readr-1-3-1/
+  actual <- tibble::as_tibble(actual)
+  testthat::expect_equal(expected, actual, info = "Data differs'")
+})
