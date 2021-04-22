@@ -101,8 +101,6 @@ each FASTQ, SAM and BAM file processed?
 
 NUM_PROCESSES = "num_processes"
 """ Number of processes to parallelize over. """
-IS_TEST_RUN = "is_test_run"
-""" Is this a test run? (unused). """
 ALIGNER = "aligner"
 """ Short read aligner to use (unused). """
 
