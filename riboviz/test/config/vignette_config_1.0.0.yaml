@@ -23,6 +23,5 @@ PrimaryID: Name
 SecondID: NULL
 dataset: vignette
 StopInCDS: FALSE
-isTestRun: FALSE
 rpf: TRUE
 ribovizGFF: TRUE
