@@ -116,7 +116,7 @@ GetCollatedTpms <- function(orfs, sample_data) {
   return(expected)
 }
 
-testthat::test_that("collate_tpms.R: Default", {
+testthat::test_that("Default", {
   orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
   samples <- c("WTnone", "WT3AT")
   sample_data <- GetSampleTpms(orfs, samples)
@@ -141,7 +141,7 @@ testthat::test_that("collate_tpms.R: Default", {
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
 
-testthat::test_that("collate_tpms.R: --sample-subdirs = TRUE", {
+testthat::test_that("--sample-subdirs = TRUE", {
   orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
   samples <- c("WTnone", "WT3AT")
   sample_data <- GetSampleTpms(orfs, samples)
@@ -164,7 +164,7 @@ testthat::test_that("collate_tpms.R: --sample-subdirs = TRUE", {
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
 
-testthat::test_that("collate_tpms.R: One sample", {
+testthat::test_that("One sample", {
   orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
   samples <- c("WTnone")
   sample_data <- GetSampleTpms(orfs, samples)
@@ -185,7 +185,7 @@ testthat::test_that("collate_tpms.R: One sample", {
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
 
-testthat::test_that("collate_tpms.R: --tpms-file", {
+testthat::test_that("--tpms-file", {
   orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
   samples <- c("WTnone", "WT3AT")
   sample_data <- GetSampleTpms(orfs, samples)
@@ -207,7 +207,7 @@ testthat::test_that("collate_tpms.R: --tpms-file", {
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
 
-testthat::test_that("collate_tpms.R: Header-only sample files", {
+testthat::test_that("Header-only sample files", {
   samples <- c("WTnone", "WT3AT")
   expected <- tibble(ORF = character())
   withr::with_tempdir({
@@ -229,7 +229,7 @@ testthat::test_that("collate_tpms.R: Header-only sample files", {
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
 
-testthat::test_that("collate_tpms.R: Sample-specific ORFs in different order", {
+testthat::test_that("Sample-specific ORFs in different orders", {
   orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
   samples <- c("WTnone", "WT3AT", "WTother")
   sample_data <- GetSampleTpms(orfs, samples)
@@ -255,7 +255,7 @@ testthat::test_that("collate_tpms.R: Sample-specific ORFs in different order", {
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
 
-testthat::test_that("collate_tpms.R: --orf-fasta", {
+testthat::test_that("--orf-fasta", {
   orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
   fasta <- Biostrings::DNAStringSet(x = replicate(length(orfs), "GATTACCA"))
   names(fasta) <- orfs
@@ -286,7 +286,7 @@ testthat::test_that("collate_tpms.R: --orf-fasta", {
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
 
-testthat::test_that("collate_tpms.R: Missing sample file", {
+testthat::test_that("Missing sample file", {
   orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
   samples <- c("WTnone")
   sample_data <- GetSampleTpms(orfs, samples)
@@ -309,8 +309,7 @@ testthat::test_that("collate_tpms.R: Missing sample file", {
   testthat::expect_equal(expected, actual, info = "Data differs'")
 })
 
-"' bbb
-testthat::test_that("collate_tpms.R: Missing sample files and --orf-fasta", {
+testthat::test_that("Missing sample files and --orf-fasta", {
   orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
   fasta <- Biostrings::DNAStringSet(x = replicate(length(orfs), "GATTACCA"))
   names(fasta) <- orfs
