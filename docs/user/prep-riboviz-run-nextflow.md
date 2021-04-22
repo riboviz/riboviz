@@ -136,7 +136,7 @@ where:
 `--validate_only` can be complemented by a `--skip_inputs` command-line parameter. This skips checks for the existence of the ribosome profiling data files (`fq_files`, `multiplexed_fq_files`, `sample_sheet`). An example without `--skip_inputs` might appear as:
 
 ```console
-$ nextflow run prep_riboviz.nf -params-file vignette/experiment_config.yaml -ansi-log false --validate_only 
+$ nextflow run prep_riboviz.nf -params-file vignette/experiment_config.yaml -ansi-log false --validate_only
 N E X T F L O W  ~  version 20.01.0
 Launching `prep_riboviz.nf` [elated_bartik] - revision: e6bda28069
 Validating configuration only
@@ -434,7 +434,9 @@ Caused by:
 
 Command executed:
 
-  Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --sample-subdirs=False             --output-dir=.             --tpms-file=TPMs_collated.tsv             WT3AT WTnone
+  Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R
+  --sample-subdirs=False             --output-dir=.
+  --tpms-file=TPMs_collated.tsv             WT3AT WTnone
 
 Command exit status:
   1
@@ -448,23 +450,23 @@ Command output:
   $options
   $options$output_dir
   [1] "."
-  
+
   $options$tpms_file
   [1] "TPMs_collated.tsv"
-  
+
   $options$sample_subdirs
   [1] FALSE
-  
+
   $options$orf_fasta
   [1] NA
-  
+
   $options$help
   [1] FALSE
-  
-  
+
+
   $args
   [1] "WT3AT"  "WTnone"
-  
+
   [1] "Loading ORFs from: ./WT3AT_tpms.tsv"
   [1] "Loading TPMs from: ./WT3AT_tpms.tsv"
   [1] "Loading TPMs from: ./WTnone_tpms.tsv"
@@ -493,7 +495,7 @@ Command error:
   )
   Error: Can't recycle `ORF` (size 68) to match `WTnone` (size 2).
   Backtrace:
-       
+
     1. ├─global::CollateTpms(...)
     2. │ ├─`%>%`(...)
     3. │ │ └─base::eval(lhs, parent, parent)
@@ -509,7 +511,8 @@ Command error:
 Work dir:
   /home/ubuntu/riboviz/work/02/fbeb79153e89224250d7a8adc507fd
 
-Tip: you can try to figure out what's wrong by changing to the process work dir and showing the script file named `.command.sh`
+Tip: you can try to figure out what's wrong by changing to the process
+work dir and showing the script file named `.command.sh`
 
 Workflow finished! (failed)
 ```
@@ -535,15 +538,17 @@ WTnone_tpms.tsv
 The command that was run was:
 
 ```console
-$ cat work/02/fbeb79153e89224250d7a8adc507fd/.command.sh 
+$ cat work/02/fbeb79153e89224250d7a8adc507fd/.command.sh
 #!/bin/bash -ue
-Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --sample-subdirs=False             --output-dir=.             --tpms-file=TPMs_collated.tsv             WT3AT WTnone
+Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R
+--sample-subdirs=False             --output-dir=.
+--tpms-file=TPMs_collated.tsv             WT3AT WTnone
 ```
 
 collate_tpms.R reads the `WTnone_tpms.tsv` and `WT3AT_tpms.tsv` input files and produces the output file `TPMS_collated.tsv`. In this run, `collate_tpms.R` produces an output file with no data, only a provenance, as the error arose during execution, before the data itself was output:
 
 ```console
-$ head work/02/fbeb79153e89224250d7a8adc507fd/TPMs_collated.tsv 
+$ head work/02/fbeb79153e89224250d7a8adc507fd/TPMs_collated.tsv
 # Created by: RiboViz
 # Date: 2021-04-22 04:11:03
 # File: /home/ubuntu/riboviz/rscripts/collate_tpms.R
@@ -553,7 +558,7 @@ $ head work/02/fbeb79153e89224250d7a8adc507fd/TPMs_collated.tsv
 The command's exit code was:
 
 ```console
-$ cat work/02/fbeb79153e89224250d7a8adc507fd/.exitcode 
+$ cat work/02/fbeb79153e89224250d7a8adc507fd/.exitcode
 ```
 
 A non-zero exit code means that the command failed.
@@ -561,7 +566,7 @@ A non-zero exit code means that the command failed.
 When the command ran it printed the following to standard output and standard error:
 
 ```console
-$ cat work/02/fbeb79153e89224250d7a8adc507fd/.command.log 
+$ cat work/02/fbeb79153e89224250d7a8adc507fd/.command.log
 [1] "Created by: RiboViz"
 [1] "Date: 2021-04-22 04:11:03"
 [1] "File: /home/ubuntu/riboviz/rscripts/collate_tpms.R"
@@ -631,7 +636,7 @@ As the Nextflow `work/` subdirectory includes both a bash script with the comman
 
 ```console
 $ cd work/02/fbeb79153e89224250d7a8adc507fd/
-$ bash .command.sh 
+$ bash .command.sh
 [1] "Created by: RiboViz"
 [1] "Date: 2021-04-22 04:19:24"
 [1] "File: /home/ubuntu/riboviz/rscripts/collate_tpms.R"
@@ -700,7 +705,7 @@ Execution halted
 In this example, inspecting the input files reveals the problem:
 
 ```console
-$ head work/02/fbeb79153e89224250d7a8adc507fd/WT3AT_tpms.tsv 
+$ head work/02/fbeb79153e89224250d7a8adc507fd/WT3AT_tpms.tsv
 ...
 ORF	readcount	rpb	tpm
 YAL001C	19	0.00538243626062323	953.022776609483
@@ -710,7 +715,7 @@ YAL005C	2668	1.3502024291498	239069.002530875
 YAL007C	15	0.0215827338129496	3821.47338292102
 ...
 
-$ head work/02/fbeb79153e89224250d7a8adc507fd/WTnone_tpms.tsv 
+$ head work/02/fbeb79153e89224250d7a8adc507fd/WTnone_tpms.tsv
 ...
 ORF	readcount	rpb	tpm
 YAL001C	4	0.00113314447592068	116.685976611765
@@ -805,19 +810,19 @@ We can then create symbolic links to all the input and data files that the vigne
 
 ```console
 $ mkdir data
-$ ln -s ../../riboviz/data/yeast_CDS_w_250utrs.fa 
-$ ln -s ../../riboviz/data/yeast_CDS_w_250utrs.gff3 
-$ ln -s ../../riboviz/data/yeast_codon_pos_i200.RData 
-$ ln -s ../../riboviz/data/yeast_features.tsv 
-$ ln -s ../../riboviz/data/yeast_standard_asite_disp_length.txt 
-$ ln -s ../../riboviz/data/yeast_tRNAs.tsv 
+$ ln -s ../../riboviz/data/yeast_CDS_w_250utrs.fa
+$ ln -s ../../riboviz/data/yeast_CDS_w_250utrs.gff3
+$ ln -s ../../riboviz/data/yeast_codon_pos_i200.RData
+$ ln -s ../../riboviz/data/yeast_features.tsv
+$ ln -s ../../riboviz/data/yeast_standard_asite_disp_length.txt
+$ ln -s ../../riboviz/data/yeast_tRNAs.tsv
 $ cd ..
 $ mkdir input
 $ cd input/
-$ ln -s ../../riboviz/vignette/input/SRR1042855_s1mi.fastq.gz 
-$ ln -s ../../riboviz/vignette/input/SRR1042864_s1mi.fastq.gz 
-$ ln -s ../../riboviz/vignette/input/yeast_rRNA_R64-1-1.fa 
-$ ln -s ../../riboviz/vignette/input/yeast_YAL_CDS_w_250utrs.fa 
+$ ln -s ../../riboviz/vignette/input/SRR1042855_s1mi.fastq.gz
+$ ln -s ../../riboviz/vignette/input/SRR1042864_s1mi.fastq.gz
+$ ln -s ../../riboviz/vignette/input/yeast_rRNA_R64-1-1.fa
+$ ln -s ../../riboviz/vignette/input/yeast_YAL_CDS_w_250utrs.fa
 $ ln -s ../../riboviz/vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 $ cd ..
 ```
@@ -827,7 +832,7 @@ We can then create `example_config.yaml`, a copy of `vignette_config.yaml` but w
 ```
 dir_index: index
 dir_in: input
-dir_out: output 
+dir_out: output
 dir_tmp: tmp
 orf_fasta_file: input/yeast_YAL_CDS_w_250utrs.fa
 orf_gff_file: input/yeast_YAL_CDS_w_250utrs.gff3
@@ -854,7 +859,7 @@ We could then, for example, run the RiboViz regression tests, again within the c
 $ PYTHONPATH=<RIBOVIZ>/riboviz pytest \
     <RIBOVIZ>/riboviz/test/regression/test_regression.py \
     --expected=$HOME/regression-test-data-2.0 \
-     --config-file=example_config.yaml --skip-workflow --nextflow 
+     --config-file=example_config.yaml --skip-workflow --nextflow
 ```
 
 `$PYTHONPATH` tells Python where the `riboviz` package can be found.
