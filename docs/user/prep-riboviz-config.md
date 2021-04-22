@@ -182,8 +182,7 @@ asite_disp_length_file: ${RIBOVIZ_ORGANISM_FILES}/other/yeast_standard_asite_dis
 
 and you set an environment variable `RIBOVIZ_ORGANISM_FILES` with value `/home/user/riboviz/example-datasets/fungi/saccharomyces/`, then the value of `asite_disp_length_file` used at runtime is `/home/user/riboviz/example-datasets/fungi/saccharomyces/other/yeast_standard_asite_disp_length.txt`.
 
-If, however, you leave `RIBOVIZ_ORGANISM_FILES` undefined, then the value of `asite_disp_length_file` used at runtime is `./other/yeast_standard_asite_disp_le
-ngth.txt`.
+If, however, you leave `RIBOVIZ_ORGANISM_FILES` undefined, then the value of `asite_disp_length_file` used at runtime is `./other/yeast_standard_asite_disp_length.txt`.
 
 As another example, imagine your input files were laid out as follows:
 
@@ -204,7 +203,7 @@ As another example, imagine your input files were laid out as follows:
       SRR1042864_s1mi.fastq.gz
 ```
 
-As an aside, there is no requirement for the three directories to be colocated under a common `dataset` directory. They can be located anywhere within your file system.
+(as an aside, there is no requirement for these three directories to be colocated under a common `dataset` directory. They can each be located anywhere within your file system)
 
 You could define the following configuration parameters, in `config.yaml` (other configuration parameters have been omitted for brevity):
 
@@ -238,8 +237,8 @@ Which, if any, token you use in each of the configuration parameters is entirely
 * `fq_files`, relative to `dir_in`.
 * `multiplex_fq_files`, relative to `dir_in`.
 * `orf_index_prefix`, relative to `dir_index`.
-* `sample_sheet`, relative to `dir_in`.
 * `rrna_index_prefix`, relative to `dir_index`.
+* `sample_sheet`, relative to `dir_in`.
 
 ### Symbolic links and creating expected directory structures
 
