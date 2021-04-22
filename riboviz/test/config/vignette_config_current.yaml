@@ -24,7 +24,6 @@ fq_files:
   NotHere: example_missing_file.fastq.gz
 group_umis: FALSE
 is_riboviz_gff: TRUE
-is_test_run: FALSE
 job_email_events: beas
 job_email: null
 job_memory: 8G
