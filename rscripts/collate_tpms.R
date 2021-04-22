@@ -48,15 +48,16 @@ if (interactive()) {
   source(file.path(dirname(self), "provenance.R"))
 }
 
-#' Load TPMs, check that gene names in `ORF` column is consistent
-#' with `orfs` and return `tpm` column.
+#' Load TPMs, sort by `ORF` column, check that gene names in `ORF`
+#' column is consistent with given `orfs`, and, if so, return `tpm`
+#' column.
 #'
-#' Warnings are printed if `tpms_file` does not exist or the ORFs
-#' are inconsistent.
+#' Warnings are printed if `tpms_file` does not exist or if the `ORF`
+#' column is inconsistent with `orfs`.
 #'
 #' @param tpms_file TPMs file (character).
-#' @param orfs List of ORFs (character).
-#' @return List of TPMs (double).
+#' @param orfs Sorted list of ORFs (character).
+#' @return List of TPMs, consistent with order of `orfs` (double).
 #'
 #' @export
 LoadTpms <- function(tpms_file, orfs) {
@@ -66,8 +67,9 @@ LoadTpms <- function(tpms_file, orfs) {
     return(NULL)
   }
   features <- readr::read_tsv(tpms_file, comment = "#")
+  features <- features[order(features$ORF), ]
   if (isFALSE(all.equal(features$ORF, orfs))) {
-    warning(paste("ORF names are not right in ", tpms_file))
+    warning(paste("Inconsistent ORF names in ", tpms_file))
   }
   return(features$tpm)
 }
@@ -108,8 +110,8 @@ GetTpmsFileName <- function(
 #' sample-specific sub-directories, in files
 #' `<samples_dir>/<sample>/<tpms_suffix>`? If not then it is assumed
 #' they are in files `<samples_dir>/<sample>_<tpms_suffix>` (logical).
-#' @param orfs List of ORFs (character).
-#' @return List of TPMs (double).
+#' @param orfs Sorted list of ORFs (character).
+#' @return List of TPMs, consistent with order of `orfs` (double).
 #'
 #' @export
 GetTpms <- function(sample, samples_dir, tpms_suffix, sample_subdirs, orfs) {
@@ -122,7 +124,7 @@ GetTpms <- function(sample, samples_dir, tpms_suffix, sample_subdirs, orfs) {
 #'
 #' If `orf_fasta` is provided then gene names are loaded from this
 #' file, else they are loaded from the first sample-specific TPMs
-#' file's `orfs` column.
+#' file's `ORF` column. ORFs are sorted after loading.
 #'
 #' @param samples_dir Directory in which to find sample-specific TPMs
 #' files (character).
@@ -149,11 +151,11 @@ MakeTpmTable <- function(samples_dir, sample_subdirs, orf_fasta,
     print(paste("Loading ORFs from:", tpms_file))
     orfs <- tpms_file %>% readr::read_tsv(comment = "#") %>% .$ORF
   } else {
-    # TODO untested
     suppressMessages(library(Biostrings, quietly = T))
     print(paste("Loading ORFs from:", orf_fasta))
     orfs <- Biostrings::readDNAStringSet(orf_fasta) %>% names
   }
+  orfs <- sort(orfs)
   tpm_list <- lapply(samples,
                      GetTpms,
                      samples_dir = samples_dir,
