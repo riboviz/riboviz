@@ -105,6 +105,7 @@ Lintr can be used within an IDE such as RStudio via an add-in once installed if 
 $ R
 ```
 ```R
+> library(lintr)
 > lint("$HOME/riboviz/rscripts/generate_stats_figs.R")
 ```
 

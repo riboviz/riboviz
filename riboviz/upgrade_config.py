@@ -15,7 +15,6 @@ Configuration parameters that have been renamed from 1.x are updated:
 * ``PrimaryID`` => ``primary_id``
 * ``SecondID`` => ``secondary_id``
 * ``StopInCDS`` => ``stop_in_cds``
-* ``isTestRun`` => ``is_test_run``
 * ``ribovizGFF`` => ``is_riboviz_gff``
 * ``t_rna`` => ``t_rna_file``
 * ``codon_pos`` => ``codon_positions_file``
@@ -95,7 +94,6 @@ UPGRADES = {"rRNA_fasta": params.RRNA_FASTA_FILE,
             "PrimaryID": params.PRIMARY_ID,
             "SecondID": params.SECONDARY_ID,
             "StopInCDS": params.STOP_IN_CDS,
-            "isTestRun": params.IS_TEST_RUN,
             "ribovizGFF": params.IS_RIBOVIZ_GFF,
             "t_rna": params.T_RNA_FILE,
             "codon_pos": params.CODON_POSITIONS_FILE}

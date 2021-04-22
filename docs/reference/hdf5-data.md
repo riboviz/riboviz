@@ -27,6 +27,22 @@ It also takes a BAM file as input and the name of the HDF5 file to create as out
 
 All reads are mapped to their 5' ends.
 
+`primary_id` is used as GFF column e.g. "Name".
+
+`secondary_id` is used as a GFF column to get alternative gene names which are associated with gene names. These are used to create symbolic links in the H5 file to the entries for the original genes.
+
+If `is_riboviz_gff == TRUE` then:
+
+* `CDS`, `UTR5` and `UTR3` entries from the GFF are used.
+* `buffer` is ignored.
+
+If `is_riboviz_gff == FALSE` then:
+
+* `CDS` entries from the GFF are used.
+* `UTR5` and `UTR3` entries from the GFF are ignored.
+* `buffer` is used as the width of left and right flanks, and to calculate start and stop codon locations for genes.
+* Whether `stop_in_cds` is `TRUE` or `FALSE` also affects the calculations for stop codon locations.
+
 ---
 
 ## HDF5 file structure
@@ -37,13 +53,13 @@ The `reads` group, `/<gene>/<dataset>/reads`, for a `<gene>` has several attribu
 
 | Attribute | Description | Origin |
 | --------- |------------ | ------ |
-| `buffer_left` | Number of nucleotides upstream of the start codon (ATG) (UTR5 length) | GFF file OR `buffer` configuration parameter (if `is_riboviz_gff` is false) |
-| `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | GFF file OR `buffer` configuration parameter  (if `is_riboviz_gff` is false) |
-| `start_codon_pos` | Positions corresponding to start codon of CDS (typically 251, 252, 253) | GFF file |
-| `stop_codon_pos` | Positions corresponding to stop codon of CDS | GFF file |
-| `lengths` | Lengths of mapped reads | Range from `buffer_left` configuration parameter to `buffer_right` configuration parameter (e.g. 10,...,50) |
+| `buffer_left` | Number of nucleotides upstream of the start codon (ATG) (UTR5 length) | EITHER position of start codon (from GFF file) - 1 OR, if `is_riboviz_gff` is false, `buffer` |
+| `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | GFF file OR, if `is_riboviz_gff` is false, `buffer` + CDS length from GFF file + `buffer` - `stop_codon_pos[3]` (see below) |
+| `start_codon_pos` | Positions corresponding to start codon of CDS (typically 251, 252, 253) | EITHER positions from GFF file OR, if `is_riboviz_gff` is false, `buffer+1,...,buffer+3` |
+| `stop_codon_pos` | Positions corresponding to stop codon of CDS | EITHER positions from GFF file OR, if `is_riboviz_gff` is false, `p,...,p+2` where `p` is `buffer` + CDS length from GFF file - `offset` where `offset` is 2 if `stop_in_cds` is true or -1 otherwise |
+| `lengths` | Lengths of mapped reads | Range from `min_read_length` to `max_read_length` (e.g. 10,...,50) |
 | `reads_by_len` | Counts of number of ribosome sequences of each length | BAM file |
-| `reads_total` | Total number of ribosome sequences | BAM file. Equal to number of non-zero reads in `reads_by_len`. |
+| `reads_total` | Total number of ribosome sequences | BAM file. Equal to number of non-zero reads in `reads_by_len` |
 
 The `data` table in `/<gene>/<dataset>/reads/data`, for a `<gene>` has the positions and lengths of ribosome sequences within the organism data (determined from the BAM file). It is an integer table with each row representing a read length and columns representing nucleotide positions. The first row corresponds to reads of length `min_read_length` and the last row corresponds to reads of length `max_read_length`.
 
@@ -145,6 +161,7 @@ where:
 * `reads_by_len`:
   - `reads_by_len[i]` = number of alignments in BAM which have Flag equal to 0 or 256 and length equal to `lengths[i]`. This equals the sum of `DATA[*, i]` i.e. sum across all positions for a specific read length.
 * `sequence_length`: position of final nt of UTR3 from GFF file (equal to length of sequence from BAM file header `LN` value).
+  - If `is_riboviz_gff` is `false` when this is equal to `buffer` + CDS length + `buffer`.
 * `DATASET "data"`:
   - 0 <= `p` <= `sequence_length - 1`
   - `DATA[p, i]` equals 1 if there is an alignment in the BAM file at position `p`+1 which has length equal to `lengths[i]` and BAM alignment has Flag 0 or 256 (see [Understanding the BAM flags](https://davetang.org/muse/2014/03/06/understanding-bam-flags/) and [Decoding SAM flags](https://broadinstitute.github.io/picard/explain-flags.html)); 0 otherwise.
