@@ -472,7 +472,7 @@ RunSamToBamToH5 <- function(bam_to_h5, sam_file, bam_file,
     info = "Unexpected exit code from 'bam_to_h5.R'")
 }
 
-testthat::test_that("bam_to_h5.R: default", {
+testthat::test_that("Default", {
 
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
   orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
@@ -499,7 +499,7 @@ testthat::test_that("bam_to_h5.R: default", {
   })
 })
 
-testthat::test_that("bam_to_h5.R: is_riboviz_gff=FALSE", {
+testthat::test_that("--is-riboviz-gff=FALSE", {
 
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
   orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
@@ -526,7 +526,7 @@ testthat::test_that("bam_to_h5.R: is_riboviz_gff=FALSE", {
   })
 })
 
-testthat::test_that("bam_to_h5.R: is_riboviz_gff=FALSE, stop_in_cds=TRUE", {
+testthat::test_that("--is-riboviz-gff=FALSE, --stop-in-cds=TRUE", {
 
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
   orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
@@ -553,7 +553,7 @@ testthat::test_that("bam_to_h5.R: is_riboviz_gff=FALSE, stop_in_cds=TRUE", {
   })
 })
 
-testthat::test_that("bam_to_h5.R: feature=ORF", {
+testthat::test_that("--feature=ORF", {
 
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
   orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
@@ -590,7 +590,7 @@ testthat::test_that("bam_to_h5.R: feature=ORF", {
   })
 })
 
-testthat::test_that("bam_to_h5.R: secondary_id=ID", {
+testthat::test_that("--secondary-id=ID", {
 
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
   orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
