@@ -192,7 +192,7 @@ Change into the **RiboViz** repository:
 $ cd riboviz/riboviz
 ```
 
-<details><summary>(Deprecated)</summary> 
+<details><summary>Run the Python workflow (Deprecated)</summary> 
 
 ```console
 $ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
@@ -514,7 +514,7 @@ In this example, we're using the Wallace et al. 2020 *Cryptococcus neoformans* '
 
 To run the `Wallace_2020_JEC21` dataset on Eddie, logout from any interactive node you may be logged into (for example, if you were running the vignette example above) and ensure you are within the `example-datasets` repository at $HOME/riboviz/example-datasets and that you are in the correct git branch for both riboviz and example-datasets repositories.
 
-NOTE: the following sections are here for information as it might be helpful in explaining to new users what these steps do, and how to adjust these steps for your own data.  These steps (except [initial setup of SRA Toolkit](#download-fastq-data-files-from-the-short-read-archive-sra-initial-setup)) are included in the sample job submission script for the Wallace_2020_JEC21 dataset, so you don't have to carry out these steps manually if you plan to run the [job submission script](#create-qsub-script) and you can skip straight there if you want to try running the script.
+NOTE: the following sections are here for information as it might be helpful in explaining to new users what these steps do, and how to adjust these steps for your own data.  These steps (except [initial setup of SRA Toolkit](#download-fastq-data-files-from-the-short-read-archive-sra-initial-setup)) are included in the sample job submission script for the Wallace_2020_JEC21 dataset, so you don't have to carry out these steps manually if you plan to run the [job submission script](#create-qsub-job-submission-script) and you can skip straight there if you want to try running the script.
 
 Please also note the paths in the YAML configuration file we will be using from the `example-datasets` directory are just a reference. You should check and edit the paths according to your directory structure.
 
@@ -597,7 +597,7 @@ This path adjusts where the tool puts your cache directory, which could get very
 
 You may have to repeat the `vdb-config` step periodically, as data on Eddie scratch space is automatically cleared after one month.
 
-For more information about the configuration utility, see [SRA toolkit installation and configuration Guide](https://ncbi.github.io/sra-tools/install_config.html).
+For more information about the configuration utility, see [Installing SRA Toolkit](https://github.com/ncbi/sra-tools/wiki/02.-Installing-SRA-Toolkit).
 
 ### Download fastq data files from the Short Read Archive (SRA): subsequent uses
 
