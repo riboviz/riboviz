@@ -152,6 +152,18 @@ ribogrid_df <- lapply(sample_names, function(x){
 ### Sample correlations heatmap
 collated_tpms_df <- read_tsv(paste0("../", yaml$dir_out, "/TPMs_collated.tsv"), skip = 4)
 
+### Gene features
+features_df <- lapply(sample_names, function(x){
+  file_loc <- paste0(x, "/sequence_features.tsv")
+  
+  return(read_tsv(file_loc, skip = 4))
+}) %>% 
+  bind_rows(.id = "samplez")
+
+# these are the possible features, hard coding these would make this faster
+# but then you have to make sure to change this if more features are added
+possible_features <- unique(features_df$Feature)
+
 ###############################################################################
 # Plotting
 ###############################################################################
@@ -160,13 +172,11 @@ collated_tpms_df <- read_tsv(paste0("../", yaml$dir_out, "/TPMs_collated.tsv"), 
 plot_theme <- theme_bw()+
   theme(panel.background = element_blank(),
         panel.grid = element_blank(),
-        text = element_text(size = 17))
+        text = element_text(size = 15))
 
 ### Start the server
 server <- function(input, output, session) {
   ### Read counts summary
-  # Read count summary at the various steps as a bar plot
-  # Requires read_counts.tsv
   output$read_counts_bar_plot <- renderPlot({
     read_counts_df %>% 
       filter(SampleName %in% input$sample) %>% 
@@ -184,23 +194,22 @@ server <- function(input, output, session) {
   cor.df <- read_tsv("/data2/john/projects/riboviz/riboviz/vignette/simdata_multiplex_output/TPMs_collated.tsv", skip = 4) %>% 
     column_to_rownames("ORF")
   
-  # sort the columns to ensure proper display of heatmap
+  # get a fixed column order, alphabetical in this case
   cor.cols <- sort(names(cor.df))
   
-  # create correlations
+  # create correlations, fix col order
   cor.df <- cor.df %>% 
     select(all_of(cor.cols)) %>% 
     as.matrix() %>%
     cor(use = "pairwise.complete.obs")
   
-  # remove lower triangle and autocorrelations
+  # remove lower triangle
   cor.df[lower.tri(cor.df)] <- NA
-  
-  cor.df[cor.df == 1] <- NA
   
   # convert to a df and reshape
   cor.df2 <- as_tibble(cor.df, rownames = "samp1") %>% 
-    pivot_longer(cols = where(is.numeric), names_to = "samp2", values_to = "R")
+    pivot_longer(cols = where(is.numeric), names_to = "samp2", values_to = "R") %>% 
+    filter(samp1 != samp2)
   
   # plot it
   output$sample_cors_plot <- renderPlot({
@@ -217,10 +226,7 @@ server <- function(input, output, session) {
       geom_text()
   })
   
-  # QUALITY CONTROL VISUALIZATIONS
-  
-  # Read length distribution plot
-  # Requires read_lengths.tsv
+  ### Read length distribution plot
   output$read_length_dist_plot <- renderPlot({
     read_length_df %>%
       filter(samplez %in% input$sample) %>%
@@ -235,8 +241,7 @@ server <- function(input, output, session) {
       scale_y_continuous(breaks = breaks_pretty(n = 4))
   })
   
-  # Periodicity metagene plot for both 5' and 3' end as a line plot
-  # Requires 3nt_periodicity.tsv
+  ### Periodicity metagene plot for both 5' and 3' end as a line plot
   output$periodicity_line_plot <- renderPlot({
     periodicity_df %>%
       filter(samplez %in% input$sample) %>%
@@ -248,8 +253,7 @@ server <- function(input, output, session) {
       plot_theme
   })
   
-  # Read counts per frame as a bar plot
-  # Requires 3ntframe_bygene.tsv
+  ### Read counts per frame as a bar plot
   output$frame_counts_bar_plot <- renderPlot({
     frame_bar_df %>% 
       filter(samplez %in% input$sample) %>% 
@@ -261,8 +265,7 @@ server <- function(input, output, session) {
       scale_color_discrete(guide = FALSE)
   })
   
-  # Proportion of reads per frame for each gene as a boxplot
-  # Requires 3ntframe_bygene.tsv
+  ### Proportion of reads per frame for each gene as a boxplot
   output$frame_proportions_boxplot <- renderPlot({
     frame_box_df %>%
       filter(samplez %in% input$sample) %>% 
@@ -273,11 +276,10 @@ server <- function(input, output, session) {
       plot_theme
   })
   
-  # Position specific normalized reads, barplot
-  # Requires pos_sp_rpf_norm_reads.tsv
+  ### Position specific normalized reads, barplot
   output$pos_sp_plot3 <- renderPlot({
     pos_sp_df %>%
-      filter(End == "3'") %>% 
+      filter(End == "3'" & samplez %in% input$sample) %>% 
       ggplot(., aes(Position, Mean, color = samplez))+
       geom_line()+
       facet_grid(End ~ samplez, scales = "free")+
@@ -287,7 +289,7 @@ server <- function(input, output, session) {
   
   output$pos_sp_plot5 <- renderPlot({
     pos_sp_df %>%
-      filter(End == "5'") %>% 
+      filter(End == "5'" & samplez %in% input$sample) %>% 
       ggplot(., aes(Position, Mean, color = samplez))+
       geom_line()+
       facet_grid(End ~ samplez, scales = "free")+
@@ -295,10 +297,7 @@ server <- function(input, output, session) {
       scale_color_discrete(guide = FALSE)
   })
   
-  # ANALYSIS VISUALIZATIONS
-  
-  # Abundance of specific gene(s) compared to all, density plot
-  # Requires TPMs_collated.tsv
+  ### Abundance of specific gene(s) compared to all, density plot
   output$tpm_density_plot <- renderPlot({
     collated_tpms_df %>%
       pivot_longer(where(is.numeric), names_to = "samplez", values_to = "tpm") %>%
@@ -315,34 +314,50 @@ server <- function(input, output, session) {
       labs(title="TPM density", x="TPM", y="Density")
   })
   
-  # Ribogrid plot
-  # Need to find plot_ribogrid() in Riboviz code
+  ### Ribogrid plot
   output$ribogrid_plot <- renderPlot({
     ribogrid_df %>%
+      filter(
+        samplez %in% input$sample &
+          ReadLen >= min(input$ribogrid_len_range) & ReadLen <= max(input$ribogrid_len_range) &
+          Pos >= min(input$ribogrid_pos_range) & Pos <= max(input$ribogrid_pos_range)) %>%
       ggplot(., aes(Pos, ReadLen, fill=Counts))+
       geom_raster()+
       scale_fill_gradient(low="white", high="navy")+
       plot_theme+
-      labs(title="Ribogrid", x="Read position", y="Read length")
+      labs(title="Ribogrid", x="Position of 5' end of read", y="Read length")+
+      facet_wrap(~samplez)
   })
   
-  # Ribogrid bar plot
+  ### Ribogrid bar plot
   output$ribogridbar_plot <- renderPlot({
-    ribogrid_df %>%
-      filter(ReadLen >= min(input$ribogrid_len_range) & ReadLen <= max(input$ribogrid_len_range)) %>%
-      filter(Pos >= min(input$ribogrid_pos_range) & Pos <= max(input$ribogrid_pos_range)) %>%
-      ggplot(., aes(Pos, ReadLen, Counts))+
+    ribogrid_df%>%
+      filter(
+        samplez %in% input$sample &
+          ReadLen >= min(input$ribogrid_len_range) & ReadLen <= max(input$ribogrid_len_range) &
+          Pos >= min(input$ribogrid_pos_range) & Pos <= max(input$ribogrid_pos_range)) %>%
+      ggplot(., aes(Pos, Counts))+
       geom_col()+
-      facet_wrap(~ReadLen, ncol=1, strip.position = "right")+
+      facet_grid(ReadLen~samplez)+
       plot_theme+
-      labs(x="Read position", y="Read length", title="Ribogrid (bar)")
+      labs(x="Position of 5' end of read", y="Read count", title="Ribogrid (bar)")
   })
   
-  
-  # TPM vs other features, scatterplots
-  # Requires tpms.tsv and other features
-  # TODO
-  
+  ### TPM vs other features
+  output$features_plot <- renderPlot({
+    features_df %>% 
+      mutate(labz = ifelse(ORF %in% input$gene, ORF, "no_lab")) %>% 
+      filter(samplez %in% input$sample & Feature %in% input$feature) %>% 
+      ggplot(., aes(tpm, Value))+
+      geom_point(aes(color = labz, size = labz))+
+      geom_smooth(method = "lm")+
+      facet_wrap(samplez ~ Feature, scales = "free")+
+      scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+      plot_theme+
+      scale_color_manual(guide = FALSE, values = c("firebrick3", "grey70"))+
+      labs(x = expression(paste(log[10], "(TPM)")))+
+      scale_size_manual(values = c(3, 1), guide = FALSE)
+  })
 }
 
 
@@ -350,9 +365,9 @@ server <- function(input, output, session) {
 # END SERVER FUNCTION
 #
 
-#
-# START UI FUNCTION
-#
+###############################################################################
+# UI design
+###############################################################################
 
 ui <- fluidPage(
   
@@ -369,22 +384,11 @@ ui <- fluidPage(
                                 choiceValues = names(sample_names),
                                 selected = names(sample_names)[1], 
                                 inline = TRUE,
-                                width = "100%"),
-             conditionalPanel(condition="input.panelId == 'Analysis'", 
-                              textInput(inputId = "gene",
-                                        label = "Gene:",
-                                        width = "100%"),
-                              sliderInput("ribogrid_len_range", "Ribogrid read length range:",
-                                          min = 0, max = 50,
-                                          value = c(20,25)),
-                              sliderInput("ribogrid_pos_range", "Ribogrid read position range:",
-                                          min = -24, max = 50,
-                                          value = c(-10,10))
+                                width = "100%")
              )
              
            )
-    )
-  ),
+    ),
   
   # Main panel for displaying outputs
   mainPanel(
@@ -397,6 +401,13 @@ ui <- fluidPage(
                  headerPanel(""),
                  plotOutput("sample_cors_plot")
         ),
+        
+        # tabPanel("TPM summary",
+        #          headerPanel(""),
+        #          plotOutput("sample_cors_plot"),
+        #          headerPanel(""),
+        #          plotOutput("tpm_density_plot")
+        # ),
         
         tabPanel("Read length distributions",
                  headerPanel(""),
@@ -412,40 +423,37 @@ ui <- fluidPage(
                  plotOutput("frame_proportions_boxplot")
         ),
         
-        tabPanel("3nt periodicity",
-                 headerPanel(""),
-                 plotOutput("periodicity_line_plot"),
-                 headerPanel(""),
-                 plotOutput("frame_counts_bar_plot"),
-                 headerPanel(""),
-                 plotOutput("frame_proportions_boxplot")
-        ),
-        
         tabPanel("Ribogrid",
-                 wellPanel(
-                   textInput(inputId = "gene",
-                             label = "Gene:",
-                             width = "100%"),
                    sliderInput("ribogrid_len_range", "Ribogrid read length range:",
                                min = 0, max = 50,
-                               value = c(20,25)),
+                               value = c(20,35)),
                    sliderInput("ribogrid_pos_range", "Ribogrid read position range:",
                                min = -24, max = 50,
                                value = c(-10,10)),
-                 ),
                  headerPanel(""),
                  plotOutput("ribogrid_plot"),
                  headerPanel(""),
                  plotOutput("ribogridbar_plot", height = "1000px")
-        )
+        ),
         
+        tabPanel("Features",
+                 wellPanel(
+                   textInput(inputId = "gene",
+                             label = "Gene:",
+                             width = "100%"),
+                   checkboxGroupInput(inputId = "feature",
+                                      label = "Feature:",
+                                      choiceNames = possible_features,
+                                      choiceValues = possible_features,
+                                      selected = possible_features[1], 
+                                      inline = TRUE,
+                                      width = "100%")),
+                 headerPanel(""),
+                 plotOutput("features_plot", height = "1000px")
+        )
       )
     )
-  )
+  ))
   
-  #
-  # END UI FUNCTION
-  #
-  
-  # I cast spell, ~run shiny app~
-  shinyApp(ui, server)
+# I cast spell, ~run shiny app~
+shinyApp(ui, server)
