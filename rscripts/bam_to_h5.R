@@ -12,11 +12,11 @@
 #' | `feature` | Feature e.g. `CDS`, `ORF`, or `uORF` |
 #' | `min-read-length` | Minimum read length in H5 output |
 #' | `max-read-length` | Maximum read length in H5 output |
-#' | `buffer` | Length of flanking region around the feature |
+#' | `buffer` | Length of flanking region around the feature. Used only if `is_riboviz_gff` is `FALSE`. |
 #' | `primary-id` | Primary gene IDs to access the data (YAL001C, YAL003W, etc.) |
 #' | `secondary-id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) |
 #' | `dataset` | Human-readable name of the dataset |
-#' | `stop-in-cds` | Are stop codons part of the feature annotations in `orf-gff-file`? |
+#' | `stop-in-cds` | Are stop codons part of the feature annotations in `orf-gff-file`? Used only if `is_riboviz_gff` is `FALSE`. |
 #' | `is-riboviz-gff` | Does `orf-gff-file` contain 3 elements per gene - UTR5, feature, and UTR3? |
 #' | `num-processes` | Number of processes to parallelize over |
 #' | `hd-file` | H5 output file |
