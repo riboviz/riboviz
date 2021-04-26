@@ -131,12 +131,14 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
 #' @param feature Feature e.g. `CDS`, `ORF`, or `uORF` (character).
 #' @param min_read_length Minimum read length in H5 output (integer).
 #' @param max_read_length Maximum read length in H5 output (integer).
-#' @param buffer Length of flanking region around the feature (integer).
+#' @param buffer Length of flanking region around the feature. Used
+#' only if `is_riboviz_gff` is `FALSE`. (logical). (integer).
 #' @param primary_id Primary gene IDs to access the data (character).
 #' @param secondary_id Secondary gene IDs to access the data (character).
 #' @param dataset Human-readable name of the dataset (character).
 #' @param stop_in_feature Are stop codons part of the feature
-#' annotations in `orf_gff_file`? (logical).
+#' annotations in `orf_gff_file`? Used only if `is_riboviz_gff`
+#' is `FALSE`. (logical).
 #' @param is_riboviz_gff Does `orf_gff_file` contain 3 elements per
 #' gene - UTR5, feature, and UTR3? (logical).
 #' @param hd_file H5 output file (character).

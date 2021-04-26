@@ -136,7 +136,8 @@ def helpMessage() {
       freqeuency? (default 'TRUE')
     * 'feature': Feature type (default 'CDS')
     * 'is_riboviz_gff': Does the GFF file contain 3 elements per gene
-      - UTR5, CDS, and UTR3? (default 'TRUE')
+      - UTR5, CDS, and UTR3? (default 'TRUE'). Used by 'bam_to_h5.R'
+      only.
     * 'make_bedgraph': Output bedgraph data files in addition to H5
       files? (default 'TRUE')
     * 'max_read_length': Maximum read length in H5 output (default 50)
@@ -147,10 +148,11 @@ def helpMessage() {
     * 'secondary_id': Secondary gene IDs to access the data (COX1,
       EFB1, etc. or 'NULL') (default 'NULL')
     * 'stop_in_cds': Are stop codons part of the CDS annotations in
-      GFF? (default 'FALSE'). Note: this parameter is now deprecated
-      by 'stop_in_feature' and will be removed in a future release. If
-      both 'stop_in_feature' and 'stop_in_cds' are defined then
-      'stop_in_feature' takes precedence 
+      GFF? (default 'FALSE') Used by 'bam_to_h5.R' only (and only
+      if 'is_riboviz_gff' is 'FALSE'). Note: this parameter is now
+      deprecated by 'stop_in_feature' and will be removed in a future
+      release. If both 'stop_in_feature' and 'stop_in_cds' are defined
+      then 'stop_in_feature' takes precedence.
     * 'stop_in_feature': Are stop codons part of the feature
       annotations in GFF? (default 'FALSE')
 

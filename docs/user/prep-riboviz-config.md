@@ -66,7 +66,7 @@ The workflow also supports the following configuration parameters. All directory
 | `features_file` | Features to correlate with ORFs (tab-separated values file) | No | |
 | `fq_files` |  List of FASTQ files to be processed, relative to `<dir_in>`. Each list member consists of identifier key with a file name value (e.g. `WT3AT: SRR1042864_s1mi.fastq.gz`). | Only if `multiplex_fq_files` is not provided | |
 | `group_umis` | Summarise UMI groups both pre- and post-deduplication, using UMI-tools? Useful for debugging. | No | `false` |
-| `is_riboviz_gff` | Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3? | No | `true` |
+| `is_riboviz_gff` | Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3? Used by `bam_to_h5.R` only. | No | `true` |
 | `job_email_events` | Events triggering emails about batch job. Any combination of `b`(begin), `e` (end), `a` (abort), `s` (suspend). (see [Create job submission script from template](./create-job-script.md)) | No | `beas` |
 | `job_email` | E-mail address for batch job events (see [Create job submission script from template](./create-job-script.md)) | No | `null` |
 | `job_memory` | Requested memory for batch job (see [Create job submission script from template](./create-job-script.md)) | No | `8G` |
@@ -96,7 +96,7 @@ The workflow also supports the following configuration parameters. All directory
  | `sample_sheet` | A sample sheet, relative to `<dir_in>` (tab-separated values file) | Only if `multiplex_fq_files` is provided | |
 | `secondary_id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) | No | `NULL` |
 | `skip_inputs` | When validating configuration (see `validate_only` below) skip checks for existence of ribosome profiling data files (`fq_files`, `multiplexed_fq_files`, `sample_sheet`)? (Nextflow workflow only) | No | `false` |
-| `stop_in_cds` | Are stop codons part of the CDS annotations in GFF? Note: this parameter is now deprecated by `stop_in_feature` and will be removed in a future release. If both `stop_in_feature` and `stop_in_cds` are defined then `stop_in_feature` takes precedence. | No | `false` |
+| `stop_in_cds` | Are stop codons part of the CDS annotations in GFF? Used by `bam_to_h5.R` only (and only if `is_riboviz_gff` is `false`). Note: this parameter is now deprecated by `stop_in_feature` and will be removed in a future release. If both `stop_in_feature` and `stop_in_cds` are defined then `stop_in_feature` takes precedence. | No | `false` |
 | `stop_in_feature` | Are stop codons part of the feature annotations in GFF? | No | `false` |
 | `trim_5p_mismatches` | Trim mismatched 5' base? (Nextflow workflow only) | No | `true` |
 | `t_rna_file` | tRNA estimates file (tab-separated values file) | Only if `codon_positions_file` is also provided | |
