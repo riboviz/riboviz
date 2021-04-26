@@ -104,4 +104,3 @@ For citations of third-party software used by **RiboViz**, see [References](./do
 **RiboViz** is Copyright (2016-2020) The University of Edinburgh; Rutgers University; University of California, Berkeley; The University of Pennsylvania.
 
 **RiboViz** is released under the [Apache License 2.0](./LICENSE).
->>>>>>> develop
