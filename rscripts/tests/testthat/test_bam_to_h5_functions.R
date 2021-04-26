@@ -67,14 +67,14 @@ context("test_bam_to_h5_functions.R")
 #' @param buffer Length of flanking region around the feature (integer).
 #' @param is_riboviz_gff Does the GFF file contain 3 elements per gene
 #' - UTR5, feature, and UTR3? (logical).
-#' @param stop_in_cds Are stop codons part of the feature annotations in
-#' GFF? (logical).
+#' @param stop_in_feature Are stop codons part of the feature
+#' annotations in GFF? (logical).
 #' @param feature Feature e.g. `CDS`, `ORF`, or `uORF` (character).
 #'
 #' @export
 ValidateH5SequenceFeature <- function(sequence, feature_name,
   h5_file, gff, bam_hdr_seq_info, bam, dataset, min_read_length,
-  max_read_length, buffer, is_riboviz_gff, stop_in_cds,
+  max_read_length, buffer, is_riboviz_gff, stop_in_feature,
   feature = "CDS") {
   num_read_counts <- max_read_length - min_read_length + 1
   # Get positions from GFF
@@ -104,7 +104,7 @@ ValidateH5SequenceFeature <- function(sequence, feature_name,
     utr3_start <- gff_cds_end + 1
     utr3_length <- buffer
     utr3_end <- utr3_start + buffer - 1
-    if (! stop_in_cds) {
+    if (! stop_in_feature) {
       stop_codon_offset <- -1
     }
     h5_buffer_left_info <-
@@ -320,14 +320,14 @@ ValidateSecondaryLink <- function(h5_file, primary_name, secondary_name) {
 #' @param buffer Length of flanking region around the feature (integer).
 #' @param is_riboviz_gff Does the GFF file contain 3 elements per gene
 #' - UTR5, feature, and UTR3? (logical).
-#' @param stop_in_cds Are stop codons part of the feature annotations in
-#' GFF? (logical).
+#' @param stop_in_feature Are stop codons part of the feature
+#' annotations in GFF? (logical).
 #' @param feature Feature e.g. `CDS`, `ORF`, or `uORF` (character).
 #'
 #' @export
 ValidateH5 <- function(h5_file, gff_file, bam_file, primary_id,
   secondary_id, dataset, min_read_length, max_read_length, buffer,
-  is_riboviz_gff, stop_in_cds, feature = "CDS") {
+  is_riboviz_gff, stop_in_feature, feature = "CDS") {
 
   gff <- readGFFAsDf(gff_file) # tbl_df tbl data.frame, list
   gff_names <- unique(gff$seqnames) # factor, integer
@@ -392,7 +392,7 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, primary_id,
         info = "Sequence name should be BAM body")
     ValidateH5SequenceFeature(sequence, feature_name, h5_file, gff,
       bam_hdr_seq_info, bam, dataset, min_read_length,
-      max_read_length, buffer, is_riboviz_gff, stop_in_cds, feature)
+      max_read_length, buffer, is_riboviz_gff, stop_in_feature, feature)
     if (!is.na(secondary_id)) {
       secondary_name <- (as.character(gff_feature[[secondary_id]]))[1]
       print(paste0("Feature name (secondary) (",
@@ -421,8 +421,8 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, primary_id,
 #' @param buffer Length of flanking region around the feature (integer).
 #' @param is_riboviz_gff Does the GFF file contain 3 elements per gene
 #' - UTR5, feature, and UTR3? (logical).
-#' @param stop_in_cds Are stop codons part of the feature annotations in
-#' GFF? (logical).
+#' @param stop_in_feature Are stop codons part of the feature
+#' annotations in GFF? (logical).
 #' @param feature Feature e.g. `CDS`, `ORF`, or `uORF` (character).
 #' @param num_processes Number of processes to parallelize over
 #' (integer).
@@ -431,7 +431,7 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, primary_id,
 RunSamToBamToH5 <- function(sam_file, bam_file,
   orf_gff_file, h5_file, primary_id, secondary_id, dataset,
   min_read_length, max_read_length, buffer, is_riboviz_gff,
-  stop_in_cds, feature = "CDS", num_processes = 1) {
+  stop_in_feature, feature = "CDS", num_processes = 1) {
 
   print(paste0("GFF: ", orf_gff_file))
   print(paste0("SAM: ", sam_file))
@@ -466,7 +466,7 @@ RunSamToBamToH5 <- function(sam_file, bam_file,
     hd_file = h5_file,
     orf_gff_file = orf_gff_file,
     is_riboviz_gff = is_riboviz_gff,
-    stop_in_cds = stop_in_cds,
+    stop_in_feature = stop_in_feature,
     feature = feature,
     secondary_id = secondary_id)
 }
@@ -482,7 +482,7 @@ testthat::test_that("Default", {
   secondary_id <- NA
   dataset <- "Mok-tinysim"
   is_riboviz_gff <- TRUE
-  stop_in_cds <- FALSE
+  stop_in_feature <- FALSE
 
   withr::with_tempdir({
     bam_file <- file.path(getwd(), "test_bam_to_h5_data.bam")
@@ -491,10 +491,10 @@ testthat::test_that("Default", {
 
     RunSamToBamToH5(sam_file, bam_file, orf_gff_file, h5_file,
       primary_id, secondary_id, dataset, min_read_length, max_read_length,
-      buffer, is_riboviz_gff, stop_in_cds)
+      buffer, is_riboviz_gff, stop_in_feature)
     ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
       dataset, min_read_length, max_read_length, buffer,
-      is_riboviz_gff, stop_in_cds)
+      is_riboviz_gff, stop_in_feature)
   })
 })
 
@@ -509,7 +509,7 @@ testthat::test_that("is_riboviz_gff=FALSE", {
   secondary_id <- NA
   dataset <- "Mok-tinysim"
   is_riboviz_gff <- FALSE
-  stop_in_cds <- FALSE
+  stop_in_feature <- FALSE
 
   withr::with_tempdir({
     bam_file <- file.path(getwd(), "test_bam_to_h5_data.bam")
@@ -518,14 +518,14 @@ testthat::test_that("is_riboviz_gff=FALSE", {
 
     RunSamToBamToH5(sam_file, bam_file, orf_gff_file, h5_file,
       primary_id, secondary_id, dataset, min_read_length, max_read_length,
-      buffer, is_riboviz_gff, stop_in_cds)
+      buffer, is_riboviz_gff, stop_in_feature)
     ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
       dataset, min_read_length, max_read_length, buffer,
-      is_riboviz_gff, stop_in_cds)
+      is_riboviz_gff, stop_in_feature)
   })
 })
 
-testthat::test_that("is_riboviz_gff=FALSE, stop_in_cds=TRUE", {
+testthat::test_that("is_riboviz_gff=FALSE, stop_in_feature=TRUE", {
 
   sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
   orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
@@ -536,7 +536,7 @@ testthat::test_that("is_riboviz_gff=FALSE, stop_in_cds=TRUE", {
   secondary_id <- NA
   dataset <- "Mok-tinysim"
   is_riboviz_gff <- FALSE
-  stop_in_cds <- TRUE
+  stop_in_feature <- TRUE
 
   withr::with_tempdir({
     bam_file <- file.path(getwd(), "test_bam_to_h5_data.bam")
@@ -545,10 +545,10 @@ testthat::test_that("is_riboviz_gff=FALSE, stop_in_cds=TRUE", {
 
     RunSamToBamToH5(sam_file, bam_file, orf_gff_file, h5_file,
       primary_id, secondary_id, dataset, min_read_length, max_read_length,
-      buffer, is_riboviz_gff, stop_in_cds)
+      buffer, is_riboviz_gff, stop_in_feature)
     ValidateH5(h5_file, orf_gff_file, bam_file, primary_id, secondary_id,
       dataset, min_read_length, max_read_length, buffer,
-      is_riboviz_gff, stop_in_cds)
+      is_riboviz_gff, stop_in_feature)
   })
 })
 
@@ -563,7 +563,7 @@ testthat::test_that("feature=ORF", {
   secondary_id <- NA
   dataset <- "Mok-tinysim"
   is_riboviz_gff <- TRUE
-  stop_in_cds <- FALSE
+  stop_in_feature <- FALSE
   feature <- "ORF"
 
   withr::with_tempdir({
@@ -582,10 +582,10 @@ testthat::test_that("feature=ORF", {
 
     RunSamToBamToH5(sam_file, bam_file, test_gff_file, h5_file,
       primary_id, secondary_id, dataset, min_read_length, max_read_length,
-      buffer, is_riboviz_gff, stop_in_cds, feature)
+      buffer, is_riboviz_gff, stop_in_feature, feature)
     ValidateH5(h5_file, test_gff_file, bam_file, primary_id, secondary_id,
       dataset, min_read_length, max_read_length, buffer,
-      is_riboviz_gff, stop_in_cds, feature)
+      is_riboviz_gff, stop_in_feature, feature)
   })
 })
 
@@ -600,7 +600,7 @@ testthat::test_that("secondary_id=ID", {
   secondary_id <- "ID"
   dataset <- "Mok-tinysim"
   is_riboviz_gff <- TRUE
-  stop_in_cds <- FALSE
+  stop_in_feature <- FALSE
 
   withr::with_tempdir({
     test_gff_file <- file.path(getwd(), "test_bam_to_h5_data.gff3")
@@ -619,9 +619,9 @@ testthat::test_that("secondary_id=ID", {
 
     RunSamToBamToH5(sam_file, bam_file, test_gff_file, h5_file,
       primary_id, secondary_id, dataset, min_read_length, max_read_length,
-      buffer, is_riboviz_gff, stop_in_cds)
+      buffer, is_riboviz_gff, stop_in_feature)
     ValidateH5(h5_file, test_gff_file, bam_file, primary_id, secondary_id,
       dataset, min_read_length, max_read_length, buffer,
-      is_riboviz_gff, stop_in_cds)
+      is_riboviz_gff, stop_in_feature)
   })
 })
