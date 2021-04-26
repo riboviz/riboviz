@@ -14,13 +14,13 @@
 #' To run the tests interactively from within R:
 #'
 #' ```
-#' test_file("rscripts/tests/testthat/test_bam_to_h5.R")
+#' test_file("rscripts/tests/testthat/test_bam_to_h5_functions.R")
 #' ```
 #'
 #' To run the tests from the console:
 #'
 #' ```
-#' Rscript -e 'library(testthat); test_file("rscripts/tests/testthat/test_bam_to_h5.R")'
+#' Rscript -e 'library(testthat); test_file("rscripts/tests/testthat/test_bam_to_h5_functions.R")'
 #' ```
 #'
 #' These tests assumes the following test data files exist:
