@@ -11,6 +11,8 @@
 #' sample-specific columns, named by sample name, with the `tpm`
 #' values from the sample-specific files.
 #'
+#' See `CollateTpms` below.
+#'
 #' @export
 
 suppressMessages(library(dplyr, quietly = T))
