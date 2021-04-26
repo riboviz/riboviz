@@ -135,8 +135,8 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
 #' @param primary_id Primary gene IDs to access the data (character).
 #' @param secondary_id Secondary gene IDs to access the data (character).
 #' @param dataset Human-readable name of the dataset (character).
-#' @param stop_in_cds Are stop codons part of the feature annotations in
-#' `orf_gff_file`? (logical).
+#' @param stop_in_feature Are stop codons part of the feature
+#' annotations in `orf_gff_file`? (logical).
 #' @param is_riboviz_gff Does `orf_gff_file` contain 3 elements per
 #' gene - UTR5, feature, and UTR3? (logical).
 #' @param hd_file H5 output file (character).
@@ -165,7 +165,7 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
 #'   `orf_gff_file` are used.
 #' * `UTR5` and `UTR3` entries from `orf_gff_file` are ignored.
 #' * `buffer` is used as the width of left and right flanks.
-#' * `stop_in_cds` states where the stop codon is located (true if
+#' * `stop_in_feature` states where the stop codon is located (true if
 #'   within the feature, false otherwise).
 #'
 #' On output, `hd5_file` has the following structure.
@@ -180,7 +180,7 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
 #' | `buffer_left` | Number of nucleotides upstream of the start codon (ATG) (UTR5 length) | EITHER position of start codon (from `orf_gff_file`) - 1 OR, if `is_riboviz_gff` is false, `buffer` |
 #' | `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | From rom `orf_gff_file` OR, if `is_riboviz_gff` is false, `buffer` + feature length from `orf_gff_file` + `buffer` - `stop_codon_pos[3]` (see below) |
 #' | `start_codon_pos` | Positions corresponding to start codon of feature (typically 251, 252, 253) | From `orf_gff_file` |
-#' | `stop_codon_pos` | Positions corresponding to stop codon of feature | From `orf_gff_file`. If `is_riboviz_gff` is false and `stop_in_cds` is false, position is last nucleotide of feature + 1 |
+#' | `stop_codon_pos` | Positions corresponding to stop codon of feature | From `orf_gff_file`. If `is_riboviz_gff` is false and `stop_in_feature` is false, position is last nucleotide of feature + 1 |
 #' | `lengths` | Lengths of mapped reads | Range from `min_read_length` to `max_read_length` (e.g. 10,...,50) |
 #' | `reads_by_len` | Counts of number of ribosome sequences of each length | BAM file |
 #' | `reads_total` | Total number of ribosome sequences | BAM file. Equal to number of non-zero reads in `reads_by_len` |
@@ -314,7 +314,7 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
 #' @export
 BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
   max_read_length, buffer, primary_id, secondary_id, dataset,
-  stop_in_cds, is_riboviz_gff, hd_file, num_processes) {
+  stop_in_feature, is_riboviz_gff, hd_file, num_processes) {
   read_lengths <- min_read_length:max_read_length
 
   # Read in the positions of all exons/genes from GFF and subset
@@ -399,7 +399,7 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
     start_codon_loc <- rtracklayer::start(gene_location[gene_location$type == feature])
     start_cod <- start_codon_loc:(start_codon_loc + 2)
     stop_codon_offset <- 2
-    if ((!is_riboviz_gff) && (! stop_in_cds)) {
+    if ((!is_riboviz_gff) && (! stop_in_feature)) {
       # GFF does not contain UTR5 or UTR3 elements.
       stop_codon_offset <- -1
     }

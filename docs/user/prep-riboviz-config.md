@@ -62,6 +62,7 @@ The workflow also supports the following configuration parameters. All directory
 | `dir_tmp` | Intermediate files directory | No | `tmp` |
 | `do_pos_sp_nt_freq` | Calculate position-specific nucleotide freqeuency? | No | `true` |
 | `extract_umis` | Extract UMIs after adapter trimming? | No | `false` |
+| `feature` | Feature type | No | `CDS` |
 | `features_file` | Features to correlate with ORFs (tab-separated values file) | No | |
 | `fq_files` |  List of FASTQ files to be processed, relative to `<dir_in>`. Each list member consists of identifier key with a file name value (e.g. `WT3AT: SRR1042864_s1mi.fastq.gz`). | Only if `multiplex_fq_files` is not provided | |
 | `group_umis` | Summarise UMI groups both pre- and post-deduplication, using UMI-tools? Useful for debugging. | No | `false` |
@@ -95,7 +96,8 @@ The workflow also supports the following configuration parameters. All directory
  | `sample_sheet` | A sample sheet, relative to `<dir_in>` (tab-separated values file) | Only if `multiplex_fq_files` is provided | |
 | `secondary_id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) | No | `NULL` |
 | `skip_inputs` | When validating configuration (see `validate_only` below) skip checks for existence of ribosome profiling data files (`fq_files`, `multiplexed_fq_files`, `sample_sheet`)? (Nextflow workflow only) | No | `false` |
-| `stop_in_cds` | Are stop codons part of the CDS annotations in GFF? | No | `false` |
+| `stop_in_cds` | Are stop codons part of the CDS annotations in GFF? Note: this parameter is now deprecated by `stop_in_feature` and will be removed in a future release. If both `stop_in_feature` and `stop_in_cds` are defined then `stop_in_feature` takes precedence. | No | `false` |
+| `stop_in_feature` | Are stop codons part of the feature annotations in GFF? | No | `false` |
 | `trim_5p_mismatches` | Trim mismatched 5' base? (Nextflow workflow only) | No | `true` |
 | `t_rna_file` | tRNA estimates file (tab-separated values file) | Only if `codon_positions_file` is also provided | |
 | `umi_regexp` | UMI-tools-compliant regular expression to extract barcodes and UMIs. For details on the regular expression format, see UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction) | Only if `extract_umis` is `true` | |

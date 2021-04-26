@@ -14,7 +14,8 @@ Configuration parameters that have been renamed from 1.x are updated:
 * ``Buffer`` => ``buffer``
 * ``PrimaryID`` => ``primary_id``
 * ``SecondID`` => ``secondary_id``
-* ``StopInCDS`` => ``stop_in_cds``
+* ``StopInCDS`` => ``stop_in_feature``
+* ``StopInFeature`` => ``stop_in_feature``
 * ``ribovizGFF`` => ``is_riboviz_gff``
 * ``t_rna`` => ``t_rna_file``
 * ``codon_pos`` => ``codon_positions_file``
@@ -51,6 +52,7 @@ Expected parameters added between release 2.0 and the current
 release are added along with default values, if they are not
 already present in the configuration:
 
+* ``feature: CDS ``
 * ``job_email: null``
 * ``job_email_events: beas``
 * ``job_memory: 8G``
@@ -63,6 +65,7 @@ already present in the configuration:
 * ``nextflow_timeline_file: nextflow-timeline.html``
 * ``nextflow_trace_file: nextflow-trace.tsv``
 * ``nextflow_work_dir: work``
+* ``stop_in_feature: false``
 * ``validate_only: false``
 
 The values of parameters ``rrna_index_prefix`` and
@@ -93,7 +96,8 @@ UPGRADES = {"rRNA_fasta": params.RRNA_FASTA_FILE,
             "Buffer": params.BUFFER,
             "PrimaryID": params.PRIMARY_ID,
             "SecondID": params.SECONDARY_ID,
-            "StopInCDS": params.STOP_IN_CDS,
+            "StopInCDS": params.STOP_IN_FEATURE,
+            params.STOP_IN_CDS: params.STOP_IN_FEATURE,
             "ribovizGFF": params.IS_RIBOVIZ_GFF,
             "t_rna": params.T_RNA_FILE,
             "codon_pos": params.CODON_POSITIONS_FILE}
@@ -135,6 +139,8 @@ added between release 1.1.0 and 2.0.
 """
 
 UPDATES_20_CURRENT = {
+    params.FEATURE: "CDS",
+    params.STOP_IN_FEATURE: False
 }
 """
 Map from configuration parameters to default values for parameters

@@ -23,7 +23,8 @@ It is passed the following configuration parameters from the RiboViz configurati
 | `orf_gff_file` | Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts (GTF/GFF3 file) |
 | `primary_id` | Primary gene IDs to access the data (YAL001C, YAL003W, etc.) |
 | `secondary_id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) |
-| `stop_in_cds` | Are stop codons part of the feature annotations in `orf_gff_file`? |
+| `stop_in_cds` | Are stop codons part of the feature annotations in `orf_gff_file`? This is only used if `stop_in_feature` is not provided. |
+| `stop_in_feature` | Are stop codons part of the feature annotations in `orf_gff_file`? |
 
 At present, the default feature is assumed to be `CDS`.
 
@@ -47,7 +48,7 @@ If not `is_riboviz_gff` then:
 * Feature (e.g. `CDS`, `ORF`, or `uORF`) entries from `orf_gff_file` are used.
 * `UTR5` and `UTR3` entries from `orf_gff_file` are ignored.
 * `buffer` is used as the width of left and right flanks.
-* `stop_in_cds` states where the stop codon is located (true if within the feature, false otherwise).
+* `stop_in_feature` states where the stop codon is located (true if within the feature, false otherwise).
 
 ---
 
@@ -60,7 +61,7 @@ The `reads` group, `/<gene>/<dataset>/reads`, for a `<gene>` has several attribu
 | `buffer_left` | Number of nucleotides upstream of the start codon (ATG) (UTR5 length) | EITHER position of start codon (from `orf_gff_file`) - 1 OR, if `is_riboviz_gff` is false, `buffer` |
 | `buffer_right` | Number of nucleotides downstream of the stop codon (TAA/TAG/TGA) (UTR3 length) | From `orf_gff_file` OR, if `is_riboviz_gff` is false, `buffer` + feature length from `orf_gff_file` + `buffer` - `stop_codon_pos[3]` (see below) |
 | `start_codon_pos` | Positions corresponding to start codon of feature (typically 251, 252, 253) | From `orf_gff_file` |
-| `stop_codon_pos` | Positions corresponding to stop codon of feature | Positions from `orf_gff_file`. If `is_riboviz_gff` is false and `stop_in_cds` is false, position is last nucleotide of feature + 1 |
+| `stop_codon_pos` | Positions corresponding to stop codon of feature | Positions from `orf_gff_file`. If `is_riboviz_gff` is false and `stop_in_feature` is false, position is last nucleotide of feature + 1 |
 | `lengths` | Lengths of mapped reads | Range from `min_read_length` to `max_read_length` (e.g. 10,...,50) |
 | `reads_by_len` | Counts of number of ribosome sequences of each length | BAM file |
 | `reads_total` | Total number of ribosome sequences | BAM file. Equal to number of non-zero reads in `reads_by_len` |

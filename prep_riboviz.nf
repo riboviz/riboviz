@@ -134,6 +134,7 @@ def helpMessage() {
        'dataset')
     * 'do_pos_sp_nt_freq': Calculate position-specific nucleotide
       freqeuency? (default 'TRUE')
+    * 'feature': Feature type (default 'CDS')
     * 'is_riboviz_gff': Does the GFF file contain 3 elements per gene
       - UTR5, CDS, and UTR3? (default 'TRUE')
     * 'make_bedgraph': Output bedgraph data files in addition to H5
@@ -146,7 +147,12 @@ def helpMessage() {
     * 'secondary_id': Secondary gene IDs to access the data (COX1,
       EFB1, etc. or 'NULL') (default 'NULL')
     * 'stop_in_cds': Are stop codons part of the CDS annotations in
-      GFF? (default 'FALSE')
+      GFF? (default 'FALSE'). Note: this parameter is now deprecated
+      by 'stop_in_feature' and will be removed in a future release. If
+      both 'stop_in_feature' and 'stop_in_cds' are defined then
+      'stop_in_feature' takes precedence 
+    * 'stop_in_feature': Are stop codons part of the feature
+      annotations in GFF? (default 'FALSE')
 
     General:
 
@@ -196,6 +202,7 @@ params.dir_tmp = "tmp"
 params.do_pos_sp_nt_freq = true
 params.extract_umis = false
 params.trim_5p_mismatches = true
+params.feature = "CDS"
 params.fq_files = [:]
 params.group_umis = false
 params.dedup_stats = true
@@ -209,7 +216,6 @@ params.publish_index_tmp = false
 params.primary_id = "Name"
 params.rpf = true
 params.secondary_id = null
-params.stop_in_cds = false
 params.samsort_memory = null
 params.validate_only = false
 params.skip_inputs = false
@@ -226,7 +232,6 @@ else
 if (params.validate_only) {
     println("Validating configuration only")
 }
-
 if (! params.containsKey('adapters')) {
     exit 1, "Undefined adapters (adapters)"
 }
@@ -258,6 +263,13 @@ if (! params.secondary_id) {
     secondary_id = null
 } else {
     secondary_id = params.secondary_id
+}
+if (params.containsKey('stop_in_feature')) {
+    stop_in_feature = params.stop_in_feature
+} else if (params.containsKey('stop_in_cds')) {
+    stop_in_feature = params.stop_in_cds
+} else {
+    stop_in_feature = false
 }
 if (params.dedup_umis) {
     if (! params.extract_umis) {
@@ -958,7 +970,8 @@ process bamToH5 {
            --hd-file=${sample_id}.h5 \
            --orf-gff-file=${orf_gff} \
            --is-riboviz-gff=${params.is_riboviz_gff} \
-           --stop-in-cds=${params.stop_in_cds}
+           --feature=${params.feature} \
+           --stop-in-feature=${stop_in_feature}
         """
 }
 

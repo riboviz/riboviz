@@ -17,6 +17,7 @@ dir_out: vignette/output
 dir_tmp: vignette/tmp
 do_pos_sp_nt_freq: TRUE
 extract_umis: FALSE
+feature: CDS
 features_file: data/yeast_features.tsv
 fq_files:
   WTnone: SRR1042855_s1mi.fastq.gz
@@ -51,7 +52,7 @@ rrna_fasta_file: vignette/input/yeast_rRNA_R64-1-1.fa
 rrna_index_prefix: yeast_rRNA
 sample_sheet: null
 secondary_id: NULL
-stop_in_cds: FALSE
+stop_in_feature: FALSE
 trim_5p_mismatches: TRUE
 t_rna_file: data/yeast_tRNAs.tsv
 umi_regexp: null

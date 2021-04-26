@@ -16,7 +16,7 @@
 #' | `primary-id` | Primary gene IDs to access the data (YAL001C, YAL003W, etc.) |
 #' | `secondary-id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) |
 #' | `dataset` | Human-readable name of the dataset |
-#' | `stop-in-cds` | Are stop codons part of the feature annotations in `orf-gff-file`? |
+#' | `stop-in-feature` | Are stop codons part of the feature annotations in `orf-gff-file`? |
 #' | `is-riboviz-gff` | Does `orf-gff-file` contain 3 elements per gene - UTR5, feature, and UTR3? |
 #' | `num-processes` | Number of processes to parallelize over |
 #' | `hd-file` | H5 output file |
@@ -66,7 +66,7 @@ option_list <- list(
     help = "Secondary gene IDs to access the data (COX1, EFB1, etc.)"),
   make_option("--dataset", type = "character", default = "data",
     help = "Human-readable name of the dataset"),
-  make_option("--stop-in-cds", type = "logical", default = FALSE,
+  make_option("--stop-in-feature", type = "logical", default = FALSE,
     help = "Are stop codons part of the feature annotations in GFF?"),
   make_option("--is-riboviz-gff", type = "logical", default = TRUE,
     help = "Does the GFF file contain 3 elements per gene - UTR5, feature, and UTR3?"),
@@ -93,7 +93,7 @@ if (is.na(opt$orf_gff_file)) {
 BamToH5(opt$bam_file, opt$orf_gff_file, opt$feature,
         opt$min_read_length, opt$max_read_length,
         opt$buffer, opt$primary_id, opt$secondary_id, opt$dataset,
-        opt$stop_in_cds, opt$is_riboviz_gff, opt$hd_file,
+        opt$stop_in_feature, opt$is_riboviz_gff, opt$hd_file,
         opt$num_processes)
 
 print("bam_to_h5.R done")

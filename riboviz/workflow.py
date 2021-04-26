@@ -516,6 +516,16 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config,
     LOGGER.info("Make length-sensitive alignments in H5 format. Log: %s",
                 log_file)
     secondary_id = config[params.SECONDARY_ID]
+    if params.FEATURE in config:
+        feature = config[params.FEATURE]
+    else:
+        feature = "CDS"
+    if params.STOP_IN_FEATURE in config:
+        stop_in_feature = config[params.STOP_IN_FEATURE]
+    elif params.STOP_IN_CDS in config:
+        stop_in_feature = config[params.STOP_IN_CDS]
+    else:
+        stop_in_feature = False
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts,
                         workflow_r.BAM_TO_H5_R),
@@ -529,9 +539,10 @@ def bam_to_h5(bam_file, h5_file, orf_gff_file, config,
            "--hd-file=" + h5_file,
            "--orf-gff-file=" + orf_gff_file,
            "--is-riboviz-gff=" + str(config[params.IS_RIBOVIZ_GFF]),
-           "--stop-in-cds=" + str(config[params.STOP_IN_CDS])]
+           "--stop-in-feature=" + str(stop_in_feature),
+           "--feature=" + feature]
     if secondary_id is not None:
-      cmd.append("--secondary-id=" + secondary_id)
+        cmd.append("--secondary-id=" + secondary_id)
     process_utils.run_logged_command(cmd, log_file,
                                      run_config.cmd_file,
                                      run_config.is_dry_run)
