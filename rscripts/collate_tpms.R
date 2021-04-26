@@ -15,11 +15,9 @@
 #'
 #' | Parameter | Description |
 #' | --------- | ----------- |
-#' | `--output-dir ` | Output directory in which to find sample-specific TPMs files and into which to write the collated TPMs file |
 #' | `--tpms-file` | Name of collated TPMs file |
-#' | `--sample-subdirs` | Are sample-specific TPMs files in sample-specific sub-directories, in files `<output_dir>/<sample>/tpms.tsv`? If not then it is assumed they are in files `<output_dir>/<sample>_tpms.tsv` |
 #' | `--orf-fasta` | ORF FASTA file that was aligned to and from which ORF names are to be retrieved |
-#' | `<sample>` | Space-delimited list of one or more sample names |
+#' | `<sample> <sample_tpms>` | Space-delimited list of one or more pairs of sample names and sample-specific TPMs files |
 #'
 #' @export
 
@@ -69,55 +67,9 @@ LoadTpms <- function(tpms_file, orfs) {
   features <- readr::read_tsv(tpms_file, comment = "#")
   features <- features[order(features$ORF), ]
   if (isFALSE(all.equal(features$ORF, orfs))) {
-    warning(paste("Inconsistent ORF names in ", tpms_file))
+    warning(paste("Inconsistent ORF names in", tpms_file))
   }
   return(features$tpm)
-}
-
-#' Get name of sample-specific TPMs file.
-#'
-#' @param samples_dir Directory in which to find sample-specific TPMs
-#' files (character).
-#' @param sample Sample ID, used to access sample-specific TPMs files
-#' (character).
-#' @param tpms_suffix Suffix for sample-specific TPMs files (character).
-#' @param sample_subdirs Are sample-specific TPMs files in
-#' sample-specific sub-directories, in files
-#' `<samples_dir>/<sample>/<tpms_suffix>`? If not then it is assumed
-#' they are in files `<samples_dir>/<sample>_<tpms_suffix>` (logical).
-#' @return `<samples_dir>/<sample>/<tpms_suffix>` (if `sample_subdirs`
-#' is true) else `<samples_dir>/<sample>_<tpms_suffix>` (character).
-#'
-#' @export
-GetTpmsFileName <- function(
-  samples_dir, sample, tpms_suffix, sample_subdirs) {
-  if (sample_subdirs) {
-    file_name <- file.path(samples_dir, sample, tpms_suffix)
-  } else {
-    file_name <- file.path(samples_dir, paste0(sample, "_", tpms_suffix))
-  }
-  return(file_name)
-}
-
-#' Get TPMs for a specific sample.
-#'
-#' @param sample Sample ID, used to access sample-specific TPMs files
-#' (character).
-#' @param samples_dir Directory in which to find sample-specific TPMs
-#' files (character).
-#' @param tpms_suffix Suffix for sample-specific TPMs files (character).
-#' @param sample_subdirs Are sample-specific TPMs files in
-#' sample-specific sub-directories, in files
-#' `<samples_dir>/<sample>/<tpms_suffix>`? If not then it is assumed
-#' they are in files `<samples_dir>/<sample>_<tpms_suffix>` (logical).
-#' @param orfs Sorted list of ORFs (character).
-#' @return List of TPMs, consistent with order of `orfs` (double).
-#'
-#' @export
-GetTpms <- function(sample, samples_dir, tpms_suffix, sample_subdirs, orfs) {
-  tpms <- LoadTpms(
-    GetTpmsFileName(samples_dir, sample, tpms_suffix, sample_subdirs), orfs)
-  return(tpms)
 }
 
 #' Collate TPMs from sample-specific files and return collated TPMs.
@@ -126,28 +78,18 @@ GetTpms <- function(sample, samples_dir, tpms_suffix, sample_subdirs, orfs) {
 #' file, else they are loaded from the first sample-specific TPMs
 #' file's `ORF` column. ORFs are sorted after loading.
 #'
-#' @param samples_dir Directory in which to find sample-specific TPMs
-#' files (character).
-#' @param sample_subdirs Are sample-specific TPMs files in
-#' sample-specific sub-directories, in files
-#' `<samples_dir>/<sample>/tpms.tsv`? If not then it is assumed
-#' they are in files `<samples_dir>/<sample>_tpms.tsv` (logical).
 #' @param orf_fasta ORF FASTA file that was aligned to and from which
 #' ORF names are to be retrieved (character).
-#' @param samples List of sample names (character).
-#' @param tpms_suffix Suffix for sample-specific TPMs files (character).
+#' @param samples List of sample files (where `names` attribute of
+#' `samples` are the sample names) (list).
 #' @return Collated TPMs with an `ORF` column and sample-specific
 #' columns, named by sample name, with the TPMs values for each sample
 #' (data.frame).
 #'
 #' @export
-MakeTpmTable <- function(samples_dir, sample_subdirs, orf_fasta,
-                         samples, tpms_suffix="tpms.tsv") {
+MakeTpmTable <- function(orf_fasta, samples) {
   if (is.na(orf_fasta)) {
-    tpms_file <- GetTpmsFileName(samples_dir,
-                                 samples[1],
-                                 tpms_suffix,
-                                 sample_subdirs)
+    tpms_file <- samples[[1]]
     print(paste("Loading ORFs from:", tpms_file))
     orfs <- tpms_file %>% readr::read_tsv(comment = "#") %>% .$ORF
   } else {
@@ -157,49 +99,35 @@ MakeTpmTable <- function(samples_dir, sample_subdirs, orf_fasta,
   }
   orfs <- sort(orfs)
   tpm_list <- lapply(samples,
-                     GetTpms,
-                     samples_dir = samples_dir,
-                     tpms_suffix = tpms_suffix,
-                     sample_subdirs = sample_subdirs,
+                     LoadTpms,
                      orfs = orfs)
   non_null_elts <- sapply(tpm_list, function(elt) !is.null(elt))
-  names(tpm_list) <- samples
+  names(tpm_list) <- names(samples)
   collated_tpms <- dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])
   return(collated_tpms)
 }
 
 #' Collate TPMs from sample-specific files and saved collated TPMs.
 #'
-#' @param output_dir Output directory in which to find sample-specific
-#' TPMs files and into which to write the collated TPMs file (character).
 #' @param tpms_file Name of collated TPMs file (character).
-#' @param sample_subdirs Are sample-specific TPMs files in
-#' sample-specific sub-directories, in files
-#' `<output_dir>/<sample>/tpms.tsv`? If not then it is assumed
-#' they are in files `<output_dir>/<sample>_tpms.tsv` (logical).
 #' @param orf_fasta ORF FASTA file that was aligned to and from which
 #' ORF names are to be retrieved (character).
-#' @param samples List of sample names (character).
+#' @param samples List of sample files (where `names` attribute of
+#' `samples` are the sample names) (list).
 #'
 #' @export
-CollateTpms <- function(
-  output_dir, tpms_file, sample_subdirs, orf_fasta, samples) {
-
+CollateTpms <- function(tpms_file, orf_fasta, samples) {
   round1 <- function(x) round(x, digits = 1)
   write_provenance_header(get_Rscript_filename(), tpms_file)
-  MakeTpmTable(output_dir, sample_subdirs, orf_fasta, samples) %>%
+  MakeTpmTable(orf_fasta, samples) %>%
     dplyr::mutate_if(is.numeric, round1) %>%
     readr::write_tsv(tpms_file, col_names = TRUE, append = TRUE)
 }
 
 option_list <- list(
-  make_option("--output-dir", type = "character", default = "./",
-    help = "Output directory"),
   make_option("--tpms-file", type = "character",
     default = "TPMs_collated.tsv",
     help = "Name of collated TPMs file"),
-  make_option("--sample-subdirs", type = "logical", default = FALSE,
-    help = "Are samples in sample-specific subdirectories of `output-dir`?"),
   make_option("--orf-fasta", type = "character", default = NA,
     help = "ORF FASTA file that was aligned to and from which ORF names are to be retrieved"))
 
@@ -211,10 +139,16 @@ opt <- parse_args(OptionParser(option_list = option_list),
 print("collate_tpms.R running with parameters:")
 print(opt)
 
-CollateTpms(opt$options$output_dir,
-  opt$options$tpms_file,
-  opt$options$sample_subdirs,
-  opt$options$orf_fasta,
-  opt$args)
+if (length(opt$args) == 0) {
+  stop("No <sample_name> <sample_file> list provided")
+}
+if ((length(opt$args) %% 2) != 0) {
+  stop("Invalid <sample_name> <sample_file> list provided")
+}
+sample_names_files <- split(opt$args, ceiling(seq_along(opt$args) %% 2))
+sample_files <- sample_names_files[[1]]
+names(sample_files) <- sample_names_files[[2]]
+
+CollateTpms(opt$options$tpms_file, opt$options$orf_fasta, sample_files)
 
 print("collate_tpms.R done")

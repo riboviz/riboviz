@@ -618,15 +618,15 @@ def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
     LOGGER.info("Collate TPMs across sample results. Log: %s", log_file)
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts,
-                        workflow_r.COLLATE_TPMS_R),
-           "--sample-subdirs=" + str(True),
-           "--output-dir=" + out_dir]
+                        workflow_r.COLLATE_TPMS_R)]
     if tpms_file is not None:
         cmd.append("--tpms-file=" + os.path.join(out_dir, tpms_file))
     else:
         cmd.append("--tpms-file=" + os.path.join(
             out_dir, workflow_r.TPMS_COLLATED_TSV))
-    cmd += samples
+    for sample in samples:
+        cmd.append(sample)
+        cmd.append(os.path.join(out_dir, sample, workflow_r.TPMS_TSV))
     process_utils.run_logged_command(cmd, log_file,
                                      run_config.cmd_file,
                                      run_config.is_dry_run)
