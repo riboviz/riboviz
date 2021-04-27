@@ -39,8 +39,7 @@ gff_df <- readGFFAsDf(YAL5_gff)
 
 
 
-# Import the .tsv file: (used the updated file which contains the first 
-# 200 codons of each gene)
+# Import the .tsv file: 
 
 yeast_codon_pos_i200 <- readr::read_tsv(file = here::here("data", "yeast_codon_table.tsv"))
 
@@ -59,25 +58,7 @@ yeast_codon_pos_i200 <- readr::read_tsv(file = here::here("data", "yeast_codon_t
 
 
 
-# Configured the yeast_codon_pos_i200 to show the positions lead and lag positions 
-# for each PosCodon and configured the Codon column to CodonPair so that the outputs 
-# looks like this: 
-# 
-# > gene_poscodon_codon_i200
-#   # A tibble: 2,826,757 x 3
-#   Gene    PosCodon CodonPair
-# <chr>   <chr>    <chr>    
-#   1 YAL068C 1 2      ATG GTC  
-#   2 YAL068C 2 3      GTC AAA  
-# 3 YAL068C 3 4      AAA TTA  
-# 4 YAL068C 4 5      TTA ACT  
-# 5 YAL068C 5 6      ACT TCA  
-# 6 YAL068C 6 7      TCA ATC  
-# 7 YAL068C 7 8      ATC GCC  
-# 8 YAL068C 8 9      GCC GCT  
-# 9 YAL068C 9 10     GCT GGT  
-# 10 YAL068C 10 11    GGT GTC  
-# # ... with 2,826,747 more rows
+# Configured the yeast_codon_pos_i200 to show the positions lead and lag positions:
 
 gene_poscodon_codon_i200 <- tibble::tibble(
   Gene = yeast_codon_pos_i200$Gene,
@@ -85,6 +66,22 @@ gene_poscodon_codon_i200 <- tibble::tibble(
   CodonPos_2 = dplyr::lead(yeast_codon_pos_i200$PosCodon),
   CodonPair = paste(yeast_codon_pos_i200$Codon, dplyr::lead(yeast_codon_pos_i200$Codon))
 )
+
+# > gene_poscodon_codon_i200
+# # A tibble: 2,826,757 x 4
+# Gene    CodonPos_1 CodonPos_2 CodonPair
+# <chr>        <dbl>      <dbl> <chr>    
+#   1 YAL068C          1          2 ATG GTC  
+# 2 YAL068C          2          3 GTC AAA  
+# 3 YAL068C          3          4 AAA TTA  
+# 4 YAL068C          4          5 TTA ACT  
+# 5 YAL068C          5          6 ACT TCA  
+# 6 YAL068C          6          7 TCA ATC  
+# 7 YAL068C          7          8 ATC GCC  
+# 8 YAL068C          8          9 GCC GCT  
+# 9 YAL068C          9         10 GCT GGT  
+# 10 YAL068C         10         11 GGT GTC  
+# # ... with 2,826,747 more rows
 
 # Replaced yeast_codon_pos_i200 with gene_poscodon_codon_i200 throughout the script
 
@@ -159,9 +156,13 @@ Mok_YAL5_data <- GetAllGeneDatamatrix(dataset="Mok-simYAL5", hd_file = YAL5_h5,
 
 
 
-Reads_pos_length <- GetGeneDatamatrix(gene="YAL003W", 
+reads_pos_length <- GetGeneDatamatrix(gene="YAL003W", 
                                       dataset="Mok-simYAL5", 
                                       hd_file=YAL5_h5)
+
+# > str(reads_pos_length)
+# int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+
 
 tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene="YAL003W", 
                                                          dataset="Mok-simYAL5", 
@@ -169,15 +170,16 @@ tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene="YAL003W",
                                        startpos = 1, 
                                        startlen = 10) 
 
+
 ### CalcAsiteFixed
 
-asite_counts_by_position <- CalcAsiteFixed(Reads_pos_length, 
+asite_counts_by_position <- CalcAsiteFixed(reads_pos_length, 
                         min_read_length = 10, 
                         asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
                                                                asite_displacement = c(15, 15, 15)), 
                         colsum_out = TRUE)
 
-# > str(Asite)
+# > str(asite_counts_by_position)
 # num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
 
 
@@ -232,12 +234,16 @@ TranscriptPosToCodonPos <- function(gene, gff_df){
   NA_UTR3_width <- rep(NA, times = UTR3_width$width)
   
   transcript_gene_pos_poscodon_frame <- tibble(
-    Gene = gene,
+    Gene = "YAL003W",
     Pos = 1:transcript_length$end,
-    Pos_Codon = c(rep(NA, times = UTR5_width$width), CDS_codon_positions, rep(NA, times = UTR3_width$width)),
+    Pos_Codon1 = c(rep(NA, times = UTR5_width$width), CDS_codon_positions, rep(NA, times = UTR3_width$width)),
+    Pos_Codon2 = dplyr::lead(c(rep(NA, times = UTR5_width$width), CDS_codon_positions, rep(NA, times = UTR3_width$width)), n = 3),
     Frame = seq(from = 2L, to = (transcript_length$end + 1L)) %% 3 # works as UTRS are 250, might not work with UTRS of others values
     # add the count column, likely something we want here 
   )
+  
+  # For codon pairs name of Pos_Codon became Pos_Codon1 and Pos_Codon2 was added 
+  # where the line for Pos_Codon1 was copied and dplyr::lead((), n = 3) was added 
   
   # frame filter zero 
   
@@ -247,8 +253,8 @@ TranscriptPosToCodonPos <- function(gene, gff_df){
 
 transcript_pos_to_codon_pos_output <- TranscriptPosToCodonPos(gene = "YAL003W", gff_df)
 # 
-# # output:
-# > TranscriptPosToCodonPosOutput
+# # output for single codons:
+# > transcript_pos_to_codon_pos_output
 # # A tibble: 1,121 x 4
 # Gene      Pos Pos_Codon Frame
 # <chr>   <int>     <int> <dbl>
@@ -264,8 +270,26 @@ transcript_pos_to_codon_pos_output <- TranscriptPosToCodonPos(gene = "YAL003W", 
 # 10 YAL003W    10        NA     2
 # # ... with 1,111 more rows
 
-# create a codon_per_codons_count_table
+# # output for codon pairs:
+# > transcript_pos_to_codon_pos_output
+# # A tibble: 1,121 x 5
+# Gene      Pos Pos_Codon1 Pos_Codon2 Frame
+# <chr>   <int>      <int>      <int> <dbl>
+#   1 YAL003W     1         NA         NA     2
+# 2 YAL003W     2         NA         NA     0
+# 3 YAL003W     3         NA         NA     1
+# 4 YAL003W     4         NA         NA     2
+# 5 YAL003W     5         NA         NA     0
+# 6 YAL003W     6         NA         NA     1
+# 7 YAL003W     7         NA         NA     2
+# 8 YAL003W     8         NA         NA     0
+# 9 YAL003W     9         NA         NA     1
+# 10 YAL003W    10         NA         NA     2
+# # ... with 1,111 more rows
 
+
+
+# create a codon_per_codons_count_table
 
 AddAsiteCountsToTranscriptPosToCodonPos <- function(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE, gff_df){
   
@@ -280,26 +304,42 @@ AddAsiteCountsToTranscriptPosToCodonPos <- function(gene, dataset, hd_file, min_
 }
  
 
-
 transcript_info_tibble <- AddAsiteCountsToTranscriptPosToCodonPos(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE, gff_df)
 
+# > str(transcript_info_tibble)
+# tibble [1,121 x 6] (S3: tbl_df/tbl/data.frame)
+# $ Gene      : chr [1:1121] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
+# $ Pos       : int [1:1121] 1 2 3 4 5 6 7 8 9 10 ...
+# $ Pos_Codon1: int [1:1121] NA NA NA NA NA NA NA NA NA NA ...
+# $ Pos_Codon2: int [1:1121] NA NA NA NA NA NA NA NA NA NA ...
+# $ Frame     : num [1:1121] 2 0 1 2 0 1 2 0 1 2 ...
+# $ Count     : num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
 
-AddCodonNamesToTranscriptInfoTibble <- function(yeast_codon_pos_i200, gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE, gff_df){
+
+AddCodonNamesToTranscriptInfoTibble <- function(gene_poscodon_codon_i200, gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE, gff_df){
   
-  codon_table <- dplyr::filter(yeast_codon_pos_i200, Gene == gene) %>% 
-    dplyr::select("PosCodon", "Codon")
+  # single codons:
+  # codon_table <- dplyr::filter(yeast_codon_pos_i200, Gene == gene) %>% 
+  #   dplyr::select("PosCodon", "Codon")
+  
+  codon_table <- dplyr::filter(gene_poscodon_codon_i200, Gene == gene) %>% 
+    dplyr::select("CodonPos_1", "CodonPos_2", "CodonPair")
   
   transcript_info_tibble <- AddAsiteCountsToTranscriptPosToCodonPos(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE, gff_df)
   
-  transcript_info_tibble <- left_join(transcript_info_tibble, codon_table, by = c("Pos_Codon" = "PosCodon"), keep = FALSE)
+  # single codons:
+  # transcript_info_tibble <- left_join(transcript_info_tibble, codon_table, by = c("Pos_Codon" = "PosCodon"), keep = FALSE)
+  
+  transcript_info_tibble <- left_join(transcript_info_tibble, codon_table, by = c("Pos_Codon1" = "CodonPos_1", "Pos_Codon2" = "CodonPos_2"), keep = FALSE)
   
   return(transcript_info_tibble)
     
 }
 
-transcript_info_tibble <- AddCodonNamesToTranscriptInfoTibble(yeast_codon_pos_i200, gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE, gff_df)
+transcript_info_tibble <- AddCodonNamesToTranscriptInfoTibble(gene_poscodon_codon_i200, gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE, gff_df)
 
-
+# output for single codons:
+#
 # > transcript_info_tibble
 # # A tibble: 1,121 x 6
 # Gene      Pos Pos_Codon Frame Count Codon
@@ -317,6 +357,24 @@ transcript_info_tibble <- AddCodonNamesToTranscriptInfoTibble(yeast_codon_pos_i2
 # # ... with 1,111 more rows
  
 
+# output for codon pairs:
+#
+# > transcript_info_tibble
+# # A tibble: 1,121 x 7
+# Gene      Pos Pos_Codon1 Pos_Codon2 Frame Count CodonPair
+# <chr>   <int>      <dbl>      <dbl> <dbl> <dbl> <chr>    
+#   1 YAL003W     1         NA         NA     2     0 NA       
+# 2 YAL003W     2         NA         NA     0     0 NA       
+# 3 YAL003W     3         NA         NA     1     0 NA       
+# 4 YAL003W     4         NA         NA     2     0 NA       
+# 5 YAL003W     5         NA         NA     0     0 NA       
+# 6 YAL003W     6         NA         NA     1     0 NA       
+# 7 YAL003W     7         NA         NA     2     0 NA       
+# 8 YAL003W     8         NA         NA     0     0 NA       
+# 9 YAL003W     9         NA         NA     1     0 NA       
+# 10 YAL003W    10         NA         NA     2     0 NA       
+# # ... with 1,111 more rows
+
 FilterForFrame <- function(transcript_info_tibble, filtering_frame = 0){
   
   transcript_info_tibble <- dplyr::filter(transcript_info_tibble, Frame == filtering_frame)
@@ -326,6 +384,8 @@ FilterForFrame <- function(transcript_info_tibble, filtering_frame = 0){
 }
 
 transcript_info_tibble <- FilterForFrame(transcript_info_tibble, filtering_frame = 0)
+
+# output for single codons:
 
 # > transcript_info_tibble
 # # A tibble: 374 x 6
@@ -341,6 +401,25 @@ transcript_info_tibble <- FilterForFrame(transcript_info_tibble, filtering_frame
 # 8 YAL003W    23        NA     0     0 NA   
 # 9 YAL003W    26        NA     0     0 NA   
 # 10 YAL003W    29        NA     0     0 NA   
+# # ... with 364 more rows
+
+
+# output for codon pairs:
+#
+# > transcript_info_tibble
+# # A tibble: 374 x 7
+# Gene      Pos Pos_Codon1 Pos_Codon2 Frame Count CodonPair
+# <chr>   <int>      <dbl>      <dbl> <dbl> <dbl> <chr>    
+#   1 YAL003W     2         NA         NA     0     0 NA       
+# 2 YAL003W     5         NA         NA     0     0 NA       
+# 3 YAL003W     8         NA         NA     0     0 NA       
+# 4 YAL003W    11         NA         NA     0     0 NA       
+# 5 YAL003W    14         NA         NA     0     0 NA       
+# 6 YAL003W    17         NA         NA     0     0 NA       
+# 7 YAL003W    20         NA         NA     0     0 NA       
+# 8 YAL003W    23         NA         NA     0     0 NA       
+# 9 YAL003W    26         NA         NA     0     0 NA       
+# 10 YAL003W    29         NA         NA     0     0 NA       
 # # ... with 364 more rows
 
 
@@ -362,49 +441,46 @@ transcript_info_tibble <- FilterForFrame(transcript_info_tibble, filtering_frame
 
 
 
-# # Function to filter for codons of interest, generates a list of the positions of the codon of interest
-FilterForCodonOfInterestPositions <- function(transcript_info_tibble, codon_of_interest){
-  
-  # transcript_info_tibble <- AddCodonNamesToTranscriptInfoTibble(yeast_codon_pos_i200,
-  #                                                               gene,
-  #                                                               dataset,
-  #                                                               hd_file,
-  #                                                               min_read_length = 10,
-  #                                                               colsum_out = TRUE,
-  #                                                               gff_df)
-  
-  # generating the transcript_info_tibble inside of the function seems to result 
-  # in the list that is generated being triplicated. Skipping this step seems to 
-  # resolve that issue 
-  
-  interesting_codon_table <- dplyr::filter(transcript_info_tibble, Codon == codon_of_interest)
-  
-  interesting_codon_positions <- interesting_codon_table$Pos_Codon
-  
-  return(interesting_codon_positions)
+# # # Function to filter for codons of interest, generates a list of the positions of the codon of interest
+# FilterForCodonOfInterestPositions <- function(transcript_info_tibble, codon_of_interest){
+#   
+#   # transcript_info_tibble <- AddCodonNamesToTranscriptInfoTibble(yeast_codon_pos_i200,
+#   #                                                               gene,
+#   #                                                               dataset,
+#   #                                                               hd_file,
+#   #                                                               min_read_length = 10,
+#   #                                                               colsum_out = TRUE,
+#   #                                                               gff_df)
+#   
+#   # generating the transcript_info_tibble inside of the function seems to result 
+#   # in the list that is generated being triplicated. Skipping this step seems to 
+#   # resolve that issue 
+#   
+#   interesting_codon_table <- dplyr::filter(transcript_info_tibble, Codon == codon_of_interest)
+#   
+#   interesting_codon_positions <- interesting_codon_table$Pos_Codon
+#   
+#   return(interesting_codon_positions)
+# }
+# 
+# 
+# interesting_codon_positions <- FilterForCodonOfInterestPositions(transcript_info_tibble, codon_of_interest = "TCT")
+
+
+
+FilterForCodonPairOfInterestPositions <- function(transcript_info_tibble, codon_pair_of_interest){
+
+    interesting_codon_table <- dplyr::filter(transcript_info_tibble, CodonPair == "TCC AAG")
+    # Changed Codon == codon_of_interest to CodonPair = codon_of_interest
+
+    interesting_first_codon_positions <- interesting_codon_table$Pos_Codon1
+
+    # return(interesting_codon_positions)
+    return(interesting_first_codon_positions)
 }
 
+interesting_first_codon_positions <- FilterForCodonPairOfInterestPositions(transcript_info_tibble, codon_pair_of_interest = "TCC AAG")
 
-interesting_codon_positions <- FilterForCodonOfInterestPositions(transcript_info_tibble, codon_of_interest = "TCT")
-
-
-
-# # Function FilterForCodonOfInterestPositions has been edited for codon pairs 
-# FilterForCodonPairOfInterestPositions <- function(gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, codon_of_interest){
-# 
-#     joined_gene_per_codon_counts <- NucleotideToCodonPosition(gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10)
-# 
-#     interesting_codon_table <- dplyr::filter(joined_gene_per_codon_counts, CodonPair == codon_of_interest)
-#     # Changed Codon == codon_of_interest to CodonPair = codon_of_interest
-#     
-#     interesting_first_codon_positions <- interesting_codon_table$CodonPos_1
-#     
-#     # return(interesting_codon_positions)
-#     return(interesting_first_codon_positions)
-# }
-#   
-# interesting_first_codon_positions <- FilterForCodonPairOfInterestPositions(gene_poscodon_codon_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, codon_of_interest = "TCC AAG")
-# 
 # # Returns: 
 # # > interesting_first_codon_position
 # # [1]  7 57
@@ -416,36 +492,33 @@ interesting_codon_positions <- FilterForCodonOfInterestPositions(transcript_info
 
 # Function needed to go from one position to a region.
 # This function will be using codon position values, not nucleotide position values
-ExpandCodonRegion <- function(.x = interesting_codon_positions, transcript_info_tibble, gene, dataset, hd_file, startpos = 1, startlen = 10, gff_df, expand_width = 5L, remove_overhang = TRUE) {
-
-  # joined_gene_per_codon_counts <- NucleotideToCodonPosition(yeast_codon_pos_i200, gene, dataset, hd_file, startpos = 1, startlen = 10)
-  
-  gene_poscodon_count <- na.omit(tibble(
-    Gene = transcript_info_tibble$Gene,
-    Pos_Codon = transcript_info_tibble$Pos_Codon,
-    Rel_Count = transcript_info_tibble$Count
-  ))
-
-  # added na.omit() as the slice function goes by the row number instead of Pos_codon
-  # na.omit() removes the UTRs so only CDS remains
-  
-  gene_length <- GetGeneLength(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5) # giving me 618??
-
-  if (.x < expand_width | .x + expand_width > gene_length ) {
-    return( tibble() )
-  } else {
-    output_codon_info <- tibble(
-      dplyr::slice(gene_poscodon_count, (.x - expand_width):(.x + expand_width), each = FALSE),
-      Rel_Pos =  seq(- expand_width, expand_width)
-    )
-    return(output_codon_info)
-  }
-}
-
-
-ExpandCodonRegionOutput <- ExpandCodonRegion(.x = interesting_codon_positions, transcript_info_tibble , gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, gff_df, expand_width = 5L, remove_overhang = TRUE)
-
-
+# ExpandCodonRegion <- function(.x = interesting_codon_positions, transcript_info_tibble, gene, dataset, hd_file, expand_width = 5L, remove_overhang = TRUE) {
+#   
+#   gene_poscodon_count <- na.omit(tibble(
+#     Gene = transcript_info_tibble$Gene,
+#     Pos_Codon = transcript_info_tibble$Pos_Codon,
+#     Rel_Count = transcript_info_tibble$Count
+#   ))
+# 
+#   # added na.omit() as the slice function goes by the row number instead of Pos_codon
+#   # na.omit() removes the UTRs so only CDS remains
+#   
+#   gene_length <- GetGeneLength(gene, dataset, hd_file) # giving me 618??
+# 
+#   if (.x < expand_width | .x + expand_width > gene_length ) {
+#     return( tibble() )
+#   } else {
+#     output_codon_info <- tibble(
+#       dplyr::slice(gene_poscodon_count, (.x - expand_width):(.x + expand_width), each = FALSE),
+#       Rel_Pos =  seq(- expand_width, expand_width)
+#     )
+#     return(output_codon_info)
+#   }
+# }
+# 
+# 
+# output_codon_info <- ExpandCodonRegion(.x = interesting_codon_positions, transcript_info_tibble , gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, expand_width = 5L, remove_overhang = TRUE)
+# 
 
 # # Gives the output:
 # 
@@ -466,56 +539,64 @@ ExpandCodonRegionOutput <- ExpandCodonRegion(.x = interesting_codon_positions, t
 # 11 YAL003W        23      1301       5
 
 
-# ExpandCodonPairRegion <- function(.x = interesting_first_codon_positions, gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10, gff_df, expand_width = 5L, remove_overhang = TRUE) {
-#   
-#   joined_gene_per_codon_counts <- NucleotideToCodonPosition(gene_poscodon_codon_i200, gene, dataset, hd_file, startpos = 1, startlen = 10)
-#   
-#   gene_length <- GetGeneLength(gene, dataset, hd_file)
-#   
-#   #if (remove_overhang) {
-#   # return an empty tibble if the desired region hangs over the edge of the coding region
-#   
-#   if (.x < expand_width | .x + expand_width > gene_length ) {
-#     return( tibble() )
-#   } else {
-#     output_codon_info <- tibble(
-#       dplyr::slice(joined_gene_per_codon_counts, (.x - expand_width):(.x + expand_width), each = FALSE),
-#       Rel_Pos =  seq(- expand_width, expand_width)
-#     )
-#     return(output_codon_info)
-#   }
-#   #  } # if(remove_overhang)
-# }
-# 
-# 
-# ExpandCodonPairRegionOutput <- ExpandCodonPairRegion(.x = interesting_first_codon_positions, gene_poscodon_codon_i200, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, gff_df, expand_width = 5L, remove_overhang = TRUE)
-# 
-# # > ExpandCodonPairRegionOutput
-# # # A tibble: 11 x 6
-# # Gene    CodonPos_1 CodonPos_2 CodonPair PerCodonCounts Rel_Pos
-# # <chr>        <dbl>      <dbl> <chr>              <int>   <int>
-# #   1 YAL003W          2          3 GCA TCC             2977      -5
-# # 2 YAL003W          3          4 TCC ACC             1967      -4
-# # 3 YAL003W          4          5 ACC GAT             1283      -3
-# # 4 YAL003W          5          6 GAT TTC              969      -2
-# # 5 YAL003W          6          7 TTC TCC             1518      -1
-# # 6 YAL003W          7          8 TCC AAG             2313       0
-# # 7 YAL003W          8          9 AAG ATT             2217       1
-# # 8 YAL003W          9         10 ATT GAA             1558       2
-# # 9 YAL003W         10         11 GAA ACT             1474       3
-# # 10 YAL003W         11         12 ACT TTG             1173       4
-# # 11 YAL003W         12         13 TTG AAA             1252       5
+ExpandCodonPairRegion <- function(.x = interesting_first_codon_positions, transcript_info_tibble, gene, dataset, hd_file, startpos = 1, startlen = 10, gff_df, expand_width = 5L, remove_overhang = TRUE) {
+
+  gene_poscodon_count <- na.omit(tibble(
+        Gene = transcript_info_tibble$Gene,
+        Pos_Codon1 = transcript_info_tibble$Pos_Codon1,
+        Pos_Codon2 = transcript_info_tibble$Pos_Codon2,
+        Rel_Count = transcript_info_tibble$Count
+      ))
+
+      # added na.omit() as the slice function goes by the row number instead of Pos_codon
+      # na.omit() removes the UTRs so only CDS remains
+  
+  gene_length <- GetGeneLength(gene, dataset, hd_file)
+
+  #if (remove_overhang) {
+  # return an empty tibble if the desired region hangs over the edge of the coding region
+
+  if (.x < expand_width | .x + expand_width > gene_length ) {
+    return( tibble() )
+  } else {
+    output_codonpair_info <- tibble(
+      dplyr::slice(gene_poscodon_count, (.x - expand_width):(.x + expand_width), each = FALSE),
+      Rel_Pos =  seq(- expand_width, expand_width)
+    )
+    return(output_codonpair_info)
+  }
+  #  } # if(remove_overhang)
+}
+
+
+output_codonpair_info <- ExpandCodonPairRegion(.x = interesting_first_codon_positions, transcript_info_tibble, gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, expand_width = 5L, remove_overhang = TRUE)
+
+# > output_codonpair_info
+# # A tibble: 11 x 5
+# Gene    Pos_Codon1 Pos_Codon2 Rel_Count Rel_Pos
+# <chr>        <dbl>      <dbl>     <dbl>   <int>
+#   1 YAL003W          2          3       429      -5
+# 2 YAL003W          3          4       488      -4
+# 3 YAL003W          4          5       102      -3
+# 4 YAL003W          5          6       994      -2
+# 5 YAL003W          6          7       146      -1
+# 6 YAL003W          7          8       173       0
+# 7 YAL003W          8          9       762       1
+# 8 YAL003W          9         10        13       2
+# 9 YAL003W         10         11       176       3
+# 10 YAL003W         11         12        98       4
+# 11 YAL003W         12         13       123       5
 
 
 
 
 # Apply the ExpandCodonRegion function to the codons of interest to generate expanded tibbles for each position 
 
-ExpandCodonRegionForList <- function(transcript_info_tibble, gene, dataset, hd_file, startpos = 1, startlen = 10, codon_of_interest, gff_df, expand_width = 5L){
+ExpandCodonPairRegionForList <- function(transcript_info_tibble, gene, dataset, hd_file, startpos = 1, startlen = 10, codon_pair_of_interest, gff_df, expand_width = 5L){
   
-  interesting_codon_positions <- FilterForCodonOfInterestPositions(transcript_info_tibble, codon_of_interest)
+  interesting_codon_positions <- FilterForCodonPairOfInterestPositions(transcript_info_tibble, codon_pair_of_interest) # or codon_of_interest 
   
-  ExpandList <- purrr::map(
+  expand_codon_pair_region <- purrr::map(
     # .x = interesting_codon_positions, # vector of codon positions to iterate over for single codons
     .x = interesting_codon_positions,
     # .f = ExpandCodonRegion,   # function to use at each codon position of interest for single codons
@@ -529,44 +610,45 @@ ExpandCodonRegionForList <- function(transcript_info_tibble, gene, dataset, hd_f
     gff_df,
     expand_width = 5L
   )
-  
+ 
+  return(expand_codon_pair_region)
+   
 }
 
-ExpandCodonPairRegionOutput <- ExpandCodonRegionForList(transcript_info_tibble, gene="YAL003W", dataset="Mok-simYAL5", hd_file=YAL5_h5, startpos = 1, startlen = 10, codon_of_interest = "TCT", gff_df, expand_width = 5L)
+expand_codon_pair_region <- ExpandCodonPairRegionForList(transcript_info_tibble, gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, startpos = 1, startlen = 10, codon_pair_of_interest = "TCC AAG", gff_df, expand_width = 5L)
 
-# > ExpandList
+# > expand_codon_pair_region
 # [[1]]
-# # A tibble: 11 x 6
-# Gene    CodonPos_1 CodonPos_2 CodonPair PerCodonCounts Rel_Pos
-# <chr>        <dbl>      <dbl> <chr>              <int>   <int>
-#   1 YAL003W          2          3 GCA TCC             2977      -5
-# 2 YAL003W          3          4 TCC ACC             1967      -4
-# 3 YAL003W          4          5 ACC GAT             1283      -3
-# 4 YAL003W          5          6 GAT TTC              969      -2
-# 5 YAL003W          6          7 TTC TCC             1518      -1
-# 6 YAL003W          7          8 TCC AAG             2313       0
-# 7 YAL003W          8          9 AAG ATT             2217       1
-# 8 YAL003W          9         10 ATT GAA             1558       2
-# 9 YAL003W         10         11 GAA ACT             1474       3
-# 10 YAL003W         11         12 ACT TTG             1173       4
-# 11 YAL003W         12         13 TTG AAA             1252       5
+# # A tibble: 11 x 5
+# Gene    Pos_Codon1 Pos_Codon2 Rel_Count Rel_Pos
+# <chr>        <dbl>      <dbl>     <dbl>   <int>
+#   1 YAL003W          2          3       429      -5
+# 2 YAL003W          3          4       488      -4
+# 3 YAL003W          4          5       102      -3
+# 4 YAL003W          5          6       994      -2
+# 5 YAL003W          6          7       146      -1
+# 6 YAL003W          7          8       173       0
+# 7 YAL003W          8          9       762       1
+# 8 YAL003W          9         10        13       2
+# 9 YAL003W         10         11       176       3
+# 10 YAL003W         11         12        98       4
+# 11 YAL003W         12         13       123       5
 # 
 # [[2]]
-# # A tibble: 11 x 6
-# Gene    CodonPos_1 CodonPos_2 CodonPair PerCodonCounts Rel_Pos
-# <chr>        <dbl>      <dbl> <chr>              <int>   <int>
-#   1 YAL003W         52         53 TTC AAC             2545      -5
-# 2 YAL003W         53         54 AAC CAC             2480      -4
-# 3 YAL003W         54         55 CAC ATC             3354      -3
-# 4 YAL003W         55         56 ATC GCT             2510      -2
-# 5 YAL003W         56         57 GCT TCC             1678      -1
-# 6 YAL003W         57         58 TCC AAG             2193       0
-# 7 YAL003W         58         59 AAG GCC             1315       1
-# 8 YAL003W         59         60 GCC GAT             2335       2
-# 9 YAL003W         60         61 GAT GAA             3061       3
-# 10 YAL003W         61         62 GAA TTC             1495       4
-# 11 YAL003W         62         63 TTC GAC              889       5
-
+# # A tibble: 11 x 5
+# Gene    Pos_Codon1 Pos_Codon2 Rel_Count Rel_Pos
+# <chr>        <dbl>      <dbl>     <dbl>   <int>
+#   1 YAL003W         52         53        42      -5
+# 2 YAL003W         53         54        53      -4
+# 3 YAL003W         54         55       648      -3
+# 4 YAL003W         55         56       293      -2
+# 5 YAL003W         56         57       121      -1
+# 6 YAL003W         57         58        92       0
+# 7 YAL003W         58         59       519       1
+# 8 YAL003W         59         60        79       2
+# 9 YAL003W         60         61       765       3
+# 10 YAL003W         61         62       196       4
+# 11 YAL003W         62         63       184       5
 
 
 # Normalization carried out within each expanded frame so that they are comparable 
@@ -579,7 +661,9 @@ ExpandedCodonRegionNormalization <- function(.x, expand_width = 5L){
 }
 
 
-table_a <- ExpandedCodonRegionNormalization(ExpandCodonPairRegionOutput[[1]], expand_width = 5L)
+table_a <- ExpandedCodonRegionNormalization(expand_codon_pair_region[[1]], expand_width = 5L)
+
+# for single codons:
 
 # # A tibble: 11 x 6
 # Gene    CodonPos Codon PerCodonCounts Rel_Pos RelCount
@@ -597,32 +681,34 @@ table_a <- ExpandedCodonRegionNormalization(ExpandCodonPairRegionOutput[[1]], ex
 # 11 YAL003W       13 AAA             1053       5    1.28 
 
 
-# > table_a <- ExpandedCodonRegionNormalization(ExpandCodonPairRegionOutput, expand_width = 5L)
+# output for codon pairs:
+
 # > table_a
-# # A tibble: 11 x 7
-# Gene    CodonPos_1 CodonPos_2 CodonPair PerCodonCounts Rel_Pos RelCount
-# <chr>        <dbl>      <dbl> <chr>              <int>   <int>    <dbl>
-#   1 YAL003W          2          3 GCA TCC             2977      -5    1.75 
-# 2 YAL003W          3          4 TCC ACC             1967      -4    1.16 
-# 3 YAL003W          4          5 ACC GAT             1283      -3    0.755
-# 4 YAL003W          5          6 GAT TTC              969      -2    0.570
-# 5 YAL003W          6          7 TTC TCC             1518      -1    0.893
-# 6 YAL003W          7          8 TCC AAG             2313       0    1.36 
-# 7 YAL003W          8          9 AAG ATT             2217       1    1.30 
-# 8 YAL003W          9         10 ATT GAA             1558       2    0.916
-# 9 YAL003W         10         11 GAA ACT             1474       3    0.867
-# 10 YAL003W         11         12 ACT TTG             1173       4    0.690
-# 11 YAL003W         12         13 TTG AAA             1252       5    0.736
+# # A tibble: 11 x 6
+# Gene    Pos_Codon1 Pos_Codon2 Rel_Count Rel_Pos RelCount
+# <chr>        <dbl>      <dbl>     <dbl>   <int>    <dbl>
+#   1 YAL003W          2          3       429      -5   1.35  
+# 2 YAL003W          3          4       488      -4   1.53  
+# 3 YAL003W          4          5       102      -3   0.320 
+# 4 YAL003W          5          6       994      -2   3.12  
+# 5 YAL003W          6          7       146      -1   0.458 
+# 6 YAL003W          7          8       173       0   0.543 
+# 7 YAL003W          8          9       762       1   2.39  
+# 8 YAL003W          9         10        13       2   0.0408
+# 9 YAL003W         10         11       176       3   0.553 
+# 10 YAL003W         11         12        98       4   0.308 
+# 11 YAL003W         12         13       123       5   0.386 
 
 
 
 # Normalization carried out for all the tibbles within ExpandList 
-NormalizedExpandList <- purrr::map(
-  .x = ExpandCodonPairRegionOutput,
+normalized_expand_list <- purrr::map(
+  .x = expand_codon_pair_region,
   .f = ExpandedCodonRegionNormalization,
   expand_width = 5L
 )
 
+# just need to change the input list as it works the same for single codons and codon pairs 
 
 
 # Function to generate a plot for the expanded list of the codon
@@ -638,8 +724,8 @@ plot <- GenerateGraphs(.x = table_a)
 
 
 # Function to generate a plot for each of the tibbles within NormalizedExpandList
-GenerateAllGraphs <- purrr::map(
-  .x = NormalizedExpandList,
+generate_all_graphs <- purrr::map(
+  .x = normalized_expand_list,
   .f = GenerateGraphs
 )
 
@@ -654,17 +740,17 @@ GenerateAllGraphs <- purrr::map(
 
 
 
-Overlayed <- function(NormalizedExpandList, expand_width = 5L){
-  number_of_objects <- length(NormalizedExpandList)
+OverlayedTable <- function(normalized_expand_list, expand_width = 5L){
+  number_of_objects <- length(normalized_expand_list)
   
-  result = lapply(NormalizedExpandList, "[", c("Rel_Pos", "RelCount"))
+  result = lapply(normalized_expand_list, "[", c("Rel_Pos", "RelCount"))
   
   joined_result = result %>% reduce(full_join, by = c("Rel_Pos"), sum("RelCount"))
   
   joined_rows = joined_result %>% 
     mutate(SumRows = rowSums(select(joined_result, -"Rel_Pos")) / number_of_objects)
   
-  Overlayed_tibbles <- tibble::tibble(
+  overlayed_tibbles <- tibble::tibble(
     Rel_Pos = seq(- expand_width, expand_width),
     RelCount = joined_rows$SumRows
   )
@@ -689,9 +775,9 @@ Overlayed <- function(NormalizedExpandList, expand_width = 5L){
 # # 11       5      3.63       1.97         1.08         0.846          3.81          1.14     2.08
 
 
-Over <- Overlayed(NormalizedExpandList, expand_width = 5L)  
+Over <- OverlayedTable(normalized_expand_list, expand_width = 5L)  
 
-# output from Overlayed function:
+# output from OverlayedTable function for single codons:
 # # > Over
 # # # A tibble: 11 x 2
 # # Rel_Pos RelCount
@@ -708,48 +794,26 @@ Over <- Overlayed(NormalizedExpandList, expand_width = 5L)
 # # 10       4    0.644
 # # 11       5    2.08
 
+
+# output from OverLayedTable function for codon pairs:
+# > Over
+# # A tibble: 11 x 2
+# Rel_Pos RelCount
+# <int>    <dbl>
+#   1      -5    0.751
+# 2      -4    0.863
+# 3      -3    1.35 
+# 4      -2    2.10 
+# 5      -1    0.452
+# 6       0    0.441
+# 7       1    2.15 
+# 8       2    0.166
+# 9       3    1.68 
+# 10       4    0.514
+# 11       5    0.531
+
+
 overlayed_plot <- ggplot(Over, mapping = aes(x = Rel_Pos, y = RelCount)) + geom_line()
-
-
-
-
-
-  
-  # input : NormalizedExpandList - list of tibbles for each occurence of the codon pair 
-  # > NormalizedExpandList
-  
-  # # A tibble: 11 x 7
-  # Gene    CodonPos_1 CodonPos_2 CodonPair PerCodonCounts Rel_Pos RelCount
-  # <chr>        <dbl>      <dbl> <chr>              <int>   <int>    <dbl>
-  #   1 YAL003W          2          3 GCA TCC             2977      -5    1.75 
-  # 2 YAL003W          3          4 TCC ACC             1967      -4    1.16 
-  # 3 YAL003W          4          5 ACC GAT             1283      -3    0.755
-  # 4 YAL003W          5          6 GAT TTC              969      -2    0.570
-  # 5 YAL003W          6          7 TTC TCC             1518      -1    0.893
-  # 6 YAL003W          7          8 TCC AAG             2313       0    1.36 
-  # 7 YAL003W          8          9 AAG ATT             2217       1    1.30 
-  # 8 YAL003W          9         10 ATT GAA             1558       2    0.916
-  # 9 YAL003W         10         11 GAA ACT             1474       3    0.867
-  # 10 YAL003W         11         12 ACT TTG             1173       4    0.690
-  # 11 YAL003W         12         13 TTG AAA             1252       5    0.736
-  # 
-  # [[2]]
-  # # A tibble: 11 x 7
-  # Gene    CodonPos_1 CodonPos_2 CodonPair PerCodonCounts Rel_Pos RelCount
-  # <chr>        <dbl>      <dbl> <chr>              <int>   <int>    <dbl>
-  #   1 YAL003W         52         53 TTC AAC             2545      -5    1.17 
-  # 2 YAL003W         53         54 AAC CAC             2480      -4    1.14 
-  # 3 YAL003W         54         55 CAC ATC             3354      -3    1.55 
-  # 4 YAL003W         55         56 ATC GCT             2510      -2    1.16 
-  # 5 YAL003W         56         57 GCT TCC             1678      -1    0.774
-  # 6 YAL003W         57         58 TCC AAG             2193       0    1.01 
-  # 7 YAL003W         58         59 AAG GCC             1315       1    0.606
-  # 8 YAL003W         59         60 GCC GAT             2335       2    1.08 
-  # 9 YAL003W         60         61 GAT GAA             3061       3    1.41 
-  # 10 YAL003W         61         62 GAA TTC             1495       4    0.689
-  # 11 YAL003W         62         63 TTC GAC              889       5    0.410
-  
-  
 
 
 
