@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
-# Uncomment the following 6 lines to take an argument from command line
-# args = commandArgs(trailingOnly=TRUE)
+# Uncomment the following 6 lines to take an argument from command line and then see line 19/20
+# args <- commandArgs(trailingOnly=TRUE)
 # 
 # # Check for a single file argument from the command line
 # if (length(args) == 0) {
@@ -149,7 +149,7 @@ ribogrid_df <- lapply(sample_names, function(x){
 }) %>% 
   bind_rows(.id = "samplez")
 
-### Sample correlations heatmap
+### collated TPMs
 collated_tpms_df <- read_tsv(paste0("../", yaml$dir_out, "/TPMs_collated.tsv"), skip = 4)
 
 ### Gene features
@@ -176,7 +176,12 @@ plot_theme <- theme_bw()+
 
 ### Start the server
 server <- function(input, output, session) {
-  ### Read counts summary
+  
+  ######################################
+  # Read count summary
+  ######################################
+  
+  ### bar plot
   output$read_counts_bar_plot <- renderPlot({
     read_counts_df %>% 
       filter(SampleName %in% input$sample) %>% 
@@ -189,9 +194,14 @@ server <- function(input, output, session) {
            title = "Read counts per step")+
       guides(fill = guide_legend(ncol = 1))
   })
+  
+  ######################################
+  # TPM summary
+  ######################################
+  
   ### Sample to sample cors
   # load the TPM df
-  cor.df <- read_tsv("/data2/john/projects/riboviz/riboviz/vignette/simdata_multiplex_output/TPMs_collated.tsv", skip = 4) %>% 
+  cor.df <- collated_tpms_df %>% 
     column_to_rownames("ORF")
   
   # get a fixed column order, alphabetical in this case
@@ -200,7 +210,8 @@ server <- function(input, output, session) {
   # create correlations, fix col order
   cor.df <- cor.df %>% 
     select(all_of(cor.cols)) %>% 
-    as.matrix() %>%
+    apply(., 2, log10) %>% 
+    na_if(., -Inf) %>% 
     cor(use = "pairwise.complete.obs")
   
   # remove lower triangle
@@ -222,9 +233,32 @@ server <- function(input, output, session) {
             panel.grid.major.x = element_line(color = "grey50", linetype = 3),
             axis.ticks = element_blank())+
       labs(x = NULL, y = NULL,
-           subtitle = "Pairwise correlations based on TPM")+
+           title = expression(paste("Pairwise correlations based on ", log[10], "(TPM)")))+
       geom_text()
   })
+  
+  ### Abundance of specific gene compared to all
+  output$tpm_density_plot <- renderPlot({
+    collated_tpms_df %>%
+      pivot_longer(where(is.numeric), names_to = "samplez", values_to = "tpm") %>%
+      filter(samplez %in% input$sample) %>%
+      mutate(labz = ifelse(ORF %in% input$gene, ORF, NA),
+             xint = ifelse(ORF %in% input$gene, tpm, NA)) %>%
+      ggplot(., aes(x = tpm, fill = samplez)) +
+      geom_density(alpha = 0.5) +
+      geom_vline(aes(xintercept = xint), size = 1) +
+      scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+      facet_wrap(~samplez)+
+      scale_fill_discrete(guide = FALSE)+
+      plot_theme+
+      labs(title="TPM distributions",
+           x=expression(paste(log[10], "(TPM)")), 
+           y="Density")
+  })
+  
+  ######################################
+  # Read length distributions
+  ######################################
   
   ### Read length distribution plot
   output$read_length_dist_plot <- renderPlot({
@@ -236,10 +270,15 @@ server <- function(input, output, session) {
       scale_fill_discrete(name = NULL, guide = FALSE)+
       plot_theme+
       labs(title = "Read length distributions",
-           x = "Read length")+
+           x = "Read length",
+           y = "Read counts")+
       scale_x_continuous(breaks = seq(10, 50, 5))+
       scale_y_continuous(breaks = breaks_pretty(n = 4))
   })
+  
+  ######################################
+  # 3nt periodicity
+  ######################################
   
   ### Periodicity metagene plot for both 5' and 3' end as a line plot
   output$periodicity_line_plot <- renderPlot({
@@ -249,7 +288,9 @@ server <- function(input, output, session) {
       geom_line() +
       scale_color_discrete(name = NULL, guide = FALSE) +
       facet_grid(cols = vars(samplez), rows = vars(End), scales = "free_y") +
-      labs(title = "3-nucleotide periodicity")+
+      labs(title = "3-nucleotide periodicity",
+           x = "Codon position",
+           y= "Read counts")+
       plot_theme
   })
   
@@ -260,7 +301,9 @@ server <- function(input, output, session) {
       ggplot(., aes(x = Frame, y = Count, fill=samplez)) + 
       geom_bar(stat="identity", pos = "dodge") + 
       scale_fill_discrete(name = NULL)+
-      labs(title = "Read counts per frame")+
+      labs(title = "Read counts per frame",
+           x = NULL,
+           y = "Read counts")+
       plot_theme+
       scale_color_discrete(guide = FALSE)
   })
@@ -270,13 +313,19 @@ server <- function(input, output, session) {
     frame_box_df %>%
       filter(samplez %in% input$sample) %>% 
       ggplot(., aes(x=Frame, y=value, fill=samplez)) +
-      labs(y="Proportion", title = "Proportion of reads per frame per gene")+
+      labs(y = "Proportion", 
+           title = "Proportion of reads per frame per gene",
+           x = NULL)+
       scale_fill_discrete(name = NULL)+
       geom_boxplot()+
       plot_theme
   })
   
-  ### Position specific normalized reads, barplot
+  ######################################
+  # Position specific normalized reads
+  ######################################
+  
+  ### 3' end
   output$pos_sp_plot3 <- renderPlot({
     pos_sp_df %>%
       filter(End == "3'" & samplez %in% input$sample) %>% 
@@ -287,6 +336,7 @@ server <- function(input, output, session) {
       scale_color_discrete(guide = FALSE)
   })
   
+  ### 5' end
   output$pos_sp_plot5 <- renderPlot({
     pos_sp_df %>%
       filter(End == "5'" & samplez %in% input$sample) %>% 
@@ -297,22 +347,9 @@ server <- function(input, output, session) {
       scale_color_discrete(guide = FALSE)
   })
   
-  ### Abundance of specific gene(s) compared to all, density plot
-  output$tpm_density_plot <- renderPlot({
-    collated_tpms_df %>%
-      pivot_longer(where(is.numeric), names_to = "samplez", values_to = "tpm") %>%
-      filter(samplez %in% input$sample) %>%
-      mutate(labz = ifelse(ORF %in% input$gene, ORF, NA),
-             xint = ifelse(ORF %in% input$gene, tpm, NA)) %>%
-      ggplot(., aes(x = tpm, fill = samplez)) +
-      geom_density(alpha = 0.5) +
-      geom_vline(aes(xintercept = xint), size = 1) +
-      scale_x_log10()+
-      facet_wrap(~samplez)+
-      scale_fill_discrete(guide = FALSE)+
-      plot_theme+
-      labs(title="TPM density", x="TPM", y="Density")
-  })
+  ######################################
+  # Ribogrids
+  ######################################
   
   ### Ribogrid plot
   output$ribogrid_plot <- renderPlot({
@@ -343,11 +380,16 @@ server <- function(input, output, session) {
       labs(x="Position of 5' end of read", y="Read count", title="Ribogrid (bar)")
   })
   
+  ######################################
+  # Features
+  ######################################
+  
   ### TPM vs other features
   output$features_plot <- renderPlot({
     features_df %>% 
-      mutate(labz = ifelse(ORF %in% input$gene, ORF, "no_lab")) %>% 
       filter(samplez %in% input$sample & Feature %in% input$feature) %>% 
+      mutate(labz = ifelse(ORF == input$gene, "a_label", "no_lab")) %>% 
+      arrange(labz) %>% 
       ggplot(., aes(tpm, Value))+
       geom_point(aes(color = labz, size = labz))+
       geom_smooth(method = "lm")+
@@ -360,6 +402,8 @@ server <- function(input, output, session) {
   })
 }
 
+  ### A gene specific read distribution plot, as in coverage along a gene, would be nice,
+  # need to remember how to access specific parts of an H5
 
 #
 # END SERVER FUNCTION
@@ -397,17 +441,19 @@ ui <- fluidPage(
       tabsetPanel(
         tabPanel("Read count summary",
                  headerPanel(""),
-                 plotOutput("read_counts_bar_plot"),
-                 headerPanel(""),
-                 plotOutput("sample_cors_plot")
+                 plotOutput("read_counts_bar_plot")
         ),
         
-        # tabPanel("TPM summary",
-        #          headerPanel(""),
-        #          plotOutput("sample_cors_plot"),
-        #          headerPanel(""),
-        #          plotOutput("tpm_density_plot")
-        # ),
+        tabPanel("TPM summary",
+                 wellPanel(
+                   textInput(inputId = "gene",
+                             label = "Gene:",
+                             width = "50%")),
+                 headerPanel(""),
+                 plotOutput("sample_cors_plot"),
+                 headerPanel(""),
+                 plotOutput("tpm_density_plot")
+        ),
         
         tabPanel("Read length distributions",
                  headerPanel(""),
@@ -423,13 +469,22 @@ ui <- fluidPage(
                  plotOutput("frame_proportions_boxplot")
         ),
         
+        tabPanel("Normalized reads by position",
+                 headerPanel(""),
+                 plotOutput("pos_sp_plot5"),
+                 headerPanel(""),
+                 plotOutput("pos_sp_plot3")
+        ),
+        
         tabPanel("Ribogrid",
-                   sliderInput("ribogrid_len_range", "Ribogrid read length range:",
+                 sliderInput("ribogrid_len_range", "Ribogrid read length range:",
                                min = 0, max = 50,
-                               value = c(20,35)),
-                   sliderInput("ribogrid_pos_range", "Ribogrid read position range:",
+                               value = c(20,35),
+                               width = "50%"),
+                 sliderInput("ribogrid_pos_range", "Ribogrid read position range:",
                                min = -24, max = 50,
-                               value = c(-10,10)),
+                               value = c(-10,10),
+                               width = "50%"),
                  headerPanel(""),
                  plotOutput("ribogrid_plot"),
                  headerPanel(""),
@@ -440,7 +495,7 @@ ui <- fluidPage(
                  wellPanel(
                    textInput(inputId = "gene",
                              label = "Gene:",
-                             width = "100%"),
+                             width = "50%"),
                    checkboxGroupInput(inputId = "feature",
                                       label = "Feature:",
                                       choiceNames = possible_features,
