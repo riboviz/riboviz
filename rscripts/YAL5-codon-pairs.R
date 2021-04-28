@@ -23,14 +23,6 @@ library(dplyr)
 
 
 
-
-GetGeneLength <- function(gene, dataset, hd_file) {
-  start_codon_pos <- rhdf5::h5readAttributes(file = hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["start_codon_pos"]][1]
-  stop_codon_pos <- rhdf5::h5readAttributes(file = hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["stop_codon_pos"]][1]
-  return(stop_codon_pos - start_codon_pos)
-}
-
-
 YAL5_h5 <- here::here("Mok-simYAL5", "output", "A", "A.h5")
 
 YAL5_gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
@@ -128,31 +120,46 @@ h5ls(YAL5_h5)
 
 # GetAllGeneDatamatrix: Function to get the datamatrix for each of the genes 
 # contained within the h5 file
+    
+      GetAllGeneDatamatrix <- function(.x = gene_names, dataset, hd_file){
+        
+        gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name 
+        
+        get_all_gene_datamatrix <- purrr::map(
+          .x = gene_names,
+          .f = GetGeneDatamatrix,
+          dataset,
+          hd_file
+        )
+        
+        return(get_all_gene_datamatrix)
+      }
+      
+      get_all_gene_datamatrix <- GetAllGeneDatamatrix(dataset = "Mok-simYAL5", hd_file = YAL5_h5)
 
-# Loop list of gene names through GetGeneDatamatrix to extract all the 
-# information
-
-# Required parameters: gene_names, dataset, hd_file)
-
-gene_names <- rhdf5::h5ls(YAL5_h5, recursive = 1)$name
-
-GetAllGeneDatamatrix <- function(dataset, hd_file, gene_names){
-  for (gene in gene_names){
-    get_datamatrix_list <- GetGeneDatamatrix(gene, dataset, hd_file)
-    return(get_datamatrix_list)
-  }
-}
 
 # Result: GetDatamatrixList which contains the datamatrix for all of the genes 
 # contained within the list 
 
 
-# Extract the datamatrix for the five genes 
-Mok_YAL5_data <- GetAllGeneDatamatrix(dataset="Mok-simYAL5", hd_file = YAL5_h5, 
-                               gene_names)
+
+TidyDatamatrixForAllGenes <- function(hd_file, dataset, startpos = 1, startlen = 10){
+ 
+  # gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
+  
+  .x = get_all_gene_datamatrix <- GetAllGeneDatamatrix(dataset = dataset, hd_file = hd_file)
+  
+  tidy_all_genes_datamatrix <- purrr::map(
+    .x = get_all_gene_datamatrix,
+    .f = TidyDatamatrix,
+    startpos = 1,
+    startlen = 10
+  )
+}
+
+tidy_all_genes_datamatrix <- TidyDatamatrixForAllGenes(hd_file = YAL5_h5, dataset = "Mok-simYAL5", startpos = 1, startlen = 10)
 
 ### ###
-
 
 
 
@@ -182,6 +189,32 @@ asite_counts_by_position <- CalcAsiteFixed(reads_pos_length,
 # > str(asite_counts_by_position)
 # num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
 
+          CalcAsiteFixedForAllGenes <- function(dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
+            
+            get_all_gene_datamatrix <- GetAllGeneDatamatrix(dataset = dataset, hd_file = hd_file)
+            
+            asite_counts_by_position_all_genes <- purrr::map(
+              .x = get_all_gene_datamatrix,
+              .f = CalcAsiteFixed,
+              min_read_length = min_read_length,
+              asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)), 
+              colsum_out = colsum_out
+              
+            )
+            
+            return(asite_counts_by_position_all_genes)
+          }
+          
+          asite_counts_by_position_all_genes <- CalcAsiteFixedForAllGenes(dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE)
+
+          # > str(asite_counts_by_position_all_genes)
+          # List of 5
+          # $ : num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : num [1:2429] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : num [1:1685] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : num [1:3509] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : num [1:2003] 0 0 0 0 0 0 0 0 0 0 ...
+
 
 TidyAsiteCountsByPosition <- function(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
   
@@ -200,17 +233,58 @@ TidyAsiteCountsByPosition <- function(gene, dataset, hd_file, min_read_length = 
   
 }
 
-
 tidy_asite_count_output <- TidyAsiteCountsByPosition(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE)
-
 
 # > str(tidy_asite_count_output)
 # tibble [1,121 x 2] (S3: tbl_df/tbl/data.frame)
 # $ Pos  : int [1:1121] 1 2 3 4 5 6 7 8 9 10 ...
 # $ Count: num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
 
+          TidyAsiteCountsByPositionAllGenes <- function(dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
+            
+            asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", "yeast_standard_asite_disp_length.txt"))
+            
+            asite_counts_by_position_all_genes <- CalcAsiteFixedForAllGenes(dataset, hd_file, min_read_length = 10, colsum_out = TRUE)
+            
+            
+            TidyAsiteCountsTibble <- function(asite_counts_by_position_all_genes){
+              
+              tidy_asite_counts_all_genes <- tibble(Pos = 1:length(asite_counts_by_position_all_genes), Count = asite_counts_by_position_all_genes)
+              
+            }
+            
+            
+            tidy_asite_counts_all_genes <- purrr::map(
+              .x = asite_counts_by_position_all_genes,
+              .f = TidyAsiteCountsTibble
+            )
+            
+            return(tidy_asite_counts_all_genes)
+            
+          }
+
+          tidy_asite_counts_all_genes <- TidyAsiteCountsByPositionAllGenes(dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE)
 
 
+          # > str(tidy_asite_counts_all_genes)
+          # List of 5
+          # $ : tibble [1,121 x 2] (S3: tbl_df/tbl/data.frame)
+          # ..$ Pos  : int [1:1121] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Count: num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : tibble [2,429 x 2] (S3: tbl_df/tbl/data.frame)
+          # ..$ Pos  : int [1:2429] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Count: num [1:2429] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : tibble [1,685 x 2] (S3: tbl_df/tbl/data.frame)
+          # ..$ Pos  : int [1:1685] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Count: num [1:1685] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : tibble [3,509 x 2] (S3: tbl_df/tbl/data.frame)
+          # ..$ Pos  : int [1:3509] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Count: num [1:3509] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : tibble [2,003 x 2] (S3: tbl_df/tbl/data.frame)
+          # ..$ Pos  : int [1:2003] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Count: num [1:2003] 0 0 0 0 0 0 0 0 0 0 ...
+
+          
 TranscriptPosToCodonPos <- function(gene, gff_df){
   
   subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene) 
@@ -234,7 +308,7 @@ TranscriptPosToCodonPos <- function(gene, gff_df){
   NA_UTR3_width <- rep(NA, times = UTR3_width$width)
   
   transcript_gene_pos_poscodon_frame <- tibble(
-    Gene = "YAL003W",
+    Gene = gene,
     Pos = 1:transcript_length$end,
     Pos_Codon1 = c(rep(NA, times = UTR5_width$width), CDS_codon_positions, rep(NA, times = UTR3_width$width)),
     Pos_Codon2 = dplyr::lead(c(rep(NA, times = UTR5_width$width), CDS_codon_positions, rep(NA, times = UTR3_width$width)), n = 3),
@@ -288,12 +362,56 @@ transcript_pos_to_codon_pos_output <- TranscriptPosToCodonPos(gene = "YAL003W", 
 # # ... with 1,111 more rows
 
 
+            TranscriptPosToCodonPosForAllGenes <- function(.x = gene_names, gff_df){
+            
+              transcript_gene_pos_poscodon_frame_all_genes <- purrr::map(
+                .x = gene_names,
+                .f = TranscriptPosToCodonPos,
+                gff_df
+              )
+              
+            }
+            
+            transcript_gene_pos_poscodon_frame_all_genes <- TranscriptPosToCodonPosForAllGenes(gene_names, gff_df)
+            
+            # List of 5
+            # $ : tibble [1,121 x 5] (S3: tbl_df/tbl/data.frame)
+            # ..$ Gene      : chr [1:1121] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
+            # ..$ Pos       : int [1:1121] 1 2 3 4 5 6 7 8 9 10 ...
+            # ..$ Pos_Codon1: int [1:1121] NA NA NA NA NA NA NA NA NA NA ...
+            # ..$ Pos_Codon2: int [1:1121] NA NA NA NA NA NA NA NA NA NA ...
+            # ..$ Frame     : num [1:1121] 2 0 1 2 0 1 2 0 1 2 ...
+            # $ : tibble [2,429 x 5] (S3: tbl_df/tbl/data.frame)
+            # ..$ Gene      : chr [1:2429] "YAL005C" "YAL005C" "YAL005C" "YAL005C" ...
+            # ..$ Pos       : int [1:2429] 1 2 3 4 5 6 7 8 9 10 ...
+            # ..$ Pos_Codon1: int [1:2429] NA NA NA NA NA NA NA NA NA NA ...
+            # ..$ Pos_Codon2: int [1:2429] NA NA NA NA NA NA NA NA NA NA ...
+            # ..$ Frame     : num [1:2429] 2 0 1 2 0 1 2 0 1 2 ...
+            # $ : tibble [1,685 x 5] (S3: tbl_df/tbl/data.frame)
+            # ..$ Gene      : chr [1:1685] "YAL012W" "YAL012W" "YAL012W" "YAL012W" ...
+            # ..$ Pos       : int [1:1685] 1 2 3 4 5 6 7 8 9 10 ...
+            # ..$ Pos_Codon1: int [1:1685] NA NA NA NA NA NA NA NA NA NA ...
+            # ..$ Pos_Codon2: int [1:1685] NA NA NA NA NA NA NA NA NA NA ...
+            # ..$ Frame     : num [1:1685] 2 0 1 2 0 1 2 0 1 2 ...
+            # $ : tibble [3,509 x 5] (S3: tbl_df/tbl/data.frame)
+            # ..$ Gene      : chr [1:3509] "YAL035W" "YAL035W" "YAL035W" "YAL035W" ...
+            # ..$ Pos       : int [1:3509] 1 2 3 4 5 6 7 8 9 10 ...
+            # ..$ Pos_Codon1: int [1:3509] NA NA NA NA NA NA NA NA NA NA ...
+            # ..$ Pos_Codon2: int [1:3509] NA NA NA NA NA NA NA NA NA NA ...
+            # ..$ Frame     : num [1:3509] 2 0 1 2 0 1 2 0 1 2 ...
+            # $ : tibble [2,003 x 5] (S3: tbl_df/tbl/data.frame)
+            # ..$ Gene      : chr [1:2003] "YAL038W" "YAL038W" "YAL038W" "YAL038W" ...
+            # ..$ Pos       : int [1:2003] 1 2 3 4 5 6 7 8 9 10 ...
+            # ..$ Pos_Codon1: int [1:2003] NA NA NA NA NA NA NA NA NA NA ...
+            # ..$ Pos_Codon2: int [1:2003] NA NA NA NA NA NA NA NA NA NA ...
+            # ..$ Frame     : num [1:2003] 2 0 1 2 0 1 2 0 1 2 ...
+            
 
 # create a codon_per_codons_count_table
 
 AddAsiteCountsToTranscriptPosToCodonPos <- function(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE, gff_df){
   
-  tidy_asite_count_output <- TidyAsiteCountsByPosition(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE)
+  tidy_asite_count_output <- TidyAsiteCountsByPosition(gene, dataset, min_read_length = 10, colsum_out = TRUE)
   
   transcript_pos_to_codon_pos_output <- TranscriptPosToCodonPos(gene, gff_df)
   
@@ -303,7 +421,6 @@ AddAsiteCountsToTranscriptPosToCodonPos <- function(gene, dataset, hd_file, min_
   
 }
  
-
 transcript_info_tibble <- AddAsiteCountsToTranscriptPosToCodonPos(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE, gff_df)
 
 # > str(transcript_info_tibble)
@@ -314,6 +431,38 @@ transcript_info_tibble <- AddAsiteCountsToTranscriptPosToCodonPos(gene = "YAL003
 # $ Pos_Codon2: int [1:1121] NA NA NA NA NA NA NA NA NA NA ...
 # $ Frame     : num [1:1121] 2 0 1 2 0 1 2 0 1 2 ...
 # $ Count     : num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+
+
+#####
+        AddAsiteCountsToTranscriptPosToCodonPosAllGenes <- function(gene_names, dataset, hd_file, min_read_length = 10, colsum_out = TRUE, gff_df){
+          
+          tidy_asite_counts_all_genes <- TidyAsiteCountsByPositionAllGenes(dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE)
+          
+          .x = transcript_gene_pos_poscodon_frame_all_genes <- TranscriptPosToCodonPosForAllGenes(gene_names, gff_df)
+          
+          TranscriptLeftJoin <- function(transcript_gene_pos_poscodon_frame_all_genes, tidy_asite_counts_all_genes){
+            
+            if (nrow(transcript_gene_pos_poscodon_frame_all_genes) == nrow(tidy_asite_counts_all_genes)){
+              
+              dplyr::left_join(transcript_gene_pos_poscodon_frame_all_genes, tidy_asite_counts_all_genes, by = "Pos")
+              
+            } else {
+              
+              print(tibble = c())
+            }
+          }
+          
+          transcript_info_tibble <- purrr::map(
+            .x = transcript_gene_pos_poscodon_frame_all_genes,
+            .f = TranscriptLeftJoin,
+            tidy_asite_counts_all_genes,
+          )
+          
+          return(transcript_info_tibble)
+          
+        }
+
+transcript_info_tibble_all_genes <- AddAsiteCountsToTranscriptPosToCodonPosAllGenes(gene_names, dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE, gff_df)
 
 
 AddCodonNamesToTranscriptInfoTibble <- function(gene_poscodon_codon_i200, gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE, gff_df){
