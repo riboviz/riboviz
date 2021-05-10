@@ -116,7 +116,7 @@ def helpMessage() {
       'FALSE')
     * 'dedup_stats': Output UMI deduplication statistics? (default
       'TRUE')
-    * 'group_umis': Smmarise UMI groups both pre- and
+    * 'group_umis': Summarise UMI groups both pre- and
       post-deduplication using UMI-tools? Useful for debugging
       (default 'FALSE')
     * If 'dedup_umis' is 'TRUE' but 'extract_umis' is 'FALSE' then a
