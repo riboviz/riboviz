@@ -27,12 +27,12 @@ SOME_SETTING = "some_setting"
 Add the parameter and its default value to the list under the comment:
 
 ```
-Expected parameters added between release 2.0 and current are added
-along with default values, if they are not already present in the
+Expected parameters added to the current release are added along
+with default values, if they are not already present in the
 configuration:
 ```
 
-Add the parameter to the `UPDATES_20_CURRENT` dictionary. For example, if the parameter was `some_setting` as above then add a mapping from its associated `riboviz.params` value to its default value. For example, if the default value is "some_value", add:
+Add the parameter to the `UPDATES` dictionary. For example, if the parameter was `some_setting` as above then add a mapping from its associated `riboviz.params` value to its default value. For example, if the default value is "some_value", add:
 
 ```
 params.SOME_SETTING: "some_value"
