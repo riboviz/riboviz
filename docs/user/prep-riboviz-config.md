@@ -97,7 +97,7 @@ The workflow also supports the following configuration parameters. All directory
 | `secondary_id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) | No | `NULL` |
 | `skip_inputs` | When validating configuration (see `validate_only` below) skip checks for existence of ribosome profiling data files (`fq_files`, `multiplexed_fq_files`, `sample_sheet`)? (Nextflow workflow only) | No | `false` |
 | `stop_in_cds` | Are stop codons part of the CDS annotations in GFF? Used by `bam_to_h5.R` only (and only if `is_riboviz_gff` is `false`). Note: this parameter is now deprecated by `stop_in_feature` and will be removed in a future release. If both `stop_in_feature` and `stop_in_cds` are defined then `stop_in_feature` takes precedence. | No | `false` |
-| `stop_in_feature` | Are stop codons part of the feature annotations in GFF? | No | `false` |
+| `stop_in_feature` | Are stop codons part of the feature annotations in GFF? If not provided and `stop_in_cds` is provided then the value of `stop_in_cds` is used for `stop_in_feature`. If both `stop_in_feature` and `stop_in_cds` are defined then `stop_in_feature` takes precedence. | No | `false` |
 | `trim_5p_mismatches` | Trim mismatched 5' base? (Nextflow workflow only) | No | `true` |
 | `t_rna_file` | tRNA estimates file (tab-separated values file) | Only if `codon_positions_file` is also provided | |
 | `umi_regexp` | UMI-tools-compliant regular expression to extract barcodes and UMIs. For details on the regular expression format, see UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction) | Only if `extract_umis` is `true` | |

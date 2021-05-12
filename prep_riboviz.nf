@@ -154,7 +154,11 @@ def helpMessage() {
       release. If both 'stop_in_feature' and 'stop_in_cds' are defined
       then 'stop_in_feature' takes precedence.
     * 'stop_in_feature': Are stop codons part of the feature
-      annotations in GFF? (default 'FALSE')
+      annotations in GFF? If not provided and 'stop_in_cds' is
+      provided then the value of 'stop_in_cds' is used for
+      'stop_in_feature'. If both 'stop_in_feature' and 'stop_in_cds'
+      are defined then `stop_in_feature` takes precedence.
+      (default 'FALSE')
 
     General:
 

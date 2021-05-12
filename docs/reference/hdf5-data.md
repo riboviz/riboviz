@@ -23,8 +23,8 @@ It is passed the following configuration parameters from the RiboViz configurati
 | `orf_gff_file` | Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts (GTF/GFF3 file) |
 | `primary_id` | Primary gene IDs to access the data (YAL001C, YAL003W, etc.) |
 | `secondary_id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) |
-| `stop_in_cds` | Are stop codons part of the feature annotations in `orf_gff_file`? This is only used if `stop_in_feature` is not provided. |
-| `stop_in_feature` | Are stop codons part of the feature annotations in `orf_gff_file`? |
+| `stop_in_cds` | Are stop codons part of the feature annotations in `orf_gff_file`? If both `stop_in_feature` and `stop_in_cds` are defined then `stop_in_feature` takes precedence. |
+| `stop_in_feature` | Are stop codons part of the feature annotations in `orf_gff_file`? If not provided and `stop_in_cds` is provided then the value of `stop_in_cds` is used for `stop_in_feature`. If both `stop_in_feature` and `stop_in_cds` are defined then `stop_in_feature` takes precedence. |
 
 At present, the default feature is assumed to be `CDS`.
 
