@@ -349,7 +349,7 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
   gff_pid <- rtracklayer::mcols(gff)[primary_id][, 1]
 
   # Map the reads to individual nucleotide position for each gene.
-  print("Mapping reads to feature")
+  print(paste("Mapping reads to feature", feature))
   read_counts <- mclapply(
     genes,
     function(gene) {
@@ -383,7 +383,7 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
   names(read_counts) <- genes
 
   # Save HDF5.
-  print("Saving mapped reads in a H5 file")
+  print(paste("Saving mapped reads in H5 file", hd_file))
 
   rhdf5::h5createFile(hd_file)
   fid <- rhdf5::H5Fopen(hd_file)
