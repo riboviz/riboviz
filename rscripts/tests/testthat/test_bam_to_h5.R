@@ -428,12 +428,14 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, primary_id,
 #' @param feature Feature e.g. `CDS`, `ORF`, or `uORF` (character).
 #' @param num_processes Number of processes to parallelize over
 #' (integer).
+#' @param exit_code Expected exit code (integer).
 #'
 #' @export
 RunSamToBamToH5 <- function(bam_to_h5, sam_file, bam_file,
   orf_gff_file, h5_file, primary_id, secondary_id, dataset,
   min_read_length, max_read_length, buffer, is_riboviz_gff,
-  stop_in_feature, feature = "CDS", num_processes = 1) {
+  stop_in_feature, feature = "CDS", num_processes = 1,
+  exit_code = 0) {
 
   print(paste0("bam_to_h5.R: ", bam_to_h5))
   print(paste0("GFF: ", orf_gff_file))
@@ -442,17 +444,17 @@ RunSamToBamToH5 <- function(bam_to_h5, sam_file, bam_file,
   bam_cmd_template <- "samtools view -S -b {sam_file} > {bam_file}"
   bam_cmd <- glue::glue(bam_cmd_template)
   print(bam_cmd)
-  exit_code <- system(bam_cmd)
-  print(paste0("'samtools view' exit code: ", exit_code))
-  testthat::expect_equal(exit_code, 0,
+  actual_exit_code <- system(bam_cmd)
+  print(paste0("'samtools view' exit code: ", actual_exit_code))
+  testthat::expect_equal(actual_exit_code, 0,
                info = "Unexpected exit code from 'samtools view'")
 
   bai_cmd_template <- "samtools index {bam_file}"
   bai_cmd <- glue::glue(bai_cmd_template)
   print(bai_cmd)
-  exit_code <- system(bai_cmd)
-  print(paste0("'samtools index' exit code: ", exit_code))
-  testthat::expect_equal(exit_code, 0,
+  actual_exit_code <- system(bai_cmd)
+  print(paste0("'samtools index' exit code: ", actual_exit_code))
+  testthat::expect_equal(actual_exit_code, 0,
       info = "Unexpected exit code from 'samtools index'")
 
   print(paste0("BAM: ", bam_file))
@@ -466,9 +468,9 @@ RunSamToBamToH5 <- function(bam_to_h5, sam_file, bam_file,
   h5_cmd <- glue::glue(h5_cmd_template)
   print(h5_cmd)
 
-  exit_code <- system(h5_cmd)
-  print(paste0("'bam_to_h5.R' exit code: ", exit_code))
-  testthat::expect_equal(exit_code, 0,
+  actual_exit_code <- system(h5_cmd)
+  print(paste0("'bam_to_h5.R' exit code: ", actual_exit_code))
+  testthat::expect_equal(actual_exit_code, exit_code,
     info = "Unexpected exit code from 'bam_to_h5.R'")
 }
 
@@ -624,5 +626,32 @@ testthat::test_that("--secondary-id=ID", {
     ValidateH5(h5_file, test_gff_file, bam_file, primary_id, secondary_id,
       dataset, min_read_length, max_read_length, buffer,
       is_riboviz_gff, stop_in_feature)
+  })
+})
+
+testthat::test_that("feature=Unknown", {
+
+  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
+  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
+  min_read_length <- 10
+  max_read_length <- 50
+  buffer <- 20
+  primary_id <- "Name"
+  secondary_id <- NA
+  dataset <- "Mok-tinysim"
+  is_riboviz_gff <- TRUE
+  stop_in_feature <- FALSE
+  feature <- "Unknown"
+  exit_code <- 1
+
+  withr::with_tempdir({
+    bam_file <- file.path(getwd(), "test_bam_to_h5_data.bam")
+    bam_bai_file <- file.path(getwd(), "test_bam_to_h5_data.bam.bai")
+    h5_file <- file.path(getwd(), "test_bam_to_h5_data.h5")
+
+    RunSamToBamToH5(bam_to_h5, sam_file, bam_file, orf_gff_file, h5_file,
+      primary_id, secondary_id, dataset, min_read_length, max_read_length,
+      buffer, is_riboviz_gff, stop_in_feature, feature,
+      exit_code = exit_code)
   })
 })

@@ -322,9 +322,13 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
   # Read in the positions of all exons/genes from GFF and subset
   # feature locations.
   gff <- rtracklayer::readGFFAsGRanges(orf_gff_file)
+  gff_features <- gff[gff$type == feature]
+  if (length(gff_features) == 0) {
+    stop(paste("No", feature, "features found in", orf_gff_file))
+  }
   if (!is_riboviz_gff) {
     # GFF does not contain UTR5 or UTR3 elements.
-    gff <- gff[gff$type == feature]
+    gff <- gff_features
   }
 
   # Check primary_id and secondary_id exist.
@@ -377,7 +381,7 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
                          left_flank = buffer_left,
                          right_flank = buffer_right,
                          mult_exon = TRUE)
-      },
+    },
     mc.cores = num_processes
   )
   names(read_counts) <- genes

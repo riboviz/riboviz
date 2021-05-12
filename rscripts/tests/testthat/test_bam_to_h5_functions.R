@@ -625,3 +625,31 @@ testthat::test_that("secondary_id=ID", {
       is_riboviz_gff, stop_in_feature)
   })
 })
+
+testthat::test_that("feature=Unknown raises error", {
+
+  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
+  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
+  min_read_length <- 10
+  max_read_length <- 50
+  buffer <- 20
+  primary_id <- "Name"
+  secondary_id <- NA
+  dataset <- "Mok-tinysim"
+  is_riboviz_gff <- TRUE
+  stop_in_feature <- FALSE
+  feature <- "Unknown"
+
+  withr::with_tempdir({
+    bam_file <- file.path(getwd(), "test_bam_to_h5_data.bam")
+    bam_bai_file <- file.path(getwd(), "test_bam_to_h5_data.bam.bai")
+    h5_file <- file.path(getwd(), "test_bam_to_h5_data.h5")
+
+    expect_error(
+      RunSamToBamToH5(sam_file, bam_file, orf_gff_file, h5_file,
+        primary_id, secondary_id, dataset, min_read_length,
+        max_read_length, buffer, is_riboviz_gff, stop_in_feature,
+        feature)
+    )
+  })
+})
