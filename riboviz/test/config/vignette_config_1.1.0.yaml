@@ -4,7 +4,6 @@ dir_tmp: vignette/tmp
 rRNA_fasta: vignette/input/yeast_rRNA_R64-1-1.fa
 orf_fasta: vignette/input/yeast_YAL_CDS_w_250utrs.fa
 orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3
-aligner: hisat2
 build_indices: TRUE
 make_bedgraph: TRUE
 dir_index: vignette/index

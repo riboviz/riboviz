@@ -1,5 +1,4 @@
 adapters: CTGTAGGCACC
-aligner: hisat2
 asite_disp_length_file: data/yeast_standard_asite_disp_length.txt
 buffer: 250
 build_indices: TRUE

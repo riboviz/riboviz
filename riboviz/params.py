@@ -101,8 +101,6 @@ each FASTQ, SAM and BAM file processed?
 
 NUM_PROCESSES = "num_processes"
 """ Number of processes to parallelize over. """
-ALIGNER = "aligner"
-""" Short read aligner to use (unused). """
 
 VALIDATE_ONLY = "validate_only"
 """ Validate configuration only? (Nextflow workflow only). """
