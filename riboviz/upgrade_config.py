@@ -68,11 +68,18 @@ are updated to::
 
     rrna_index_prefix: yeast_rRNA
     orf_index_prefix: YAL_CDS_w_250
+
+Configuration parameters that are now unused are removed:
+
+* ``aligner``
+* ``isTestRun``
+* ``is_test_run``
 """
 import os
 import os.path
 import yaml
 from riboviz import params
+
 
 RENAMES = {
     # Names in pre-commit 8da8071, 18 Dec 2019, to current names.
@@ -106,6 +113,7 @@ UPDATES = {
     params.DEDUP_UMIS: False,
     params.EXTRACT_UMIS: False,
     params.FEATURES_FILE:  "data/yeast_features.tsv",
+    params.FQ_FILES: None,
     params.GROUP_UMIS: False,
     params.LOGS_DIR: "vignette/logs",
     params.MULTIPLEX_FQ_FILES: None,
@@ -117,6 +125,15 @@ UPDATES = {
 }
 """
 Map from configuration parameters to default values for parameters.
+"""
+
+UNUSED = [
+    "aligner",
+    "isTestRun",
+    "is_test_run"
+]
+"""
+Unused configuration parameters for removal.
 """
 
 
@@ -151,6 +168,11 @@ def upgrade_config(config):
     for key in [params.RRNA_INDEX_PREFIX, params.ORF_INDEX_PREFIX]:
         prefix = os.path.split(config[key])[1]
         config[key] = prefix
+
+    # Removed unused parameters.
+    for key in UNUSED:
+        if key in config:
+            del config[key]
 
 
 def upgrade_config_file(input_file, output_file=None):
