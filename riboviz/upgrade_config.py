@@ -15,6 +15,7 @@ Configuration parameters that have been renamed from 1.x are updated:
 * ``PrimaryID`` => ``primary_id``
 * ``SecondID`` => ``secondary_id``
 * ``StopInCDS`` => ``stop_in_feature``
+* ``stop_in_cds`` => ``stop_in_feature``
 * ``StopInFeature`` => ``stop_in_feature``
 * ``ribovizGFF`` => ``is_riboviz_gff``
 * ``t_rna`` => ``t_rna_file``
