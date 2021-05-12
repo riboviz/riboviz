@@ -18,6 +18,7 @@ library(scales)
 # read in the yaml, the path here would get replaced with "args" if you're grabbing it 
 # from command line
 yaml <- read_yaml("/data2/john/projects/riboviz/riboviz/vignette/simdata_multiplex_config.yaml")
+# yaml <- args
 
 # use this function to pull the sample names and directories from the yaml
 # the sample names and dirs will be used to find data files.
@@ -201,27 +202,29 @@ server <- function(input, output, session) {
   
   ### Sample to sample cors
   # load the TPM df
-  cor.df <- collated_tpms_df %>% 
+  cor.df <- collated_tpms_df %>%
     column_to_rownames("ORF")
-  
+
   # get a fixed column order, alphabetical in this case
   cor.cols <- sort(names(cor.df))
-  
+
   # create correlations, fix col order
-  cor.df <- cor.df %>% 
-    select(all_of(cor.cols)) %>% 
-    apply(., 2, log10) %>% 
-    na_if(., -Inf) %>% 
+  cor.df <- cor.df %>%
+    select(all_of(cor.cols)) %>%
+    apply(., 2, log10) %>%
+    na_if(., -Inf) %>%
     cor(use = "pairwise.complete.obs")
-  
+
   # remove lower triangle
   cor.df[lower.tri(cor.df)] <- NA
-  
+
   # convert to a df and reshape
-  cor.df2 <- as_tibble(cor.df, rownames = "samp1") %>% 
-    pivot_longer(cols = where(is.numeric), names_to = "samp2", values_to = "R") %>% 
-    filter(samp1 != samp2)
-  
+  cor.df2 <- as_tibble(cor.df, rownames = "samp1") %>%
+    pivot_longer(cols = where(is.numeric), names_to = "samp2", values_to = "R") %>%
+    filter(samp1 != samp2) %>%
+    mutate(samp1 = factor(samp1, levels = cor.cols),
+           samp2 = factor(samp2, levels = cor.cols))
+
   # plot it
   output$sample_cors_plot <- renderPlot({
     ggplot(cor.df2, aes(samp1, samp2, fill = R, label = signif(R,2)))+
@@ -386,24 +389,36 @@ server <- function(input, output, session) {
   
   ### TPM vs other features
   output$features_plot <- renderPlot({
-    features_df %>% 
-      filter(samplez %in% input$sample & Feature %in% input$feature) %>% 
-      mutate(labz = ifelse(ORF == input$gene, "a_label", "no_lab")) %>% 
-      arrange(labz) %>% 
-      ggplot(., aes(tpm, Value))+
-      geom_point(aes(color = labz, size = labz))+
-      geom_smooth(method = "lm")+
-      facet_wrap(samplez ~ Feature, scales = "free")+
-      scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))+
-      plot_theme+
-      scale_color_manual(guide = FALSE, values = c("firebrick3", "grey70"))+
-      labs(x = expression(paste(log[10], "(TPM)")))+
-      scale_size_manual(values = c(3, 1), guide = FALSE)
+    if (input$gene2 == ""){
+      features_df %>% 
+        filter(samplez %in% input$sample & Feature %in% input$feature) %>% 
+        ggplot(., aes(tpm, Value))+
+        geom_point()+
+        geom_smooth(method = "lm")+
+        facet_wrap(samplez ~ Feature, scales = "free")+
+        scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+        plot_theme+
+        labs(x = expression(paste(log[10], "(TPM)")))+
+        scale_size_manual(values = c(4, 1), guide = FALSE)
+    } else {
+      features_df %>% 
+        filter(samplez %in% input$sample & Feature %in% input$feature) %>% 
+        mutate(labz = ifelse(ORF == input$gene2, "a_label", "no_lab")) %>% 
+        arrange(labz) %>% 
+        ggplot(., aes(tpm, Value))+
+        geom_point(aes(color = labz, size = labz))+
+        geom_smooth(method = "lm")+
+        facet_wrap(samplez ~ Feature, scales = "free")+
+        scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+        plot_theme+
+        scale_color_manual(guide = FALSE, values = c("firebrick3", "grey70"))+
+        labs(x = expression(paste(log[10], "(TPM)")))+
+        scale_size_manual(values = c(4, 1), guide = FALSE)
+    }
+    
+    
   })
 }
-
-  ### A gene specific read distribution plot, as in coverage along a gene, would be nice,
-  # need to remember how to access specific parts of an H5
 
 #
 # END SERVER FUNCTION
@@ -493,7 +508,7 @@ ui <- fluidPage(
         
         tabPanel("Features",
                  wellPanel(
-                   textInput(inputId = "gene",
+                   textInput(inputId = "gene2",
                              label = "Gene:",
                              width = "50%"),
                    checkboxGroupInput(inputId = "feature",
