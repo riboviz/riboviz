@@ -46,7 +46,7 @@ exons_preordered <- args$exons_preordered
 
 ##### Helper functions #########################################################
 
-
+print(sessionInfo())
 
 
 # Funciton to resize GRanges while keeping track of multi-exon genes
@@ -372,7 +372,7 @@ if (!is.null(remove_trailing))
 print("Creating riboviz-style CDS...")
 gff_annot <- annot
 
-#cds <- convertGenomeToCDSFile(genome,annot,buffer,exons_preordered)
+
 tmp_gff <- sapply(unique(gff_annot$Name),
                   function(x){
                     gene_location <- gff_annot[gff_annot$Name==x]; 
