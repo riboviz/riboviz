@@ -1218,7 +1218,8 @@ process helperViz {
     output:
       file "interactive_viz.sh" into interactive_viz_sh
     shell:
-      script = "'${workflow.projectDir}/rscripts/shiny_visualization.R', "
+      script = "Rscript -e "
+      script += "'${workflow.projectDir}/rscripts/shiny_visualization.R' "
       script += "'\$PWD/${config_file_yaml}'"
       """
       echo "${script}" > "interactive_viz.sh"
