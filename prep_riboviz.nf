@@ -1217,13 +1217,11 @@ process helperViz {
       file config_file_yaml from config_file_yaml
     output:
       file "interactive_viz.sh" into interactive_viz_sh
-    when:
-      params.create_helper_script // NEED TO ADD THIS PARAM ABOVE, TO CONFIG FILE & ASSOCIATED LOCATIONS
     shell:
-      script = "'${workflow.projectDir}/rscripts/make_shiny_server.R', "
+      script = "'${workflow.projectDir}/rscripts/shiny_visualization.R', "
       script += "'\$PWD/${config_file_yaml}'"
       """
-      Rscript -e "${script}"
+      echo "${script}" > "interactive_viz.sh"
       """
 }
 
