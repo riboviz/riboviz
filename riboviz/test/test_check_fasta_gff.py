@@ -20,6 +20,12 @@ TEST_FASTA_CHECK_FILE = os.path.join(os.path.dirname(data.__file__),
 TEST_GFF_CHECK_FILE = os.path.join(os.path.dirname(data.__file__),
                                    "test_check_fasta_gff.gff")
 """ Test GFF file in :py:mod:`riboviz.test.data`. """
+TEST_NUM_SEQUENCES = 17
+""" Number of sequences in :py:const:`TEST_FASTA_CHECK_FILE`. """
+TEST_NUM_FEATURES = 19
+""" Number of features in :py:const:`TEST_GFF_CHECK_FILE`. """
+TEST_NUM_CDS_FEATURES = 19
+""" Number of CDS features in :py:const:`TEST_GFF_CHECK_FILE`. """
 TEST_NO_ID_NAME_ATTR_PREFIX = "YAL004CNoIDNameAttr_mRNA"
 """ Prefix for name of feature in test issue. """
 TEST_NO_ID_NAME_ATTR_ISSUE = (
@@ -158,33 +164,29 @@ def test_get_fasta_sequence_ids_empty_fasta_file(tmpdir):
     assert not seq_ids, "Expected empty set of sequence IDs"
 
 
-def test_get_fasta_gff_cds_issues_no_such_fasta_file():
+def test_get_issues_no_such_fasta_file():
     """
-    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    Test :py:func:`riboviz.check_fasta_gff.get_issues`
     with an empty FASTA file and GFF file
     (:py:const:`TEST_GFF_CHECK_FILE`) raises an exception.
     """
     with pytest.raises(FileNotFoundError):
-        check_fasta_gff.get_fasta_gff_cds_issues(
-            "nosuch.fasta",
-            TEST_GFF_CHECK_FILE)
+        check_fasta_gff.get_issues("nosuch.fasta", TEST_GFF_CHECK_FILE)
 
 
-def test_get_fasta_gff_cds_issues_no_such_gff_file():
+def test_get_issues_no_such_gff_file():
     """
-    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    Test :py:func:`riboviz.check_fasta_gff.get_issues`
     with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and
     a non-existent GFF file raises an exception.
     """
     with pytest.raises(FileNotFoundError):
-        check_fasta_gff.get_fasta_gff_cds_issues(
-            TEST_FASTA_CHECK_FILE,
-            "nosuch.gff")
+        check_fasta_gff.get_issues(TEST_FASTA_CHECK_FILE, "nosuch.gff")
 
 
-def test_get_fasta_gff_cds_issues_empty_fasta_file(tmpdir):
+def test_get_issues_empty_fasta_file(tmpdir):
     """
-    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    Test :py:func:`riboviz.check_fasta_gff.get_issues`
     with an empty FASTA file and GFF file
     (:py:const:`TEST_GFF_CHECK_FILE`) raises an exception.
 
@@ -196,14 +198,12 @@ def test_get_fasta_gff_cds_issues_empty_fasta_file(tmpdir):
     fasta_file = str(tmpdir.join("fasta.fasta"))
     open(fasta_file, 'a').close()
     with pytest.raises(FastaIndexingError):
-        check_fasta_gff.get_fasta_gff_cds_issues(
-            fasta_file,
-            TEST_GFF_CHECK_FILE)
+        check_fasta_gff.get_issues(fasta_file, TEST_GFF_CHECK_FILE)
 
 
-def test_get_fasta_gff_cds_issues_empty_gff_file(tmpdir):
+def test_get_issues_empty_gff_file(tmpdir):
     """
-    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    Test :py:func:`riboviz.check_fasta_gff.get_issues`
     with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and
     an empty GFF file raises an exception.
 
@@ -215,35 +215,45 @@ def test_get_fasta_gff_cds_issues_empty_gff_file(tmpdir):
     gff_file = str(tmpdir.join("gff.gff"))
     open(gff_file, 'a').close()
     with pytest.raises(ValueError):
-        check_fasta_gff.get_fasta_gff_cds_issues(
-            TEST_FASTA_CHECK_FILE,
-            gff_file)
+        check_fasta_gff.get_issues(TEST_FASTA_CHECK_FILE, gff_file)
 
 
-def test_get_fasta_gff_cds_issues():
+def test_get_issues():
     """
-    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    Test :py:func:`riboviz.check_fasta_gff.get_issues`
     with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
     (:py:const:`TEST_GFF_CHECK_FILE`) and check all issues match
     expected issues in :py:const:`TEST_CHECK_ISSUES`).
     """
-    issues = check_fasta_gff.get_fasta_gff_cds_issues(
-        TEST_FASTA_CHECK_FILE,
-        TEST_GFF_CHECK_FILE)
+    num_sequences, num_features, num_cds_features, issues = \
+        check_fasta_gff.get_issues(TEST_FASTA_CHECK_FILE,
+                                   TEST_GFF_CHECK_FILE)
+    assert num_sequences == TEST_NUM_SEQUENCES, \
+        "Unexpected number of sequences"
+    assert num_features == TEST_NUM_FEATURES, \
+        "Unexpected number of features"
+    assert num_cds_features == TEST_NUM_CDS_FEATURES, \
+        "Unexpected number of CDS features"
     for issue in issues:
         assert issue in TEST_CHECK_ISSUES
 
 
-def test_get_fasta_gff_cds_issues_use_feature_name_true():
+def test_get_issues_use_feature_name_true():
     """
-    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    Test :py:func:`riboviz.check_fasta_gff.get_issues`
     with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
     (:py:const:`TEST_GFF_CHECK_FILE`) and ``use_feature_name=True``.
     """
-    issues = check_fasta_gff.get_fasta_gff_cds_issues(
-        TEST_FASTA_CHECK_FILE,
-        TEST_GFF_CHECK_FILE,
-        use_feature_name=True)
+    num_sequences, num_features, num_cds_features, issues = \
+        check_fasta_gff.get_issues(TEST_FASTA_CHECK_FILE,
+                                   TEST_GFF_CHECK_FILE,
+                                   use_feature_name=True)
+    assert num_sequences == TEST_NUM_SEQUENCES, \
+        "Unexpected number of sequences"
+    assert num_features == TEST_NUM_FEATURES, \
+        "Unexpected number of features"
+    assert num_cds_features == TEST_NUM_CDS_FEATURES, \
+        "Unexpected number of CDS features"
     # Create expected results when use_feature_name=True.
     test_check_issues = TEST_CHECK_ISSUES.copy()
     test_check_issues.remove(TEST_NO_ATG_START_ID_NAME_ATTR_ISSUE)
@@ -256,18 +266,24 @@ def test_get_fasta_gff_cds_issues_use_feature_name_true():
         assert issue in test_check_issues
 
 
-def test_get_fasta_gff_cds_issues_feature_format():
+def test_get_issues_feature_format():
     """
-    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    Test :py:func:`riboviz.check_fasta_gff.get_issues`
     with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
     (:py:const:`TEST_GFF_CHECK_FILE`) and custom
     ``cds_feature_format``.
     """
     cds_feature_format = "{}-Custom"
-    issues = check_fasta_gff.get_fasta_gff_cds_issues(
-        TEST_FASTA_CHECK_FILE,
-        TEST_GFF_CHECK_FILE,
-        feature_format=cds_feature_format)
+    num_sequences, num_features, num_cds_features, issues = \
+        check_fasta_gff.get_issues(TEST_FASTA_CHECK_FILE,
+                                   TEST_GFF_CHECK_FILE,
+                                   feature_format=cds_feature_format)
+    assert num_sequences == TEST_NUM_SEQUENCES, \
+        "Unexpected number of sequences"
+    assert num_features == TEST_NUM_FEATURES, \
+        "Unexpected number of features"
+    assert num_cds_features == TEST_NUM_CDS_FEATURES, \
+        "Unexpected number of CDS features"
     # Create expected results for custom cds_feature_format.
     test_check_issues = TEST_CHECK_ISSUES.copy()
     test_check_issues.remove(TEST_NO_ID_NAME_ATTR_ISSUE)
@@ -280,16 +296,22 @@ def test_get_fasta_gff_cds_issues_feature_format():
         assert issue in test_check_issues
 
 
-def test_get_fasta_gff_cds_issues_start_codons():
+def test_get_issues_start_codons():
     """
-    Test :py:func:`riboviz.check_fasta_gff.get_fasta_gff_cds_issues`
+    Test :py:func:`riboviz.check_fasta_gff.get_issues`
     with FASTA file (:py:const:`TEST_FASTA_CHECK_FILE`) and GFF file
     (:py:const:`TEST_GFF_CHECK_FILE`) and custom ``start_codons``.
     """
-    issues = check_fasta_gff.get_fasta_gff_cds_issues(
-        TEST_FASTA_CHECK_FILE,
-        TEST_GFF_CHECK_FILE,
-        start_codons=TEST_START_CODONS)
+    num_sequences, num_features, num_cds_features, issues = \
+        check_fasta_gff.get_issues(TEST_FASTA_CHECK_FILE,
+                                   TEST_GFF_CHECK_FILE,
+                                   start_codons=TEST_START_CODONS)
+    assert num_sequences == TEST_NUM_SEQUENCES, \
+        "Unexpected number of sequences"
+    assert num_features == TEST_NUM_FEATURES, \
+        "Unexpected number of features"
+    assert num_cds_features == TEST_NUM_CDS_FEATURES, \
+        "Unexpected number of CDS features"
     # TEST_START_CODONS includes all start codons in test data so
     # expect no NO_START_CODON issues in results.
     test_check_issues = [(s, f, i, d)
@@ -303,13 +325,13 @@ def check_fasta_gff_issues_csv(issues, csv_file):
     """
     Check contents of given list of tuples with issues held within
     a CSV file written by
-    :py:func:`riboviz.check_fasta_gff.write_fasta_gff_issues_to_csv`.
+    :py:func:`riboviz.check_fasta_gff.write_issues_to_csv`.
 
     :param issues: List of issues for sequences and features.
     :type issues: list(tuple(str or unicode, str or unicode, \
     str or unicode))
     :param csv_file: CSV file
-    :type: str or unicode
+    :type csv_file: str or unicode
     """
     df = pd.read_csv(csv_file, delimiter="\t", comment="#")
     df = df.fillna("")  # Force None to "" not "nan"
@@ -346,30 +368,30 @@ def check_fasta_gff_issues_csv(issues, csv_file):
                 df_issue_data, sequence, feature, issue_type)
 
 
-def test_write_fasta_gff_issues_to_csv(tmpdir):
+def test_write_issues_to_csv(tmpdir):
     """
-    Test :py:func:`riboviz.check_fasta_gff.write_fasta_gff_issues_to_csv`
+    Test :py:func:`riboviz.check_fasta_gff.write_issues_to_csv`
     produces a CSV file with the expected columns, rows and values.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir: py._path.local.LocalPath
     """
     issues_file = tmpdir.join("issues.tsv")
-    check_fasta_gff.write_fasta_gff_issues_to_csv(
+    check_fasta_gff.write_issues_to_csv(
         TEST_CHECK_ISSUES, issues_file)
     check_fasta_gff_issues_csv(TEST_CHECK_ISSUES, issues_file)
 
 
-def test_write_fasta_gff_issues_to_csv_empty(tmpdir):
+def test_write_issues_to_csv_empty(tmpdir):
     """
-    Test :py:func:`riboviz.check_fasta_gff.write_fasta_gff_issues_to_csv`
+    Test :py:func:`riboviz.check_fasta_gff.write_issues_to_csv`
     with no values produces a header-only CSV file.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir: py._path.local.LocalPath
     """
     issues_file = tmpdir.join("issues.tsv")
-    check_fasta_gff.write_fasta_gff_issues_to_csv([], issues_file)
+    check_fasta_gff.write_issues_to_csv([], issues_file)
     check_fasta_gff_issues_csv([], issues_file)
 
 
@@ -417,7 +439,7 @@ def test_check_fasta_gff_no_such_fasta_file(tmpdir):
     with an empty FASTA file and GFF file
     (:py:const:`TEST_GFF_CHECK_FILE`) raises an exception.
 
-    :param tmpdir: Temporary directory (pytest built-in fixture).
+    :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir: py._path.local.LocalPath
     """
     issues_file = tmpdir.join("issues.tsv")
@@ -527,6 +549,16 @@ def test_check_fasta_gff_stdout(tmpdir, capsys):
     assert lines[0:len(expected_config)] == expected_config,\
         "Unexpected Configuration header"
     lines = lines[len(expected_config):]
+    expected_metadata = [
+        "Metadata:",
+        "{}\t{}".format(check_fasta_gff.NUM_SEQUENCES, TEST_NUM_SEQUENCES),
+        "{}\t{}".format(check_fasta_gff.NUM_FEATURES, TEST_NUM_FEATURES),
+        "{}\t{}".format(check_fasta_gff.NUM_CDS_FEATURES,
+                        TEST_NUM_CDS_FEATURES),
+        ""]
+    assert lines[0:len(expected_metadata)] == expected_metadata,\
+        "Unexpected Metadata header"
+    lines = lines[len(expected_metadata):]
     expected_summary = ["Issue summary:", "{}\t{}".format("Issue", "Count")]
     assert lines[0:len(expected_summary)] == expected_summary,\
         "Unexpected Issue summary header"
