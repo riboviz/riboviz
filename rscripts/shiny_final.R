@@ -1,12 +1,12 @@
 #!/usr/bin/env Rscript
 
 # Uncomment the following 6 lines to take an argument from command line and then see line 19/20
-# args <- commandArgs(trailingOnly=TRUE)
-# 
-# # Check for a single file argument from the command line
-# if (length(args) == 0) {
-#   stop("Provide the path to the YAML file used in your riboviz2 run", call.=FALSE)
-# }
+args <- commandArgs(trailingOnly=TRUE)
+
+# Check for a single file argument from the command line
+if (length(args) == 0) {
+  stop("Provide the path to the YAML file used in your riboviz2 run", call.=FALSE)
+}
 
 # load required packages
 library(shiny)
@@ -17,8 +17,8 @@ library(scales)
 ### Get information from the YAML ###
 # read in the yaml, the path here would get replaced with "args" if you're grabbing it 
 # from command line
-yaml <- read_yaml("/data2/john/projects/riboviz/riboviz/vignette/simdata_multiplex_config.yaml")
-# yaml <- args
+#yaml <- yaml::read_yaml(here::here("vignette", "simdata_multiplex_config.yaml"))
+yaml <- args
 
 # use this function to pull the sample names and directories from the yaml
 # the sample names and dirs will be used to find data files.
