@@ -7,6 +7,7 @@ import os
 import warnings
 from Bio import SeqIO
 import gffutils
+from pyfaidx import Fasta
 from pyfaidx import FastaIndexingError
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 from riboviz.fasta_gff import START_CODON
@@ -230,6 +231,7 @@ def get_issues(fasta,
     # Track sequences encountered and counts of features for
     # each.
     sequence_features = {}
+    fasta_genes = Fasta(fasta)
     for feature in gffdb.features_of_type('CDS'):
         if feature.seqid not in sequence_features:
             sequence_features[feature.seqid] = 0
@@ -248,7 +250,7 @@ def get_issues(fasta,
             issues.append((feature.seqid, feature_id_name,
                            NO_ID_NAME, None))
         try:
-            sequence = feature.sequence(fasta)
+            sequence = feature.sequence(fasta_genes)
         except KeyError as e:  # Missing sequence.
             issues.append((feature.seqid,
                            NOT_APPLICABLE,
@@ -380,7 +382,7 @@ def run_fasta_gff_check(fasta,
     * Metadata:
         - :py:const:`NUM_SEQUENCES`: number of sequences in ``fasta``.
         - :py:const:`NUM_FEATURES`: number of features in ``gff``.
-        - :py:const:`NUM_CDS_FEATURE`: number of ``CDS`` features in 
+        - :py:const:`NUM_CDS_FEATURE`: number of ``CDS`` features in
           ``gff``.
 
     :param fasta: FASTA file
