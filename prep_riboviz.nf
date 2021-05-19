@@ -1236,7 +1236,6 @@ process helperViz {
       file helper_config_file_yaml from helper_config_file_yaml
     output:
       file "interactive_viz.sh" into interactive_viz_sh
-      // file "helper_config_viz.yaml" into helper_config_file_viz_yaml
     shell:
       script = "Rscript -e "
       script += "'${workflow.projectDir}/rscripts/run_shiny_server.R' "
