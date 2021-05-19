@@ -32,11 +32,42 @@ TidyDatamatrix <- function(data_mat, startpos = 1, startlen = 1) {
     mutate(Pos = as.integer(Pos), Counts = as.integer(Counts))
 }
 
+GetGeneReadLength <- function(gene, hd_file){
+  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["reads_by_len"]]
+}
+
+CalculateReadLengths <- function(gene_names, dataset, hd_file){
+  
+  ## distribution of lengths of all mapped reads
+  print("Starting: Distribution of lengths of all mapped reads")
+  
+  # read length-specific read counts stored as attributes of 'reads' in H5 file
+  gene_sp_read_length <- lapply(gene_names, function(gene) {
+    GetGeneReadLength(gene, hd_file)
+  })
+  
+  # sum reads of each length across all genes
+  read_length_data <- data.frame(
+    Length = read_range,
+    Counts = gene_sp_read_length %>%
+      Reduce("+", .)
+  )
+  
+  # return read length data
+  return(read_length_data)
+  
+}
+
 ## Actual code
 # path to H5 file
-file_url <- "wt.noAT.ribo.4_s/4c7158e339494e80dadcfd1a859f62/wt.noAT.ribo.4_s.h5"
-Gene_of_interest <- 'SPCC188.09c.1'
-Dataset <- 'D-Sp_2018'
+# path to H5 file
+gff_in <- here::here('Git','example-datasets','fungi', 'schizosaccharomyces','annotation','Schizosaccharomyces_pombe_full_UTR_or_50nt_buffer.gff3')
+GFF <- readGFFAsDf(gff_in)
+gene_names <- levels(GFF$seqnames)
+file_url <- "D-Sp_2018/output/wt.noAT.ribo.4_s/wt.noAT.ribo.4_s.h5"
+Gene_of_interest <- 'SPAC17G6.03.1'
+dataset <- 'D-Sp_2018'
+read_range <- c(10:50)
 
 # Create the gene data matrix 
 gene_data_matrix <- GetGeneDatamatrix(gene= Gene_of_interest,
@@ -75,6 +106,35 @@ for(i in gene_of_interest_tidy_matrix[1,]$Pos:max(gene_of_interest_tidy_matrix$P
 }
 
 # plot the data, so positions are along the x axis and number of counts is along the y axis
-ggplot(gene_Total_reads_at_position,aes(x = Pos, y = Counts))+
+reads_on_transcript_plot <- ggplot(gene_Total_reads_at_position,aes(x = Pos, y = Counts))+
+   theme_bw()+
+   geom_col( width = 1, color = 'red')+
+   scale_y_continuous(limits = c(0, 50))+
+   labs(title = paste(strsplit(basename(file_url), '.h5'), ' - ', Gene_of_interest), 
+        x = 'Position relative to start codon', y = 'Number of reads') +
+   theme(axis.text=element_text(size=14),
+         axis.title=element_text(size=14, face='bold'),
+         title = element_text(size = 16, face='bold'))
+
+
+## reads per million plot 
+# calculate total number of reads by getting sum of total reads per length 
+
+# get the number of reads per length
+read_length_data <- CalculateReadLengths(gene_names, dataset, file_url)
+# get total number of reads for dataset
+total_reads <- sum(read_length_data$Counts)
+
+#calculate reads per million for gene
+reads_per_million <- gene_Total_reads_at_position %>% mutate(Counts = (Counts/total_reads)*1e6)
+
+reads_per_million_plot <- ggplot(reads_per_million,aes(x = Pos, y = Counts))+
+  theme_bw()+
   geom_col( width = 1, color = 'red')+
-  labs(title = paste(file_url, ' - ', Gene_of_interest), x = 'Position relative to start codon', y = 'Number of reads')
+  scale_y_continuous(limits = c(0, 50))+
+  labs(title = paste0(Gene_of_interest), 
+       x = 'Position relative to start codon', y = 'Reads per million 
+  reads (RPFs)') +
+  theme(axis.text=element_text(size=14),
+        axis.title=element_text(size=14, face='bold'),
+        title = element_text(size = 14, face='bold'))
