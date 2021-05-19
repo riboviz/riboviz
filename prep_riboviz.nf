@@ -1210,17 +1210,37 @@ process staticHTML {
       """
 }
 
-// create helper script to generate interactive visusaliation command: riboviz/#275
+// create 'new' yaml for use in helperViz process
+// replace with variable with selected parameters required by
+//   shiny_final.R ahead of riboviz/#274 (e.g. analysis_outputs_inputs_yaml)
+helper_config_yaml = new Yaml().dump(params)
+
+// more fun with config yamls - create one for helperViz
+process createHelperConfigFile {
+    publishDir "${params.dir_out}", mode: 'copy', overwrite: true
+    input:
+      val helper_config_yaml from helper_config_yaml
+     output:
+      file "helper_config.yaml" into helper_config_file_yaml
+    shell:
+      """
+      echo "${helper_config_yaml}" > "helper_config.yaml"
+      """
+}
+
+
+// create helper script to generate interactive visualization command: riboviz/#275
 process helperViz {
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
     input:
-      file config_file_yaml from config_file_yaml
+      file helper_config_file_yaml from helper_config_file_yaml
     output:
       file "interactive_viz.sh" into interactive_viz_sh
+      // file "helper_config_viz.yaml" into helper_config_file_viz_yaml
     shell:
       script = "Rscript -e "
-      script += "'${workflow.projectDir}/rscripts/shiny_final.R' "
-      script += "'\$PWD/${config_file_yaml}'"
+      script += "'${workflow.projectDir}/rscripts/run_shiny_server.R' "
+      script += "'${params.dir_out}/helper_config.yaml'"
       """
       echo "${script}" > "interactive_viz.sh"
       """
