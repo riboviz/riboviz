@@ -157,6 +157,8 @@ $ RIBOVIZ_SAMPLES=/home/$USER/tinysim \
 
 then this will fail as `-params-file` has value `/Mok-tinysim_config.yaml` and not `/home/$USER/riboviz/example-datasets/simulated/mok/Mok-tinysim_config.yaml`. This is because the bash shell expands all the environment variables in the command (within `${...}`) *before* it runs the command (and, so, before the variables are defined). In such cases, either provide the path to `<CONFIG_FILE>` or define the variables using `export`.
 
+**Note:** If a configuration file contains environment variable tokens then you **must** provide values for these when running the workflow.
+
 ---
 
 ## Validate configuration
