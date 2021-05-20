@@ -51,6 +51,7 @@ configuration:
 * ``nextflow_work_dir: work``
 * ``publish_index_tmp: false``
 * ``sample_sheet: null``
+* ``samsort_memory: null``
 * ``t_rna_file: data/yeast_tRNAs.tsv``
 * ``trim_5p_mismatches: true``
 * ``umi_regexp: null``
@@ -119,6 +120,7 @@ UPDATES = {
     params.MULTIPLEX_FQ_FILES: None,
     params.PUBLISH_INDEX_TMP: False,
     params.SAMPLE_SHEET: None,
+    params.SAMSORT_MEMORY: None,
     params.TRIM_5P_MISMATCHES: True,
     params.T_RNA_FILE: "data/yeast_tRNAs.tsv",
     params.UMI_REGEXP: None
