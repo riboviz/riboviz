@@ -146,6 +146,17 @@ $ nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml
 
 The above approaches can be combined i.e. you can define variables using `export` (2) but provide other values as part of the command to run the workflow (1). Values provided within the command take precedence over those defined via `export`.
 
+**Note:** If using (1) then `<CONFIG_FILE>` cannot use the value of any variable defined within the same line. For example, if there was a configuration file `/home/$USER/riboviz/example-datasets/simulated/mok/Mok-tinysim_config.yaml` and the user runs:
+
+```console
+$ RIBOVIZ_SAMPLES=/home/$USER/tinysim \
+  RIBOVIZ_DATA=/home/$USER/riboviz/riboviz/data \
+  RIBOVIZ_ORGANISMS=/home/$USER/riboviz/example-datasets/simulated/mok \
+  nextflow prep_riboviz.nf -params-file ${RIBOVIZ_ORGANISMS}/Mok-tinysim_config.yaml
+```
+
+then this will fail as `-params-file` has value `/Mok-tinysim_config.yaml` and not `/home/$USER/riboviz/example-datasets/simulated/mok/Mok-tinysim_config.yaml`. This is because the bash shell expands all the environment variables in the command (within `${...}`) *before* it runs the command (and, so, before the variables are defined). In such cases, either provide the path to `<CONFIG_FILE>` or define the variables using `export`.
+
 ---
 
 ## Validate configuration
