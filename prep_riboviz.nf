@@ -1302,28 +1302,38 @@ process countReads {
         """
 }
 
-// create 'new' yaml for use in staticHTML process
-config_yaml = new Yaml().dump(params)
+Map viz_params = [:]
+if (is_asite_disp_length_file) {
+    viz_params.asite_disp_length_file = asite_disp_length_file
+}
+if (is_codon_positions_file) {
+    viz_params.codon_positions_file = codon_positions_file
+}
+if (is_features_file) {
+    viz_params.features_file = features_file
+}
+if (is_t_rna_file) {
+    viz_params.t_rna_file = t_rna_file
+}
+viz_params_yaml = new Yaml().dump(viz_params)
 
-// fun with config yamls
-process createConfigFile {
+process createVizParamsConfigFile {
     input:
-      val config_yaml from config_yaml
+      val viz_params_yaml from viz_params_yaml
      output:
-      file "config.yaml" into config_file_yaml
+      file "config.yaml" into viz_params_config_file_yaml
     shell:
       """
-      echo "${config_yaml}" > "config.yaml"
+      echo "${viz_params_yaml}" > "config.yaml"
       """
 }
 
-// run visualization system to generate interactive output report: riboviz/#193
 process staticHTML {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}", \
+    publishDir "${dir_out}/${sample_id}", \
     mode: 'copy', overwrite: true
     input:
-      file config_file_yaml from config_file_yaml
+      file viz_params_config_file_yaml from viz_params_config_file_yaml
       tuple val(sample_id), \
         file(sample_nt3_periodicity_tsv), \
         file(sample_gene_position_length_counts_5start_tsv), \
@@ -1342,7 +1352,7 @@ process staticHTML {
       script = "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd',"
       script += "params = list("
       script += "verbose='FALSE', "
-      script += "yamlfile='\$PWD/${config_file_yaml}', "
+      script += "yamlfile='\$PWD/${viz_params_config_file_yaml}', "
       script += "sampleid='!{sample_id}', "
       script += "three_nucleotide_periodicity_data_file = '\$PWD/${sample_nt3_periodicity_tsv}', "
       script += "gene_position_length_counts_5start_file = '\$PWD/${sample_gene_position_length_counts_5start_tsv}', "
