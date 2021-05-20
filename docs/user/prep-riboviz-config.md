@@ -222,7 +222,7 @@ t_rna_file: ${RIBOVIZ_DATA}/yeast_tRNAs.tsv
 
 Which, if any, token you use in each of the configuration parameters is entirely up to you. No checks are made to see which specific token is used with which configuration parameter.
 
-[Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md) describes how to define values for these environment variables so that their values can be applied when the workflow is run.
+[Defining values for environment variables](./prep-riboviz-run-nextflow.md#defining-values-for-environment-variables) in [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md) describes how to define values for these environment variables so that their values can be applied when the workflow is run.
 
 **Note:** If a configuration file contains environment variable tokens then you **must** provide values for these when running the workflow.
 
