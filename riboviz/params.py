@@ -38,6 +38,8 @@ MULTIPLEX_FQ_FILES = "multiplex_fq_files"
 
 TRIM_5P_MISMATCHES = "trim_5p_mismatches"
 """ Trim mismatched 5' base? """
+RUN_STATIC_HTML = "run_static_html"
+""" Create static html visualization per sample? """
 
 SAMPLE_SHEET = "sample_sheet"
 """ Sample sheet. """

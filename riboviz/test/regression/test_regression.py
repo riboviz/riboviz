@@ -111,6 +111,7 @@ import pytest
 import pysam
 from riboviz import environment
 from riboviz import h5
+from riboviz import html
 from riboviz import hisat2
 from riboviz import sam_bam
 from riboviz import compare_files
@@ -683,6 +684,10 @@ def test_bam_to_h5_h5(expected_fixture, output_dir, sample):
                           workflow_r.POS_SP_RPF_NORM_READS_TSV,
                           workflow_r.READ_LENGTHS_TSV,
                           workflow_r.THREE_NT_FRAME_BY_GENE_TSV,
+                          workflow_r.THREE_NT_FRAME_BY_GENE_FILTERED_TSV,
+                          workflow_r.SEQUENCE_FEATURES_TSV,
+                          workflow_r.GENE_POSITION_LENGTH_COUNTS_TSV,
+                          workflow_r.CODON_RIBODENS_GATHERED_TSV,
                           workflow_r.TPMS_TSV])
 def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
                                  file_name):
@@ -739,6 +744,39 @@ def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
                                  sample, file_name)
     if not os.path.exists(expected_file):
         pytest.skip('Skipped as expected file does not exist')
+    compare_files.compare_files(
+        expected_file,
+        os.path.join(output_dir, sample, file_name))
+
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("file_name", [workflow_files.STATIC_HTML_FILE])
+def test_analysis_outputs_html(expected_fixture, output_dir, sample, file_name, nextflow_fixture):
+    """
+    Test ``AnalysisOutputs.Rmd`` html files for equality. See
+    :py:func:`riboviz.compare_files.compare_files`.
+
+    If Nextflow tests were requested then this test is run.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param output_dir: Output directory, from configuration file
+    :type output_dir: str or unicode
+    :param sample: sample name
+    :type sample: str or unicode
+    :param file_name: file name
+    :type file_name: str or unicode
+    :param nextflow_fixture: Should Nextflow tests be run?
+    :type nextflow_fixture: bool
+    """
+    if not nextflow_fixture:
+        pytest.skip('Skipped test not applicable to Nextflow')
+    file_name = workflow_files.STATIC_HTML_FILE.format(sample)
+    output_dir_name = os.path.basename(os.path.normpath(output_dir))
+    expected_file = os.path.join(expected_fixture, output_dir_name,
+                                 sample, file_name)
+    if not os.path.exists(expected_file):
+       pytest.skip('Skipped as expected file does not exist')
+    assert os.path.exists(os.path.join(output_dir, sample, file_name))
     compare_files.compare_files(
         expected_file,
         os.path.join(output_dir, sample, file_name))
