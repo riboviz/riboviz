@@ -38,6 +38,8 @@ MULTIPLEX_FQ_FILES = "multiplex_fq_files"
 
 TRIM_5P_MISMATCHES = "trim_5p_mismatches"
 """ Trim mismatched 5' base? """
+RUN_STATIC_HTML = "run_static_html"
+""" Create static html visualization per sample? """
 
 SAMPLE_SHEET = "sample_sheet"
 """ Sample sheet. """
@@ -207,5 +209,43 @@ JOB_CONFIG_TYPE = {
     VALIDATE_ONLY: bool
 }
 """ Types of job configuration parameters. """
-RUN_STATIC_HTML = "run_static_html"
-""" Create static html visualization per sample? """
+
+ENV_RIBOVIZ_SAMPLES = "RIBOVIZ_SAMPLES"
+""" Samples directory environment variable name (Nextflow workflow only). """
+ENV_RIBOVIZ_ORGANISMS = "RIBOVIZ_ORGANISMS"
+""" Organisms directory environment variable name (Nextflow workflow only). """
+ENV_RIBOVIZ_DATA = "RIBOVIZ_DATA"
+""" Data directory environment variable name (Nextflow workflow only). """
+ENV_DIRS = [
+    ENV_RIBOVIZ_SAMPLES,
+    ENV_RIBOVIZ_ORGANISMS,
+    ENV_RIBOVIZ_DATA
+]
+"""
+Environment variables which can be used to define directories
+(Nextflow workflow only).
+"""
+ENV_INPUT_PARAMS = [ASITE_DISP_LENGTH_FILE,
+                    CODON_POSITIONS_FILE,
+                    FEATURES_FILE,
+                    INPUT_DIR,
+                    ORF_FASTA_FILE,
+                    ORF_GFF_FILE,
+                    RRNA_FASTA_FILE,
+                    T_RNA_FILE]
+"""
+Names of input parameters whose values can include RiboViz environment
+variables (Nextflow workflow only).
+"""
+ENV_OUTPUT_PARAMS = [INDEX_DIR,
+                     OUTPUT_DIR,
+                     TMP_DIR]
+"""
+Names of output parameters whose values can include RiboViz environment
+variables (Nextflow workflow only).
+"""
+ENV_PARAMS = ENV_INPUT_PARAMS + ENV_OUTPUT_PARAMS
+"""
+Names of parameters whose values can include RiboViz environment
+variables (Nextflow workflow only).
+"""
