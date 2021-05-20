@@ -34,6 +34,14 @@ The test suite accepts the following command-line parameters:
   Nextflow). Note that some regression tests differ for Nextflow due
   to differences in naming of some temporary files.
 
+If the configuration uses environment variable tokens, then these
+should be defined in the bash shell within which ``pytest`` is
+run. Alternatively, they can be provided when running ``pytest``, for
+example::
+
+    $ RIBOVIZ_SAMPLES=data/ RIBOVIZ_ORGANISMS=vignette/input/ \
+      RIBOVIZ_DATA=data/ pytest ...
+
 If the configuration specifies samples
 (:py:const:`riboviz.params.FQ_FILES`) then ``--check-index-tmp``
 can be used.
@@ -99,12 +107,11 @@ See :py:mod:`riboviz.test.regression.conftest` for information on the
 fixtures used by these tests.
 """
 import os
-import shutil
-import subprocess
-import tempfile
 import pytest
 import pysam
+from riboviz import environment
 from riboviz import h5
+from riboviz import html
 from riboviz import hisat2
 from riboviz import sam_bam
 from riboviz import compare_files
@@ -112,6 +119,7 @@ from riboviz import count_reads
 from riboviz import workflow_files
 from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
+from riboviz.test import nextflow
 from riboviz import test
 
 
@@ -133,24 +141,24 @@ def prep_riboviz_fixture(skip_workflow_fixture, config_fixture,
         if not nextflow_fixture:
             exit_code = prep_riboviz.prep_riboviz(config_fixture)
         else:
-            cmd = ["nextflow", "run", test.NEXTFLOW_WORKFLOW,
-                   "-params-file", config_fixture, "-ansi-log", "false"]
-            exit_code = subprocess.call(cmd)
+            env_vars = environment.get_environment_vars()
+            exit_code = nextflow.run_nextflow(config_fixture,
+                                              envs=env_vars)
         assert exit_code == 0, \
             "prep_riboviz returned non-zero exit code %d" % exit_code
 
 
 @pytest.fixture(scope="function")
-def scratch_directory():
+def scratch_directory(tmpdir):
     """
     Create a scratch directory.
 
+    :param tmpdir: Temporary directory (pytest built-in fixture)
+    :type tmpdir py._path.local.LocalPath
     :return: directory
-    :rtype: str or unicode
+    :rtype: py._path.local.LocalPath
     """
-    scratch_dir = tempfile.mkdtemp("tmp_scratch")
-    yield scratch_dir
-    shutil.rmtree(scratch_dir)
+    return tmpdir.mkdir("scratch")
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
@@ -676,6 +684,10 @@ def test_bam_to_h5_h5(expected_fixture, output_dir, sample):
                           workflow_r.POS_SP_RPF_NORM_READS_TSV,
                           workflow_r.READ_LENGTHS_TSV,
                           workflow_r.THREE_NT_FRAME_BY_GENE_TSV,
+                          workflow_r.THREE_NT_FRAME_BY_GENE_FILTERED_TSV,
+                          workflow_r.SEQUENCE_FEATURES_TSV,
+                          workflow_r.GENE_POSITION_LENGTH_COUNTS_TSV,
+                          workflow_r.CODON_RIBODENS_GATHERED_TSV,
                           workflow_r.TPMS_TSV])
 def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
                                  file_name):
@@ -732,6 +744,39 @@ def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
                                  sample, file_name)
     if not os.path.exists(expected_file):
         pytest.skip('Skipped as expected file does not exist')
+    compare_files.compare_files(
+        expected_file,
+        os.path.join(output_dir, sample, file_name))
+
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("file_name", [workflow_files.STATIC_HTML_FILE])
+def test_analysis_outputs_html(expected_fixture, output_dir, sample, file_name, nextflow_fixture):
+    """
+    Test ``AnalysisOutputs.Rmd`` html files for equality. See
+    :py:func:`riboviz.compare_files.compare_files`.
+
+    If Nextflow tests were requested then this test is run.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param output_dir: Output directory, from configuration file
+    :type output_dir: str or unicode
+    :param sample: sample name
+    :type sample: str or unicode
+    :param file_name: file name
+    :type file_name: str or unicode
+    :param nextflow_fixture: Should Nextflow tests be run?
+    :type nextflow_fixture: bool
+    """
+    if not nextflow_fixture:
+        pytest.skip('Skipped test not applicable to Nextflow')
+    file_name = workflow_files.STATIC_HTML_FILE.format(sample)
+    output_dir_name = os.path.basename(os.path.normpath(output_dir))
+    expected_file = os.path.join(expected_fixture, output_dir_name,
+                                 sample, file_name)
+    if not os.path.exists(expected_file):
+       pytest.skip('Skipped as expected file does not exist')
+    assert os.path.exists(os.path.join(output_dir, sample, file_name))
     compare_files.compare_files(
         expected_file,
         os.path.join(output_dir, sample, file_name))
