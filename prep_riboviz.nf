@@ -31,18 +31,38 @@ def helpMessage() {
       '--make_bedgraph=FALSE').
 
     To specify values for environment variables (see Environment
-    variable and configuration tokens), you can run:
-
-    \$ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \\
-      RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY> \\
-      RIBOVIZ_DATA=<DATA_DIRECTORY> \\
-      nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml [--help]
-
-    where:
+    variable and configuration tokens), you have two options, where:
 
     * '<SAMPLES_DIRECTORY>' is a directory with input files.
     * '<ORGANISMS_DIRECTORY>' is a directory with input files.
     * '<DATA_DIRECTORY>' is a directory with input files.
+
+    The options are:
+
+    1. Specify environment variables with the paths to the directories
+       on the same line as your command to run the workflow. The
+       values will be used for this run of the workflow only. For
+       example:
+
+    \$ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \\
+       RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY> \\
+       RIBOVIZ_DATA=<DATA_DIRECTORY> \\
+       nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml
+
+    2. Define values for the environment variables within your bash
+       shell. The values will be available for successive runs of the
+       workflow. The values need to be defined using 'export' so they
+       are available to 'nextflow' when it runs. For example:
+
+    \$ export RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY>
+    \$ export RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY>
+    \$ export RIBOVIZ_DATA=<DATA_DIRECTORY>
+    \$ nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml
+
+    The above approaches can be combined i.e. you can define variables
+    using 'export' (2) but provide other values as part of the command
+    to run the workflow (1). Values provided within the command take
+    precedence over those defined via 'export'.
 
     Configuration
     -------------

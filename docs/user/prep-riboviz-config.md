@@ -220,16 +220,11 @@ rrna_fasta_file: ${RIBOVIZ_ORGANISMS}/yeast_rRNA_R64-1-1.fa
 t_rna_file: ${RIBOVIZ_DATA}/yeast_tRNAs.tsv
 ```
 
-When [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md) you would specify environment variables with the paths to the directories e.g.
-
-```console
-$ RIBOVIZ_SAMPLES=/home/user/dataset/samples \
-  RIBOVIZ_ORGANISMS=/home/user/dataset/organisms \
-  RIBOVIZ_DATA=/home/user/dataset/data \
-  nextflow run prep_riboviz.nf -ansi-log false -params-file config.yaml
-```
-
 Which, if any, token you use in each of the configuration parameters is entirely up to you. No checks are made to see which specific token is used with which configuration parameter.
+
+[Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md) describes how to define values for these environment variables so that their values can be applied when the workflow is run.
+
+**Note:** If a configuration file contains environment variable tokens then you **must** provide values for these when running the workflow.
 
 **Note:** The following configuration parameters also take values that are relative paths to files or directories, but the use of tokens in their values is **not supported**, as these paths are assumed to be relative to paths defined by the configuration parameters stated above:
 
