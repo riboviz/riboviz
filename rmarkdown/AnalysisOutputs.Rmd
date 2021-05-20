@@ -1,0 +1,261 @@
+
+---
+title: "Riboviz Analysis Outputs"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+params: 
+  verbose: FALSE
+  yamlfile: NA
+  sampleid: NA
+  three_nucleotide_periodicity_data_file: NA
+  gene_position_length_counts_5start_file: NA
+  read_length_data_file: NA
+  pos_sp_rpf_norm_reads_data_file: NA
+  gene_read_frames_filtered_data_file: NA
+  codon_ribodens_gathered_file: NA
+  sequence_features_file: NA
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+suppressMessages(library(here))
+suppressMessages(library(getopt))
+suppressMessages(library(knitr)) 
+suppressMessages(library(yaml))
+suppressMessages(library(tidyverse))
+```
+
+```{r optional_params, echo=FALSE}
+
+### handling optional outputs parameters: 
+
+# get contents of config yaml file to check for missing conditional files
+yaml <- yaml::read_yaml(params$yamlfile)
+
+# 3ntframe_propbygene.pdf plot: read frame (conditional on `asite_disp_length_file`) 
+if (is.null(yaml$asite_disp_length_file)){
+  readframe_plot <- NA
+} else {
+  readframe_plot <- "present"
+}
+
+# features.pdf plot: gene features (conditional on `features_file`)
+if (is.null(yaml$features_file)){
+  features_plot <- NA
+} else {
+  features_plot <- "present"
+}
+
+# codon_ribodens.pdf plot: (conditional on `t_rna_file` and `codon_positions_file`)
+# check trna file config yaml parameter for file presence/absence
+if (is.null(yaml$t_rna_file)){
+  trna_file <- NA
+} else {
+  trna_file <- "present"
+}
+# check codon positions file config yaml parameter for file presence/absence
+if (is.null(yaml$codon_positions_file)){
+  codonpos_file <- NA
+} else {
+  codonpos_file <- "present"
+}
+
+# use result of absence/presence yaml-config-checking for both files 
+# to determine whether to plot codon_ribodens:
+if (is.na(trna_file) & is.na(codonpos_file)){
+  codonspecificribosomedensitytrnacorrelation_plot <- NA
+} else {
+  codonspecificribosomedensitytrnacorrelation_plot <- "present"
+}
+```
+
+## Sample Name: `r params$sampleid`
+
+```{r printparams, echo=FALSE}
+
+if(params$verbose == TRUE){
+  print(codonspecificribosomedensitytrnacorrelation_plot)
+  # show yaml file info
+  print(params$yamlfile)
+  
+  # show sample ID
+  print(params$sampleid)
+  
+  # show yaml params
+  print(str(yaml))
+}
+```
+
+```{r source_script, include=FALSE}
+
+source(here::here("rscripts", "provenance.R"), local = knitr::knit_global())
+source(here::here("rscripts", "read_count_functions.R"), local = knitr::knit_global())
+source(here::here("rscripts", "stats_figs_block_functions.R"), local = knitr::knit_global())
+# o?r sys.source("your-script.R", envir = knitr::knit_global())
+
+# set theme for plotting
+ggplot2::theme_set(theme_bw(base_size=11.5))
+```
+
+## Provenance
+
+```{r provenance, echo=FALSE, warning=FALSE}
+# handle interactive vs standard running
+
+if(is.na(getopt::get_Rscript_filename())){
+  this_script <- "AnalysisOutputs.Rmd"
+  path_to_this_script <- here::here("rmarkdown", this_script)
+} else {
+  this_script <- getopt::get_Rscript_filename()
+  path_to_this_script <- this_script
+}
+
+# print provenance
+print_provenance(path_to_this_script)
+```
+
+```{r message=FALSE, include=FALSE}
+
+### Load Data: 
+
+# three nucleotide periodicity
+three_nucleotide_periodicity_data <- read_tsv(
+  file = params$three_nucleotide_periodicity_data_file, 
+  skip = 4, # this avoids the provenance info
+  col_names = TRUE) %>%
+  mutate(End = factor(End, levels = c("5'", "3'")))
+
+# codon ribogrid & codon ribogrid bar
+gene_poslen_counts_5start_df <- read_tsv(
+  file = params$gene_position_length_counts_5start_file, 
+  skip = 4, # this avoids the provenance info
+  col_names = TRUE
+)
+
+# read length
+read_length_data <- read_tsv(
+  file = params$read_length_data_file, 
+  skip = 4, # this avoids the provenance info
+  col_names = TRUE)
+
+# position specific distribution of reads 
+pos_sp_rpf_norm_reads_data <- read_tsv(
+  file = params$pos_sp_rpf_norm_reads_data_file, 
+  skip = 4, # this avoids the provenance info
+  col_names = TRUE) %>%
+  mutate(End = factor(End, levels = c("5'", "3'")))
+
+### Load Data for conditional plots:
+
+# 3ntframe_propbygene.pdf plot: read frame (conditional on `asite_disp_length_file`) 
+if (!is.na(readframe_plot)){
+  gene_read_frame_data_filtered <- read_tsv(
+    file = params$gene_read_frames_filtered_data_file, 
+    skip = 4, # this avoids the provenance info
+    col_names = TRUE)
+}
+
+# features.pdf plot: gene features (conditional on `features-file`)
+if(!is.na(features_plot)){
+  # load data sequence_features_file
+  features_plot_data <- read_tsv(
+    file = params$sequence_features_file, 
+    skip = 4, # this avoids the provenance info
+    col_names = TRUE)
+}
+
+# codon_ribodens.pdf plot: (conditional on `t_rna_file` and `codon_positions_file`)
+if(!is.na(codonspecificribosomedensitytrnacorrelation_plot)){
+  # load data 
+  cod_dens_tRNA_wide <- read_tsv(
+    file = params$codon_ribodens_gathered_file, 
+    skip = 4, # this avoids the provenance info
+    col_names = TRUE)
+}
+```
+
+## Plots:
+
+### Three nucleotide periodicity: 
+
+```{r plot_threenucleotideperiodicity, echo=FALSE}
+
+# three nucleotide periodicity
+PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
+```
+
+### Ribogrid: 
+
+```{r codonribogrid, echo=FALSE}
+
+# codonribogrid
+PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
+```
+
+### Ribogridbar: 
+
+```{r codonribogridbar, echo=FALSE}
+
+# codonribogridbar
+PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
+```
+
+### Read lengths:
+
+```{r plot_readlength, echo=FALSE}
+
+# read length
+PlotReadLengths(read_length_data)
+```
+
+### Position specific distribution of reads:
+
+```{r plot_positionspecificdistribution, echo=FALSE, message=FALSE}
+
+# position specific distribution of reads
+PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
+```
+
+### Read frame proportion by gene: 
+
+```{r proportionframe, echo=FALSE, message=FALSE, warning=FALSE}
+
+# plot read frame
+if (!is.na(readframe_plot)){
+  # run PlotGeneReadFrames():
+  PlotGeneReadFrames(gene_read_frame_data_filtered)
+} else {
+  print("read frame proportion by gene NOT plotted: required input files not provided")
+}
+```
+
+### Sequence features: 
+
+```{r featuresplot, echo=FALSE, message=FALSE, warning=FALSE}
+
+# plot sequence features
+if (!is.na(features_plot)) {
+  # conditional on `features-file`
+  PlotSequenceBasedFeatures(features_plot_data)
+} else {
+  print("features NOT plotted: required input files not provided")
+}
+```
+
+### Codon-specific ribosome density and tRNA correlation:
+
+```{r ribosomedensitytrna_plot, echo=FALSE, message=FALSE, warning=FALSE}
+
+# plot codon specific ribosome density 
+if (!is.na(codonspecificribosomedensitytrnacorrelation_plot)) {
+  # conditional on `t_rna_file` and `codon_positions_file`
+  PlotCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_wide)
+} else {
+  print("codon-specific ribosome density and tRNA correlation NOT plotted: required input files not provided")
+}
+```

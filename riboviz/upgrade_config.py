@@ -56,6 +56,7 @@ configuration:
 * ``trim_5p_mismatches: true``
 * ``umi_regexp: null``
 * ``validate_only: false``
+* `run_static_html: true`
 
 The values of parameters ``rrna_index_prefix`` and
 ``orf_index_prefix`` are updated to be file names only, as, these are
@@ -119,6 +120,7 @@ UPDATES = {
     params.LOGS_DIR: "vignette/logs",
     params.MULTIPLEX_FQ_FILES: None,
     params.PUBLISH_INDEX_TMP: False,
+    params.RUN_STATIC_HTML: True,
     params.SAMPLE_SHEET: None,
     params.SAMSORT_MEMORY: None,
     params.TRIM_5P_MISMATCHES: True,
