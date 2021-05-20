@@ -7,6 +7,7 @@ Contents:
 * [Prepare input data](#prepare-input-data)
 * [Set up your environment](#set-up-your-environment)
 * [Configure number of processes (optional)](#configure-number-of-processes-optional)
+* [Defining values for environment variables](#defining-values-for-environment-variables)
 * [Validate configuration](#validate-configuration)
   - [Skip checks for ribosome profiling data files parameter](#skip-checks-for-ribosome-profiling-data-files-parameter)
 * [Run the Nextflow workflow](#run-the-nextflow-workflow)
@@ -115,28 +116,85 @@ This parameter is currently used by `hisat2`, `samtools sort`, `bam_to_h5.R` and
 
 ---
 
+## Defining values for environment variables
+
+To specify values for environment variables cited as tokens in configuration parameters, (see [Environment variables and configuration tokens](./prep-riboviz-config.md#environment-variables-and-configuration-tokens)), you have two options, where:
+
+* `<SAMPLES_DIRECTORY>` is a directory with input files.
+* `<ORGANISMS_DIRECTORY>` is a directory with input files.
+* `<DATA_DIRECTORY>` is a directory with input files.
+
+The options are:
+
+1. Specify environment variables with the paths to the directories on the same line as your command to run the workflow. The values will be used for this run of the workflow only. For example:
+
+```console
+$ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \
+  RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY> \
+  RIBOVIZ_DATA=<DATA_DIRECTORY> \
+  nextflow run prep_riboviz.nf -params-file <CONFIG_FILE>
+```
+
+2. Define values for the environment variables within your bash shell. The values will be available for successive runs of the workflow. The values need to be defined using `export` so they are available to `nextflow` when it runs. For example:
+
+```console
+$ export RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY>
+$ export RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY>
+$ export RIBOVIZ_DATA=<DATA_DIRECTORY>
+$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE>
+```
+
+The above approaches can be combined i.e. you can define variables using `export` (2) but provide other values as part of the command to run the workflow (1). Values provided within the command take precedence over those defined via `export`.
+
+**Note:** If using (1) then `<CONFIG_FILE>` cannot use the value of any variable defined within the same line. For example, if there was a configuration file `/home/$USER/riboviz/example-datasets/simulated/mok/Mok-tinysim_config.yaml` and the user runs:
+
+```console
+$ RIBOVIZ_SAMPLES=/home/$USER/tinysim \
+  RIBOVIZ_DATA=/home/$USER/riboviz/riboviz/data \
+  RIBOVIZ_ORGANISMS=/home/$USER/riboviz/example-datasets/simulated/mok \
+  nextflow prep_riboviz.nf -params-file ${RIBOVIZ_ORGANISMS}/Mok-tinysim_config.yaml
+```
+
+then this will fail as `-params-file` has value `/Mok-tinysim_config.yaml` and not `/home/$USER/riboviz/example-datasets/simulated/mok/Mok-tinysim_config.yaml`. This is because the bash shell expands all the environment variables in the command (within `${...}`) *before* it runs the command (and, so, before the variables are defined). In such cases, either provide the path to `<CONFIG_FILE>` or define the variables using `export`.
+
+**Note:** If a configuration file contains environment variable tokens then you **must** provide values for these when running the workflow.
+
+---
+
 ## Validate configuration
 
 The workflow supports a `--validate_only` command-line parameter which allows for the workflow configuration to be validated without running the workflow.
 
 **Tip:** we strongly recommend validating the configuration before doing a live run on data you have not processed before.
 
-Validate configuration:
+Validate configuration, by running one of the following (depending on whether or not your workflow configuration uses environment variable tokens - see [Defining values for environment variables](#defining-values-for-environment-variables) above):
 
 ```console
+$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE> --validate_only
+```
+```console
+$ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \
+  RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY> \
+  RIBOVIZ_DATA=<DATA_DIRECTORY> \
+  nextflow run prep_riboviz.nf -params-file <CONFIG_FILE> --validate_only
+```
+```console
+$ export RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY>
+$ export RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY>
+$ export RIBOVIZ_DATA=<DATA_DIRECTORY>
 $ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE> --validate_only
 ```
 
 where:
 
-* `<CONFIG_FILE>`: path to a YAML configuration file.
+* `<CONFIG_FILE>`: is a YAML configuration file.
 
 ### Skip checks for ribosome profiling data files parameter
 
 `--validate_only` can be complemented by a `--skip_inputs` command-line parameter. This skips checks for the existence of the ribosome profiling data files (`fq_files`, `multiplexed_fq_files`, `sample_sheet`). An example without `--skip_inputs` might appear as:
 
 ```console
-$ nextflow run prep_riboviz.nf -params-file vignette/experiment_config.yaml -ansi-log false --validate_only
+$ nextflow run prep_riboviz.nf -params-file vignette/experiment_config.yaml -ansi-log false --validate_only 
 N E X T F L O W  ~  version 20.01.0
 Launching `prep_riboviz.nf` [elated_bartik] - revision: e6bda28069
 Validating configuration only
@@ -162,24 +220,36 @@ This can be useful if you want to check that a configuration file you have recei
 
 ## Run the Nextflow workflow
 
-Run:
+Run one of the following (depending on whether or not your workflow configuration uses environment variable tokens - see [Defining values for environment variables](#defining-values-for-environment-variables) above):
 
 ```console
-$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE> -ansi-log false
+$ nextflow run prep_riboviz.nf -ansi-log false -params-file <CONFIG_FILE>
+```
+```console
+$ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \
+  RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY> \
+  RIBOVIZ_DATA=<DATA_DIRECTORY> \
+  nextflow run prep_riboviz.nf -ansi-log false -params-file <CONFIG_FILE>
+```
+```console
+$ export RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY>
+$ export RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY>
+$ export RIBOVIZ_DATA=<DATA_DIRECTORY>
+$ nextflow run prep_riboviz.nf -ansi-log false -params-file <CONFIG_FILE>
 ```
 
 where:
 
-* `<CONFIG_FILE>`: path to a YAML configuration file.
 * `-ansi-log false`: requests that each invocation of a Nextflow task is displayed on a separate line.
+* `<CONFIG_FILE>`: is a YAML configuration file.
+* Configuration parameters can also be provided via the command-line in the form `--<PARAMETER>=<VALUE>` (for example `--make_bedgraph=FALSE`).
 
-Configuration parameters can also be provided via the command-line in the form `--<PARAMETER>=<VALUE>` (for example `--make_bedgraph=FALSE`).
+The workflow will then execute, displaying information on each step as it is executed:
 
-Information on the key steps during processing is displayed.
-
-Each sample-specific process is labelled with the sample ID, indexing processes are labelled with the index prefix, and multiplexed file-specific processes are labelled with the file name (minus extension).
-
-The `collateTpms` process displays the names of all the samples that are collated.
+* Indexing steps are labelled with the index prefix
+* Sample-specific steps are labelled with the sample ID.
+* Multiplexed file-specific steps are labelled with the file name (minus extension).
+* `collateTpms` is labelled with the IDs of all the samples that are collated.
 
 ### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
 
@@ -228,7 +298,7 @@ Usage and configuration information can be viewed via use of the `--help` flag:
 $ nextflow run prep_riboviz.nf --help
 ```
 
-Note that `--help` displays workflow help, whereas `-help` display's the `nextflow run` command's in-built help.
+Note that `--help` displays RiboViz-specific workflow help, whereas `-help` display's the `nextflow run` command's in-built help.
 
 ---
 
@@ -763,103 +833,16 @@ For more information see [DAG visualisation](https://www.nextflow.io/docs/latest
 
 ## Invoking the workflow from outwith the RiboViz home directory
 
-To invoke the workflow from outwith the RiboViz home directory:
-
-* Ensure that all the input paths in the YAML configuration file are correctly configured:
-  - `dir_in`
-  - `orf_fasta_file`
-  - `orf_gff_file`
-  - `rrna_fasta_file`
-* Ensure that all the output paths in the YAML configuration file are correctly configured:
-  - `dir_index`
-  - `dir_out`
-  - `dir_tmp`
-* Ensure that all the data paths in the YAML configuration file are correctly configured:
-  - `asite_disp_length_file`
-  - `codon_positions_file`
-  - `features_file`
-  - `t_rna_file`
-
-* Run:
+The workflow can be invoked from any directory, by providing the path to the workflow. For example:
 
 ```console
-$ nextflow run <RIBOVIZ>/prep_riboviz.nf -params-file <CONFIG_FILE> \
-    -ansi-log false
+$ nextflow run <RIBOVIZ>/prep_riboviz.nf -params-file <CONFIG_FILE> -ansi-log false
 ```
 
-where:
-
-* `<RIBOVIZ>`: path to RiboViz home directory, which can be relative to the current directory or absolute.
-* `<CONFIG>`: path to a YAML configuration file, which can be relative to the current directory or absolute.
-
-File and folder paths can be relative or absolute. They can also point to symbolic links to the actua files or folders.
-
-### Using relative paths and symbolic links
-
-You may have input files and data files in different locations. Rather than copy these all into a single directory you can create symbolic links to these files.
-
-For example, imagine we wanted to run the vignette in a new directory, but not copy all the input and data files. We can create an `example` directory:
+For example:
 
 ```console
-$ cd
-$ mkdir example
-$ cd example
+$ nextflow run ../riboviz/prep_riboviz.nf -params-file <CONFIG_FILE> -ansi-log false
 ```
 
-We can then create symbolic links to all the input and data files that the vignette uses:
-
-```console
-$ mkdir data
-$ ln -s ../../riboviz/data/yeast_CDS_w_250utrs.fa
-$ ln -s ../../riboviz/data/yeast_CDS_w_250utrs.gff3
-$ ln -s ../../riboviz/data/yeast_codon_pos_i200.RData
-$ ln -s ../../riboviz/data/yeast_features.tsv
-$ ln -s ../../riboviz/data/yeast_standard_asite_disp_length.txt
-$ ln -s ../../riboviz/data/yeast_tRNAs.tsv
-$ cd ..
-$ mkdir input
-$ cd input/
-$ ln -s ../../riboviz/vignette/input/SRR1042855_s1mi.fastq.gz
-$ ln -s ../../riboviz/vignette/input/SRR1042864_s1mi.fastq.gz
-$ ln -s ../../riboviz/vignette/input/yeast_rRNA_R64-1-1.fa
-$ ln -s ../../riboviz/vignette/input/yeast_YAL_CDS_w_250utrs.fa
-$ ln -s ../../riboviz/vignette/input/yeast_YAL_CDS_w_250utrs.gff3
-$ cd ..
-```
-
-We can then create `example_config.yaml`, a copy of `vignette_config.yaml` but with file paths updated:
-
-```
-dir_index: index
-dir_in: input
-dir_out: output
-dir_tmp: tmp
-orf_fasta_file: input/yeast_YAL_CDS_w_250utrs.fa
-orf_gff_file: input/yeast_YAL_CDS_w_250utrs.gff3
-rrna_fasta_file: input/yeast_rRNA_R64-1-1.fa
-```
-
-Now, we can validate our configuration, by running Nextflow from within the current directory (where `<RIBOVIZ>` is the path to RiboViz home directory, which can be relative to the current directory or absolute):
-
-```console
-$ nextflow run <RIBOVIZ>/prep_riboviz.nf -params-file example_config.yaml -ansi-log false --validate_only
-```
-
-Now, we can run our workflow:
-
-```console
-$ nextflow run <RIBOVIZ>/prep_riboviz.nf -params-file example_config.yaml -ansi-log false
-```
-
-Our temporary and output files and the Nextflow work directory will all be written to the current directory.
-
-We could then, for example, run the RiboViz regression tests, again within the current directory:
-
-```console
-$ PYTHONPATH=<RIBOVIZ>/riboviz pytest \
-    <RIBOVIZ>/riboviz/test/regression/test_regression.py \
-    --expected=$HOME/regression-test-data-2.0 \
-     --config-file=example_config.yaml --skip-workflow --nextflow
-```
-
-`$PYTHONPATH` tells Python where the `riboviz` package can be found.
+Note that if `<CONFIG_FILE>` has relative paths then these will be relative to the current directory, not `<CONFIG_FILE>` or `prep_riboviz.nf`.

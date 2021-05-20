@@ -6,6 +6,7 @@ import csv
 import os
 import warnings
 import gffutils
+from pyfaidx import Fasta
 from riboviz import provenance
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 
@@ -78,8 +79,8 @@ def get_cds_from_fasta(feature, fasta):
 
     :param feature: GFF feature for the CDS
     :type feature: gffutils.feature.Feature
-    :param fasta: FASTA file
-    :type fasta: str or unicode
+    :param fasta: FASTA genes
+    :type fasta: pyfaidx.Fasta
     :return: sequence
     :rtype: str or unicode
     :raises AssertionError: If sequence has length not divisible by 3
@@ -163,9 +164,10 @@ def get_cds_codons_from_fasta(fasta,
         raise ValueError("{} ({})".format(e, gff)) from e
     cds_codons = {}
     same_feature_id_count = 0
+    fasta_genes = Fasta(fasta)
     for feature in gffdb.features_of_type('CDS'):
         try:
-            sequence = get_cds_from_fasta(feature, fasta)
+            sequence = get_cds_from_fasta(feature, fasta_genes)
             codons = sequence_to_codons(sequence)
         except KeyError as e:  # Missing sequence.
             warnings.warn(str(e))
@@ -198,7 +200,7 @@ def write_feature_codons_to_csv(feature_codons, csv_file, delimiter="\t"):
     * :py:const:`GENE`: feature name.
     * :py:const:`POS`: codon position in coding sequence (1-indexed).
     * :py:const:`CODON`: codon.
-    
+
     :param feature_codons: Codons for each feature, keyed by feature \
     name
     :type feature_codons: dict(str or unicode -> list(str or unicode))

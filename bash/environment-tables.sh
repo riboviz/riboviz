@@ -65,7 +65,7 @@ HISAT2_VERSION=$(echo "$HISAT2_VERSION" | head -n 1  | cut -d" " -f3)
 echo "| Hisat2 | $HISAT2_VERSION |"
 BOWTIE_VERSION=$(bowtie --version | head -n 1 | cut -d" " -f3)
 echo "| Bowtie | $BOWTIE_VERSION |"
-# /home/ubuntu/bowtie-1.2.2-linux-x86_64/bowtie-align-s version 1.2.2 
+# /home/ubuntu/bowtie-1.2.2-linux-x86_64/bowtie-align-s version 1.2.2
 R_VERSION=$(R --version | head -n 1 | cut -d" " -f3)
 # R version 3.4.4 (2018-03-15) -- "Someone to Lean On"
 echo "| R | $R_VERSION |"
@@ -96,7 +96,7 @@ echo " "
 echo "| R Package | Version |"
 echo "| --------- | ------- |"
 R_PKGS=$(Rscript rscripts/list-r-packages.R)
-R_LIST=(Biostrings devtools ggplot2 git2r glue here lintr optparse plotly RcppRoll readr rhdf5 roxygen2 Rsamtools rtracklayer shiny ShortRead styler testthat tidyr withr)
+R_LIST=(Biostrings tidyverse git2r here lintr optparse plotly RcppRoll rhdf5 Rsamtools rtracklayer shiny ShortRead styler)
 for pkg in ${R_LIST[@]}; do
     PKG_VERSION=$(echo "$R_PKGS" | grep -iw "$pkg " | tr -s " ")
     PKG_VERSION=$(echo $PKG_VERSION | cut -d" " -f2)

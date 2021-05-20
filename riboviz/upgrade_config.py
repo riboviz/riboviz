@@ -68,6 +68,7 @@ already present in the configuration:
 * ``nextflow_work_dir: work``
 * ``stop_in_feature: false``
 * ``validate_only: false``
+* `run_static_html: true`
 
 The values of parameters ``rrna_index_prefix`` and
 ``orf_index_prefix`` are updated to be file names only, as, these are
@@ -141,8 +142,10 @@ added between release 1.1.0 and 2.0.
 
 UPDATES_20_CURRENT = {
     params.FEATURE: "CDS",
+    params.RUN_STATIC_HTML: True,
     params.STOP_IN_FEATURE: False
 }
+
 """
 Map from configuration parameters to default values for parameters
 added between release 2.0 and the current release.

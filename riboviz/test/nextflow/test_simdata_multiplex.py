@@ -175,7 +175,8 @@ def test_deplex_umi_groups(configuration_module, sample_id):
     :type sample_id: str or unicode
     """
     config, _ = configuration_module
-    check_umi_groups(config, sample_id, 5)
+    tmp_dir = config[params.TMP_DIR]
+    check_umi_groups(tmp_dir, sample_id, 5)
 
 
 @pytest.mark.parametrize("sample_id", ["Tag0", "Tag1", "Tag2"])
@@ -192,4 +193,5 @@ def test_deplex_tpms_collated_tsv(configuration_module, sample_id):
     :type sample_id: str or unicode
     """
     config, _ = configuration_module
-    check_tpms_collated_tsv(config, sample_id, 4)
+    output_dir = config[params.OUTPUT_DIR]
+    check_tpms_collated_tsv(output_dir, sample_id, 4)

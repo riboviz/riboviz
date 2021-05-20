@@ -50,6 +50,7 @@ publish_index_tmp: FALSE # Publish index and temporary files to dir_index and di
 rpf: TRUE # Is the dataset an RPF or mRNA dataset?
 rrna_fasta_file: vignette/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning to
 rrna_index_prefix: yeast_rRNA # rRNA index file prefix, relative to dir_index
+run_static_html: TRUE # Create static html visualization per sample?
 sample_sheet: null # Sample sheet, TSV file with, at least, SampleID and TagRead (barcode) columns
 secondary_id: NULL # Secondary gene IDs to access the data (COX1, EFB1, etc.)
 stop_in_feature: FALSE # Are stop codons part of the feature annotations in GFF?

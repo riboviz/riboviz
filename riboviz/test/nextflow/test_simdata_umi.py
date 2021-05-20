@@ -84,17 +84,17 @@ def test_umi_extract(configuration_module, sample_id):
     fastq.equal_fastq(expected_output, actual_output)
 
 
-def check_umi_groups(config, sample_id, num_groups):
+def check_umi_groups(tmp_dir, sample_id, num_groups):
     """
     Test that the UMI groups are as expected.
 
-    :type config: dict
+    :param tmp_dir: Temporary directory
+    :type tmp_dir: str or unicode
     :param sample_id: sample ID
     :type sample_id: str or unicode
     :param num_groups: Expected number of groups
     :type num_groups: int
     """
-    tmp_dir = config[params.TMP_DIR]
     groups_tsv = os.path.join(tmp_dir,
                               sample_id,
                               workflow_files.POST_DEDUP_GROUPS_TSV)
@@ -143,7 +143,8 @@ def test_umi_group(configuration_module, sample_id):
     :type sample_id: str or unicode
     """
     config, _ = configuration_module
-    check_umi_groups(config, sample_id, 5)
+    tmp_dir = config[params.TMP_DIR]
+    check_umi_groups(tmp_dir, sample_id, 5)
 
 
 @pytest.mark.usefixtures("nextflow_fixture")
@@ -170,7 +171,7 @@ def test_umi_stats_files(configuration_module, sample_id, stats_file):
     assert os.path.exists(stats_file)
 
 
-def check_tpms_collated_tsv(config, sample_id, expected_num_columns):
+def check_tpms_collated_tsv(output_dir, sample_id, expected_num_columns):
     """
     Test that the collated TPMs are as expected.
 
@@ -181,7 +182,6 @@ def check_tpms_collated_tsv(config, sample_id, expected_num_columns):
     :param expected_num_columns: Expected number of columns in TSV file
     :type expected_num_columns: int
     """
-    output_dir = config[params.OUTPUT_DIR]
     tpms_tsv = os.path.join(output_dir, workflow_r.TPMS_COLLATED_TSV)
     tpms = pd.read_csv(tpms_tsv, sep="\t", comment="#")
     num_rows, num_columns = tpms.shape
@@ -216,4 +216,5 @@ def test_tpms_collated_tsv(configuration_module, sample_id):
     :type sample_id: str or unicode
     """
     config, _ = configuration_module
-    check_tpms_collated_tsv(config, sample_id, 2)
+    output_dir = config[params.OUTPUT_DIR]
+    check_tpms_collated_tsv(output_dir, sample_id, 2)

@@ -32,6 +32,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | bedtools | 2.26.0 |
 | hdf5tools (h5diff) | 1.10.6 |
 | pigz | 2.4 |
+| pandoc | 1.19.2.4 |
 | Python | 3.7.7 |
 | Cutadapt | 1.18 |
 | samtools | 1.7 |
@@ -67,22 +68,24 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | --------- | ------- |
 | Biostrings | 2.54.0 |
 | devtools | 2.3.2 |
-| ggplot2 | 3.3.2 |
 | git2r | 0.27.1 |
 | here | 0.1 |
+| knitr | 1.29 |
 | lintr | 2.0.1 |
 | optparse | 1.6.6 |
 | plotly | 4.9.2.1 |
 | RcppRoll | 0.3.0 |
-| readr | 1.3.1 |
 | rhdf5 | 2.30.1 |
+| rmarkdown | 2.3 |
 | roxygen2 | 7.1.1 |
 | Rsamtools | 2.2.3 |
 | rtracklayer | 1.46.0 |
 | shiny | 1.5.0 |
-| tidyr | 1.1.0 |
 | ShortRead | 1.44.3 |
 | styler | 1.3.2 |
+| tidyverse | 1.3.0 |
+
+Note: R packages ggplot2, dplyr, tidyr, and readr are used within the R metapackage 'tidyverse'.
 
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
@@ -95,7 +98,7 @@ Constraints:
 * Either [Miniconda](https://conda.io/miniconda.html) Python 3.6, or later, or [Anaconda Distribution](https://www.anaconda.com/distribution/) Python 3.6, or later, are strongly recommended.
 * Cutadapt v1.18 (2018-09-07), or later, is required.
 * Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
-* R 2.14.0, or later, is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
+* R 3.2, or later, is required as it includes the [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) (meta-)package.
 * R 3.6, or later, is strongly recommended.
 
 ---
@@ -110,8 +113,8 @@ Constraints:
 | bedtools | [bedtools](http://bedtools.readthedocs.io/en/latest/), [GitHub](https://github.com/arq5x/bedtools2) |
 | hdf5tools | [HDF5](https://portal.hdfgroup.org/display/HDF5) |
 | pigz | [pigz](http://zlib.net/pigz/) |
+| pandoc | [pandoc](https://pandoc.org) |
 | GraphViz | [GraphViz](https://www.graphviz.org/) |
-
 
 ### Install on Ubuntu
 
@@ -121,6 +124,7 @@ $ sudo apt-get install -y curl
 $ sudo apt-get install -y bedtools
 $ sudo apt-get install -y hdf5-tools
 $ sudo apt-get install -y pigz
+$ sudo apt-get install -y pandoc
 $ sudo apt-get install -y graphviz
 ```
 
@@ -133,6 +137,7 @@ $ sudo yum install -y epel-release
 $ sudo yum install -y BEDTools
 $ sudo yum install -y hdf5-devel
 $ sudo yum install -y pigz
+$ sudo yum install -y pandoc
 $ sudo yum install -y graphviz
 ```
 
@@ -144,6 +149,7 @@ $ curl --version
 $ bedtools -version
 $ h5diff -version
 $ pigz --version
+$ pandoc -version
 $ dot -V
 ```
 
@@ -590,13 +596,13 @@ Your version of R may differ from that shown.
 | ------- | ----- |
 | RcppRoll | [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html) |
 | optparse | [optparse](https://cran.r-project.org/web/packages/optparse/index.html) |
-| tidyr | [tidyr](https://cran.r-project.org/web/packages/tidyr/index.html) |
-| ggplot2 | [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html) |
+| tidyverse | [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) |
 | shiny | [shiny](https://cran.r-project.org/web/packages/shiny/index.html) |
 | plotly | [plotly](https://cran.r-project.org/web/packages/plotly/index.html) |
-| readr | [readr](https://cran.r-project.org/web/packages/readr/index.html) |
 | git2r |  [git2r](https://docs.ropensci.org/git2r), [GitHub](https://github.com/ropensci/git2r) |
 | here | [here](https://here.r-lib.org/), [CRAN](https://cran.r-project.org/package=here), [GitHub](https://github.com/r-lib/here) |
+| rmarkdown | [rmarkdown](https://cran.r-project.org/web/packages/rmarkdown/index.html) |
+| knitr | [knitr](https://cran.r-project.org/web/packages/knitr/index.html) |
 | Bioconductor Rsamtools | [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html) |
 | Bioconductor rhdf5 | [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html) |
 | Bioconductor rtracklayer | [rtracklayer](https://bioconductor.org/packages/release/bioc/html/rtracklayer.html) |
@@ -626,6 +632,8 @@ Install in R:
 > install.packages("readr")
 > install.packages("git2r")
 > install.packages("here")
+> install.packages("rmarkdown")
+> install.packages("knitr")
 ```
 
 The commands to install Bioconductor packages depend on your version of R. For full details:

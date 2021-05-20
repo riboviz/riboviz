@@ -201,3 +201,22 @@ def equal_tsv(file1, file2, tolerance=0.0001, comment="#"):
         message += " in file: " + str(file1) + ":" + str(file2)
         error.args = (message,)
         raise
+
+
+def replace_tokens(string, tokens={}):
+    """
+    Customise string. Given a string and mapping from tokens to
+    substrings, iterate through the tokens and when a match is
+    found replace the token with the substring.
+    :param string: String
+    :type string: str or unicode
+    :param tokens: Map from tokens to substrings
+    :type tokens: dict
+    :return: String with token replaced, if a match was found
+    :rtype string: str or unicode
+    """
+    customised = string
+    for token, replace in tokens.items():
+        if token in customised:
+            customised = customised.replace(token, replace)
+    return customised
