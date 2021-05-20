@@ -47,7 +47,7 @@ def helpMessage() {
     \$ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \\
        RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY> \\
        RIBOVIZ_DATA=<DATA_DIRECTORY> \\
-       nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml
+       nextflow run prep_riboviz.nf -params-file <CONFIG_FILE>
 
     2. Define values for the environment variables within your bash
        shell. The values will be available for successive runs of the
@@ -57,7 +57,7 @@ def helpMessage() {
     \$ export RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY>
     \$ export RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY>
     \$ export RIBOVIZ_DATA=<DATA_DIRECTORY>
-    \$ nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml
+    \$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE>
 
     The above approaches can be combined i.e. you can define variables
     using 'export' (2) but provide other values as part of the command

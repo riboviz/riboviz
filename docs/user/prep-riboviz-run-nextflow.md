@@ -141,7 +141,7 @@ $ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \
 $ export RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY>
 $ export RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY>
 $ export RIBOVIZ_DATA=<DATA_DIRECTORY>
-$ nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml
+$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE>
 ```
 
 The above approaches can be combined i.e. you can define variables using `export` (2) but provide other values as part of the command to run the workflow (1). Values provided within the command take precedence over those defined via `export`.
@@ -182,7 +182,7 @@ $ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \
 $ export RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY>
 $ export RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY>
 $ export RIBOVIZ_DATA=<DATA_DIRECTORY>
-$ nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml --validate_only
+$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE> --validate_only
 ```
 
 where:
@@ -235,7 +235,7 @@ $ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \
 $ export RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY>
 $ export RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY>
 $ export RIBOVIZ_DATA=<DATA_DIRECTORY>
-$ nextflow run prep_riboviz.nf -ansi-log false -params-file <CONFIG>.yaml
+$ nextflow run prep_riboviz.nf -ansi-log false -params-file <CONFIG_FILE>
 ```
 
 where:
