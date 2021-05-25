@@ -63,7 +63,7 @@ Command-line tools:
 * [Git branching model](./docs/developer/git-branching-model.md)
 * [Coding style](./docs/developer/coding-style.md)
 * [Debugging](./docs/developer/debugging.md)
-* [Adding configuration parameters](./docs/developer/adding-config.md)
+* [Using and adding configuration parameters](./docs/developer/config.md)
 * [Developing and running tests](./docs/developer/testing.md)
 * [Creating a regression test data repository](./docs/developer/create-test-data-repository.md)
 * [Writing and updating documentation](./docs/developer/documentation.md)
