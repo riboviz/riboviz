@@ -88,10 +88,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | tidyverse | 1.3.0 |
 | withr | 2.3.0 |
 
-Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
-
-* Python: pycodestyle, pylint, pytest-cov, sphinx.
-* R: devtools, glue, lintr, roxygen2, styler, testthat, withr.
+**Note:** These tables summarise packages required to both use and develop RiboViz. The packages to install for using RiboViz are described below. The packages required to also develop RiboViz are described in [Install developer dependencies](../developer/install.md).
 
 Constraints:
 
