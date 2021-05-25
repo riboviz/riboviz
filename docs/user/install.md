@@ -522,7 +522,7 @@ $ sudo yum install -y libcurl-devel
 $ sudo yum install -y libgit2-devel
 ```
 
-**Troubleshooting: `the most recent version of R is not installed` or `package "..." is not available (for R version ...)`
+**Troubleshooting: `the most recent version of R is not installed` or `package "..." is not available (for R version ...)`**
 
 Default package managers may not have the most up-to-date version of R available. This may cause problems when installing R packages. [The Comprehensive R Archive Network](https://cran.r-project.org/) has information on alternative ways to get a more recent version of R.
 
