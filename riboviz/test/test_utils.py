@@ -113,3 +113,30 @@ def get_file_ext_name():
     ``example``.
      """
     assert utils.get_file_ext("example") == ""
+
+
+@pytest.mark.parametrize(
+    "string,tokens,expected",
+    [("", {}, ""),
+     ("abcdef", {}, "abcdef"),
+     ("", {"ab": "GH", "ef": "IJ"}, ""),
+     ("abcdef", {"ab": "GH", "ef": "IJ"}, "GHcdIJ"),
+     ("abcdef", {"pq": "QP", "ef": "IJ"}, "abcdIJ"),
+     ("abcdef", {"pq": "QP", "rs": "SR"}, "abcdef")],
+    ids=["empty-string-empty-tokens",
+         "string-empty-tokens",
+         "empty-string-tokens",
+         "string-all-token",
+         "string-some-tokens",
+         "string-no-tokens"])
+def test_replace_tokens(string, tokens, expected):
+    """
+    Test :py:func:`riboviz.utils.replace_tokens`.
+    :param string: String
+    :type string: str or unicode
+    :param tokens: Map from tokens to substrings
+    :type tokens: dict
+    :param expected: Expected result
+    :type expected: str or unicode
+     """
+    assert utils.replace_tokens(string, tokens) == expected

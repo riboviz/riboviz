@@ -69,28 +69,29 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | Biostrings | 2.54.0 |
 | devtools | 2.3.2 |
 | git2r | 0.27.1 |
-| here | 0.1 |
-| knitr | 1.29 |
+| glue | 1.4.1 |
+| here | 1.0.1 |
+| knitr | 1.33 |
 | lintr | 2.0.1 |
 | optparse | 1.6.6 |
 | plotly | 4.9.2.1 |
 | RcppRoll | 0.3.0 |
 | rhdf5 | 2.30.1 |
-| rmarkdown | 2.3 |
+| rmarkdown | 2.7 |
 | roxygen2 | 7.1.1 |
 | Rsamtools | 2.2.3 |
 | rtracklayer | 1.46.0 |
 | shiny | 1.5.0 |
 | ShortRead | 1.44.3 |
 | styler | 1.3.2 |
+| testthat | 3.0.1 |
 | tidyverse | 1.3.0 |
-
-Note: R packages ggplot2, dplyr, tidyr, and readr are used within the R metapackage 'tidyverse'.
+| withr | 2.3.0 |
 
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
-* Python pycodestyle, pylint, pytest-cov, sphinx.
-* R: lintr, styler, roxygen2, devtools, glue, testthat, withr.
+* Python: pycodestyle, pylint, pytest-cov, sphinx.
+* R: devtools, glue, lintr, roxygen2, styler, testthat, withr.
 
 Constraints:
 
@@ -594,20 +595,20 @@ Your version of R may differ from that shown.
 
 | Package | Links |
 | ------- | ----- |
-| RcppRoll | [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html) |
-| optparse | [optparse](https://cran.r-project.org/web/packages/optparse/index.html) |
-| tidyverse | [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) |
-| shiny | [shiny](https://cran.r-project.org/web/packages/shiny/index.html) |
-| plotly | [plotly](https://cran.r-project.org/web/packages/plotly/index.html) |
-| git2r |  [git2r](https://docs.ropensci.org/git2r), [GitHub](https://github.com/ropensci/git2r) |
-| here | [here](https://here.r-lib.org/), [CRAN](https://cran.r-project.org/package=here), [GitHub](https://github.com/r-lib/here) |
-| rmarkdown | [rmarkdown](https://cran.r-project.org/web/packages/rmarkdown/index.html) |
-| knitr | [knitr](https://cran.r-project.org/web/packages/knitr/index.html) |
+| Bioconductor Biostrings | [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html) |
 | Bioconductor Rsamtools | [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html) |
+| Bioconductor ShortRead | [ShortRead](https://bioconductor.org/packages/release/bioc/html/ShortRead.html) |
 | Bioconductor rhdf5 | [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html) |
 | Bioconductor rtracklayer | [rtracklayer](https://bioconductor.org/packages/release/bioc/html/rtracklayer.html) |
-| Bioconductor Biostrings | [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html) |
-| Bioconductor ShortRead | [ShortRead](https://bioconductor.org/packages/release/bioc/html/ShortRead.html) |
+| RcppRoll | [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html) |
+| git2r |  [git2r](https://docs.ropensci.org/git2r), [GitHub](https://github.com/ropensci/git2r) |
+| here | [here](https://here.r-lib.org/), [CRAN](https://cran.r-project.org/package=here), [GitHub](https://github.com/r-lib/here) |
+| knitr | [knitr](https://cran.r-project.org/web/packages/knitr/index.html) |
+| optparse | [optparse](https://cran.r-project.org/web/packages/optparse/index.html) |
+| plotly | [plotly](https://cran.r-project.org/web/packages/plotly/index.html) |
+| rmarkdown | [rmarkdown](https://cran.r-project.org/web/packages/rmarkdown/index.html) |
+| shiny | [shiny](https://cran.r-project.org/web/packages/shiny/index.html) |
+| tidyverse | [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) |
 
 If, when installing R packages, you see a message like:
 
@@ -624,16 +625,14 @@ Install in R:
 
 ```r
 > install.packages("RcppRoll")
-> install.packages("optparse")
-> install.packages("tidyr")
-> install.packages("ggplot2")
-> install.packages("shiny")
-> install.packages("plotly")
-> install.packages("readr")
 > install.packages("git2r")
 > install.packages("here")
-> install.packages("rmarkdown")
 > install.packages("knitr")
+> install.packages("optparse")
+> install.packages("plotly")
+> install.packages("rmarkdown")
+> install.packages("shiny")
+> install.packages("tidyverse")
 ```
 
 The commands to install Bioconductor packages depend on your version of R. For full details:
