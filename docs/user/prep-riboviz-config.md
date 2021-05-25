@@ -138,7 +138,9 @@ While both `codon_positions_file` and `t_rna_file` are optional, either both mus
 
 ---
 
-## Configuring file paths and directories (Nextflow workflow only)
+## Configuring file paths and directories
+
+(Nextflow workflow only)
 
 The following configuration parameters take values that are absolute or relative paths to files or directories:
 
