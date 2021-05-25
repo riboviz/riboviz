@@ -115,7 +115,7 @@ Finally, [Update Dependencies overview](#update-dependencies-overview).
 
 ## Update an existing dependency
 
-Run through the relevant subsection of [Adding a new dependency](#adding-a-new-dependency), updating the relevant content if necessary.
+Run through the relevant subsection of [Adding a new dependency](#adding-a-new-dependency) or [Adding a new developer dependency](#adding-a-new-developer-dependency) updating the relevant content if necessary.
 
 Finally, [Update Dependencies overview](#update-dependencies-overview).
 
