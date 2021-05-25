@@ -101,7 +101,7 @@ Constraints:
 
 ---
 
-## Install general packages
+## Install operating system packages
 
 | Package | Links |
 | ------- | ----- |
@@ -324,7 +324,7 @@ Python 2.7.16 :: Anaconda, Inc.
 
 ---
 
-## Install Bioinformatics tools
+## Install tools not available as operating system packages
 
 | Package | Links |
 | ------- | ----- |
@@ -393,7 +393,6 @@ $ nextflow -version
       cite doi:10.1038/nbt.3820
       http://nextflow.io
 ```
-
 
 Your version of Nextflow may differ from that shown.
 
