@@ -35,10 +35,10 @@ Install Miniconda Python 3 and Python packages:
 $ source install-py.sh
 ```
 
-Install bioinformatics tools:
+Install tools not available as operating system packages:
 
 ```console
-$ source install-bio-tools.sh
+$ source install-tools.sh
 ```
 
 Install R:
