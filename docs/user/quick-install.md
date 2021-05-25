@@ -35,10 +35,10 @@ Install Miniconda Python 3 and Python packages:
 $ source install-py.sh
 ```
 
-Install Hisat2 and Bowtie:
+Install bioinformatics tools:
 
 ```console
-$ source install-hisat-bowtie.sh
+$ source install-bio-tools.sh
 ```
 
 Install R:
