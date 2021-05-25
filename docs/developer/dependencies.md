@@ -1,12 +1,12 @@
 # Adding and updating dependencies
 
-## Adding a new dependency
+## Adding a new user dependency
 
-If you add a new dependency - a new operating system package, Python package or R package, or another package - then made the following updates.
+If you add a new user dependency - a new operating system package, Python package or R package, or another package - then made the following updates.
 
 ### Operating system packages
 
-Update [Install general packages](../user/install.md#install-general-packages) in [Install RiboViz and dependencies](../user/install.md):
+Update [Install operating system packages](../user/install.md#install-operating-system-packages) in [docs/user/install.md](../user/install.md):
 
 * Add an entry for the package to the 'Package Links' table.
 * Add commands to the 'Install on Ubuntu' and 'Install on CentOS' subsections.
@@ -14,16 +14,16 @@ Update [Install general packages](../user/install.md#install-general-packages) i
 
 Add commands to "quick install scripts" (see current content of scripts for what is expected):
 
-* [install-ubuntu.sh](../../bash/install-ubuntu.sh).
-* [install-centos.sh](../../bash/install-centos.sh).
-* [environment.sh](../../bash/environment.sh), commands to print versions of any command-line tools.
-* [environment-tables.sh](../../bash/environment-tables.sh), commands to capture versions of any command-line tools and echo these in a tabular format.
+* [bash/install-ubuntu.sh](../../bash/install-ubuntu.sh).
+* [bash/install-centos.sh](../../bash/install-centos.sh).
+* [bash/environment.sh](../../bash/environment.sh), commands to print versions of any command-line tools.
+* [bash/environment-tables.sh](../../bash/environment-tables.sh), commands to capture versions of any command-line tools and echo these in a tabular format.
 
 Finally, [Update Dependencies overview](#update-dependencies-overview).
 
-### Bioinformatics tools not available as operating system packages
+### Tools not available as operating system packages
 
-Update [Install Bioinformatics tools](../user/install.md#install-bioinformatics-tools) in [Install RiboViz and dependencies](../user/install.md):
+Update [Install ttools not available as operating system packages](../user/install.md#install-tools-not-available-as-operating-system-packages) in [docs/user/install.md](../user/install.md):
 
 * Add an entry for the package to the 'Package Links' table.
 * Add a new subsection describing how to download, build, configure, install and check the package.
@@ -31,15 +31,15 @@ Update [Install Bioinformatics tools](../user/install.md#install-bioinformatics-
 
 Add commands to "quick install scripts" (see current content of scripts for what is expected):
 
-* [install-bio-tools.sh](../../bash/install-bio-tools.sh), also update commands to create `setenv.sh` if applicable.
-* [environment.sh](../../bash/environment.sh), commands to print versions of any command-line tools.
-* [environment-tables.sh](../../bash/environment-tables.sh), commands to capture versions of any command-line tools and echo these in a tabular format.
+* [bash/install-tools.sh](../../bash/install-tools.sh), also update commands to create `setenv.sh` if applicable.
+* [bash/environment.sh](../../bash/environment.sh), commands to print versions of any command-line tools.
+* [bash/environment-tables.sh](../../bash/environment-tables.sh), commands to capture versions of any command-line tools and echo these in a tabular format.
 
 Finally, [Update Dependencies overview](#update-dependencies-overview).
 
 ### Python packages
 
-Update [Install Python packages](../user/install.md#install-python-packages) in [Install RiboViz and dependencies](../user/install.md):
+Update [Install Python packages](../user/install.md#install-python-packages) in [docs/user/install.md](../user/install.md):
 
 * Add an entry for the package to the 'Package Links' table.
 * Add commands to the 'Install' commands.
@@ -47,18 +47,18 @@ Update [Install Python packages](../user/install.md#install-python-packages) in 
 
 Add commands to "quick install scripts" (see current content of scripts for what is expected):
 
-* [install-py.sh](../../bash/install-py.sh).
-* [environment-tables.sh](../../bash/environment-tables.sh), add `conda` package names to `CONDA_LIST` or `pip` package names to `PIP_LIST`.
+* [bash/install-py.sh](../../bash/install-py.sh).
+* [bash/environment-tables.sh](../../bash/environment-tables.sh), add `conda` package names to `CONDA_LIST` or `pip` package names to `PIP_LIST`.
 
 Finally, [Update Dependencies overview](#update-dependencies-overview).
 
 ### R packages
 
-Update [Install R and packages required by R packages to be installed](../user/install.md#install-r-and-packages-required-by-r-packages-to-be-installed) in [Install RiboViz and dependencies](../user/install.md):
+Update [Install R and packages required by R packages to be installed](../user/install.md#install-r-and-packages-required-by-r-packages-to-be-installed) in [docs/user/install.md](../user/install.md):
 
 * Add commands to install any operating system packages to 'Install on Ubuntu' and 'Install on CentOS' subsections.
 
-Update [Install R packages](../user/install.md#install-r-packages) in [Install RiboViz and dependencies](../user/install.md):
+Update [Install R packages](../user/install.md#install-r-packages) in [docs/user/install.md](../user/install.md):
 
 * Add an entry for the package to the 'Package Links' table.
 * Add commands to the 'Install in R' commands.
@@ -66,12 +66,48 @@ Update [Install R packages](../user/install.md#install-r-packages) in [Install R
 
 Add commands to "quick install scripts" (see current content of scripts for what is expected):
 
-* [install-r-ubuntu.sh](../../bash/install-r-ubuntu.sh), commands to install Ubuntu packages.
- [install-r-centos.sh](../../bash/install-r-centos.sh), commands to install CentOS packages.
-* [install-r.R](../../bash/install-r.R), commands to install R packages.
-* [install-r-3.4-bioconductor.R](../../bash/install-r-3.4-bioconductor.R), commands to install Bioconductor sub-packages under R 3.4.
-* [install-r-3.5-bioconductor.R](../../bash/install-r-3.5-bioconductor.R), commands to install Bioconductor sub-packages under R 3.5+.
-* [environment-tables.sh](../../bash/environment-tables.sh), add package names `R_LIST`.
+* [bash/install-r-ubuntu.sh](../../bash/install-r-ubuntu.sh), commands to install Ubuntu packages.
+* [bash/install-r-centos.sh](../../bash/install-r-centos.sh), commands to install CentOS packages.
+* [bash/install-r.R](../../bash/install-r.R), commands to install R packages.
+* [bash/install-r-3.4-bioconductor.R](../../bash/install-r-3.4-bioconductor.R), commands to install Bioconductor sub-packages under R 3.4.
+* [bash/install-r-3.5-bioconductor.R](../../bash/install-r-3.5-bioconductor.R), commands to install Bioconductor sub-packages under R 3.5+.
+* [bash/environment-tables.sh](../../bash/environment-tables.sh), add package names `R_LIST`.
+
+Finally, [Update Dependencies overview](#update-dependencies-overview).
+
+---
+
+## Adding a new developer dependency
+
+If you add a new developer dependency - a new Python package or R package - then made the following updates.
+
+### Python packages
+
+Update [Install Python packages](../developer/install.md#install-python-packages) in [docs/developer/install.md](../developer/install.md):
+
+* Add an entry for the package to the 'Package Links' table.
+* Add commands to the 'Install:' commands.
+
+Add commands to "quick install scripts" (see current content of scripts for what is expected):
+
+* [bash/install-py.sh](../../bash/install-py.sh).
+* [bash/environment-tables.sh](../../bash/environment-tables.sh), add `conda` package names to `CONDA_LIST` or `pip` package names to `PIP_LIST`.
+
+Finally, [Update Dependencies overview](#update-dependencies-overview).
+
+### R packages
+
+Update [Install R packages](../developer/install.md#install-r-packages) in [docs/developer/install.md](../developer/install.md):
+
+* Add an entry for the package to the 'Package Links' table.
+* Add commands to the 'Install:' commands.
+
+Add commands to "quick install scripts" (see current content of scripts for what is expected):
+
+* [bash/install-r.R](../../bash/install-r.R), commands to install R packages.
+* [bash/install-r-3.4-bioconductor.R](../../bash/install-r-3.4-bioconductor.R), commands to install Bioconductor sub-packages under R 3.4.
+* [bash/install-r-3.5-bioconductor.R](../../bash/install-r-3.5-bioconductor.R), commands to install Bioconductor sub-packages under R 3.5+.
+* [bash/environment-tables.sh](../../bash/environment-tables.sh), add package names `R_LIST`.
 
 Finally, [Update Dependencies overview](#update-dependencies-overview).
 
@@ -87,7 +123,7 @@ Finally, [Update Dependencies overview](#update-dependencies-overview).
 
 ## Update Dependencies overview
 
-To update the [Dependencies overview](#update-dependencies-overview)  tables in [Install RiboViz and dependencies](../user/install.md):
+To update the [Dependencies overview](#update-dependencies-overview) tables in [docs/user/install.md](../user/install.md):
 
 * Run:
 
