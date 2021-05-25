@@ -124,6 +124,6 @@ if (params.containsKey('asite_disp_length_file')
 }
 ```
 
-The new parameter should also be added to the list in the [Configuring file paths and directories](../user/prep-riboviz-config.md#configuring-file-paths-and-directories) section in [Configuring the RiboViz workflow](../user/prep-riboviz-config.md).
+Add the new parameter to the list in the [Configuring file paths and directories](../user/prep-riboviz-config.md#configuring-file-paths-and-directories) section in [Configuring the RiboViz workflow](../user/prep-riboviz-config.md).
 
 If the parameter is a directory then add it to the list in [Using directory configuration parameters in Nextflow](#using-directory-configuration-parameters-in-nextflow) above.
