@@ -63,7 +63,7 @@ riboviz/test/config/simdata_multiplex_config_current.yaml
 $ pytest riboviz/test/test_upgrade_config.py 
 ```
 
-5. Add an entry for the parameter in the [Configuration parameters](../user/prep-riboviz-config.md#configuration-parameters) table in [Configuring the RiboViz workflow](../user/prep-riboviz-config.md).
+5. Add an entry for the parameter in the [Configuration parameters](../user/prep-riboviz-config.md#configuration-parameters) table in [docs/user/prep-riboviz-config.md](../user/prep-riboviz-config.md).
 
 6. If the parameter is optional and has a default value then add the parameter and its default value to `prep_riboviz.nf` e.g.
 
@@ -124,6 +124,6 @@ if (params.containsKey('asite_disp_length_file')
 }
 ```
 
-Add the new parameter to the list in the [Configuring file paths and directories](../user/prep-riboviz-config.md#configuring-file-paths-and-directories) section in [Configuring the RiboViz workflow](../user/prep-riboviz-config.md).
+Add the new parameter to the list in the [Configuring file paths and directories](../user/prep-riboviz-config.md#configuring-file-paths-and-directories) section in [docs/user/prep-riboviz-config.md](../user/prep-riboviz-config.md).
 
 If the parameter is a directory then add it to the list in [Using directory configuration parameters in Nextflow](#using-directory-configuration-parameters-in-nextflow) above.
