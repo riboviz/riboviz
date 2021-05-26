@@ -30,6 +30,9 @@ PIGZ_VERSION=$(pigz --version 2>&1 | cut -d" " -f2)
 # pigz 2.4
 # pigz outputs version information to standard error stream.
 echo "| pigz | $PIGZ_VERSION |"
+PANDOC_VERSION=$(pandoc --version | head -n 1 | cut -d" " -f2)
+# pandoc 1.19.2.4
+echo "| pandoc | $PANDOC_VERSION |"
 PYTHON_VERSION=$(python --version | cut -d" " -f2)
 # Python 3.7.3
 echo "| Python | $PYTHON_VERSION |"
