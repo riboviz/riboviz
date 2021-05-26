@@ -10,7 +10,9 @@ Installing some of these tools requires you to have permission to run `sudo` to 
 
 We suggest that you:
 
-* Either, use a virtual machine running under [VMWare Workstation Player](https://www.vmware.com/uk/products/workstation-player.html) or [Oracle VirtualBox](https://www.virtualbox.org/).
+* Either, use a virtual machine running under [VMWare Workstation Player](https://www.vmware.com/uk/products/workstation-player.html) or [Oracle VirtualBox](https://www.virtualbox.org/). We provide quick-start instructions for using VMWare to:
+  - [Deploy a Ubuntu Virtual Machine on Windows 10](./docs/user/deploy-ubuntu-vm-windows.md).
+  - [Deploy a CentOS Virtual Machine on Windows 10](./docs/user/deploy-centos-vm-windows.md).
 * Or, try using Windows 10's [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about) which allows running of a Linux environment on Windows 10 without the need for a VM. Most command-line tools, utilities, and applications can be directly on Windows, unmodified. Ubuntu, openSUSE, Debian, Kali flavours of Linux can be used.
 
 ### Mac OSX users
