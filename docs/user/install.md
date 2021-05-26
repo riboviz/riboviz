@@ -388,6 +388,8 @@ Check install:
 ```console
 $ javac -version
 $ java -version
+$ nextflow -v
+nextflow version 20.04.1.5335
 $ nextflow -version
 
       N E X T F L O W
@@ -397,8 +399,15 @@ $ nextflow -version
       http://nextflow.io
 ```
 
+If the Nextflow version is less than version 20 then force an update to version 20:
 
-Your version of Nextflow may differ from that shown.
+```console
+$ conda install -y -c bioconda nextflow=20
+$ nextflow -version
+version 20.01.0 build 5264
+```
+
+Your version of Nextflow can differ from that shown but must be version 20 or above.
 
 **Install Nextflow (alternative)**
 
