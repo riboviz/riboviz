@@ -148,9 +148,9 @@ $ sudo yum install -y graphviz
 $ git --version
 $ curl --version
 $ bedtools -version
-$ h5diff -version
+$ h5diff --version
 $ pigz --version
-$ pandoc -version
+$ pandoc --version
 $ dot -V
 ```
 
