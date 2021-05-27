@@ -96,8 +96,7 @@ Constraints:
 * Either [Miniconda](https://conda.io/miniconda.html) Python 3.6, or later, or [Anaconda Distribution](https://www.anaconda.com/distribution/) Python 3.6, or later, are strongly recommended.
 * Cutadapt v1.18 (2018-09-07), or later, is required.
 * Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
-* R 3.2, or later, is required as it includes the [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) (meta-)package.
-* R 3.6, or later, is strongly recommended.
+* R 3.6, or later, is required.
 
 ---
 
@@ -145,9 +144,9 @@ $ sudo yum install -y graphviz
 $ git --version
 $ curl --version
 $ bedtools -version
-$ h5diff -version
+$ h5diff --version
 $ pigz --version
-$ pandoc -version
+$ pandoc --version
 $ dot -V
 ```
 
@@ -385,6 +384,8 @@ Check install:
 ```console
 $ javac -version
 $ java -version
+$ nextflow -v
+nextflow version 20.04.1.5335
 $ nextflow -version
 
       N E X T F L O W
@@ -394,7 +395,15 @@ $ nextflow -version
       http://nextflow.io
 ```
 
-Your version of Nextflow may differ from that shown.
+If the Nextflow version is less than version 20 then force an update to version 20:
+
+```console
+$ conda install -y -c bioconda nextflow=20
+$ nextflow -version
+version 20.01.0 build 5264
+```
+
+Your version of Nextflow can differ from that shown but must be version 20 or above.
 
 **Install Nextflow (alternative)**
 
@@ -483,16 +492,12 @@ $ source setenv.sh
 
 ---
 
-## Install R 2.14.0+
+## Install R 3.6+
 
 Web sites:
 
 * [The R Project for Statistical Computing](https://www.r-project.org/)
 * [The Comprehensive R Archive Network](https://cran.r-project.org/) (CRAN).
-
-**Note:** R 2.14.0, or later, is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
-
-**Note:** R 3.6, or later, is strongly recommended.
 
 ### Install R and packages required by R packages to be installed
 
@@ -508,6 +513,28 @@ $ sudo apt-get install -y libssl-dev
 $ sudo apt-get install -y libcurl4-openssl-dev
 $ sudo apt-get install -y libgit2-dev
 ```
+```console
+$ R --version
+R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
+```
+
+Your version of R can differ from that shown but must be version 3.6 or above.
+
+Default package managers may not have the most up-to-date version of R available. This may cause problems when installing R or its packages. [The Comprehensive R Archive Network](https://cran.r-project.org/) has information on alternative ways to get a more recent version of R.
+
+For Ubuntu, you can do the following, from [Ubuntu Packages For R - Brief Instructions](https://cran.r-project.org/bin/linux/ubuntu/):
+
+```console
+$ sudo apt update -qq
+$ sudo apt install -y --no-install-recommends software-properties-common dirmngr
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+$ sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+$ sudo apt-get update
+$ sudo apt-get install -y r-base
+$ sudo apt-get install -y r-base-dev
+$ R --version
+R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
+```
 
 **Install on CentOS**
 
@@ -521,69 +548,12 @@ $ sudo yum install -y openssl-devel
 $ sudo yum install -y libcurl-devel
 $ sudo yum install -y libgit2-devel
 ```
-
-**Troubleshooting: `the most recent version of R is not installed` or `package "..." is not available (for R version ...)`**
-
-Default package managers may not have the most up-to-date version of R available. This may cause problems when installing R packages. [The Comprehensive R Archive Network](https://cran.r-project.org/) has information on alternative ways to get a more recent version of R.
-
-For example, following CRAN-R's [UBUNTU PACKAGES FOR R](https://cran.r-project.org/bin/linux/ubuntu/README.html) to get the latest R 3.6 packages:
-
-* Get your Ubuntu version, for example:
-
-```console
-$ lsb_release -a
-No LSB modules are available.
-Distributor ID:	Ubuntu
-Description:	Ubuntu 18.04 LTS
-Release:	18.04
-Codename:	bionic
-```
-
-* Open `/etc/apt/sources.list` in an editor (requires `sudo` access), for example:
-
-```console
-$ sudo nano /etc/apt/sources.list
-```
-
-* From UBUNTU PACKAGES FOR R get the entry for your Ubuntu version and add it to the end of the file. For example:
-
-```
-deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/
-```
-
-* Install CRAN-R Ubuntu server key:
-
-```console
-$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
-```
-
-* Update packages:
-
-```console
-$ sudo apt-get update
-```
-
-* Install:
-
-```console
-$ sudo apt-get install -y r-base
-$ sudo apt-get install -y r-base-dev
-$ R --version
-R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
-Copyright (C) 2020 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
-```
-
-### Check R has installed
-
 ```console
 $ R --version
 R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
-Copyright (C) 2020 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
 ```
 
-Your version of R may differ from that shown.
+Your version of R can differ from that shown but must be version 3.6 or above.
 
 ---
 
@@ -637,7 +607,7 @@ The commands to install Bioconductor packages depend on your version of R. For f
 * Click the link of a Bioconductor release consistent with your version of R.
 * Click the link of the specific package.
 
-For example, for R 3.5 or R 3.6, install in R:
+For example, for R 3.6 or R4.1, install in R:
 
 ```r
 > install.packages("BiocManager")
@@ -646,17 +616,6 @@ For example, for R 3.5 or R 3.6, install in R:
 > BiocManager::install("rhdf5")
 > BiocManager::install("Biostrings")
 > BiocManager::install("ShortRead")
-```
-
-For example, for R 3.4, install in R:
-
-```r
-> source("https://bioconductor.org/biocLite.R")
-> biocLite("Rsamtools")
-> biocLite("rtracklayer")
-> biocLite("rhdf5")
-> biocLite("Biostrings")
-> biocLite("ShortRead")
 ```
 
 ### Troubleshooting: installation path not writeable
@@ -680,7 +639,7 @@ DESCRIPTION  libs  LICENSE  Meta  NAMESPACE  NEWS
 ```
 
 ```console
-$ ls ~/R/x86_64-redhat-linux-gnu-library/3.5/Rsamtools/
+$ ls ~/R/x86_64-redhat-linux-gnu-library/3.6/Rsamtools/
 DESCRIPTION  libs  LICENSE  Meta  NAMESPACE  NEWS
 ```
 
@@ -692,7 +651,7 @@ paste0("--arch=",  :
   cannot popen ' '/usr/lib/R/bin/R' --no-save --slave 2>&1 <
   '/tmp/Rtmpw3pOH7/file12471113d0d2b'', probable reason 'Cannot
   allocate memory'
-* removing "/home/ubuntu/R/x86_64-pc-linux-gnu-library/3.5/Rsamtools"
+* removing "/home/ubuntu/R/x86_64-pc-linux-gnu-library/3.6/Rsamtools"
 Warning in q("no", status = status, runLast = FALSE) :
   system call failed: Cannot allocate memory
 
