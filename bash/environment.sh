@@ -22,6 +22,8 @@ echo "# h5diff --version # Tool from hdf5tools"
 h5diff --version
 echo "# pigz --version"
 pigz --version
+echo "# pandoc --version"
+pandoc --version
 echo "# dot -v # Tool from GraphViz"
 dot -V
 echo "# python --version"

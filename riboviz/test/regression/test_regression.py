@@ -34,6 +34,14 @@ The test suite accepts the following command-line parameters:
   Nextflow). Note that some regression tests differ for Nextflow due
   to differences in naming of some temporary files.
 
+If the configuration uses environment variable tokens, then these
+should be defined in the bash shell within which ``pytest`` is
+run. Alternatively, they can be provided when running ``pytest``, for
+example::
+
+    $ RIBOVIZ_SAMPLES=data/ RIBOVIZ_ORGANISMS=vignette/input/ \
+      RIBOVIZ_DATA=data/ pytest ...
+
 If the configuration specifies samples
 (:py:const:`riboviz.params.FQ_FILES`) then ``--check-index-tmp``
 can be used.
@@ -99,11 +107,9 @@ See :py:mod:`riboviz.test.regression.conftest` for information on the
 fixtures used by these tests.
 """
 import os
-import shutil
-import subprocess
-import tempfile
 import pytest
 import pysam
+from riboviz import environment
 from riboviz import h5
 from riboviz import html
 from riboviz import hisat2
@@ -113,6 +119,7 @@ from riboviz import count_reads
 from riboviz import workflow_files
 from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
+from riboviz.test import nextflow
 from riboviz import test
 
 
@@ -134,24 +141,24 @@ def prep_riboviz_fixture(skip_workflow_fixture, config_fixture,
         if not nextflow_fixture:
             exit_code = prep_riboviz.prep_riboviz(config_fixture)
         else:
-            cmd = ["nextflow", "run", test.NEXTFLOW_WORKFLOW,
-                   "-params-file", config_fixture, "-ansi-log", "false"]
-            exit_code = subprocess.call(cmd)
+            env_vars = environment.get_environment_vars()
+            exit_code = nextflow.run_nextflow(config_fixture,
+                                              envs=env_vars)
         assert exit_code == 0, \
             "prep_riboviz returned non-zero exit code %d" % exit_code
 
 
 @pytest.fixture(scope="function")
-def scratch_directory():
+def scratch_directory(tmpdir):
     """
     Create a scratch directory.
 
+    :param tmpdir: Temporary directory (pytest built-in fixture)
+    :type tmpdir py._path.local.LocalPath
     :return: directory
-    :rtype: str or unicode
+    :rtype: py._path.local.LocalPath
     """
-    scratch_dir = tempfile.mkdtemp("tmp_scratch")
-    yield scratch_dir
-    shutil.rmtree(scratch_dir)
+    return tmpdir.mkdir("scratch")
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")

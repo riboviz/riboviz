@@ -30,6 +30,9 @@ PIGZ_VERSION=$(pigz --version 2>&1 | cut -d" " -f2)
 # pigz 2.4
 # pigz outputs version information to standard error stream.
 echo "| pigz | $PIGZ_VERSION |"
+PANDOC_VERSION=$(pandoc --version | head -n 1 | cut -d" " -f2)
+# pandoc 1.19.2.4
+echo "| pandoc | $PANDOC_VERSION |"
 PYTHON_VERSION=$(python --version | cut -d" " -f2)
 # Python 3.7.3
 echo "| Python | $PYTHON_VERSION |"
@@ -96,7 +99,7 @@ echo " "
 echo "| R Package | Version |"
 echo "| --------- | ------- |"
 R_PKGS=$(Rscript rscripts/list-r-packages.R)
-R_LIST=(Biostrings tidyverse git2r here lintr optparse plotly RcppRoll rhdf5 Rsamtools rtracklayer shiny ShortRead styler)
+R_LIST=(Biostrings devtools git2r glue here knitr lintr optparse plotly RcppRoll rhdf5 rmarkdown roxygen2 Rsamtools rtracklayer shiny ShortRead styler testthat tidyverse withr)
 for pkg in ${R_LIST[@]}; do
     PKG_VERSION=$(echo "$R_PKGS" | grep -iw "$pkg " | tr -s " ")
     PKG_VERSION=$(echo $PKG_VERSION | cut -d" " -f2)

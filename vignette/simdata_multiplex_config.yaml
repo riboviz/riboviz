@@ -21,7 +21,6 @@ features_file: data/yeast_features.tsv # Features to correlate with ORFs
 fq_files: null
 group_umis: TRUE # Summarise UMI groups before and after deduplication, if TRUE
 is_riboviz_gff: TRUE # Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3
-is_test_run: FALSE # Is this a test run
 job_email_events: beas # Events triggering emails about batch job (job submission). Any combination of b - begin, e - end, a - abort, s - suspend.
 job_email: null # E-mail address for batch job events (job submission).
 job_memory: 8G # Requested memory for batch job (job submission).

@@ -65,18 +65,33 @@ configuration_module = pytest.fixture(scope='module')(configuration_fixture)
 """ Module-level fixture for :py:func:`configuration_fixture` """
 
 
-def run_nextflow(config_file):
+def run_nextflow(config_file, envs={}, validate_only=False, cwd=None):
     """
     Run ``nextflow run`` using a given conflguration file.
 
     :param config_file: Configuration file
     :type config_file: str or unicode
+    :param envs: Environment variables
+    :type envs: dict
+    :param validate_only: Run with \
+    :py:const:`riboviz.params.VALIDATE_ONLY` (``--validate_only``)?
+    :type validate_only: bool
+    :param cwd: Directory to run command in, if ``None`` use current \
+    directory
+    :type cwd: str or unicode.
     :return: exit code
     :rtype: int
     """
     cmd = ["nextflow", "run", test.NEXTFLOW_WORKFLOW,
            "-params-file", config_file, "-ansi-log", "false"]
-    exit_code = subprocess.call(cmd)
+    if validate_only:
+        cmd.append("--{}".format(params.VALIDATE_ONLY))
+    env = dict(os.environ)
+    for variable, value in envs.items():
+        env[variable] = value
+    print("Working directory:")
+    exit_code = subprocess.call("pwd", cwd=cwd)
+    exit_code = subprocess.call(cmd, env=env, cwd=cwd)
     return exit_code
 
 

@@ -21,7 +21,6 @@ features_file: data/yeast_features.tsv
 fq_files: null
 group_umis: TRUE
 is_riboviz_gff: TRUE
-is_test_run: FALSE
 job_email_events: beas
 job_email: null
 job_memory: 8G
