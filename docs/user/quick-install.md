@@ -41,6 +41,12 @@ Install Hisat2 and Bowtie:
 $ source install-hisat-bowtie.sh
 ```
 
+Create `set-riboviz-env.sh`:
+
+```console
+$ source create-set-riboviz-env.sh
+```
+
 Install R:
 
 * Ubuntu:

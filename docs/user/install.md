@@ -10,8 +10,10 @@ Installing some of these tools requires you to have permission to run `sudo` to 
 
 We suggest that you:
 
-* Either, use a virtual machine running under [VMWare Workstation Player](https://www.vmware.com/uk/products/workstation-player.html) or [Oracle VirtualBox](https://www.virtualbox.org/).
-* Or, try using Windows 10's [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about) which allows running of a Linux environment on Windows 10 without the need for a VM. Most command-line tools, utilities, and applications can be directly on Windows, unmodified. Ubuntu, openSUSE, Debian, Kali flavours of Linux can be used.
+* Either, use a virtual machine running under [VMWare Workstation Player](https://www.vmware.com/uk/products/workstation-player.html) or [Oracle VirtualBox](https://www.virtualbox.org/). We provide quick-start instructions for using VMWare to:
+  - [Deploy a Ubuntu Virtual Machine using VMWare on Windows 10](./deploy-ubuntu-vmware-windows.md).
+  - [Deploy a CentOS Virtual Machine using VMWare on Windows 10](./deploy-centos-vmware-windows.md).
+* Or, use Windows Subsystem for Linux following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10). We have successfully installed and run RiboViz under WSL2 using Microsoft Store's [Ubuntu 18.04 LTS](https://www.microsoft.com/en-gb/p/ubuntu-1804-lts/9n9tngvndl3q).
 
 ### Mac OSX users
 
@@ -33,6 +35,9 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | hdf5tools (h5diff) | 1.10.6 |
 | pigz | 2.4 |
 | pandoc | 1.19.2.4 |
+| GraphViz (dot) | 2.40.1 |
+| zip | 3.0 |
+| unzip | 6.00 |
 | Python | 3.7.7 |
 | Cutadapt | 1.18 |
 | samtools | 1.7 |
@@ -40,7 +45,6 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | Java (javac) | 1.8.0_152-release |
 | Java (java) | 1.8.0_152-release |
 | Nextflow | 20.04.1.5335 |
-| GraphViz (dot) | 2.40.1 |
 | Hisat2 | 2.1.0 |
 | Bowtie | 1.2.2 |
 | R | 3.6.3 |
@@ -69,28 +73,29 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | Biostrings | 2.54.0 |
 | devtools | 2.3.2 |
 | git2r | 0.27.1 |
-| here | 0.1 |
-| knitr | 1.29 |
+| glue | 1.4.1 |
+| here | 1.0.1 |
+| knitr | 1.33 |
 | lintr | 2.0.1 |
 | optparse | 1.6.6 |
 | plotly | 4.9.2.1 |
 | RcppRoll | 0.3.0 |
 | rhdf5 | 2.30.1 |
-| rmarkdown | 2.3 |
+| rmarkdown | 2.7 |
 | roxygen2 | 7.1.1 |
 | Rsamtools | 2.2.3 |
 | rtracklayer | 1.46.0 |
 | shiny | 1.5.0 |
 | ShortRead | 1.44.3 |
 | styler | 1.3.2 |
+| testthat | 3.0.1 |
 | tidyverse | 1.3.0 |
-
-Note: R packages ggplot2, dplyr, tidyr, and readr are used within the R metapackage 'tidyverse'.
+| withr | 2.3.0 |
 
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
-* Python pycodestyle, pylint, pytest-cov, sphinx.
-* R: lintr, styler, roxygen2, devtools, glue, testthat, withr.
+* Python: pycodestyle, pylint, pytest-cov, sphinx.
+* R: devtools, glue, lintr, roxygen2, styler, testthat, withr.
 
 Constraints:
 
@@ -98,12 +103,11 @@ Constraints:
 * Either [Miniconda](https://conda.io/miniconda.html) Python 3.6, or later, or [Anaconda Distribution](https://www.anaconda.com/distribution/) Python 3.6, or later, are strongly recommended.
 * Cutadapt v1.18 (2018-09-07), or later, is required.
 * Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
-* R 3.2, or later, is required as it includes the [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) (meta-)package.
-* R 3.6, or later, is strongly recommended.
+* R 3.6, or later, is required.
 
 ---
 
-## Install general packages
+## Install operating system packages
 
 | Package | Links |
 | ------- | ----- |
@@ -115,10 +119,12 @@ Constraints:
 | pigz | [pigz](http://zlib.net/pigz/) |
 | pandoc | [pandoc](https://pandoc.org) |
 | GraphViz | [GraphViz](https://www.graphviz.org/) |
+| zip, unzip | |
 
 ### Install on Ubuntu
 
 ```console
+$ sudo apt update -y
 $ sudo apt-get install -y git
 $ sudo apt-get install -y curl
 $ sudo apt-get install -y bedtools
@@ -126,7 +132,11 @@ $ sudo apt-get install -y hdf5-tools
 $ sudo apt-get install -y pigz
 $ sudo apt-get install -y pandoc
 $ sudo apt-get install -y graphviz
+$ sudo apt-get install -y zip
+$ sudo apt-get install -y unzip
 ```
+
+Note: some packages may already be present.
 
 ### Install on CentOS
 
@@ -147,10 +157,12 @@ $ sudo yum install -y graphviz
 $ git --version
 $ curl --version
 $ bedtools -version
-$ h5diff -version
+$ h5diff --version
 $ pigz --version
-$ pandoc -version
+$ pandoc --version
 $ dot -V
+$ zip -v
+$ unzip -v
 ```
 
 `h5diff` is one of the hdf5tools.
@@ -289,6 +301,8 @@ $ conda install -y -c anaconda h5py
 $ conda install -y -c bioconda umi_tools
 ```
 
+**Note:** For `gffutils`, `pip install` is recommended because using `conda install -y -c bioconda gffutils` under Python 3, seems to confuse the Python environment and sets Python to `Python 2.7.16`.
+
 Check packages have installed command-line tools:
 
 ```console
@@ -311,17 +325,21 @@ $ python
 
 Your number of `skipped` and `xfailed` (expected failures may differ, depending upon the version of h5py installed.
 
-**Note:** For `gffutils`, `pip install` is recommended because using
+**Troubleshooting: `samtools: error while loading shared libraries: libcrypto.so.1.0.0`**
 
-```console
-$ conda install -y -c bioconda gffutils
+If you get:
+
+```conda
+$ samtools --version
+samtools: error while loading shared libraries: libcrypto.so.1.0.0: cannot open shared object file: No such file or directory
 ```
 
-under Python 3, seems to confuse the Python environment and sets Python to:
+then try forcing a reinstall to a more recent version, for example:
 
 ```console
-$ python --version
-Python 2.7.16 :: Anaconda, Inc.
+$ conda install -c bioconda samtools=1.9 --force-reinstall
+$ samtools --version
+samtools 1.9
 ```
 
 ---
@@ -387,6 +405,8 @@ Check install:
 ```console
 $ javac -version
 $ java -version
+$ nextflow -v
+nextflow version 20.04.1.5335
 $ nextflow -version
 
       N E X T F L O W
@@ -396,8 +416,15 @@ $ nextflow -version
       http://nextflow.io
 ```
 
+If the Nextflow version is less than version 20 then force an update to version 20:
 
-Your version of Nextflow may differ from that shown.
+```console
+$ conda install -y -c bioconda nextflow=20
+$ nextflow -version
+version 20.01.0 build 5264
+```
+
+Your version of Nextflow can differ from that shown but must be version 20 or above.
 
 **Install Nextflow (alternative)**
 
@@ -460,14 +487,16 @@ This runs Nextflow workflow [main.nf](https://github.com/nextflow-io/hello/blob/
 
 ---
 
-## Create `setenv.sh` to configure paths
+## Create `set-riboviz-env.sh` to configure paths
 
-Create a `setenv.sh` script with the paths to your Hisat2 and Bowtie directories. For example:
+Create a `set-riboviz-env.sh` script with the paths to your Hisat2 and Bowtie directories. For example:
 
 ```console
 #!/usr/bin/env bash
-export PATH=~/hisat2-2.1.0:$PATH
-export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
+export PATH=$HOME/hisat2-2.1.0:$PATH
+export PATH=$HOME/bowtie-1.2.2-linux-x86_64/:$PATH
+source $HOME/miniconda3/bin/activate
+conda activate riboviz
 ```
 
 Remember, your directory names may differ, depending on the versions of Hisat2 and Bowtie you have.
@@ -481,21 +510,17 @@ export PATH=$HOME/nextflow:$PATH
 In future you can configure the paths by running:
 
 ```console
-$ source setenv.sh
+$ source set-riboviz-env.sh
 ```
 
 ---
 
-## Install R 2.14.0+
+## Install R 3.6+
 
 Web sites:
 
 * [The R Project for Statistical Computing](https://www.r-project.org/)
 * [The Comprehensive R Archive Network](https://cran.r-project.org/) (CRAN).
-
-**Note:** R 2.14.0, or later, is required as it includes the [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/00Index.html) package.
-
-**Note:** R 3.6, or later, is strongly recommended.
 
 ### Install R and packages required by R packages to be installed
 
@@ -511,6 +536,28 @@ $ sudo apt-get install -y libssl-dev
 $ sudo apt-get install -y libcurl4-openssl-dev
 $ sudo apt-get install -y libgit2-dev
 ```
+```console
+$ R --version
+R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
+```
+
+Your version of R can differ from that shown but must be version 3.6 or above.
+
+Default package managers may not have the most up-to-date version of R available. This may cause problems when installing R or its packages. [The Comprehensive R Archive Network](https://cran.r-project.org/) has information on alternative ways to get a more recent version of R.
+
+For Ubuntu, you can do the following, from [Ubuntu Packages For R - Brief Instructions](https://cran.r-project.org/bin/linux/ubuntu/):
+
+```console
+$ sudo apt update -qq
+$ sudo apt install -y --no-install-recommends software-properties-common dirmngr
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+$ sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+$ sudo apt-get update
+$ sudo apt-get install -y r-base
+$ sudo apt-get install -y r-base-dev
+$ R --version
+R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
+```
 
 **Install on CentOS**
 
@@ -524,69 +571,12 @@ $ sudo yum install -y openssl-devel
 $ sudo yum install -y libcurl-devel
 $ sudo yum install -y libgit2-devel
 ```
-
-**Troubleshooting: `the most recent version of R is not installed` or `package "..." is not available (for R version ...)`
-
-Default package managers may not have the most up-to-date version of R available. This may cause problems when installing R packages. [The Comprehensive R Archive Network](https://cran.r-project.org/) has information on alternative ways to get a more recent version of R.
-
-For example, following CRAN-R's [UBUNTU PACKAGES FOR R](https://cran.r-project.org/bin/linux/ubuntu/README.html) to get the latest R 3.6 packages:
-
-* Get your Ubuntu version, for example:
-
-```console
-$ lsb_release -a
-No LSB modules are available.
-Distributor ID:	Ubuntu
-Description:	Ubuntu 18.04 LTS
-Release:	18.04
-Codename:	bionic
-```
-
-* Open `/etc/apt/sources.list` in an editor (requires `sudo` access), for example:
-
-```console
-$ sudo nano /etc/apt/sources.list
-```
-
-* From UBUNTU PACKAGES FOR R get the entry for your Ubuntu version and add it to the end of the file. For example:
-
-```
-deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/
-```
-
-* Install CRAN-R Ubuntu server key:
-
-```console
-$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
-```
-
-* Update packages:
-
-```console
-$ sudo apt-get update
-```
-
-* Install:
-
-```console
-$ sudo apt-get install -y r-base
-$ sudo apt-get install -y r-base-dev
-$ R --version
-R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
-Copyright (C) 2020 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
-```
-
-### Check R has installed
-
 ```console
 $ R --version
 R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
-Copyright (C) 2020 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
 ```
 
-Your version of R may differ from that shown.
+Your version of R can differ from that shown but must be version 3.6 or above.
 
 ---
 
@@ -594,20 +584,20 @@ Your version of R may differ from that shown.
 
 | Package | Links |
 | ------- | ----- |
-| RcppRoll | [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html) |
-| optparse | [optparse](https://cran.r-project.org/web/packages/optparse/index.html) |
-| tidyverse | [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) |
-| shiny | [shiny](https://cran.r-project.org/web/packages/shiny/index.html) |
-| plotly | [plotly](https://cran.r-project.org/web/packages/plotly/index.html) |
-| git2r |  [git2r](https://docs.ropensci.org/git2r), [GitHub](https://github.com/ropensci/git2r) |
-| here | [here](https://here.r-lib.org/), [CRAN](https://cran.r-project.org/package=here), [GitHub](https://github.com/r-lib/here) |
-| rmarkdown | [rmarkdown](https://cran.r-project.org/web/packages/rmarkdown/index.html) |
-| knitr | [knitr](https://cran.r-project.org/web/packages/knitr/index.html) |
+| Bioconductor Biostrings | [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html) |
 | Bioconductor Rsamtools | [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html) |
+| Bioconductor ShortRead | [ShortRead](https://bioconductor.org/packages/release/bioc/html/ShortRead.html) |
 | Bioconductor rhdf5 | [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html) |
 | Bioconductor rtracklayer | [rtracklayer](https://bioconductor.org/packages/release/bioc/html/rtracklayer.html) |
-| Bioconductor Biostrings | [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html) |
-| Bioconductor ShortRead | [ShortRead](https://bioconductor.org/packages/release/bioc/html/ShortRead.html) |
+| RcppRoll | [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html) |
+| git2r |  [git2r](https://docs.ropensci.org/git2r), [GitHub](https://github.com/ropensci/git2r) |
+| here | [here](https://here.r-lib.org/), [CRAN](https://cran.r-project.org/package=here), [GitHub](https://github.com/r-lib/here) |
+| knitr | [knitr](https://cran.r-project.org/web/packages/knitr/index.html) |
+| optparse | [optparse](https://cran.r-project.org/web/packages/optparse/index.html) |
+| plotly | [plotly](https://cran.r-project.org/web/packages/plotly/index.html) |
+| rmarkdown | [rmarkdown](https://cran.r-project.org/web/packages/rmarkdown/index.html) |
+| shiny | [shiny](https://cran.r-project.org/web/packages/shiny/index.html) |
+| tidyverse | [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) |
 
 If, when installing R packages, you see a message like:
 
@@ -624,16 +614,14 @@ Install in R:
 
 ```r
 > install.packages("RcppRoll")
-> install.packages("optparse")
-> install.packages("tidyr")
-> install.packages("ggplot2")
-> install.packages("shiny")
-> install.packages("plotly")
-> install.packages("readr")
 > install.packages("git2r")
 > install.packages("here")
-> install.packages("rmarkdown")
 > install.packages("knitr")
+> install.packages("optparse")
+> install.packages("plotly")
+> install.packages("rmarkdown")
+> install.packages("shiny")
+> install.packages("tidyverse")
 ```
 
 The commands to install Bioconductor packages depend on your version of R. For full details:
@@ -642,7 +630,7 @@ The commands to install Bioconductor packages depend on your version of R. For f
 * Click the link of a Bioconductor release consistent with your version of R.
 * Click the link of the specific package.
 
-For example, for R 3.5 or R 3.6, install in R:
+For example, for R 3.6 or R4.1, install in R:
 
 ```r
 > install.packages("BiocManager")
@@ -651,17 +639,6 @@ For example, for R 3.5 or R 3.6, install in R:
 > BiocManager::install("rhdf5")
 > BiocManager::install("Biostrings")
 > BiocManager::install("ShortRead")
-```
-
-For example, for R 3.4, install in R:
-
-```r
-> source("https://bioconductor.org/biocLite.R")
-> biocLite("Rsamtools")
-> biocLite("rtracklayer")
-> biocLite("rhdf5")
-> biocLite("Biostrings")
-> biocLite("ShortRead")
 ```
 
 ### Troubleshooting: installation path not writeable
@@ -685,7 +662,7 @@ DESCRIPTION  libs  LICENSE  Meta  NAMESPACE  NEWS
 ```
 
 ```console
-$ ls ~/R/x86_64-redhat-linux-gnu-library/3.5/Rsamtools/
+$ ls ~/R/x86_64-redhat-linux-gnu-library/3.6/Rsamtools/
 DESCRIPTION  libs  LICENSE  Meta  NAMESPACE  NEWS
 ```
 
@@ -697,7 +674,7 @@ paste0("--arch=",  :
   cannot popen ' '/usr/lib/R/bin/R' --no-save --slave 2>&1 <
   '/tmp/Rtmpw3pOH7/file12471113d0d2b'', probable reason 'Cannot
   allocate memory'
-* removing "/home/ubuntu/R/x86_64-pc-linux-gnu-library/3.5/Rsamtools"
+* removing "/home/ubuntu/R/x86_64-pc-linux-gnu-library/3.6/Rsamtools"
 Warning in q("no", status = status, runLast = FALSE) :
   system call failed: Cannot allocate memory
 
@@ -723,6 +700,42 @@ then one solution may be to install "XML" specifying the URL of the source packa
 
 ```R
 > install.packages("https://cran.r-project.org/src/contrib/Archive/XML/XML_3.99-0.3.tar.gz", repos=NULL, type="source")
+```
+
+### Troubleshooting: `ShortRead` installation fails on CentOS
+
+If the following failure arises when installing `ShortRead` under CentOS:
+
+```R
+> install.packages("BiocManager")
+...
+> BiocManager::install("ShortRead")
+Warning messages:
+1: In .inet_warning(msg) :
+  installation of package "png" had non-zero exit status
+2: In .inet_warning(msg) :
+  installation of package "jpeg" had non-zero exit status
+3: In .inet_warning(msg) :
+  installation of package "latticeExtra" had non-zero exit status
+4: In .inet_warning(msg) :
+  installation of package "ShortRead" had non-zero exit status
+Install libjpegdevel:
+```
+
+Failure 2 causes failure 4 may be due to a missing package. To resolve this failure, install the `libjpeg-devel` package:
+
+```console
+$ sudo yum install -y libjpeg-devel
+```
+
+Failure 1 causes failures 3 and 4 and may be due to, on CentOS 7, the system-wide `libpng` package being at version 15, while Miniconda 3, after installation of the Python packages above, has `libpng` version 16. To resolve this failure, start a new bash terminal but do not activate the Miniconda environment, start R and reinstall the package:
+
+```console
+$ R
+```
+```R
+> install.packages("BiocManager")
+> BiocManager::install("ShortRead")
 ```
 
 ---
