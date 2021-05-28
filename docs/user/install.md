@@ -301,6 +301,8 @@ $ conda install -y -c anaconda h5py
 $ conda install -y -c bioconda umi_tools
 ```
 
+**Note:** For `gffutils`, `pip install` is recommended because using `conda install -y -c bioconda gffutils` under Python 3, seems to confuse the Python environment and sets Python to `Python 2.7.16`.
+
 Check packages have installed command-line tools:
 
 ```console
@@ -323,17 +325,21 @@ $ python
 
 Your number of `skipped` and `xfailed` (expected failures may differ, depending upon the version of h5py installed.
 
-**Note:** For `gffutils`, `pip install` is recommended because using
+**Troubleshooting: `samtools: error while loading shared libraries: libcrypto.so.1.0.0`
 
-```console
-$ conda install -y -c bioconda gffutils
+If you get:
+
+```conda
+$ samtools --version
+samtools: error while loading shared libraries: libcrypto.so.1.0.0: cannot open shared object file: No such file or directory
 ```
 
-under Python 3, seems to confuse the Python environment and sets Python to:
+then try forcing a reinstall to a more recent version, for example:
 
 ```console
-$ python --version
-Python 2.7.16 :: Anaconda, Inc.
+$ conda install -c bioconda samtools=1.9 --force-reinstall
+$ samtools --version
+samtools 1.9
 ```
 
 ---
