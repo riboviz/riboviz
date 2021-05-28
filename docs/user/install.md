@@ -325,7 +325,7 @@ $ python
 
 Your number of `skipped` and `xfailed` (expected failures may differ, depending upon the version of h5py installed.
 
-**Troubleshooting: `samtools: error while loading shared libraries: libcrypto.so.1.0.0`
+**Troubleshooting: `samtools: error while loading shared libraries: libcrypto.so.1.0.0`**
 
 If you get:
 
