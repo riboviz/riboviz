@@ -33,6 +33,17 @@ echo "| pigz | $PIGZ_VERSION |"
 PANDOC_VERSION=$(pandoc --version | head -n 1 | cut -d" " -f2)
 # pandoc 1.19.2.4
 echo "| pandoc | $PANDOC_VERSION |"
+GRAPHVIZ_VERSION=$(dot -V 2>&1 | cut -d" " -f5)
+# dot - graphviz version 2.40.1 (20161225.0304)
+# dot outputs version information to standard error stream.
+echo "| GraphViz (dot) | $GRAPHVIZ_VERSION |"
+ZIP_VERSION=$(zip -h | head -n 2 | tail -n 1 | cut -d" " -f2)
+# Copyright (c) 1990-2008 Info-ZIP - Type 'zip "-L"' for software license.
+# Zip 3.0 (July 5th 2008). Usage:
+echo "| zip | $ZIP_VERSION |"
+UNZIP_VERSION=$(unzip -h | head -n 1 | cut -d" " -f2)
+# UnZip 6.00 of 20 April 2009, by Debian. Original by Info-ZIP.
+echo "| unzip | $UNZIP_VERSION |"
 PYTHON_VERSION=$(python --version | cut -d" " -f2)
 # Python 3.7.3
 echo "| Python | $PYTHON_VERSION |"
@@ -56,10 +67,6 @@ echo "| Java (java) | $JAVA_VERSION |"
 NEXTFLOW_VERSION=$(nextflow -v | cut -d" " -f3)
 # nextflow version 20.01.0.5264
 echo "| Nextflow | $NEXTFLOW_VERSION |"
-GRAPHVIZ_VERSION=$(dot -V 2>&1 | cut -d" " -f5)
-# dot - graphviz version 2.40.1 (20161225.0304)
-# dot outputs version information to standard error stream.
-echo "| GraphViz (dot) | $GRAPHVIZ_VERSION |"
 HISAT2_VERSION=$(hisat2 --version)
 HISAT2_VERSION=$(echo "$HISAT2_VERSION" | head -n 1  | cut -d" " -f3)
 # /home/ubuntu/hisat2-2.1.0/hisat2-align-s version 2.1.0
