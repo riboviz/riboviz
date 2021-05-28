@@ -1,4 +1,4 @@
-# Deploy a Ubuntu Virtual Machine on Windows 10
+# Deploy a Ubuntu Virtual Machine using VMWare on Windows 10
 
 ## Requirements
 

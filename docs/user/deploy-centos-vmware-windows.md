@@ -1,4 +1,4 @@
-# Deploy a CentOS Virtual Machine on Windows 10
+# Deploy a CentOS Virtual Machine using VMWare on Windows 10
 
 ## Requirements
 
