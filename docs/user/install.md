@@ -298,6 +298,8 @@ $ conda install -y -c anaconda h5py
 $ conda install -y -c bioconda umi_tools
 ```
 
+**Note:** For `gffutils`, `pip install` is recommended because using `conda install -y -c bioconda gffutils` under Python 3, seems to confuse the Python environment and sets Python to `Python 2.7.16`.
+
 Check packages have installed command-line tools:
 
 ```console
@@ -320,17 +322,21 @@ $ python
 
 Your number of `skipped` and `xfailed` (expected failures may differ, depending upon the version of h5py installed.
 
-**Note:** For `gffutils`, `pip install` is recommended because using
+**Troubleshooting: `samtools: error while loading shared libraries: libcrypto.so.1.0.0`**
 
-```console
-$ conda install -y -c bioconda gffutils
+If you get:
+
+```conda
+$ samtools --version
+samtools: error while loading shared libraries: libcrypto.so.1.0.0: cannot open shared object file: No such file or directory
 ```
 
-under Python 3, seems to confuse the Python environment and sets Python to:
+then try forcing a reinstall to a more recent version, for example:
 
 ```console
-$ python --version
-Python 2.7.16 :: Anaconda, Inc.
+$ conda install -c bioconda samtools=1.9 --force-reinstall
+$ samtools --version
+samtools 1.9
 ```
 
 ---
@@ -691,6 +697,42 @@ then one solution may be to install "XML" specifying the URL of the source packa
 
 ```R
 > install.packages("https://cran.r-project.org/src/contrib/Archive/XML/XML_3.99-0.3.tar.gz", repos=NULL, type="source")
+```
+
+### Troubleshooting: `ShortRead` installation fails on CentOS
+
+If the following failure arises when installing `ShortRead` under CentOS:
+
+```R
+> install.packages("BiocManager")
+...
+> BiocManager::install("ShortRead")
+Warning messages:
+1: In .inet_warning(msg) :
+  installation of package "png" had non-zero exit status
+2: In .inet_warning(msg) :
+  installation of package "jpeg" had non-zero exit status
+3: In .inet_warning(msg) :
+  installation of package "latticeExtra" had non-zero exit status
+4: In .inet_warning(msg) :
+  installation of package "ShortRead" had non-zero exit status
+Install libjpegdevel:
+```
+
+Failure 2 causes failure 4 may be due to a missing package. To resolve this failure, install the `libjpeg-devel` package:
+
+```console
+$ sudo yum install -y libjpeg-devel
+```
+
+Failure 1 causes failures 3 and 4 and may be due to, on CentOS 7, the system-wide `libpng` package being at version 15, while Miniconda 3, after installation of the Python packages above, has `libpng` version 16. To resolve this failure, start a new bash terminal but do not activate the Miniconda environment, start R and reinstall the package:
+
+```console
+$ R
+```
+```R
+> install.packages("BiocManager")
+> BiocManager::install("ShortRead")
 ```
 
 ---
