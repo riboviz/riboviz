@@ -13,7 +13,7 @@ We suggest that you:
 * Either, use a virtual machine running under [VMWare Workstation Player](https://www.vmware.com/uk/products/workstation-player.html) or [Oracle VirtualBox](https://www.virtualbox.org/). We provide quick-start instructions for using VMWare to:
   - [Deploy a Ubuntu Virtual Machine using VMWare on Windows 10](./deploy-ubuntu-vmware-windows.md).
   - [Deploy a CentOS Virtual Machine using VMWare on Windows 10](./deploy-centos-vmware-windows.md).
-* Or, try using Windows 10's [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about) which allows running of a Linux environment on Windows 10 without the need for a VM. Most command-line tools, utilities, and applications can be directly on Windows, unmodified. Ubuntu, openSUSE, Debian, Kali flavours of Linux can be used.
+* Or, use Windows 10's [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10). We have successfully installed and run RiboViz under WSL2 using Microsoft Store's [Ubuntu 18.04 LTS](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 ### Mac OSX users
 
