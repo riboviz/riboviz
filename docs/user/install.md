@@ -35,6 +35,9 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | hdf5tools (h5diff) | 1.10.6 |
 | pigz | 2.4 |
 | pandoc | 1.19.2.4 |
+| GraphViz (dot) | 2.40.1 |
+| zip | 3.0 |
+| unzip | 6.00 |
 | Python | 3.7.7 |
 | Cutadapt | 1.18 |
 | samtools | 1.7 |
@@ -42,7 +45,6 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | Java (javac) | 1.8.0_152-release |
 | Java (java) | 1.8.0_152-release |
 | Nextflow | 20.04.1.5335 |
-| GraphViz (dot) | 2.40.1 |
 | Hisat2 | 2.1.0 |
 | Bowtie | 1.2.2 |
 | R | 3.6.3 |
@@ -105,7 +107,7 @@ Constraints:
 
 ---
 
-## Install general packages
+## Install operating system packages
 
 | Package | Links |
 | ------- | ----- |
@@ -117,10 +119,12 @@ Constraints:
 | pigz | [pigz](http://zlib.net/pigz/) |
 | pandoc | [pandoc](https://pandoc.org) |
 | GraphViz | [GraphViz](https://www.graphviz.org/) |
+| zip, unzip | |
 
 ### Install on Ubuntu
 
 ```console
+$ sudo apt update -y
 $ sudo apt-get install -y git
 $ sudo apt-get install -y curl
 $ sudo apt-get install -y bedtools
@@ -128,7 +132,11 @@ $ sudo apt-get install -y hdf5-tools
 $ sudo apt-get install -y pigz
 $ sudo apt-get install -y pandoc
 $ sudo apt-get install -y graphviz
+$ sudo apt-get install -y zip
+$ sudo apt-get install -y unzip
 ```
+
+Note: some packages may already be present.
 
 ### Install on CentOS
 
@@ -153,6 +161,8 @@ $ h5diff --version
 $ pigz --version
 $ pandoc --version
 $ dot -V
+$ zip -v
+$ unzip -v
 ```
 
 `h5diff` is one of the hdf5tools.
