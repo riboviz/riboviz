@@ -481,14 +481,16 @@ This runs Nextflow workflow [main.nf](https://github.com/nextflow-io/hello/blob/
 
 ---
 
-## Create `setenv.sh` to configure paths
+## Create `set-riboviz-env.sh` to configure paths
 
-Create a `setenv.sh` script with the paths to your Hisat2 and Bowtie directories. For example:
+Create a `set-riboviz-env.sh` script with the paths to your Hisat2 and Bowtie directories. For example:
 
 ```console
 #!/usr/bin/env bash
-export PATH=~/hisat2-2.1.0:$PATH
-export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
+export PATH=$HOME/hisat2-2.1.0:$PATH
+export PATH=$HOME/bowtie-1.2.2-linux-x86_64/:$PATH
+source $HOME/miniconda3/bin/activate
+conda activate riboviz
 ```
 
 Remember, your directory names may differ, depending on the versions of Hisat2 and Bowtie you have.
@@ -502,7 +504,7 @@ export PATH=$HOME/nextflow:$PATH
 In future you can configure the paths by running:
 
 ```console
-$ source setenv.sh
+$ source set-riboviz-env.sh
 ```
 
 ---
