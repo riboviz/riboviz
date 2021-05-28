@@ -10,8 +10,10 @@ Installing some of these tools requires you to have permission to run `sudo` to 
 
 We suggest that you:
 
-* Either, use a virtual machine running under [VMWare Workstation Player](https://www.vmware.com/uk/products/workstation-player.html) or [Oracle VirtualBox](https://www.virtualbox.org/).
-* Or, try using Windows 10's [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about) which allows running of a Linux environment on Windows 10 without the need for a VM. Most command-line tools, utilities, and applications can be directly on Windows, unmodified. Ubuntu, openSUSE, Debian, Kali flavours of Linux can be used.
+* Either, use a virtual machine running under [VMWare Workstation Player](https://www.vmware.com/uk/products/workstation-player.html) or [Oracle VirtualBox](https://www.virtualbox.org/). We provide quick-start instructions for using VMWare to:
+  - [Deploy a Ubuntu Virtual Machine using VMWare on Windows 10](./deploy-ubuntu-vmware-windows.md).
+  - [Deploy a CentOS Virtual Machine using VMWare on Windows 10](./deploy-centos-vmware-windows.md).
+* Or, use Windows Subsystem for Linux following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10). We have successfully installed and run RiboViz under WSL2 using Microsoft Store's [Ubuntu 18.04 LTS](https://www.microsoft.com/en-gb/p/ubuntu-1804-lts/9n9tngvndl3q).
 
 ### Mac OSX users
 
@@ -33,6 +35,9 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | hdf5tools (h5diff) | 1.10.6 |
 | pigz | 2.4 |
 | pandoc | 1.19.2.4 |
+| GraphViz (dot) | 2.40.1 |
+| zip | 3.0 |
+| unzip | 6.00 |
 | Python | 3.7.7 |
 | Cutadapt | 1.18 |
 | samtools | 1.7 |
@@ -40,7 +45,6 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | Java (javac) | 1.8.0_152-release |
 | Java (java) | 1.8.0_152-release |
 | Nextflow | 20.04.1.5335 |
-| GraphViz (dot) | 2.40.1 |
 | Hisat2 | 2.1.0 |
 | Bowtie | 1.2.2 |
 | R | 3.6.3 |
@@ -112,10 +116,12 @@ Constraints:
 | pigz | [pigz](http://zlib.net/pigz/) |
 | pandoc | [pandoc](https://pandoc.org) |
 | GraphViz | [GraphViz](https://www.graphviz.org/) |
+| zip, unzip | |
 
 ### Install on Ubuntu
 
 ```console
+$ sudo apt update -y
 $ sudo apt-get install -y git
 $ sudo apt-get install -y curl
 $ sudo apt-get install -y bedtools
@@ -123,7 +129,11 @@ $ sudo apt-get install -y hdf5-tools
 $ sudo apt-get install -y pigz
 $ sudo apt-get install -y pandoc
 $ sudo apt-get install -y graphviz
+$ sudo apt-get install -y zip
+$ sudo apt-get install -y unzip
 ```
+
+Note: some packages may already be present.
 
 ### Install on CentOS
 
@@ -148,6 +158,8 @@ $ h5diff --version
 $ pigz --version
 $ pandoc --version
 $ dot -V
+$ zip -v
+$ unzip -v
 ```
 
 `h5diff` is one of the hdf5tools.
@@ -466,14 +478,16 @@ This runs Nextflow workflow [main.nf](https://github.com/nextflow-io/hello/blob/
 
 ---
 
-## Create `setenv.sh` to configure paths
+## Create `set-riboviz-env.sh` to configure paths
 
-Create a `setenv.sh` script with the paths to your Hisat2 and Bowtie directories. For example:
+Create a `set-riboviz-env.sh` script with the paths to your Hisat2 and Bowtie directories. For example:
 
 ```console
 #!/usr/bin/env bash
-export PATH=~/hisat2-2.1.0:$PATH
-export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
+export PATH=$HOME/hisat2-2.1.0:$PATH
+export PATH=$HOME/bowtie-1.2.2-linux-x86_64/:$PATH
+source $HOME/miniconda3/bin/activate
+conda activate riboviz
 ```
 
 Remember, your directory names may differ, depending on the versions of Hisat2 and Bowtie you have.
@@ -487,7 +501,7 @@ export PATH=$HOME/nextflow:$PATH
 In future you can configure the paths by running:
 
 ```console
-$ source setenv.sh
+$ source set-riboviz-env.sh
 ```
 
 ---

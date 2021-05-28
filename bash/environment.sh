@@ -26,6 +26,10 @@ echo "# pandoc --version"
 pandoc --version
 echo "# dot -v # Tool from GraphViz"
 dot -V
+echo "# zip -h"
+zip -h | head -n 2
+echo "# unzip -h"
+unzip -h | head -n 1
 echo "# python --version"
 python --version
 echo "# conda list"

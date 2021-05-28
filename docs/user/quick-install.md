@@ -41,6 +41,12 @@ Install tools not available as operating system packages:
 $ source install-tools.sh
 ```
 
+Create `set-riboviz-env.sh`:
+
+```console
+$ source create-set-riboviz-env.sh
+```
+
 Install R:
 
 * Ubuntu:
