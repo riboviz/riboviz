@@ -415,6 +415,8 @@ miniconda3.sh: line 2: `Resolving repo.continuum.io
 2606:4700::6812:c94f, ...'
 ```
 
+then rerun wget and use `-O`, not `-o`.
+
 **Troubleshooting: incompatible Python versions**
 
 If you find when installing packages below that your version of Python is too new (e.g. your Python version is 3.8 and the tool only works with Python 3.7), then two options are:
