@@ -13,14 +13,14 @@ conda install -y pandas
 conda install -y -c bioconda cutadapt
 cutadapt --version
 conda install -y -c bioconda pysam
-conda install -y -c bioconda samtools
+conda install -y -c bioconda samtools=1.9
 samtools --version
 conda install -y -c anaconda biopython
 pip install gffutils
 conda install -y -c anaconda h5py
 conda install -y -c bioconda umi_tools
 umi_tools -v
-conda install -y -c bioconda nextflow
+conda install -y -c bioconda nextflow=20
 javac -version
 java -version
 nextflow -v
