@@ -30,5 +30,3 @@ conda install -y pytest-cov
 conda install -y pylint
 conda install -y pycodestyle
 pip install sphinx
-conda deactivate
-conda deactivate
