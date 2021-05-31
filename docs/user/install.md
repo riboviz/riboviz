@@ -357,8 +357,6 @@ then one solution may be to install "XML" specifying the URL of the source packa
 > install.packages("https://cran.r-project.org/src/contrib/Archive/XML/XML_3.99-0.3.tar.gz", repos=NULL, type="source")
 ```
 
-### Troubleshooting: `ShortRead` installation fails on CentOS
-
 ---
 
 ## Install Python
