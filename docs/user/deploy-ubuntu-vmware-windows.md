@@ -107,7 +107,7 @@ Add Terminal (bash shell) icon to icon bar:
 Within a terminal window, install Git (enter your password when prompted):
 
 ```console
-$ sudo apt-get install -y git
+$ sudo apt install -y git
 ```
 
 Set UK keyboard (optional):
