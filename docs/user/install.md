@@ -30,7 +30,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | Command-line tool | Version |
 | ----------------- | ------- |
 | Git | 2.17.1 |
-| cURL | 7.71.0 |
+| cURL | 7.69.1 |
 | bedtools | 2.26.0 |
 | hdf5tools (h5diff) | 1.10.6 |
 | pigz | 2.4 |
@@ -38,16 +38,16 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | GraphViz (dot) | 2.40.1 |
 | zip | 3.0 |
 | unzip | 6.00 |
-| Python | 3.7.7 |
+| R | 3.6.3 |
+| Python | 3.7.6 |
 | Cutadapt | 1.18 |
-| samtools | 1.7 |
+| samtools | 1.9 |
 | UMI-tools | 1.0.1 |
 | Java (javac) | 1.8.0_152-release |
 | Java (java) | 1.8.0_152-release |
 | Nextflow | 20.04.1.5335 |
 | Hisat2 | 2.1.0 |
 | Bowtie | 1.2.2 |
-| R | 3.6.3 |
 
 | R Package | Version |
 | --------- | ------- |
@@ -77,6 +77,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | -------------- | ------- | --------------- |
 | biopython | 1.77 | conda |
 | cutadapt | 1.18 | conda |
+| gffutils | 0.10.1 | conda |
 | gitpython | 3.1.3 | conda |
 | h5py | 2.10.0 | conda |
 | nextflow | 20.04.1 | conda |
@@ -88,9 +89,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | pytest-cov | 2.10.1 | conda |
 | pyyaml | 5.3.1 | conda |
 | samtools | 1.9 | conda |
-| sphinx | 3.2.0 | conda |
 | umi_tools | 1.0.1 | conda |
-| gffutils | 0.10.1 | pip |
 | sphinx | 3.2.0 | pip |
 
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
@@ -455,7 +454,7 @@ $ source $HOME/miniconda3/bin/activate
 Create a `riboviz` environment and activate it:
 
 ```console
-$ conda create --name riboviz python=3.7
+$ conda create -y --name riboviz python=3.7
 $ conda activate riboviz
 $ python --version
 ```
@@ -556,13 +555,11 @@ $ conda install -y -c bioconda cutadapt
 $ conda install -y -c bioconda pysam
 $ conda install -y -c bioconda samtools=1.9
 $ conda install -y -c anaconda biopython
-$ pip install gffutils
+$ conda install -y -c bioconda gffutils
 $ conda install -y -c anaconda h5py
 $ conda install -y -c bioconda umi_tools
 $ conda install -y -c bioconda nextflow=20
 ```
-
-**Note:** `pip install` is recommended for gffutils because using `conda install -y -c bioconda gffutils` under Python 3, seems to confuse the Python environment and sets Python to `Python 2.7.16`.
 
 Check packages have installed command-line tools:
 

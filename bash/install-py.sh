@@ -16,7 +16,7 @@ conda install -y -c bioconda pysam
 conda install -y -c bioconda samtools=1.9
 samtools --version
 conda install -y -c anaconda biopython
-pip install gffutils
+conda install -y -c bioconda gffutils
 conda install -y -c anaconda h5py
 conda install -y -c bioconda umi_tools
 umi_tools -v

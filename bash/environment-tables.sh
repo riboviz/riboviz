@@ -44,6 +44,9 @@ echo "| zip | $ZIP_VERSION |"
 UNZIP_VERSION=$(unzip -h | head -n 1 | cut -d" " -f2)
 # UnZip 6.00 of 20 April 2009, by Debian. Original by Info-ZIP.
 echo "| unzip | $UNZIP_VERSION |"
+R_VERSION=$(R --version | head -n 1 | cut -d" " -f3)
+# R version 3.4.4 (2018-03-15) -- "Someone to Lean On"
+echo "| R | $R_VERSION |"
 PYTHON_VERSION=$(python --version | cut -d" " -f2)
 # Python 3.7.3
 echo "| Python | $PYTHON_VERSION |"
@@ -76,9 +79,6 @@ echo "| Hisat2 | $HISAT2_VERSION |"
 BOWTIE_VERSION=$(bowtie --version | head -n 1 | cut -d" " -f3)
 echo "| Bowtie | $BOWTIE_VERSION |"
 # /home/ubuntu/bowtie-1.2.2-linux-x86_64/bowtie-align-s version 1.2.2
-R_VERSION=$(R --version | head -n 1 | cut -d" " -f3)
-# R version 3.4.4 (2018-03-15) -- "Someone to Lean On"
-echo "| R | $R_VERSION |"
 echo " "
 echo "| R Package | Version |"
 echo "| --------- | ------- |"
@@ -97,7 +97,7 @@ echo " "
 echo "| Python Package | Version | Package Manager |"
 echo "| -------------- | ------- | --------------- |"
 CONDA_PKGS=$(conda list)
-CONDA_LIST=(biopython cutadapt gitpython h5py nextflow pandas pycodestyle pylint pysam pytest pytest-cov pyyaml samtools sphinx umi_tools)
+CONDA_LIST=(biopython cutadapt gffutils gitpython h5py nextflow pandas pycodestyle pylint pysam pytest pytest-cov pyyaml samtools umi_tools)
 for pkg in ${CONDA_LIST[@]}; do
     PKG_VERSION=$(echo "$CONDA_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
     # pkg     M.N    ...
@@ -110,7 +110,7 @@ for pkg in ${CONDA_LIST[@]}; do
     echo "| $pkg | $PKG_VERSION | conda |"
 done
 PIP_PKGS=$(pip list)
-PIP_LIST=(gffutils sphinx)
+PIP_LIST=(sphinx)
 for pkg in ${PIP_LIST[@]}; do
     PKG_VERSION=$(echo "$PIP_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
     echo "| $pkg | $PKG_VERSION | pip |"
