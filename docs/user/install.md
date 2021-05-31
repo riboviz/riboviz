@@ -720,8 +720,6 @@ $ pip list
 
 The Python packages and their versions will be listed.
 
-`nextflow` will only be shown if you installed Nextflow.
-
 ### Check names and versions of R packages
 
 Run:
