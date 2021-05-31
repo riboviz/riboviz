@@ -2,9 +2,9 @@
 
 ## About these instructions
 
-These instructions were written for Ubuntu 18.04 and CentOS 7.4. Other Linux flavours will require different commands to be run.
+These instructions written for Ubuntu and CentOS and tested upon Ubuntu 18.04 and CentOS 7. Other Linux flavours will require different commands to be run.
 
-Installing some of these tools requires you to have permission to run `sudo` to install and configure software. If you don't have `sudo` access you will have to ask a local system administrator to run these commands for you.
+You need to have permission to run `sudo` to install many of the dependencies. If you don't have `sudo` access you will have to ask a local system administrator to run these commands for you.
 
 ### Windows users
 
@@ -15,17 +15,17 @@ We suggest that you:
   - [Deploy a CentOS Virtual Machine using VMWare on Windows 10](./deploy-centos-vmware-windows.md).
 * Or, use Windows Subsystem for Linux following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10). We have successfully installed and run RiboViz under WSL2 using Microsoft Store's [Ubuntu 18.04 LTS](https://www.microsoft.com/en-gb/p/ubuntu-1804-lts/9n9tngvndl3q).
 
-### Mac OSX users
+### Mac OS users
 
-We suggest that you check out the web sites for each prerequisite for information on how to install the prerequisites under Mac OS X.
+We suggest that you check out the web sites for each prerequisite for information on how to install the prerequisites under Mac OS.
 
 ---
 
 ## Dependencies overview
 
-The following tables summarise the packages required by RiboViz. Instructions to install each dependency are given in the following sections - only minimal installation instructions are given, see the documentation for each dependency for full instructions.
+The following tables summarise the packages required by RiboViz. Instructions to install each dependency are given in the following sections. Only minimal installation instructions are given. For full information, see the documentation for each dependency.
 
-The versions listed are those used by a RiboViz developer when preparing the current release. Other versions of the prerequisites, different from the versions shown, may also be usable, but see the constraints below.
+The versions listed are those used by a RiboViz developer when preparing the current release. Other versions may also be acceptable, but see the constraints below.
 
 | Command-line tool | Version |
 | ----------------- | ------- |
@@ -99,11 +99,13 @@ Certain packages are only required if you plan to develop and extend RiboViz. Th
 
 Constraints:
 
-* RiboViz is **not** compatible with Python 2. Python 2 comes to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
-* Either [Miniconda](https://conda.io/miniconda.html) Python 3.6, or later, or [Anaconda Distribution](https://www.anaconda.com/distribution/) Python 3.6, or later, are strongly recommended.
-* Cutadapt v1.18 (2018-09-07), or later, is required.
-* Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
+* RiboViz is **not** compatible with Python 2. Python 2 came to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
 * R 3.6, or later, is required.
+* Either [Miniconda](https://conda.io/miniconda.html) or [Anaconda Distribution](https://www.anaconda.com/distribution/) are strongly recommended.
+* Python 3.6, or later, is strongly recommended.
+* Cutadapt v1.18 (2018-09-07), or later, is required.
+* Nextflow 20, or later, is required.
+* Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 will resolve in a future release.
 
 ---
 
@@ -397,11 +399,13 @@ Web site: [python](https://www.python.org/)
 
 RiboViz is **not** compatible with Python 2. Python 2 comes to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
 
-Either [Miniconda](https://conda.io/miniconda.html) Python 3.6, or later, or [Anaconda Distribution](https://www.anaconda.com/distribution/) Python 3.6, or later, are strongly recommended.
-
 The instructions which follow have been written under the assumption that you are using Miniconda Python. If using Anaconda then, when installing some packages, you will be told that they are already available. This is because Anaconda comes with a wide range of common Python packages.
 
 If you are using other distributions of Python you will need to consult the relevant documentation for each package for installation information. See also the section on [python and python3](#python-and-python3) below.
+
+**Note:** Either [Miniconda](https://conda.io/miniconda.html) or [Anaconda Distribution](https://www.anaconda.com/distribution/) are strongly recommended.
+
+**Note:** Python 3.6, or later, is strongly recommended.
 
 ### Install Miniconda Python 3.6+
 
@@ -414,9 +418,9 @@ $ bash miniconda3.sh -b -p $HOME/miniconda3
 
 **Note:** make sure you use `-O`, which provides a name for the downloaded file, and not `-o`, which provides the name of a file for messages about the download.
 
-For MacOS and Windows installers, go to [Miniconda installation page](https://docs.conda.io/en/latest/miniconda.html).
+For Mac OS and Windows installers, go to [Miniconda installation page](https://docs.conda.io/en/latest/miniconda.html).
 
-When miniconda is installed, activate the environment:
+When Miniconda has installed, activate the environment:
 
 ```console
 $ source $HOME/miniconda3/bin/activate
