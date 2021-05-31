@@ -12,10 +12,9 @@ Download VMware Workstation 15.5.6 Player for Windows 64-bit Operating Systems f
 
 The download details are as follows:
 
-* Name: VMware-player-15.5.6-16341506.exe
-* Size 152747144 bytes (146 MB)
-* SHA256 checksum: 96a8b2da596ec5057f53992b200b834ecba1f6d0ee2290bec2b3e28459c42f7e
-* For full details, click Read More on the Download Product page above.
+| Name | Size (bytes) | Size (MB) | SHA256 checksum |
+| ---- | ------------ | --------- | --------------- |
+| VMware-player-15.5.6-16341506.exe | 152747144 | 146 | 96a8b2da596ec5057f53992b200b834ecba1f6d0ee2290bec2b3e28459c42f7e |
 
 Double-click `VMware-player-15.5.6-16341506.exe` and install VMware Workstation Player.
 
@@ -37,9 +36,9 @@ Download CentOS 7:
 
 The download details are as follows:
 
-* Name: CentOS-7-x86_64-DVD-2009.iso.
-* Size: 4712300544 bytes (4494 MB, 4.4 GB)
-* SHA256 checksum: e33d7b1ea7a9e2f38c8f693215dd85254c3a4fe446f93f563279715b68d07987  
+| Name | Size (bytes) | Size (GB) | SHA256 checksum |
+| ---- | ------------ | --------- | --------------- |
+| CentOS-7-x86_64-DVD-2009.iso | 4712300544 | 4.4 | e33d7b1ea7a9e2f38c8f693215dd85254c3a4fe446f93f563279715b68d07987 |
 
 ---
 

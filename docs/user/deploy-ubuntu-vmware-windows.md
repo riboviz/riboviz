@@ -12,10 +12,11 @@ Download VMware Workstation 15.5.6 Player for Windows 64-bit Operating Systems f
 
 The download details are as follows:
 
-* Name: VMware-player-15.5.6-16341506.exe
-* Size 152747144 bytes (146 MB)
-* SHA256 checksum: 96a8b2da596ec5057f53992b200b834ecba1f6d0ee2290bec2b3e28459c42f7e
-* For full details, click Read More on the Download Product page above.
+| Name | Size (bytes) | Size (MB) | SHA256 checksum |
+| ---- | ------------ | --------- | --------------- |
+| VMware-player-15.5.6-16341506.exe | 152747144 | 146 | 96a8b2da596ec5057f53992b200b834ecba1f6d0ee2290bec2b3e28459c42f7e |
+
+For full details, click Read More on the Download Product page above.
 
 Double-click `VMware-player-15.5.6-16341506.exe` and install VMware Workstation Player.
 
@@ -34,13 +35,10 @@ Download one of:
 
 The download details are as follows:
 
-* Name: ubuntu-18.04.5-desktop-amd64.iso
-* Size 2193522688 bytes (2092 MB, 2 GB)
-* SHA256 checksum: f295570badb09a606d97ddfc3421d7bf210b4a81c07ba81e9c040eda6ddea6a0
-
-* Name: ubuntu-20.04.2.0-desktop-amd64.iso
-* Size: 2877227008 bytes (2744 MB, 2.7 GB)
-* SHA256 checksum: 93bdab204067321ff131f560879db46bee3b994bf24836bb78538640f689e58f
+| Name | Size (bytes) | Size (GB) | SHA256 checksum |
+| ---- | ------------ | --------- | --------------- |
+| ubuntu-18.04.5-desktop-amd64.iso | 2193522688 | 2 | f295570badb09a606d97ddfc3421d7bf210b4a81c07ba81e9c040eda6ddea6a0 |
+| ubuntu-20.04.2.0-desktop-amd64.iso | 2877227008 | 2.7 | 93bdab204067321ff131f560879db46bee3b994bf24836bb78538640f689e58f |
 
 Notes:
 
@@ -69,7 +67,7 @@ Create VM:
   - Confirm: Re-enter the password.
 * Click Next.
 * Name the Virtual Machine appears.
-* Enter Virtual machine name: Ubuntu 64-bit 18.04.5
+* Enter Virtual machine name: e.g. `Ubuntu 64-bit 18.04.5` OR `Ubuntu 64-bit 20.04.2.0`
 * Select Location: Use the default location. This will be something like `C:\Users\<WINDOWS USER NAME>\<VIRTUAL MACHINE NAME>` e.g. `C:\Users\Jo Smith\Documents\Virtual Machines\Ubuntu 64-bit 18.04.5` or `C:\Users\Jo Smith\Documents\Virtual Machines\Ubuntu 64-bit 20.04.2.0`.
 * Click Next.
 * Specify Disk Capacity appears.
