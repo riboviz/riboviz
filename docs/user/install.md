@@ -415,7 +415,7 @@ miniconda3.sh: line 2: `Resolving repo.continuum.io
 2606:4700::6812:c94f, ...'
 ```
 
-then rerun wget and use `-O`, not `-o`.
+then rerun `wget` and use `-O`, not `-o`.
 
 **Troubleshooting: incompatible Python versions**
 
