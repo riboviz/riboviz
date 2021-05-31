@@ -48,7 +48,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | Hisat2 | 2.1.0 |
 | Bowtie | 1.2.2 |
 | R | 3.6.3 |
-
+  
 | R Package | Version |
 | --------- | ------- |
 | Biostrings | 2.54.0 |
@@ -85,12 +85,13 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | pylint | 2.5.3 | conda |
 | pysam | 0.15.3 | conda |
 | pytest | 5.4.3 | conda |
-| pytest-cov |  | conda |
+| pytest-cov | 2.10.1 | conda |
 | pyyaml | 5.3.1 | conda |
 | samtools | 1.7 | conda |
+| sphinx | 3.2.0 | conda |
 | umi_tools | 1.0.1 | conda |
 | gffutils | 0.10.1 | pip |
-| sphinx |  | pip |
+| sphinx | 3.2.0 | pip |
 
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 

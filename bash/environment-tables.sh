@@ -80,7 +80,20 @@ R_VERSION=$(R --version | head -n 1 | cut -d" " -f3)
 # R version 3.4.4 (2018-03-15) -- "Someone to Lean On"
 echo "| R | $R_VERSION |"
 echo " "
-
+echo "| R Package | Version |"
+echo "| --------- | ------- |"
+R_PKGS=$(Rscript rscripts/list-r-packages.R)
+R_LIST=(Biostrings devtools git2r glue here knitr lintr optparse plotly RcppRoll rhdf5 rmarkdown roxygen2 Rsamtools rtracklayer shiny ShortRead styler testthat tidyverse withr)
+for pkg in ${R_LIST[@]}; do
+    PKG_VERSION=$(echo "$R_PKGS" | grep -iw "$pkg " | tr -s " ")
+    PKG_VERSION=$(echo $PKG_VERSION | cut -d" " -f2)
+    #   pkg     M.N
+    # Delimiter between columns can be 1 or more spaces, so tr is used
+    # to remove multiple spaces.
+    # To remove leading space, use echo $PKG_VERSION outwith a string.
+    echo "| $pkg | $PKG_VERSION |"
+done
+echo " "
 echo "| Python Package | Version | Package Manager |"
 echo "| -------------- | ------- | --------------- |"
 CONDA_PKGS=$(conda list)
@@ -103,16 +116,3 @@ for pkg in ${PIP_LIST[@]}; do
     echo "| $pkg | $PKG_VERSION | pip |"
 done
 echo " "
-echo "| R Package | Version |"
-echo "| --------- | ------- |"
-R_PKGS=$(Rscript rscripts/list-r-packages.R)
-R_LIST=(Biostrings devtools git2r glue here knitr lintr optparse plotly RcppRoll rhdf5 rmarkdown roxygen2 Rsamtools rtracklayer shiny ShortRead styler testthat tidyverse withr)
-for pkg in ${R_LIST[@]}; do
-    PKG_VERSION=$(echo "$R_PKGS" | grep -iw "$pkg " | tr -s " ")
-    PKG_VERSION=$(echo $PKG_VERSION | cut -d" " -f2)
-    #   pkg     M.N
-    # Delimiter between columns can be 1 or more spaces, so tr is used
-    # to remove multiple spaces.
-    # To remove leading space, use echo $PKG_VERSION outwith a string.
-    echo "| $pkg | $PKG_VERSION |"
-done
