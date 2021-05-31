@@ -232,6 +232,22 @@ R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
 
 Your version of R can differ from that shown but must be version 3.6 or above.
 
+If you wish to install the latest version of R then [RStudio](https://docs.rstudio.com/) has instructions on how to do this at [Install R](https://docs.rstudio.com/resources/install-r/). For example, to install R 4.1.0:
+
+```console
+$ sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm 
+$ sudo yum-config-manager --enable "rhel-*-optional-rpms"
+$ export R_VERSION=4.1.0
+$ curl -O https://cdn.rstudio.com/r/centos-7/pkgs/R-${R_VERSION}-1-1.x86_64.rpm
+$ sudo yum install -y R-${R_VERSION}-1-1.x86_64.rpm
+$ /opt/R/${R_VERSION}/bin/R --version
+R version 4.1.0 (2021-05-18) -- "Camp Pontanezen"
+$ sudo ln -s /opt/R/${R_VERSION}/bin/R /usr/local/bin/R
+$ sudo ln -s /opt/R/${R_VERSION}/bin/Rscript /usr/local/bin/Rscript
+$ R --version
+R version 4.1.0 (2021-05-18) -- "Camp Pontanezen"
+```
+
 ---
 
 ## Install R packages
