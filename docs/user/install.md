@@ -49,25 +49,6 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | Bowtie | 1.2.2 |
 | R | 3.6.3 |
 
-| Python Package | Version | Package Manager |
-| -------------- | ------- | --------------- |
-| biopython | 1.77 | conda | |
-| cutadapt | 1.18 | conda | |
-| gitpython | 3.1.3 | conda | |
-| h5py | 2.10.0 | conda | |
-| nextflow | 20.04.1 | conda | |
-| pandas | 1.0.5 | conda | |
-| pycodestyle | 2.6.0 | conda | |
-| pylint | 2.5.3 | conda | |
-| pysam | 0.15.3 | conda | |
-| pytest | 5.4.3 | conda | |
-| pytest-cov |  | conda | |
-| pyyaml | 5.3.1 | conda | |
-| samtools | 1.7 | conda | |
-| umi_tools | 1.0.1 | conda | |
-| gffutils | 0.10.1 | pip |
-| sphinx |  | pip |
-
 | R Package | Version |
 | --------- | ------- |
 | Biostrings | 2.54.0 |
@@ -92,10 +73,29 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | tidyverse | 1.3.0 |
 | withr | 2.3.0 |
 
+| Python Package | Version | Package Manager |
+| -------------- | ------- | --------------- |
+| biopython | 1.77 | conda | |
+| cutadapt | 1.18 | conda | |
+| gitpython | 3.1.3 | conda | |
+| h5py | 2.10.0 | conda | |
+| nextflow | 20.04.1 | conda | |
+| pandas | 1.0.5 | conda | |
+| pycodestyle | 2.6.0 | conda | |
+| pylint | 2.5.3 | conda | |
+| pysam | 0.15.3 | conda | |
+| pytest | 5.4.3 | conda | |
+| pytest-cov |  | conda | |
+| pyyaml | 5.3.1 | conda | |
+| samtools | 1.7 | conda | |
+| umi_tools | 1.0.1 | conda | |
+| gffutils | 0.10.1 | pip |
+| sphinx |  | pip |
+
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
-* Python: pycodestyle, pylint, pytest-cov, sphinx.
 * R: devtools, glue, lintr, roxygen2, styler, testthat, withr.
+* Python: pycodestyle, pylint, pytest-cov, sphinx.
 
 Constraints:
 
@@ -121,26 +121,31 @@ Constraints:
 | GraphViz | [GraphViz](https://www.graphviz.org/) |
 | zip, unzip | |
 
+Note: some packages may already be present.
+
 ### Install on Ubuntu
 
 ```console
 $ sudo apt update -y
-$ sudo apt-get install -y git
-$ sudo apt-get install -y curl
-$ sudo apt-get install -y bedtools
-$ sudo apt-get install -y hdf5-tools
-$ sudo apt-get install -y pigz
-$ sudo apt-get install -y pandoc
-$ sudo apt-get install -y graphviz
-$ sudo apt-get install -y zip
-$ sudo apt-get install -y unzip
+$ sudo apt install -y git
+$ sudo apt install -y curl
+$ sudo apt install -y bedtools
+$ sudo apt install -y hdf5-tools
+$ sudo apt install -y pigz
+$ sudo apt install -y pandoc
+$ sudo apt install -y graphviz
+$ sudo apt install -y zip
+$ sudo apt install -y unzip
+$ sudo apt install -y libxml2-dev
+$ sudo apt install -y libssl-dev
+$ sudo apt install -y libcurl4-openssl-dev
+$ sudo apt install -y libgit2-dev
 ```
-
-Note: some packages may already be present.
 
 ### Install on CentOS
 
 ```console
+$ sudo yum update -y
 $ sudo yum install -y git
 $ sudo yum install -y curl
 $ sudo yum install -y epel-release
@@ -149,9 +154,13 @@ $ sudo yum install -y hdf5-devel
 $ sudo yum install -y pigz
 $ sudo yum install -y pandoc
 $ sudo yum install -y graphviz
+$ sudo yum install -y libxml2-devel
+$ sudo yum install -y openssl-devel
+$ sudo yum install -y libcurl-devel
+$ sudo yum install -y libgit2-devel
 ```
 
-### Check packages have installed
+### Check tools have installed
 
 ```console
 $ git --version
@@ -169,352 +178,6 @@ $ unzip -v
 
 ---
 
-## Install Python
-
-Web site: [python](https://www.python.org/)
-
-RiboViz is **not** compatible with Python 2. Python 2 comes to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
-
-Either [Miniconda](https://conda.io/miniconda.html) Python 3.6, or later, or [Anaconda Distribution](https://www.anaconda.com/distribution/) Python 3.6, or later, are strongly recommended.
-
-The instructions which follow have been written under the assumption that you are using Miniconda Python. If using Anaconda then, when installing some packages, you will be told that they are already available. This is because Anaconda comes with a wide range of common Python packages.
-
-If you are using other distributions of Python you will need to consult the relevant documentation for each package for installation information. See also the section on [python and python3](#python-and-python3) below.
-
-### Install Miniconda Python 3.6+
-
-On Linux, install:
-
-```console
-$ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda3.sh
-$ bash miniconda3.sh -b -p $HOME/miniconda3
-```
-
-**Note:** make sure you use `-O`, which provides a name for the downloaded file, and not `-o`, which provides the name of a file for messages about the download.
-
-For MacOS and Windows installers, go to [Miniconda installation page](https://docs.conda.io/en/latest/miniconda.html).
-
-When miniconda is installed, activate the environment:
-
-```console
-$ source $HOME/miniconda3/bin/activate
-```
-
-Create a `riboviz` environment and activate it:
-
-```console
-$ conda create --name riboviz python=3.7
-$ conda activate riboviz
-$ python --version
-```
-
-Your version of Python may differ from that shown.
-
-**Troubleshooting: `...command not found...`**
-
-If you see:
-
-```
-$ bash miniconda3.sh -b -p $HOME/miniconda3
-miniconda3.sh: line 1: --2019-07-31: command not found
-miniconda3.sh: line 2: syntax error near unexpected token `('
-miniconda3.sh: line 2: `Resolving repo.continuum.io
-(repo.continuum.io)... 104.18.200.79, 104.18.201.79,
-2606:4700::6812:c94f, ...'
-```
-
-**Troubleshooting: incompatible Python versions**
-
-If you find when installing packages below that your version of Python is too new (e.g. your Python version is 3.8 and the tool only works with Python 3.7), then two options are:
-
-1. See if a more recent version of the tool is available. For example a version available via `pip` may be more up-to-date than a version available via `conda`.
-2. Create a conda environment that supports a version of Python compatible with the tools.
-
-```console
-$ conda create --name riboviz python=<VERSION>
-```
-
-  - For example:
-
-```console
-$ conda create --name riboviz python=3.7
-```
-
-### `python` and `python3`
-
-If you have an environment which has both `python` and `python3`, such as can arise when you are using a system that has both native Python 2 and Python 3 packages installed, then please note the following.
-
-The RiboViz workflow invokes both Python and R scripts. It invokes Python scripts using the command `python`. If you have a system that has both `python`, which invokes Python 2, and `python3`, which invokes Python 3, then the workflow will fail as RiboViz's Python scripts are Python 3-compatible only.
-
-A workaround is to create a local `bin` directory with a symbolic link called `python` which points to Python 3 (and similarly for `pip` and `pip3`). This can be done as follows:
-
-```console
-$ mkdir ~/bin
-$ cd ~/bin
-$ ln -s $(which python3) python
-$ ln -s $(which pip3) pip
-$ cd
-```
-
-Now, when you run `python`, `python3` should be invoked. If the symlinks aren't picked up then you may need to add ~/bin to your PATH:
-
-```console
-$ export PATH=~/bin:$PATH
-```
-
-This approach was suggested in a [comment](https://stackoverflow.com/a/55295939) on StackOverflow's [Unable to set default python version to python3 in ubuntu](https://stackoverflow.com/questions/41986507/unable-to-set-default-python-version-to-python3-in-ubuntu).
-
-We would recommend using Miniconda, Anaconda or some other virtual environment solution for Python which provide a more usable means of managing multiple environments (including Python 2 and Python 3).
-
----
-
-## Install Python packages
-
-| Package | Links |
-| ------- | ----- |
-| pyyaml | [PyYAML](https://pyyaml.org/), [GitHub](https://github.com/yaml/pyyaml/) |
-| gitpython | [gitpython](https://gitpython.readthedocs.io/en/stable/), [GitHub](https://github.com/gitpython-developers/GitPython) |
-| pytest | [pytest](https://pytest.org/), [GitHub](https://github.com/pytest-dev/pytest/) |
-| pandas | [pandas](https://pandas.pydata.org/), [GitHub](https://github.com/pandas-dev/pandas) |
-| Cutadapt | [GitHub](https://github.com/marcelm/cutadapt), [readthedocs](https://cutadapt.readthedocs.io/) |
-| pysam | [GitHub](https://github.com/pysam-developers/pysam/), [readthedocs](https://pysam.readthedocs.io/) |
-| BioPython | [Biopython](http://biopython.org/) |
-| gffutils | [gffutils](http://daler.github.io/gffutils/) |
-| h5py | [h5py](https://www.h5py.org/) |
-| UMI-tools | [GitHub](https://github.com/CGATOxford/UMI-tools), [readthedocs](https://readthedocs.org/projects/umi-tools/) |
-
-**Note:** Cutadapt v1.18 (2018-09-07), or later, is required.
-
-Install:
-
-```console
-$ conda install -y pyyaml
-$ conda install -y gitpython
-$ conda install -y pytest
-$ conda install -y pandas
-$ conda install -y -c bioconda cutadapt
-$ conda install -y -c bioconda pysam
-$ conda install -y -c bioconda samtools
-$ conda install -y -c anaconda biopython
-$ pip install gffutils
-$ conda install -y -c anaconda h5py
-$ conda install -y -c bioconda umi_tools
-```
-
-**Note:** For `gffutils`, `pip install` is recommended because using `conda install -y -c bioconda gffutils` under Python 3, seems to confuse the Python environment and sets Python to `Python 2.7.16`.
-
-Check packages have installed command-line tools:
-
-```console
-$ cutadapt --version
-$ samtools --version
-$ umi_tools -v
-```
-
-Check h5py package has installed:
-
-```console
-$ python
-```
-```python
->>> import h5py
->>> h5py.run_tests()
-...
-============ 521 passed, 25 skipped, 3 xfailed, 1 warning in 5.50s =============
-```
-
-Your number of `skipped` and `xfailed` (expected failures may differ, depending upon the version of h5py installed.
-
-**Troubleshooting: `samtools: error while loading shared libraries: libcrypto.so.1.0.0`**
-
-If you get:
-
-```conda
-$ samtools --version
-samtools: error while loading shared libraries: libcrypto.so.1.0.0: cannot open shared object file: No such file or directory
-```
-
-then try forcing a reinstall to a more recent version, for example:
-
-```console
-$ conda install -c bioconda samtools=1.9 --force-reinstall
-$ samtools --version
-samtools 1.9
-```
-
----
-
-## Install Bioinformatics tools
-
-| Package | Links |
-| ------- | ----- |
-| Hisat2 (2.1.0) | [Hisat2](https://daehwankimlab.github.io/hisat2/) |
-| Bowtie | [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml) |
-| Nextflow | [Nextflow](https://www.nextflow.io/), [Documentation](https://www.nextflow.io/docs/latest/index.html), [GitHub](https://github.com/nextflow-io/nextflow) |
-
-The directory names may differ, depending on the versions you have.
-
-### Install Hisat2
-
-**Note:** Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
-
-```console
-$ wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.1.0-Linux_x86_64.zip
-$ unzip hisat2-2.1.0-Linux_x86_64.zip
-$ ls hisat2-2.1.0/
-```
-
-Update `PATH` and check that the `hisat2` tool is available:
-
-```console
-$ export PATH=~/hisat2-2.1.0:$PATH
-$ hisat2 --version
-```
-
-### Install Bowtie
-
-**Note:** We are working to add a Bowtie alignment option.
-
-```console
-$ wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/1.2.2/bowtie-1.2.2-linux-x86_64.zip/download -O bowtie.zip
-$ unzip bowtie.zip
-$ ls bowtie-1.2.2-linux-x86_64/
-```
-
-Update `PATH` and check that the `bowtie` tool is available:
-
-```console
-$ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
-$ bowtie --version
-```
-
-### Install Nextflow
-
-**Note:** Nextflow only needs to be installed if you plan to use the Nextflow version of RiboViz.
-
-**Install Nextflow using conda (recommended)**
-
-Install Nextflow and its dependencies (including Java):
-
-```console
-$ conda install -y -c bioconda nextflow
-```
-
-Check install:
-
-```console
-$ javac -version
-$ java -version
-$ nextflow -v
-nextflow version 20.04.1.5335
-$ nextflow -version
-
-      N E X T F L O W
-      version 20.01.0 build 5264
-      created 12-02-2020 10:14 UTC (02:14 PDT)
-      cite doi:10.1038/nbt.3820
-      http://nextflow.io
-```
-
-If the Nextflow version is less than version 20 then force an update to version 20:
-
-```console
-$ conda install -y -c bioconda nextflow=20
-$ nextflow -version
-version 20.01.0 build 5264
-```
-
-Your version of Nextflow can differ from that shown but must be version 20 or above.
-
-**Install Nextflow (alternative)**
-
-Install [OpenJDK](https://openjdk.java.net) 1.8:
-
-* Ubuntu 18 users:
-
-```console
-$ sudo apt-get install -y openjdk-8-jdk-headless
-```
-
-* CentOS 7 users:
-
-```console
-$ sudo yum install -y openjdk-8-jdk-headless
-```
-
-Check install:
-
-```console
-$ javac -version
-$ java -version
-```
-
-Install Nextflow:
-
-```console
-$ curl -s https://get.nextflow.io | bash
-$ export PATH=$HOME/nextflow:$PATH
-$ nextflow -version
-```
-
-Set `PATH`:
-
-```console
-$ export PATH=$HOME/nextflow:$PATH
-```
-
-**Run Nextflow "hello" example**
-
-```console
-$ nextflow run hello
-N E X T F L O W  ~  version 20.01.0
-Pulling nextflow-io/hello ...
-downloaded from https://github.com/nextflow-io/hello.git
-Launching `nextflow-io/hello` [spontaneous_magritte] - revision: 1d43afc0ec [master]
-WARN: The use of `echo` method is deprecated
-executor >  local (4)
-[1d/bb459e] process > sayHello [100%] 4 of 4 /
-Hola world!
-
-Bonjour world!
-
-Ciao world!
-
-Hello world!
-```
-
-This runs Nextflow workflow [main.nf](https://github.com/nextflow-io/hello/blob/master/main.nf) from [nextflow-io/hello.git](https://github.com/nextflow-io/hello.git).
-
----
-
-## Create `set-riboviz-env.sh` to configure paths
-
-Create a `set-riboviz-env.sh` script with the paths to your Hisat2 and Bowtie directories. For example:
-
-```console
-#!/usr/bin/env bash
-export PATH=$HOME/hisat2-2.1.0:$PATH
-export PATH=$HOME/bowtie-1.2.2-linux-x86_64/:$PATH
-source $HOME/miniconda3/bin/activate
-conda activate riboviz
-```
-
-Remember, your directory names may differ, depending on the versions of Hisat2 and Bowtie you have.
-
-If you installed Nextflow using the "Install Nextflow (alternative)" instructions then also add:
-
-```
-export PATH=$HOME/nextflow:$PATH
-```
-
-In future you can configure the paths by running:
-
-```console
-$ source set-riboviz-env.sh
-```
-
----
-
 ## Install R 3.6+
 
 Web sites:
@@ -527,14 +190,8 @@ Web sites:
 **Install on Ubuntu**
 
 ```console
-$ sudo apt-get update -y
-$ sudo apt-get install -y r-base
-$ sudo apt-get install -y r-base-dev
-
-$ sudo apt-get install -y libxml2-dev
-$ sudo apt-get install -y libssl-dev
-$ sudo apt-get install -y libcurl4-openssl-dev
-$ sudo apt-get install -y libgit2-dev
+$ sudo apt install -y r-base
+$ sudo apt install -y r-base-dev
 ```
 ```console
 $ R --version
@@ -548,13 +205,12 @@ Default package managers may not have the most up-to-date version of R available
 For Ubuntu, you can do the following, from [Ubuntu Packages For R - Brief Instructions](https://cran.r-project.org/bin/linux/ubuntu/):
 
 ```console
-$ sudo apt update -qq
 $ sudo apt install -y --no-install-recommends software-properties-common dirmngr
 $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 $ sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-$ sudo apt-get update
-$ sudo apt-get install -y r-base
-$ sudo apt-get install -y r-base-dev
+$ sudo apt update
+$ sudo apt install -y r-base
+$ sudo apt install -y r-base-dev
 $ R --version
 R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
 ```
@@ -562,14 +218,9 @@ R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
 **Install on CentOS**
 
 ```console
-$ sudo yum update -y
 $ sudo yum install -y R
 $ sudo yum install -y R-devel
 
-$ sudo yum install -y libxml2-devel
-$ sudo yum install -y openssl-devel
-$ sudo yum install -y libcurl-devel
-$ sudo yum install -y libgit2-devel
 ```
 ```console
 $ R --version
@@ -740,6 +391,274 @@ $ R
 
 ---
 
+## Install Python
+
+Web site: [python](https://www.python.org/)
+
+RiboViz is **not** compatible with Python 2. Python 2 comes to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
+
+Either [Miniconda](https://conda.io/miniconda.html) Python 3.6, or later, or [Anaconda Distribution](https://www.anaconda.com/distribution/) Python 3.6, or later, are strongly recommended.
+
+The instructions which follow have been written under the assumption that you are using Miniconda Python. If using Anaconda then, when installing some packages, you will be told that they are already available. This is because Anaconda comes with a wide range of common Python packages.
+
+If you are using other distributions of Python you will need to consult the relevant documentation for each package for installation information. See also the section on [python and python3](#python-and-python3) below.
+
+### Install Miniconda Python 3.6+
+
+On Linux, install:
+
+```console
+$ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda3.sh
+$ bash miniconda3.sh -b -p $HOME/miniconda3
+```
+
+**Note:** make sure you use `-O`, which provides a name for the downloaded file, and not `-o`, which provides the name of a file for messages about the download.
+
+For MacOS and Windows installers, go to [Miniconda installation page](https://docs.conda.io/en/latest/miniconda.html).
+
+When miniconda is installed, activate the environment:
+
+```console
+$ source $HOME/miniconda3/bin/activate
+```
+
+Create a `riboviz` environment and activate it:
+
+```console
+$ conda create --name riboviz python=3.7
+$ conda activate riboviz
+$ python --version
+```
+
+Your version of Python may differ from that shown.
+
+**Troubleshooting: `...command not found...`**
+
+If you see:
+
+```
+$ bash miniconda3.sh -b -p $HOME/miniconda3
+miniconda3.sh: line 1: --2019-07-31: command not found
+miniconda3.sh: line 2: syntax error near unexpected token `('
+miniconda3.sh: line 2: `Resolving repo.continuum.io
+(repo.continuum.io)... 104.18.200.79, 104.18.201.79,
+2606:4700::6812:c94f, ...'
+```
+
+**Troubleshooting: incompatible Python versions**
+
+If you find when installing packages below that your version of Python is too new (e.g. your Python version is 3.8 and the tool only works with Python 3.7), then two options are:
+
+1. See if a more recent version of the tool is available. For example a version available via `pip` may be more up-to-date than a version available via `conda`.
+2. Create a conda environment that supports a version of Python compatible with the tools.
+
+```console
+$ conda create --name riboviz python=<VERSION>
+```
+
+  - For example:
+
+```console
+$ conda create --name riboviz python=3.7
+```
+
+### `python` and `python3`
+
+If you have an environment which has both `python` and `python3`, such as can arise when you are using a system that has both native Python 2 and Python 3 packages installed, then please note the following.
+
+The RiboViz workflow invokes both Python and R scripts. It invokes Python scripts using the command `python`. If you have a system that has both `python`, which invokes Python 2, and `python3`, which invokes Python 3, then the workflow will fail as RiboViz's Python scripts are Python 3-compatible only.
+
+A workaround is to create a local `bin` directory with a symbolic link called `python` which points to Python 3 (and similarly for `pip` and `pip3`). This can be done as follows:
+
+```console
+$ mkdir ~/bin
+$ cd ~/bin
+$ ln -s $(which python3) python
+$ ln -s $(which pip3) pip
+$ cd
+```
+
+Now, when you run `python`, `python3` should be invoked. If the symlinks aren't picked up then you may need to add ~/bin to your PATH:
+
+```console
+$ export PATH=~/bin:$PATH
+```
+
+This approach was suggested in a [comment](https://stackoverflow.com/a/55295939) on StackOverflow's [Unable to set default python version to python3 in ubuntu](https://stackoverflow.com/questions/41986507/unable-to-set-default-python-version-to-python3-in-ubuntu).
+
+We would recommend using Miniconda, Anaconda or some other virtual environment solution for Python which provide a more usable means of managing multiple environments (including Python 2 and Python 3).
+
+---
+
+## Install Python and conda packages
+
+| Package | Links |
+| ------- | ----- |
+| pyyaml | [PyYAML](https://pyyaml.org/), [GitHub](https://github.com/yaml/pyyaml/) |
+| gitpython | [gitpython](https://gitpython.readthedocs.io/en/stable/), [GitHub](https://github.com/gitpython-developers/GitPython) |
+| pytest | [pytest](https://pytest.org/), [GitHub](https://github.com/pytest-dev/pytest/) |
+| pandas | [pandas](https://pandas.pydata.org/), [GitHub](https://github.com/pandas-dev/pandas) |
+| Cutadapt | [GitHub](https://github.com/marcelm/cutadapt), [readthedocs](https://cutadapt.readthedocs.io/) |
+| pysam | [GitHub](https://github.com/pysam-developers/pysam/), [readthedocs](https://pysam.readthedocs.io/) |
+| BioPython | [Biopython](http://biopython.org/) |
+| gffutils | [gffutils](http://daler.github.io/gffutils/) |
+| h5py | [h5py](https://www.h5py.org/) |
+| UMI-tools | [GitHub](https://github.com/CGATOxford/UMI-tools), [readthedocs](https://readthedocs.org/projects/umi-tools/) |
+| Nextflow | [Nextflow](https://www.nextflow.io/), [Documentation](https://www.nextflow.io/docs/latest/index.html), [GitHub](https://github.com/nextflow-io/nextflow) |
+
+Install:
+
+```console
+$ conda install -y pyyaml
+$ conda install -y gitpython
+$ conda install -y pytest
+$ conda install -y pandas
+$ conda install -y -c bioconda cutadapt
+$ conda install -y -c bioconda pysam
+$ conda install -y -c bioconda samtools
+$ conda install -y -c anaconda biopython
+$ pip install gffutils
+$ conda install -y -c anaconda h5py
+$ conda install -y -c bioconda umi_tools
+$ conda install -y -c bioconda nextflow=20
+```
+
+**Note:** For `gffutils`, `pip install` is recommended because using `conda install -y -c bioconda gffutils` under Python 3, seems to confuse the Python environment and sets Python to `Python 2.7.16`.
+
+Check packages have installed command-line tools:
+
+```console
+$ cutadapt --version
+$ samtools --version
+$ umi_tools -v
+$ javac -version
+$ java -version
+$ nextflow -v
+$ nextflow -version
+```
+
+**Note:** Cutadapt v1.18 (2018-09-07), or later, is required.
+
+**Note:** Nextflow 20, or later, is required.
+
+Check h5py package has installed:
+
+```console
+$ python
+```
+```python
+>>> import h5py
+>>> h5py.run_tests()
+...
+============ 521 passed, 25 skipped, 3 xfailed, 1 warning in 5.50s =============
+```
+
+Your number of `skipped` and `xfailed` (expected failures may differ, depending upon the version of h5py installed.
+
+Run Nextflow "hello" example [main.nf](https://github.com/nextflow-io/hello/blob/master/main.nf) from [nextflow-io/hello.git](https://github.com/nextflow-io/hello.git):
+
+```console
+$ nextflow run hello
+N E X T F L O W  ~  version 20.01.0
+Pulling nextflow-io/hello ...
+downloaded from https://github.com/nextflow-io/hello.git
+Launching `nextflow-io/hello` [spontaneous_magritte] - revision: 1d43afc0ec [master]
+WARN: The use of `echo` method is deprecated
+executor >  local (4)
+[1d/bb459e] process > sayHello [100%] 4 of 4 /
+Hola world!
+
+Bonjour world!
+
+Ciao world!
+
+Hello world!
+```
+
+**Troubleshooting: `samtools: error while loading shared libraries: libcrypto.so.1.0.0`**
+
+If you get:
+
+```conda
+$ samtools --version
+samtools: error while loading shared libraries: libcrypto.so.1.0.0: cannot open shared object file: No such file or directory
+```
+
+then try forcing a reinstall to a more recent version, for example:
+
+```console
+$ conda install -c bioconda samtools=1.9 --force-reinstall
+$ samtools --version
+samtools 1.9
+```
+
+---
+
+## Install Bioinformatics tools
+
+| Package | Links |
+| ------- | ----- |
+| Hisat2 (2.1.0) | [Hisat2](https://daehwankimlab.github.io/hisat2/) |
+| Bowtie | [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml) |
+
+The directory names may differ, depending on the versions you have.
+
+### Install Hisat2
+
+**Note:** Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
+
+```console
+$ wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.1.0-Linux_x86_64.zip
+$ unzip hisat2-2.1.0-Linux_x86_64.zip
+$ ls hisat2-2.1.0/
+```
+
+Update `PATH` and check that the `hisat2` tool is available:
+
+```console
+$ export PATH=~/hisat2-2.1.0:$PATH
+$ hisat2 --version
+```
+
+### Install Bowtie
+
+```console
+$ wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/1.2.2/bowtie-1.2.2-linux-x86_64.zip/download -O bowtie.zip
+$ unzip bowtie.zip
+$ ls bowtie-1.2.2-linux-x86_64/
+```
+
+Update `PATH` and check that the `bowtie` tool is available:
+
+```console
+$ export PATH=~/bowtie-1.2.2-linux-x86_64/:$PATH
+$ bowtie --version
+```
+
+---
+
+## Create `set-riboviz-env.sh` to configure paths
+
+Create a `set-riboviz-env.sh` script with the paths to your Hisat2 and Bowtie directories. For example:
+
+```console
+#!/usr/bin/env bash
+export PATH=$HOME/hisat2-2.1.0:$PATH
+export PATH=$HOME/bowtie-1.2.2-linux-x86_64/:$PATH
+source $HOME/miniconda3/bin/activate
+conda activate riboviz
+```
+
+Remember, your directory names may differ, depending on the versions of Hisat2 and Bowtie you have.
+
+In future you can configure the paths by running:
+
+```console
+$ source set-riboviz-env.sh
+```
+
+---
+
 ## Get RiboViz
 
 Get RiboViz:
@@ -760,18 +679,10 @@ Run tests:
 
 ```console
 $ cd riboviz
-$ pytest --ignore-glob="*regression*" --ignore-glob="*nextflow*"
+$ pytest --ignore-glob="*regression*"
 ```
 
 All tests should pass (some may be skipped, but none should fail). `PendingDeprecationWarning` `warnings` can be ignored.
-
-If you installed Nextflow, run the Nextflow tests too:
-
-```console
-$ pytest riboviz/test/nextflow
-```
-
-Again, all tests should pass (some may be skipped, but none should fail).
 
 Download regression test data:
 
@@ -780,22 +691,14 @@ $ cd
 $ git clone https://github.com/riboviz/regression-test-data-2.0
 ```
 
-Run the regression tests for the RiboViz Python workflow (these may take a few minutes):
+Run the regression tests for the RiboViz Nextflow workflow (these may take a few minutes):
 
 ```console
 $ cd riboviz
-$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0/
-```
-
-All tests should pass (some may be skipped, but none should fail).
-
-If you installed Nextflow, run the regression tests for the RiboViz Nextflow workflow (these may take a few minutes):
-
-```console
 $ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0/ --nextflow
 ```
 
-Again, all tests should pass (some may be skipped, but none should fail).
+All tests should pass (some may be skipped, but none should fail).
 
 ---
 
