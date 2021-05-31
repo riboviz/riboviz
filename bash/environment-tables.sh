@@ -94,7 +94,7 @@ for pkg in ${CONDA_LIST[@]}; do
     # stop "pytest" matching "pytest-cov", for example.
     # Delimiter between columns can be 1 or more spaces, so use tr
     # to remove multiple spaces.
-    echo "| $pkg | $PKG_VERSION | conda | |"
+    echo "| $pkg | $PKG_VERSION | conda |"
 done
 PIP_PKGS=$(pip list)
 PIP_LIST=(gffutils sphinx)
