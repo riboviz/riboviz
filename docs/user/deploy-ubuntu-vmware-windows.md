@@ -27,7 +27,10 @@ Notes:
 
 ## Download Ubuntu
 
-Download Ubuntu 18.04.5 LTS (Bionic Beaver) 64-bit PC (AMD64) desktop image from [Ubuntu 18.04.5 LTS (Bionic Beaver)](https://releases.ubuntu.com/bionic/).
+Download one of:
+
+* Ubuntu 18.04.5 LTS (Bionic Beaver) 64-bit PC (AMD64) desktop image from [Ubuntu 18.04.5 LTS (Bionic Beaver)](https://releases.ubuntu.com/bionic/).
+* Ubuntu 20.04.2.0 LTS (Focal Fossa) 64-bit PC (AMD64) desktop image from [Ubuntu 20.04.2.0 LTS (Focal Fossa)](https://releases.ubuntu.com/focal/).
 
 The download details are as follows:
 
@@ -35,9 +38,13 @@ The download details are as follows:
 * Size 2193522688 bytes (2092 MB, 2 GB)
 * SHA256 checksum: f295570badb09a606d97ddfc3421d7bf210b4a81c07ba81e9c040eda6ddea6a0
 
+* Name: ubuntu-20.04.2.0-desktop-amd64.iso
+* Size: 2877227008 bytes (2744 MB, 2.7 GB)
+* SHA256 checksum: 93bdab204067321ff131f560879db46bee3b994bf24836bb78538640f689e58f
+
 Notes:
 
-* The latest versions of Ubuntu are Ubuntu 20.04.2.0 LTS and Ubuntu 21.04, available from [Download Ubuntu Desktop](https://www.ubuntu.com/download/desktop) but these have not been tried.
+* The latest version of Ubuntu is Ubuntu 21.04, available from [Download Ubuntu Desktop](https://www.ubuntu.com/download/desktop), but this has not been tried.
 * Other, older, [releases](https://releases.ubuntu.com/) are also available.
 
 -----
@@ -51,7 +58,7 @@ Create VM:
 * New Virtual Machine Wizard appears.
 * Select Installer disc image file (iso).
 * Click Browse...
-* Use file browser to browse to the `.iso` file e.g. `ubuntu-18.04.5-desktop-amd64.iso`.
+* Use file browser to browse to the `.iso` file e.g. `ubuntu-18.04.5-desktop-amd64.iso` or `ubuntu-20.04.2.0-desktop-amd64.iso`.
 * Click OK.
 * Click Next.
 * Easy Install Information appears.
@@ -63,7 +70,7 @@ Create VM:
 * Click Next.
 * Name the Virtual Machine appears.
 * Enter Virtual machine name: Ubuntu 64-bit 18.04.5
-* Select Location: Use the default location. This will be something like `C:\Users\<WINDOWS USER NAME>\<VIRTUAL MACHINE NAME>` e.g. `C:\Users\Jo Smith\Documents\Virtual Machines\Ubuntu 64-bit 18.04.5`.
+* Select Location: Use the default location. This will be something like `C:\Users\<WINDOWS USER NAME>\<VIRTUAL MACHINE NAME>` e.g. `C:\Users\Jo Smith\Documents\Virtual Machines\Ubuntu 64-bit 18.04.5` or `C:\Users\Jo Smith\Documents\Virtual Machines\Ubuntu 64-bit 20.04.2.0`.
 * Click Next.
 * Specify Disk Capacity appears.
 * Enter Maximum disk size: 25
