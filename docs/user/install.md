@@ -75,20 +75,20 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 
 | Python Package | Version | Package Manager |
 | -------------- | ------- | --------------- |
-| biopython | 1.77 | conda | |
-| cutadapt | 1.18 | conda | |
-| gitpython | 3.1.3 | conda | |
-| h5py | 2.10.0 | conda | |
-| nextflow | 20.04.1 | conda | |
-| pandas | 1.0.5 | conda | |
-| pycodestyle | 2.6.0 | conda | |
-| pylint | 2.5.3 | conda | |
-| pysam | 0.15.3 | conda | |
-| pytest | 5.4.3 | conda | |
-| pytest-cov |  | conda | |
-| pyyaml | 5.3.1 | conda | |
-| samtools | 1.7 | conda | |
-| umi_tools | 1.0.1 | conda | |
+| biopython | 1.77 | conda |
+| cutadapt | 1.18 | conda |
+| gitpython | 3.1.3 | conda |
+| h5py | 2.10.0 | conda |
+| nextflow | 20.04.1 | conda |
+| pandas | 1.0.5 | conda |
+| pycodestyle | 2.6.0 | conda |
+| pylint | 2.5.3 | conda |
+| pysam | 0.15.3 | conda |
+| pytest | 5.4.3 | conda |
+| pytest-cov |  | conda |
+| pyyaml | 5.3.1 | conda |
+| samtools | 1.7 | conda |
+| umi_tools | 1.0.1 | conda |
 | gffutils | 0.10.1 | pip |
 | sphinx |  | pip |
 
