@@ -252,6 +252,8 @@ Your version of R can differ from that shown but must be version 3.6 or above.
 | shiny | [shiny](https://cran.r-project.org/web/packages/shiny/index.html) |
 | tidyverse | [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) |
 
+**Note:** Biostrings is installed as a dependency of `Rsamtools`.
+
 If, when installing R packages, you see a message like:
 
 ```
@@ -290,7 +292,6 @@ For example, for R 3.6 or R4.1, install in R:
 > BiocManager::install("Rsamtools")
 > BiocManager::install("rtracklayer")
 > BiocManager::install("rhdf5")
-> BiocManager::install("Biostrings")
 > BiocManager::install("ShortRead")
 ```
 
