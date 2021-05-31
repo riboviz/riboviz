@@ -425,7 +425,7 @@ If you find when installing packages below that your version of Python is too ne
 2. Create a conda environment that supports a version of Python compatible with the tools.
 
 ```console
-$ conda create --name riboviz python=<VERSION>
+$ conda create -y --name riboviz python=<VERSION>
 ```
 
   - For example:
