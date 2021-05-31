@@ -21,6 +21,8 @@ unzip -v
 sudo yum install -y libxml2-devel
 sudo yum install -y openssl-devel
 sudo yum install -y libcurl-devel
+sudo yum install -y libjpeg-devel
+sudo yum install -y libgit2-devel
 sudo yum install -y R
 sudo yum install -y R-devel
 R --version

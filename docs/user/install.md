@@ -159,6 +159,7 @@ $ sudo yum install -y graphviz
 $ sudo yum install -y libxml2-devel
 $ sudo yum install -y openssl-devel
 $ sudo yum install -y libcurl-devel
+$ sudo yum install -y libjpeg-devel
 $ sudo yum install -y libgit2-devel
 ```
 
@@ -357,40 +358,6 @@ then one solution may be to install "XML" specifying the URL of the source packa
 ```
 
 ### Troubleshooting: `ShortRead` installation fails on CentOS
-
-If the following failure arises when installing `ShortRead` under CentOS:
-
-```R
-> install.packages("BiocManager")
-...
-> BiocManager::install("ShortRead")
-Warning messages:
-1: In .inet_warning(msg) :
-  installation of package "png" had non-zero exit status
-2: In .inet_warning(msg) :
-  installation of package "jpeg" had non-zero exit status
-3: In .inet_warning(msg) :
-  installation of package "latticeExtra" had non-zero exit status
-4: In .inet_warning(msg) :
-  installation of package "ShortRead" had non-zero exit status
-Install libjpegdevel:
-```
-
-Failure 2 causes failure 4 may be due to a missing package. To resolve this failure, install the `libjpeg-devel` package:
-
-```console
-$ sudo yum install -y libjpeg-devel
-```
-
-Failure 1 causes failures 3 and 4 and may be due to, on CentOS 7, the system-wide `libpng` package being at version 15, while Miniconda 3, after installation of the Python packages above, has `libpng` version 16. To resolve this failure, start a new bash terminal but do not activate the Miniconda environment, start R and reinstall the package:
-
-```console
-$ R
-```
-```R
-> install.packages("BiocManager")
-> BiocManager::install("ShortRead")
-```
 
 ---
 
