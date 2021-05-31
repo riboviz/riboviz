@@ -100,10 +100,10 @@ Certain packages are only required if you plan to develop and extend RiboViz. Th
 
 Requirements and constraints:
 
-* Python 3 is required. Python 2 came to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
 * R 3.6, or later, is required.
-* Either [Miniconda](https://conda.io/miniconda.html) or [Anaconda Distribution](https://www.anaconda.com/distribution/) are strongly recommended.
+* Python 3 is required. Python 2 came to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
 * Python 3.6, or later, is strongly recommended.
+* Either [Miniconda](https://conda.io/miniconda.html) or [Anaconda Distribution](https://www.anaconda.com/distribution/) are strongly recommended.
 * Cutadapt 1.18 (2018-09-07), or later, is required.
 * Samtools 1.9 is required if running on CentOS 7.
 * Nextflow 20, or later, is required.
@@ -123,9 +123,10 @@ Requirements and constraints:
 | pigz | [pigz](http://zlib.net/pigz/) |
 | pandoc | [pandoc](https://pandoc.org) |
 | GraphViz | [GraphViz](https://www.graphviz.org/) |
-| zip, unzip | |
 
-Note: some packages may already be present.
+plus common utilities and low level libraries.
+
+*Note:** It is OK if some of these packages are already present.
 
 ### Install on Ubuntu
 
@@ -185,10 +186,11 @@ $ unzip -v
 
 ## Install R 3.6+
 
-Web sites:
+| Package | Links |
+| ------- | ----- |
+| R | [The R Project for Statistical Computing](https://www.r-project.org/), [The Comprehensive R Archive Network](https://cran.r-project.org/) (CRAN) |
 
-* [The R Project for Statistical Computing](https://www.r-project.org/)
-* [The Comprehensive R Archive Network](https://cran.r-project.org/) (CRAN).
+**Note:** R 3.6, or later, is required.
 
 ### Install R and packages required by R packages to be installed
 
@@ -255,11 +257,6 @@ R version 4.1.0 (2021-05-18) -- "Camp Pontanezen"
 
 | Package | Links |
 | ------- | ----- |
-| Bioconductor Biostrings | [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html) |
-| Bioconductor Rsamtools | [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html) |
-| Bioconductor ShortRead | [ShortRead](https://bioconductor.org/packages/release/bioc/html/ShortRead.html) |
-| Bioconductor rhdf5 | [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html) |
-| Bioconductor rtracklayer | [rtracklayer](https://bioconductor.org/packages/release/bioc/html/rtracklayer.html) |
 | RcppRoll | [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html) |
 | git2r | [git2r](https://docs.ropensci.org/git2r), [GitHub](https://github.com/ropensci/git2r) |
 | here | [here](https://here.r-lib.org/), [CRAN](https://cran.r-project.org/package=here), [GitHub](https://github.com/r-lib/here) |
@@ -269,8 +266,13 @@ R version 4.1.0 (2021-05-18) -- "Camp Pontanezen"
 | rmarkdown | [rmarkdown](https://cran.r-project.org/web/packages/rmarkdown/index.html) |
 | shiny | [shiny](https://cran.r-project.org/web/packages/shiny/index.html) |
 | tidyverse | [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) |
+| Bioconductor Biostrings | [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html) |
+| Bioconductor Rsamtools | [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html) |
+| Bioconductor ShortRead | [ShortRead](https://bioconductor.org/packages/release/bioc/html/ShortRead.html) |
+| Bioconductor rhdf5 | [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html) |
+| Bioconductor rtracklayer | [rtracklayer](https://bioconductor.org/packages/release/bioc/html/rtracklayer.html) |
 
-**Note:** Biostrings is installed as a dependency of `Rsamtools`.
+**Note:** Biostrings is installed as a dependency of Rsamtools.
 
 If, when installing R packages, you see a message like:
 
@@ -417,13 +419,15 @@ $ R
 
 ## Install Python
 
-Web site: [python](https://www.python.org/)
+| Package | Links |
+| ------- | ----- |
+| Python | [python](https://www.python.org/) |
 
-RiboViz is **not** compatible with Python 2. Python 2 comes to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
+The instructions which follow have been written for Miniconda Python. If using Anaconda then, when installing some packages, you will be told that they are already available. This is because Anaconda comes with a wide range of common Python packages.
 
-The instructions which follow have been written under the assumption that you are using Miniconda Python. If using Anaconda then, when installing some packages, you will be told that they are already available. This is because Anaconda comes with a wide range of common Python packages.
+If you are using other distributions of Python, you will need to consult the relevant documentation for each package for installation information. See also the section on [python and python3](#python-and-python3) below.
 
-If you are using other distributions of Python you will need to consult the relevant documentation for each package for installation information. See also the section on [python and python3](#python-and-python3) below.
+**Note:** Python 3 is required. Python 2 came to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
 
 **Note:** Either [Miniconda](https://conda.io/miniconda.html) or [Anaconda Distribution](https://www.anaconda.com/distribution/) are strongly recommended.
 
@@ -438,7 +442,7 @@ $ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O 
 $ bash miniconda3.sh -b -p $HOME/miniconda3
 ```
 
-**Note:** make sure you use `-O`, which provides a name for the downloaded file, and not `-o`, which provides the name of a file for messages about the download.
+**Note:** Make sure you use `-O`, which provides a name for the downloaded file, and not `-o`, which provides the name of a file for messages about the download.
 
 For Mac OS and Windows installers, go to [Miniconda installation page](https://docs.conda.io/en/latest/miniconda.html).
 
@@ -492,7 +496,7 @@ $ conda create --name riboviz python=3.7
 
 ### `python` and `python3`
 
-If you have an environment which has both `python` and `python3`, such as can arise when you are using a system that has both native Python 2 and Python 3 packages installed, then please note the following.
+If you have an environment which has both `python` and `python3`, such as can arise when you are using a system that has both Python 2 and Python 3 packages centrally installed, then please note the following.
 
 The RiboViz workflow invokes both Python and R scripts. It invokes Python scripts using the command `python`. If you have a system that has both `python`, which invokes Python 2, and `python3`, which invokes Python 3, then the workflow will fail as RiboViz's Python scripts are Python 3-compatible only.
 
@@ -535,6 +539,12 @@ We would recommend using Miniconda, Anaconda or some other virtual environment s
 | UMI-tools | [GitHub](https://github.com/CGATOxford/UMI-tools), [readthedocs](https://readthedocs.org/projects/umi-tools/) |
 | Nextflow | [Nextflow](https://www.nextflow.io/), [Documentation](https://www.nextflow.io/docs/latest/index.html), [GitHub](https://github.com/nextflow-io/nextflow) |
 
+**Note:** Cutadapt v1.18 (2018-09-07), or later, is required.
+
+**Note:** Samtools 1.9 is required if running on CentOS 7.
+
+**Note:** Nextflow 20, or later, is required.
+
 Install:
 
 ```console
@@ -552,7 +562,7 @@ $ conda install -y -c bioconda umi_tools
 $ conda install -y -c bioconda nextflow=20
 ```
 
-**Note:** For `gffutils`, `pip install` is recommended because using `conda install -y -c bioconda gffutils` under Python 3, seems to confuse the Python environment and sets Python to `Python 2.7.16`.
+**Note:** `pip install` is recommended for gffutils because using `conda install -y -c bioconda gffutils` under Python 3, seems to confuse the Python environment and sets Python to `Python 2.7.16`.
 
 Check packages have installed command-line tools:
 
@@ -566,9 +576,7 @@ $ nextflow -v
 $ nextflow -version
 ```
 
-**Note:** Cutadapt v1.18 (2018-09-07), or later, is required.
-
-**Note:** Nextflow 20, or later, is required.
+**Note:** Java is installed as a side-effect of installing Nextflow.
 
 Check h5py package has installed:
 
@@ -582,7 +590,7 @@ $ python
 ============ 521 passed, 25 skipped, 3 xfailed, 1 warning in 5.50s =============
 ```
 
-Your number of `skipped` and `xfailed` (expected failures may differ, depending upon the version of h5py installed.
+Values for `skipped`, `xfailed` (expected failures) and `warning` may differ, depending upon the version of h5py installed.
 
 Run Nextflow "hello" example [main.nf](https://github.com/nextflow-io/hello/blob/master/main.nf) from [nextflow-io/hello.git](https://github.com/nextflow-io/hello.git):
 
@@ -634,7 +642,7 @@ The directory names may differ, depending on the versions you have.
 
 ### Install Hisat2
 
-**Note:** Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 say will be resolved in a future release.
+**Note:** Hisat 2.1.0 is strongly recommended. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 will resolve in a future release.
 
 ```console
 $ wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.1.0-Linux_x86_64.zip
