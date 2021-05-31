@@ -87,7 +87,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | pytest | 5.4.3 | conda |
 | pytest-cov | 2.10.1 | conda |
 | pyyaml | 5.3.1 | conda |
-| samtools | 1.7 | conda |
+| samtools | 1.9 | conda |
 | sphinx | 3.2.0 | conda |
 | umi_tools | 1.0.1 | conda |
 | gffutils | 0.10.1 | pip |
@@ -216,7 +216,7 @@ $ sudo apt update -y
 $ sudo apt install -y r-base
 $ sudo apt install -y r-base-dev
 $ R --version
-R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
+R version 4.1.0 (2021-05-18) -- "Camp Pontanezen"
 ```
 
 **Install on CentOS**
@@ -224,7 +224,6 @@ R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
 ```console
 $ sudo yum install -y R
 $ sudo yum install -y R-devel
-
 ```
 ```console
 $ R --version
