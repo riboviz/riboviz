@@ -48,7 +48,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | Hisat2 | 2.1.0 |
 | Bowtie | 1.2.2 |
 | R | 3.6.3 |
-  
+
 | R Package | Version |
 | --------- | ------- |
 | Biostrings | 2.54.0 |
@@ -261,7 +261,7 @@ R version 4.1.0 (2021-05-18) -- "Camp Pontanezen"
 | Bioconductor rhdf5 | [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html) |
 | Bioconductor rtracklayer | [rtracklayer](https://bioconductor.org/packages/release/bioc/html/rtracklayer.html) |
 | RcppRoll | [RcppRoll](https://cran.r-project.org/web/packages/RcppRoll/index.html) |
-| git2r |  [git2r](https://docs.ropensci.org/git2r), [GitHub](https://github.com/ropensci/git2r) |
+| git2r | [git2r](https://docs.ropensci.org/git2r), [GitHub](https://github.com/ropensci/git2r) |
 | here | [here](https://here.r-lib.org/), [CRAN](https://cran.r-project.org/package=here), [GitHub](https://github.com/r-lib/here) |
 | knitr | [knitr](https://cran.r-project.org/web/packages/knitr/index.html) |
 | optparse | [optparse](https://cran.r-project.org/web/packages/optparse/index.html) |
@@ -316,7 +316,7 @@ For example, for R 3.6 or R4.1, install in R:
 > BiocManager::install("ShortRead")
 ```
 
-### Troubleshooting: installation path not writeable
+### Troubleshooting: `installation path not writeable`
 
 The following warning can be ignored:
 
@@ -341,7 +341,7 @@ $ ls ~/R/x86_64-redhat-linux-gnu-library/3.6/Rsamtools/
 DESCRIPTION  libs  LICENSE  Meta  NAMESPACE  NEWS
 ```
 
-### Troubleshooting: Cannot allocate memory
+### Troubleshooting: `Cannot allocate memory`
 
 ```
 Error in system2(file.path(R.home("bin"), "R"), c(if (nzchar(arch))
@@ -363,9 +363,9 @@ In install.packagees(pkgs = doing, lib = lib, ...) :
 
 You may need to assign more memory to R or your machine.
 
-### Troubleshooting: package "XML" is not available (for R version 3.6.3)
+### Troubleshooting: `package "XML" is not available`
 
-If you get this errort when running:
+If you get this error message when running:
 
 ```R
 > BiocManager::install("rtracklayer")
@@ -604,7 +604,7 @@ Ciao world!
 Hello world!
 ```
 
-**Troubleshooting: Samtools `error while loading shared libraries: libcrypto.so.1.0.0`**
+### Troubleshooting: Samtools `error while loading shared libraries: libcrypto.so.1.0.0`
 
 If you get the following then using Samtools 1.7:
 
