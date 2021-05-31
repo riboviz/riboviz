@@ -487,7 +487,7 @@ $ conda install -y pytest
 $ conda install -y pandas
 $ conda install -y -c bioconda cutadapt
 $ conda install -y -c bioconda pysam
-$ conda install -y -c bioconda samtools
+$ conda install -y -c bioconda samtools=1.9
 $ conda install -y -c anaconda biopython
 $ pip install gffutils
 $ conda install -y -c anaconda h5py
@@ -658,7 +658,7 @@ Run the regression tests for the RiboViz Nextflow workflow (these may take a few
 
 ```console
 $ cd riboviz
-$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0/ --nextflow
+$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0/ --nextflow --skip-workflow
 ```
 
 All tests should pass (some may be skipped, but none should fail).
