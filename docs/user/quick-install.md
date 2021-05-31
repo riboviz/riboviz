@@ -69,16 +69,8 @@ $ Rscript install-R.r
 
 Install R Bioconductor packages:
 
-* R 3.4 users:
-
 ```console
-$ Rscript install-r-3.4-bioconductor.R
-```
-
-* R 3.5 users:
-
-```console
-$ Rscript install-r-3.5-bioconductor.R
+$ Rscript install-r-bioconductor.R
 ```
 
 When complete, check that R's library paths include your personal library:
