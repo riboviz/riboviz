@@ -98,15 +98,16 @@ Certain packages are only required if you plan to develop and extend RiboViz. Th
 * R: devtools, glue, lintr, roxygen2, styler, testthat, withr.
 * Python: pycodestyle, pylint, pytest-cov, sphinx.
 
-Constraints:
+Requirements and constraints:
 
-* RiboViz is **not** compatible with Python 2. Python 2 came to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
+* Python 3 is required. Python 2 came to the end of its supported life in 2020 and there will be no Python 2.8 (see [PEP 373 Python 2.7 Release Schedule](https://legacy.python.org/dev/peps/pep-0373/)).
 * R 3.6, or later, is required.
 * Either [Miniconda](https://conda.io/miniconda.html) or [Anaconda Distribution](https://www.anaconda.com/distribution/) are strongly recommended.
 * Python 3.6, or later, is strongly recommended.
-* Cutadapt v1.18 (2018-09-07), or later, is required.
+* Cutadapt 1.18 (2018-09-07), or later, is required.
+* Samtools 1.9 is required if running on CentOS 7.
 * Nextflow 20, or later, is required.
-* Hisat 2.1.0 is recommended, not 2.2.0. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 will resolve in a future release.
+* Hisat 2.1.0 is strongly recommended. Hisat2 2.2.0 users have reported bugs and issues (see for example [DaehwanKimLab/hisat2#242](https://github.com/DaehwanKimLab/hisat2/issues/242) and [DaehwanKimLab/hisat2#245](https://github.com/DaehwanKimLab/hisat2/issues/245)) which Hisat2 will resolve in a future release.
 
 ---
 
@@ -527,6 +528,7 @@ We would recommend using Miniconda, Anaconda or some other virtual environment s
 | pandas | [pandas](https://pandas.pydata.org/), [GitHub](https://github.com/pandas-dev/pandas) |
 | Cutadapt | [GitHub](https://github.com/marcelm/cutadapt), [readthedocs](https://cutadapt.readthedocs.io/) |
 | pysam | [GitHub](https://github.com/pysam-developers/pysam/), [readthedocs](https://pysam.readthedocs.io/) |
+| Samtools | [samtools](https://www.htslib.org/) |
 | BioPython | [Biopython](http://biopython.org/) |
 | gffutils | [gffutils](http://daler.github.io/gffutils/) |
 | h5py | [h5py](https://www.h5py.org/) |
@@ -602,9 +604,9 @@ Ciao world!
 Hello world!
 ```
 
-**Troubleshooting: `samtools: error while loading shared libraries: libcrypto.so.1.0.0`**
+**Troubleshooting: Samtools `error while loading shared libraries: libcrypto.so.1.0.0`**
 
-If you get:
+If you get the following then using Samtools 1.7:
 
 ```conda
 $ samtools --version
