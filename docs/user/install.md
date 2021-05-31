@@ -208,7 +208,7 @@ For Ubuntu, you can do the following, from [Ubuntu Packages For R - Brief Instru
 $ sudo apt install -y --no-install-recommends software-properties-common dirmngr
 $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 $ sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-$ sudo apt update
+$ sudo apt update -y
 $ sudo apt install -y r-base
 $ sudo apt install -y r-base-dev
 $ R --version
