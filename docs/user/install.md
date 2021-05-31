@@ -268,6 +268,9 @@ then enter `yes`.
 
 Install in R:
 
+```console
+> R
+```
 ```r
 > install.packages("RcppRoll")
 > install.packages("git2r")
