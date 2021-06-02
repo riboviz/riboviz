@@ -224,12 +224,15 @@ server <- function(input, output, session) {
     filter(samp1 != samp2) %>%
     mutate(samp1 = factor(samp1, levels = cor.cols),
            samp2 = factor(samp2, levels = cor.cols))
-
+  
+  # find the floor of min correlation
+  min.cor <- floor(min(cor.df2$R, na.rm = TRUE) * 10) / 10
+  
   # plot it
   output$sample_cors_plot <- renderPlot({
     ggplot(cor.df2, aes(samp1, samp2, fill = R, label = signif(R,2)))+
       geom_raster()+
-      scale_fill_viridis_c(option = "B", na.value = NA)+
+      scale_fill_viridis_c(option = "B", na.value = NA, limits = c(min.cor, 1))+
       theme(panel.background = element_blank(),
             text = element_text(size = 14),
             axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
@@ -443,7 +446,8 @@ ui <- fluidPage(
                                 choiceValues = names(sample_names),
                                 selected = names(sample_names)[1], 
                                 inline = TRUE,
-                                width = "100%")
+                                width = "100%"),
+             submitButton(text = "Apply Changes", icon = NULL, width = NULL)
              )
              
            )
