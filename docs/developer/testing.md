@@ -100,6 +100,31 @@ $ pytest riboviz/test/regression/test_regression.py \
 
 `PendingDeprecationWarning` `warnings` can be ignored.
 
+**Troubleshooting: `FAILED ... test_bam_to_h5_h5[...]` test failures
+
+If, running the vignette regression tests, you see the following two failures:
+
+```
+...
+FAILED riboviz/test/regression/test_regression.py::test_bam_to_h5_h5[vignette/output-WTnone]
+FAILED riboviz/test/regression/test_regression.py::test_bam_to_h5_h5[vignette/output-WT3AT]
+...
+```
+
+but all other tests pass, then these two test failures can be ignored. These failures can arise if the regression test data was produced in an environment using rhdf 2.34.0 or above and you are using a version of rhd5 prior to 2.34.0, or vice versa. [Bioconductor 3.12 Released](http://bioconductor.org/news/bioc_3_12_release/) (October 28, 2020) explains that, for rhdf4 2.34.0, "datasets written with h5write() now have the attribute rhdf5-NA.OK added to them ... to indicate that rhdf5 was used to create the file...". These new attributes have form:
+
+```
+ATTRIBUTE "rhdf5-NA.OK" {
+   DATATYPE  H5T_STD_I32LE
+   DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+   DATA {
+   (0): 1
+   }
+}
+```
+
+The H5 files produced by RiboViz (via invocation of the `bam_to_h5.R` script) are used by downstream processing steps (notably `generate_stats_figs.R`) so these failures can be ignored if all other regression tests pass.
+
 ---
 
 ## Using the regression test suite
