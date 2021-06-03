@@ -9,6 +9,7 @@ These are the key steps in building a release.
 * Update the following documentation to refer to the current release version:
   - [docs/developer/create-test-data-repository.md](./create-test-data-repository.md)
   - [docs/developer/testing.md](./testing.md)
+  - [docs/developer/adding-config.md](./adding-config.md)
   - [docs/developer/releasing.md](./releasing.md) (this page)
 * Update the Releases table in `README.md` with a row for intended release and provide a URL with the intended release tag. See the current rows of the table for the format of the URL.
 * Update software versions in `docs/user/install.md` - see [Update Dependencies overview](./dependencies.md#update-dependencies-overview).
