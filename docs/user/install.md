@@ -96,7 +96,6 @@ Certain packages are only required if you plan to develop and extend RiboViz. Th
 
 * R: devtools, glue, lintr, roxygen2, styler, testthat, withr.
 * Python: pycodestyle, pylint, pytest-cov, sphinx.
->>>>>>> develop
 
 Requirements and constraints:
 
