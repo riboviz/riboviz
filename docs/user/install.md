@@ -707,32 +707,10 @@ $ git clone https://github.com/riboviz/riboviz
 
 You can now check your installation by running RiboViz tests by running a "vignette" of the **RiboViz** workflow to see **RiboViz**'s capabilities. See [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md).
 
-Once you have run the "vignette", you can check your installation by running regression tests.
+Once you have run the "vignette", you can check your installation by running tests:
 
-Download regression test data:
-
-```console
-$ cd
-$ git clone https://github.com/riboviz/regression-test-data-2.0
-```
-
-Run the regression tests for the RiboViz Nextflow workflow (these may take a few minutes):
-
-```console
-$ cd riboviz
-$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/regression-test-data-2.0/ --nextflow --skip-workflow
-```
-
-All tests should pass (some may be skipped, but none should fail).
-
-You can also run all non-regression tests:
-
-```console
-$ cd riboviz
-$ pytest --ignore-glob="*regression*"
-```
-
-All tests should pass (some may be skipped, but none should fail). `PendingDeprecationWarning` `warnings` can be ignored.
+* [Run vignette regression tests](#../developer/testing.md#run-vignette-regression-tests).
+* [Run Python tests and workflow tests](#../developer/testing.md#run-python-tests-and-workflow-tests).
 
 ---
 

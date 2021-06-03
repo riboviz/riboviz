@@ -318,13 +318,3 @@ data  vignette  work
 $ ls vignette/
 index  input  output  tmp
 ```
-
-You could then, for example, run the RiboViz regression tests, again within the current directory:
-
-```console
-$ pytest $HOME/riboviz/riboviz/test/regression/test_regression.py \
- --expected=$HOME/regression-test-data-2.0 \
- --config-file=$HOME/riboviz/vignette/vignette_config.yaml \
-  --skip-workflow \
-  --nextflow 
-```
