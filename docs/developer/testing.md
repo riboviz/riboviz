@@ -1,6 +1,133 @@
 # Developing and running tests
 
-## Run vignette regression test suite
+## Run Python tests and workflow tests
+
+If you have not installed Nextflow, run:
+
+```console
+$ pytest --ignore-glob="*regression*" --ignore-glob="*nextflow*"
+```
+
+If you have installed Nextflow, run:
+
+```console
+$ pytest --ignore-glob="*regression*"
+```
+
+`PendingDeprecationWarning` `warnings` can be ignored.
+
+---
+
+## Run R tests
+
+testthat-compliant tests for R scripts can be run as follows:
+
+```console
+$ Rscript rscripts/tests/testthat.R
+```
+
+Individual test scripts can be run as follows (for example):
+
+```console
+$ Rscript rscripts/tests/testthat/test_bam_to_h5.R 
+```
+
+Test scripts can also be run from within R as follows (for example):
+
+```R
+> library(testthat)
+> test_file("rscripts/tests/testthat/test_bam_to_h5.R")
+```
+
+---
+
+## Run vignette regression tests
+
+Test data found within repositories prefixed `regression-test-data-<YYYYMMDD>|<TAG>`, within the [riboviz](https://github.com/riboviz) project on GitHub. These contain output files from the workflow.
+
+**Note:** The most recent `regression-test-data-<YYYYMMDD>` repository will be consistent with the most recent version of the code on the `develop` branch.
+
+**Note:** `regression-test-data-<TAG>` repositories will be consistent with releases with tagged with `<TAG>`.
+
+Download test data, for example:
+
+```console
+$ cd
+$ git clone https://github.com/riboviz/regression-test-data-2.0
+```
+
+Run the tests for the RiboViz Python workflow (these may take a few minutes):
+
+```console
+$ cd riboviz
+$ pytest riboviz/test/regression/test_regression.py \
+    --expected=$HOME/regression-test-data-<YYYYMMDD>|<TAG> \
+    --config-file=vignette/vignette_config.yaml
+```
+
+For example:
+
+```console
+$ cd riboviz
+$ pytest riboviz/test/regression/test_regression.py \
+    --expected=$HOME/regression-test-data-2.0 \
+    --config-file=vignette/vignette_config.yaml
+```
+
+**Note:** If you have already run the vignette, then add a `--skip-workflow` flag to the call to `pytest`.
+
+Run the tests for the RiboViz Nextflow workflow (these may take a few minutes):
+
+```console
+$ cd riboviz
+$ pytest riboviz/test/regression/test_regression.py \
+    --expected=$HOME/regression-test-data-<YYYYMMDD>|<TAG> \
+    --config-file=vignette/vignette_config.yaml \
+    --nextflow
+```
+
+For example:
+
+```console
+$ cd riboviz
+$ pytest riboviz/test/regression/test_regression.py \
+    --expected=$HOME/regression-test-data-2.0 \
+    --config-file=vignette/vignette_config.yaml  \
+    --nextflow
+```
+
+**Note:** If you have already run the vignette, then add a `--skip-workflow` flag to the call to `pytest`.
+
+`PendingDeprecationWarning` `warnings` can be ignored.
+
+**Troubleshooting: `FAILED ... test_bam_to_h5_h5[...]` test failures**
+
+If, running the vignette regression tests, you see the following two failures:
+
+```
+...
+FAILED riboviz/test/regression/test_regression.py::test_bam_to_h5_h5[vignette/output-WTnone]
+FAILED riboviz/test/regression/test_regression.py::test_bam_to_h5_h5[vignette/output-WT3AT]
+...
+```
+
+but all other tests pass, then these two test failures can be ignored. These failures can arise if the regression test data was produced in an environment using rhdf 2.34.0 or above and you are using a version of rhd5 prior to 2.34.0, or vice versa. [Bioconductor 3.12 Released](http://bioconductor.org/news/bioc_3_12_release/) (October 28, 2020) explains that, for rhdf4 2.34.0, "datasets written with h5write() now have the attribute rhdf5-NA.OK added to them ... to indicate that rhdf5 was used to create the file...". These new attributes have form:
+
+```
+ATTRIBUTE "rhdf5-NA.OK" {
+   DATATYPE  H5T_STD_I32LE
+   DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+   DATA {
+   (0): 1
+   }
+}
+```
+
+The H5 files produced by RiboViz (via invocation of the `bam_to_h5.R` script) are used by downstream processing steps (notably `generate_stats_figs.R`) so these failures can be ignored if all other regression tests pass.
+
+---
+
+## Using the regression test suite
 
 `riboviz.test.regression.test_regression` is a regression test suite. The test suite runs the Python workflow or the Nextflow workflow using a given configuration file, then compares the results to a directory of pre-calculated results, specified by the user.
 
@@ -22,6 +149,10 @@ The test suite accepts the following command-line parameters:
 * `--check-index-tmp`: Check index and temporary files (default is that only the output files are checked). This can be used with configurations that specify samples (`fq_files`) but not those that specify multiplexed samples (`multiplex_fq_files`) (for more information, see [Tests for temporary files for multiplexed sample files](#tests-for-temporary-files-for-multiplexed-sample-files) below).
 * `--config-file=<CONFIG_FILE>`: Configuration file. If provided then the index, temporary and output directories specified in this file will be validated against those specified by `--expected`. If not provided then the file `vignette/vignette_config.yaml` will be used.
 * `--nextflow`: Run the tests for the Nextflow workflow instead of the Python workflow. Some tests differ for Nextflow due to differences in naming of some temporary files.
+
+**Note:** Do not use the `--check-index-tmp` parameter when running the tests using the test data repositories `https://github.com/riboviz/regression-test-data-<YYYYMMDD>|<TAG>`. These repositories contain no index or temporary files.
+
+### Specifying values for environment variable configuration tokens
 
 To specify values for environment variables cited as tokens in configuration parameters (see [Environment variables and configuration tokens](../user/prep-riboviz-config.md#environment-variables-and-configuration-tokens)) (Nextflow workflow only), then these should be defined as described in [Defining values for environment variables](../user/prep-riboviz-run-nextflow.md#defining-values-for-environment-variables). For example:
 
@@ -100,43 +231,19 @@ riboviz/test/regression/test_regression.py::test_collate_tpms_tsv[vignette/outpu
 riboviz/test/regression/test_regression.py::test_read_counts_tsv[vignette/output] PASSED [100%]
 ```
 
-### Tests for temporary files for multiplexed sample files
+### Tests for temporary demultiplexed sample files
 
-The test suite does not implement support for validating temporary files produced for worklows that process multiplexed sample files (`multiplex_fq_files`). This is because the sample names for the tests are derived from the sample sheet file (`sample_sheet`) and it can't be guaranteed that a sample in the sample sheet will yield corresponding sample files post-demultiplexing.
+The test suite does not implement support for validating temporary demultiplexed sample files produced for worklows that process multiplexed sample files (`multiplex_fq_files`). This is because the sample names for the tests are derived from the sample sheet file (`sample_sheet`) and it can't be guaranteed that a sample in the sample sheet will yield corresponding sample files post-demultiplexing.
+
+Output files are validated.
 
 ### Tests for UMI extraction, deduplication and grouping
 
-If running with a configuration that used UMI extraction, deduplication and grouping then note that:
+If running with a configuration that used UMI extraction, deduplication and grouping then:
 
 * UMI deduplication statistics files are not checked (files prefixed by `dedup_stats`).
 * UMI group file post-deduplication files, (`post_dedup_groups.tsv`) files can differ between runs depending on which reads are removed by `umi_tools dedup`, so only the existence of the file is checked.
 * BAM file output by deduplication (`<SAMPLE>.bam`) files can differ between runs depending on which reads are removed by `umi_tools dedup`, so only the existence of the file is checked.
-
-### Test data
-
-Test data can be found within repositories prefixed `regression-test-data-<YYYYMMDD>|<TAG>`, within the [riboviz](https://github.com/riboviz) project on GitHub. These contain output files from the workflow.
-
-Download test data:
-
-```console
-$ cd
-$ git clone https://github.com/riboviz/regression-test-data-<YYYYMMDD>
-```
-
-Run the tests for the RiboViz Python workflow (these may take a few minutes):
-
-```console
-$ cd riboviz
-$ pytest riboviz/test/regression/test_regression.py \
-    --expected=$HOME/regression-test-data-<YYYYMMDD>|<TAG> \
-    --config-file=vignette/vignette_config.yaml
-```
-
-**Note:** The most recent `regression-test-data-<YYYYMMDD>` repository will be consistent with the most recent version of the code on the `develop` branch.
-
-**Note:** `regression-test-data-<TAG>` repositories will be consistent with releases with tagged with `<TAG>`.
-
-**Note:** Do not use the `--check-index-tmp` parameter when running the tests using these repositories as the repositories contain no index or temporary files.
 
 ### Using your own expected results directory
 
@@ -155,53 +262,12 @@ You can now provide this folder as a value for the `--expected` parameter. For e
 
 ```console
 $ pytest riboviz/test/regression/test_regression.py \
-    --expected=$HOME/results-<BRANCH>-<COMMIT-HASH> \
+    --expected=results-<BRANCH>-<COMMIT-HASH> \
     --config-file=<CONFIG_FILE> \
     --check-index-tmp
 ```
 
 **Note:** Test data, produced by the Python workflow can be used with the Nextflow tests, and vice versa, but some of the tests relating to temporary files will fail due to the Python and Nextflow workflows each producing some temporary files with differing names.
-
----
-
-## Run all tests (excluding regression tests)
-
-If you have not installed Nextflow, run:
-
-```console
-$ pytest --ignore-glob="*regression*" --ignore-glob="*nextflow*"
-```
-
-If you have installed Nextflow, run:
-
-```console
-$ pytest --ignore-glob="*regression*"
-```
-
-See also [Run R tests](#run-r-tests) below.
-
----
-
-## Run R tests
-
-All testthat-compliant R tests can be run as follows:
-
-```console
-$ Rscript rscripts/tests/testthat.R
-```
-
-Individual test scripts can be run as follows (for example):
-
-```console
-$ Rscript rscripts/tests/testthat/test_bam_to_h5.R 
-```
-
-Test scripts can also be run within R as follows (for example):
-
-```R
-> library(testthat)
-> test_file("rscripts/tests/testthat/test_bam_to_h5.R")
-```
 
 ---
 

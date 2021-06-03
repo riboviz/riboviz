@@ -5,10 +5,6 @@ suppressMessages(library(getopt, quietly=T))
 suppressMessages(library(here))
 # NOTE: other libraries loaded from read_count_functions.R
 
-# FLIC: adding testthat package for +/- temporary unit testing
-suppressMessages(library(testthat))
-
-
 # Handle interactive session behaviours or use get_Rscript_filename():
 if (interactive()) {
   # Use hard-coded script name and assume script is in "rscripts"
