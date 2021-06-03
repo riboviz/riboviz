@@ -100,7 +100,7 @@ $ pytest riboviz/test/regression/test_regression.py \
 
 `PendingDeprecationWarning` `warnings` can be ignored.
 
-**Troubleshooting: `FAILED ... test_bam_to_h5_h5[...]` test failures
+**Troubleshooting: `FAILED ... test_bam_to_h5_h5[...]` test failures**
 
 If, running the vignette regression tests, you see the following two failures:
 
