@@ -13,9 +13,10 @@ These are the key steps in building a release.
 * Update the Releases table in `README.md` with a row for intended release and provide a URL with the intended release tag. See the current rows of the table for the format of the URL.
 * Update software versions in `docs/user/install.md` - see [Update Dependencies overview in Install RiboViz and dependencies](./documentation.md#update-dependencies-overview-in-install-riboviz-and-dependencies)
 * Merge `develop` branch into `master` branch.
-* Rerun all tests - see [Run all tests (excluding regression tests)](./testing.md#run-all-tests-excluding-regression-tests).
-* Rerun Python workflow and regression tests - see [Run vignette regression tests](./testing.md#run-vignette-regression-tests).
-* Rerun Nextflow workflow and regression tests - see [Run vignette regression tests](./testing.md#run-vignette-regression-tests).
+* Rerun all tests:
+  - [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
+  - [Run R tests](./testing.md#run-r-tests).
+  - [Run vignette regression tests](./testing.md#run-vignette-regression-tests).
 * Skim all documentation via the GitHub web interface and check formatting and links.
 * Tag release in repository:
 

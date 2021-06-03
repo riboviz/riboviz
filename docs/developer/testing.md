@@ -16,11 +16,9 @@ $ pytest --ignore-glob="*regression*"
 
 `PendingDeprecationWarning` `warnings` can be ignored.
 
-See also [Run R script tests](#run-script-tests) below.
-
 ---
 
-## Run R script tests
+## Run R tests
 
 testthat-compliant tests for R scripts can be run as follows:
 
