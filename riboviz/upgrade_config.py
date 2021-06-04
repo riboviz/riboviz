@@ -74,6 +74,8 @@ Configuration parameters that are now unused are removed:
 * ``aligner``
 * ``isTestRun``
 * ``is_test_run``
+* ``cmd_file``
+* ``dir_logs``
 """
 import os
 import os.path
