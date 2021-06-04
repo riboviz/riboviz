@@ -1,17 +1,28 @@
 #!/usr/bin/env bash
 
 sudo apt update -y
-sudo apt-get install -y git
-sudo apt-get install -y curl
-sudo apt-get install -y emacs
-sudo apt-get install -y bedtools
+sudo apt install -y git
+git --version
+sudo apt install -y curl
+curl --version
+sudo apt install -y bedtools
 bedtools -version
-sudo apt-get install -y hdf5-tools
-sudo apt-get install -y pigz
+sudo apt install -y hdf5-tools
+h5diff --version
+sudo apt install -y pigz
 pigz --version
-sudo apt-get install -y graphviz
+sudo apt install -y pandoc
+pandoc --version
+sudo apt install -y graphviz
 dot -V
-sudo apt-get install -y zip
+sudo apt install -y zip
 zip -v
-sudo apt-get install -y unzip
+sudo apt install -y unzip
 unzip -v
+sudo apt install -y libxml2-dev
+sudo apt install -y libssl-dev
+sudo apt install -y libcurl4-openssl-dev
+sudo apt install -y libgit2-dev
+sudo apt install -y r-base
+sudo apt install -y r-base-dev
+R --version
