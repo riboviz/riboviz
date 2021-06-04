@@ -1,5 +1,5 @@
 """
-:py:mod:`riboviz.tools.prep_riboviz` regression test suite.
+Regression test suite.
 
 The regression test suite runs
 :py:const:`riboviz.test.NEXTFLOW_WORKFLOW` (via Nextflow) using a
@@ -114,7 +114,6 @@ from riboviz import compare_files
 from riboviz import count_reads
 from riboviz import workflow_files
 from riboviz import workflow_r
-from riboviz.tools import prep_riboviz
 from riboviz.test import nextflow
 from riboviz import test
 
@@ -122,8 +121,8 @@ from riboviz import test
 @pytest.fixture(scope="module")
 def prep_riboviz_fixture(skip_workflow_fixture, config_fixture):
     """
-    Run :py:mod:`riboviz.tools.prep_riboviz` if
-    ``skip_workflow_fixture`` is not ``True``.
+    Run :py:const:`riboviz.test.NEXTFLOW_WORKFLOW` (via Nextflow)
+    if ``skip_workflow_fixture`` is not ``True``.
 
     :param skip_workflow_fixture: Should workflow not be run?
     :type skip_workflow_fixture: bool
