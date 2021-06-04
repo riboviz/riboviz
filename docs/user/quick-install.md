@@ -15,7 +15,7 @@ $ sudo su -
 CTRL-D
 ```
 
-Install operating system packages:
+Install operating system packages and R:
 
 * Ubuntu:
 
@@ -29,59 +29,13 @@ $ source install-ubuntu.sh
 $ source install-centos.sh
 ```
 
-Install Miniconda Python 3 and Python packages:
-
-```console
-$ source install-py.sh
-```
-
-Install Hisat2 and Bowtie:
-
-```console
-$ source install-hisat-bowtie.sh
-```
-
-Create `set-riboviz-env.sh`:
-
-```console
-$ source create-set-riboviz-env.sh
-```
-
-Install R:
-
-* Ubuntu:
-
-```console
-$ source install-r-ubuntu.sh
-```
-
-* CentOS
-
-```console
-$ source install-r-centos.sh
-```
-
 Install R packages:
 
 ```console
-$ Rscript install-R.r
+$ Rscript install-r.R
 ```
 
-Install R Bioconductor packages:
-
-* R 3.4 users:
-
-```console
-$ Rscript install-r-3.4-bioconductor.R
-```
-
-* R 3.5 users:
-
-```console
-$ Rscript install-r-3.5-bioconductor.R
-```
-
-When complete, check that R's library paths include your personal library:
+Check that R's library paths include your personal library:
 
 ```console
 $ Rscript -e ".libPaths()"
@@ -104,4 +58,22 @@ You should see something like:
 [1] "/home/centos/R/x86_64-redhat-linux-gnu-library/3.5"
 [2] "/usr/lib64/R/library"                              
 [3] "/usr/share/R/library"  
+```
+
+Install Miniconda Python 3 and Python packages:
+
+```console
+$ source install-py.sh
+```
+
+Install Hisat2 and Bowtie:
+
+```console
+$ source install-hisat-bowtie.sh
+```
+
+Create `set-riboviz-env.sh`:
+
+```console
+$ source create-set-riboviz-env.sh
 ```
