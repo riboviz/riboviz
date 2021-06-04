@@ -26,7 +26,14 @@ Please be reassured that so long as you do **not** merge branches into `develop`
 
 ## Merging development branches into `develop`
 
-To request that a branch be merged into `develop` create a new pull request.
+To request that a branch be merged into `develop`:
+
+1. Merge the current version of `develop` into your local branch.
+2. Resolve conflicts, if any, and commit the fixes.
+3. [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
+4. [Run vignette regression tests](./testing.md#run-vignette-regression-tests).
+5. Make fixes to resolve any test failures. If unsure then ask another member of the team for advice.
+6. When all tests are passing for your branch, create a new pull request.
 
 Decisions to merge development branches into `develop` are made by Edward Wallace, Felicity Anderson, Kostas Kavoussanakis and Mike Jackon.
 

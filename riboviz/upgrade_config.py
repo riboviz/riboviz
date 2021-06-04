@@ -68,7 +68,7 @@ already present in the configuration:
 * ``nextflow_work_dir: work``
 * ``stop_in_feature: false``
 * ``validate_only: false``
-* `run_static_html: true`
+* ``run_static_html: true``
 
 The values of parameters ``rrna_index_prefix`` and
 ``orf_index_prefix`` are updated to be file names only, as, these are
