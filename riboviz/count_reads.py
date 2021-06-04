@@ -407,7 +407,7 @@ def umi_tools_dedup_bam(tmp_dir, output_dir, sample):
     ``umi_tools dedup``.
 
     ``<tmp_dir>/<sample>`` is searched for a BAM file matching
-    :py:const:`riboviz.workflow_files.PRE_DEDUP_BAM` and
+    :py:const:`riboviz.workflow_files.DEDUP_BAM` and
     if this is found the reads in the output file
     ``<output_dir>/<sample>/<sample>.bam`` are counted.
 
@@ -424,16 +424,12 @@ def umi_tools_dedup_bam(tmp_dir, output_dir, sample):
     :return: ``pandas.core.frame.Series``, or ``None``
     :rtype: pandas.core.frame.Series
     """
-    # Look for pre_dedup.bam.
+    # Look for dedup.bam.
     files = glob.glob(
-        os.path.join(tmp_dir, sample, workflow_files.PRE_DEDUP_BAM))
+        os.path.join(tmp_dir, sample, workflow_files.DEDUP_BAM))
     if not files:
-        # Look for dedup.bam (Nextflow).
-        files = glob.glob(
-            os.path.join(tmp_dir, sample, workflow_files.DEDUP_BAM))
-        if not files:
-            # Deduplication was not done.
-            return None
+        # Deduplication was not done.
+        return None
     # Look for the BAM file output.
     files = glob.glob(os.path.join(
         output_dir, sample, sam_bam.BAM_FORMAT.format(sample)))

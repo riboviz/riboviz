@@ -2,7 +2,6 @@ adapters: CTGTAGGCACC
 asite_disp_length_file: data/yeast_standard_asite_disp_length.txt
 buffer: 250
 build_indices: TRUE
-cmd_file: run_riboviz_vignette.sh
 codon_positions_file: data/yeast_codon_pos_i200.RData
 count_reads: TRUE
 count_threshold: 64
@@ -11,7 +10,6 @@ dedup_stats: FALSE
 dedup_umis: FALSE
 dir_index: vignette/index
 dir_in: vignette/input
-dir_logs: vignette/logs
 dir_out: vignette/output
 dir_tmp: vignette/tmp
 do_pos_sp_nt_freq: TRUE
