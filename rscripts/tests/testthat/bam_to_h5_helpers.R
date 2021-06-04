@@ -325,16 +325,6 @@ ValidateH5 <- function(h5_file, gff_file, bam_file, primary_id,
   print(paste0("H5 sequence names (", length(h5_names), "):"))
   print(h5_names)
 
-  ## VALIDATE H5
-
-  expected_h5_names <- append(gff_primary_ids, gff_secondary_ids)
-
-  testthat::expect_equal(length(h5_names), length(expected_h5_names),
-    info = "Unexpected number of sequence names, compared to GFF")
-  testthat::expect_equal(as.factor(sort(h5_names)),
-                         as.factor(sort(expected_h5_names)),
-    info = "Unexpected sequence names, compared to GFF")
-
   ## VALIDATE H5 (sequence-specific)
 
   for (feature_name in gff_primary_ids) {
