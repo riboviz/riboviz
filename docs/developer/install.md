@@ -32,6 +32,8 @@ $ pip install sphinx
 | testthat | [testthat package on CRAN](https://cran.r-project.org/web/packages/testthat/index.html), [testthat package documentation](https://testthat.r-lib.org/) |
 | withr | [withr package on CRAN](https://cran.r-project.org/web/packages/withr/index.html) |
 
+Install:
+
 ```console
 $ R
 ```

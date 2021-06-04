@@ -1,30 +1,30 @@
-dir_in: vignette/input
-dir_out: vignette/output
-dir_tmp: vignette/tmp
-rRNA_fasta: vignette/input/yeast_rRNA_R64-1-1.fa
-orf_fasta: vignette/input/yeast_YAL_CDS_w_250utrs.fa
-orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3
-aligner: hisat2
-build_indices: TRUE
-make_bedgraph: TRUE
-dir_index: vignette/index
-rRNA_index: vignette/index/yeast_rRNA
-orf_index: vignette/index/YAL_CDS_w_250
-fq_files:
-  WTnone: SRR1042855_s1mi.fastq.gz
+dir_in: vignette/input # input directory
+dir_out: vignette/output # output directory
+dir_tmp: vignette/tmp # tmp directory for intermediate files
+rRNA_fasta: vignette/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid aligning to
+orf_fasta: vignette/input/yeast_YAL_CDS_w_250utrs.fa # orf file to align to
+orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3 # GFF2/GFF3 file for ORFs
+aligner: hisat2 # short read aligner to use. Currently only hisat2 works
+build_indices: TRUE # build indices for aligner? if TRUE, remake indices from fasta files
+make_bedgraph: TRUE # output bedgraph.gzs of data, in addition to h5?
+dir_index: vignette/index # directory to put built indices in
+rRNA_index: vignette/index/yeast_rRNA # rRNA index file
+orf_index: vignette/index/YAL_CDS_w_250 # ORF index file
+fq_files: # fastq files to be processed
+  WTnone: SRR1042855_s1mi.fastq.gz # do not use "_" in dataset name
   WT3AT: SRR1042864_s1mi.fastq.gz
-  NotHere: example_missing_file.fastq.gz
-adapters: CTGTAGGCACC
-nprocesses: 1
-MinReadLen: 10
-MaxReadLen: 50
-Buffer: 250
-PrimaryID: Name
-SecondID: NULL
-dataset: vignette
-StopInCDS: FALSE
-
-rpf: TRUE
-ribovizGFF: TRUE
-features_file: data/yeast_features.tsv
-do_pos_sp_nt_freq: TRUE
+  NotHere: example_missing_file.fastq.gz # prepRiboviz should give error message for missing files
+adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
+nprocesses: 1 # number of processes to parallelize over
+MinReadLen: 10 # Minimum read length in H5 output
+MaxReadLen: 50 # Maximum read length in H5 output
+Buffer: 250 # Length of flanking region around the CDS
+PrimaryID: Name # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
+SecondID: NULL # Secondary gene IDs to access the data (COX1, EFB1, etc.)
+dataset: vignette # Name of the dataset
+StopInCDS: FALSE # Are stop codons part of the CDS annotations in GFF?
+isTestRun: FALSE # Is this a test run
+rpf: TRUE # Is the dataset an RPF or mRNA dataset?
+ribovizGFF: TRUE # Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3
+features_file: data/yeast_features.tsv # file of features to correlate with ORFs
+do_pos_sp_nt_freq: TRUE # Do calculate position-specific nucleotide frequency

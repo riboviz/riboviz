@@ -628,7 +628,7 @@ samtools 1.9
 
 ---
 
-## Install Bioinformatics tools
+## Install tools not available as operating system packages
 
 | Package | Links |
 | ------- | ----- |

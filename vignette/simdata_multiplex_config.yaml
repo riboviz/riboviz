@@ -1,5 +1,4 @@
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
-aligner: hisat2 # Short read aligner to use. Currently only hisat2 works
 asite_disp_length_file: data/yeast_standard_asite_disp_length.txt # Table of fixed A-site positions by read length
 buffer: 250 # Length of flanking region around the CDS
 build_indices: TRUE # Build indices for aligner? if TRUE, remake indices from fasta files
@@ -49,6 +48,7 @@ rrna_fasta_file: vignette/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid align
 rrna_index_prefix: yeast_rRNA # rRNA index file prefix, relative to dir_index
 run_static_html: TRUE # Create static html visualization per sample?
 sample_sheet: multiplex_barcodes.tsv # Sample sheet, TSV file with, at least, SampleID and TagRead (barcode) columns
+samsort_memory:	null # Memory to give to 'samtools sort'
 secondary_id: NULL # Secondary gene IDs to access the data (COX1, EFB1, etc.)
 stop_in_cds: FALSE # Are stop codons part of the CDS annotations in GFF?
 trim_5p_mismatches: TRUE # Trim mismatched 5' base?

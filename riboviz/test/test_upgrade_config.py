@@ -56,6 +56,7 @@ def upgrade_and_validate(config_file,
 @pytest.mark.parametrize("config_file",
                          ["vignette_config_1.0.0.yaml",
                           "vignette_config_1.1.0.yaml",
+                          "vignette_config_2.0.0.yaml",
                           "vignette_config_current.yaml"])
 def test_upgrade_vignette_config(config_file, tmp_file):
     """
@@ -69,39 +70,3 @@ def test_upgrade_vignette_config(config_file, tmp_file):
     """
     upgrade_and_validate(config_file, tmp_file,
                          "vignette_config_current.yaml")
-
-
-@pytest.mark.parametrize("config_file",
-                         ["simdata_umi_config_current.yaml"])
-def test_upgrade_simdata_umi_config(config_file, tmp_file):
-    """
-    Test :py:func:`riboviz.upgrade_config.upgrade_config_file` on
-    previous versions of the simulated UMI data configuration file
-    (in :py:mod:`riboviz.test.config`) and compare to the current
-    version.
-
-    :param config_file: configuration file
-    :type config_file: str or unicode
-    :param tmp_file: upgraded configuration file
-    :type tmp_file: str or unicode
-    """
-    upgrade_and_validate(config_file, tmp_file,
-                         "simdata_umi_config_current.yaml")
-
-
-@pytest.mark.parametrize("config_file",
-                         ["simdata_multiplex_config_current.yaml"])
-def test_upgrade_simdata_multiplex_config(config_file, tmp_file):
-    """
-    Test :py:func:`riboviz.upgrade_config.upgrade_config_file` on
-    previous versions of the simulated multiplexed data configuration
-    file (in :py:mod:`riboviz.test.config`) and compare to the current
-    version.
-
-    :param config_file: configuration file
-    :type config_file: str or unicode
-    :param tmp_file: upgraded configuration file
-    :type tmp_file: str or unicode
-    """
-    upgrade_and_validate(config_file, tmp_file,
-                         "simdata_multiplex_config_current.yaml")
