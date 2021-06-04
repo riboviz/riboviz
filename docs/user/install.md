@@ -523,20 +523,20 @@ We would recommend using Miniconda, Anaconda or some other virtual environment s
 
 ## Install Python and conda packages
 
-| Package | Links |
-| ------- | ----- |
-| pyyaml | [PyYAML](https://pyyaml.org/), [GitHub](https://github.com/yaml/pyyaml/) |
-| gitpython | [gitpython](https://gitpython.readthedocs.io/en/stable/), [GitHub](https://github.com/gitpython-developers/GitPython) |
-| pytest | [pytest](https://pytest.org/), [GitHub](https://github.com/pytest-dev/pytest/) |
-| pandas | [pandas](https://pandas.pydata.org/), [GitHub](https://github.com/pandas-dev/pandas) |
-| Cutadapt | [GitHub](https://github.com/marcelm/cutadapt), [readthedocs](https://cutadapt.readthedocs.io/) |
-| pysam | [GitHub](https://github.com/pysam-developers/pysam/), [readthedocs](https://pysam.readthedocs.io/) |
-| Samtools | [samtools](https://www.htslib.org/) |
-| BioPython | [Biopython](http://biopython.org/) |
-| gffutils | [gffutils](http://daler.github.io/gffutils/) |
-| h5py | [h5py](https://www.h5py.org/) |
-| UMI-tools | [GitHub](https://github.com/CGATOxford/UMI-tools), [readthedocs](https://readthedocs.org/projects/umi-tools/) |
-| Nextflow | [Nextflow](https://www.nextflow.io/), [Documentation](https://www.nextflow.io/docs/latest/index.html), [GitHub](https://github.com/nextflow-io/nextflow) |
+| Package | conda channel | Links |
+| ------- | ------------- | ----- |
+| pyyaml | default | [PyYAML](https://pyyaml.org/), [GitHub](https://github.com/yaml/pyyaml/) |
+| gitpython | default | [gitpython](https://gitpython.readthedocs.io/en/stable/), [GitHub](https://github.com/gitpython-developers/GitPython) |
+| pytest | default | [pytest](https://pytest.org/), [GitHub](https://github.com/pytest-dev/pytest/) |
+| pandas | default | [pandas](https://pandas.pydata.org/), [GitHub](https://github.com/pandas-dev/pandas) |
+| Cutadapt | bioconda | [GitHub](https://github.com/marcelm/cutadapt), [readthedocs](https://cutadapt.readthedocs.io/) |
+| pysam | bioconda | [GitHub](https://github.com/pysam-developers/pysam/), [readthedocs](https://pysam.readthedocs.io/) |
+| Samtools | bioconda | [samtools](https://www.htslib.org/) |
+| BioPython | anaconda |[Biopython](http://biopython.org/) |
+| gffutils | bioconda | [gffutils](http://daler.github.io/gffutils/) |
+| h5py | anaconda |[h5py](https://www.h5py.org/) |
+| UMI-tools | bioconda | [GitHub](https://github.com/CGATOxford/UMI-tools), [readthedocs](https://readthedocs.org/projects/umi-tools/) |
+| Nextflow | bioconda | [Nextflow](https://www.nextflow.io/), [Documentation](https://www.nextflow.io/docs/latest/index.html), [GitHub](https://github.com/nextflow-io/nextflow) |
 
 **Note:** Cutadapt v1.18 (2018-09-07), or later, is required.
 
