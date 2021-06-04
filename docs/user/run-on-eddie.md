@@ -192,54 +192,6 @@ Change into the **RiboViz** repository:
 $ cd riboviz/riboviz
 ```
 
-<details><summary>Run the Python workflow (Deprecated)</summary> 
-
-```console
-$ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
-Running under Python: 3.7.6 | packaged by conda-forge | (default, Jun  1 2020, 18:57:50)
-[GCC 7.5.0]
-Created by: RiboViz Date: 2020-06-06 02:09:31.484844 Command-line tool: /exports/csce/eddie/biology/groups/wallace_rna/riboviz/riboviz/tools/prep_riboviz.py File: /exports/csce/eddie/biology/groups/wallace_rna/riboviz/riboviz/tools/prep_riboviz.py Version: commit 0fe0191f585d55763d00283d129a12e4c3c1e5c1 date 2020-06-04 00:43:45-07:00
-Configuration file: vignette/vignette_config.yaml
-Command file: run_riboviz_vignette.sh
-Number of processes: 1
-Build indices for alignment, if necessary/requested
-Build indices for alignment (vignette/input/yeast_rRNA_R64-1-1.fa). Log: vignette/logs/20200606-020931/hisat2_build_r_rna.log
-Build indices for alignment (vignette/input/yeast_YAL_CDS_w_250utrs.fa). Log: vignette/logs/20200606-020931/hisat2_build_orf.log
-Processing samples
-Processing sample: WTnone
-Processing file: vignette/input/SRR1042855_s1mi.fastq.gz
-Cut out sequencing library adapters. Log: vignette/logs/20200606-020931/WTnone/01_cutadapt.log
-Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: vignette/logs/20200606-020931/WTnone/02_hisat2_rrna.log
-Align remaining reads to ORFs index files using hisat2. Log: vignette/logs/20200606-020931/WTnone/03_hisat2_orf.log
-Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: vignette/logs/20200606-020931/WTnone/04_trim_5p_mismatch.log
-Convert SAM to BAM and sort on genome. Log: vignette/logs/20200606-020931/WTnone/05_samtools_view_sort.log
-Index BAM file. Log: vignette/logs/20200606-020931/WTnone/06_samtools_index.log
-Calculate transcriptome coverage for + strand and save as a bedgraph. Log: vignette/logs/20200606-020931/WTnone/07_bedtools_genome_cov_plus.log
-Calculate transcriptome coverage for - strand and save as a bedgraph. Log: vignette/logs/20200606-020931/WTnone/08_bedtools_genome_cov_minus.log
-Make length-sensitive alignments in H5 format. Log: vignette/logs/20200606-020931/WTnone/09_bam_to_h5.log
-Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets. Log: vignette/logs/20200606-020931/WTnone/10_generate_stats_figs.log
-Finished processing sample: vignette/input/SRR1042855_s1mi.fastq.gz
-Processing sample: WT3AT
-Processing file: vignette/input/SRR1042864_s1mi.fastq.gz
-Cut out sequencing library adapters. Log: vignette/logs/20200606-020931/WT3AT/01_cutadapt.log
-Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: vignette/logs/20200606-020931/WT3AT/02_hisat2_rrna.log
-Align remaining reads to ORFs index files using hisat2. Log: vignette/logs/20200606-020931/WT3AT/03_hisat2_orf.log
-Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: vignette/logs/20200606-020931/WT3AT/04_trim_5p_mismatch.log
-Convert SAM to BAM and sort on genome. Log: vignette/logs/20200606-020931/WT3AT/05_samtools_view_sort.log
-Index BAM file. Log: vignette/logs/20200606-020931/WT3AT/06_samtools_index.log
-Calculate transcriptome coverage for + strand and save as a bedgraph. Log: vignette/logs/20200606-020931/WT3AT/07_bedtools_genome_cov_plus.log
-Calculate transcriptome coverage for - strand and save as a bedgraph. Log: vignette/logs/20200606-020931/WT3AT/08_bedtools_genome_cov_minus.log
-Make length-sensitive alignments in H5 format. Log: vignette/logs/20200606-020931/WT3AT/09_bam_to_h5.log
-Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets. Log: vignette/logs/20200606-020931/WT3AT/10_generate_stats_figs.log
-Finished processing sample: vignette/input/SRR1042864_s1mi.fastq.gz
-File not found: vignette/input/example_missing_file.fastq.gz
-Finished processing 3 samples, 1 failed
-Collate TPMs across sample results. Log: vignette/logs/20200606-020931/collate_tpms.log
-Count reads. Log: vignette/logs/20200606-020931/count_reads.log
-Completed
-```
-</details>
-
 ### Run the Nextflow workflow
 
 ```console
@@ -341,18 +293,6 @@ $ python -m riboviz.tools.create_job_script \
     --config-file vignette/vignette_config.yaml \
     --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary \
     --job-runtime "01:00:00"
-```
-
-**Note:** If you want to run the Python workflow you should edit `job_riboviz.sh` and replace the line:
-
-```
-nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -work-dir work -ansi-log false -with-report nextflow-report.html -with-timeline nextflow-timeline.html -with-trace nextflow-trace.tsv -with-dag nextflow-dag.html  
-```
-
-with:
-
-```
-python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 ```
 
 For full details on how to use `riboviz.tools.create_job_script`, see [Create job submission script from template](./create-job-script.md).
