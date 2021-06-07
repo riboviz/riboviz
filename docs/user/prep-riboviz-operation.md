@@ -168,7 +168,7 @@ In addition, the following files are also put into the output directory:
 
 ## Log files
 
-### Python workflow
+### Python workflow log files
 
 Information on the execution of the Python workflow, including the causes of any errors, is added to a timestamped log file in the current directory, named `riboviz-YYYYMMDD-HHMMSS.log` (for example, `riboviz.20190926-002455.log`).
 
@@ -247,7 +247,7 @@ collate_tpms.log
 count_reads.log
 ```
 
-### Nextflow workflow
+### Nextflow workflow log files
 
 Information on the execution of the Nextflow workflow is added to a file `.nextflow.log`. Log files from previous runs are in files named `.nextflow.log.1`, `.nextflow.log.2` etc. Every time Nextflow is run, the log file names are adjusted - on each successive run `.nextflow.log.1` becomes `.nextflow.log.2` and `.nextflow.log` becomes `.nextflow.log.1`).
 
@@ -317,7 +317,7 @@ Nextflow creates a `work/` directory with all the files created during execution
   - Output files in other `work/` subdirectories. For example, the directory for an `hisat2rRNA` proces will have input files which are symbolic links to the output files produced by a `cutAdapters` process,
   - Input files for the workflow. For example, the directory for a `cutAdapters` process will have an input file which is a symbolic link to a sample file in `vignettte/input`.
 * Output files, from the invocation of the task.
-* Standard output (`.command.out`) and standard error (`.command.err`) files and exit codes (`.exitcode`) for each process.
+* Standard output (`.command.out`) and standard error (`.command.err`) files, both standard output and standard error (`.command.log`) and exit codes (`.exitcode`) for each process.
 * Bash script (`.command.sh`) containing the specific command invoked by Nextflow by that process.
 
 For example, for a process `ad/1e7c54`, an invocation of task `hisat2rRNA` for sample `WTnone`, the `work/` directory would include:

@@ -51,13 +51,18 @@ Edit `code-docs/conf.py`:
 ```python
 # import os
 # import sys
+```
+
+* Replace:
+
+```python
 # sys.path.insert(0, os.path.abspath('.'))
 ```
 
-* Update above to:
+* with:
 
 ```python
-sys.path.insert(0, os.path.abspath('../../riboviz'))
+sys.path.insert(0, os.path.abspath('..'))
 ```
 
 * Update:

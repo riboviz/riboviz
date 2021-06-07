@@ -82,10 +82,10 @@ $ conda activate riboviz
 
 If you have not already done so, set the paths to Hisat2 and Bowtie:
 
-* If you followed [Create `setenv.sh` to configure paths](./install.md#create-setenvsh-to-configure-paths), then run:
+* If you followed [Create `set-riboviz-env.sh` to configure paths](./install.md#create-set-riboviz-envsh-to-configure-paths), then run:
 
 ```console
-$ source $HOME/setenv.sh
+$ source $HOME/set-riboviz-env.sh
 ```
 
 * Otherwise, run the following (your directory names may be different, depending on the versions of Hisat2 and Bowtie you have):

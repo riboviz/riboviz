@@ -1,5 +1,5 @@
 """
-Workflow configuration parameter names.
+Configuration parameter names.
 """
 
 INPUT_DIR = "dir_in"
@@ -38,6 +38,8 @@ MULTIPLEX_FQ_FILES = "multiplex_fq_files"
 
 TRIM_5P_MISMATCHES = "trim_5p_mismatches"
 """ Trim mismatched 5' base? """
+RUN_STATIC_HTML = "run_static_html"
+""" Create static html visualization per sample? """
 
 SAMPLE_SHEET = "sample_sheet"
 """ Sample sheet. """
@@ -101,8 +103,6 @@ each FASTQ, SAM and BAM file processed?
 
 NUM_PROCESSES = "num_processes"
 """ Number of processes to parallelize over. """
-IS_TEST_RUN = "is_test_run"
-""" Is this a test run? (unused). """
 ALIGNER = "aligner"
 """ Short read aligner to use (unused). """
 
@@ -116,4 +116,136 @@ SKIP_INPUTS = "skip_inputs"
 """
 When validating configuration skip checks for existence of ribosome
 profiling data files.
+"""
+
+R_LIBS = "r_libs"
+""" R libraries directory (job submission) (command-line only). """
+CONFIG_FILE = "config_file"
+"""
+RiboViz YAML configuration file (job submission) (command-line only).
+"""
+NEXTFLOW_DAG_FILE = "nextflow_dag_file"
+"""
+Nextflow DAG file (Nextflow workflow only)
+(job submission).
+"""
+NEXTFLOW_REPORT_FILE = "nextflow_report_file"
+"""
+Nextflow report file (Nextflow workflow only)
+(job submission).
+"""
+NEXTFLOW_TIMELINE_FILE = "nextflow_timeline_file"
+"""
+Nextflow timeline file (Nextflow workflow only)
+(job submission).
+"""
+NEXTFLOW_TRACE_FILE = "nextflow_trace_file"
+"""
+Nextflow trace file (Nextflow workflow only)
+(job submission).
+"""
+NEXTFLOW_WORK_DIR = "nextflow_work_dir"
+"""
+Nextflow work directory (Nextflow workflow only)
+(job submission).
+"""
+NEXTFLOW_RESUME = "nextflow_resume"
+"""
+Resume Nextflow workflow (Nextflow workflow only)
+(job submission).
+"""
+JOB_NAME = "job_name"
+""" Name of batch job (job submission). """
+JOB_RUNTIME = "job_runtime"
+"""
+Maximum runtime for batch job (job submission).
+"""
+JOB_MEMORY = "job_memory"
+""" Requested memory for batch job (job submission). """
+JOB_NUM_CPUS = "job_num_cpus"
+"""
+Requested number of CPUs for batch job (job submission).
+"""
+JOB_PARALLEL_ENV = "job_parallel_env"
+""" Requested parallel environment for batch job (job submission). """
+JOB_EMAIL = "job_email"
+""" E-mail address for batch job events (job submission). """
+JOB_EMAIL_EVENTS = "job_email_events"
+"""
+Events triggering emails about batch job (job submission).
+"""
+
+DEFAULT_JOB_CONFIG = {
+    JOB_EMAIL: None,
+    JOB_EMAIL_EVENTS: "beas",
+    JOB_MEMORY: "8G",
+    JOB_NAME: "riboviz",
+    JOB_NUM_CPUS: 4,
+    JOB_RUNTIME: "48:00:00",
+    JOB_PARALLEL_ENV: "mpi",
+    NEXTFLOW_DAG_FILE: "nextflow-dag.html",
+    NEXTFLOW_REPORT_FILE: "nextflow-report.html",
+    NEXTFLOW_RESUME: "false",
+    NEXTFLOW_TIMELINE_FILE: "nextflow-timeline.html",
+    NEXTFLOW_TRACE_FILE: "nextflow-trace.tsv",
+    NEXTFLOW_WORK_DIR: "work",
+    VALIDATE_ONLY: False
+}
+""" Default values for job configuration parameters. """
+JOB_CONFIG_TYPE = {
+    JOB_EMAIL: str,
+    JOB_EMAIL_EVENTS: str,
+    JOB_MEMORY: str,
+    JOB_NAME: str,
+    JOB_PARALLEL_ENV: str,
+    JOB_RUNTIME: str,
+    JOB_NUM_CPUS: int,
+    NEXTFLOW_DAG_FILE: str,
+    NEXTFLOW_REPORT_FILE: str,
+    NEXTFLOW_RESUME: bool,
+    NEXTFLOW_TIMELINE_FILE: str,
+    NEXTFLOW_TRACE_FILE: str,
+    NEXTFLOW_WORK_DIR: str,
+    VALIDATE_ONLY: bool
+}
+""" Types of job configuration parameters. """
+
+ENV_RIBOVIZ_SAMPLES = "RIBOVIZ_SAMPLES"
+""" Samples directory environment variable name (Nextflow workflow only). """
+ENV_RIBOVIZ_ORGANISMS = "RIBOVIZ_ORGANISMS"
+""" Organisms directory environment variable name (Nextflow workflow only). """
+ENV_RIBOVIZ_DATA = "RIBOVIZ_DATA"
+""" Data directory environment variable name (Nextflow workflow only). """
+ENV_DIRS = [
+    ENV_RIBOVIZ_SAMPLES,
+    ENV_RIBOVIZ_ORGANISMS,
+    ENV_RIBOVIZ_DATA
+]
+"""
+Environment variables which can be used to define directories
+(Nextflow workflow only).
+"""
+ENV_INPUT_PARAMS = [ASITE_DISP_LENGTH_FILE,
+                    CODON_POSITIONS_FILE,
+                    FEATURES_FILE,
+                    INPUT_DIR,
+                    ORF_FASTA_FILE,
+                    ORF_GFF_FILE,
+                    RRNA_FASTA_FILE,
+                    T_RNA_FILE]
+"""
+Names of input parameters whose values can include RiboViz environment
+variables (Nextflow workflow only).
+"""
+ENV_OUTPUT_PARAMS = [INDEX_DIR,
+                     OUTPUT_DIR,
+                     TMP_DIR]
+"""
+Names of output parameters whose values can include RiboViz environment
+variables (Nextflow workflow only).
+"""
+ENV_PARAMS = ENV_INPUT_PARAMS + ENV_OUTPUT_PARAMS
+"""
+Names of parameters whose values can include RiboViz environment
+variables (Nextflow workflow only).
 """

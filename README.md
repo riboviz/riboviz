@@ -12,15 +12,6 @@ For information on **RiboViz**, see "riboviz: analysis and visualization of ribo
 
 All the code for processing the raw reads is available in this repository.
 
-## Python and Nextflow workflows
-
-This release contains two versions of the **RiboViz** workflow:
-
-* A Python workflow, `riboviz.tools.prep_riboviz`.
-* A Nextflow workflow, `prep_riboviz_nf`. [Nextflow](https://www.nextflow.io/) is a workflow management system and `prep_riboviz.nf` is a port of `riboviz.tools.prep_riboviz`, into a Nextflow workflow. In the next release, the Python workflow will be deprecated by this Nextflow workflow.
-
-Instructions for the configuration and use of both versions are provided.
-
 ## Use RiboViz
 
 Quick start:
@@ -35,7 +26,6 @@ Usage:
 
 * [What the RiboViz workflow does](./docs/user/prep-riboviz-operation.md)
 * [Configuring the RiboViz workflow](./docs/user/prep-riboviz-config.md)
-* [Running the RiboViz Python workflow](./docs/user/prep-riboviz-run-python.md)
 * [Running the RiboViz Nextflow workflow](./docs/user/prep-riboviz-run-nextflow.md)
 * [Running the RiboViz workflow on Eddie](./docs/user/run-on-eddie.md)
 * [Memory and storage](./docs/user/memory-storage.md). Information and advice relating to **RiboViz**'s memory and storage requirements.
@@ -49,6 +39,7 @@ Command-line tools:
 | [riboviz.tools.count_reads](./riboviz/tools/count_reads.py) | Scan input, temporary and output directories and count the number of reads (sequences) processed by specific stages of a workflow (invoked as part of a workflow) |
 | [riboviz.tools.create_barcode_pairs](./riboviz/tools/create_barcode_pairs.py) | Create barcode pairs and write each pair plus the Hamming distance between then to a file of tab-separated values |
 | [riboviz.tools.create_fastq_simdata](./riboviz/tools/create_fastq_simdata.py) | Create simulated FASTQ files to test UMI/deduplication, adaptor trimming, anddemultiplexing. Files in `data/simdata/` were created using this tool |
+| [riboviz.tools.create_job_script](./riboviz/tools/create_job_script.py) | [Create job submission script from template](./docs/user/create-job-script.md) |
 | [riboviz.tools.demultiplex_fastq](./riboviz/tools/demultiplex_fastq.py) | Demultiplex FASTQ files using UMI-tools-compliant barcodes present within the FASTQ headers and a sample sheet file (invoked as part of a workflow) |
 | [riboviz.tools.get_cds_codons](./riboviz/tools/get_cds_codons.py) | Extract coding sequence codons and export as a tab-separated values file |
 | [riboviz.tools.prep_riboviz](./riboviz/tools/prep_riboviz.py) | Run the workflow |
@@ -71,7 +62,7 @@ Command-line tools:
 ## Reference
 
 * [Content and provenance of repository data files](./docs/reference/data.md)
-* [Structure of HDF5 data](./docs/reference/hdf5-data.md)
+* [Structure of HDF5 data](./docs/reference/hdf5-data.md). Structure of HDF5 data files produced by `bam_to_h5.R`.
 
 ## Releases
 

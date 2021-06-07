@@ -6,13 +6,14 @@ import csv
 import os
 import warnings
 import gffutils
+from pyfaidx import Fasta
 from riboviz import provenance
 from riboviz.fasta_gff import CDS_FEATURE_FORMAT
 
 
 GENE = "Gene"
 """ Codon positions column name (gene name). """
-POS = "Pos"
+POS = "PosCodon"
 """
 Codon positions column name (codon position in coding sequence,
 1-indexed by codon).
@@ -78,8 +79,8 @@ def get_cds_from_fasta(feature, fasta):
 
     :param feature: GFF feature for the CDS
     :type feature: gffutils.feature.Feature
-    :param fasta: FASTA file
-    :type fasta: str or unicode
+    :param fasta: FASTA genes
+    :type fasta: pyfaidx.Fasta
     :return: sequence
     :rtype: str or unicode
     :raises AssertionError: If sequence has length not divisible by 3
@@ -163,9 +164,10 @@ def get_cds_codons_from_fasta(fasta,
         raise ValueError("{} ({})".format(e, gff)) from e
     cds_codons = {}
     same_feature_id_count = 0
+    fasta_genes = Fasta(fasta)
     for feature in gffdb.features_of_type('CDS'):
         try:
-            sequence = get_cds_from_fasta(feature, fasta)
+            sequence = get_cds_from_fasta(feature, fasta_genes)
             codons = sequence_to_codons(sequence)
         except KeyError as e:  # Missing sequence.
             warnings.warn(str(e))
@@ -196,8 +198,8 @@ def write_feature_codons_to_csv(feature_codons, csv_file, delimiter="\t"):
     The CSV file has columns:
 
     * :py:const:`GENE`: feature name.
-    * :py:const:`CODON`: codon.
     * :py:const:`POS`: codon position in coding sequence (1-indexed).
+    * :py:const:`CODON`: codon.
 
     :param feature_codons: Codons for each feature, keyed by feature \
     name
@@ -210,10 +212,10 @@ def write_feature_codons_to_csv(feature_codons, csv_file, delimiter="\t"):
     provenance.write_provenance_header(__file__, csv_file)
     with open(csv_file, "a") as f:
         writer = csv.writer(f, delimiter=delimiter, lineterminator='\n')
-        writer.writerow([GENE, CODON, POS])
+        writer.writerow([GENE, POS, CODON])
         for feature_id, codons in list(feature_codons.items()):
             for pos, codon in zip(range(0, len(codons)), codons):
-                writer.writerow([feature_id, codon, pos+1])
+                writer.writerow([feature_id, pos+1, codon])
 
 
 def get_cds_codons_file(fasta,

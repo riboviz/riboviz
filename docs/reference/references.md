@@ -46,6 +46,8 @@ Sievert, S. (2018) plotly for R. https://plotly-r.com/
 
 pycodestyle, https://github.com/pycqa/pycodestyle/
 
+Shirley, M.D., Ma, Z., Pedersen, B., Wheelan, S. (2015) Efficient "pythonic" access to FASTA iles using pyfaidx. PeerJ PrePrints 3:e1196. 2015. doi: (10.7287/peerj.preprints.970](https://doi.org/10.7287/peerj.preprints.970).
+
 pylint, https://www.pylint.org/
 
 pytest, https://github.com/pytest-dev/pytest/

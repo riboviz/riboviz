@@ -15,9 +15,14 @@ oldData/
 __pycache__
 .RData
 .Rhistory
+rmarkdown/*.html
+*~
+*.pyc
+__pycache__
+.idea/
 riboviz.Rproj
 .Rproj.user
-scripts/script_for_transcript_annotation.nb.html
+rmarkdown/script_for_transcript_annotation.nb.html
 vignette/*index
 vignette/*logs
 vignette/*output
