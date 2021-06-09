@@ -20,19 +20,19 @@ Install operating system packages and R:
 * Ubuntu:
 
 ```console
-$ source install-ubuntu.sh
+$ source bash/install-ubuntu.sh
 ```
 
 * CentOS:
 
 ```console
-$ source install-centos.sh
+$ source bash/install-centos.sh
 ```
 
 Install R packages:
 
 ```console
-$ Rscript install-r.R
+$ Rscript rscripts/install-r.R
 ```
 
 Check that R's library paths include your personal library:
@@ -63,17 +63,17 @@ You should see something like:
 Install Miniconda Python 3 and Python packages:
 
 ```console
-$ source install-py.sh
+$ source bash/install-py.sh
 ```
 
 Install Hisat2 and Bowtie:
 
 ```console
-$ source install-hisat-bowtie.sh
+$ source bash/install-hisat-bowtie.sh
 ```
 
 Create `set-riboviz-env.sh`:
 
 ```console
-$ source create-set-riboviz-env.sh
+$ source bash/create-set-riboviz-env.sh
 ```
