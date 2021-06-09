@@ -29,4 +29,4 @@ nextflow -version
 conda install -y pytest-cov
 conda install -y pylint
 conda install -y pycodestyle
-pip install sphinx
+conda install -y sphinx

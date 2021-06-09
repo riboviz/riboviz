@@ -89,8 +89,8 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | pytest-cov | 2.10.1 | conda |
 | pyyaml | 5.3.1 | conda |
 | samtools | 1.9 | conda |
+| sphinx | 4.0.1 | conda |
 | umi_tools | 1.0.1 | conda |
-| sphinx | 3.2.0 | pip |
 
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
@@ -715,6 +715,14 @@ Once you have run the "vignette", you can check your installation by running tes
 ---
 
 ## Reference
+
+### Check names and versions of command-line tools, Python, and R packages
+
+Run:
+
+```console
+$ source bash/environment-tables.sh 
+```
 
 ### Check names and versions of Python packages
 
