@@ -287,12 +287,11 @@ Create and populate `data/Mok-tinysim-gffsam`:
 
 ```console
 $ mkdir data/Mok-tinysim-gffsam
-$ cp ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 data/Mok-tinysim-gffsam/
 $ samtools view -h Mok-tinysim/output/A/A.bam > data/Mok-tinysim-gffsam/A.sam
+$ cp ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 data/Mok-tinysim-gffsam/
 ```
 
 ---
-
 
 ## `riboviz/test/` test data files
 
