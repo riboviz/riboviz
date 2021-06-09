@@ -1371,30 +1371,27 @@ process staticHTML {
     when:
       params.run_static_html
     shell:
-      script = "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd',"
-      script += "params = list("
-      script += "verbose='FALSE', "
-      script += "yamlfile='\$PWD/${viz_params_config_file_yaml}', "
-      script += "sampleid='!{sample_id}', "
-      script += "three_nucleotide_periodicity_data_file = '\$PWD/${sample_nt3_periodicity_tsv}', "
-      script += "gene_position_length_counts_5start_file = '\$PWD/${sample_gene_position_length_counts_5start_tsv}', "
-      script += "read_length_data_file='\$PWD/${sample_read_lengths_tsv}', "
-      script += "pos_sp_rpf_norm_reads_data_file='\$PWD/${sample_pos_sp_rpf_norm_reads_tsv}' "
-      if (is_asite_disp_length_file) {
-          script += ", gene_read_frames_filtered_data_file='\$PWD/${sample_nt3frame_bygene_filtered_tsv}'"
-      }
-      if (is_t_rna_and_codon_positions_file) {
-          script += ", codon_ribodens_gathered_file='\$PWD/${sample_codon_ribodens_gathered_tsv}'"
-      }
-      if (is_features_file) {
-          script += ", sequence_features_file='\$PWD/${sample_sequence_features_tsv}' "
-      }
-      script += "), "
-      script += "output_format = 'html_document', "
-      script += "output_file = '\$PWD/${sample_id}_output_report.html')"
-      """
-      Rscript -e "${script}"
-      """
+        gene_read_frames_flag = is_asite_disp_length_file \
+            ? "--gene-read-frames-filtered-data-file=\$PWD/${sample_nt3frame_bygene_filtered_tsv}" : ''
+        features_flag = is_features_file \
+            ? "--sequence-features-file=\$PWD/${sample_sequence_features_tsv}" : ''
+        codon_ribodens_flag = is_t_rna_and_codon_positions_file \
+            ? "--codon-ribodens-gathered-file=\$PWD/${sample_codon_ribodens_gathered_tsv}": ''
+	"""
+        Rscript --vanilla ${workflow.projectDir}/rscripts/analyse_outputs.R \
+          --rmd=${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd \
+          --yamlfile=\$PWD/${viz_params_config_file_yaml} \
+          --sampleid="${sample_id}" \
+          --three-nucleotide-periodicity-data-file=\$PWD/${sample_nt3_periodicity_tsv} \
+          --gene-position-length-counts-5start-file=\$PWD/${sample_gene_position_length_counts_5start_tsv} \
+          --read-length-data-file=\$PWD/${sample_read_lengths_tsv} \
+          --pos-sp-rpf-norm-reads-data-file=\$PWD/${sample_pos_sp_rpf_norm_reads_tsv} \
+          ${gene_read_frames_flag} \
+          ${features_flag} \
+          ${codon_ribodens_flag} \
+          --output-format='html_document' \
+          --output-file=\$PWD/${sample_id}_output_report.html
+        """
 }
 
 finished_viz_sample_id
