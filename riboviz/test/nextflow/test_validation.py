@@ -18,7 +18,7 @@ def test_no_sample_multiplex_fq_files(tmpdir):
     exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -39,7 +39,7 @@ def test_both_sample_multiplex_fq_files(tmpdir):
     exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.SIMDATA_MULTIPLEX_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -60,7 +60,7 @@ def test_dir_in_not_found(tmpdir):
     directory raises a non-zero exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -79,7 +79,7 @@ def test_fq_files_not_found(tmpdir):
     raise a non-zero exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -101,7 +101,7 @@ def test_multiplex_fq_files_not_found(tmpdir):
     files raise a non-zero exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.SIMDATA_MULTIPLEX_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -121,7 +121,7 @@ def test_no_sample_sheet(tmpdir):
     exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.SIMDATA_MULTIPLEX_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -141,7 +141,7 @@ def test_sample_sheet_not_found(tmpdir):
     returns a non-zero exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.SIMDATA_MULTIPLEX_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -175,7 +175,7 @@ def test_no_mandatory_parameter(tmpdir, parameter):
     then the other must be too.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     :param parameter: Parameter
     :type parameter: str or unicode
     """
@@ -205,7 +205,7 @@ def test_file_not_found(tmpdir, parameter):
     non-zero exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     :param parameter: Parameter
     :type parameter: str or unicode
     """
@@ -229,7 +229,7 @@ def test_optional_file_not_specified(tmpdir, parameter):
     parameters returns a zero exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     :param parameter: Parameter
     :type parameter: str or unicode
     """
@@ -252,7 +252,7 @@ def test_t_rna_codon_positions_not_specified(tmpdir):
     code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -276,7 +276,7 @@ def test_optional_file_none(tmpdir, parameter):
     set to 'none' returns a zero exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     :param parameter: Parameter
     :type parameter: str or unicode
     """
@@ -299,7 +299,7 @@ def test_t_rna_codon_positions_none(tmpdir):
     'none' returns a zero exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -324,7 +324,7 @@ def test_t_rna_codon_positions_either_or(tmpdir, parameter):
     one is defined and the other is not.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     :param parameter: Parameter
     :type parameter: str or unicode
     """
@@ -346,7 +346,7 @@ def test_extract_umis_no_umi_regexp(tmpdir):
     exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.SIMDATA_UMI_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -392,7 +392,7 @@ def test_max_read_length_less_min(tmpdir):
     code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -413,7 +413,7 @@ def test_build_indices_false_no_such_index_dir(tmpdir):
     returns a non-zero exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -435,7 +435,7 @@ def test_build_indices_false_no_such_orf_index_prefix(tmpdir):
     exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     index_dir = tmpdir.mkdir("index")
     with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
@@ -470,7 +470,7 @@ def test_build_indices_false_no_such_rrna_index_prefix(tmpdir):
     exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     index_dir = tmpdir.mkdir("index")
     with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
@@ -505,7 +505,7 @@ def test_validate_skip_inputs_dir_in_not_found(tmpdir):
     :py:const:`riboviz.params.SKIP_INPUTS` returns a zero exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -528,7 +528,7 @@ def test_validate_skip_inputs_fq_files_not_found(tmpdir):
     code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.VIGNETTE_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -553,7 +553,7 @@ def test_validate_skip_inputs_multiplex_fq_files_not_found(tmpdir):
     :py:const:`riboviz.params.SKIP_INPUTS` returns a zero exit code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.SIMDATA_MULTIPLEX_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -577,7 +577,7 @@ def test_validate_skip_inputs_sample_sheet_not_found(tmpdir):
     code.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     with open(riboviz.test.SIMDATA_MULTIPLEX_CONFIG, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
@@ -598,7 +598,7 @@ def test_environment_vars(tmpdir):
     :py:const:`riboviz.params.ENV_DIRS`, validates.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     """
     envs = {env: tmpdir for env in params.ENV_DIRS}
     exit_code = run_nextflow(riboviz.test.VIGNETTE_CONFIG,

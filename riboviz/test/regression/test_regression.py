@@ -154,7 +154,7 @@ def scratch_directory(tmpdir):
     Create a scratch directory.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     :return: directory
     :rtype: py._path.local.LocalPath
     """

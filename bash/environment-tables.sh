@@ -97,7 +97,7 @@ echo " "
 echo "| Python Package | Version | Package Manager |"
 echo "| -------------- | ------- | --------------- |"
 CONDA_PKGS=$(conda list)
-CONDA_LIST=(biopython cutadapt gffutils gitpython h5py nextflow pandas pycodestyle pylint pysam pytest pytest-cov pyyaml samtools umi_tools)
+CONDA_LIST=(biopython cutadapt gffutils gitpython h5py nextflow pandas pycodestyle pylint pysam pytest pytest-cov pyyaml samtools sphinx umi_tools)
 for pkg in ${CONDA_LIST[@]}; do
     PKG_VERSION=$(echo "$CONDA_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
     # pkg     M.N    ...
@@ -108,11 +108,5 @@ for pkg in ${CONDA_LIST[@]}; do
     # Delimiter between columns can be 1 or more spaces, so use tr
     # to remove multiple spaces.
     echo "| $pkg | $PKG_VERSION | conda |"
-done
-PIP_PKGS=$(pip list)
-PIP_LIST=(sphinx)
-for pkg in ${PIP_LIST[@]}; do
-    PKG_VERSION=$(echo "$PIP_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
-    echo "| $pkg | $PKG_VERSION | pip |"
 done
 echo " "
