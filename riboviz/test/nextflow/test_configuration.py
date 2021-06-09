@@ -51,7 +51,7 @@ def tokenize_config_in_place(config):
       updated to
       ``${RIBOVIZ_ORGANISMS}/yeast_YAL_CDS_w_250utrs.gff3``.
 
-    See also :py:`func:riboviz.test.customise_path`.
+    See also :py:func:`riboviz.test.customise_path`.
 
     :param config: Configuration
     :type config: dict
@@ -107,7 +107,7 @@ def create_vignette_test_dir(directory):
     * data: ``<directory>/data/``
 
     :param directory: Directory
-    :type directory py._path.local.LocalPath
+    :type directory: py._path.local.LocalPath
     :return: organisms directory, samples directory, data directory
     :rtype: tuple(str or unicode, str or unicode, str or unicode)
     """
@@ -155,7 +155,7 @@ def create_vignette_token_test_dir(directory):
     * data: ``<directory>/data/``
 
     :param directory: Directory
-    :type directory py._path.local.LocalPath
+    :type directory: py._path.local.LocalPath
     :return: organisms directory, samples directory, data directory
     :rtype: tuple(str or unicode, str or unicode, str or unicode)
     """
@@ -202,7 +202,7 @@ def create_vignette_default_token_test_dir(directory):
     * data: ``<directory>/``
 
     :param directory: Directory
-    :type directory py._path.local.LocalPath
+    :type directory: py._path.local.LocalPath
     :return: organisms directory, samples directory, data directory
     :rtype: tuple(str or unicode, str or unicode, str or unicode)
     """
@@ -247,7 +247,7 @@ def create_simdata_test_dir(directory):
     * data: ``<directory>/data/``
 
     :param directory: Directory
-    :type directory py._path.local.LocalPath
+    :type directory: py._path.local.LocalPath
     :return: organisms directory, samples directory, data directory
     :rtype: tuple(str or unicode, str or unicode, str or unicode)
     """
@@ -297,7 +297,7 @@ def create_simdata_token_test_dir(directory):
     * data: ``<directory>/data/``
 
     :param directory: Directory
-    :type directory py._path.local.LocalPath
+    :type directory: py._path.local.LocalPath
     :return: organisms directory, samples directory, data directory
     :rtype: tuple(str or unicode, str or unicode, str or unicode)
     """
@@ -346,7 +346,7 @@ def create_simdata_default_token_test_dir(directory):
     * data: ``<directory>/``
 
     :param directory: Directory
-    :type directory py._path.local.LocalPath
+    :type directory: py._path.local.LocalPath
     :return: organisms directory, samples directory, data directory
     :rtype: tuple(str or unicode, str or unicode, str or unicode)
     """
@@ -443,7 +443,7 @@ def get_default_run_dir(directory):
     ``cwd`` argument. ``directory`` is unused.
 
     :param directory: Directory
-    :type directory py._path.local.LocalPath
+    :type directory: py._path.local.LocalPath
     :return: Directory
     :rtype: str or unicode
     """
@@ -457,7 +457,7 @@ def get_given_run_dir(directory):
     ``cwd`` argument.
 
     :param directory: Directory
-    :type directory py._path.local.LocalPath
+    :type directory: py._path.local.LocalPath
     :return: Directory
     :rtype: str or unicode
     """
@@ -525,7 +525,7 @@ def relative_config(config, organisms_dir, samples_dir, data_dir):
       ``vignette/input/yeast_YAL_CDS_w_250utrs.gff3``, then it is
       updated to ``yeast_YAL_CDS_w_250utrs.gff3``.
 
-    See also :py:`func:riboviz.test.customise_path`.
+    See also :py:func:`riboviz.test.customise_path`.
 
     :param config: Configuration
     :type config: dict
@@ -571,7 +571,7 @@ def absolute_config(config, organisms_dir, samples_dir, data_dir):
       ``vignette/input/yeast_YAL_CDS_w_250utrs.gff3``, then it is
       updated to ``<organisms>/yeast_YAL_CDS_w_250utrs.gff3``.
 
-    See also :py:`func:riboviz.test.customise_path`.
+    See also :py:func:`riboviz.test.customise_path`.
 
     :param config: Configuration
     :type config: dict
@@ -637,6 +637,7 @@ CONFIG_TEST_CASES = [
 ]
 """
 Configuration test cases. Each is a tuple with:
+
 * Dictionary from configuration files to functions that create
   directory structures compatible with these configuration
   files.
@@ -673,7 +674,7 @@ def test_run(tmpdir, config_file, validate_only, test_dir_lookup,
     :py:const:`riboviz.workflow_r.TPMS_COLLATED_TSV` exist.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
-    :type tmpdir py._path.local.LocalPath
+    :type tmpdir: py._path.local.LocalPath
     :param config_file: Configuration file
     :type config_file: str or unicode
     :param validate_only: Validate only?
