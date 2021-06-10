@@ -10,14 +10,15 @@ existing values are preserved):
 * ``MinReadLen`` => ``min_read_length``
 * ``PrimaryID`` => ``primary_id``
 * ``SecondID`` => ``secondary_id``
-* ``StopInCDS`` => ``stop_in_cds``
+* ``StopInCDS`` => ``stop_in_feature``
 * ``codon_pos`` => ``codon_positions_file``
 * ``nprocesses`` => ``num_processes``
 * ``orf_fasta`` => ``orf_fasta_file``
 * ``orf_index`` => ``orf_index_prefix``
+* ``ribovizGFF`` => ``is_riboviz_gff``
 * ``rRNA_fasta`` => ``rrna_fasta_file``
 * ``rRNA_index`` => ``rrna_index_prefix``
-* ``ribovizGFF`` => ``is_riboviz_gff``
+* ``stop_in_cds`` => ``stop_in_feature``
 * ``t_rna`` => ``t_rna_file``
 
 Expected parameters added to the current release are added along
@@ -34,6 +35,7 @@ configuration:
 * ``dir_logs: vignette/logs``
 * ``do_pos_sp_nt_freq: true``
 * ``extract_umis: false``
+* ``feature: CDS``
 * ``features_file: data/yeast_features.tsv``
 * ``group_umis: false``
 * ``job_email: null``
@@ -50,13 +52,14 @@ configuration:
 * ``nextflow_trace_file: nextflow-trace.tsv``
 * ``nextflow_work_dir: work``
 * ``publish_index_tmp: false``
+* ``run_static_html: true``
 * ``sample_sheet: null``
 * ``samsort_memory: null``
-* ``t_rna_file: data/yeast_tRNAs.tsv``
+* ``stop_in_feature: false``
 * ``trim_5p_mismatches: true``
+* ``t_rna_file: data/yeast_tRNAs.tsv``
 * ``umi_regexp: null``
 * ``validate_only: false``
-* ``run_static_html: true``
 
 The values of parameters ``rrna_index_prefix`` and
 ``orf_index_prefix`` are updated to be file names only, as, these are
@@ -90,7 +93,7 @@ RENAMES = {
     "MinReadLen": params.MIN_READ_LENGTH,
     "PrimaryID": params.PRIMARY_ID,
     "SecondID": params.SECONDARY_ID,
-    "StopInCDS": params.STOP_IN_CDS,
+    "StopInCDS": params.STOP_IN_FEATURE,
     "codon_pos": params.CODON_POSITIONS_FILE,
     "nprocesses": params.NUM_PROCESSES,
     "orf_fasta": params.ORF_FASTA_FILE,
@@ -98,6 +101,7 @@ RENAMES = {
     "rRNA_fasta": params.RRNA_FASTA_FILE,
     "rRNA_index": params.RRNA_INDEX_PREFIX,
     "ribovizGFF": params.IS_RIBOVIZ_GFF,
+    "stop_in_cds" : params.STOP_IN_FEATURE,
     "t_rna": params.T_RNA_FILE
 }
 """
@@ -114,6 +118,7 @@ UPDATES = {
     params.DEDUP_STATS: False,
     params.DEDUP_UMIS: False,
     params.EXTRACT_UMIS: False,
+    params.FEATURE: "CDS",
     params.FEATURES_FILE:  "data/yeast_features.tsv",
     params.FQ_FILES: None,
     params.GROUP_UMIS: False,
@@ -123,10 +128,12 @@ UPDATES = {
     params.RUN_STATIC_HTML: True,
     params.SAMPLE_SHEET: None,
     params.SAMSORT_MEMORY: None,
+    params.STOP_IN_FEATURE: False,
     params.TRIM_5P_MISMATCHES: True,
     params.T_RNA_FILE: "data/yeast_tRNAs.tsv",
     params.UMI_REGEXP: None
 }
+
 """
 Map from configuration parameters to default values for parameters.
 """

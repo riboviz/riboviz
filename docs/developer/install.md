@@ -2,12 +2,12 @@
 
 ## Install Python packages
 
-| Package | Links |
-| ------- | ----- |
-| pycodestyle | [readthedocs](https://pycodestyle.readthedocs.io/), [GitHub](https://github.com/pycqa/pycodestyle) |
-| pylint | [Pylint](https://www.pylint.org/), [BitBucket](https://bitbucket.org/logilab/pylint.org) |
-| pytest-cov | [pytest-cov](https://pytest-cov.readthedocs.io), [GitHub](https://github.com/pytest-dev/pytest-cov) |
-| Sphinx | [Sphinx](https://www.sphinx-doc.org/) |
+| Package | conda channel | Links |
+| ------- | ------------- | ----- |
+| pycodestyle | default | [readthedocs](https://pycodestyle.readthedocs.io/), [GitHub](https://github.com/pycqa/pycodestyle) |
+| pylint | default | [Pylint](https://www.pylint.org/), [BitBucket](https://bitbucket.org/logilab/pylint.org) |
+| pytest-cov | default | [pytest-cov](https://pytest-cov.readthedocs.io), [GitHub](https://github.com/pytest-dev/pytest-cov) |
+| Sphinx | default | [Sphinx](https://www.sphinx-doc.org/) |
 
 Install:
 
@@ -15,7 +15,7 @@ Install:
 $ conda install -y pycodestyle
 $ conda install -y pylint
 $ conda install -y pytest-cov
-$ pip install sphinx
+$ conda install -y sphinx
 ```
 
 ---
