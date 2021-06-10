@@ -1330,16 +1330,16 @@ process countReads {
 
 Map viz_params = [:]
 if (is_asite_disp_length_file) {
-    viz_params.asite_disp_length_file = asite_disp_length_file
+    viz_params.asite_disp_length_file = asite_disp_length_file.toString()
 }
 if (is_codon_positions_file) {
-    viz_params.codon_positions_file = codon_positions_file
+    viz_params.codon_positions_file = codon_positions_file.toString()
 }
 if (is_features_file) {
-    viz_params.features_file = features_file
+    viz_params.features_file = features_file.toString()
 }
 if (is_t_rna_file) {
-    viz_params.t_rna_file = t_rna_file
+    viz_params.t_rna_file = t_rna_file.toString()
 }
 viz_params_yaml = new Yaml().dump(viz_params)
 
