@@ -50,8 +50,8 @@ configuration:
 * ``nextflow_timeline_file: nextflow-timeline.html``
 * ``nextflow_trace_file: nextflow-trace.tsv``
 * ``nextflow_work_dir: work``
-* ``multiplex_fq_files: null``
 * ``publish_index_tmp: false``
+* ``run_static_html: true``
 * ``sample_sheet: null``
 * ``samsort_memory: null``
 * ``stop_in_feature: false``
@@ -59,7 +59,6 @@ configuration:
 * ``t_rna_file: data/yeast_tRNAs.tsv``
 * ``umi_regexp: null``
 * ``validate_only: false``
-* ``run_static_html: true``
 
 The values of parameters ``rrna_index_prefix`` and
 ``orf_index_prefix`` are updated to be file names only, as, these are
@@ -96,7 +95,6 @@ RENAMES = {
     "PrimaryID": params.PRIMARY_ID,
     "SecondID": params.SECONDARY_ID,
     "StopInCDS": params.STOP_IN_FEATURE,
-    "stop_in_cds" : params.STOP_IN_FEATURE,
     "codon_pos": params.CODON_POSITIONS_FILE,
     "nprocesses": params.NUM_PROCESSES,
     "orf_fasta": params.ORF_FASTA_FILE,
@@ -104,6 +102,7 @@ RENAMES = {
     "rRNA_fasta": params.RRNA_FASTA_FILE,
     "rRNA_index": params.RRNA_INDEX_PREFIX,
     "ribovizGFF": params.IS_RIBOVIZ_GFF,
+    "stop_in_cds" : params.STOP_IN_FEATURE,
     "t_rna": params.T_RNA_FILE
 }
 """
@@ -133,6 +132,7 @@ UPDATES = {
     params.T_RNA_FILE: "data/yeast_tRNAs.tsv",
     params.UMI_REGEXP: None
 }
+
 """
 Map from configuration parameters to default values for parameters.
 """
