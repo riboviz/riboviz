@@ -47,17 +47,20 @@ if (interactive()) {
 #'
 #' @param tpms_file TPMs file (character).
 #' @param orfs Sorted list of ORFs (character).
+#' @param sort_orfs sort ORF list lexicographically (logical)
 #' @return List of TPMs, consistent with order of `orfs` (double).
 #'
 #' @export
-LoadTpms <- function(tpms_file, orfs) {
+LoadTpms <- function(tpms_file, orfs, sort_orfs = TRUE) {
   print(paste0("Loading TPMs from: ", tpms_file))
   if (!file.exists(tpms_file)) {
     warning(paste(tpms_file, "does not exist, returning empty list"))
     return(NULL)
   }
   features <- readr::read_tsv(tpms_file, comment = "#")
-  features <- features[order(features$ORF), ]
+  if (sort_orfs) {
+    features <- features[order(features$ORF), ]
+  }
   if (isFALSE(all.equal(features$ORF, orfs))) {
     warning(paste("Inconsistent ORF names in", tpms_file))
   }
@@ -74,12 +77,13 @@ LoadTpms <- function(tpms_file, orfs) {
 #' ORF names are to be retrieved (character).
 #' @param samples List of sample files (where `names` attribute of
 #' `samples` are the sample names) (list).
+#' @param sort_orfs sort ORF list lexicographically (logical)
 #' @return Collated TPMs with an `ORF` column and sample-specific
 #' columns, named by sample name, with the TPMs values for each sample
 #' (data.frame).
 #'
 #' @export
-MakeTpmTable <- function(orf_fasta, samples) {
+MakeTpmTable <- function(orf_fasta, samples, sort_orfs = TRUE) {
   if (is.na(orf_fasta)) {
     tpms_file <- samples[[1]]
     print(paste("Loading ORFs from:", tpms_file))
@@ -89,10 +93,13 @@ MakeTpmTable <- function(orf_fasta, samples) {
     print(paste("Loading ORFs from:", orf_fasta))
     orfs <- Biostrings::readDNAStringSet(orf_fasta) %>% names
   }
-  orfs <- sort(orfs)
+  if(sort_orfs) {
+    orfs <- sort(orfs)
+  }
   tpm_list <- lapply(samples,
                      LoadTpms,
-                     orfs = orfs)
+                     orfs = orfs,
+                     sort_orfs = sort_orfs)
   non_null_elts <- sapply(tpm_list, function(elt) !is.null(elt))
   names(tpm_list) <- names(samples)
   collated_tpms <- dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])
@@ -108,11 +115,12 @@ MakeTpmTable <- function(orf_fasta, samples) {
 #' `samples` are the sample names) (list).
 #' @param digits Number of decimal places to be used in table in file 
 #' output (integer).
+#' @param sort_orfs sort ORF list lexicographically (logical)
 #'
 #' @export
-CollateTpms <- function(tpms_file, orf_fasta, samples, digits = 1) {
+CollateTpms <- function(tpms_file, orf_fasta, samples, sort_orfs = TRUE, digits = 1) {
   write_provenance_header(get_Rscript_filename(), tpms_file)
-  MakeTpmTable(orf_fasta, samples) %>%
+  MakeTpmTable(orf_fasta, samples, sort_orfs = sort_orfs) %>%
     dplyr::mutate_if(is.numeric, round, digits = digits) %>%
     readr::write_tsv(tpms_file, col_names = TRUE, append = TRUE)
 }
