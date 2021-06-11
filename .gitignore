@@ -1,8 +1,8 @@
 *~
 *.bai
-code-docs/_build/
-code-docs/modules.rst
-code-docs/riboviz*.rst
+py-docs/_build/
+py-docs/modules.rst
+py-docs/riboviz*.rst
 .coverage
 *.db
 .DS_Store
