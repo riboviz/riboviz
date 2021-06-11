@@ -106,12 +106,13 @@ MakeTpmTable <- function(orf_fasta, samples) {
 #' ORF names are to be retrieved (character).
 #' @param samples List of sample files (where `names` attribute of
 #' `samples` are the sample names) (list).
+#' @param digits Number of decimal places to be used in table in file 
+#' output (integer).
 #'
 #' @export
-CollateTpms <- function(tpms_file, orf_fasta, samples) {
-  round1 <- function(x) round(x, digits = 1)
+CollateTpms <- function(tpms_file, orf_fasta, samples, digits = 1) {
   write_provenance_header(get_Rscript_filename(), tpms_file)
   MakeTpmTable(orf_fasta, samples) %>%
-    dplyr::mutate_if(is.numeric, round1) %>%
+    dplyr::mutate_if(is.numeric, round, digits = digits) %>%
     readr::write_tsv(tpms_file, col_names = TRUE, append = TRUE)
 }
