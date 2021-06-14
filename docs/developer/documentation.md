@@ -2,15 +2,7 @@
 
 ## Update Dependencies overview in Install RiboViz and dependencies
 
-To update the [Dependencies overview](../user/install.md#dependencies-overview) tables in [Install RiboViz and dependencies](../user/install.md):
-
-* Run:
-
-```console
-$ source bash/environment-tables.sh                                       
-```
-
-* Copy the Markdown tables output and paste into `docs/user/install.md`.
+See [Update Dependencies overview](./dependencies.md#update-dependencies-overview).
 
 ---
 

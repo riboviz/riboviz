@@ -44,7 +44,6 @@ The workflow also supports the following configuration parameters. All directory
 | Parameter | Description | Mandatory | Default |
 | --------- | ----------- | --------- | ------- |
 | `adapters` | Illumina sequencing adapter(s) to remove | Yes | |
-| `aligner` | Short read aligner to use (currently ignored, hisat2 is used) | No | |
 | `asite_disp_length_file` | Summary of read frame displacement from 5' end to A-site for each read length based on "standard" yeast data from early ribosome profiling papers (tab-separated values file with `read_length`, `asite_disp` columns) | No | |
 | `buffer` | Length of flanking region around the CDS | No | `250` |
 | `build_indices` | Rebuild indices from FASTA files? If `false` then `dir_index` is expected to contain the index files | No | `true` |
@@ -141,7 +140,9 @@ While both `codon_positions_file` and `t_rna_file` are optional, either both mus
 
 ---
 
-## Configuring file paths and directories (Nextflow workflow only)
+## Configuring file paths and directories
+
+(Nextflow workflow only)
 
 The following configuration parameters take values that are absolute or relative paths to files or directories:
 
