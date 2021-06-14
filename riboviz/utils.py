@@ -124,7 +124,7 @@ def equal_file_sizes(file1, file2):
         "Unequal file sizes: %s, %s" % (file1, file2)
 
 
-def equal_dataframes(data1, data2, tolerance=0.0001):
+def equal_dataframes(data1, data2, tolerance=0.0001, ignore_row_order=False):
     """
     Compare two Pandas data frames for equality. The data frames are
     expected to be two dimensional i.e. rows and columns.
@@ -150,6 +150,8 @@ def equal_dataframes(data1, data2, tolerance=0.0001):
     :type data2: pandas.core.frame.DataFrame
     :param tolerance: Tolerance for floating point comparisons
     :type tolerance: float
+    :param ignore_row_order: Ignore row order?
+    :type ignore_row_order: bool
     :raise AssertionError: If the data frames differ in their content
     """
     assert data1.shape == data2.shape,\
@@ -158,6 +160,9 @@ def equal_dataframes(data1, data2, tolerance=0.0001):
     assert set(data1.columns) == set(data2.columns),\
         "Unequal column names: %s, %s"\
         % (str(data1.columns), str(data2.columns))
+    if ignore_row_order:
+        data1 = data1.sort_values(by=data1.columns[0])
+        data2 = data2.sort_values(by=data1.columns[0])
     for column in data1.columns:
         column1 = data1[column]
         column2 = data2[column]
@@ -171,11 +176,15 @@ def equal_dataframes(data1, data2, tolerance=0.0001):
                                equal_nan=True),\
                 "Unequal column values: %s" % column
         else:
-            assert column1.equals(column2),\
+            # column1 and column2 have type pandas.core.series.Series.
+            # Don't use column1.equals(column2) as this will compare
+            # also compare Series index values which may differ.
+            assert np.array_equal(column1.values, column2.values), \
                 "Unequal column values: %s" % column
 
 
-def equal_tsv(file1, file2, tolerance=0.0001, comment="#"):
+def equal_tsv(file1, file2, tolerance=0.0001, ignore_row_order=False,
+              comment="#"):
     """
     Compare two tab-separated (TSV) files for equality. This function
     uses :py:func:`equal_dataframes`.
@@ -186,6 +195,8 @@ def equal_tsv(file1, file2, tolerance=0.0001, comment="#"):
     :type file2: str or unicode
     :param tolerance: Tolerance for floating point comparisons
     :type tolerance: float
+    :param ignore_row_order: Ignore row order?
+    :type ignore_row_order: bool
     :param comment: Comment prefix
     :type comment: str or unicode
     :raise AssertionError: If files differ in their contents
@@ -194,7 +205,7 @@ def equal_tsv(file1, file2, tolerance=0.0001, comment="#"):
     data1 = pd.read_csv(file1, sep="\t", comment=comment)
     data2 = pd.read_csv(file2, sep="\t", comment=comment)
     try:
-        equal_dataframes(data1, data2, tolerance)
+        equal_dataframes(data1, data2, tolerance, ignore_row_order)
     except AssertionError as error:
         # Add file names to error message.
         message = error.args[0]
