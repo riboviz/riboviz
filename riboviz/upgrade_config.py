@@ -11,6 +11,7 @@ existing values are preserved):
 * ``PrimaryID`` => ``primary_id``
 * ``SecondID`` => ``secondary_id``
 * ``StopInCDS`` => ``stop_in_feature``
+* ``StopInFeature`` => ``stop_in_feature``
 * ``codon_pos`` => ``codon_positions_file``
 * ``nprocesses`` => ``num_processes``
 * ``orf_fasta`` => ``orf_fasta_file``
@@ -26,13 +27,11 @@ with default values, if they are not already present in the
 configuration:
 
 * ``asite_disp_length_file: data/yeast_standard_asite_disp_length.txt``
-* ``cmd_file: run_riboviz_vignette.sh``
 * ``codon_positions_file: data/yeast_codon_pos_i200.RData``
 * ``count_reads: true``
 * ``count_threshold: 64``
 * ``dedup_stats: false``
 * ``dedup_umis: false``
-* ``dir_logs: vignette/logs``
 * ``do_pos_sp_nt_freq: true``
 * ``extract_umis: false``
 * ``feature: CDS``
@@ -79,6 +78,8 @@ Configuration parameters that are now unused are removed:
 * ``aligner``
 * ``isTestRun``
 * ``is_test_run``
+* ``cmd_file``
+* ``dir_logs``
 """
 import os
 import os.path
@@ -111,7 +112,6 @@ Renamed configuration parameters.
 UPDATES = {
     params.ASITE_DISP_LENGTH_FILE: "data/yeast_standard_asite_disp_length.txt",
     params.DO_POS_SP_NT_FREQ: True,
-    params.CMD_FILE: "run_riboviz_vignette.sh",
     params.CODON_POSITIONS_FILE: "data/yeast_codon_pos_i200.RData",
     params.COUNT_READS: True,
     params.COUNT_THRESHOLD: 64,
@@ -122,7 +122,6 @@ UPDATES = {
     params.FEATURES_FILE:  "data/yeast_features.tsv",
     params.FQ_FILES: None,
     params.GROUP_UMIS: False,
-    params.LOGS_DIR: "vignette/logs",
     params.MULTIPLEX_FQ_FILES: None,
     params.PUBLISH_INDEX_TMP: False,
     params.RUN_STATIC_HTML: True,
@@ -141,7 +140,9 @@ Map from configuration parameters to default values for parameters.
 UNUSED = [
     "aligner",
     "isTestRun",
-    "is_test_run"
+    "is_test_run",
+    "cmd_file",
+    "dir_logs"
 ]
 """
 Unused configuration parameters for removal.

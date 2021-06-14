@@ -217,19 +217,16 @@ def make_fastq_records(tag,
     * A record for sequence: ``umi5`` + ``read`` + ``umi3`` +
       ``barcode`` + ``adaptor`` + ``post_adaptor_nt``.
     * A record as above with ``adaptor`` and ``post_adaptor_nt``
-      trimmed: ``umi5`` + ``read`` + ``umi3`` + ``barcode``.
-        - If ``adaptor`` and ``post_adaptor_nt`` are both ``''`` then
-          this is equivalent to the above record.
+      trimmed: ``umi5`` + ``read`` + ``umi3`` + ``barcode``. If
+      ``adaptor`` and ``post_adaptor_nt`` are both ``''`` then
+      this is equivalent to the above record.
     * A record as above with the barcode and UMIs trimmed and added to
-      the header with ``_`` delimiters: ``read``.
-        - If both the barcode and both UMIs are ``''`` then this is
-          equivalent to the above record.
-        - Depending on whether ``barcode``, ``umi5`` and ``umi3`` are
-          ``''``  the header will be extended with one of:
-            - ``<barcode>_<umi5><umi3>``
-            - ``<barcode>_<umi3>``
-            - ``_<umi5><umi3>``
-            - ``<umi3>``
+      the header with ``_`` delimiters: ``read``. If both the barcode
+      and both UMIs are ``''`` then this is equivalent to the above
+      record. Depending on whether ``barcode``, ``umi5`` and ``umi3``
+      are ``''``  the header will be extended with one of:
+      ``<barcode>_<umi5><umi3>``, ``<barcode>_<umi3>``,
+      ``_<umi5><umi3>``, ``<umi3>``.
 
     :param tag: Human-readable tag
     :type tag: str or unicode

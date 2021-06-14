@@ -796,7 +796,7 @@ YAL002W	8	0.00206611570247934	212.759037933641
 
 For more information on the `work/` directory, and its files, see [Nextflow `work/` directory](./prep-riboviz-operation.md#nextflow-work-directory),
 
-For more information on Nextflow's log files, see [Nextflow workflow log files](./prep-riboviz-operation.md#nextflow-workflow-log-files).
+For more information on Nextflow's log files, see [Log files](./prep-riboviz-operation.md#log-files).
 
 ---
 
