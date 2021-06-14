@@ -275,9 +275,6 @@ module load igmm/apps/R/3.6.3
 module load anaconda
 source activate riboviz
 
-# Uncomment this to run the python workflow:
-#python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
-
 # Run the Nextflow workflow:
 nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false
 ```
