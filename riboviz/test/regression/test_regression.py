@@ -116,6 +116,7 @@ from riboviz import hisat2
 from riboviz import sam_bam
 from riboviz import compare_files
 from riboviz import count_reads
+from riboviz import utils
 from riboviz import workflow_files
 from riboviz import workflow_r
 from riboviz.tools import prep_riboviz
@@ -748,6 +749,7 @@ def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
         expected_file,
         os.path.join(output_dir, sample, file_name))
 
+
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name", [workflow_files.STATIC_HTML_FILE])
 def test_analysis_outputs_html(expected_fixture, output_dir, sample, file_name, nextflow_fixture):
@@ -775,7 +777,7 @@ def test_analysis_outputs_html(expected_fixture, output_dir, sample, file_name, 
     expected_file = os.path.join(expected_fixture, output_dir_name,
                                  sample, file_name)
     if not os.path.exists(expected_file):
-       pytest.skip('Skipped as expected file does not exist')
+        pytest.skip('Skipped as expected file does not exist')
     assert os.path.exists(os.path.join(output_dir, sample, file_name))
     compare_files.compare_files(
         expected_file,
@@ -801,9 +803,9 @@ def test_collate_tpms_tsv(expected_fixture, output_dir):
                                  workflow_r.TPMS_COLLATED_TSV)
     if not os.path.exists(expected_file):
         pytest.skip('Skipped as expected file does not exist')
-    compare_files.compare_files(
-        expected_file,
-        os.path.join(output_dir, workflow_r.TPMS_COLLATED_TSV))
+    utils.equal_tsv(expected_file,
+                    os.path.join(output_dir, workflow_r.TPMS_COLLATED_TSV),
+                    ignore_row_order=True)
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
