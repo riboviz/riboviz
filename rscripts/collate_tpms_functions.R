@@ -93,7 +93,7 @@ MakeTpmTable <- function(orf_fasta, samples, sort_orfs = TRUE) {
     print(paste("Loading ORFs from:", orf_fasta))
     orfs <- Biostrings::readDNAStringSet(orf_fasta) %>% names
   }
-  if(sort_orfs) {
+  if (sort_orfs) {
     orfs <- sort(orfs)
   }
   tpm_list <- lapply(samples,
@@ -114,7 +114,7 @@ MakeTpmTable <- function(orf_fasta, samples, sort_orfs = TRUE) {
 #' @param samples List of sample files (where `names` attribute of
 #' `samples` are the sample names) (list).
 #' @param sort_orfs sort ORF list lexicographically (logical)
-#' @param digits Number of decimal places to be used in table in file 
+#' @param digits Number of decimal places to be used in table in file
 #' output (integer).
 #'
 #' @export
