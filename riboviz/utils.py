@@ -94,7 +94,7 @@ def equal_file_names(file1, file2):
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
-    :raise AssertionError: If file do not exist, are not files or
+    :raise AssertionError: If file do not exist, are not files or \
     their names differ
     """
     local_file1 = os.path.split(file1)[1].lower()
