@@ -1031,7 +1031,7 @@ process dedupUmis {
         params.dedup_umis
     shell:
         output_stats_flag = params.dedup_stats \
-	    ? "--output-stats=dedup_stats" : ''
+            ? "--output-stats=dedup_stats" : ''
         """
         umi_tools dedup -I ${sample_bam} -S dedup.bam ${output_stats_flag}
         samtools --version
@@ -1278,12 +1278,16 @@ process collateTpms {
         file "TPMs_collated.tsv" into collate_tpms_tsv
         val sample_ids into collate_tpms_sample_ids
     shell:
+        samples_tsvs = []
+        for (i = 0; i < sample_ids.size(); i++) {
+            samples_tsvs.add(sample_ids[i])
+            samples_tsvs.add(tpms_tsvs[i])
+        }
+        samples_tsvs = samples_tsvs.join(' ')
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/collate_tpms.R \
-            --sample-subdirs=False \
-            --output-dir=. \
             --tpms-file=TPMs_collated.tsv \
-            ${sample_ids.join(' ')}
+            ${samples_tsvs}
         """
 }
 

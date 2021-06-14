@@ -102,7 +102,7 @@ def test_deplex_num_reads(configuration_module):
         riboviz.test.SIMDATA_DIR,
         "deplex",
         demultiplex_fastq.NUM_READS_FILE)
-    utils.equal_tsv(expected_output, actual_output)
+    utils.equal_tsv(expected_output, actual_output, na_to_empty_str=True)
 
 
 @pytest.mark.parametrize(
