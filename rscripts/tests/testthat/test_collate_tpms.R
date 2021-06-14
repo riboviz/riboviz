@@ -46,12 +46,15 @@ context("test_collate_tpms.R")
 #' @param orf_fasta ORF FASTA file that was aligned to and from which
 #' ORF names are to be retrieved (character).
 #' @param expected_exit_code Expected exit code (integer).
+#' @param sort_orfs sort ORF list lexicographically (logical)
+#' @param digits Number of decimal places to be used in table in file
+#' output (integer).
 #' @return Tibble with collated TPMs (`NULL` if `expected_exit_code`
 #' is not 0) (tbl_df).
 #'
 #' @export
 RunCollateTpms <- function(collate_tpms, samples, tpms_file = NA,
-  orf_fasta = NA, expected_exit_code = 0) {
+  orf_fasta = NA, sort_orfs = NA, digits = NA, expected_exit_code = 0) {
 
   print(paste0("collate_tpms.R: ", collate_tpms))
   cmd_template <- "Rscript --vanilla {collate_tpms}"
@@ -60,6 +63,12 @@ RunCollateTpms <- function(collate_tpms, samples, tpms_file = NA,
   }
   if (!is.na(orf_fasta)) {
     cmd_template <- paste(cmd_template, "--orf-fasta={orf_fasta}")
+  }
+  if (!is.na(sort_orfs)) {
+    cmd_template <- paste(cmd_template, "--sort-orfs={sort_orfs}")
+  }
+  if (!is.na(digits)) {
+    cmd_template <- paste(cmd_template, "--digits={digits}")
   }
   cmd_template <- paste(cmd_template,
     paste(as.vector(rbind(names(samples), samples)),
@@ -103,7 +112,7 @@ GetSampleTpms <- function(orfs, samples) {
   sample_data <- list()
   for (sample in samples) {
     new_offset <- offset + length(orfs)
-    data <- offset:(new_offset - 1)
+    data <- offset:(new_offset - 1) + 0.1
     offset <- new_offset
     sample_data[[sample]] <- data
   }
@@ -136,19 +145,15 @@ GetCollatedTpms <- function(orfs, sample_data) {
 #' @param sample_data List of sample data (lists of integer of length
 #' `orfs`),  keyed by sample name (list).
 #' @param output_dir Output directory (character).
-#' @param shuffle Reorder rows of every second sample file? (logical)
 #' @return List of sample files (where `names` attribute of
 #' `samples` are the sample names) (list).
 #'
 #' @export
-SaveTpms <- function(orfs, sample_data, output_dir, shuffle = FALSE) {
+SaveTpms <- function(orfs, sample_data, output_dir) {
   orf_decreasing <- FALSE
   sample_files <- character()
   for (sample in names(sample_data)) {
     data <- tibble::tibble(ORF = orfs, tpm = sample_data[[sample]])
-    if (shuffle) {
-      data <- data[order(data$ORF, decreasing = orf_decreasing), ]
-    }
     sample_file <- file.path(output_dir, paste0(sample, "_", "tpms.tsv"))
     readr::write_tsv(data, sample_file, col_names = TRUE)
       orf_decreasing <- ! orf_decreasing
@@ -159,7 +164,7 @@ SaveTpms <- function(orfs, sample_data, output_dir, shuffle = FALSE) {
 }
 
 testthat::test_that("Defaults", {
-  orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
   samples <- c("WTone", "WTtwo")
   sample_data <- GetSampleTpms(orfs, samples)
   withr::with_tempdir({
@@ -170,8 +175,22 @@ testthat::test_that("Defaults", {
   testthat::expect_equal(expected_tpms, actual_tpms, info = "TPMs differ")
 })
 
+testthat::test_that("digits=0", {
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
+  samples <- c("WTone", "WTtwo")
+  sample_data <- GetSampleTpms(orfs, samples)
+  withr::with_tempdir({
+    sample_files <- SaveTpms(orfs, sample_data, getwd())
+    actual_tpms <- RunCollateTpms(collate_tpms, sample_files, digits = 0)
+  })
+  expected_tpms <- GetCollatedTpms(orfs, sample_data)
+  expected_tpms <- dplyr::mutate_if(expected_tpms, is.numeric, round,
+                                    digits = 0)
+  testthat::expect_equal(expected_tpms, actual_tpms, info = "TPMs differ")
+})
+
 testthat::test_that("Sample files in directories", {
-  orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
   samples <- c("WTone", "WTtwo")
   sample_data <- GetSampleTpms(orfs, samples)
   withr::with_tempdir({
@@ -192,7 +211,7 @@ testthat::test_that("Sample files in directories", {
 })
 
 testthat::test_that("One sample only", {
-  orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
   samples <- c("WTone")
   sample_data <- GetSampleTpms(orfs, samples)
   withr::with_tempdir({
@@ -223,12 +242,26 @@ testthat::test_that("Header-only sample files", {
   testthat::expect_equal(expected_tpms, actual_tpms, info = "TPMs differ")
 })
 
-testthat::test_that("Sample files with ORFs in different orders", {
-  orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
+testthat::test_that("sort_orfs=TRUE", {
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
   samples <- c("WTone", "WTtwo", "WTthree", "WTfour")
   sample_data <- GetSampleTpms(orfs, samples)
   withr::with_tempdir({
-    sample_files <- SaveTpms(orfs, sample_data, getwd(), TRUE)
+    sample_files <- SaveTpms(orfs, sample_data, getwd())
+    actual_tpms <- RunCollateTpms(collate_tpms, sample_files,
+                                  sort_orfs = TRUE)
+  })
+  expected_tpms <- GetCollatedTpms(orfs, sample_data)
+  expected_tpms <- dplyr::arrange(expected_tpms, ORF)
+  testthat::expect_equal(expected_tpms, actual_tpms, info = "TPMs differ")
+})
+
+testthat::test_that("sort_orfs=FALSE", {
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
+  samples <- c("WTone", "WTtwo", "WTthree", "WTfour")
+  sample_data <- GetSampleTpms(orfs, samples)
+  withr::with_tempdir({
+    sample_files <- SaveTpms(orfs, sample_data, getwd())
     actual_tpms <- RunCollateTpms(collate_tpms, sample_files)
   })
   expected_tpms <- GetCollatedTpms(orfs, sample_data)
@@ -236,7 +269,7 @@ testthat::test_that("Sample files with ORFs in different orders", {
 })
 
 testthat::test_that("Sample files with one non-existent sample file", {
-  orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
   samples <- c("WTone")
   sample_data <- GetSampleTpms(orfs, samples)
   withr::with_tempdir({
@@ -252,7 +285,7 @@ testthat::test_that("Sample files with one non-existent sample file", {
 })
 
 testthat::test_that("--tpms-file", {
-  orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
   samples <- c("WTone", "WTtwo")
   sample_data <- GetSampleTpms(orfs, samples)
   withr::with_tempdir({
@@ -264,8 +297,8 @@ testthat::test_that("--tpms-file", {
   testthat::expect_equal(expected_tpms, actual_tpms, info = "TPMs differ")
 })
 
-testthat::test_that("--orf-fasta", {
-  orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
+testthat::test_that("--orf-fasta (sort_orfs=TRUE)", {
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
   fasta <- Biostrings::DNAStringSet(x = replicate(length(orfs), "GATTACCA"))
   names(fasta) <- orfs
   samples <- c("WTone", "WTtwo", "WTthree", "WTfour")
@@ -273,7 +306,25 @@ testthat::test_that("--orf-fasta", {
   withr::with_tempdir({
     orf_fasta <- "test.fasta"
     Biostrings::writeXStringSet(fasta, orf_fasta, format = "fasta")
-    sample_files <- SaveTpms(orfs, sample_data, getwd(), TRUE)
+    sample_files <- SaveTpms(orfs, sample_data, getwd())
+    actual_tpms <- RunCollateTpms(collate_tpms, sample_files,
+      orf_fasta = orf_fasta, sort_orfs = TRUE)
+  })
+  expected_tpms <- GetCollatedTpms(orfs, sample_data)
+  expected_tpms <- dplyr::arrange(expected_tpms, ORF)
+  testthat::expect_equal(expected_tpms, actual_tpms, info = "TPMs differ")
+})
+
+testthat::test_that("--orf-fasta (sort_orfs=FALSE)", {
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
+  fasta <- Biostrings::DNAStringSet(x = replicate(length(orfs), "GATTACCA"))
+  names(fasta) <- orfs
+  samples <- c("WTone", "WTtwo", "WTthree", "WTfour")
+  sample_data <- GetSampleTpms(orfs, samples)
+  withr::with_tempdir({
+    orf_fasta <- "test.fasta"
+    Biostrings::writeXStringSet(fasta, orf_fasta, format = "fasta")
+    sample_files <- SaveTpms(orfs, sample_data, getwd())
     actual_tpms <- RunCollateTpms(collate_tpms, sample_files,
       orf_fasta = orf_fasta)
   })
@@ -282,7 +333,7 @@ testthat::test_that("--orf-fasta", {
 })
 
 testthat::test_that("Non-existent --orf-fasta file raises error", {
-  orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
   samples <- c("WTone", "WTtwo")
   sample_data <- GetSampleTpms(orfs, samples)
   withr::with_tempdir({
@@ -293,7 +344,7 @@ testthat::test_that("Non-existent --orf-fasta file raises error", {
 })
 
 testthat::test_that("Non-existent samples file for ORFs raises error", {
-  orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
   samples <- c("WTone", "WTtwo")
   sample_data <- GetSampleTpms(orfs, samples)
   withr::with_tempdir({
@@ -305,7 +356,7 @@ testthat::test_that("Non-existent samples file for ORFs raises error", {
 })
 
 testthat::test_that("Non-existent samples files and --orf-fasta", {
-  orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
   fasta <- Biostrings::DNAStringSet(x = replicate(length(orfs), "GATTACCA"))
   names(fasta) <- orfs
   withr::with_tempdir({
@@ -323,7 +374,7 @@ testthat::test_that("Non-existent samples files and --orf-fasta", {
 })
 
 testthat::test_that("Missing sample file for sample raises error", {
-  orfs <- c("YAL001C", "YAL002W", "YAL003W", "YAL004W")
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
   samples <- c("WTone", "WTtwo")
   sample_data <- GetSampleTpms(orfs, samples)
   withr::with_tempdir({

@@ -51,7 +51,7 @@ if (interactive()) {
 #' @return List of TPMs, consistent with order of `orfs` (double).
 #'
 #' @export
-LoadTpms <- function(tpms_file, orfs, sort_orfs = TRUE) {
+LoadTpms <- function(tpms_file, orfs, sort_orfs = FALSE) {
   print(paste0("Loading TPMs from: ", tpms_file))
   if (!file.exists(tpms_file)) {
     warning(paste(tpms_file, "does not exist, returning empty list"))
@@ -83,7 +83,7 @@ LoadTpms <- function(tpms_file, orfs, sort_orfs = TRUE) {
 #' (data.frame).
 #'
 #' @export
-MakeTpmTable <- function(orf_fasta, samples, sort_orfs = TRUE) {
+MakeTpmTable <- function(orf_fasta, samples, sort_orfs = FALSE) {
   if (is.na(orf_fasta)) {
     tpms_file <- samples[[1]]
     print(paste("Loading ORFs from:", tpms_file))
@@ -118,7 +118,7 @@ MakeTpmTable <- function(orf_fasta, samples, sort_orfs = TRUE) {
 #' output (integer).
 #'
 #' @export
-CollateTpms <- function(tpms_file, orf_fasta, samples, sort_orfs = TRUE,
+CollateTpms <- function(tpms_file, orf_fasta, samples, sort_orfs = FALSE,
                         digits = 1) {
   write_provenance_header(get_Rscript_filename(), tpms_file)
   MakeTpmTable(orf_fasta, samples, sort_orfs = sort_orfs) %>%

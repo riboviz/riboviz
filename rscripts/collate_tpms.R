@@ -17,6 +17,8 @@
 #' | --------- | ----------- |
 #' | `--tpms-file` | Name of collated TPMs file |
 #' | `--orf-fasta` | ORF FASTA file that was aligned to and from which ORF names are to be retrieved |
+#' | `--sort-orfs` | Sort ORF list lexicographically (default `FALSE`) |
+#' | `--digits` | Number of decimal places to be used in output (default 1) |
 #' | `<sample> <sample_tpms>` | Space-delimited list of one or more pairs of sample names and sample-specific TPMs files |
 #'
 #' @export
@@ -48,7 +50,12 @@ option_list <- list(
     default = "TPMs_collated.tsv",
     help = "Name of collated TPMs file"),
   make_option("--orf-fasta", type = "character", default = NA,
-    help = "ORF FASTA file that was aligned to and from which ORF names are to be retrieved"))
+    help = "ORF FASTA file that was aligned to and from which ORF names are to be retrieved"),
+  make_option("--sort-orfs", type = "logical", default = FALSE,
+    help = "Sort ORF list lexicographically"),
+  make_option("--digits", type = "integer", default = 1,
+    help = "Number of decimal places to be used in output"))
+
 
 print_provenance(get_Rscript_filename())
 
@@ -68,6 +75,10 @@ sample_names_files <- split(opt$args, ceiling(seq_along(opt$args) %% 2))
 sample_files <- sample_names_files[[1]]
 names(sample_files) <- sample_names_files[[2]]
 
-CollateTpms(opt$options$tpms_file, opt$options$orf_fasta, sample_files)
+CollateTpms(opt$options$tpms_file,
+            opt$options$orf_fasta,
+            sample_files,
+            sort_orfs = opt$options$sort_orfs,
+            digits = opt$options$digits)
 
 print("collate_tpms.R done")
