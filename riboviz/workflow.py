@@ -617,8 +617,9 @@ def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
     :type log_file: str or unicode
     :param run_config: Run-related configuration
     :type run_config: RunConfigTuple
-    :param tpms_file: TPMS file relative to ``out_dir`` (if omitted \
-    then default, chosen by ``collate_tpms.R``, is used) (output)
+    :param tpms_file: TPMS file (if omitted then \
+    :py:const:`riboviz.workflow_r.TPMS_COLLATED_TSV` is used) \
+    (output)
     :type tpms_file: str or unicode
     :raise FileNotFoundError: if ``Rscript`` cannot be found
     :raise AssertionError: if ``Rscript`` returns a non-zero exit \
@@ -627,12 +628,15 @@ def collate_tpms(out_dir, samples, log_file, run_config, tpms_file=None):
     LOGGER.info("Collate TPMs across sample results. Log: %s", log_file)
     cmd = ["Rscript", "--vanilla",
            os.path.join(run_config.r_scripts,
-                        workflow_r.COLLATE_TPMS_R),
-           "--sample-subdirs=" + str(True),
-           "--output-dir=" + out_dir]
+                        workflow_r.COLLATE_TPMS_R)]
     if tpms_file is not None:
-        cmd.append("--tpms-file=" + tpms_file)
-    cmd += samples
+        cmd.append("--tpms-file=" + os.path.join(out_dir, tpms_file))
+    else:
+        cmd.append("--tpms-file=" + os.path.join(
+            out_dir, workflow_r.TPMS_COLLATED_TSV))
+    for sample in samples:
+        cmd.append(sample)
+        cmd.append(os.path.join(out_dir, sample, workflow_r.TPMS_TSV))
     process_utils.run_logged_command(cmd, log_file,
                                      run_config.cmd_file,
                                      run_config.is_dry_run)
