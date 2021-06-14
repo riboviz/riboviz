@@ -184,7 +184,7 @@ def equal_dataframes(data1, data2, tolerance=0.0001, ignore_row_order=False):
 
 
 def equal_tsv(file1, file2, tolerance=0.0001, ignore_row_order=False,
-              comment="#"):
+              comment="#", na_to_empty_str=False):
     """
     Compare two tab-separated (TSV) files for equality. This function
     uses :py:func:`equal_dataframes`.
@@ -199,11 +199,16 @@ def equal_tsv(file1, file2, tolerance=0.0001, ignore_row_order=False,
     :type ignore_row_order: bool
     :param comment: Comment prefix
     :type comment: str or unicode
+    :param na_to_empty_str: Convert ``NaN`` to `""`?
+    :type na_to_empty_str: bool
     :raise AssertionError: If files differ in their contents
     :raise Exception: If problems arise when loading the files
     """
     data1 = pd.read_csv(file1, sep="\t", comment=comment)
     data2 = pd.read_csv(file2, sep="\t", comment=comment)
+    if na_to_empty_str:
+        data1 = data1.fillna("")
+        data2 = data2.fillna("")
     try:
         equal_dataframes(data1, data2, tolerance, ignore_row_order)
     except AssertionError as error:

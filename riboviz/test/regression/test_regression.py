@@ -805,7 +805,8 @@ def test_collate_tpms_tsv(expected_fixture, output_dir):
         pytest.skip('Skipped as expected file does not exist')
     utils.equal_tsv(expected_file,
                     os.path.join(output_dir, workflow_r.TPMS_COLLATED_TSV),
-                    ignore_row_order=True)
+                    ignore_row_order=True,
+                    na_to_empty_str=True)
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
