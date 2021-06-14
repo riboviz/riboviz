@@ -489,8 +489,8 @@ if ((! params.validate_only) || (! params.skip_inputs)) {
         exit 1, "No such directory (dir_in): $dir_in"
     }
 }
-if ((! params.fq_files) && (! params.multiplex_fq_files)) {
-    exit 1, "No sample files (fq_files) or multiplexed files (multiplex_fq_files) are defined"
+if ((! params.fq_files) && (! params.multiplex_fq_files) && (! params.download) && (! params.download_multiplex)) {
+    exit 1, "No sample files (fq_files) or multiplexed files (multiplex_fq_files) are defined. No files to donwload were provided."
 } else if (params.fq_files && params.multiplex_fq_files) {
     exit 1, "Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are defined - only one or the other should be defined"
 } else if (params.fq_files) {
