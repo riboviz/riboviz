@@ -263,7 +263,7 @@ $ rm -rf vignette/tmp
 $ rm -rf vignette/output
 ```
 
-Delete the working directories (nextflow workflow only):
+Delete the working directories:
 
 ```console
 $ rm -rf work
