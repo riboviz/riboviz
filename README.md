@@ -35,7 +35,6 @@ Command-line tools:
 | Tool | Description |
 | ---- | ----------- |
 | [riboviz.tools.check_fasta_gff](./riboviz/tools/check_fasta_gff.py) | [Check FASTA and GFF files for coding sequence (CDS) features](./docs/user/check-fasta-gff.md) |
-| [riboviz.tools.compare_files](./riboviz/tools/compare_files.py) | Compare two files for equality |
 | [riboviz.tools.count_reads](./riboviz/tools/count_reads.py) | Scan input, temporary and output directories and count the number of reads (sequences) processed by specific stages of a workflow (invoked as part of a workflow) |
 | [riboviz.tools.create_barcode_pairs](./riboviz/tools/create_barcode_pairs.py) | Create barcode pairs and write each pair plus the Hamming distance between then to a file of tab-separated values |
 | [riboviz.tools.create_fastq_simdata](./riboviz/tools/create_fastq_simdata.py) | Create simulated FASTQ files to test UMI/deduplication, adaptor trimming, anddemultiplexing. Files in `data/simdata/` were created using this tool |
