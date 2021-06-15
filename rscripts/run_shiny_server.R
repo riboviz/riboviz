@@ -1,17 +1,18 @@
-# load required packages
-library(shiny)
-library(yaml)
-library(tidyverse)
-library(scales)
-library(here)
-
 ### Get information from the YAML ###
+library(yaml)
+
 args <- commandArgs(TRUE)
 if (!is.na(args[1])) {
   yaml <- read_yaml(args[1])
 } else {
-  return(error("Provide a path to a yaml file used in a riboviz run."))
+  return("Provide a path to a yaml file used in a riboviz run.")
 }
+
+# load required packages
+library(shiny)
+library(tidyverse)
+library(scales)
+library(here)
 
 # use this function to pull the sample names and directories from the yaml
 # the sample names and dirs will be used to find data files.
@@ -170,12 +171,14 @@ collated_tpms_df <-
   read_tsv(paste0("../", yaml$dir_out, "/TPMs_collated.tsv"), skip = 4)
 
 ### Gene features
-features_df <- lapply(sample_names, function(x) {
-  file_loc <- paste0(x, "/sequence_features.tsv")
-  
-  return(read_tsv(file_loc, skip = 4))
-}) %>%
-  bind_rows(.id = "samplez")
+# this is commented out because we're not sure what the format of the sequence features file is
+# presumably it's to match the one in the vignette but I'm not sure if it's described anywhere.
+# features_df <- lapply(sample_names, function(x) {
+#   file_loc <- paste0(x, "/sequence_features.tsv")
+#   
+#   return(read_tsv(file_loc, skip = 4))
+# }) %>%
+#   bind_rows(.id = "samplez")
 
 ###############################################################################
 # Plotting
@@ -435,41 +438,44 @@ server <- function(input, output, session) {
   # Features
   ######################################
   
-  ### TPM vs other features
-  output$features_plot <- renderPlot({
-    if (input$gene2 == "") {
-      features_df %>%
-        filter(samplez %in% input$sample &
-                 Feature %in% input$feature) %>%
-        ggplot(., aes(tpm, Value)) +
-        geom_point() +
-        geom_smooth(method = "lm") +
-        facet_wrap(samplez ~ Feature, scales = "free") +
-        scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10 ^
-                                                                                   .x))) +
-        plot_theme +
-        labs(x = expression(paste(log[10], "(TPM)"))) +
-        scale_size_manual(values = c(4, 1), guide = FALSE)
-    } else {
-      features_df %>%
-        filter(samplez %in% input$sample &
-                 Feature %in% input$feature) %>%
-        mutate(labz = ifelse(ORF == input$gene2, "a_label", "no_lab")) %>%
-        arrange(labz) %>%
-        ggplot(., aes(tpm, Value)) +
-        geom_point(aes(color = labz, size = labz)) +
-        geom_smooth(method = "lm") +
-        facet_wrap(samplez ~ Feature, scales = "free") +
-        scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10 ^
-                                                                                   .x))) +
-        plot_theme +
-        scale_color_manual(guide = FALSE,
-                           values = c("firebrick3", "grey70")) +
-        labs(x = expression(paste(log[10], "(TPM)"))) +
-        scale_size_manual(values = c(4, 1), guide = FALSE)
-    }
-  })
-  
+  # Features are an optional file if it exists it's here
+  # but the format isn't described so I'll hold off on this for now
+
+#   ### TPM vs other features
+  # output$features_plot <- renderPlot({
+  #   if (input$gene2 == "") {
+  #     features_df %>%
+  #       filter(samplez %in% input$sample &
+  #                Feature %in% input$feature) %>%
+  #       ggplot(., aes(tpm, Value)) +
+  #       geom_point() +
+  #       geom_smooth(method = "lm") +
+  #       facet_wrap(samplez ~ Feature, scales = "free") +
+  #       scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10 ^
+  #                                                                                  .x))) +
+  #       plot_theme +
+  #       labs(x = expression(paste(log[10], "(TPM)"))) +
+  #       scale_size_manual(values = c(4, 1), guide = FALSE)
+  #   } else {
+  #     features_df %>%
+  #       filter(samplez %in% input$sample &
+  #                Feature %in% input$feature) %>%
+  #       mutate(labz = ifelse(ORF == input$gene2, "a_label", "no_lab")) %>%
+  #       arrange(labz) %>%
+  #       ggplot(., aes(tpm, Value)) +
+  #       geom_point(aes(color = labz, size = labz)) +
+  #       geom_smooth(method = "lm") +
+  #       facet_wrap(samplez ~ Feature, scales = "free") +
+  #       scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10 ^
+  #                                                                                  .x))) +
+  #       plot_theme +
+  #       scale_color_manual(guide = FALSE,
+  #                          values = c("firebrick3", "grey70")) +
+  #       labs(x = expression(paste(log[10], "(TPM)"))) +
+  #       scale_size_manual(values = c(4, 1), guide = FALSE)
+  #   }
+  # })
+
 }
 
 #
