@@ -36,6 +36,7 @@ def helpMessage() {
     * '<SAMPLES_DIRECTORY>' is a directory with input files.
     * '<ORGANISMS_DIRECTORY>' is a directory with input files.
     * '<DATA_DIRECTORY>' is a directory with input files.
+<<<<<<< HEAD
 
     The options are:
 
@@ -54,6 +55,26 @@ def helpMessage() {
        workflow. The values need to be defined using 'export' so they
        are available to 'nextflow' when it runs. For example:
 
+=======
+
+    The options are:
+
+    1. Specify environment variables with the paths to the directories
+       on the same line as your command to run the workflow. The
+       values will be used for this run of the workflow only. For
+       example:
+
+    \$ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \\
+       RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY> \\
+       RIBOVIZ_DATA=<DATA_DIRECTORY> \\
+       nextflow run prep_riboviz.nf -params-file <CONFIG_FILE>
+
+    2. Define values for the environment variables within your bash
+       shell. The values will be available for successive runs of the
+       workflow. The values need to be defined using 'export' so they
+       are available to 'nextflow' when it runs. For example:
+
+>>>>>>> 993000b01801f44693ab25bdbcf07194a5cee4f1
     \$ export RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY>
     \$ export RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY>
     \$ export RIBOVIZ_DATA=<DATA_DIRECTORY>
@@ -201,9 +222,12 @@ def helpMessage() {
     Visualization parameters:
 
     * 'run_static_html': run static html visualization per sample? (default 'TRUE')
+<<<<<<< HEAD
 
     visualization parameters:
     * 'run_dashboard': run visualization dashboard? (default 'TRUE')
+=======
+>>>>>>> 993000b01801f44693ab25bdbcf07194a5cee4f1
 
     General:
 
@@ -1240,7 +1264,10 @@ process generateStatsFigs {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 993000b01801f44693ab25bdbcf07194a5cee4f1
 // Join outputs from generateStatsFigs for staticHTML.
 // Join is done on first value of each tuple i.e. sample ID.
 generate_stats_figs_static_html =
@@ -1251,6 +1278,9 @@ generate_stats_figs_static_html =
     .join(nt3frame_bygene_filtered_tsv, remainder: true)
     .join(sequence_features_tsv, remainder: true)
     .join(codon_ribodens_gathered_tsv, remainder: true)
+<<<<<<< HEAD
+>>>>>>> 993000b01801f44693ab25bdbcf07194a5cee4f1
+=======
 >>>>>>> 993000b01801f44693ab25bdbcf07194a5cee4f1
 
 finished_sample_id
@@ -1335,6 +1365,7 @@ process countReads {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // create 'new' yaml for use in dashboard process
 config_yaml = new Yaml().dump(params)
 
@@ -1382,6 +1413,8 @@ process dashboard {
 
 dashboard_output.subscribe { println "Received from 'dashboard': $it" }
 =======
+=======
+>>>>>>> 993000b01801f44693ab25bdbcf07194a5cee4f1
 Map viz_params = [:]
 if (is_asite_disp_length_file) {
     viz_params.asite_disp_length_file = asite_disp_length_file.toString()
@@ -1458,6 +1491,9 @@ process staticHTML {
 finished_viz_sample_id
     .ifEmpty { exit 1, "No sample was visualised successfully" }
     .view { "Finished visualising sample: ${it}" }
+<<<<<<< HEAD
+>>>>>>> 993000b01801f44693ab25bdbcf07194a5cee4f1
+=======
 >>>>>>> 993000b01801f44693ab25bdbcf07194a5cee4f1
 
 workflow.onComplete {
