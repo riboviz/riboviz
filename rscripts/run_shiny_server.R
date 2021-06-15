@@ -1,5 +1,3 @@
-#!/usr/bin/env Rscript
-
 # load required packages
 library(shiny)
 library(yaml)
@@ -79,7 +77,6 @@ graph_cats <- data.frame(
 )
 
 # Load the data frame and add the short names
-# paste0("../", yaml$dir_out, "/read_counts.tsv")
 read_counts_df <-
   read_tsv(normalizePath(here(yaml$dir_out, "read_counts.tsv")), skip = 5) %>%
   left_join(graph_cats, by = "Description") %>%
@@ -154,7 +151,6 @@ pos_sp_df <- lapply(sample_names, function(x) {
   return(read_tsv(file_loc, skip = 4))
 }) %>%
   bind_rows(.id = "samplez")
-
 
 ### collated TPMs
 collated_tpms_df <-
