@@ -94,7 +94,7 @@ def equal_file_names(file1, file2):
     :type file1: str or unicode
     :param file2: File name
     :type file2: str or unicode
-    :raise AssertionError: If file do not exist, are not files or
+    :raise AssertionError: If file do not exist, are not files or \
     their names differ
     """
     local_file1 = os.path.split(file1)[1].lower()
@@ -124,7 +124,7 @@ def equal_file_sizes(file1, file2):
         "Unequal file sizes: %s, %s" % (file1, file2)
 
 
-def equal_dataframes(data1, data2, tolerance=0.0001):
+def equal_dataframes(data1, data2, tolerance=0.0001, ignore_row_order=False):
     """
     Compare two Pandas data frames for equality. The data frames are
     expected to be two dimensional i.e. rows and columns.
@@ -150,6 +150,8 @@ def equal_dataframes(data1, data2, tolerance=0.0001):
     :type data2: pandas.core.frame.DataFrame
     :param tolerance: Tolerance for floating point comparisons
     :type tolerance: float
+    :param ignore_row_order: Ignore row order?
+    :type ignore_row_order: bool
     :raise AssertionError: If the data frames differ in their content
     """
     assert data1.shape == data2.shape,\
@@ -158,6 +160,9 @@ def equal_dataframes(data1, data2, tolerance=0.0001):
     assert set(data1.columns) == set(data2.columns),\
         "Unequal column names: %s, %s"\
         % (str(data1.columns), str(data2.columns))
+    if ignore_row_order:
+        data1 = data1.sort_values(by=data1.columns[0])
+        data2 = data2.sort_values(by=data1.columns[0])
     for column in data1.columns:
         column1 = data1[column]
         column2 = data2[column]
@@ -171,11 +176,15 @@ def equal_dataframes(data1, data2, tolerance=0.0001):
                                equal_nan=True),\
                 "Unequal column values: %s" % column
         else:
-            assert column1.equals(column2),\
+            # column1 and column2 have type pandas.core.series.Series.
+            # Don't use column1.equals(column2) as this will compare
+            # also compare Series index values which may differ.
+            assert np.array_equal(column1.values, column2.values), \
                 "Unequal column values: %s" % column
 
 
-def equal_tsv(file1, file2, tolerance=0.0001, comment="#"):
+def equal_tsv(file1, file2, tolerance=0.0001, ignore_row_order=False,
+              comment="#", na_to_empty_str=False):
     """
     Compare two tab-separated (TSV) files for equality. This function
     uses :py:func:`equal_dataframes`.
@@ -186,18 +195,44 @@ def equal_tsv(file1, file2, tolerance=0.0001, comment="#"):
     :type file2: str or unicode
     :param tolerance: Tolerance for floating point comparisons
     :type tolerance: float
+    :param ignore_row_order: Ignore row order?
+    :type ignore_row_order: bool
     :param comment: Comment prefix
     :type comment: str or unicode
+    :param na_to_empty_str: Convert ``NaN`` to `""`?
+    :type na_to_empty_str: bool
     :raise AssertionError: If files differ in their contents
     :raise Exception: If problems arise when loading the files
     """
     data1 = pd.read_csv(file1, sep="\t", comment=comment)
     data2 = pd.read_csv(file2, sep="\t", comment=comment)
+    if na_to_empty_str:
+        data1 = data1.fillna("")
+        data2 = data2.fillna("")
     try:
-        equal_dataframes(data1, data2, tolerance)
+        equal_dataframes(data1, data2, tolerance, ignore_row_order)
     except AssertionError as error:
         # Add file names to error message.
         message = error.args[0]
         message += " in file: " + str(file1) + ":" + str(file2)
         error.args = (message,)
         raise
+
+
+def replace_tokens(string, tokens={}):
+    """
+    Customise string. Given a string and mapping from tokens to
+    substrings, iterate through the tokens and when a match is
+    found replace the token with the substring.
+    :param string: String
+    :type string: str or unicode
+    :param tokens: Map from tokens to substrings
+    :type tokens: dict
+    :return: String with token replaced, if a match was found
+    :rtype string: str or unicode
+    """
+    customised = string
+    for token, replace in tokens.items():
+        if token in customised:
+            customised = customised.replace(token, replace)
+    return customised

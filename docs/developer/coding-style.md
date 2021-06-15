@@ -85,12 +85,12 @@ For examples and further information, see:
 
 ### Python
 
-Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible. For example, to run these on `riboviz/compare_files.py`:
+Regularly run `pylint`, `pycodestyle`, and `2to3` and update the code to adopt the recommendations as far as possible. For example, to run these on `riboviz/check_fasta_gff.py`:
 
 ```console
-$ pylint riboviz/compare_files.py
-$ pycodestyle riboviz/compare_files.py
-$ 2to3 riboviz/compare_files.py
+$ pylint riboviz/check_fasta_gff.py
+$ pycodestyle riboviz/check_fasta_gff.py
+$ 2to3 riboviz/check_fasta_gff.py
 ```
 
 ### R
@@ -105,6 +105,7 @@ Lintr can be used within an IDE such as RStudio via an add-in once installed if 
 $ R
 ```
 ```R
+> library(lintr)
 > lint("$HOME/riboviz/rscripts/generate_stats_figs.R")
 ```
 
