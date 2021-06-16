@@ -50,6 +50,7 @@ configuration:
 * ``nextflow_timeline_file: nextflow-timeline.html``
 * ``nextflow_trace_file: nextflow-trace.tsv``
 * ``nextflow_work_dir: work``
+* ``output_pdfs: true``
 * ``publish_index_tmp: false``
 * ``run_static_html: true``
 * ``sample_sheet: null``
@@ -123,6 +124,7 @@ UPDATES = {
     params.FQ_FILES: None,
     params.GROUP_UMIS: False,
     params.MULTIPLEX_FQ_FILES: None,
+    params.OUTPUT_PDFS: True,
     params.PUBLISH_INDEX_TMP: False,
     params.RUN_STATIC_HTML: True,
     params.SAMPLE_SHEET: None,
