@@ -1163,7 +1163,7 @@ process generateStatsFigs {
         val sample_id into finished_sample_id
         tuple val(sample_id), file("tpms.tsv") into tpms_tsv
         tuple val(sample_id), file("3nt_periodicity.pdf") \
-            into nt3_periodicity_pdf
+            optional true into nt3_periodicity_pdf
         tuple val(sample_id), file("3nt_periodicity.tsv") \
             into nt3_periodicity_tsv
         tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
@@ -1172,20 +1172,20 @@ process generateStatsFigs {
             optional (! params.do_pos_sp_nt_freq) \
             into pos_sp_nt_freq_tsv
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.pdf") \
-            into pos_sp_rpf_norm_reads_pdf
+            optional true into pos_sp_rpf_norm_reads_pdf
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
             into pos_sp_rpf_norm_reads_tsv
         tuple val(sample_id), file("read_lengths.pdf") \
-            into read_lengths_pdf
+            optional true into read_lengths_pdf
         tuple val(sample_id), file("read_lengths.tsv") \
             into read_lengths_tsv
         tuple val(sample_id), file("startcodon_ribogridbar.pdf") \
-            into start_codon_ribogridbar_pdf
+            optional true into start_codon_ribogridbar_pdf
         tuple val(sample_id), file("startcodon_ribogrid.pdf") \
-            into start_codon_ribogrid_pdf
+            optional true into start_codon_ribogrid_pdf
         tuple val(sample_id), file("codon_ribodens.pdf") \
             optional (! is_t_rna_and_codon_positions_file) \
-            into codon_ribodens_pdf
+            optional true into codon_ribodens_pdf
         tuple val(sample_id), file("codon_ribodens.tsv") \
             optional (! is_t_rna_and_codon_positions_file) \
             into codon_ribodens_tsv
@@ -1193,7 +1193,7 @@ process generateStatsFigs {
             optional (! is_t_rna_and_codon_positions_file) \
             into codon_ribodens_gathered_tsv
         tuple val(sample_id), file("features.pdf") \
-            optional (! is_features_file) into features_pdf
+            optional (! is_features_file) optional true into features_pdf
         tuple val(sample_id), file("sequence_features.tsv") \
             optional (! is_features_file) into sequence_features_tsv
         tuple val(sample_id), file("3ntframe_bygene.tsv") \
@@ -1204,7 +1204,7 @@ process generateStatsFigs {
             into nt3frame_bygene_filtered_tsv
         tuple val(sample_id), file("3ntframe_propbygene.pdf") \
             optional (! is_asite_disp_length_file) \
-            into nt3frame_propbygene_pdf
+            optional true into nt3frame_propbygene_pdf
     shell:
         t_rna_flag = is_t_rna_and_codon_positions_file \
             ? "--t-rna-file=${t_rna_tsv}" : ''
