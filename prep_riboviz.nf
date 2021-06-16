@@ -1163,7 +1163,7 @@ process generateStatsFigs {
         val sample_id into finished_sample_id
         tuple val(sample_id), file("tpms.tsv") into tpms_tsv
         tuple val(sample_id), file("3nt_periodicity.pdf") \
-            optional true into nt3_periodicity_pdf
+            optional params.output_pdfs into nt3_periodicity_pdf
         tuple val(sample_id), file("3nt_periodicity.tsv") \
             into nt3_periodicity_tsv
         tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
@@ -1172,17 +1172,17 @@ process generateStatsFigs {
             optional (! params.do_pos_sp_nt_freq) \
             into pos_sp_nt_freq_tsv
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.pdf") \
-            optional true into pos_sp_rpf_norm_reads_pdf
+            optional params.output_pdfs into pos_sp_rpf_norm_reads_pdf
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
             into pos_sp_rpf_norm_reads_tsv
         tuple val(sample_id), file("read_lengths.pdf") \
-            optional true into read_lengths_pdf
+            optional params.output_pdfs into read_lengths_pdf
         tuple val(sample_id), file("read_lengths.tsv") \
             into read_lengths_tsv
         tuple val(sample_id), file("startcodon_ribogridbar.pdf") \
-            optional true into start_codon_ribogridbar_pdf
+            optional params.output_pdfs into start_codon_ribogridbar_pdf
         tuple val(sample_id), file("startcodon_ribogrid.pdf") \
-            optional true into start_codon_ribogrid_pdf
+            optional params.output_pdfs into start_codon_ribogrid_pdf
         tuple val(sample_id), file("codon_ribodens.pdf") \
             optional (! (is_t_rna_and_codon_positions_file && params.output_pdfs)) \
             into codon_ribodens_pdf
