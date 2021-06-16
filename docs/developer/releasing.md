@@ -16,7 +16,7 @@ These are the key steps in building a release.
 * Rerun all tests:
   - [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
   - [Run R tests](./testing.md#run-r-tests).
-  - [Run vignette regression tests](./testing.md#run-vignette-regression-tests).
+  - [Run vignette integration tests](./testing.md#run-vignette-integration-tests).
 * Skim all documentation via the GitHub web interface and check formatting and links.
 * Tag release in repository:
 
@@ -25,4 +25,4 @@ $ git tag 2.0
 $ git push origin 2.0
 ```
 
-* Create a regression test data repository. See [Creating a regression test data repository](./create-test-data-repository.md)
+* Create a test data repository. See [Creating a test data repository](./create-test-data-repository.md)

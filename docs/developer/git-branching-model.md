@@ -31,7 +31,7 @@ To request that a branch be merged into `develop`:
 1. Merge the current version of `develop` into your local branch.
 2. Resolve conflicts, if any, and commit the fixes.
 3. [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
-4. [Run vignette regression tests](./testing.md#run-vignette-regression-tests).
+4. [Run vignette integration tests](./testing.md#run-vignette-integration-tests).
 5. Make fixes to resolve any test failures. If unsure then ask another member of the team for advice.
 6. When all tests are passing for your branch, create a new pull request.
 

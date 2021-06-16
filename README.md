@@ -54,7 +54,7 @@ Command-line tools:
 * [Using and adding configuration parameters](./docs/developer/config.md)
 * [Adding and updating dependencies](./docs/developer/dependencies.md)
 * [Developing and running tests](./docs/developer/testing.md)
-* [Creating a regression test data repository](./docs/developer/create-test-data-repository.md)
+* [Creating a test data repository](./docs/developer/create-test-data-repository.md)
 * [Writing and updating documentation](./docs/developer/documentation.md)
 * [Building a release](./docs/developer/releasing.md)
 

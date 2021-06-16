@@ -1,4 +1,4 @@
-# RiboViz regression test data <DD>/<MM>/<YYYY>
+# RiboViz test data <DD>/<MM>/<YYYY>
 
 Provenance:
 
@@ -13,7 +13,7 @@ Usage:
 ```console
 $ git clone https://github.com/riboviz/<REPOSITORY>
 $ cd riboviz
-$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/<REPOSITORY>
+$ pytest riboviz/test/integration/test_integration.py --expected=$HOME/<REPOSITORY>
 ```
 
 For full instructions see the RiboViz developer guide in the RiboViz repository.
