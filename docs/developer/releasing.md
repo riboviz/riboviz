@@ -12,7 +12,7 @@ These are the key steps in building a release.
   - [docs/developer/releasing.md](./releasing.md) (this page)
 * Update the Releases table in `README.md` with a row for intended release and provide a URL with the intended release tag. See the current rows of the table for the format of the URL.
 * Update software versions in `docs/user/install.md` - see [Update Dependencies overview](./dependencies.md#update-dependencies-overview).
-* Merge `develop` branch into `master` branch.
+* Merge `develop` branch into `main` branch.
 * Rerun all tests:
   - [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
   - [Run R tests](./testing.md#run-r-tests).
