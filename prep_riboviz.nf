@@ -201,6 +201,7 @@ def helpMessage() {
     Visualization parameters:
 
     * 'run_static_html': run static html visualization per sample? (default 'TRUE')
+    * 'output_pdfs': generate .pdfs for sample-related plots (default 'TRUE')
 
     General:
 
@@ -327,6 +328,7 @@ params.max_read_length = 50
 params.min_read_length = 10
 params.multiplex_fq_files = []
 params.num_processes = 1
+params.output_pdfs = true
 params.publish_index_tmp = false
 params.primary_id = "Name"
 params.rpf = true
