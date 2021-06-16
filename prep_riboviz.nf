@@ -1226,6 +1226,7 @@ process generateStatsFigs {
            --dataset=${params.dataset} \
            --hd-file=${sample_h5} \
            --orf-fasta-file=${orf_fasta} \
+           --output-pdfs=${params.output_pdfs} \
            --rpf=${params.rpf} \
            --output-dir=. \
            --do-pos-sp-nt-freq=${params.do_pos_sp_nt_freq} \
