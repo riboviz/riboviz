@@ -1,4 +1,4 @@
-# Creating a regression test data repository
+# Creating a test data repository
 
 ## Caution
 
@@ -6,10 +6,9 @@ Any repository hosted on GitHub should not exceed 1GB in size. GitHub's [What is
 
 ## Create a repository on GitHub
 
-Create a repository, `regression-test-data-<YYYYMMDD>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: `regression-test-data-20200220`.
+Create a repository, `test-data-<YYYYMMDD>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: `test-data-20200220`.
 
-For data corresponding to a release, create a repository, `regression-test-data-<TAG>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: `regression-test-data-2.0`.
-
+For data corresponding to a release, create a repository, `test-data-<TAG>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: `test-data-2.0`.
 
 ## Clone a local copy of the new repository
 
@@ -37,10 +36,10 @@ $ source bash/environment.sh > ~/<REPOSITORY>/environment.txt 2>&1
 Copy template `README.md`:
 
 ```console
-$ cp docs/developer/regression-test-data-readme.md ~/<REPOSITORY>/README.md
+$ cp docs/developer/test-data-readme.md ~/<REPOSITORY>/README.md
 ```
 
-Edit `<REPOSITORY>/README.md` and fill in the details about the regression test data.
+Edit `<REPOSITORY>/README.md` and fill in the details about the test data.
 
 ## Add, commit and push data
 

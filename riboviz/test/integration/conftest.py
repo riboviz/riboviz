@@ -1,8 +1,8 @@
 """
-pytest plugin file for regression tests.
+pytest plugin file for integration tests.
 
 This allows pytest to take in additional command-line parameters to
-pass onto regression test modules:
+pass onto integration test modules:
 
 * ``--expected=<DIRECTORY>``: Directory with expected data files,
   against which files specified in the configuration file (see below)

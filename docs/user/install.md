@@ -709,7 +709,7 @@ You can now check your installation by running RiboViz tests by running a "vigne
 
 Once you have run the "vignette", you can check your installation by running tests:
 
-* [Run vignette regression tests](../developer/testing.md#run-vignette-regression-tests).
+* [Run vignette integration tests](../developer/testing.md#run-vignette-integration-tests).
 * [Run Python tests and workflow tests](../developer/testing.md#run-python-tests-and-workflow-tests).
 
 ---
