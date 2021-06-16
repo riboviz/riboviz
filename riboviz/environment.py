@@ -47,7 +47,7 @@ def update_config_with_env(env_vars, config):
     environment variable.
 
     If any environment variable is undefined then the
-    value :py:const.`DEFAULT_ENV_DIR` is inserted.
+    value :py:const:`DEFAULT_ENV_DIR` is inserted.
 
     :param env_vars: Environment variables and values
     :type env_vars: dict

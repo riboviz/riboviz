@@ -1,11 +1,11 @@
 """
 html-related constants and functions.
 """
-import subprocess
 from riboviz import utils
 
 HTML_EXT = "html"
 """ File extension. """
+
 
 def equal_html(file1, file2):
     """

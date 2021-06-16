@@ -224,6 +224,7 @@ def replace_tokens(string, tokens={}):
     Customise string. Given a string and mapping from tokens to
     substrings, iterate through the tokens and when a match is
     found replace the token with the substring.
+
     :param string: String
     :type string: str or unicode
     :param tokens: Map from tokens to substrings

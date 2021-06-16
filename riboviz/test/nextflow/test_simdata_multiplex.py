@@ -26,8 +26,8 @@ from riboviz import fastq
 from riboviz import params
 from riboviz import utils
 from riboviz import workflow_files
-from riboviz.test.nextflow import configuration_module
-from riboviz.test.nextflow import nextflow_fixture
+from riboviz.test.nextflow import configuration_module  # pylint: disable=unused-import
+from riboviz.test.nextflow import nextflow_fixture  # pylint: disable=unused-import
 from riboviz.test.nextflow.test_simdata_umi \
     import check_umi_groups
 from riboviz.test.nextflow.test_simdata_umi \

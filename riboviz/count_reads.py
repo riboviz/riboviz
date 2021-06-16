@@ -573,6 +573,7 @@ def equal_read_counts(file1, file2, comment="#"):
         error.args = (message,)
         raise
 
+
 if __name__ == '__main__':
 
     import sys

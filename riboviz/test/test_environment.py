@@ -19,6 +19,7 @@ from riboviz import params
 def test_get_environment_vars(envs_values, monkeypatch):
     """
     Test :py:func:`riboviz.environment.get_environment_vars`.
+
     :param envs_values: Dictionary of environment variables to values
     :type envs_values: dict
     :param monkeypatch: Fixture to help modify OS environment variables \
@@ -41,7 +42,8 @@ def test_apply_env_to_config(env, param, monkeypatch):
     """
     Test :py:func:`riboviz.environment.apply_env_to_config` with
     a combination of environment variable and RiboViz parameter
-    that supports the use of environment variable tokens
+    that supports the use of environment variable tokens.
+
     :param env: Environment variable
     :type envs_values: str or unicode
     :param param: Parameter
@@ -75,6 +77,7 @@ def test_apply_default_env_to_config(env, param):
     that supports the use of environment variable tokens. In this
     test the environment variable token is not used so the
     default value of "." is expected to be substituted.
+
     :param env: Environment variable
     :type envs_values: str or unicode
     :param param: Parameter
