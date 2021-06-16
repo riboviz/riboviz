@@ -102,7 +102,7 @@ RENAMES = {
     "rRNA_fasta": params.RRNA_FASTA_FILE,
     "rRNA_index": params.RRNA_INDEX_PREFIX,
     "ribovizGFF": params.IS_RIBOVIZ_GFF,
-    "stop_in_cds" : params.STOP_IN_FEATURE,
+    "stop_in_cds": params.STOP_IN_FEATURE,
     "t_rna": params.T_RNA_FILE
 }
 """
