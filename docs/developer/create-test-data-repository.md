@@ -48,5 +48,5 @@ Edit `<REPOSITORY>/README.md` and fill in the details about the regression test 
 $ cd ~/<REPOSITORY>
 $ git add .
 $ git commit -m "Added test data"
-$ git push origin master
+$ git push origin main
 ```
