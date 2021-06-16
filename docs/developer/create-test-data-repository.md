@@ -47,5 +47,5 @@ Edit `<REPOSITORY>/README.md` and fill in the details about the test data.
 $ cd ~/<REPOSITORY>
 $ git add .
 $ git commit -m "Added test data"
-$ git push origin master
+$ git push origin main
 ```
