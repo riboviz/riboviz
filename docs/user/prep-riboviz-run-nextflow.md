@@ -11,8 +11,8 @@ Contents:
 * [Validate configuration](#validate-configuration)
   - [Skip checks for ribosome profiling data files parameter](#skip-checks-for-ribosome-profiling-data-files-parameter)
 * [Run the Nextflow workflow](#run-the-nextflow-workflow)
-  - [Troubleshooting: `Error executing process staticHTML` and `AnalysisOutputs.Rmd`](#troubleshooting-error-executing-process-statichtml-and-analysisoutputsrmd`
-  - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
+  - [Troubleshooting: `Error executing process staticHTML` and `AnalysisOutputs.Rmd`](#troubleshooting-error-executing-process-statichtml-and-analysisoutputsrmd)
+- [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
   - [Troubleshooting: deduplication and memory issues](#troubleshooting-deduplication-and-memory-issues)
 * [Help](#help)
 * [Incremental build](#incremental-build)
