@@ -1184,7 +1184,7 @@ process generateStatsFigs {
         tuple val(sample_id), file("startcodon_ribogrid.pdf") \
             optional true into start_codon_ribogrid_pdf
         tuple val(sample_id), file("codon_ribodens.pdf") \
-            optional (! (is_t_rna_and_codon_positions_file && output_pdfs)) \
+            optional (! (is_t_rna_and_codon_positions_file && params.output_pdfs)) \
             into codon_ribodens_pdf
         tuple val(sample_id), file("codon_ribodens.tsv") \
             optional (! is_t_rna_and_codon_positions_file) \
@@ -1193,7 +1193,7 @@ process generateStatsFigs {
             optional (! is_t_rna_and_codon_positions_file) \
             into codon_ribodens_gathered_tsv
         tuple val(sample_id), file("features.pdf") \
-            optional (! (is_features_file && output_pdfs)) into features_pdf
+            optional (! (is_features_file && params.output_pdfs)) into features_pdf
         tuple val(sample_id), file("sequence_features.tsv") \
             optional (! is_features_file) into sequence_features_tsv
         tuple val(sample_id), file("3ntframe_bygene.tsv") \
@@ -1203,7 +1203,7 @@ process generateStatsFigs {
             optional (! is_asite_disp_length_file) \
             into nt3frame_bygene_filtered_tsv
         tuple val(sample_id), file("3ntframe_propbygene.pdf") \
-            optional (! (is_asite_disp_length_file && output_pdfs)) \
+            optional (! (is_asite_disp_length_file && params.output_pdfs)) \
             into nt3frame_propbygene_pdf
     shell:
         t_rna_flag = is_t_rna_and_codon_positions_file \
