@@ -192,6 +192,7 @@ def pytest_generate_tests(metafunc):
         "index_dir": [config[params.INDEX_DIR]],
         "tmp_dir": [config[params.TMP_DIR]],
         "output_dir": [config[params.OUTPUT_DIR]],
+	"output_pdfs": [utils.value_in_dict(params.OUTPUT_PDFS, config)],
         "extract_umis": [utils.value_in_dict(params.EXTRACT_UMIS, config)],
         "dedup_umis": [utils.value_in_dict(params.DEDUP_UMIS, config)],
         "dedup_stats": [True if params.DEDUP_STATS not in config else utils.value_in_dict(params.DEDUP_STATS, config)],

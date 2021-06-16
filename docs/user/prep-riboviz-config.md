@@ -82,6 +82,7 @@ The workflow also supports the following configuration parameters. All directory
 | `orf_fasta_file` | Transcript sequences file containing both coding regions and flanking regions (FASTA file) | Yes | |
 | `orf_gff_file` | Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts (GTF/GFF3 file) | Yes | |
 | `orf_index_prefix` | Prefix for ORF index files, relative to `<dir_index>` | Yes | |
+| `output_pdfs` | Generate .pdfs for sample-related plots | No | `true` |
 | `primary_id` | Primary gene IDs to access the data (YAL001C, YAL003W, etc.) | No | `Name` |
 | `publish_index_tmp` | Publish index and temporary files to `<dir_index>` and `<dir_tmp>`? If `true` copy index and temporary files from Nextflow's `work/` directory, else use symbolic links only (see [Nextflow `work/` directory](../user/prep-riboviz-operation.md#nextflow-work-directory)). | No | `false` |
 | `rpf` | Is the dataset an RPF or mRNA dataset? | No | `true` |
@@ -90,7 +91,6 @@ The workflow also supports the following configuration parameters. All directory
 | `samsort_memory` | Memory to give to `samtools sort`  | No | `null` (`samtools sort` uses built-in default `768M`, [samtools sort](http://www.htslib.org/doc/samtools-sort.html)) |
  | `sample_sheet` | A sample sheet, relative to `<dir_in>` (tab-separated values file) | Only if `multiplex_fq_files` is provided | |
 | `secondary_id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) | No | `NULL` |
-<<<<<< HEAD
 | `skip_inputs` | When validating configuration (see `validate_only` below) skip checks for existence of ribosome profiling data files (`fq_files`, `multiplexed_fq_files`, `sample_sheet`)?  | No | `false` |
 | `stop_in_cds` | Are stop codons part of the CDS annotations in GFF? Used by `bam_to_h5.R` only (and only if `is_riboviz_gff` is `false`). Note: this parameter is now deprecated by `stop_in_feature` and will be removed in a future release. If both `stop_in_feature` and `stop_in_cds` are defined then `stop_in_feature` takes precedence. | No | `false` |
 | `stop_in_feature` | Are stop codons part of the feature annotations in GFF? If not provided and `stop_in_cds` is provided then the value of `stop_in_cds` is used for `stop_in_feature`. If both `stop_in_feature` and `stop_in_cds` are defined then `stop_in_feature` takes precedence. | No | `false` |

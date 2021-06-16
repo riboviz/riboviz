@@ -660,7 +660,7 @@ def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
                           workflow_r.START_CODON_RIBOGRID_PDF,
                           workflow_r.THREE_NT_FRAME_PROP_BY_GENE_PDF])
 def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
-                                 file_name):
+                                 file_name, output_pdfs):
     """
     Test ``generate_stats_figs.R`` PDF files exist.
 
@@ -672,7 +672,11 @@ def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
+    :param output_pdfs: Whether pdfs will be generated
+    :type output_pdfs: bool
     """
+    if not output_pdfs:
+	    pytest.skip('Skipped testing for pdfs as pdfs not generated')
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
     expected_file = os.path.join(expected_fixture, output_dir_name,
                                  sample, file_name)

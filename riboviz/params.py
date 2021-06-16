@@ -11,6 +11,9 @@ TMP_DIR = "dir_tmp"
 OUTPUT_DIR = "dir_out"
 """ Output files directory. """
 
+OUTPUT_PDFS = "output_pdfs"
+""" Generate .pdfs for sample-related plots. """
+
 ORF_FASTA_FILE = "orf_fasta_file"
 """ ORF file to align to. """
 ORF_GFF_FILE = "orf_gff_file"
