@@ -27,8 +27,8 @@ from riboviz import params
 from riboviz import umi_tools
 from riboviz import workflow_files
 from riboviz import workflow_r
-from riboviz.test.nextflow import configuration_module
-from riboviz.test.nextflow import nextflow_fixture
+from riboviz.test.nextflow import configuration_module  # pylint: disable=unused-import
+from riboviz.test.nextflow import nextflow_fixture  # pylint: disable=unused-import
 
 
 TEST_CONFIG_FILE = riboviz.test.SIMDATA_UMI_CONFIG

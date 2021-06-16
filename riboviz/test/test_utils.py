@@ -132,6 +132,7 @@ def get_file_ext_name():
 def test_replace_tokens(string, tokens, expected):
     """
     Test :py:func:`riboviz.utils.replace_tokens`.
+
     :param string: String
     :type string: str or unicode
     :param tokens: Map from tokens to substrings

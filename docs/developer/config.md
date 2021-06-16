@@ -38,8 +38,6 @@ vignette/simdata_umi_config.yaml
 vignette/simdata_multiplex_config.yaml
 vignette/remote_vignette_config.yaml
 riboviz/test/config/vignette_config_current.yaml
-riboviz/test/config/simdata_umi_config_current.yaml
-riboviz/test/config/simdata_multiplex_config_current.yaml
 ```
 
 3. Update the "Upgrade configuration files" code, `riboviz/upgrade_config.py`:

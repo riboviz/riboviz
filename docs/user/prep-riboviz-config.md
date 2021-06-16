@@ -82,6 +82,7 @@ The workflow also supports the following configuration parameters. All directory
 | `orf_fasta_file` | Transcript sequences file containing both coding regions and flanking regions (FASTA file) | Yes | |
 | `orf_gff_file` | Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts (GTF/GFF3 file) | Yes | |
 | `orf_index_prefix` | Prefix for ORF index files, relative to `<dir_index>` | Yes | |
+| `output_pdfs` | Generate .pdfs for sample-related plots | No | `true` |
 | `primary_id` | Primary gene IDs to access the data (YAL001C, YAL003W, etc.) | No | `Name` |
 | `publish_index_tmp` | Publish index and temporary files to `<dir_index>` and `<dir_tmp>`? If `true` copy index and temporary files from Nextflow's `work/` directory, else use symbolic links only (see [Nextflow `work/` directory](../user/prep-riboviz-operation.md#nextflow-work-directory)). | No | `false` |
 | `rpf` | Is the dataset an RPF or mRNA dataset? | No | `true` |
@@ -90,7 +91,6 @@ The workflow also supports the following configuration parameters. All directory
 | `samsort_memory` | Memory to give to `samtools sort`  | No | `null` (`samtools sort` uses built-in default `768M`, [samtools sort](http://www.htslib.org/doc/samtools-sort.html)) |
  | `sample_sheet` | A sample sheet, relative to `<dir_in>` (tab-separated values file) | Only if `multiplex_fq_files` is provided | |
 | `secondary_id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) | No | `NULL` |
-<<<<<< HEAD
 | `skip_inputs` | When validating configuration (see `validate_only` below) skip checks for existence of ribosome profiling data files (`fq_files`, `multiplexed_fq_files`, `sample_sheet`)?  | No | `false` |
 | `stop_in_cds` | Are stop codons part of the CDS annotations in GFF? Used by `bam_to_h5.R` only (and only if `is_riboviz_gff` is `false`). Note: this parameter is now deprecated by `stop_in_feature` and will be removed in a future release. If both `stop_in_feature` and `stop_in_cds` are defined then `stop_in_feature` takes precedence. | No | `false` |
 | `stop_in_feature` | Are stop codons part of the feature annotations in GFF? If not provided and `stop_in_cds` is provided then the value of `stop_in_cds` is used for `stop_in_feature`. If both `stop_in_feature` and `stop_in_cds` are defined then `stop_in_feature` takes precedence. | No | `false` |
@@ -120,8 +120,8 @@ Example `umi_regexp` are:
 
 * `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})$` extracts a 4nt UMI from the 5' end of a read and a 4nt UMI from the 3' end.
 * `^(?P<umi_1>.{4}).+(?P<umi_2>.{4})(?P<cell_1>.{3})$` extracts a 3nt barcode from the 3' end of a read then extracts a 4nt UMI from the 5' end and a 4nt UMI from the 3' end.
-* `^(?P<umi_1>.{4}).+(?P<umi_2>.{5})(?P<cell_1>.{5})$` extracts a 4nt umi from the 5' end, 5nt umi from the 3' end, and a 5nt barcode from the 3' end. This expression is used in the [Favate et al 2020 E. coli example dataset](https://github.com/riboviz/example-datasets/blob/master/bacteria/ecoli/Favate_2020_unpublished.yaml) and the [Gupta et al 2018 saccharomyces example dataset](https://github.com/riboviz/example-datasets/blob/master/fungi/saccharomyces/Gupta_2018_tRNA_Modification_Carbon_Nitrogen_Metabolism_RPF_9-samples_CDS_w_250utrs_config.yaml).
-* `(?P<umi_1>.{8})` extracts an 8nt UMI from the 5' end of the read. This expression is used in the [Weinberg et al 2016 Saccharomyces example dataset](https://github.com/riboviz/example-datasets/blob/weinberg_2016_dataset-20/fungi/saccharomyces/Weinberg_2016_RPF_3_samples_CDS_w_250utrs_config.yaml).
+* `^(?P<umi_1>.{4}).+(?P<umi_2>.{5})(?P<cell_1>.{5})$` extracts a 4nt umi from the 5' end, 5nt umi from the 3' end, and a 5nt barcode from the 3' end. This expression is used in the [Favate et al 2021 E. coli example dataset](https://github.com/riboviz/example-datasets/blob/master/bacteria/escherichia/Favate_etal_2021_ltee_translation_multiplexed_CDS_w_25utrs.yaml) and the [Gupta et al 2018 saccharomyces example dataset](https://github.com/riboviz/example-datasets/blob/master/fungi/saccharomyces/Gupta_2018_tRNA_Modification_Carbon_Nitrogen_Metabolism_RPF_9-samples_CDS_w_250utrs_config.yaml).
+* `(?P<umi_1>.{8})` extracts an 8nt UMI from the 5' end of the read. This expression is used in the [Weinberg et al 2016 Saccharomyces example dataset](https://github.com/riboviz/example-datasets/blob/master/fungi/saccharomyces/Weinberg_2016_RPF_1_sample_cerevisiae_CDS_w_250utrs_config.yaml).
 
 ### Constraints
 
@@ -240,18 +240,18 @@ For example, `vignette/vignette_config.yaml` assumes the following structure of 
 
 ```
 data/
-  yeast_CDS_w_250utrs.fa 
-  yeast_CDS_w_250utrs.gff3 
-  yeast_codon_pos_i200.RData 
-  yeast_features.tsv 
-  yeast_standard_asite_disp_length.txt 
-  yeast_tRNAs.tsv 
+  yeast_CDS_w_250utrs.fa
+  yeast_CDS_w_250utrs.gff3
+  yeast_codon_pos_i200.RData
+  yeast_features.tsv
+  yeast_standard_asite_disp_length.txt
+  yeast_tRNAs.tsv
 vignette/
   input/
-    SRR1042855_s1mi.fastq.gz 
-    SRR1042864_s1mi.fastq.gz 
-    yeast_rRNA_R64-1-1.fa 
-    yeast_YAL_CDS_w_250utrs.fa 
+    SRR1042855_s1mi.fastq.gz
+    SRR1042864_s1mi.fastq.gz
+    yeast_rRNA_R64-1-1.fa
+    yeast_YAL_CDS_w_250utrs.fa
     yeast_YAL_CDS_w_250utrs.gff3
 ```
 
@@ -273,17 +273,17 @@ Create symbolic links to all the input files, where `$HOME/riboviz` is the path 
 
 ```console
 $ cd example/data
-$ ln -s $HOME/riboviz/data/yeast_CDS_w_250utrs.fa 
-$ ln -s $HOME/riboviz/data/yeast_CDS_w_250utrs.gff3 
-$ ln -s $HOME/riboviz/data/yeast_codon_pos_i200.RData 
-$ ln -s $HOME/riboviz/data/yeast_features.tsv 
-$ ln -s $HOME/riboviz/data/yeast_standard_asite_disp_length.txt 
-$ ln -s $HOME/riboviz/data/yeast_tRNAs.tsv 
+$ ln -s $HOME/riboviz/data/yeast_CDS_w_250utrs.fa
+$ ln -s $HOME/riboviz/data/yeast_CDS_w_250utrs.gff3
+$ ln -s $HOME/riboviz/data/yeast_codon_pos_i200.RData
+$ ln -s $HOME/riboviz/data/yeast_features.tsv
+$ ln -s $HOME/riboviz/data/yeast_standard_asite_disp_length.txt
+$ ln -s $HOME/riboviz/data/yeast_tRNAs.tsv
 $ cd ../vignette/input
-$ ln -s $HOME/riboviz/vignette/input/SRR1042855_s1mi.fastq.gz 
-$ ln -s $HOME/riboviz/vignette/input/SRR1042864_s1mi.fastq.gz 
-$ ln -s $HOME/riboviz/vignette/input/yeast_rRNA_R64-1-1.fa 
-$ ln -s $HOME/riboviz/vignette/input/yeast_YAL_CDS_w_250utrs.fa 
+$ ln -s $HOME/riboviz/vignette/input/SRR1042855_s1mi.fastq.gz
+$ ln -s $HOME/riboviz/vignette/input/SRR1042864_s1mi.fastq.gz
+$ ln -s $HOME/riboviz/vignette/input/yeast_rRNA_R64-1-1.fa
+$ ln -s $HOME/riboviz/vignette/input/yeast_YAL_CDS_w_250utrs.fa
 $ ln -s $HOME/riboviz/vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 $ cd ../..
 $ ls

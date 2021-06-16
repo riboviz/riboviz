@@ -1,14 +1,14 @@
 """
-Regression test suite.
+Integration test suite.
 
-The regression test suite runs
+The integration test suite runs
 :py:const:`riboviz.test.NEXTFLOW_WORKFLOW` (via Nextflow) using a
 given configuration file, then compares the results to a directory of
 pre-calculated results, specified by the user.
 
 Usage::
 
-    pytest riboviz/test/regression/test_regression.py
+    pytest riboviz/test/integration/test_integration.py
       --expected=DIRECTORY
       [--skip-workflow]
       [--check-index-tmp]
@@ -44,7 +44,7 @@ can be used.
 
 If the configuration specifies multiplexed samples
 (:py:const:`riboviz.params.MULTIPLEX_FQ_FILES`) then
-``--check-index-tmp`` cannot be used. This regression test module
+``--check-index-tmp`` cannot be used. This integration test module
 does not implement support for validating temporary files produced
 for worklows including demultiplexing. For sample-specific output
 files, each sample-specific output file is only validated if the
@@ -99,7 +99,7 @@ deduplication and grouping then note that:
   between runs depending on which reads are removed by ``umi_tools
   dedup``, so only the existence of the file is checked.
 
-See :py:mod:`riboviz.test.regression.conftest` for information on the
+See :py:mod:`riboviz.test.integration.conftest` for information on the
 fixtures used by these tests.
 """
 import os
@@ -660,7 +660,7 @@ def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
                           workflow_r.START_CODON_RIBOGRID_PDF,
                           workflow_r.THREE_NT_FRAME_PROP_BY_GENE_PDF])
 def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
-                                 file_name):
+                                 file_name, output_pdfs):
     """
     Test ``generate_stats_figs.R`` PDF files exist.
 
@@ -672,7 +672,11 @@ def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
+    :param output_pdfs: Whether pdfs will be generated
+    :type output_pdfs: bool
     """
+    if not output_pdfs:
+	    pytest.skip('Skipped testing for pdfs as pdfs not generated')
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
     expected_file = os.path.join(expected_fixture, output_dir_name,
                                  sample, file_name)
