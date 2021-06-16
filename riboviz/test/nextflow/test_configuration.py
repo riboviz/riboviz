@@ -35,7 +35,7 @@ def tokenize_config_in_place(config):
       - :py:const:`riboviz.params.ORF_FASTA_FILE`
       - :py:const:`riboviz.params.ORF_GFF_FILE`
       - :py:const:`riboviz.params.RRNA_FASTA_FILE`
-    * :py:const:`riboviz.params.ENV_RIBOVIZ_SAMPLES`replaces paths in:
+    * :py:const:`riboviz.params.ENV_RIBOVIZ_SAMPLES` replaces paths in:
       - :py:const:`riboviz.params.INDEX_DIR`
       - :py:const:`riboviz.params.INPUT_DIR`
       - :py:const:`riboviz.params.OUTPUT_DIR`
