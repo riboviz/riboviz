@@ -11,7 +11,6 @@ Contents:
 * [Validate configuration](#validate-configuration)
   - [Skip checks for ribosome profiling data files parameter](#skip-checks-for-ribosome-profiling-data-files-parameter)
 * [Run the Nextflow workflow](#run-the-nextflow-workflow)
-  - [Troubleshooting: `Error executing process staticHTML` and `AnalysisOutputs.Rmd`](#troubleshooting-error-executing-process-statichtml-and-analysisoutputsrmd`
   - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
   - [Troubleshooting: deduplication and memory issues](#troubleshooting-deduplication-and-memory-issues)
 * [Help](#help)
@@ -251,51 +250,6 @@ The workflow will then execute, displaying information on each step as it is exe
 * Sample-specific steps are labelled with the sample ID.
 * Multiplexed file-specific steps are labelled with the file name (minus extension).
 * `collateTpms` is labelled with the IDs of all the samples that are collated.
-
-### Troubleshooting: `Error executing process staticHTML` and `AnalysisOutputs.Rmd`
-
-If your version of RiboViz is from a `.zip` or `.tar.gz` file downloaded from GitHub or Figshare (i.e. not a clone of the repository from GitHub) then you may see the following error during execution of the `staticHTML` task of the workflow. For example:
-
-```console
-...
-[a1/93adf8] Submitted process > staticHTML (WT3AT)
-Error executing process > 'staticHTML (WT3AT)'
-
-Caused by:
-  Process `staticHTML (WT3AT)` terminated with an error exit status (1)
-
-Command executed:
-
-  Rscript -e "rmarkdown::render('/home/user/riboviz/riboviz/rmarkdown/AnalysisOutputs.Rmd', ...)
-
-Command exit status:
-  1
-
-...
-
-Command error:
- 
-processing file: AnalysisOutputs.Rmd
-  Quitting from lines 95-103 (AnalysisOutputs.Rmd) 
-  Error in file(filename, "r", encoding = encoding) : 
-    cannot open the connection
-  Calls: <Anonymous> ... withCallingHandlers -> withVisible -> eval -> eval -> source -> file
-  Execution halted
-...
-
-Workflow finished! (failed)
-...
-```
-
-If this arises then create a `.here` file in your RiboViz directory:
-
-```console
-$ touch .here
-```
-
-and rerun the workflow.
-
-If the problem still arises then it is recommended you use a clone of the `riboviz` repository from GitHub. Please also add information to the issue "Fix bug with AnalysisOutputs.Rmd use of 'here' if `.git` is not present" [#352](https://github.com/riboviz/riboviz/issues/352). It is unclear why this arises but it is hoped, when RiboViz moves its R code into a package that this problem will no longer arise.
 
 ### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
 
