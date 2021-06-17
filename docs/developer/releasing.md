@@ -10,7 +10,10 @@ These are the key steps in building a release.
   - [docs/developer/create-test-data-repository.md](./create-test-data-repository.md)
   - [docs/developer/testing.md](./testing.md)
   - [docs/developer/releasing.md](./releasing.md) (this page)
-* Update the Releases table in `README.md` with a row for intended release and provide a URL with the intended release tag. See the current rows of the table for the format of the URL.
+* Update `README.md`:
+  - Update the 'figshare. Software' reference publication year.
+  - Update the 'Copyright' year.
+  - Update the Releases table with a row for the release and provide a URL with the release tag. See the current rows of the table for the format of the URL.
 * Update software versions in `docs/user/install.md` - see [Update Dependencies overview](./dependencies.md#update-dependencies-overview).
 * Merge `develop` branch into `main` branch.
 * Rerun all tests:
@@ -21,8 +24,8 @@ These are the key steps in building a release.
 * Tag release in repository:
 
 ```console
-$ git tag 2.0
-$ git push origin 2.0
+$ git tag 2.1
+$ git push origin 2.1
 ```
 
 * Create a test data repository. See [Creating a test data repository](./create-test-data-repository.md)

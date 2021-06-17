@@ -8,7 +8,7 @@ Any repository hosted on GitHub should not exceed 1GB in size. GitHub's [What is
 
 Create a repository, `test-data-<YYYYMMDD>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: `test-data-20200220`.
 
-For data corresponding to a release, create a repository, `test-data-<TAG>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: `test-data-2.0`.
+For data corresponding to a release, create a repository, `test-data-<TAG>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: `test-data-2.1`.
 
 ## Clone a local copy of the new repository
 

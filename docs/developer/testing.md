@@ -49,7 +49,7 @@ Download test data, for example:
 
 ```console
 $ cd
-$ git clone https://github.com/riboviz/test-data-2.0
+$ git clone https://github.com/riboviz/test-data-2.1
 ```
 
 Run the tests for the workflow (these may take a few minutes):
@@ -66,7 +66,7 @@ For example:
 ```console
 $ cd riboviz
 $ pytest riboviz/test/integration/test_integration.py \
-    --expected=$HOME/test-data-2.0 \
+    --expected=$HOME/test-data-2.1 \
     --config-file=vignette/vignette_config.yaml
 ```
 
@@ -177,7 +177,7 @@ Observe that the final directories in each path - `index`, `output`, `tmp` - are
 If `--check-index-tmp` is not provided (the default behaviour) then tests for index and temporary files will be skipped. An example of how this appears is as follows:
 
 ```console
-$ pytest riboviz/test/integration/test_integration.py --expected=$HOME/vignette-20200304-2.0 --skip-workflow
+$ pytest riboviz/test/integration/test_integration.py --expected=$HOME/vignette-20210617-2.1 --skip-workflow
 ...
 riboviz/test/integration/test_integration.py ssssssssssssssssssssssssssssssssss..ssss......................................
 ```
@@ -185,7 +185,7 @@ riboviz/test/integration/test_integration.py ssssssssssssssssssssssssssssssssss.
 or, if using pytest's `-v`, verbose, mode:
 
 ```console
-$ pytest -v riboviz/test/integration/test_integration.py --expected=$HOME/vignette-20200304-2.0 --skip-workflow
+$ pytest -v riboviz/test/integration/test_integration.py --expected=$HOME/vignette-20210617-2.1 --skip-workflow
 ...
 riboviz/test/integration/test_integration.py::test_hisat2_build_index[YAL_CDS_w_250-vignette/index-1] SKIPPED [  1%]
 ...
