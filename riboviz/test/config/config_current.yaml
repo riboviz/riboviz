@@ -1,8 +1,8 @@
 adapters: CTGTAGGCACC
-asite_disp_length_file: data/yeast_standard_asite_disp_length.txt
+asite_disp_length_file: NULL
 buffer: 250
 build_indices: TRUE
-codon_positions_file: data/yeast_codon_pos_i200.RData
+codon_positions_file: NULL
 count_reads: TRUE
 count_threshold: 64
 dataset: vignette
@@ -15,7 +15,7 @@ dir_tmp: vignette/tmp
 do_pos_sp_nt_freq: TRUE
 extract_umis: FALSE
 feature: CDS
-features_file: data/yeast_features.tsv
+features_file: NULL
 fq_files:
   WTnone: SRR1042855_s1mi.fastq.gz
   WT3AT: SRR1042864_s1mi.fastq.gz
@@ -54,6 +54,6 @@ samsort_memory: null
 secondary_id: null
 stop_in_feature: FALSE
 trim_5p_mismatches: TRUE
-t_rna_file: data/yeast_tRNAs.tsv
+t_rna_file: NULL
 umi_regexp: null
 validate_only: false
