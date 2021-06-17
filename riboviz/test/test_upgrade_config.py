@@ -81,7 +81,8 @@ def test_upgrade_config_file_identity(config_file, tmp_file):
     """
     Test :py:func:`riboviz.upgrade_config.upgrade_config_file` on
     current versions of configuration files and ensure that the
-    result is the same i.e. the upgrade is a no-op.
+    result is the same i.e. the configurations are already up
+    to date and no parameters are changed during the upgrade.
 
     :param config_file: configuration file
     :type config_file: str or unicode
