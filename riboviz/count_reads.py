@@ -407,7 +407,7 @@ def umi_tools_dedup_bam(tmp_dir, output_dir, sample):
     ``umi_tools dedup``.
 
     ``<tmp_dir>/<sample>`` is searched for a BAM file matching
-    :py:const:`riboviz.workflow_files.PRE_DEDUP_BAM` and
+    :py:const:`riboviz.workflow_files.DEDUP_BAM` and
     if this is found the reads in the output file
     ``<output_dir>/<sample>/<sample>.bam`` are counted.
 
@@ -424,16 +424,12 @@ def umi_tools_dedup_bam(tmp_dir, output_dir, sample):
     :return: ``pandas.core.frame.Series``, or ``None``
     :rtype: pandas.core.frame.Series
     """
-    # Look for pre_dedup.bam.
+    # Look for dedup.bam.
     files = glob.glob(
-        os.path.join(tmp_dir, sample, workflow_files.PRE_DEDUP_BAM))
+        os.path.join(tmp_dir, sample, workflow_files.DEDUP_BAM))
     if not files:
-        # Look for dedup.bam (Nextflow).
-        files = glob.glob(
-            os.path.join(tmp_dir, sample, workflow_files.DEDUP_BAM))
-        if not files:
-            # Deduplication was not done.
-            return None
+        # Deduplication was not done.
+        return None
     # Look for the BAM file output.
     files = glob.glob(os.path.join(
         output_dir, sample, sam_bam.BAM_FORMAT.format(sample)))
@@ -535,7 +531,9 @@ def equal_read_counts(file1, file2, comment="#"):
 
     The data frames are compared column-by-column. All columns, with
     the exception of ``File`` are compared for exact equality
-    using ``pandas.core.series.Series.equals``.
+    using ``pandas.core.series.Series.equals``. ``File`` is
+    compared using the basename of the file only, ignoring
+    the path.
 
     :param file1: File name
     :type file1: str or unicode
@@ -564,23 +562,17 @@ def equal_read_counts(file1, file2, comment="#"):
             assert column1.equals(column2),\
                 "Unequal column values: %s" % column
         for (f1, f2) in zip(data1[FILE], data2[FILE]):
-            is_abs1 = os.path.isabs(f1)
-            is_abs2 = os.path.isabs(f2)
-            if (is_abs1 and is_abs2) or \
-               ((not is_abs1) and (not is_abs2)):
-                assert f1 == f2, "Unequal column values: %s" % FILE
-            elif is_abs1:
-                assert f1.endswith(f2), \
-                    "Unequal column values: %s" % FILE
-            else:
-                assert f2.endswith(f1), \
-                    "Unequal column values: %s" % FILE
+            f1_name = os.path.basename(f1)
+            f2_name = os.path.basename(f2)
+            assert f1_name == f2_name, \
+                "Unequal column values: %s" % FILE
     except AssertionError as error:
         # Add file names to error message.
         message = error.args[0]
         message += " in file: " + str(file1) + ":" + str(file2)
         error.args = (message,)
         raise
+
 
 if __name__ == '__main__':
 

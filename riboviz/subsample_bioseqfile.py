@@ -1,38 +1,52 @@
 """
-Subsample an input FASTQ (or other sequencing) file, to produce a
-smaller file whose reads are randomly sampled from of the input with a
-fixed probability.
+Subsample .fastq, .fastq.gz or other sequence file.
 """
 import gzip
 import os
-import os.path
-from random import random
+import random
 from Bio import SeqIO
 
 
-def subsample_bioseqfile(input_file, prob, output_file, file_type,
-                         verbose=False):
+def subsample_bioseqfile(
+        seqfilein, seqfileout, filetype, prob, overwrite, seedvalue, verbose
+):
     """
-    Subsample an input FASTQ (or other sequencing) file, to produce a
-    smaller file whose reads are randomly sampled from of the input
-    with a fixed probability.
+    Subsample a *gzipped* biological sequence file using Bio.SeqIO
+    See https://biopython.org/wiki/SeqIO for description of valid filetypes
 
-    See https://biopython.org/wiki/SeqIO for description of valid
-    filetypes (``fastq``, etc).
-
-    :param input_file: Input file
-    :type input_file: str or unicode
-    :param prob: Proportion to sample
+    :param seqfilein: File name of input sequence file
+    :type seqfilein: str or unicode
+    :param seqfileout: File name of input sequence file
+    :type seqfileout: str or unicode
+    :param filetype: SeqIO file type (default 'fastq')
+    :type filetype: str or unicode
+    :param prob: probability / proportion to sample (default 0.01)
     :type prob: float
-    :param output_file: Output file
-    :type output_file: str or unicode
-    :param file_type: `Bio.SeqIO` file type
-    :type file_type: str or unicode
-    :param verbose: Print progress statements?
+    :param overwrite: overwrite if output file exists? (default False)
+    :type overwrite: bool
+    :param seedvalue: set random seed value (default 1)
+    :type seedvalue: int
+    :param verbose: print progress statements (default False)
     :type verbose: bool
+    :return: Bio.SeqIO
+    :rtype:
+    :raise FileNotFoundError: If the file cannot be found or is \
+    not a file
     """
-    ext = os.path.splitext(input_file)[1]
+
+    ext = os.path.splitext(seqfilein)[1].lower()
+
+    # files exist, overwrite output?
+    if os.path.exists(seqfileout) and not overwrite:
+        raise ValueError(
+            "output file {} already exists, use '-overwrite' to replace"
+            .format(seqfileout))
+    if not os.path.exists(seqfilein):
+        raise ValueError(
+            "input file {} doesn't exist".format(seqfilein))
+
     is_gz = ext in [".gz", ".gzip"]
+
     if is_gz:
         open_file = gzip.open
         open_r = "rt"
@@ -41,12 +55,23 @@ def subsample_bioseqfile(input_file, prob, output_file, file_type,
         open_file = open
         open_r = "r"
         open_w = "w"
-    with open_file(input_file, open_r) as in_handle, \
-        open_file(output_file, open_w) as out_handle:
-        for record in SeqIO.parse(in_handle, file_type):
-            if random() < prob:
+
+    row_count = 0
+    row_count_out = 0
+
+    if seedvalue is not None:
+        random.seed(seedvalue)
+
+    with open_file(seqfilein, open_r) as in_handle, \
+            open_file(seqfileout, open_w) as out_handle:
+        for record in SeqIO.parse(in_handle, filetype):
+            row_count += 1
+            if row_count % 100000 == 0:
+                print(("read {rowcount}".format(rowcount=row_count)))
+            if random.random() < prob:
+                row_count_out += 1
                 if verbose:
-                    print(record.id)
-                SeqIO.write(record, out_handle, file_type)
-    if verbose:
-        print("subsampling complete")
+                    print((record.id))
+                SeqIO.write(record, out_handle, filetype)
+    print(("subsampling complete; read {} records from {}, wrote {} records \
+to {}".format(row_count, seqfilein, row_count_out, seqfileout)))

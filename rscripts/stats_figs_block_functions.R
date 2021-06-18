@@ -86,6 +86,33 @@ PlotThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data){
   
 } # end PlotThreeNucleotidePeriodicity() definition
 
+
+CalculateGenePositionLengthCounts5Start <- function(gene_names, dataset, hd_file, gff_df){
+  # create intermediate data object
+  gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(
+    gene_names = gene_names, 
+    dataset= dataset, 
+    hd_file = hd_file, 
+    gff_df = gff_df
+  )
+  return(gene_poslen_counts_5start_df)
+}
+
+WriteGenePositionLengthCounts5Start <- function(gene_poslen_counts_5start_df){
+  # write out intermediate object
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "gene_position_length_counts_5start.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    gene_poslen_counts_5start_df,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+}
+
 # potentially replace/tweak plot_ribogrid() to follow StyleGuide
 PlotStartCodonRiboGrid <- function(gene_poslen_counts_5start_df){
   # function to do the ribogrid & ribogridbar plots?
@@ -156,12 +183,9 @@ WriteThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data) {
 # calculate function
 CalculateReadLengths <- function(gene_names, dataset, hd_file){
   
-  ## distribution of lengths of all mapped reads
-  print("Starting: Distribution of lengths of all mapped reads")
-  
   # read length-specific read counts stored as attributes of 'reads' in H5 file
   gene_sp_read_length <- lapply(gene_names, function(gene) {
-    GetGeneReadLength(gene, hd_file)
+    GetGeneReadLength(gene, dataset, hd_file)
   })
   
   # sum reads of each length across all genes
@@ -237,13 +261,13 @@ CalculateBiasesInNucleotideComposition <- function(gene_names, dataset, hd_file,
   # This is in a conditional loop because it fails for some inputs
   # and has not been debugged. Needs to be rewritten in tidyverse
   all_out <- c() # creates output object set to null
-  for (lid in seq_len(length(read_range))) { # TODO: WHAT IS LID
+  for (length_id in seq_len(length(read_range))) { 
     out <- lapply(gene_names, function(x) { # TODO: fix variablename 'out' (also check below for uses)
       # For each read length convert reads to IRanges
       GetNTReadPosition(gene = as.character(x),
                         dataset = dataset,
                         hd_file = hd_file,
-                        lid = lid, min_read_length = min_read_length)
+                        length_id = length_id, min_read_length = min_read_length)
     })
     names(out) <- gene_names
     
@@ -252,57 +276,57 @@ CalculateBiasesInNucleotideComposition <- function(gene_names, dataset, hd_file,
     # seq_len(41) generates sequence 1:41
     
     # GetNTReadPosition:
-    # GetNTReadPosition <- function(gene, dataset, hd_file, lid, min_read_length) {
-    #   reads_pos_len <- GetGeneDatamatrix(gene, dataset, hd_file)[lid, ] # Get reads of a particular length
-    #   reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (lid + min_read_length - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
+    # GetNTReadPosition <- function(gene, dataset, hd_file, length_id, min_read_length) {
+    #   reads_pos_len <- GetGeneDatamatrix(gene, dataset, hd_file)[length_id, ] # Get reads of a particular length
+    #   reads_pos_len <- reads_pos_len[1:(length(reads_pos_len) - (length_id + min_read_length - 1))] # Ignore reads whose 5' ends map close to the end of the 3' buffer
     #   pos <- rep(1:length(reads_pos_len), reads_pos_len) # nt positions weighted by number of reads mapping to it
-    #   pos_IR <- IRanges::IRanges(start = pos, width = (lid + min_read_length - 1)) # Create an IRanges object for position-specific reads of a particular length
+    #   pos_IR <- IRanges::IRanges(start = pos, width = (length_id + min_read_length - 1)) # Create an IRanges object for position-specific reads of a particular length
     #   return(pos_IR)
     # }
     
     # TODO FLIC testcode
-    # for (lid in 1:3) { # TODO: WHAT IS LID
+    # for (length_id in 1:3) { # TODO: WHAT IS length_id
     #   out <- lapply(gene_names, function(x) { # TODO: fix variablename 'out' (also check below for uses)
     #     # For each read length convert reads to IRanges
     #     GetNTReadPosition(gene = as.character(x),
     #                       dataset = dataset,
     #                       hd_file = hd_file,
-    #                       lid = lid, min_read_length = min_read_length)
+    #                       length_id = length_id, min_read_length = min_read_length)
     #   })
     # names(out) <- gene_names[1]
     
     # Get position-specific nucleotide counts for reads in each frame
     
     # # TODO: test this function
-    # CalculatePositionSpecificNucleotideCountsByFrame <- function(gene_names, cframe, lid, num_processes){
+    # CalculatePositionSpecificNucleotideCountsByFrame <- function(gene_names, cframe, length_id, num_processes){
     #   mcapply(gene_names, function(gene){
-    #     cons_mat(gene = gene, pos_IR = out[[gene]], cframe = cframe, lid = lid)
+    #     PositionSpecificConsensusMatrix(gene = gene, pos_IR = out[[gene]], cframe = cframe, length_id = length_id)
     #   }, mc.cores = num_processes)
     # } # end of function definition CalculatePositionSpecificNucleotideCountsByFrame()
-    # test_frame0 <- CalculatePositionSpecificNucleotideCountsByFrame(gene_names, cframe=0, lid, num_processes)
+    # test_frame0 <- CalculatePositionSpecificNucleotideCountsByFrame(gene_names, cframe=0, length_id, num_processes)
     
     # frame 0
     fr0 <- mclapply(gene_names, function(gene) {
-      cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 0, lid = lid)
+      PositionSpecificConsensusMatrix(gene = gene, pos_IR = out[[gene]], cframe = 0, length_id = length_id)
     }, mc.cores = num_processes)
     allfr0 <- do.call(rbind, fr0)
     
     # frame 1
     fr1 <- mclapply(gene_names, function(gene) {
-      cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 1, lid = lid)
+      PositionSpecificConsensusMatrix(gene = gene, pos_IR = out[[gene]], cframe = 1, length_id = length_id)
     }, mc.cores = num_processes)
     allfr1 <- do.call(rbind, fr1)
     
     # frame 2
     fr2 <- mclapply(gene_names, function(gene) {
-      cons_mat(gene = gene, pos_IR = out[[gene]], cframe = 2, lid = lid)
+      PositionSpecificConsensusMatrix(gene = gene, pos_IR = out[[gene]], cframe = 2, length_id = length_id)
     }, mc.cores = num_processes)
     allfr2 <- do.call(rbind, fr2)
     
     # Get position-specific freq for all nucleotides
-    cnt_fr0 <- signif(comb_freq(allfr0), 3)
-    cnt_fr1 <- signif(comb_freq(allfr1), 3)
-    cnt_fr2 <- signif(comb_freq(allfr2), 3)
+    cnt_fr0 <- signif(CombineFrequencies(allfr0), 3)
+    cnt_fr1 <- signif(CombineFrequencies(allfr1), 3)
+    cnt_fr2 <- signif(CombineFrequencies(allfr2), 3)
     
     output <- data.frame(rbind(cnt_fr0, cnt_fr1, cnt_fr2)) # TODO: replace variablename 'output'
     all_out <- rbind(all_out, output)
@@ -384,10 +408,35 @@ CalculateGeneReadFrames <- function(dataset, hd_file, gff_df, min_read_length, a
 # gives:
 # TODO
 
-PlotGeneReadFrames <- function(gene_read_frames_data){
-  gene_read_frame_plot <- gene_read_frames_data %>%
-    filter(Ct_fr0 + Ct_fr1 + Ct_fr2 > count_threshold) %>%
-    BoxplotReadFrameProportion()
+FilterGeneReadFrames <- function(gene_read_frames_data, count_threshold){
+  gene_read_frame_data_filtered <- gene_read_frames_data %>%
+    filter(Ct_fr0 + Ct_fr1 + Ct_fr2 > count_threshold)
+  
+  return(gene_read_frame_data_filtered)
+} # end FilterGeneReadFrames() definition
+# gives:
+# TODO
+
+WriteFilteredGeneReadFrames <- function(gene_read_frame_data_filtered){
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3ntframe_bygene_filtered.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    gene_read_frame_data_filtered,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+  #return() # no return as writing-out
+} # end WriteFilteredGeneReadFrames() definition
+# gives:
+# TODO
+
+PlotGeneReadFrames <- function(gene_read_frame_data_filtered){
+  
+  gene_read_frame_plot <- BoxplotReadFrameProportion(gene_read_frame_data_filtered)
   
   return(gene_read_frame_plot)
 } # end PlotGeneReadFrames() definition
@@ -430,7 +479,7 @@ WriteGeneReadFrames <- function(gene_read_frames_data){
 #
 #
 
-CalculatePositionSpecificDistributionOfReads <- function(hd_file, gene_names, dataset, buffer, min_read_length, count_threshold){
+CalculatePositionSpecificDistributionOfReads <- function(gene_names, dataset, hd_file, buffer, min_read_length, count_threshold){
   
   # create empty matrix to store position-specific read counts
   out5p <- matrix(NA, nrow = length(gene_names), ncol = 500) # 5'
@@ -438,9 +487,9 @@ CalculatePositionSpecificDistributionOfReads <- function(hd_file, gene_names, da
   
   out <- lapply(gene_names, function(gene) {
     GetCodonPositionReads(
-      hd_file,
       gene,
       dataset,
+      hd_file = hd_file,
       left = (buffer - 15),
       right = (buffer + 11),
       min_read_length = min_read_length
@@ -503,6 +552,7 @@ PlotPositionSpecificDistributionOfReads <- function(pos_sp_rpf_norm_reads_data){
     geom_line() +
     facet_grid(~End, scales = "free") +
     guides(col = FALSE)
+  return(pos_sp_rpf_norm_reads_plot)
 } # end of definition of function PlotPositionSpecificDistributionOfReads()
 
 SavePositionSpecificDistributionOfReads <- function(pos_sp_rpf_norm_reads_plot){
@@ -730,13 +780,29 @@ PlotSequenceBasedFeatures <- function(features_plot_data){
 } # end PlotSequenceBasedFeatures() definition
 
 
-WriteSequenceBasedFeatures <- function(features_plot) {
+SaveSequenceBasedFeatures <- function(features_plot) {
   # Save plot and file
   ggsave(features_plot, filename = file.path(output_dir, paste0(output_prefix, "features.pdf")))
-  
   # return() NO RETURN as writing out
   
-} # end WriteSequenceBasedFeatures() definition
+} # end SaveSequenceBasedFeatures() definition
+
+
+WriteSequenceBasedFeatures <- function(features_plot_data){
+  # Save file
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "sequence_features.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    features_plot_data,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+  # return() # NO RETURN as writing out
+} # end of WriteSequenceBasedFeatures() definition
 
 
 ## Codon-specific ribosome densities for correlations with tRNAs
@@ -746,13 +812,13 @@ WriteSequenceBasedFeatures <- function(features_plot) {
 CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_file, gene_names, hd_file, dataset, buffer, count_threshold){
   
   # This still depends on yeast-specific arguments and should be edited.
-  yeast_tRNAs <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
+  trna <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
   load(codon_positions_file) # Position of codons in each gene (numbering ignores first 200 codons)
   # Reads in an object named "codon_pos"
   
   out <- lapply(gene_names, function(gene) {
     # From "Position specific distribution of reads" plot
-    GetCodonPositionReads(hd_file, gene, dataset, left = (buffer - 15), right = (buffer + 11), min_read_length = min_read_length)
+    GetCodonPositionReads(gene, dataset, hd_file = hd_file, left = (buffer - 15), right = (buffer + 11), min_read_length = min_read_length)
   }) # Get codon-based position-specific reads for each gene
   names(out) <- gene_names
   
@@ -793,20 +859,22 @@ CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_fi
   A <- a_mn[order(names(codon_pos))]
   P <- p_mn[order(names(codon_pos))]
   E <- e_mn[order(names(codon_pos))]
-  
-  cod_dens_tRNA_data <- cbind(yeast_tRNAs, A, P, E)
-  
+  trna <- trna[order(trna$Codon),]
+  cod_dens_tRNA_data <- cbind(trna, A, P, E)
   return(cod_dens_tRNA_data)
   
 } # end of CalculateCodonSpecificRibosomeDensity() definition
 
 
-PlotCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_data) {
-
+GatherCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_data) {
   # Prepare data for plot
   cod_dens_tRNA_wide <- cod_dens_tRNA_data %>%
-    gather(tRNA_type, tRNA_value, 3:6) %>%
-    gather(Site, Ribodens, 3:5)
+     pivot_longer(!c(AA,Codon,A,P,E),names_to="tRNA_type",values_to="tRNA_value") %>% 
+     pivot_longer(c(A,P,E),names_to="Site",values_to="Ribodens")
+  return(cod_dens_tRNA_wide)
+} 
+
+PlotCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_wide) {
 
   # Plot
   cod_dens_tRNA_plot <- ggplot(cod_dens_tRNA_wide, aes(x = tRNA_value, y = Ribodens)) +
@@ -827,6 +895,22 @@ SaveCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_plot){
   # return() # NO RETURN as writing out
 
 } # end of SaveCodonSpecificRibosomeDensityTRNACorrelation() definition
+
+WriteGatheredCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_wide){
+  # Save file
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "codon_ribodens_gathered.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    cod_dens_tRNA_wide,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+  # return() # NO RETURN as writing out
+} # end of WriteCodonSpecificRibosomeDensityTRNACorrelation() definition
 
 
 WriteCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_data){
