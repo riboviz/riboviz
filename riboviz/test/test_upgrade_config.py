@@ -5,6 +5,7 @@ import os
 import tempfile
 import pytest
 import yaml
+from riboviz import test
 from riboviz import upgrade_config
 from riboviz.test import config
 
@@ -54,14 +55,14 @@ def upgrade_and_validate(config_file,
 
 
 @pytest.mark.parametrize("config_file",
-                         ["vignette_config_1.0.0.yaml",
-                          "vignette_config_1.1.0.yaml",
-                          "vignette_config_2.0.0.yaml",
-                          "vignette_config_current.yaml"])
-def test_upgrade_vignette_config(config_file, tmp_file):
+                         ["config_1.0.0.yaml",
+                          "config_1.1.0.yaml",
+                          "config_2.0.0.yaml",
+                          "config_current.yaml"])
+def test_upgrade_config_file(config_file, tmp_file):
     """
     Test :py:func:`riboviz.upgrade_config.upgrade_config_file` on
-    previous versions of the vignette configuration file
+    previous versions of the configuration file
     (in :py:mod:`riboviz.test.config`) and compare to the current
     version.
 
@@ -69,4 +70,21 @@ def test_upgrade_vignette_config(config_file, tmp_file):
     :type config_file: str or unicode
     """
     upgrade_and_validate(config_file, tmp_file,
-                         "vignette_config_current.yaml")
+                         "config_current.yaml")
+
+
+@pytest.mark.parametrize("config_file",
+                         [test.VIGNETTE_CONFIG,
+                          test.SIMDATA_UMI_CONFIG,
+                          test.SIMDATA_MULTIPLEX_CONFIG])
+def test_upgrade_config_file_identity(config_file, tmp_file):
+    """
+    Test :py:func:`riboviz.upgrade_config.upgrade_config_file` on
+    current versions of configuration files and ensure that the
+    result is the same i.e. the configurations are already up
+    to date and no parameters are changed during the upgrade.
+
+    :param config_file: configuration file
+    :type config_file: str or unicode
+    """
+    upgrade_and_validate(config_file, tmp_file, config_file)

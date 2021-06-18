@@ -26,8 +26,8 @@ Expected parameters added to the current release are added along
 with default values, if they are not already present in the
 configuration:
 
-* ``asite_disp_length_file: data/yeast_standard_asite_disp_length.txt``
-* ``codon_positions_file: data/yeast_codon_pos_i200.RData``
+* ``asite_disp_length_file: null``
+* ``codon_positions_file: null``
 * ``count_reads: true``
 * ``count_threshold: 64``
 * ``dedup_stats: false``
@@ -35,7 +35,7 @@ configuration:
 * ``do_pos_sp_nt_freq: true``
 * ``extract_umis: false``
 * ``feature: CDS``
-* ``features_file: data/yeast_features.tsv``
+* ``features_file: null``
 * ``group_umis: false``
 * ``job_email: null``
 * ``job_email_events: beas``
@@ -57,7 +57,7 @@ configuration:
 * ``samsort_memory: null``
 * ``stop_in_feature: false``
 * ``trim_5p_mismatches: true``
-* ``t_rna_file: data/yeast_tRNAs.tsv``
+* ``t_rna_file: null``
 * ``umi_regexp: null``
 * ``validate_only: false``
 
@@ -111,16 +111,16 @@ Renamed configuration parameters.
 """
 
 UPDATES = {
-    params.ASITE_DISP_LENGTH_FILE: "data/yeast_standard_asite_disp_length.txt",
+    params.ASITE_DISP_LENGTH_FILE: None,
     params.DO_POS_SP_NT_FREQ: True,
-    params.CODON_POSITIONS_FILE: "data/yeast_codon_pos_i200.RData",
+    params.CODON_POSITIONS_FILE: None,
     params.COUNT_READS: True,
     params.COUNT_THRESHOLD: 64,
     params.DEDUP_STATS: False,
     params.DEDUP_UMIS: False,
     params.EXTRACT_UMIS: False,
     params.FEATURE: "CDS",
-    params.FEATURES_FILE:  "data/yeast_features.tsv",
+    params.FEATURES_FILE: None,
     params.FQ_FILES: None,
     params.GROUP_UMIS: False,
     params.MULTIPLEX_FQ_FILES: None,
@@ -131,7 +131,7 @@ UPDATES = {
     params.SAMSORT_MEMORY: None,
     params.STOP_IN_FEATURE: False,
     params.TRIM_5P_MISMATCHES: True,
-    params.T_RNA_FILE: "data/yeast_tRNAs.tsv",
+    params.T_RNA_FILE: None,
     params.UMI_REGEXP: None
 }
 

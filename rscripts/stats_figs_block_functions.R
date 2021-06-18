@@ -812,7 +812,7 @@ WriteSequenceBasedFeatures <- function(features_plot_data){
 CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_file, gene_names, hd_file, dataset, buffer, count_threshold){
   
   # This still depends on yeast-specific arguments and should be edited.
-  yeast_tRNAs <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
+  trna <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
   load(codon_positions_file) # Position of codons in each gene (numbering ignores first 200 codons)
   # Reads in an object named "codon_pos"
   
@@ -859,9 +859,8 @@ CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_fi
   A <- a_mn[order(names(codon_pos))]
   P <- p_mn[order(names(codon_pos))]
   E <- e_mn[order(names(codon_pos))]
-  
-  cod_dens_tRNA_data <- cbind(yeast_tRNAs, A, P, E)
-  
+  trna <- trna[order(trna$Codon),]
+  cod_dens_tRNA_data <- cbind(trna, A, P, E)
   return(cod_dens_tRNA_data)
   
 } # end of CalculateCodonSpecificRibosomeDensity() definition
@@ -870,9 +869,8 @@ CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_fi
 GatherCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_data) {
   # Prepare data for plot
   cod_dens_tRNA_wide <- cod_dens_tRNA_data %>%
-    gather(tRNA_type, tRNA_value, 3:6) %>%
-    gather(Site, Ribodens, 3:5)
-  
+     pivot_longer(!c(AA,Codon,A,P,E),names_to="tRNA_type",values_to="tRNA_value") %>% 
+     pivot_longer(c(A,P,E),names_to="Site",values_to="Ribodens")
   return(cod_dens_tRNA_wide)
 } 
 

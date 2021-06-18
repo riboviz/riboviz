@@ -16,7 +16,6 @@ Add commands to "quick install scripts" (see current content of scripts for what
 
 * [bash/install-ubuntu.sh](../../bash/install-ubuntu.sh).
 * [bash/install-centos.sh](../../bash/install-centos.sh).
-* [bash/environment.sh](../../bash/environment.sh), commands to print versions of any command-line tools.
 * [bash/environment-tables.sh](../../bash/environment-tables.sh), commands to capture versions of any command-line tools and echo these in a tabular format.
 
 Finally, [Update Dependencies overview](#update-dependencies-overview).
@@ -32,7 +31,6 @@ Update [Install ttools not available as operating system packages](../user/insta
 Add commands to "quick install scripts" (see current content of scripts for what is expected):
 
 * [bash/install-tools.sh](../../bash/install-tools.sh), also update commands to create `setenv.sh` if applicable.
-* [bash/environment.sh](../../bash/environment.sh), commands to print versions of any command-line tools.
 * [bash/environment-tables.sh](../../bash/environment-tables.sh), commands to capture versions of any command-line tools and echo these in a tabular format.
 
 Finally, [Update Dependencies overview](#update-dependencies-overview).

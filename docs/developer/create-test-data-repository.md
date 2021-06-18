@@ -6,7 +6,7 @@ Any repository hosted on GitHub should not exceed 1GB in size. GitHub's [What is
 
 ## Create a repository on GitHub
 
-Create a repository, `test-data-<YYYYMMDD>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: `test-data-20200220`.
+Create a repository, `test-data-<YYYYMMDD>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: `test-data-20210618`.
 
 For data corresponding to a release, create a repository, `test-data-<TAG>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: `test-data-2.1`.
 
@@ -25,12 +25,6 @@ $ cp -r vignette/logs ~/<REPOSITORY>
 $ cp -r vignette/output ~/<REPOSITORY>
 ```
 
-## Document execution environment
-
-```console
-$ source bash/environment.sh > ~/<REPOSITORY>/environment.txt 2>&1
-```
-
 ## Create `README.md`
 
 Copy template `README.md`:
@@ -40,6 +34,12 @@ $ cp docs/developer/test-data-readme.md ~/<REPOSITORY>/README.md
 ```
 
 Edit `<REPOSITORY>/README.md` and fill in the details about the test data.
+
+Document environment under which test data was produced:
+
+```console
+$ source bash/environment-tables.sh >> ~/<REPOSITORY>/README.md
+```
 
 ## Add, commit and push data
 
