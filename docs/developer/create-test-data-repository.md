@@ -28,7 +28,7 @@ $ cp -r vignette/output ~/<REPOSITORY>
 ## Document execution environment
 
 ```console
-$ source bash/environment.sh > ~/<REPOSITORY>/environment.txt 2>&1
+$ source bash/environment-tables.sh > ~/<REPOSITORY>/environment.txt 2>&1
 ```
 
 ## Create `README.md`
