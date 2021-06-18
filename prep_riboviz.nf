@@ -1397,6 +1397,7 @@ process staticHTML {
           script += ", sequence_features_file='\$PWD/${sample_sequence_features_tsv}' "
       }
       script += "), "
+      script += "intermediates_dir = '\$PWD', "
       script += "output_format = 'html_document', "
       script += "output_file = '\$PWD/${sample_id}_output_report.html')"
       """
