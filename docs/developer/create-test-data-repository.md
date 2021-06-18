@@ -10,6 +10,15 @@ Create a repository, `test-data-<YYYYMMDD>`, within the [riboviz](https://github
 
 For data corresponding to a release, create a repository, `test-data-<TAG>`, within the [riboviz](https://github.com/riboviz) project on GitHub. For example: `test-data-2.0`.
 
+Rename `master` branch to `main`:
+
+* Go to your repository page on GitHub.
+* Click Settings.
+* Click Branches.
+* In Default branches table, click pen icon to right of master.
+* Enter main.
+* Click Rename branch.
+
 ## Clone a local copy of the new repository
 
 ```console
