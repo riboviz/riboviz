@@ -49,7 +49,7 @@ Download test data, for example:
 
 ```console
 $ cd
-$ git clone https://github.com/riboviz/test-data-2.0
+$ git clone https://github.com/riboviz/test-data-20210618
 ```
 
 Run the tests for the workflow (these may take a few minutes):
@@ -66,7 +66,7 @@ For example:
 ```console
 $ cd riboviz
 $ pytest riboviz/test/integration/test_integration.py \
-    --expected=$HOME/test-data-2.0 \
+    --expected=$HOME/test-data-20210618 \
     --config-file=vignette/vignette_config.yaml
 ```
 
