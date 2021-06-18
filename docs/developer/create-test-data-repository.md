@@ -21,7 +21,6 @@ $ git clone https://github.com/riboviz/<REPOSITORY>
 ```console
 $ cd riboviz
 $ cp vignette/vignette_config.yaml ~/<REPOSITORY>
-$ cp -r vignette/logs ~/<REPOSITORY>
 $ cp -r vignette/output ~/<REPOSITORY>
 ```
 
