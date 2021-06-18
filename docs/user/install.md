@@ -48,7 +48,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | Nextflow | 20.04.1.5335 |
 | Hisat2 | 2.1.0 |
 | Bowtie | 1.2.2 |
-
+ 
 | R Package | Version |
 | --------- | ------- |
 | Biostrings | 2.54.0 |
@@ -72,7 +72,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | testthat | 3.0.1 |
 | tidyverse | 1.3.0 |
 | withr | 2.3.0 |
-
+ 
 | Python Package | Version | Package Manager |
 | -------------- | ------- | --------------- |
 | biopython | 1.77 | conda |
@@ -91,7 +91,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | samtools | 1.9 | conda |
 | sphinx | 4.0.1 | conda |
 | umi_tools | 1.0.1 | conda |
-
+ 
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
 * R: devtools, glue, lintr, roxygen2, styler, testthat, withr.
