@@ -1,8 +1,16 @@
 # Install RiboViz and dependencies
 
-## About these instructions
+## Introduction
 
-These instructions written for Ubuntu and CentOS and tested upon Ubuntu 18.04 and CentOS 7. Other Linux flavours will require different commands to be run.
+This page contains the complete installation instructions for those wishing to run **RiboViz** under a variety of operating systems. It includes information on how to install all of the dependencies required by **RiboViz** along with how to access the **RiboViz** source code and finishes with links to our documentation on how to run **RiboViz** on an example dataset.
+
+**RiboViz** runs under Linux and full instructions are provided for Ubuntu and CentOS (these were tested upon Ubuntu 18.04 Ubuntu 20.04.02.0) and CentOS 7 (2009)). Windows users will either need to use a virtual machine or the Windows Subsystem for Linux (links to instructons on how to set these up are provided below). Mac OS users need check out the web sites for each dependency for information on how to install the dependency under Mac OS.
+
+---
+
+## Operating systems
+
+### Linux users
 
 You need to have permission to run `sudo` to install many of the dependencies. If you don't have `sudo` access you will have to ask a local system administrator to run these commands for you.
 
@@ -17,13 +25,15 @@ We suggest that you:
 
 ### Mac OS users
 
-We suggest that you check out the web sites for each prerequisite for information on how to install the prerequisites under Mac OS.
+We suggest that you check out the web sites for each dependency for information on how to install the dependency under Mac OS.
 
 ---
 
 ## Dependencies overview
 
-The following tables summarise the packages required by RiboViz. Instructions to install each dependency are given in the following sections. Only minimal installation instructions are given. For full information, see the documentation for each dependency.
+The following tables summarise the packages required by RiboViz. Instructions to install each dependency are given in the following sections.
+
+**Note:** Only minimal installation instructions are given. For full information, see the documentation for each dependency.
 
 The versions listed are those used by a RiboViz developer when preparing the current release. Other versions may also be acceptable, but see the constraints below.
 
