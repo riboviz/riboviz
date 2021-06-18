@@ -25,12 +25,6 @@ $ cp -r vignette/logs ~/<REPOSITORY>
 $ cp -r vignette/output ~/<REPOSITORY>
 ```
 
-## Document execution environment
-
-```console
-$ source bash/environment-tables.sh > ~/<REPOSITORY>/environment.txt 2>&1
-```
-
 ## Create `README.md`
 
 Copy template `README.md`:
@@ -40,6 +34,12 @@ $ cp docs/developer/test-data-readme.md ~/<REPOSITORY>/README.md
 ```
 
 Edit `<REPOSITORY>/README.md` and fill in the details about the test data.
+
+Document environment under which test data was produced:
+
+```console
+$ source bash/environment-tables.sh >> ~/<REPOSITORY>/README.md
+```
 
 ## Add, commit and push data
 
