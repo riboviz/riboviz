@@ -737,7 +737,7 @@ $ nextflow log big_majorana -f script,exit -filter "name == 'collateTpms (WT3AT,
         	1
 ```
 
-Here, the `cutadapt` command run for `cutAdapters (WTnone)` had an exit code of 0 so the step succeeded. The `collate_tpms.R` command run for `collateTpms (WT3AT, WTnone)'` had an exit code of 1, indicating an error, so the step failed.
+Here, the `cutadapt` command run for `cutAdapters (WTnone)` had an exit code of 0 so the step succeeded. The `collate_tpms.R` command run for `collateTpms (WT3AT, WTnone)` had an exit code of 1, indicating an error, so the step failed.
 
 To see any output and error messages printed by the commands run by Nextflow and which are captured by Nextflow, run, for example:
 
@@ -900,7 +900,7 @@ Execution halted
 
 For more information on the `work/` directory, and its files, see [Nextflow `work/` directory](./prep-riboviz-operation.md#nextflow-work-directory),
 
-For more information on `nextflow log`, see Nextflow's [Tracing & visualisation](https://www.nextflow.io/docs/latest/tracing.html) or run `nextflow log -h`. To see the log fields available, run `nextlog log -l`.
+For more information on `nextflow log`, see Nextflow's [Tracing & visualisation](https://www.nextflow.io/docs/latest/tracing.html) or run `nextflow log -h`. To see the log fields available, run `nextflow log -l`.
 
 ---
 
