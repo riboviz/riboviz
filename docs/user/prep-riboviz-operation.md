@@ -162,14 +162,6 @@ In addition, the following files are also put into the output directory:
 
 ---
 
-## Log files
-
-Information on the execution of the workflow is added to a file `.nextflow.log`. Log files from previous runs are in files named `.nextflow.log.1`, `.nextflow.log.2` etc. Every time Nextflow is run, the log file names are adjusted - on each successive run `.nextflow.log.1` becomes `.nextflow.log.2` and `.nextflow.log` becomes `.nextflow.log.1`).
-
-Log files for the invocation of each step in the workflow are captured in the [Nextflow `work/` directory](#nextflow-work-directory) described below.
-
----
-
 ## Read counts file
 
 The workflow will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is produced by scanning input, temporary and output directories and counting the number of reads (sequences) processed by specific stages of a RiboViz workflow.
@@ -226,9 +218,9 @@ WTnone	riboviz.tools.trim_5p_mismatch	vignette/tmp/WTnone/orf_map_clean.sam	1451
 
 ## Nextflow `work/` directory
 
-When Nextflow runs, it creates a unique directory for every task in the workflow. This directory contains the input files to the task, the command to be invoked for that task and the output files from that task. These are created within a Nextflow `work/` directory.
+When Nextflow runs, it creates a unique step-specific directory for every step in the workflow. Each step-specific directory has symbolic links to the input files for the step and a bash script with the commands to be run by Nextflow for that step. Nextflow runs this bash script within this directory which creates the step's output files. Nextflow also creates files with output and error messages and the exit code. These step-specific directories are created within a Nextflow `work/` directory located, by default, within the directory within which Nextflow is run.
 
-Every invocation of a task - every process - has its own subdirectory within Nextflow's `work/` directory, each of which are named after the process identifiers (e.g. `ad/1e7c54`) which are displayed when Nextflow runs. These identifiers can also be accessed using the `nextflow log` command. For example, to display the process identifier and `work/` subdirectory of a step called `collateTpms (WT3AT, WTnone)` in a workflow run named `big_majorana`:
+Every step-specific directory within Nextflow's `work/` directory has a name in common with the process identifier (e.g. `ad/1e7c54`) which is displayed when Nextflow runs. These identifiers can also be accessed using the `nextflow log` command. For example, to display the process identifier and `work/` subdirectory of a step called `collateTpms (WT3AT, WTnone)` in a workflow run named `big_majorana`:
 
 ```console
 $ nextflow log big_majorana -f hash,workdir -filter "name == 'collateTpms (WT3AT, WTnone)'"
@@ -236,19 +228,19 @@ $ nextflow log big_majorana -f hash,workdir -filter "name == 'collateTpms (WT3AT
 38/784d89	/home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73
 ```
 
-This shows both the unique identifier, termed a "hash", of this task that was shown when the workflow was run, and also the corresponding subdirectory within `work/` for that task. Note that the identifier is a prefix of the subdirectory under `work/`.
+This shows both the unique identifier, termed a "hash", of this step that was shown when the workflow was run, and also the corresponding subdirectory within `work/` for that step. Note that the identifier is a prefix of the subdirectory under `work/`.
 
-These step-specific subdirectories are where Nextflow runs its tasks. Each subdirectory has:
+These step-specific directories are where Nextflow runs each step. Each subdirectory has:
 
-* Input files. These are symbolic links to the input files for the task which, depending on the task, can be:
-  - Output files in other `work/` subdirectories. For example, the directory for an `hisat2rRNA` proces will have input files which are symbolic links to the output files produced by a `cutAdapters` process,
-  - Input files for the workflow. For example, the directory for a `cutAdapters` process will have an input file which is a symbolic link to a sample file in `vignettte/input`.
-* Bash script (`.command.sh`) containing the specific commands invoked by Nextflow for that task.
-* Output files, from the invocation of the task.
+* Input files. These are symbolic links to the input files for the step which, depending on the step, can be:
+  - Output files in other `work/` subdirectories. For example, the directory for an `hisat2rRNA` step will have input files which are symbolic links to the output files produced by a `cutAdapters` step.
+  - Input files for the workflow. For example, the directory for a `cutAdapters` step will have an input file which is a symbolic link to a sample file in `vignettte/input`.
+* Bash script (`.command.sh`) containing the specific commands invoked by Nextflow for that step.
+* Output files, from the invocation of the step.
 * Standard output (`.command.out`) and standard error (`.command.err`) files and combined standard output and standard error (`.command.log`) containing the output and error messages printed during invocation of the bash script and captured by Nextflow.
-* Exit code (`.exitcode`) output from running the bash script for the task.
+* Exit code (`.exitcode`) output from running the bash script.
 
-For example, for a process `ad/1e7c54`, an invocation of task `hisat2rRNA` for sample `WTnone`, the `work/` directory would include:
+For example, for a p `ad/1e7c54`, an invocation of `hisat2rRNA` for sample `WTnone`, the `work/` directory would include:
 
 ```console
 $ ls -1a work/ad/1e7c54a889f21451cb07d29655e0be/ -printf '%P\t%l\n' | so
@@ -273,7 +265,7 @@ yeast_rRNA.7.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yea
 yeast_rRNA.8.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yeast_rRNA.8.ht2
 ```
 
-The `.ht2` files are symbolic links to the outputs of process `e5/ccf3e6`, an invocation of the task `buildIndicesrRNA`.
+The `.ht2` files are symbolic links to the outputs of the step `e5/ccf3e6`, an invocation of the process `buildIndicesrRNA`.
 
 The RiboViz workflow uses Nextflow's [publishDir](https://www.nextflow.io/docs/latest/process.html#publishdir) directive which allows files to be published to specific directories outwith `work/`.
 
@@ -287,4 +279,12 @@ For index and temporary files, `publishDir` is configured using the value of the
 
 ### `Missing` files
 
-If an optional file for `generate_stats_figs.R` is not provided within the YAML configuration file then a `Missing_<PARAM>` file (for example `Missing_features_file`) is created within the `work/` directories for the `generateStatsFigs` process. This symbolically links to a non-existent `Missing_<PARAM>` file in the current directory. This is not an issue since the files will not be passed onto `generate_stats_figs.R` and no attempt is made to use them. They are a side-effect of using the Nextflow pattern for optional inputs, [optional inputs](https://github.com/nextflow-io/patterns/blob/master/optional-input.nf).
+If an optional file for `generate_stats_figs.R` is not provided within the YAML configuration file then a `Missing_<PARAM>` file (for example `Missing_features_file`) is created within the `work/` directory for a `generateStatsFigs` steps. This symbolically links to a non-existent `Missing_<PARAM>` file in the current directory. This is not an issue since the files will not be passed onto `generate_stats_figs.R` and no attempt is made to use them. They are a side-effect of using the Nextflow pattern for optional inputs, [optional inputs](https://github.com/nextflow-io/patterns/blob/master/optional-input.nf).
+
+---
+
+## Nextflow log files
+
+Information on the execution of the workflow is added to a file `.nextflow.log`. Log files from previous runs are in files named `.nextflow.log.1`, `.nextflow.log.2` etc. Every time Nextflow is run, the log file names are adjusted - on each successive run `.nextflow.log.1` becomes `.nextflow.log.2` and `.nextflow.log` becomes `.nextflow.log.1`).
+
+Log files for the invocation of each step in the workflow are captured in the [Nextflow `work/` directory](#nextflow-work-directory) described above.
