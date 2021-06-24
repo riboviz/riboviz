@@ -228,11 +228,12 @@ WTnone	riboviz.tools.trim_5p_mismatch	vignette/tmp/WTnone/orf_map_clean.sam	1451
 
 When Nextflow runs, it creates a unique directory for every task in the workflow. This directory contains the input files to the task, the command to be invoked for that task and the output files from that task. These are created within a Nextflow `work/` directory.
 
-Every invocation of a task - every process - has its own subdirectory within Nextflow's `work/` directory, each of which are named after the process identifiers (e.g. `ad/1e7c54`) which are displayed when Nextflow runs. These identifiers can also be accessed using the `nextflow log` command. For example, to display the process identifier and `work/` subdirectory of a step called `cutAdapters (WTnone)` in a workflow run named `modest_shaw`:
+Every invocation of a task - every process - has its own subdirectory within Nextflow's `work/` directory, each of which are named after the process identifiers (e.g. `ad/1e7c54`) which are displayed when Nextflow runs. These identifiers can also be accessed using the `nextflow log` command. For example, to display the process identifier and `work/` subdirectory of a step called `collateTpms (WT3AT, WTnone)` in a workflow run named `big_majorana`:
 
 ```console
-$ nextflow log modest_shaw -f hash,workdir -filter "name == 'cutAdapters (WTnone)'"
-3d/5bcc67	/home/ubuntu/riboviz/work/3d/5bcc6780442d00c216c5c1c116ea90
+$ nextflow log big_majorana -f hash,workdir -filter "name == 'collateTpms (WT3AT, WTnone)'"
+
+38/784d89	/home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73
 ```
 
 This shows both the unique identifier, termed a "hash", of this task that was shown when the workflow was run, and also the corresponding subdirectory within `work/` for that task. Note that the identifier is a prefix of the subdirectory under `work/`.
