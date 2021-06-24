@@ -226,19 +226,31 @@ WTnone	riboviz.tools.trim_5p_mismatch	vignette/tmp/WTnone/orf_map_clean.sam	1451
 
 ## Nextflow `work/` directory
 
-Nextflow creates a `work/` directory with all the files created during execution of workflows. Every invocation of a task - every process - has its own subdirectory within Nextflow's `work/` directory named after the process identifiers (e.g. `ad/1e7c54`) which are displayed when Nextflow runs. These subdirectories have:
+When Nextflow runs, it creates a unique directory for every task in the workflow. This directory contains the input files to the task, the command to be invoked for that task and the output files from that task. These are created within a Nextflow `work/` directory.
+
+Every invocation of a task - every process - has its own subdirectory within Nextflow's `work/` directory, each of which are named after the process identifiers (e.g. `ad/1e7c54`) which are displayed when Nextflow runs. These identifiers can also be accessed using the `nextflow log` command. For example, to display the process identifier and `work/` subdirectory of a step called `cutAdapters (WTnone)` in a workflow run named `modest_shaw` you would run:
+
+```console
+$ nextflow log modest_shaw -f hash,workdir -filter "name == 'cutAdapters (WTnone)'"
+3d/5bcc67	/home/ubuntu/riboviz/work/3d/5bcc6780442d00c216c5c1c116ea90
+```
+
+This shows both the unique identifier, termed a "hash", of this task that was shown when we ran the workflow, and also the corresponding subdirectory within `work/` for that task. Note that the identifier is a prefix of the subdirectory under `work/`.
+
+These step-specific subdirectories are where Nextflow runs its tasks. Each subdirectory has:
 
 * Input files. These are symbolic links to the input files for the task which, depending on the task, can be:
   - Output files in other `work/` subdirectories. For example, the directory for an `hisat2rRNA` proces will have input files which are symbolic links to the output files produced by a `cutAdapters` process,
   - Input files for the workflow. For example, the directory for a `cutAdapters` process will have an input file which is a symbolic link to a sample file in `vignettte/input`.
+* Bash script (`.command.sh`) containing the specific commands invoked by Nextflow for that task.
 * Output files, from the invocation of the task.
-* Standard output (`.command.out`) and standard error (`.command.err`) files, both standard output and standard error (`.command.log`) and exit codes (`.exitcode`) for each process.
-* Bash script (`.command.sh`) containing the specific command invoked by Nextflow by that process.
+* Standard output (`.command.out`) and standard error (`.command.err`) files and combined standard output and standard error (`.command.log`) containing the output and error messages printed during invocation of the bash script and captured by Nextflow.
+* Exit code (`.exitcode`) output from running the bash script for the task.
 
 For example, for a process `ad/1e7c54`, an invocation of task `hisat2rRNA` for sample `WTnone`, the `work/` directory would include:
 
 ```console
-$ find work/ad/1e7c54a889f21451cb07d29655e0be/ -printf '%P\t%l\n' | sort
+$ ls -1a work/ad/1e7c54a889f21451cb07d29655e0be/ -printf '%P\t%l\n' | so
 .command.begin
 .command.err
 .command.log
@@ -260,13 +272,17 @@ yeast_rRNA.7.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yea
 yeast_rRNA.8.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yeast_rRNA.8.ht2
 ```
 
-The `.ht2` files are symbolic links to the outputs of process `e5/ccf3e6`, an invocation of task `buildIndicesrRNA`.
+The `.ht2` files are symbolic links to the outputs of process `e5/ccf3e6`, an invocation of the task `buildIndicesrRNA`.
 
 The RiboViz workflow uses Nextflow's [publishDir](https://www.nextflow.io/docs/latest/process.html#publishdir) directive which allows files to be published to specific directories outwith `work/`.
 
 For index and temporary files, `publishDir` is configured using the value of the `publish_index_tmp` parameter. If `FALSE` then files in the index (`dir_index`) and temporary (`dir_tmp`) directories are symbolically linked to those in `work/`. If `TRUE` then they are copied. Output files are always copied from `work/` into the output (`dir_out`) directory specified in the workflow configuration file.
 
-If `publish_index_tmp` is false and the `work/` directory is deleted then the index and temporary files will no longer be accessible.
+**Caution:** 
+
+* If `publish_index_tmp` is `FALSE` and the `work/` directory is deleted then the index and temporary files will no longer be accessible.
+* If you delete the `work/` folder then certain information will no longer be accessible via `nextflow log`.
+* If you delete the `work/` folder then `the `-resume` flag has no effect and the whole workflow will be rerun.
 
 ### `Missing` files
 
