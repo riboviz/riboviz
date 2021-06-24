@@ -680,7 +680,7 @@ If you run the `example-dataset` in your scratch space, remember to move the out
 
 The job submission should create two files: an output file `JOB_NAME-$JOB_ID-$HOSTNAME.o` and an error file `$JOB_NAME-$JOB_ID-$HOSTNAME.e`.  These are the best place to start looking after a job has completed, to check if it has run successfully.
 
-The output file will contain the standard output from the nextflow run, and will give you the locations within `/work` for the folders associated with each process. More information on this can be found in the user documentation for [Debugging](./prep-riboviz-run-nextflow.md#debugging)
+The output file will contain the standard output from the nextflow run, and will give you the locations within `work/` for the folders associated with each process. More information on this can be found in the user documentation for [Debugging](./prep-riboviz-run-nextflow.md#debugging).
 
 The output files will be in `/exports/eddie/scratch/$USER/Wallace_2020_JEC21/output/`.
 
