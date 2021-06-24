@@ -72,9 +72,7 @@ To debug a specific line of code, you could add a `browser()` statement in the s
 
 ## Debugging and Nextflow
 
-Information on Debugging and Nextflow is provided in [Debugging](./prep-riboviz-run-nextflow.md#debugging) in [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md).
-
-This section contains additional developer-specific information.
+Information on Debugging and Nextflow is provided in [Debugging](../user/prep-riboviz-run-nextflow.md#debugging) in [Running the RiboViz Nextflow workflow](../user/prep-riboviz-run-nextflow.md). This section contains additional developer-specific information.
 
 ### Debugging within Nextflow's `work/` step-specific directories
 
