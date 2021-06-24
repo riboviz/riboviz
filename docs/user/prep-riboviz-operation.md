@@ -92,7 +92,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `orf_map.sam`: ORF-mapped reads.
 * `orf_map_clean.sam`: ORF-mapped reads with mismatched nt trimmed (if `params.trim_5p_mismatches: TRUE`).
 * `trim_5p_mismatch.tsv`: number of reads processed, discarded, trimmed and written when trimming 5' mismatches from reads and removing reads with more than a set number of mismatches (if `params.trim_5p_mismatches: TRUE`).
-* `unaligned.sam`: unaligned reads. These files can be used to find common contaminants or translated sequences not in your ORF annotation.
+* `unaligned.sam`: unaligned reads. These files can be used to find common contaminants or translated sequences not in the ORF annotation.
 * `orf_map_clean.bam`: BAM file equivalent of `orf_map_clean.sam`, ORF-mapped reads, and, if trimming is enabled (if `params.trim_5p_mismatches: TRUE`), with 5' mismatches trimmed. If deduplication is not enabled (if `dedup_umis: FALSE`) then this is copied to become the output file `<SAMPLE_ID>.bam` (see below).
 * `orf_map_clean.bam.bai`: BAM index file for the above. If deduplication is not enabled (if `dedup_umis: FALSE`) then this is copied to become the output file `<SAMPLE_ID>.bam.bai` (see below).
 
@@ -228,14 +228,14 @@ WTnone	riboviz.tools.trim_5p_mismatch	vignette/tmp/WTnone/orf_map_clean.sam	1451
 
 When Nextflow runs, it creates a unique directory for every task in the workflow. This directory contains the input files to the task, the command to be invoked for that task and the output files from that task. These are created within a Nextflow `work/` directory.
 
-Every invocation of a task - every process - has its own subdirectory within Nextflow's `work/` directory, each of which are named after the process identifiers (e.g. `ad/1e7c54`) which are displayed when Nextflow runs. These identifiers can also be accessed using the `nextflow log` command. For example, to display the process identifier and `work/` subdirectory of a step called `cutAdapters (WTnone)` in a workflow run named `modest_shaw` you would run:
+Every invocation of a task - every process - has its own subdirectory within Nextflow's `work/` directory, each of which are named after the process identifiers (e.g. `ad/1e7c54`) which are displayed when Nextflow runs. These identifiers can also be accessed using the `nextflow log` command. For example, to display the process identifier and `work/` subdirectory of a step called `cutAdapters (WTnone)` in a workflow run named `modest_shaw`:
 
 ```console
 $ nextflow log modest_shaw -f hash,workdir -filter "name == 'cutAdapters (WTnone)'"
 3d/5bcc67	/home/ubuntu/riboviz/work/3d/5bcc6780442d00c216c5c1c116ea90
 ```
 
-This shows both the unique identifier, termed a "hash", of this task that was shown when we ran the workflow, and also the corresponding subdirectory within `work/` for that task. Note that the identifier is a prefix of the subdirectory under `work/`.
+This shows both the unique identifier, termed a "hash", of this task that was shown when the workflow was run, and also the corresponding subdirectory within `work/` for that task. Note that the identifier is a prefix of the subdirectory under `work/`.
 
 These step-specific subdirectories are where Nextflow runs its tasks. Each subdirectory has:
 
@@ -281,9 +281,9 @@ For index and temporary files, `publishDir` is configured using the value of the
 **Caution:** 
 
 * If `publish_index_tmp` is `FALSE` and the `work/` directory is deleted then the index and temporary files will no longer be accessible.
-* If you delete the `work/` folder then certain information will no longer be accessible via `nextflow log`.
-* If you delete the `work/` folder then `the `-resume` flag has no effect and the whole workflow will be rerun.
+* If the `work/` folder is deleted, then certain information will no longer be accessible via `nextflow log`.
+* If the `work/` folder is deleted, then `the `-resume` flag has no effect and the whole workflow will be rerun.
 
 ### `Missing` files
 
-If an optional file for `generate_stats_figs.R` is not provided within the YAML configuration file then a `Missing_<PARAM>` file (for example `Missing_features_file`) is created within the `work/` directories for the `generateStatsFigs` process. This symbolically links to a non-existent `Missing_<PARAM>` file in your current directory. This is not an issue since the files will not be passed onto `generate_stats_figs.R` and no attempt is made to use them. They are a side-effect of using the Nextflow pattern for optional inputs, [optional inputs](https://github.com/nextflow-io/patterns/blob/master/optional-input.nf).
+If an optional file for `generate_stats_figs.R` is not provided within the YAML configuration file then a `Missing_<PARAM>` file (for example `Missing_features_file`) is created within the `work/` directories for the `generateStatsFigs` process. This symbolically links to a non-existent `Missing_<PARAM>` file in the current directory. This is not an issue since the files will not be passed onto `generate_stats_figs.R` and no attempt is made to use them. They are a side-effect of using the Nextflow pattern for optional inputs, [optional inputs](https://github.com/nextflow-io/patterns/blob/master/optional-input.nf).
