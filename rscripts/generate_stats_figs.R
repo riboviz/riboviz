@@ -475,7 +475,7 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
 
   if (rpf) {
     
-    cod_dens_tRNA_data <- CalculateCodonSpecificRibosomeDensity(t_rna_file, codon_positions_file, gene_names, hd_file, dataset, buffer, count_threshold)
+    cod_dens_tRNA_data <- CalculateCodonSpecificRibosomeDensity(t_rna_file, codon_positions_file, gene_names, hd_file, dataset, buffer, count_threshold,asite_displacement_length)
     
     cod_dens_tRNA_wide <- GatherCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_data)
     
