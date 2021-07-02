@@ -14,7 +14,7 @@ fq_files:
   WTnone: SRR1042855_s1mi.fastq.gz
   WT3AT: SRR1042864_s1mi.fastq.gz
   NotHere: example_missing_file.fastq.gz
-adapters: CTGTAGGCACC #
+adapters: CTGTAGGCACC
 nprocesses: 1
 MinReadLen: 10
 MaxReadLen: 50

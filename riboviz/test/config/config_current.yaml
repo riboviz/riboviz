@@ -1,27 +1,27 @@
 adapters: CTGTAGGCACC
-aligner: hisat2
-asite_disp_length_file: data/yeast_standard_asite_disp_length.txt
+asite_disp_length_file: NULL
 buffer: 250
 build_indices: TRUE
-cmd_file: run_riboviz_simdata_multiplex.sh
-codon_positions_file: null
+codon_positions_file: NULL
 count_reads: TRUE
-count_threshold: 1
-dataset: simdata_multiplex
-dedup_stats: TRUE
-dedup_umis: TRUE
-dir_in: data/simdata/
+count_threshold: 64
+dataset: vignette
+dedup_stats: FALSE
+dedup_umis: FALSE
 dir_index: vignette/index
-dir_logs: vignette/simdata_multiplex_logs
-dir_out: vignette/simdata_multiplex_output
-dir_tmp: vignette/simdata_multiplex_tmp
+dir_in: vignette/input
+dir_out: vignette/output
+dir_tmp: vignette/tmp
 do_pos_sp_nt_freq: TRUE
-extract_umis: TRUE
-features_file: data/yeast_features.tsv
-fq_files: null
-group_umis: TRUE
+extract_umis: FALSE
+feature: CDS
+features_file: NULL
+fq_files:
+  WTnone: SRR1042855_s1mi.fastq.gz
+  WT3AT: SRR1042864_s1mi.fastq.gz
+  NotHere: example_missing_file.fastq.gz
+group_umis: FALSE
 is_riboviz_gff: TRUE
-is_test_run: FALSE
 job_email_events: beas
 job_email: null
 job_memory: 8G
@@ -32,8 +32,7 @@ job_runtime: '48:00:00'
 make_bedgraph: TRUE
 max_read_length: 50
 min_read_length: 10
-multiplex_fq_files:
-- multiplex_umi_barcode_adaptor.fastq
+multiplex_fq_files: null
 nextflow_dag_file: nextflow-dag.html
 nextflow_report_file: nextflow-report.html
 nextflow_timeline_file: nextflow-timeline.html
@@ -43,15 +42,18 @@ num_processes: 1
 orf_fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa
 orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3
 orf_index_prefix: YAL_CDS_w_250
+output_pdfs: TRUE
 primary_id: Name
 publish_index_tmp: FALSE
 rpf: TRUE
 rrna_fasta_file: vignette/input/yeast_rRNA_R64-1-1.fa
 rrna_index_prefix: yeast_rRNA
-sample_sheet: multiplex_barcodes.tsv
-secondary_id: NULL
-stop_in_cds: FALSE
+run_static_html: TRUE
+sample_sheet: null
+samsort_memory: null
+secondary_id: null
+stop_in_feature: FALSE
 trim_5p_mismatches: TRUE
-t_rna_file: null
-umi_regexp: ^(?P<umi_1>.{4}).+(?P<umi_2>.{4})(?P<cell_1>.{3})$
+t_rna_file: NULL
+umi_regexp: null
 validate_only: false
