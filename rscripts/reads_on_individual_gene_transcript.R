@@ -1,86 +1,51 @@
-suppressMessages(library(Rsamtools))
-suppressMessages(library(rtracklayer))
-suppressMessages(library(rhdf5))
-suppressMessages(library(parallel))
-suppressMessages(library(optparse))
-suppressMessages(library(RcppRoll))
-suppressMessages(library(ggplot2))
-suppressMessages(library(tidyr))
-suppressMessages(library(dplyr))
-suppressMessages(library(magrittr))
-suppressMessages(library(purrr))
+print('Loading required files')
+
+suppressMessages(library(getopt, quietly=T))
 suppressMessages(library(here))
+library(argparse)
 
-## functions to be used in code - replace with source(here::here("rscripts", "read_count_functions.R"))
+source(here::here("rscripts", "read_count_functions.R"))
+source(here::here("rscripts", "stats_figs_block_functions.R"))
 
-#Get a data matrix for the gene of interest 
-GetGeneDatamatrix <- function(gene, dataset, hd_file){
-  rhdf5::h5read(file = hd_file, name = paste0("/", gene, "/", dataset, "/reads/data")) %>%
-    return()
-}
+parser <- ArgumentParser()
+parser$add_argument('-i', '--input', help="input H5 file, Path to the H5 file containing the data to be studied", type="character")
+parser$add_argument('-g', '--gff', help="Path to GFF3 file corresponding to the species being studies", type="character")
+parser$add_argument('--gene', help="Gene of interest, name used should match the name listed in H5 file so check format", type="character")
+parser$add_argument('-d', '--dataset', help='Name of the dataset being run, ie D-Sp_2018, should match the dataset listed in H5 file', type="character")
+parser$add_argument('-o', '--output', help='Output directory for plots')
 
-# create tidy data matrix
-TidyDatamatrix <- function(data_mat, startpos = 1, startlen = 1) {
-  # CHECK startpos/off-by-one
-  positions <- startpos:(startpos + ncol(data_mat) - 1)
-  readlengths <- startlen:(startlen + nrow(data_mat) - 1)
-  data_mat %>%
-    set_colnames(positions) %>%
-    as_tibble() %>%
-    mutate(ReadLen = readlengths) %>%
-    gather(-ReadLen, key = "Pos", value = "Counts", convert = FALSE) %>%
-    mutate(Pos = as.integer(Pos), Counts = as.integer(Counts))
-}
+args <- parser$parse_args()
 
-GetGeneReadLength <- function(gene, hd_file){
-  rhdf5::h5readAttributes(hd_file, name=paste0("/", gene, "/", dataset, "/reads"))[["reads_by_len"]]
-}
+file_url <- args$input
+gff_in <- args$gff
+Gene_of_interest <- args$gene
+dataset <- args$dataset
+output_dir <- args$output
 
-CalculateReadLengths <- function(gene_names, dataset, hd_file){
-  
-  ## distribution of lengths of all mapped reads
-  print("Starting: Distribution of lengths of all mapped reads")
-  
-  # read length-specific read counts stored as attributes of 'reads' in H5 file
-  gene_sp_read_length <- lapply(gene_names, function(gene) {
-    GetGeneReadLength(gene, hd_file)
-  })
-  
-  # sum reads of each length across all genes
-  read_length_data <- data.frame(
-    Length = read_range,
-    Counts = gene_sp_read_length %>%
-      Reduce("+", .)
-  )
-  
-  # return read length data
-  return(read_length_data)
-  
-}
 
 ## Actual code
-# path to H5 file
-# path to H5 file
-gff_in <- here::here('Git','example-datasets','fungi', 'schizosaccharomyces','annotation','Schizosaccharomyces_pombe_full_UTR_or_50nt_buffer.gff3')
+
 GFF <- readGFFAsDf(gff_in)
 gene_names <- levels(GFF$seqnames)
-file_url <- "D-Sp_2018/output/wt.noAT.ribo.4_s/wt.noAT.ribo.4_s.h5"
-Gene_of_interest <- 'SPAC17G6.03.1'
-dataset <- 'D-Sp_2018'
 read_range <- c(10:50)
+
+
+print('reads_on_individual_gene_transcript.R is running')
+
 
 # Create the gene data matrix 
 gene_data_matrix <- GetGeneDatamatrix(gene= Gene_of_interest,
-                                      dataset = Dataset,
+                                      dataset = dataset,
                                       hd_file = file_url)
 
+
 # extract the buffer so can identify stop codon later
-buffer_left <- h5readAttributes(file_url, base::paste('/',Gene_of_interest,'/D-Sp_2018/reads', sep = ''))[['buffer_left']]
-buffer_right <- h5readAttributes(file_url, base::paste('/',Gene_of_interest,'/D-Sp_2018/reads', sep = ''))[['buffer_right']]
+buffer_left <- h5readAttributes(file_url, base::paste('/',Gene_of_interest,'/',dataset,'/reads', sep = ''))[['buffer_left']]
+buffer_right <- h5readAttributes(file_url, base::paste('/',Gene_of_interest,'/',dataset,'/reads', sep = ''))[['buffer_right']]
 nnt_buffer <- buffer_left
 
-# Create a Tidy data matrix, using the the gene data matrix. set start as -nnt_buffer + 1
-# so the actual start codon lies on 1
+# Create a Tidy data matrix, using the the gene data matrix. set start as -nnt_buffer + 1 so the actual start codon lies on 1
+ 
 gene_of_interest_tidy_matrix <- TidyDatamatrix(data_mat = gene_data_matrix, startpos = -nnt_buffer +1 )
 
 
@@ -94,16 +59,25 @@ gene_of_interest_tidy_matrix <- TidyDatamatrix(data_mat = gene_data_matrix, star
 # output: TidyDataMatrix
 
 # create an empty tibble with two columns; Pos and Counts.
+
 gene_Total_reads_at_position <- tibble(Pos =integer(),
                                             Counts = integer())
 
 # Loop through tidy data matrix, and for each position add up all of the counts for different 
 # read lengths, storing them in the new tidy data matrix
+# To do: edit to use apply function
+
 for(i in gene_of_interest_tidy_matrix[1,]$Pos:max(gene_of_interest_tidy_matrix$Pos)){
-  tmp_row <- gene_of_interest_tidy_matrix %>% filter(gene_of_interest_tidy_matrix$Pos ==i)
+  tmp_row <- gene_of_interest_tidy_matrix %>% 
+    filter(gene_of_interest_tidy_matrix$Pos ==i)
   new_row <- tibble(Pos = i, Counts = sum(tmp_row$Counts))
-  gene_Total_reads_at_position <- gene_Total_reads_at_position %>% bind_rows(new_row)
+  gene_Total_reads_at_position <- gene_Total_reads_at_position %>% 
+    bind_rows(new_row)
 }
+
+
+print('Creating reads on transcript plot')
+
 
 # plot the data, so positions are along the x axis and number of counts is along the y axis
 reads_on_transcript_plot <- ggplot(gene_Total_reads_at_position,aes(x = Pos, y = Counts))+
@@ -116,17 +90,27 @@ reads_on_transcript_plot <- ggplot(gene_Total_reads_at_position,aes(x = Pos, y =
          axis.title=element_text(size=14, face='bold'),
          title = element_text(size = 16, face='bold'))
 
+# save reads_on_transcript_plot as pdf
+
+reads_on_transcript_plot %>%
+  ggsave(
+    filename = file.path(output_dir,"reads_on_transcript_plot.pdf"),
+    width = 6, height = 5
+  )
 
 ## reads per million plot 
 # calculate total number of reads by getting sum of total reads per length 
 
 # get the number of reads per length
-read_length_data <- CalculateReadLengths(gene_names, dataset, file_url)
+read_length_data <- CalculateReadLengths(gene_names, dataset, hd_file = file_url)
 # get total number of reads for dataset
 total_reads <- sum(read_length_data$Counts)
 
 #calculate reads per million for gene
 reads_per_million <- gene_Total_reads_at_position %>% mutate(Counts = (Counts/total_reads)*1e6)
+
+
+print('Creating reads per million plot')
 
 reads_per_million_plot <- ggplot(reads_per_million,aes(x = Pos, y = Counts))+
   theme_bw()+
@@ -138,3 +122,14 @@ reads_per_million_plot <- ggplot(reads_per_million,aes(x = Pos, y = Counts))+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=14, face='bold'),
         title = element_text(size = 14, face='bold'))
+
+# save as reads_per_million_plot as PDF
+
+reads_per_million_plot %>%
+  ggsave(
+    filename = file.path(output_dir,"reads_per_million_plot.pdf"),
+    width = 6, height = 5
+  )
+
+
+print('Done')
