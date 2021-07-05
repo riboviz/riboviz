@@ -26,8 +26,8 @@ from riboviz import fastq
 from riboviz import params
 from riboviz import utils
 from riboviz import workflow_files
-from riboviz.test.nextflow import configuration_module
-from riboviz.test.nextflow import nextflow_fixture
+from riboviz.test.nextflow import configuration_module  # pylint: disable=unused-import
+from riboviz.test.nextflow import nextflow_fixture  # pylint: disable=unused-import
 from riboviz.test.nextflow.test_simdata_umi \
     import check_umi_groups
 from riboviz.test.nextflow.test_simdata_umi \
@@ -102,7 +102,7 @@ def test_deplex_num_reads(configuration_module):
         riboviz.test.SIMDATA_DIR,
         "deplex",
         demultiplex_fastq.NUM_READS_FILE)
-    utils.equal_tsv(expected_output, actual_output)
+    utils.equal_tsv(expected_output, actual_output, na_to_empty_str=True)
 
 
 @pytest.mark.parametrize(
@@ -175,7 +175,8 @@ def test_deplex_umi_groups(configuration_module, sample_id):
     :type sample_id: str or unicode
     """
     config, _ = configuration_module
-    check_umi_groups(config, sample_id, 5)
+    tmp_dir = config[params.TMP_DIR]
+    check_umi_groups(tmp_dir, sample_id, 5)
 
 
 @pytest.mark.parametrize("sample_id", ["Tag0", "Tag1", "Tag2"])
@@ -192,4 +193,5 @@ def test_deplex_tpms_collated_tsv(configuration_module, sample_id):
     :type sample_id: str or unicode
     """
     config, _ = configuration_module
-    check_tpms_collated_tsv(config, sample_id, 4)
+    output_dir = config[params.OUTPUT_DIR]
+    check_tpms_collated_tsv(output_dir, sample_id, 4)

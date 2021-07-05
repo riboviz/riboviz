@@ -11,10 +11,8 @@ TMP_DIR = "dir_tmp"
 OUTPUT_DIR = "dir_out"
 """ Output files directory. """
 
-CMD_FILE = "cmd_file"
-""" Bash commands file name. """
-LOGS_DIR = "dir_logs"
-""" Log files directory. """
+OUTPUT_PDFS = "output_pdfs"
+""" Generate .pdfs for sample-related plots. """
 
 ORF_FASTA_FILE = "orf_fasta_file"
 """ ORF file to align to. """
@@ -38,6 +36,8 @@ MULTIPLEX_FQ_FILES = "multiplex_fq_files"
 
 TRIM_5P_MISMATCHES = "trim_5p_mismatches"
 """ Trim mismatched 5' base? """
+RUN_STATIC_HTML = "run_static_html"
+""" Create static html visualization per sample? """
 
 SAMPLE_SHEET = "sample_sheet"
 """ Sample sheet. """
@@ -77,6 +77,8 @@ DATASET = "dataset"
 """ Dataset name. """
 DO_POS_SP_NT_FREQ = "do_pos_sp_nt_freq"
 """ Calculate position-specific nucleotide frequency? """
+FEATURE = "feature"
+""" Feature type """
 MIN_READ_LENGTH = "min_read_length"
 """ Minimum read length in H5 output. """
 MAX_READ_LENGTH = "max_read_length"
@@ -91,8 +93,8 @@ Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3?
 """
 RPF = "rpf"
 """ Is the dataset an RPF or mRNA dataset? """
-STOP_IN_CDS = "stop_in_cds"
-""" Are stop codons part of the CDS annotations in GFF? """
+STOP_IN_FEATURE = "stop_in_feature"
+""" Are stop codons part of the feature annotations in GFF? """
 COUNT_READS = "count_reads"
 """
 Scan input, temporary and output files and produce counts of reads in
@@ -101,17 +103,13 @@ each FASTQ, SAM and BAM file processed?
 
 NUM_PROCESSES = "num_processes"
 """ Number of processes to parallelize over. """
-IS_TEST_RUN = "is_test_run"
-""" Is this a test run? (unused). """
-ALIGNER = "aligner"
-""" Short read aligner to use (unused). """
+SAMSORT_MEMORY = "samsort_memory"
+""" Memory to give to 'samtools sort'. """
 
 VALIDATE_ONLY = "validate_only"
-""" Validate configuration only? (Nextflow workflow only). """
+""" Validate configuration only? """
 PUBLISH_INDEX_TMP = "publish_index_tmp"
-"""
-Publish index and temporary files? (Nextflow workflow only).
-"""
+""" Publish index and temporary files? """
 SKIP_INPUTS = "skip_inputs"
 """
 When validating configuration skip checks for existence of ribosome
@@ -126,33 +124,27 @@ RiboViz YAML configuration file (job submission) (command-line only).
 """
 NEXTFLOW_DAG_FILE = "nextflow_dag_file"
 """
-Nextflow DAG file (Nextflow workflow only)
-(job submission).
+Nextflow DAG file (job submission).
 """
 NEXTFLOW_REPORT_FILE = "nextflow_report_file"
 """
-Nextflow report file (Nextflow workflow only)
-(job submission).
+Nextflow report file (job submission).
 """
 NEXTFLOW_TIMELINE_FILE = "nextflow_timeline_file"
 """
-Nextflow timeline file (Nextflow workflow only)
-(job submission).
+Nextflow timeline file (job submission).
 """
 NEXTFLOW_TRACE_FILE = "nextflow_trace_file"
 """
-Nextflow trace file (Nextflow workflow only)
-(job submission).
+Nextflow trace file (job submission).
 """
 NEXTFLOW_WORK_DIR = "nextflow_work_dir"
 """
-Nextflow work directory (Nextflow workflow only)
-(job submission).
+Nextflow work directory (job submission).
 """
 NEXTFLOW_RESUME = "nextflow_resume"
 """
-Resume Nextflow workflow (Nextflow workflow only)
-(job submission).
+Resume Nextflow workflow (job submission).
 """
 JOB_NAME = "job_name"
 """ Name of batch job (job submission). """
@@ -209,3 +201,40 @@ JOB_CONFIG_TYPE = {
     VALIDATE_ONLY: bool
 }
 """ Types of job configuration parameters. """
+
+ENV_RIBOVIZ_SAMPLES = "RIBOVIZ_SAMPLES"
+""" Samples directory environment variable name. """
+ENV_RIBOVIZ_ORGANISMS = "RIBOVIZ_ORGANISMS"
+""" Organisms directory environment variable name. """
+ENV_RIBOVIZ_DATA = "RIBOVIZ_DATA"
+""" Data directory environment variable name. """
+ENV_DIRS = [
+    ENV_RIBOVIZ_SAMPLES,
+    ENV_RIBOVIZ_ORGANISMS,
+    ENV_RIBOVIZ_DATA
+]
+"""
+Environment variables which can be used to define directories.
+"""
+ENV_INPUT_PARAMS = [ASITE_DISP_LENGTH_FILE,
+                    CODON_POSITIONS_FILE,
+                    FEATURES_FILE,
+                    INPUT_DIR,
+                    ORF_FASTA_FILE,
+                    ORF_GFF_FILE,
+                    RRNA_FASTA_FILE,
+                    T_RNA_FILE]
+"""
+Names of input parameters whose values can include RiboViz environment
+variables.
+"""
+ENV_OUTPUT_PARAMS = [INDEX_DIR, OUTPUT_DIR, TMP_DIR]
+"""
+Names of output parameters whose values can include RiboViz environment
+variables.
+"""
+ENV_PARAMS = ENV_INPUT_PARAMS + ENV_OUTPUT_PARAMS
+"""
+Names of parameters whose values can include RiboViz environment
+variables.
+"""
