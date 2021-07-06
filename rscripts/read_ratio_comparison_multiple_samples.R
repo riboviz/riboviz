@@ -86,9 +86,9 @@ GeneFeatureTotalCountsPerBase <- function(gene = gene, dataset = dataset, hd_fil
 # Create function of applying GeneFeatureTotalCountsPerBase to genes,
 # so it can be used in a nested map() function to apple to all datasets listed
 
-ApplyGeneFeatureTotalCountsPerBaseToSamples <- function(gene = gene_names[1:100], dataset = dataset, hd_file = .x, startpos = 1){
+ApplyGeneFeatureTotalCountsPerBaseToSamples <- function(gene = gene_names, dataset = dataset, hd_file = .x, startpos = 1){
   
-  all_genes_one_sample <- purrr::map_dfr(.x = gene_names[1:100], .f = GeneFeatureTotalCountsPerBase, hd_file = hd_file, dataset = dataset, startpos = 1)
+  all_genes_one_sample <- purrr::map_dfr(.x = gene_names, .f = GeneFeatureTotalCountsPerBase, hd_file = hd_file, dataset = dataset, startpos = 1)
    
   return(all_genes_one_sample)
   
