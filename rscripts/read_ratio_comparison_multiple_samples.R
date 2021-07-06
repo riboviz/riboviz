@@ -24,7 +24,9 @@ suppressMessages(library(argparse))
 source(here::here('rscripts','read_count_functions.R'))
 
 parser <- ArgumentParser()
-parser$add_argument('-i', '--input', help="input H5 file, Path to the H5 file containing the data to be studied", type="character", nargs='+')
+parser$add_argument('-i', '--input',
+                    help="input H5 file, Path to the H5 file containing the data to be studied. Able to take multiple files, with file paths separated by a space",
+                    type="character", nargs='+')
 parser$add_argument('-g', '--gff', help="Path to GFF3 file corresponding to the species being studies", type="character")
 parser$add_argument('--gene', help="Gene of interest, name used should match the name listed in H5 file so check format", type="character")
 parser$add_argument('-d', '--dataset', help='Name of the dataset being run, ie D-Sp_2018, should match the dataset listed in H5 file', type="character")
