@@ -571,10 +571,12 @@ normalized_expand_list <- purrr::map(
 
 OverlayedTable <- function(normalized_expand_list, expand_width = 5L){
   number_of_objects <- length(normalized_expand_list)
+  # The number of objects inside normalized_expand_list
   
   result <- lapply(normalized_expand_list, "[", c("Rel_Pos", "RelCount"))
+  # Reduces normalized_expand_list to the columns Rel_Pos and RelCount
   
-  joined_result = result %>% reduce(full_join, by = c("Rel_Pos"), sum("RelCount"))
+  joined_result <- result %>% purrr::reduce(full_join, by = c("Rel_Pos"), sum("RelCount"))
   
   joined_rows = joined_result %>% 
     mutate(SumRows = rowSums(select(joined_result, -"Rel_Pos")) / number_of_objects)
@@ -606,3 +608,4 @@ Over <- OverlayedTable(normalized_expand_list, expand_width = 5L)
 # # 10       4    0.644
 # # 11       5    2.08
 
+overlayed_plot <- ggplot(Over, mapping = aes(x = Rel_Pos, y = RelCount)) + geom_line()
