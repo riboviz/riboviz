@@ -95,6 +95,88 @@ tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene="YAL003W",
                                        startlen = 10) 
 
 
+          ##### ALL GENES #####
+          
+          # GetAllGeneDatamatrix: Function to get the datamatrix for each of the genes 
+          # in the h5 file contained within a list. 
+          
+          gene_names <- rhdf5::h5ls(YAL5_h5, recursive = 1)$name
+          
+          GetAllGeneDatamatrix <- function(.x = gene_names, dataset, hd_file){
+            
+            gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name 
+            
+            get_all_genes_datamatrix <- purrr::map(
+              .x = gene_names,
+              .f = GetGeneDatamatrix,
+              dataset,
+              hd_file
+            )
+            
+            return(get_all_genes_datamatrix)
+          }
+          
+          get_all_genes_datamatrix <- GetAllGeneDatamatrix(dataset = "Mok-simYAL5", 
+                                                           hd_file = YAL5_h5)
+          
+          # > str(get_all_genes_datamatrix)
+          # List of 5
+          # $ : int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : int [1:41, 1:2429] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : int [1:41, 1:1685] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : int [1:41, 1:3509] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : int [1:41, 1:2003] 0 0 0 0 0 0 0 0 0 0 ...
+          
+          
+          # TidyDatamatrixForAllGenes: Function to get the tidydatamatrix for each of the 
+          # genes contained within a list. 
+          
+          TidyDatamatrixForAllGenes <- function(hd_file, dataset, startpos = 1, startlen = 10){
+            
+            gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
+            
+            .x = get_all_genes_datamatrix <- GetAllGeneDatamatrix(dataset = dataset, 
+                                                                  hd_file = hd_file)
+            
+            tidy_all_genes_datamatrix <- purrr::map(
+              .x = get_all_gene_datamatrix,
+              .f = TidyDatamatrix,
+              startpos = 1,
+              startlen = 10
+            )
+          }
+          
+          tidy_all_genes_datamatrix <- TidyDatamatrixForAllGenes(hd_file = YAL5_h5, 
+                                                                 dataset = "Mok-simYAL5", 
+                                                                 startpos = 1, 
+                                                                 startlen = 10)
+          
+          # > str(tidy_all_genes_datamatrix)
+          # List of 5
+          # $ : tibble [45,961 x 3] (S3: tbl_df/tbl/data.frame)
+          # ..$ ReadLen: int [1:45961] 10 11 12 13 14 15 16 17 18 19 ...
+          # ..$ Pos    : int [1:45961] 1 1 1 1 1 1 1 1 1 1 ...
+          # ..$ Counts : int [1:45961] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : tibble [99,589 x 3] (S3: tbl_df/tbl/data.frame)
+          # ..$ ReadLen: int [1:99589] 10 11 12 13 14 15 16 17 18 19 ...
+          # ..$ Pos    : int [1:99589] 1 1 1 1 1 1 1 1 1 1 ...
+          # ..$ Counts : int [1:99589] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : tibble [69,085 x 3] (S3: tbl_df/tbl/data.frame)
+          # ..$ ReadLen: int [1:69085] 10 11 12 13 14 15 16 17 18 19 ...
+          # ..$ Pos    : int [1:69085] 1 1 1 1 1 1 1 1 1 1 ...
+          # ..$ Counts : int [1:69085] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : tibble [143,869 x 3] (S3: tbl_df/tbl/data.frame)
+          # ..$ ReadLen: int [1:143869] 10 11 12 13 14 15 16 17 18 19 ...
+          # ..$ Pos    : int [1:143869] 1 1 1 1 1 1 1 1 1 1 ...
+          # ..$ Counts : int [1:143869] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : tibble [82,123 x 3] (S3: tbl_df/tbl/data.frame)
+          # ..$ ReadLen: int [1:82123] 10 11 12 13 14 15 16 17 18 19 ...
+          # ..$ Pos    : int [1:82123] 1 1 1 1 1 1 1 1 1 1 ...
+          # ..$ Counts : int [1:82123] 0 0 0 0 0 0 0 0 0 0 ...
+          
+          #####
+          
+
 
 ### CalcAsiteFixed (Aim: A-site assignment) 
 
@@ -110,7 +192,44 @@ asite_counts_by_position <- CalcAsiteFixed(reads_pos_length,
 
   # This step extracts the asite reads from the reads_pos_length file
   # This step is incorporated in the funciton below 
-
+          
+          
+          ##### ALL GENES #####
+          
+          # CalcAsiteFixed function applied to all genes 
+          CalcAsiteFixedForAllGenes <- function(dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
+            
+            get_all_genes_datamatrix <- GetAllGeneDatamatrix(dataset = dataset, 
+                                                             hd_file = hd_file)
+            
+            asite_counts_by_position_all_genes <- purrr::map(
+              .x = get_all_genes_datamatrix,
+              .f = CalcAsiteFixed,
+              min_read_length = min_read_length,
+              asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
+                                                     asite_displacement = c(15, 15, 15)), 
+              colsum_out = colsum_out
+              
+            )
+            
+            return(asite_counts_by_position_all_genes)
+          }
+          
+          asite_counts_by_position_all_genes <- CalcAsiteFixedForAllGenes(dataset = "Mok-simYAL5", 
+                                                                          hd_file = YAL5_h5, 
+                                                                          min_read_length = 10, 
+                                                                          colsum_out = TRUE)
+          
+          # > str(asite_counts_by_position_all_genes)
+          # List of 5
+          # $ : num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : num [1:2429] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : num [1:1685] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : num [1:3509] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : num [1:2003] 0 0 0 0 0 0 0 0 0 0 ...
+          
+          #####
+          
 
 # Funtction with the aim of combining the asite count with the position of the nucleotides           
 TidyAsiteCountsByPosition <- function(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
@@ -146,6 +265,62 @@ tidy_asite_count_output <- TidyAsiteCountsByPosition(gene = "YAL003W",
   # The end result here is that the asite counts are aligned to the gene of interest
   # (in nucleotides, including UTRs and CDS)
 
+
+
+          ##### ALL GENES #####
+
+          # TidyAsiteCountsByPosition function applied to all genes of interest
+          TidyAsiteCountsByPositionAllGenes <- function(dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
+            
+            asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", "yeast_standard_asite_disp_length.txt"))
+            
+            asite_counts_by_position_all_genes <- CalcAsiteFixedForAllGenes(dataset, 
+                                                                            hd_file, 
+                                                                            min_read_length = 10, 
+                                                                            colsum_out = TRUE)
+            
+            
+            TidyAsiteCountsTibble <- function(asite_counts_by_position_all_genes){
+              
+              tidy_asite_counts_all_genes <- tibble(Pos = 1:length(asite_counts_by_position_all_genes), 
+                                                    Count = asite_counts_by_position_all_genes)
+              
+            }
+            
+            
+            tidy_asite_counts_all_genes <- purrr::map(
+              .x = asite_counts_by_position_all_genes,
+              .f = TidyAsiteCountsTibble
+            )
+            
+            return(tidy_asite_counts_all_genes)
+            
+          }
+          
+          tidy_asite_counts_all_genes <- TidyAsiteCountsByPositionAllGenes(dataset = "Mok-simYAL5", 
+                                                                           hd_file = YAL5_h5, 
+                                                                           min_read_length = 10, 
+                                                                           colsum_out = TRUE)
+          
+          # > str(tidy_asite_counts_all_genes)
+          # List of 5
+          # $ : tibble [1,121 x 2] (S3: tbl_df/tbl/data.frame)
+          # ..$ Pos  : int [1:1121] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Count: num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : tibble [2,429 x 2] (S3: tbl_df/tbl/data.frame)
+          # ..$ Pos  : int [1:2429] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Count: num [1:2429] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : tibble [1,685 x 2] (S3: tbl_df/tbl/data.frame)
+          # ..$ Pos  : int [1:1685] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Count: num [1:1685] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : tibble [3,509 x 2] (S3: tbl_df/tbl/data.frame)
+          # ..$ Pos  : int [1:3509] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Count: num [1:3509] 0 0 0 0 0 0 0 0 0 0 ...
+          # $ : tibble [2,003 x 2] (S3: tbl_df/tbl/data.frame)
+          # ..$ Pos  : int [1:2003] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Count: num [1:2003] 0 0 0 0 0 0 0 0 0 0 ...
+
+          #####
 
 
 # TranscriptPosToCodonPos generates a table with the columns Gene, Pos (position 
@@ -213,6 +388,53 @@ transcript_pos_to_codon_pos_output <- TranscriptPosToCodonPos(gene = "YAL003W", 
   # $ Frame    : num [1:1121] 2 0 1 2 0 1 2 0 1 2 ...
 
 
+          ##### ALL GENES #####
+
+          # TranscriptPosToCodonPos applied to all genes, generates a list of tibbles
+          # with the same structure as described above 
+          TranscriptPosToCodonPosForAllGenes <- function(.x = gene_names, gff_df){
+            
+            transcript_gene_pos_poscodon_frame_all_genes <- purrr::map(
+              .x = gene_names,
+              .f = TranscriptPosToCodonPos,
+              gff_df
+            )
+            
+          }
+          
+          transcript_gene_pos_poscodon_frame_all_genes <- TranscriptPosToCodonPosForAllGenes(gene_names, gff_df)
+          
+          # > str(transcript_gene_pos_poscodon_frame_all_genes)
+          # List of 5
+          # $ : tibble [1,121 x 4] (S3: tbl_df/tbl/data.frame)
+          # ..$ Gene     : chr [1:1121] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
+          # ..$ Pos      : int [1:1121] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Pos_Codon: int [1:1121] NA NA NA NA NA NA NA NA NA NA ...
+          # ..$ Frame    : num [1:1121] 2 0 1 2 0 1 2 0 1 2 ...
+          # $ : tibble [2,429 x 4] (S3: tbl_df/tbl/data.frame)
+          # ..$ Gene     : chr [1:2429] "YAL005C" "YAL005C" "YAL005C" "YAL005C" ...
+          # ..$ Pos      : int [1:2429] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Pos_Codon: int [1:2429] NA NA NA NA NA NA NA NA NA NA ...
+          # ..$ Frame    : num [1:2429] 2 0 1 2 0 1 2 0 1 2 ...
+          # $ : tibble [1,685 x 4] (S3: tbl_df/tbl/data.frame)
+          # ..$ Gene     : chr [1:1685] "YAL012W" "YAL012W" "YAL012W" "YAL012W" ...
+          # ..$ Pos      : int [1:1685] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Pos_Codon: int [1:1685] NA NA NA NA NA NA NA NA NA NA ...
+          # ..$ Frame    : num [1:1685] 2 0 1 2 0 1 2 0 1 2 ...
+          # $ : tibble [3,509 x 4] (S3: tbl_df/tbl/data.frame)
+          # ..$ Gene     : chr [1:3509] "YAL035W" "YAL035W" "YAL035W" "YAL035W" ...
+          # ..$ Pos      : int [1:3509] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Pos_Codon: int [1:3509] NA NA NA NA NA NA NA NA NA NA ...
+          # ..$ Frame    : num [1:3509] 2 0 1 2 0 1 2 0 1 2 ...
+          # $ : tibble [2,003 x 4] (S3: tbl_df/tbl/data.frame)
+          # ..$ Gene     : chr [1:2003] "YAL038W" "YAL038W" "YAL038W" "YAL038W" ...
+          # ..$ Pos      : int [1:2003] 1 2 3 4 5 6 7 8 9 10 ...
+          # ..$ Pos_Codon: int [1:2003] NA NA NA NA NA NA NA NA NA NA ...
+          # ..$ Frame    : num [1:2003] 2 0 1 2 0 1 2 0 1 2 ...
+
+          #####
+
+
 
 # Function joins the tables which are output by TidyAsiteCountsByPosition and 
 # TranscriptPosToCodonPos functions to generate transcript_info_tibble
@@ -254,6 +476,42 @@ transcript_info_tibble <- AddAsiteCountsToTranscriptPosToCodonPos(gene = "YAL003
   # End result is a table which contains the asite counts, reading frame, codons and 
   # codon positions for the gene of interest
 
+
+          ##### ALL GENES #####
+
+          # AddAsiteCountsToTranscriptPosToCodonPos for all genes 
+          AddAsiteCountsToTranscriptPosToCodonPosAllGenes <- function(gene_names, dataset, hd_file, min_read_length = 10, colsum_out = TRUE, gff_df){
+            
+            tidy_asite_counts_all_genes <- TidyAsiteCountsByPositionAllGenes(dataset, hd_file, min_read_length = 10, colsum_out = TRUE)
+            
+            .x = transcript_gene_pos_poscodon_frame_all_genes <- TranscriptPosToCodonPosForAllGenes(gene_names, gff_df)
+            
+            TranscriptLeftJoin <- function(transcript_gene_pos_poscodon_frame_all_genes, tidy_asite_counts_all_genes){
+              
+              if (nrow(transcript_gene_pos_poscodon_frame_all_genes) == nrow(tidy_asite_counts_all_genes)){
+                
+                dplyr::left_join(transcript_gene_pos_poscodon_frame_all_genes, tidy_asite_counts_all_genes, by = "Pos")
+                
+              } else {
+                
+                print(tibble = c())
+              }
+            }
+            
+            transcript_info_tibble <- purrr::map(
+              .x = transcript_gene_pos_poscodon_frame_all_genes,
+              .f = TranscriptLeftJoin,
+              tidy_asite_counts_all_genes,
+            )
+            
+            return(transcript_info_tibble)
+            
+          }
+          
+          transcript_info_tibble_all_genes <- AddAsiteCountsToTranscriptPosToCodonPosAllGenes(gene_names, dataset = "Mok-simYAL5", hd_file = YAL5_h5, min_read_length = 10, colsum_out = TRUE, gff_df)
+          
+          #####
+          
 
 
 # Function to add codon names to transcript_info_tibble
@@ -591,21 +849,21 @@ OverlayedTable <- function(normalized_expand_list, expand_width = 5L){
 
 Over <- OverlayedTable(normalized_expand_list, expand_width = 5L) 
 
-# output from OverlayedTable function for single codons:
-# # > Over
-# # # A tibble: 11 x 2
-# # Rel_Pos RelCount
-# # <int>    <dbl>
-# #   1      -5    0.860
-# # 2      -4    2.09
-# # 3      -3    0.876
-# # 4      -2    0.735
-# # 5      -1    0.772
-# # 6       0    0.426
-# # 7       1    0.460
-# # 8       2    1.21
-# # 9       3    0.845
-# # 10       4    0.644
-# # 11       5    2.08
+  # output from OverlayedTable function for single codons:
+  # # > Over
+  # # # A tibble: 11 x 2
+  # # Rel_Pos RelCount
+  # # <int>    <dbl>
+  # #   1      -5    0.860
+  # # 2      -4    2.09
+  # # 3      -3    0.876
+  # # 4      -2    0.735
+  # # 5      -1    0.772
+  # # 6       0    0.426
+  # # 7       1    0.460
+  # # 8       2    1.21
+  # # 9       3    0.845
+  # # 10       4    0.644
+  # # 11       5    2.08
 
 overlayed_plot <- ggplot(Over, mapping = aes(x = Rel_Pos, y = RelCount)) + geom_line()
