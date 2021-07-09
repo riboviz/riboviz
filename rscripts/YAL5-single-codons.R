@@ -24,11 +24,15 @@ library(dplyr)
 
 # Load the necessary input files 
 
+
 YAL5_h5 <- here::here("Mok-simYAL5", "output", "A", "A.h5")
 # The h5 file from the dataset of interest 
 
+hd_file = YAL5_h5
+
 YAL5_gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
 gff_df <- readGFFAsDf(YAL5_gff)
+dataset <- "Mok-simYAL5"
 # The GFF file for the simulated dataset, given the general name gff_df so that 
 # the script does not have to change based on different gff_df files being used 
 
@@ -48,52 +52,90 @@ yeast_codon_pos_i200 <- readr::read_tsv(file = here::here("data", "yeast_codon_t
   # 6 YAL068C        6 TCA
 
 
+
+
 # Filter down the yeast_codon_pos_i200 file to the gene that you are 
 # working with, in this case YAL003W
-YAL003W_pos <- dplyr::filter(yeast_codon_pos_i200, Gene=="YAL003W")
+# YAL003W_pos <- dplyr::filter(yeast_codon_pos_i200, Gene=="YAL003W")
 
 # structure of the h5 file 
-h5ls(YAL5_h5)
-
-  # group        name       otype  dclass       dim
-  # 0                           /     YAL003W   H5I_GROUP                  
-  # 1                    /YAL003W Mok-simYAL5   H5I_GROUP                  
-  # 2        /YAL003W/Mok-simYAL5       reads   H5I_GROUP                  
-  # 3  /YAL003W/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 1121
-  # 4                           /     YAL005C   H5I_GROUP                  
-  # 5                    /YAL005C Mok-simYAL5   H5I_GROUP                  
-  # 6        /YAL005C/Mok-simYAL5       reads   H5I_GROUP                  
-  # 7  /YAL005C/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 2429
-  # 8                           /     YAL012W   H5I_GROUP                  
-  # 9                    /YAL012W Mok-simYAL5   H5I_GROUP                  
-  # 10       /YAL012W/Mok-simYAL5       reads   H5I_GROUP                  
-  # 11 /YAL012W/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 1685
-  # 12                          /     YAL035W   H5I_GROUP                  
-  # 13                   /YAL035W Mok-simYAL5   H5I_GROUP                  
-  # 14       /YAL035W/Mok-simYAL5       reads   H5I_GROUP                  
-  # 15 /YAL035W/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 3509
-  # 16                          /     YAL038W   H5I_GROUP                  
-  # 17                   /YAL038W Mok-simYAL5   H5I_GROUP                  
-  # 18       /YAL038W/Mok-simYAL5       reads   H5I_GROUP                  
-  # 19 /YAL038W/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 2003
 
 
 # Fetch the datamatrix for a single gene of interest , e.g YAL003W
-reads_pos_length <- GetGeneDatamatrix(gene="YAL003W", 
-                                      dataset="Mok-simYAL5", 
-                                      hd_file=YAL5_h5)
+# reads_pos_length <- GetGeneDatamatrix(gene="YAL003W",
+#                                       dataset="Mok-simYAL5",
+#                                       hd_file=YAL5_h5)
+# 
+#   # > str(reads_pos_length)
+#   # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+# 
+# 
+# # Fetch the tidydatamatrix for a single gene of interest, e.g. YAL003W
+# tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene="YAL003W",
+#                                                          dataset="Mok-simYAL5",
+#                                                          hd_file=YAL5_h5),
+#                                        startpos = 1,
+#                                        startlen = 10)
+
+
+gene_names <- rhdf5::h5ls(YAL5_h5, recursive = 1)$name
+# 
+# GetAllGeneDatamatrix <- function(.x = gene_names, dataset, hd_file){
+#   
+#   gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name 
+#   
+#   get_all_gene_datamatrix <- purrr::map(
+#     .x = gene_names,
+#     .f = GetGeneDatamatrix,
+#     dataset,
+#     hd_file
+#   )
+#   
+#   return(get_all_gene_datamatrix)
+# }
+# 
+# get_all_gene_datamatrix <- GetAllGeneDatamatrix(dataset = "Mok-simYAL5", hd_file = YAL5_h5)
+
+
+# TidyDatamatrixForAllGenes: Function to get the tidydatamatrix for each of the 
+# genes contained within a list. 
+
+# TidyDatamatrixForAllGenes <- function(hd_file, dataset, startpos = 1, startlen = 10){
+#   
+#   # gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
+#   
+#   .x = get_all_gene_datamatrix <- GetAllGeneDatamatrix(dataset = dataset, hd_file = hd_file)
+#   
+#   tidy_all_genes_datamatrix <- purrr::map(
+#     .x = get_all_gene_datamatrix,
+#     .f = TidyDatamatrix,
+#     startpos = 1,
+#     startlen = 10
+#   )
+# }
+# 
+# tidy_all_genes_datamatrix <- TidyDatamatrixForAllGenes(hd_file = YAL5_h5, dataset = "Mok-simYAL5", startpos = 1, startlen = 10)
+
+
+
+
+test_function <- function(gene, dataset, hd_file, gff_df){
+  
+  # Fetch the datamatrix for a single gene of interest , e.g YAL003W
+  reads_pos_length <- GetGeneDatamatrix(gene,
+                                        dataset="Mok-simYAL5",
+                                        hd_file=YAL5_h5)
   
   # > str(reads_pos_length)
   # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
-
-
-# Fetch the tidydatamatrix for a single gene of interest, e.g. YAL003W 
-tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene="YAL003W", 
-                                                         dataset="Mok-simYAL5", 
-                                                         hd_file=YAL5_h5), 
-                                       startpos = 1, 
-                                       startlen = 10) 
-
+  
+  
+  # Fetch the tidydatamatrix for a single gene of interest, e.g. YAL003W
+  tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene,
+                                                           dataset="Mok-simYAL5",
+                                                           hd_file=YAL5_h5),
+                                         startpos = 1,
+                                         startlen = 10)
 
 
 ### CalcAsiteFixed (Aim: A-site assignment) 
@@ -112,7 +154,7 @@ asite_counts_by_position <- CalcAsiteFixed(reads_pos_length,
   # This step is incorporated in the funciton below 
 
 
-# Funtction with the aim of combining the asite count with the position of the nucleotides           
+# FunTCTion with the aim of combining the asite count with the position of the nucleotides           
 TidyAsiteCountsByPosition <- function(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
   
   asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", 
@@ -132,9 +174,9 @@ TidyAsiteCountsByPosition <- function(gene, dataset, hd_file, min_read_length = 
   
 }
 
-tidy_asite_count_output <- TidyAsiteCountsByPosition(gene = "YAL003W", 
-                                                     dataset = "Mok-simYAL5", 
-                                                     hd_file = YAL5_h5, 
+tidy_asite_count_output <- TidyAsiteCountsByPosition(gene, 
+                                                     dataset, 
+                                                     hd_file, 
                                                      min_read_length = 10, 
                                                      colsum_out = TRUE)
 
@@ -236,9 +278,9 @@ AddAsiteCountsToTranscriptPosToCodonPos <- function(gene, dataset, hd_file, min_
   
 }
 
-transcript_info_tibble <- AddAsiteCountsToTranscriptPosToCodonPos(gene = "YAL003W", 
-                                                                  dataset = "Mok-simYAL5", 
-                                                                  hd_file = YAL5_h5, 
+transcript_info_tibble <- AddAsiteCountsToTranscriptPosToCodonPos(gene, 
+                                                                  dataset, 
+                                                                  hd_file, 
                                                                   min_read_length = 10, 
                                                                   colsum_out = TRUE, 
                                                                   gff_df)
@@ -286,9 +328,9 @@ AddCodonNamesToTranscriptInfoTibble <- function(yeast_codon_pos_i200,
 }
 
 transcript_info_tibble <- AddCodonNamesToTranscriptInfoTibble(yeast_codon_pos_i200, 
-                                                              gene = "YAL003W", 
-                                                              dataset = "Mok-simYAL5", 
-                                                              hd_file = YAL5_h5, 
+                                                              gene, 
+                                                              dataset, 
+                                                              hd_file, 
                                                               min_read_length = 10, 
                                                               colsum_out = TRUE, 
                                                               gff_df)
@@ -302,7 +344,9 @@ transcript_info_tibble <- AddCodonNamesToTranscriptInfoTibble(yeast_codon_pos_i2
   # $ Count    : num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
   # $ Codon    : chr [1:1121] NA NA NA NA ...
 
-
+}
+# test_function(reads_pos_length, gene, dataset, hd_file, gff_df)
+transcript_info_tibble <- purrr::map_dfr(.x = gene_names, .f = test_function, dataset, hd_file, gff_df )
 
 ### Filter for reading frame of interest (default = 0)
 FilterForFrame <- function(transcript_info_tibble, filtering_frame = 0){
@@ -393,7 +437,7 @@ ExpandCodonRegion <- function(.x = interesting_codon_positions, transcript_info_
 output_codon_info <- ExpandCodonRegion(.x = interesting_codon_positions, 
                                        transcript_info_tibble , 
                                        gene="YAL003W", 
-                                       dataset="Mok-simYAL5", 
+                                       dataset, 
                                        hd_file=YAL5_h5, 
                                        expand_width = 5L, 
                                        remove_overhang = TRUE)
@@ -482,8 +526,21 @@ expand_codon_region <- ExpandCodonRegionForList(transcript_info_tibble,
   # ..$ Rel_Count: num [1:11] 364 960 162 52 115 58 89 235 7 86 ...
   # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
 
+### when looped over all genes, some elements are empty. these must be removed. hense the messy loop
+# put this bit in a function 
 
+tmp_expand_codon_list <- list()
+cc <- 1
 
+for(number in c(1:length(expand_codon_region))){
+  if(nrow(expand_codon_region[[number]] != 0 )){
+    tmp_expand_codon_list[[cc]] <- expand_codon_region[[number]]
+    
+  }
+cc <- cc +1 
+}
+
+expand_codon_region <- tmp_expand_codon_list[!sapply(tmp_expand_codon_list,is.null)]
 ### Normalization 
 
 # Normalization carried out within each expanded frame so that they are comparable 
