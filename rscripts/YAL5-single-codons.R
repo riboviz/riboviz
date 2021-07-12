@@ -33,6 +33,8 @@ hd_file = YAL5_h5
 YAL5_gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
 gff_df <- readGFFAsDf(YAL5_gff)
 dataset <- "Mok-simYAL5"
+codon_of_interest <- 'TCT'
+
 # The GFF file for the simulated dataset, given the general name gff_df so that 
 # the script does not have to change based on different gff_df files being used 
 
@@ -123,7 +125,7 @@ test_function <- function(gene, dataset, hd_file, gff_df){
   
   # Fetch the datamatrix for a single gene of interest , e.g YAL003W
   reads_pos_length <- GetGeneDatamatrix(gene,
-                                        dataset="Mok-simYAL5",
+                                        dataset,
                                         hd_file=YAL5_h5)
   
   # > str(reads_pos_length)
@@ -132,7 +134,7 @@ test_function <- function(gene, dataset, hd_file, gff_df){
   
   # Fetch the tidydatamatrix for a single gene of interest, e.g. YAL003W
   tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene,
-                                                           dataset="Mok-simYAL5",
+                                                           dataset,
                                                            hd_file=YAL5_h5),
                                          startpos = 1,
                                          startlen = 10)
@@ -243,7 +245,7 @@ TranscriptPosToCodonPos <- function(gene, gff_df){
   return(transcript_gene_pos_poscodon_frame)
 }
 
-transcript_pos_to_codon_pos_output <- TranscriptPosToCodonPos(gene = "YAL003W", gff_df)
+transcript_pos_to_codon_pos_output <- TranscriptPosToCodonPos(gene, gff_df)
 
   # The end result is a table with the columns Gene, Pos, Pos_Codon and Frame (reading frame).
   # For the Pos_Codon column the UTR positions have NA, while the CDS has the codon positions 
@@ -346,7 +348,7 @@ transcript_info_tibble <- AddCodonNamesToTranscriptInfoTibble(yeast_codon_pos_i2
 
 }
 # test_function(reads_pos_length, gene, dataset, hd_file, gff_df)
-transcript_info_tibble <- purrr::map_dfr(.x = gene_names, .f = test_function, dataset, hd_file, gff_df )
+transcript_info_tibble <- purrr::map_dfr(.x = gene_names, .f = test_function, dataset, hd_file, gff_df)
 
 ### Filter for reading frame of interest (default = 0)
 FilterForFrame <- function(transcript_info_tibble, filtering_frame = 0){
@@ -389,14 +391,12 @@ FilterForCodonOfInterestPositions <- function(transcript_info_tibble, codon_of_i
   # in the list that is generated being triplicated. Skipping this step seems to
   # resolve that issue
 
-  interesting_codon_table <- dplyr::filter(transcript_info_tibble, Codon == codon_of_interest & Gene == gene_name)
-
+  interesting_codon_table <- dplyr::filter(transcript_info_tibble, Codon == codon_of_interest, Gene == gene_name)
   interesting_codon_positions <- interesting_codon_table$Pos_Codon
 
   return(interesting_codon_positions)
 }
 # 
-# interesting_codon_positions <- FilterForCodonOfInterestPositions(transcript_info_tibble, codon_of_interest = "TCT")
 
   # > interesting_codon_positions
   # [1]  18  31  43  64  69 197
@@ -407,12 +407,12 @@ FilterForCodonOfInterestPositions <- function(transcript_info_tibble, codon_of_i
 
 # Function needed to go from one position to an exapnded region.
 # This function uses codon position values, not nucleotide position values
-ExpandCodonRegion <- function(.x = interesting_codon_positions, transcript_info_tibble, gene, dataset, hd_file, expand_width = 5L, remove_overhang = TRUE) {
+ExpandCodonRegion <- function(.x = interesting_codon_positions, transcript_info_tibble_gene, gene, dataset, hd_file, expand_width = 5L, remove_overhang = TRUE) {
 
   gene_poscodon_count <- na.omit(tibble(
-    Gene = transcript_info_tibble$Gene,
-    Pos_Codon = transcript_info_tibble$Pos_Codon,
-    Rel_Count = transcript_info_tibble$Count
+    Gene = transcript_info_tibble_gene$Gene,
+    Pos_Codon = transcript_info_tibble_gene$Pos_Codon,
+    Rel_Count = transcript_info_tibble_gene$Count
   ))
 
   # added na.omit() as the slice function goes by the row number instead of Pos_codon
@@ -420,9 +420,7 @@ ExpandCodonRegion <- function(.x = interesting_codon_positions, transcript_info_
 
   gene_length <- GetGeneLength(gene, dataset, hd_file) # giving me 618??
 
-  if (.x < expand_width | .x + expand_width > gene_length ) {
-    return()
-  } else {
+  if (!(.x < expand_width |.x + expand_width > gene_length/3)) {
     output_codon_info <- tibble(
       dplyr::slice(gene_poscodon_count, (.x - expand_width):(.x + expand_width), each = FALSE),
       Rel_Pos =  seq(- expand_width, expand_width)
@@ -473,34 +471,38 @@ ExpandCodonRegionForList <- function(transcript_info_tibble, gene, dataset, hd_f
   
   for(gene_name in unique(gene)){
     
-    interesting_codon_positions <- FilterForCodonOfInterestPositions(transcript_info_tibble, codon_of_interest = "TCT", gene_name)
+    interesting_codon_positions <- FilterForCodonOfInterestPositions(transcript_info_tibble, codon_of_interest, gene_name)
+    
+    transcript_info_tibble_gene <- dplyr::filter(transcript_info_tibble, Gene == gene_name)
     
     tmp_expand_codon_region <- purrr::map(
       .x = interesting_codon_positions, # vector of codon positions to iterate over for single codons
       .f = ExpandCodonRegion,   # function to use at each codon position of interest for single codons
-      transcript_info_tibble,
+      transcript_info_tibble_gene,
       gene = gene_name,
       dataset = "Mok-simYAL5",
       hd_file = YAL5_h5,
       gff_df,
       expand_width = 5L
     )
+    tmp_expand_codon_region <- tmp_expand_codon_region[!sapply(tmp_expand_codon_region,is.null)]
     expand_codon_region <- append(expand_codon_region, tmp_expand_codon_region)
   }
+    
   
   # remove any tibbles from the list that are null, so are within one expand_width of the UTRs
-  expand_codon_region <- expand_codon_region[!sapply(expand_codon_region,is.null)]
+  
   
   return(expand_codon_region)
 }
 
 expand_codon_region <- ExpandCodonRegionForList(transcript_info_tibble, 
                                                 gene = unique(transcript_info_tibble$Gene), 
-                                                dataset = "Mok-simYAL5", 
+                                                dataset, 
                                                 hd_file = YAL5_h5, 
                                                 startpos = 1, 
                                                 startlen = 10, 
-                                                codon_of_interest = "TCT", 
+                                                codon_of_interest, 
                                                 gff_df, 
                                                 expand_width = 5L)
 
