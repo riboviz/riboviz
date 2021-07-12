@@ -375,7 +375,7 @@ transcript_info_tibble <- FilterForFrame(transcript_info_tibble,
 
 
 # Function to filter for codons of interest, generates a list of the positions of the codon of interest
-FilterForCodonOfInterestPositions <- function(transcript_info_tibble, codon_of_interest){
+FilterForCodonOfInterestPositions <- function(transcript_info_tibble, codon_of_interest, gene_name){
 
   # transcript_info_tibble <- AddCodonNamesToTranscriptInfoTibble(yeast_codon_pos_i200,
   #                                                               gene,
@@ -389,14 +389,14 @@ FilterForCodonOfInterestPositions <- function(transcript_info_tibble, codon_of_i
   # in the list that is generated being triplicated. Skipping this step seems to
   # resolve that issue
 
-  interesting_codon_table <- dplyr::filter(transcript_info_tibble, Codon == codon_of_interest)
+  interesting_codon_table <- dplyr::filter(transcript_info_tibble, Codon == codon_of_interest & Gene == gene_name)
 
   interesting_codon_positions <- interesting_codon_table$Pos_Codon
 
   return(interesting_codon_positions)
 }
-
-interesting_codon_positions <- FilterForCodonOfInterestPositions(transcript_info_tibble, codon_of_interest = "TCT")
+# 
+# interesting_codon_positions <- FilterForCodonOfInterestPositions(transcript_info_tibble, codon_of_interest = "TCT")
 
   # > interesting_codon_positions
   # [1]  18  31  43  64  69 197
@@ -421,7 +421,7 @@ ExpandCodonRegion <- function(.x = interesting_codon_positions, transcript_info_
   gene_length <- GetGeneLength(gene, dataset, hd_file) # giving me 618??
 
   if (.x < expand_width | .x + expand_width > gene_length ) {
-    return( tibble() )
+    return()
   } else {
     output_codon_info <- tibble(
       dplyr::slice(gene_poscodon_count, (.x - expand_width):(.x + expand_width), each = FALSE),
@@ -434,13 +434,13 @@ ExpandCodonRegion <- function(.x = interesting_codon_positions, transcript_info_
   # expand_width value are discarded 
 }
 
-output_codon_info <- ExpandCodonRegion(.x = interesting_codon_positions, 
-                                       transcript_info_tibble , 
-                                       gene="YAL003W", 
-                                       dataset, 
-                                       hd_file=YAL5_h5, 
-                                       expand_width = 5L, 
-                                       remove_overhang = TRUE)
+# output_codon_info <- ExpandCodonRegion(.x = interesting_codon_positions, 
+#                                        transcript_info_tibble , 
+#                                        gene="YAL003W", 
+#                                        dataset, 
+#                                        hd_file=YAL5_h5, 
+#                                        expand_width = 5L, 
+#                                        remove_overhang = TRUE)
 
   # # Gives the output:
   # 
@@ -466,25 +466,36 @@ output_codon_info <- ExpandCodonRegion(.x = interesting_codon_positions,
 
 ExpandCodonRegionForList <- function(transcript_info_tibble, gene, dataset, hd_file, startpos = 1, startlen = 10, codon_of_interest, gff_df, expand_width = 5L){
   
-  interesting_codon_positions <- FilterForCodonOfInterestPositions(transcript_info_tibble, codon_of_interest = "TCT")
+  expand_codon_region <- list()
   
-  expand_codon_region <- purrr::map(
-    .x = interesting_codon_positions, # vector of codon positions to iterate over for single codons
-    .f = ExpandCodonRegion,   # function to use at each codon position of interest for single codons
-    transcript_info_tibble,
-    gene = "YAL003W",
-    dataset = "Mok-simYAL5",
-    hd_file = YAL5_h5,
-    gff_df,
-    expand_width = 5L
-  )
+  # A loop is used here so each unique gene can be processed separately. there were issues with using map and lapply 
+  # on the filter function of FilterForCodonOfInterestPositions, and filtering using only one gene would produce NULLs
+  
+  for(gene_name in unique(gene)){
+    
+    interesting_codon_positions <- FilterForCodonOfInterestPositions(transcript_info_tibble, codon_of_interest = "TCT", gene_name)
+    
+    tmp_expand_codon_region <- purrr::map(
+      .x = interesting_codon_positions, # vector of codon positions to iterate over for single codons
+      .f = ExpandCodonRegion,   # function to use at each codon position of interest for single codons
+      transcript_info_tibble,
+      gene = gene_name,
+      dataset = "Mok-simYAL5",
+      hd_file = YAL5_h5,
+      gff_df,
+      expand_width = 5L
+    )
+    expand_codon_region <- append(expand_codon_region, tmp_expand_codon_region)
+  }
+  
+  # remove any tibbles from the list that are null, so are within one expand_width of the UTRs
+  expand_codon_region <- expand_codon_region[!sapply(expand_codon_region,is.null)]
   
   return(expand_codon_region)
-  
 }
 
 expand_codon_region <- ExpandCodonRegionForList(transcript_info_tibble, 
-                                                gene = "YAL003W", 
+                                                gene = unique(transcript_info_tibble$Gene), 
                                                 dataset = "Mok-simYAL5", 
                                                 hd_file = YAL5_h5, 
                                                 startpos = 1, 
@@ -526,21 +537,7 @@ expand_codon_region <- ExpandCodonRegionForList(transcript_info_tibble,
   # ..$ Rel_Count: num [1:11] 364 960 162 52 115 58 89 235 7 86 ...
   # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
 
-### when looped over all genes, some elements are empty. these must be removed. hense the messy loop
-# put this bit in a function 
 
-tmp_expand_codon_list <- list()
-cc <- 1
-
-for(number in c(1:length(expand_codon_region))){
-  if(nrow(expand_codon_region[[number]] != 0 )){
-    tmp_expand_codon_list[[cc]] <- expand_codon_region[[number]]
-    
-  }
-cc <- cc +1 
-}
-
-expand_codon_region <- tmp_expand_codon_list[!sapply(tmp_expand_codon_list,is.null)]
 ### Normalization 
 
 # Normalization carried out within each expanded frame so that they are comparable 
