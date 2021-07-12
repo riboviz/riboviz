@@ -32,8 +32,7 @@ hd_file <- YAL5_h5
 # assign YAL5_h5 file to a general name applied throughput the script 
 # the script does not have to change based on different hd_files being used
 
-YAL5_gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
-gff_df <- readGFFAsDf(YAL5_gff)
+gff_df <- readGFFAsDf(here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3"))
 # The GFF file for the simulated dataset, given the general name gff_df so that
 # the script does not have to change based on different gff_df files being used
 
@@ -89,47 +88,30 @@ gene_poscodon_codon_i200 <- tibble::tibble(
   # the script when applied to codon pairs 
 
 
-
 # # Filter down the gene_poscodon_codon_i200 file to the gene that you are 
 # # working with, in this case YAL003W
 # YAL003W_pos <- dplyr::filter(gene_poscodon_codon_i200, Gene=="YAL003W")
 
 
-# read the structure of the h5 file 
-h5ls(YAL5_h5)
-
-  # group        name       otype  dclass       dim
-  # 0                           /     YAL003W   H5I_GROUP                  
-  # 1                    /YAL003W Mok-simYAL5   H5I_GROUP                  
-  # 2        /YAL003W/Mok-simYAL5       reads   H5I_GROUP                  
-  # 3  /YAL003W/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 1121
-  # 4                           /     YAL005C   H5I_GROUP                  
-  # 5                    /YAL005C Mok-simYAL5   H5I_GROUP                  
-  # 6        /YAL005C/Mok-simYAL5       reads   H5I_GROUP                  
-  # 7  /YAL005C/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 2429
-  # 8                           /     YAL012W   H5I_GROUP                  
-  # 9                    /YAL012W Mok-simYAL5   H5I_GROUP                  
-  # 10       /YAL012W/Mok-simYAL5       reads   H5I_GROUP                  
-  # 11 /YAL012W/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 1685
-  # 12                          /     YAL035W   H5I_GROUP                  
-  # 13                   /YAL035W Mok-simYAL5   H5I_GROUP                  
-  # 14       /YAL035W/Mok-simYAL5       reads   H5I_GROUP                  
-  # 15 /YAL035W/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 3509
-  # 16                          /     YAL038W   H5I_GROUP                  
-  # 17                   /YAL038W Mok-simYAL5   H5I_GROUP                  
-  # 18       /YAL038W/Mok-simYAL5       reads   H5I_GROUP                  
-  # 19 /YAL038W/Mok-simYAL5/reads        data H5I_DATASET INTEGER 41 x 2003
-
-
           ##### ALL GENES #####
           # Functions for the application of the script for all genes
-          
-          # GetAllGeneDatamatrix: Function to get the datamatrix for each of the genes
-          # in the h5 file contained within a list.
-          
-          gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
-          
-          GetAllGeneDatamatrix <- function(.x = gene_names, dataset = dataset, hd_file = hd_file){
+
+
+#' GetAllGeneDatamatrix(): Get matrix of read counts by length for all genes contained within the gene_names file from .h5 file.
+#'
+#' This accesses the attribute `reads/data` in .h5 file. 
+#' 
+#' @param list of each gene name to pull out read counts for.
+#' @param dataset name of dataset stored in .h5 file.
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples.
+#' 
+#' @ return a list of numeric matrices of read count data for each given gene in given dataset.
+#'
+#' @examples
+#' GetAllGeneDatamatrix(dataset = "Mok-simYAL5", hd_file = YAL5_h5), (where gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name)
+#'
+#' @export
+          GetAllGeneDatamatrix <- function(dataset = dataset, hd_file = hd_file){
           
             gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
           
@@ -144,7 +126,7 @@ h5ls(YAL5_h5)
           }
           
           get_all_gene_datamatrix <- GetAllGeneDatamatrix(dataset = "Mok-simYAL5", hd_file = YAL5_h5)
-          
+        
           # > str(get_all_gene_datamatrix)
           # List of 5
           # $ : int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
@@ -153,11 +135,27 @@ h5ls(YAL5_h5)
           # $ : int [1:41, 1:3509] 0 0 0 0 0 0 0 0 0 0 ...
           # $ : int [1:41, 1:2003] 0 0 0 0 0 0 0 0 0 0 ...
           
+#TEST: GetAllGeneDatamatrix(): returns list of matrices (where number of genes in gene names = number of matrices inside list) TRUE
+
           
-          # TidyDatamatrixForAllGenes: Function to get the tidydatamatrix for each of the
-          # genes contained within a list.
-          
-          TidyDatamatrixForAllGenes <- function(hd_file, dataset, startpos = 1, startlen = 10){
+#' TidyDatamatrixForAllGenes(): Convert gene data matrices for all genes into tidy dataframes
+#' 
+#' Converts each data matrix into readable tidy format with columns: `ReadLen`, `Pos`, `Counts`
+#' to hold read lengths, position (in transcript-centric coordinates), and number of reads
+#' 
+#' @param list of each gene name to pull out read counts for.
+#' @param dataset name of dataset stored in .h5 file.
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples.
+#' @param startpos numeric value, start position along transcript-centric alignment for specific gene, default = 1.
+#' @param startlen numeric value, value from which to begin counting lengths from (ie equivalent to '10' in read_lengths= 10:50), default = 10.
+#' 
+#' @return a list of tidy format data frames (tibbles), with columns: `ReadLen`, `Pos` and `Counts`
+#' 
+#' @examples 
+#' TidyDatamatrixForAllGenes(dataset = "Mok-simYAL5", hd_file = YAL5_h5, startpos = 1, startlen = 10)
+#' 
+#' @export
+          TidyDatamatrixForAllGenes <- function(dataset, hd_file, startpos = 1, startlen = 10){
           
             # gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
           
@@ -196,6 +194,9 @@ h5ls(YAL5_h5)
           # ..$ Pos    : int [1:82123] 1 1 1 1 1 1 1 1 1 1 ...
           # ..$ Counts : int [1:82123] 0 0 0 0 0 0 0 0 0 0 ...
           
+#TEST: TidyDatamatrixForAllGenes(): returns a list of tidy format data frames (tibbles) TRUE
+#TEST: TidyDatamatrixForAllGenes(): for each tibble in list: number of rows of output tibble = nrow(data_mat) * ncol(data_mat)
+#TEST: TidyDatamatrixForAllGenes(): column names are %in% c("ReadLen", "Pos", "Counts")
           #####
 
 # test_function <- function(gene, dataset, hd_file, gff_df, filtering_frame){
