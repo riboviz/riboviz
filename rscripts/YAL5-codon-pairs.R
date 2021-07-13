@@ -88,18 +88,18 @@ gene_poscodon_codon_i200 <- tibble::tibble(
   # the script when applied to codon pairs 
 
 
-# # Filter down the gene_poscodon_codon_i200 file to the gene that you are 
-# # working with, in this case YAL003W
+# # Filter down the gene_poscodon_codon_i200 file to gene of interest
 # YAL003W_pos <- dplyr::filter(gene_poscodon_codon_i200, Gene=="YAL003W")
 
 
-          ##### ALL GENES #####
-          # Functions for the application of the script for all genes
+#####
 
+
+### Functions to read data from h5 file for all genes ###
 
 #' GetAllGeneDatamatrix(): Get matrix of read counts by length for all genes contained within the gene_names file from .h5 file.
 #'
-#' This accesses the attribute `reads/data` in .h5 file. 
+#' This accesses the attribute `reads/data` in .h5 file for each gene listed in gene_names. 
 #' 
 #' @param list of each gene name to pull out read counts for.
 #' @param dataset name of dataset stored in .h5 file.
@@ -108,40 +108,41 @@ gene_poscodon_codon_i200 <- tibble::tibble(
 #' @ return a list of numeric matrices of read count data for each given gene in given dataset.
 #'
 #' @examples
-#' GetAllGeneDatamatrix(dataset = "Mok-simYAL5", hd_file = YAL5_h5), (where gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name)
+#' GetAllGeneDatamatrix(dataset = "Mok-simYAL5", hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5"))
 #'
 #' @export
-          GetAllGeneDatamatrix <- function(dataset = dataset, hd_file = hd_file){
+GetAllGeneDatamatrix <- function(dataset, hd_file){
           
-            gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
+  gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
           
-            get_all_gene_datamatrix <- purrr::map(
-              .x = gene_names,
-              .f = GetGeneDatamatrix,
-              dataset,
-              hd_file
-            )
+  get_all_gene_datamatrix <- purrr::map(
+      .x = gene_names,
+      .f = GetGeneDatamatrix,
+      dataset,
+      hd_file
+      )
           
-            return(get_all_gene_datamatrix)
-          }
-          
-          get_all_gene_datamatrix <- GetAllGeneDatamatrix(dataset = "Mok-simYAL5", hd_file = YAL5_h5)
-        
-          # > str(get_all_gene_datamatrix)
-          # List of 5
-          # $ : int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
-          # $ : int [1:41, 1:2429] 0 0 0 0 0 0 0 0 0 0 ...
-          # $ : int [1:41, 1:1685] 0 0 0 0 0 0 0 0 0 0 ...
-          # $ : int [1:41, 1:3509] 0 0 0 0 0 0 0 0 0 0 ...
-          # $ : int [1:41, 1:2003] 0 0 0 0 0 0 0 0 0 0 ...
-          
-#TEST: GetAllGeneDatamatrix(): returns list of matrices (where number of genes in gene names = number of matrices inside list) TRUE
+    return(get_all_gene_datamatrix)
+}
+#TEST: GetAllGeneDatamatrix(): returns list of matrices (where number of genes in gene_names = number of items inside list) TRUE
+# gives:
+# > str(get_all_gene_datamatrix)
+# List of 5
+#   $ : int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+#   $ : int [1:41, 1:2429] 0 0 0 0 0 0 0 0 0 0 ...
+#   $ : int [1:41, 1:1685] 0 0 0 0 0 0 0 0 0 0 ...
+#   $ : int [1:41, 1:3509] 0 0 0 0 0 0 0 0 0 0 ...
+#   $ : int [1:41, 1:2003] 0 0 0 0 0 0 0 0 0 0 ...
 
-          
+
+get_all_gene_datamatrix <- GetAllGeneDatamatrix(dataset = "Mok-simYAL5", hd_file = YAL5_h5)          
+        
+
+  
 #' TidyDatamatrixForAllGenes(): Convert gene data matrices for all genes into tidy dataframes
 #' 
 #' Converts each data matrix into readable tidy format with columns: `ReadLen`, `Pos`, `Counts`
-#' to hold read lengths, position (in transcript-centric coordinates), and number of reads
+#' to hold read lengths, position (in transcript-centric coordinates), and number of reads for all genes
 #' 
 #' @param list of each gene name to pull out read counts for.
 #' @param dataset name of dataset stored in .h5 file.
@@ -152,119 +153,155 @@ gene_poscodon_codon_i200 <- tibble::tibble(
 #' @return a list of tidy format data frames (tibbles), with columns: `ReadLen`, `Pos` and `Counts`
 #' 
 #' @examples 
-#' TidyDatamatrixForAllGenes(dataset = "Mok-simYAL5", hd_file = YAL5_h5, startpos = 1, startlen = 10)
+#' TidyDatamatrixForAllGenes(dataset = "Mok-simYAL5", hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5"), startpos = 1, startlen = 10)
 #' 
 #' @export
-          TidyDatamatrixForAllGenes <- function(dataset, hd_file, startpos = 1, startlen = 10){
+TidyDatamatrixForAllGenes <- function(dataset, hd_file, startpos = 1, startlen = 10){
           
-            # gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
+    gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
           
-            .x = get_all_gene_datamatrix <- GetAllGeneDatamatrix(dataset = dataset, hd_file = hd_file)
+    .x = get_all_gene_datamatrix <- GetAllGeneDatamatrix(dataset = dataset, 
+                                                         hd_file = hd_file)
           
-            tidy_all_genes_datamatrix <- purrr::map(
-              .x = get_all_gene_datamatrix,
-              .f = TidyDatamatrix,
-              startpos = 1,
-              startlen = 10
-            )
-          }
-          
-          tidy_all_genes_datamatrix <- TidyDatamatrixForAllGenes(hd_file, dataset, startpos = 1, startlen = 10)
-          
-          # > str(tidy_all_genes_datamatrix)
-          # List of 5
-          # $ : tibble [45,961 x 3] (S3: tbl_df/tbl/data.frame)
-          # ..$ ReadLen: int [1:45961] 10 11 12 13 14 15 16 17 18 19 ...
-          # ..$ Pos    : int [1:45961] 1 1 1 1 1 1 1 1 1 1 ...
-          # ..$ Counts : int [1:45961] 0 0 0 0 0 0 0 0 0 0 ...
-          # $ : tibble [99,589 x 3] (S3: tbl_df/tbl/data.frame)
-          # ..$ ReadLen: int [1:99589] 10 11 12 13 14 15 16 17 18 19 ...
-          # ..$ Pos    : int [1:99589] 1 1 1 1 1 1 1 1 1 1 ...
-          # ..$ Counts : int [1:99589] 0 0 0 0 0 0 0 0 0 0 ...
-          # $ : tibble [69,085 x 3] (S3: tbl_df/tbl/data.frame)
-          # ..$ ReadLen: int [1:69085] 10 11 12 13 14 15 16 17 18 19 ...
-          # ..$ Pos    : int [1:69085] 1 1 1 1 1 1 1 1 1 1 ...
-          # ..$ Counts : int [1:69085] 0 0 0 0 0 0 0 0 0 0 ...
-          # $ : tibble [143,869 x 3] (S3: tbl_df/tbl/data.frame)
-          # ..$ ReadLen: int [1:143869] 10 11 12 13 14 15 16 17 18 19 ...
-          # ..$ Pos    : int [1:143869] 1 1 1 1 1 1 1 1 1 1 ...
-          # ..$ Counts : int [1:143869] 0 0 0 0 0 0 0 0 0 0 ...
-          # $ : tibble [82,123 x 3] (S3: tbl_df/tbl/data.frame)
-          # ..$ ReadLen: int [1:82123] 10 11 12 13 14 15 16 17 18 19 ...
-          # ..$ Pos    : int [1:82123] 1 1 1 1 1 1 1 1 1 1 ...
-          # ..$ Counts : int [1:82123] 0 0 0 0 0 0 0 0 0 0 ...
-          
-#TEST: TidyDatamatrixForAllGenes(): returns a list of tidy format data frames (tibbles) TRUE
+    tidy_all_genes_datamatrix <- purrr::map(
+        .x = get_all_gene_datamatrix,
+        .f = TidyDatamatrix,
+        startpos = 1,
+        startlen = 10
+        )
+    
+    return(tidy_all_genes_datamatrix)
+}
+#TEST: TidyDatamatrixForAllGenes(): returns a list of tidy format data frames (tibbles) returns list of matrices (where number of genes in gene_names = number of items inside list) TRUE
 #TEST: TidyDatamatrixForAllGenes(): for each tibble in list: number of rows of output tibble = nrow(data_mat) * ncol(data_mat)
 #TEST: TidyDatamatrixForAllGenes(): column names are %in% c("ReadLen", "Pos", "Counts")
-          #####
+# gives:
+# > str(tidy_all_genes_datamatrix)
+# List of 5
+# $ : Classes 'tbl_df', 'tbl' and 'data.frame':  45,961 observations of 3 variables:
+#   $ ReadLen: int  10 11 12 13 14 15 16 17 18 19 ...
+#   $ Pos    : int  1 1 1 1 1 1 1 1 1 1 ...
+#   $ Counts : int  0 0 0 0 0 0 0 0 0 0 ...
+# $ : Classes 'tbl_df', 'tbl' and 'data.frame':  99,589 observations of 3 variables: 
+#   $ ReadLen: int  10 11 12 13 14 15 16 17 18 19 ...
+#   $ Pos    : int  1 1 1 1 1 1 1 1 1 1 ...
+#   $ Counts : int  0 0 0 0 0 0 0 0 0 0 ...
+# $ : Classes 'tbl_df', 'tbl' and 'data.frame':  69,085 observations of 3 variables: 
+#   $ ReadLen: int  10 11 12 13 14 15 16 17 18 19 ...
+#   $ Pos    : int  1 1 1 1 1 1 1 1 1 1 ...
+#   $ Counts : int  0 0 0 0 0 0 0 0 0 0 ...
+# $ : Classes 'tbl_df', 'tbl' and 'data.frame':  143,869 observations of 3 variables:  
+#   $ ReadLen: int  10 11 12 13 14 15 16 17 18 19 ...
+#   $ Pos    : int  1 1 1 1 1 1 1 1 1 1 ...
+#   $ Counts : int  0 0 0 0 0 0 0 0 0 0 ...
+# $ : Classes 'tbl_df', 'tbl' and 'data.frame':  82,123 observations of 3 variables: 
+#   $ ReadLen: int  10 11 12 13 14 15 16 17 18 19 ...
+#   $ Pos    : int  1 1 1 1 1 1 1 1 1 1 ...
+#   $ Counts : int  0 0 0 0 0 0 0 0 0 0 ...
+          
 
-# test_function <- function(gene, dataset, hd_file, gff_df, filtering_frame){
+tidy_all_genes_datamatrix <- TidyDatamatrixForAllGenes(hd_file, dataset, startpos = 1, startlen = 10)          
 
-  # Fetch the datamatrix for a single gene of interest , e.g YAL003W
-  reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", 
-                                        dataset  = dataset, 
-                                        hd_file)
-  
-    # > str(reads_pos_length)
-    # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
-  
-  # Fetch the tidydatamatrix for a single gene of interest, e.g. YAL003W 
-  tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene = "YAL003W", 
-                                                           dataset = dataset, 
-                                                           hd_file), 
-                                         startpos = 1, 
-                                         startlen = 10)
-  
-    # > str(tidy_gene_datamatrix)
-    # tibble [45,961 x 3] (S3: tbl_df/tbl/data.frame)
-    # $ ReadLen: int [1:45961] 10 11 12 13 14 15 16 17 18 19 ...
-    # $ Pos    : int [1:45961] 1 1 1 1 1 1 1 1 1 1 ...
-    # $ Counts : int [1:45961] 0 0 0 0 0 0 0 0 0 0 ...
-  
-  
-  ### CalcAsiteFixed (Aim: A-site assignment) 
-  
-  # CalcAsiteFixed for single gene of interst 
-  asite_counts_by_position <- CalcAsiteFixed(reads_pos_length, 
-                          min_read_length = 10, 
-                          asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
-                                                                 asite_displacement = c(15, 15, 15)), 
-                          colsum_out = TRUE)
-  
-    # > str(asite_counts_by_position)
-    # num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
-  
-  
-            ##### ALL GENES #####
-            # CalcAsiteFixed function applied to all genes
-            CalcAsiteFixedForAllGenes <- function(dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
 
-              get_all_gene_datamatrix <- GetAllGeneDatamatrix(dataset = dataset, hd_file = hd_file)
+          
+          
+# # test_function <- function(gene, dataset, hd_file, gff_df, filtering_frame){
+# 
+#   # Fetch the datamatrix for a single gene of interest , e.g YAL003W
+#   reads_pos_length <- GetGeneDatamatrix(gene = "YAL003W", 
+#                                         dataset  = dataset, 
+#                                         hd_file)
+#   
+#     # > str(reads_pos_length)
+#     # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+#   
+#   # Fetch the tidydatamatrix for a single gene of interest, e.g. YAL003W 
+#   tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene = "YAL003W", 
+#                                                            dataset = dataset, 
+#                                                            hd_file), 
+#                                          startpos = 1, 
+#                                          startlen = 10)
+#   
+#     # > str(tidy_gene_datamatrix)
+#     # tibble [45,961 x 3] (S3: tbl_df/tbl/data.frame)
+#     # $ ReadLen: int [1:45961] 10 11 12 13 14 15 16 17 18 19 ...
+#     # $ Pos    : int [1:45961] 1 1 1 1 1 1 1 1 1 1 ...
+#     # $ Counts : int [1:45961] 0 0 0 0 0 0 0 0 0 0 ...
+ 
 
-              asite_counts_by_position_all_genes <- purrr::map(
-                .x = get_all_gene_datamatrix,
-                .f = CalcAsiteFixed,
-                min_read_length = min_read_length,
-                asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)),
-                colsum_out = colsum_out
 
-              )
+##### 
 
-              return(asite_counts_by_position_all_genes)
-            }
+### Functions for A-site assignment of reads extracted from .h5 file ###
+  
 
-            asite_counts_by_position_all_genes <- CalcAsiteFixedForAllGenes(dataset = "Mok-simYAL5", hd_file, min_read_length = 10, colsum_out = TRUE)
+#' CalcAsiteFixedForAllGenes(): Calculate read A-site using a fixed displacement for read lengths for all genes in gene_names.
+#' 
+#' The assignment rules are specified in a user-supplied data frame, 'asite_displacement_length'.
+#' 
+#' @param min_read_length numeric, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
+#' @param asite_displacement_length data frame with columns `read_length` and `asite_displacement`
+#'  default: read_length = c(28, 29, 30), and asite_displacement = c(15, 15, 15).
+#' @param colsum_out logical; if true, return summary column of summed a-site lengths; default: TRUE
+#' 
+#' @return a list of numeric vectors if colsum_out = TRUE; matrices with a number of rows equivalent to number of rows in asite_displacement_length if colsum_out = FALSE
+#' 
+#' @examples 
+#' CalcAsiteFixedForAllGenes(dataset = "Mok-simYAL5", hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5"), min_read_length = 10, asite_displacement_length = data.frame(read_length = c(28, 29, 30), asite_displacement = c(15, 15, 15)), colsum_out = TRUE)
+#' 
+#' @export
+CalcAsiteFixedForAllGenes <- function(dataset, 
+                                      hd_file, 
+                                      min_read_length = 10, 
+                                      asite_displacement_length = data.frame(
+                                        read_length = c(28, 29, 30), 
+                                        asite_displacement = c(15, 15, 15)
+                                        ),
+                                      colsum_out = TRUE){
+ 
+  get_all_gene_datamatrix <- GetAllGeneDatamatrix(dataset = dataset, 
+                                                  hd_file = hd_file)
 
-            # > str(asite_counts_by_position_all_genes)
-            # List of 5
-            # $ : num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
-            # $ : num [1:2429] 0 0 0 0 0 0 0 0 0 0 ...
-            # $ : num [1:1685] 0 0 0 0 0 0 0 0 0 0 ...
-            # $ : num [1:3509] 0 0 0 0 0 0 0 0 0 0 ...
-            # $ : num [1:2003] 0 0 0 0 0 0 0 0 0 0 ...
+  asite_counts_by_position_all_genes <- purrr::map(
+    .x = get_all_gene_datamatrix,
+    .f = CalcAsiteFixed,
+    min_read_length = min_read_length,
+    asite_displacement_length = asite_displacement_length,
+    colsum_out = colsum_out
+  )
+  
+  return(asite_counts_by_position_all_genes)
+}
+# TEST: CalcAsiteFixedForAllGenes(): if col_sum = TRUE, return list of numeric vectors returns list of matrices (where number of genes in gene_names = number of items inside list)? TRUE
+# TEST: CalcAsiteFixedForAllGenes(): if col_sum = FALSE, return list of matrices? TRUE
+# gives:
+# > str(asite_counts_by_position_all_genes)
+# List of 5
+# $ : num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+# $ : num [1:2429] 0 0 0 0 0 0 0 0 0 0 ...
+# $ : num [1:1685] 0 0 0 0 0 0 0 0 0 0 ...
+# $ : num [1:3509] 0 0 0 0 0 0 0 0 0 0 ...
+# $ : num [1:2003] 0 0 0 0 0 0 0 0 0 0 ...
 
-            #####
+
+asite_counts_by_position_all_genes <- CalcAsiteFixedForAllGenes(dataset = "Mok-simYAL5", 
+                                                                hd_file, 
+                                                                min_read_length = 10, 
+                                                                colsum_out = TRUE)
+
+
+
+      # # CalcAsiteFixed for single gene of interst 
+      # asite_counts_by_position <- CalcAsiteFixed(reads_pos_length, 
+      #                         min_read_length = 10, 
+      #                         asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
+      #                                                                asite_displacement = c(15, 15, 15)), 
+      #                         colsum_out = TRUE)
+      # 
+      #   # > str(asite_counts_by_position)
+      #   # num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+
+
   
   
   # Funtction with the aim of combining the asite count with the position of the nucleotides           
