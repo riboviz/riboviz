@@ -101,7 +101,6 @@ gene_poscodon_codon_i200 <- tibble::tibble(
 #'
 #' This accesses the attribute `reads/data` in .h5 file for each gene listed in gene_names. 
 #' 
-#' @param list of each gene name to pull out read counts for.
 #' @param dataset name of dataset stored in .h5 file.
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples.
 #' 
@@ -144,7 +143,6 @@ get_all_gene_datamatrix <- GetAllGeneDatamatrix(dataset = "Mok-simYAL5", hd_file
 #' Converts each data matrix into readable tidy format with columns: `ReadLen`, `Pos`, `Counts`
 #' to hold read lengths, position (in transcript-centric coordinates), and number of reads for all genes
 #' 
-#' @param list of each gene name to pull out read counts for.
 #' @param dataset name of dataset stored in .h5 file.
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples.
 #' @param startpos numeric value, start position along transcript-centric alignment for specific gene, default = 1.
@@ -200,7 +198,7 @@ TidyDatamatrixForAllGenes <- function(dataset, hd_file, startpos = 1, startlen =
 #   $ Counts : int  0 0 0 0 0 0 0 0 0 0 ...
           
 
-tidy_all_genes_datamatrix <- TidyDatamatrixForAllGenes(hd_file, dataset, startpos = 1, startlen = 10)          
+tidy_all_genes_datamatrix <- TidyDatamatrixForAllGenes(hd_file, dataset = "Mok-simYAL5", startpos = 1, startlen = 10)          
 
 
           
@@ -232,13 +230,17 @@ tidy_all_genes_datamatrix <- TidyDatamatrixForAllGenes(hd_file, dataset, startpo
 
 ##### 
 
+
 ### Functions for A-site assignment of reads extracted from .h5 file ###
   
 
 #' CalcAsiteFixedForAllGenes(): Calculate read A-site using a fixed displacement for read lengths for all genes in gene_names.
 #' 
 #' The assignment rules are specified in a user-supplied data frame, 'asite_displacement_length'.
+#' This function is used in TidyAsiteCountsByPositionAllGenes().
 #' 
+#' @param dataset name of dataset stored in .h5 file.
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples.
 #' @param min_read_length numeric, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
 #' @param asite_displacement_length data frame with columns `read_length` and `asite_displacement`
 #'  default: read_length = c(28, 29, 30), and asite_displacement = c(15, 15, 15).
@@ -302,80 +304,102 @@ asite_counts_by_position_all_genes <- CalcAsiteFixedForAllGenes(dataset = "Mok-s
       #   # num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
 
 
+
+
+
+  #' #' TidyAsiteCountsByPosition(): Aligns A-site assigned counts to the nucleotide positions for a single gene
+  #' # Funtction with the aim of combining the asite count with the position of the nucleotides           
+  #' TidyAsiteCountsByPosition <- function(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
+  #'   
+  #'   asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", "yeast_standard_asite_disp_length.txt"))
+  #'   
+  #'   reads_pos_length <- GetGeneDatamatrix(gene, dataset = dataset, hd_file)
+  #'   
+  #'   asite_counts_by_position <- CalcAsiteFixed(reads_pos_length, 
+  #'                                              min_read_length = min_read_length, 
+  #'                                              asite_displacement_length = asite_displacement_length,
+  #'                                              colsum_out = colsum_out)
+  #'   
+  #'   tidy_asite_counts <- tibble(Pos = 1:length(asite_counts_by_position), Count = asite_counts_by_position)
+  #'   
+  #'   return(tidy_asite_counts)
+  #'   
+  #' }
+  #' 
+  #' tidy_asite_count_output <- TidyAsiteCountsByPosition(gene = "YAL003W", dataset, hd_file, min_read_length = 10, colsum_out = TRUE)
+  
+  # > str(tidy_asite_count_output)
+  # tibble [1,121 x 2] (S3: tbl_df/tbl/data.frame)
+  # $ Pos  : int [1:1121] 1 2 3 4 5 6 7 8 9 10 ...
+  # $ Count: num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+
+
+#' TidyAsiteCountsByPositionAllGenes(): Align A-site assigned counts to the nucleotide positions for each gene contained within gene_names.  
+#' 
+#' @param dataset name of dataset stored in .h5 file.
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples.
+#' @param min_read_length numeric, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
+#' @param colsum_out logical; if true, return summary column of summed a-site lengths; default: TRUE
+#' 
+#' @return a list of tibbles where the A-site assigned counts are aligned to the nucleotide positions of each gene of interest (UTRs and CDS)
+#' 
+#' @examples 
+#' TidyAsiteCountsByPositionAllGenes(dataset = "Mok-simYAL5", hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5"), min_read_length = 10, colsum_out = TRUE)
+#' 
+#' @export
+TidyAsiteCountsByPositionAllGenes <- function(dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
+  
+  asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", "yeast_standard_asite_disp_length.txt"))
+  
+  asite_counts_by_position_all_genes <- CalcAsiteFixedForAllGenes(dataset = dataset, hd_file = hd_file, min_read_length = 10, colsum_out = TRUE)
   
   
-  # Funtction with the aim of combining the asite count with the position of the nucleotides           
-  TidyAsiteCountsByPosition <- function(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
+  TidyAsiteCountsTibble <- function(asite_counts_by_position_all_genes){
     
-    asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", "yeast_standard_asite_disp_length.txt"))
-    
-    reads_pos_length <- GetGeneDatamatrix(gene, dataset = dataset, hd_file)
-    
-    asite_counts_by_position <- CalcAsiteFixed(reads_pos_length, 
-                                               min_read_length = min_read_length, 
-                                               asite_displacement_length = asite_displacement_length,
-                                               colsum_out = colsum_out)
-    
-    tidy_asite_counts <- tibble(Pos = 1:length(asite_counts_by_position), Count = asite_counts_by_position)
-    
-    return(tidy_asite_counts)
+    tidy_asite_counts_all_genes <- tibble(Pos = 1:length(asite_counts_by_position_all_genes), Count = asite_counts_by_position_all_genes)
     
   }
   
-  tidy_asite_count_output <- TidyAsiteCountsByPosition(gene = "YAL003W", dataset, hd_file, min_read_length = 10, colsum_out = TRUE)
+  tidy_asite_counts_all_genes <- purrr::map(
+    .x = asite_counts_by_position_all_genes,
+    .f = TidyAsiteCountsTibble
+  )
   
-    # > str(tidy_asite_count_output)
-    # tibble [1,121 x 2] (S3: tbl_df/tbl/data.frame)
-    # $ Pos  : int [1:1121] 1 2 3 4 5 6 7 8 9 10 ...
-    # $ Count: num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
+  return(tidy_asite_counts_all_genes)
+}
+#TEST: TidyAsiteCountsByPositionAllGenes(): returns a list of tidy format data frame (tibble) where the number of items in the list = number of items in gene_names. 
+#TEST: TidyAsiteCountsByPositionAllGenes(): each tibble has 2 columns.
+#TEST: TidyAsiteCountsByPositionAllGenes(): number of observations in the output tibble = width of UTR5+CDS+UTR3 from gff_df for each respective gene in gene_names.
+#TEST: TidyAsiteCountsByPositionAllGenes(): the column names are %in% c("Pos", "Count")
+# gives:
+# > str(tidy_asite_counts_all_genes)
+# List of 5
+# Classes 'tbl_df', 'tbl' and 'data.frame':   1121 observations of 2 variables:
+#   $ Pos  : int  1 2 3 4 5 6 7 8 9 10 ...
+#   $ Count: num  0 0 0 0 0 0 0 0 0 0 ...
+# Classes 'tbl_df', 'tbl' and 'data.frame':   2429 observations of 2 variables:
+#   $ Pos  : int  1 2 3 4 5 6 7 8 9 10 ...
+#   $ Count: num  0 0 0 0 0 0 0 0 0 0 ...
+# Classes 'tbl_df', 'tbl' and 'data.frame':   1685 observations of 2 variables:
+#   $ Pos  : int  1 2 3 4 5 6 7 8 9 10 ...
+#   $ Count: num  0 0 0 0 0 0 0 0 0 0 ...
+# Classes 'tbl_df', 'tbl' and 'data.frame':   3509 observations of 2 variables:
+#   $ Pos  : int  1 2 3 4 5 6 7 8 9 10 ...
+#   $ Count: num  0 0 0 0 0 0 0 0 0 0 ...
+# Classes 'tbl_df', 'tbl' and 'data.frame':   2003 observations of 2 variables:
+#   $ Pos  : int  1 2 3 4 5 6 7 8 9 10 ...
+#   $ Count: num  0 0 0 0 0 0 0 0 0 0 ...
+
+
+tidy_asite_counts_all_genes <- TidyAsiteCountsByPositionAllGenes(dataset, hd_file, min_read_length = 10, colsum_out = TRUE)
+
+
+#####
+
+ 
   
   
-            ##### ALL GENES #####
-            # TidyAsiteCountsByPosition function applied to all genes of interest
-            TidyAsiteCountsByPositionAllGenes <- function(dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
-
-              asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", "yeast_standard_asite_disp_length.txt"))
-
-              asite_counts_by_position_all_genes <- CalcAsiteFixedForAllGenes(dataset = dataset, hd_file = hd_file, min_read_length = 10, colsum_out = TRUE)
-
-
-              TidyAsiteCountsTibble <- function(asite_counts_by_position_all_genes){
-
-                tidy_asite_counts_all_genes <- tibble(Pos = 1:length(asite_counts_by_position_all_genes), Count = asite_counts_by_position_all_genes)
-
-              }
-
-
-              tidy_asite_counts_all_genes <- purrr::map(
-                .x = asite_counts_by_position_all_genes,
-                .f = TidyAsiteCountsTibble
-              )
-
-              return(tidy_asite_counts_all_genes)
-
-            }
-
-            tidy_asite_counts_all_genes <- TidyAsiteCountsByPositionAllGenes(dataset, hd_file, min_read_length = 10, colsum_out = TRUE)
-
-            # > str(tidy_asite_counts_all_genes)
-            # List of 5
-            # $ : tibble [1,121 x 2] (S3: tbl_df/tbl/data.frame)
-            # ..$ Pos  : int [1:1121] 1 2 3 4 5 6 7 8 9 10 ...
-            # ..$ Count: num [1:1121] 0 0 0 0 0 0 0 0 0 0 ...
-            # $ : tibble [2,429 x 2] (S3: tbl_df/tbl/data.frame)
-            # ..$ Pos  : int [1:2429] 1 2 3 4 5 6 7 8 9 10 ...
-            # ..$ Count: num [1:2429] 0 0 0 0 0 0 0 0 0 0 ...
-            # $ : tibble [1,685 x 2] (S3: tbl_df/tbl/data.frame)
-            # ..$ Pos  : int [1:1685] 1 2 3 4 5 6 7 8 9 10 ...
-            # ..$ Count: num [1:1685] 0 0 0 0 0 0 0 0 0 0 ...
-            # $ : tibble [3,509 x 2] (S3: tbl_df/tbl/data.frame)
-            # ..$ Pos  : int [1:3509] 1 2 3 4 5 6 7 8 9 10 ...
-            # ..$ Count: num [1:3509] 0 0 0 0 0 0 0 0 0 0 ...
-            # $ : tibble [2,003 x 2] (S3: tbl_df/tbl/data.frame)
-            # ..$ Pos  : int [1:2003] 1 2 3 4 5 6 7 8 9 10 ...
-            # ..$ Count: num [1:2003] 0 0 0 0 0 0 0 0 0 0 ...
-
-            #####
+           
 
   
   # TranscriptPosToCodonPos generates a table with the columns Gene, Pos (position 
