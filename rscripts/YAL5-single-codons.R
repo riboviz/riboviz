@@ -1,45 +1,66 @@
 # YAL5_h5 is at location $HOME/riboviz/riboviz/Mok-simYAL5/output/A/A.h5
 
+# Given an h5 file, GFF file and .tsv file, this script creates a metafeature plot 
+# for the codon of interest
+
 # source packages and functions from rscripts 
 source(here::here("rscripts", "read_count_functions.R"))
 source(here::here("rscripts", "stats_figs_block_functions.R"))
 
-
-# other packages I loaded that I used 
 library(tidyverse)
-# install.packages("zoo") - new package required for function rollapply
 library(zoo)
-# install.packages("ggplot2")
 library(ggplot2)
-# install.packages("plotly")
 library(plotly)
 library(purrr)
 library(dplyr)
+install.packages('argparse')
+library(argparse)
 
-# Given an h5 file, GFF file and .tsv file, this script creates a metafeature plot 
-# for the codon of interest. 
+parser <- ArgumentParser()
+parser$add_argument('-i', '--input', help='Path input to h5 file')
+parser$add_argument('-d', '--dataset', help='Name of the dataset being studied')
+parser$add_argument('-g', '--gff', help='Path t the GFF3 file of the organism being studied')
+parser$add_argument('-a', '--annotation', help='Path to codon table for organism')
+parser$add_argument('--codon', help='Codon of interest')
+parser$add_argument('--expand_width', help='the desired range either side of the codon of interest', default = 5)
+parser$add_argument('--startpos', help='position of the start codon', default = 1)
+parser$add_argument('--startlen', help='smallest length of reads', default = 10) # please correct if wrong
+parser$add_argument('--frame', help='frame to be studied', default = 0)
+parser$add_argument('--minreadlen', help='minimum read length', default = 10)
+args <- parser$parse_args()
 
-# FOR SINGLE CODONS: USE yeast_codon_pos_i200 THROUGHOUT
+
+hd_file <- args$input
+dataset <- args$dataset
+gff <- args$gff
+yeast_codon_table <- args$annotation
+codon_of_interest <- args$codon
+expand_width <- args$expand_width
+startpos <- args$startpos
+startlen <- args$startlen
+filtering_framw <- args$frame
+min_read_length <- args$minreadlen
 
 
-# Load the necessary input files 
+# hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
+# dataset <- "Mok-simYAL5"
+# codon_of_interest <- 'TCT'
+# expand_width = 10L
+# startpos <-1 
+# startlen <- 10 
+# filtering_frame <- 0
+# min_read_length <- 10
+# yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
+# YAL5_gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
 
-
-YAL5_h5 <- here::here("Mok-simYAL5", "output", "A", "A.h5")
-# The h5 file from the dataset of interest 
-
-hd_file = YAL5_h5
-
-YAL5_gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
-gff_df <- readGFFAsDf(YAL5_gff)
-dataset <- "Mok-simYAL5"
-codon_of_interest <- 'TCT'
+gff_df <- readGFFAsDf(gff)
+gene_names <- rhdf5::h5ls(YAL5_h5, recursive = 1)$name
 
 # The GFF file for the simulated dataset, given the general name gff_df so that 
 # the script does not have to change based on different gff_df files being used 
 
 # Import the .tsv file: 
-yeast_codon_pos_i200 <- readr::read_tsv(file = here::here("data", "yeast_codon_table.tsv"))
+yeast_codon_pos_i200 <- readr::read_tsv(file = yeast_codon_table)
 
   # head(yeast_codon_pos_i200) 
   # 
@@ -80,7 +101,7 @@ yeast_codon_pos_i200 <- readr::read_tsv(file = here::here("data", "yeast_codon_t
 #                                        startlen = 10)
 
 
-gene_names <- rhdf5::h5ls(YAL5_h5, recursive = 1)$name
+
 # 
 # GetAllGeneDatamatrix <- function(.x = gene_names, dataset, hd_file){
 #   
@@ -126,7 +147,7 @@ test_function <- function(gene, dataset, hd_file, gff_df){
   # Fetch the datamatrix for a single gene of interest , e.g YAL003W
   reads_pos_length <- GetGeneDatamatrix(gene,
                                         dataset,
-                                        hd_file=YAL5_h5)
+                                        hd_file)
   
   # > str(reads_pos_length)
   # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
@@ -135,9 +156,9 @@ test_function <- function(gene, dataset, hd_file, gff_df){
   # Fetch the tidydatamatrix for a single gene of interest, e.g. YAL003W
   tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene,
                                                            dataset,
-                                                           hd_file=YAL5_h5),
-                                         startpos = 1,
-                                         startlen = 10)
+                                                           hd_file),
+                                         startpos,
+                                         startlen)
 
           
 
@@ -146,7 +167,7 @@ test_function <- function(gene, dataset, hd_file, gff_df){
 
 # CalcAsiteFixed for single gene of interest 
 asite_counts_by_position <- CalcAsiteFixed(reads_pos_length, 
-                                           min_read_length = 10, 
+                                           min_read_length, 
                                            asite_displacement_length = data.frame(read_length = c(28, 29, 30), 
                                                                                   asite_displacement = c(15, 15, 15)), 
                                            colsum_out = TRUE)
@@ -159,7 +180,7 @@ asite_counts_by_position <- CalcAsiteFixed(reads_pos_length,
           
 
 # FunTCTion with the aim of combining the asite count with the position of the nucleotides           
-TidyAsiteCountsByPosition <- function(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE){
+TidyAsiteCountsByPosition <- function(gene, dataset, hd_file, min_read_length, colsum_out = TRUE){
   
   asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", 
                                                                               "yeast_standard_asite_disp_length.txt"))
@@ -181,7 +202,7 @@ TidyAsiteCountsByPosition <- function(gene, dataset, hd_file, min_read_length = 
 tidy_asite_count_output <- TidyAsiteCountsByPosition(gene, 
                                                      dataset, 
                                                      hd_file, 
-                                                     min_read_length = 10, 
+                                                     min_read_length, 
                                                      colsum_out = TRUE)
 
   # > str(tidy_asite_count_output)
@@ -262,12 +283,12 @@ transcript_pos_to_codon_pos_output <- TranscriptPosToCodonPos(gene, gff_df)
 # Function joins the tables which are output by TidyAsiteCountsByPosition and 
 # TranscriptPosToCodonPos functions to generate transcript_info_tibble
 
-AddAsiteCountsToTranscriptPosToCodonPos <- function(gene, dataset, hd_file, min_read_length = 10, colsum_out = TRUE, gff_df){
+AddAsiteCountsToTranscriptPosToCodonPos <- function(gene, dataset, hd_file, min_read_length, colsum_out = TRUE, gff_df){
   
   tidy_asite_count_output <- TidyAsiteCountsByPosition(gene, 
                                                        dataset, 
                                                        hd_file, 
-                                                       min_read_length = 10, 
+                                                       min_read_length, 
                                                        colsum_out = TRUE)
   
   transcript_pos_to_codon_pos_output <- TranscriptPosToCodonPos(gene, 
@@ -284,7 +305,7 @@ AddAsiteCountsToTranscriptPosToCodonPos <- function(gene, dataset, hd_file, min_
 transcript_info_tibble <- AddAsiteCountsToTranscriptPosToCodonPos(gene, 
                                                                   dataset, 
                                                                   hd_file, 
-                                                                  min_read_length = 10, 
+                                                                  min_read_length, 
                                                                   colsum_out = TRUE, 
                                                                   gff_df)
 
@@ -304,7 +325,7 @@ transcript_info_tibble <- AddAsiteCountsToTranscriptPosToCodonPos(gene,
 AddCodonNamesToTranscriptInfoTibble <- function(yeast_codon_pos_i200, 
                                                 gene, dataset, 
                                                 hd_file, 
-                                                min_read_length = 10, 
+                                                min_read_length, 
                                                 colsum_out = TRUE, 
                                                 gff_df){
   
@@ -316,7 +337,7 @@ AddCodonNamesToTranscriptInfoTibble <- function(yeast_codon_pos_i200,
   transcript_info_tibble <- AddAsiteCountsToTranscriptPosToCodonPos(gene, 
                                                                     dataset, 
                                                                     hd_file, 
-                                                                    min_read_length = 10, 
+                                                                    min_read_length, 
                                                                     colsum_out = TRUE, 
                                                                     gff_df)
 
@@ -333,7 +354,7 @@ transcript_info_tibble <- AddCodonNamesToTranscriptInfoTibble(yeast_codon_pos_i2
                                                               gene, 
                                                               dataset, 
                                                               hd_file, 
-                                                              min_read_length = 10, 
+                                                              min_read_length, 
                                                               colsum_out = TRUE, 
                                                               gff_df)
 
@@ -347,11 +368,40 @@ transcript_info_tibble <- AddCodonNamesToTranscriptInfoTibble(yeast_codon_pos_i2
   # $ Codon    : chr [1:1121] NA NA NA NA ...
 
 }
+
 # test_function(reads_pos_length, gene, dataset, hd_file, gff_df)
+
 transcript_info_tibble <- purrr::map_dfr(.x = gene_names, .f = test_function, dataset, hd_file, gff_df)
 
+# this takes all of the functions defined above and applies them to all of the genes in the sample. 
+# the output should be a tibble with 6 columns:Gene, Pos, Pos_Codon, Frame, Count & Codon
+
+
+# > head(transcript_info_tibble)
+# # A tibble: 6 x 6
+# Gene      Pos Pos_Codon Frame Count Codon
+# <chr>   <int>     <dbl> <dbl> <dbl> <chr>
+#   1 YAL003W     1        NA     2     0 NA   
+# 2 YAL003W     2        NA     0     0 NA   
+# 3 YAL003W     3        NA     1     0 NA   
+# 4 YAL003W     4        NA     2     0 NA   
+# 5 YAL003W     5        NA     0     0 NA   
+# 6 YAL003W     6        NA     1     0 NA
+
+# should contain the same number of genes as listed in the h5 file
+# length(unique(transcript_info_tibble$Gene)) == length(gene_names)
+# [1] TRUE
+
+# and the genes included should be the same as those listed in the h5 file
+
+# unique(transcript_info_tibble$Gene) %in% gene_names
+# [1] TRUE TRUE TRUE TRUE TRUE
+
+# length(unique(transcript_info_tibble$Frame)) 
+# [1] 3
+
 ### Filter for reading frame of interest (default = 0)
-FilterForFrame <- function(transcript_info_tibble, filtering_frame = 0){
+FilterForFrame <- function(transcript_info_tibble, filtering_frame){
   
   transcript_info_tibble <- dplyr::filter(transcript_info_tibble, 
                                           Frame == filtering_frame)
@@ -361,9 +411,12 @@ FilterForFrame <- function(transcript_info_tibble, filtering_frame = 0){
 }
 
 transcript_info_tibble <- FilterForFrame(transcript_info_tibble, 
-                                         filtering_frame = 0)
+                                         filtering_frame)
 
   # removes reads which are in the reading frame 1 and 2 
+
+# length(unique(transcript_info_tibble$Frame)) 
+# [1] 1
 
   # > str(transcript_info_tibble)
   # tibble [374 x 6] (S3: tbl_df/tbl/data.frame)
@@ -407,7 +460,7 @@ FilterForCodonOfInterestPositions <- function(transcript_info_tibble, codon_of_i
 
 # Function needed to go from one position to an exapnded region.
 # This function uses codon position values, not nucleotide position values
-ExpandCodonRegion <- function(.x = interesting_codon_positions, transcript_info_tibble_gene, gene, dataset, hd_file, expand_width = 5L, remove_overhang = TRUE) {
+ExpandCodonRegion <- function(.x = interesting_codon_positions, transcript_info_tibble_gene, gene, dataset, hd_file, expand_width, remove_overhang = TRUE) {
 
   gene_poscodon_count <- na.omit(tibble(
     Gene = transcript_info_tibble_gene$Gene,
@@ -462,7 +515,7 @@ ExpandCodonRegion <- function(.x = interesting_codon_positions, transcript_info_
 
 # Apply the ExpandCodonRegion function to the codons of interest to generate expanded tibbles for each position 
 
-ExpandCodonRegionForList <- function(transcript_info_tibble, gene, dataset, hd_file, startpos = 1, startlen = 10, codon_of_interest, gff_df, expand_width = 5L){
+ExpandCodonRegionForList <- function(transcript_info_tibble, gene, dataset, hd_file, startpos, startlen, codon_of_interest, gff_df, expand_width){
   
   expand_codon_region <- list()
   
@@ -480,10 +533,10 @@ ExpandCodonRegionForList <- function(transcript_info_tibble, gene, dataset, hd_f
       .f = ExpandCodonRegion,   # function to use at each codon position of interest for single codons
       transcript_info_tibble_gene,
       gene = gene_name,
-      dataset = "Mok-simYAL5",
-      hd_file = YAL5_h5,
+      dataset,
+      hd_file,
       gff_df,
-      expand_width = 5L
+      expand_width = expand_width
     )
     tmp_expand_codon_region <- tmp_expand_codon_region[!sapply(tmp_expand_codon_region,is.null)]
     expand_codon_region <- append(expand_codon_region, tmp_expand_codon_region)
@@ -499,12 +552,23 @@ ExpandCodonRegionForList <- function(transcript_info_tibble, gene, dataset, hd_f
 expand_codon_region <- ExpandCodonRegionForList(transcript_info_tibble, 
                                                 gene = unique(transcript_info_tibble$Gene), 
                                                 dataset, 
-                                                hd_file = YAL5_h5, 
-                                                startpos = 1, 
-                                                startlen = 10, 
+                                                hd_file, 
+                                                startpos, 
+                                                startlen, 
                                                 codon_of_interest, 
                                                 gff_df, 
-                                                expand_width = 5L)
+                                                expand_width)
+
+# three fuctions called in one. returns a list containing a tibble for each occurrence of the codon of interest
+# type(expand_codon_region)
+# [1] "list"
+
+# the dimensions of each item in the list shoud be [(2*expand_width+1)X4] as there are 4 rows; Gene, Pos_Codon, Rel_Count, Rel_Pos
+# and one column for each position being included ie (-5 to 5) relative to the stop codon
+# where an expand_width of =5 is given,the following would be observed:
+# > dim(expand_codon_region[[1]])
+# [1] 11  4
+
 
   # > str(expand_codon_region)
   # List of 6
@@ -544,7 +608,7 @@ expand_codon_region <- ExpandCodonRegionForList(transcript_info_tibble,
 
 # Normalization carried out within each expanded frame so that they are comparable 
 # Normalizes the expand_codon_region list generating a RelCount column with the normalization values
-ExpandedCodonRegionNormalization <- function(.x, expand_width = 5L){
+ExpandedCodonRegionNormalization <- function(.x, expand_width){
   
   # dplyr::mutate(.x, RelCount = PerCodonCounts / sum(PerCodonCounts) * (2 * expand_width + 1))
   dplyr::mutate(.x, RelCount = Rel_Count / sum(Rel_Count) * (2 * expand_width + 1))
@@ -552,7 +616,7 @@ ExpandedCodonRegionNormalization <- function(.x, expand_width = 5L){
 }
 
 
-normalized_expanded_codon_region <- ExpandedCodonRegionNormalization(expand_codon_region[[1]], expand_width = 5L)
+normalized_expanded_codon_region <- ExpandedCodonRegionNormalization(expand_codon_region[[1]], expand_width)
 
   # # A tibble: 11 x 5
   # Gene    Pos_Codon Rel_Count Rel_Pos RelCount
@@ -575,8 +639,17 @@ normalized_expanded_codon_region <- ExpandedCodonRegionNormalization(expand_codo
 normalized_expand_list <- purrr::map(
   .x = expand_codon_region,
   .f = ExpandedCodonRegionNormalization,
-  expand_width = 5L
+  expand_width
 )
+
+# the dimensions of each item in the list shoud be [(2*expand_width+1) X 5] as there are now 5 rows; Gene, Pos_Codon, Rel_Count, Rel_Pos, RelCount
+# > dim(expand_codon_region[[1]])
+# [1] 11  5
+
+# At each position, the sum of RelCount should be equal to (2*expand_width+1)
+# ie if the expand width was 5:
+# sum(normalized_expand_list[[1]]$RelCount)
+# [1] 11
 
   # > str(normalized_expand_list)
   # List of 6
@@ -625,7 +698,7 @@ normalized_expand_list <- purrr::map(
 # from NormalizedExpandList. Need to join by Rel_Pos, in RelCount need the mean for 
 # each Rel_Pos (sum row(x) / number of row(x))
 
-OverlayedTable <- function(normalized_expand_list, expand_width = 5L){
+OverlayedTable <- function(normalized_expand_list, expand_width){
   number_of_objects <- length(normalized_expand_list)
   # The number of objects inside normalized_expand_list
   
@@ -645,7 +718,7 @@ OverlayedTable <- function(normalized_expand_list, expand_width = 5L){
 
 # something is wrong within the overlaying function, need to figure out why this isnt working anymore  
 
-Over <- OverlayedTable(normalized_expand_list, expand_width = 5L) 
+Over <- OverlayedTable(normalized_expand_list, expand_width) 
 
   # output from OverlayedTable function for single codons:
   # # > Over
@@ -663,5 +736,15 @@ Over <- OverlayedTable(normalized_expand_list, expand_width = 5L)
   # # 9       3    0.845
   # # 10       4    0.644
   # # 11       5    2.08
+
+# At each position, the sum of RelCount should be equal to (2*expand_width+1)
+# ie if the expand width was 5:
+# sum(Over$RelCount)
+# [1] 11
+
+# max Rel_Pos should equal expand_width and min Rel_Pos should equal -expand_width
+# > min(Over$Rel_Pos)
+# [1] -5
+
 
 overlayed_plot <- ggplot(Over, mapping = aes(x = Rel_Pos, y = RelCount)) + geom_line()
