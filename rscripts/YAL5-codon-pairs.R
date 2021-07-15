@@ -27,6 +27,7 @@ parser$add_argument('-d', '--dataset', help='Name of the dataset being studied')
 parser$add_argument('-g', '--gff', help='Path to the GFF3 file of the organism being studied')
 parser$add_argument('-a', '--annotation', help='Path to codon table for organism')
 parser$add_argument('--codonpair', help='Codon pair of interest')
+parser$add_argument('-o', '--output', help='Path to output directory')
 parser$add_argument('--expand_width', help='the desired range either side of the codon of interest', default = 5)
 parser$add_argument('--startpos', help='position of the start codon', default = 1)
 parser$add_argument('--startlen', help='smallest length of reads', default = 10) # please correct if wrong
@@ -41,6 +42,7 @@ dataset <- args$dataset
 gff <- args$gff
 yeast_codon_table <- args$annotation
 codon_pair_of_interest <- args$codonpair
+output_dir <- args$output
 expand_width <- args$expand_width
 startpos <- args$startpos
 startlen <- args$startlen
@@ -72,7 +74,7 @@ min_read_length <- args$minreadlen
 gff_df <- readGFFAsDf(gff)
 # The GFF file for the simulated dataset, given the general name gff_df so that
 # the script does not have to change based on different gff_df files being used
-gene_names <- rhdf5::h5ls(YAL5_h5, recursive = 1)$name
+gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
 
 
 # Import the .tsv file: 
@@ -236,17 +238,17 @@ print('Creating information tibble')
 CreateTranscriptInfoTibbleAllGenes <- function(gene, dataset, hd_file, gff_df, filtering_frame){
 
           # Fetch the datamatrix for a single gene of interest , e.g YAL003W
-          reads_pos_length <- GetGeneDatamatrix(gene,
-                                                dataset,
-                                                hd_file)
+          reads_pos_length <- GetGeneDatamatrix(gene = gene,
+                                                dataset = dataset,
+                                                hd_file = hd_file)
 
             # > str(reads_pos_length)
             # int [1:41, 1:1121] 0 0 0 0 0 0 0 0 0 0 ...
 
           # Fetch the tidydatamatrix for a single gene of interest, e.g. YAL003W
-          tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene,
-                                                                   dataset,
-                                                                   hd_file),
+          tidy_gene_datamatrix <- TidyDatamatrix(GetGeneDatamatrix(gene = gene,
+                                                                   dataset = dataset,
+                                                                   hd_file = hd_file),
                                                  startpos = 1,
                                                  startlen = 10)
 
@@ -797,7 +799,12 @@ transcript_info_tibble <- AddAsiteCountsToTranscriptPosToCodonPos(gene, dataset,
 }
 
 # CreateTranscriptInfoTibbleAllGenes (reads_pos_length, gene, dataset, hd_file, gff_df)
-transcript_info_tibble <- suppressMessages(purrr::map_dfr(.x = gene_names, .f = CreateTranscriptInfoTibbleAllGenes, dataset, hd_file, gff_df, filtering_frame = 0))
+transcript_info_tibble <- suppressMessages(purrr::map_dfr(.x = gene_names, 
+                                                          .f = CreateTranscriptInfoTibbleAllGenes, 
+                                                          dataset, 
+                                                          hd_file, 
+                                                          gff_df, 
+                                                          filtering_frame = 0))
 
 # this takes all of the functions defined above and applies them to all of the genes in the sample. 
 
@@ -838,9 +845,9 @@ transcript_info_tibble <- suppressMessages(purrr::map_dfr(.x = gene_names, .f = 
 
 print('Filtering for codon of interest')
 
-  FilterForCodonPairOfInterestPositions <- function(transcript_info_tibble, codon_pair_of_interest){
+  FilterForCodonPairOfInterestPositions <- function(transcript_info_tibble, codon_pair_of_interest, gene_name = gene_name){
   
-      interesting_codon_table <- dplyr::filter(transcript_info_tibble, CodonPair == "TCC AAG")
+      interesting_codon_table <- dplyr::filter(transcript_info_tibble, CodonPair == codon_pair_of_interest & Gene == gene_name)
       # Changed Codon == codon_of_interest to CodonPair = codon_of_interest
   
       interesting_first_codon_positions <- interesting_codon_table$Pos_Codon1
@@ -849,7 +856,7 @@ print('Filtering for codon of interest')
       return(interesting_first_codon_positions)
   }
   
-  interesting_first_codon_positions <- FilterForCodonPairOfInterestPositions(transcript_info_tibble, codon_pair_of_interest)
+# interesting_first_codon_positions <- FilterForCodonPairOfInterestPositions(transcript_info_tibble, codon_pair_of_interest, gene_name)
 
   # > str(interesting_first_codon_positions)
   # num [1:8] 7 57 383 508 535 321 90 412
@@ -897,7 +904,7 @@ ExpandCodonPairRegion <- function(.x = interesting_first_codon_positions,
       Rel_Pos =  seq(- expand_width, expand_width)
     )
     
-    if(dim(output_codon_info)[1] == (2*expand_width + 1)){
+    if(dim(output_codonpair_info)[1] == (2*expand_width + 1)){
       
     return(output_codonpair_info)
   }else{
@@ -944,7 +951,7 @@ ExpandCodonPairRegionForList <- function(transcript_info_tibble,
                                          gff_df, 
                                          expand_width){
   
-  expand_codon_region <- list()
+  expand_codon_pair_region <- list()
   
   
   # A loop is used here so each unique gene can be processed separately. there were issues with using map and lapply 
@@ -968,10 +975,10 @@ ExpandCodonPairRegionForList <- function(transcript_info_tibble,
     )
    
     # remove any tibbles from the list that are null, so are within one expand_width of the UTRs
-    tmp_expand_codon_region <- tmp_expand_codon_region[!sapply(tmp_expand_codon_region,is.null)]
+    tmp_expand_codon_pair_region <- tmp_expand_codon_pair_region[!sapply(tmp_expand_codon_pair_region,is.null)]
     
     
-    expand_codon_region <- append(expand_codon_region, tmp_expand_codon_region)
+    expand_codon_pair_region <- append(expand_codon_pair_region, tmp_expand_codon_pair_region)
     
   }
     
@@ -1105,7 +1112,7 @@ Over <- OverlayedTable(normalized_expand_list, expand_width)
   # $ Rel_Pos : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
   # $ RelCount: num [1:11] 0.751 0.863 1.351 2.099 0.452 ...
 
-print(`Creating plot`)
+print('Creating plot')
 
 
 overlayed_plot <- ggplot(Over, mapping = aes(x = Rel_Pos, y = RelCount)) + geom_line()
