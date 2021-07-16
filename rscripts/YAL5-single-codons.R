@@ -9,8 +9,6 @@ print('Starting process')
 source(here::here("rscripts", "read_count_functions.R"))
 source(here::here("rscripts", "stats_figs_block_functions.R"))
 
-suppressMessages(library(tidyverse))
-suppressMessages(library(zoo))
 suppressMessages(library(ggplot2))
 suppressMessages(library(plotly))
 suppressMessages(library(purrr))
@@ -808,8 +806,15 @@ Over <- OverlayedTable(normalized_expand_list, expand_width)
 
 print('Creating plot')
 
-overlayed_plot <- ggplot(Over, mapping = aes(x = Rel_Pos, y = RelCount)) + geom_line()
-
+overlayed_plot <- ggplot(Over, mapping = aes(x = Rel_Pos, y = RelCount)) + 
+  geom_line() +
+  theme_bw()+
+  theme(text=element_text(size=14),
+        axis.title=element_text(size=14, face='bold'),
+        title = element_text(size = 14, face='bold'))+
+  labs(title = paste0('Relative read counts around codon ', codon_of_interest),
+       x = 'Position relative to codon of interest',
+       y = 'Relative number of reads', size = 2)
 
 save_plot_pdf <- function(overlayed_plot, output_dir){
   overlayed_plot %>%
