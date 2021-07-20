@@ -40,9 +40,9 @@ ui <- fluidPage(
              selectInput("fq_type", "Input FASTQ file(s) is/are:", 
                          c("singleplex", "multiplex")),
              conditionalPanel(condition="input.fq_type == 'singleplex'",
-                              helpText("Enter one sample per line"),
-                              helpText("WTnone: SRR1042855_s1mi.fastq.gz"),
-                              helpText("WT3AT: SRR1042864_s1mi.fastq.gz"),
+                              helpText("Enter one sample per line as"),
+                              helpText("<sample name>: <FASTQ filename>"),
+                              helpText("ex. WTnone: SRR1042855_s1mi.fastq.gz"),
                               textAreaInput("sample_names", 
                                             "Sample names and FASTQ filenames (relative to input directory)", "", 
                                             rows=5, width="100%"),
@@ -107,6 +107,7 @@ ui <- fluidPage(
              checkboxInput("is_riboviz_gff", "GFF file contains 3 elements (UTR5, CDS, UTR3) per gene", T, width="100%"),
              checkboxInput("make_bedgraph", "Output bedgraph data files in addition to H5 files", T, width="100%"),
              checkboxInput("output_pdfs", "Generate .pdfs for sample-related plots", T, width="100%"),
+             checkboxInput("run_static_html", "Run static HTML visualization per sample", T, width="100%"),
              checkboxInput("publish_index_tmp", "Copy index and temporary files from Nextflow's <work/> directory", F, width="100%"),
     ),
     
@@ -270,6 +271,8 @@ server <- function(input, output) {
                      #       "# Create static html visualization per sample?"),
                      ### ^ still in vignette config, but not listed on
                      ### https://github.com/riboviz/riboviz/blob/main/docs/user/prep-riboviz-config.md
+                     paste("run_static_html:", as.character(input$run_static_html),
+                           "# Run static HTML visualization per sample?"),
                      paste("sample_sheet:", input$sample_sheet,
                            "# Sample sheet, TSV file with, at least,",
                            "SampleID and TagRead (barcode) columns"),
