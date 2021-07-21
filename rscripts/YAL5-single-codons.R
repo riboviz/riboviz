@@ -736,13 +736,6 @@ expand_codon_region <- ExpandCodonRegionForList(transcript_info_tibble,
                                                 expand_width)
 
 
-# the dimensions of each item in the list shoud be [(2*expand_width+1)X4] as there are 4 rows; Gene, Pos_Codon, Rel_Count, Rel_Pos
-# and one column for each position being included ie (-5 to 5) relative to the stop codon
-# TEST:: Where an expand_width of =5 is given,the following would be observed:
-# > dim(expand_codon_region[[1]])
-# [1] 11  4
-
-
 
 ### Normalization ###
 
@@ -761,7 +754,7 @@ print('Normalising data')
 #' 
 #' @example 
 #' 
-#' ExpandedCodonRegionNormalization(expand_codon_region, expand_width = 5L)
+#' ExpandedRegionNormalization(expand_codon_region, expand_width = 5L)
 #' 
 ExpandedRegionNormalization <- function(.x, expand_width){
   
@@ -772,8 +765,7 @@ ExpandedRegionNormalization <- function(.x, expand_width){
 #TEST: ExpandedRegionNormalization(): creates a tidy format data frame (tibble) = TRUE
 #TEST: ExpandedRegionNormalization(): the tibble contains 5 columns = TRUE
 #TEST: ExpandedRegionNormalization(): the column names are %in% c("Gene", "Pos_Codon", "Rel_Count", "Rel_Pos", "RelCount")
-#TEST: ExpandedRegionNormalization(): number of observations in the output tibble = "expand_width" * 2 + 1, if "expand_width" = 5L the number of observations should be 11
-#TEST: ExpandedRegionNormalization(): the position from "interesting_codon_positions" has "Rel_Pos" value 0 = TRUE
+#TEST: ExpandedRegionNormalization(): number of observations in the output tibble = "expand_width"*2+1, if "expand_width" = 5L the number of observations should be 11
 #TEST: ExpandedRegionNormalization(): the column "Rel_Pos" goes from -"expand_width to +"expand_width" 
 #gives:
 # > str(normalized_expanded_codon_region)
@@ -791,7 +783,7 @@ ExpandedRegionNormalization <- function(.x, expand_width){
 # Normalization carried out for all the tibbles within ExpandList 
 normalized_expand_list <- purrr::map(
   .x = expand_codon_region,
-  .f = ExpandedCodonRegionNormalization,
+  .f = ExpandedRegionNormalization,
   expand_width
 )
 
@@ -853,15 +845,54 @@ normalized_expand_list <- purrr::map(
   # ..$ RelCount : num [1:11] 1.686 4.446 0.75 0.241 0.533 ...
 
 
+    # > str(normalized_expand_list) for TCC
+    # List of 68
+    # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
+    # ..$ Gene     : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
+    # ..$ Pos_Codon: num [1:11] 2 3 4 5 6 7 8 9 10 11 ...
+    # ..$ Rel_Count: num [1:11] 429 488 102 994 146 173 762 13 176 98 ...
+    # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
+    # ..$ RelCount : num [1:11] 1.347 1.532 0.32 3.12 0.458 ...
+    # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
+    # ..$ Gene     : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
+    # ..$ Pos_Codon: num [1:11] 44 45 46 47 48 49 50 51 52 53 ...
+    # ..$ Rel_Count: num [1:11] 128 279 417 389 237 ...
+    # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
+    # ..$ RelCount : num [1:11] 0.341 0.744 1.111 1.037 0.632 ...
+    # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
+    # ..$ Gene     : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
+    # ..$ Pos_Codon: num [1:11] 52 53 54 55 56 57 58 59 60 61 ...
+    # ..$ Rel_Count: num [1:11] 42 53 648 293 121 92 519 79 765 196 ...
+    # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
+    # ..$ RelCount : num [1:11] 0.154 0.195 2.382 1.077 0.445 ...
 
-### Overlaying the normalized expanded tibbles 
+
+
+
+### Overlaying the normalized expanded tibbles ###
 
 print('Calculating average')
 
 # Function to overlay graphs into a single graph. Need to generate a single tibble 
-# from NormalizedExpandList. Need to join by Rel_Pos, in RelCount need the mean for 
+# from NormalizedExpandList. Join by Rel_Pos, in RelCount need the mean for 
 # each Rel_Pos (sum row(x) / number of row(x))
 
+
+#' OverlayedTable(): overlays tidy format data frames (tibbles) to create a single overlayed tibble.
+#' 
+#' FIXME: Takes normalized_expand_list as its input.
+#' 
+#' @param normalized_expand_list the output from the looped function ExpandedRegionNormalization()
+#' @param expand_width integer which provides the number of positions on each side of the feature of interest to include in the window
+#' 
+#' @example 
+#' 
+#' normalized_expand_list <- purrr::map(.x = expand_codon_region,
+#'                                      .f = ExpandedRegionNormalization,
+#'                                      expand_width)
+#' 
+#' OverlayedTable(normalized_expand_list, expand_width)
+#' 
 OverlayedTable <- function(normalized_expand_list, expand_width){
   number_of_objects <- length(normalized_expand_list)
   # The number of objects inside normalized_expand_list
@@ -879,42 +910,21 @@ OverlayedTable <- function(normalized_expand_list, expand_width){
     RelCount = joined_rows$SumRows
   )
 }
+#TEST: OverlayedTable(): creates a tidy format data frame (tibble) = TRUE
+#TEST: OverlayedTable(): the tibble contains 2 columns = TRUE
+#TEST: OverlayedTable(): the column names are %in% c("Rel_Pos", "RelCount")
+#TEST: OverlayedTable(): number of observations in the output tibble = "expand_width"*2+1, if "expand_width" = 5L the number of observations should be 11
+#TEST: OverlayedTable(): the column "Rel_Pos" goes from -"expand_width to +"expand_width" 
+#TEST: OverlayedTable(): RelCount is a numeric 
+#gives:
+# > str(overlayed_tibbles)
+# Classes 'tbl_df', 'tbl' and 'data.frame':   11 observations of 2 variables
+#   $ Rel_Pos : int  -5 -4 -3 -2 -1 0 1 2 3 4 ...
+#   $ RelCount: num  0.893 1.125 0.992 0.998 0.779 ...
 
-# something is wrong within the overlaying function, need to figure out why this isnt working anymore  
+overlayed_tibbles <- OverlayedTable(normalized_expand_list, expand_width) 
 
-Over <- OverlayedTable(normalized_expand_list, expand_width) 
 
-  # output from OverlayedTable function for single codons:
-  # # > Over
-  # # # A tibble: 11 x 2
-  # # Rel_Pos RelCount
-  # # <int>    <dbl>
-  # #   1      -5    0.860
-  # # 2      -4    2.09
-  # # 3      -3    0.876
-  # # 4      -2    0.735
-  # # 5      -1    0.772
-  # # 6       0    0.426
-  # # 7       1    0.460
-  # # 8       2    1.21
-  # # 9       3    0.845
-  # # 10       4    0.644
-  # # 11       5    2.08
-
-# At each position, the sum of RelCount should be equal to (2*expand_width+1)
-# ie if the expand width was 5:
-# sum(Over$RelCount)
-# [1] 11
-
-# TEST:: max Rel_Pos should equal expand_width and min Rel_Pos should equal -expand_width
-# max(Over$Rel_Pos)
-# [1] 5
-# min(Over$Rel_Pos)
-# [1] -5
-
-# TEST:: Over should be a tibble
-# class(Over)
-# [1] "tbl_df"     "tbl"        "data.frame"
 
 print('Creating plot')
 
