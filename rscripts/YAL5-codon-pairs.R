@@ -2,7 +2,7 @@
 # YAL5_h5 is at location $HOME/riboviz/riboviz/Mok-simYAL5/output/A/A.h5
 
 # Given an h5 file, GFF file and .tsv file, this script creates a metafeature plot 
-# for the codon/codon pair of interest. 
+# for the codon pair of interest. 
 
 print('Starting process')
 
@@ -11,7 +11,6 @@ suppressMessages(source(here::here("rscripts", "read_count_functions.R")))
 suppressMessages(source(here::here("rscripts", "stats_figs_block_functions.R")))
 
 
-suppressMessages(library(tidyverse))
 suppressMessages(library(ggplot2))
 suppressMessages(library(plotly))
 suppressMessages(library(purrr))
@@ -25,7 +24,7 @@ parser$add_argument('-i', '--input', help='Path input to h5 file')
 parser$add_argument('-d', '--dataset', help='Name of the dataset being studied')
 parser$add_argument('-g', '--gff', help='Path to the GFF3 file of the organism being studied')
 parser$add_argument('-a', '--annotation', help='Path to codon table for organism')
-parser$add_argument('--codonpair', help='Codon pair of interest')
+parser$add_argument('--feature', help='Feature of interest, e.g. codon pair')
 parser$add_argument('-o', '--output', help='Path to output directory')
 parser$add_argument('--expand_width', help='the desired range either side of the codon of interest', default = 5)
 parser$add_argument('--startpos', help='position of the start codon', default = 1)
@@ -41,7 +40,7 @@ hd_file <- args$input
 dataset <- args$dataset
 gff <- args$gff
 yeast_codon_table <- args$annotation
-codon_pair_of_interest <- args$codonpair
+feature_of_interest <- args$feature
 output_dir <- args$output
 expand_width <- args$expand_width
 startpos <- args$startpos
@@ -51,17 +50,17 @@ min_read_length <- args$minreadlen
 colsum_out <- args$colsum_out
 
 
-hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
-dataset <- "Mok-simYAL5"
-codon_pair_of_interest <- 'TCC AAG'
-expand_width = 5L
-startpos <-1
-startlen <- 10
-filtering_frame <- 0
-min_read_length <- 10
-yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
-gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
-colsum_out <- TRUE
+# hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
+# dataset <- "Mok-simYAL5"
+# feature <- 'TCC AAG'
+# expand_width = 5L
+# startpos <-1
+# startlen <- 10
+# filtering_frame <- 0
+# min_read_length <- 10
+# yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
+# gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
+# colsum_out <- TRUE
 
 #
 
@@ -127,7 +126,7 @@ CreateTranscriptInfoTibbleAllGenes <- function(gene, dataset, hd_file, gff_df, s
 #' @param min_read_length numeric, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
 #' @param colsum_out logical; if true, return summary column of summed a-site lengths; default: TRUE
 #' 
-#' @return a tidy format data frame (tibble) with the columns "Pos" and "Count"
+#' @return a tibble with the columns "Pos" and "Count"
 #' 
 #' @examples
 #' 
@@ -169,8 +168,8 @@ TidyAsiteCountsByPosition <- function(gene, dataset, hd_file, min_read_length, c
 # gives:          
 # > str(tidy_asite_count_output)
 # Classes 'tbl_df', 'tbl' and 'data.frame':   1121 observations of 2 variables:
-# $ Pos  : int  1 2 3 4 5 6 7 8 9 10 ...
-# $ Count: num  0 0 0 0 0 0 0 0 0 0 ...
+#   $ Pos  : int  1 2 3 4 5 6 7 8 9 10 ...
+#   $ Count: num  0 0 0 0 0 0 0 0 0 0 ...
           
 tidy_asite_counts <- TidyAsiteCountsByPosition(gene, dataset, hd_file, min_read_length, colsum_out)
           
@@ -397,14 +396,14 @@ transcript_info_tibble <- suppressMessages(purrr::map_dfr(.x = gene_names,
 # This is due to the 250 nt utr buffer, present in many riboviz example datasets 
 
 # > str(transcript_info_tibble)
-# tibble [3,584 x 7] (S3: tbl_df/tbl/data.frame)
-# $ Gene      : chr [1:3584] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-# $ Pos       : int [1:3584] 2 5 8 11 14 17 20 23 26 29 ...
-# $ Pos_Codon1: num [1:3584] NA NA NA NA NA NA NA NA NA NA ...
-# $ Pos_Codon2: num [1:3584] NA NA NA NA NA NA NA NA NA NA ...
-# $ Frame     : num [1:3584] 0 0 0 0 0 0 0 0 0 0 ...
-# $ Count     : num [1:3584] 0 0 0 0 0 0 0 0 0 0 ...
-# $ CodonPair : chr [1:3584] NA NA NA NA ...
+# tibble [10,747 x 7] (S3: tbl_df/tbl/data.frame)
+# $ Gene      : chr [1:10747] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
+# $ Pos       : int [1:10747] 1 2 3 4 5 6 7 8 9 10 ...
+# $ Pos_Codon1: num [1:10747] NA NA NA NA NA NA NA NA NA NA ...
+# $ Pos_Codon2: num [1:10747] NA NA NA NA NA NA NA NA NA NA ...
+# $ Frame     : num [1:10747] 2 0 1 2 0 1 2 0 1 2 ...
+# $ Count     : num [1:10747] 0 0 0 0 0 0 0 0 0 0 ...
+# $ CodonPair : chr [1:10747] NA NA NA NA ...
 
 
 
@@ -431,13 +430,13 @@ FilterForFrame <- function(transcript_info_tibble, filtering_frame){
   }
 #TEST: FilterForFrame(): creates a tidy format data frame (tibble) = TRUE
 #TEST: FilterForFrame(): the tibble contains 7 columns = TRUE
-#TEST: FilterForFrame(): number of observations in the output tibble = width of UTR5+CDS+UTR3 from gff_df divided by 3, for YAL003W = 1121/3 = ~374
-#TEST: FilterForFrame(): The "Frame" column only contains the paramter you filtered for, e.g. 0.
+#TEST: FilterForFrame(): the number of objects in gene_names is equal to the number of unique objects in transcript_info_tibble$Gene
+#TEST: FilterForFrame(): The "Frame" column only contains the parameter you filtered for, e.g. 0.
 #TEST: AddCodonNamesToTranscriptInfoTibble(): the column names are %in% c("Gene", "Pos", "Pos_Codon1", "Pos_Codon2", "Frame", "Count", "CodonPair") 
 #TEST: AddCodonNamesToTranscriptInfoTibble(): the first and last ~83 rows of the columns "Pos_codon1", "Pos_Codon2" and "CodonPair" for each gene contain NA. 
 # gives: 
-# > str(transcript_info_tibble)
-# Classes 'tbl_df', 'tbl' and 'data.frame':   374 observations of 7 variables
+# > str(transcript_info_tibble) 
+# Classes 'tbl_df', 'tbl' and 'data.frame':   3,584 observations of 7 variables
 #   $ Gene      : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
 #   $ Pos       : int  2 5 8 11 14 17 20 23 26 29 ...
 #   $ Pos_Codon1: num  NA NA NA NA NA NA NA NA NA NA ...
@@ -448,55 +447,54 @@ FilterForFrame <- function(transcript_info_tibble, filtering_frame){
 
 transcript_info_tibble <- FilterForFrame(transcript_info_tibble, filtering_frame)
 
-  
-  ###
+
+###
 
 
+print('Filtering for feature of interest')
 
-print('Filtering for codon of interest')
 
-
-#' FilterForCodonPairOfInterestPositions(): Filters for the codon pairs of interest 
+#' FilterForFeatureOfInterestPositions(): Filters for the feature of interest 
 #' 
 #' FIXME: takes transcript_info_tibble from CreateTranscriptInfoTibbleAllGenes() as its input
 #' 
 #' @param gene in gene_names to pull information from the gff_df file 
 #' @param transcript_info_tibble from CreateTranscriptInfoTibbleAllGenes()
-#' @param codon_pair_of_interest character, each incidence of the codon pair will be extracted from transcript_info_tibble
+#' @param feature_of_interest character, each incidence of the feature will be extracted from transcript_info_tibble
 #' 
 #' @example 
 #' 
-#' FilterForCodonPairOfInterestPositions(transcript_info_tibble, codon_pair_of_interest = "TCC AAG", gene_name)
+#' FilterForFeatureOfInterestPositions(transcript_info_tibble, feature_of_interest = "TCC AAG", gene_name)
 #' 
 #' @export
-FilterForCodonPairOfInterestPositions <- function(transcript_info_tibble, codon_pair_of_interest, gene_name){
+FilterForFeatureOfInterestPositions <- function(transcript_info_tibble, feature_of_interest, gene_name = gene_name){
   
-      interesting_codon_table <- dplyr::filter(transcript_info_tibble, CodonPair == codon_pair_of_interest & Gene == gene_name)
-      # Changed Codon == codon_of_interest to CodonPair = codon_of_interest
+      interesting_feature_table <- dplyr::filter(transcript_info_tibble, CodonPair == feature_of_interest, Gene == gene_name)
   
-      interesting_first_codon_positions <- interesting_codon_table$Pos_Codon1
+      interesting_feature_positions <- interesting_feature_table$Pos_Codon1
   
-      # return(interesting_codon_positions)
-      return(interesting_first_codon_positions)
+      # return(interesting_feature_positions)
+      return(interesting_feature_positions)
 }
-#TEST: FilterForCodonPairOfInterestPositions(): returns a list of numeric values = TRUE
+#TEST: FilterForFeatureOfInterestPositions(): returns a list of numeric values = TRUE
 #gives:
-  # > str(interesting_first_codon_positions)
-  # num [1:8] 7 57 383 508 535 321 90 412
+# > str(interesting_feature_positions)
+# num [1:8] 7 57 383 508 535 321 90 412
   
     # # Which refers to the position of the first codon in the codon pair as the second codon
     # # in the pair is the first codon position + 1
 
-# interesting_first_codon_positions <- FilterForCodonPairOfInterestPositions(transcript_info_tibble, codon_pair_of_interest, gene_name)
+interesting_feature_positions <- FilterForFeatureOfInterestPositions(transcript_info_tibble, feature_of_interest, gene_name = gene_name)
   
 
 
-### Expand frame around codon of interest 
+### Expand frame around feature of interest ###
 
 
-#' ExpandCodonPairRegion(): Expands the window around the codon_pair position of interest
+#' ExpandFeatureRegion(): Expands the window around the feature position of interest
 #' 
-#' Helperfunction for ExpandCodonPairRegionForList()
+#' Helperfunction for ExpandFeatureRegionForList()
+#' This function is not looped and will only generate one tidy format data frame (tibble)
 #' 
 #' FIXME: takes transcript_info_tibble as its input, do not want outputs from other functions as input
 #' 
@@ -505,7 +503,7 @@ FilterForCodonPairOfInterestPositions <- function(transcript_info_tibble, codon_
 #' 
 #' @param gene in gene_names to pull information from the gff_df file 
 #' @param transcript_info_tibble from CreateTranscriptInfoTibbleAllGenes()
-#' @param interesting_first_codon_positions list of numeric values describing position of the feature of interest
+#' @param interesting_feature_positions list of numeric values describing position of the feature of interest
 #' @param dataset name of dataset stored in .h5 file.
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples.
 #' @param expand_width integer which provides the number of positions on each side of the feature of interest to include in the window
@@ -513,7 +511,7 @@ FilterForCodonPairOfInterestPositions <- function(transcript_info_tibble, codon_
 #' 
 #' @example 
 #' 
-#' ExpandCodonPairRegion(.x = interesting_first_codon_positions, 
+#' ExpandFeatureRegion(.x = interesting_feature_positions, 
 #'                       transcript_info_tibble, 
 #'                       gene = "YAL003W", 
 #'                       dataset = "Mok-simYAL5", 
@@ -522,7 +520,7 @@ FilterForCodonPairOfInterestPositions <- function(transcript_info_tibble, codon_
 #'                       remove_overhang = TRUE)
 #'                       
 #' @export                       
-ExpandCodonPairRegion <- function(.x = interesting_first_codon_positions, 
+ExpandFeatureRegion <- function(.x = interesting_feature_positions, 
                                   transcript_info_tibble, 
                                   gene, 
                                   dataset, 
@@ -548,54 +546,47 @@ ExpandCodonPairRegion <- function(.x = interesting_first_codon_positions,
   if (.x <= expand_width  |.x + expand_width > gene_length/3) {
     return()
   } else {
-    output_codonpair_info <- tibble(
+    output_feature_info <- tibble(
       dplyr::slice(gene_poscodon_count, (.x - expand_width):(.x + expand_width), each = FALSE),
       Rel_Pos =  seq(- expand_width, expand_width)
     )
     
-    if(dim(output_codonpair_info)[1] == (2*expand_width + 1)){
+    if(dim(output_feature_info)[1] == (2*expand_width + 1)){
       
-    return(output_codonpair_info)
+    return(output_feature_info)
   }else{
     return()
     }
   }
+  # The if statement ensures that feature positions that are less/more than the 
+  # expand_width value are discarded 
 }
-
-    # The if statement ensures that codon positions that are less/more than the 
-    # expand_width value are discarded 
-#TEST:
+#TEST: ExpandFeatureRegion(): creates a tidy format data frame (tibble) = TRUE
+#TEST: ExpandFeatureRegion(): the tibble contains 5 columns = TRUE
+#TEST: ExpandFeatureRegion(): the column names are %in% c("Gene", "Pos_Codon1", "Pos_Codon2", "Rel_Count", "Rel_Pos") 
+#TEST: ExpandFeatureRegion(): number of observations in the output tibble = "expand_width" * 2 + 1, if "expand_width" = 5L the number of observations should be 11
+#TEST: ExpandFeatureRegion(): the position from "interesting_feature_positions" has "Rel_Pos" value 0 = TRUE
+#TEST: ExpandFeatureRegion(): the column "Rel_Pos" goes from -"expand_width to +"expand_width"
 #gives: 
+# > str(output_feature_info)
+# Classes 'tbl_df', 'tbl' and 'data.frame':   11 observations of 5 variables
+#   $ Gene      : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
+#   $ Pos_Codon1: num  2 3 4 5 6 7 8 9 10 11 ...
+#   $ Pos_Codon2: num  3 4 5 6 7 8 9 10 11 12 ...
+#   $ Rel_Count : num  429 488 102 994 146 173 762 13 176 98 ...
+#   $ Rel_Pos   : int  -5 -4 -3 -2 -1 0 1 2 3 4 ...
 
-
-output_codonpair_info <- ExpandCodonPairRegion(.x = interesting_first_codon_positions, transcript_info_tibble, gene, dataset, hd_file, expand_width = 5L, remove_overhang = TRUE)
-
-# > output_codonpair_info
-# # A tibble: 11 x 5
-# Gene    Pos_Codon1 Pos_Codon2 Rel_Count Rel_Pos
-# <chr>        <dbl>      <dbl>     <dbl>   <int>
-#   1 YAL003W          2          3       429      -5
-# 2 YAL003W          3          4       488      -4
-# 3 YAL003W          4          5       102      -3
-# 4 YAL003W          5          6       994      -2
-# 5 YAL003W          6          7       146      -1
-# 6 YAL003W          7          8       173       0
-# 7 YAL003W          8          9       762       1
-# 8 YAL003W          9         10        13       2
-# 9 YAL003W         10         11       176       3
-# 10 YAL003W         11         12        98       4
-# 11 YAL003W         12         13       123       5
+output_feature_info <- ExpandFeatureRegion(.x = interesting_feature_positions, transcript_info_tibble, gene, dataset, hd_file, expand_width, remove_overhang)
 
 
 
-
-# Apply the ExpandCodonRegion function to the codons of interest to generate expanded tibbles for each position 
-
-#' ExpandCodonPairRegionForList(): Applies the ExpandCodonRegion function to all of the codons of interest. 
+#' ExpandFeatureRegionForList(): Applies the ExpandFeatureRegion function to all of the features of interest. 
 #' 
-#' This function generates expanded tibbles for each position contained within the codon_pair_of_interest list.
+#' This function generates expanded tibbles for each position contained within the feature_of_interest list.
+#' Each occurence in feature_of_interest list generates one tibble 
 #' 
-#' FIXME: Takes codon_pair_of_interest and transcript_info_tibble as inputs 
+#' FIXME: Takes feature_of_interest and transcript_info_tibble as inputs 
+#' FIXME: THIS STILL CREATES TIBBLES OF CODON PAIRS OF INTEREST IN THE WRONG GENES
 #' 
 #' @param transcript_info_tibble from CreateTranscriptInfoTibbleAllGenes()
 #' @param gene in gene_names to pull information from the gff_df file 
@@ -603,48 +594,48 @@ output_codonpair_info <- ExpandCodonPairRegion(.x = interesting_first_codon_posi
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples.
 #' @param startpos position of the start codon, default = 1
 #' @param startlen, smallest length of reads', default = 10
-#' @param codon_pair_of_interest character, each incidence of the codon pair will be extracted from transcript_info_tibble
+#' @param feature_of_interest character, each incidence of the codon pair will be extracted from transcript_info_tibble
 #' @param gff_df from which to extract the UTRs and CDS widths.
 #' @param expand_width integer which provides the number of positions on each side of the feature of interest to include in the window
 #' 
 #' @example 
 #' 
-#' ExpandCodonPairRegionForList(transcript_info_tibble, 
+#' ExpandFeatureRegionForList(transcript_info_tibble, 
 #'                              gene = unique(transcript_info_tibble$Gene), 
 #'                              dataset = "Mok-simYAL5", 
 #'                              hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5") 
 #'                              startpos = 1, 
 #'                              startlen = 10, 
-#'                              codon_pair_of_interest = "TCC AAG", 
+#'                              feature_of_interest = "TCC AAG", 
 #'                              gff_df, 
 #'                              expand_width = 5L)
 #' 
 #' @export
-ExpandCodonPairRegionForList <- function(transcript_info_tibble, 
+ExpandFeatureRegionForList <- function(transcript_info_tibble, 
                                          gene, 
                                          dataset, 
                                          hd_file, 
                                          startpos, 
                                          startlen, 
-                                         codon_pair_of_interest,
+                                         feature_of_interest,
                                          gff_df, 
                                          expand_width){
   
-  expand_codon_pair_region <- list()
+  expand_feature_region <- list()
   
   
   # A loop is used here so each unique gene can be processed separately. there were issues with using map and lapply 
-  # on the filter function of FilterForCodonOfInterestPositions, and filtering using only one gene would produce NULLs
+  # on the filter function of FilterForFeatureOfInterestPositions, and filtering using only one gene would produce NULLs
   
   for(gene_name in unique(gene)){
   
-    interesting_codon_positions <- FilterForCodonPairOfInterestPositions(transcript_info_tibble, codon_pair_of_interest = codon_pair_of_interest, gene_name = gene_name)  
+    interesting_feature_positions <- FilterForFeatureOfInterestPositions(transcript_info_tibble, feature_of_interest, gene_name)  
   
     transcript_info_tibble_gene <- dplyr::filter(transcript_info_tibble, Gene == gene_name)
     
-    tmp_expand_codon_pair_region <- purrr::map(
-      .x = interesting_codon_positions,
-      .f = ExpandCodonPairRegion,
+    tmp_expand_feature_region <- purrr::map(
+      .x = interesting_feature_positions,
+      .f = ExpandFeatureRegion,
       transcript_info_tibble,
       gene = gene_name,
       dataset,
@@ -654,91 +645,107 @@ ExpandCodonPairRegionForList <- function(transcript_info_tibble,
     )
    
     # remove any tibbles from the list that are null, so are within one expand_width of the UTRs
-    tmp_expand_codon_pair_region <- tmp_expand_codon_pair_region[!sapply(tmp_expand_codon_pair_region,is.null)]
+    tmp_expand_feature_region <- tmp_expand_feature_region[!sapply(tmp_expand_feature_region,is.null)]
     
     
-    expand_codon_pair_region <- append(expand_codon_pair_region, tmp_expand_codon_pair_region)
+    expand_feature_region <- append(expand_feature_region, tmp_expand_feature_region)
     
   }
-    
-    return(expand_codon_pair_region)
-   
+  return(expand_feature_region)
 }
-#TEST:
+#TEST: ExpandFeatureRegionForList(): output is a list of tidy format data frames (tibbles) = TRUE. type(expand_feature_region) = "list"
+#TEST: ExpandFeatureRegionForList(): number of tibbles in list matches the number of occurrences in "feature_of_interest" list = TRUE
+#TEST: ExpandFeatureRegionForList(): each tibble contains 5 columns = TRUE
+#TEST: ExpandFeatureRegionForList(): the column names are %in% c("Gene", "Pos_Codon1", "Pos_Codon2", "Rel_Count", "Rel_Pos")
+#TEST: ExpandFeatureRegionForList(): number of observations in each output tibble = "expand_width"*2+1, if "expand_width" = 5L the number of observations should be 11
+#TEST: ExpandFeatureRegionForList(): the position from "interesting_feature_positions" has "Rel_Pos" value 0 = TRUE
+#TEST: ExpandFeatureRegionForList(): the column "Rel_Pos" goes from -"expand_width to +"expand_width"
 #gives:
+# > str(expand_feature_region)
+# List of 8
+# Classes 'tbl_df', 'tbl' and 'data.frame':   11 observations of 5 variables
+#   $ Gene      : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
+#   $ Pos_Codon1: num  2 3 4 5 6 7 8 9 10 11 ...
+#   $ Pos_Codon2: num  3 4 5 6 7 8 9 10 11 12 ...
+#   $ Rel_Count : num  429 488 102 994 146 173 762 13 176 98 ...
+#   $ Rel_Pos   : int  -5 -4 -3 -2 -1 0 1 2 3 4 ...
+# Classes 'tbl_df', 'tbl' and 'data.frame':   11 observations of 5 variables
+#   $ Gene      : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
+#   $ Pos_Codon1: num  52 53 54 55 56 57 58 59 60 61 ...
+#   $ Pos_Codon2: num  53 54 55 56 57 58 59 60 61 62 ...
+#   $ Rel_Count : num  42 53 648 293 121 92 519 79 765 196 ...
+#   $ Rel_Pos   : int  -5 -4 -3 -2 -1 0 1 2 3 4 ...
 
-expand_codon_pair_region <- ExpandCodonPairRegionForList(transcript_info_tibble, 
+expand_feature_region <- ExpandFeatureRegionForList(transcript_info_tibble, 
                                                          gene = unique(transcript_info_tibble$Gene), 
                                                          dataset, 
                                                          hd_file, 
                                                          startpos, 
                                                          startlen, 
-                                                         codon_pair_of_interest, 
+                                                         feature_of_interest, 
                                                          gff_df, 
                                                          expand_width)
 
-# three fuctions called in one.returns a list containing a tibble for each occurrence of the codon of interest
-# TEST:: expand_codon_region should be a list
-# type(expand_codon_region)
+# three fuctions called in one.returns a list containing a tibble for each occurrence of the feature of interest
+# TEST:: expand_feature_region should be a list
+# type(expand_feature_region)
 # [1] "list"
 
 # the dimensions of each item in the list shoud be [(2*expand_width+1)X4] as there are 4 rows; Gene, Pos_Codon, Rel_Count, Rel_Pos
 # and one column for each position being included ie (-5 to 5) relative to the stop codon
 # TEST:: Where an expand_width of =5 is given,the following would be observed:
-# > dim(expand_codon_region[[1]])
+# > dim(expand_feature_region[[1]])
 # [1] 11  4
 
-  # > str(expand_codon_pair_region)
-  # List of 2
-  # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
-  # ..$ Gene      : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-  # ..$ Pos_Codon1: num [1:11] 2 3 4 5 6 7 8 9 10 11 ...
-  # ..$ Pos_Codon2: num [1:11] 3 4 5 6 7 8 9 10 11 12 ...
-  # ..$ Rel_Count : num [1:11] 429 488 102 994 146 173 762 13 176 98 ...
-  # ..$ Rel_Pos   : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
-  # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
-  # ..$ Gene      : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-  # ..$ Pos_Codon1: num [1:11] 52 53 54 55 56 57 58 59 60 61 ...
-  # ..$ Pos_Codon2: num [1:11] 53 54 55 56 57 58 59 60 61 62 ...
-  # ..$ Rel_Count : num [1:11] 42 53 648 293 121 92 519 79 765 196 ...
-  # ..$ Rel_Pos   : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
 
 
-
-### Normalization
+### Normalization ###
 
 
 print('Normalising data')
 
-#' ExpandedCodonRegionNormalization(): carries out normalization within each expanded frame so that they are comparable
+#' ExpandedRegionNormalization(): carries out normalization within each expanded frame so that they are comparable
 #' 
-#' Normalizes the ExpandCodonRegion list generating a RelCount column with the normalization values 
+#' Normalizes the ExpandRegion list generating a RelCount column with the normalization values 
+#' As this function is not looped it will only generate one normalized tibble for one occurence 
 #' 
-ExpandedCodonRegionNormalization <- function(.x, expand_width){
+#' @param .x which is the list of tidy format data frames (tibbles) generated by the function ExpandFeatureRegion
+#' @param expand_width integer which provides the number of positions on each side of the feature of interest to include in the window
+#' 
+#' @example 
+#' 
+#' ExpandedRegionNormalization(expand_feature_region, expand_width = 5L)
+#' 
+#' @export 
+ExpandedRegionNormalization <- function(.x, expand_width){
   
   # dplyr::mutate(.x, RelCount = PerCodonCounts / sum(PerCodonCounts) * (2 * expand_width + 1))
   dplyr::mutate(.x, RelCount = Rel_Count / sum(Rel_Count) * (2 * expand_width + 1))
   
 }
+#TEST: ExpandedRegionNormalization(): creates a tidy format data frame (tibble) = TRUE
+#TEST: ExpandedRegionNormalization(): the tibble contains 6 columns = TRUE
+#TEST: ExpandedRegionNormalization(): the column names are %in% c("Gene", "Pos_Codon1", "Pos_Codon2", "Rel_Count", "Rel_Pos", "RelCount")
+#TEST: ExpandedRegionNormalization(): number of observations in the output tibble = "expand_width"*2+1, if "expand_width" = 5L the number of observations should be 11
+#TEST: ExpandedRegionNormalization(): the column "Rel_Pos" goes from -"expand_width to +"expand_width" 
+#gives:
+# > str(normalized_expanded_feature_region)
+# Classes 'tbl_df', 'tbl' and 'data.frame':   11 observations of 6 variables
+#   $ Gene      : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
+#   $ Pos_Codon1: num  2 3 4 5 6 7 8 9 10 11 ...
+#   $ Pos_Codon2: num  3 4 5 6 7 8 9 10 11 12 ...
+#   $ Rel_Count : num  429 488 102 994 146 173 762 13 176 98 ...
+#   $ Rel_Pos   : int  -5 -4 -3 -2 -1 0 1 2 3 4 ...
+#   $ RelCount  : num  1.347 1.532 0.32 3.12 0.458 ...
 
-
-# normalized_expanded_codonpair_region <- ExpandedCodonRegionNormalization(expand_codon_pair_region[[1]], expand_width = 5L)
-
-  # > str(normalized_expanded_codonpair_region)
-  # tibble [11 x 6] (S3: tbl_df/tbl/data.frame)
-  # $ Gene      : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-  # $ Pos_Codon1: num [1:11] 2 3 4 5 6 7 8 9 10 11 ...
-  # $ Pos_Codon2: num [1:11] 3 4 5 6 7 8 9 10 11 12 ...
-  # $ Rel_Count : num [1:11] 429 488 102 994 146 173 762 13 176 98 ...
-  # $ Rel_Pos   : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
-  # $ RelCount  : num [1:11] 1.347 1.532 0.32 3.12 0.458 ...
+# normalized_expanded_feature_region <- ExpandedRegionNormalization(expand_feature_region[[1]], expand_width = 5L)
 
 
 
 # Normalization carried out for all the tibbles within ExpandList 
 normalized_expand_list <- purrr::map(
-  .x = expand_codon_pair_region,
-  .f = ExpandedCodonRegionNormalization,
+  .x = expand_feature_region,
+  .f = ExpandedFeatureRegionNormalization,
   expand_width = 5L
 )
 
@@ -746,12 +753,12 @@ normalized_expand_list <- purrr::map(
 # type(normalized_expand_list)
 # [1] "list"
 
-# TEST:: Normalized_expand_list should be the same length as expand_codon_region
-# > length(normalized_expand_list)==length(expand_codon_region)
+# TEST:: Normalized_expand_list should be the same length as expand_feature_region
+# > length(normalized_expand_list)==length(expand_feature_region)
 # [1] TRUE
 
 # TEST:: the dimensions of each item in the list shoud be [(2*expand_width+1) X 5] as there are now 5 rows; Gene, Pos_Codon, Rel_Count, Rel_Pos, RelCount
-# > dim(expand_codon_region[[1]])
+# > dim(expand_feature_region[[1]])
 # [1] 11  5
 
 # TEST:: At each position, the sum of RelCount should be equal to (2*expand_width+1)
@@ -760,7 +767,8 @@ normalized_expand_list <- purrr::map(
 # [1] 11
 
 
-### Overlaying the normalized expanded tibbles 
+
+### Overlaying the normalized expanded tibbles ###
 
 print('Calculating average')
 
@@ -768,6 +776,22 @@ print('Calculating average')
 # from NormalizedExpandList. Need to join by Rel_Pos, in RelCount need the mean for 
 # each Rel_Pos (sum row(x) / number of row(x))
 
+#' OverlayedTable(): overlays tidy format data frames (tibbles) to create a single overlayed tibble.
+#' 
+#' FIXME: Takes normalized_expand_list as its input.
+#' 
+#' @param normalized_expand_list the output from the looped function ExpandedRegionNormalization()
+#' @param expand_width integer which provides the number of positions on each side of the feature of interest to include in the window
+#' 
+#' @example 
+#' 
+#' normalized_expand_list <- purrr::map(.x = expand_feature_region,
+#'                                      .f = ExpandedRegionNormalization,
+#'                                      expand_width)
+#' 
+#' OverlayedTable(normalized_expand_list, expand_width)
+#' 
+#' @export
 OverlayedTable <- function(normalized_expand_list, expand_width){
   
   number_of_objects <- length(normalized_expand_list)
@@ -786,25 +810,31 @@ OverlayedTable <- function(normalized_expand_list, expand_width){
     RelCount = joined_rows$SumRows
   )
 }
+#TEST: OverlayedTable(): creates a tidy format data frame (tibble) = TRUE
+#TEST: OverlayedTable(): the tibble contains 2 columns = TRUE
+#TEST: OverlayedTable(): the column names are %in% c("Rel_Pos", "RelCount")
+#TEST: OverlayedTable(): number of observations in the output tibble = "expand_width"*2+1, if "expand_width" = 5L the number of observations should be 11
+#TEST: OverlayedTable(): the column "Rel_Pos" goes from -"expand_width to +"expand_width" 
+#TEST: OverlayedTable(): RelCount is a numeric 
+#gives:
+# > str(overlayed_tibbles)
+# Classes 'tbl_df', 'tbl' and 'data.frame':   11 observations of 2 variables
+# $ Rel_Pos : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
+# $ RelCount: num [1:11] 1.029 1.07 0.987 1.45 1.151 ...
 
+overlayed_tibbles <- OverlayedTable(normalized_expand_list, expand_width) 
 
-Over <- OverlayedTable(normalized_expand_list, expand_width) 
-
-  # > str(overlayed_tibbles)
-  # tibble [11 x 2] (S3: tbl_df/tbl/data.frame)
-  # $ Rel_Pos : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
-  # $ RelCount: num [1:11] 0.751 0.863 1.351 2.099 0.452 ...
 
 print('Creating plot')
 
 
-overlayed_plot <- ggplot(Over, mapping = aes(x = Rel_Pos, y = RelCount)) + 
+overlayed_plot <- ggplot(overlayed_tibbles, mapping = aes(x = Rel_Pos, y = RelCount)) + 
   geom_line() +
   theme_bw() +
   theme(text = element_text(size = 12),
         axis.title = element_text(size = 12),
         title = element_text(size = 12, face = 'bold'))+
-  labs(title = paste0('Meta-feature plot of codon pair ', codon_pair_of_interest),
+  labs(title = paste0('Meta-feature plot of codon pair ', feature_of_interest),
        x = 'Distance from codon pair (3nt)',
        y = 'Normalized ribosomal occupancy', size = 2)
 save_plot_pdf <- function(overlayed_plot, output_dir){
