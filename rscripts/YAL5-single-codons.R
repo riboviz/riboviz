@@ -120,7 +120,26 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
 }
 
 
-
+#' GetAllCodonPosCounts(): extracts A-site assigned counts for a list of genes 
+#' 
+#' Applies the GetGeneCodonPosReads1dsnap() function to a list of genes and generates 
+#' a tidy data frame (tibble) which contains the counts for all genes 
+#' 
+#' @param gene from gene_names to get read lengths for
+#' @param dataset name of dataset stored in .h5 file.
+#' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples.
+#' @param min_read_length integer, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
+#' @param snapdisp integer any additional displacement in the snapping
+#' 
+#' @return a tibble which contains the columns "Gene", "PosCodon" and "Count" for a list of genes
+#' 
+#' @example 
+#' 
+#' gff_df <- readGFFAsDf(gff)
+#' 
+#' GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 0L)
+#' 
+#' @export 
 GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, snapdisp){
   
   gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
@@ -136,7 +155,7 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
     asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", 
                                                                                 "yeast_standard_asite_disp_length.txt"))
     
-    codon_counts_1_gene <- GetGeneCodonPosReads1dsnap(gene = "YAL038W", dataset, hd_file, left, right, min_read_length, asite_displacement_length, snapdisp = 0L)
+    codon_counts_1_gene <- GetGeneCodonPosReads1dsnap(gene, dataset, hd_file, left, right, min_read_length, asite_displacement_length, snapdisp = 0L)
     
     codon_pos_counts <- tibble(Gene = gene,
                                 PosCodon = 1:length(codon_counts_1_gene),
@@ -154,21 +173,26 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
                                        hd_file,
                                        min_read_length,
                                        snapdisp,
-                                       gff_df
                                        )
   
   return (total_codon_pos_counts)
 }
+#TEST: GetAllCodonPosCounts(): returns a tibble. 
+#TEST: GetAllCodonPosCounts(): the tibble has 3 columns.
+#TEST: GetAllCodonPosCounts(): the column names are %in% c("Gene", "PosCodon" and "Count").
+#TEST: GetAllCodonPosCounts(): number of observations in the output tibble = sum of CDS (codon co-ordinates) for all genes in gene_names.
+#TEST: GetAllCodonPosCounts(): the unique gene names in column "Gene" match the genes in gene_names (unique(total_codon_pos_counts$Gene) = gene_names) = TRUE.
+#gives: 
+# > str(total_codon_pos_counts)
+# Classes 'tbl_df', 'tbl' and 'data.frame':   2749 observations of 3 variables:
+#   $ Gene    : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
+#   $ PosCodon: int  1 2 3 4 5 6 7 8 9 10 ...
+#   $ Count   : num  4249 825 1017 1176 1116 ...
 
 total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 0L)
 
 
 #######
-
-
-
-
-
 
 
     
