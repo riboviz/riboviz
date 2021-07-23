@@ -42,6 +42,8 @@ ui <- fluidPage(
     
     "Filenames and locations",
     tabPanel("Sample FASTQ files",
+             textInput("dir_in", label_mandatory("Directory for input files"), "vignette/input", width="100%"),
+             textInput("dataset", "Dataset name", "vignette", width="100%"),
              selectInput("fq_type", "Input FASTQ file(s) is/are:", 
                          c("singleplex", "multiplex")),
              conditionalPanel(condition="input.fq_type == 'singleplex'",
@@ -64,14 +66,15 @@ ui <- fluidPage(
     ),
     tabPanel("Other inputs",
              helpText("Unless otherwise specified, paths should be relative to riboviz directory."),
-             textInput("dir_in", label_mandatory("Directory for input files"), "vignette/input", width="100%"),
              textInput("dir_index", "Directory for built indices", "vignette/index", width="100%"),
              textInput("dir_tmp", "Directory for intermediate files", "vignette/tmp", width="100%"),
              textInput("dir_out", "Directory for for output files", "vignette/output", width="100%"),
              textInput("asite_disp_length_file", "TSV file with displacement lengths for A-site assignment", "data/yeast_standard_asite_disp_length.txt", width="100%"),
              textInput("features_file", "Features to correlate with ORFs", "data/yeast_features.tsv", width="100%"),
-             textInput("orf_fasta_file", label_mandatory("FASTA file containing transcript sequences (CDS and flanking regions"), "vignette/input/yeast_YAL_CDS_w_250utrs.fa", width="100%"),
+             textInput("orf_index_prefix", label_mandatory("Prefix for ORF index files (relative to index directory)"), "YAL_CDS_w_250", width="100%"),
+             textInput("orf_fasta_file", label_mandatory("FASTA file containing transcript sequences (CDS and flanking regions)"), "vignette/input/yeast_YAL_CDS_w_250utrs.fa", width="100%"),
              textInput("orf_gff_file", label_mandatory("GTF/GFF3 file corresponding to ORF FASTA file"), "vignette/input/yeast_YAL_CDS_w_250utrs.gff3", width="100%"),
+             textInput("rrna_index_prefix", label_mandatory("Prefix for contaminant index files (relative to index directory)"), "yeast_rRNA", width="100%"),
              textInput("rrna_fasta_file", label_mandatory("FASTA file containing contaminant (rRNA, etc.) sequences"), "vignette/input/yeast_rRNA_R64-1-1.fa", width="100%"),
              textInput("codon_positions_file", "Codon positions within each gene (RData file)", "data/yeast_codon_pos_i200.RData", width="100%"),
              textInput("t_rna_file", "tRNA estimates (tab-separated values file)", "data/yeast_tRNAs.tsv", width="100%")
@@ -86,34 +89,35 @@ ui <- fluidPage(
              checkboxInput("skip_inputs", "Skip checks for existence of data files", F, width="100%"),
              
              h4("Parameters"),
-             textInput("dataset", "Dataset name", "vignette", width="100%"),
-             textInput("orf_index_prefix", label_mandatory("Prefix for ORF index files (relative to index directory)"), "YAL_CDS_w_250", width="100%"),
-             textInput("rrna_index_prefix", label_mandatory("Prefix for contaminant index files (relative to index directory)"), "yeast_rRNA", width="100%"),
              textInput("adapters", label_mandatory("Illumina sequencing adapter to remove"), "CTGTAGGCACC", width="100%"),
              textInput("umi_regexp", "Regular expression to extract barcodes and UMIs using UMI-tools", "null", width="100%"),
              numericInput("count_threshold", "Minimum read count to keep gene in report", 64, width="100%"),
              numericInput("min_read_length", "Minimum read length in H5 output", 10, width="100%"),
              numericInput("max_read_length", "Maximum read length in H5 output", 50, width="100%"),
-             textInput("primary_id", "Primary gene IDs (ex. YAL001C, YAL003W)", "Name", width="100%"), # ???
              numericInput("num_processes", "Number of processes to parallelize over", 1, width="100%"),
              textInput("samsort_memory", "Memory to allocate to samtools", "null", width="100%"),
-             numericInput("buffer", "Length of flanking region around CDS", 250), width="100%",
-             textInput("secondary_id", "Secondary gene IDs (ex. COX1, EFB1)", "NULL", width="100%") # ???
+             numericInput("buffer", "Length of flanking region around CDS", 250, width="100%"),
+             textInput("primary_id", "Primary gene IDs (ex. YAL001C, YAL003W)", "Name", width="100%"), # ???
+             textInput("secondary_id", "Secondary gene IDs (ex. COX1, EFB1)", "NULL", width="100%"), # ???
+             textInput("feature", "Feature type", "CDS", width="100%") # ???
     ),
     tabPanel("Other options",
              checkboxInput("rpf", "Dataset is an RPF (vs. mRNA) datset", T, width="100%"), # ???
-             textInput("feature", "Feature type", "CDS", width="100%"), # ???
-             # checkboxInput("stop_in_cds", "Stop codons are part of CDS annotations in GFF/GTF3", F),
-             checkboxInput("stop_in_feature", "Stop codons are part of feature annotations in GFF/GTF3", F, width="100%"),
              checkboxInput("build_indices", "Build indices for aligner", T, width="100%"),
-             checkboxInput("count_reads", "Count reads in input, temporary, and output files", T, width="100%"),
              checkboxInput("trim_5p_mismatches", "Trim mismatched 5' base", T, width="100%"),
+             checkboxInput("is_riboviz_gff", "GFF file contains 3 elements (UTR5, CDS, UTR3) per gene", T, width="100%"),
+             checkboxInput("stop_in_feature", "Stop codons are part of feature annotations in GFF/GTF3", F, width="100%"),
+             # checkboxInput("stop_in_cds", "Stop codons are part of CDS annotations in GFF/GTF3", F),
+             checkboxInput("count_reads", "Count reads in input, temporary, and output files", T, width="100%"),
+             checkboxInput("do_pos_sp_nt_freq", "Calculate position-specific nucleotide frequency", T, width="100%"),
+             
+             strong("Deduplication and UMI options"),
              checkboxInput("dedup_umis", "Deduplicate reads using UMI-tools", F, width="100%"),
              checkboxInput("extract_umis", "Extract UMIs after adapter trimming", F, width="100%"),
              checkboxInput("group_umis", "Summarize UMI groups pre- and post-deduplication", F, width="100%"),
              checkboxInput("dedup_stats", "Output UMI deduplication statistics", F, width="100%"),
-             checkboxInput("do_pos_sp_nt_freq", "Calculate position-specific nucleotide frequency", T, width="100%"),
-             checkboxInput("is_riboviz_gff", "GFF file contains 3 elements (UTR5, CDS, UTR3) per gene", T, width="100%"),
+             
+             strong("Output options"),
              checkboxInput("make_bedgraph", "Output bedgraph data files in addition to H5 files", T, width="100%"),
              checkboxInput("output_pdfs", "Generate .pdfs for sample-related plots", T, width="100%"),
              checkboxInput("run_static_html", "Run static HTML visualization per sample", T, width="100%"),
@@ -178,6 +182,13 @@ server <- function(input, output) {
     output_text <- reactive({
       yaml_params <- sort(names(input))
       yaml_params <- subset(yaml_params, yaml_params != "fq_type")
+      if(input$fq_type == "singleplex") {
+        yaml_params <- subset(yaml_params, !(yaml_params %in% c("multiplex_fq_files", 
+                                                                "sample_sheet")))
+      }
+      if(input$fq_type == "multiplex") {
+        yaml_params <- subset(yaml_params, yaml_params != "fq_files")
+      }
       sapply(yaml_params,
              function(param) {
                if(param=="fq_files") {
@@ -187,7 +198,11 @@ server <- function(input, output) {
                    paste0("fq_files: \n  ", gsub("\n", "\n  ", input$fq_files))
                  }
                } else {
-                 paste0(param, ": ", input[[param]])
+                 if(param == "multiplex_fq_files") {
+                   paste0("multiplex_fq_files: \n- ", input$multiplex_fq_files)
+                 } else {
+                   paste0(param, ": ", input[[param]])
+                 }
                }
              })
     })
@@ -197,12 +212,8 @@ server <- function(input, output) {
     
     # download yaml text
     output$download_yaml <- downloadHandler(
-      filename = function() {
-        "riboviz_config.yaml"
-      },
-      content = function(file) {
-        writeLines(sub("\n", "", output_text), file)
-      }
+      filename = function() { "riboviz_config.yaml" },
+      content = function(file) { writeLines(output_text(), file) }
     )
   })
 }
