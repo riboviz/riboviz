@@ -81,8 +81,8 @@ yeast_codon_pos_i200 <- suppressMessages(readr::read_tsv(file = yeast_codon_tabl
 # The yeast_codon_pos_i200 file is configured to show the lead and lag codon pair positions:
 gene_poscodon_codon_i200 <- tibble::tibble(
   Gene = yeast_codon_pos_i200$Gene,
-  CodonPos_1 = yeast_codon_pos_i200$PosCodon, 
-  CodonPos_2 = dplyr::lead(yeast_codon_pos_i200$PosCodon),
+  CodonPos1 = yeast_codon_pos_i200$PosCodon, 
+  CodonPos2 = dplyr::lead(yeast_codon_pos_i200$PosCodon),
   CodonPair = paste(yeast_codon_pos_i200$Codon, dplyr::lead(yeast_codon_pos_i200$Codon))
 )
   
@@ -510,12 +510,12 @@ AddCodonNamesToCodonPosCounts <- function(gene_poscodon_codon_i200, gene_names, 
   
   total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 0L)
   
-  transcript_tibbles <- left_join(total_codon_pos_counts, gene_poscodon_codon_i200, by = c("PosCodon" = "CodonPos_1", "Gene" = "Gene"), keep = FALSE)
+  transcript_tibbles <- total_codon_pos_counts %>% left_join(gene_poscodon_codon_i200, by = c("PosCodon" = "CodonPos1", "Gene" = "Gene"), keep = FALSE, copy = TRUE)
   
   transcript_gene_pos_poscodon_frame <- tibble(
     Gene = transcript_tibbles$Gene,
     CodonPos1 = transcript_tibbles$PosCodon,
-    CodonPos2 = transcript_tibbles$CodonPos_2,
+    CodonPos2 = transcript_tibbles$CodonPos2,
     Count = transcript_tibbles$Count,
     CodonPair = transcript_tibbles$CodonPair
   )
@@ -722,24 +722,41 @@ ExpandFeatureRegion <- function(gene_poscodon_codon_i200,
                                                                       min_read_length, 
                                                                       colsum_out, 
                                                                       gff_df)
+
   
-  interesting_feature_positions <- FilterForFeatureOfInterestPositions(gene_poscodon_codon_i200, 
-                                                                       gene, dataset, hd_file, 
-                                                                       min_read_length, colsum_out, 
-                                                                       gff_df, feature_of_interest)
+  TranscriptForOneGene <- function(gene_poscodon_codon_i200, 
+                                   gene, dataset, hd_file, 
+                                   min_read_length, colsum_out, 
+                                   gff_df, feature_of_interest){
+    
+    interesting_feature_tibble <- FilterForFeatureOfInterestPositions(gene_poscodon_codon_i200, 
+                                                                         gene, dataset, hd_file, 
+                                                                         min_read_length, colsum_out, 
+                                                                         gff_df, feature_of_interest)
+    
+    transcript_for_one_gene <- dplyr::filter(interesting_feature_tibble, Gene == gene)
+    
+    interesting_feature_positions <- transcript_for_one_gene$CodonPos1
+    
+    return(interesting_feature_positions)
+    
+  }
   
-  .x = interesting_features <- interesting_feature_positions$CodonPos1
+  interesting_features <- TranscriptForOneGene(gene_poscodon_codon_i200, 
+                                                    gene, dataset, hd_file, 
+                                                    min_read_length, colsum_out, 
+                                                    gff_df, feature_of_interest)
   
   gene_length <- GetGeneLength(gene, dataset, hd_file)
 
   #if (remove_overhang) {
   # return an empty tibble if the desired region hangs over the edge of the coding region
 
-  if (.x <= expand_width  |.x + expand_width > gene_length/3) {
+  if (interesting_features <= expand_width  |interesting_features + expand_width > gene_length/3) {
     return()
   } else {
     output_feature_info <- tibble(
-      dplyr::slice(transcript_gene_pos_poscodon_frame, (.x - expand_width):(.x + expand_width), each = FALSE),
+      dplyr::slice(transcript_gene_pos_poscodon_frame, (interesting_features - expand_width):(interesting_features + expand_width), each = FALSE),
       Rel_Pos =  seq(- expand_width, expand_width)
     )
     
@@ -774,6 +791,22 @@ output_feature_info <- ExpandFeatureRegion(gene_poscodon_codon_i200,
                                            min_read_length, colsum_out, 
                                            gff_df, feature_of_interest, 
                                            expand_width, remove_overhang)
+
+
+
+
+
+
+
+
+listed <- purrr::map(.x = gene_names,
+                     .f = ExpandFeatureRegion,
+                     gene_poscodon_codon_i200, 
+                     dataset, hd_file, 
+                     min_read_length, colsum_out, 
+                     gff_df, feature_of_interest, 
+                     expand_width, remove_overhang)
+
 
 
 
@@ -819,6 +852,9 @@ ExpandFeatureRegionForList <- function(gene_poscodon_codon_i200,
                                          startlen, 
                                          feature_of_interest,
                                          expand_width){
+  
+
+  
   
   transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(gene_poscodon_codon_i200, 
                                                                       gene, 
