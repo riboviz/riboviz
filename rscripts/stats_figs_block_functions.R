@@ -479,20 +479,28 @@ WriteGeneReadFrames <- function(gene_read_frames_data){
 #
 #
 
-CalculatePositionSpecificDistributionOfReads <- function(gene_names, dataset, hd_file, buffer, min_read_length, count_threshold){
+CalculatePositionSpecificDistributionOfReads <- function(gene_names, dataset, hd_file, gff_df, min_read_length, count_threshold,a_site_displacement){
   
   # create empty matrix to store position-specific read counts
   out5p <- matrix(NA, nrow = length(gene_names), ncol = 500) # 5'
   out3p <- matrix(NA, nrow = length(gene_names), ncol = 500) # 3'
   
+  gff_df_cds <- gff_df %>% filter(type=="CDS")
+  start_pos <- gff_df_cds$start
+  end_pos <- gff_df_cds$end
+  names(start_pos) <- gff_df_cds$seqnames
+  names(end_pos) <- gff_df_cds$ seqnames
+  
+  a_site_displacement_min_read_length <- a_site_displacement %>% filter(read_length >= min_read_length)
   out <- lapply(gene_names, function(gene) {
     GetCodonPositionReads(
       gene,
       dataset,
       hd_file = hd_file,
-      left = (buffer - 15),
-      right = (buffer + 11),
-      min_read_length = min_read_length
+      left = start_pos[gene],
+      right = end_pos[gene],
+      min_read_length = min_read_length,
+      a_site_displacement = a_site_displacement_min_read_length
     )
   }) # Get codon-based position-specific reads for each gene
   names(out) <- gene_names
@@ -809,16 +817,30 @@ WriteSequenceBasedFeatures <- function(features_plot_data){
 
 
 # # MEDIUM FUNCTIONS:
-CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_file, gene_names, hd_file, dataset, buffer, count_threshold){
+CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_file, gene_names, hd_file, dataset, gff_df, count_threshold, a_site_displacement){
   
-  # This still depends on yeast-specific arguments and should be edited.
-  trna <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
+
+  trna <- read_tsv(t_rna_file) 
   load(codon_positions_file) # Position of codons in each gene (numbering ignores first 200 codons)
   # Reads in an object named "codon_pos"
   
+  # Pull CDS start and end positions
+  gff_df_cds <- gff_df %>% filter(type=="CDS")
+  start_pos <- gff_df_cds$start
+  end_pos <- gff_df_cds$end
+  names(start_pos) <- gff_df_cds$seqnames
+  names(end_pos) <- gff_df_cds$ seqnames
+  
+  a_site_displacement_min_read_length <- a_site_displacement %>% filter(read_length >= min_read_length)
+
   out <- lapply(gene_names, function(gene) {
     # From "Position specific distribution of reads" plot
-    GetCodonPositionReads(gene, dataset, hd_file = hd_file, left = (buffer - 15), right = (buffer + 11), min_read_length = min_read_length)
+    GetCodonPositionReads(gene, dataset, 
+      hd_file = hd_file, 
+      left = start_pos[gene], 
+      right = end_pos[gene], 
+      min_read_length = min_read_length, 
+      a_site_displacement = a_site_displacement_min_read_length)
   }) # Get codon-based position-specific reads for each gene
   names(out) <- gene_names
   
@@ -844,13 +866,13 @@ CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_fi
   })
   p_mn <- sapply(names(codon_pos), function(codon) {
     mean(unlist(apply(codon_pos[[codon]], 1, function(a) {
-      pos <- as.numeric(a[2]) + 1
+      pos <- as.numeric(a[2]) + 1 ## original code has +1
       norm_out[[a[1]]][pos]
     })), na.rm = T)
   })
   e_mn <- sapply(names(codon_pos), function(codon) {
     mean(unlist(apply(codon_pos[[codon]], 1, function(a) {
-      pos <- as.numeric(a[2]) + 2
+      pos <- as.numeric(a[2]) + 2 ## original code has +2
       norm_out[[a[1]]][pos]
     })), na.rm = T)
   })
@@ -863,7 +885,7 @@ CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_fi
   cod_dens_tRNA_data <- cbind(trna, A, P, E)
   return(cod_dens_tRNA_data)
   
-} # end of CalculateCodonSpecificRibosomeDensity() definition
+} # end of CalculateCodonSpecificRibosomeDensity() definitionlateCodonSpecificRibosomeDensity() definition
 
 
 GatherCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_data) {
