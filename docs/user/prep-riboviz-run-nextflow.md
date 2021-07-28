@@ -14,6 +14,7 @@ Contents:
   - [Troubleshooting: `Error executing process staticHTML` and `AnalysisOutputs.Rmd`](#troubleshooting-error-executing-process-statichtml-and-analysisoutputsrmd)
 - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
   - [Troubleshooting: deduplication and memory issues](#troubleshooting-deduplication-and-memory-issues)
+  - [Troubleshooting: cutadapt 3.x fails](#troubleshooting-cutadapt-3x-fails)
 * [Help](#help)
 * [Incremental build](#incremental-build)
 * [Multiplexed files](#multiplexed-files)
@@ -333,6 +334,26 @@ For information on the allowable values, see [samtools sort](http://www.htslib.o
 ### Troubleshooting: deduplication and memory issues
 
 See [Troubleshooting: deduplication and memory issues](memory-storage.md#troubleshooting-deduplication-and-memory-issues) in [Memory and storage](./memory-storage.md).
+
+### Troubleshooting: cutadapt 3.x fails
+
+Some users have noticed the workflow fails during invocation of `cutadapt` 3.2 or 3.4. [Debugging](#debugging) reveals the following error message:
+
+```
+Traceback (most recent call last):  
+...
+-  Traceback (most recent call last):  File "/.../miniconda3/envs/riboviz/bin/cutadapt", line 12, in <module>
+    sys.exit(main())TypeError: main() missing 1 required positional argument: 'cmdlineargs'
+```
+
+It is unclear why this arises but it seems to arise if the Python `cutadapt` package was installed using `conda`. One solution is to reinstall the Python `cutadapt` package using `pip`. For example:
+
+```console
+$ conda remove cutadapt
+$ pip install cutadapt
+```
+
+If you encounter this issue for another version of cutadapt or if you have other solutions then please add a comment to cutadapt 3.x from conda causes workflow failure [#380](https://github.com/riboviz/riboviz/issues/380).
 
 ---
 
