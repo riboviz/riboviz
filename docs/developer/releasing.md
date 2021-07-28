@@ -20,7 +20,7 @@ These are the key steps in building a release.
   - [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
   - [Run R tests](./testing.md#run-r-tests).
   - [Run vignette integration tests](./testing.md#run-vignette-integration-tests).
-* Create a test data repository. See [Creating a test data repository](./create-test-data-repository.md)
+* Create a test data repository. See [Creating a test data repository](./create-test-data-repository.md). Ensure this has the same name as that in [docs/developer/create-test-data-repository.md](./create-test-data-repository.md) which you updated above.
 * Merge `develop` branch into `main` branch.
 * Tag release in repository:
 
