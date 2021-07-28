@@ -8,23 +8,61 @@ RiboViz ribosome profiling workflow
 ===================================
 */
 
+/**
+ * Log a help message.
+ */
 def helpMessage() {
-    log.info """
-
+    help = """
     Usage
     -----
 
-        nextflow run prep_riboviz.nf -params-file <CONFIG>.yaml [--help]
+    Run:
 
-    where '<CONFIG>' is a YAML configuration file. The YAML
-    configuration parameters are as follows (all are mandatory unless
-    stated).
+    \$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE> [--help]
 
-    Configuration parameters can also be provided via the
-    command-line in the form '--<PARAMETER>=<VALUE>' (for example
-    '--make_bedgraph=FALSE').
+    where:
 
-    '--help' displays this help information and exits.
+    * '<CONFIG_FILE>' is a YAML configuration file. The YAML
+      configuration parameters are described below (all are mandatory
+      unless otherwise stated).
+    * '--help' displays this help information and exits.
+    * Configuration parameters can also be provided via the
+      command-line in the form '--<PARAMETER>=<VALUE>' (for example
+      '--make_bedgraph=FALSE').
+
+    To specify values for environment variables (see Environment
+    variable and configuration tokens), you have two options, where:
+
+    * '<SAMPLES_DIRECTORY>' is a directory with input files.
+    * '<ORGANISMS_DIRECTORY>' is a directory with input files.
+    * '<DATA_DIRECTORY>' is a directory with input files.
+
+    The options are:
+
+    1. Specify environment variables with the paths to the directories
+       on the same line as your command to run the workflow. The
+       values will be used for this run of the workflow only. For
+       example:
+
+    \$ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \\
+       RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY> \\
+       RIBOVIZ_DATA=<DATA_DIRECTORY> \\
+       nextflow run prep_riboviz.nf -params-file <CONFIG_FILE>
+
+    2. Define values for the environment variables within your bash
+       shell. The values will be available for successive runs of the
+       workflow. The values need to be defined using 'export' so they
+       are available to 'nextflow' when it runs. For example:
+
+    \$ export RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY>
+    \$ export RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY>
+    \$ export RIBOVIZ_DATA=<DATA_DIRECTORY>
+    \$ nextflow run prep_riboviz.nf -params-file <CONFIG_FILE>
+
+    The above approaches can be combined i.e. you can define variables
+    using 'export' (2) but provide other values as part of the command
+    to run the workflow (1). Values provided within the command take
+    precedence over those defined via 'export'.
 
     Configuration
     -------------
@@ -98,7 +136,7 @@ def helpMessage() {
       'FALSE')
     * 'dedup_stats': Output UMI deduplication statistics? (default
       'TRUE')
-    * 'group_umis': Smmarise UMI groups both pre- and
+    * 'group_umis': Summarise UMI groups both pre- and
       post-deduplication using UMI-tools? Useful for debugging
       (default 'FALSE')
     * If 'dedup_umis' is 'TRUE' but 'extract_umis' is 'FALSE' then a
@@ -134,8 +172,10 @@ def helpMessage() {
        'dataset')
     * 'do_pos_sp_nt_freq': Calculate position-specific nucleotide
       freqeuency? (default 'TRUE')
+    * 'feature': Feature type (default 'CDS')
     * 'is_riboviz_gff': Does the GFF file contain 3 elements per gene
-      - UTR5, CDS, and UTR3? (default 'TRUE')
+      - UTR5, CDS, and UTR3? (default 'TRUE'). Used by 'bam_to_h5.R'
+      only.
     * 'make_bedgraph': Output bedgraph data files in addition to H5
       files? (default 'TRUE')
     * 'max_read_length': Maximum read length in H5 output (default 50)
@@ -146,7 +186,22 @@ def helpMessage() {
     * 'secondary_id': Secondary gene IDs to access the data (COX1,
       EFB1, etc. or 'NULL') (default 'NULL')
     * 'stop_in_cds': Are stop codons part of the CDS annotations in
-      GFF? (default 'FALSE')
+      GFF? (default 'FALSE') Used by 'bam_to_h5.R' only (and only
+      if 'is_riboviz_gff' is 'FALSE'). Note: this parameter is now
+      deprecated by 'stop_in_feature' and will be removed in a future
+      release. If both 'stop_in_feature' and 'stop_in_cds' are defined
+      then 'stop_in_feature' takes precedence.
+    * 'stop_in_feature': Are stop codons part of the feature
+      annotations in GFF? If not provided and 'stop_in_cds' is
+      provided then the value of 'stop_in_cds' is used for
+      'stop_in_feature'. If both 'stop_in_feature' and 'stop_in_cds'
+      are defined then `stop_in_feature` takes precedence.
+      (default 'FALSE')
+
+    Visualization parameters:
+
+    * 'run_static_html': run static html visualization per sample? (default 'TRUE')
+    * 'output_pdfs': generate .pdfs for sample-related plots (default 'TRUE')
 
     visualization parameters:
     * 'run_dashboard': run visualization dashboard? (default 'TRUE')
@@ -169,7 +224,74 @@ def helpMessage() {
     * 'samsort_memory': Memory to give to 'samtools sort' (
       default '768M', 'samtools sort' built-in default,
       see http://www.htslib.org/doc/samtools-sort.html)
+
+    Environment variable and configuration tokens:
+
+    * The following configuration parameters take values that are
+      absolute or relative paths to files or directories:
+      - 'asite_disp_length_file'
+      - 'codon_positions_file'
+      - 'dir_in'
+      - 'dir_index'
+      - 'dir_tmp'
+      - 'dir_out'
+      - 'features_file'
+      - 'orf_fasta_file'
+      - 'orf_gff_file'
+      - 'rrna_fasta_file'
+      - 't_rna_file'
+    * To give you flexibility in how and where you locate these input
+      files and directories, the values for these paths can each
+      include, as a prefix, one of the following three tokens:
+      - '\${RIBOVIZ_SAMPLES}'
+      - '\${RIBOVIZ_ORGANISMS}'
+      - '\${RIBOVIZ_DATA}'
+    * At runtime, these tokens will be replaced with the names of the
+      corresponding environment variables. The environment variables
+      are:
+      - 'RIBOVIZ_SAMPLES'
+      - 'RIBOVIZ_ORGANISMS'
+      - 'RIBOVIZ_DATA'
+    * If a token is present in a value but the corresponding
+      environment variable is undefined, then the path '.' is
+      substituted.
+    * Which if any token you use in each of the configuration
+      parameters is entirely up to you. No checks are made to see
+      which specific token is used with which configuration
+      parameter.
+    * The following configuration parameters also take values that are
+      relative paths to files or directories, but the use of tokens in
+      their values is *not supported*, as these paths are assumed to
+      be relative to paths defined by the configuration parameters
+      stated above:
+      -'fq_files',' relative to 'dir_in'.
+      - 'multiplex_fq_files', relative to 'dir_in'.
+      - 'orf_index_prefix', relative to 'dir_index'.
+      - 'sample_sheet', relative to 'dir_in'.
+      - 'rrna_index_prefix', relative to 'dir_index'.
     """.stripIndent()
+    print(help)
+}
+
+/**
+ * Customise string. Given a string and mapping from tokens to
+ * substrings, iterate through the tokens and when a match is
+ * found replace the token with substring in the original string,
+ * returning the new string. Only the first matching token
+ * is replaced.
+ * @param string String
+ * @param token_replacements Mapping from tokens to substrings
+ */
+def replace_tokens(string, token_replacements)
+{
+    for (token_replace in token_replacements)
+    {
+        if (string.indexOf(token_replace.key) >= 0)
+	{
+            return string.replace(token_replace.key, token_replace.value)
+        }
+    }
+    return string
 }
 
 // Help message implementation, following
@@ -199,6 +321,7 @@ params.dir_tmp = "tmp"
 params.do_pos_sp_nt_freq = true
 params.extract_umis = false
 params.trim_5p_mismatches = true
+params.feature = "CDS"
 params.fq_files = [:]
 params.group_umis = false
 params.dedup_stats = true
@@ -208,11 +331,12 @@ params.max_read_length = 50
 params.min_read_length = 10
 params.multiplex_fq_files = []
 params.num_processes = 1
+params.output_pdfs = true
 params.publish_index_tmp = false
 params.primary_id = "Name"
 params.rpf = true
-params.run_dashboard = true
-params.secondary_id = "NULL"
+params.run_static_html = true
+params.secondary_id = null
 params.stop_in_cds = false
 params.samsort_memory = null
 params.validate_only = false
@@ -230,7 +354,6 @@ else
 if (params.validate_only) {
     println("Validating configuration only")
 }
-
 if (! params.containsKey('adapters')) {
     exit 1, "Undefined adapters (adapters)"
 }
@@ -259,9 +382,16 @@ if (params.max_read_length < params.min_read_length) {
     exit 1, "Maximum read length in H5 output (max_read_length) must be >= minimum read length (min_read_length)"
 }
 if (! params.secondary_id) {
-    secondary_id = "NULL"
+    secondary_id = null
 } else {
     secondary_id = params.secondary_id
+}
+if (params.containsKey('stop_in_feature')) {
+    stop_in_feature = params.stop_in_feature
+} else if (params.containsKey('stop_in_cds')) {
+    stop_in_feature = params.stop_in_cds
+} else {
+    stop_in_feature = false
 }
 if (params.dedup_umis) {
     if (! params.extract_umis) {
@@ -275,6 +405,46 @@ if (params.extract_umis) {
 }
 
 /*
+Get and validate environment variables
+*/
+
+samples_dir = System.getenv('RIBOVIZ_SAMPLES') ?: "."
+println("samples_dir: " + samples_dir)
+if (! file(samples_dir).exists())
+{
+    exit 1, "No such RIBOVIZ_SAMPLES directory: $samples_dir"
+}
+organisms_dir = System.getenv('RIBOVIZ_ORGANISMS') ?: "."
+println("organisms_dir: " + organisms_dir)
+if (! file(organisms_dir).exists())
+{
+    exit 1, "No such RIBOVIZ_ORGANISMS directory: $organisms_dir"
+}
+data_dir = System.getenv('RIBOVIZ_DATA') ?: "."
+println("data_dir: " + data_dir)
+if (! file(data_dir).exists())
+{
+    exit 1, "No such RIBOVIZ_DATA directory: $data_dir"
+}
+// Create mapping from environment variable tokens to directories.
+riboviz_env_paths = [:]
+riboviz_env_paths['${RIBOVIZ_SAMPLES}'] = samples_dir
+riboviz_env_paths['${RIBOVIZ_ORGANISMS}'] = organisms_dir
+riboviz_env_paths['${RIBOVIZ_DATA}'] = data_dir
+
+/*
+Apply environment variables to paths
+*/
+
+if (! params.containsKey('dir_in')) {
+    exit 1, "Undefined input directory (dir_in)"
+}
+dir_in = replace_tokens(params.dir_in, riboviz_env_paths)
+dir_index = replace_tokens(params.dir_index, riboviz_env_paths)
+dir_out = replace_tokens(params.dir_out, riboviz_env_paths)
+dir_tmp = replace_tokens(params.dir_tmp, riboviz_env_paths)
+
+/*
 Validate input files.
 */
 
@@ -283,11 +453,15 @@ multiplex_id_fq = [:]
 multiplex_sample_sheet_tsv = Channel.empty()
 is_multiplexed = false
 if (params.validate_only && params.skip_inputs) {
-    println("Skipping checks for existence of of ribosome profiling input files (fq_files|multiplex_fq_files|sample_sheet)")
+    println("Skipping checks for existence of of ribosome profiling input files (dir_in|fq_files|multiplex_fq_files|sample_sheet)")
 }
-if (! params.containsKey('dir_in')) {
-    exit 1, "Undefined input directory (dir_in)"
-} else if ((! params.fq_files) && (! params.multiplex_fq_files)) {
+if ((! params.validate_only) || (! params.skip_inputs)) {
+    if (! file(dir_in).exists())
+    {
+        exit 1, "No such directory (dir_in): $dir_in"
+    }
+}
+if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     exit 1, "No sample files (fq_files) or multiplexed files (multiplex_fq_files) are defined"
 } else if (params.fq_files && params.multiplex_fq_files) {
     exit 1, "Both sample files (fq_files) and multiplexed files (multiplex_fq_files) are defined - only one or the other should be defined"
@@ -295,7 +469,7 @@ if (! params.containsKey('dir_in')) {
     if ((! params.validate_only) || (! params.skip_inputs)) {
         // Filter 'params.fq_files' down to those samples that exist.
         for (entry in params.fq_files) {
-            sample_fq = file("${params.dir_in}/${entry.value}")
+            sample_fq = file("${dir_in}/${entry.value}")
             if (sample_fq.exists()) {
                 sample_id_fq[entry.key] = sample_fq
             } else {
@@ -310,7 +484,7 @@ if (! params.containsKey('dir_in')) {
     if ((! params.validate_only) || (! params.skip_inputs)) {
         // Filter 'params.multiplex_fq_files' down to those files that exist.
         for (entry in params.multiplex_fq_files) {
-            multiplex_fq = file("${params.dir_in}/${entry}")
+            multiplex_fq = file("${dir_in}/${entry}")
             if (multiplex_fq.exists()) {
                 // Use file base name as key, ensuring that if file
                 // has extension '.fastq.gz' or '.fq.gz' then both
@@ -333,7 +507,7 @@ if (! params.containsKey('dir_in')) {
     if (! params.containsKey('sample_sheet')) {
         exit 1, "Undefined sample sheet (sample_sheet)"
     }
-    sample_sheet = file("${params.dir_in}/${params.sample_sheet}")
+    sample_sheet = file("${dir_in}/${params.sample_sheet}")
     if ((! params.validate_only) || (! params.skip_inputs)) {
         if (! sample_sheet.exists()) {
             exit 1, "No such sample sheet (sample_sheet): ${sample_sheet}"
@@ -356,19 +530,19 @@ ribosome_fqs_yaml = new Yaml().dump(ribosome_fqs)
 
 // Non-sample-specific input files.
 if (! params.build_indices) {
-    rrna_index_prefix = file("${params.dir_index}/${params.rrna_index_prefix}.*.ht2")
+    rrna_index_prefix = file("${dir_index}/${params.rrna_index_prefix}.*.ht2")
     if (! rrna_index_prefix) {
-        exit 1, "No such rRNA index files (rrna_index_prefix): ${params.dir_index}/${params.rrna_index_prefix}.*.ht2"
+        exit 1, "No such rRNA index files (rrna_index_prefix): ${dir_index}/${params.rrna_index_prefix}.*.ht2"
     }
     pre_built_rrna_index_ht2 = Channel
         .fromPath(rrna_index_prefix, checkIfExists: true)
         .collect()
-    orf_index_prefix = file("${params.dir_index}/${params.orf_index_prefix}.*.ht2")
+    orf_index_prefix = file("${dir_index}/${params.orf_index_prefix}.*.ht2")
     if (! orf_index_prefix) {
-        exit 1, "No such ORF index files (orf_index_prefix): ${params.dir_index}/${params.orf_index_prefix}.*.ht2"
+        exit 1, "No such ORF index files (orf_index_prefix): ${dir_index}/${params.orf_index_prefix}.*.ht2"
     }
     pre_built_orf_index_ht2 = Channel
-        .fromPath("${params.dir_index}/${params.orf_index_prefix}.*.ht2",
+        .fromPath("${dir_index}/${params.orf_index_prefix}.*.ht2",
                   checkIfExists: true)
         .collect()
 } else {
@@ -379,7 +553,8 @@ if (! params.build_indices) {
 if (! params.containsKey('rrna_fasta_file')) {
     exit 1, "Undefined rRNA FASTA file (rrna_fasta_file)"
 }
-rrna_fasta_file = file(params.rrna_fasta_file)
+rrna_fasta_file = file(replace_tokens(params.rrna_fasta_file,
+                                      riboviz_env_paths))
 if (! rrna_fasta_file.exists()) {
     exit 1, "No such file rRNA FASTA file (rrna_fasta_file): ${rrna_fasta_file}"
 }
@@ -387,7 +562,8 @@ rrna_fasta = Channel.fromPath(rrna_fasta_file, checkIfExists: true)
 if (! params.containsKey('orf_fasta_file')) {
     exit 1, "Undefined ORF FASTA file (orf_fasta_file)"
 }
-orf_fasta_file = file(params.orf_fasta_file)
+orf_fasta_file = file(replace_tokens(params.orf_fasta_file,
+                                     riboviz_env_paths))
 if (! orf_fasta_file.exists()) {
     exit 1, "No such ORF FASTA file (orf_fasta_file): ${orf_fasta_file}"
 }
@@ -395,7 +571,7 @@ orf_fasta = Channel.fromPath(orf_fasta_file, checkIfExists: true)
 if (! params.containsKey('orf_gff_file')) {
     exit 1, "Undefined ORF GFF file (orf_gff_file)"
 }
-orf_gff_file = file(params.orf_gff_file)
+orf_gff_file = file(replace_tokens(params.orf_gff_file, riboviz_env_paths))
 if (! orf_gff_file.exists()) {
     exit 1, "No such ORF GFF file (orf_gff_file): ${orf_gff_file}"
 }
@@ -413,7 +589,8 @@ orf_gff = Channel.fromPath(orf_gff_file, checkIfExists: true)
 // Optional inputs implementation follows pattern
 // https://github.com/nextflow-io/patterns/blob/master/optional-input.nf.
 if (params.containsKey('t_rna_file') && params.t_rna_file) {
-    t_rna_file = file(params.t_rna_file)
+    t_rna_file = file(replace_tokens(params.t_rna_file,
+                                     riboviz_env_paths))
     if (! t_rna_file.exists()) {
         exit 1, "No such tRNA estimates file (t_rna_file): ${t_rna_file}"
     }
@@ -425,7 +602,8 @@ if (params.containsKey('t_rna_file') && params.t_rna_file) {
 }
 if (params.containsKey('codon_positions_file')
     && params.codon_positions_file) {
-    codon_positions_file = file(params.codon_positions_file)
+    codon_positions_file = file(replace_tokens(params.codon_positions_file,
+                                               riboviz_env_paths))
     if (! codon_positions_file.exists()) {
         exit 1, "No such codon positions file (codon_positions_file): ${codon_positions_file}"
     }
@@ -444,7 +622,8 @@ if (is_t_rna_file && is_codon_positions_file) {
     exit 1, "Either both tRNA estimates (t_rna_file) and codon positions (codon_positions_file) must be defined or neither must be defined"
 }
 if (params.containsKey('features_file') && params.features_file) {
-    features_file = file(params.features_file)
+    features_file = file(replace_tokens(params.features_file,
+                                        riboviz_env_paths))
     if (! features_file.exists()) {
         exit 1, "No such features file (features_file): ${features_file}"
     }
@@ -456,7 +635,8 @@ if (params.containsKey('features_file') && params.features_file) {
 }
 if (params.containsKey('asite_disp_length_file')
     && params.asite_disp_length_file) {
-    asite_disp_length_file = file(params.asite_disp_length_file)
+    asite_disp_length_file = file(replace_tokens(params.asite_disp_length_file,
+                                                 riboviz_env_paths))
     if (! asite_disp_length_file.exists()) {
         exit 1, "No such A-site displacement file (asite_disp_length_file): ${asite_disp_length_file}"
     }
@@ -482,7 +662,7 @@ orf_gff.into { bam_to_h5_orf_gff; generate_stats_figs_orf_gff }
 
 process buildIndicesrRNA {
     tag "${params.rrna_index_prefix}"
-    publishDir "${params.dir_index}", mode: publish_index_tmp_type, overwrite: true
+    publishDir "${dir_index}", mode: publish_index_tmp_type, overwrite: true
     input:
         file rrna_fasta from rrna_fasta
     output:
@@ -498,7 +678,7 @@ process buildIndicesrRNA {
 
 process buildIndicesORF {
     tag "${params.orf_index_prefix}"
-    publishDir "${params.dir_index}", mode: publish_index_tmp_type, overwrite: true
+    publishDir "${dir_index}", mode: publish_index_tmp_type, overwrite: true
     input:
         file orf_fasta from build_indices_orf_fasta
     output:
@@ -526,7 +706,7 @@ Sample file (fq_files)-specific processes.
 process cutAdapters {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}", \
+    publishDir "${dir_tmp}/${sample_id}", \
         mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_fq) \
@@ -553,7 +733,7 @@ cut_fq.branch {
 process extractUmis {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}", \
+    publishDir "${dir_tmp}/${sample_id}", \
         mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_fq) \
@@ -578,7 +758,7 @@ Multiplexed files (multiplex_fq_files)-specific processes.
 process cutAdaptersMultiplex {
     tag "${multiplex_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}", mode: publish_index_tmp_type, overwrite: true
+    publishDir "${dir_tmp}", mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(multiplex_id), file(multiplex_fq) \
             from multiplex_id_fq.collect{ id, file -> [id, file] }
@@ -605,7 +785,7 @@ cut_multiplex_fq.branch {
 process extractUmisMultiplex {
     tag "${multiplex_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}", mode: publish_index_tmp_type, overwrite: true
+    publishDir "${dir_tmp}", mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(multiplex_id), file(multiplex_fq) \
             from cut_multiplex_fq_branch.umi_fq
@@ -635,7 +815,7 @@ multiplex_sample_sheet_tsv.into {
 
 process demultiplex {
     tag "${multiplex_id}"
-    publishDir "${params.dir_tmp}/${multiplex_id}_deplex", \
+    publishDir "${dir_tmp}/${multiplex_id}_deplex", \
         mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
@@ -709,7 +889,7 @@ trimmed_fq = cut_fq_branch.non_umi_fq
 
 process hisat2rRNA {
     tag "${sample_id}"
-    publishDir "${params.dir_tmp}/${sample_id}", \
+    publishDir "${dir_tmp}/${sample_id}", \
         mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
@@ -730,7 +910,7 @@ process hisat2rRNA {
 
 process hisat2ORF {
     tag "${sample_id}"
-    publishDir "${params.dir_tmp}/${sample_id}", \
+    publishDir "${dir_tmp}/${sample_id}", \
         mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
@@ -759,7 +939,7 @@ trim_5p_mismatches.branch {
 
 process trim5pMismatches {
     tag "${sample_id}"
-    publishDir "${params.dir_tmp}/${sample_id}", \
+    publishDir "${dir_tmp}/${sample_id}", \
         mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
@@ -788,7 +968,7 @@ trimmed_5p_fq = trim_5p_branch.non_trim_5p_fq
 
 process samViewSort {
     tag "${sample_id}"
-    publishDir "${params.dir_tmp}/${sample_id}", \
+    publishDir "${dir_tmp}/${sample_id}", \
         mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
@@ -822,7 +1002,7 @@ orf_map_bam_branch.dedup_bam.into {
 process groupUmisPreDedup {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}", \
+    publishDir "${dir_tmp}/${sample_id}", \
         mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
@@ -841,7 +1021,7 @@ process groupUmisPreDedup {
 process dedupUmis {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}", \
+    publishDir "${dir_tmp}/${sample_id}", \
         mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
@@ -856,7 +1036,7 @@ process dedupUmis {
         params.dedup_umis
     shell:
         output_stats_flag = params.dedup_stats \
-	    ? "--output-stats=dedup_stats" : ''
+            ? "--output-stats=dedup_stats" : ''
         """
         umi_tools dedup -I ${sample_bam} -S dedup.bam ${output_stats_flag}
         samtools --version
@@ -870,7 +1050,7 @@ dedup_bam.into { post_dedup_group_bam; post_dedup_bam }
 process groupUmisPostDedup {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${params.dir_tmp}/${sample_id}", \
+    publishDir "${dir_tmp}/${sample_id}", \
         mode: publish_index_tmp_type, overwrite: true
     input:
         tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
@@ -893,7 +1073,7 @@ pre_output_bam = orf_map_bam_branch.non_dedup_bam.mix(post_dedup_bam)
 
 process outputBams {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}", \
+    publishDir "${dir_out}/${sample_id}", \
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
@@ -914,7 +1094,7 @@ output_bam.into { bedgraph_bam; bam_to_h5_bam }
 
 process makeBedgraphs {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}", \
+    publishDir "${dir_out}/${sample_id}", \
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
@@ -937,7 +1117,7 @@ process makeBedgraphs {
 
 process bamToH5 {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}", \
+    publishDir "${dir_out}/${sample_id}", \
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
@@ -947,6 +1127,8 @@ process bamToH5 {
     output:
         tuple val(sample_id), file("${sample_id}.h5") into h5s
     shell:
+        secondary_id_flag = (secondary_id != null) \
+            ? "--secondary-id=${secondary_id}" : ''
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/bam_to_h5.R \
            --num-processes=${params.num_processes} \
@@ -954,13 +1136,14 @@ process bamToH5 {
            --max-read-length=${params.max_read_length} \
            --buffer=${params.buffer} \
            --primary-id=${params.primary_id} \
-           --secondary-id=${secondary_id} \
+           ${secondary_id_flag} \
            --dataset=${params.dataset} \
            --bam-file=${sample_bam} \
            --hd-file=${sample_id}.h5 \
            --orf-gff-file=${orf_gff} \
            --is-riboviz-gff=${params.is_riboviz_gff} \
-           --stop-in-cds=${params.stop_in_cds}
+           --feature=${params.feature} \
+           --stop-in-feature=${stop_in_feature}
         """
 }
 
@@ -968,7 +1151,7 @@ process bamToH5 {
 // https://github.com/nextflow-io/patterns/blob/master/optional-input.nf.
 process generateStatsFigs {
     tag "${sample_id}"
-    publishDir "${params.dir_out}/${sample_id}", \
+    publishDir "${dir_out}/${sample_id}", \
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
@@ -983,37 +1166,47 @@ process generateStatsFigs {
         val sample_id into finished_sample_id
         tuple val(sample_id), file("tpms.tsv") into tpms_tsv
         tuple val(sample_id), file("3nt_periodicity.pdf") \
-            into nt3_periodicity_pdf
+            optional (! params.output_pdfs) into nt3_periodicity_pdf
         tuple val(sample_id), file("3nt_periodicity.tsv") \
             into nt3_periodicity_tsv
+        tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
+            into gene_position_length_counts_5start_tsv
         tuple val(sample_id), file("pos_sp_nt_freq.tsv") \
-	    optional (! params.do_pos_sp_nt_freq) \
-	    into pos_sp_nt_freq_tsv
+            optional (! params.do_pos_sp_nt_freq) \
+            into pos_sp_nt_freq_tsv
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.pdf") \
-            into pos_sp_rpf_norm_reads_pdf
+            optional (! params.output_pdfs) into pos_sp_rpf_norm_reads_pdf
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
             into pos_sp_rpf_norm_reads_tsv
         tuple val(sample_id), file("read_lengths.pdf") \
-            into read_lengths_pdf
+            optional (! params.output_pdfs) into read_lengths_pdf
         tuple val(sample_id), file("read_lengths.tsv") \
             into read_lengths_tsv
         tuple val(sample_id), file("startcodon_ribogridbar.pdf") \
-            into start_codon_ribogridbar_pdf
+            optional (! params.output_pdfs) into start_codon_ribogridbar_pdf
         tuple val(sample_id), file("startcodon_ribogrid.pdf") \
-            into start_codon_ribogrid_pdf
+            optional (! params.output_pdfs) into start_codon_ribogrid_pdf
         tuple val(sample_id), file("codon_ribodens.pdf") \
-            optional (! is_t_rna_and_codon_positions_file) \
+            optional (! (is_t_rna_and_codon_positions_file && params.output_pdfs)) \
             into codon_ribodens_pdf
         tuple val(sample_id), file("codon_ribodens.tsv") \
             optional (! is_t_rna_and_codon_positions_file) \
             into codon_ribodens_tsv
+        tuple val(sample_id), file("codon_ribodens_gathered.tsv") \
+            optional (! is_t_rna_and_codon_positions_file) \
+            into codon_ribodens_gathered_tsv
         tuple val(sample_id), file("features.pdf") \
-            optional (! is_features_file) into features_pdf
+            optional (! (is_features_file && params.output_pdfs)) into features_pdf
+        tuple val(sample_id), file("sequence_features.tsv") \
+            optional (! is_features_file) into sequence_features_tsv
         tuple val(sample_id), file("3ntframe_bygene.tsv") \
             optional (! is_asite_disp_length_file) \
             into nt3frame_bygene_tsv
-        tuple val(sample_id), file("3ntframe_propbygene.pdf") \
+        tuple val(sample_id), file("3ntframe_bygene_filtered.tsv") \
             optional (! is_asite_disp_length_file) \
+            into nt3frame_bygene_filtered_tsv
+        tuple val(sample_id), file("3ntframe_propbygene.pdf") \
+            optional (! (is_asite_disp_length_file && params.output_pdfs)) \
             into nt3frame_propbygene_pdf
     shell:
         t_rna_flag = is_t_rna_and_codon_positions_file \
@@ -1036,6 +1229,7 @@ process generateStatsFigs {
            --dataset=${params.dataset} \
            --hd-file=${sample_h5} \
            --orf-fasta-file=${orf_fasta} \
+           --output-pdfs=${params.output_pdfs} \
            --rpf=${params.rpf} \
            --output-dir=. \
            --do-pos-sp-nt-freq=${params.do_pos_sp_nt_freq} \
@@ -1048,6 +1242,16 @@ process generateStatsFigs {
         """
 }
 
+// Join outputs from generateStatsFigs for staticHTML.
+// Join is done on first value of each tuple i.e. sample ID.
+generate_stats_figs_static_html =
+    nt3_periodicity_tsv
+    .join(gene_position_length_counts_5start_tsv, remainder: true)
+    .join(read_lengths_tsv, remainder: true)
+    .join(pos_sp_rpf_norm_reads_tsv, remainder: true)
+    .join(nt3frame_bygene_filtered_tsv, remainder: true)
+    .join(sequence_features_tsv, remainder: true)
+    .join(codon_ribodens_gathered_tsv, remainder: true)
 
 finished_sample_id
     .ifEmpty { exit 1, "No sample was processed successfully" }
@@ -1072,7 +1276,7 @@ process renameTpms {
 
 process collateTpms {
     tag "${sample_ids.join(', ')}"
-    publishDir "${params.dir_out}", mode: 'copy', overwrite: true
+    publishDir "${dir_out}", mode: 'copy', overwrite: true
     input:
         val sample_ids from tpms_sample_id.collect()
         file tpms_tsvs from tpms_sample_tsv.collect()
@@ -1080,17 +1284,21 @@ process collateTpms {
         file "TPMs_collated.tsv" into collate_tpms_tsv
         val sample_ids into collate_tpms_sample_ids
     shell:
+        samples_tsvs = []
+        for (i = 0; i < sample_ids.size(); i++) {
+            samples_tsvs.add(sample_ids[i])
+            samples_tsvs.add(tpms_tsvs[i])
+        }
+        samples_tsvs = samples_tsvs.join(' ')
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/collate_tpms.R \
-            --sample-subdirs=False \
-            --output-dir=. \
             --tpms-file=TPMs_collated.tsv \
-            ${sample_ids.join(' ')}
+            ${samples_tsvs}
         """
 }
 
 process countReads {
-    publishDir "${params.dir_out}", mode: 'copy', overwrite: true
+    publishDir "${dir_out}", mode: 'copy', overwrite: true
     input:
         // Use '.toString' to prevent changing hashes of
         // 'workflow.projectDir' triggering reexecution of this
@@ -1119,59 +1327,90 @@ process countReads {
         echo "${ribosome_fqs_yaml}" > ribosome_fqs.yaml
         python -m riboviz.tools.count_reads \
            -c ribosome_fqs.yaml \
-           -i ${file(params.dir_in).toAbsolutePath()} \
-           -t ${file(params.dir_tmp).toAbsolutePath()} \
-           -o ${file(params.dir_out).toAbsolutePath()} \
+           -i ${file(dir_in).toAbsolutePath()} \
+           -t ${file(dir_tmp).toAbsolutePath()} \
+           -o ${file(dir_out).toAbsolutePath()} \
            -r read_counts.tsv
         """
 }
 
-// create 'new' yaml for use in dashboard process
-config_yaml = new Yaml().dump(params)
+Map viz_params = [:]
+if (is_asite_disp_length_file) {
+    viz_params.asite_disp_length_file = asite_disp_length_file.toString()
+}
+if (is_codon_positions_file) {
+    viz_params.codon_positions_file = codon_positions_file.toString()
+}
+if (is_features_file) {
+    viz_params.features_file = features_file.toString()
+}
+if (is_t_rna_file) {
+    viz_params.t_rna_file = t_rna_file.toString()
+}
+viz_params_yaml = new Yaml().dump(viz_params)
 
-// fun with config yamls
-process createConfigFile {
+process createVizParamsConfigFile {
     input:
-      val config_yaml from config_yaml
+      val viz_params_yaml from viz_params_yaml
      output:
-      file "config.yaml" into config_file_yaml
+      file "config.yaml" into viz_params_config_file_yaml
     shell:
       """
-      echo "${config_yaml}" > "config.yaml"
+      echo "${viz_params_yaml}" > "config.yaml"
       """
 }
 
-// run visualization system to generate interactive output report: riboviz/#239
-process dashboard {
-    publishDir "${params.dir_out}", mode: 'copy', overwrite: true
-
+process staticHTML {
+    tag "${sample_id}"
+    publishDir "${dir_out}/${sample_id}", \
+    mode: 'copy', overwrite: true
     input:
-      file config_file_yaml from config_file_yaml
-      file "read_counts.tsv" from read_counts_tsv
-
-    // this is a temporary output, still not clear on what output is produced:
+      file viz_params_config_file_yaml from viz_params_config_file_yaml
+      tuple val(sample_id), \
+        file(sample_nt3_periodicity_tsv), \
+        file(sample_gene_position_length_counts_5start_tsv), \
+        file(sample_read_lengths_tsv), \
+        file(sample_pos_sp_rpf_norm_reads_tsv), \
+        file(sample_nt3frame_bygene_filtered_tsv), \
+        file(sample_sequence_features_tsv), \
+        file(sample_codon_ribodens_gathered_tsv) \
+	from generate_stats_figs_static_html
     output:
-      file 'tmp.txt' into dashboard_output
-
+      val sample_id into finished_viz_sample_id
+      file "${sample_id}_output_report.html" into static_html_html
     when:
-      params.run_dashboard
-
+      params.run_static_html
     shell:
+      script = "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd',"
+      script += "params = list("
+      script += "verbose='FALSE', "
+      script += "yamlfile='\$PWD/${viz_params_config_file_yaml}', "
+      script += "sampleid='!{sample_id}', "
+      script += "three_nucleotide_periodicity_data_file = '\$PWD/${sample_nt3_periodicity_tsv}', "
+      script += "gene_position_length_counts_5start_file = '\$PWD/${sample_gene_position_length_counts_5start_tsv}', "
+      script += "read_length_data_file='\$PWD/${sample_read_lengths_tsv}', "
+      script += "pos_sp_rpf_norm_reads_data_file='\$PWD/${sample_pos_sp_rpf_norm_reads_tsv}' "
+      if (is_asite_disp_length_file) {
+          script += ", gene_read_frames_filtered_data_file='\$PWD/${sample_nt3frame_bygene_filtered_tsv}'"
+      }
+      if (is_t_rna_and_codon_positions_file) {
+          script += ", codon_ribodens_gathered_file='\$PWD/${sample_codon_ribodens_gathered_tsv}'"
+      }
+      if (is_features_file) {
+          script += ", sequence_features_file='\$PWD/${sample_sequence_features_tsv}' "
+      }
+      script += "), "
+      script += "intermediates_dir = '\$PWD', "
+      script += "output_format = 'html_document', "
+      script += "output_file = '\$PWD/${sample_id}_output_report.html')"
       """
-      # RMarkdown flexdashboard method
-      #Rscript -e "rmarkdown::render( \
-      #'${workflow.projectDir}/rmarkdown/new_visualization.Rmd', \
-      #params = list(yamlfile='\$PWD/${config_file_yaml}'))"
-
-      # R shiny method
-      Rscript --vanilla ${workflow.projectDir}/rscripts/shiny_test.R \
-         --yamlfile=\$PWD/${config_file_yaml}
-
-      touch tmp.txt
+      Rscript -e "${script}"
       """
 }
 
-dashboard_output.subscribe { println "Received from 'dashboard': $it" }
+finished_viz_sample_id
+    .ifEmpty { exit 1, "No sample was visualised successfully" }
+    .view { "Finished visualising sample: ${it}" }
 
 workflow.onComplete {
     println "Workflow finished! (${workflow.success ? 'OK' : 'failed'})"

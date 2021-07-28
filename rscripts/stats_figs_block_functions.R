@@ -86,6 +86,33 @@ PlotThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data){
   
 } # end PlotThreeNucleotidePeriodicity() definition
 
+
+CalculateGenePositionLengthCounts5Start <- function(gene_names, dataset, hd_file, gff_df){
+  # create intermediate data object
+  gene_poslen_counts_5start_df <- AllGenes5StartPositionLengthCountsTibble(
+    gene_names = gene_names, 
+    dataset= dataset, 
+    hd_file = hd_file, 
+    gff_df = gff_df
+  )
+  return(gene_poslen_counts_5start_df)
+}
+
+WriteGenePositionLengthCounts5Start <- function(gene_poslen_counts_5start_df){
+  # write out intermediate object
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "gene_position_length_counts_5start.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    gene_poslen_counts_5start_df,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+}
+
 # potentially replace/tweak plot_ribogrid() to follow StyleGuide
 PlotStartCodonRiboGrid <- function(gene_poslen_counts_5start_df){
   # function to do the ribogrid & ribogridbar plots?
@@ -155,9 +182,6 @@ WriteThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data) {
 
 # calculate function
 CalculateReadLengths <- function(gene_names, dataset, hd_file){
-  
-  ## distribution of lengths of all mapped reads
-  print("Starting: Distribution of lengths of all mapped reads")
   
   # read length-specific read counts stored as attributes of 'reads' in H5 file
   gene_sp_read_length <- lapply(gene_names, function(gene) {
@@ -384,10 +408,35 @@ CalculateGeneReadFrames <- function(dataset, hd_file, gff_df, min_read_length, a
 # gives:
 # TODO
 
-PlotGeneReadFrames <- function(gene_read_frames_data){
-  gene_read_frame_plot <- gene_read_frames_data %>%
-    filter(Ct_fr0 + Ct_fr1 + Ct_fr2 > count_threshold) %>%
-    BoxplotReadFrameProportion()
+FilterGeneReadFrames <- function(gene_read_frames_data, count_threshold){
+  gene_read_frame_data_filtered <- gene_read_frames_data %>%
+    filter(Ct_fr0 + Ct_fr1 + Ct_fr2 > count_threshold)
+  
+  return(gene_read_frame_data_filtered)
+} # end FilterGeneReadFrames() definition
+# gives:
+# TODO
+
+WriteFilteredGeneReadFrames <- function(gene_read_frame_data_filtered){
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3ntframe_bygene_filtered.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    gene_read_frame_data_filtered,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+  #return() # no return as writing-out
+} # end WriteFilteredGeneReadFrames() definition
+# gives:
+# TODO
+
+PlotGeneReadFrames <- function(gene_read_frame_data_filtered){
+  
+  gene_read_frame_plot <- BoxplotReadFrameProportion(gene_read_frame_data_filtered)
   
   return(gene_read_frame_plot)
 } # end PlotGeneReadFrames() definition
@@ -503,6 +552,7 @@ PlotPositionSpecificDistributionOfReads <- function(pos_sp_rpf_norm_reads_data){
     geom_line() +
     facet_grid(~End, scales = "free") +
     guides(col = FALSE)
+  return(pos_sp_rpf_norm_reads_plot)
 } # end of definition of function PlotPositionSpecificDistributionOfReads()
 
 SavePositionSpecificDistributionOfReads <- function(pos_sp_rpf_norm_reads_plot){
@@ -730,13 +780,29 @@ PlotSequenceBasedFeatures <- function(features_plot_data){
 } # end PlotSequenceBasedFeatures() definition
 
 
-WriteSequenceBasedFeatures <- function(features_plot) {
+SaveSequenceBasedFeatures <- function(features_plot) {
   # Save plot and file
   ggsave(features_plot, filename = file.path(output_dir, paste0(output_prefix, "features.pdf")))
-  
   # return() NO RETURN as writing out
   
-} # end WriteSequenceBasedFeatures() definition
+} # end SaveSequenceBasedFeatures() definition
+
+
+WriteSequenceBasedFeatures <- function(features_plot_data){
+  # Save file
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "sequence_features.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    features_plot_data,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+  # return() # NO RETURN as writing out
+} # end of WriteSequenceBasedFeatures() definition
 
 
 ## Codon-specific ribosome densities for correlations with tRNAs
@@ -746,7 +812,7 @@ WriteSequenceBasedFeatures <- function(features_plot) {
 CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_file, gene_names, hd_file, dataset, buffer, count_threshold){
   
   # This still depends on yeast-specific arguments and should be edited.
-  yeast_tRNAs <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
+  trna <- read.table(t_rna_file, h = T) # Read in yeast tRNA estimates
   load(codon_positions_file) # Position of codons in each gene (numbering ignores first 200 codons)
   # Reads in an object named "codon_pos"
   
@@ -793,20 +859,22 @@ CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_fi
   A <- a_mn[order(names(codon_pos))]
   P <- p_mn[order(names(codon_pos))]
   E <- e_mn[order(names(codon_pos))]
-  
-  cod_dens_tRNA_data <- cbind(yeast_tRNAs, A, P, E)
-  
+  trna <- trna[order(trna$Codon),]
+  cod_dens_tRNA_data <- cbind(trna, A, P, E)
   return(cod_dens_tRNA_data)
   
 } # end of CalculateCodonSpecificRibosomeDensity() definition
 
 
-PlotCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_data) {
-
+GatherCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_data) {
   # Prepare data for plot
   cod_dens_tRNA_wide <- cod_dens_tRNA_data %>%
-    gather(tRNA_type, tRNA_value, 3:6) %>%
-    gather(Site, Ribodens, 3:5)
+     pivot_longer(!c(AA,Codon,A,P,E),names_to="tRNA_type",values_to="tRNA_value") %>% 
+     pivot_longer(c(A,P,E),names_to="Site",values_to="Ribodens")
+  return(cod_dens_tRNA_wide)
+} 
+
+PlotCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_wide) {
 
   # Plot
   cod_dens_tRNA_plot <- ggplot(cod_dens_tRNA_wide, aes(x = tRNA_value, y = Ribodens)) +
@@ -827,6 +895,22 @@ SaveCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_plot){
   # return() # NO RETURN as writing out
 
 } # end of SaveCodonSpecificRibosomeDensityTRNACorrelation() definition
+
+WriteGatheredCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_wide){
+  # Save file
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "codon_ribodens_gathered.tsv"))
+  write_provenance_header(path_to_this_script, tsv_file_path)
+  write.table(
+    cod_dens_tRNA_wide,
+    file = tsv_file_path,
+    append = T,
+    sep = "\t",
+    row = F,
+    col = T,
+    quote = F
+  )
+  # return() # NO RETURN as writing out
+} # end of WriteCodonSpecificRibosomeDensityTRNACorrelation() definition
 
 
 WriteCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_data){

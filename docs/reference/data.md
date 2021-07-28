@@ -72,15 +72,37 @@ The file can be used as an input to RiboViz.
 
 ## Additional yeast-specific data
 
-Position of codons within each gene (the numbering ignores the first 200 codons):
+### Position of codons within each gene 
+
+```
+data/yeast_codon_table.tsv
+```
+
+This file was produced using  [script_for_transcript_annotation.Rmd](../../rmarkdown/script_for_transcript_annotation.Rmd) as part of the preparation described in [Saccharomyces cerevisiae (yeast) genome and annotation data](#saccharomyces-cerevisiae-yeast-genome-and-annotation-data) above.
+
+An identical table (differing only in the commented lines in the header) is produced by:
+
+```
+python -m riboviz.tools.get_cds_codons \
+        -f data/yeast_CDS_w_250utrs.fa \
+        -g data/yeast_CDS_w_250utrs.gff3 \
+        -c data/yeast_codon_table_alternative.tsv
+```
+
+#### Obsolete version whose numbering ignores the first 200 codons
 
 ```
 data/yeast_codon_pos_i200.RData
 ```
 
-This file was produced using [script_for_transcript_annotation.Rmd](../../rmarkdown/script_for_transcript_annotation.Rmd) as part of the preparation described in [Saccharomyces cerevisiae (yeast) genome and annotation data](#saccharomyces-cerevisiae-yeast-genome-and-annotation-data) above.
+This file was produced using version 1.0 of [script_for_transcript_annotation.Rmd](../../rmarkdown/script_for_transcript_annotation.Rmd).
 
-Features to correlate with ORFs:
+The file contains data identical from codon position 201 onwards of the data in `data/yeast_codon_table.tsv`.
+
+The `.Rdata` file is obsolete as of March 2021, and will be removed once we have updated the code section `CalculateCodonSpecificRibosomeDensity` to use input data formatted from `data/yeast_codon_table.tsv` instead
+
+
+### Features to correlate with ORFs:
 
 ```
 data/yeast_features.tsv
@@ -96,7 +118,7 @@ Data within this file was derived as follows:
 6. `FE_cap`: Estimated from 2. using sequences of length 70 nts from the 5' end of the mRNA transcript with folding energies calculated at 37 degress Centigrade following [Supplementary Methods](https://www.cell.com/cms/10.1016/j.celrep.2016.01.043/attachment/257faf34-ff8f-4071-a642-bfdb531c75b8/mmc1) for Weinberg et al. 2016 "Improved Ribosome-Footprint and mRNA Measurements Provide Insights into Dynamics and Regulation of Yeast Translation", Cell Reports, 14(7), 23 February 2016, 1787-1799 doi: [10.1016/j.celrep.2016.01.043](https://doi.org/10.1016/j.celrep.2016.01.043). Calculations were done using [RNAfold](https://www.tbi.univie.ac.at/RNA/RNAfold.1.html) in the [ViennaRNA](https://www.tbi.univie.ac.at/RNA/) package.
 7. `FE_atg`: Estimated from 30 nt upstream from ATG.
 
-tRNA estimates:
+### tRNA estimates:
 
 ```
 data/yeast_tRNAs.tsv
@@ -210,6 +232,66 @@ Data was imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb
 * `Sample_init10000_R1.fastq.gz`: Initial 10000 read 1s from a paired-end S. cerevisiae dataset.
 * `Sample_init10000_R2.fastq.gz`: 10000 read 2s corresponding to `Sample_init10000_R1.fastq.gz`.
 * `TagSeqBarcodedOligos2015.txt`: TagSeq barcoded oligos used in Shishkin, et al. (2015). "Simultaneous generation of many RNA-seq libraries in a single reaction", Nature Methods, 12(4), 323–325. doi: [10.1038/nmeth.3313](http://doi.org/10.1038/nmeth.3313)
+
+---
+
+## GFF and BAM files for testing `bam_to_h5.R`
+
+`data/Mok-tinysim-gffsam` folder.
+
+Used by `rscripts/tests/testthat/test_bam_to_h5.R`.
+
+Created using:
+
+* [riboviz](https://github.com/riboviz/riboviz), `test-bam-to-h5-238` branch, 7b944eb, Wed Feb 3 07:57:11 2021.
+* [example-datasets](https://github.com/riboviz/example-datasets/), `origin` branch, commit 24c2fe4, Mon Jan 18 17:21:17 2021.
+* [amandamok/simRiboSeq](https://github.com/amandamok/simRiboSeq), `master` branch, commit 8367709, Wed Jan 13 13:51:18 2021.
+
+Get `example-datasets`:
+
+```console
+$ git clone https://github.com/riboviz/example-datasets/
+```
+
+Get `amandamok/simRiboSeq`:
+
+```console
+$ git clone https://github.com/amandamok/simRiboSeq/
+$ ls simRiboSeq/simulation_runs/riboviz/
+...
+tiny_2genes.fq
+```
+
+Create configuration files directory in `riboviz`:
+
+```console
+$ cd riboviz
+$ mkdir -p Mok-tinysim/input
+$ cp ../simRiboSeq/simulation_runs/riboviz/tiny_2genes.fq Mok-tinysim/input/
+$ cp ../example-datasets/simulated/mok/Mok-tinysim_config.yaml .
+```
+
+Edit `.yaml `and change `../../riboviz/` to `../`:
+
+```
+orf_fasta_file: ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa
+orf_gff_file: ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3
+rrna_fasta_file: ../example-datasets/simulated/mok/contaminants/Sc_rRNA_example.fa
+```
+
+Run RiboViz:
+
+```console
+$ nextflow run prep_riboviz.nf  -params-file Mok-tinysim_config.yaml -ansi-log false
+```
+
+Create and populate `data/Mok-tinysim-gffsam`:
+
+```console
+$ mkdir data/Mok-tinysim-gffsam
+$ samtools view -h Mok-tinysim/output/A/A.bam > data/Mok-tinysim-gffsam/A.sam
+$ cp ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 data/Mok-tinysim-gffsam/
+```
 
 ---
 

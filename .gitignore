@@ -1,8 +1,8 @@
 *~
 *.bai
-code-docs/_build/
-code-docs/modules.rst
-code-docs/riboviz*.rst
+py-docs/_build/
+py-docs/modules.rst
+py-docs/riboviz*.rst
 .coverage
 *.db
 .DS_Store
@@ -15,9 +15,14 @@ oldData/
 __pycache__
 .RData
 .Rhistory
+rmarkdown/*.html
+*~
+*.pyc
+__pycache__
+.idea/
 riboviz.Rproj
 .Rproj.user
-scripts/script_for_transcript_annotation.nb.html
+rmarkdown/script_for_transcript_annotation.nb.html
 vignette/*index
 vignette/*logs
 vignette/*output
