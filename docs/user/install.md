@@ -572,7 +572,7 @@ $ conda install -y -c bioconda nextflow=20
 ```
 
 
-**Note:** For some users, the workflow fails during invocation of `cutadapt` 3.2 or 3.4. If this arises then uninstall and reinstall `cutadapt` as documented in [Troubleshooting: cutadapt 3.x](./prep-riboviz-run-nextflow.md#troubleshooting-cutadapt-3x-fails).
+**Note:** For some users, the workflow fails during invocation of `cutadapt` 3.2 or 3.4. If this arises then uninstall and reinstall `cutadapt` as documented in [Troubleshooting: cutadapt 3.x failure](./prep-riboviz-run-nextflow.md#troubleshooting-cutadapt-3x-failure).
 
 Check packages have installed command-line tools:
 

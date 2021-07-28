@@ -14,7 +14,7 @@ Contents:
   - [Troubleshooting: `Error executing process staticHTML` and `AnalysisOutputs.Rmd`](#troubleshooting-error-executing-process-statichtml-and-analysisoutputsrmd)
   - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
   - [Troubleshooting: deduplication and memory issues](#troubleshooting-deduplication-and-memory-issues)
-  - [Troubleshooting: cutadapt 3.x fails](#troubleshooting-cutadapt-3x-fails)
+  - [Troubleshooting: cutadapt 3.x failure](#troubleshooting-cutadapt-3x-failure)
 * [Help](#help)
 * [Incremental build](#incremental-build)
 * [Multiplexed files](#multiplexed-files)
@@ -335,7 +335,7 @@ For information on the allowable values, see [samtools sort](http://www.htslib.o
 
 See [Troubleshooting: deduplication and memory issues](memory-storage.md#troubleshooting-deduplication-and-memory-issues) in [Memory and storage](./memory-storage.md).
 
-### Troubleshooting: cutadapt 3.x fails
+### Troubleshooting: cutadapt 3.x failure
 
 For some users, the workflow fails during invocation of `cutadapt` 3.2 or 3.4. [Debugging](#debugging) reveals the following error message:
 
