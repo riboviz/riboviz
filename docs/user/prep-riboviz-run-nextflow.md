@@ -15,6 +15,7 @@ Contents:
   - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
   - [Troubleshooting: deduplication and memory issues](#troubleshooting-deduplication-and-memory-issues)
   - [Troubleshooting: cutadapt 3.x failure](#troubleshooting-cutadapt-3x-failure)
+  - [Troubleshooting: `ln: failed to create symbolic link`](#troubleshooting-ln-failed-to-create-symbolic-link)
 * [Help](#help)
 * [Incremental build](#incremental-build)
 * [Multiplexed files](#multiplexed-files)
@@ -354,6 +355,18 @@ $ pip install cutadapt
 ```
 
 If you encounter this issue for another version of cutadapt or if you have other solutions then please add a comment to cutadapt 3.x from conda causes workflow failure [#380](https://github.com/riboviz/riboviz/issues/380).
+
+### Troubleshooting: `ln: failed to create symbolic link`
+
+If the workflow fails and [Debugging](#debugging) reveals an error message of form:
+
+```
+ln: failed to create symbolic link '<FILE>': Operation not supported
+```
+
+then this can arise if you do not have permission to create symbolic links within your file system. Nextflow requires the ability to be able to create symbolic links.
+
+The solution is to reconfigure your file system to allow you to create symbolic links within it.
 
 ---
 
