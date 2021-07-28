@@ -12,7 +12,7 @@ These are the key steps in building a release.
   - [docs/developer/create-test-data-repository.md](./create-test-data-repository.md)
   - [docs/developer/testing.md](./testing.md), update the test data URLs in the `git clone` commands with the intended URL for the test data repository (`https://github.com/riboviz/test-data-<TAG>`).
 * Update `README.md`:
-  - Update the 'figshare. Software' reference publication year.
+  - Update the 'figshare. Software' reference publication year and authors.
   - Update the 'Copyright' year.
   - Update the Releases table with a row for the release and provide a URL with the release tag. See the current rows of the table for the format of the URL.
 * Skim all documentation via the GitHub web interface and check formatting and links.
