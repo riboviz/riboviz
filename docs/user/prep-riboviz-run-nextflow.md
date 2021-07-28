@@ -12,7 +12,7 @@ Contents:
   - [Skip checks for ribosome profiling data files parameter](#skip-checks-for-ribosome-profiling-data-files-parameter)
 * [Run the Nextflow workflow](#run-the-nextflow-workflow)
   - [Troubleshooting: `Error executing process staticHTML` and `AnalysisOutputs.Rmd`](#troubleshooting-error-executing-process-statichtml-and-analysisoutputsrmd)
-- [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
+  - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
   - [Troubleshooting: deduplication and memory issues](#troubleshooting-deduplication-and-memory-issues)
   - [Troubleshooting: cutadapt 3.x fails](#troubleshooting-cutadapt-3x-fails)
 * [Help](#help)
@@ -337,7 +337,7 @@ See [Troubleshooting: deduplication and memory issues](memory-storage.md#trouble
 
 ### Troubleshooting: cutadapt 3.x fails
 
-Some users have noticed the workflow fails during invocation of `cutadapt` 3.2 or 3.4. [Debugging](#debugging) reveals the following error message:
+For some users, the workflow fails during invocation of `cutadapt` 3.2 or 3.4. [Debugging](#debugging) reveals the following error message:
 
 ```
 Traceback (most recent call last):  
