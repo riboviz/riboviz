@@ -9,7 +9,7 @@ Any repository hosted on GitHub should not exceed 1GB in size. GitHub's [What is
 Create a repository:
 
 * Visit https://github.com/riboviz
-* Click Mew
+* Click New
 * Enter Repository name:
   - For data corresponding to a release, enter `test-data-<TAG>` e.g. `test-data-2.1`.
   - For data produced on a given date, enter `test-data-<YYYYMMDD>` e.g. `test-data-20210618`.
