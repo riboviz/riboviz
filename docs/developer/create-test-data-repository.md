@@ -11,7 +11,7 @@ Create a repository:
 * Visit https://github.com/riboviz
 * Click Mew
 * Enter Repository name:
-  - For data corresponding to a release, enter `test-data-<TAG>` e.g. `test-data-2.0`.
+  - For data corresponding to a release, enter `test-data-<TAG>` e.g. `test-data-2.1`.
   - For data produced on a given date, enter `test-data-<YYYYMMDD>` e.g. `test-data-20210618`.
 * Select Public.
 * Click Create repository.

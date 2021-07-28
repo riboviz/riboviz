@@ -25,6 +25,6 @@ These are the key steps in building a release.
 * Tag release in repository:
 
 ```console
-$ git tag 2.0
-$ git push origin 2.0
+$ git tag 2.1
+$ git push origin 2.1
 ```
