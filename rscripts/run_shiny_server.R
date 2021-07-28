@@ -1,19 +1,19 @@
 ### Get information from the YAML ###
 library(yaml)
 
-args <- commandArgs(TRUE)
-if (!is.na(args[1])) {
-  yaml <- read_yaml(args[1])
-} else {
-  return("Provide a path to a yaml file used in a riboviz run.")
-}
-
 # load required packages
 library(shiny)
 library(tidyverse)
 library(scales)
 library(here)
 library(rhdf5)
+
+args <- commandArgs(TRUE)
+if (!is.na(args[1])) {
+  yaml <- read_yaml(args[1])
+} else {
+  return("Provide a path to a yaml file used in a riboviz run.")
+}
 
 # use this function to pull the sample names and directories from the yaml
 # the sample names and dirs will be used to find data files.
@@ -295,7 +295,7 @@ server <- function(input, output, session) {
         xint = ifelse(ORF %in% input$gene, tpm, NA)
       ) %>%
       ggplot(., aes(x = tpm, fill = samplez)) +
-      geom_density(alpha = 0.5) +
+      geom_density() +
       geom_vline(aes(xintercept = xint), size = 1) +
       scale_x_log10(labels = label_number_si()) +
       facet_wrap(~ samplez) +
