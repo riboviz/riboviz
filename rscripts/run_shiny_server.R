@@ -1,19 +1,19 @@
 ### Get information from the YAML ###
 library(yaml)
 
-# load required packages
-library(shiny)
-library(tidyverse)
-library(scales)
-library(here)
-library(rhdf5)
-
 args <- commandArgs(TRUE)
 if (!is.na(args[1])) {
   yaml <- read_yaml(args[1])
 } else {
   return("Provide a path to a yaml file used in a riboviz run.")
 }
+
+# load required packages
+library(shiny)
+library(tidyverse)
+library(scales)
+library(here)
+library(rhdf5)
 
 # use this function to pull the sample names and directories from the yaml
 # the sample names and dirs will be used to find data files.
@@ -22,7 +22,7 @@ find_sample_names <- function(yaml_file) {
   if (is.null(yaml_file$fq_files)) {
     # get the names from the barcodes file, this is the location of the sample sheet
     sample_sheet_loc <-
-      normalizePath(here(yaml_file$dir_in, yaml_file$sample_sheet))
+      normalizePath(here::here(yaml_file$dir_in, yaml_file$sample_sheet))
     
     # get the sample names from it
     sample_names <- read_tsv(sample_sheet_loc)$SampleID
@@ -33,7 +33,7 @@ find_sample_names <- function(yaml_file) {
   
   # construct the paths to the dirs
   sample_dir_paths <-
-    normalizePath(here(yaml_file$dir_out, sample_names))
+    normalizePath(here::here(yaml_file$dir_out, sample_names))
   
   names(sample_dir_paths) <- sample_names
   
@@ -80,7 +80,7 @@ graph_cats <- data.frame(
 
 # Load the data frame and add the short names
 read_counts_df <-
-  read_tsv(normalizePath(here(yaml$dir_out, "read_counts.tsv")), skip = 5) %>%
+  read_tsv(normalizePath(here::here(yaml$dir_out, "read_counts.tsv")), skip = 5) %>%
   left_join(graph_cats, by = "Description") %>%
   filter(
     Description %in% graph_cats$Description &
@@ -88,24 +88,24 @@ read_counts_df <-
   )
 
 # find which categories actually occur
-occurring_cats <- unique(read_counts_df$short_name)
+occurring_cats <- unique(read_counts_df$short_name) 
 
 read_counts_df <- read_counts_df %>%
-  mutate(short_name = factor(short_name, levels = graph_cats$short_name[graph_cats$short_name %in% occurring_cats]))
+  mutate(short_name = factor(short_name, levels = graph_cats$short_name[graph_cats$short_name %in% occurring_cats])) 
 
 ### Read length distributions
-read_length_df <- lapply(sample_names, function(x) {
+read_length_df <- lapply(sample_names, function(x) { 
   # path to the read length file
-  file_loc <- normalizePath(here(x, "read_lengths.tsv"))
+  file_loc <- normalizePath(paste0(x, "/read_lengths.tsv"))
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
-  bind_rows(.id = "samplez")
+  bind_rows(.id = "samplez")  
 
 ### Periodicity line plot
 periodicity_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- normalizePath(here(x, "3nt_periodicity.tsv"))
+  file_loc <- normalizePath(paste0(x, "/3nt_periodicity.tsv"))
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -114,7 +114,7 @@ periodicity_df <- lapply(sample_names, function(x) {
 ### Read counts by frame bar plot
 frame_bar_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- normalizePath(here(x, "3ntframe_bygene.tsv"))
+  file_loc <- normalizePath(paste0(x, "/3ntframe_bygene.tsv"))
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -132,7 +132,7 @@ frame_bar_df <- lapply(sample_names, function(x) {
 ### Read counts by frame boxplot
 frame_box_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- normalizePath(here(x, "3ntframe_bygene.tsv"))
+  file_loc <- normalizePath(paste0(x, "/3ntframe_bygene.tsv"))
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -148,7 +148,7 @@ frame_box_df <- lapply(sample_names, function(x) {
 ### Position specific normalized reads
 pos_sp_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- normalizePath(here(x, "pos_sp_rpf_norm_reads.tsv"))
+  file_loc <- normalizePath(paste0(x, "/pos_sp_rpf_norm_reads.tsv"))
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -156,7 +156,7 @@ pos_sp_df <- lapply(sample_names, function(x) {
 
 ### collated TPMs
 collated_tpms_df <-
-  read_tsv(normalizePath(here(yaml$dir_out, "TPMs_collated.tsv")), skip = 4)
+  read_tsv(normalizePath(here::here(yaml$dir_out, "TPMs_collated.tsv")), skip = 4)
 
 ### Ribogrid
 # ribogrid_df <- lapply(sample_names, function(x) {
@@ -175,11 +175,11 @@ if (any(names(yaml) == "features_file")) {
   if (length(yaml$features_file) > 0) {
     features_df <- lapply(sample_names, function(x) {
       file_loc <- paste0(x, "/sequence_features.tsv")
-
+      
       return(read_tsv(file_loc, skip = 4))
     }) %>%
       bind_rows(.id = "samplez")
-
+    
     possible_features <- unique(features_df$Feature)
   }
 }
@@ -295,7 +295,7 @@ server <- function(input, output, session) {
         xint = ifelse(ORF %in% input$gene, tpm, NA)
       ) %>%
       ggplot(., aes(x = tpm, fill = samplez)) +
-      geom_density() +
+      geom_density(alpha = 0.5) +
       geom_vline(aes(xintercept = xint), size = 1) +
       scale_x_log10(labels = label_number_si()) +
       facet_wrap(~ samplez) +
@@ -454,7 +454,7 @@ server <- function(input, output, session) {
       nm <- only_name[[length(only_name)]]
       
       file_loc <-
-        normalizePath(here(yaml$dir_out, paste0(nm[[length(nm)]], "/", nm[[length(nm)]], ".h5")))
+        normalizePath(here::here(yaml$dir_out, paste0(nm[[length(nm)]], "/", nm[[length(nm)]], ".h5")))
       
       ret <-
         h5read(file_loc, name = file.path(input$gene, yaml$dataset, "reads/data"))$data %>%
