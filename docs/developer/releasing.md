@@ -28,3 +28,11 @@ These are the key steps in building a release.
 $ git tag 2.1
 $ git push origin 2.1
 ```
+* Create release on GitHub:
+  - Visit https://github.com/riboviz/riboviz
+  - Click Releases, https://github.com/riboviz/riboviz/releases
+  - Click Draft a new release
+  - Enter Tag version: 2.1
+  - Enter Release title: 2.1
+  - Enter Description: RiboViz release 2.1 (29/07/21).
+  - Click Publish release.
