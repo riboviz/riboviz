@@ -34,5 +34,5 @@ $ git push origin 2.1
   - Click Draft a new release
   - Enter Tag version: 2.1
   - Enter Release title: 2.1
-  - Enter Description: RiboViz release 2.1 (29/07/21).
+  - Enter Description: RiboViz release 2.1 (RELEASE-DATE).
   - Click Publish release.
