@@ -704,7 +704,7 @@ See [Storage](https://www.wiki.ed.ac.uk/display/ResearchServices/Storage) for mo
 
 ## Hints and tips
 
-### Using the Linux `screen` command](./using-linux-screen.md)
+### Using the Linux `screen` command
 
 Linux's `screen` command provides a virtual terminal multiplexer. It allows us to run a number of different sessions (or windows, or virtual terminals) withina single terminal, or console, window. This can be useful if we do not have access to a graphical user interface with multiple windows, which is the case when using EDDIE.
 
