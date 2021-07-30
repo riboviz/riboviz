@@ -1,6 +1,6 @@
 # Using the Linux `screen` command
 
-Linux's `screen` command provides a virtual terminal multiplexer. It allows us to run a number of different sessions (or windows, or virtual terminals) withina single terminal, or console, window. This can be useful if we do not have access to a graphical user interface with multiple windows, which may be the case when using high-performance computing systems, for example.
+Linux's `screen` command provides a virtual terminal multiplexer. It allows us to run a number of different sessions (or windows, or virtual terminals) within a single terminal, or console, window. This can be useful if we do not have access to a graphical user interface with multiple windows, which may be the case when using high-performance computing systems, for example.
 
 One use case is if we want to have one or more files open in editors while also running programs that use those files - for example editing source code and running a compiler, or editing configuration files and running an analysis program - without having to repeatedly open and close the files within the editors.
 
@@ -107,8 +107,8 @@ If we had left a command running in the screen session, before we detached, as w
 To kill a screen session we are in, we can do one of:
 
 * Press CTRL+A then k. A `Really kill this window [y/n]` prompt will appear.
-* Press CTRL+D.
-* Run:
+* Or press CTRL+D.
+* Or run:
 
 ```console
 $ exit
@@ -231,7 +231,7 @@ Set window's title to: Edit counter
 
 Press CTRL+A then press 1 to switch to the other window.
 
-Press CTRL+A then press A and rename the current window to `Run counter`
+Press CTRL+A then press A and rename the current window to `Run counter`.
 
 ```
 Set window's title to: Run counter
