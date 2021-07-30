@@ -95,8 +95,8 @@ gene_poscodon_codon_i200 <- tibble::tibble(
 
 
 #####
-
-
+gene <- "YAL003W"
+asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", "yeast_standard_asite_disp_length.txt"))
 
 GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
                                        min_read_length,
@@ -106,13 +106,60 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
                                        ),
                                        snapdisp=0L) {
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
+  
   reads_asitepos <- CalcAsiteFixed(
     reads_pos_length,
     min_read_length,
     asite_displacement_length
   )
+  
   SnapToCodon(reads_asitepos, left, right, snapdisp)
 }
+
+
+
+FilterForFrameFunction <- function(reads_asitepos, left, right){
+  
+  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene) 
+  # where gene = YAL003W
+  
+  left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(start))
+  # 251
+  
+  right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(end))
+  # 871
+  
+  cds <- reads_asitepos[left:right]
+  # num [1:621] 811 460 2978 429 251 ...
+  
+  cds_length <- length(cds)/3
+  # 207
+  
+  cds_frames <- tibble(Count = cds,
+                       Frame = rep(c(0, 1, 2), times = cds_length)
+  )
+  # > str(cds_frames)
+  # tibble [621 x 2] (S3: tbl_df/tbl/data.frame)
+  # $ Count: num [1:621] 811 460 2978 429 251 ...
+  # $ Frame: num [1:621] 0 1 2 0 1 2 0 1 2 0 ...
+  
+  filtered <- dplyr::filter(cds_frames, Frame == 0L)
+  # > str(cds_frames)
+  # tibble [621 x 2] (S3: tbl_df/tbl/data.frame)
+  # $ Count: num [1:621] 811 460 2978 429 251 ...
+  # $ Frame: num [1:621] 0 1 2 0 1 2 0 1 2 0 ...
+  
+  filtered_counts <- filtered$Count
+  # > str(filtered_counts)
+  # num [1:207] 811 429 488 102 994 146 173 762 13 176 ...
+  
+}
+  
+frames <- FilterForFrameFunction(reads_asitepos, left, right)
+# > str(frames)
+# num [1:207] 811 429 488 102 994 146 173 762 13 176 ...
+
+
 
 
 #' GetAllCodonPosCounts(): extracts A-site assigned counts for a list of genes 
@@ -150,7 +197,22 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
     asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", 
                                                                                 "yeast_standard_asite_disp_length.txt"))
     
-    codon_counts_1_gene <- GetGeneCodonPosReads1dsnap(gene, dataset, hd_file, left, right, min_read_length, asite_displacement_length, snapdisp = 0L)
+    
+    if(SnapCodon == TRUE){
+      
+      codon_counts_1_gene <- GetGeneCodonPosReads1dsnap(gene, dataset, hd_file, 
+                                                        left, right, min_read_length, 
+                                                        asite_displacement_length, snapdisp = 0L)
+      
+        # > str(codon_counts_1_gene)
+        # num [1:207] 4249 825 1017 1176 1116 ...
+      
+    } else {
+      
+      codon_counts_1_gene <- FilterForFrameFunction(reads_asitepos, left, right)
+      
+    }
+    
     
     codon_pos_counts <- tibble(Gene = gene,
                                PosCodon = 1:length(codon_counts_1_gene),
@@ -188,12 +250,6 @@ total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min
 
 
 #######
-
-
-
-
-
-
 
 
 
