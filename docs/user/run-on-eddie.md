@@ -34,7 +34,7 @@ Contents:
    - [Checking outputs](#checking-outputs)
    - [Moving and downloading outputs](#moving-and-downloading-outputs)
 * [Hints and tips](#hints-and-tips)
-  - [Using the Linux `screen` command](#using-linux-screen)
+  - [Using the Linux `screen` command](#using-the-linux-screen-command)
 
 ---
 
