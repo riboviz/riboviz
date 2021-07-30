@@ -26,6 +26,16 @@ A [read counts file](#read-counts-file) (only if `count_reads: TRUE`).
 For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-specific subdirectory (`<SAMPLE_ID>`).
 
 
+## `<SAMPLE_ID>_output_report.html` 
+
+This output report in .html format contains multiple figures output by riboviz:
+
+* first figure (link to description below?)
+* ... (fill this in!)
+
+Only output if `run_static_html: TRUE`.
+
+
 ## `<SAMPLE_ID>.bam` 
 
 BAM file of reads mapped to transcripts, which can be directly used in genome browsers.
@@ -107,8 +117,3 @@ Only output if `--asite-disp-length-file` was defined.
 ## `3ntframe_propbygene.pdf` 
 
 Only output if `--asite-disp-length-file` was defined.
-
-
-## `<SAMPLE_ID>_output_report.html` 
-
-Only output if `run_static_html: TRUE`.
