@@ -29,12 +29,13 @@ suppressMessages(library(argparse))
 # parser$add_argument('--frame', help='reading frame to be studied', default = 0)
 # parser$add_argument('--minreadlen', help='minimum read length', default = 10)
 # parser$add_argument('--colsum_out', help='logical', default = TRUE)
+# parser$add_argument('--filter_for_frame', help='Filter to include only the reads from the first nucleotide of a codon', default = FALSE)
 # 
 # args <- parser$parse_args()
 
 hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
 dataset <- "Mok-simYAL5"
-feature_of_interest <- 'CGA'
+feature_of_interest <- 'TCT'
 expand_width = 5L
 startpos <-1
 startlen <- 10
@@ -44,6 +45,8 @@ yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
 gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
 colsum_out <- TRUE
 output_dir <- '.'
+filter_for_frame <- TRUE
+
 
 # hd_file <- args$input
 # dataset <- args$dataset
@@ -57,6 +60,7 @@ output_dir <- '.'
 # filtering_frame <- args$frame
 # min_read_length <- args$minreadlen
 # colsum_out <- args$olsum_out
+# filter_for_frame <- args$filter_for_frame
 
 # 
 
@@ -97,7 +101,7 @@ print('Creating information tibble')
 # to run for a single gene or to run each function separately, filter for a gene of interest and run
 
 # YAL003W_pos <- dplyr::filter(gene_poscodon_codon_i200, Gene=="YAL003W")
-gene <- 'YAL035W'
+gene <- 'YAL038W'
 
 
 
@@ -121,6 +125,47 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
 }
 
 
+FilterForFrameFunction <- function(gene, dataset, hd_file, asite_displacement_length ,reads_asitepos, left, right){
+  
+  reads_pos_length <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
+  
+  reads_asitepos <- CalcAsiteFixed(reads_pos_length, min_read_length, asite_displacement_length)
+  
+  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene) 
+  # where gene = YAL003W
+  
+  left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(start))
+  # 251
+  
+  right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(end))
+  # 871
+  
+  cds <- reads_asitepos[left:right]
+  # num [1:621] 811 460 2978 429 251 ...
+  
+  cds_length <- length(cds)/3
+  # 207
+  
+  cds_frames <- tibble(Count = cds,
+                       Frame = rep(c(0, 1, 2), times = cds_length)
+  )
+  # > str(cds_frames)
+  # tibble [621 x 2] (S3: tbl_df/tbl/data.frame)
+  # $ Count: num [1:621] 811 460 2978 429 251 ...
+  # $ Frame: num [1:621] 0 1 2 0 1 2 0 1 2 0 ...
+  
+  filtered <- dplyr::filter(cds_frames, Frame == 0L)
+  # > str(cds_frames)
+  # tibble [621 x 2] (S3: tbl_df/tbl/data.frame)
+  # $ Count: num [1:621] 811 460 2978 429 251 ...
+  # $ Frame: num [1:621] 0 1 2 0 1 2 0 1 2 0 ...
+  
+  filtered_counts <- filtered$Count
+  # > str(filtered_counts)
+  # num [1:207] 811 429 488 102 994 146 173 762 13 176 ...
+  
+}
+
 #' GetAllCodonPosCounts(): extracts A-site assigned counts for a list of genes 
 #' 
 #' Applies the GetGeneCodonPosReads1dsnap() function to a list of genes and generates 
@@ -141,7 +186,48 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
 #' GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 0L)
 #' 
 #' @export 
-GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, snapdisp){
+#' 
+#' 
+# GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, snapdisp){
+#   
+#   GetAllCodonPosCounts1Gene <- function(gene, dataset, hd_file, min_read_length, asite_displacement_length, snapdisp){
+#     
+#     subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene) 
+#     
+#     left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(start))
+#     
+#     right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(end))
+#     
+#     asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", 
+#                                                                                 "yeast_standard_asite_disp_length.txt"))
+#     
+#     codon_counts_1_gene <- GetGeneCodonPosReads1dsnap(gene, dataset, hd_file, left, right, min_read_length, asite_displacement_length, snapdisp = 0L)
+#     
+#     codon_pos_counts <- tibble(Gene = gene,
+#                                 PosCodon = 1:length(codon_counts_1_gene),
+#                                 Count = codon_counts_1_gene)
+#     
+#     as.data.frame(codon_pos_counts, row.names = NULL, optional = FALSE)
+#     
+#     return(codon_pos_counts)
+#     
+#   }
+#   
+#   total_codon_pos_counts <- purrr::map_dfr(.x = gene_names,
+#                                        .f = GetAllCodonPosCounts1Gene,
+#                                        dataset,
+#                                        hd_file,
+#                                        min_read_length,
+#                                        snapdisp,
+#                                        )
+#   
+#   return (total_codon_pos_counts)
+# }
+
+
+GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, snapdisp, filter_for_frame){
+  
+  gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
   
   GetAllCodonPosCounts1Gene <- function(gene, dataset, hd_file, min_read_length, asite_displacement_length, snapdisp){
     
@@ -153,12 +239,26 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
     
     asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", 
                                                                                 "yeast_standard_asite_disp_length.txt"))
+      
+    if(filter_for_frame == FALSE){
+      
+      codon_counts_1_gene <- GetGeneCodonPosReads1dsnap(gene, dataset, hd_file, 
+                                                        left, right, min_read_length, 
+                                                        asite_displacement_length, snapdisp = 0L)
+      
+      # > str(codon_counts_1_gene)
+      # num [1:207] 4249 825 1017 1176 1116 ...
+      
+    } else {
+      
+      codon_counts_1_gene <- FilterForFrameFunction(gene,dataset, hd_file, asite_displacement_length, left, right)
+      
+    }
     
-    codon_counts_1_gene <- GetGeneCodonPosReads1dsnap(gene, dataset, hd_file, left, right, min_read_length, asite_displacement_length, snapdisp = 0L)
     
     codon_pos_counts <- tibble(Gene = gene,
-                                PosCodon = 1:length(codon_counts_1_gene),
-                                Count = codon_counts_1_gene)
+                               PosCodon = 1:length(codon_counts_1_gene),
+                               Count = codon_counts_1_gene)
     
     as.data.frame(codon_pos_counts, row.names = NULL, optional = FALSE)
     
@@ -167,15 +267,17 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
   }
   
   total_codon_pos_counts <- purrr::map_dfr(.x = gene_names,
-                                       .f = GetAllCodonPosCounts1Gene,
-                                       dataset,
-                                       hd_file,
-                                       min_read_length,
-                                       snapdisp,
-                                       )
+                                           .f = GetAllCodonPosCounts1Gene,
+                                           dataset,
+                                           hd_file,
+                                           min_read_length,
+                                           snapdisp,
+  )
   
   return (total_codon_pos_counts)
 }
+
+
 #TEST: GetAllCodonPosCounts(): returns a tibble. 
 #TEST: GetAllCodonPosCounts(): the tibble has 3 columns.
 #TEST: GetAllCodonPosCounts(): the column names are %in% c("Gene", "PosCodon" and "Count").
@@ -188,7 +290,7 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
 #   $ PosCodon: int  1 2 3 4 5 6 7 8 9 10 ...
 #   $ Count   : num  4249 825 1017 1176 1116 ...
 
-total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 0L)
+total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 0L, filter_for_frame)
 
 
 #######
@@ -250,9 +352,9 @@ total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min
         #'     
         #' #####
     
-AddCodonNamesToCodonPosCounts <- function(yeast_codon_pos_i200, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df){
+AddCodonNamesToCodonPosCounts <- function(yeast_codon_pos_i200, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, filter_for_frame){
   
-  total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 0L)
+  total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 0L, filter_for_frame)
   
   transcript_tibbles <- left_join(total_codon_pos_counts, yeast_codon_pos_i200, by = c("PosCodon", "Gene"), keep = FALSE, copy = TRUE)
   
@@ -267,7 +369,7 @@ AddCodonNamesToCodonPosCounts <- function(yeast_codon_pos_i200, gene_names, data
 }   
     
 
-transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df)
+transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, filter_for_frame)
 
           
 
@@ -700,7 +802,7 @@ transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(yeast_codon_
 
 
 
-FilterForFeatureOfInterestPositions <- function(yeast_codon_pos_i200, gene, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, feature_of_interest ){
+FilterForFeatureOfInterestPositions <- function(yeast_codon_pos_i200, gene, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, feature_of_interest, filter_for_frame ){
   
   transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, 
                                                                       gene_names, 
@@ -708,7 +810,8 @@ FilterForFeatureOfInterestPositions <- function(yeast_codon_pos_i200, gene, gene
                                                                       hd_file, 
                                                                       min_read_length, 
                                                                       colsum_out, 
-                                                                      gff_df)
+                                                                      gff_df,
+                                                                      filter_for_frame)
   
   interesting_feature_table <- dplyr::filter(transcript_gene_pos_poscodon_frame, Codon == feature_of_interest & Gene == gene)
   
@@ -716,7 +819,7 @@ FilterForFeatureOfInterestPositions <- function(yeast_codon_pos_i200, gene, gene
 }
 
 
-interesting_feature_positions <- FilterForFeatureOfInterestPositions(yeast_codon_pos_i200, gene, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, feature_of_interest)
+interesting_feature_positions <- FilterForFeatureOfInterestPositions(yeast_codon_pos_i200, gene, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, feature_of_interest, filter_for_frame)
 
           #' #' ExpandFeatureRegion(): Expands the window around the feature position of interest
           #' #' 
@@ -966,7 +1069,8 @@ ExpandFeatureRegion <- function(yeast_codon_pos_i200,
                                 min_read_length, colsum_out, 
                                 gff_df, feature_of_interest,
                                 expand_width = 5L, 
-                                remove_overhang = TRUE) {
+                                remove_overhang = TRUE,
+                                filtering_frame) {
   
   transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, 
                                                                       gene_names, 
@@ -974,18 +1078,19 @@ ExpandFeatureRegion <- function(yeast_codon_pos_i200,
                                                                       hd_file, 
                                                                       min_read_length, 
                                                                       colsum_out, 
-                                                                      gff_df)
+                                                                      gff_df,
+                                                                      filter_for_frame)
   
   
   TranscriptForOneGene <- function(yeast_codon_pos_i200, 
                                    gene, dataset, hd_file, 
                                    min_read_length, colsum_out, 
-                                   gff_df, feature_of_interest){
+                                   gff_df, feature_of_interest, filter_for_frame){
     
     interesting_feature_tibble <- FilterForFeatureOfInterestPositions(yeast_codon_pos_i200, 
                                                                       gene, gene_names, dataset, hd_file, 
                                                                       min_read_length, colsum_out, 
-                                                                      gff_df, feature_of_interest)
+                                                                      gff_df, feature_of_interest, filter_for_frame)
     
     transcript_for_one_gene <- dplyr::filter(interesting_feature_tibble, Gene == gene)
     
@@ -998,7 +1103,7 @@ ExpandFeatureRegion <- function(yeast_codon_pos_i200,
   transcript_for_one_gene <- TranscriptForOneGene(yeast_codon_pos_i200, 
                                                gene, dataset, hd_file, 
                                                min_read_length, colsum_out, 
-                                               gff_df, feature_of_interest)
+                                               gff_df, feature_of_interest, filter_for_frame)
   gene <- transcript_for_one_gene$Gene
  
   #if (remove_overhang) {
@@ -1066,11 +1171,11 @@ ExpandFeatureRegion <- function(yeast_codon_pos_i200,
 # $ CodonPair: chr [1:11] "GCA TCC" "TCC ACC" "ACC GAT" "GAT TTC" ...
 # $ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
 
-output_feature_info <- ExpandFeatureRegion(yeast_codon_pos_i200, 
-                                           gene, gene_names, dataset, hd_file, 
-                                           min_read_length, colsum_out, 
-                                           gff_df, feature_of_interest, 
-                                           expand_width, remove_overhang)
+# output_feature_info <- ExpandFeatureRegion(yeast_codon_pos_i200, 
+#                                            gene, gene_names, dataset, hd_file, 
+#                                            min_read_length, colsum_out, 
+#                                            gff_df, feature_of_interest, 
+#                                            expand_width, remove_overhang, filter_for_frame)
 
 
 
@@ -1083,7 +1188,8 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
                                 min_read_length, colsum_out, 
                                 gff_df, feature_of_interest,
                                 expand_width = 5L, 
-                                remove_overhang = TRUE) {
+                                remove_overhang = TRUE,
+                                filter_for_frame) {
   
   transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, 
                                                                       gene_names, 
@@ -1091,13 +1197,15 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
                                                                       hd_file, 
                                                                       min_read_length, 
                                                                       colsum_out, 
-                                                                      gff_df)
+                                                                      gff_df,
+                                                                      filter_for_frame)
 
  # take as inputs and select for positions on separate genes
   AllGeneInterestingFeatures <- function(yeast_codon_pos_i200, 
                                          gene, gene_names, dataset, hd_file, 
                                          min_read_length, colsum_out, 
-                                         gff_df, feature_of_interest, transcript_gene_pos_poscodon_frame){ 
+                                         gff_df, feature_of_interest, transcript_gene_pos_poscodon_frame,
+                                         filter_for_frame){ 
     print(gene)
     
     TranscriptForOneGene <- function(yeast_codon_pos_i200, 
@@ -1187,7 +1295,7 @@ output_feature_info <- ExpandFeatureRegionAllGenes(yeast_codon_pos_i200 = yeast_
                                            gene_names = gene_names, dataset, hd_file, 
                                            min_read_length, colsum_out, 
                                            gff_df, feature_of_interest, 
-                                           expand_width, remove_overhang)
+                                           expand_width, remove_overhang, filter_for_frame)
 
 
 
@@ -1483,8 +1591,6 @@ OverlayedTable <- function(normalized_expand_list, expand_width){
 
 overlayed_tibbles <- OverlayedTable(normalized_expand_list, expand_width) 
 
-
-
 print('Creating plot')
 
 overlayed_plot <- ggplot(overlayed_tibbles, mapping = aes(x = Rel_Pos, y = RelCount)) + 
@@ -1500,7 +1606,7 @@ overlayed_plot <- ggplot(overlayed_tibbles, mapping = aes(x = Rel_Pos, y = RelCo
 save_plot_pdf <- function(overlayed_plot, output_dir){
   overlayed_plot %>%
     ggsave(
-      filename = file.path(output_dir,"inhibitory_codon_plot.pdf"),
+      filename = file.path(output_dir,"inhibitory_codon_plot_filter_for_frame.pdf"),
       width = 6, height = 5
     )
 }
