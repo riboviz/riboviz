@@ -88,19 +88,19 @@ read_counts_df <-
   )
 
 # find which categories actually occur
-occurring_cats <- unique(read_counts_df$short_name) 
+occurring_cats <- unique(read_counts_df$short_name)
 
 read_counts_df <- read_counts_df %>%
-  mutate(short_name = factor(short_name, levels = graph_cats$short_name[graph_cats$short_name %in% occurring_cats])) 
+  mutate(short_name = factor(short_name, levels = graph_cats$short_name[graph_cats$short_name %in% occurring_cats]))
 
 ### Read length distributions
-read_length_df <- lapply(sample_names, function(x) { 
+read_length_df <- lapply(sample_names, function(x) {
   # path to the read length file
   file_loc <- normalizePath(paste0(x, "/read_lengths.tsv"))
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
-  bind_rows(.id = "samplez")  
+  bind_rows(.id = "samplez")
 
 ### Periodicity line plot
 periodicity_df <- lapply(sample_names, function(x) {
@@ -159,13 +159,13 @@ collated_tpms_df <-
   read_tsv(normalizePath(here::here(yaml$dir_out, "TPMs_collated.tsv")), skip = 4)
 
 ### Ribogrid
-# ribogrid_df <- lapply(sample_names, function(x) {
-#   # path to the read length file
-#   file_loc <- paste0(x, "/gene_position_length_counts_5start.tsv")
-#   # read it in
-#   return(read_tsv(file_loc, skip = 4))
-# }) %>%
-#   bind_rows(.id = "samplez")
+ribogrid_df <- lapply(sample_names, function(x) {
+  # path to the read length file
+  file_loc <- paste0(x, "/gene_position_length_counts_5start.tsv")
+  # read it in
+  return(read_tsv(file_loc, skip = 4))
+}) %>%
+  bind_rows(.id = "samplez")
 
 
 ### Gene features
@@ -213,7 +213,7 @@ server <- function(input, output, session) {
       labs(x = NULL,
            y = "Read count",
            title = "Read counts per step") +
-      guides(fill = guide_legend(ncol = 1))+
+      guides(fill = guide_legend(ncol = 1)) +
       scale_y_continuous(labels = label_number_si())
   })
   
@@ -233,7 +233,7 @@ server <- function(input, output, session) {
   cor.df <- cor.df %>%
     select(all_of(cor.cols)) %>%
     apply(., 2, log10) %>%
-    na_if(., -Inf) %>%
+    na_if(.,-Inf) %>%
     cor(use = "pairwise.complete.obs")
   
   # remove lower triangle
@@ -298,7 +298,7 @@ server <- function(input, output, session) {
       geom_density(alpha = 0.5) +
       geom_vline(aes(xintercept = xint), size = 1) +
       scale_x_log10(labels = label_number_si()) +
-      facet_wrap(~ samplez) +
+      facet_wrap( ~ samplez) +
       scale_fill_discrete(guide = FALSE) +
       plot_theme +
       labs(title = "TPM distributions",
@@ -316,7 +316,7 @@ server <- function(input, output, session) {
       filter(samplez %in% input$sample) %>%
       ggplot(., aes(Length, Counts, fill = samplez)) +
       geom_col(width = 1) +
-      facet_wrap(~ samplez, scales = "free_y") +
+      facet_wrap( ~ samplez, scales = "free_y") +
       scale_fill_discrete(name = NULL, guide = FALSE) +
       plot_theme +
       labs(title = "Read length distributions",
@@ -344,7 +344,7 @@ server <- function(input, output, session) {
       labs(title = "3-nucleotide periodicity",
            x = "Codon position",
            y = "Read counts") +
-      plot_theme+
+      plot_theme +
       scale_y_continuous(labels = label_number_si())
   })
   
@@ -359,7 +359,7 @@ server <- function(input, output, session) {
            x = NULL,
            y = "Read counts") +
       plot_theme +
-      scale_color_discrete(guide = FALSE)+
+      scale_color_discrete(guide = FALSE) +
       scale_y_continuous(labels = label_number_si())
   })
   
@@ -406,58 +406,60 @@ server <- function(input, output, session) {
   # Ribogrids
   ######################################
   
-  # ### Ribogrid plot
-  # output$ribogrid_plot <- renderPlot({
-  #   ribogrid_df %>%
-  #     filter(
-  #       samplez %in% input$sample &
-  #         ReadLen >= min(input$ribogrid_len_range) &
-  #         ReadLen <= max(input$ribogrid_len_range) &
-  #         Pos >= min(input$ribogrid_pos_range) &
-  #         Pos <= max(input$ribogrid_pos_range)
-  #     ) %>%
-  #     ggplot(., aes(Pos, ReadLen, fill = Counts)) +
-  #     geom_raster() +
-  #     scale_fill_gradient(low = "white", high = "navy") +
-  #     plot_theme +
-  #     labs(title = "Ribogrid", x = "Position of 5' end of read", y = "Read length") +
-  #     facet_wrap( ~ samplez)
-  # })
-  #
-  # ### Ribogrid bar plot
-  # output$ribogridbar_plot <- renderPlot({
-  #   ribogrid_df %>%
-  #     filter(
-  #       samplez %in% input$sample &
-  #         ReadLen >= min(input$ribogrid_len_range) &
-  #         ReadLen <= max(input$ribogrid_len_range) &
-  #         Pos >= min(input$ribogrid_pos_range) &
-  #         Pos <= max(input$ribogrid_pos_range)
-  #     ) %>%
-  #     ggplot(., aes(Pos, Counts)) +
-  #     geom_col() +
-  #     facet_grid(ReadLen ~ samplez) +
-  #     plot_theme +
-  #     labs(x = "Position of 5' end of read", y = "Read count", title = "Ribogrid (bar)")
-  # })
+  ### Ribogrid plot
+  output$ribogrid_plot <- renderPlot({
+    ribogrid_df %>%
+      filter(
+        samplez %in% input$sample &
+          ReadLen >= min(input$ribogrid_len_range) &
+          ReadLen <= max(input$ribogrid_len_range) &
+          Pos >= min(input$ribogrid_pos_range) &
+          Pos <= max(input$ribogrid_pos_range)
+      ) %>%
+      ggplot(., aes(Pos, ReadLen, fill = Counts)) +
+      geom_raster() +
+      scale_fill_gradient(low = "white", high = "navy") +
+      plot_theme +
+      labs(title = "Ribogrid", x = "Position of 5' end of read", y = "Read length") +
+      facet_wrap(~ samplez)
+  })
+  
+  ### Ribogrid bar plot
+  output$ribogridbar_plot <- renderPlot({
+    ribogrid_df %>%
+      filter(
+        samplez %in% input$sample &
+          ReadLen >= min(input$ribogrid_len_range) &
+          ReadLen <= max(input$ribogrid_len_range) &
+          Pos >= min(input$ribogrid_pos_range) &
+          Pos <= max(input$ribogrid_pos_range)
+      ) %>%
+      ggplot(., aes(Pos, Counts)) +
+      geom_col() +
+      facet_grid(ReadLen ~ samplez) +
+      plot_theme +
+      labs(x = "Position of 5' end of read", y = "Read count", title = "Ribogrid (bar)")
+  })
   
   ######################################
-  # Single-gene ribogrids
+  # Single-gene plots
   ######################################
   
-  ### Single-gene ribogrid
-  # Go through h5 file for each sample and in a specific gene
-  sgribogrid_df <- reactive({
-    lapply(sample_names, function(x) {
-      only_name <- str_split(x, "/")
-      
-      nm <- only_name[[length(only_name)]]
+  # Go through h5 file for each sample and get the data for a specific gene
+  # this is the part that is breaking it, I need to make this a normal variable
+  # after it's done being reactive
+  output$sgribogrid_plot <- renderPlot({
+    
+    sgribogrid_df <- lapply(sample_names, function(x) {
+      only_name <- str_split(x, "/") %>%
+        unlist() %>%
+        tail(1)
       
       file_loc <-
-        normalizePath(here::here(yaml$dir_out, paste0(nm[[length(nm)]], "/", nm[[length(nm)]], ".h5")))
+        normalizePath(here::here(yaml$dir_out, paste0(only_name, "/", only_name, ".h5")))
       
       ret <-
-        h5read(file_loc, name = file.path(input$gene, yaml$dataset, "reads/data"))$data %>%
+        h5read(file_loc, name = file.path(input$gene, yaml$dataset, "reads/data")) %>%
         as_tibble() %>%
         rowid_to_column("read_length") %>%
         pivot_longer(cols = starts_with("V"), names_to = "position") %>%
@@ -468,32 +470,20 @@ server <- function(input, output, session) {
       return(ret)
     }) %>%
       bind_rows(.id = "samplez")
-  })
   
-  output$sgribogrid_plot <- renderPlot({
+  # single gene coverage
     sgribogrid_df %>%
-      filter(
-        samplez %in% input$sample &
-          read_length >= min(input$ribogrid_len_range) &
-          read_length <= max(input$ribogrid_len_range) &
-          position >= min(input$ribogrid_pos_range) &
-          position <= max(input$ribogrid_pos_range)
-      ) %>%
-      ggplot(., aes(position, read_length, fill = value)) +
-      geom_raster() +
-      facet_wrap(~samplez, ncol = 1) +
-      scale_fill_gradient(low = "white",
-                          high = "navy",
-                          name = "Read count") +
-      theme_bw() +
-      theme(
-        text = element_text(size = 14),
-        panel.grid = element_blank()
-      ) +
+      group_by(samplez, position) %>%
+      summarise(total_reads = sum(value)) %>%
+      ungroup() %>% 
+      ggplot(., aes(position, total_reads))+
+      geom_col(width = 1)+
+      facet_wrap(~samplez, ncol = 1)+
+      theme_bw()+
+      theme(panel.grid = element_blank(),
+            text = element_text(size = 14))+
       labs(x = "Position",
-           y = "Read length",
-           title = input$gene)+
-      scale_x_continuous(breaks = breaks_pretty(n = 8))
+           y = "Read count")
   })
   
   
@@ -543,7 +533,7 @@ server <- function(input, output, session) {
   } else {
     output$features_plot <- renderPlot({
       # this is simply a dummy plot to plot nothing
-      ggplot(mtcars, aes(x = wt, y = mpg)) + 
+      ggplot(mtcars, aes(x = wt, y = mpg)) +
         geom_blank() +
         theme_void()
     })
@@ -595,6 +585,7 @@ ui <- fluidPage(# App title
                   wellPanel(textInput(
                     inputId = "gene",
                     label = "Gene:",
+                    value = collated_tpms_df$ORF[1],
                     width = "50%"
                   )),
                   headerPanel(""),
@@ -628,16 +619,17 @@ ui <- fluidPage(# App title
                 ) ,
                 
                 tabPanel(
-                  "Single-gene ribogrid",
+                  "Gene specific coverage",
                   wellPanel(textInput(
                     inputId = "gene",
                     label = "Gene:",
+                    value = collated_tpms_df$ORF[1],
                     width = "50%"
                   )),
                   headerPanel(""),
                   sliderInput(
                     "ribogrid_len_range",
-                    "Ribogrid read length range:",
+                    "Read lengths:",
                     min = 0,
                     max = 50,
                     value = c(20, 35),
@@ -645,7 +637,7 @@ ui <- fluidPage(# App title
                   ),
                   sliderInput(
                     "ribogrid_pos_range",
-                    "Ribogrid read position range:",
+                    "Read position:",
                     min = 0,
                     max = 100,
                     value = c(-10, 10),
@@ -655,35 +647,36 @@ ui <- fluidPage(# App title
                   plotOutput("sgribogrid_plot")
                 ),
                 
-                # tabPanel(
-                #   "Ribogrid",
-                #   sliderInput(
-                #     "ribogrid_len_range",
-                #     "Ribogrid read length range:",
-                #     min = 0,
-                #     max = 50,
-                #     value = c(20, 35),
-                #     width = "50%"
-                #   ),
-                #   sliderInput(
-                #     "ribogrid_pos_range",
-                #     "Ribogrid read position range:",
-                #     min = -24,
-                #     max = 50,
-                #     value = c(-10, 10),
-                #     width = "50%"
-                #   ),
-                #   headerPanel(""),
-                #   plotOutput("ribogrid_plot"),
-                #   headerPanel(""),
-                #   plotOutput("ribogridbar_plot", height = "1000px")
-                # ) #,
+                tabPanel(
+                  "Ribogrid",
+                  sliderInput(
+                    "ribogrid_len_range",
+                    "Read lengths:",
+                    min = 0,
+                    max = 50,
+                    value = c(20, 35),
+                    width = "50%"
+                  ),
+                  sliderInput(
+                    "ribogrid_pos_range",
+                    "Read position:",
+                    min = -24,
+                    max = 50,
+                    value = c(-10, 10),
+                    width = "50%"
+                  ),
+                  headerPanel(""),
+                  plotOutput("ribogrid_plot"),
+                  headerPanel(""),
+                  plotOutput("ribogridbar_plot", height = "1000px")
+                ),
                 
                 tabPanel(
                   "Features",
                   wellPanel(textInput(
                     inputId = "gene2",
                     label = "Gene:",
+                    value = collated_tpms_df$ORF[1],
                     width = "50%"
                   ),
                   if (any(names(yaml) == "features_file") &&
