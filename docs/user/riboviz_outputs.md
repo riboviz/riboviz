@@ -30,11 +30,12 @@ SPAC1002.06c.1	3.6	4	1.7	2.9
 
 A [read counts file](#read-counts-file) (only if `count_reads: TRUE`). Produced by count_reads.py 
 
+```
 SampleName	Program	File	NumReads	Description
 30C1	input	/exports/csce/eddie/biology/groups/wallace_rna/riboviz-emma/riboviz/riboviz/M-Ec_2018/input/SRR5036070.fastq.gz	17874120	input
 30C1	cutadapt	/exports/csce/eddie/biology/groups/wallace_rna/riboviz-emma/riboviz/riboviz/M-Ec_2018/tmp/30C1/trim.fq	17791329	Reads after removal of sequencing library adapters
 30C1	hisat2	/exports/csce/eddie/biology/groups/wallace_rna/riboviz-emma/riboviz/riboviz/M-Ec_2018/tmp/30C1/nonrRNA.fq	13335859	rRNA or other contaminating reads removed by alignment to rRNA index files
-
+```
 
 # Output files for each sample
 
