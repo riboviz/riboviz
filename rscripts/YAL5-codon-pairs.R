@@ -29,9 +29,10 @@ parser$add_argument('-o', '--output', help='Path to output directory')
 parser$add_argument('--expand_width', help='the desired range either side of the codon of interest', default = 5)
 parser$add_argument('--startpos', help='position of the start codon', default = 1)
 parser$add_argument('--startlen', help='smallest length of reads', default = 10) # please correct if wrong
-parser$add_argument('--frame', help='frame to be studied', default = 0)
+parser$add_argument('--frame', help='logical', default = TRUE)
 parser$add_argument('--minreadlen', help='minimum read length', default = 10)
 parser$add_argument('--colsum_out', help='logical', default = TRUE)
+parser$add_argument('--snapdisp', help='frame to filter for', default = 0L)
 
 args <- parser$parse_args()
 
@@ -48,6 +49,7 @@ startlen <- args$startlen
 filter_for_frame <- args$frame
 min_read_length <- args$minreadlen
 colsum_out <- args$colsum_out
+snapdisp <- args$snapdisp
 
 
 hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
@@ -61,15 +63,18 @@ min_read_length <- 10
 yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
 gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
 colsum_out <- TRUE
+snapdisp <- 0L
 
 
-# hd_file <- here::here("tinysim", "A.h5")
-# dataset <- "tinysim"
+# hd_file <- here::here("Mok-tinysim", "A", "A.h5")
+# dataset <- "Mok-tinysim"
 # gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "tiny_2genes_20utrs.gff3")
 # gene <- "MAT"
 # gene_names <- unique(gff_df$Name)
-# 
-# mike <- GetGeneDatamatrix(gene = "MIKE", dataset = "tinysim", hd_file = "tinysim/A.h5")
+
+# mike_datamatrix <- GetGeneDatamatrix(gene = "MIKE", dataset, hd_file)
+# mat_datamatrix <- GetGeneDatamatrix(gene = "MAT", dataset, hd_file)
+
 
 
 #
@@ -131,6 +136,15 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
 }
 
 
+# asite_mat <- CalcAsiteFixed(mat_datamatrix, min_read_length = 10, asite_displacement_length)
+# mat_tibble <- tibble(counts =asite_mat,
+#                      pos = 1:length(asite_mat))
+# 
+# 
+# asite_mike <- CalcAsiteFixed(mike_datamatrix, min_read_length = 10, asite_displacement_length)
+# mike_tibble <- tibble(counts = asite_mike,
+#                       pos = 1:length(asite_mike))
+
 
 #' FilterForFrameFunction(): fetches A-site assigned counts, filtered for a reading frame
 #' 
@@ -141,15 +155,16 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
 #' @param dataset name of dataset stored in .h5 file.
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples.
 #' @param min_read_length integer, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
+#' @param snapdisp integer any additional displacement in the snapping, default = 0L
 #' 
 #' @return a list of numeric values (counts) for a single reading frame
 #' 
 #' @example 
 #' 
-#' FilterForFrameFunction(gene, dataset, hd_file, min_read_length)
+#' FilterForFrameFunction(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file, min_read_length = 10, snapdisp = 0L)
 #' 
 #' @export
-FilterForFrameFunction <- function(gene, dataset, hd_file, min_read_length){
+FilterForFrameFunction <- function(gene, dataset, hd_file, min_read_length, snapdisp){
   
   asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", "yeast_standard_asite_disp_length.txt"))
   
@@ -180,7 +195,7 @@ FilterForFrameFunction <- function(gene, dataset, hd_file, min_read_length){
     # $ Count: num [1:621] 811 460 2978 429 251 ...
     # $ Frame: num [1:621] 0 1 2 0 1 2 0 1 2 0 ...
   
-  filtered <- dplyr::filter(cds_frames, Frame == 0L)
+  filtered <- dplyr::filter(cds_frames, Frame == snapdisp)
     # > str(cds_frames)
     # tibble [621 x 2] (S3: tbl_df/tbl/data.frame)
     # $ Count: num [1:621] 811 460 2978 429 251 ...
@@ -196,6 +211,7 @@ FilterForFrameFunction <- function(gene, dataset, hd_file, min_read_length){
 # gives:
 # > str(frames)
 # num [1:207] 811 429 488 102 994 146 173 762 13 176 ...
+
 
 
 
@@ -245,14 +261,14 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
       
       codon_counts_1_gene <- GetGeneCodonPosReads1dsnap(gene, dataset, hd_file, 
                                                         left, right, min_read_length, 
-                                                        asite_displacement_length, snapdisp = 0L)
+                                                        asite_displacement_length, snapdisp = snapdisp)
       
         # > str(codon_counts_1_gene)
         # num [1:207] 4249 825 1017 1176 1116 ...
       
     } else {
       
-      codon_counts_1_gene <- FilterForFrameFunction(gene, dataset, hd_file, min_read_length)
+      codon_counts_1_gene <- FilterForFrameFunction(gene, dataset, hd_file, min_read_length, snapdisp)
       
     }
     
@@ -272,7 +288,7 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
                                            dataset,
                                            hd_file,
                                            min_read_length,
-                                           snapdisp,
+                                           snapdisp = snapdisp,
                                            filter_for_frame = filter_for_frame
   )
   
@@ -297,10 +313,13 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
 #   $ PosCodon: int  1 2 3 4 5 6 7 8 9 10 ...
 #   $ Count   : num  811 429 488 102 994 146 173 762 13 176 ...
 
-total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 0L, filter_for_frame)
+total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp, filter_for_frame)
 
 
-
+total_false <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 0L, filter_for_frame = FALSE)
+total_true_0 <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 0L, filter_for_frame = TRUE)
+total_true_1 <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 1L, filter_for_frame = TRUE)
+total_true_2 <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 2L, filter_for_frame = TRUE)
 #######
 
 
