@@ -26,9 +26,15 @@ SPAC1002.05c.1	5.2	9.1	6.4	9.2
 SPAC1002.06c.1	3.6	4	1.7	2.9
 ```
 
+*Potential file names*
+
+TPMs_all_samples, TPMs_samples_collated, TPMs_genes_collated, TPMs_samples_genes_compared, TPMs_all_genes_all_samples
+
 ## `read_counts.tsv` 
 
-A [read counts file](#read-counts-file) (only if `count_reads: TRUE`). Produced by count_reads.py 
+A [read counts file](#read-counts-file) (only if `count_reads: TRUE`). Produced by count_reads.py
+
+This file lists the sample being processed, the stage of the riboviz process and file used at that stage, the number of reads at each stage and includes a description of the process. The number of reads is expected to decrease between stages as reads are filtered and trimmed.
 
 ```
 SampleName	Program	File	NumReads	Description
@@ -37,6 +43,10 @@ SampleName	Program	File	NumReads	Description
 30C1	hisat2	/exports/csce/eddie/biology/groups/wallace_rna/riboviz-emma/riboviz/riboviz/M-Ec_2018/tmp/30C1/nonrRNA.fq	13335859	rRNA or other contaminating reads removed by alignment to rRNA index files
 ```
 
+*Potential file names*
+
+reads_per_process, reads_per_stage, reads_stage_inputs
+
 # Output files for each sample
 
 For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-specific subdirectory (`<SAMPLE_ID>`).
@@ -44,7 +54,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 
 ## `<SAMPLE_ID>_output_report.html` 
 
-This output report in .html format contains a provenance section for the sample run, all of the pdfs produced, and a information on any plots not produced multiple figures output by riboviz:
+This output report in .html format contains a provenance section for the sample run, all of the pdfs produced, and information on any plots not produced multiple figures output by riboviz:
 
 * first figure (link to description below?)
 * ... (fill this in!)
@@ -54,26 +64,26 @@ Only output if `run_static_html: TRUE`. Produced by AnalysisOutputs.Rmd.
 
 ## `<SAMPLE_ID>.bam` 
 
-BAM file of reads mapped to transcripts, which can be directly used in genome browsers. 
+BAM file of reads mapped to transcripts, which can be directly used in genome browsers. The BAM file is produced by samtools.
 
 
 ## `<SAMPLE_ID>.bam.bai` 
 
-BAM index file for `<SAMPLE_ID>.bam`.
+BAM index file for `<SAMPLE_ID>.bam`. This file is produced by samtools.
 
 
 ## `minus.bedgraph` 
 
 Bedgraph of reads from minus strand (if `make_bedgraph: TRUE`).
 
-Because riboviz aligns to the transcriptome, which represents single-stranded positive-sense RNA, there should be very few reads counted in `minus.bedgraph`.
+Because riboviz aligns to the transcriptome, which represents single-stranded positive-sense RNA, there should be very few reads counted in `minus.bedgraph`. This file is produced by bedtools.
 
 
 ## `plus.bedgraph` 
 
 Bedgraph of reads from plus strand (if `make_bedgraph: TRUE`).
 
-Almost all translated reads should be counted in open reading frames within `plus.bedgraph`, again because riboviz aligns to the transcriptome, which represents single-stranded positive-sense RNA.
+Almost all translated reads should be counted in open reading frames within `plus.bedgraph`, again because riboviz aligns to the transcriptome, which represents single-stranded positive-sense RNA. This file is produced by bedtools.
 
 
 ## `<SAMPLE_ID>.h5` 
@@ -95,9 +105,17 @@ Pos	Counts	End
 -18	1077	5'
 ```
 
+*Potential names*
+
+meta_read_counts_start_stop, meta_reads_start_stop, all_reads_meta_transcript, reads_meta_feature_transcript
+
 ## `3nt_periodicity.pdf`
 
 A Meta Feature plot showing the total number of reads present within 50nt of the start and stop codons. The reads occurring at each position for each gene are summed to give a total for each position, then plotted. It is expected to see a large peak just upstream of the start codon, due to ribosome binding being the slow step of translation, the regular repeating smaller peaks, showing 3nt periodicity, as the majority of reads will map to the first nucleotide of a codon. If the expected features are not seen, then it is possible that there is a problem with annotation files, the adapter listed in the config files or the dataset used is of low quality. 
+
+*Potential names*
+
+meta_read_counts_start_stop, meta_reads_start_stop, all_reads_meta_transcript, reads_meta_feature_transcript
 
 ## `read_lengths.tsv`
 
@@ -131,9 +149,17 @@ Length	Position	Frame	A	C	G	T
 10	6	0	0	0	0	0
 ```
 
+*Potential names*
+
+read_nt_compostion, nt_freq_read_length, read_nt_freq
+
 ## `pos_sp_rpf_norm_reads.pdf`
 
 A pdf that shows the mean number of reads mapping to each position upstream and downstream of the start and stop codon for all genes. It is expected to have a peak at the start codon, with the majority of following positions having a relatively consistent mean. 
+
+*Potential names*
+
+norm_reads_transcript, norm_reads_start_stop
 
 ## `pos_sp_rpf_norm_reads.tsv`
 
@@ -148,6 +174,11 @@ Position	Mean	SD	End
 5	1.01560588202852	0.0589736885646061	5'
 6	1.68451606445801	0.0801004577589218	5'
 ```
+
+*Potential names*
+
+norm_reads_transcript, norm_reads_start_stop
+
 ## `features.pdf` 
 
 Only output if `--features-file` was defined.
@@ -166,6 +197,11 @@ NP_414545.1	6085	4.56146926536732	446.192220171666
 NP_414546.1	39	0.113372093023256	11.0897921149276
 NP_414547.1	576	0.699029126213592	68.3773888729219
 ```
+
+*Potential names*
+
+<SAMPLE_ID>_tmps
+
 ## `codon_ribodens.tsv` 
 
 Only output if `--t-rna-file` and `--codon-positions-file` were defined.
@@ -180,9 +216,17 @@ Only output if `--t-rna-file` and `--codon-positions-file` were defined.
 
 A meta feature bar chart showing the number of reads occurring at positions around the start codons of genes, faceted by read length. As the majority of reads will be 28-31 nt in length, only bar charts for lengths 26-32 nt are shown. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. Note: the Y axis scale will vary for each read length. 
 
+*Potential names*
+
+startcodon_gridbar, start_gridbar_readlen, readlen_gridbar_start
+
 ## `startcodon_ribogrid.pdf`
 
-A meta feature density plot showing the number of reads occurring at positions around the start codons of genes with the y axis as read length, and the colour intensity showing read count. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, shown by an intense dark purple, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. 
+A meta feature heatmap showing the number of reads occurring at positions around the start codons of genes with the y axis as read length, and the colour intensity showing read count. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, shown by an intense dark purple, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. 
+
+*Potential names*
+
+startcodon_readlen_heatmap, heatmap_readlen_pos
 
 ## `3ntframe_bygene.tsv` 
 
