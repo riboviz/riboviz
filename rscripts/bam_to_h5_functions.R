@@ -390,80 +390,117 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
   print(paste("Saving mapped reads in H5 file", hd_file))
 
   rhdf5::h5createFile(hd_file)
-  fid <- rhdf5::H5Fopen(hd_file)
 
-  # Create symbolic links for alternate gene IDs, if required.
-  if (!is.na(secondary_id)) {
-    base_gid <- rhdf5::H5Gopen(fid, "/")
+  # create multi-part HDF5 files, so different process can write in different file at the same time
+  processes=1:num_processes
+  gene_ids=1:length(genes)
+  fid=rhdf5::H5Fopen(hd_file)
+  base_gid <- rhdf5::H5Gopen(fid, "/")
+  rhdf5::H5Fclose(fid)
+
+  for (gene_id in gene_ids){
+    # create a symbolic link to link the multi-part HDF5 file with the target HDF5 file
+    tmp_hd_file <- paste(hd_file,(gene_id %% num_processes) +1,sep='.')
+    gene=genes[gene_id]
+    rhdf5::H5Lcreate_external(tmp_hd_file, gene, base_gid, gene)
   }
-  for (gene in genes) {
-    # Get matrix of read counts by position and length for the gene.
-    gene_read_counts <- read_counts[[gene]]
-    # Get gene location from GFF.
-    gene_location <- gff[gff_pid == gene]
-    # Get location of start and stop codon nucleotides.
-    start_codon_loc <- rtracklayer::start(gene_location[gene_location$type == feature])
-    start_cod <- start_codon_loc:(start_codon_loc + 2)
-    stop_codon_offset <- 2
-    if ((!is_riboviz_gff) && (! stop_in_feature)) {
-      # GFF does not contain UTR5 or UTR3 elements.
-      stop_codon_offset <- -1
-    }
-    stop_codon_loc <- rtracklayer::end(gene_location[gene_location$type == feature]) - stop_codon_offset
-    stop_cod <- stop_codon_loc:(stop_codon_loc + 2)
-
-    # Create H5 groups for gene.
-    rhdf5::h5createGroup(fid, gene)
-    rhdf5::h5createGroup(fid, paste(gene, dataset, sep = "/"))
-    rhdf5::h5createGroup(fid, paste(gene, dataset, "reads", sep = "/"))
-    mapped_reads <- paste(gene, dataset, "reads", sep = "/")
-    # Create symbolic link with alternate IDs, if required.
-    if (!is.na(secondary_id)) {
+  for (pid in processes){
+    # The reason of creating symbolic link first then create the multi-part HDF5 files is that
+    # the HDF5 will use absolute path if the source file exists when creating the link.
+    # however, we want to use the relative path, so we have to first create link then create file.
+    tmp_hd_file <- paste(hd_file,pid,sep='.')
+    rhdf5::h5createFile(tmp_hd_file)
+  }
+  # parallel the processes by writing in different HDF5 files
+  execution_return_list<-mclapply(
+    processes,
+    function(pid){
+      for (gene_id in gene_ids){
+        if ((gene_id %% num_processes) != pid-1){
+          # we only store some gene on each process
+          next
+        }
+        gene=genes[gene_id]
+        # Get matrix of read counts by position and length for the gene.
+        gene_read_counts <- read_counts[[gene]]
+        # calculate the HDF5 file to write in
+        tmp_hd_file <- paste(hd_file,(gene_id %% num_processes) +1,sep='.')
+        # Get gene location from GFF.
+        gene_location <- gff[gff_pid == gene]
+        # Get location of start and stop codon nucleotides.
+        start_codon_loc <- rtracklayer::start(gene_location[gene_location$type == feature])
+        start_cod <- start_codon_loc:(start_codon_loc + 2)
+        stop_codon_offset <- 2
+        if ((!is_riboviz_gff) && (! stop_in_feature)) {
+          # GFF does not contain UTR5 or UTR3 elements.
+          stop_codon_offset <- -1
+        }
+        stop_codon_loc <- rtracklayer::end(gene_location[gene_location$type == feature]) - stop_codon_offset
+        stop_cod <- stop_codon_loc:(stop_codon_loc + 2)
+      
+        fid <- rhdf5::H5Fopen(tmp_hd_file) 
+        # Create H5 groups for gene.
+        rhdf5::h5createGroup(fid, gene)
+        rhdf5::h5createGroup(fid, paste(gene, dataset, sep = "/"))
+        rhdf5::h5createGroup(fid, paste(gene, dataset, "reads", sep = "/"))
+        mapped_reads <- paste(gene, dataset, "reads", sep = "/")
+        
+        gid <- rhdf5::H5Gopen(fid, mapped_reads)
+        # Specify then write gene attributes.
+        rhdf5::h5createAttribute(gid, "reads_total", c(1, 1))
+        rhdf5::h5createAttribute(gid, "buffer_left", c(1, 1))
+        rhdf5::h5createAttribute(gid, "buffer_right", c(1, 1))
+        rhdf5::h5createAttribute(gid, "start_codon_pos", c(1, 3))
+        rhdf5::h5createAttribute(gid, "stop_codon_pos", c(1, 3))
+        rhdf5::h5createAttribute(gid, "reads_by_len", c(1, length(read_lengths)))
+        rhdf5::h5createAttribute(gid, "lengths", c(1, length(read_lengths)))
+        rhdf5::h5writeAttribute.integer(sum(gene_read_counts),
+                                        gid,
+                                        name = "reads_total")
+        # Though start_codon_loc is an integer, start_codon_loc - 1
+        # is a double, so cast back to integer so H5 type is
+        # H5T_STD_I32LE and not H5T_IEEE_F64LE.
+        rhdf5::h5writeAttribute.integer(as.integer(start_codon_loc - 1),
+                                        gid,
+                                        name = "buffer_left")
+        rhdf5::h5writeAttribute.integer((ncol(gene_read_counts) - stop_cod[3]),
+                                        gid,
+                                        name = "buffer_right")
+        rhdf5::h5writeAttribute.integer(start_cod, gid, name = "start_codon_pos")
+        rhdf5::h5writeAttribute.integer(stop_cod, gid, name = "stop_codon_pos")
+        rhdf5::h5writeAttribute.integer(read_lengths, gid, name = "lengths")
+        rhdf5::h5writeAttribute.integer(apply(gene_read_counts, 1, sum),
+                                gid,
+                                name = "reads_by_len")
+        # Specify a dataset within the gene group to store the values and
+        # degree of compression, then write the dataset.
+        read_data <- paste(mapped_reads, "data", sep = "/")
+        rhdf5::h5createDataset(fid,
+                        read_data,
+                        dim(gene_read_counts),
+                        storage.mode = "integer",
+                        chunk = c(1, ncol(gene_read_counts)),
+                        level = 7)
+        rhdf5::h5write(gene_read_counts, fid, name = read_data, start = c(1, 1))
+        rhdf5::H5Gclose(gid)
+        rhdf5::H5Fclose(fid)
+      }
+    },
+    mc.cores = num_processes,
+    mc.preschedule = TRUE
+    # uses preschedule to prevent more than 1 process write the same file at the same time.
+  )
+  # Create symbolic link with alternate IDs, if required.
+  if (!is.na(secondary_id)) {
+    fid=rhdf5::H5Fopen(hd_file)
+    base_gid <- rhdf5::H5Gopen(fid, "/")
+    for (gene in genes) {
       if (alt_genes[[gene]] != gene) {
         rhdf5::H5Lcreate_external(hd_file, gene, base_gid, alt_genes[[gene]])
       }
     }
-    gid <- rhdf5::H5Gopen(fid, mapped_reads)
-    # Specify then write gene attributes.
-    rhdf5::h5createAttribute(gid, "reads_total", c(1, 1))
-    rhdf5::h5createAttribute(gid, "buffer_left", c(1, 1))
-    rhdf5::h5createAttribute(gid, "buffer_right", c(1, 1))
-    rhdf5::h5createAttribute(gid, "start_codon_pos", c(1, 3))
-    rhdf5::h5createAttribute(gid, "stop_codon_pos", c(1, 3))
-    rhdf5::h5createAttribute(gid, "reads_by_len", c(1, length(read_lengths)))
-    rhdf5::h5createAttribute(gid, "lengths", c(1, length(read_lengths)))
-    rhdf5::h5writeAttribute.integer(sum(gene_read_counts),
-                                    gid,
-                                    name = "reads_total")
-    # Though start_codon_loc is an integer, start_codon_loc - 1
-    # is a double, so cast back to integer so H5 type is
-    # H5T_STD_I32LE and not H5T_IEEE_F64LE.
-    rhdf5::h5writeAttribute.integer(as.integer(start_codon_loc - 1),
-                                    gid,
-                                    name = "buffer_left")
-    rhdf5::h5writeAttribute.integer((ncol(gene_read_counts) - stop_cod[3]),
-                                    gid,
-                                    name = "buffer_right")
-    rhdf5::h5writeAttribute.integer(start_cod, gid, name = "start_codon_pos")
-    rhdf5::h5writeAttribute.integer(stop_cod, gid, name = "stop_codon_pos")
-    rhdf5::h5writeAttribute.integer(read_lengths, gid, name = "lengths")
-    rhdf5::h5writeAttribute.integer(apply(gene_read_counts, 1, sum),
-                             gid,
-                             name = "reads_by_len")
-    # Specify a dataset within the gene group to store the values and
-    # degree of compression, then write the dataset.
-    read_data <- paste(mapped_reads, "data", sep = "/")
-    rhdf5::h5createDataset(fid,
-                    read_data,
-                    dim(gene_read_counts),
-                    storage.mode = "integer",
-                    chunk = c(1, ncol(gene_read_counts)),
-                    level = 7)
-    rhdf5::h5write(gene_read_counts, fid, name = read_data, start = c(1, 1))
-    rhdf5::H5Gclose(gid)
-  }
-  if (!is.na(secondary_id)) {
     rhdf5::H5Gclose(base_gid)
+    rhdf5::H5Fclose(fid)
   }
   rhdf5::H5close()
 }
