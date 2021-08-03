@@ -47,6 +47,7 @@ For example::
 import glob
 import os
 import os.path
+import multiprocessing
 import yaml
 import pandas as pd
 from riboviz import demultiplex_fastq
@@ -77,7 +78,7 @@ INPUT = "input"
 """ ``Program`` value to denote input files """
 
 
-def input_fq(config_file, input_dir):
+def input_fq(config_file, input_dir, pool=None):
     """
     Extract names of FASTQ input files from workflow configuration
     file and count the number of reads in each file.
@@ -101,11 +102,17 @@ def input_fq(config_file, input_dir):
     for multiplexed files, ``''``), ``Program`` (set to ``input``),
     ``File``, ``NumReads``, ``Description`` (``input``).
 
+    Parameter pool (type: multiprocessing.Pool) is used for multiprocessing.
+    If it is not specified, then the code will run in one process, and return a list of panda dataframes
+    If it is specified, the code will use the workers of the pool to run different samples in parallel, and return a list of pool.apply_async returns, where the panda dataframe can be obtained by .get() function.
+
     :param config_file: Configuration file
     :type config_file: str or unicode
     :param input_dir: Directory
     :type input_dir: str or unicode
-    :return: list of ``pandas.core.frame.Series``, or ``[]``
+    :param pool: multiprocessing pool object that the process will be joined into
+    :type pool: multiprocessing.Pool
+    :return: list of ``pandas.core.frame.Series`` or ``[]`` if pool is not specified. If pool is specified, then the return will be a list of pool.apply_async returns.
     :rtype: list(pandas.core.frame.Series)
     """
     with open(config_file, 'r') as f:
@@ -126,15 +133,33 @@ def input_fq(config_file, input_dir):
     for (sample_name, file_name) in files:
         print(file_name)
         try:
-            num_reads = fastq.count_sequences(file_name)
-            row = pd.DataFrame(
-                [[sample_name, INPUT, file_name, num_reads, INPUT]],
-                columns=HEADER)
-            rows.append(row)
+            if pool is None:
+                # uses the original serial version
+                num_reads = fastq.count_sequences(file_name)
+                row = pd.DataFrame(
+                    [[sample_name, INPUT, file_name, num_reads, INPUT]],
+                    columns=HEADER)
+                rows.append(row)
+            else:
+                # uses the worker of pool to execute in parallel
+                rows.append(pool.apply_async(_input_fq_count, args=(sample_name, file_name,)))
         except Exception as e:
             print(e)
             continue
     return rows
+
+
+def _input_fq_count(sample_name, file_name):
+    # the same as original serial version, but written in a separate function that can be loaded by multiprocess apply_async
+    try:
+        num_reads = fastq.count_sequences(file_name)
+        return pd.DataFrame(
+            [[sample_name, INPUT, file_name, num_reads, INPUT]],
+            columns=HEADER)
+    except Exception as e:
+        # return none so that this sample will be treated as invalid in later process
+        print(e)
+        return None
 
 
 def cutadapt_fq(tmp_dir, sample=""):
@@ -472,24 +497,39 @@ def count_reads_df(config_file, input_dir, tmp_dir, output_dir):
     :rtype: pandas.core.frame.DataFrame
     """
     df = pd.DataFrame(columns=HEADER)
-    rows = []
-    rows.extend(input_fq(config_file, input_dir))
-    rows.append(cutadapt_fq(tmp_dir))
-    rows.extend(umi_tools_deplex_fq(tmp_dir))
+    # create a multiprocessing pool
+    # we do not specify the worker number because this is the last process of the workflow, so it can use all cores.
+    pool = multiprocessing.Pool()
+    result_ret = []
+    # the item of result_ret is like [type,content]. Where type represents how the result should be processed.
+    result_ret.append(['MULTIPLE', input_fq(config_file, input_dir, pool)])
+    result_ret.append(['APPEND', pool.apply_async(cutadapt_fq, args=(tmp_dir,))])
+    result_ret.append(['EXTEND', pool.apply_async(umi_tools_deplex_fq, args=(tmp_dir,))])
     tmp_samples = [f.name for f in os.scandir(tmp_dir) if f.is_dir()]
     tmp_samples.sort()
     for sample in tmp_samples:
-        rows.append(cutadapt_fq(tmp_dir, sample))
-        rows.append(hisat2_fq(tmp_dir, sample, workflow_files.NON_RRNA_FQ,
-                              "rRNA or other contaminating reads removed by alignment to rRNA index files"))
-        rows.append(hisat2_sam(tmp_dir, sample, workflow_files.RRNA_MAP_SAM,
-                               "Reads with rRNA and other contaminating reads removed by alignment to rRNA index files"))
-        rows.append(hisat2_fq(tmp_dir, sample, workflow_files.UNALIGNED_FQ,
-                              "Unaligned reads removed by alignment of remaining reads to ORFs index files"))
-        rows.append(hisat2_sam(tmp_dir, sample, workflow_files.ORF_MAP_SAM,
-                               "Reads aligned to ORFs index files"))
-        rows.append(trim_5p_mismatch_sam(tmp_dir, sample))
-        rows.append(umi_tools_dedup_bam(tmp_dir, output_dir, sample))
+        result_ret.append(['APPEND', pool.apply_async(cutadapt_fq, args=(tmp_dir, sample,))])
+        result_ret.append(['APPEND', pool.apply_async(hisat2_fq, args=(tmp_dir, sample, workflow_files.NON_RRNA_FQ,
+                                                                       "rRNA or other contaminating reads removed by alignment to rRNA index files",))])
+        result_ret.append(['APPEND', pool.apply_async(hisat2_sam, args=(tmp_dir, sample, workflow_files.RRNA_MAP_SAM,
+                                                                        "Reads with rRNA and other contaminating reads removed by alignment to rRNA index files",))])
+        result_ret.append(['APPEND', pool.apply_async(hisat2_fq, args=(tmp_dir, sample, workflow_files.UNALIGNED_FQ,
+                                                                       "Unaligned reads removed by alignment of remaining reads to ORFs index files",))])
+        result_ret.append(['APPEND', pool.apply_async(hisat2_sam, args=(tmp_dir, sample, workflow_files.ORF_MAP_SAM,
+                                                                        "Reads aligned to ORFs index files",))])
+        result_ret.append(['APPEND', pool.apply_async(trim_5p_mismatch_sam, args=(tmp_dir, sample,))])
+        result_ret.append(['APPEND', pool.apply_async(umi_tools_dedup_bam, args=(tmp_dir, output_dir, sample,))])
+    rows = []
+    pool.close()
+    pool.join()
+    for i in result_ret:
+        if i[0] == 'MULTIPLE':
+            for j in i[1]:
+                rows.append(j.get())
+        elif i[0] == 'EXTEND':
+            rows.extend(i[1].get())
+        else:
+            rows.append(i[1].get())
     rows = [row for row in rows if row is not None]
     df = df.append(rows)
     return df
