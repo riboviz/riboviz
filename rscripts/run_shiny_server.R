@@ -204,17 +204,20 @@ server <- function(input, output, session) {
   
   ### bar plot
   output$read_counts_bar_plot <- renderPlot({
-    read_counts_df %>%
-      filter(SampleName %in% input$sample) %>%
-      ggplot(., aes(SampleName, NumReads, fill = short_name)) +
-      geom_col(position = position_dodge()) +
-      plot_theme +
-      scale_fill_discrete(name = NULL) +
-      labs(x = NULL,
-           y = "Read count",
-           title = "Read counts per step") +
-      guides(fill = guide_legend(ncol = 1)) +
-      scale_y_continuous(labels = label_number_si())
+    input$apply_changes
+    isolate({
+      read_counts_df %>%
+        filter(SampleName %in% input$sample) %>%
+        ggplot(., aes(SampleName, NumReads, fill = short_name)) +
+        geom_col(position = position_dodge()) +
+        plot_theme +
+        scale_fill_discrete(name = NULL) +
+        labs(x = NULL,
+             y = "Read count",
+             title = "Read counts per step") +
+        guides(fill = guide_legend(ncol = 1)) +
+        scale_y_continuous(labels = label_number_si())
+    })
   })
   
   ######################################
@@ -257,53 +260,59 @@ server <- function(input, output, session) {
   
   # plot it
   output$sample_cors_plot <- renderPlot({
-    ggplot(cor.df2, aes(samp1, samp2, fill = R, label = signif(R, 2))) +
-      geom_raster() +
-      scale_fill_viridis_c(
-        option = "B",
-        na.value = NA,
-        limits = c(min.cor, 1)
-      ) +
-      theme(
-        panel.background = element_blank(),
-        text = element_text(size = 14),
-        axis.text.x = element_text(
-          angle = 45,
-          vjust = 1,
-          hjust = 1
-        ),
-        panel.grid.major.x = element_line(color = "grey50", linetype = 3),
-        axis.ticks = element_blank()
-      ) +
-      labs(x = NULL,
-           y = NULL,
-           title = expression(paste(
-             "Pairwise correlations based on ", log[10], "(TPM)"
-           ))) +
-      geom_text()
+    input$apply_changes
+    isolate({
+      ggplot(cor.df2, aes(samp1, samp2, fill = R, label = signif(R, 2))) +
+        geom_raster() +
+        scale_fill_viridis_c(
+          option = "B",
+          na.value = NA,
+          limits = c(min.cor, 1)
+        ) +
+        theme(
+          panel.background = element_blank(),
+          text = element_text(size = 14),
+          axis.text.x = element_text(
+            angle = 45,
+            vjust = 1,
+            hjust = 1
+          ),
+          panel.grid.major.x = element_line(color = "grey50", linetype = 3),
+          axis.ticks = element_blank()
+        ) +
+        labs(x = NULL,
+             y = NULL,
+             title = expression(paste(
+               "Pairwise correlations based on ", log[10], "(TPM)"
+             ))) +
+        geom_text()
+    })
   })
   
   ### Abundance of specific gene compared to all
   output$tpm_density_plot <- renderPlot({
-    collated_tpms_df %>%
-      pivot_longer(where(is.numeric),
-                   names_to = "samplez",
-                   values_to = "tpm") %>%
-      filter(samplez %in% input$sample) %>%
-      mutate(
-        labz = ifelse(ORF %in% input$gene, ORF, NA),
-        xint = ifelse(ORF %in% input$gene, tpm, NA)
-      ) %>%
-      ggplot(., aes(x = tpm, fill = samplez)) +
-      geom_density(alpha = 0.5) +
-      geom_vline(aes(xintercept = xint), size = 1) +
-      scale_x_log10(labels = label_number_si()) +
-      facet_wrap( ~ samplez) +
-      scale_fill_discrete(guide = FALSE) +
-      plot_theme +
-      labs(title = "TPM distributions",
-           x = expression(paste(log[10], "(TPM)")),
-           y = "Density")
+    input$apply_changes
+    isolate({
+      collated_tpms_df %>%
+        pivot_longer(where(is.numeric),
+                     names_to = "samplez",
+                     values_to = "tpm") %>%
+        filter(samplez %in% input$sample) %>%
+        mutate(
+          labz = ifelse(ORF %in% input$gene, ORF, NA),
+          xint = ifelse(ORF %in% input$gene, tpm, NA)
+        ) %>%
+        ggplot(., aes(x = tpm, fill = samplez)) +
+        geom_density(alpha = 0.5) +
+        geom_vline(aes(xintercept = xint), size = 1) +
+        scale_x_log10(labels = label_number_si()) +
+        facet_wrap( ~ samplez) +
+        scale_fill_discrete(guide = FALSE) +
+        plot_theme +
+        labs(title = "TPM distributions",
+             x = expression(paste(log[10], "(TPM)")),
+             y = "Density")
+    })
   })
   
   ######################################
@@ -312,19 +321,22 @@ server <- function(input, output, session) {
   
   ### Read length distribution plot
   output$read_length_dist_plot <- renderPlot({
-    read_length_df %>%
-      filter(samplez %in% input$sample) %>%
-      ggplot(., aes(Length, Counts, fill = samplez)) +
-      geom_col(width = 1) +
-      facet_wrap( ~ samplez, scales = "free_y") +
-      scale_fill_discrete(name = NULL, guide = FALSE) +
-      plot_theme +
-      labs(title = "Read length distributions",
-           x = "Read length",
-           y = "Read counts") +
-      scale_x_continuous(breaks = seq(10, 50, 5)) +
-      scale_y_continuous(breaks = breaks_pretty(n = 4),
-                         labels = label_number_si())
+    input$apply_changes
+    isolate({
+      read_length_df %>%
+        filter(samplez %in% input$sample) %>%
+        ggplot(., aes(Length, Counts, fill = samplez)) +
+        geom_col(width = 1) +
+        facet_wrap( ~ samplez, scales = "free_y") +
+        scale_fill_discrete(name = NULL, guide = FALSE) +
+        plot_theme +
+        labs(title = "Read length distributions",
+             x = "Read length",
+             y = "Read counts") +
+        scale_x_continuous(breaks = seq(10, 50, 5)) +
+        scale_y_continuous(breaks = breaks_pretty(n = 4),
+                           labels = label_number_si())
+    })
   })
   
   ######################################
@@ -333,47 +345,56 @@ server <- function(input, output, session) {
   
   ### Periodicity metagene plot for both 5' and 3' end as a line plot
   output$periodicity_line_plot <- renderPlot({
-    periodicity_df %>%
-      filter(samplez %in% input$sample) %>%
-      ggplot(., aes(x = Pos, y = Counts, color = samplez)) +
-      geom_line() +
-      scale_color_discrete(name = NULL, guide = FALSE) +
-      facet_grid(cols = vars(samplez),
-                 rows = vars(End),
-                 scales = "free_y") +
-      labs(title = "3-nucleotide periodicity",
-           x = "Codon position",
-           y = "Read counts") +
-      plot_theme +
-      scale_y_continuous(labels = label_number_si())
+    input$apply_changes
+    isolate({
+      periodicity_df %>%
+        filter(samplez %in% input$sample) %>%
+        ggplot(., aes(x = Pos, y = Counts, color = samplez)) +
+        geom_line() +
+        scale_color_discrete(name = NULL, guide = FALSE) +
+        facet_grid(cols = vars(samplez),
+                   rows = vars(End),
+                   scales = "free_y") +
+        labs(title = "3-nucleotide periodicity",
+             x = "Codon position",
+             y = "Read counts") +
+        plot_theme +
+        scale_y_continuous(labels = label_number_si())
+    })
   })
   
   ### Read counts per frame as a bar plot
   output$frame_counts_bar_plot <- renderPlot({
-    frame_bar_df %>%
-      filter(samplez %in% input$sample) %>%
-      ggplot(., aes(x = Frame, y = Count, fill = samplez)) +
-      geom_bar(stat = "identity", pos = "dodge") +
-      scale_fill_discrete(name = NULL) +
-      labs(title = "Read counts per frame",
-           x = NULL,
-           y = "Read counts") +
-      plot_theme +
-      scale_color_discrete(guide = FALSE) +
-      scale_y_continuous(labels = label_number_si())
+    input$apply_changes
+    isolate({
+      frame_bar_df %>%
+        filter(samplez %in% input$sample) %>%
+        ggplot(., aes(x = Frame, y = Count, fill = samplez)) +
+        geom_bar(stat = "identity", pos = "dodge") +
+        scale_fill_discrete(name = NULL) +
+        labs(title = "Read counts per frame",
+             x = NULL,
+             y = "Read counts") +
+        plot_theme +
+        scale_color_discrete(guide = FALSE) +
+        scale_y_continuous(labels = label_number_si())
+    })
   })
   
   ### Proportion of reads per frame for each gene as a boxplot
   output$frame_proportions_boxplot <- renderPlot({
-    frame_box_df %>%
-      filter(samplez %in% input$sample) %>%
-      ggplot(., aes(x = Frame, y = value, fill = samplez)) +
-      labs(y = "Proportion",
-           title = "Proportion of reads per frame per gene",
-           x = NULL) +
-      scale_fill_discrete(name = NULL) +
-      geom_boxplot() +
-      plot_theme
+    input$apply_changes
+    isolate({
+      frame_box_df %>%
+        filter(samplez %in% input$sample) %>%
+        ggplot(., aes(x = Frame, y = value, fill = samplez)) +
+        labs(y = "Proportion",
+             title = "Proportion of reads per frame per gene",
+             x = NULL) +
+        scale_fill_discrete(name = NULL) +
+        geom_boxplot() +
+        plot_theme
+    })
   })
   
   ######################################
@@ -382,24 +403,30 @@ server <- function(input, output, session) {
   
   ### 3' end
   output$pos_sp_plot3 <- renderPlot({
-    pos_sp_df %>%
-      filter(End == "3'" & samplez %in% input$sample) %>%
-      ggplot(., aes(Position, Mean, color = samplez)) +
-      geom_line() +
-      facet_grid(End ~ samplez, scales = "free") +
-      plot_theme +
-      scale_color_discrete(guide = FALSE)
+    input$apply_changes
+    isolate({
+      pos_sp_df %>%
+        filter(End == "3'" & samplez %in% input$sample) %>%
+        ggplot(., aes(Position, Mean, color = samplez)) +
+        geom_line() +
+        facet_grid(End ~ samplez, scales = "free") +
+        plot_theme +
+        scale_color_discrete(guide = FALSE)
+    })
   })
   
   ### 5' end
   output$pos_sp_plot5 <- renderPlot({
-    pos_sp_df %>%
-      filter(End == "5'" & samplez %in% input$sample) %>%
-      ggplot(., aes(Position, Mean, color = samplez)) +
-      geom_line() +
-      facet_grid(End ~ samplez, scales = "free") +
-      plot_theme +
-      scale_color_discrete(guide = FALSE)
+    input$apply_changes
+    isolate({
+      pos_sp_df %>%
+        filter(End == "5'" & samplez %in% input$sample) %>%
+        ggplot(., aes(Position, Mean, color = samplez)) +
+        geom_line() +
+        facet_grid(End ~ samplez, scales = "free") +
+        plot_theme +
+        scale_color_discrete(guide = FALSE)
+    })
   })
   
   ######################################
@@ -408,37 +435,43 @@ server <- function(input, output, session) {
   
   ### Ribogrid plot
   output$ribogrid_plot <- renderPlot({
-    ribogrid_df %>%
-      filter(
-        samplez %in% input$sample &
-          ReadLen >= min(input$ribogrid_len_range) &
-          ReadLen <= max(input$ribogrid_len_range) &
-          Pos >= min(input$ribogrid_pos_range) &
-          Pos <= max(input$ribogrid_pos_range)
-      ) %>%
-      ggplot(., aes(Pos, ReadLen, fill = Counts)) +
-      geom_raster() +
-      scale_fill_gradient(low = "white", high = "navy") +
-      plot_theme +
-      labs(title = "Ribogrid", x = "Position of 5' end of read", y = "Read length") +
-      facet_wrap(~ samplez)
+    input$apply_changes
+      isolate({
+      ribogrid_df %>%
+        filter(
+          samplez %in% input$sample &
+            ReadLen >= min(input$ribogrid_len_range) &
+            ReadLen <= max(input$ribogrid_len_range) &
+            Pos >= min(input$ribogrid_pos_range) &
+            Pos <= max(input$ribogrid_pos_range)
+        ) %>%
+        ggplot(., aes(Pos, ReadLen, fill = Counts)) +
+        geom_raster() +
+        scale_fill_gradient(low = "white", high = "navy") +
+        plot_theme +
+        labs(title = "Ribogrid", x = "Position of 5' end of read", y = "Read length") +
+        facet_wrap(~ samplez)
+    })
   })
   
   ### Ribogrid bar plot
   output$ribogridbar_plot <- renderPlot({
-    ribogrid_df %>%
-      filter(
-        samplez %in% input$sample &
-          ReadLen >= min(input$ribogrid_len_range) &
-          ReadLen <= max(input$ribogrid_len_range) &
-          Pos >= min(input$ribogrid_pos_range) &
-          Pos <= max(input$ribogrid_pos_range)
-      ) %>%
-      ggplot(., aes(Pos, Counts)) +
-      geom_col() +
-      facet_grid(ReadLen ~ samplez) +
-      plot_theme +
-      labs(x = "Position of 5' end of read", y = "Read count", title = "Ribogrid (bar)")
+    input$apply_changes
+    isolate({
+      ribogrid_df %>%
+        filter(
+          samplez %in% input$sample &
+            ReadLen >= min(input$ribogrid_len_range) &
+            ReadLen <= max(input$ribogrid_len_range) &
+            Pos >= min(input$ribogrid_pos_range) &
+            Pos <= max(input$ribogrid_pos_range)
+        ) %>%
+        ggplot(., aes(Pos, Counts)) +
+        geom_col() +
+        facet_grid(ReadLen ~ samplez) +
+        plot_theme +
+        labs(x = "Position of 5' end of read", y = "Read count", title = "Ribogrid (bar)")
+    })
   })
   
   ######################################
@@ -448,42 +481,69 @@ server <- function(input, output, session) {
   # Go through h5 file for each sample and get the data for a specific gene
   # this is the part that is breaking it, I need to make this a normal variable
   # after it's done being reactive
-  output$sgribogrid_plot <- renderPlot({
-    
-    sgribogrid_df <- lapply(sample_names, function(x) {
-      only_name <- str_split(x, "/") %>%
-        unlist() %>%
-        tail(1)
-      
-      file_loc <-
-        normalizePath(here::here(yaml$dir_out, paste0(only_name, "/", only_name, ".h5")))
-      
-      ret <-
-        h5read(file_loc, name = file.path(input$gene, yaml$dataset, "reads/data")) %>%
-        as_tibble() %>%
-        rowid_to_column("read_length") %>%
-        pivot_longer(cols = starts_with("V"), names_to = "position") %>%
-        mutate(position = as.numeric(str_remove(position, "V")))
-      
-      h5closeAll()
-      
-      return(ret)
-    }) %>%
-      bind_rows(.id = "samplez")
   
-  # single gene coverage
-    sgribogrid_df %>%
+  # Call genepos_range() for a vector of length two with the minimum and
+  # maximum read positions
+  genepos_range <- reactive(input$genepos_range)
+  
+  sgribogrid_df <- reactive({lapply(sample_names, function(x) {
+    only_name <- str_split(x, "/") %>%
+      unlist() %>%
+      tail(1)
+    
+    file_loc <-
+      normalizePath(here::here(yaml$dir_out, paste0(only_name, "/", only_name, ".h5")))
+    
+    ret <-
+      h5read(file_loc, name = file.path(input$gene, yaml$dataset, "reads/data")) %>%
+      as_tibble() %>%
+      rowid_to_column("read_length") %>%
+      pivot_longer(cols = starts_with("V"), names_to = "position") %>%
+      mutate(position = as.numeric(str_remove(position, "V")))
+    
+    h5closeAll()
+    
+    return(ret)
+  }) %>%
+    bind_rows(.id = "samplez")})
+  
+  output$gene_specific_slider <- renderUI({
+    
+    newdf <- sgribogrid_df() %>%
+      filter(samplez %in% input$sample) %>%
       group_by(samplez, position) %>%
       summarise(total_reads = sum(value)) %>%
-      ungroup() %>% 
-      ggplot(., aes(position, total_reads))+
-      geom_col(width = 1)+
-      facet_wrap(~samplez, ncol = 1)+
-      theme_bw()+
-      theme(panel.grid = element_blank(),
-            text = element_text(size = 14))+
-      labs(x = "Position",
-           y = "Read count")
+      ungroup()
+    
+    sliderInput(
+      "genepos_range",
+      "Read position:",
+      min = 0,
+      max = nrow(newdf),
+      value = c(0, nrow(newdf)),
+      width = "50%"
+    )
+  })
+  
+  output$sgribogrid_plot <- renderPlot({
+    input$apply_changes
+    isolate({
+    # single gene coverage
+      sgribogrid_df() %>%
+        filter(samplez %in% input$sample) %>%
+        group_by(samplez, position) %>%
+        summarise(total_reads = sum(value)) %>%
+        ungroup() %>% 
+        ggplot(., aes(position, total_reads))+
+        geom_col(width = 1)+
+        facet_wrap(~samplez, ncol = 1)+
+        scale_x_continuous(limits = genepos_range())+
+        theme_bw()+
+        theme(panel.grid = element_blank(),
+              text = element_text(size = 14))+
+        labs(x = "Position",
+             y = "Read count")
+    })
   })
   
   
@@ -498,45 +558,52 @@ server <- function(input, output, session) {
   if (any(names(yaml) == "features_file") &&
       length(yaml$features_file) > 0) {
     output$features_plot <- renderPlot({
-      if (input$gene2 == "") {
-        features_df %>%
-          filter(samplez %in% input$sample &
-                   Feature %in% input$feature) %>%
-          ggplot(., aes(tpm, Value)) +
-          geom_point() +
-          geom_smooth(method = "lm") +
-          facet_wrap(samplez ~ Feature, scales = "free") +
-          scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10 ^
-                                                                                     .x))) +
-          plot_theme +
-          labs(x = expression(paste(log[10], "(TPM)"))) +
-          scale_size_manual(values = c(4, 1), guide = FALSE)
-      } else {
-        features_df %>%
-          filter(samplez %in% input$sample &
-                   Feature %in% input$feature) %>%
-          mutate(labz = ifelse(ORF == input$gene2, "a_label", "no_lab")) %>%
-          arrange(labz) %>%
-          ggplot(., aes(tpm, Value)) +
-          geom_point(aes(color = labz, size = labz)) +
-          geom_smooth(method = "lm") +
-          facet_wrap(samplez ~ Feature, scales = "free") +
-          scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10 ^
-                                                                                     .x))) +
-          plot_theme +
-          scale_color_manual(guide = FALSE,
-                             values = c("firebrick3", "grey70")) +
-          labs(x = expression(paste(log[10], "(TPM)"))) +
-          scale_size_manual(values = c(4, 1), guide = FALSE)
-      }
+      input$apply_changes
+      isolate({
+        if (input$gene2 == "") {
+          features_df %>%
+            filter(samplez %in% input$sample &
+                     Feature %in% input$feature) %>%
+            ggplot(., aes(tpm, Value)) +
+            geom_point() +
+            geom_smooth(method = "lm") +
+            facet_wrap(samplez ~ Feature, scales = "free") +
+            scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10 ^
+                                                                                       .x))) +
+            plot_theme +
+            labs(x = expression(paste(log[10], "(TPM)"))) +
+            scale_size_manual(values = c(4, 1), guide = FALSE)
+        } else {
+          features_df %>%
+            filter(samplez %in% input$sample &
+                     Feature %in% input$feature) %>%
+            mutate(labz = ifelse(ORF == input$gene2, "a_label", "no_lab")) %>%
+            arrange(labz) %>%
+            ggplot(., aes(tpm, Value)) +
+            geom_point(aes(color = labz, size = labz)) +
+            geom_smooth(method = "lm") +
+            facet_wrap(samplez ~ Feature, scales = "free") +
+            scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10 ^
+                                                                                       .x))) +
+            plot_theme +
+            scale_color_manual(guide = FALSE,
+                               values = c("firebrick3", "grey70")) +
+            labs(x = expression(paste(log[10], "(TPM)"))) +
+            scale_size_manual(values = c(4, 1), guide = FALSE)
+        }
+      })
     })
   } else {
     output$features_plot <- renderPlot({
-      # this is simply a dummy plot to plot nothing
-      ggplot(mtcars, aes(x = wt, y = mpg)) +
-        geom_blank() +
-        theme_void()
+      input$apply_changes
+      isolate({
+        # this is simply a dummy plot to plot nothing
+        ggplot(mtcars, aes(x = wt, y = mpg)) +
+          geom_blank() +
+          theme_void()
+      })
     })
+    
   }
   
 }
@@ -565,7 +632,7 @@ ui <- fluidPage(# App title
         inline = TRUE,
         width = "100%"
       ),
-      submitButton(text = "Apply Changes", icon = NULL, width = NULL)
+      actionButton("apply_changes", "Apply Changes")
     )
     
   )),
@@ -626,23 +693,7 @@ ui <- fluidPage(# App title
                     value = collated_tpms_df$ORF[1],
                     width = "50%"
                   )),
-                  headerPanel(""),
-                  sliderInput(
-                    "ribogrid_len_range",
-                    "Read lengths:",
-                    min = 0,
-                    max = 50,
-                    value = c(20, 35),
-                    width = "50%"
-                  ),
-                  sliderInput(
-                    "ribogrid_pos_range",
-                    "Read position:",
-                    min = 0,
-                    max = 100,
-                    value = c(-10, 10),
-                    width = "50%"
-                  ),
+                  uiOutput("gene_specific_slider"),
                   headerPanel(""),
                   plotOutput("sgribogrid_plot")
                 ),
