@@ -209,7 +209,7 @@ A tsv file showing the transcripts per million, a feature (ie Length_log10, FE_a
 ORF	tpm	Feature	Value
 YAL001C	3.42470723290552	Length_log10	3.06445798922692
 YAL002W	1.78650805583587	Length_log10	3.10516942799933
-YAL003W	4043.513688639	Length_log10	2.31386722036915
+YAL003W	4043.513688639	  Length_log10	2.31386722036915
 YAL007C	105.576584188032	Length_log10	2.33243845991561
 YAL008W	11.8454807087593	Length_log10	2.29666519026153
 YAL010C	4.82007633057095	Length_log10	2.69284691927723
@@ -223,7 +223,7 @@ sequence_features_vs_tpms, tpms_feature_changes, feature_trends_tpms
 
 ## `features.pdf` 
 
-The features pdf relates the transcripts per million value of different genes to a variety of different sequence features. This highlights any trends in feature value as transcripts per million increases. 
+The features pdf relates the transcripts per million value of different genes to a variety of different sequence features. This highlights any trends in feature value as transcripts per million changes. Values for different features are in the features-file, if provided
 
 Example features plot:
 
@@ -263,8 +263,8 @@ Produced during generate_stats_figs during step "Codon-specific ribosome densiti
 AA	Codon	tRNA	tAI	Microarray	RNA.seq	A	P	E
 K	AAA	7	0.431034	222273	82386	0.701009246604793	0.757271500717756	0.882163216975167
 N	AAC	10	0.615764	378101	110849	0.608843172114343	0.868064826175943	0.844584176727076
-K	AAG	14	1	397111	83036	0.719699425589095	0.985491091356775	1.11948381450794
-N	AAT	6.4	0.27032	241984.64	70943.36	0.566975111040301	0.786255203154437	0.76039088714112
+K	AAG	14	1	        397111	83036	0.719699425589095	0.985491091356775	1.11948381450794
+N	AAT	6.4	0.27032	        241984.64 70943.36	0.566975111040301	0.786255203154437	0.76039088714112
 T	ACA	4	0.246373	105862	47598	0.933640392583143	1.007034200634	1.11922337626619
 ```
 
