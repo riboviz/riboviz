@@ -55,10 +55,13 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 
 ## `<SAMPLE_ID>_output_report.html` 
 
-This output report in .html format contains a provenance section for the sample run, all of the pdfs produced, and information on any plots not produced multiple figures output by riboviz:
+This output report in .html format contains a provenance section for the sample run, all the plots produced, and information on any plots not produced multiple figures output by riboviz.
 
-* first figure (link to description below?)
-* ... (fill this in!)
+The HTML includes a side bar to allow for navigation between figures.
+
+Example of the top of the HTML file:
+
+<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/html_output.jpg" alt="html_output image" width="500"/>
 
 Only output if `run_static_html: TRUE`. Produced by AnalysisOutputs.Rmd.
 
@@ -198,13 +201,39 @@ Position	Mean	SD	End
 
 norm_reads_transcript, norm_reads_start_stop
 
-## `features.pdf` 
+## `sequence_features`
+
+A tsv file showing the transcripts per million, a feature (ie Length_log10, FE_atg, uATGs etc) and a value for that feature. This is produced by combining the tpms file with the features file if provided. This is done by generate_stats_figs.R during step "Correlations between TPMs of genes with their sequence-based features" using function CalculateSequenceBasedFeatures then WriteSequenceBasedFeatures.
+
+```
+ORF	tpm	Feature	Value
+YAL001C	3.42470723290552	Length_log10	3.06445798922692
+YAL002W	1.78650805583587	Length_log10	3.10516942799933
+YAL003W	4043.513688639	Length_log10	2.31386722036915
+YAL007C	105.576584188032	Length_log10	2.33243845991561
+YAL008W	11.8454807087593	Length_log10	2.29666519026153
+YAL010C	4.82007633057095	Length_log10	2.69284691927723
+```
 
 Only output if `--features-file` was defined.
+
+*Potential names*
+
+sequence_features_vs_tpms, tpms_feature_changes, feature_trends_tpms 
+
+## `features.pdf` 
+
+The features pdf relates the transcripts per million value of different genes to a variety of different sequence features. This highlights any trends in feature value as transcripts per million increases. 
 
 Example features plot:
 
 <img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/features.jpg" alt=" features plot" width="500"/>
+
+Only output if `--features-file` was defined.
+
+*Potential names*
+
+sequence_features_vs_tpms, tpms_feature_changes, feature_trends_tpms 
 
 ## `tpms.tsv`
 
@@ -226,6 +255,10 @@ Q0070	20	0.0103092783505155	0.66647646133505
 
 ## `codon_ribodens.tsv` 
 
+A tsv file showing the correlatation of different codons to features based on a provided tRNA file, which gives the codon, the tRNA estimates, the tAI (tRNA Adaptation Index), Microarray values, and RNA.seq values. These are used to calculate mean ribosome-densities at the A/P/E sites for each codon.
+
+Produced during generate_stats_figs during step "Codon-specific ribosome densities for correlations with tRNAs" by function WriteCodonSpecificRibosomeDensityTRNACorrelation.
+
 ```
 AA	Codon	tRNA	tAI	Microarray	RNA.seq	A	P	E
 K	AAA	7	0.431034	222273	82386	0.701009246604793	0.757271500717756	0.882163216975167
@@ -237,8 +270,14 @@ T	ACA	4	0.246373	105862	47598	0.933640392583143	1.007034200634	1.11922337626619
 
 Only output if `--t-rna-file` and `--codon-positions-file` were defined.
 
+*Potential names*
+
+APE_codondens, APE_feature_codonden, APE_codon_den
+
 
 ## `codon_ribodens.pdf` 
+
+This plot shows a range of features and relates them to ribosome densitiy on the A, P and E sites. 4 features are shown; Microarry, RNA.seq, tAI and tRNA. These are taken from the '--t-rna-file' if provided. Each codon codon has a different value for each of these features, described generally here as a tRNA_value. These tRNA_values are plotted against the ribodensity at each site of the ribosome, showing any relationships or trends.
 
 Example codon_ribodens plot:
 
@@ -246,6 +285,9 @@ Example codon_ribodens plot:
 
 Only output if `--t-rna-file` and `--codon-positions-file` were defined.
 
+*Potential names*
+
+APE_codondens, APE_feature_codonden, APE_codon_den
 
 ## `startcodon_ribogridbar.pdf`
 
