@@ -2,6 +2,31 @@
 
 This document lists the output files from a typical riboviz run, along with short descriptions.
 
+[TPMs_collated.tsv](#tpms_collatedtsv)
+[read_counts.tsv](#read_countstsv)
+[<SAMPLE_ID>_output_report.html](#sample_id_output_reporthtml)
+[<SAMPLE_ID>.bam](#sample_idbam)
+[<SAMPLE_ID>.bam.bai](#sample_idbambai)
+[minus.bedgraph](#minusbedgraph)
+[plus.bedgraph](#plusbedgraph)
+[<SAMPLE_ID>.h5](#sample_idh5)
+[3nt_periodicity.tsv](#3nt_periodicitytsv)
+[3nt_periodicity.pdf](#3nt_periodicitypdf)
+[read_lengths.tsv](#read_lengthstsv)
+[read_lengths.pdf](#read_lengthspdf)
+[pos_sp_nt_freq.tsv](#pos_sp_nt_freqtsv)
+[pos_sp_rpf_norm_reads.pdf](#pos_sp_rpf_norm_readspdf)
+[pos_sp_rpf_norm_reads.tsv](#pos_sp_rpf_norm_readstsv)
+[sequence_features.tsv](#sequence_featurestsv)
+[features.pdf](#featurespdf)
+[tpms.tsv](#tpmstsv)
+[codon_ribodens.tsv](#codon_ribodenstsv)
+[codon_ribodens.pdf](#codon_ribodenspdf)
+[startcodon_ribogridbar.pdf](#startcodon_ribogridbarpdf)
+[startcodon_ribogrid.pdf](#startcodon_ribogridpdf)
+[3ntframe_bygene.tsv](#3ntframe_bygenetsv)
+[3ntframe_propbygene.pdf](#3ntframe_propbygenepdf)
+
 After a riboviz run, many output files are produced within the output directory.
 The output directory is specified by the parameter `dir_out` in `config.yaml`.
 
@@ -201,7 +226,7 @@ Position	Mean	SD	End
 
 norm_reads_transcript, norm_reads_start_stop
 
-## `sequence_features`
+## `sequence_features.tsv`
 
 A tsv file showing the transcripts per million, a feature (ie Length_log10, FE_atg, uATGs etc) and a value for that feature. This is produced by combining the tpms file with the features file if provided. This is done by generate_stats_figs.R during step "Correlations between TPMs of genes with their sequence-based features" using function CalculateSequenceBasedFeatures then WriteSequenceBasedFeatures.
 
