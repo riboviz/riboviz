@@ -172,8 +172,10 @@ def helpMessage() {
        'dataset')
     * 'do_pos_sp_nt_freq': Calculate position-specific nucleotide
       freqeuency? (default 'TRUE')
+    * 'feature': Feature type (default 'CDS')
     * 'is_riboviz_gff': Does the GFF file contain 3 elements per gene
-      - UTR5, CDS, and UTR3? (default 'TRUE')
+      - UTR5, CDS, and UTR3? (default 'TRUE'). Used by 'bam_to_h5.R'
+      only.
     * 'make_bedgraph': Output bedgraph data files in addition to H5
       files? (default 'TRUE')
     * 'max_read_length': Maximum read length in H5 output (default 50)
@@ -184,11 +186,22 @@ def helpMessage() {
     * 'secondary_id': Secondary gene IDs to access the data (COX1,
       EFB1, etc. or 'NULL') (default 'NULL')
     * 'stop_in_cds': Are stop codons part of the CDS annotations in
-      GFF? (default 'FALSE')
+      GFF? (default 'FALSE') Used by 'bam_to_h5.R' only (and only
+      if 'is_riboviz_gff' is 'FALSE'). Note: this parameter is now
+      deprecated by 'stop_in_feature' and will be removed in a future
+      release. If both 'stop_in_feature' and 'stop_in_cds' are defined
+      then 'stop_in_feature' takes precedence.
+    * 'stop_in_feature': Are stop codons part of the feature
+      annotations in GFF? If not provided and 'stop_in_cds' is
+      provided then the value of 'stop_in_cds' is used for
+      'stop_in_feature'. If both 'stop_in_feature' and 'stop_in_cds'
+      are defined then `stop_in_feature` takes precedence.
+      (default 'FALSE')
 
     Visualization parameters:
 
     * 'run_static_html': run static html visualization per sample? (default 'TRUE')
+    * 'output_pdfs': generate .pdfs for sample-related plots (default 'TRUE')
 
     General:
 
@@ -305,6 +318,7 @@ params.dir_tmp = "tmp"
 params.do_pos_sp_nt_freq = true
 params.extract_umis = false
 params.trim_5p_mismatches = true
+params.feature = "CDS"
 params.fq_files = [:]
 params.group_umis = false
 params.dedup_stats = true
@@ -314,11 +328,12 @@ params.max_read_length = 50
 params.min_read_length = 10
 params.multiplex_fq_files = []
 params.num_processes = 1
+params.output_pdfs = true
 params.publish_index_tmp = false
 params.primary_id = "Name"
 params.rpf = true
 params.run_static_html = true
-params.secondary_id = "NULL"
+params.secondary_id = null
 params.stop_in_cds = false
 params.samsort_memory = null
 params.validate_only = false
@@ -336,7 +351,6 @@ else
 if (params.validate_only) {
     println("Validating configuration only")
 }
-
 if (! params.containsKey('adapters')) {
     exit 1, "Undefined adapters (adapters)"
 }
@@ -365,9 +379,16 @@ if (params.max_read_length < params.min_read_length) {
     exit 1, "Maximum read length in H5 output (max_read_length) must be >= minimum read length (min_read_length)"
 }
 if (! params.secondary_id) {
-    secondary_id = "NULL"
+    secondary_id = null
 } else {
     secondary_id = params.secondary_id
+}
+if (params.containsKey('stop_in_feature')) {
+    stop_in_feature = params.stop_in_feature
+} else if (params.containsKey('stop_in_cds')) {
+    stop_in_feature = params.stop_in_cds
+} else {
+    stop_in_feature = false
 }
 if (params.dedup_umis) {
     if (! params.extract_umis) {
@@ -1012,7 +1033,7 @@ process dedupUmis {
         params.dedup_umis
     shell:
         output_stats_flag = params.dedup_stats \
-	    ? "--output-stats=dedup_stats" : ''
+            ? "--output-stats=dedup_stats" : ''
         """
         umi_tools dedup -I ${sample_bam} -S dedup.bam ${output_stats_flag}
         samtools --version
@@ -1103,6 +1124,8 @@ process bamToH5 {
     output:
         tuple val(sample_id), file("${sample_id}.h5") into h5s
     shell:
+        secondary_id_flag = (secondary_id != null) \
+            ? "--secondary-id=${secondary_id}" : ''
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/bam_to_h5.R \
            --num-processes=${params.num_processes} \
@@ -1110,13 +1133,14 @@ process bamToH5 {
            --max-read-length=${params.max_read_length} \
            --buffer=${params.buffer} \
            --primary-id=${params.primary_id} \
-           --secondary-id=${secondary_id} \
+           ${secondary_id_flag} \
            --dataset=${params.dataset} \
            --bam-file=${sample_bam} \
            --hd-file=${sample_id}.h5 \
            --orf-gff-file=${orf_gff} \
            --is-riboviz-gff=${params.is_riboviz_gff} \
-           --stop-in-cds=${params.stop_in_cds}
+           --feature=${params.feature} \
+           --stop-in-feature=${stop_in_feature}
         """
 }
 
@@ -1139,7 +1163,7 @@ process generateStatsFigs {
         val sample_id into finished_sample_id
         tuple val(sample_id), file("tpms.tsv") into tpms_tsv
         tuple val(sample_id), file("3nt_periodicity.pdf") \
-            into nt3_periodicity_pdf
+            optional (! params.output_pdfs) into nt3_periodicity_pdf
         tuple val(sample_id), file("3nt_periodicity.tsv") \
             into nt3_periodicity_tsv
         tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
@@ -1148,19 +1172,19 @@ process generateStatsFigs {
             optional (! params.do_pos_sp_nt_freq) \
             into pos_sp_nt_freq_tsv
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.pdf") \
-            into pos_sp_rpf_norm_reads_pdf
+            optional (! params.output_pdfs) into pos_sp_rpf_norm_reads_pdf
         tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
             into pos_sp_rpf_norm_reads_tsv
         tuple val(sample_id), file("read_lengths.pdf") \
-            into read_lengths_pdf
+            optional (! params.output_pdfs) into read_lengths_pdf
         tuple val(sample_id), file("read_lengths.tsv") \
             into read_lengths_tsv
         tuple val(sample_id), file("startcodon_ribogridbar.pdf") \
-            into start_codon_ribogridbar_pdf
+            optional (! params.output_pdfs) into start_codon_ribogridbar_pdf
         tuple val(sample_id), file("startcodon_ribogrid.pdf") \
-            into start_codon_ribogrid_pdf
+            optional (! params.output_pdfs) into start_codon_ribogrid_pdf
         tuple val(sample_id), file("codon_ribodens.pdf") \
-            optional (! is_t_rna_and_codon_positions_file) \
+            optional (! (is_t_rna_and_codon_positions_file && params.output_pdfs)) \
             into codon_ribodens_pdf
         tuple val(sample_id), file("codon_ribodens.tsv") \
             optional (! is_t_rna_and_codon_positions_file) \
@@ -1169,7 +1193,7 @@ process generateStatsFigs {
             optional (! is_t_rna_and_codon_positions_file) \
             into codon_ribodens_gathered_tsv
         tuple val(sample_id), file("features.pdf") \
-            optional (! is_features_file) into features_pdf
+            optional (! (is_features_file && params.output_pdfs)) into features_pdf
         tuple val(sample_id), file("sequence_features.tsv") \
             optional (! is_features_file) into sequence_features_tsv
         tuple val(sample_id), file("3ntframe_bygene.tsv") \
@@ -1179,7 +1203,7 @@ process generateStatsFigs {
             optional (! is_asite_disp_length_file) \
             into nt3frame_bygene_filtered_tsv
         tuple val(sample_id), file("3ntframe_propbygene.pdf") \
-            optional (! is_asite_disp_length_file) \
+            optional (! (is_asite_disp_length_file && params.output_pdfs)) \
             into nt3frame_propbygene_pdf
     shell:
         t_rna_flag = is_t_rna_and_codon_positions_file \
@@ -1202,6 +1226,7 @@ process generateStatsFigs {
            --dataset=${params.dataset} \
            --hd-file=${sample_h5} \
            --orf-fasta-file=${orf_fasta} \
+           --output-pdfs=${params.output_pdfs} \
            --rpf=${params.rpf} \
            --output-dir=. \
            --do-pos-sp-nt-freq=${params.do_pos_sp_nt_freq} \
@@ -1256,12 +1281,16 @@ process collateTpms {
         file "TPMs_collated.tsv" into collate_tpms_tsv
         val sample_ids into collate_tpms_sample_ids
     shell:
+        samples_tsvs = []
+        for (i = 0; i < sample_ids.size(); i++) {
+            samples_tsvs.add(sample_ids[i])
+            samples_tsvs.add(tpms_tsvs[i])
+        }
+        samples_tsvs = samples_tsvs.join(' ')
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/collate_tpms.R \
-            --sample-subdirs=False \
-            --output-dir=. \
             --tpms-file=TPMs_collated.tsv \
-            ${sample_ids.join(' ')}
+            ${samples_tsvs}
         """
 }
 
@@ -1304,16 +1333,16 @@ process countReads {
 
 Map viz_params = [:]
 if (is_asite_disp_length_file) {
-    viz_params.asite_disp_length_file = asite_disp_length_file
+    viz_params.asite_disp_length_file = asite_disp_length_file.toString()
 }
 if (is_codon_positions_file) {
-    viz_params.codon_positions_file = codon_positions_file
+    viz_params.codon_positions_file = codon_positions_file.toString()
 }
 if (is_features_file) {
-    viz_params.features_file = features_file
+    viz_params.features_file = features_file.toString()
 }
 if (is_t_rna_file) {
-    viz_params.t_rna_file = t_rna_file
+    viz_params.t_rna_file = t_rna_file.toString()
 }
 viz_params_yaml = new Yaml().dump(viz_params)
 
@@ -1368,6 +1397,7 @@ process staticHTML {
           script += ", sequence_features_file='\$PWD/${sample_sequence_features_tsv}' "
       }
       script += "), "
+      script += "intermediates_dir = '\$PWD', "
       script += "output_format = 'html_document', "
       script += "output_file = '\$PWD/${sample_id}_output_report.html')"
       """

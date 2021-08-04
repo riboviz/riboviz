@@ -1,8 +1,8 @@
 """
-pytest plugin file for regression tests.
+pytest plugin file for integration tests.
 
 This allows pytest to take in additional command-line parameters to
-pass onto regression test modules:
+pass onto integration test modules:
 
 * ``--expected=<DIRECTORY>``: Directory with expected data files,
   against which files specified in the configuration file (see below)
@@ -21,9 +21,6 @@ pass onto regression test modules:
   :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` is provided then sample
   names are extracted from the sample sheet file specified in
   :py:const:`riboviz.params.SAMPLE_SHEET`.
-* ``--nextflow``: Run Nextflow-specific tests. Some regression tests
-  differ for Nextflow due to differences in file naming. This should
-  only be used with ``--skip-workflow``.
 """
 import os.path
 import pytest
@@ -42,8 +39,6 @@ CHECK_INDEX_TMP = "--check-index-tmp"
 """ Check index and temporary files command-line flag. """
 CONFIG_FILE = "--config-file"
 """ Configuration file command-line flag. """
-NEXTFLOW = "--nextflow"
-""" Nextflow command-line flag. """
 
 
 def pytest_addoption(parser):
@@ -69,10 +64,6 @@ def pytest_addoption(parser):
                      action="store",
                      required=False,
                      help="Configuration file")
-    parser.addoption(NEXTFLOW,
-                     action="store_true",
-                     required=False,
-                     help="Run Nextflow tests")
 
 
 @pytest.fixture(scope="module")
@@ -139,19 +130,6 @@ def config_fixture(request):
     return config_file
 
 
-@pytest.fixture(scope="module")
-def nextflow_fixture(request):
-    """
-    Gets value for ``--nextflow`` command-line option.
-
-    :param request: request
-    :type request: _pytest.fixtures.SubRequest
-    :return: flag
-    :rtype: bool
-    """
-    return request.config.getoption(NEXTFLOW)
-
-
 def pytest_generate_tests(metafunc):
     """
     Parametrize tests using information within a configuration file.
@@ -214,6 +192,7 @@ def pytest_generate_tests(metafunc):
         "index_dir": [config[params.INDEX_DIR]],
         "tmp_dir": [config[params.TMP_DIR]],
         "output_dir": [config[params.OUTPUT_DIR]],
+	"output_pdfs": [utils.value_in_dict(params.OUTPUT_PDFS, config)],
         "extract_umis": [utils.value_in_dict(params.EXTRACT_UMIS, config)],
         "dedup_umis": [utils.value_in_dict(params.DEDUP_UMIS, config)],
         "dedup_stats": [True if params.DEDUP_STATS not in config else utils.value_in_dict(params.DEDUP_STATS, config)],

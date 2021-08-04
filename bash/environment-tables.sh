@@ -33,6 +33,20 @@ echo "| pigz | $PIGZ_VERSION |"
 PANDOC_VERSION=$(pandoc --version | head -n 1 | cut -d" " -f2)
 # pandoc 1.19.2.4
 echo "| pandoc | $PANDOC_VERSION |"
+GRAPHVIZ_VERSION=$(dot -V 2>&1 | cut -d" " -f5)
+# dot - graphviz version 2.40.1 (20161225.0304)
+# dot outputs version information to standard error stream.
+echo "| GraphViz (dot) | $GRAPHVIZ_VERSION |"
+ZIP_VERSION=$(zip -h | head -n 2 | tail -n 1 | cut -d" " -f2)
+# Copyright (c) 1990-2008 Info-ZIP - Type 'zip "-L"' for software license.
+# Zip 3.0 (July 5th 2008). Usage:
+echo "| zip | $ZIP_VERSION |"
+UNZIP_VERSION=$(unzip -h | head -n 1 | cut -d" " -f2)
+# UnZip 6.00 of 20 April 2009, by Debian. Original by Info-ZIP.
+echo "| unzip | $UNZIP_VERSION |"
+R_VERSION=$(R --version | head -n 1 | cut -d" " -f3)
+# R version 3.4.4 (2018-03-15) -- "Someone to Lean On"
+echo "| R | $R_VERSION |"
 PYTHON_VERSION=$(python --version | cut -d" " -f2)
 # Python 3.7.3
 echo "| Python | $PYTHON_VERSION |"
@@ -56,10 +70,6 @@ echo "| Java (java) | $JAVA_VERSION |"
 NEXTFLOW_VERSION=$(nextflow -v | cut -d" " -f3)
 # nextflow version 20.01.0.5264
 echo "| Nextflow | $NEXTFLOW_VERSION |"
-GRAPHVIZ_VERSION=$(dot -V 2>&1 | cut -d" " -f5)
-# dot - graphviz version 2.40.1 (20161225.0304)
-# dot outputs version information to standard error stream.
-echo "| GraphViz (dot) | $GRAPHVIZ_VERSION |"
 HISAT2_VERSION=$(hisat2 --version)
 HISAT2_VERSION=$(echo "$HISAT2_VERSION" | head -n 1  | cut -d" " -f3)
 # /home/ubuntu/hisat2-2.1.0/hisat2-align-s version 2.1.0
@@ -69,32 +79,6 @@ echo "| Hisat2 | $HISAT2_VERSION |"
 BOWTIE_VERSION=$(bowtie --version | head -n 1 | cut -d" " -f3)
 echo "| Bowtie | $BOWTIE_VERSION |"
 # /home/ubuntu/bowtie-1.2.2-linux-x86_64/bowtie-align-s version 1.2.2
-R_VERSION=$(R --version | head -n 1 | cut -d" " -f3)
-# R version 3.4.4 (2018-03-15) -- "Someone to Lean On"
-echo "| R | $R_VERSION |"
-echo " "
-
-echo "| Python Package | Version | Package Manager |"
-echo "| -------------- | ------- | --------------- |"
-CONDA_PKGS=$(conda list)
-CONDA_LIST=(biopython cutadapt gitpython h5py nextflow pandas pycodestyle pylint pysam pytest pytest-cov pyyaml samtools sphinx umi_tools)
-for pkg in ${CONDA_LIST[@]}; do
-    PKG_VERSION=$(echo "$CONDA_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
-    # pkg     M.N    ...
-    # Use 'echo "$CONDA_PKGS"' not 'echo $CONDA_PKGS' to preserves
-    # newlines so grep can be used.
-    # grep for "$pkg " to ensure exact matches. "-iw" is not enough to
-    # stop "pytest" matching "pytest-cov", for example.
-    # Delimiter between columns can be 1 or more spaces, so use tr
-    # to remove multiple spaces.
-    echo "| $pkg | $PKG_VERSION | conda | |"
-done
-PIP_PKGS=$(pip list)
-PIP_LIST=(gffutils sphinx)
-for pkg in ${PIP_LIST[@]}; do
-    PKG_VERSION=$(echo "$PIP_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
-    echo "| $pkg | $PKG_VERSION | pip |"
-done
 echo " "
 echo "| R Package | Version |"
 echo "| --------- | ------- |"
@@ -109,3 +93,20 @@ for pkg in ${R_LIST[@]}; do
     # To remove leading space, use echo $PKG_VERSION outwith a string.
     echo "| $pkg | $PKG_VERSION |"
 done
+echo " "
+echo "| Python Package | Version | Package Manager |"
+echo "| -------------- | ------- | --------------- |"
+CONDA_PKGS=$(conda list)
+CONDA_LIST=(biopython cutadapt gffutils gitpython h5py nextflow pandas pycodestyle pylint pysam pytest pytest-cov pyyaml samtools sphinx umi_tools)
+for pkg in ${CONDA_LIST[@]}; do
+    PKG_VERSION=$(echo "$CONDA_PKGS" | grep -iw "$pkg " | tr -s " " | cut -d" " -f2)
+    # pkg     M.N    ...
+    # Use 'echo "$CONDA_PKGS"' not 'echo $CONDA_PKGS' to preserves
+    # newlines so grep can be used.
+    # grep for "$pkg " to ensure exact matches. "-iw" is not enough to
+    # stop "pytest" matching "pytest-cov", for example.
+    # Delimiter between columns can be 1 or more spaces, so use tr
+    # to remove multiple spaces.
+    echo "| $pkg | $PKG_VERSION | conda |"
+done
+echo " "

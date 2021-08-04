@@ -2,8 +2,8 @@
 
 RiboViz uses three classes of branch for development:
 
-* `master` branch: the most stable branch. Releases are created as tags of specific versions from `master`.
-* `develop` branch: for ongoing development. At regular intervals this will be merged into `master`.
+* `main` branch: the most stable branch. Releases are created as tags of specific versions from `main`.
+* `develop` branch: for ongoing development. At regular intervals this will be merged into `main`.
 * Feature and bug fix-specific branches. On completion, these will be merged into `develop`.
 
 ## Developing new features, enhancements and bug fixes
@@ -22,14 +22,21 @@ Preferably, all branches should have an associated issue.
 
 Please do **not** commit large (many megabytes or gigabytes) data files into the repository. Data files that are a few megabytes in size *are* permitted if required for test code.
 
-Please be reassured that so long as you do **not** merge branches into `develop` or `master` or commit large data files then any mistakes you make should be relatively straightforward to recover from!
+Please be reassured that so long as you do **not** merge branches into `develop` or `main` or commit large data files then any mistakes you make should be relatively straightforward to recover from!
 
 ## Merging development branches into `develop`
 
-To request that a branch be merged into `develop` create a new pull request.
+To request that a branch be merged into `develop`:
+
+1. Merge the current version of `develop` into your local branch.
+2. Resolve conflicts, if any, and commit the fixes.
+3. [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
+4. [Run vignette integration tests](./testing.md#run-vignette-integration-tests).
+5. Make fixes to resolve any test failures. If unsure then ask another member of the team for advice.
+6. When all tests are passing for your branch, create a new pull request.
 
 Decisions to merge development branches into `develop` are made by Edward Wallace, Felicity Anderson, Kostas Kavoussanakis and Mike Jackon.
 
-## Merging `develop` into `master` and tagging releases
+## Merging `develop` into `main` and tagging releases
 
-Decisions to merge `develop` into `master` and to tag releases are made by Edward Wallace, Felicity Anderson, Kostas Kavoussanakis and Mike Jackon.
+Decisions to merge `develop` into `main` and to tag releases are made by Edward Wallace, Felicity Anderson, Kostas Kavoussanakis and Mike Jackon.

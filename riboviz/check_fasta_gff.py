@@ -202,7 +202,7 @@ def get_issues(fasta,
     number of GFF CDS features, list of unique sequence IDs in GFF \
     file and list of issues for sequences and features.
     :rtype: tuple(int, int, int, list(tuple(str or unicode, \
-    str or unicode, str or unicode, *))
+    str or unicode, str or unicode, object))
     :raises FileNotFoundError: If the FASTA or GFF files \
     cannot be found
     :raises pyfaidx.FastaIndexingError: If the FASTA file has badly \
@@ -320,7 +320,7 @@ def write_issues_to_csv(issues, csv_file, header={}, delimiter="\t"):
     :param issues: List of tuples of form (sequence ID, feature ID ('' if \
     not applicable to the issue), issue type, issue data).
     :type issues: list(tuple(str or unicode, str or unicode, \
-    str or unicode, *))
+    str or unicode, object))
     :param csv_file: CSV file name
     :type csv_file: str or unicode
     :param header: Tags-values to be put into a header, prefixed by `#`
@@ -344,10 +344,10 @@ def count_issues(issues):
     """
     Iterate through issues and count number of unique issues of each type.
 
-    :param issues: List of tuples of form (sequence ID, feature ID ('' if \
-    not applicable to the issue), issue type, issue data).
+    :param issues: List of tuples of form (sequence ID, feature ID \
+    '' if not applicable to the issue), issue type, issue data).
     :type issues: list(tuple(str or unicode, str or unicode, \
-    str or unicode, *))
+    str or unicode, object))
     :return: List of tuples of form (issue type, count) sorted by 'count'
     :type issues: list(tuple(str or unicode, int))
     """

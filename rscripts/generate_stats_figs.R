@@ -5,10 +5,6 @@ suppressMessages(library(getopt, quietly=T))
 suppressMessages(library(here))
 # NOTE: other libraries loaded from read_count_functions.R
 
-# FLIC: adding testthat package for +/- temporary unit testing
-suppressMessages(library(testthat))
-
-
 # Handle interactive session behaviours or use get_Rscript_filename():
 if (interactive()) {
   # Use hard-coded script name and assume script is in "rscripts"
@@ -45,6 +41,10 @@ option_list <- list(
   make_option("--orf-gff-file",
               type = "character", default = NA,
               help = "riboviz generated GFF2/GFF3 annotation file"
+  ),
+  make_option("--output-pdfs",
+              type = "logical", default = TRUE,
+              help = "generate .pdfs for sample-related plots"
   ),
   make_option("--num-processes",
               type = "integer", default = 1,
@@ -188,24 +188,26 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hd_file, gff_df) {
   gene_poslen_counts_5start_df <- CalculateGenePositionLengthCounts5Start(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
   
   # PlotThreeNucleotidePeriodicity()
-  three_nucleotide_periodicity_plot <- PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
-
-  # run PlotStartCodonRiboGrid()
-  start_codon_ribogrid_plot <- PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
-  # creates plot object
-
-  # run SaveStartCodonRiboGrid():
-  SaveStartCodonRiboGrid(start_codon_ribogrid_plot)
-
-  # run PlotStartCodonRiboGridBar():
-  start_codon_ribogrid_bar_plot <- PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
-  # creates plot object
-
-  # run SaveStartCodonRiboGridBar():
-  SaveStartCodonRiboGridBar(start_codon_ribogrid_bar_plot)
-
-  # run SavePlotThreeNucleotidePeriodicity():
-  SavePlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_plot)
+  if(output_pdfs){
+    three_nucleotide_periodicity_plot <- PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
+    
+    # run PlotStartCodonRiboGrid()
+    start_codon_ribogrid_plot <- PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
+    # creates plot object
+    
+    # run SaveStartCodonRiboGrid():
+    SaveStartCodonRiboGrid(start_codon_ribogrid_plot)
+    
+    # run PlotStartCodonRiboGridBar():
+    start_codon_ribogrid_bar_plot <- PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
+    # creates plot object
+    
+    # run SaveStartCodonRiboGridBar():
+    SaveStartCodonRiboGridBar(start_codon_ribogrid_bar_plot)
+    
+    # run SavePlotThreeNucleotidePeriodicity():
+    SavePlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_plot)
+  } 
 
   # run WriteThreeNucleotidePeriodicity():
   WriteThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
@@ -233,13 +235,15 @@ DistributionOfLengthsMappedReads <- function(gene_names, dataset, hd_file){
   # run CalculateReadLengths():
   read_length_data <- CalculateReadLengths(gene_names, dataset, hd_file)
 
-  # run PlotReadLengths():
-  read_len_plot <- PlotReadLengths(read_length_data)
-  # creates plot object
-
-  # to run SavePlotReadLenths():
-  SavePlotReadLengths(read_len_plot)
-
+  if(output_pdfs){
+    # run PlotReadLengths():
+    read_len_plot <- PlotReadLengths(read_length_data)
+    # creates plot object
+    
+    # to run SavePlotReadLenths():
+    SavePlotReadLengths(read_len_plot)
+  }
+  
   # to run WriteReadLengths():
   WriteReadLengths(read_length_data)
 
@@ -315,12 +319,14 @@ if (!is.na(asite_disp_length_file)) {
   # filter gene_read_frames_data to remove counts over the count_threshold
   gene_read_frame_data_filtered <- FilterGeneReadFrames(gene_read_frames_data, count_threshold)
   
-  # run PlotGeneReadFrames():
-  gene_read_frame_plot <- PlotGeneReadFrames(gene_read_frame_data_filtered)
-  # creates plot object
-
-  # run SaveGeneReadFrames():
-  SaveGeneReadFrames(gene_read_frame_plot)
+  if(output_pdfs){
+    # run PlotGeneReadFrames():
+    gene_read_frame_plot <- PlotGeneReadFrames(gene_read_frame_data_filtered)
+    # creates plot object
+    
+    # run SaveGeneReadFrames():
+    SaveGeneReadFrames(gene_read_frame_plot)
+  }
 
   # run WriteFilteredGeneReadFrames():
   WriteFilteredGeneReadFrames(gene_read_frame_data_filtered)
@@ -346,9 +352,11 @@ if (rpf) {
   
   pos_sp_rpf_norm_reads_data <- CalculatePositionSpecificDistributionOfReads(gene_names, dataset, hd_file, buffer, min_read_length, count_threshold)
   
-  pos_sp_rpf_norm_reads_plot <- PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
-  
-  SavePositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_plot)
+  if(output_pdfs){
+    pos_sp_rpf_norm_reads_plot <- PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
+    
+    SavePositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_plot)
+  }
 
   WritePositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
 
@@ -377,11 +385,13 @@ if (!rpf) {
   # calculate
   pos_sp_mrna_norm_coverage <- CalculateNucleotideBasedPositionSpecificReadsMRNA(gene_names, dataset, min_read_length, read_range, buffer)
   
-  # plot
-  PlotNucleotideBasedPositionSpecificReadsPerGeneMRNA(pos_sp_mrna_norm_coverage)
-  
-  # save plot out
-  SaveNucleotideBasedPositionSpecificReadsPerGeneMRNA(pos_sp_mrna_norm_coverage_plot)
+  if(output_pdfs){
+    # plot
+    PlotNucleotideBasedPositionSpecificReadsPerGeneMRNA(pos_sp_mrna_norm_coverage)
+    
+    # save plot out
+    SaveNucleotideBasedPositionSpecificReadsPerGeneMRNA(pos_sp_mrna_norm_coverage_plot)
+  }
   
   # write file out
   WriteNucleotideBasedPositionSpecificReadsPerGeneMRNA(pos_sp_mrna_norm_coverage)
@@ -439,9 +449,11 @@ if (!is.na(features_file)) { # do correlating
 
   features_plot_data <- CalculateSequenceBasedFeatures(features, tpms)
 
-  features_plot <- PlotSequenceBasedFeatures(features_plot_data)
-  
-  SaveSequenceBasedFeatures(features_plot)
+  if (output_pdfs){
+    features_plot <- PlotSequenceBasedFeatures(features_plot_data)
+    
+    SaveSequenceBasedFeatures(features_plot)
+  }
 
   WriteSequenceBasedFeatures(features_plot_data)
 
@@ -467,9 +479,11 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
     
     cod_dens_tRNA_wide <- GatherCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_data)
     
-    cod_dens_tRNA_plot <- PlotCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_wide)
-
-    SaveCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_plot)
+    if(output_pdfs){
+      cod_dens_tRNA_plot <- PlotCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_wide)
+      
+      SaveCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_plot)
+    }
     
     WriteGatheredCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_wide)
     
