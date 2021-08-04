@@ -113,9 +113,14 @@ meta_read_counts_start_stop, meta_reads_start_stop, all_reads_meta_transcript, r
 
 A Meta Feature plot showing the total number of reads present within 50nt of the start and stop codons. The reads occurring at each position for each gene are summed to give a total for each position, then plotted. It is expected to see a large peak just upstream of the start codon, due to ribosome binding being the slow step of translation, the regular repeating smaller peaks, showing 3nt periodicity, as the majority of reads will map to the first nucleotide of a codon. If the expected features are not seen, then it is possible that there is a problem with annotation files, the adapter listed in the config files or the dataset used is of low quality. 
 
-![Good quality 3nt_periodicity plot](https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/3nt_periodicity.jpg)
+Good quality 3nt periodicity plot:
 
-![3nt_periodicity plot with poor annotation files](https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/bad_3nt_periodicity.jpg)
+<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/3nt_periodicity.jpg" alt="Good quality 3nt_periodicity plot" width="500"/>
+
+3nt periodicity plot produced using incorrect annotation files:
+
+<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/bad_3nt_periodicity.jpg" alt="poor quality 3nt_periodicity plot" width="500"/>
+
 
 *Potential names*
 
@@ -140,7 +145,10 @@ Length	Counts
 
 A bar chart showing the lengths of the reads detected in the sample. It is expected that the majority of reads will be 28-31 nt long. A good file to check first when running a new dataset, as if the reads peak in the expected range then it is a good indication of a successful run. If no reads are detected then it is a clear indication of something going wrong, potentially the wrong UMI expression or adapter sequence being used, leading to reads being unable to align to annotation files.
 
-![example read_lengths plot](https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/read_lengths.jpg)
+Example read_lengths plot:
+
+<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/read_lengths.jpg" alt="poor quality read_lengths plot" width="500"/>
+
 
 ## `pos_sp_nt_freq.tsv`
 
@@ -164,7 +172,9 @@ read_nt_compostion, nt_freq_read_length, read_nt_freq
 
 A pdf that shows the mean number of reads mapping to each position upstream and downstream of the start and stop codon for all genes. It is expected to have a peak at the start codon, with the majority of following positions having a relatively consistent mean. 
 
-![Example pos_sp_rpf_norm_reads.pdf](https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/pos_sp_rpf_norm_reads.jpg)
+Example pos_sp_rpf_norm_reads plot:
+
+<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/pos_sp_rpf_norm_reads.jpg" alt="pos_sp_rpf_norm_reads plot" width="500"/>
 
 *Potential names*
 
@@ -192,7 +202,9 @@ norm_reads_transcript, norm_reads_start_stop
 
 Only output if `--features-file` was defined.
 
-![Example features plot](https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/features.jpg)
+Example features plot:
+
+<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/features.jpg" alt=" features plot" width="500"/>
 
 ## `tpms.tsv`
 
@@ -228,7 +240,9 @@ Only output if `--t-rna-file` and `--codon-positions-file` were defined.
 
 ## `codon_ribodens.pdf` 
 
-![Example codon_ribodens](https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/codon_ribodens.jpg)
+Example codon_ribodens plot:
+
+<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/codon_ribodens.jpg" alt="codon_ribodens plot" width="500"/>
 
 Only output if `--t-rna-file` and `--codon-positions-file` were defined.
 
@@ -237,7 +251,9 @@ Only output if `--t-rna-file` and `--codon-positions-file` were defined.
 
 A meta feature bar chart showing the number of reads occurring at positions around the start codons of genes, faceted by read length. As the majority of reads will be 28-31 nt in length, only bar charts for lengths 26-32 nt are shown. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. Note: the Y axis scale will vary for each read length. 
 
-![Example startcodon_ribogridbar](https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/startcodon_ribogridbar.jpg)
+Example startcodon_ribogridbar:
+
+<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/startcodon_ribogridbar.jpg" alt="startcodon_ribogridbar plot" width="500"/>
 
 *Potential names*
 
@@ -247,7 +263,9 @@ startcodon_gridbar, start_gridbar_readlen, readlen_gridbar_start
 
 A meta feature heatmap showing the number of reads occurring at positions around the start codons of genes with the y axis as read length, and the colour intensity showing read count. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, shown by an intense dark purple, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. 
 
-![Example startcodon_ribogrid](https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/startcodon_ribogrid.jpg)
+Example startcodon_ribogrid:
+
+<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/startcodon_ribogrid.jpg" alt="startcodon_ribogrid plot" width="500"/>
 
 *Potential names*
 
@@ -273,6 +291,8 @@ Only output if `--asite-disp-length-file` was defined.
 
 A box plot of the proportion of reads mapping to each nucleotide of a codon for each ORF, with the first codon being denoted as Frame 0, the second being Frame 1 and the 3rd being Frame 2. It is expected that the majority of reads will be mapping to the first nucleotide, Frame 0, so this box will be higher than the others. 
 
-![Example 3ntframe_propbygene](https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/3ntframe_propbygene.jpg)
+Example 3ntframe_propbygene:
+
+<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/3ntframe_propbygene.jpg" alt="3ntframe_propbygene plot" width="500"/>
 
 Only output if `--asite-disp-length-file` was defined.
