@@ -1422,7 +1422,7 @@ interactive_viz_params_yaml = new Yaml().dump(interactive_viz_params)
 // this will write out the required params to a new yaml file
 // for use by run_shiny_server.R script.
 process createInteractiveVizParamsConfigFile {
-    publishDir "${params.dir_out}", mode: 'copy', overwrite: true
+    publishDir "${dir_out}", mode: 'copy', overwrite: true
     input:
       val interactive_viz_params_yaml from interactive_viz_params_yaml
      output:
