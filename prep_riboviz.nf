@@ -1408,7 +1408,7 @@ process staticHTML {
 
 // collect only parameters needed for interactive visualization (riboviz/#275)
 Map interactive_viz_params = [:]
-interactive_viz_params.dir_in = params.dir_in
+interactive_viz_params.dir_in = dir_in
 interactive_viz_params.fq_files = params.fq_files
 interactive_viz_params.sample_sheet = params.sample_sheet
 interactive_viz_params_yaml = new Yaml().dump(interactive_viz_params)
