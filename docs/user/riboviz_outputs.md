@@ -85,7 +85,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 
 ## `<SAMPLE_ID>_output_report.html` 
 
-This output report in .html format contains a provenance section for the sample run, all the plots produced, and information on any plots not produced multiple figures output by riboviz. This file is produced by AnalysisOutputs.Rmd, which loads and creates all of the output graphs in HTML format.
+This output report in .html format contains a provenance section for the sample run, multiple figures produced by riboviz, and information on any plots not produced such as what files would be needed to produce them in the future. This file is produced by AnalysisOutputs.Rmd, which loads and creates all of the output graphs in HTML format.
 
 The HTML includes a side bar to allow for navigation between figures.
 
