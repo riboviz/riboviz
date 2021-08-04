@@ -1408,6 +1408,32 @@ process staticHTML {
       """
 }
 
+
+// collect only parameters needed for interactive visualization (riboviz/#275)
+Map interactive_viz_params = [:]
+interactive_viz_params.dir_in = params.dir_in
+interactive_viz_params.fq_files = params.fq_files
+interactive_viz_params.sample_sheet = params.sample_sheet
+interactive_viz_params_yaml = new Yaml().dump(interactive_viz_params)
+
+// create new yaml used only for interactive visualization (riboviz/#275, riboviz/#239)
+// this will write out dir_in, fq_files and sample_sheet to a new yaml file
+// for use by run_shiny_server.R script.
+// NOTE: fq_files & sample_sheet don't use environment tokens, are relative to dir_in
+// however dir_in MAY use environment tokens but these are handled above in the script
+process createInteractiveVizParamsConfigFile {
+    publishDir "${params.dir_out}", mode: 'copy', overwrite: true
+    input:
+      val interactive_viz_params_yaml from interactive_viz_params_yaml
+     output:
+      file "interactive_viz_config.yaml" into interactive_viz_params_config_file_yaml
+    shell:
+      """
+      echo "${interactive_viz_params_yaml}" > "interactive_viz_config.yaml"
+      """
+}
+
+
 finished_viz_sample_id
     .ifEmpty { exit 1, "No sample was visualised successfully" }
     .view { "Finished visualising sample: ${it}" }
