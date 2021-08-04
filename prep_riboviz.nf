@@ -1407,17 +1407,20 @@ process staticHTML {
 
 
 // collect only parameters needed for interactive visualization (riboviz/#275)
+// NOTE: fq_files, dataset & sample_sheet don't use environment tokens, are relative to dir_in
+// however dir_in, dir_out and features_file MAY use environment tokens but these are handled above in the script
 Map interactive_viz_params = [:]
 interactive_viz_params.dir_in = dir_in
+interactive_viz_params.dir_out = dir_out
+interactive_viz_params.dataset = params.dataset
 interactive_viz_params.fq_files = params.fq_files
 interactive_viz_params.sample_sheet = params.sample_sheet
+interactive_viz_params.features_file = features_file.toString()
 interactive_viz_params_yaml = new Yaml().dump(interactive_viz_params)
 
 // create new yaml used only for interactive visualization (riboviz/#275, riboviz/#239)
-// this will write out dir_in, fq_files and sample_sheet to a new yaml file
+// this will write out the required params to a new yaml file
 // for use by run_shiny_server.R script.
-// NOTE: fq_files & sample_sheet don't use environment tokens, are relative to dir_in
-// however dir_in MAY use environment tokens but these are handled above in the script
 process createInteractiveVizParamsConfigFile {
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
     input:
