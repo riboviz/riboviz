@@ -338,6 +338,9 @@ params.stop_in_cds = false
 params.samsort_memory = null
 params.validate_only = false
 params.skip_inputs = false
+params.time_override=false
+params.time_mult=3
+params.default_time="2h"
 
 if (params.publish_index_tmp)
 {
@@ -447,6 +450,7 @@ Validate input files.
 
 sample_id_fq = [:]
 multiplex_id_fq = [:]
+file_size_dict=[:] // saves the size of each file
 multiplex_sample_sheet_tsv = Channel.empty()
 is_multiplexed = false
 if (params.validate_only && params.skip_inputs) {
@@ -469,6 +473,8 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
             sample_fq = file("${dir_in}/${entry.value}")
             if (sample_fq.exists()) {
                 sample_id_fq[entry.key] = sample_fq
+                File tmp_file = new File("${dir_in}/${entry.value}")
+                file_size_dict[entry.key] = tmp_file.length()
             } else {
                 println("No such sample file ($entry.key): $entry.value")
             }
@@ -571,6 +577,10 @@ if (! params.containsKey('orf_gff_file')) {
 orf_gff_file = file(replace_tokens(params.orf_gff_file, riboviz_env_paths))
 if (! orf_gff_file.exists()) {
     exit 1, "No such ORF GFF file (orf_gff_file): ${orf_gff_file}"
+}else{
+    //read the size of the gff file
+    File tmp_file = new File(replace_tokens(params.orf_gff_file, riboviz_env_paths))
+    file_size_dict["gff"] = tmp_file.readLines().size
 }
 orf_gff = Channel.fromPath(orf_gff_file, checkIfExists: true)
 
@@ -649,6 +659,34 @@ if (params.validate_only) {
     exit 0, "Validated configuration"
 }
 
+// calculate the time
+process_time=[:]
+execution_cpu=[:]
+execution_cpu["single_core"]=1
+execution_cpu["multiple_core"]=params.num_processes
+
+for ( e in file_size_dict ) {
+    if (e.key=='gff'){
+        continue
+    }
+    for (task in ["cutadapt","hisat2rrna","hisat2orf","samviewsort","bamtoh5"]){
+        if (params.time_override){
+            process_time[e.key+task]=params.default_time
+        }else{
+            def cmd ="python -m riboviz.tools.estimate_time -s ${e.value} -g ${file_size_dict['gff']} -p ${params.num_processes} -t ${task}" 
+            def proc =cmd.execute() 
+            // the estimated time is obtained by the exit code of the script
+            proc.waitFor()
+            // multiply the estimated time have more redundancy
+            def reture_value=proc.exitValue() * params.time_mult * 60
+            process_time[e.key+task]=reture_value.toString()+"s"
+        }
+    }
+}
+// add prefix shell command for the SGE executor
+
+params.prefix_shell=""
+
 /*
 Indexing.
 */
@@ -713,7 +751,7 @@ process cutAdapters {
     when:
         (! is_multiplexed)
     shell:
-        """
+        params.prefix_shell+"""
         cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} \
             -o trim.fq ${sample_fq} -j 0
         """
@@ -765,7 +803,7 @@ process cutAdaptersMultiplex {
     when:
         is_multiplexed
     shell:
-        """
+        params.prefix_shell+"""
         cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} \
             -o ${multiplex_id}_trim.fq ${multiplex_fq} -j 0
         """
@@ -896,7 +934,7 @@ process hisat2rRNA {
         tuple val(sample_id), file("nonrRNA.fq") into non_rrna_fq
         tuple val(sample_id), file("rRNA_map.sam") into rrna_map_sam
     shell:
-        """
+        params.prefix_shell+"""
         hisat2 --version
         hisat2 -p ${params.num_processes} -N 1 -k 1 \
             --un nonrRNA.fq --no-unal \
@@ -917,7 +955,7 @@ process hisat2ORF {
         tuple val(sample_id), file("unaligned.fq") into unaligned_fq
         tuple val(sample_id), file("orf_map.sam") into trim_5p_mismatches
     shell:
-        """
+        params.prefix_shell+"""
         hisat2 --version
         hisat2 -p ${params.num_processes} -k 2 \
             --no-spliced-alignment --rna-strandness F --no-unal \
@@ -951,7 +989,7 @@ process trim5pMismatches {
         tuple val(sample_id), file("trim_5p_mismatch.tsv") \
             into trim_summary_tsv
     shell:
-        """
+        params.prefix_shell+"""
         python -m riboviz.tools.trim_5p_mismatch -m 2 \
             -i ${sample_sam} -o orf_map_clean.sam -s trim_5p_mismatch.tsv
         """
@@ -975,7 +1013,7 @@ process samViewSort {
             file("orf_map_clean.bam.bai") into orf_map_bam
     shell:
         memory = params.samsort_memory != null ? "-m ${params.samsort_memory}" : ""
-        """
+        params.prefix_shell+"""
         samtools --version
         samtools view -b ${sample_sam} | samtools sort ${memory} \
             -@ ${params.num_processes} -O bam -o orf_map_clean.bam -
@@ -1103,7 +1141,7 @@ process makeBedgraphs {
     when:
         params.make_bedgraph
     shell:
-        """
+        params.prefix_shell+"""
         bedtools --version
         bedtools genomecov -ibam ${sample_bam} -trackline -bga -5 \
             -strand + > plus.bedgraph
@@ -1126,7 +1164,7 @@ process bamToH5 {
     shell:
         secondary_id_flag = (secondary_id != null) \
             ? "--secondary-id=${secondary_id}" : ''
-        """
+        params.prefix_shell+"""
         Rscript --vanilla ${workflow.projectDir}/rscripts/bam_to_h5.R \
            --num-processes=${params.num_processes} \
            --min-read-length=${params.min_read_length} \
@@ -1216,7 +1254,7 @@ process generateStatsFigs {
             ? "--asite-disp-length-file=${asite_disp_length_txt}" : ''
         count_threshold_flag = params.containsKey('count_threshold') \
             ? "--count-threshold=${params['count_threshold']}": ''
-        """
+        params.prefix_shell+"""
         Rscript --vanilla ${workflow.projectDir}/rscripts/generate_stats_figs.R \
            --num-processes=${params.num_processes} \
            --min-read-length=${params.min_read_length} \
@@ -1320,7 +1358,7 @@ process countReads {
         //    are to be counted into this process's work directory.
         //    This would require a new implementation of
         //    riboviz.tools.count_reads.
-        """
+        params.prefix_shell+"""
         echo "${ribosome_fqs_yaml}" > ribosome_fqs.yaml
         python -m riboviz.tools.count_reads \
            -c ribosome_fqs.yaml \
@@ -1400,7 +1438,7 @@ process staticHTML {
       script += "intermediates_dir = '\$PWD', "
       script += "output_format = 'html_document', "
       script += "output_file = '\$PWD/${sample_id}_output_report.html')"
-      """
+      params.prefix_shell+"""
       Rscript -e "${script}"
       """
 }
