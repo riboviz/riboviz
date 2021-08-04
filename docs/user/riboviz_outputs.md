@@ -4,8 +4,11 @@ This document lists the output files from a typical riboviz run, along with shor
 
 Descriptions of specific files can be located quickly using the following links:
 
+**Output files for an entire run**
 * [TPMs_collated.tsv](#tpms_collatedtsv)
 * [read_counts.tsv](#read_countstsv)
+
+**Output files for each samples** 
 * [<SAMPLE_ID>_output_report.html](#sample_id_output_reporthtml)
 * [<SAMPLE_ID>.bam](#sample_idbam)
 * [<SAMPLE_ID>.bam.bai](#sample_idbambai)
