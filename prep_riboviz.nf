@@ -1405,40 +1405,31 @@ process staticHTML {
       """
 }
 
-// create 'new' yaml for use in helperViz process
-// replace with variable with selected parameters required by
-//   shiny_final.R ahead of riboviz/#274 (e.g. analysis_outputs_inputs_yaml)
-helper_config_yaml = new Yaml().dump(params)
 
-// more fun with config yamls - create one for helperViz
-process createHelperConfigFile {
+// collect only parameters needed for interactive visualization (riboviz/#275)
+Map interactive_viz_params = [:]
+interactive_viz_params.dir_in = params.dir_in
+interactive_viz_params.fq_files = params.fq_files
+interactive_viz_params.sample_sheet = params.sample_sheet
+interactive_viz_params_yaml = new Yaml().dump(interactive_viz_params)
+
+// create new yaml used only for interactive visualization (riboviz/#275, riboviz/#239)
+// this will write out dir_in, fq_files and sample_sheet to a new yaml file
+// for use by run_shiny_server.R script.
+// NOTE: fq_files & sample_sheet don't use environment tokens, are relative to dir_in
+// however dir_in MAY use environment tokens but these are handled above in the script
+process createInteractiveVizParamsConfigFile {
     publishDir "${params.dir_out}", mode: 'copy', overwrite: true
     input:
-      val helper_config_yaml from helper_config_yaml
+      val interactive_viz_params_yaml from interactive_viz_params_yaml
      output:
-      file "helper_config.yaml" into helper_config_file_yaml
+      file "interactive_viz_config.yaml" into interactive_viz_params_config_file_yaml
     shell:
       """
-      echo "${helper_config_yaml}" > "helper_config.yaml"
+      echo "${interactive_viz_params_yaml}" > "interactive_viz_config.yaml"
       """
 }
 
-
-// create helper script to generate interactive visualization command: riboviz/#275
-process helperViz {
-    publishDir "${params.dir_out}", mode: 'copy', overwrite: true
-    input:
-      file helper_config_file_yaml from helper_config_file_yaml
-    output:
-      file "interactive_viz.sh" into interactive_viz_sh
-    shell:
-      script = "Rscript -e "
-      script += "'${workflow.projectDir}/rscripts/run_shiny_server.R' "
-      script += "'${params.dir_out}/helper_config.yaml'"
-      """
-      echo "${script}" > "interactive_viz.sh"
-      """
-}
 
 finished_viz_sample_id
     .ifEmpty { exit 1, "No sample was visualised successfully" }
