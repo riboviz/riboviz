@@ -18,6 +18,7 @@ Quick start:
 
 * [Install RiboViz and dependencies](./docs/user/install.md)
 * [Quick install scripts](./docs/user/quick-install.md) (Ubuntu and CentOS only)
+* [Generate YAML configuration file](https://riboviz.shinyapps.io/generate-yaml/)
 * [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./docs/user/run-vignette.md). Run a "vignette" of the **RiboViz** workflow to see **RiboViz**'s capabilities.
 * [Run UMI extraction, deduplication and demultiplexing examples](./docs/user/run-dedup-demultiplex-examples.md). Run **RiboViz** on simulated data, to see how **RiboViz** handles duplicated and multiplexed data.
 * [Upgrade configuration files from RiboViz 1.x](./docs/user/upgrade-1x.md)
