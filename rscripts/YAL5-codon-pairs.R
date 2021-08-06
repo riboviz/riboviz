@@ -650,10 +650,32 @@ print('Normalising data')
 #' ExpandedRegionNormalization(expand_feature_region, expand_width = 5L)
 #' 
 #' @export 
-ExpandedRegionNormalization <- function(.x, expand_width){
+ExpandedRegionNormalization <- function(gene_poscodon_codon_i200, 
+                                        gene_names, dataset, hd_file, 
+                                        min_read_length, colsum_out, 
+                                        gff_df, feature_of_interest,
+                                        expand_width, 
+                                        remove_overhang = TRUE,
+                                        snapdisp, filter_for_frame){
   
+  expand_feature_region <- ExpandFeatureRegion(gene_poscodon_codon_i200, 
+                                               gene_names, dataset, hd_file, 
+                                               min_read_length, colsum_out, 
+                                               gff_df, feature_of_interest,
+                                               expand_width, 
+                                               remove_overhang = TRUE,
+                                               snapdisp, filter_for_frame)
+  Normalization <- function(.x, expand_width){
   # dplyr::mutate(.x, RelCount = PerCodonCounts / sum(PerCodonCounts) * (2 * expand_width + 1))
   dplyr::mutate(.x, RelCount = Count / sum(Count) * (2 * expand_width + 1))
+  }
+  
+  normalized_expand_list <- purrr::map(
+    .x = expand_feature_region,
+    .f = Normalization,
+    expand_width = 5L
+  )
+  
   
 }
 #TEST: ExpandedRegionNormalization(): creates a tidy format data frame (tibble) = TRUE
@@ -673,14 +695,14 @@ ExpandedRegionNormalization <- function(.x, expand_width){
 
 # normalized_expanded_feature_region <- ExpandedRegionNormalization(expand_feature_region[[1]], expand_width = 5L)
 
+normalized_expand_list <- ExpandedRegionNormalization(gene_poscodon_codon_i200, 
+                                                                  gene_names, dataset, hd_file, 
+                                                                  min_read_length, colsum_out, 
+                                                                  gff_df, feature_of_interest,
+                                                                  expand_width, 
+                                                                  remove_overhang = TRUE,
+                                                                  snapdisp, filter_for_frame = FALSE)
 
-
-# Normalization carried out for all the tibbles within ExpandList 
-normalized_expand_list <- purrr::map(
-  .x = expand_feature_region,
-  .f = ExpandedRegionNormalization,
-  expand_width = 5L
-)
 
 # TEST:: normalised_expand_list should be of type list
 # type(normalized_expand_list)
