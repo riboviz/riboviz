@@ -1,7 +1,7 @@
-# YAL5_h5 is at location $HOME/riboviz/riboviz/Mok-simYAL5/output/A/A.h5
-
 # Given an h5 file, GFF file and .tsv file, this script creates a metafeature plot 
 # for the feature of interest
+
+## TEST: run on TinySim Dataset 
 
 print('Starting process')
 
@@ -67,39 +67,37 @@ snapdisp <- 0L
 # 
 
 gff_df <- readGFFAsDf(gff)
+
+## TEST: When running on tidy sim data set, the gff appears as follows
+# There are 2 genes, MAT and MIKE, which have CDSs flanked by 20nt 
+
+# > gff_df
+# # A tibble: 6 x 10
+# seqnames start   end width strand source   type  score phase Name 
+# <fct>    <int> <int> <int> <fct>  <fct>    <fct> <dbl> <int> <chr>
+#   1 MAT          1    20    20 +      ewallace UTR5     NA    NA MAT  
+# 2 MAT         21    32    12 +      ewallace CDS      NA    NA MAT  
+# 3 MAT         33    52    20 +      ewallace UTR3     NA    NA MAT  
+# 4 MIKE         1    20    20 +      ewallace UTR5     NA    NA MIKE 
+# 5 MIKE        21    35    15 +      ewallace CDS      NA    NA MIKE 
+# 6 MIKE        36    55    20 +      ewallace UTR3     NA    NA MIKE 
+
+
 gene_names <- unique(gff_df$Name)
 
-# The GFF file for the simulated dataset, given the general name gff_df so that 
-# the script does not have to change based on different gff_df files being used 
 
 # Import the .tsv file: 
+
 yeast_codon_pos_i200 <- suppressMessages(readr::read_tsv(file = yeast_codon_table))
 
-  # head(yeast_codon_pos_i200) 
-  # 
-  # # A tibble: 6 x 3
-  # Gene    PosCodon Codon
-  # <chr>      <dbl> <chr>
-  #   1 YAL068C        1 ATG  
-  # 2 YAL068C        2 GTC  
-  # 3 YAL068C        3 AAA  
-  # 4 YAL068C        4 TTA  
-  # 5 YAL068C        5 ACT  
-  # 6 YAL068C        6 TCA
 
+# > str(yeast_codon_pos_i200)
+# spec_tbl_df [2,826,757 x 3] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+# $ Gene    : chr [1:2826757] "YAL068C" "YAL068C" "YAL068C" "YAL068C" ...
+# $ PosCodon: num [1:2826757] 1 2 3 4 5 6 7 8 9 10 ...
+# $ Codon   : chr [1:2826757] "ATG" "GTC" "AAA" "TTA" ...
 
-
-
-# Filter down the yeast_codon_pos_i200 file to the gene that you are 
-# working with, in this case YAL003W
-# YAL003W_pos <- dplyr::filter(yeast_codon_pos_i200, Gene=="YAL003W")
-
-
-print('Creating information tibble')
-
-# YAL003W_pos <- dplyr::filter(gene_poscodon_codon_i200, Gene=="YAL003W")
-gene <- 'YAL038W'
-
+print('Get codon positions and read counts')
 
 
 
@@ -120,6 +118,42 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
   )
   SnapToCodon(reads_asitepos, left, right, snapdisp)
 }
+
+## TEST:: CalAsiteFixed:
+#
+# mat_datamatrix <- GetGeneDatamatrix('MAT', dataset, hd_file)
+# mike_datamatrix <- GetGeneDatamatrix('MIKE', dataset, hd_file) 
+#
+# asite_mat <- CalcAsiteFixed(mat_datamatrix, min_read_length = 10, asite_displacement_length)
+# mat_tibble <- tibble(counts =asite_mat,
+#                      pos = 1:length(asite_mat))
+#
+# mat_tibble <- tibble(pos = 1:length(asite_mat)
+#                      counts =asite_mat)
+#
+# 
+# asite_mike <- CalcAsiteFixed(mike_datamatrix, min_read_length = 10, asite_displacement_length)
+# mike_tibble <- tibble(counts = asite_mike,
+#                       pos = 1:length(asite_mike))
+# 
+# mike_tibble <- tibble(pos = 1:length(asite_mike)
+#                       counts =asite_mike)
+#
+# Expected contents of mat_tibble 
+#
+# pos   counts
+# <int>  <dbl>
+# 19    1
+# 25    1
+# 26    1
+# 27    2
+# 
+# Expected contents of mike_tibble
+#   
+# pos   counts
+# <int>  <dbl>
+# 20    1
+# 25    1
 
 
 FilterForFrameFunction <- function(gene, dataset, hd_file, asite_displacement_length ,reads_asitepos, left, right){
@@ -176,50 +210,6 @@ FilterForFrameFunction <- function(gene, dataset, hd_file, asite_displacement_le
 #' 
 #' @return a tibble which contains the columns "Gene", "PosCodon" and "Count" for a list of genes
 #' 
-#' @example 
-#' 
-#' gff_df <- readGFFAsDf(gff)
-#' 
-#' GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 0L)
-#' 
-#' @export 
-#' 
-#' 
-# GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, snapdisp){
-#   
-#   GetAllCodonPosCounts1Gene <- function(gene, dataset, hd_file, min_read_length, asite_displacement_length, snapdisp){
-#     
-#     subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene) 
-#     
-#     left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(start))
-#     
-#     right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(end))
-#     
-#     asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", 
-#                                                                                 "yeast_standard_asite_disp_length.txt"))
-#     
-#     codon_counts_1_gene <- GetGeneCodonPosReads1dsnap(gene, dataset, hd_file, left, right, min_read_length, asite_displacement_length, snapdisp = 0L)
-#     
-#     codon_pos_counts <- tibble(Gene = gene,
-#                                 PosCodon = 1:length(codon_counts_1_gene),
-#                                 Count = codon_counts_1_gene)
-#     
-#     as.data.frame(codon_pos_counts, row.names = NULL, optional = FALSE)
-#     
-#     return(codon_pos_counts)
-#     
-#   }
-#   
-#   total_codon_pos_counts <- purrr::map_dfr(.x = gene_names,
-#                                        .f = GetAllCodonPosCounts1Gene,
-#                                        dataset,
-#                                        hd_file,
-#                                        min_read_length,
-#                                        snapdisp,
-#                                        )
-#   
-#   return (total_codon_pos_counts)
-# }
 
 
 GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, snapdisp, filter_for_frame){
@@ -287,10 +277,32 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
 #   $ Gene    : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
 #   $ PosCodon: int  1 2 3 4 5 6 7 8 9 10 ...
 #   $ Count   : num  4249 825 1017 1176 1116 ...
+# 
+# 
+# #TEST:: GetAllCodonPosCounts example with tinysim, filter_for_frame = FALSE
+# 
+# 
+# Gene      PosCodon  Count
+# 1 MAT       1         0
+# 2 MAT       2         2
+# 3 MAT       3         2
+# 4 MAT       4         0
+# 5 MIKE      1         0
+# 6 MIKE      2         1
+# 7 MIKE      3         0
+# 8 MIKE      4         0
+# 9 MIKE      5         0
+#
+## TEST:: GetAllCodonPosCounts example with tinysim, filter_for_frame = TRUE
+# 
+# Gene      PosCodon  Count
+# MAT       3         2
+# 
+# this is expected as only reads mapping to the first nucleotide of the codon are retained
+
+
 
 total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp, filter_for_frame)
-
-
 
 
     
