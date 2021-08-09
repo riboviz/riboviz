@@ -34,19 +34,19 @@ suppressMessages(library(argparse))
 # 
 # args <- parser$parse_args()
 
-hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
-dataset <- "Mok-simYAL5"
-feature_of_interest <- 'TCT'
-expand_width = 5L
+hd_file <- here::here("Mok-tinysim", "output", "A", "A.h5")
+dataset <- "Mok-tinysim"
+feature_of_interest <- 'GCC'
+expand_width = 1L
 startpos <-1
 startlen <- 10
 filtering_frame <- 0
 min_read_length <- 10
-yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
-gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
+yeast_codon_table <- here::here("Mok-tinysim", "tinysim_codon_pos.tsv")
+gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "tiny_2genes_20utrs.gff3")
 colsum_out <- TRUE
 output_dir <- '.'
-filter_for_frame <- TRUE
+filter_for_frame <- FALSE
 snapdisp <- 0L
 
 
@@ -63,8 +63,8 @@ snapdisp <- 0L
 # min_read_length <- args$minreadlen
 # colsum_out <- args$olsum_out
 # filter_for_frame <- args$filter_for_frame
+# snapdisp <- args$snapdisp
 
-# 
 
 gff_df <- readGFFAsDf(gff)
 
@@ -258,13 +258,14 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
                                            dataset,
                                            hd_file,
                                            min_read_length,
-                                           snapdisp,
+                                           snapdisp = snapdisp,
                                            filter_for_frame = filter_for_frame
   )
   
   return (total_codon_pos_counts)
 }
 
+total_codon_pos_counts <- suppressMessages(GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp, filter_for_frame))
 
 #TEST: GetAllCodonPosCounts(): returns a tibble. 
 #TEST: GetAllCodonPosCounts(): the tibble has 3 columns.
@@ -295,16 +296,20 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
 #
 ## TEST:: GetAllCodonPosCounts example with tinysim, filter_for_frame = TRUE
 # 
-# Gene      PosCodon  Count
-# MAT       3         2
+# A tibble: 9 x 3
+# Gene  PosCodon Count
+# <chr>    <int> <dbl>
+#   1 MAT          1     0
+# 2 MAT          2     0
+# 3 MAT          3     2
+# 4 MAT          4     0
+# 5 MIKE         1     0
+# 6 MIKE         2     0
+# 7 MIKE         3     0
+# 8 MIKE         4     0
+# 9 MIKE         5     0
 # 
 # this is expected as only reads mapping to the first nucleotide of the codon are retained
-
-
-
-total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp, filter_for_frame)
-
-
     
 AddCodonNamesToCodonPosCounts <- function(yeast_codon_pos_i200, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, filter_for_frame, snapdisp){
   
@@ -321,9 +326,32 @@ AddCodonNamesToCodonPosCounts <- function(yeast_codon_pos_i200, gene_names, data
   
   return(transcript_gene_pos_poscodon_frame)
 }   
-    
 
-transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, filter_for_frame, snapdisp)
+
+transcript_gene_pos_poscodon_frame <- suppressMessages(AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, filter_for_frame, snapdisp))
+
+
+##TEST: Expect to produce a tibble with each position in the CDS having the correct codon beside it.
+
+#TEST: AddCodonNamesToCodonPosCounts(): returns a tibble. 
+#TEST: AddCodonNamesToCodonPosCounts(): the tibble has 4 columns.
+#TEST: AddCodonNamesToCodonPosCounts(): the column names are %in% c("Gene", "PosCodon", "Count", "Codon").
+#TEST: AddCodonNamesToCodonPosCounts(): number of observations in the output tibble = sum of CDS (codon co-ordinates) for all genes in gene_names.
+#TEST: AddCodonNamesToCodonPosCounts(): the unique gene names in column "Gene" match the genes in gene_names (unique(total_codon_pos_counts$Gene) = gene_names) = TRUE.
+#gives: 
+#Example: using Mok-tinysim data, the following tibble is returned 
+# # A tibble: 9 x 4
+# Gene  PosCodon Count Codon
+# <chr>    <dbl> <dbl> <chr>
+#   1 MAT          1     0 ATG  
+# 2 MAT          2     2 GCC  
+# 3 MAT          3     2 ACA  
+# 4 MAT          4     0 TGA  
+# 5 MIKE         1     0 ATG  
+# 6 MIKE         2     1 ATC  
+# 7 MIKE         3     0 AAG  
+# 8 MIKE         4     0 GAG  
+# 9 MIKE         5     0 TAA  
 
         
 FilterForFeatureOfInterestPositions <- function(yeast_codon_pos_i200, gene, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, feature_of_interest, filter_for_frame, snapdisp ){
@@ -343,130 +371,30 @@ FilterForFeatureOfInterestPositions <- function(yeast_codon_pos_i200, gene, gene
   return(interesting_feature_table)
 }
 
+# gene <- 'MAT'
 
-ExpandFeatureRegion <- function(yeast_codon_pos_i200, 
-                                gene, gene_names, dataset, hd_file, 
-                                min_read_length, colsum_out, 
-                                gff_df, feature_of_interest,
-                                expand_width, 
-                                remove_overhang,
-                                filtering_frame,
-                                snapdisp) {
-  
-  transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, 
-                                                                      gene_names, 
-                                                                      dataset, 
-                                                                      hd_file, 
-                                                                      min_read_length, 
-                                                                      colsum_out, 
-                                                                      gff_df,
-                                                                      filter_for_frame,
-                                                                      snapdisp)
-  
-  
-  TranscriptForOneGene <- function(yeast_codon_pos_i200, 
-                                   gene, dataset, hd_file, 
-                                   min_read_length, colsum_out, 
-                                   gff_df, feature_of_interest, filter_for_frame,
-                                   snapdisp){
-    
-    interesting_feature_tibble <- FilterForFeatureOfInterestPositions(yeast_codon_pos_i200, 
-                                                                      gene, gene_names, dataset, hd_file, 
-                                                                      min_read_length, colsum_out, 
-                                                                      gff_df, feature_of_interest, filter_for_frame,
-                                                                      snapdisp)
-    
-    transcript_for_one_gene <- dplyr::filter(interesting_feature_tibble, Gene == gene)
-    
+# interesting_feature_table <- FilterForFeatureOfInterestPositions(yeast_codon_pos_i200, gene, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, feature_of_interest, filter_for_frame, snapdisp)
 
-    
-    return(transcript_for_one_gene)
-    
-  }
-  
-  transcript_for_one_gene <- TranscriptForOneGene(yeast_codon_pos_i200, 
-                                               gene, dataset, hd_file, 
-                                               min_read_length, colsum_out, 
-                                               gff_df, feature_of_interest, filter_for_frame,
-                                               snapdisp)
-  gene <- transcript_for_one_gene$Gene
- 
-  #if (remove_overhang) {
-  # return an empty tibble if the desired region hangs over the edge of the coding region
-  
-  ExpandRegions <- function(transcript_for_one_gene, gene, transcript_gene_pos_poscodon_frame, dataset, hd_file, expand_width, remove_overhang = TRUE){
-    
-    interesting_features <- transcript_for_one_gene
-    
-    transcript_gene_pos_poscodon_gene_interest <- dplyr::filter(transcript_gene_pos_poscodon_frame, Gene == gene)
-
-    gene_length <- GetGeneLength(gene, dataset, hd_file)
-  
-    if (interesting_features <= expand_width  |interesting_features + expand_width > gene_length/3) {
-      return()
-    } else {
-      output_feature_info <- tibble(
-        dplyr::slice(transcript_gene_pos_poscodon_gene_interest, (interesting_features - expand_width):(interesting_features + expand_width), each = FALSE),
-        Rel_Pos =  seq(- expand_width, expand_width)
-      )
-      
-      if(dim(output_feature_info)[1] == (2*expand_width + 1)){
-        
-        return(output_feature_info)
-      }else{
-        return()
-      }
-    }
-  }
-  # The if statement ensures that feature positions that are less/more than the 
-  # expand_width value are discarded 
-  output_feature_info <- purrr::map(.x = transcript_for_one_gene$PosCodon, .f = ExpandRegions,
-                                    gene, 
-                                    transcript_gene_pos_poscodon_frame,
-                                    dataset,
-                                    hd_file,
-                                    expand_width,
-                                    remove_overhang)
-  
-  return(output_feature_info)
-}
-
-
-# output_feature_info <- purrr::map(.x = interesting_features, .f = ExpandRegion,
-#                                   transcript_gene_pos_poscodon_frame,
-#                                   gene, 
-#                                   dataset, 
-#                                   hd_file, 
-#                                   expand_width, 
-#                                   remove_overhang = TRUE)
-
-#TEST: ExpandFeatureRegion(): creates a tidy format data frame (tibble) = TRUE
-#TEST: ExpandFeatureRegion(): the tibble contains 5 columns = TRUE
-#TEST: ExpandFeatureRegion(): the column names are %in% c("Gene", "CodonPos1", "CodonPos2", "Count", "Rel_Pos") 
-#TEST: ExpandFeatureRegion(): number of observations in the output tibble = "expand_width" * 2 + 1, if "expand_width" = 5L the number of observations should be 11
-#TEST: ExpandFeatureRegion(): the position from "interesting_feature_positions" has "Rel_Pos" value 0 = TRUE
-#TEST: ExpandFeatureRegion(): the column "Rel_Pos" goes from -"expand_width to +"expand_width"
+# When run individually FilterForFeatureOfInterestPositions will only run on an individual gene, so needs a gene name as an input.
+#TEST: FilterForFeatureOfInterestPositions(): returns a tibble if there is at least one occurrence of the feature_of_interest.
+#TEST: FilterForFeatureOfInterestPositions(): returns an empty tibble if there are no occurrences of the feature_of_interest 
+#TEST: FilterForFeatureOfInterestPositions(): the tibble has 4 columns.
+#TEST: FilterForFeatureOfInterestPositions(): the column names are %in% c("Gene", "PosCodon", "Count", "Codon").
+#TEST: FilterForFeatureOfInterestPositions(): number of observations in the output tibble = number of occurances of the feature of interest in the gene being studied .
+#TEST: FilterForFeatureOfInterestPositions(): the unique gene names in column "Gene" match the genes in gene_names (unique(total_codon_pos_counts$Gene) = gene_names) = TRUE.
 #gives: 
-# > str(output_feature_info)
-# Classes 'tbl_df', 'tbl' and 'data.frame':   11 observations of 6 variables
-# $ Gene     : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-# $ CodonPos1: num [1:11] 2 3 4 5 6 7 8 9 10 11 ...
-# $ CodonPos2: num [1:11] 3 4 5 6 7 8 9 10 11 12 ...
-# $ Count    : num [1:11] 825 1017 1176 1116 284 ...
-# $ CodonPair: chr [1:11] "GCA TCC" "TCC ACC" "ACC GAT" "GAT TTC" ...
-# $ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
-
-# output_feature_info <- ExpandFeatureRegion(yeast_codon_pos_i200, 
-#                                            gene, gene_names, dataset, hd_file, 
-#                                            min_read_length, colsum_out, 
-#                                            gff_df, feature_of_interest, 
-#                                            expand_width, remove_overhang, filter_for_frame)
+#Example: using Mok-tinysim data, when feature_of_interest is GCC and gene is MAT, the following tibble is returned 
+# # A tibble: 1 x 4
+# Gene  PosCodon Count Codon
+# <chr>    <dbl> <dbl> <chr>
+#   1 MAT          2     2 GCC
 
 
+## Slice out interesting features
 
-
-# try for all genes 
-
+# ExpandFeatureRegionAllGenes takes a slice out of transcript_gene_pos_poscodon_frame, centered on the position of the feature of interest
+# It then sets the position of the feature of interest to 0, and changes the positions of adjacent codons to be relative to the feature of interest
+# This is done for all occurrences of the feature of interest on all genes in the sample provided.
 
 ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200, 
                                 gene_names, dataset, hd_file, 
@@ -493,7 +421,7 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
                                          min_read_length, colsum_out, 
                                          gff_df, feature_of_interest, transcript_gene_pos_poscodon_frame,
                                          filter_for_frame){ 
-    print(gene)
+    print(paste('Checking',gene))
     
     TranscriptForOneGene <- function(yeast_codon_pos_i200, 
                                      gene, gene_names, dataset, hd_file, 
@@ -523,7 +451,7 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
       
       transcript_gene_pos_poscodon_gene_interest <- dplyr::filter(transcript_gene_pos_poscodon_frame, Gene == gene)
       
-      gene_length <- GetGeneLength(gene, dataset, hd_file)
+      gene_length <- filter(gff_df, gff_df$type == 'CDS' & gff_df$Name == gene)$width
       
       if (interesting_features <= expand_width  |interesting_features + expand_width > gene_length/3) {
         return()
@@ -578,12 +506,44 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
 }
 
 
-output_feature_info <- ExpandFeatureRegionAllGenes(yeast_codon_pos_i200 = yeast_codon_pos_i200, 
+output_feature_info <- suppressMessages(ExpandFeatureRegionAllGenes(yeast_codon_pos_i200 = yeast_codon_pos_i200, 
                                            gene_names = gene_names, dataset, hd_file, 
                                            min_read_length, colsum_out, 
                                            gff_df, feature_of_interest, 
-                                           expand_width, remove_overhang, filter_for_frame, snapdisp)
+                                           expand_width, remove_overhang, filter_for_frame, snapdisp))
 
+
+#TEST: ExpandFeatureRegionAllGenes(): creates an object of type "list" 
+#TEST: ExpandFeatureRegionAllGenes(): Returns an empty list if there are no occurrences of the feature_of_interest 
+#TEST: ExpandFeatureRegionAllGenes(): length(list) == nrow(interesting_feature_table)
+#TEST: ExpandFeatureRegionAllGenes(): the tibble contains 5 columns = TRUE
+#TEST: ExpandFeatureRegionAllGenes(): the column names are %in% c("Gene", "PosCodon", "Count", "Codon, "Rel_Pos") 
+#TEST: ExpandFeatureRegionAllGenes(): number of observations in the output tibble = "expand_width" * 2 + 1, so if "expand_width" = 5L the number of observations should be 11
+#TEST: ExpandFeatureRegionAllGenes(): the position from "interesting_feature_positions" has "Rel_Pos" value 0 = TRUE
+#TEST: ExpandFeatureRegionAllGenes(): the column "Rel_Pos" goes from -"expand_width to +"expand_width"
+## Example, tidysim with feature_of_interest == 'GCC' and expand_width == '1L'
+# [[1]]
+# # A tibble: 3 x 5
+# Gene  PosCodon Count Codon Rel_Pos
+# <chr>    <dbl> <dbl> <chr>   <int>
+#   1 MAT          1     0 ATG        -1
+# 2 MAT          2     2 GCC         0
+# 3 MAT          3     2 ACA         1
+
+
+
+
+if(length(output_feature_info) == 0){
+  print('No occurrances of the feature of interest')
+  
+  if(expand_width>1){
+    
+    print('Try script with an expand_width of 1L to check for occurances near to start or stop codon')
+  }
+  
+  print('Done')
+  stop()
+}
 
 
 
@@ -597,38 +557,57 @@ print('Normalising data')
 #' ExpandedRegionNormalization(): carries out normalization within each expanded frame 
 #' 
 #' Normalizes the ExpandFeatureRegion list generating a RelCount column with the normalization values.
-#' As this function is not looped it will only generate one normalized tibble for one occurence 
+#' As this function is not looped it will only generate one normalized tibble for each occurrence of the feature of interest 
 #' 
 #' @param .x which is the list of tidy format data frames (tibbles) generated by the function ExpandFeatureRegion
 #' @param expand_width integer which provides the number of positions on each side of the feature of interest to include in the window
 #' 
 #' @return the list of tibbles which contain the normalized counts within the window so that the feature is comparable despite overall varying levels of expression between genes 
 #' 
-#' @example 
-#' 
-#' ExpandedRegionNormalization(expand_feature_region, expand_width = 5L)
-#' 
+
+ 
+ 
+
 ExpandedRegionNormalization <- function(.x, expand_width){
   
   # dplyr::mutate(.x, RelCount = PerCodonCounts / sum(PerCodonCounts) * (2 * expand_width + 1))
-  dplyr::mutate(.x, RelCount = Count / sum(Count) * (2 * expand_width + 1))
+  normalized_expand_tibble <- dplyr::mutate(.x, RelCount = Count / sum(Count) * (2 * expand_width + 1))
   
+  CheckForNaN <- function(normalized_expand_tibble){
+    
+    Relcount_values <- unlist(normalized_expand_tibble$RelCount)
+    
+    SetNaNToZero <- function(Relcount_values){
+      
+      if(is.nan(Relcount_values)){
+        Relcount_values <- 0
+      }else{
+        Relcount_values <- Relcount_values 
+      }
+    }
+    Relcount_values <- unlist(purrr::map(.x = Relcount_values, .f = SetNaNToZero))
+    
+    dplyr::mutate(.x, RelCount = Relcount_values)
+  }
+  CheckForNaN(normalized_expand_tibble)
 }
+
 #TEST: ExpandedRegionNormalization(): creates a tidy format data frame (tibble) = TRUE
 #TEST: ExpandedRegionNormalization(): the tibble contains 5 columns = TRUE
 #TEST: ExpandedRegionNormalization(): the column names are %in% c("Gene", "Pos_Codon", "Rel_Count", "Rel_Pos", "RelCount")
 #TEST: ExpandedRegionNormalization(): number of observations in the output tibble = "expand_width"*2+1, if "expand_width" = 5L the number of observations should be 11
 #TEST: ExpandedRegionNormalization(): the column "Rel_Pos" goes from -"expand_width to +"expand_width" 
-#gives:
-# > str(normalized_expanded_region)
-# Classes 'tbl_df', 'tbl' and 'data.frame':   11 observations of 5 variables
-#   $ Gene     : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-#   $ Pos_Codon: num  2 3 4 5 6 7 8 9 10 11 ...
-#   $ Rel_Count: num  429 488 102 994 146 173 762 13 176 98 ...
-#   $ Rel_Pos  : int  -5 -4 -3 -2 -1 0 1 2 3 4 ...
-#   $ RelCount : num  1.347 1.532 0.32 3.12 0.458 ...
-
-# normalized_expanded_region <- ExpandedRegionNormalization(expand_feature_region[[1]], expand_width)
+#TEST: ExpandedRegionNormalization(): sum(normalized_expand_list[[1]]$RelCount)/nrow(normalized_expand_list[[1]]) == 1 
+#TEST: ExpandedRegionNormalizetion(): None of the RelCount columns should contain NaN. These should all be set to 0
+#
+# Example: using tinysim
+# A tibble: 3 x 6
+# Gene  PosCodon Count Codon Rel_Pos RelCount
+# <chr>    <dbl> <dbl> <chr>   <int>    <dbl>
+#   1 MAT          1     0 ATG        -1      0  
+# 2 MAT          2     2 GCC         0      1.5
+# 3 MAT          3     2 ACA         1      1.5
+#
 
 
 
@@ -638,6 +617,7 @@ normalized_expand_list <- purrr::map(
   .f = ExpandedRegionNormalization,
   expand_width
 )
+
 
 # TEST:: normalised_expand_list should be of type list
 # type(normalized_expand_list)
@@ -655,70 +635,6 @@ normalized_expand_list <- purrr::map(
 # ie if the expand width was 5:
 # sum(normalized_expand_list[[1]]$RelCount)
 # [1] 11
-
-
-  # > str(normalized_expand_list)
-  # List of 6
-  # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
-  # ..$ Gene     : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-  # ..$ Pos_Codon: num [1:11] 13 14 15 16 17 18 19 20 21 22 ...
-  # ..$ Rel_Count: num [1:11] 490 561 51 567 67 65 158 71 323 288 ...
-  # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
-  # ..$ RelCount : num [1:11] 1.367 1.565 0.142 1.582 0.187 ...
-  # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
-  # ..$ Gene     : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-  # ..$ Pos_Codon: num [1:11] 26 27 28 29 30 31 32 33 34 35 ...
-  # ..$ Rel_Count: num [1:11] 224 429 201 94 0 54 118 485 242 50 ...
-  # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
-  # ..$ RelCount : num [1:11] 1.067 2.043 0.957 0.448 0 ...
-  # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
-  # ..$ Gene     : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-  # ..$ Pos_Codon: num [1:11] 38 39 40 41 42 43 44 45 46 47 ...
-  # ..$ Rel_Count: num [1:11] 64 251 128 191 232 89 128 279 417 389 ...
-  # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
-  # ..$ RelCount : num [1:11] 0.293 1.148 0.585 0.874 1.061 ...
-  # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
-  # ..$ Gene     : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-  # ..$ Pos_Codon: num [1:11] 59 60 61 62 63 64 65 66 67 68 ...
-  # ..$ Rel_Count: num [1:11] 79 765 196 184 626 84 62 395 104 72 ...
-  # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
-  # ..$ RelCount : num [1:11] 0.312 3.026 0.775 0.728 2.476 ...
-  # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
-  # ..$ Gene     : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-  # ..$ Pos_Codon: num [1:11] 64 65 66 67 68 69 70 71 72 73 ...
-  # ..$ Rel_Count: num [1:11] 84 62 395 104 72 214 99 163 128 69 ...
-  # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
-  # ..$ RelCount : num [1:11] 0.435 0.321 2.044 0.538 0.373 ...
-  # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
-  # ..$ Gene     : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-  # ..$ Pos_Codon: num [1:11] 192 193 194 195 196 197 198 199 200 201 ...
-  # ..$ Rel_Count: num [1:11] 364 960 162 52 115 58 89 235 7 86 ...
-  # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
-  # ..$ RelCount : num [1:11] 1.686 4.446 0.75 0.241 0.533 ...
-
-
-    # > str(normalized_expand_list) for TCC
-    # List of 68
-    # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
-    # ..$ Gene     : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-    # ..$ Pos_Codon: num [1:11] 2 3 4 5 6 7 8 9 10 11 ...
-    # ..$ Rel_Count: num [1:11] 429 488 102 994 146 173 762 13 176 98 ...
-    # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
-    # ..$ RelCount : num [1:11] 1.347 1.532 0.32 3.12 0.458 ...
-    # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
-    # ..$ Gene     : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-    # ..$ Pos_Codon: num [1:11] 44 45 46 47 48 49 50 51 52 53 ...
-    # ..$ Rel_Count: num [1:11] 128 279 417 389 237 ...
-    # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
-    # ..$ RelCount : num [1:11] 0.341 0.744 1.111 1.037 0.632 ...
-    # $ : tibble [11 x 5] (S3: tbl_df/tbl/data.frame)
-    # ..$ Gene     : chr [1:11] "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-    # ..$ Pos_Codon: num [1:11] 52 53 54 55 56 57 58 59 60 61 ...
-    # ..$ Rel_Count: num [1:11] 42 53 648 293 121 92 519 79 765 196 ...
-    # ..$ Rel_Pos  : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
-    # ..$ RelCount : num [1:11] 0.154 0.195 2.382 1.077 0.445 ...
-
-
 
 
 ### Overlaying the normalized expanded tibbles ###
