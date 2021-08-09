@@ -9,11 +9,12 @@ Any repository hosted on GitHub should not exceed 1GB in size. GitHub's [What is
 Create a repository:
 
 * Visit https://github.com/riboviz
-* Click Mew
+* Click New
 * Enter Repository name:
-  - For data corresponding to a release, enter `test-data-<TAG>` e.g. `test-data-2.0`.
+  - For data corresponding to a release, enter `test-data-<TAG>` e.g. `test-data-2.1`.
   - For data produced on a given date, enter `test-data-<YYYYMMDD>` e.g. `test-data-20210618`.
 * Select Public.
+* Select Add a README file.
 * Click Create repository.
 
 ## Clone a local copy of the new repository
@@ -52,21 +53,5 @@ $ source bash/environment-tables.sh >> ~/<REPOSITORY>/README.md
 $ cd ~/<REPOSITORY>
 $ git add .
 $ git commit -m "Added test data"
-$ git push origin master
-```
-
-## Rename `master` branch to `main`
-
-* Go to your repository page on GitHub.
-* Click Settings.
-* Click Branches.
-* In Default branches table, click pen icon to right of master.
-* Enter main.
-* Click Rename branch.
-* In your local clone, run:
-
-```console
-$ git branch -m master main
-$ git fetch origin
-$ git branch -u origin/main main
+$ git push origin main
 ```
