@@ -55,16 +55,16 @@ colsum_out <- args$colsum_out
 snapdisp <- args$snapdisp
 
 
-hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
-dataset <- "Mok-simYAL5"
-feature_of_interest <- 'TCC AAG'
-expand_width = 5L
+# hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
+# dataset <- "Mok-simYAL5"
+# feature_of_interest <- 'TCC AAG'
+# expand_width = 5L
 startpos <-1
 startlen <- 10
 filter_for_frame <- TRUE
 min_read_length <- 10
 yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
-gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
+# gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
 colsum_out <- TRUE
 snapdisp <- 0L
 
@@ -72,22 +72,17 @@ snapdisp <- 0L
 hd_file <- here::here("Mok-tinysim", "A", "A.h5")
 dataset <- "Mok-tinysim"
 gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "tiny_2genes_20utrs.gff3")
+gff_df <- readGFFAsDf(gff)
 gene <- "MAT"
 gene_names <- unique(gff_df$Name)
 yeast_codon_table <- here::here("data", "tinysim_codon_table.tsv")
 
 
-#
-
-gff_df <- readGFFAsDf(gff)
 gene_names <- rhdf5::h5ls(hd_file, 
                           recursive = 1)$name
 
-
-
 # Import the .tsv file: 
 yeast_codon_pos_i200 <- suppressMessages(readr::read_tsv(file = yeast_codon_table))
-
     # > str(yeast_codon_pos_i200)
     # spec_tbl_df [2,826,757 x 3] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
     # $ Gene    : chr [1:2826757] "YAL068C" "YAL068C" "YAL068C" "YAL068C" ...
@@ -103,7 +98,6 @@ gene_poscodon_codon_i200 <- tibble::tibble(
   CodonPair = paste(yeast_codon_pos_i200$Codon, (dplyr::lead(yeast_codon_pos_i200$Codon) 
                                                  %>% str_replace_all("ATG", "NA")))
 )
-
     # > str(gene_poscodon_codon_i200)
     # tibble [2,826,757 x 4] (S3: tbl_df/tbl/data.frame)
     # $ Gene      : chr [1:2826757] "YAL068C" "YAL068C" "YAL068C" "YAL068C" ...
@@ -113,10 +107,6 @@ gene_poscodon_codon_i200 <- tibble::tibble(
 
 
 #####
-
-
-
-print('Fetching read counts')
 
 
 
@@ -149,8 +139,7 @@ FilterForFrameFunction <- function(gene, dataset, hd_file, min_read_length, snap
                                    min_read_length, 
                                    asite_displacement_length)
   
-  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, 
-                                         seqnames == gene) 
+  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene) 
     # where gene = YAL003W
   
   left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") 
@@ -191,6 +180,10 @@ FilterForFrameFunction <- function(gene, dataset, hd_file, min_read_length, snap
 # gives:
 # > str(frames)
 # num [1:207] 811 429 488 102 994 146 173 762 13 176 ...
+
+
+
+### Fetch and format counts from the h5 file ###
 
 
 
@@ -298,17 +291,7 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
 #   $ PosCodon: int  1 2 3 4 5 6 7 8 9 10 ...
 #   $ Count   : num  811 429 488 102 994 146 173 762 13 176 ...
 
-total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, 
-                                               min_read_length, snapdisp, 
-                                               filter_for_frame)
 
-
-
-######
-
-
-
-print('Creating information tibble')
  
 
 #' AddCodonNamesToCodonPosCounts(): takes codon names from .tsv file, joined to the codon counts table 
@@ -369,14 +352,10 @@ AddCodonNamesToCodonPosCounts <- function(gene_poscodon_codon_i200, gene_names,
 #   $ Count    : num  4249 825 1017 1176 1116 ...
 #   $ CodonPair: chr  "ATG GCA" "GCA TCC" "TCC ACC" "ACC GAT" ...
 
-transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(gene_poscodon_codon_i200, 
-                                                                    gene_names, dataset, hd_file, 
-                                                                    min_read_length, snapdisp, 
-                                                                    filter_for_frame)
 
 
+### Filtering for feature of interest ###
 
-print('Filtering for feature of interest')
 
 
 #' FilterForFeatureOfInterestPositions(): Filters for the feature of interest 
@@ -430,11 +409,6 @@ FilterForFeatureOfInterestPositions <- function(gene_poscodon_codon_i200, gene_n
 #   $ CodonPos2: num  8 58 384 509 536 322 91 413
 #   $ Count    : num  1553 1147 358 317 498 ...
 #   $ CodonPair: chr  "TCC AAG" "TCC AAG" "TCC AAG" "TCC AAG" ...
-  
-interesting_feature_positions <- FilterForFeatureOfInterestPositions(gene_poscodon_codon_i200, gene_names, dataset, hd_file, min_read_length, snapdisp = 2L, filter_for_frame = TRUE, feature_of_interest = "GAG CGA")
-  
-
-print('Expanding regions around features of interest')
 
 
 
@@ -643,19 +617,9 @@ ExpandFeatureRegion <- function(gene_poscodon_codon_i200, gene_names, dataset,
 #   $ CodonPair: chr  "ACC CCA" "CCA AGA" "AGA TTG" "TTG GTT" ...
 #   $ RelPos   : int  -5 -4 -3 -2 -1 0 1 2 3 4 ...
 
-expand_feature_region <- ExpandFeatureRegion(gene_poscodon_codon_i200, 
-                                              gene_names, dataset, hd_file, 
-                                              min_read_length, colsum_out, 
-                                             gff_df, feature_of_interest,
-                                             expand_width, 
-                                             remove_overhang = TRUE,
-                                             snapdisp, filter_for_frame) 
 
+### Normalisation ###
 
-### Normalization ###
-
-
-print('Normalising data')
 
 #' ExpandedRegionNormalisation(): carries out normalization within each expanded frame so that they are comparable
 #' 
@@ -704,8 +668,8 @@ ExpandedRegionNormalisation <- function(gene_poscodon_codon_i200,
                                                remove_overhang = TRUE,
                                                snapdisp, filter_for_frame)
   
-  Normalization <- function(.x, expand_width){
-    dplyr::mutate(.x, RelCount = Count / sum(Count) * (2 * expand_width + 1))
+  Normalization <- function(.x = expand_feature_region, expand_width){
+    dplyr::mutate(.x = expand_feature_region, RelCount = Count / sum(Count) * (2 * expand_width + 1))
  }
   
   
@@ -717,9 +681,9 @@ ExpandedRegionNormalisation <- function(gene_poscodon_codon_i200,
   
   CheckForNaN <- function(.x){
     
-    normalized_expand_tibble <- .x 
+    normalized_expand_list <- .x 
     
-    Relcount_values <- unlist(normalized_expand_tibble$RelCount)
+    Relcount_values <- unlist(normalized_expand_list$RelCount)
     
     print(Relcount_values)
     
@@ -759,20 +723,11 @@ ExpandedRegionNormalisation <- function(gene_poscodon_codon_i200,
 #   $ RelPos    : int  -5 -4 -3 -2 -1 0 1 2 3 4 ...
 #   $ RelCount  : num  1.347 1.532 0.32 3.12 0.458 ...
 
-# normalized_expanded_feature_region <- ExpandedRegionNormalisation(expand_feature_region[[1]], expand_width = 5L)
-
-normalized_expand_list <- ExpandedRegionNormalisation(gene_poscodon_codon_i200, 
-                                                                  gene_names, dataset, hd_file, 
-                                                                  min_read_length, colsum_out, 
-                                                                  gff_df, feature_of_interest,
-                                                                  expand_width, 
-                                                                  remove_overhang = TRUE,
-                                                                  snapdisp, filter_for_frame)
 
 
 ### Overlaying the normalized expanded tibbles ###
 
-print('Calculating average')
+
 
 #' OverlayedTibble: overlays the expanded tibbles generated by ExpandedRegionNormalisation
 #'
@@ -810,30 +765,27 @@ OverlayedTibble <- function(gene_poscodon_codon_i200,
                            remove_overhang = TRUE,
                            snapdisp, filter_for_frame){
   
-  normalized_expand_list <- ExpandedRegionNormalisation(gene_poscodon_codon_i200, 
-                                                        gene_names, dataset, hd_file, 
-                                                        min_read_length, colsum_out, 
-                                                        gff_df, feature_of_interest,
-                                                        expand_width, 
-                                                        remove_overhang = TRUE,
-                                                        snapdisp, filter_for_frame)
+  # normalized_expand_list <- ExpandedRegionNormalisation(gene_poscodon_codon_i200, 
+  #                                                       gene_names, dataset, hd_file, 
+  #                                                       min_read_length, colsum_out, 
+  #                                                       gff_df, feature_of_interest,
+  #                                                       expand_width, 
+  #                                                       remove_overhang = TRUE,
+  #                                                       snapdisp, filter_for_frame)
   
   number_of_objects <- length(normalized_expand_list)
   # The number of objects inside normalized_expand_list
   
-  result = lapply(normalized_expand_list, "[", c("RelPos", "RelCount"))
+  .x = result <- lapply(normalized_expand_list, "[", c("RelPos", "RelCount")) 
   # Reduces normalized_expand_list to the columns RelPos and RelCount
   
-  joined_result = result %>% purrr::reduce(full_join, 
-                                           by = c("RelPos"), 
-                                           sum("RelCount"))
+  joined_result <- purrr::reduce(.x = result, .f =`+`)
   
-  joined_rows = joined_result %>% 
-    mutate(SumRows = rowSums(select(joined_result, -"RelPos")) / number_of_objects)
+  joined_rows <- mutate(joined_result / number_of_objects)
   
   overlayed_tibbles <- tibble::tibble(
     RelPos = seq(- expand_width, expand_width),
-    RelCount = joined_rows$SumRows
+    RelCount = joined_rows$RelCount
   )
 }
 #TEST: OverlayedTibble(): creates a tidy format data frame (tibble) = TRUE
@@ -848,12 +800,10 @@ OverlayedTibble <- function(gene_poscodon_codon_i200,
 # $ RelPos : int [1:11] -5 -4 -3 -2 -1 0 1 2 3 4 ...
 # $ RelCount: num [1:11] 1.029 1.07 0.987 1.45 1.151 ...
 
-overlayed_tibbles <- OverlayedTibble(gene_poscodon_codon_i200, gene_names, dataset, 
-                                     hd_file, min_read_length, colsum_out, gff_df, 
-                                     feature_of_interest, expand_width, 
-                                     remove_overhang = TRUE, snapdisp, filter_for_frame) 
 
-print('Creating plot')
+
+### Generate plot around feature of interest ###
+
 
 
 #' GeneratePlot(): Generates a metafeature plot around the feature of interest
@@ -918,14 +868,64 @@ GeneratePlot <- function(gene_poscodon_codon_i200, gene_names, dataset, hd_file,
 #Test: GeneratePlot(): the x-axis is "Distance from codon pair (3nt) and y-axis is "Normalised ribosomal occupancy"
 #gives: 
 
-plot <- GeneratePlot(gene_poscodon_codon_i200, gene_names, dataset, hd_file, 
-                     min_read_length, colsum_out, gff_df, feature_of_interest, 
-                     expand_width, remove_overhang = TRUE, snapdisp, 
-                     filter_for_frame, size = 12)  
-
-
-print('Done')
 
 
 
+print('Fetching read counts')
 
+total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, 
+                                               min_read_length, snapdisp, 
+                                               filter_for_frame)
+
+print('Creating information tibble')
+
+transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(gene_poscodon_codon_i200, 
+                                                                    gene_names, dataset, hd_file, 
+                                                                    min_read_length, snapdisp, 
+                                                                    filter_for_frame)
+
+print('Filtering for feature of interest')
+
+interesting_feature_positions <- FilterForFeatureOfInterestPositions(gene_poscodon_codon_i200, 
+                                                                     gene_names, 
+                                                                     dataset, 
+                                                                     hd_file, 
+                                                                     min_read_length, 
+                                                                     snapdisp, 
+                                                                     filter_for_frame, 
+                                                                     feature_of_interest)
+
+print('Expanding regions around features of interest')
+
+expand_feature_region <- ExpandFeatureRegion(gene_poscodon_codon_i200, 
+                                             gene_names, dataset, hd_file, 
+                                             min_read_length, colsum_out, 
+                                             gff_df, feature_of_interest,
+                                             expand_width, 
+                                             remove_overhang = TRUE,
+                                             snapdisp, filter_for_frame) 
+print('Normalising data')
+
+normalized_expand_list <- ExpandedRegionNormalisation(gene_poscodon_codon_i200, 
+                                                      gene_names, dataset, hd_file, 
+                                                      min_read_length, colsum_out, 
+                                                      gff_df, feature_of_interest,
+                                                      expand_width, 
+                                                      remove_overhang = TRUE,
+                                                      snapdisp, filter_for_frame)
+print('Calculating average')
+
+overlayed_tibbles <- OverlayedTibble(gene_poscodon_codon_i200, gene_names, dataset,
+                                     hd_file, min_read_length, colsum_out, gff_df,
+                                     feature_of_interest, expand_width,
+                                     remove_overhang = TRUE, snapdisp, filter_for_frame)
+
+print('Creating plot')
+# 
+# plot <- GeneratePlot(gene_poscodon_codon_i200, gene_names, dataset, hd_file, 
+#                      min_read_length, colsum_out, gff_df, feature_of_interest, 
+#                      expand_width, remove_overhang = TRUE, snapdisp, 
+#                      filter_for_frame, size = 12)  
+# 
+# 
+# print('Done')
