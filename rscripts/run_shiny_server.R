@@ -7,6 +7,11 @@ if (!is.na(args[1])) {
 } else {
   return("Provide a path to a yaml file used in a riboviz run.")
 }
+if (!is.na(args[2])) {
+  port_num <- args[2]
+} else {
+  port_num <- "4254"
+}
 
 # load required packages
 library(shiny)
@@ -749,4 +754,4 @@ ui <- fluidPage(# App title
             )))
 
 # I cast spell, ~run shiny app~
-shinyApp(ui, server, options = list(port = 4254))
+shinyApp(ui, server, options = list(port = port_num))
