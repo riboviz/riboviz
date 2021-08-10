@@ -18,6 +18,20 @@ library(GenomicRanges)
 library(parallel)
 library(rhdf5)
 library(tidyverse)
+
+# Funciton to resize GRanges while keeping track of multi-exon genes
+resize_gff_flank <- function(gene_location,flank){
+  if(length(gene_location)==1){	
+    start(gene_location) <- start(gene_location)-flank
+    end(gene_location) <- end(gene_location)+flank
+  }else{
+    start(gene_location)[start(gene_location)==min(start(gene_location))] <- start(gene_location)[start(gene_location)==min(start(gene_location))]-flank
+    end(gene_location)[end(gene_location)==max(end(gene_location))] <- end(gene_location)[end(gene_location)==max(end(gene_location))]+flank
+  }
+  return(gene_location)
+}
+
+
 ```
 
 ## Yeast datasets
@@ -150,6 +164,150 @@ for(gene in names(nt_seq)){
 }
 H5close()
 ```
+
+## E. coli
+
+### Prepare Annotations and Sequences
+```{r}
+# Download annotations and genome seq from here - 
+# ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/005/845/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.fna.gz
+# ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/005/845/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.gff.gz
+
+ecoli_annot <- readGFFAsGRanges("~/ecoliK12_refseq.gff")
+ecoli_genome <- readDNAStringSet("~/ecoliK12.fasta")
+
+# Pad genomes with 25 N nts to provide null flanking regions for genes close to chromosomal boundaries
+ecoli_genome <- xscat(DNAString(paste(rep("N",25),collapse="")),
+                      ecoli_genome,
+                      DNAString(paste(rep("N",25),collapse="")))
+
+names(ecoli_genome) <- c("NC_000913.3")
+
+# Adjust the annotations for this 250nt shift
+ecoli_annot <- shift(ecoli_annot,25)
+
+# Get the annotations for all CDS of uncharacterized and verified genes
+cds_annot <- ecoli_annot[ecoli_annot$type=="CDS"]
+
+
+```
+
+### Get ORF+UTR seqs
+```{r, eval=FALSE}
+# Resize all CDS with 250 nt UTR regions
+tmp_gff <- sapply(unique(cds_annot$Name),
+                  function(x){
+                    gene_location <- cds_annot[which(cds_annot$Name==x),]; 
+                    resize_gff_flank(gene_location = gene_location, flank=25)
+                    })
+cds_flank_annot <- unlist(GRangesList(tmp_gff))
+
+# Obtain sequences of CDS+UTRs from genome
+cds_flank_seq <- ecoli_genome[cds_flank_annot]
+names(cds_flank_seq) <- cds_flank_annot$Name
+
+# Combine multi-exon genes into a single transcript
+output_seqlist <- list()
+cc <- 1
+for(i in unique(names(cds_flank_seq))){
+  output_seqlist[[cc]] <- c(unlist(cds_flank_seq[names(cds_flank_seq)==i]))
+  if(any(strand(cds_flank_annot[cds_flank_annot$Name==i])=="-")){
+    output_seqlist[[cc]] <- reverseComplement(output_seqlist[[cc]])
+  }
+  cc <- cc+1
+}
+output_seq <- DNAStringSet(output_seqlist)
+names(output_seq) <- unique(names(cds_flank_seq))
+
+# Write seqs to a FASTA file
+writeXStringSet(output_seq,filepath = "~/ecoli_CDS_w_25utrs.fa",format = "fasta")
+```
+
+### Create a GFF file based on these transcripts
+```{r, eval=FALSE}
+len_gff <- c(matrix(c(rep(25,length(output_seq)), (width(output_seq)-50), rep(25,length(output_seq))),nrow=3,byrow = T))
+start_gff <- c(matrix(c(rep(1,length(output_seq)),rep(26,length(output_seq)), (width(output_seq)-24)),nrow=3,byrow = T))
+type_gff <- rep(c("UTR5","CDS","UTR3"),length(output_seq))
+
+# Create a GRange object to be saved as a GFF
+output_gff <- GRanges(seqnames = rep(names(output_seq),each=3), 
+                      ranges = IRanges(start=start_gff, width=len_gff),
+                      strand = "+",type=type_gff,
+                      Name=rep(names(output_seq),each=3))
+export.gff3(output_gff, con="~/ecoli_CDS_w_25utrs.gff3")
+```
+### Create an RData object with gene-specific codon positions for riboviz plots
+
+```{r, eval=FALSE}
+seq <- output_seq
+gff <- output_gff
+
+seq <- seq[gff[gff$type=="CDS"]] # Restrict sequences to only CDS
+seq <- DNAStringSet(seq)
+cods <- sapply(sapply(seq,Biostrings::codons),as.character) # Split the sequences into codons
+
+# Function to find positions for a codon in a CDS
+codon_pos_locator <- function(seq,codon,gene){
+  out <- NULL
+  pos <- which(seq==codon)
+  if(length(pos)>=1)
+    out <- cbind(gene,pos)
+  return(out)
+}
+
+codon_pos <- sapply(names(GENETIC_CODE),
+              function(codon){
+                allpos <- mclapply(names(cods),
+                                function(gene){
+                                  codon_pos_locator(seq=cods[[gene]],
+                                                    codon=codon,
+                                                    gene=gene)
+                                },mc.cores=25)
+                do.call(rbind,allpos)
+              })
+codon_pos <- codon_pos[!names(codon_pos) %in% c("TAG","TAA","TGA")]
+
+# Save output as an RData object
+save(codon_pos, file = "~/ecoli_codon_pos_i0.RData")
+```
+
+### Create h5 file with gene-specific `nt` and `codon` sequences for `Shiny` plots
+```{r, eval=FALSE}
+hdfile <- "~/ecoli_seq.h5"
+
+seq <- output_seq
+gff <- output_gff
+
+nt_seq <- strsplit(as.character(seq),"")
+seq <- seq[gff[gff$type=="CDS"]] # Restrict sequences to only CDS
+cod_seq <- sapply(sapply(seq,Biostrings::codons),as.character) # Split the sequences into codons
+
+# Save seq data as H5 file
+h5createFile(hdfile) # Create the output h5 file
+fid <- H5Fopen(hdfile) # Filehandle for the h5 file
+
+for(gene in names(nt_seq)){
+  # Get the output matrix of read counts by position and length for a gene
+  tmp_nt <- nt_seq[[gene]]
+  tmp_cod <- cod_seq[[gene]]
+
+  # Create H5 groups for each gene
+  h5createGroup(fid,gene)
+
+  # Specify a dataset within the gene group to store the values and degree of compression
+  nt_dname <- paste(gene,"nt",sep="/")
+  cod_dname <- paste(gene,"codon",sep="/")
+
+  h5createDataset(fid,nt_dname,dims=c(1,length(tmp_nt)), storage.mode="character",size=2,level=7)
+  h5createDataset(fid,cod_dname,dims=c(1,length(tmp_cod)), storage.mode="character",size=4,level=7)
+
+  # Write the dataset within the gene group
+  h5write(as.matrix(t(tmp_nt)),fid,name=nt_dname,start=c(1,1))
+  h5write(as.matrix(t(tmp_cod)),fid,name=cod_dname,start=c(1,1))
+}
+H5close()
+```
+
 
 ## Human datasets
 
