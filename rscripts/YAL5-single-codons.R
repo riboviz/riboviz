@@ -34,19 +34,22 @@ suppressMessages(library(argparse))
 # 
 # args <- parser$parse_args()
 
-hd_file <- here::here("Mok-tinysim", "output", "A", "A.h5")
-dataset <- "Mok-tinysim"
-feature_of_interest <- 'GCC'
-expand_width = 1L
+hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
+dataset <- "Mok-simYAL5"
+feature_of_interest <- c('GCG','TCT')
+
+# check all codons 
+# feature_of_interest <- here::here('data', 'codons.tsv')
+expand_width = 5L
 startpos <-1
 startlen <- 10
 filtering_frame <- 0
 min_read_length <- 10
-yeast_codon_table <- here::here("Mok-tinysim", "tinysim_codon_pos.tsv")
-gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "tiny_2genes_20utrs.gff3")
+yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
+gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
 colsum_out <- TRUE
 output_dir <- '.'
-filter_for_frame <- FALSE
+filter_for_frame <- TRUE
 snapdisp <- 0L
 
 
@@ -64,6 +67,16 @@ snapdisp <- 0L
 # colsum_out <- args$olsum_out
 # filter_for_frame <- args$filter_for_frame
 # snapdisp <- args$snapdisp
+
+
+# If the list of codons is given in tsv format, the first column should contain the feature of interest (codons)
+# If a file is given it will be extracted into the expected format by the following if statement
+# otherwise, it it is assumed that the feture of interest is given in the format c("feature") 
+
+if(file.exists(feature_of_interest)){
+  feature_of_interest <- read.csv(feature_of_interest)
+  feature_of_interest <- feature_of_interest[,1]
+}
 
 
 gff_df <- readGFFAsDf(gff)
@@ -265,7 +278,8 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
   return (total_codon_pos_counts)
 }
 
-total_codon_pos_counts <- suppressMessages(GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp, filter_for_frame))
+
+# total_codon_pos_counts <- suppressMessages(GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp, filter_for_frame))
 
 #TEST: GetAllCodonPosCounts(): returns a tibble. 
 #TEST: GetAllCodonPosCounts(): the tibble has 3 columns.
@@ -328,7 +342,7 @@ AddCodonNamesToCodonPosCounts <- function(yeast_codon_pos_i200, gene_names, data
 }   
 
 
-transcript_gene_pos_poscodon_frame <- suppressMessages(AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, filter_for_frame, snapdisp))
+ transcript_gene_pos_poscodon_frame <- suppressMessages(AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, filter_for_frame, snapdisp))
 
 
 ##TEST: Expect to produce a tibble with each position in the CDS having the correct codon beside it.
@@ -353,48 +367,17 @@ transcript_gene_pos_poscodon_frame <- suppressMessages(AddCodonNamesToCodonPosCo
 # 8 MIKE         4     0 GAG  
 # 9 MIKE         5     0 TAA  
 
-        
-FilterForFeatureOfInterestPositions <- function(yeast_codon_pos_i200, gene, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, feature_of_interest, filter_for_frame, snapdisp ){
-  
-  transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, 
-                                                                      gene_names, 
-                                                                      dataset, 
-                                                                      hd_file, 
-                                                                      min_read_length, 
-                                                                      colsum_out, 
-                                                                      gff_df,
-                                                                      filter_for_frame,
-                                                                      snapdisp)
-  
-  interesting_feature_table <- dplyr::filter(transcript_gene_pos_poscodon_frame, Codon == feature_of_interest & Gene == gene)
-  
-  return(interesting_feature_table)
-}
+ 
+ 
+ 
 
-# gene <- 'MAT'
-
-# interesting_feature_table <- FilterForFeatureOfInterestPositions(yeast_codon_pos_i200, gene, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, feature_of_interest, filter_for_frame, snapdisp)
-
-# When run individually FilterForFeatureOfInterestPositions will only run on an individual gene, so needs a gene name as an input.
-#TEST: FilterForFeatureOfInterestPositions(): returns a tibble if there is at least one occurrence of the feature_of_interest.
-#TEST: FilterForFeatureOfInterestPositions(): returns an empty tibble if there are no occurrences of the feature_of_interest 
-#TEST: FilterForFeatureOfInterestPositions(): the tibble has 4 columns.
-#TEST: FilterForFeatureOfInterestPositions(): the column names are %in% c("Gene", "PosCodon", "Count", "Codon").
-#TEST: FilterForFeatureOfInterestPositions(): number of observations in the output tibble = number of occurances of the feature of interest in the gene being studied .
-#TEST: FilterForFeatureOfInterestPositions(): the unique gene names in column "Gene" match the genes in gene_names (unique(total_codon_pos_counts$Gene) = gene_names) = TRUE.
-#gives: 
-#Example: using Mok-tinysim data, when feature_of_interest is GCC and gene is MAT, the following tibble is returned 
-# # A tibble: 1 x 4
-# Gene  PosCodon Count Codon
-# <chr>    <dbl> <dbl> <chr>
-#   1 MAT          2     2 GCC
-
-
-## Slice out interesting features
+###  Slice out window around interesting features ###
 
 # ExpandFeatureRegionAllGenes takes a slice out of transcript_gene_pos_poscodon_frame, centered on the position of the feature of interest
 # It then sets the position of the feature of interest to 0, and changes the positions of adjacent codons to be relative to the feature of interest
 # This is done for all occurrences of the feature of interest on all genes in the sample provided.
+
+
 
 ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200, 
                                 gene_names, dataset, hd_file, 
@@ -405,6 +388,8 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
                                 filter_for_frame,
                                 snapdisp) {
   
+  # generate transcript_gene_pos_poscodon_frame, tests and descriptions above
+  
   transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, 
                                                                       gene_names, 
                                                                       dataset, 
@@ -415,13 +400,16 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
                                                                       filter_for_frame,
                                                                       snapdisp)
 
- # take as inputs and select for positions on separate genes
+ # take as inputs transcript_gene_pos_poscodon_frame and select for positions on separate genes
+
+  
   AllGeneInterestingFeatures <- function(yeast_codon_pos_i200, 
                                          gene, gene_names, dataset, hd_file, 
                                          min_read_length, colsum_out, 
                                          gff_df, feature_of_interest, transcript_gene_pos_poscodon_frame,
                                          filter_for_frame){ 
-    print(paste('Checking',gene))
+    
+    # Take an individual gene as an input, then filter for the codon of interest on the gene being investigated
     
     TranscriptForOneGene <- function(yeast_codon_pos_i200, 
                                      gene, gene_names, dataset, hd_file, 
@@ -441,8 +429,10 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
                                                  min_read_length, colsum_out, 
                                                  gff_df, feature_of_interest)
     
-    
-    #if (remove_overhang) {
+  
+    # Use transcript one gen as an input to ExpandRegions
+    # For each occurance of the codon of interest on the gene being studied, slice out a window of positions around the feature of interest from transcript_gene_pos_poscodon_frame 
+  
     # return an empty tibble if the desired region hangs over the edge of the coding region
     
     ExpandRegions <- function(transcript_for_one_gene, transcript_gene_pos_poscodon_frame, gene, dataset, hd_file, expand_width, remove_overhang = TRUE){
@@ -469,8 +459,8 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
         }
       }
     }
-    # The if statement ensures that feature positions that are less/more than the 
-    # expand_width value are discarded 
+    # The if statement ensures that feature positions that are less/more than the expand_width value are discarded
+
     output_feature_info <- purrr::map(.x = transcript_for_one_gene$PosCodon, .f = ExpandRegions, 
                                       transcript_gene_pos_poscodon_frame,
                                       gene,
@@ -495,6 +485,7 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
                                     transcript_gene_pos_poscodon_frame)
   
   # produces a list for each gene, containing a list for each occurrence of the feature of interest
+  
   # Unlist to produce one list, containing each occurrence of the feature of interest
   
   output_feature_info <- unlist(output_feature_info, recursive = F)
@@ -506,11 +497,11 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
 }
 
 
-output_feature_info <- suppressMessages(ExpandFeatureRegionAllGenes(yeast_codon_pos_i200 = yeast_codon_pos_i200, 
-                                           gene_names = gene_names, dataset, hd_file, 
-                                           min_read_length, colsum_out, 
-                                           gff_df, feature_of_interest, 
-                                           expand_width, remove_overhang, filter_for_frame, snapdisp))
+# output_feature_info <- suppressMessages(ExpandFeatureRegionAllGenes(yeast_codon_pos_i200 = yeast_codon_pos_i200,
+#                                            gene_names = gene_names, dataset, hd_file,
+#                                            min_read_length, colsum_out,
+#                                            gff_df, feature_of_interest,
+#                                            expand_width, remove_overhang, filter_for_frame, snapdisp))
 
 
 #TEST: ExpandFeatureRegionAllGenes(): creates an object of type "list" 
@@ -532,19 +523,19 @@ output_feature_info <- suppressMessages(ExpandFeatureRegionAllGenes(yeast_codon_
 
 
 
-
-if(length(output_feature_info) == 0){
-  print('No occurrances of the feature of interest')
-  
-  if(expand_width>1){
-    
-    print('Try script with an expand_width of 1L to check for occurances near to start or stop codon')
-  }
-  
-  print('Done')
-  stop()
-}
-
+# 
+# if(length(output_feature_info) == 0){
+#   print('No occurrances of the feature of interest')
+#   
+#   if(expand_width>1){
+#     
+#     print('Try script with an expand_width of 1L to check for occurances near to start or stop codon')
+#   }
+#   
+#   print('Done')
+#   stop()
+# }
+# 
 
 
 ### Normalization ###
@@ -564,9 +555,6 @@ print('Normalising data')
 #' 
 #' @return the list of tibbles which contain the normalized counts within the window so that the feature is comparable despite overall varying levels of expression between genes 
 #' 
-
- 
- 
 
 ExpandedRegionNormalization <- function(.x, expand_width){
   
@@ -608,15 +596,52 @@ ExpandedRegionNormalization <- function(.x, expand_width){
 # 2 MAT          2     2 GCC         0      1.5
 # 3 MAT          3     2 ACA         1      1.5
 #
+# After editing tinysim codon position 4 to inculde a GCC, the following output_feature_info object is produced
+# 
+# > output_feature_info
+# [[1]]
+# # A tibble: 3 x 5
+# Gene  PosCodon Count Codon Rel_Pos
+# <chr>    <dbl> <dbl> <chr>   <int>
+#   1 MAT          1     0 ATG        -1
+# 2 MAT          2     2 GCC         0
+# 3 MAT          3     2 ACA         1
+# 
+# [[2]]
+# # A tibble: 3 x 5
+# Gene  PosCodon Count Codon Rel_Pos
+# <chr>    <dbl> <dbl> <chr>   <int>
+#   1 MIKE         3     0 AAG        -1
+# 2 MIKE         4     0 GCC         0
+# 3 MIKE         5     0 TAA         1
+#
+# This is processed by ExpandedRegionNormalization to produce the following output
 
+# > normalized_expand_list
+# [[1]]
+# # A tibble: 3 x 6
+# Gene  PosCodon Count Codon Rel_Pos RelCount
+# <chr>    <dbl> <dbl> <chr>   <int>    <dbl>
+#   1 MAT          1     0 ATG        -1      0  
+# 2 MAT          2     2 GCC         0      1.5
+# 3 MAT          3     2 ACA         1      1.5
+# 
+# [[2]]
+# # A tibble: 3 x 6
+# Gene  PosCodon Count Codon Rel_Pos RelCount
+# <chr>    <dbl> <dbl> <chr>   <int>    <dbl>
+#   1 MIKE         3     0 AAG        -1        0
+# 2 MIKE         4     0 GCC         0        0
+# 3 MIKE         5     0 TAA         1        0
+# 
 
 
 # Normalization carried out for all the tibbles within ExpandList 
-normalized_expand_list <- purrr::map(
-  .x = output_feature_info,
-  .f = ExpandedRegionNormalization,
-  expand_width
-)
+# normalized_expand_list <- purrr::map(
+#   .x = output_feature_info,
+#   .f = ExpandedRegionNormalization,
+#   expand_width
+# )
 
 
 # TEST:: normalised_expand_list should be of type list
@@ -637,9 +662,9 @@ normalized_expand_list <- purrr::map(
 # [1] 11
 
 
-### Overlaying the normalized expanded tibbles ###
 
-print('Calculating average')
+
+### Overlaying the normalized expanded tibbles ###
 
 # Function to overlay graphs into a single graph. Need to generate a single tibble 
 # from NormalizedExpandList. Join by Rel_Pos, in RelCount need the mean for 
@@ -662,7 +687,7 @@ print('Calculating average')
 #'                                      expand_width)
 #' 
 #' OverlayedTable(normalized_expand_list, expand_width)
-#' 
+
 OverlayedTable <- function(normalized_expand_list, expand_width){
   number_of_objects <- length(normalized_expand_list)
   # The number of objects inside normalized_expand_list
@@ -680,6 +705,7 @@ OverlayedTable <- function(normalized_expand_list, expand_width){
     RelCount = joined_rows$SumRows
   )
 }
+
 #TEST: OverlayedTable(): creates a tidy format data frame (tibble) = TRUE
 #TEST: OverlayedTable(): the tibble contains 2 columns = TRUE
 #TEST: OverlayedTable(): the column names are %in% c("Rel_Pos", "RelCount")
@@ -692,28 +718,158 @@ OverlayedTable <- function(normalized_expand_list, expand_width){
 #   $ Rel_Pos : int  -5 -4 -3 -2 -1 0 1 2 3 4 ...
 #   $ RelCount: num  0.893 1.125 0.992 0.998 0.779 ...
 
-overlayed_tibbles <- OverlayedTable(normalized_expand_list, expand_width) 
 
-print('Creating plot')
 
-overlayed_plot <- ggplot(overlayed_tibbles, mapping = aes(x = Rel_Pos, y = RelCount)) + 
-  geom_line() +
-  theme_bw()+
-  theme(text=element_text(size=14),
-        axis.title=element_text(size=14, face='bold'),
-        title = element_text(size = 14, face='bold'))+
-  labs(title = paste0('Relative read counts around feature ', feature_of_interest),
-       x = 'Position relative to feature of interest',
-       y = 'Relative number of reads', size = 2)
 
-save_plot_pdf <- function(overlayed_plot, output_dir){
-  overlayed_plot %>%
-    ggsave(
-      filename = file.path(output_dir,"inhibitory_codon_plot.pdf"),
-      width = 6, height = 5
+### Run commands ###
+
+# Feature of interest may be provided as a single feature, ie a codon, or a list of features
+# When only one feature is provided then a graph is plotted based on the overlayed relative count around the feature of interest  
+
+if(length(feature_of_interest) == 1){
+  
+  # Run ExpandFeatureRegionAllGenes to get a list of occurrances of the codon of interest 
+  
+  print(paste0('Finding occurances of ', feature_of_interest))
+  output_feature_info <- suppressMessages(ExpandFeatureRegionAllGenes(yeast_codon_pos_i200 = yeast_codon_pos_i200, 
+                                                                      gene_names = gene_names, dataset, hd_file, 
+                                                                      min_read_length, colsum_out, 
+                                                                      gff_df, feature_of_interest, 
+                                                                      expand_width, remove_overhang, filter_for_frame, snapdisp))
+  
+  # Check for the presence of the feature of interest. Output_feature_info being empty will cause problems with normalization
+  
+  if(length(output_feature_info) == 0){
+    print('No occurrances of the feature of interest')
+    
+    if(expand_width > 1){
+      
+      print('Try script with an expand_width of 1L to check for occurances near to start or stop codon')
+    }
+    
+    print('Done')
+    stop()
+  }
+  
+  # Run ExpandedRegionNormalization to calculate the relative number of reads mapping to each position arounf the feature of interest
+  
+  print('Normalising read counts')
+  normalized_expand_list <- purrr::map(
+    .x = output_feature_info,
+    .f = ExpandedRegionNormalization,
+    expand_width
+  )
+  
+  # Run OverlayedTable to create an average of reads at positions at and around the feature of interest 
+  
+  print('Overlaying tibbles for feature of interest and calculating the average relative reads at each position')
+  overlayed_tibbles <- OverlayedTable(normalized_expand_list, expand_width) 
+  
+  # Create a graph using ggplot
+  
+  print('Creating graph')
+  overlayed_plot <- ggplot(overlayed_tibbles, mapping = aes(x = Rel_Pos, y = RelCount)) + 
+    geom_line() +
+    theme_bw()+
+    theme(text=element_text(size=14),
+          axis.title=element_text(size=14, face='bold'),
+          title = element_text(size = 14, face='bold'))+
+    labs(title = paste0('Relative read counts around feature ', feature_of_interest),
+         x = 'Position relative to feature of interest',
+         y = 'Relative read count', size = 2)
+  
+  # save plot as PDF
+  
+  print('Save plot as PDF')
+  save_plot_pdf <- function(overlayed_plot, output_dir){
+    overlayed_plot %>%
+      ggsave(
+        filename = file.path(output_dir, paste0("Meta_feature_plot", feature_of_interest,".pdf")),
+        width = 6, height = 5
+      )
+  }
+  
+  save_plot_pdf(overlayed_plot, output_dir)
+  
+  print('Done')
+  
+  
+} else{
+  
+  # FindAllFeatures is a function that contains ExpandFeatureRegionAllGenes, ExpandedRegionNormalization and OverlayedTable, which are defined above.
+  
+  FindAllFeatures <- function(yeast_codon_pos_i200 = yeast_codon_pos_i200, 
+                              gene_names = gene_names, dataset, hd_file, 
+                              min_read_length, colsum_out, 
+                              gff_df, .x , 
+                              expand_width, remove_overhang, filter_for_frame, snapdisp){
+    
+    # set .x to feature being studies, allowing purrr::map to iterate over different features of interest without having problems due to .x being a changing vector
+    
+    feature_being_studied <- .x
+    
+    
+    # Run ExpandFeatureRegionAllGenes to get a list of occurrances of the codon of interest 
+    
+    print(paste0('Finding occurances of ', feature_being_studied))
+    output_feature_info <- suppressMessages(ExpandFeatureRegionAllGenes(yeast_codon_pos_i200 = yeast_codon_pos_i200, 
+                                                                        gene_names = gene_names, dataset, hd_file, 
+                                                                        min_read_length, colsum_out, 
+                                                                        gff_df, feature_of_interest = feature_being_studied, 
+                                                                        expand_width, remove_overhang, filter_for_frame, snapdisp))
+    
+    
+    # Check for the presence of the feature of interest. Output_feature_info being empty will cause problems with normalization
+    
+    if(length(output_feature_info) == 0){
+      print('No occurrances of the feature of interest')
+      
+      if(expand_width > 1){
+        
+        print('Try script with an expand_width of 1L to check for occurances near to start or stop codon')
+      }
+      
+      print('Done')
+      stop()
+    }
+    
+    
+    # Run ExpandedRegionNormalization to calculate the relative number of reads mapping to each position arounf the feature of interest
+    
+    normalized_expand_list <- purrr::map(
+      .x = output_feature_info,
+      .f = ExpandedRegionNormalization,
+      expand_width
     )
+    
+    
+    # Run OverlayedTable to create an average of reads at positions at and around the feature of interest 
+    
+    overlayed_tibbles <- OverlayedTable(normalized_expand_list, expand_width) 
+    
+   
+    # Create a new tibble listing the feature being studeied, and the RelCount at position 0, ie RelCount at the feature of interest 
+    
+    feature_rel_use<- tibble(Feature = feature_being_studied, RelCount = filter(overlayed_tibbles, overlayed_tibbles$Rel_Pos == 0)$RelCount)
+  
+  }
+  
+  # Use purrr::map to extract the RelCounts at position 0 of all desired features of interest     
+  
+  feature_rel_use <- purrr::map_df(.x = feature_of_interest, .f = FindAllFeatures, yeast_codon_pos_i200 = yeast_codon_pos_i200, 
+                gene_names = gene_names, dataset = dataset, hd_file = hd_file, 
+                min_read_length = min_read_length, colsum_out = colsum_out, 
+                gff_df = gff_df, expand_width = expand_width, remove_overhang = remove_overhang, filter_for_frame = filter_for_frame, snapdisp = snapdisp)
+  
+  # Rearrange feature_rel_use to be in descending order, so features with the highest relative use are listed at the top
+  
+  feature_rel_use <- arrange(feature_rel_use, desc(RelCount))
+  
+  # Save feature_rel_use as a tsv file 
+  
+  write.table(feature_rel_use, file = "Feature_Relativ_use.tsv", sep = "\t", row.names = F, quote = F)
+  
+  # Users can then look at feature_rel_use and see which features they want to investigate further, and can use as a single feature_of_interest input to produce a graph 
+ 
 }
 
-save_plot_pdf(overlayed_plot, output_dir)
-
-print('Done')
