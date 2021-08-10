@@ -1,10 +1,10 @@
 # riboviz output files and figures
 
-This document lists the output files from a typical riboviz run, along with short descriptions. When first looking at outputs of a riboviz run, read_length.pdf and 3nt_periodicity.pdf will be a good starting point for accessing the success of the run and the quality of the data used, as described below. 
+This document lists the output files from a typical riboviz run, along with short descriptions. When first looking at outputs of a riboviz run, `read_length.pdf` and `3nt_periodicity.pdf` will be a good starting point for accessing the success of the run and the quality of the data used, as described below. 
 
 **Initial Quality control checks**
 
-When looking at the `read_lengths.pdf`, it is expected to see a peak of reads at 28-31nt. If an incorrect adapter or UMI regular expression is given in the config file, such as sequences being too long, too short or just not the one used in the actual experiment. then the peak will not be present at 28-31 nt, and potentially very few reads will be seen on the plot as they are unable to align to annotation files so are discarded at an earlier stage of the pipeline. 
+When looking at the `read_lengths.pdf`, it is expected to see a peak of reads at 28-31nt. If the adapter or UMI (Unique Molecular Identifiers) sequence given in the config file does not match those used in the experiment irregularities will be present in the output files. If these sequences are incorrect a clear peak at 28-31nt in `read_lengths.pdf` will not be present. In addition, very few reads may be present as they are unable to align to the annotation files so are discarded at an earlier stage of the pipeline. You can examine `read_counts.tsv` to check the number of aligned reads at each stage of the pipeline. 
 
 When looking at the `3nt_periodicity.pdf`, it is expected to see a peak of reads upstream of the start codon, then repeating smaller peaks every 3nt. Severe disruption of the 3nt periodicity indicates a lower quality dataset and potential issues with the adapter sequence or UMI regular expression. 
 
@@ -71,7 +71,7 @@ TPMs_all_samples, TPMs_samples_collated, TPMs_genes_collated, TPMs_samples_genes
 
 A [read counts file](#read-counts-file) (only if `count_reads: TRUE`).
 
-A tsv file produced by count_reads.py. This file lists the sample being processed, the stage of the riboviz process, the path to the file being processed at that stage, the number of reads present at each stage, and includes a description of the process. The number of reads is expected to decrease between stages as reads are filtered and trimmed.
+A tsv file produced by `count_reads.py`. This file lists the sample being processed, the stage of the riboviz process, the path to the file being processed at that stage, the number of reads present at each stage, and includes a description of the process. The number of reads is expected to decrease between stages as reads are filtered and trimmed.
 
 ```
 SampleName	Program	File	NumReads	Description
@@ -92,7 +92,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 
 ## `<SAMPLE_ID>_output_report.html` 
 
-This output report in .html format contains a provenance section for the sample, multiple figures produced by riboviz, and information on any plots not produced such as which files would be needed to produce plots in future runs. The HTML also includes a side bar to allow for navigation between figures. This file is produced by `AnalysisOutputs.Rmd`, which loads and creates all of the output graphs in HTML format.
+This output report in .html format contains a provenance section for the sample, all the pdf output files produced by riboviz, and information on any plots not produced such as which files would be needed to produce plots in future runs. The HTML also includes a side bar to allow for navigation between figures. This file is produced by `AnalysisOutputs.Rmd`, which loads and creates all of the output graphs in HTML format.
 
 Example of the top of the HTML file:
 
@@ -127,11 +127,11 @@ Almost all translated reads should be counted in open reading frames within `plu
 
 ## `<SAMPLE_ID>.h5` 
 
-Length-sensitive alignments of reads in compressed h5 format. This file is created from the sample Bam file using `Bam_to_H5.R`. Information contained within the h5 file can be accessed using functions `GetGeneDataMatrix` and `TidyGeneDataMatrix` in R, which will create a tibble showing the number of reads of each length occurring at each position in a gene. More functions useful for working with a h5 file are described in `rscript/read_count_functions.R`.
+Length-sensitive alignments of reads in compressed h5 format. This file is created from the sample Bam file using `Bam_to_H5.R`. Information contained within the h5 file can be accessed using the functions `GetGeneDataMatrix` and `TidyGeneDataMatrix` in R, which will create a tibble showing the number of reads of each length occurring at each position in a gene. More useful functions for working with a h5 file are described in `rscripts/read_count_functions.R`.
 
 ## `3nt_periodicity.tsv`
 
-A tsv file, showing the sum of reads occurring at positions around the start and stop codons for all genes. Generated by `generate_stats_figs.R` during step “Check for 3nt periodicity globally”, using functions `CalculateThreeNucleotidePeriodicity` and `WriteThreeNucleotidePeriodicity`. These function produce a table showing the number of reads mapping to each position being investigated, using `AllGenes5StartPositionLengthCountsTibble` and `AllGenes3EndPositionLengthCountsTibble` to extract information from the sample h5 file
+A tsv file, showing the sum of reads occurring at positions around the start and stop codons for all genes. Generated by `generate_stats_figs.R` during step “Check for 3nt periodicity globally”, using functions `CalculateThreeNucleotidePeriodicity` and `WriteThreeNucleotidePeriodicity`. These function produce a table showing the number of reads mapping to each position being investigated, using `AllGenes5StartPositionLengthCountsTibble` and `AllGenes3EndPositionLengthCountsTibble` to extract information from the sample h5 file.
 
 ```
 Pos	Counts	End
@@ -166,7 +166,7 @@ meta_read_counts_start_stop, meta_reads_start_stop, all_reads_meta_transcript, r
 
 ## `read_lengths.tsv`
 
-A tsv file showing how many reads are of each length, with the majority being of 28-31 nt in length. Generated by `generate_stats_figs.R` during step “Distribution of lengths of all mapped reads” using functions `CalculateReadLengths` and `WriteReadLengths` to get the length and number of reads for each gene, then calculate the total number of reads of each length. These functions extract the information from the h5 file. 
+A tsv file showing how many reads are of each length, with the majority being of 28-31nt in length. Generated by `generate_stats_figs.R` during step “Distribution of lengths of all mapped reads” using functions `CalculateReadLengths` and `WriteReadLengths` to get the length and number of reads for each gene, then calculate the total number of reads of each length. These functions extract the information from the h5 file. 
 
 ```
 Length	Counts
@@ -181,7 +181,7 @@ Length	Counts
 
 ## `read_lengths.pdf`
 
-A bar chart showing the lengths of the reads detected in the sample. It is expected that the majority of reads will be 28-31 nt long if the adapter sequences have been removed correctly. A good file to check first when running a new dataset, as if the reads peak in the expected range then it is a good indication of a successful run. If no reads are detected then it is a clear indication of something going wrong, such as the wrong UMI expression or adapter sequence being used, leading to reads being unable to align to annotation files.
+A bar chart showing the lengths of the reads detected in the sample. It is expected that the majority of reads will be 28-31nt long if the adapter sequences have been removed correctly. A good file to check first when running a new dataset, as if the reads peak in the expected range then it is a good indication of a successful run. If no reads are detected then it is a clear indication of something going wrong, such as the wrong UMI expression or adapter sequence being used, leading to reads being unable to align to annotation files.
 
 Example read_lengths plot:
 
@@ -238,7 +238,7 @@ norm_reads_transcript, norm_reads_start_stop
 
 ## `sequence_features.tsv`
 
-A tsv file showing the transcripts per million, a feature; Length_log10, uATGs, FE_atg, FE_cap, utr, utr_gc, or polyA, and a value for that feature; log10 of the gene length, number of upstrem start codons, Free Energy at ATG, Free Energy at the cap, length of the UTR, and GC content of the UTR. This is produced by combining the tpms file with the features file, if a features file is provided. This is done by `generate_stats_figs.R` during step "Correlations between TPMs of genes with their sequence-based features" using the functions `CalculateSequenceBasedFeatures` and `WriteSequenceBasedFeatures`.
+A tsv file showing the tpm of a set of features and a value for that feature. The features are Length_log10 (log10 of the gene length); uATGs (number of upstream start codons); FE_atg (Free Energy at ATG); FE_cap (Free Energy at the cap); utr (length of the UTR); utr_gc (GC content of the UTR); and polyA (3' polyA tail on mRNA). This is produced by combining the tpms file with the features file, if a features file is provided. This is done by `generate_stats_figs.R` during step "Correlations between TPMs of genes with their sequence-based features" using the functions `CalculateSequenceBasedFeatures` and `WriteSequenceBasedFeatures`.
 
 ```
 ORF	tpm	Feature	Value
@@ -258,7 +258,7 @@ sequence_features_vs_tpms, tpms_feature_changes, feature_trends_tpms
 
 ## `features.pdf` 
 
-The features pdf relates the transcripts per million value of different genes to a variety of different sequence features. This highlights any trends in feature value as transcripts per million changes. Values for different the features come from the features-file, if it is provided and are described above.
+The features pdf relates the tpm value of different genes to a variety of different sequence features. This highlights any trends in feature value as the tpm changes. Values for the different features come from the features-file, if it is provided and are described above.
 
 Example features plot:
 
@@ -272,7 +272,7 @@ sequence_features_vs_tpms, tpms_feature_changes, feature_trends_tpms
 
 ## `tpms.tsv`
 
-A tsv file listing the rpb (reads per base) and tpm (transcripts per million) of the ORFs of a sample, along with the number of reads detected in the ORF. Generated by `generate_stats_figs.R` during step “Calculate TPMs of genes” using functions `CalculateGeneTranscriptsPerMillion` and `WriteGeneTranscriptsPerMillion`. These functions get the total number of reads per gene from the h5 file which they use to calculate the reads per base and transcripts per million
+A tsv file listing the rpb (reads per base) and tpm of the ORFs of a sample, along with the number of reads detected in the ORF. Generated by `generate_stats_figs.R` during the step “Calculate TPMs of genes” using functions `CalculateGeneTranscriptsPerMillion` and `WriteGeneTranscriptsPerMillion`. These functions get the total number of reads per gene from the h5 file which they use to calculate the rpb and tpm.
 
 ```
 ORF	readcount	rpb	tpm
@@ -290,7 +290,7 @@ Q0070	20	0.0103092783505155	0.66647646133505
 
 ## `codon_ribodens.tsv` 
 
-A tsv file showing the correlatation of different codons to features based on a provided tRNA file, which gives the AMino acids, the tRNA estimates, the tAI (tRNA Adaptation Index), Microarray values, and RNA.seq values for each codon. These are used to calculate mean ribosome-densities at the A/P/E sites for each codon.
+A tsv file showing the correlatation of different codons to features based on a provided tRNA file, which gives the Amino acids, the tRNA estimates, the tAI (tRNA Adaptation Index), Microarray values, and RNA.seq values for each codon. These are used to calculate mean ribosome-densities at the A/P/E sites for each codon.
 
 Produced by `generate_stats_figs` during step "Codon-specific ribosome densities for correlations with tRNAs" using functions `CalculateCodonSpecificRibosomeDensityTRNACorrelation` and `WriteCodonSpecificRibosomeDensityTRNACorrelation`.
 
@@ -312,7 +312,7 @@ APE_codondens, APE_feature_codonden, APE_codon_den
 
 ## `codon_ribodens.pdf` 
 
-This plot shows a range of features and relates them to ribosome densitiy on the A, P and E sites. 4 features are shown; Microarry, RNA.seq, tAI and tRNA. These are taken from the '--t-rna-file' if provided. Each codon codon has a different value for each of these features, described generally here as a tRNA_value. These tRNA_values are plotted against the ribodensity at each site of the ribosome, showing any relationships or trends.
+This plot shows a range of features and relates them to ribosome densitiy on the A, P and E sites. 4 features are shown; Microarry, RNA.seq, tAI and tRNA. These are taken from the `--t-rna-file` if provided. Each codon codon has a different value for each of these features, described generally here as a tRNA_value. These tRNA_values are plotted against the ribodensity at each site of the ribosome, showing any relationships or trends.
 
 Example codon_ribodens plot:
 
@@ -326,7 +326,7 @@ APE_codondens, APE_feature_codonden, APE_codon_den
 
 ## `startcodon_ribogridbar.pdf`
 
-A meta feature bar chart showing the number of reads occurring at positions around the start codons of genes, faceted by read length. As the majority of reads will be 28-31 nt in length, only bar charts for lengths 26-32 nt are shown. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the 3nt_periodicity.tsv file. Note: the Y axis scale will vary for each read length. 
+A meta-feature bar chart showing the number of reads occurring at positions around the start codons of genes, faceted by read length. As the majority of reads will be 28-31nt in length, only bar charts for lengths 26-32nt are shown. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the `3nt_periodicity.tsv` file. Note: the Y axis scale will vary for each read length. 
 
 Example startcodon_ribogridbar:
 
@@ -338,7 +338,7 @@ startcodon_gridbar, start_gridbar_readlen, readlen_gridbar_start
 
 ## `startcodon_ribogrid.pdf`
 
-A meta feature heatmap showing the number of reads occurring at positions around the start codons of genes with the y axis as read length, and the colour intensity showing read count. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, shown by an intense dark purple, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the 3nt_periodicity.tsv file. 
+A meta-feature heatmap showing the number of reads occurring at positions around the start codons of genes with the y axis as read length, and the colour intensity showing read count. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, shown by an intense dark purple, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the `3nt_periodicity.tsv` file. 
 
 Example startcodon_ribogrid:
 
