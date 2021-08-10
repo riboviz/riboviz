@@ -35,14 +35,12 @@ Command-line tools:
 | Tool | Description |
 | ---- | ----------- |
 | [riboviz.tools.check_fasta_gff](./riboviz/tools/check_fasta_gff.py) | [Check FASTA and GFF files for coding sequence (CDS) features](./docs/user/check-fasta-gff.md) |
-| [riboviz.tools.compare_files](./riboviz/tools/compare_files.py) | Compare two files for equality |
 | [riboviz.tools.count_reads](./riboviz/tools/count_reads.py) | Scan input, temporary and output directories and count the number of reads (sequences) processed by specific stages of a workflow (invoked as part of a workflow) |
 | [riboviz.tools.create_barcode_pairs](./riboviz/tools/create_barcode_pairs.py) | Create barcode pairs and write each pair plus the Hamming distance between then to a file of tab-separated values |
 | [riboviz.tools.create_fastq_simdata](./riboviz/tools/create_fastq_simdata.py) | Create simulated FASTQ files to test UMI/deduplication, adaptor trimming, anddemultiplexing. Files in `data/simdata/` were created using this tool |
 | [riboviz.tools.create_job_script](./riboviz/tools/create_job_script.py) | [Create job submission script from template](./docs/user/create-job-script.md) |
 | [riboviz.tools.demultiplex_fastq](./riboviz/tools/demultiplex_fastq.py) | Demultiplex FASTQ files using UMI-tools-compliant barcodes present within the FASTQ headers and a sample sheet file (invoked as part of a workflow) |
 | [riboviz.tools.get_cds_codons](./riboviz/tools/get_cds_codons.py) | Extract coding sequence codons and export as a tab-separated values file |
-| [riboviz.tools.prep_riboviz](./riboviz/tools/prep_riboviz.py) | Run the workflow |
 | [riboviz.tools.subsample_bioseqfile](./riboviz/tools/subsample_bioseqfile.py) | Subsample an input FASTQ (or other sequencing) file, to produce a smaller file whose reads are randomly sampled from of the input with a fixed probability |
 | [riboviz.tools.trim_5p_mismatch](./riboviz/tools/trim_5p_mismatch.py) | Remove a single 5' mismatched nt and filter reads with more than a specified mismatches from a SAM file and save the trimming summary to a file (invoked as part of a workflow) |
 | [riboviz.tools.upgrade_config_file](./riboviz/tools/upgrade_config_file.py) | Upgrade workflow configuration file to be compatible with current configuration |
@@ -53,9 +51,10 @@ Command-line tools:
 * [Git branching model](./docs/developer/git-branching-model.md)
 * [Coding style](./docs/developer/coding-style.md)
 * [Debugging](./docs/developer/debugging.md)
-* [Adding configuration parameters](./docs/developer/adding-config.md)
+* [Using and adding configuration parameters](./docs/developer/config.md)
+* [Adding and updating dependencies](./docs/developer/dependencies.md)
 * [Developing and running tests](./docs/developer/testing.md)
-* [Creating a regression test data repository](./docs/developer/create-test-data-repository.md)
+* [Creating a test data repository](./docs/developer/create-test-data-repository.md)
 * [Writing and updating documentation](./docs/developer/documentation.md)
 * [Building a release](./docs/developer/releasing.md)
 
@@ -68,7 +67,8 @@ Command-line tools:
 
 | Release | Description |
 | ------- | ----------- |
-| [2.0](https://github.com/riboviz/riboviz/releases/tag/2.0) | Current stable release |
+| [2.1](https://github.com/riboviz/riboviz/releases/tag/2.1) | 2.1, current stable release |
+| [2.0](https://github.com/riboviz/riboviz/releases/tag/2.0) | 2.0 |
 | [2.0.beta](https://github.com/riboviz/riboviz/releases/tag/2.0.beta) | 2.0 beta release |
 | [1.1.0](https://github.com/riboviz/riboviz/releases/tag/1.1.0) | Most recent version prior to commencement of BBSRC/NSF Riboviz project |
 | [1.0.0](https://github.com/riboviz/riboviz/releases/tag/1.0.0) | Associated with Carja et al. (2017) "riboviz: analysis and visualization of ribosome profiling datasets", BMC Bioinformatics, volume 18, article 461 (2017), 25 October 2017, doi: [10.1186/s12859-017-1873-8](https://doi.org/10.1186/s12859-017-1873-8) |
@@ -81,7 +81,7 @@ To cite **RiboViz**, please use both of the following references:
 
 riboviz: analysis and visualization of ribosome profiling datasets, Carja et al., BMC Bioinformatics 2017. doi:[10.1186/s12859-017-1873-8](https://doi.org/10.1186/s12859-017-1873-8).
 
-Wallace, Edward; Anderson, Felicity; Kavoussanakis, Kostas; Jackson, Michael; Shah, Premal; Lareau, Liana; et al. (2020): riboviz: software for analysis and visualization of ribosome profiling datasets. figshare. Software. doi: [10.6084/m9.figshare.12624200](https://doi.org/10.6084/m9.figshare.12624200)
+Wallace, Edward; Anderson, Felicity; Kavoussanakis, Kostas; Jackson, Michael; Shah, Premal; Lareau, Liana; et al. (2021): riboviz: software for analysis and visualization of ribosome profiling datasets. figshare. Software. doi: [10.6084/m9.figshare.12624200](https://doi.org/10.6084/m9.figshare.12624200)
 
 ## Acknowledgements
 
@@ -91,6 +91,6 @@ For citations of third-party software used by **RiboViz**, see [References](./do
 
 ## Copyright and License
 
-**RiboViz** is Copyright (2016-2020) The University of Edinburgh; Rutgers University; University of California, Berkeley; The University of Pennsylvania.
+**RiboViz** is Copyright (2016-2021) The University of Edinburgh; Rutgers University; University of California, Berkeley; The University of Pennsylvania.
 
 **RiboViz** is released under the [Apache License 2.0](./LICENSE).

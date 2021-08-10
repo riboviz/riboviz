@@ -1,9 +1,7 @@
 adapters: CTGTAGGCACC # Illumina sequencing adapter(s) to remove
-aligner: hisat2 # Short read aligner to use. Currently only hisat2 works
 asite_disp_length_file: data/yeast_standard_asite_disp_length.txt # Table of fixed A-site positions by read length
 buffer: 250 # Length of flanking region around the CDS
 build_indices: TRUE # Build indices for aligner? if TRUE, remake indices from fasta files
-cmd_file: run_riboviz_vignette.sh # Bash commands file
 codon_positions_file: data/yeast_codon_pos_i200.RData # Codon positions in each gene
 count_reads: TRUE # Scan input, temporary and output files and produce counts of reads in each FASTQ, SAM, and BAM file processed?
 count_threshold: 64 # Remove genes with a read count below this threshold, when generating statistics and figures
@@ -12,7 +10,6 @@ dedup_stats: FALSE # Output UMI deduplication statistics?
 dedup_umis: FALSE # Extract UMIs and deduplicate reads if TRUE
 dir_index: vignette/index # Built indices directory
 dir_in: vignette/input # Input directory
-dir_logs: vignette/logs # Log files directory
 dir_out: vignette/output # Output directory
 dir_tmp: vignette/tmp # Intermediate files directory
 do_pos_sp_nt_freq: TRUE # Calculate position-specific nucleotide frequency?
@@ -36,15 +33,16 @@ make_bedgraph: TRUE # Output bedgraph files, as TSV, in addition to h5?
 max_read_length: 50 # Maximum read length in H5 output
 min_read_length: 10 # Minimum read length in H5 output
 multiplex_fq_files: null # Multiplexed fastq files to be processed, relative to dir_in
-nextflow_dag_file: nextflow-dag.html # Nextflow DAG file (Nextflow workflow only) (job submission).
-nextflow_report_file: nextflow-report.html # Nextflow report file (Nextflow workflow only) (job submission).
-nextflow_timeline_file: nextflow-timeline.html # Nextflow timeline file (Nextflow workflow only) (job submission).
-nextflow_trace_file: nextflow-trace.tsv # Nextflow trace file (Nextflow workflow only) (job submission).
-nextflow_work_dir: work # Nextflow work directory (Nextflow workflow only) (job submission).
+nextflow_dag_file: nextflow-dag.html # Nextflow DAG file (job submission).
+nextflow_report_file: nextflow-report.html # Nextflow report file (job submission).
+nextflow_timeline_file: nextflow-timeline.html # Nextflow timeline file (job submission).
+nextflow_trace_file: nextflow-trace.tsv # Nextflow trace file (job submission).
+nextflow_work_dir: work # Nextflow work directory (job submission).
 num_processes: 1 # Number of processes to parallelize over
 orf_fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa # ORF file to align to
 orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3 # GFF2/GFF3 file for ORFs
-orf_index_prefix: YAL_CDS_w_250 # ORF index file prefix, relative to dir_index
+orf_index_prefix: YAL_CDS_w_250 # ORF index file prefix, relative to dir_index 
+output_pdfs: TRUE # generate .pdfs for sample-related plots 
 primary_id: Name # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
 publish_index_tmp: FALSE # Publish index and temporary files to dir_index and dir_tmp? If FALSE, use symlinks.
 rpf: TRUE # Is the dataset an RPF or mRNA dataset?
@@ -52,6 +50,7 @@ rrna_fasta_file: vignette/input/yeast_rRNA_R64-1-1.fa # rRNA file to avoid align
 rrna_index_prefix: yeast_rRNA # rRNA index file prefix, relative to dir_index
 run_static_html: TRUE # Create static html visualization per sample?
 sample_sheet: null # Sample sheet, TSV file with, at least, SampleID and TagRead (barcode) columns
+samsort_memory: null # Memory to give to 'samtools sort'
 secondary_id: NULL # Secondary gene IDs to access the data (COX1, EFB1, etc.)
 stop_in_feature: FALSE # Are stop codons part of the feature annotations in GFF?
 trim_5p_mismatches: TRUE # Trim mismatched 5' base?

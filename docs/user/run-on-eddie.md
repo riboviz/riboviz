@@ -33,6 +33,8 @@ Contents:
    - [Submit job](#submit-job)
    - [Checking outputs](#checking-outputs)
    - [Moving and downloading outputs](#moving-and-downloading-outputs)
+* [Hints and tips](#hints-and-tips)
+  - [Using the Linux `screen` command](#using-the-linux-screen-command)
 
 ---
 
@@ -192,54 +194,6 @@ Change into the **RiboViz** repository:
 $ cd riboviz/riboviz
 ```
 
-<details><summary>Run the Python workflow (Deprecated)</summary> 
-
-```console
-$ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
-Running under Python: 3.7.6 | packaged by conda-forge | (default, Jun  1 2020, 18:57:50)
-[GCC 7.5.0]
-Created by: RiboViz Date: 2020-06-06 02:09:31.484844 Command-line tool: /exports/csce/eddie/biology/groups/wallace_rna/riboviz/riboviz/tools/prep_riboviz.py File: /exports/csce/eddie/biology/groups/wallace_rna/riboviz/riboviz/tools/prep_riboviz.py Version: commit 0fe0191f585d55763d00283d129a12e4c3c1e5c1 date 2020-06-04 00:43:45-07:00
-Configuration file: vignette/vignette_config.yaml
-Command file: run_riboviz_vignette.sh
-Number of processes: 1
-Build indices for alignment, if necessary/requested
-Build indices for alignment (vignette/input/yeast_rRNA_R64-1-1.fa). Log: vignette/logs/20200606-020931/hisat2_build_r_rna.log
-Build indices for alignment (vignette/input/yeast_YAL_CDS_w_250utrs.fa). Log: vignette/logs/20200606-020931/hisat2_build_orf.log
-Processing samples
-Processing sample: WTnone
-Processing file: vignette/input/SRR1042855_s1mi.fastq.gz
-Cut out sequencing library adapters. Log: vignette/logs/20200606-020931/WTnone/01_cutadapt.log
-Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: vignette/logs/20200606-020931/WTnone/02_hisat2_rrna.log
-Align remaining reads to ORFs index files using hisat2. Log: vignette/logs/20200606-020931/WTnone/03_hisat2_orf.log
-Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: vignette/logs/20200606-020931/WTnone/04_trim_5p_mismatch.log
-Convert SAM to BAM and sort on genome. Log: vignette/logs/20200606-020931/WTnone/05_samtools_view_sort.log
-Index BAM file. Log: vignette/logs/20200606-020931/WTnone/06_samtools_index.log
-Calculate transcriptome coverage for + strand and save as a bedgraph. Log: vignette/logs/20200606-020931/WTnone/07_bedtools_genome_cov_plus.log
-Calculate transcriptome coverage for - strand and save as a bedgraph. Log: vignette/logs/20200606-020931/WTnone/08_bedtools_genome_cov_minus.log
-Make length-sensitive alignments in H5 format. Log: vignette/logs/20200606-020931/WTnone/09_bam_to_h5.log
-Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets. Log: vignette/logs/20200606-020931/WTnone/10_generate_stats_figs.log
-Finished processing sample: vignette/input/SRR1042855_s1mi.fastq.gz
-Processing sample: WT3AT
-Processing file: vignette/input/SRR1042864_s1mi.fastq.gz
-Cut out sequencing library adapters. Log: vignette/logs/20200606-020931/WT3AT/01_cutadapt.log
-Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: vignette/logs/20200606-020931/WT3AT/02_hisat2_rrna.log
-Align remaining reads to ORFs index files using hisat2. Log: vignette/logs/20200606-020931/WT3AT/03_hisat2_orf.log
-Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: vignette/logs/20200606-020931/WT3AT/04_trim_5p_mismatch.log
-Convert SAM to BAM and sort on genome. Log: vignette/logs/20200606-020931/WT3AT/05_samtools_view_sort.log
-Index BAM file. Log: vignette/logs/20200606-020931/WT3AT/06_samtools_index.log
-Calculate transcriptome coverage for + strand and save as a bedgraph. Log: vignette/logs/20200606-020931/WT3AT/07_bedtools_genome_cov_plus.log
-Calculate transcriptome coverage for - strand and save as a bedgraph. Log: vignette/logs/20200606-020931/WT3AT/08_bedtools_genome_cov_minus.log
-Make length-sensitive alignments in H5 format. Log: vignette/logs/20200606-020931/WT3AT/09_bam_to_h5.log
-Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets. Log: vignette/logs/20200606-020931/WT3AT/10_generate_stats_figs.log
-Finished processing sample: vignette/input/SRR1042864_s1mi.fastq.gz
-File not found: vignette/input/example_missing_file.fastq.gz
-Finished processing 3 samples, 1 failed
-Collate TPMs across sample results. Log: vignette/logs/20200606-020931/collate_tpms.log
-Count reads. Log: vignette/logs/20200606-020931/count_reads.log
-Completed
-```
-</details>
-
 ### Run the Nextflow workflow
 
 ```console
@@ -323,9 +277,6 @@ module load igmm/apps/R/3.6.3
 module load anaconda
 source activate riboviz
 
-# Uncomment this to run the python workflow:
-#python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
-
 # Run the Nextflow workflow:
 nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false
 ```
@@ -341,18 +292,6 @@ $ python -m riboviz.tools.create_job_script \
     --config-file vignette/vignette_config.yaml \
     --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary \
     --job-runtime "01:00:00"
-```
-
-**Note:** If you want to run the Python workflow you should edit `job_riboviz.sh` and replace the line:
-
-```
-nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -work-dir work -ansi-log false -with-report nextflow-report.html -with-timeline nextflow-timeline.html -with-trace nextflow-trace.tsv -with-dag nextflow-dag.html  
-```
-
-with:
-
-```
-python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
 ```
 
 For full details on how to use `riboviz.tools.create_job_script`, see [Create job submission script from template](./create-job-script.md).
@@ -743,7 +682,7 @@ If you run the `example-dataset` in your scratch space, remember to move the out
 
 The job submission should create two files: an output file `JOB_NAME-$JOB_ID-$HOSTNAME.o` and an error file `$JOB_NAME-$JOB_ID-$HOSTNAME.e`.  These are the best place to start looking after a job has completed, to check if it has run successfully.
 
-The output file will contain the standard output from the nextflow run, and will give you the locations within `/work` for the folders associated with each process. More information on this can be found in the user documentation for [Debugging](./prep-riboviz-run-nextflow.md#debugging)
+The output file will contain the standard output from the nextflow run, and will provide you with information needed if you need to debug the run. For more information, see [Debugging](./prep-riboviz-run-nextflow.md#debugging) in [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md).
 
 The output files will be in `/exports/eddie/scratch/$USER/Wallace_2020_JEC21/output/`.
 
@@ -760,3 +699,15 @@ You can check the file sizes using `du -ch` to get an idea of how much space you
 Files older than one month are removed from this directory automatically.
 
 See [Storage](https://www.wiki.ed.ac.uk/display/ResearchServices/Storage) for more information.
+
+---
+
+## Hints and tips
+
+### Using the Linux `screen` command
+
+Linux's `screen` command provides a virtual terminal multiplexer. It allows us to run a number of different sessions (or windows, or virtual terminals) withina single terminal, or console, window. This can be useful if we do not have access to a graphical user interface with multiple windows, which is the case when using EDDIE.
+
+One use case is if we want to have one or more files open in editors while also running programs that use those files - for example editing source code and running a compiler, or editing configuration files and running an analysis program - without having to repeatedly open and close the files within the editor
+
+For a short introduction, see [Using the Linux `screen` command](./using-linux-screen.md).

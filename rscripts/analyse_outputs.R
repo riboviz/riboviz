@@ -63,6 +63,10 @@ option_list <- list(
               type = "character", default = NA,
               help = "Sequence features TSV file"
   ),
+  make_option("--intermediates-dir",
+              type = "character", default = NA,
+              help = "Intermediate files directory"
+  ),
   make_option("--output-format",
               type = "character", default = "html_document",
               help = "Output format"
@@ -93,5 +97,6 @@ rmarkdown::render(
     gene_read_frames_filtered_data_file = opt$gene_read_frames_filtered_data_file,
     codon_ribodens_gathered_file = opt$codon_ribodens_gathered_file,
     sequence_features_file = opt$sequence_features_file),
+  intermediates_dir = opt$intermediates_dir,
   output_format = opt$output_format,
   output_file = opt$output_file)

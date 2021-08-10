@@ -11,10 +11,16 @@ Contents:
 * [Validate configuration](#validate-configuration)
   - [Skip checks for ribosome profiling data files parameter](#skip-checks-for-ribosome-profiling-data-files-parameter)
 * [Run the Nextflow workflow](#run-the-nextflow-workflow)
+  - [Troubleshooting: `Error executing process staticHTML` and `AnalysisOutputs.Rmd`](#troubleshooting-error-executing-process-statichtml-and-analysisoutputsrmd)
   - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
   - [Troubleshooting: deduplication and memory issues](#troubleshooting-deduplication-and-memory-issues)
+  - [Troubleshooting: cutadapt 3.x failure](#troubleshooting-cutadapt-3x-failure)
+  - [Troubleshooting: `ln: failed to create symbolic link`](#troubleshooting-ln-failed-to-create-symbolic-link)
 * [Help](#help)
-* [Incremental build](#incremental-build)
+* [Incremental build and resuming a workflow](#incremental-build-and-resuming-a-workflow)
+  - [Resuming after a failure](#resuming-after-a-failure)
+  - [Resuming after adding more samples](#resuming-after-adding-more-samples)
+  - [Resuming after changing configuration](#resuming-after-changing-configuration)
 * [Multiplexed files](#multiplexed-files)
 * [Debugging](#debugging)
 * [Generating reports](#generating-reports)
@@ -240,7 +246,7 @@ $ nextflow run prep_riboviz.nf -ansi-log false -params-file <CONFIG_FILE>
 
 where:
 
-* `-ansi-log false`: requests that each invocation of a Nextflow task is displayed on a separate line.
+* `-ansi-log false`: requests that each invocation of a Nextflow process is displayed on a separate line.
 * `<CONFIG_FILE>`: is a YAML configuration file.
 * Configuration parameters can also be provided via the command-line in the form `--<PARAMETER>=<VALUE>` (for example `--make_bedgraph=FALSE`).
 
@@ -250,6 +256,51 @@ The workflow will then execute, displaying information on each step as it is exe
 * Sample-specific steps are labelled with the sample ID.
 * Multiplexed file-specific steps are labelled with the file name (minus extension).
 * `collateTpms` is labelled with the IDs of all the samples that are collated.
+
+### Troubleshooting: `Error executing process staticHTML` and `AnalysisOutputs.Rmd`
+
+If your version of RiboViz is from a `.zip` or `.tar.gz` file downloaded from GitHub or Figshare (i.e. not a clone of the repository from GitHub) then you may see the following error during execution of a `staticHTML` step of the workflow. For example:
+
+```console
+...
+[a1/93adf8] Submitted process > staticHTML (WT3AT)
+Error executing process > 'staticHTML (WT3AT)'
+
+Caused by:
+  Process `staticHTML (WT3AT)` terminated with an error exit status (1)
+
+Command executed:
+
+  Rscript -e "rmarkdown::render('/home/user/riboviz/riboviz/rmarkdown/AnalysisOutputs.Rmd', ...)
+
+Command exit status:
+  1
+
+...
+
+Command error:
+ 
+processing file: AnalysisOutputs.Rmd
+  Quitting from lines 95-103 (AnalysisOutputs.Rmd) 
+  Error in file(filename, "r", encoding = encoding) : 
+    cannot open the connection
+  Calls: <Anonymous> ... withCallingHandlers -> withVisible -> eval -> eval -> source -> file
+  Execution halted
+...
+
+Workflow finished! (failed)
+...
+```
+
+If this arises then create a `.here` file in your RiboViz directory:
+
+```console
+$ touch .here
+```
+
+and rerun the workflow.
+
+If the problem still arises then it is recommended you use a clone of the `riboviz` repository from GitHub. Please also add information to the issue "Fix bug with AnalysisOutputs.Rmd use of 'here' if `.git` is not present" [#352](https://github.com/riboviz/riboviz/issues/352). It is unclear why this arises but it is hoped, when RiboViz moves its R code into a package that this problem will no longer arise.
 
 ### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
 
@@ -288,6 +339,38 @@ For information on the allowable values, see [samtools sort](http://www.htslib.o
 
 See [Troubleshooting: deduplication and memory issues](memory-storage.md#troubleshooting-deduplication-and-memory-issues) in [Memory and storage](./memory-storage.md).
 
+### Troubleshooting: cutadapt 3.x failure
+
+For some users, the workflow fails during invocation of `cutadapt` 3.2 or 3.4. [Debugging](#debugging) reveals the following error message:
+
+```
+Traceback (most recent call last):  
+...
+-  Traceback (most recent call last):  File "/.../miniconda3/envs/riboviz/bin/cutadapt", line 12, in <module>
+    sys.exit(main())TypeError: main() missing 1 required positional argument: 'cmdlineargs'
+```
+
+It is unclear why this arises but it seems to arise if the Python `cutadapt` package was installed using `conda`. One solution is to reinstall the Python `cutadapt` package using `pip`. For example:
+
+```console
+$ conda remove cutadapt
+$ pip install cutadapt
+```
+
+If you encounter this issue for another version of cutadapt or if you have other solutions then please add a comment to cutadapt 3.x from conda causes workflow failure [#380](https://github.com/riboviz/riboviz/issues/380).
+
+### Troubleshooting: `ln: failed to create symbolic link`
+
+If the workflow fails and [Debugging](#debugging) reveals an error message of form:
+
+```
+ln: failed to create symbolic link '<FILE>': Operation not supported
+```
+
+then this can arise if you do not have permission to create symbolic links within your file system. Nextflow requires the ability to be able to create symbolic links.
+
+The solution is to reconfigure your file system to allow you to create symbolic links within it.
+
 ---
 
 ## Help
@@ -302,9 +385,13 @@ Note that `--help` displays RiboViz-specific workflow help, whereas `-help` disp
 
 ---
 
-## Incremental build
+## Incremental build and resuming a workflow
 
-If processing of a sample fails then the workflow has been written to ensure that this does not prevent the processing of other samples. For example, if the file for the vignette sample `WTnone` was corrupt in some way:
+Nextflow supports a `-resume` parameter which allows a workflow to be resumed from the point at which it failed or when new samples have been added.
+
+### Resuming after a failure
+
+If the processing of a sample fails then the workflow has been written to ensure that this does not prevent the processing of other samples. For example, if the file for the vignette sample `WTnone` was corrupt in some way, then the workflow might fail as follows:
 
 ```console
 $ nextflow run prep_riboviz.nf \
@@ -323,14 +410,18 @@ No such file (NotHere): example_missing_file.fastq.gz
 ...
 ```
 
-If the workflow fails, then a `-resume` option allows it to be rerun from the point at which it failed (for example, after fixing the issue with the file for `WTnone`):
+After fixing the problematic file, the workflow can be resumed, using `-resume` as follows:
 
 ```console
 $ nextflow run prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false -resume
 ```
 
-This feature also supports incremental build. For example, given a `vignette_config.yaml` which specifies only sample `WTnone`, running Nextflow gives:
+The workflow will rerun but the samples already processed will not be reprocessed. The outputs to date for these samples, cached by Nextflow, will be reused.
+
+### Resuming after adding more samples
+
+`-resume` can also be used to resume a workflow, when more samples have been added to a configuration, without reprocessing the samples already processed. For example, given a `vignette_config.yaml` which specifies only sample `WTnone`, running Nextflow may give:
 
 ```console
 $ nextflow run prep_riboviz.nf \
@@ -347,7 +438,7 @@ No such file (NotHere): example_missing_file.fastq.gz
 ...
 ```
 
-If `WT3AT` is then added to `vignette_config.yaml` and Nextflow is run with the `-resume` option, then only the processing for `WT3AT` is done, the cached outputs to date for `WTnone` being reused, not recomputed:
+If `WT3AT` is then added to `vignette_config.yaml` and Nextflow is run with the `-resume` option, then only the processing for `WT3AT` is done, the outputs to date for `WTnone`, cached by Nextflow, are reused:
 
 ```console
 $ nextflow run prep_riboviz.nf \
@@ -368,13 +459,15 @@ No such file (NotHere): example_missing_file.fastq.gz
 ...
 ```
 
-As another example, if the configuration file had:
+### Resuming after changing configuration
+
+`-resume` can also be used to trigger a rerun of parts of the workflow when you have changed the configuration. For example, if the configuration file has:
 
 ```yaml
 make_bedgraph: FALSE
 ```
 
-then bedgraphs will not be created when the workflow is run. If you decide you do want the bedgraphs you can use `-resume` in conjunction with setting the `make_bedgraph` parameter to `TRUE`, on the command-line, to create the bedgraphs. For example:
+then bedgraphs will not be created when the workflow is run. If you decide you do want the bedgraphs after all you can use `-resume`, in conjunction with setting the `make_bedgraph` parameter to `TRUE`, on the command-line, to create the bedgraphs. For example:
 
 ```console
 $ nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false -resume --make_bedgraph=TRUE
@@ -409,6 +502,15 @@ Finished processing sample: WT3AT
 [0c/9d6aa8] Cached process > countReads
 Workflow finished! (OK)
 ```
+
+This works because the workflow uses `make_bedgraph` to determine whether or not to create bedgraphs. In some cases, changing the configuration will not be enough to trigger a reinvocation of the affected steps. For example, changing the value of `adapters` then rerunning the workflow with `-resume` does not trigger a reinvocation of `cutadapt`. For these cases you need to remove the output files produced by the step you want to rerun. When you resume the workflow, Nextflow will notice that these files are missing and reinvoke the step to recreate them, using your updated configuration.
+
+To remove the output files for a specific step of the workflow and rerun the workflow to recreate these files using an updated configuration:
+
+* Use the `nextflow log` command to find the directory in Nextflow's `work` directory for the step. For more information see [Nextflow `work/` directory](./prep-riboviz-operation.md#nextflow-work-directory) and [Debugging](./prep-riboviz-run-nextflow.md#debugging).
+* Remove the output files from the step-specific `work/` subdirectory.
+* Update the configuration.
+* `-resume` the workflow.
 
 ---
 
@@ -492,54 +594,84 @@ Workflow finished! (OK)
 
 ## Debugging
 
-When Nextflow runs it prints information about the execution of each workflow task and also logs information to a log file, `nextflow.log`. If an individual workflow task fails then information on the failure will be both printed and logged. For example:
+Nextflow prints information if one or more steps fail. For example:
 
-```
-...
-[02/fbeb79] Submitted process > collateTpms (WT3AT, WTnone)
-Error executing process > 'collateTpms (WT3AT, WTnone)'
+```console
+$ nextflow run -ansi-log false prep_riboviz.nf -params-file vignette/vignette_config.yaml
+N E X T F L O W  ~  version 20.04.1
+Launching `prep_riboviz.nf` [big_majorana] - revision: 6c6670470d
+samples_dir: .
+organisms_dir: .
+data_dir: .
+No such sample file (NotHere): example_missing_file.fastq.gz
+[7e/e093a6] Submitted process > cutAdapters (WT3AT)
+[42/b1c9a2] Submitted process > buildIndicesrRNA (yeast_rRNA)
+[3d/5bcc67] Submitted process > cutAdapters (WTnone)
+[0f/0757fc] Submitted process > buildIndicesORF (YAL_CDS_w_250)
+[e4/850912] Submitted process > createVizParamsConfigFile
+[e9/5f318c] Submitted process > hisat2rRNA (WTnone)
+[8d/1ecb5d] Submitted process > hisat2rRNA (WT3AT)
+[f5/a34897] Submitted process > hisat2ORF (WTnone)
+[11/a2c59f] Submitted process > trim5pMismatches (WTnone)
+[7e/2579c7] Submitted process > samViewSort (WTnone)
+[d2/68d6aa] Submitted process > outputBams (WTnone)
+[53/5bee02] Submitted process > makeBedgraphs (WTnone)
+[16/26d72f] Submitted process > bamToH5 (WTnone)
+[2d/0330b5] Submitted process > hisat2ORF (WT3AT)
+[02/5594ad] Submitted process > trim5pMismatches (WT3AT)
+[91/3ad140] Submitted process > samViewSort (WT3AT)
+[60/796bd2] Submitted process > outputBams (WT3AT)
+[e2/254948] Submitted process > makeBedgraphs (WT3AT)
+[14/154ad6] Submitted process > bamToH5 (WT3AT)
+[e1/bebe80] Submitted process > generateStatsFigs (WTnone)
+[b0/013c22] Submitted process > generateStatsFigs (WT3AT)
+Finished processing sample: WTnone
+[69/1f6794] Submitted process > renameTpms (WTnone)
+[a1/b61f46] Submitted process > staticHTML (WTnone)
+Finished processing sample: WT3AT
+[a1/6eb17a] Submitted process > renameTpms (WT3AT)
+[b0/5a6872] Submitted process > staticHTML (WT3AT)
+Finished visualising sample: WTnone
+Finished visualising sample: WT3AT
+[38/784d89] Submitted process > collateTpms (WTnone, WT3AT)
+Error executing process > 'collateTpms (WTnone, WT3AT)'
 
 Caused by:
-  Process `collateTpms (WT3AT, WTnone)` terminated with an error exit status (1)
+  Process `collateTpms (WTnone, WT3AT)` terminated with an error exit status (1)
 
 Command executed:
 
-  Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R
-  --sample-subdirs=False             --output-dir=.
-  --tpms-file=TPMs_collated.tsv             WT3AT WTnone
+  Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --tpms-file=TPMs_collated.tsv             WTnone WTnone_tpms.tsv WT3AT WT3AT_tpms.tsv
 
 Command exit status:
   1
 
 Command output:
-  [1] "Created by: RiboViz"
-  [1] "Date: 2021-04-22 04:11:03"
-  [1] "File: /home/ubuntu/riboviz/rscripts/collate_tpms.R"
-  [1] "Version: commit 2c506e07799c17c09fc7f0e151334c0a3313a51c date 2021-04-22 10:14:44 GMT"
+  ...
   [1] "collate_tpms.R running with parameters:"
   $options
-  $options$output_dir
-  [1] "."
-
   $options$tpms_file
   [1] "TPMs_collated.tsv"
-
-  $options$sample_subdirs
-  [1] FALSE
-
+  
   $options$orf_fasta
   [1] NA
-
+  
+  $options$sort_orfs
+  [1] FALSE
+  
+  $options$digits
+  [1] 1
+  
   $options$help
   [1] FALSE
-
-
+  
+  
   $args
-  [1] "WT3AT"  "WTnone"
-
-  [1] "Loading ORFs from: ./WT3AT_tpms.tsv"
-  [1] "Loading TPMs from: ./WT3AT_tpms.tsv"
-  [1] "Loading TPMs from: ./WTnone_tpms.tsv"
+  [1] "WTnone"          "WTnone_tpms.tsv" "WT3AT"           "WT3AT_tpms.tsv" 
+  
+  [1] "Loading ORFs from: WTnone_tpms.tsv"
+  [1] "Loading TPMs from: WTnone_tpms.tsv"
+  [1] "Loading TPMs from: WT3AT_tpms.tsv"
 
 Command error:
   Parsed with column specification:
@@ -563,36 +695,135 @@ Command error:
     rpb = col_double(),
     tpm = col_double()
   )
-  Error: Can't recycle `ORF` (size 68) to match `WTnone` (size 2).
+  Error: Can't recycle `ORF` (size 68) to match `WT3AT` (size 4).
   Backtrace:
-
-    1. ├─global::CollateTpms(...)
-    2. │ ├─`%>%`(...)
-    3. │ │ └─base::eval(lhs, parent, parent)
-    4. │ │   └─base::eval(lhs, parent, parent)
-    5. │ └─global::MakeTpmTable(output_dir, sample_subdirs, orf_fasta, samples)
-    6. │   └─dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])
-    7. │     └─vctrs::vec_cbind(!!!dots, .name_repair = .name_repair)
-    8. └─vctrs::stop_incompatible_size(...)
-    9.   └─vctrs:::stop_incompatible(...)
-   10.     └─vctrs:::stop_vctrs(...)
+       �
+    1. +-global::CollateTpms(...)
+    2. � +-`%>%`(...)
+    3. � � +-base::eval(lhs, parent, parent)
+    4. � �   +-base::eval(lhs, parent, parent)
+    5. � +-global::MakeTpmTable(orf_fasta, samples, sort_orfs = sort_orfs)
+    6. �   +-dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])
+    7. �     +-vctrs::vec_cbind(!!!dots, .name_repair = .name_repair)
+    8. +-vctrs::stop_incompatible_size(...)
+    9.   +-vctrs:::stop_incompatible(...)
+   10.     +-vctrs:::stop_vctrs(...)
   Execution halted
 
 Work dir:
-  /home/ubuntu/riboviz/work/02/fbeb79153e89224250d7a8adc507fd
+  /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73
 
-Tip: you can try to figure out what's wrong by changing to the process
-work dir and showing the script file named `.command.sh`
-
-Workflow finished! (failed)
+Tip: you can replicate the issue by changing to the process work dir and entering the command `bash .command.run`
 ```
 
-Note the reference to the `Work dir`. Each invocation of a task has its own sub-directory within the Nextflow `work/` directory, which includes a bash script with the command that was run (`.command.sh`), its input files, its output files (if any), a file with a log of the output printed by the command (`.command.log`) and a file with its exit code (`.exit_code`). These can be used to help you understand why a task failed and also to rerun the task in isolation.
+If there are many errors, this may result in lots of lines being printed, which can be overwhelming. Nextflow has a `nextflow log` command that allows for the browsing of step-specific information, for both successful and failed steps, in a more manageable way.
 
-For example, for the failure above, the task's `work/` subdirectory includes:
+Each time Nextflow runs a workflow, it gives the workflow a unique name. For example, in the above, failed, run it was `big_majorana`:
+
+```
+Launching `prep_riboviz.nf` [big_majorana] - revision: 6c6670470d
+```
+
+`nextflow log` can be used with this unique name to find out information about the workflow's run.
+
+To see every invocation of a process, every step, that was run and the names of these steps, run, for example:
 
 ```console
-$ ls -1A /home/ubuntu/riboviz/work/02/fbeb79153e89224250d7a8adc507fd
+$ nextflow log big_majorana -f process,name
+cutAdapters	cutAdapters (WT3AT)
+buildIndicesrRNA	buildIndicesrRNA (yeast_rRNA)
+cutAdapters	cutAdapters (WTnone)
+buildIndicesORF	buildIndicesORF (YAL_CDS_w_250)
+createVizParamsConfigFile	createVizParamsConfigFile
+hisat2rRNA	hisat2rRNA (WTnone)
+hisat2rRNA	hisat2rRNA (WT3AT)
+hisat2ORF	hisat2ORF (WTnone)
+trim5pMismatches	trim5pMismatches (WTnone)
+samViewSort	samViewSort (WTnone)
+outputBams	outputBams (WTnone)
+makeBedgraphs	makeBedgraphs (WTnone)
+bamToH5	bamToH5 (WTnone)
+hisat2ORF	hisat2ORF (WT3AT)
+trim5pMismatches	trim5pMismatches (WT3AT)
+samViewSort	samViewSort (WT3AT)
+outputBams	outputBams (WT3AT)
+makeBedgraphs	makeBedgraphs (WT3AT)
+bamToH5	bamToH5 (WT3AT)
+generateStatsFigs	generateStatsFigs (WTnone)
+generateStatsFigs	generateStatsFigs (WT3AT)
+renameTpms	renameTpms (WTnone)
+staticHTML	staticHTML (WTnone)
+renameTpms	renameTpms (WT3AT)
+staticHTML	staticHTML (WT3AT)
+collateTpms	collateTpms (WTnone, WT3AT)
+countReads	countReads
+```
+
+If the workflow failed, then the names of the failed steps can be displayed as follows, for example:
+
+```console
+$ nextflow log big_majorana -f name -filter "status == 'FAILED'"
+collateTpms (WT3AT, WTnone)
+```
+
+To see only the names of specific steps, invocations of a specific process, run, for example:
+
+```console
+$ nextflow log big_majorana -f name -filter "process == 'cutAdapters'"
+cutAdapters (WTnone)
+cutAdapters (WT3AT)
+```
+```console
+$ nextflow log big_majorana -f name -filter "process == 'collateTpms'"
+collateTpms (WT3AT, WTnone)
+```
+
+To see information about a specific step including the command that was run by Nextflow, and its exit code, run, for example:
+
+```console
+$ nextflow log big_majorana -f script,exit -filter "name == 'cutAdapters (WTnone)'"
+
+        cutadapt --trim-n -O 1 -m 5 -a CTGTAGGCACC             -o trim.fq SRR1042855_s1mi.fastq.gz -j 0
+        	0
+```
+```console
+$ nextflow log big_majorana -f script,exit -filter "name == 'collateTpms (WT3AT, WTnone)'"
+
+        Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --tpms-file=TPMs_collated.tsv             WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms.tsv
+        	1
+```
+
+Here, the `cutadapt` command run for `cutAdapters (WTnone)` had an exit code of 0 so the step succeeded. The `collate_tpms.R` command run for `collateTpms (WT3AT, WTnone)` had an exit code of 1, indicating an error, so the step failed.
+
+To see any output and error messages printed by the commands run by Nextflow and which are captured by Nextflow, run, for example:
+
+```console
+$ nextflow log big_majorana -f stdout,stderr -filter "name == 'cutAdapters (WTnone)'"
+This is cutadapt 1.18 with Python 3.7.6Command line parameters: --trim-n -O 1 -m 5 -a CTGTAGGCACC -o trim.fq SRR1042855_s1mi.fastq.gz -j 0Processing reads on 4 cores in single-end mode ...Finished in 7.35 s (8 us/read; 7.87 M reads/minute).-
+```
+```console
+$ nextflow log big_majorana -f stdout,stderr -filter "name == 'collateTpms (WT3AT, WTnone)'"
+[1] "Created by: RiboViz"[1] "Date: 2021-06-24 05:43:14"[1] "File: /home/ubuntu/riboviz/rscripts/collate_tpms.R"[1] "Version: commit 144d95ab228a2da71b9a92912a24b26c37f4a64e date 2021-06-21 08:11:03 GMT"[1] "collate_tpms.R running with parameters:"$options$options$tpms_file[1] "TPMs_collated.tsv"	Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Error: Can't recycle `ORF` (size 4) to match `WTnone` (size 68).Backtrace:     �  1. +-global::CollateTpms(...)  2. � +-`%>%`(...)  3. � � +-base::eval(lhs, parent, parent)  4. � �   +-base::eval(lhs, parent, parent)  5. � +-global::MakeTpmTable(orf_fasta, samples, sort_orfs = sort_orfs)  6. �   +-dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])  7. �     +-vctrs::vec_cbind(!!!dots, .name_repair = .name_repair)  8. +-vctrs::stop_incompatible_size(...)  9.   +-vctrs:::stop_incompatible(...) 10.     +-vctrs:::stop_vctrs(...)Execution halted
+```
+
+Only the first few lines of the output are shown. If, as for `cutadapt (WTnone)`, there were no error messages, then `-` is displayed. The information may not be readable. How to view the complete record of output and error messages for a step is described below.
+
+As described in [Nextflow `work/` directory](./prep-riboviz-operation.md#nextflow-work-directory), when Nextflow runs, it creates a unique step-specific directory for every step in the workflow. Each step-specific directory has symbolic links to the input files for the step and a bash script with the commands to be run by Nextflow for that step. Nextflow runs this bash script within this directory which creates the step's output files. Nextflow also creates files with output and error messages and the exit code. These step-specific directories are created within a Nextflow `work/` directory located, by default, within the directory within which Nextflow is run.
+
+The location of the `work/` subdirectory for a step can be accessed as follows, for example:
+
+```console
+$ nextflow log big_majorana -f hash,workdir -filter "name == 'collateTpms (WT3AT, WTnone)'"
+
+38/784d89	/home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73
+```
+
+This directory can then be browsed:
+
+```console
+$ ls -1a /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73
+.
+..
 .command.begin
 .command.err
 .command.log
@@ -605,134 +836,41 @@ WT3AT_tpms.tsv
 WTnone_tpms.tsv
 ```
 
-The command that was run was:
+The complete list of output and error messages captured by Nextflow for the step can be viewed in the `.command.out` and `.command.err` files. These files can be viewed:
 
 ```console
-$ cat work/02/fbeb79153e89224250d7a8adc507fd/.command.sh
-#!/bin/bash -ue
-Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R
---sample-subdirs=False             --output-dir=.
---tpms-file=TPMs_collated.tsv             WT3AT WTnone
-```
-
-collate_tpms.R reads the `WTnone_tpms.tsv` and `WT3AT_tpms.tsv` input files and produces the output file `TPMS_collated.tsv`. In this run, `collate_tpms.R` produces an output file with no data, only a provenance, as the error arose during execution, before the data itself was output:
-
-```console
-$ head work/02/fbeb79153e89224250d7a8adc507fd/TPMs_collated.tsv
-# Created by: RiboViz
-# Date: 2021-04-22 04:11:03
-# File: /home/ubuntu/riboviz/rscripts/collate_tpms.R
-# Version: commit 2c506e07799c17c09fc7f0e151334c0a3313a51c date 2021-04-22 10:14:44 GMT
-```
-
-The command's exit code was:
-
-```console
-$ cat work/02/fbeb79153e89224250d7a8adc507fd/.exitcode
-```
-
-A non-zero exit code means that the command failed.
-
-When the command ran it printed the following to standard output and standard error:
-
-```console
-$ cat work/02/fbeb79153e89224250d7a8adc507fd/.command.log
+$ cat /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73/.command.out 
 [1] "Created by: RiboViz"
-[1] "Date: 2021-04-22 04:11:03"
+[1] "Date: 2021-06-24 05:43:14"
 [1] "File: /home/ubuntu/riboviz/rscripts/collate_tpms.R"
-[1] "Version: commit 2c506e07799c17c09fc7f0e151334c0a3313a51c date 2021-04-22 10:14:44 GMT"
+[1] "Version: commit 144d95ab228a2da71b9a92912a24b26c37f4a64e date 2021-06-21 08:11:03 GMT"
 [1] "collate_tpms.R running with parameters:"
 $options
-$options$output_dir
-[1] "."
-
 $options$tpms_file
 [1] "TPMs_collated.tsv"
 
-$options$sample_subdirs
-[1] FALSE
-
 $options$orf_fasta
 [1] NA
+
+$options$sort_orfs
+[1] FALSE
+
+$options$digits
+[1] 1
 
 $options$help
 [1] FALSE
 
 
 $args
-[1] "WT3AT"  "WTnone"
+[1] "WT3AT"           "WT3AT_tpms.tsv"  "WTnone"          "WTnone_tpms.tsv"
 
-[1] "Loading ORFs from: ./WT3AT_tpms.tsv"
-Parsed with column specification:
-cols(
-  ORF = col_character(),
-  readcount = col_double(),
-  rpb = col_double(),
-  tpm = col_double()
-)
-[1] "Loading TPMs from: ./WT3AT_tpms.tsv"
-Parsed with column specification:
-cols(
-  ORF = col_character(),
-  readcount = col_double(),
-  rpb = col_double(),
-  tpm = col_double()
-)
-[1] "Loading TPMs from: ./WTnone_tpms.tsv"
-Parsed with column specification:
-cols(
-  ORF = col_character(),
-  readcount = col_double(),
-  rpb = col_double(),
-  tpm = col_double()
-)
-Error: Can't recycle `ORF` (size 68) to match `WTnone` (size 2).
-Backtrace:
-     █
-  1. ├─global::CollateTpms(...)
-  2. │ ├─`%>%`(...)
-  3. │ │ └─base::eval(lhs, parent, parent)
-  4. │ │   └─base::eval(lhs, parent, parent)
-  5. │ └─global::MakeTpmTable(output_dir, sample_subdirs, orf_fasta, samples)
-  6. │   └─dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])
-  7. │     └─vctrs::vec_cbind(!!!dots, .name_repair = .name_repair)
-  8. └─vctrs::stop_incompatible_size(...)
-  9.   └─vctrs:::stop_incompatible(...)
- 10.     └─vctrs:::stop_vctrs(...)
-Execution halted
+[1] "Loading ORFs from: WT3AT_tpms.tsv"
+[1] "Loading TPMs from: WT3AT_tpms.tsv"
+[1] "Loading TPMs from: WTnone_tpms.tsv"
 ```
-
-As the Nextflow `work/` subdirectory includes both a bash script with the command that was run and symbolic links to any input files used by the task, you can rerun the task within the subdirectory to investigate a failure in more detail. For example:
-
 ```console
-$ cd work/02/fbeb79153e89224250d7a8adc507fd/
-$ bash .command.sh
-[1] "Created by: RiboViz"
-[1] "Date: 2021-04-22 04:19:24"
-[1] "File: /home/ubuntu/riboviz/rscripts/collate_tpms.R"
-[1] "Version: commit 2c506e07799c17c09fc7f0e151334c0a3313a51c date 2021-04-22 10:14:44 GMT"
-[1] "collate_tpms.R running with parameters:"
-$options
-$options$output_dir
-[1] "."
-
-$options$tpms_file
-[1] "TPMs_collated.tsv"
-
-$options$sample_subdirs
-[1] FALSE
-
-$options$orf_fasta
-[1] NA
-
-$options$help
-[1] FALSE
-
-
-$args
-[1] "WT3AT"  "WTnone"
-
-[1] "Loading ORFs from: ./WT3AT_tpms.tsv"
+$ cat /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73/.command.err 
 Parsed with column specification:
 cols(
   ORF = col_character(),
@@ -740,7 +878,6 @@ cols(
   rpb = col_double(),
   tpm = col_double()
 )
-[1] "Loading TPMs from: ./WT3AT_tpms.tsv"
 Parsed with column specification:
 cols(
   ORF = col_character(),
@@ -748,7 +885,6 @@ cols(
   rpb = col_double(),
   tpm = col_double()
 )
-[1] "Loading TPMs from: ./WTnone_tpms.tsv"
 Parsed with column specification:
 cols(
   ORF = col_character(),
@@ -756,53 +892,77 @@ cols(
   rpb = col_double(),
   tpm = col_double()
 )
-Error: Can't recycle `ORF` (size 68) to match `WTnone` (size 2).
+Error: Can't recycle `ORF` (size 4) to match `WTnone` (size 68).
 Backtrace:
-     █
-  1. ├─global::CollateTpms(...)
-  2. │ ├─`%>%`(...)
-  3. │ │ └─base::eval(lhs, parent, parent)
-  4. │ │   └─base::eval(lhs, parent, parent)
-  5. │ └─global::MakeTpmTable(output_dir, sample_subdirs, orf_fasta, samples)
-  6. │   └─dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])
-  7. │     └─vctrs::vec_cbind(!!!dots, .name_repair = .name_repair)
-  8. └─vctrs::stop_incompatible_size(...)
-  9.   └─vctrs:::stop_incompatible(...)
- 10.     └─vctrs:::stop_vctrs(...)
+     �
+  1. +-global::CollateTpms(...)
+  2. � +-`%>%`(...)
+  3. � � +-base::eval(lhs, parent, parent)
+  4. � �   +-base::eval(lhs, parent, parent)
+  5. � +-global::MakeTpmTable(orf_fasta, samples, sort_orfs = sort_orfs)
+  6. �   +-dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])
+  7. �     +-vctrs::vec_cbind(!!!dots, .name_repair = .name_repair)
+  8. +-vctrs::stop_incompatible_size(...)
+  9.   +-vctrs:::stop_incompatible(...)
+ 10.     +-vctrs:::stop_vctrs(...)
 Execution halted
 ```
 
 In this example, inspecting the input files reveals the problem:
 
 ```console
-$ head work/02/fbeb79153e89224250d7a8adc507fd/WT3AT_tpms.tsv
-...
+$ cat /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73/WT3AT_tpms.tsv 
+# Created by: RiboViz
+# Date: 2021-06-24 03:20:00
+# File: /home/ubuntu/riboviz/rscripts/generate_stats_figs.R
+# Version: commit 144d95ab228a2da71b9a92912a24b26c37f4a64e date 2021-06-21 08:11:03 GMT
 ORF	readcount	rpb	tpm
 YAL001C	19	0.00538243626062323	953.022776609483
 YAL002W	8	0.00206611570247934	365.829752221778
 YAL003W	379	0.567365269461078	100458.602437955
 YAL005C	2668	1.3502024291498	239069.002530875
-YAL007C	15	0.0215827338129496	3821.47338292102
-...
-
-$ head work/02/fbeb79153e89224250d7a8adc507fd/WTnone_tpms.tsv
-...
+$ cat /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73/WTnone_tpms.tsv 
+# Created by: RiboViz
+# Date: 2021-06-24 03:19:51
+# File: /home/ubuntu/riboviz/rscripts/generate_stats_figs.R
+# Version: commit 144d95ab228a2da71b9a92912a24b26c37f4a64e date 2021-06-21 08:11:03 GMT
 ORF	readcount	rpb	tpm
 YAL001C	4	0.00113314447592068	116.685976611765
 YAL002W	8	0.00206611570247934	212.759037933641
+YAL003W	1291	1.93263473053892	199013.784878156
+YAL005C	4797	2.42763157894737	249986.270649977
+YAL007C	42	0.060431654676259	6222.9722634749
+YAL008W	6	0.0093167701863354	959.397897762878
+YAL009W	4	0.00483675937122128	498.06710694018
+YAL010C	5	0.00327011118378025	336.740923348209
+YAL011W	16	0.00831168831168831	855.899215458761
+...
 ```
 
-`collate_tpms.R` expects each input file to have the same number of rows and the same ORF values. In this case they differ. This would indicate a problem with the upstream task in the workflow that produced these files.
+`collate_tpms.R` expects each input file to have the same number of rows and the same ORFs. In this case they differ. Specifically, `WT3AT_tpms.tsv` only has rows for four ORFs. This may indicate a problem with the data for sample WT3AT.
+
+As the Nextflow `work/` subdirectory includes the bash script with the command that was run and symbolic links to any input files used by the step, this bash script can rerun as-is within the subdirectory to investigate a failure in more detail. For example:
+
+```console
+$ cd /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73/
+$ bash .command.sh 
+[1] "Created by: RiboViz"
+[1] "Date: 2021-06-24 06:08:35"
+...
+  9.   +-vctrs:::stop_incompatible(...)
+ 10.     +-vctrs:::stop_vctrs(...)
+Execution halted
+```
 
 For more information on the `work/` directory, and its files, see [Nextflow `work/` directory](./prep-riboviz-operation.md#nextflow-work-directory),
 
-For more information on Nextflow's log files, see [Nextflow workflow log files](./prep-riboviz-operation.md#nextflow-workflow-log-files).
+For more information on `nextflow log`, see Nextflow's [Tracing & visualisation](https://www.nextflow.io/docs/latest/tracing.html) or run `nextflow log -h`. To see the log fields available, run `nextflow log -l`.
 
 ---
 
 ## Generating reports
 
-Nextflow's `-with-report`, `-with-timeline`, `with-trace` and `-with-dag` flags allow you to request that Nextflow create reports on a run and an image of the task execution workflow. For example:
+Nextflow's `-with-report`, `-with-timeline`, `with-trace` and `-with-dag` flags allow you to request that Nextflow create reports on a run and an image of the execution workflow. For example:
 
 ```console
 $ nextflow run prep_riboviz.nf \

@@ -23,8 +23,8 @@ PrimaryID: Name
 SecondID: NULL
 dataset: vignette
 StopInCDS: FALSE
-
+isTestRun: FALSE
 rpf: TRUE
 ribovizGFF: TRUE
-features_file: data/yeast_features.tsv
+features_file: NULL
 do_pos_sp_nt_freq: TRUE

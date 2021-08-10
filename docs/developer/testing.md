@@ -2,16 +2,10 @@
 
 ## Run Python tests and workflow tests
 
-If you have not installed Nextflow, run:
+Run:
 
 ```console
-$ pytest --ignore-glob="*regression*" --ignore-glob="*nextflow*"
-```
-
-If you have installed Nextflow, run:
-
-```console
-$ pytest --ignore-glob="*regression*"
+$ pytest --ignore-glob="*integration*"
 ```
 
 `PendingDeprecationWarning` `warnings` can be ignored.
@@ -41,27 +35,29 @@ Test scripts can also be run from within R as follows (for example):
 
 ---
 
-## Run vignette regression tests
+## Run vignette integration tests
 
-Test data found within repositories prefixed `regression-test-data-<YYYYMMDD>|<TAG>`, within the [riboviz](https://github.com/riboviz) project on GitHub. These contain output files from the workflow.
+Test data found within repositories prefixed `test-data-<YYYYMMDD>|<TAG>`, within the [riboviz](https://github.com/riboviz) project on GitHub. These contain output files from the workflow.
 
-**Note:** The most recent `regression-test-data-<YYYYMMDD>` repository will be consistent with the most recent version of the code on the `develop` branch.
+**Note:** The most recent `test-data-<YYYYMMDD>` repository will be consistent with the most recent version of the code on the `develop` branch.
 
-**Note:** `regression-test-data-<TAG>` repositories will be consistent with releases with tagged with `<TAG>`.
+**Note:** `test-data-<TAG>` repositories will be consistent with releases with tagged with `<TAG>`.
+
+**Note:** Repositories prior to release 2.1, June 2021, were prefixed `regression-`.
 
 Download test data, for example:
 
 ```console
 $ cd
-$ git clone https://github.com/riboviz/regression-test-data-2.0
+$ git clone https://github.com/riboviz/test-data-2.1
 ```
 
-Run the tests for the RiboViz Python workflow (these may take a few minutes):
+Run the tests for the workflow (these may take a few minutes):
 
 ```console
 $ cd riboviz
-$ pytest riboviz/test/regression/test_regression.py \
-    --expected=$HOME/regression-test-data-<YYYYMMDD>|<TAG> \
+$ pytest riboviz/test/integration/test_integration.py \
+    --expected=$HOME/test-data-<YYYYMMDD>|<TAG> \
     --config-file=vignette/vignette_config.yaml
 ```
 
@@ -69,31 +65,9 @@ For example:
 
 ```console
 $ cd riboviz
-$ pytest riboviz/test/regression/test_regression.py \
-    --expected=$HOME/regression-test-data-2.0 \
+$ pytest riboviz/test/integration/test_integration.py \
+    --expected=$HOME/test-data-2.1 \
     --config-file=vignette/vignette_config.yaml
-```
-
-**Note:** If you have already run the vignette, then add a `--skip-workflow` flag to the call to `pytest`.
-
-Run the tests for the RiboViz Nextflow workflow (these may take a few minutes):
-
-```console
-$ cd riboviz
-$ pytest riboviz/test/regression/test_regression.py \
-    --expected=$HOME/regression-test-data-<YYYYMMDD>|<TAG> \
-    --config-file=vignette/vignette_config.yaml \
-    --nextflow
-```
-
-For example:
-
-```console
-$ cd riboviz
-$ pytest riboviz/test/regression/test_regression.py \
-    --expected=$HOME/regression-test-data-2.0 \
-    --config-file=vignette/vignette_config.yaml  \
-    --nextflow
 ```
 
 **Note:** If you have already run the vignette, then add a `--skip-workflow` flag to the call to `pytest`.
@@ -102,16 +76,16 @@ $ pytest riboviz/test/regression/test_regression.py \
 
 **Troubleshooting: `FAILED ... test_bam_to_h5_h5[...]` test failures**
 
-If, running the vignette regression tests, you see the following two failures:
+If, running the vignette integration tests, you see the following two failures:
 
 ```
 ...
-FAILED riboviz/test/regression/test_regression.py::test_bam_to_h5_h5[vignette/output-WTnone]
-FAILED riboviz/test/regression/test_regression.py::test_bam_to_h5_h5[vignette/output-WT3AT]
+FAILED riboviz/test/integration/test_integration.py::test_bam_to_h5_h5[vignette/output-WTnone]
+FAILED riboviz/test/integration/test_integration.py::test_bam_to_h5_h5[vignette/output-WT3AT]
 ...
 ```
 
-but all other tests pass, then these two test failures can be ignored. These failures can arise if the regression test data was produced in an environment using rhdf 2.34.0 or above and you are using a version of rhd5 prior to 2.34.0, or vice versa. [Bioconductor 3.12 Released](http://bioconductor.org/news/bioc_3_12_release/) (October 28, 2020) explains that, for rhdf4 2.34.0, "datasets written with h5write() now have the attribute rhdf5-NA.OK added to them ... to indicate that rhdf5 was used to create the file...". These new attributes have form:
+but all other tests pass, then these two test failures can be ignored. These failures can arise if the test data was produced in an environment using rhdf 2.34.0 or above and you are using a version of rhd5 prior to 2.34.0, or vice versa. [Bioconductor 3.12 Released](http://bioconductor.org/news/bioc_3_12_release/) (October 28, 2020) explains that, for rhdf4 2.34.0, "datasets written with h5write() now have the attribute rhdf5-NA.OK added to them ... to indicate that rhdf5 was used to create the file...". These new attributes have form:
 
 ```
 ATTRIBUTE "rhdf5-NA.OK" {
@@ -123,23 +97,22 @@ ATTRIBUTE "rhdf5-NA.OK" {
 }
 ```
 
-The H5 files produced by RiboViz (via invocation of the `bam_to_h5.R` script) are used by downstream processing steps (notably `generate_stats_figs.R`) so these failures can be ignored if all other regression tests pass.
+The H5 files produced by RiboViz (via invocation of the `bam_to_h5.R` script) are used by downstream processing steps (notably `generate_stats_figs.R`) so these failures can be ignored if all other integration tests pass.
 
 ---
 
-## Using the regression test suite
+## Using the integration test suite
 
-`riboviz.test.regression.test_regression` is a regression test suite. The test suite runs the Python workflow or the Nextflow workflow using a given configuration file, then compares the results to a directory of pre-calculated results, specified by the user.
+`riboviz.test.integration.test_integration` is a integration test suite. The test suite runs the workflow using a given configuration file, then compares the results to a directory of pre-calculated results, specified by the user.
 
 Usage:
 
 ```console
-$ pytest riboviz/test/regression/test_regression.py \
+$ pytest riboviz/test/integration/test_integration.py \
     --expected=<EXPECTED_RESULTS_DIRECTORY> \
     [--skip-workflow] \
     [--check-index-tmp] \
-    [--config-file=<CONFIG_FILE>] \
-    [--nextflow]
+    [--config-file=<CONFIG_FILE>]
 ```
 
 The test suite accepts the following command-line parameters:
@@ -148,24 +121,22 @@ The test suite accepts the following command-line parameters:
 * `--skip-workflow`: Workflow will not be run prior to checking data files. This can be used to check existing files generated by a run of the workflow.
 * `--check-index-tmp`: Check index and temporary files (default is that only the output files are checked). This can be used with configurations that specify samples (`fq_files`) but not those that specify multiplexed samples (`multiplex_fq_files`) (for more information, see [Tests for temporary files for multiplexed sample files](#tests-for-temporary-files-for-multiplexed-sample-files) below).
 * `--config-file=<CONFIG_FILE>`: Configuration file. If provided then the index, temporary and output directories specified in this file will be validated against those specified by `--expected`. If not provided then the file `vignette/vignette_config.yaml` will be used.
-* `--nextflow`: Run the tests for the Nextflow workflow instead of the Python workflow. Some tests differ for Nextflow due to differences in naming of some temporary files.
 
-**Note:** Do not use the `--check-index-tmp` parameter when running the tests using the test data repositories `https://github.com/riboviz/regression-test-data-<YYYYMMDD>|<TAG>`. These repositories contain no index or temporary files.
+**Note:** Do not use the `--check-index-tmp` parameter when running the tests using the test data repositories `https://github.com/riboviz/test-data-<YYYYMMDD>|<TAG>`. These repositories contain no index or temporary files.
 
 ### Specifying values for environment variable configuration tokens
 
-To specify values for environment variables cited as tokens in configuration parameters (see [Environment variables and configuration tokens](../user/prep-riboviz-config.md#environment-variables-and-configuration-tokens)) (Nextflow workflow only), then these should be defined as described in [Defining values for environment variables](../user/prep-riboviz-run-nextflow.md#defining-values-for-environment-variables). For example:
+To specify values for environment variables cited as tokens in configuration parameters (see [Environment variables and configuration tokens](../user/prep-riboviz-config.md#environment-variables-and-configuration-tokens)), then these should be defined as described in [Defining values for environment variables](../user/prep-riboviz-run-nextflow.md#defining-values-for-environment-variables). For example:
 
 ```console
 $ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \
   RIBOVIZ_ORGANISMS=<ORGANISMS_DIRECTORY> \
   RIBOVIZ_DATA=<DATA_DIRECTORY> \
-  pytest riboviz/test/regression/test_regression.py \
+  pytest riboviz/test/integration/test_integration.py \
     --expected=<EXPECTED_RESULTS_DIRECTORY> \
     [--skip-workflow] \
     [--check-index-tmp] \
-    [--config-file=<CONFIG_FILE>] \
-    --nextflow
+    [--config-file=<CONFIG_FILE>]
 ```
 
 ### Comparing actual directories and files to expected directories and files
@@ -206,29 +177,29 @@ Observe that the final directories in each path - `index`, `output`, `tmp` - are
 If `--check-index-tmp` is not provided (the default behaviour) then tests for index and temporary files will be skipped. An example of how this appears is as follows:
 
 ```console
-$ pytest riboviz/test/regression/test_regression.py --expected=$HOME/vignette-20200304-2.0 --skip-workflow
+$ pytest riboviz/test/integration/test_integration.py --expected=$HOME/vignette-20210617-2.1 --skip-workflow
 ...
-riboviz/test/regression/test_regression.py ssssssssssssssssssssssssssssssssss..ssss......................................
+riboviz/test/integration/test_integration.py ssssssssssssssssssssssssssssssssss..ssss......................................
 ```
 
 or, if using pytest's `-v`, verbose, mode:
 
 ```console
-$ pytest -v riboviz/test/regression/test_regression.py --expected=$HOME/vignette-20200304-2.0 --skip-workflow
+$ pytest -v riboviz/test/integration/test_integration.py --expected=$HOME/vignette-20210617-2.1 --skip-workflow
 ...
-riboviz/test/regression/test_regression.py::test_hisat2_build_index[YAL_CDS_w_250-vignette/index-1] SKIPPED [  1%]
+riboviz/test/integration/test_integration.py::test_hisat2_build_index[YAL_CDS_w_250-vignette/index-1] SKIPPED [  1%]
 ...
-riboviz/test/regression/test_regression.py::test_hisat2_build_index[YAL_CDS_w_250-vignette/index-8] SKIPPED [ 10%]
-riboviz/test/regression/test_regression.py::test_hisat2_build_index[yeast_rRNA-vignette/index-1] SKIPPED [ 11%]
+riboviz/test/integration/test_integration.py::test_hisat2_build_index[YAL_CDS_w_250-vignette/index-8] SKIPPED [ 10%]
+riboviz/test/integration/test_integration.py::test_hisat2_build_index[yeast_rRNA-vignette/index-1] SKIPPED [ 11%]
 ...
-riboviz/test/regression/test_regression.py::test_hisat2_build_index[yeast_rRNA-vignette/index-8] SKIPPED [ 20%]
-riboviz/test/regression/test_regression.py::test_cutadapt_fq[vignette/tmp-WTnone] SKIPPED [ 21%]
+riboviz/test/integration/test_integration.py::test_hisat2_build_index[yeast_rRNA-vignette/index-8] SKIPPED [ 20%]
+riboviz/test/integration/test_integration.py::test_cutadapt_fq[vignette/tmp-WTnone] SKIPPED [ 21%]
 ...
-riboviz/test/regression/test_regression.py::test_bedtools_bedgraph[vignette/output-WTnone-minus.bedgraph] PASSED [ 52%]
+riboviz/test/integration/test_integration.py::test_bedtools_bedgraph[vignette/output-WTnone-minus.bedgraph] PASSED [ 52%]
 ...
-riboviz/test/regression/test_regression.py::test_generate_stats_figs_pdf[vignette/output-WT3AT-3ntframe_propbygene.pdf] PASSED [ 97%]
-riboviz/test/regression/test_regression.py::test_collate_tpms_tsv[vignette/output] PASSED [ 98%]
-riboviz/test/regression/test_regression.py::test_read_counts_tsv[vignette/output] PASSED [100%]
+riboviz/test/integration/test_integration.py::test_generate_stats_figs_pdf[vignette/output-WT3AT-3ntframe_propbygene.pdf] PASSED [ 97%]
+riboviz/test/integration/test_integration.py::test_collate_tpms_tsv[vignette/output] PASSED [ 98%]
+riboviz/test/integration/test_integration.py::test_read_counts_tsv[vignette/output] PASSED [100%]
 ```
 
 ### Tests for temporary demultiplexed sample files
@@ -261,13 +232,11 @@ $ cp -r <OUTPUT_DIRECTORY> results-<BRANCH>-<COMMIT-HASH>/
 You can now provide this folder as a value for the `--expected` parameter. For example, after doing some development, you can run:
 
 ```console
-$ pytest riboviz/test/regression/test_regression.py \
+$ pytest riboviz/test/integration/test_integration.py \
     --expected=results-<BRANCH>-<COMMIT-HASH> \
     --config-file=<CONFIG_FILE> \
     --check-index-tmp
 ```
-
-**Note:** Test data, produced by the Python workflow can be used with the Nextflow tests, and vice versa, but some of the tests relating to temporary files will fail due to the Python and Nextflow workflows each producing some temporary files with differing names.
 
 ---
 
