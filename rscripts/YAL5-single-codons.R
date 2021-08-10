@@ -32,22 +32,6 @@ option_list <- list(make_option(c('-i', '--input'),type = "character", help='Pat
 
 opt <- optparse::parse_args(OptionParser(option_list = option_list))
 
-# parser$add_option(parser, c('-i', '--input'), help='Path input to h5 file')
-# parser$add_option(parser, c('-d', '--dataset'), help='Name of the dataset being studied')
-# parser$add_option(parser, c('-g', '--gff'), help='Path t the GFF3 file of the organism being studied')
-# parser$add_option(parser, c('-a', '--annotation'), help='Path to codon table for organism')
-# parser$add_option(parser, c('--feature'), help='Feature of interest, e.g. codon')
-# parser$add_option(parser, c('-o', '--output'), help='Path to output directory')
-#parser$add_option(parser, c('--expand_width'), help='the desired range either side of the feature of interest', default = 5)
-#parser$add_option(parser, c('--startpos'), help='position of the start codon', default = 1)
-#parser$add_option(parser, c('--startlen'), help='smallest length of reads', default = 10) # please correct if wrong
-#parser$add_option(parser, c('--frame'), help='reading frame to be studied', default = 0)
-#parser$add_option(parser, c('--minreadlen'), help='minimum read length', default = 10)
-#parser$add_option(parser, c('--colsum_out'), help='logical', default = TRUE)
-#parser$add_option(parser, c('--filter_for_frame'), help='Filter to include only the reads from the first nucleotide of a codon', default = FALSE)
-#parser$add_option(parser, c('--snapdisp'), help='frame to filer to when using SnapToCodon', default = 0L)
-
-# args <- parse_args(parser, args)
 
 # hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
 # dataset <- "Mok-simYAL5"
