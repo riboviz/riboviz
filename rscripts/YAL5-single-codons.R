@@ -37,7 +37,6 @@ suppressMessages(library(argparse))
 hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
 dataset <- "Mok-simYAL5"
 feature_of_interest <- c('GCG','TCT')
-
 # check all codons 
 # feature_of_interest <- here::here('data', 'codons.tsv')
 expand_width = 5L
@@ -49,7 +48,7 @@ yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
 gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
 colsum_out <- TRUE
 output_dir <- '.'
-filter_for_frame <- TRUE
+filter_for_frame <- FALSE
 snapdisp <- 0L
 
 
@@ -95,11 +94,9 @@ gff_df <- readGFFAsDf(gff)
 # 5 MIKE        21    35    15 +      ewallace CDS      NA    NA MIKE 
 # 6 MIKE        36    55    20 +      ewallace UTR3     NA    NA MIKE 
 
-
 gene_names <- unique(gff_df$Name)
 
-
-# Import the .tsv file: 
+# Import the .tsv file of codon positions: 
 
 yeast_codon_pos_i200 <- suppressMessages(readr::read_tsv(file = yeast_codon_table))
 
@@ -109,9 +106,6 @@ yeast_codon_pos_i200 <- suppressMessages(readr::read_tsv(file = yeast_codon_tabl
 # $ Gene    : chr [1:2826757] "YAL068C" "YAL068C" "YAL068C" "YAL068C" ...
 # $ PosCodon: num [1:2826757] 1 2 3 4 5 6 7 8 9 10 ...
 # $ Codon   : chr [1:2826757] "ATG" "GTC" "AAA" "TTA" ...
-
-print('Get codon positions and read counts')
-
 
 
 ##### GetAllCodonPosCounts #####
@@ -342,7 +336,7 @@ AddCodonNamesToCodonPosCounts <- function(yeast_codon_pos_i200, gene_names, data
 }   
 
 
- transcript_gene_pos_poscodon_frame <- suppressMessages(AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, filter_for_frame, snapdisp))
+# transcript_gene_pos_poscodon_frame <- suppressMessages(AddCodonNamesToCodonPosCounts(yeast_codon_pos_i200, gene_names, dataset, hd_file, min_read_length, colsum_out, gff_df, filter_for_frame, snapdisp))
 
 
 ##TEST: Expect to produce a tibble with each position in the CDS having the correct codon beside it.
@@ -542,8 +536,6 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
 
 # Normalization carried out within each expanded frame so that they are comparable 
 # Normalizes the expand_feature_region list generating a RelCount column with the normalization values
-
-print('Normalising data')
 
 #' ExpandedRegionNormalization(): carries out normalization within each expanded frame 
 #' 
@@ -822,15 +814,13 @@ if(length(feature_of_interest) == 1){
     # Check for the presence of the feature of interest. Output_feature_info being empty will cause problems with normalization
     
     if(length(output_feature_info) == 0){
-      print('No occurrances of the feature of interest')
+      print(paste('No occurrances of', feature_being_studied))
       
       if(expand_width > 1){
         
-        print('Try script with an expand_width of 1L to check for occurances near to start or stop codon')
+        print('Use an expand_width of 1L to check for occurances near to start or stop codon')
       }
-      
-      print('Done')
-      stop()
+      return()
     }
     
     
