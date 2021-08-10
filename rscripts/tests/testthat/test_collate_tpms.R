@@ -45,16 +45,19 @@ context("test_collate_tpms.R")
 #' @param tpms_file Name of collated TPMs file (character).
 #' @param orf_fasta ORF FASTA file that was aligned to and from which
 #' ORF names are to be retrieved (character).
-#' @param expected_exit_code Expected exit code (integer).
 #' @param sort_orfs sort ORF list lexicographically (logical)
 #' @param digits Number of decimal places to be used in table in file
 #' output (integer).
+#' @param files-only Sample names are not provided with the
+#' sample-specific TPMs files? (logical).
+#' @param expected_exit_code Expected exit code (integer).
 #' @return Tibble with collated TPMs (`NULL` if `expected_exit_code`
 #' is not 0) (tbl_df).
 #'
 #' @export
 RunCollateTpms <- function(collate_tpms, samples, tpms_file = NA,
-  orf_fasta = NA, sort_orfs = NA, digits = NA, expected_exit_code = 0) {
+  orf_fasta = NA, sort_orfs = NA, digits = NA, files_only = NA,
+  expected_exit_code = 0) {
 
   print(paste0("collate_tpms.R: ", collate_tpms))
   cmd_template <- "Rscript --vanilla {collate_tpms}"
@@ -70,9 +73,19 @@ RunCollateTpms <- function(collate_tpms, samples, tpms_file = NA,
   if (!is.na(digits)) {
     cmd_template <- paste(cmd_template, "--digits={digits}")
   }
-  cmd_template <- paste(cmd_template,
-    paste(as.vector(rbind(names(samples), samples)),
-    collapse = " "))
+  if (!is.na(files_only)) {
+    cmd_template <- paste(cmd_template, "--files-only={files_only}")
+  }
+  if (is.na(files_only) || (!files_only)) {
+    # Add argument list of <sample> <sample_tpms_file> pairs.
+    cmd_template <- paste(cmd_template,
+      paste(as.vector(rbind(names(samples), samples)),
+      collapse = " "))
+  } else {
+    # Add argument list of <sample_tpms_file>.
+    cmd_template <- paste(cmd_template,
+      paste(as.vector(samples), collapse = " "))
+  }
   cmd <- glue::glue(cmd_template)
   print(cmd)
 
@@ -171,6 +184,35 @@ testthat::test_that("Defaults", {
     sample_files <- SaveTpms(orfs, sample_data, getwd())
     actual_tpms <- RunCollateTpms(collate_tpms, sample_files)
   })
+  expected_tpms <- GetCollatedTpms(orfs, sample_data)
+  testthat::expect_equal(expected_tpms, actual_tpms, info = "TPMs differ")
+})
+
+testthat::test_that("files-only=FALSE", {
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
+  samples <- c("WTone", "WTtwo")
+  sample_data <- GetSampleTpms(orfs, samples)
+  withr::with_tempdir({
+    sample_files <- SaveTpms(orfs, sample_data, getwd())
+    actual_tpms <- RunCollateTpms(collate_tpms, sample_files,
+                                  files_only = FALSE)
+  })
+  expected_tpms <- GetCollatedTpms(orfs, sample_data)
+  testthat::expect_equal(expected_tpms, actual_tpms, info = "TPMs differ")
+})
+
+testthat::test_that("files-only=TRUE", {
+  orfs <- c("YAL004C", "YAL003W", "YAL002W", "YAL001W")
+  samples <- c("WTone", "WTtwo")
+  sample_data <- GetSampleTpms(orfs, samples)
+  withr::with_tempdir({
+    sample_files <- SaveTpms(orfs, sample_data, getwd())
+    actual_tpms <- RunCollateTpms(collate_tpms, sample_files,
+                                  files_only = TRUE)
+  })
+  # As sample names were not provided to `collate_tpms.R`, expect
+  # sample file names to be used as names for sample-specific TPMs.
+  names(sample_data) <- lapply(sample_files, basename)
   expected_tpms <- GetCollatedTpms(orfs, sample_data)
   testthat::expect_equal(expected_tpms, actual_tpms, info = "TPMs differ")
 })
