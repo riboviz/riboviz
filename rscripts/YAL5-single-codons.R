@@ -15,55 +15,55 @@ suppressMessages(library(purrr))
 suppressMessages(library(dplyr))
 suppressMessages(library(optparse))
 
-option_list <- list(make_option(c('-i', '--input'),type = "character", help='Path input to h5 file'),
-                    make_option(c('-d', '--dataset'),type = "character", help='Name of the dataset being studied'),
-                    make_option(c('-g', '--gff'),type = "character", help='Path t the GFF3 file of the organism being studied'),
-                    make_option(c('-a', '--annotation'),type = "character", help='Path to codon table for organism'),
-                    make_option('--feature', type = "character", help='Feature of interest, e.g. codon'),
-                    make_option(c('-o', '--output'), type = "character", help='Path to output directory'),
-                    make_option(c('--expand_width'), type = "integer", help='the desired range either side of the feature of interest', default = 5),
-                    make_option(('--startpos'), type = "integer", help='position of the start codon', default = 1),
-                    make_option(c('--startlen'), help='smallest length of reads', default = 10),
-                    make_option(c('--frame'), type = "integer", help='reading frame to be studied', default = 0),
-                    make_option(c('--minreadlen'),type = "integer", help='minimum read length', default = 10),
-                    make_option(c('--colsum_out'),  type = "logical", help='logical', default = TRUE),
-                    make_option(c('--filter_for_frame'),  type = "logical", help='Filter to include only the reads from the first nucleotide of a codon', default = FALSE),
-                    make_option(c('--snapdisp'),type = "integer", help='frame to filer to when using SnapToCodon', default = 0L))
+# option_list <- list(make_option(c('-i', '--input'),type = "character", help='Path input to h5 file'),
+#                     make_option(c('-d', '--dataset'),type = "character", help='Name of the dataset being studied'),
+#                     make_option(c('-g', '--gff'),type = "character", help='Path t the GFF3 file of the organism being studied'),
+#                     make_option(c('-a', '--annotation'),type = "character", help='Path to codon table for organism'),
+#                     make_option('--feature', type = "character", help='Feature of interest, e.g. codon'),
+#                     make_option(c('-o', '--output'), type = "character", help='Path to output directory'),
+#                     make_option(c('--expand_width'), type = "integer", help='the desired range either side of the feature of interest', default = 5),
+#                     make_option(('--startpos'), type = "integer", help='position of the start codon', default = 1),
+#                     make_option(c('--startlen'), help='smallest length of reads', default = 10),
+#                     make_option(c('--frame'), type = "integer", help='reading frame to be studied', default = 0),
+#                     make_option(c('--minreadlen'),type = "integer", help='minimum read length', default = 10),
+#                     make_option(c('--colsum_out'),  type = "logical", help='logical', default = TRUE),
+#                     make_option(c('--filter_for_frame'),  type = "logical", help='Filter to include only the reads from the first nucleotide of a codon', default = FALSE),
+#                     make_option(c('--snapdisp'),type = "integer", help='frame to filer to when using SnapToCodon', default = 0L))
+# 
+# opt <- optparse::parse_args(OptionParser(option_list = option_list))
 
-opt <- optparse::parse_args(OptionParser(option_list = option_list))
 
+hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
+dataset <- "Mok-simYAL5"
+feature_of_interest <- c('GCG','TCT', 'CGA')
+# check all codons
+# feature_of_interest <- here::here('data', 'codons.tsv')
+expand_width = 5L
+startpos <-1
+startlen <- 10
+filtering_frame <- 0
+min_read_length <- 10
+yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
+gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
+colsum_out <- TRUE
+output_dir <- '.'
+filter_for_frame <- FALSE
+snapdisp <- 0L
 
-# hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
-# dataset <- "Mok-simYAL5"
-# feature_of_interest <- c('GCG','TCT')
-# # check all codons 
-# # feature_of_interest <- here::here('data', 'codons.tsv')
-# expand_width = 5L
-# startpos <-1
-# startlen <- 10
-# filtering_frame <- 0
-# min_read_length <- 10
-# yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
-# gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
-# colsum_out <- TRUE
-# output_dir <- '.'
-# filter_for_frame <- FALSE
-# snapdisp <- 0L
-
-hd_file <- opt$input
-dataset <- opt$dataset
-gff <- opt$gff
-yeast_codon_table <- opt$annotation
-feature_of_interest <- opt$feature
-output_dir <- opt$output
-expand_width <- opt$expand_width
-startpos <- opt$startpos
-startlen <- opt$startlen
-filtering_frame <- opt$frame
-min_read_length <- opt$minreadlen
-colsum_out <- opt$olsum_out
-filter_for_frame <- opt$filter_for_frame
-snapdisp <- opt$snapdisp
+# hd_file <- opt$input
+# dataset <- opt$dataset
+# gff <- opt$gff
+# yeast_codon_table <- opt$annotation
+# feature_of_interest <- opt$feature
+# output_dir <- opt$output
+# expand_width <- opt$expand_width
+# startpos <- opt$startpos
+# startlen <- opt$startlen
+# filtering_frame <- opt$frame
+# min_read_length <- opt$minreadlen
+# colsum_out <- opt$olsum_out
+# filter_for_frame <- opt$filter_for_frame
+# snapdisp <- opt$snapdisp
 
 
 # If the list of codons is given in tsv format, the first column should contain the feature of interest (codons)
@@ -787,6 +787,7 @@ if(length(feature_of_interest) == 1){
 } else{
   
   # FindAllFeatures is a function that contains ExpandFeatureRegionAllGenes, ExpandedRegionNormalization and OverlayedTable, which are defined above.
+  # The function creates a tibble of features and their relcounts at position 0 of their overlayed tibble which can e used to compare the relcount between different features.
   
   FindAllFeatures <- function(yeast_codon_pos_i200 = yeast_codon_pos_i200, 
                               gene_names = gene_names, dataset, hd_file, 
@@ -837,6 +838,7 @@ if(length(feature_of_interest) == 1){
     
    
     # Create a new tibble listing the feature being studeied, and the RelCount at position 0, ie RelCount at the feature of interest 
+  
     
     feature_rel_use<- tibble(Feature = feature_being_studied, RelCount = filter(overlayed_tibbles, overlayed_tibbles$Rel_Pos == 0)$RelCount)
   
@@ -852,6 +854,17 @@ if(length(feature_of_interest) == 1){
   # Rearrange feature_rel_use to be in descending order, so features with the highest relative use are listed at the top
   
   feature_rel_use <- arrange(feature_rel_use, desc(RelCount))
+  
+  #TEST::feature_rel_use should be of class 'tbl'
+  #TEST::feature_rel_use should have 2 columns. feature_rel_use may not contain as many rows as features were initially input, as if no occurrences of features are found then they wont be included
+  #TEST::The headings of feature_rel_use should be 'Feature' and 'RelCount'
+  #EXAMPLE:: When run on tinysim, with expandwidth = 1, Filter_for_frame = False and using all codons as feature_of_interest, the following file is produced
+  # NOTE:: position 4 of MIKE edited to contain GCC to test for occurrences where the feature of interest has reads at one position but not the other
+  # Feature   RelCount
+  # ATC   3.00
+  # ACA  1.50
+  # GCC   0.75
+  # AAG   0.00
   
   # Save feature_rel_use as a tsv file 
   
