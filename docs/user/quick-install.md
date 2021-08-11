@@ -69,7 +69,7 @@ $ source bash/install-py.sh
 Install Hisat2 and Bowtie:
 
 ```console
-$ source bash/install-hisat-bowtie.sh
+$ source bash/install-tools.sh
 ```
 
 Create `set-riboviz-env.sh`:

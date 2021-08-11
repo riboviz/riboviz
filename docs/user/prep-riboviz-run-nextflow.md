@@ -12,10 +12,15 @@ Contents:
   - [Skip checks for ribosome profiling data files parameter](#skip-checks-for-ribosome-profiling-data-files-parameter)
 * [Run the Nextflow workflow](#run-the-nextflow-workflow)
   - [Troubleshooting: `Error executing process staticHTML` and `AnalysisOutputs.Rmd`](#troubleshooting-error-executing-process-statichtml-and-analysisoutputsrmd)
-- [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
+  - [Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`](#troubleshooting-samtools-sort-couldnt-allocate-memory-for-bam_mem)
   - [Troubleshooting: deduplication and memory issues](#troubleshooting-deduplication-and-memory-issues)
+  - [Troubleshooting: cutadapt 3.x failure](#troubleshooting-cutadapt-3x-failure)
+  - [Troubleshooting: `ln: failed to create symbolic link`](#troubleshooting-ln-failed-to-create-symbolic-link)
 * [Help](#help)
-* [Incremental build](#incremental-build)
+* [Incremental build and resuming a workflow](#incremental-build-and-resuming-a-workflow)
+  - [Resuming after a failure](#resuming-after-a-failure)
+  - [Resuming after adding more samples](#resuming-after-adding-more-samples)
+  - [Resuming after changing configuration](#resuming-after-changing-configuration)
 * [Multiplexed files](#multiplexed-files)
 * [Debugging](#debugging)
 * [Generating reports](#generating-reports)
@@ -334,6 +339,38 @@ For information on the allowable values, see [samtools sort](http://www.htslib.o
 
 See [Troubleshooting: deduplication and memory issues](memory-storage.md#troubleshooting-deduplication-and-memory-issues) in [Memory and storage](./memory-storage.md).
 
+### Troubleshooting: cutadapt 3.x failure
+
+For some users, the workflow fails during invocation of `cutadapt` 3.2 or 3.4. [Debugging](#debugging) reveals the following error message:
+
+```
+Traceback (most recent call last):  
+...
+-  Traceback (most recent call last):  File "/.../miniconda3/envs/riboviz/bin/cutadapt", line 12, in <module>
+    sys.exit(main())TypeError: main() missing 1 required positional argument: 'cmdlineargs'
+```
+
+It is unclear why this arises but it seems to arise if the Python `cutadapt` package was installed using `conda`. One solution is to reinstall the Python `cutadapt` package using `pip`. For example:
+
+```console
+$ conda remove cutadapt
+$ pip install cutadapt
+```
+
+If you encounter this issue for another version of cutadapt or if you have other solutions then please add a comment to cutadapt 3.x from conda causes workflow failure [#380](https://github.com/riboviz/riboviz/issues/380).
+
+### Troubleshooting: `ln: failed to create symbolic link`
+
+If the workflow fails and [Debugging](#debugging) reveals an error message of form:
+
+```
+ln: failed to create symbolic link '<FILE>': Operation not supported
+```
+
+then this can arise if you do not have permission to create symbolic links within your file system. Nextflow requires the ability to be able to create symbolic links.
+
+The solution is to reconfigure your file system to allow you to create symbolic links within it.
+
 ---
 
 ## Help
@@ -348,9 +385,13 @@ Note that `--help` displays RiboViz-specific workflow help, whereas `-help` disp
 
 ---
 
-## Incremental build
+## Incremental build and resuming a workflow
 
-If processing of a sample fails then the workflow has been written to ensure that this does not prevent the processing of other samples. For example, if the file for the vignette sample `WTnone` was corrupt in some way:
+Nextflow supports a `-resume` parameter which allows a workflow to be resumed from the point at which it failed or when new samples have been added.
+
+### Resuming after a failure
+
+If the processing of a sample fails then the workflow has been written to ensure that this does not prevent the processing of other samples. For example, if the file for the vignette sample `WTnone` was corrupt in some way, then the workflow might fail as follows:
 
 ```console
 $ nextflow run prep_riboviz.nf \
@@ -369,14 +410,18 @@ No such file (NotHere): example_missing_file.fastq.gz
 ...
 ```
 
-If the workflow fails, then a `-resume` option allows it to be rerun from the point at which it failed (for example, after fixing the issue with the file for `WTnone`):
+After fixing the problematic file, the workflow can be resumed, using `-resume` as follows:
 
 ```console
 $ nextflow run prep_riboviz.nf \
     -params-file vignette/vignette_config.yaml -ansi-log false -resume
 ```
 
-This feature also supports incremental build. For example, given a `vignette_config.yaml` which specifies only sample `WTnone`, running Nextflow gives:
+The workflow will rerun but the samples already processed will not be reprocessed. The outputs to date for these samples, cached by Nextflow, will be reused.
+
+### Resuming after adding more samples
+
+`-resume` can also be used to resume a workflow, when more samples have been added to a configuration, without reprocessing the samples already processed. For example, given a `vignette_config.yaml` which specifies only sample `WTnone`, running Nextflow may give:
 
 ```console
 $ nextflow run prep_riboviz.nf \
@@ -393,7 +438,7 @@ No such file (NotHere): example_missing_file.fastq.gz
 ...
 ```
 
-If `WT3AT` is then added to `vignette_config.yaml` and Nextflow is run with the `-resume` option, then only the processing for `WT3AT` is done, the cached outputs to date for `WTnone` being reused, not recomputed:
+If `WT3AT` is then added to `vignette_config.yaml` and Nextflow is run with the `-resume` option, then only the processing for `WT3AT` is done, the outputs to date for `WTnone`, cached by Nextflow, are reused:
 
 ```console
 $ nextflow run prep_riboviz.nf \
@@ -414,13 +459,15 @@ No such file (NotHere): example_missing_file.fastq.gz
 ...
 ```
 
-As another example, if the configuration file had:
+### Resuming after changing configuration
+
+`-resume` can also be used to trigger a rerun of parts of the workflow when you have changed the configuration. For example, if the configuration file has:
 
 ```yaml
 make_bedgraph: FALSE
 ```
 
-then bedgraphs will not be created when the workflow is run. If you decide you do want the bedgraphs you can use `-resume` in conjunction with setting the `make_bedgraph` parameter to `TRUE`, on the command-line, to create the bedgraphs. For example:
+then bedgraphs will not be created when the workflow is run. If you decide you do want the bedgraphs after all you can use `-resume`, in conjunction with setting the `make_bedgraph` parameter to `TRUE`, on the command-line, to create the bedgraphs. For example:
 
 ```console
 $ nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false -resume --make_bedgraph=TRUE
@@ -455,6 +502,15 @@ Finished processing sample: WT3AT
 [0c/9d6aa8] Cached process > countReads
 Workflow finished! (OK)
 ```
+
+This works because the workflow uses `make_bedgraph` to determine whether or not to create bedgraphs. In some cases, changing the configuration will not be enough to trigger a reinvocation of the affected steps. For example, changing the value of `adapters` then rerunning the workflow with `-resume` does not trigger a reinvocation of `cutadapt`. For these cases you need to remove the output files produced by the step you want to rerun. When you resume the workflow, Nextflow will notice that these files are missing and reinvoke the step to recreate them, using your updated configuration.
+
+To remove the output files for a specific step of the workflow and rerun the workflow to recreate these files using an updated configuration:
+
+* Use the `nextflow log` command to find the directory in Nextflow's `work` directory for the step. For more information see [Nextflow `work/` directory](./prep-riboviz-operation.md#nextflow-work-directory) and [Debugging](./prep-riboviz-run-nextflow.md#debugging).
+* Remove the output files from the step-specific `work/` subdirectory.
+* Update the configuration.
+* `-resume` the workflow.
 
 ---
 

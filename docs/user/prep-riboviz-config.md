@@ -88,6 +88,7 @@ The workflow also supports the following configuration parameters. All directory
 | `rpf` | Is the dataset an RPF or mRNA dataset? | No | `true` |
 | `rrna_fasta_file` | Ribosomal rRNA and other contaminant sequences to avoid aligning to (FASTA file) | Yes | |
 | `rrna_index_prefix` | Prefix for rRNA index files, relative to `<dir_index>` | Yes | |
+| `run_static_html` | Run static HTML visualization per sample? | No | `true` |
 | `samsort_memory` | Memory to give to `samtools sort`  | No | `null` (`samtools sort` uses built-in default `768M`, [samtools sort](http://www.htslib.org/doc/samtools-sort.html)) |
  | `sample_sheet` | A sample sheet, relative to `<dir_in>` (tab-separated values file) | Only if `multiplex_fq_files` is provided | |
 | `secondary_id` | Secondary gene IDs to access the data (COX1, EFB1, etc. or `NULL`) | No | `NULL` |
