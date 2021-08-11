@@ -10,7 +10,7 @@ if (!is.na(args[1])) {
 if (!is.na(args[2])) {
   port_num <- args[2]
 } else {
-  port_num <- "4254"
+  port_num <- 4254
 }
 
 # load required packages
@@ -26,8 +26,7 @@ find_sample_names <- function(yaml_file) {
   # if there are no entries in fq_files, data is multiplexed
   if (is.null(yaml_file$fq_files)) {
     # get the names from the barcodes file, this is the location of the sample sheet
-    sample_sheet_loc <-
-      normalizePath(here::here(yaml_file$dir_in, yaml_file$sample_sheet))
+    sample_sheet_loc <- here::here(yaml_file$dir_in, yaml_file$sample_sheet)
     
     # get the sample names from it
     sample_names <- read_tsv(sample_sheet_loc)$SampleID
@@ -37,8 +36,7 @@ find_sample_names <- function(yaml_file) {
   }
   
   # construct the paths to the dirs
-  sample_dir_paths <-
-    normalizePath(here::here(yaml_file$dir_out, sample_names))
+  sample_dir_paths <- here::here(yaml_file$dir_out, sample_names)
   
   names(sample_dir_paths) <- sample_names
   
@@ -85,7 +83,7 @@ graph_cats <- data.frame(
 
 # Load the data frame and add the short names
 read_counts_df <-
-  read_tsv(normalizePath(here::here(yaml$dir_out, "read_counts.tsv")), skip = 5) %>%
+  read_tsv(here::here(yaml$dir_out, "read_counts.tsv"), skip = 5) %>%
   left_join(graph_cats, by = "Description") %>%
   filter(
     Description %in% graph_cats$Description &
@@ -101,7 +99,7 @@ read_counts_df <- read_counts_df %>%
 ### Read length distributions
 read_length_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- normalizePath(paste0(x, "/read_lengths.tsv"))
+  file_loc <- paste0(x, "/read_lengths.tsv")
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -110,7 +108,7 @@ read_length_df <- lapply(sample_names, function(x) {
 ### Periodicity line plot
 periodicity_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- normalizePath(paste0(x, "/3nt_periodicity.tsv"))
+  file_loc <- paste0(x, "/3nt_periodicity.tsv")
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -119,7 +117,7 @@ periodicity_df <- lapply(sample_names, function(x) {
 ### Read counts by frame bar plot
 frame_bar_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- normalizePath(paste0(x, "/3ntframe_bygene.tsv"))
+  file_loc <- paste0(x, "/3ntframe_bygene.tsv")
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -137,7 +135,7 @@ frame_bar_df <- lapply(sample_names, function(x) {
 ### Read counts by frame boxplot
 frame_box_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- normalizePath(paste0(x, "/3ntframe_bygene.tsv"))
+  file_loc <- paste0(x, "/3ntframe_bygene.tsv")
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -153,7 +151,7 @@ frame_box_df <- lapply(sample_names, function(x) {
 ### Position specific normalized reads
 pos_sp_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- normalizePath(paste0(x, "/pos_sp_rpf_norm_reads.tsv"))
+  file_loc <- paste0(x, "/pos_sp_rpf_norm_reads.tsv")
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -161,7 +159,7 @@ pos_sp_df <- lapply(sample_names, function(x) {
 
 ### collated TPMs
 collated_tpms_df <-
-  read_tsv(normalizePath(here::here(yaml$dir_out, "TPMs_collated.tsv")), skip = 4)
+  read_tsv(here::here(yaml$dir_out, "TPMs_collated.tsv"), skip = 4)
 
 ### Ribogrid
 ribogrid_df <- lapply(sample_names, function(x) {
@@ -312,7 +310,7 @@ server <- function(input, output, session) {
         geom_vline(aes(xintercept = xint), size = 1) +
         scale_x_log10(labels = label_number_si()) +
         facet_wrap( ~ samplez) +
-        scale_fill_discrete(guide = FALSE) +
+        scale_fill_discrete(guide = "none") +
         plot_theme +
         labs(title = "TPM distributions",
              x = expression(paste(log[10], "(TPM)")),
@@ -333,7 +331,7 @@ server <- function(input, output, session) {
         ggplot(., aes(Length, Counts, fill = samplez)) +
         geom_col(width = 1) +
         facet_wrap( ~ samplez, scales = "free_y") +
-        scale_fill_discrete(name = NULL, guide = FALSE) +
+        scale_fill_discrete(name = NULL, guide = "none") +
         plot_theme +
         labs(title = "Read length distributions",
              x = "Read length",
@@ -356,7 +354,7 @@ server <- function(input, output, session) {
         filter(samplez %in% input$sample) %>%
         ggplot(., aes(x = Pos, y = Counts, color = samplez)) +
         geom_line() +
-        scale_color_discrete(name = NULL, guide = FALSE) +
+        scale_color_discrete(name = NULL, guide = "none") +
         facet_grid(cols = vars(samplez),
                    rows = vars(End),
                    scales = "free_y") +
@@ -381,7 +379,7 @@ server <- function(input, output, session) {
              x = NULL,
              y = "Read counts") +
         plot_theme +
-        scale_color_discrete(guide = FALSE) +
+        scale_color_discrete(guide = "none") +
         scale_y_continuous(labels = label_number_si())
     })
   })
@@ -416,7 +414,7 @@ server <- function(input, output, session) {
         geom_line() +
         facet_grid(End ~ samplez, scales = "free") +
         plot_theme +
-        scale_color_discrete(guide = FALSE)
+        scale_color_discrete(guide = "none")
     })
   })
   
@@ -430,7 +428,7 @@ server <- function(input, output, session) {
         geom_line() +
         facet_grid(End ~ samplez, scales = "free") +
         plot_theme +
-        scale_color_discrete(guide = FALSE)
+        scale_color_discrete(guide = "none")
     })
   })
   
@@ -496,8 +494,7 @@ server <- function(input, output, session) {
       unlist() %>%
       tail(1)
     
-    file_loc <-
-      normalizePath(here::here(yaml$dir_out, paste0(only_name, "/", only_name, ".h5")))
+    file_loc <- here::here(yaml$dir_out, paste0(only_name, "/", only_name, ".h5"))
     
     ret <-
       h5read(file_loc, name = file.path(input$gene, yaml$dataset, "reads/data")) %>%
@@ -577,7 +574,7 @@ server <- function(input, output, session) {
                                                                                        .x))) +
             plot_theme +
             labs(x = expression(paste(log[10], "(TPM)"))) +
-            scale_size_manual(values = c(4, 1), guide = FALSE)
+            scale_size_manual(values = c(4, 1), guide = "none")
         } else {
           features_df %>%
             filter(samplez %in% input$sample &
@@ -591,10 +588,10 @@ server <- function(input, output, session) {
             scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10 ^
                                                                                        .x))) +
             plot_theme +
-            scale_color_manual(guide = FALSE,
+            scale_color_manual(guide = "none",
                                values = c("firebrick3", "grey70")) +
             labs(x = expression(paste(log[10], "(TPM)"))) +
-            scale_size_manual(values = c(4, 1), guide = FALSE)
+            scale_size_manual(values = c(4, 1), guide = "none")
         }
       })
     })
