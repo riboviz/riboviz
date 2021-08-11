@@ -1,0 +1,458 @@
+---
+title: "RiboViz Visualization"
+output: 
+  flexdashboard::flex_dashboard:
+    theme: yeti
+    orientation: rows
+    vertical_layout: fill
+runtime: shiny
+params: 
+  yamlfile: NA
+---
+
+<!-- Use a JS hack to store the currently selected tab into a reactive value -->
+<script>
+$("body").on("shown.bs.tab", "a[data-toggle='tab']", function(e) {
+   Shiny.setInputValue("active_tab", $(e.target).parent().index());
+})
+</script>
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(shiny)
+library(tidyverse)
+library(patchwork)
+library(scales)
+library(yaml)
+library(here)
+
+yamlfilepath <- params$yamlfile
+```
+
+<!-- The issue here is that I'm uncertain as to how to point this code to the output directories that riboviz makes for each sample. The names of those directories, i.e. the sample names, are required for the graphs to be correctly labeled. Also, A bit work will have to be done on grouping related samples, because unless they're something sensible like wt_1, wt_2, etc., the current method won't find them. For example, mouse_1, mouse_2, mouse_3, ..., might be the file names and the experimenter knows which mouse is which sample but as far as this code goes, that will all get labeled as one group. Hence the groups are currently hard coded in at line 179, meaning that it only works with the Gupta data right now. -->
+
+```{r}
+# Define a unified plot theme
+plot_theme <- theme_bw()+
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        text = element_text(size = 14))
+```
+
+<!-- Parse info from the config YAML -->
+
+```{r}
+# ideally, this is the only place that needs to read a command line arg, it should take whatever is given to
+# -params-file when you start a riboviz run
+yaml1 <- here("vignette", "simdata_multiplex_config.yaml")
+yaml2 <- here("vignette", "vignette_config.yaml")
+yaml3 <- yamlfilepath
+
+print(params$yamlfile)
+print(yaml1)
+print(yaml2)
+print(yaml3)
+```
+
+```{r}
+# this function constructs the location of the sample directories
+# from info in the yaml, it needs to know the path to the yaml
+# which can be pulled from the command line input perhaps? 
+
+find_sample_names <- function(path_to_yaml){
+  # read in the yaml
+  yaml <- read_yaml(path_to_yaml) #   yaml <- read_yaml(path_to_yaml)
+# str(yaml)
+# List of 43
+#  $ adapters              : chr "CTGTAGGCACC"
+#  $ aligner               : chr "hisat2"
+#  $ asite_disp_length_file: chr "data/yeast_standard_asite_disp_length.txt"
+#  $ buffer                : int 250
+#  $ build_indices         : logi TRUE
+#  $ cmd_file              : chr "run_riboviz_vignette.sh"
+#  $ codon_positions_file  : chr "data/yeast_codon_pos_i200.RData"
+#  $ count_reads           : logi TRUE
+#  $ count_threshold       : int 64
+#  $ dataset               : chr "vignette"
+#  $ dedup_stats           : logi FALSE
+#  $ dedup_umis            : logi FALSE
+#  $ dir_index             : chr "vignette/index"
+#  $ dir_in                : chr "vignette/input"
+#  $ dir_logs              : chr "vignette/logs"
+#  $ dir_out               : chr "vignette/output"
+#  $ dir_tmp               : chr "vignette/tmp"
+#  $ do_pos_sp_nt_freq     : logi TRUE
+#  $ extract_umis          : logi FALSE
+#  $ features_file         : chr "data/yeast_features.tsv"
+#  $ fq_files              :List of 3
+#   ..$ WTnone : chr "SRR1042855_s1mi.fastq.gz"
+#   ..$ WT3AT  : chr "SRR1042864_s1mi.fastq.gz"
+#   ..$ NotHere: chr "example_missing_file.fastq.gz"
+#  $ group_umis            : logi FALSE
+#  $ is_riboviz_gff        : logi TRUE
+#  $ is_test_run           : logi FALSE
+#  $ make_bedgraph         : logi TRUE
+#  $ max_read_length       : int 50
+#  $ min_read_length       : int 10
+#  $ multiplex_fq_files    : NULL
+#  $ num_processes         : int 1
+#  $ orf_fasta_file        : chr "vignette/input/yeast_YAL_CDS_w_250utrs.fa"
+#  $ orf_gff_file          : chr "vignette/input/yeast_YAL_CDS_w_250utrs.gff3"
+#  $ orf_index_prefix      : chr "YAL_CDS_w_250"
+#  $ primary_id            : chr "Name"
+#  $ publish_index_tmp     : logi FALSE
+#  $ rpf                   : logi TRUE
+#  $ rrna_fasta_file       : chr "vignette/input/yeast_rRNA_R64-1-1.fa"
+#  $ rrna_index_prefix     : chr "yeast_rRNA"
+#  $ sample_sheet          : NULL
+#  $ secondary_id          : NULL
+#  $ stop_in_cds           : logi FALSE
+#  $ trim_5p_mismatches    : logi TRUE
+#  $ t_rna_file            : chr "data/yeast_tRNAs.tsv"
+#  $ umi_regexp            : NULL
+
+# > yaml$fq_files
+# $WTnone
+# [1] "SRR1042855_s1mi.fastq.gz"
+# $WT3AT
+# [1] "SRR1042864_s1mi.fastq.gz"
+# $NotHere
+# [1] "example_missing_file.fastq.gz"
+
+# multiplex example:
+# yaml <- read_yaml(yaml1)
+# ...
+# > yaml$fq_files
+# NULL
+# > yaml$dir_in
+# [1] "data/simdata/"
+# > yaml$sample_sheet
+# [1] "multiplex_barcodes.tsv"
+  
+  # if fq_files is NULL
+  if (is.null(yaml$fq_files)){
+    # then it is multiplexed, get the names from the barcodes file
+    # this is the location of the sample sheet
+    #sample_sheet_loc <- paste0("../", yaml$dir_in, yaml$sample_sheet)
+    sample_sheet_loc <- here(yaml$dir_in, yaml$sample_sheet)
+    
+# > here(yaml$dir_in, yaml$sample_sheet)
+# [1] "/home/fanders6/riboviz/riboviz/data/simdata//multiplex_barcodes.tsv"
+# > file.exists(here(yaml$dir_in, yaml$sample_sheet))
+# [1] TRUE
+# NOTE: the double bracket doesn't seem to cause any issues tbh.  
+# Could use gsub(pattern="//", replacement="/", x) if it does though.
+    
+    # get the sample names from it
+    sample_names <- read_tsv(sample_sheet_loc)$SampleID
+    
+# > read_tsv(sample_sheet_loc)$SampleID
+# Parsed with column specification:
+# cols(
+#   SampleID = col_character(),
+#   TagRead = col_character()
+# )
+# [1] "Tag0" "Tag1" "Tag2" "Tag3"
+
+# > sample_names
+# [1] "Tag0" "Tag1" "Tag2" "Tag3"
+    
+  } else {
+    # it is not multiplexed, read the names from the yaml
+    sample_names <- names(yaml$fq_files)
+    
+# > sample_names <- names(yaml$fq_files)
+# > sample_names
+# [1] "WTnone"  "WT3AT"   "NotHere"
+    
+  }
+  
+  # construct the paths to the dirs
+  #sample_dir_paths <- paste0("../", yaml$dir_out, "/", sample_names)
+  sample_dir_paths <- here(yaml$dir_out, sample_names)
+  
+# > here(yaml$dir_out, sample_names) # vanilla
+# [1] "/home/fanders6/riboviz/riboviz/vignette/output/WTnone" 
+# "/home/fanders6/riboviz/riboviz/vignette/output/WT3AT" 
+# "/home/fanders6/riboviz/riboviz/vignette/output/NotHere"
+  
+# > here(yaml$dir_out, sample_names) # multiplex
+# [1] "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_output/Tag0" "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_output/Tag1"
+# [3] "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_output/Tag2" "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_output/Tag3"
+  
+  names(sample_dir_paths) <- sample_names
+# > names(sample_dir_paths)
+# [1] "WTnone"  "WT3AT"   "NotHere"
+  
+#  > names(sample_dir_paths)
+# [1] "Tag0" "Tag1" "Tag2" "Tag3"
+  
+  # in the case where reads are not demultiplexed, as in Tag3
+  # remove that from the vector
+  do_dirs_exist <- unlist(lapply(sample_dir_paths, dir.exists))
+  
+# > lapply(sample_dir_paths, dir.exists)
+# $Tag0
+# [1] TRUE
+# 
+# $Tag1
+# [1] TRUE
+# 
+# $Tag2
+# [1] TRUE
+# 
+# $Tag3
+# [1] FALSE
+
+# do_dirs_exist <- unlist(lapply(sample_dir_paths, dir.exists))
+#  > do_dirs_exist
+#  Tag0  Tag1  Tag2  Tag3 
+#  TRUE  TRUE  TRUE FALSE
+  
+  # retain only sample names for dirs that exist
+  these_dirs_exist <- names(do_dirs_exist[do_dirs_exist == TRUE])
+
+# > names(do_dirs_exist[do_dirs_exist == TRUE])
+# [1] "Tag0" "Tag1" "Tag2"
+  
+  sample_dir_paths_that_exist <- sample_dir_paths[names(sample_dir_paths) %in% these_dirs_exist]
+  
+# > sample_dir_paths_that_exist
+#  Tag0 
+# "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_output/Tag0" 
+#  Tag1 
+# "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_output/Tag1" 
+#  Tag2 
+# "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_output/Tag2" 
+  
+  # load read_counts.tsv into it's own global variable
+#  read_counts_df <<- read_tsv(paste0("../", yaml$dir_out, "/read_counts.tsv"), skip = 5)
+
+  read_counts_df <<- read_tsv(here(yaml$dir_out, "read_counts.tsv"), skip = 5)
+  
+#  >   here(yaml$dir_out, "read_counts.tsv")
+# [1] "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_output/read_counts.tsv"
+  
+# > str(read_counts_df)
+# tibble [24 × 5] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+#  $ SampleName : chr [1:24] NA NA "Tag0" "Tag1" ...
+#  $ Program    : chr [1:24] "input" "cutadapt" "riboviz.tools.demultiplex_fastq" "riboviz.tools.demultiplex_fastq" ...
+#  $ File       : chr [1:24] "/home/fanders6/riboviz/riboviz/data/simdata/multiplex_umi_barcode_adaptor.fastq" "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_tmp/multiplex_umi_barcode_adaptor_trim.fq" "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_tmp/multiplex_umi_barcode_adaptor_deplex/Tag0.fq" "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_tmp/multiplex_umi_barcode_adaptor_deplex/Tag1.fq" ...
+#  $ NumReads   : num [1:24] 90 90 27 27 27 9 27 27 0 27 ...
+#  $ Description: chr [1:24] "input" "Reads after removal of sequencing library adapters" "Demultiplexed reads" "Demultiplexed reads" ...
+#  - attr(*, "spec")=
+#   .. cols(
+#   ..   SampleName = col_character(),
+#   ..   Program = col_character(),
+#   ..   File = col_character(),
+#   ..   NumReads = col_double(),
+#   ..   Description = col_character()
+#   .. )
+
+
+  return(sample_dir_paths_that_exist)
+  
+}
+```
+
+```{r}
+# apply the function
+sample_dir_names <- find_sample_names(yamlfilepath) 
+sample_names <- names(sample_dir_names)
+
+# >  find_sample_names(yaml1)
+# Parsed with column specification:
+# cols(
+#   SampleID = col_character(),
+#   TagRead = col_character()
+# )
+# Parsed with column specification:
+# cols(
+#   SampleName = col_character(),
+#   Program = col_character(),
+#   File = col_character(),
+#   NumReads = col_double(),
+#   Description = col_character()
+# )
+#                                                                    Tag0                                                                    Tag1 
+# "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_output/Tag0" "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_output/Tag1" 
+#                                                                    Tag2 
+# "/home/fanders6/riboviz/riboviz/vignette/simdata_multiplex_output/Tag2" 
+
+# >  find_sample_names(yaml2)
+# Parsed with column specification:
+# cols(
+#   SampleName = col_character(),
+#   Program = col_character(),
+#   File = col_character(),
+#   NumReads = col_double(),
+#   Description = col_character()
+# )
+#                                                  WTnone                                                   WT3AT 
+# "/home/fanders6/riboviz/riboviz/vignette/output/WTnone"  "/home/fanders6/riboviz/riboviz/vignette/output/WT3AT" 
+
+```
+<!-- Load the files necessary for the graphs -->
+
+```{r}
+# get read length dists into one data frame
+read_length_df <- lapply(sample_dir_names, function(x){
+  # path to the read length file
+  file_loc <- paste0(x, "/read_lengths.tsv")
+  # read it in
+  return(read_tsv(file_loc, skip = 4))
+}) %>% 
+  bind_rows(.id = "sample")
+
+# get the 3nt periodicity into one df
+three_nt_per_df <- lapply(sample_dir_names, function(x){
+  # path to the read length file
+  file_loc <- paste0(x, "/3nt_periodicity.tsv")
+  # read it in
+  return(read_tsv(file_loc, skip = 4))
+}) %>% 
+  bind_rows(.id = "sample") %>% 
+  mutate(End = factor(End, levels  = c("5'", "3'")))
+
+# get the frame by gene into one df
+frame_by_gene_df <- lapply(sample_dir_names, function(x){
+  # path to the read length file
+  file_loc <- paste0(x, "/3ntframe_bygene.tsv")
+  # read it in
+  return(read_tsv(file_loc, skip = 4))
+}) %>% 
+  bind_rows(.id = "sample")
+```
+
+<!-- Create the plotting functions -->
+
+```{r}
+# Make the read length dists plot function
+read_length_dists_plot <- shiny::reactive({
+  read_length_df %>% 
+    filter(sample %in% samp()) %>%
+    ggplot(., aes(Length, Counts, fill = sample))+
+    geom_col(width = 1)+
+    facet_wrap(~sample, scales = "free_y")+
+    scale_fill_discrete(name = NULL, guide = FALSE)+
+    plot_theme+
+    labs(title = "Read length distributions",
+         x = "Read length")+
+    scale_x_continuous(breaks = seq(10, 50, 5))+
+    scale_y_continuous(breaks = breaks_pretty(n = 4))
+})
+```
+
+```{r}
+# Make the 3nt periodicity plot function
+three_nt_per_5p_plot <- shiny::reactive({
+  three_nt_per_df %>% 
+    filter(sample %in% samp() & End == "5'") %>%
+    ggplot(., aes(x = Pos, y = Counts, color = sample))+ 
+    geom_line(size = 1)+ 
+    scale_color_discrete(guide = FALSE)+
+    facet_wrap(~sample, scales = "free")+
+    labs(title = "3-nucleotide periodicity, 5' end mapping",
+         x = "Position",
+         y = "Read count")+
+    plot_theme+
+    scale_y_continuous(breaks = breaks_pretty(n = 3))
+})
+
+# a separate one for 3' ends
+three_nt_per_3p_plot <- shiny::reactive({
+  three_nt_per_df %>% 
+    filter(sample %in% samp() & End == "3'") %>%
+    ggplot(., aes(x = Pos, y = Counts, color = sample))+ 
+    geom_line(size = 1)+ 
+    scale_color_discrete(guide = FALSE)+
+    facet_wrap(~sample, scales = "free")+
+    labs(title = "3-nucleotide periodicity, 3' end mapping",
+         x = "Position",
+         y = "Read count")+
+    plot_theme+
+    scale_y_continuous(breaks = breaks_pretty(n = 3))
+})
+```
+
+```{r}
+# Make the read counts by frame boxplot
+frame_by_gene_plot <- shiny::reactive({
+  frame_by_gene_df %>% 
+    rename("Frame 0" = "Ct_fr0", "Frame 1" = "Ct_fr1", "Frame 2" = "Ct_fr2") %>% 
+    select(sample, gene, starts_with("Frame")) %>% 
+    pivot_longer(where(is.numeric)) %>% 
+    filter(sample %in% samp()) %>%
+    ggplot(., aes(x=name, y=value, fill=sample))+
+    labs(y="Reads per gene", 
+         title = "Reads per frame per gene",
+         x = NULL)+
+    scale_fill_discrete(guide = FALSE)+
+    geom_boxplot(outlier.size = 1)+
+    plot_theme
+})
+```
+```{r}
+# Make the total read counts by frame plot function
+total_reads_per_frame <- shiny::reactive({
+  frame_by_gene_df %>% 
+    rename("Frame 0" = "Ct_fr0", "Frame 1" = "Ct_fr1", "Frame 2" = "Ct_fr2") %>% 
+    select(sample, gene, starts_with("Frame")) %>% 
+    pivot_longer(where(is.numeric)) %>% 
+    group_by(sample, name) %>% 
+    summarise(total_reads = sum(value)) %>% 
+    filter(sample %in% samp()) %>%
+    ggplot(., aes(x=name, y=total_reads, fill=sample))+
+    labs(y="Total reads", 
+         title = "Reads per frame",
+         x = NULL)+
+    scale_fill_discrete(name = NULL)+
+    geom_col(position = position_dodge())+
+    plot_theme+
+    guides(guide_legend(ncol = 1))
+})
+```
+
+```{r reactive}
+# Getting the desired sample name
+samp <- shiny::reactive({
+  if(is.na(input$samp)) {
+    "*"
+  } else {
+    paste(input$samp)  
+  }
+})
+```
+
+## Input {.sidebar}
+
+```{r input, eval=FALSE}
+# Display UI depending on selected output tab
+output$input_ui <- renderUI({
+   # See JS code at top to see where active_tab comes from
+   sel <- input$active_tab
+   
+   # UI for "Single Group"
+   if (is.null(sel) || sel == 0) {
+      checkboxGroupInput("samp", "Sample name:", sample_names, sample_names[1])
+   
+   } else if (sel == 1) {
+      # Future tab
+    
+   } else {
+      # Future tab     
+   }
+})
+
+# Show the prepared UI
+uiOutput("input_ui")
+```
+
+## Data {.tabset}
+
+### By Sample
+```{r output_bysample}
+renderPlot({
+  plot((read_length_dists_plot() / three_nt_per_5p_plot() / three_nt_per_3p_plot() / (frame_by_gene_plot() | total_reads_per_frame())))
+})
+```

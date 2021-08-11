@@ -34,22 +34,22 @@ find_sample_names <- function(yaml_file) {
     # it is not multiplexed, read the names from the yaml_file
     sample_names <- names(yaml_file$fq_files)
   }
-  
+
   # construct the paths to the dirs
   sample_dir_paths <- here::here(yaml_file$dir_out, sample_names)
   
   names(sample_dir_paths) <- sample_names
-  
+
   # in the case where reads are not demultiplexed, as in Tag3 in the vignette
   # remove that from the vector
   do_dirs_exist <- unlist(lapply(sample_dir_paths, dir.exists))
-  
+
   # retain only sample names for dirs that exist
   these_dirs_exist <- names(do_dirs_exist[do_dirs_exist == TRUE])
-  
+
   sample_dir_paths_that_exist <-
     sample_dir_paths[names(sample_dir_paths) %in% these_dirs_exist]
-  
+
   return(sample_dir_paths_that_exist)
 }
 
@@ -178,11 +178,11 @@ if (any(names(yaml) == "features_file")) {
   if (length(yaml$features_file) > 0) {
     features_df <- lapply(sample_names, function(x) {
       file_loc <- paste0(x, "/sequence_features.tsv")
-      
+
       return(read_tsv(file_loc, skip = 4))
     }) %>%
       bind_rows(.id = "samplez")
-    
+
     possible_features <- unique(features_df$Feature)
   }
 }
@@ -204,7 +204,7 @@ server <- function(input, output, session) {
   ######################################
   # Read count summary
   ######################################
-  
+
   ### bar plot
   output$read_counts_bar_plot <- renderPlot({
     input$apply_changes
@@ -222,29 +222,29 @@ server <- function(input, output, session) {
         scale_y_continuous(labels = label_number_si())
     })
   })
-  
+
   ######################################
   # TPM summary
   ######################################
-  
+
   ### Sample to sample cors
   # load the TPM df
   cor.df <- collated_tpms_df %>%
     column_to_rownames("ORF")
-  
+
   # get a fixed column order, alphabetical in this case
   cor.cols <- sort(names(cor.df))
-  
+
   # create correlations, fix col order
   cor.df <- cor.df %>%
     select(all_of(cor.cols)) %>%
     apply(., 2, log10) %>%
     na_if(.,-Inf) %>%
     cor(use = "pairwise.complete.obs")
-  
+
   # remove lower triangle
   cor.df[lower.tri(cor.df)] <- NA
-  
+
   # convert to a df and reshape
   cor.df2 <- as_tibble(cor.df, rownames = "samp1") %>%
     pivot_longer(
@@ -257,10 +257,10 @@ server <- function(input, output, session) {
       samp1 = factor(samp1, levels = cor.cols),
       samp2 = factor(samp2, levels = cor.cols)
     )
-  
+
   # find the floor of min correlation
   min.cor <- floor(min(cor.df2$R, na.rm = TRUE) * 10) / 10
-  
+
   # plot it
   output$sample_cors_plot <- renderPlot({
     input$apply_changes
@@ -291,7 +291,7 @@ server <- function(input, output, session) {
         geom_text()
     })
   })
-  
+
   ### Abundance of specific gene compared to all
   output$tpm_density_plot <- renderPlot({
     input$apply_changes
@@ -317,11 +317,11 @@ server <- function(input, output, session) {
              y = "Density")
     })
   })
-  
+
   ######################################
   # Read length distributions
   ######################################
-  
+
   ### Read length distribution plot
   output$read_length_dist_plot <- renderPlot({
     input$apply_changes
@@ -341,11 +341,11 @@ server <- function(input, output, session) {
                            labels = label_number_si())
     })
   })
-  
+
   ######################################
   # 3nt periodicity
   ######################################
-  
+
   ### Periodicity metagene plot for both 5' and 3' end as a line plot
   output$periodicity_line_plot <- renderPlot({
     input$apply_changes
@@ -365,7 +365,7 @@ server <- function(input, output, session) {
         scale_y_continuous(labels = label_number_si())
     })
   })
-  
+
   ### Read counts per frame as a bar plot
   output$frame_counts_bar_plot <- renderPlot({
     input$apply_changes
@@ -383,7 +383,7 @@ server <- function(input, output, session) {
         scale_y_continuous(labels = label_number_si())
     })
   })
-  
+
   ### Proportion of reads per frame for each gene as a boxplot
   output$frame_proportions_boxplot <- renderPlot({
     input$apply_changes
@@ -399,11 +399,11 @@ server <- function(input, output, session) {
         plot_theme
     })
   })
-  
+
   ######################################
   # Position specific normalized reads
   ######################################
-  
+
   ### 3' end
   output$pos_sp_plot3 <- renderPlot({
     input$apply_changes
@@ -417,7 +417,7 @@ server <- function(input, output, session) {
         scale_color_discrete(guide = "none")
     })
   })
-  
+
   ### 5' end
   output$pos_sp_plot5 <- renderPlot({
     input$apply_changes
@@ -431,11 +431,11 @@ server <- function(input, output, session) {
         scale_color_discrete(guide = "none")
     })
   })
-  
+
   ######################################
   # Ribogrids
   ######################################
-  
+
   ### Ribogrid plot
   output$ribogrid_plot <- renderPlot({
     input$apply_changes
@@ -456,7 +456,7 @@ server <- function(input, output, session) {
         facet_wrap(~ samplez)
     })
   })
-  
+
   ### Ribogrid bar plot
   output$ribogridbar_plot <- renderPlot({
     input$apply_changes
@@ -476,19 +476,19 @@ server <- function(input, output, session) {
         labs(x = "Position of 5' end of read", y = "Read count", title = "Ribogrid (bar)")
     })
   })
-  
+
   ######################################
   # Single-gene plots
   ######################################
-  
+
   # Go through h5 file for each sample and get the data for a specific gene
   # this is the part that is breaking it, I need to make this a normal variable
   # after it's done being reactive
-  
+
   # Call genepos_range() for a vector of length two with the minimum and
   # maximum read positions
   genepos_range <- reactive(input$genepos_range)
-  
+
   sgribogrid_df <- reactive({lapply(sample_names, function(x) {
     only_name <- str_split(x, "/") %>%
       unlist() %>%
@@ -502,21 +502,21 @@ server <- function(input, output, session) {
       rowid_to_column("read_length") %>%
       pivot_longer(cols = starts_with("V"), names_to = "position") %>%
       mutate(position = as.numeric(str_remove(position, "V")))
-    
+
     h5closeAll()
-    
+
     return(ret)
   }) %>%
     bind_rows(.id = "samplez")})
-  
+
   output$gene_specific_slider <- renderUI({
-    
+
     newdf <- sgribogrid_df() %>%
       filter(samplez %in% input$sample) %>%
       group_by(samplez, position) %>%
       summarise(total_reads = sum(value)) %>%
       ungroup()
-    
+
     sliderInput(
       "genepos_range",
       "Read position:",
@@ -526,7 +526,7 @@ server <- function(input, output, session) {
       width = "50%"
     )
   })
-  
+
   output$sgribogrid_plot <- renderPlot({
     input$apply_changes
     isolate({
@@ -535,7 +535,7 @@ server <- function(input, output, session) {
         filter(samplez %in% input$sample) %>%
         group_by(samplez, position) %>%
         summarise(total_reads = sum(value)) %>%
-        ungroup() %>% 
+        ungroup() %>%
         ggplot(., aes(position, total_reads))+
         geom_col(width = 1)+
         facet_wrap(~samplez, ncol = 1)+
@@ -547,15 +547,15 @@ server <- function(input, output, session) {
              y = "Read count")
     })
   })
-  
-  
+
+
   ######################################
   # Features
   ######################################
-  
+
   # Features are an optional file if it exists it's here
   # but the format isn't described so I'll hold off on this for now
-  
+
   ### TPM vs other features
   if (any(names(yaml) == "features_file") &&
       length(yaml$features_file) > 0) {
@@ -605,9 +605,9 @@ server <- function(input, output, session) {
           theme_void()
       })
     })
-    
+
   }
-  
+
 }
 
 #
@@ -620,7 +620,7 @@ server <- function(input, output, session) {
 
 ui <- fluidPage(# App title
   headerPanel("riboviz2"),
-  
+
   # Sidebar panel for inputs
   fluidRow(column(
     12,
@@ -636,9 +636,9 @@ ui <- fluidPage(# App title
       ),
       actionButton("apply_changes", "Apply Changes")
     )
-    
+
   )),
-  
+
   # Main panel for displaying outputs
   mainPanel(width = 12,
             fluidRow(
@@ -648,7 +648,7 @@ ui <- fluidPage(# App title
                   headerPanel(""),
                   plotOutput("read_counts_bar_plot")
                 ),
-                
+
                 tabPanel(
                   "TPM summary",
                   wellPanel(textInput(
@@ -662,13 +662,13 @@ ui <- fluidPage(# App title
                   headerPanel(""),
                   plotOutput("tpm_density_plot")
                 ),
-                
+
                 tabPanel(
                   "Read length distributions",
                   headerPanel(""),
                   plotOutput("read_length_dist_plot")
                 ),
-                
+
                 tabPanel(
                   "3nt periodicity",
                   headerPanel(""),
@@ -678,7 +678,7 @@ ui <- fluidPage(# App title
                   headerPanel(""),
                   plotOutput("frame_proportions_boxplot")
                 ),
-                
+
                 tabPanel(
                   "Normalized reads by position",
                   headerPanel(""),
@@ -686,7 +686,7 @@ ui <- fluidPage(# App title
                   headerPanel(""),
                   plotOutput("pos_sp_plot3")
                 ) ,
-                
+
                 tabPanel(
                   "Gene specific coverage",
                   wellPanel(textInput(
@@ -699,7 +699,7 @@ ui <- fluidPage(# App title
                   headerPanel(""),
                   plotOutput("sgribogrid_plot")
                 ),
-                
+
                 tabPanel(
                   "Ribogrid",
                   sliderInput(
@@ -723,7 +723,7 @@ ui <- fluidPage(# App title
                   headerPanel(""),
                   plotOutput("ribogridbar_plot", height = "1000px")
                 ),
-                
+
                 tabPanel(
                   "Features",
                   wellPanel(textInput(
