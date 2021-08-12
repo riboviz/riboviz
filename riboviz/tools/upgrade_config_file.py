@@ -45,7 +45,7 @@ def parse_command_line_options():
     return options
 
 
-def invoke_upgrade_config_file():
+def main():
     """
     Parse command-line options then invoke
     :py:mod:`riboviz.upgrade_config.upgrade_config_file`.
@@ -57,4 +57,4 @@ def invoke_upgrade_config_file():
 
 
 if __name__ == "__main__":
-    invoke_upgrade_config_file()
+    main()

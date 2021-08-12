@@ -87,7 +87,7 @@ def parse_command_line_options():
     return options
 
 
-def invoke_check_fasta_gff():
+def main():
     """
     Parse command-line options then invoke
     :py:func:`riboviz.check_fasta_gff.check_fasta_gff`.
@@ -118,4 +118,4 @@ def invoke_check_fasta_gff():
 
 
 if __name__ == "__main__":
-    invoke_check_fasta_gff()
+    main()
