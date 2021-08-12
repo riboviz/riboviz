@@ -481,9 +481,9 @@ def count_reads_df(config_file, input_dir, tmp_dir, output_dir):
     for sample in tmp_samples:
         rows.append(cutadapt_fq(tmp_dir, sample))
         rows.append(hisat2_fq(tmp_dir, sample, workflow_files.NON_RRNA_FQ,
-                              "rRNA or other contaminating reads removed by alignment to rRNA index files"))
+                              "Reads that did not align to rRNA or other contaminating reads in rRNA index files"))
         rows.append(hisat2_sam(tmp_dir, sample, workflow_files.RRNA_MAP_SAM,
-                               "Reads with rRNA and other contaminating reads removed by alignment to rRNA index files"))
+                               "Reads aligned to rRNA and other contaminating reads in rRNA index files"))
         rows.append(hisat2_fq(tmp_dir, sample, workflow_files.UNALIGNED_FQ,
                               "Unaligned reads removed by alignment of remaining reads to ORFs index files"))
         rows.append(hisat2_sam(tmp_dir, sample, workflow_files.ORF_MAP_SAM,
