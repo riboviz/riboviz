@@ -33,10 +33,13 @@ Descriptions of specific files can be located quickly using the following links:
 * [features.pdf](#featurespdf)
 * [tpms.tsv](#tpmstsv)
 * [codon_ribodens.tsv](#codon_ribodenstsv)
+* [codon_ribodens_gathered.tsv](#codon_ribodens_gatheredtsv)
 * [codon_ribodens.pdf](#codon_ribodenspdf)
+* [gene_position_length_counts_5start.tsv](#gene_position_length_counts_5starttsv)
 * [startcodon_ribogridbar.pdf](#startcodon_ribogridbarpdf)
 * [startcodon_ribogrid.pdf](#startcodon_ribogridpdf)
 * [3ntframe_bygene.tsv](#3ntframe_bygenetsv)
+* [3ntframe_bygene_filtered.tsv](#3ntframe_bygene_filteredtsv)
 * [3ntframe_propbygene.pdf](#3ntframe_propbygenepdf)
 
 After a riboviz run, many output files are produced within the output directory.
@@ -309,6 +312,32 @@ Only output if `--t-rna-file` and `--codon-positions-file` were defined.
 
 APE_codondens, APE_feature_codonden, APE_codon_den
 
+## `codon_ribodens_gathered.tsv`
+
+A tsv file showing the correlatation of different codons to features based on a provided tRNA file, which gives the Amino acids, the tRNA type (tRNA, tAI, Microarray, and RNA.seq), the tRNA values, the site in the ribosome and the ribodensity for each codon. It is produced by reformatting the codon_ribodens.tsv file. 
+
+```
+AA	Codon	tRNA_type	tRNA_value	Site	Ribodens
+K	AAA	tRNA	7	A	1.19938409239398
+K	AAA	tRNA	7	P	1.2109078995196
+K	AAA	tRNA	7	E	1.02770556029175
+K	AAA	tAI	0.431034	A	1.19938409239398
+K	AAA	tAI	0.431034	P	1.2109078995196
+K	AAA	tAI	0.431034	E	1.02770556029175
+K	AAA	Microarray	222273	A	1.19938409239398
+K	AAA	Microarray	222273	P	1.2109078995196
+K	AAA	Microarray	222273	E	1.02770556029175
+K	AAA	RNA.seq	82386	A	1.19938409239398
+K	AAA	RNA.seq	82386	P	1.2109078995196
+K	AAA	RNA.seq	82386	E	1.02770556029175
+
+```
+
+Only output if `--t-rna-file` and `--codon-positions-file` were defined.
+
+*Potential names*
+
+APE_codondens_gathered, APE_feature_codonden_gathered, APE_codon_den_gathered
 
 ## `codon_ribodens.pdf` 
 
@@ -323,6 +352,24 @@ Only output if `--t-rna-file` and `--codon-positions-file` were defined.
 *Potential names*
 
 APE_codondens, APE_feature_codonden, APE_codon_den
+
+
+## `gene_position_length_counts_5start.tsv`
+
+A TSV file containing the number of reads of different lengths mapping to positions around the start codon. This file is created by `generate_stats_figs.R` during step "Check for 3nt periodicity globally" by functions CalculateGenePositionLengthCounts5Start and WriteGenePositionLengthCounts5Start. 
+
+```
+ReadLen	Pos	Counts
+10	-24	0
+11	-24	0
+12	-24	0
+13	-24	0
+14	-24	0
+15	-24	3
+16	-24	4
+17	-24	9
+
+```
 
 ## `startcodon_ribogridbar.pdf`
 
@@ -360,6 +407,21 @@ YAL067C	1	0	0	0.5	0.5	0.5
 YAL065C	65	10	56	0.000225406271329839	0.433008955500838	0.00465962908671896
 YAL064W-B	0	0	0	1	1	1
 YAL064C-A	0	0	0	1	1	1
+```
+
+Only output if `--asite-disp-length-file` was defined.
+
+## `3ntframe_bygene_filtered.tsv`
+
+A tsv file showing the count threshold for each frame and the p value comparing the counts in frame 0 to frames 1, 2 and both 1 and 2 for each gene. It is expected that there will be a significant difference between the frames, with the majority of reads mapping to frame 0. This file is produced by filtering the 3ntframe_bygene.tsv file, keeping only the genes where Ct_fr0 + Ct_fr1 + Ct_fr2 is greater than the count_threshold, which is defined in the config file.
+
+```
+gene	Ct_fr0	Ct_fr1	Ct_fr2	pval_fr0vs1	pval_fr0vs2	pval_fr0vsboth
+YAL065C	65	10	56	0.000225406271329839	0.433008955500838	0.00465962908671896
+YAL063C	859	207	944	2.71355108503869e-21	0.976833449475798	8.09866408105508e-08
+YAL060W	267	40	201	7.93480334492926e-15	0.0274846446691625	5.69179781323741e-12
+YAL059W	173	34	159	2.29896520195999e-09	0.339582970614079	4.5634250757101e-06
+YAL058W	43	4	31	3.99564191533441e-08	0.175807992651532	4.21595642555769e-06
 ```
 
 Only output if `--asite-disp-length-file` was defined.
