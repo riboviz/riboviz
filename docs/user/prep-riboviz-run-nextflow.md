@@ -641,7 +641,7 @@ Caused by:
 
 Command executed:
 
-  Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --tpms-file=TPMs_collated.tsv             WTnone WTnone_tpms.tsv WT3AT WT3AT_tpms.tsv
+  Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --tpms-file=TPMs_all_CDS_all_samples.tsv             WTnone WTnone_tpms.tsv WT3AT WT3AT_tpms.tsv
 
 Command exit status:
   1
@@ -651,7 +651,7 @@ Command output:
   [1] "collate_tpms.R running with parameters:"
   $options
   $options$tpms_file
-  [1] "TPMs_collated.tsv"
+  [1] "TPMs_all_CDS_all_samples.tsv"
   
   $options$orf_fasta
   [1] NA
@@ -789,7 +789,7 @@ $ nextflow log big_majorana -f script,exit -filter "name == 'cutAdapters (WTnone
 ```console
 $ nextflow log big_majorana -f script,exit -filter "name == 'collateTpms (WT3AT, WTnone)'"
 
-        Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --tpms-file=TPMs_collated.tsv             WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms.tsv
+        Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --tpms-file=TPMs_all_CDS_all_samples.tsv             WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms.tsv
         	1
 ```
 
@@ -803,7 +803,7 @@ This is cutadapt 1.18 with Python 3.7.6Command line parameters: --trim-n -O 1 -m
 ```
 ```console
 $ nextflow log big_majorana -f stdout,stderr -filter "name == 'collateTpms (WT3AT, WTnone)'"
-[1] "Created by: RiboViz"[1] "Date: 2021-06-24 05:43:14"[1] "File: /home/ubuntu/riboviz/rscripts/collate_tpms.R"[1] "Version: commit 144d95ab228a2da71b9a92912a24b26c37f4a64e date 2021-06-21 08:11:03 GMT"[1] "collate_tpms.R running with parameters:"$options$options$tpms_file[1] "TPMs_collated.tsv"	Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Error: Can't recycle `ORF` (size 4) to match `WTnone` (size 68).Backtrace:     ¦  1. +-global::CollateTpms(...)  2. ¦ +-`%>%`(...)  3. ¦ ¦ +-base::eval(lhs, parent, parent)  4. ¦ ¦   +-base::eval(lhs, parent, parent)  5. ¦ +-global::MakeTpmTable(orf_fasta, samples, sort_orfs = sort_orfs)  6. ¦   +-dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])  7. ¦     +-vctrs::vec_cbind(!!!dots, .name_repair = .name_repair)  8. +-vctrs::stop_incompatible_size(...)  9.   +-vctrs:::stop_incompatible(...) 10.     +-vctrs:::stop_vctrs(...)Execution halted
+[1] "Created by: RiboViz"[1] "Date: 2021-06-24 05:43:14"[1] "File: /home/ubuntu/riboviz/rscripts/collate_tpms.R"[1] "Version: commit 144d95ab228a2da71b9a92912a24b26c37f4a64e date 2021-06-21 08:11:03 GMT"[1] "collate_tpms.R running with parameters:"$options$options$tpms_file[1] "TPMs_all_CDS_all_samples.tsv"	Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Error: Can't recycle `ORF` (size 4) to match `WTnone` (size 68).Backtrace:     ¦  1. +-global::CollateTpms(...)  2. ¦ +-`%>%`(...)  3. ¦ ¦ +-base::eval(lhs, parent, parent)  4. ¦ ¦   +-base::eval(lhs, parent, parent)  5. ¦ +-global::MakeTpmTable(orf_fasta, samples, sort_orfs = sort_orfs)  6. ¦   +-dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])  7. ¦     +-vctrs::vec_cbind(!!!dots, .name_repair = .name_repair)  8. +-vctrs::stop_incompatible_size(...)  9.   +-vctrs:::stop_incompatible(...) 10.     +-vctrs:::stop_vctrs(...)Execution halted
 ```
 
 Only the first few lines of the output are shown. If, as for `cutadapt (WTnone)`, there were no error messages, then `-` is displayed. The information may not be readable. How to view the complete record of output and error messages for a step is described below.
@@ -831,7 +831,7 @@ $ ls -1a /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73
 .command.run
 .command.sh
 .exitcode
-TPMs_collated.tsv
+TPMs_all_CDS_all_samples.tsv
 WT3AT_tpms.tsv
 WTnone_tpms.tsv
 ```
@@ -847,7 +847,7 @@ $ cat /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73/.command.out
 [1] "collate_tpms.R running with parameters:"
 $options
 $options$tpms_file
-[1] "TPMs_collated.tsv"
+[1] "TPMs_all_CDS_all_samples.tsv"
 
 $options$orf_fasta
 [1] NA

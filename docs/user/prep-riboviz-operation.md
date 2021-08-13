@@ -158,7 +158,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 
 In addition, the following files are also put into the output directory:
 
-* `TPMs_collated.tsv`: file with the transcripts per million (tpm) for all successfully processed samples.
+* `TPMs_all_CDS_all_samples.tsv`: file with the transcripts per million (tpm) for all successfully processed samples.
 * `read_counts.tsv`: a [read counts file](#read-counts-file) (only if `count_reads: TRUE`).
 
 ---

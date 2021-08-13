@@ -1278,7 +1278,7 @@ process collateTpms {
         val sample_ids from tpms_sample_id.collect()
         file tpms_tsvs from tpms_sample_tsv.collect()
     output:
-        file "TPMs_collated.tsv" into collate_tpms_tsv
+        file "TPMs_all_CDS_all_samples.tsv" into tpms_all_cds_all_samples_tsv
         val sample_ids into collate_tpms_sample_ids
     shell:
         samples_tsvs = []
@@ -1289,7 +1289,7 @@ process collateTpms {
         samples_tsvs = samples_tsvs.join(' ')
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/collate_tpms.R \
-            --tpms-file=TPMs_collated.tsv \
+            --tpms-file=TPMs_all_CDS_all_samples.tsv \
             ${samples_tsvs}
         """
 }

@@ -246,7 +246,7 @@ WTnone/
   startcodon_ribogrid.pdf
   tpms.tsv
 read_counts.tsv
-TPMs_collated.tsv
+TPMs_all_CDS_all_samples.tsv
 ```
 
 For full information on what the workflow does and the files it outputs, see [What the RiboViz workflow does](./prep-riboviz-operation.md).

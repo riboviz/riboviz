@@ -92,7 +92,7 @@ Work dir:
 $ cd /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73/
 $ cat .command.sh 
 #!/bin/bash -ue
-Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --tpms-file=TPMs_collated.tsv             WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms.ts
+Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --tpms-file=TPMs_all_CDS_all_samples.tsv             WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms.ts
 $ bash .command.sh 
 [1] "Created by: RiboViz"
 [1] "Date: 2021-06-24 06:08:35"
@@ -106,7 +106,7 @@ Alternatively, the command in `.command.sh` can be rerun directly, which may be 
 
 ```console
 $ Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R \
-  --tpms-file=TPMs_collated.tsv \
+  --tpms-file=TPMs_all_CDS_all_samples.tsv \
   WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms
 ```
 
@@ -114,7 +114,7 @@ For R you may want to run the script interactively, as described in the previous
 
 ```console
 $ Rscript --vanilla --args \
-  --tpms-file=TPMs_collated.tsv \
+  --tpms-file=TPMs_all_CDS_all_samples.tsv \
   WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms
 ```
 

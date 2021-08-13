@@ -51,5 +51,5 @@ GENE_POSITION_LENGTH_COUNTS_TSV = "gene_position_length_counts_5start.tsv"
 CODON_RIBODENS_GATHERED_TSV = "codon_ribodens_gathered.tsv"
 """ ``generate_stats_figs.R`` output file. """
 
-TPMS_COLLATED_TSV = "TPMs_collated.tsv"
+TPMS_ALL_CDS_ALL_SAMPLES_TSV = "TPMs_all_CDS_all_samples.tsv"
 """ ``collate_tpms.R`` output file. """
