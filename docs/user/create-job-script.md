@@ -1,6 +1,6 @@
 # Create job submission script from template
 
-`riboviz.tools.create_job_script` has a script that can take a template job submission script and customise it with values provided via the command-line or within a RiboViz YAML configuration file. The script replaces configuration files, delimited by `%%`-delimited tokens (for example `%%job_num_cpus%%`) with configuration values.
+`create_job_script` has a script that can take a template job submission script and customise it with values provided via the command-line or within a RiboViz YAML configuration file. The script replaces configuration files, delimited by `%%`-delimited tokens (for example `%%job_num_cpus%%`) with configuration values.
 
 The following configuration parameters can be specified within the template:
 
@@ -29,7 +29,7 @@ In addition the following parameters can be specified within the template:
 
 As an example, a template job submission script for [Eddie](https://www.ed.ac.uk/information-services/research-support/research-computing/ecdf/high-performance-computing), The University of Edinburgh ECDF Linux Compute Cluster, is in `jobs/eddie-template.sh`.
 
-`riboviz.tools.create_job_script` can be used to customise a template as follows:
+`create_job_script` can be used to customise a template as follows:
 
 ```console
 $ create_job_script [-h] \

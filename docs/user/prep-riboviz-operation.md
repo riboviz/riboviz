@@ -13,15 +13,15 @@ The workflow prepares ribosome profiling data for by implementing a workflow tha
 * `hisat2-build`: build rRNA and ORF indices.
 * `cutadapt`: cut adapters.
 * `hisat2`: align reads.
-* `riboviz.tools.trim_5p_mismatch`: trim 5' mismatches from reads and remove reads with more than a set number of mismatches (local script, in `riboviz/tools/`).
+* `trim_5p_mismatch`: trim 5' mismatches from reads and remove reads with more than a set number of mismatches (local script, in `riboviz/tools/`).
 * `umi_tools` (`extract`, `dedup`, `group`): extract barcodes and UMIs, deduplicate reads and group reads.
-* `riboviz.tools.demultiplex_fastq`: demultiplex multiplexed files (local script, in `riboviz/tools/`).
+* `demultiplex_fastq`: demultiplex multiplexed files (local script, in `riboviz/tools/`).
 * `samtools` (`view`, `sort`, `index`): convert SAM files to BAM files and index.
 * `bedtools` (`genomecov`): export transcriptome coverage as bedgraphs.
 * `bam_to_h5.R`: convert BAM to compressed H5 format (local script, in `rscripts/`)
 * `generate_stats_figs.R`: generate summary statistics, analyses plots and QC plots (local script, in `rscripts/`)
 * `collate_tpms.R`: collate TPMs across samples (local script, in `rscripts/`)
-* `riboviz.tools.count_reads`: count the number of reads (sequences) processed by specific stages of the workflow (local script, in `riboviz/tools/`).
+* `count_reads`: count the number of reads (sequences) processed by specific stages of the workflow (local script, in `riboviz/tools/`).
 
 ---
 
@@ -184,12 +184,12 @@ The following information is included:
 
 * Input files: number of reads in the FASTQ files used as inputs.
 * `cutadapt`: number of reads in the FASTQ file output.
-* `riboviz.tools.demultiplex_fastq`: FASTQ files output by
+* `demultiplex_fastq`: FASTQ files output by
   "demultiplex_fastq", using the information in the associated
   `num_reads.tsv` summary files, or, if these can't be found, the
   FASTQ files themselves.
 * `hisat2`: number of reads in the SAM file and FASTQ file output.
-* `riboviz.tools.trim_5p_mismatch`: number of reads in the SAM file
+* `trim_5p_mismatch`: number of reads in the SAM file
   output as recorded in the `trim_5p_mismatch.tsv` summary file
   output, or the SAM file itself, if the TSV file cannot be found (if
   `trim_5p_mismatches: TRUE`)

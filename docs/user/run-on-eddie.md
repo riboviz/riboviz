@@ -281,7 +281,7 @@ source activate riboviz
 nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-log false
 ```
 
-We provide a Python script, `riboviz.tools.create_job_script`, which creates a job submission script using the template in [jobs/eddie-template.sh](../../jobs/eddie-template.sh).
+We provide a Python script, `create_job_script`, which creates a job submission script using the template in [jobs/eddie-template.sh](../../jobs/eddie-template.sh).
 
 You can run this to create a job script named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
 
@@ -294,7 +294,7 @@ $ create_job_script \
     --job-runtime "01:00:00"
 ```
 
-For full details on how to use `riboviz.tools.create_job_script`, see [Create job submission script from template](./create-job-script.md).
+For full details on how to use `create_job_script`, see [Create job submission script from template](./create-job-script.md).
 
 ### Requesting resources
 

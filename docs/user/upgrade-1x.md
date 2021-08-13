@@ -2,7 +2,7 @@
 
 RiboViz has undergone extensive changes from 1.x. This includes the prerequisites RiboViz needs, how RiboViz is used and also the structure of RiboViz's YAML configuration files. Consult the appropriate sections of the documentation for details.
 
-To assist your migration to the current version of RiboViz, we have included a tool to help you upgrade your 1.x-compliant YAML configuration files, `riboviz.tools.upgrade_config_file`.
+To assist your migration to the current version of RiboViz, we have included a tool to help you upgrade your 1.x-compliant YAML configuration files, `upgrade_config_file`.
 
 The tool can be used as follows:
 

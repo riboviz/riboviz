@@ -1,6 +1,6 @@
 # Check FASTA and GFF files for coding sequence (CDS) features
 
-`riboviz.tools.check_fasta_gff` checks FASTA and GGF files for coding sequence (CDS) features. It can be run as follows:
+`check_fasta_gff` checks FASTA and GGF files for coding sequence (CDS) features. It can be run as follows:
 
 ```console
 $ check_fasta_gff [-h] \
