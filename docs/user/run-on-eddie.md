@@ -286,7 +286,7 @@ We provide a Python script, `riboviz.tools.create_job_script`, which creates a j
 You can run this to create a job script named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
 
 ```console
-$ python -m riboviz.tools.create_job_script \
+$ create_job_script \
     -i jobs/eddie-template.sh \
     -o job_riboviz.sh \
     --config-file vignette/vignette_config.yaml \

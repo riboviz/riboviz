@@ -7,7 +7,7 @@ To assist your migration to the current version of RiboViz, we have included a t
 The tool can be used as follows:
 
 ```console
-$ python -m riboviz.tools.upgrade_config_file -i <INPUT_FILE> [-o <OUTPUT_FILE>]
+$ upgrade_config_file -i <INPUT_FILE> [-o <OUTPUT_FILE>]
 ```
 
 where:
@@ -18,8 +18,7 @@ where:
 For example:
 
 ```console
-$ python -m riboviz.tools.upgrade_config_file \
-    -i /home/user/riboviz-data/config.yaml -o nu_config.yaml 
+$ upgrade_config_file -i /home/user/riboviz-data/config.yaml -o nu_config.yaml 
 ```
 
 **Note:** it is strongly recommended that you visually inspect the updated configuration to ensure the updates reflect your local environment. This especially relates to any file paths.

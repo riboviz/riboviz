@@ -32,7 +32,7 @@ As an example, a template job submission script for [Eddie](https://www.ed.ac.uk
 `riboviz.tools.create_job_script` can be used to customise a template as follows:
 
 ```console
-$ python -m riboviz.tools.create_job_script [-h] \
+$ create_job_script [-h] \
   -i [INPUT_FILE] [-o [OUTPUT_FILE]] [-t [TOKEN_TAG]] \
   --r-libs R_LIBS --config-file [CONFIG_FILE] \
   [--job-email JOB_EMAIL] \
@@ -63,7 +63,7 @@ Default values, defined in code, are overriden by any values provided in the YAM
 Examples:
 
 ```console
-$ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
+$ create_job_script -i jobs/eddie-template.sh \
     -o run_B-Sc_2012.sh \
     --config-file ~/data-folder/Brar_2012_Meiosis_RPF_6-samples_CDS_w_250utrs_config.yaml \
     --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary \
@@ -72,7 +72,7 @@ $ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
     --validate-only
 ```
 ```console
-$ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
+$ create_job_script -i jobs/eddie-template.sh \
     -o run_B-Sc_2012.sh \
     --config-file ~/data-folder/Brar_2012_Meiosis_RPF_6-samples_CDS_w_250utrs_config.yaml \
     --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary \
@@ -80,7 +80,7 @@ $ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
     --job-memory 8G --job-num-cpus 16
 ```
 ```console
-$ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
+$ create_job_script -i jobs/eddie-template.sh \
     -o run_W-Cn-H99_2020.sh \
     --config-file ~/data-folder/Brar_2012_Meiosis_RPF_6-samples_CDS_w_250utrs_config.yaml \
     --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary \
@@ -89,7 +89,7 @@ $ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
     --validate-only
 ```
 ```console
-$ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
+$ create_job_script -i jobs/eddie-template.sh \
     -o run_W-Cn-H99_2020.sh \
     --config-file ~/data-folder/Brar_2012_Meiosis_RPF_6-samples_CDS_w_250utrs_config.yaml \
     --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary \

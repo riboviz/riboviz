@@ -82,8 +82,8 @@ This file was produced using  [script_for_transcript_annotation.Rmd](../../rmark
 
 An identical table (differing only in the commented lines in the header) is produced by:
 
-```
-python -m riboviz.tools.get_cds_codons \
+```console
+$ get_cds_codons \
         -f data/yeast_CDS_w_250utrs.fa \
         -g data/yeast_CDS_w_250utrs.gff3 \
         -c data/yeast_codon_table_alternative.tsv
