@@ -716,6 +716,16 @@ $ git clone https://github.com/riboviz/riboviz
 
 ---
 
+## Install RiboViz `riboviz-py` package
+
+Install `riboviz-py` from Git repository:
+
+```console
+$ pip install .
+```
+
+---
+
 ## Check installation
 
 You can now check your installation by running RiboViz tests by running a "vignette" of the **RiboViz** workflow to see **RiboViz**'s capabilities. See [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md).
