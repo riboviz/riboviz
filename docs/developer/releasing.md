@@ -4,6 +4,7 @@ These are the key steps in building a release.
 
 * Merge all pull requests agreed for the release into the `develop` branch, via the GitHub web interface.
 * Merge additional branches agreed for the release into the `develop` branch via creation of pull requests, again via the GitHub web interface.
+* Update `__version_info__` value in `riboviz/__init__.py`.
 * Check [docs/acks.md](../acks.md), and update if necessary.
 * Check [docs/reference/references.md](../reference/references.md), and update if necessary.
 * Update software versions in `docs/user/install.md` - see [Update Dependencies overview](./dependencies.md#update-dependencies-overview).
