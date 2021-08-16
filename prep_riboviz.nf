@@ -1306,7 +1306,7 @@ process countReads {
         // is only run when all other processing has completed.
         val samples_ids from collate_tpms_sample_ids
     output:
-        file "read_counts.tsv" into read_counts_tsv
+        file "read_counts_per_file.tsv" into read_counts_per_file_tsv
     when:
         params.count_reads
     shell:
@@ -1327,7 +1327,7 @@ process countReads {
            -i ${file(dir_in).toAbsolutePath()} \
            -t ${file(dir_tmp).toAbsolutePath()} \
            -o ${file(dir_out).toAbsolutePath()} \
-           -r read_counts.tsv
+           -r read_counts_per_file.tsv
         """
 }
 

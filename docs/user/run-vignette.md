@@ -245,7 +245,7 @@ WTnone/
   startcodon_ribogridbar.pdf
   startcodon_ribogrid.pdf
   tpms.tsv
-read_counts.tsv
+read_counts_per_file_tsv
 TPMs_all_CDS_all_samples.tsv
 ```
 

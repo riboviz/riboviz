@@ -736,7 +736,7 @@ def test_collate_tpms_tsv(expected_fixture, output_dir):
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_read_counts_tsv(expected_fixture, output_dir):
+def test_read_counts_per_file_tsv(expected_fixture, output_dir):
     """
     Test :py:mod:`riboviz.tools.count_reads` TSV files for
     equality. See :py:func:`riboviz.count_reads.equal_read_counts`.
@@ -749,5 +749,5 @@ def test_read_counts_tsv(expected_fixture, output_dir):
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
     count_reads.equal_read_counts(
         os.path.join(expected_fixture, output_dir_name,
-                     workflow_files.READ_COUNTS_FILE),
-        os.path.join(output_dir, workflow_files.READ_COUNTS_FILE))
+                     workflow_files.READ_COUNTS_PER_FILE_FILE),
+        os.path.join(output_dir, workflow_files.READ_COUNTS_PER_FILE_FILE))

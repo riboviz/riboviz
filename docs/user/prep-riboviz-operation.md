@@ -159,7 +159,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 In addition, the following files are also put into the output directory:
 
 * `TPMs_all_CDS_all_samples.tsv`: file with the transcripts per million (tpm) for all successfully processed samples.
-* `read_counts.tsv`: a [read counts file](#read-counts-file) (only if `count_reads: TRUE`).
+* `read_counts_per_file_tsv`: a [read counts file](#read-counts-file) (only if `count_reads: TRUE`).
 
 ---
 
@@ -167,7 +167,7 @@ In addition, the following files are also put into the output directory:
 
 The workflow will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is produced by scanning input, temporary and output directories and counting the number of reads (sequences) processed by specific stages of a RiboViz workflow.
 
-The read counts file, `read_counts.tsv`, is written into the output directory.
+The read counts file, `read_counts_per_file_tsv`, is written into the output directory.
 
 The reads counts file is a tab-separated values (TSV) file with the following columns:
 
