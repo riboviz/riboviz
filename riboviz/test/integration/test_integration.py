@@ -726,11 +726,11 @@ def test_collate_tpms_tsv(expected_fixture, output_dir):
     """
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
     expected_file = os.path.join(expected_fixture, output_dir_name,
-                                 workflow_r.TPMS_COLLATED_TSV)
+                                 workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV)
     if not os.path.exists(expected_file):
         pytest.skip('Skipped as expected file does not exist')
     utils.equal_tsv(expected_file,
-                    os.path.join(output_dir, workflow_r.TPMS_COLLATED_TSV),
+                    os.path.join(output_dir, workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV),
                     ignore_row_order=True,
                     na_to_empty_str=True)
 
