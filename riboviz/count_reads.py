@@ -510,9 +510,9 @@ def count_reads_df(config_file, input_dir, tmp_dir, output_dir):
     for sample in tmp_samples:
         result_ret.append(['APPEND', pool.apply_async(cutadapt_fq, args=(tmp_dir, sample,))])
         result_ret.append(['APPEND', pool.apply_async(hisat2_fq, args=(tmp_dir, sample, workflow_files.NON_RRNA_FQ,
-                                                                       "rRNA or other contaminating reads removed by alignment to rRNA index files",))])
+                                                                       "Reads that did not align to rRNA or other contaminating reads in rRNA index files",))])
         result_ret.append(['APPEND', pool.apply_async(hisat2_sam, args=(tmp_dir, sample, workflow_files.RRNA_MAP_SAM,
-                                                                        "Reads with rRNA and other contaminating reads removed by alignment to rRNA index files",))])
+                                                                        "Reads aligned to rRNA and other contaminating reads in rRNA index files",))])
         result_ret.append(['APPEND', pool.apply_async(hisat2_fq, args=(tmp_dir, sample, workflow_files.UNALIGNED_FQ,
                                                                        "Unaligned reads removed by alignment of remaining reads to ORFs index files",))])
         result_ret.append(['APPEND', pool.apply_async(hisat2_sam, args=(tmp_dir, sample, workflow_files.ORF_MAP_SAM,
