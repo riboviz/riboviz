@@ -150,13 +150,13 @@ SavePlotThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_plot
   # Save plot and file
   ggsave(
     three_nucleotide_periodicity_plot,
-    filename = file.path(output_dir, paste0(output_prefix, "3nt_periodicity.pdf"))
+    filename = file.path(output_dir, paste0(output_prefix, "metagene_start_stop_read_counts.pdf"))
   )
   # return() # NO RETURN as writing out
 } # end of function definition SavePlotThreeNucleotidePeriodicity()
 
 WriteThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data) {
-  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3nt_periodicity.tsv"))
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "metagene_start_stop_read_counts.tsv"))
   write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
     three_nucleotide_periodicity_data,

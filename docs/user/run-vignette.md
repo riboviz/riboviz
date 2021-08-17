@@ -206,8 +206,8 @@ Outputs in `vignette/output`:
 WT3AT/
   3ntframe_bygene.tsv
   3ntframe_propbygene.pdf
-  3nt_periodicity.pdf
-  3nt_periodicity.tsv
+  metagene_start_stop_read_counts.pdf
+  metagene_start_stop_read_counts.tsv
   WT3AT.bam
   WT3AT.bam.bai
   codon_ribodens.pdf
@@ -227,8 +227,8 @@ WT3AT/
 WTnone/
   3ntframe_bygene.tsv
   3ntframe_propbygene.pdf
-  3nt_periodicity.pdf
-  3nt_periodicity.tsv
+  metagene_start_stop_read_counts.pdf
+  metagene_start_stop_read_counts.tsv
   WTnone.bam
   WTnone.bam.bai
   codon_ribodens.pdf

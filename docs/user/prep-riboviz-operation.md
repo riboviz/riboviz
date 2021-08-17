@@ -139,8 +139,8 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `minus.bedgraph`: bedgraph of reads from minus strand (if `make_bedgraph: TRUE`).
 * `plus.bedgraph`: bedgraph of reads from plus strand (if `make_bedgraph: TRUE`).
 * `<SAMPLE_ID>.h5`: length-sensitive alignments in compressed h5 format.
-* `3nt_periodicity.tsv`
-* `3nt_periodicity.pdf`
+* `metagene_start_stop_read_counts.tsv`
+* `metagene_start_stop_read_counts.pdf`
 * `read_lengths.tsv`
 * `read_lengths.pdf`
 * `pos_sp_nt_freq.tsv`

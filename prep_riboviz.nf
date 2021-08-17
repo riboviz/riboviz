@@ -1162,10 +1162,10 @@ process generateStatsFigs {
     output:
         val sample_id into finished_sample_id
         tuple val(sample_id), file("tpms.tsv") into tpms_tsv
-        tuple val(sample_id), file("3nt_periodicity.pdf") \
-            optional (! params.output_pdfs) into nt3_periodicity_pdf
-        tuple val(sample_id), file("3nt_periodicity.tsv") \
-            into nt3_periodicity_tsv
+        tuple val(sample_id), file("metagene_start_stop_read_counts.pdf") \
+            optional (! params.output_pdfs) into metagene_start_stop_read_counts_pdf
+        tuple val(sample_id), file("metagene_start_stop_read_counts.tsv") \
+            into metagene_start_stop_read_counts_tsv
         tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
             into gene_position_length_counts_5start_tsv
         tuple val(sample_id), file("pos_sp_nt_freq.tsv") \
@@ -1242,7 +1242,7 @@ process generateStatsFigs {
 // Join outputs from generateStatsFigs for staticHTML.
 // Join is done on first value of each tuple i.e. sample ID.
 generate_stats_figs_static_html =
-    nt3_periodicity_tsv
+    metagene_start_stop_read_counts_tsv
     .join(gene_position_length_counts_5start_tsv, remainder: true)
     .join(read_lengths_tsv, remainder: true)
     .join(pos_sp_rpf_norm_reads_tsv, remainder: true)
@@ -1364,7 +1364,7 @@ process staticHTML {
     input:
       file viz_params_config_file_yaml from viz_params_config_file_yaml
       tuple val(sample_id), \
-        file(sample_nt3_periodicity_tsv), \
+        file(sample_metagene_start_stop_read_counts_tsv), \
         file(sample_gene_position_length_counts_5start_tsv), \
         file(sample_read_lengths_tsv), \
         file(sample_pos_sp_rpf_norm_reads_tsv), \
@@ -1383,7 +1383,7 @@ process staticHTML {
       script += "verbose='FALSE', "
       script += "yamlfile='\$PWD/${viz_params_config_file_yaml}', "
       script += "sampleid='!{sample_id}', "
-      script += "three_nucleotide_periodicity_data_file = '\$PWD/${sample_nt3_periodicity_tsv}', "
+      script += "three_nucleotide_periodicity_data_file = '\$PWD/${sample_metagene_start_stop_read_counts_tsv}', "
       script += "gene_position_length_counts_5start_file = '\$PWD/${sample_gene_position_length_counts_5start_tsv}', "
       script += "read_length_data_file='\$PWD/${sample_read_lengths_tsv}', "
       script += "pos_sp_rpf_norm_reads_data_file='\$PWD/${sample_pos_sp_rpf_norm_reads_tsv}' "

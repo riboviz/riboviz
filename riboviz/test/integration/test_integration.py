@@ -613,7 +613,7 @@ def test_bam_to_h5_h5(expected_fixture, output_dir, sample):
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name",
-                         [workflow_r.THREE_NT_PERIODICITY_TSV,
+                         [workflow_r.METAGENE_START_STOP_READ_COUNTS_TSV,
                           workflow_r.CODON_RIBODENS_TSV,
                           workflow_r.POS_SP_NT_FREQ_TSV,
                           workflow_r.POS_SP_RPF_NORM_READS_TSV,
@@ -651,7 +651,7 @@ def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name",
-                         [workflow_r.THREE_NT_PERIODICITY_PDF,
+                         [workflow_r.METAGENE_START_STOP_READ_COUNTS_PDF,
                           workflow_r.CODON_RIBODENS_PDF,
                           workflow_r.FEATURES_PDF,
                           workflow_r.POS_SP_RPF_NORM_READS_PDF,
