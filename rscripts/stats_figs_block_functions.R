@@ -532,40 +532,40 @@ CalculatePositionSpecificDistributionOfReads <- function(gene_names, dataset, hd
   m3p <- m3p / mean(m3p[450:500])
   
   # Create a dataframe to store the output for plots/analyses
-  pos_sp_rpf_norm_reads_data <- data.frame(
+  metagene_normalized_profile_start_stop_data <- data.frame(
     Position = c(1:500, 0:-499),
     Mean = c(m5p, m3p),
     SD = c(s5p, s3p),
     End = factor(rep(c("5'", "3'"), each = 500), levels = c("5'", "3'"))
   )
   
-  return(pos_sp_rpf_norm_reads_data)
+  return(metagene_normalized_profile_start_stop_data)
   
 } # end of definition of function CalculatePositionSpecificDistributionOfReads()
 
-PlotPositionSpecificDistributionOfReads <- function(pos_sp_rpf_norm_reads_data){
+PlotPositionSpecificDistributionOfReads <- function(metagene_normalized_profile_start_stop_data){
   # Plot
-  pos_sp_rpf_norm_reads_plot <- ggplot(
-    pos_sp_rpf_norm_reads_data,
+  metagene_normalized_profile_start_stop_plot <- ggplot(
+    metagene_normalized_profile_start_stop_data,
     aes(Position, Mean, col = End)
   ) +
     geom_line() +
     facet_grid(~End, scales = "free") +
     guides(col = FALSE)
-  return(pos_sp_rpf_norm_reads_plot)
+  return(metagene_normalized_profile_start_stop_plot)
 } # end of definition of function PlotPositionSpecificDistributionOfReads()
 
-SavePositionSpecificDistributionOfReads <- function(pos_sp_rpf_norm_reads_plot){
+SavePositionSpecificDistributionOfReads <- function(metagene_normalized_profile_start_stop_plot){
   # Save plot and file
-  ggsave(pos_sp_rpf_norm_reads_plot, filename = file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.pdf")))
+  ggsave(metagene_normalized_profile_start_stop_plot, filename = file.path(output_dir, paste0(output_prefix, "metagene_normalized_profile_start_stop.pdf")))
   
 } # end of definition of function SavePositionSpecificDistributionOfReads()
 
-WritePositionSpecificDistributionOfReads <- function(pos_sp_rpf_norm_reads_data){
-  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_rpf_norm_reads.tsv"))
+WritePositionSpecificDistributionOfReads <- function(metagene_normalized_profile_start_stop_data){
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "metagene_normalized_profile_start_stop.tsv"))
   write_provenance_header(this_script, tsv_file_path)
   write.table(
-    pos_sp_rpf_norm_reads_data,
+    metagene_normalized_profile_start_stop_data,
     file = tsv_file_path,
     append = T,
     sep = "\t",

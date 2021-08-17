@@ -14,7 +14,7 @@ params:
   three_nucleotide_periodicity_data_file: NA
   gene_position_length_counts_5start_file: NA
   read_length_data_file: NA
-  pos_sp_rpf_norm_reads_data_file: NA
+  metagene_normalized_profile_start_stop_data_file: NA
   gene_read_frames_filtered_data_file: NA
   codon_ribodens_gathered_file: NA
   sequence_features_file: NA
@@ -144,8 +144,8 @@ read_length_data <- read_tsv(
   col_names = TRUE)
 
 # position specific distribution of reads 
-pos_sp_rpf_norm_reads_data <- read_tsv(
-  file = params$pos_sp_rpf_norm_reads_data_file, 
+metagene_normalized_profile_start_stop_data <- read_tsv(
+  file = params$metagene_normalized_profile_start_stop_data_file, 
   skip = 4, # this avoids the provenance info
   col_names = TRUE) %>%
   mutate(End = factor(End, levels = c("5'", "3'")))
@@ -218,7 +218,7 @@ PlotReadLengths(read_length_data)
 ```{r plot_positionspecificdistribution, echo=FALSE, message=FALSE}
 
 # position specific distribution of reads
-PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
+PlotPositionSpecificDistributionOfReads(metagene_normalized_profile_start_stop_data)
 ```
 
 ### Read frame proportion by gene: 

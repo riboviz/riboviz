@@ -144,8 +144,8 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `read_lengths.tsv`
 * `read_lengths.pdf`
 * `pos_sp_nt_freq.tsv`
-* `pos_sp_rpf_norm_reads.pdf`
-* `pos_sp_rpf_norm_reads.tsv`
+* `metagene_normalized_profile_start_stop.pdf`
+* `metagene_normalized_profile_start_stop.tsv`
 * `features.pdf`: only output if `--features-file` was defined.
 * `tpms.tsv`
 * `codon_ribodens.tsv`: only output if `--t-rna-file` and `--codon-positions-file` were defined.

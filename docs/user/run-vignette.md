@@ -217,8 +217,8 @@ WT3AT/
   minus.bedgraph
   plus.bedgraph
   pos_sp_nt_freq.tsv
-  pos_sp_rpf_norm_reads.pdf
-  pos_sp_rpf_norm_reads.tsv
+  metagene_normalized_profile_start_stop.pdf
+  metagene_normalized_profile_start_stop.tsv
   read_lengths.pdf
   read_lengths.tsv
   startcodon_ribogridbar.pdf
@@ -238,8 +238,8 @@ WTnone/
   minus.bedgraph
   plus.bedgraph
   pos_sp_nt_freq.tsv
-  pos_sp_rpf_norm_reads.pdf
-  pos_sp_rpf_norm_reads.tsv
+  metagene_normalized_profile_start_stop.pdf
+  metagene_normalized_profile_start_stop.tsv
   read_lengths.pdf
   read_lengths.tsv
   startcodon_ribogridbar.pdf

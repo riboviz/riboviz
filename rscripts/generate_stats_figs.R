@@ -350,15 +350,15 @@ print("Starting: Position specific distribution of reads")
 # For RPF datasets, generate codon-based position-specific reads
 if (rpf) {
   
-  pos_sp_rpf_norm_reads_data <- CalculatePositionSpecificDistributionOfReads(gene_names, dataset, hd_file, buffer, min_read_length, count_threshold)
+  metagene_normalized_profile_start_stop_data <- CalculatePositionSpecificDistributionOfReads(gene_names, dataset, hd_file, buffer, min_read_length, count_threshold)
   
   if(output_pdfs){
-    pos_sp_rpf_norm_reads_plot <- PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
+    metagene_normalized_profile_start_stop_plot <- PlotPositionSpecificDistributionOfReads(metagene_normalized_profile_start_stop_data)
     
-    SavePositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_plot)
+    SavePositionSpecificDistributionOfReads(metagene_normalized_profile_start_stop_plot)
   }
 
-  WritePositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
+  WritePositionSpecificDistributionOfReads(metagene_normalized_profile_start_stop_data)
 
 }
 

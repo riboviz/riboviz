@@ -1171,10 +1171,10 @@ process generateStatsFigs {
         tuple val(sample_id), file("pos_sp_nt_freq.tsv") \
             optional (! params.do_pos_sp_nt_freq) \
             into pos_sp_nt_freq_tsv
-        tuple val(sample_id), file("pos_sp_rpf_norm_reads.pdf") \
-            optional (! params.output_pdfs) into pos_sp_rpf_norm_reads_pdf
-        tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
-            into pos_sp_rpf_norm_reads_tsv
+        tuple val(sample_id), file("metagene_normalized_profile_start_stop.pdf") \
+            optional (! params.output_pdfs) into metagene_normalized_profile_start_stop_pdf
+        tuple val(sample_id), file("metagene_normalized_profile_start_stop.tsv") \
+            into metagene_normalized_profile_start_stop_tsv
         tuple val(sample_id), file("read_lengths.pdf") \
             optional (! params.output_pdfs) into read_lengths_pdf
         tuple val(sample_id), file("read_lengths.tsv") \
@@ -1245,7 +1245,7 @@ generate_stats_figs_static_html =
     metagene_start_stop_read_counts_tsv
     .join(gene_position_length_counts_5start_tsv, remainder: true)
     .join(read_lengths_tsv, remainder: true)
-    .join(pos_sp_rpf_norm_reads_tsv, remainder: true)
+    .join(metagene_normalized_profile_start_stop_tsv, remainder: true)
     .join(nt3frame_bygene_filtered_tsv, remainder: true)
     .join(sequence_features_tsv, remainder: true)
     .join(codon_ribodens_gathered_tsv, remainder: true)
@@ -1367,7 +1367,7 @@ process staticHTML {
         file(sample_metagene_start_stop_read_counts_tsv), \
         file(sample_gene_position_length_counts_5start_tsv), \
         file(sample_read_lengths_tsv), \
-        file(sample_pos_sp_rpf_norm_reads_tsv), \
+        file(sample_metagene_normalized_profile_start_stop_tsv), \
         file(sample_nt3frame_bygene_filtered_tsv), \
         file(sample_sequence_features_tsv), \
         file(sample_codon_ribodens_gathered_tsv) \
@@ -1386,7 +1386,7 @@ process staticHTML {
       script += "three_nucleotide_periodicity_data_file = '\$PWD/${sample_metagene_start_stop_read_counts_tsv}', "
       script += "gene_position_length_counts_5start_file = '\$PWD/${sample_gene_position_length_counts_5start_tsv}', "
       script += "read_length_data_file='\$PWD/${sample_read_lengths_tsv}', "
-      script += "pos_sp_rpf_norm_reads_data_file='\$PWD/${sample_pos_sp_rpf_norm_reads_tsv}' "
+      script += "metagene_normalized_profile_start_stop_data_file='\$PWD/${sample_metagene_normalized_profile_start_stop_tsv}' "
       if (is_asite_disp_length_file) {
           script += ", gene_read_frames_filtered_data_file='\$PWD/${sample_nt3frame_bygene_filtered_tsv}'"
       }
