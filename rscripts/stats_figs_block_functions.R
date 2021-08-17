@@ -782,7 +782,7 @@ PlotSequenceBasedFeatures <- function(features_plot_data){
 
 SaveSequenceBasedFeatures <- function(features_plot) {
   # Save plot and file
-  ggsave(features_plot, filename = file.path(output_dir, paste0(output_prefix, "features.pdf")))
+  ggsave(features_plot, filename = file.path(output_dir, paste0(output_prefix, "ORF_TPMs_vs_features.pdf")))
   # return() NO RETURN as writing out
   
 } # end SaveSequenceBasedFeatures() definition

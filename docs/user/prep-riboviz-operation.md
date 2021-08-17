@@ -147,7 +147,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `metagene_normalized_profile_start_stop.pdf`
 * `metagene_normalized_profile_start_stop.tsv`
 * `ORF_TPMs_vs_features.tsv`: only output if `--features-file` was defined.
-* `features.pdf`: only output if `--features-file` was defined.
+* `ORF_TPMs_vs_features.pdf`: only output if `--features-file` was defined.
 * `tpms.tsv`
 * `codon_ribodens.tsv`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
 * `codon_ribodens.pdf`: only output if `--t-rna-file` and `--codon-positions-file` were defined.

@@ -212,7 +212,7 @@ WT3AT/
   WT3AT.bam.bai
   codon_ribodens.pdf
   codon_ribodens.tsv
-  features.pdf
+  ORF_TPMs_vs_features.pdf
   ORF_TPMs_vs_features.tsv
   WT3AT.h5
   minus.bedgraph
@@ -234,7 +234,7 @@ WTnone/
   WTnone.bam.bai
   codon_ribodens.pdf
   codon_ribodens.tsv
-  features.pdf
+  ORF_TPMs_vs_features.pdf
   ORF_TPMs_vs_features.tsv
   WTnone.h5
   minus.bedgraph

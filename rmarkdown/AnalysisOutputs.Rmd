@@ -44,7 +44,7 @@ if (is.null(yaml$asite_disp_length_file)){
   readframe_plot <- "present"
 }
 
-# features.pdf plot: gene features (conditional on `features_file`)
+# ORF_TPMs_vs_features.pdf plot: gene features (conditional on `features_file`)
 if (is.null(yaml$features_file)){
   features_plot <- NA
 } else {
@@ -160,7 +160,7 @@ if (!is.na(readframe_plot)){
     col_names = TRUE)
 }
 
-# features.pdf plot: gene features (conditional on `features-file`)
+# ORF_TPMs_vs_features.pdf plot: gene features (conditional on `features-file`)
 if(!is.na(features_plot)){
   # load data ORF_TPMs_vs_features_file
   features_plot_data <- read_tsv(

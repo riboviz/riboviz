@@ -26,7 +26,7 @@ METAGENE_NORMALIZED_PROFILE_START_STOP_TSV = "metagene_normalized_profile_start_
 """ ``generate_stats_figs.R`` output file. """
 METAGENE_NORMALIZED_PROFILE_START_STOP_PDF = "metagene_normalized_profile_start_stop.pdf"
 """ ``generate_stats_figs.R`` output file. """
-FEATURES_PDF = "features.pdf"
+ORF_TPMS_VS_FEATURES_PDF = "ORF_TPMs_vs_features.pdf"
 """ ``generate_stats_figs.R`` output file. """
 TPMS_TSV = "tpms.tsv"
 """ ``generate_stats_figs.R`` output file. """

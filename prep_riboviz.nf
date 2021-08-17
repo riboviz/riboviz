@@ -1192,8 +1192,8 @@ process generateStatsFigs {
         tuple val(sample_id), file("codon_ribodens_gathered.tsv") \
             optional (! is_t_rna_and_codon_positions_file) \
             into codon_ribodens_gathered_tsv
-        tuple val(sample_id), file("features.pdf") \
-            optional (! (is_features_file && params.output_pdfs)) into features_pdf
+        tuple val(sample_id), file("ORF_TPMs_vs_features.pdf") \
+            optional (! (is_features_file && params.output_pdfs)) into ORF_TPMs_vs_features_pdf
         tuple val(sample_id), file("ORF_TPMs_vs_features.tsv") \
             optional (! is_features_file) into ORF_TPMs_vs_features_tsv
         tuple val(sample_id), file("3ntframe_bygene.tsv") \
