@@ -17,7 +17,7 @@ params:
   metagene_normalized_profile_start_stop_data_file: NA
   gene_read_frames_filtered_data_file: NA
   codon_ribodens_gathered_file: NA
-  sequence_features_file: NA
+  ORF_TPMs_vs_features_file: NA
 ---
 
 ```{r setup, include=FALSE}
@@ -162,9 +162,9 @@ if (!is.na(readframe_plot)){
 
 # features.pdf plot: gene features (conditional on `features-file`)
 if(!is.na(features_plot)){
-  # load data sequence_features_file
+  # load data ORF_TPMs_vs_features_file
   features_plot_data <- read_tsv(
-    file = params$sequence_features_file, 
+    file = params$ORF_TPMs_vs_features_file, 
     skip = 4, # this avoids the provenance info
     col_names = TRUE)
 }

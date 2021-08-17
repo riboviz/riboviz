@@ -790,7 +790,7 @@ SaveSequenceBasedFeatures <- function(features_plot) {
 
 WriteSequenceBasedFeatures <- function(features_plot_data){
   # Save file
-  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "sequence_features.tsv"))
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "ORF_TPMs_vs_features.tsv"))
   write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
     features_plot_data,

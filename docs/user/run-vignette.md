@@ -213,6 +213,7 @@ WT3AT/
   codon_ribodens.pdf
   codon_ribodens.tsv
   features.pdf
+  ORF_TPMs_vs_features.tsv
   WT3AT.h5
   minus.bedgraph
   plus.bedgraph
@@ -234,6 +235,7 @@ WTnone/
   codon_ribodens.pdf
   codon_ribodens.tsv
   features.pdf
+  ORF_TPMs_vs_features.tsv
   WTnone.h5
   minus.bedgraph
   plus.bedgraph

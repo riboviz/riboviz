@@ -620,7 +620,7 @@ def test_bam_to_h5_h5(expected_fixture, output_dir, sample):
                           workflow_r.READ_LENGTHS_TSV,
                           workflow_r.THREE_NT_FRAME_BY_GENE_TSV,
                           workflow_r.THREE_NT_FRAME_BY_GENE_FILTERED_TSV,
-                          workflow_r.SEQUENCE_FEATURES_TSV,
+                          workflow_r.ORF_TPMS_VS_FEATURES_TSV,
                           workflow_r.GENE_POSITION_LENGTH_COUNTS_TSV,
                           workflow_r.CODON_RIBODENS_GATHERED_TSV,
                           workflow_r.TPMS_TSV])

@@ -1194,8 +1194,8 @@ process generateStatsFigs {
             into codon_ribodens_gathered_tsv
         tuple val(sample_id), file("features.pdf") \
             optional (! (is_features_file && params.output_pdfs)) into features_pdf
-        tuple val(sample_id), file("sequence_features.tsv") \
-            optional (! is_features_file) into sequence_features_tsv
+        tuple val(sample_id), file("ORF_TPMs_vs_features.tsv") \
+            optional (! is_features_file) into ORF_TPMs_vs_features_tsv
         tuple val(sample_id), file("3ntframe_bygene.tsv") \
             optional (! is_asite_disp_length_file) \
             into nt3frame_bygene_tsv
@@ -1247,7 +1247,7 @@ generate_stats_figs_static_html =
     .join(read_lengths_tsv, remainder: true)
     .join(metagene_normalized_profile_start_stop_tsv, remainder: true)
     .join(nt3frame_bygene_filtered_tsv, remainder: true)
-    .join(sequence_features_tsv, remainder: true)
+    .join(ORF_TPMs_vs_features_tsv, remainder: true)
     .join(codon_ribodens_gathered_tsv, remainder: true)
 
 finished_sample_id
@@ -1369,7 +1369,7 @@ process staticHTML {
         file(sample_read_lengths_tsv), \
         file(sample_metagene_normalized_profile_start_stop_tsv), \
         file(sample_nt3frame_bygene_filtered_tsv), \
-        file(sample_sequence_features_tsv), \
+        file(sample_ORF_TPMs_vs_features_tsv), \
         file(sample_codon_ribodens_gathered_tsv) \
 	from generate_stats_figs_static_html
     output:
@@ -1394,7 +1394,7 @@ process staticHTML {
           script += ", codon_ribodens_gathered_file='\$PWD/${sample_codon_ribodens_gathered_tsv}'"
       }
       if (is_features_file) {
-          script += ", sequence_features_file='\$PWD/${sample_sequence_features_tsv}' "
+          script += ", ORF_TPMs_vs_features_file='\$PWD/${sample_ORF_TPMs_vs_features_tsv}' "
       }
       script += "), "
       script += "intermediates_dir = '\$PWD', "
