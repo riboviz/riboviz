@@ -1,3 +1,4 @@
+rm(list=ls())
 
 # YAL5_h5 is at location $HOME/riboviz/riboviz/Mok-simYAL5/output/A/A.h5
 
@@ -55,18 +56,19 @@ colsum_out <- args$colsum_out
 snapdisp <- args$snapdisp
 
 
-# hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
-# dataset <- "Mok-simYAL5"
-# feature_of_interest <- 'TCC AAG'
-# expand_width = 5L
+hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
+dataset <- "Mok-simYAL5"
+feature_of_interest <- 'CGA TAG'
+expand_width = 5L
 startpos <-1
 startlen <- 10
 filter_for_frame <- TRUE
 min_read_length <- 10
 yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
-# gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
+gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
 colsum_out <- TRUE
 snapdisp <- 0L
+output_dir <- here::here(".")
 
 
 hd_file <- here::here("Mok-tinysim", "A", "A.h5")
@@ -77,6 +79,12 @@ gene <- "MAT"
 gene_names <- unique(gff_df$Name)
 yeast_codon_table <- here::here("data", "tinysim_codon_table.tsv")
 
+
+
+hd_file <- here::here("J-Sc_2014", "sec63_1.h5")
+dataset <- "J-Sc_2014"
+gff <- here::here("..", "example-datasets", "fungi", "saccharomyces", "annotation", "Saccharomyces_cerevisiae_yeast_CDS_w_250utrs.gff3")
+gene_names <- c("YOL012C", "YOL039W", "YOL086C")
 
 gene_names <- rhdf5::h5ls(hd_file, 
                           recursive = 1)$name
@@ -94,10 +102,11 @@ yeast_codon_pos_i200 <- suppressMessages(readr::read_tsv(file = yeast_codon_tabl
 gene_poscodon_codon_i200 <- tibble::tibble(
   Gene = yeast_codon_pos_i200$Gene,
   CodonPos1 = yeast_codon_pos_i200$PosCodon, 
-  CodonPos2 = dplyr::lead(yeast_codon_pos_i200$PosCodon) %>% str_replace_all("1", "NA"),
+  CodonPos2 = dplyr::lead(yeast_codon_pos_i200$PosCodon) %>% str_replace_all(as.numeric(1L), "NA"),
   CodonPair = paste(yeast_codon_pos_i200$Codon, (dplyr::lead(yeast_codon_pos_i200$Codon) 
                                                  %>% str_replace_all("ATG", "NA")))
 )
+
     # > str(gene_poscodon_codon_i200)
     # tibble [2,826,757 x 4] (S3: tbl_df/tbl/data.frame)
     # $ Gene      : chr [1:2826757] "YAL068C" "YAL068C" "YAL068C" "YAL068C" ...
@@ -668,8 +677,8 @@ ExpandedRegionNormalisation <- function(gene_poscodon_codon_i200,
                                                remove_overhang = TRUE,
                                                snapdisp, filter_for_frame)
   
-  Normalization <- function(.x = expand_feature_region, expand_width){
-    dplyr::mutate(.x = expand_feature_region, RelCount = Count / sum(Count) * (2 * expand_width + 1))
+  Normalization <- function(.x, expand_width){
+    dplyr::mutate(.x, RelCount = Count / sum(Count) * (2 * expand_width + 1))
  }
   
   
@@ -765,18 +774,18 @@ OverlayedTibble <- function(gene_poscodon_codon_i200,
                            remove_overhang = TRUE,
                            snapdisp, filter_for_frame){
   
-  # normalized_expand_list <- ExpandedRegionNormalisation(gene_poscodon_codon_i200, 
-  #                                                       gene_names, dataset, hd_file, 
-  #                                                       min_read_length, colsum_out, 
-  #                                                       gff_df, feature_of_interest,
-  #                                                       expand_width, 
-  #                                                       remove_overhang = TRUE,
-  #                                                       snapdisp, filter_for_frame)
+  normalized_expand_list <- ExpandedRegionNormalisation(gene_poscodon_codon_i200,
+                                                        gene_names, dataset, hd_file,
+                                                        min_read_length, colsum_out,
+                                                        gff_df, feature_of_interest,
+                                                        expand_width,
+                                                        remove_overhang = TRUE,
+                                                        snapdisp, filter_for_frame)
   
   number_of_objects <- length(normalized_expand_list)
   # The number of objects inside normalized_expand_list
   
-  .x = result <- lapply(normalized_expand_list, "[", c("RelPos", "RelCount")) 
+  result <- lapply(normalized_expand_list, "[", c("RelPos", "RelCount")) 
   # Reduces normalized_expand_list to the columns RelPos and RelCount
   
   joined_result <- purrr::reduce(.x = result, .f =`+`)
@@ -921,11 +930,197 @@ overlayed_tibbles <- OverlayedTibble(gene_poscodon_codon_i200, gene_names, datas
                                      remove_overhang = TRUE, snapdisp, filter_for_frame)
 
 print('Creating plot')
-# 
-# plot <- GeneratePlot(gene_poscodon_codon_i200, gene_names, dataset, hd_file, 
-#                      min_read_length, colsum_out, gff_df, feature_of_interest, 
-#                      expand_width, remove_overhang = TRUE, snapdisp, 
-#                      filter_for_frame, size = 12)  
-# 
-# 
-# print('Done')
+
+plot <- GeneratePlot(gene_poscodon_codon_i200, gene_names, dataset, hd_file,
+                     min_read_length, colsum_out, gff_df, feature_of_interest,
+                     expand_width, remove_overhang = TRUE, snapdisp,
+                     filter_for_frame, size = 12)
+
+print('Done')
+
+
+
+
+
+
+
+
+
+if(length(feature_of_interest) == 1){
+  
+  # Run ExpandFeatureRegionAllGenes to get a list of occurrances of the codon of interest 
+  
+  print(paste0('Finding occurances of ', feature_of_interest))
+  
+  output_feature_info <- suppressMessages(ExpandFeatureRegion(gene_poscodon_codon_i200, 
+                                                              gene_names, dataset, hd_file, 
+                                                              min_read_length, colsum_out, 
+                                                              gff_df, feature_of_interest,
+                                                              expand_width, 
+                                                              remove_overhang = TRUE,
+                                                              snapdisp, filter_for_frame))
+  
+  # Check for the presence of the feature of interest. Output_feature_info being empty will cause problems with normalization
+  
+  if(length(output_feature_info) == 0){
+    
+    print('No occurrances of the feature of interest')
+    
+    if(expand_width > 1){
+      
+      print('Try script with an expand_width of 1L to check for occurances near to start or stop codon')
+    }
+    
+    print('Done')
+    stop()
+  }
+  
+  # Run ExpandedRegionNormalisation to calculate the relative number of reads mapping to each position arounf the feature of interest
+  
+  print('Normalising read counts')
+  
+  normalized_expand_list <- ExpandedRegionNormalisation(gene_poscodon_codon_i200, 
+                                                        gene_names, dataset, hd_file, 
+                                                        min_read_length, colsum_out, 
+                                                        gff_df, feature_of_interest,
+                                                        expand_width, 
+                                                        remove_overhang = TRUE,
+                                                        snapdisp, filter_for_frame)
+  
+  # Run OverlayedTable to create an average of reads at positions at and around the feature of interest 
+  
+  print('Overlaying tibbles for feature of interest and calculating the average relative reads at each position')
+  
+  overlayed_tibbles <- OverlayedTibble(gene_poscodon_codon_i200, gene_names, dataset,
+                                       hd_file, min_read_length, colsum_out, gff_df,
+                                       feature_of_interest, expand_width,
+                                       remove_overhang = TRUE, snapdisp, filter_for_frame)
+  
+  # Create a graph using ggplot
+  
+  print('Creating graph')
+  
+  overlayed_plot <- GeneratePlot(gene_poscodon_codon_i200, gene_names, dataset, hd_file,
+                                         min_read_length, colsum_out, gff_df, feature_of_interest,
+                                         expand_width, remove_overhang = TRUE, snapdisp,
+                                         filter_for_frame, size = 12)
+  
+  # save plot as PDF
+  
+  print('Save plot as PDF')
+  
+  save_plot_pdf <- function(overlayed_plot, output_dir){
+    overlayed_plot %>%
+      ggsave(
+        filename = file.path(output_dir, paste0("Meta_feature_plot", feature_of_interest,".pdf")),
+        width = 6, height = 5
+      )
+  }
+  
+  save_plot_pdf(overlayed_plot, output_dir)
+  
+  print('Done')
+  
+  
+} else{
+  
+  # FindAllFeatures is a function that contains ExpandFeatureRegionAllGenes, ExpandedRegionNormalization and OverlayedTable, which are defined above.
+  
+  FindAllFeatures <- function(gene_poscodon_codon_i200 = gene_poscodon_codon_i200, 
+                              gene_names = gene_names, dataset, hd_file, 
+                              min_read_length, colsum_out, 
+                              gff_df, .x , 
+                              expand_width, remove_overhang, filter_for_frame, snapdisp){
+    
+    # set .x to feature being studies, allowing purrr::map to iterate over different features of interest without having problems due to .x being a changing vector
+    
+    feature_being_studied <- .x
+    
+    
+    # Run ExpandFeatureRegionAllGenes to get a list of occurrances of the codon of interest 
+    
+    print(paste0('Finding occurances of ', feature_being_studied))
+    output_feature_info <- suppressMessages(ExpandFeatureRegion(gene_poscodon_codon_i200, 
+                                                                gene_names, dataset, hd_file, 
+                                                                min_read_length, colsum_out, 
+                                                                gff_df, feature_of_interest,
+                                                                expand_width, 
+                                                                remove_overhang = TRUE,
+                                                                snapdisp, filter_for_frame))
+    
+    
+    # Check for the presence of the feature of interest. Output_feature_info being empty will cause problems with normalization
+    
+    if(length(output_feature_info) == 0){
+      print('No occurrances of the feature of interest')
+      
+      if(expand_width > 1){
+        
+        print('Try script with an expand_width of 1L to check for occurances near to start or stop codon')
+      }
+      
+      print('Done')
+      stop()
+    }
+    
+    
+    # Run ExpandedRegionNormalization to calculate the relative number of reads mapping to each position arounf the feature of interest
+    
+    normalized_expand_list <- ExpandedRegionNormalisation(gene_poscodon_codon_i200, 
+                                                          gene_names, dataset, hd_file, 
+                                                          min_read_length, colsum_out, 
+                                                          gff_df, feature_of_interest,
+                                                          expand_width, 
+                                                          remove_overhang = TRUE,
+                                                          snapdisp, filter_for_frame)
+    
+    
+    # Run OverlayedTable to create an average of reads at positions at and around the feature of interest 
+    
+    overlayed_tibbles <- OverlayedTibble(gene_poscodon_codon_i200, gene_names, dataset,
+                                         hd_file, min_read_length, colsum_out, gff_df,
+                                         feature_of_interest, expand_width,
+                                         remove_overhang = TRUE, snapdisp, filter_for_frame)
+    
+    
+    
+    # Create a new tibble listing the feature being studeied, and the RelCount at position 0, ie RelCount at the feature of interest 
+    
+    feature_rel_use<- tibble(Feature = feature_being_studied, RelCount = filter(overlayed_tibbles, overlayed_tibbles$Rel_Pos == 0)$RelCount)
+    
+  }
+  
+  # Use purrr::map to extract the RelCounts at position 0 of all desired features of interest     
+  
+  feature_rel_use <- purrr::map_df(.x = feature_of_interest, .f = FindAllFeatures, yeast_codon_pos_i200 = yeast_codon_pos_i200, 
+                                   gene_names = gene_names, dataset = dataset, hd_file = hd_file, 
+                                   min_read_length = min_read_length, colsum_out = colsum_out, 
+                                   gff_df = gff_df, expand_width = expand_width, remove_overhang = remove_overhang, filter_for_frame = filter_for_frame, snapdisp = snapdisp)
+  
+  # Rearrange feature_rel_use to be in descending order, so features with the highest relative use are listed at the top
+  
+  feature_rel_use <- arrange(feature_rel_use, desc(RelCount))
+  
+  # Save feature_rel_use as a tsv file 
+  
+  write.table(feature_rel_use, file = "Feature_Relativ_use.tsv", sep = "\t", row.names = F, quote = F)
+  
+  # Users can then look at feature_rel_use and see which features they want to investigate further, and can use as a single feature_of_interest input to produce a graph 
+  
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
