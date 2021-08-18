@@ -162,6 +162,8 @@ In addition, the following files are also put into the output directory:
 * `TPMs_all_CDS_all_samples.tsv`: file with the transcripts per million (tpm) for all successfully processed samples.
 * `read_counts_per_file_tsv`: a [read counts file](#read-counts-file) (only if `count_reads: TRUE`).
 
+More details on the output files can be found at riboviz/docs/[riboviz_outputs.md](https://github.com/riboviz/riboviz/blob/output-docs-395/docs/user/riboviz_outputs.md)
+
 ---
 
 ## Read counts file
