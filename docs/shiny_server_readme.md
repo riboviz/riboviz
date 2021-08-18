@@ -7,7 +7,7 @@ author: "John Favate"
 date: "`r Sys.time()`"
 ---
 
-Riboviz 2.0 has an integrated, but optional data visualization tool written in `R` and using `shiny`. TO use the visualization tool, you can enter the following command at the command line. If you're outside of `riboviz/rscripts`, then you'll need to provide the full path to the `run_shiny_server.R` script.
+Riboviz 2.0 has an integrated, but optional data visualization tool written in `R` and using `shiny`. To use the visualization tool, you can enter the following command at the command line. If you're outside of `riboviz/rscripts`, then you'll need to provide the full path to the `run_shiny_server.R` script.
 ```{bash, echo = FALSE}
 Rscript --vanilla run_shiny_server.R path/to/yaml/configuration/file.yaml
 ```
@@ -19,7 +19,7 @@ Rscript --vanilla run_shiny_server.R path/to/yaml/configuration/file.yaml 1234
 
 # Description of tabs
 
-Globally, the user can choose which samples they would like to view by checking the appropriate boxes at the top of the screen. 
+Globally, the user can choose which samples they would like to view by checking the appropriate boxes at the top of the screen.
 
 ### Read count summary
 
