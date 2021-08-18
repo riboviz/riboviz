@@ -1,20 +1,33 @@
 # How To Run the Riboviz Interactive Data Visualization On Your Data
 
-This page describes how to generate and run an interactive shiny app to visualize and explore your data after running the riboviz workflow.
+This page describes how to generate and run an interactive shiny app to visualize and explore your data after running the riboviz workflow. Riboviz 2.0 has an integrated, but optional data visualization tool written in `R` and using `shiny`. The script is located at `riboviz/rscripts/run_shiny_server.R` and takes a single mandatory argument - a YAML file, and one optional argument - a port number for port forwarding. The YAML file is not the one used for a riboviz run, but instead is one called `interactive_viz_config.yaml` which will be located in your output folder.
 
-Riboviz 2.0 has an integrated, but optional data visualization tool written in `R` and using `shiny`. To use the visualization tool, you can enter the following command at the command line. If you're outside of `riboviz/rscripts`, then you'll need to provide the full path to the `run_shiny_server.R` script.
-```{bash, echo = FALSE}
-Rscript --vanilla run_shiny_server.R path/to/yaml/configuration/file.yaml
+# Activating the shiny server on a local machine
+
+To use the visualization tool, you can enter the following command at the command line. If you're outside of `riboviz/rscripts`, then you'll need to provide the full path to the `run_shiny_server.R` script.
+```
+Rscript --vanilla run_shiny_server.R path/to/interactive_viz_config.yaml
 ```
 
-Once entered, the command will provide an IP address which you can simply paste into your browsers URL bar and navigate to. If you're running on a headless machine like a server, you will need to first forward the port the shiny server has been created on an be on the same network as the headless machine in order to access it. By default, the port used is `4254` but if you need to give a specific port, you can supply one when entering the command as shown below. This will use the port `1234`.
-```{bash, echo = FALSE}
+Once entered, the command will print out the something like the following
+```
+"Listening on http://127.0.0.1:4254"
+```
+
+The IP address provided can simply be pasted into a web browsers URL bar and will direct you to the shiny server which is now hosted from the local machine. 
+
+# Activating the shiny server on a headless machine
+
+If you're running on a headless machine like a server, the shiny server will be hosted on said server. By default, the shiny server is sent to port `4254`. If this port is open, then the same command as above will allow you to access the shiny server. Alternatively, you can specify a port at the command line as in the following example which uses port `1234`.
+```
 Rscript --vanilla run_shiny_server.R path/to/yaml/configuration/file.yaml 1234
 ```
 
+You may need to forward that port. *A description of how to forward the port from the command line as opposed to doing it in VSC would be good here...*
+
 # Description of tabs
 
-Globally, the user can choose which samples they would like to view by checking the appropriate boxes at the top of the screen.
+Globally, the user can choose which samples they would like to view by checking the appropriate boxes at the top of the screen. Changes are not submitted until the user presses the `apply` button.
 
 ### Read count summary
 

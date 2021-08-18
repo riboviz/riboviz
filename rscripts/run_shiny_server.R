@@ -172,8 +172,9 @@ ribogrid_df <- lapply(sample_names, function(x) {
 
 
 ### Gene features
-# this is commented out because we're not sure what the format of the sequence features file is
-# presumably it's to match the one in the vignette but I'm not sure if it's described anywhere.
+
+# this liekly needs some work, but it depends on the exact format of the feature file which isn't documented yet
+
 if (any(names(yaml) == "features_file")) {
   if (length(yaml$features_file) > 0) {
     features_df <- lapply(sample_names, function(x) {
@@ -580,7 +581,7 @@ server <- function(input, output, session) {
             filter(samplez %in% input$sample &
                      Feature %in% input$feature) %>%
             mutate(labz = ifelse(ORF == input$gene2, "a_label", "no_lab")) %>%
-            arrange(labz) %>%
+            arrange(desc(labz)) %>%
             ggplot(., aes(tpm, Value)) +
             geom_point(aes(color = labz, size = labz)) +
             geom_smooth(method = "lm") +
