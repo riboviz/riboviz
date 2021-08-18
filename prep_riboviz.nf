@@ -203,9 +203,6 @@ def helpMessage() {
     * 'run_static_html': run static html visualization per sample? (default 'TRUE')
     * 'output_pdfs': generate .pdfs for sample-related plots (default 'TRUE')
 
-    visualization parameters:
-    * 'run_dashboard': run visualization dashboard? (default 'TRUE')
-
     General:
 
     * 'validate_only': Validate configuration, check that mandatory
