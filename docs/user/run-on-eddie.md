@@ -33,6 +33,8 @@ Contents:
    - [Submit job](#submit-job)
    - [Checking outputs](#checking-outputs)
    - [Moving and downloading outputs](#moving-and-downloading-outputs)
+* [Hints and tips](#hints-and-tips)
+  - [Using the Linux `screen` command](#using-the-linux-screen-command)
 
 ---
 
@@ -697,3 +699,15 @@ You can check the file sizes using `du -ch` to get an idea of how much space you
 Files older than one month are removed from this directory automatically.
 
 See [Storage](https://www.wiki.ed.ac.uk/display/ResearchServices/Storage) for more information.
+
+---
+
+## Hints and tips
+
+### Using the Linux `screen` command
+
+Linux's `screen` command provides a virtual terminal multiplexer. It allows us to run a number of different sessions (or windows, or virtual terminals) withina single terminal, or console, window. This can be useful if we do not have access to a graphical user interface with multiple windows, which is the case when using EDDIE.
+
+One use case is if we want to have one or more files open in editors while also running programs that use those files - for example editing source code and running a compiler, or editing configuration files and running an analysis program - without having to repeatedly open and close the files within the editor
+
+For a short introduction, see [Using the Linux `screen` command](./using-linux-screen.md).
