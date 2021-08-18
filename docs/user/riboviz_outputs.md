@@ -52,7 +52,7 @@ There are many output files that are specific to each sample, which are organize
 # Output files for an entire run
 
 
-## `TPMs_all_CDS_all_samples` 
+## `TPMs_all_CDS_all_samples.tsv` 
 
 A tsv file with transcripts per million (tpm) for all genes from successfully processed samples. This file is produced by the script `collate_TPMs.R`. This script uses the `tpms.tsv` file from each processed sample and lists the tmps of each sample for each gene, allowing for comparison between samples. 
 
