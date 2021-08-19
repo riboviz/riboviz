@@ -954,12 +954,6 @@ $ bash .command.sh
 Execution halted
 ```
 
-**Note:** If rerunning a step that invokes a Python command then you need to provide a `PYTHONPATH` with the path to your `riboviz` directory. For example:
-
-```console
-$ PYTHONPATH=$HOME/riboviz bash .command.sh 
-```
-
 For more information on the `work/` directory, and its files, see [Nextflow `work/` directory](./prep-riboviz-operation.md#nextflow-work-directory),
 
 For more information on `nextflow log`, see Nextflow's [Tracing & visualisation](https://www.nextflow.io/docs/latest/tracing.html) or run `nextflow log -h`. To see the log fields available, run `nextflow log -l`.
