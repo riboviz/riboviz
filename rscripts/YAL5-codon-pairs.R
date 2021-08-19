@@ -1,9 +1,13 @@
 rm(list=ls())
 
-# YAL5_h5 is at location $HOME/riboviz/riboviz/Mok-simYAL5/output/A/A.h5
-
 # Given an h5 file, GFF file and .tsv file, this script creates a metafeature plot 
-# for the codon pair of interest. 
+# for the feature of interest. 
+
+### TEST ###
+
+# run the script on the tinysim dataset. Documentation of tests in issue ticket 
+# #402 "Writing tests for visualisation of feature scripts" 
+# (https://github.com/riboviz/riboviz/issues/402)
 
 print('Starting process')
 
@@ -16,75 +20,71 @@ suppressMessages(library(ggplot2))
 suppressMessages(library(plotly))
 suppressMessages(library(purrr))
 suppressMessages(library(dplyr))
-suppressMessages(library(argparse))
+suppressMessages(library(optparse))
 suppressMessages(library(tidyverse))
 suppressMessages(library(stringr))
 
 
-# Set parser arguments
-parser <- ArgumentParser()
+# Set optparse arguments
 
-parser$add_argument('-i', '--input', help='Path input to h5 file')
-parser$add_argument('-d', '--dataset', help='Name of the dataset being studied')
-parser$add_argument('-g', '--gff', help='Path to the GFF3 file of the organism being studied')
-parser$add_argument('-a', '--annotation', help='Path to codon table for organism')
-parser$add_argument('--feature', help='Feature of interest, e.g. codon pair')
-parser$add_argument('-o', '--output', help='Path to output directory')
-parser$add_argument('--expand_width', help='the desired range either side of the codon of interest', default = 5)
-parser$add_argument('--startpos', help='position of the start codon', default = 1)
-parser$add_argument('--startlen', help='smallest length of reads', default = 10) # please correct if wrong
-parser$add_argument('--frame', help='logical', default = TRUE)
-parser$add_argument('--minreadlen', help='minimum read length', default = 10)
-parser$add_argument('--colsum_out', help='logical', default = TRUE)
-parser$add_argument('--snapdisp', help='frame to filter for', default = 0L)
+option_list <- list(make_option(c('-i', '--input'), type = "character", help='Path input to h5 file'),
+                    make_option(c('-d', '--dataset'), type = "character", help='Name of dataset being studied'),
+                    make_option(c('-g', '--gff'), type = "character", help='Path to the GFF3 file of the organism being studied'),
+                    make_option(c('-a', '--annotation'), type = "character", help='Path to codon positions table for organism being studied'),
+                    make_option(c('--feature'), type = "character", help='Feature of interest, e.g. codon pair'),
+                    make_option(c('-o', '--output'), type = "character", help='Path to output directory'),
+                    make_option(c('--expand_width'), type = "integer", help='the desired range either side of the feature of interest', default = 5),
+                    make_option(c('--frame'), type = "integer", help='Reading frame to filter counts for, either 0, 1 or 2', default = 0),
+                    make_option(c('--minreadlen'), type = "integer", help='Minimum read length', default = 10),
+                    make_option(c('--filter_for_frame'), type = "logical", help='FALSE: keep counts for all reading frames, TRUE: filter for a reading frame', default = TRUE),
+                    make_option(c('--snapdisp'), type = "integer", help='Frame to filter for wjem using SnaptToCodon', default = 0L))
 
-args <- parser$parse_args()
+opt <- optparse::parse_args(OptionParser(option_list = option_list))
 
-
-hd_file <- args$input
-dataset <- args$dataset
-gff <- args$gff
-yeast_codon_table <- args$annotation
-feature_of_interest <- args$feature
-output_dir <- args$output
-expand_width <- args$expand_width
-startpos <- args$startpos
-startlen <- args$startlen
-filter_for_frame <- args$frame
-min_read_length <- args$minreadlen
-colsum_out <- args$colsum_out
-snapdisp <- args$snapdisp
+# parser$add_argument('--colsum_out', help='logical', default = TRUE)
 
 
-hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
-dataset <- "Mok-simYAL5"
-feature_of_interest <- 'CGA TAG'
-expand_width = 5L
-startpos <-1
-startlen <- 10
-filter_for_frame <- TRUE
-min_read_length <- 10
+hd_file <- opt$input
+dataset <- opt$dataset
+gff <- opt$gff
+yeast_codon_table <- opt$annotation
+feature_of_interest <- opt$feature
+output_dir <- opt$output
+expand_width <- opt$expand_width
+filter_for_frame <- opt$frame
+min_read_length <- opt$minreadlen
+# colsum_out <- opt$colsum_out
+snapdisp <- opt$snapdisp
+
+
+# hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
+# dataset <- "Mok-simYAL5"
+# feature_of_interest <- 'CGA TAG'
+# expand_width = 5L
+# filter_for_frame <- TRUE
+# min_read_length <- 10
 yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
-gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
-colsum_out <- TRUE
-snapdisp <- 0L
-output_dir <- here::here(".")
+# gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
+# colsum_out <- TRUE
+# snapdisp <- 0L
+# output_dir <- here::here(".")
 
 
-hd_file <- here::here("Mok-tinysim", "A", "A.h5")
-dataset <- "Mok-tinysim"
-gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "tiny_2genes_20utrs.gff3")
+# hd_file <- here::here("Mok-tinysim", "A", "A.h5")
+# dataset <- "Mok-tinysim"
+# gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "tiny_2genes_20utrs.gff3")
+# gene <- "MAT"
+# gene_names <- unique(gff_df$Name)
+# yeast_codon_table <- here::here("data", "tinysim_codon_table.tsv")
+# 
+# 
+# 
+# hd_file <- here::here("J-Sc_2014", "sec63_1.h5")
+# dataset <- "J-Sc_2014"
+# gff <- here::here("..", "example-datasets", "fungi", "saccharomyces", "annotation", "Saccharomyces_cerevisiae_yeast_CDS_w_250utrs.gff3")
+# gene_names <- c("YOL012C", "YOL039W", "YOL086C")
+
 gff_df <- readGFFAsDf(gff)
-gene <- "MAT"
-gene_names <- unique(gff_df$Name)
-yeast_codon_table <- here::here("data", "tinysim_codon_table.tsv")
-
-
-
-hd_file <- here::here("J-Sc_2014", "sec63_1.h5")
-dataset <- "J-Sc_2014"
-gff <- here::here("..", "example-datasets", "fungi", "saccharomyces", "annotation", "Saccharomyces_cerevisiae_yeast_CDS_w_250utrs.gff3")
-gene_names <- c("YOL012C", "YOL039W", "YOL086C")
 
 gene_names <- rhdf5::h5ls(hd_file, 
                           recursive = 1)$name
@@ -102,7 +102,7 @@ yeast_codon_pos_i200 <- suppressMessages(readr::read_tsv(file = yeast_codon_tabl
 gene_poscodon_codon_i200 <- tibble::tibble(
   Gene = yeast_codon_pos_i200$Gene,
   CodonPos1 = yeast_codon_pos_i200$PosCodon, 
-  CodonPos2 = dplyr::lead(yeast_codon_pos_i200$PosCodon) %>% str_replace_all(as.numeric(1L), "NA"),
+  CodonPos2 = dplyr::lead(yeast_codon_pos_i200$PosCodon),
   CodonPair = paste(yeast_codon_pos_i200$Codon, (dplyr::lead(yeast_codon_pos_i200$Codon) 
                                                  %>% str_replace_all("ATG", "NA")))
 )
@@ -119,9 +119,9 @@ gene_poscodon_codon_i200 <- tibble::tibble(
 
 
 
-#' FilterForFrameFunction(): fetches A-site assigned counts, filtered for a reading frame
+#' FilterForFrame(): fetches A-site assigned counts, filters for a reading frame
 #' 
-#' Counts are fetched with GetGeneDatamatrix and A-site assignment is carried out with CalcAsiteFixed (in nt positions)
+#' Counts are fetched with GetGeneDatamatrix() and A-site assignment is carried out with CalcAsiteFixed() (in nt positions)
 #' the reading frame is then filtered for and the counts are returned (in codon positions)
 #' 
 #' @param gene from gene_names to get read lengths for
@@ -130,14 +130,14 @@ gene_poscodon_codon_i200 <- tibble::tibble(
 #' @param min_read_length integer, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
 #' @param snapdisp integer any additional displacement in the snapping, default = 0L
 #' 
-#' @return a list of numeric values (counts) for a single reading frame
+#' @return a list of numeric values (counts) for a single reading frame (0, 1 or 2)
 #' 
 #' @example 
 #' 
-#' FilterForFrameFunction(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file, min_read_length = 10, snapdisp = 0L)
+#' FilterForFrame(gene = "YAL003W", dataset = "Mok-simYAL5", hd_file, min_read_length = 10, snapdisp = 0L)
 #' 
 #' @export
-FilterForFrameFunction <- function(gene, dataset, hd_file, min_read_length, snapdisp){
+FilterForFrame <- function(gene, dataset, hd_file, min_read_length, snapdisp){
   
   asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", 
                                                                               "yeast_standard_asite_disp_length.txt"))
@@ -184,10 +184,10 @@ FilterForFrameFunction <- function(gene, dataset, hd_file, min_read_length, snap
     # num [1:207] 811 429 488 102 994 146 173 762 13 176 ...
   
 }
-# TEST: FilterForFrameFunction(): returns a list of numeric values = TRUE
-# TEST: FilterForFrameFunction(): length(filtered_counts) = length(CDS) for gene of interest = TRUE
+# TEST: FilterForFrame(): returns a list of numeric values = TRUE
+# TEST: FilterForFrame(): length(filtered_counts) = length(CDS) for gene of interest = TRUE
 # gives:
-# > str(frames)
+# > str(filtered_counts)
 # num [1:207] 811 429 488 102 994 146 173 762 13 176 ...
 
 
@@ -198,8 +198,14 @@ FilterForFrameFunction <- function(gene, dataset, hd_file, min_read_length, snap
 
 #' GetAllCodonPosCounts(): extracts A-site assigned counts for a list of genes 
 #' 
-#' Applies the GetGeneCodonPosReads1dsnap() function to a list of genes and generates 
-#' a tidy data frame (tibble) which contains the counts for all genes 
+#' This function extracts the A-site assigned counts and generates a tidy data frame
+#' (tibble) which contains the counts for all genes in the list of genes.
+#' 
+#' If filter_for_frame = FALSE the GetGeneCodonPosReads1dsnap() function is applied to a 
+#' list of genes and generates a tidy data frame (tibble) which contains the counts from all reading frames.
+#' 
+#' If filter_for_frame = TRUE the FilterForFrame() function is applied instead, this generates
+#' a tibble which contains the read counts for a reading frame (snapdisp = 0L or 1L or 2L). 
 #' 
 #' @param gene from gene_names to get read lengths for
 #' @param dataset name of dataset stored in .h5 file.
@@ -212,9 +218,12 @@ FilterForFrameFunction <- function(gene, dataset, hd_file, min_read_length, snap
 #' 
 #' @example 
 #' 
-#' gff_df <- readGFFAsDf(gff)
-#' 
-#' GetAllCodonPosCounts(gene_names, dataset, hd_file, min_read_length, snapdisp = 0L)
+#' GetAllCodonPosCounts(gene_names, 
+#'                      dataset = "Mok-simYAL5", 
+#'                      hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5"), 
+#'                      min_read_length = 10, 
+#'                      snapdisp = 0L, 
+#'                      filter_for_frame = TRUE)
 #' 
 #' @export 
 GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, snapdisp, filter_for_frame){
@@ -254,7 +263,7 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
       
     } else {
       
-      codon_counts_1_gene <- FilterForFrameFunction(gene, dataset, hd_file, 
+      codon_counts_1_gene <- FilterForFrame(gene, dataset, hd_file, 
                                                     min_read_length, snapdisp)
       
     }
@@ -293,7 +302,7 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
 #   $ Gene    : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
 #   $ PosCodon: int  1 2 3 4 5 6 7 8 9 10 ...
 #   $ Count   : num  4249 825 1017 1176 1116 ...
-# for filter_for_frame = TRUE
+# for filter_for_frame = TRUE, snapdisp = 0L
 # > str(total_codon_pos_counts)
 # Classes 'tbl_df', 'tbl' and 'data.frame':   2749 observations of 3 variables:
 #   $ Gene    : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
@@ -303,7 +312,7 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
 
  
 
-#' AddCodonNamesToCodonPosCounts(): takes codon names from .tsv file, joined to the codon counts table 
+#' AddCodonNamesToCodonPosCounts(): takes codon names from the annotation .tsv file, joined to the codon counts table 
 #' 
 #' Uses the function GetAllCodonPosCounts().
 #' 
@@ -319,9 +328,13 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
 #' 
 #' @example 
 #' 
-#' gff_df <- readGFFAsDf(here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3"))
-#' 
-#' AddCodonNamesToCodonPosCounts(gene_poscodon_codon_i200, gene_names, dataset = Mok-simYAL5, hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5"), min_read_length = 10, colsum_out = TRUE, gff_df)
+#' AddCodonNamesToCodonPosCounts(gene_poscodon_codon_i200,
+#'                               gene_names,
+#'                               dataset = "Mok-simYAL5",
+#'                               hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5"),
+#'                               min_read_length = 10,
+#'                               snapdisp = 0L,
+#'                               filter_for_frame = TRUE)
 #' 
 #' @export
 AddCodonNamesToCodonPosCounts <- function(gene_poscodon_codon_i200, gene_names, 
@@ -335,7 +348,8 @@ AddCodonNamesToCodonPosCounts <- function(gene_poscodon_codon_i200, gene_names,
   transcript_tibbles <- total_codon_pos_counts %>% left_join(gene_poscodon_codon_i200, 
                                                              by = c("PosCodon" = "CodonPos1", 
                                                                     "Gene" = "Gene"), 
-                                                             keep = FALSE, copy = TRUE)
+                                                             keep = FALSE, 
+                                                             copy = TRUE)
   
   transcript_gene_pos_poscodon_frame <- tibble(
     Gene = transcript_tibbles$Gene,
@@ -384,14 +398,19 @@ AddCodonNamesToCodonPosCounts <- function(gene_poscodon_codon_i200, gene_names,
 #' 
 #' @example 
 #' 
-#' gff_df <- readGFFAsDf(here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3"))
-#' 
-#' FilterForFeatureOfInterestPositions(gene_poscodon_codon_i200, gene, dataset = Mok-simYAL5, hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5"), min_read_length = 10, snapdisp = 0L, filter_for_frame = TRUE, feature_of_interest = 'TCC AAG')
+#' FilterForFeatureOfInterestPositions(gene_poscodon_codon_i200, 
+#'                                     gene, 
+#'                                     dataset = "Mok-simYAL5", 
+#'                                     hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5"), 
+#'                                     min_read_length = 10, 
+#'                                     snapdisp = 0L, 
+#'                                     filter_for_frame = TRUE, 
+#'                                     feature_of_interest = 'TCC AAG')
 #' 
 #' @export
 FilterForFeatureOfInterestPositions <- function(gene_poscodon_codon_i200, gene_names, 
                                                 dataset, hd_file, min_read_length, 
-                                                snapdisp, filter_for_frame, feature_of_interest ){
+                                                snapdisp, filter_for_frame, feature_of_interest){
   
   transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(gene_poscodon_codon_i200, 
                                                                       gene_names, 
@@ -434,11 +453,10 @@ FilterForFeatureOfInterestPositions <- function(gene_poscodon_codon_i200, gene_n
 #' @param dataset name of dataset stored in .h5 file. 
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples.
 #' @param min_read_length numeric, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
-#' @param colsum_out logical; if true, return summary column of summed a-site lengths; default: TRUE
 #' @param gff_df from which to extract the UTRs and CDS widths.
 #' @param feature_of_interest character, each incidence of the feature will be extracted from transcript_info_tibble
 #' @param expand_width integer which provides the number of positions on each side of the feature of interest to include in the window
-#' @param remove_overhang default = TRUE, removes features of interest who's positions do not allow for complete windows to be generated
+#' @param remove_overhang logical, default = TRUE, removes features of interest who's positions fall within expand_width and therefore do not allow for complete windows to be generated
 #' @param snapdisp integer any additional displacement in the snapping
 #' @param filter_for_frame TRUE if filtering for a reading frame, FALSE if keeping and grouping all reading frames for each codon
 #' 
@@ -446,13 +464,21 @@ FilterForFeatureOfInterestPositions <- function(gene_poscodon_codon_i200, gene_n
 #' 
 #' gff_df <- readGFFAsDf(here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3"))
 #' 
-#' ExpandFeatureRegion(gene_poscodon_codon_i200, gene_names, dataset, hd_file, min_read_length, colsum_out,
-#'                             gff_df, feature_of_interest, expand_width = 5L,
-#'                             remove_overhang = TRUE, snapdisp, filter_for_frame)
+#' ExpandFeatureRegion(gene_poscodon_codon_i200, 
+#'                     gene_names, 
+#'                     dataset = "Mok-simYAL5", 
+#'                     hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5"), 
+#'                     min_read_length = 10, 
+#'                     gff_df, 
+#'                     feature_of_interest = 'TCC AAG', 
+#'                     expand_width = 5L,
+#'                     remove_overhang = TRUE, 
+#'                     snapdisp = 0L, 
+#'                     filter_for_frame = TRUE)
 #' 
 #' @export                                                           
 ExpandFeatureRegion <- function(gene_poscodon_codon_i200, gene_names, dataset, 
-                                hd_file, min_read_length, colsum_out, gff_df, 
+                                hd_file, min_read_length, gff_df, 
                                 feature_of_interest, expand_width, remove_overhang = TRUE,
                                 snapdisp, filter_for_frame) {
   
@@ -467,7 +493,7 @@ ExpandFeatureRegion <- function(gene_poscodon_codon_i200, gene_names, dataset,
   # take as inputs and select for positions on separate genes
   AllGeneInterestingFeatures <- function(gene_poscodon_codon_i200, 
                                          gene, gene_names, dataset, hd_file, 
-                                         min_read_length, colsum_out, 
+                                         min_read_length, 
                                          gff_df, feature_of_interest, 
                                          transcript_gene_pos_poscodon_frame,
                                          filter_for_frame){ 
@@ -475,7 +501,7 @@ ExpandFeatureRegion <- function(gene_poscodon_codon_i200, gene_names, dataset,
     
     TranscriptForOneGene <- function(gene_poscodon_codon_i200, 
                                      gene, gene_names, dataset, hd_file, 
-                                     min_read_length, colsum_out, 
+                                     min_read_length, 
                                      gff_df, feature_of_interest){
       
       interesting_feature_tibble <- dplyr::filter(transcript_gene_pos_poscodon_frame, 
@@ -490,7 +516,7 @@ ExpandFeatureRegion <- function(gene_poscodon_codon_i200, gene_names, dataset,
     
     transcript_for_one_gene <- TranscriptForOneGene(gene_poscodon_codon_i200, 
                                                     gene, gene_names, dataset, hd_file, 
-                                                    min_read_length, colsum_out, 
+                                                    min_read_length, 
                                                     gff_df, feature_of_interest)
     
     
@@ -536,7 +562,8 @@ ExpandFeatureRegion <- function(gene_poscodon_codon_i200, gene_names, dataset,
                                       dataset,
                                       hd_file,
                                       expand_width,
-                                      remove_overhang = TRUE, gff_df)
+                                      remove_overhang = TRUE, 
+                                      gff_df)
     
     
     return(expand_feature_region)
@@ -546,7 +573,7 @@ ExpandFeatureRegion <- function(gene_poscodon_codon_i200, gene_names, dataset,
                                       .f = AllGeneInterestingFeatures,
                                       gene_names = gene_names,
                                       gene_poscodon_codon_i200 = gene_poscodon_codon_i200, 
-                                      dataset, hd_file, min_read_length, colsum_out, 
+                                      dataset, hd_file, min_read_length, 
                                       gff_df, feature_of_interest,
                                       transcript_gene_pos_poscodon_frame)
   
@@ -642,7 +669,6 @@ ExpandFeatureRegion <- function(gene_poscodon_codon_i200, gene_names, dataset,
 #' @param dataset name of dataset stored in .h5 file. 
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples.
 #' @param min_read_length numeric, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
-#' @param colsum_out logical; if true, return summary column of summed a-site lengths; default: TRUE
 #' @param gff_df from which to extract the UTRs and CDS widths.
 #' @param feature_of_interest character, each incidence of the feature will be extracted from transcript_info_tibble
 #' @param expand_width integer which provides the number of positions on each side of the feature of interest to include in the window
@@ -652,13 +678,19 @@ ExpandFeatureRegion <- function(gene_poscodon_codon_i200, gene_names, dataset,
 #' 
 #' @example 
 #' 
-#' ExpandedRegionNormalisation(gene_poscodon_codon_i200, 
-#'                             gene_names, dataset, hd_file, 
-#'                             min_read_length, colsum_out, 
-#'                             gff_df, feature_of_interest,
-#'                             expand_width, 
+#' gff_df <- readGFFAsDf(here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3"))
+#' 
+#' ExpandedRegionNormalisation(gene_poscodon_codon_i200,
+#'                             gene_names, 
+#'                             dataset = "Mok-simYAL5", 
+#'                             hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5"),
+#'                             min_read_length = 10, 
+#'                             gff_df, 
+#'                             feature_of_interest = 'TCC AAG',
+#'                             expand_width = 5L,
 #'                             remove_overhang = TRUE,
-#'                             snapdisp, filter_for_frame)
+#'                             snapdisp = 0L, 
+#'                             filter_for_frame = TRUE)
 #' 
 #' @export 
 ExpandedRegionNormalisation <- function(gene_poscodon_codon_i200, 
@@ -745,7 +777,6 @@ ExpandedRegionNormalisation <- function(gene_poscodon_codon_i200,
 #' @param dataset name of dataset stored in .h5 file. 
 #' @param hd_file name of .h5 hdf5 file holding read data for all genes, created from BAM files for dataset samples.
 #' @param min_read_length numeric, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
-#' @param colsum_out logical; if true, return summary column of summed a-site lengths; default: TRUE
 #' @param gff_df from which to extract the UTRs and CDS widths.
 #' @param feature_of_interest character, each incidence of the feature will be extracted from transcript_info_tibble
 #' @param expand_width integer which provides the number of positions on each side of the feature of interest to include in the window
@@ -757,13 +788,19 @@ ExpandedRegionNormalisation <- function(gene_poscodon_codon_i200,
 #' 
 #' @example 
 #' 
+#' gff_df <- readGFFAsDf(here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3"))
+#' 
 #' OverlayedTibble(gene_poscodon_codon_i200, 
-#'                 gene_names, dataset, hd_file, 
-#'                 min_read_length, colsum_out, 
-#'                 gff_df, feature_of_interest,
-#'                 expand_width, 
-#'                 remove_overhang = TRUE,
-#'                 snapdisp, filter_for_frame)
+#'                  gene_names, 
+#'                  dataset = "Mok-simYAL5",
+#'                  hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5"),
+#'                  min_read_length = 10,
+#'                  gff_df,
+#'                  feature_of_interest = 'TCC AAG',
+#'                  expand_width = 5L,
+#'                  remove_overhang = TRUE,
+#'                  snapdisp = 0L,
+#'                  filter_for_frame = TRUE)
 #' 
 #' @export
 OverlayedTibble <- function(gene_poscodon_codon_i200, 
@@ -834,10 +871,23 @@ OverlayedTibble <- function(gene_poscodon_codon_i200,
 #' @param size the size of the text on the metafeature plot
 #' 
 #' @example 
-#' GeneratePlot(gene_poscodon_codon_i200, gene_names, dataset, hd_file, min_read_length, 
-#'              colsum_out, gff_df, feature_of_interest, expand_width, 
-#'              remove_overhang = TRUE, snapdisp, filter_for_frame, size = 12)
-#'              
+#' 
+#' gff_df <- readGFFAsDf(here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3"))
+#' 
+#' GeneratePlot(gene_poscodon_codon_i200, 
+#'              gene_names, 
+#'              dataset = "Mok-simYAL5", 
+#'              hd_file = here::here("Mok-simYAL5", "output", "A", "A.h5"), 
+#'              min_read_length = 10,
+#'              colsum_out, 
+#'              gff_df, 
+#'              feature_of_interest = 'TCC AAG', 
+#'              expand_width = 5L,
+#'              remove_overhang = TRUE, 
+#'              snapdisp = 0L, 
+#'              filter_for_frame = TRUE, 
+#'              size = 12)
+#'             
 #' @export              
 GeneratePlot <- function(gene_poscodon_codon_i200, gene_names, dataset, hd_file, 
                          min_read_length, colsum_out, gff_df, feature_of_interest, 
@@ -878,66 +928,64 @@ GeneratePlot <- function(gene_poscodon_codon_i200, gene_names, dataset, hd_file,
 #gives: 
 
 
-
-
-print('Fetching read counts')
-
-total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, 
-                                               min_read_length, snapdisp, 
-                                               filter_for_frame)
-
-print('Creating information tibble')
-
-transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(gene_poscodon_codon_i200, 
-                                                                    gene_names, dataset, hd_file, 
-                                                                    min_read_length, snapdisp, 
-                                                                    filter_for_frame)
-
-print('Filtering for feature of interest')
-
-interesting_feature_positions <- FilterForFeatureOfInterestPositions(gene_poscodon_codon_i200, 
-                                                                     gene_names, 
-                                                                     dataset, 
-                                                                     hd_file, 
-                                                                     min_read_length, 
-                                                                     snapdisp, 
-                                                                     filter_for_frame, 
-                                                                     feature_of_interest)
-
-print('Expanding regions around features of interest')
-
-expand_feature_region <- ExpandFeatureRegion(gene_poscodon_codon_i200, 
-                                             gene_names, dataset, hd_file, 
-                                             min_read_length, colsum_out, 
-                                             gff_df, feature_of_interest,
-                                             expand_width, 
-                                             remove_overhang = TRUE,
-                                             snapdisp, filter_for_frame) 
-print('Normalising data')
-
-normalized_expand_list <- ExpandedRegionNormalisation(gene_poscodon_codon_i200, 
-                                                      gene_names, dataset, hd_file, 
-                                                      min_read_length, colsum_out, 
-                                                      gff_df, feature_of_interest,
-                                                      expand_width, 
-                                                      remove_overhang = TRUE,
-                                                      snapdisp, filter_for_frame)
-print('Calculating average')
-
-overlayed_tibbles <- OverlayedTibble(gene_poscodon_codon_i200, gene_names, dataset,
-                                     hd_file, min_read_length, colsum_out, gff_df,
-                                     feature_of_interest, expand_width,
-                                     remove_overhang = TRUE, snapdisp, filter_for_frame)
-
-print('Creating plot')
-
-plot <- GeneratePlot(gene_poscodon_codon_i200, gene_names, dataset, hd_file,
-                     min_read_length, colsum_out, gff_df, feature_of_interest,
-                     expand_width, remove_overhang = TRUE, snapdisp,
-                     filter_for_frame, size = 12)
-
-print('Done')
-
+# print('Fetching read counts')
+# 
+# total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, dataset, hd_file, 
+#                                                min_read_length, snapdisp, 
+#                                                filter_for_frame)
+# 
+# print('Creating information tibble')
+# 
+# transcript_gene_pos_poscodon_frame <- AddCodonNamesToCodonPosCounts(gene_poscodon_codon_i200, 
+#                                                                     gene_names, dataset, hd_file, 
+#                                                                     min_read_length, snapdisp, 
+#                                                                     filter_for_frame)
+# 
+# print('Filtering for feature of interest')
+# 
+# interesting_feature_positions <- FilterForFeatureOfInterestPositions(gene_poscodon_codon_i200, 
+#                                                                      gene_names, 
+#                                                                      dataset, 
+#                                                                      hd_file, 
+#                                                                      min_read_length, 
+#                                                                      snapdisp, 
+#                                                                      filter_for_frame, 
+#                                                                      feature_of_interest)
+# 
+# print('Expanding regions around features of interest')
+# 
+# expand_feature_region <- ExpandFeatureRegion(gene_poscodon_codon_i200, 
+#                                              gene_names, dataset, hd_file, 
+#                                              min_read_length, colsum_out, 
+#                                              gff_df, feature_of_interest,
+#                                              expand_width, 
+#                                              remove_overhang = TRUE,
+#                                              snapdisp, filter_for_frame) 
+# print('Normalising data')
+# 
+# normalized_expand_list <- ExpandedRegionNormalisation(gene_poscodon_codon_i200, 
+#                                                       gene_names, dataset, hd_file, 
+#                                                       min_read_length, colsum_out, 
+#                                                       gff_df, feature_of_interest,
+#                                                       expand_width, 
+#                                                       remove_overhang = TRUE,
+#                                                       snapdisp, filter_for_frame)
+# print('Calculating average')
+# 
+# overlayed_tibbles <- OverlayedTibble(gene_poscodon_codon_i200, gene_names, dataset,
+#                                      hd_file, min_read_length, colsum_out, gff_df,
+#                                      feature_of_interest, expand_width,
+#                                      remove_overhang = TRUE, snapdisp, filter_for_frame)
+# 
+# print('Creating plot')
+# 
+# plot <- GeneratePlot(gene_poscodon_codon_i200, gene_names, dataset, hd_file,
+#                      min_read_length, colsum_out, gff_df, feature_of_interest,
+#                      expand_width, remove_overhang = TRUE, snapdisp,
+#                      filter_for_frame, size = 12)
+# 
+# print('Done')
+# 
 
 
 
