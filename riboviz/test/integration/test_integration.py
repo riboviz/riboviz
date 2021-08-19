@@ -106,7 +106,7 @@ import os
 import pytest
 import pysam
 from riboviz import bedgraph
-from riboviz import count_reads
+from riboviz import count_reads as count_reads_module
 from riboviz import environment
 from riboviz import fastq
 from riboviz import h5
@@ -155,8 +155,7 @@ def scratch_directory(tmpdir):
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("index", list(range(1, test.NUM_INDICES)))
-def test_hisat2_build_index(expected_fixture, index_dir, index_prefix,
-                            index):
+def test_hisat2_build_index(expected_fixture, index_dir, index_prefix, index):
     """
     Test ``hisat2-build`` index file sizes for equality. See
     :py:func:`riboviz.utils.equal_file_sizes`.
@@ -514,8 +513,8 @@ def test_umitools_pre_dedup_group_tsv(
     If UMI grouping was not enabled in the configuration that
     produced the data then this test is skipped.
 
-    :param dedup_umi: Was UMI deduplication configured?
-    :type dedup_umis: bool
+    :param group_umis: Was UMI grouping configured?
+    :type group_umis: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
     :param tmp_dir: Temporary directory, from configuration file
@@ -546,8 +545,8 @@ def test_umitools_post_dedup_group_tsv(group_umis, tmp_dir, sample):
     If UMI grouping was not enabled in the configuration that
     produced the data then this test is skipped.
 
-    :param dedup_umi: Was UMI deduplication configured?
-    :type dedup_umis: bool
+    :param group_umis: Was UMI grouping configured?
+    :type group_umis: bool
     :param tmp_dir: Temporary directory, from configuration file
     :type tmp_dir: str or unicode
     :param sample: sample name
@@ -676,7 +675,7 @@ def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
     :type output_pdfs: bool
     """
     if not output_pdfs:
-	    pytest.skip('Skipped testing for pdfs as pdfs not generated')
+        pytest.skip('Skipped testing for pdfs as pdfs not generated')
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
     expected_file = os.path.join(expected_fixture, output_dir_name,
                                  sample, file_name)
@@ -736,18 +735,22 @@ def test_collate_tpms_tsv(expected_fixture, output_dir):
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_read_counts_tsv(expected_fixture, output_dir):
+def test_read_counts_tsv(count_reads, expected_fixture, output_dir):
     """
     Test :py:mod:`riboviz.tools.count_reads` TSV files for
     equality. See :py:func:`riboviz.count_reads.equal_read_counts`.
 
+    :param count_reads: Was count reading configured?
+    :type count_reads: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
     :param output_dir: Output directory, from configuration file
     :type output_dir: str or unicode
     """
+    if not count_reads:
+        pytest.skip('Skipped test as read counts were not requested')
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
-    count_reads.equal_read_counts(
+    count_reads_module.equal_read_counts(
         os.path.join(expected_fixture, output_dir_name,
                      workflow_files.READ_COUNTS_FILE),
         os.path.join(output_dir, workflow_files.READ_COUNTS_FILE))
