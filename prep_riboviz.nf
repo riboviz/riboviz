@@ -1202,9 +1202,9 @@ process generateStatsFigs {
         tuple val(sample_id), file("3ntframe_bygene_filtered.tsv") \
             optional (! is_asite_disp_length_file) \
             into nt3frame_bygene_filtered_tsv
-        tuple val(sample_id), file("3ntframe_propbygene.pdf") \
+        tuple val(sample_id), file("frame_proportions_per_ORF.pdf") \
             optional (! (is_asite_disp_length_file && params.output_pdfs)) \
-            into nt3frame_propbygene_pdf
+            into frame_proportions_per_orf_pdf
     shell:
         t_rna_flag = is_t_rna_and_codon_positions_file \
             ? "--t-rna-file=${t_rna_tsv}" : ''

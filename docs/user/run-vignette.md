@@ -205,7 +205,7 @@ Outputs in `vignette/output`:
 ```
 WT3AT/
   3ntframe_bygene.tsv
-  3ntframe_propbygene.pdf
+  frame_proportions_per_ORF.pdf
   metagene_start_stop_read_counts.pdf
   metagene_start_stop_read_counts.tsv
   WT3AT.bam
@@ -228,7 +228,7 @@ WT3AT/
   tpms.tsv
 WTnone/
   3ntframe_bygene.tsv
-  3ntframe_propbygene.pdf
+  frame_proportions_per_ORF.pdf
   metagene_start_stop_read_counts.pdf
   metagene_start_stop_read_counts.tsv
   WTnone.bam

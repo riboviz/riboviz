@@ -40,7 +40,7 @@ Descriptions of specific files can be located quickly using the following links:
 * [metagene_start_ribogrid_by_length.pdf](#metagene_start_ribogrid_by_lengthpdf)
 * [3ntframe_bygene.tsv](#3ntframe_bygenetsv)
 * [3ntframe_bygene_filtered.tsv](#3ntframe_bygene_filteredtsv)
-* [3ntframe_propbygene.pdf](#3ntframe_propbygenepdf)
+* [frame_proportions_per_ORF.pdf](#frame_proportions_per_ORFpdf)
 
 After a riboviz run, many output files are produced within the output directory.
 The output directory is specified by the parameter `dir_out` in `config.yaml`.
@@ -388,11 +388,11 @@ YAL058W	43	4	31	3.99564191533441e-08	0.175807992651532	4.21595642555769e-06
 
 Only output if `--asite-disp-length-file` was defined.
 
-## `3ntframe_propbygene.pdf` 
+## `frame_proportions_per_ORF.pdf` 
 
 A box plot of the proportion of reads mapping to each nucleotide of a codon for each ORF, with the first codon being denoted as Frame 0, the second being Frame 1 and the 3rd being Frame 2. It is expected that the majority of reads will be mapping to the first nucleotide, Frame 0, so this box will be higher than the others. 
 
-Example 3ntframe_propbygene:
+Example 3ntframe_propbygene.pdf:
 
 <img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/3ntframe_propbygene.jpg" alt="3ntframe_propbygene plot" width="500"/>
 

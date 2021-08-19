@@ -446,7 +446,7 @@ PlotGeneReadFrames <- function(gene_read_frame_data_filtered){
 SaveGeneReadFrames <- function(gene_read_frame_plot){
   # save read lengths plot and file
   ggsave(gene_read_frame_plot,
-         filename = file.path(output_dir, paste0(output_prefix, "3ntframe_propbygene.pdf")),
+         filename = file.path(output_dir, paste0(output_prefix, "frame_proportions_per_ORF.pdf")),
          width = 3, height = 3
   )
   #return() # no return as writing-out

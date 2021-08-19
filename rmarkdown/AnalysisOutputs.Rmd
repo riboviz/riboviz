@@ -37,7 +37,7 @@ suppressMessages(library(tidyverse))
 # get contents of config yaml file to check for missing conditional files
 yaml <- yaml::read_yaml(params$yamlfile)
 
-# 3ntframe_propbygene.pdf plot: read frame (conditional on `asite_disp_length_file`) 
+# frame_proportions_per_ORF.pdf plot: read frame (conditional on `asite_disp_length_file`) 
 if (is.null(yaml$asite_disp_length_file)){
   readframe_plot <- NA
 } else {
@@ -152,7 +152,7 @@ metagene_normalized_profile_start_stop_data <- read_tsv(
 
 ### Load Data for conditional plots:
 
-# 3ntframe_propbygene.pdf plot: read frame (conditional on `asite_disp_length_file`) 
+# frame_proportions_per_ORF.pdf plot: read frame (conditional on `asite_disp_length_file`) 
 if (!is.na(readframe_plot)){
   gene_read_frame_data_filtered <- read_tsv(
     file = params$gene_read_frames_filtered_data_file, 

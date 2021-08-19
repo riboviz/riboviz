@@ -155,7 +155,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `metagene_start_barplot_by_length.pdf`
 * `metagene_start_ribogrid_by_length.pdf`
 * `3ntframe_bygene.tsv`: only output if `--asite-disp-length-file` was defined.
-* `3ntframe_propbygene.pdf`: only output if `--asite-disp-length-file` was defined.
+* `frame_proportions_per_ORF.pdf`: only output if `--asite-disp-length-file` was defined.
 * `<SAMPLE_ID>_output_report.html`: only output if `run_static_html: TRUE`.
 
 In addition, the following files are also put into the output directory:

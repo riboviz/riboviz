@@ -658,7 +658,7 @@ def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
                           workflow_r.READ_LENGTHS_PDF,
                           workflow_r.METAGENE_START_BARPLOT_BY_LENGTH_PDF,
                           workflow_r.METAGENE_START_RIBOGRID_BY_LENGTH_PDF,
-                          workflow_r.THREE_NT_FRAME_PROP_BY_GENE_PDF])
+                          workflow_r.FRAME_PROPORTIONS_PER_ORF_PDF])
 def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
                                  file_name, output_pdfs):
     """
