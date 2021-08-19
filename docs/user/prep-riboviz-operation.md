@@ -152,7 +152,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `normalized_density_APEsites_per_codon.tsv`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
 * `normalized_density_APEsites_per_codon.pdf`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
 * `normalized_density_APEsites_per_codon_long.tsv` only output if `--t-rna-file` and `--codon-positions-file` were defined.
-* `startcodon_ribogridbar.pdf`
+* `metagene_start_barplot_by_length.pdf`
 * `startcodon_ribogrid.pdf`
 * `3ntframe_bygene.tsv`: only output if `--asite-disp-length-file` was defined.
 * `3ntframe_propbygene.pdf`: only output if `--asite-disp-length-file` was defined.

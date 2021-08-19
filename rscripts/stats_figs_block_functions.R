@@ -140,7 +140,7 @@ PlotStartCodonRiboGridBar <- function(gene_poslen_counts_5start_df){
 SaveStartCodonRiboGridBar <- function(start_codon_ribogrid_bar_plot){
   start_codon_ribogrid_bar_plot %>%
     ggsave(
-      filename = file.path(output_dir, paste0(output_prefix, "startcodon_ribogridbar.pdf")),
+      filename = file.path(output_dir, paste0(output_prefix, "metagene_start_barplot_by_length.pdf")),
       width = 6, height = 5
     )
   #return() # no return as writing-out

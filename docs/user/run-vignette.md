@@ -223,7 +223,7 @@ WT3AT/
   metagene_normalized_profile_start_stop.tsv
   read_lengths.pdf
   read_lengths.tsv
-  startcodon_ribogridbar.pdf
+  metagene_start_barplot_by_length.pdf
   startcodon_ribogrid.pdf
   tpms.tsv
 WTnone/
@@ -246,7 +246,7 @@ WTnone/
   metagene_normalized_profile_start_stop.tsv
   read_lengths.pdf
   read_lengths.tsv
-  startcodon_ribogridbar.pdf
+  metagene_start_barplot_by_length.pdf
   startcodon_ribogrid.pdf
   tpms.tsv
 read_counts_per_file_tsv

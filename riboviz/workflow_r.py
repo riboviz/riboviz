@@ -34,7 +34,7 @@ NORMALIZED_DENSITY_APESITES_PER_CODON_TSV = "normalized_density_APEsites_per_cod
 """ ``generate_stats_figs.R`` output file. """
 NORMALIZED_DENSITY_APESITES_PER_CODON_PDF = "normalized_density_APEsites_per_codon.pdf"
 """ ``generate_stats_figs.R`` output file. """
-START_CODON_RIBOGRID_BAR_PDF = "startcodon_ribogridbar.pdf"
+METAGENE_START_BARPLOT_BY_LENGTH_PDF = "metagene_start_barplot_by_length.pdf"
 """ ``generate_stats_figs.R`` output file. """
 START_CODON_RIBOGRID_PDF = "startcodon_ribogrid.pdf"
 """ ``generate_stats_figs.R`` output file. """

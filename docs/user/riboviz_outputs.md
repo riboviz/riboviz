@@ -36,7 +36,7 @@ Descriptions of specific files can be located quickly using the following links:
 * [normalized_density_APEsites_per_codon_long.tsv](#normalized_density_APEsites_per_codon_longtsv)
 * [normalized_density_APEsites_per_codon.pdf](#normalized_density_APEsites_per_codonpdf)
 * [gene_position_length_counts_5start.tsv](#gene_position_length_counts_5starttsv)
-* [startcodon_ribogridbar.pdf](#startcodon_ribogridbarpdf)
+* [metagene_start_barplot_by_length.pdf](#metagene_start_barplot_by_lengthpdf)
 * [startcodon_ribogrid.pdf](#startcodon_ribogridpdf)
 * [3ntframe_bygene.tsv](#3ntframe_bygenetsv)
 * [3ntframe_bygene_filtered.tsv](#3ntframe_bygene_filteredtsv)
@@ -348,11 +348,11 @@ ReadLen	Pos	Counts
 
 ```
 
-## `startcodon_ribogridbar.pdf`
+## `metagene_start_barplot_by_length.pdf`
 
 A meta-feature bar chart showing the number of reads occurring at positions around the start codons of genes, faceted by read length. As the majority of reads will be 28-31nt in length, only bar charts for lengths 26-32nt are shown. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the `3nt_periodicity.tsv` file. Note: the Y axis scale will vary for each read length. 
 
-Example startcodon_ribogridbar:
+Example metagene_start_barplot_by_length.pdf:
 
 <img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/startcodon_ribogridbar.jpg" alt="startcodon_ribogridbar plot" width="500"/>
 

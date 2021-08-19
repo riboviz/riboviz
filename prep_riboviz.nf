@@ -1179,8 +1179,8 @@ process generateStatsFigs {
             optional (! params.output_pdfs) into read_lengths_pdf
         tuple val(sample_id), file("read_lengths.tsv") \
             into read_lengths_tsv
-        tuple val(sample_id), file("startcodon_ribogridbar.pdf") \
-            optional (! params.output_pdfs) into start_codon_ribogridbar_pdf
+        tuple val(sample_id), file("metagene_start_barplot_by_length.pdf") \
+            optional (! params.output_pdfs) into metagene_start_barplot_by_length_pdf
         tuple val(sample_id), file("startcodon_ribogrid.pdf") \
             optional (! params.output_pdfs) into start_codon_ribogrid_pdf
         tuple val(sample_id), file("normalized_density_APEsites_per_codon.pdf") \
