@@ -149,8 +149,9 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `ORF_TPMs_vs_features.tsv`: only output if `--features-file` was defined.
 * `ORF_TPMs_vs_features.pdf`: only output if `--features-file` was defined.
 * `tpms.tsv`
-* `codon_ribodens.tsv`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
-* `codon_ribodens.pdf`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
+* `normalized_density_APEsites_per_codon.tsv`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
+* `normalized_density_APEsites_per_codon.pdf`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
+* `normalized_density_APEsites_per_codon_long.tsv` only output if `--t-rna-file` and `--codon-positions-file` were defined.
 * `startcodon_ribogridbar.pdf`
 * `startcodon_ribogrid.pdf`
 * `3ntframe_bygene.tsv`: only output if `--asite-disp-length-file` was defined.

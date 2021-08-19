@@ -32,9 +32,9 @@ Descriptions of specific files can be located quickly using the following links:
 * [ORF_TPMs_vs_features.tsv](#orf_tpms_vs_featurestsv)
 * [ORF_TPMs_vs_features.pdf](#orf_tpms_vs_featurespdf)
 * [tpms.tsv](#tpmstsv)
-* [codon_ribodens.tsv](#codon_ribodenstsv)
-* [codon_ribodens_gathered.tsv](#codon_ribodens_gatheredtsv)
-* [codon_ribodens.pdf](#codon_ribodenspdf)
+* [normalized_density_APEsites_per_codon.tsv](#normalized_density_APEsites_per_codontsv)
+* [normalized_density_APEsites_per_codon_long.tsv](#normalized_density_APEsites_per_codon_longtsv)
+* [normalized_density_APEsites_per_codon.pdf](#normalized_density_APEsites_per_codonpdf)
 * [gene_position_length_counts_5start.tsv](#gene_position_length_counts_5starttsv)
 * [startcodon_ribogridbar.pdf](#startcodon_ribogridbarpdf)
 * [startcodon_ribogrid.pdf](#startcodon_ribogridpdf)
@@ -268,7 +268,7 @@ Q0070	20	0.0103092783505155	0.66647646133505
 
 <SAMPLE_ID>_tmps
 
-## `codon_ribodens.tsv` 
+## `normalized_density_APEsites_per_codon.tsv` 
 
 A tsv file showing the correlatation of different codons to features based on a provided tRNA file, which gives the Amino acids, the tRNA estimates, the tAI (tRNA Adaptation Index), Microarray values, and RNA.seq values for each codon. These are used to calculate mean ribosome-densities at the A/P/E sites for each codon.
 
@@ -289,9 +289,9 @@ Only output if `--t-rna-file` and `--codon-positions-file` were defined.
 
 APE_codondens, APE_feature_codonden, APE_codon_den
 
-## `codon_ribodens_gathered.tsv`
+## `normalized_density_APEsites_per_codon_long.tsv`
 
-A tsv file showing the correlatation of different codons to features based on a provided tRNA file, which gives the Amino acids, the tRNA type (tRNA, tAI, Microarray, and RNA.seq), the tRNA values, the site in the ribosome and the ribodensity for each codon. It is produced by reformatting the codon_ribodens.tsv file. 
+A tsv file showing the correlatation of different codons to features based on a provided tRNA file, which gives the Amino acids, the tRNA type (tRNA, tAI, Microarray, and RNA.seq), the tRNA values, the site in the ribosome and the ribodensity for each codon. It is produced by reformatting the normalized_density_APEsites_per_codon.tsv file. 
 
 ```
 AA	Codon	tRNA_type	tRNA_value	Site	Ribodens
@@ -316,11 +316,11 @@ Only output if `--t-rna-file` and `--codon-positions-file` were defined.
 
 APE_codondens_gathered, APE_feature_codonden_gathered, APE_codon_den_gathered
 
-## `codon_ribodens.pdf` 
+## `normalized_density_APEsites_per_codon.pdf` 
 
 This plot shows a range of features and relates them to ribosome densitiy on the A, P and E sites. 4 features are shown; Microarry, RNA.seq, tAI and tRNA. These are taken from the `--t-rna-file` if provided. Each codon codon has a different value for each of these features, described generally here as a tRNA_value. These tRNA_values are plotted against the ribodensity at each site of the ribosome, showing any relationships or trends.
 
-Example codon_ribodens plot:
+Example normalized_density_apesites_per_codon plot:
 
 <img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/codon_ribodens.jpg" alt="codon_ribodens plot" width="500"/>
 

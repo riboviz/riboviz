@@ -210,8 +210,9 @@ WT3AT/
   metagene_start_stop_read_counts.tsv
   WT3AT.bam
   WT3AT.bam.bai
-  codon_ribodens.pdf
-  codon_ribodens.tsv
+  normalized_density_APEsites_per_codon.pdf
+  normalized_density_APEsites_per_codon.tsv
+  normalized_density_APEsites_per_codon_long.tsv
   ORF_TPMs_vs_features.pdf
   ORF_TPMs_vs_features.tsv
   WT3AT.h5
@@ -232,8 +233,9 @@ WTnone/
   metagene_start_stop_read_counts.tsv
   WTnone.bam
   WTnone.bam.bai
-  codon_ribodens.pdf
-  codon_ribodens.tsv
+  normalized_density_APEsites_per_codon.pdf
+  normalized_density_APEsites_per_codon.tsv
+  normalized_density_APEsites_per_codon_long.tsv
   ORF_TPMs_vs_features.pdf
   ORF_TPMs_vs_features.tsv
   WTnone.h5

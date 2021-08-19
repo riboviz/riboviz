@@ -16,7 +16,7 @@ params:
   read_length_data_file: NA
   metagene_normalized_profile_start_stop_data_file: NA
   gene_read_frames_filtered_data_file: NA
-  codon_ribodens_gathered_file: NA
+  normalized_density_apesites_per_codon_long_file: NA
   ORF_TPMs_vs_features_file: NA
 ---
 
@@ -51,7 +51,7 @@ if (is.null(yaml$features_file)){
   features_plot <- "present"
 }
 
-# codon_ribodens.pdf plot: (conditional on `t_rna_file` and `codon_positions_file`)
+# normalized_density_APEsites_per_codon.pdf plot: (conditional on `t_rna_file` and `codon_positions_file`)
 # check trna file config yaml parameter for file presence/absence
 if (is.null(yaml$t_rna_file)){
   trna_file <- NA
@@ -66,7 +66,7 @@ if (is.null(yaml$codon_positions_file)){
 }
 
 # use result of absence/presence yaml-config-checking for both files 
-# to determine whether to plot codon_ribodens:
+# to determine whether to plot normalized_density_apesites_per_codons:
 if (is.na(trna_file) & is.na(codonpos_file)){
   codonspecificribosomedensitytrnacorrelation_plot <- NA
 } else {
@@ -169,11 +169,11 @@ if(!is.na(features_plot)){
     col_names = TRUE)
 }
 
-# codon_ribodens.pdf plot: (conditional on `t_rna_file` and `codon_positions_file`)
+# normalized_density_APEsites_per_codon.pdf plot: (conditional on `t_rna_file` and `codon_positions_file`)
 if(!is.na(codonspecificribosomedensitytrnacorrelation_plot)){
   # load data 
   cod_dens_tRNA_wide <- read_tsv(
-    file = params$codon_ribodens_gathered_file, 
+    file = params$normalized_density_apesites_per_codon_long_file, 
     skip = 4, # this avoids the provenance info
     col_names = TRUE)
 }

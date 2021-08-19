@@ -890,7 +890,7 @@ PlotCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_wide) 
 SaveCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_plot){
 
   # save plot
-  ggsave(cod_dens_tRNA_plot, filename = file.path(output_dir, paste0(output_prefix, "codon_ribodens.pdf")))
+  ggsave(cod_dens_tRNA_plot, filename = file.path(output_dir, paste0(output_prefix, "normalized_density_APEsites_per_codon.pdf")))
 
   # return() # NO RETURN as writing out
 
@@ -898,7 +898,7 @@ SaveCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_plot){
 
 WriteGatheredCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_wide){
   # Save file
-  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "codon_ribodens_gathered.tsv"))
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "normalized_density_APEsites_per_codon_long.tsv"))
   write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
     cod_dens_tRNA_wide,
@@ -915,7 +915,7 @@ WriteGatheredCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tR
 
 WriteCodonSpecificRibosomeDensityTRNACorrelation <- function(cod_dens_tRNA_data){
   # Save file
-  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "codon_ribodens.tsv"))
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "normalized_density_APEsites_per_codon.tsv"))
   write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
     cod_dens_tRNA_data,

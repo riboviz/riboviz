@@ -614,7 +614,7 @@ def test_bam_to_h5_h5(expected_fixture, output_dir, sample):
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name",
                          [workflow_r.METAGENE_START_STOP_READ_COUNTS_TSV,
-                          workflow_r.CODON_RIBODENS_TSV,
+                          workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_TSV,
                           workflow_r.POS_SP_NT_FREQ_TSV,
                           workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_TSV,
                           workflow_r.READ_LENGTHS_TSV,
@@ -622,7 +622,7 @@ def test_bam_to_h5_h5(expected_fixture, output_dir, sample):
                           workflow_r.THREE_NT_FRAME_BY_GENE_FILTERED_TSV,
                           workflow_r.ORF_TPMS_VS_FEATURES_TSV,
                           workflow_r.GENE_POSITION_LENGTH_COUNTS_TSV,
-                          workflow_r.CODON_RIBODENS_GATHERED_TSV,
+                          workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_LONG_TSV,
                           workflow_r.TPMS_TSV])
 def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
                                  file_name):
@@ -652,7 +652,7 @@ def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name",
                          [workflow_r.METAGENE_START_STOP_READ_COUNTS_PDF,
-                          workflow_r.CODON_RIBODENS_PDF,
+                          workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_PDF,
                           workflow_r.ORF_TPMS_VS_FEATURES_PDF,
                           workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_PDF,
                           workflow_r.READ_LENGTHS_PDF,

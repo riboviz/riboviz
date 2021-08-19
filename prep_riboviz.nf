@@ -1183,15 +1183,15 @@ process generateStatsFigs {
             optional (! params.output_pdfs) into start_codon_ribogridbar_pdf
         tuple val(sample_id), file("startcodon_ribogrid.pdf") \
             optional (! params.output_pdfs) into start_codon_ribogrid_pdf
-        tuple val(sample_id), file("codon_ribodens.pdf") \
+        tuple val(sample_id), file("normalized_density_APEsites_per_codon.pdf") \
             optional (! (is_t_rna_and_codon_positions_file && params.output_pdfs)) \
-            into codon_ribodens_pdf
-        tuple val(sample_id), file("codon_ribodens.tsv") \
+            into normalized_density_apesites_per_codon_pdf
+        tuple val(sample_id), file("normalized_density_APEsites_per_codon.tsv") \
             optional (! is_t_rna_and_codon_positions_file) \
-            into codon_ribodens_tsv
-        tuple val(sample_id), file("codon_ribodens_gathered.tsv") \
+            into normalized_density_apesites_per_codon_tsv
+        tuple val(sample_id), file("normalized_density_APEsites_per_codon_long.tsv") \
             optional (! is_t_rna_and_codon_positions_file) \
-            into codon_ribodens_gathered_tsv
+            into normalized_density_apesites_per_codon_long_tsv
         tuple val(sample_id), file("ORF_TPMs_vs_features.pdf") \
             optional (! (is_features_file && params.output_pdfs)) into ORF_TPMs_vs_features_pdf
         tuple val(sample_id), file("ORF_TPMs_vs_features.tsv") \
@@ -1248,7 +1248,7 @@ generate_stats_figs_static_html =
     .join(metagene_normalized_profile_start_stop_tsv, remainder: true)
     .join(nt3frame_bygene_filtered_tsv, remainder: true)
     .join(ORF_TPMs_vs_features_tsv, remainder: true)
-    .join(codon_ribodens_gathered_tsv, remainder: true)
+    .join(normalized_density_apesites_per_codon_long_tsv, remainder: true)
 
 finished_sample_id
     .ifEmpty { exit 1, "No sample was processed successfully" }
@@ -1370,7 +1370,7 @@ process staticHTML {
         file(sample_metagene_normalized_profile_start_stop_tsv), \
         file(sample_nt3frame_bygene_filtered_tsv), \
         file(sample_ORF_TPMs_vs_features_tsv), \
-        file(sample_codon_ribodens_gathered_tsv) \
+        file(sample_normalized_density_apesites_per_codon_long_tsv) \
 	from generate_stats_figs_static_html
     output:
       val sample_id into finished_viz_sample_id
@@ -1391,7 +1391,7 @@ process staticHTML {
           script += ", gene_read_frames_filtered_data_file='\$PWD/${sample_nt3frame_bygene_filtered_tsv}'"
       }
       if (is_t_rna_and_codon_positions_file) {
-          script += ", codon_ribodens_gathered_file='\$PWD/${sample_codon_ribodens_gathered_tsv}'"
+          script += ", normalized_density_apesites_per_codon_long_file='\$PWD/${sample_normalized_density_apesites_per_codon_long_tsv}'"
       }
       if (is_features_file) {
           script += ", ORF_TPMs_vs_features_file='\$PWD/${sample_ORF_TPMs_vs_features_tsv}' "
