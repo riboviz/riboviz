@@ -619,7 +619,7 @@ def test_bam_to_h5_h5(expected_fixture, output_dir, sample):
                           workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_TSV,
                           workflow_r.READ_LENGTHS_TSV,
                           workflow_r.THREE_NT_FRAME_BY_GENE_TSV,
-                          workflow_r.THREE_NT_FRAME_BY_GENE_FILTERED_TSV,
+                          workflow_r.READ_FRAME_PER_ORF_FILTERED_TSV,
                           workflow_r.ORF_TPMS_VS_FEATURES_TSV,
                           workflow_r.GENE_POSITION_LENGTH_COUNTS_TSV,
                           workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_LONG_TSV,

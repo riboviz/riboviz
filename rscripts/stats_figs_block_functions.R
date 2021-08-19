@@ -418,7 +418,7 @@ FilterGeneReadFrames <- function(gene_read_frames_data, count_threshold){
 # TODO
 
 WriteFilteredGeneReadFrames <- function(gene_read_frame_data_filtered){
-  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "3ntframe_bygene_filtered.tsv"))
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "read_frame_per_ORF_filtered.tsv"))
   write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
     gene_read_frame_data_filtered,

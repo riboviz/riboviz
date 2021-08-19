@@ -1199,9 +1199,9 @@ process generateStatsFigs {
         tuple val(sample_id), file("3ntframe_bygene.tsv") \
             optional (! is_asite_disp_length_file) \
             into nt3frame_bygene_tsv
-        tuple val(sample_id), file("3ntframe_bygene_filtered.tsv") \
+        tuple val(sample_id), file("read_frame_per_ORF_filtered.tsv") \
             optional (! is_asite_disp_length_file) \
-            into nt3frame_bygene_filtered_tsv
+            into read_frame_per_orf_filtered_tsv
         tuple val(sample_id), file("frame_proportions_per_ORF.pdf") \
             optional (! (is_asite_disp_length_file && params.output_pdfs)) \
             into frame_proportions_per_orf_pdf
@@ -1246,7 +1246,7 @@ generate_stats_figs_static_html =
     .join(gene_position_length_counts_5start_tsv, remainder: true)
     .join(read_lengths_tsv, remainder: true)
     .join(metagene_normalized_profile_start_stop_tsv, remainder: true)
-    .join(nt3frame_bygene_filtered_tsv, remainder: true)
+    .join(read_frame_per_orf_filtered_tsv, remainder: true)
     .join(ORF_TPMs_vs_features_tsv, remainder: true)
     .join(normalized_density_apesites_per_codon_long_tsv, remainder: true)
 
@@ -1368,7 +1368,7 @@ process staticHTML {
         file(sample_gene_position_length_counts_5start_tsv), \
         file(sample_read_lengths_tsv), \
         file(sample_metagene_normalized_profile_start_stop_tsv), \
-        file(sample_nt3frame_bygene_filtered_tsv), \
+        file(sample_read_frame_per_orf_filtered_tsv), \
         file(sample_ORF_TPMs_vs_features_tsv), \
         file(sample_normalized_density_apesites_per_codon_long_tsv) \
 	from generate_stats_figs_static_html
@@ -1388,7 +1388,7 @@ process staticHTML {
       script += "read_length_data_file='\$PWD/${sample_read_lengths_tsv}', "
       script += "metagene_normalized_profile_start_stop_data_file='\$PWD/${sample_metagene_normalized_profile_start_stop_tsv}' "
       if (is_asite_disp_length_file) {
-          script += ", gene_read_frames_filtered_data_file='\$PWD/${sample_nt3frame_bygene_filtered_tsv}'"
+          script += ", gene_read_frames_filtered_data_file='\$PWD/${sample_read_frame_per_orf_filtered_tsv}'"
       }
       if (is_t_rna_and_codon_positions_file) {
           script += ", normalized_density_apesites_per_codon_long_file='\$PWD/${sample_normalized_density_apesites_per_codon_long_tsv}'"

@@ -39,7 +39,7 @@ Descriptions of specific files can be located quickly using the following links:
 * [metagene_start_barplot_by_length.pdf](#metagene_start_barplot_by_lengthpdf)
 * [metagene_start_ribogrid_by_length.pdf](#metagene_start_ribogrid_by_lengthpdf)
 * [3ntframe_bygene.tsv](#3ntframe_bygenetsv)
-* [3ntframe_bygene_filtered.tsv](#3ntframe_bygene_filteredtsv)
+* [read_frame_per_ORF_filtered.tsv](#read_frame_per_ORF_filteredtsv)
 * [frame_proportions_per_ORF.pdf](#frame_proportions_per_ORFpdf)
 
 After a riboviz run, many output files are produced within the output directory.
@@ -373,7 +373,7 @@ YAL064C-A	0	0	0	1	1	1
 
 Only output if `--asite-disp-length-file` was defined.
 
-## `3ntframe_bygene_filtered.tsv`
+## `read_frame_per_ORF_filtered.tsv`
 
 A tsv file showing the count threshold for each frame and the p value comparing the counts in frame 0 to frames 1, 2 and both 1 and 2 for each gene. It is expected that there will be a significant difference between the frames, with the majority of reads mapping to frame 0. This file is produced by filtering the 3ntframe_bygene.tsv file, keeping only the genes where Ct_fr0 + Ct_fr1 + Ct_fr2 is greater than the count_threshold, which is defined in the config file.
 
