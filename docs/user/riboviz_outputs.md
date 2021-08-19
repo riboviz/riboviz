@@ -37,7 +37,7 @@ Descriptions of specific files can be located quickly using the following links:
 * [normalized_density_APEsites_per_codon.pdf](#normalized_density_APEsites_per_codonpdf)
 * [gene_position_length_counts_5start.tsv](#gene_position_length_counts_5starttsv)
 * [metagene_start_barplot_by_length.pdf](#metagene_start_barplot_by_lengthpdf)
-* [startcodon_ribogrid.pdf](#startcodon_ribogridpdf)
+* [metagene_start_ribogrid_by_length.pdf](#metagene_start_ribogrid_by_lengthpdf)
 * [3ntframe_bygene.tsv](#3ntframe_bygenetsv)
 * [3ntframe_bygene_filtered.tsv](#3ntframe_bygene_filteredtsv)
 * [3ntframe_propbygene.pdf](#3ntframe_propbygenepdf)
@@ -285,9 +285,6 @@ T	ACA	4	0.246373	105862	47598	0.933640392583143	1.007034200634	1.11922337626619
 
 Only output if `--t-rna-file` and `--codon-positions-file` were defined.
 
-*Potential names*
-
-APE_codondens, APE_feature_codonden, APE_codon_den
 
 ## `normalized_density_APEsites_per_codon_long.tsv`
 
@@ -312,9 +309,7 @@ K	AAA	RNA.seq	82386	E	1.02770556029175
 
 Only output if `--t-rna-file` and `--codon-positions-file` were defined.
 
-*Potential names*
 
-APE_codondens_gathered, APE_feature_codonden_gathered, APE_codon_den_gathered
 
 ## `normalized_density_APEsites_per_codon.pdf` 
 
@@ -325,10 +320,6 @@ Example normalized_density_apesites_per_codon plot:
 <img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/codon_ribodens.jpg" alt="codon_ribodens plot" width="500"/>
 
 Only output if `--t-rna-file` and `--codon-positions-file` were defined.
-
-*Potential names*
-
-APE_codondens, APE_feature_codonden, APE_codon_den
 
 
 ## `gene_position_length_counts_5start.tsv`
@@ -356,21 +347,15 @@ Example metagene_start_barplot_by_length.pdf:
 
 <img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/startcodon_ribogridbar.jpg" alt="startcodon_ribogridbar plot" width="500"/>
 
-*Potential names*
 
-startcodon_gridbar, start_gridbar_readlen, readlen_gridbar_start
-
-## `startcodon_ribogrid.pdf`
+## `metagene_start_ribogrid_by_length.pdf`
 
 A meta-feature heatmap showing the number of reads occurring at positions around the start codons of genes with the y axis as read length, and the colour intensity showing read count. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, shown by an intense dark purple, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the `3nt_periodicity.tsv` file. 
 
-Example startcodon_ribogrid:
+Example metagene_start_ribogrid_by_length.pdf:
 
 <img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/startcodon_ribogrid.jpg" alt="startcodon_ribogrid plot" width="500"/>
 
-*Potential names*
-
-startcodon_readlen_heatmap, heatmap_readlen_pos
 
 ## `3ntframe_bygene.tsv` 
 

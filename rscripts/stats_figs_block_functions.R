@@ -117,28 +117,28 @@ WriteGenePositionLengthCounts5Start <- function(gene_poslen_counts_5start_df){
 PlotStartCodonRiboGrid <- function(gene_poslen_counts_5start_df){
   # function to do the ribogrid & ribogridbar plots?
   # ribogrid_5start
-  start_codon_ribogrid_plot <- plot_ribogrid(gene_poslen_counts_5start_df)
-  return(start_codon_ribogrid_plot)
+  metagene_start_ribogrid_by_length_plot <- plot_ribogrid(gene_poslen_counts_5start_df)
+  return(metagene_start_ribogrid_by_length_plot)
 } # end PlotStartCodonRiboGrid() definition
 
-SaveStartCodonRiboGrid <- function(start_codon_ribogrid_plot){
+SaveStartCodonRiboGrid <- function(metagene_start_ribogrid_by_length_plot){
   # function to do the ribogrid & ribogridbar plots?
   # ribogrid_5start
-  start_codon_ribogrid_plot %>%
+  metagene_start_ribogrid_by_length_plot %>%
     ggsave(
-      filename = file.path(output_dir, paste0(output_prefix, "startcodon_ribogrid.pdf")),
+      filename = file.path(output_dir, paste0(output_prefix, "metagene_start_ribogrid_by_length.pdf")),
       width = 6, height = 3
     )
   #return() # no return as writing-out
 } # end SaveStartCodonRiboGrid() definition
 
 PlotStartCodonRiboGridBar <- function(gene_poslen_counts_5start_df){
-  start_codon_ribogrid_bar_plot <- barplot_ribogrid(gene_poslen_counts_5start_df)
-  return(start_codon_ribogrid_bar_plot)
+  metagene_start_ribogrid_by_length_bar_plot <- barplot_ribogrid(gene_poslen_counts_5start_df)
+  return(metagene_start_ribogrid_by_length_bar_plot)
 } # end PlotStartCodonRiboGridBar() definition
 
-SaveStartCodonRiboGridBar <- function(start_codon_ribogrid_bar_plot){
-  start_codon_ribogrid_bar_plot %>%
+SaveStartCodonRiboGridBar <- function(metagene_start_ribogrid_by_length_bar_plot){
+  metagene_start_ribogrid_by_length_bar_plot %>%
     ggsave(
       filename = file.path(output_dir, paste0(output_prefix, "metagene_start_barplot_by_length.pdf")),
       width = 6, height = 5

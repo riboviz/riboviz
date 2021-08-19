@@ -36,7 +36,7 @@ NORMALIZED_DENSITY_APESITES_PER_CODON_PDF = "normalized_density_APEsites_per_cod
 """ ``generate_stats_figs.R`` output file. """
 METAGENE_START_BARPLOT_BY_LENGTH_PDF = "metagene_start_barplot_by_length.pdf"
 """ ``generate_stats_figs.R`` output file. """
-START_CODON_RIBOGRID_PDF = "startcodon_ribogrid.pdf"
+METAGENE_START_RIBOGRID_BY_LENGTH_PDF = "metagene_start_ribogrid_by_length.pdf"
 """ ``generate_stats_figs.R`` output file. """
 THREE_NT_FRAME_BY_GENE_TSV = "3ntframe_bygene.tsv"
 """ ``generate_stats_figs.R`` output file. """

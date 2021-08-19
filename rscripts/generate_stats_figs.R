@@ -192,18 +192,18 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hd_file, gff_df) {
     three_nucleotide_periodicity_plot <- PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
     
     # run PlotStartCodonRiboGrid()
-    start_codon_ribogrid_plot <- PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
+    metagene_start_ribogrid_by_length_plot <- PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
     # creates plot object
     
     # run SaveStartCodonRiboGrid():
-    SaveStartCodonRiboGrid(start_codon_ribogrid_plot)
+    SaveStartCodonRiboGrid(metagene_start_ribogrid_by_length_plot)
     
     # run PlotStartCodonRiboGridBar():
-    start_codon_ribogrid_bar_plot <- PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
+    metagene_start_ribogrid_by_length_bar_plot <- PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
     # creates plot object
     
     # run SaveStartCodonRiboGridBar():
-    SaveStartCodonRiboGridBar(start_codon_ribogrid_bar_plot)
+    SaveStartCodonRiboGridBar(metagene_start_ribogrid_by_length_bar_plot)
     
     # run SavePlotThreeNucleotidePeriodicity():
     SavePlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_plot)

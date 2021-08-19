@@ -224,7 +224,7 @@ WT3AT/
   read_lengths.pdf
   read_lengths.tsv
   metagene_start_barplot_by_length.pdf
-  startcodon_ribogrid.pdf
+  metagene_start_ribogrid_by_length.pdf
   tpms.tsv
 WTnone/
   3ntframe_bygene.tsv
@@ -247,7 +247,7 @@ WTnone/
   read_lengths.pdf
   read_lengths.tsv
   metagene_start_barplot_by_length.pdf
-  startcodon_ribogrid.pdf
+  metagene_start_ribogrid_by_length.pdf
   tpms.tsv
 read_counts_per_file_tsv
 TPMs_all_CDS_all_samples.tsv
