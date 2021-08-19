@@ -858,7 +858,7 @@ if(length(feature_of_interest) == 1){
   
   # Save feature_rel_use as a tsv file 
   
-  write.table(feature_rel_use, file = paste0("Feature_Relativ_use",dataset,".tsv"), sep = "\t", row.names = F, quote = F)
+  write.table(feature_rel_use, file = paste0("Feature_Relative_use_",dataset,".tsv"), sep = "\t", row.names = F, quote = F)
   
   # Users can then look at feature_rel_use and see which features they want to investigate further, and can use as a single feature_of_interest input to produce a graph 
  
