@@ -141,6 +141,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `<SAMPLE_ID>.h5`: length-sensitive alignments in compressed h5 format.
 * `metagene_start_stop_read_counts.tsv`
 * `metagene_start_stop_read_counts.pdf`
+* `gene_position_length_counts_5start.tsv`
 * `read_counts_by_length.tsv`
 * `read_counts_by_length.pdf`
 * `pos_sp_nt_freq.tsv`
