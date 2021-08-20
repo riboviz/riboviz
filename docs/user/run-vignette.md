@@ -204,8 +204,8 @@ Outputs in `vignette/output`:
 
 ```
 WT3AT/
-  3ntframe_bygene.tsv
-  3ntframe_bygene_filtered.tsv
+  read_frame_per_ORF.tsv
+  read_frame_per_ORF_filtered.tsv
   frame_proportions_per_ORF.pdf
   metagene_start_stop_read_counts.pdf
   metagene_start_stop_read_counts.tsv
@@ -228,8 +228,8 @@ WT3AT/
   metagene_start_ribogrid_by_length.pdf
   tpms.tsv
 WTnone/
-  3ntframe_bygene.tsv
-  3ntframe_bygene_filtered.tsv
+  read_frame_per_ORF.tsv
+  read_frame_per_ORF_filtered.tsv
   frame_proportions_per_ORF.pdf
   metagene_start_stop_read_counts.pdf
   metagene_start_stop_read_counts.tsv

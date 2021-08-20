@@ -1196,9 +1196,9 @@ process generateStatsFigs {
             optional (! (is_features_file && params.output_pdfs)) into ORF_TPMs_vs_features_pdf
         tuple val(sample_id), file("ORF_TPMs_vs_features.tsv") \
             optional (! is_features_file) into ORF_TPMs_vs_features_tsv
-        tuple val(sample_id), file("3ntframe_bygene.tsv") \
+        tuple val(sample_id), file("read_frame_per_ORF.tsv") \
             optional (! is_asite_disp_length_file) \
-            into nt3frame_bygene_tsv
+            into read_frame_per_orf_tsv
         tuple val(sample_id), file("read_frame_per_ORF_filtered.tsv") \
             optional (! is_asite_disp_length_file) \
             into read_frame_per_orf_filtered_tsv

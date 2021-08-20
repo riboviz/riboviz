@@ -154,8 +154,8 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `normalized_density_APEsites_per_codon_long.tsv` only output if `--t-rna-file` and `--codon-positions-file` were defined.
 * `metagene_start_barplot_by_length.pdf`
 * `metagene_start_ribogrid_by_length.pdf`
-* `3ntframe_bygene.tsv`: only output if `--asite-disp-length-file` was defined.
-* `3ntframe_bygene_filtered.tsv`: only output if `--asite-disp-length-file` was defined.
+* `read_frame_per_ORF.tsv`: only output if `--asite-disp-length-file` was defined.
+* `read_frame_per_ORF_filtered.tsv`: only output if `--asite-disp-length-file` was defined.
 * `frame_proportions_per_ORF.pdf`: only output if `--asite-disp-length-file` was defined.
 * `<SAMPLE_ID>_output_report.html`: only output if `run_static_html: TRUE`.
 
