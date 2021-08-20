@@ -175,7 +175,7 @@ A bar chart showing the lengths of the reads detected in the sample. It is expec
 
 Example read_counts_by_length plot:
 
-<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/read_counts_by_length.jpg" alt="poor quality read_counts_by_length plot" width="500"/>
+<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/read_lengths.jpg" alt="poor quality read_counts_by_length plot" width="500"/>
 
 
 ## `nt_freq_per_read_position.tsv`
