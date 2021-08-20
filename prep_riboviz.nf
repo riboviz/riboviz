@@ -1168,9 +1168,9 @@ process generateStatsFigs {
             into metagene_start_stop_read_counts_tsv
         tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
             into gene_position_length_counts_5start_tsv
-        tuple val(sample_id), file("pos_sp_nt_freq.tsv") \
+        tuple val(sample_id), file("nt_freq_per_read_position.tsv") \
             optional (! params.do_pos_sp_nt_freq) \
-            into pos_sp_nt_freq_tsv
+            into nt_freq_per_read_position_tsv
         tuple val(sample_id), file("metagene_normalized_profile_start_stop.pdf") \
             optional (! params.output_pdfs) into metagene_normalized_profile_start_stop_pdf
         tuple val(sample_id), file("metagene_normalized_profile_start_stop.tsv") \

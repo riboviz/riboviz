@@ -144,7 +144,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `gene_position_length_counts_5start.tsv`
 * `read_counts_by_length.tsv`
 * `read_counts_by_length.pdf`
-* `pos_sp_nt_freq.tsv`
+* `nt_freq_per_read_position.tsv`
 * `metagene_normalized_profile_start_stop.pdf`
 * `metagene_normalized_profile_start_stop.tsv`
 * `ORF_TPMs_vs_features.tsv`: only output if `--features-file` was defined.

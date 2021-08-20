@@ -363,7 +363,7 @@ CalculateBiasesInNucleotideComposition <- function(gene_names, dataset, hd_file,
 ## WRITE DATA Biases In Nucleotide Composition Along Mapped Read Lengths
 WriteBiasesInNucleotideComposition <- function(all_out){
   # save file
-  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "pos_sp_nt_freq.tsv"))
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "nt_freq_per_read_position.tsv"))
   write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(all_out, file = tsv_file_path, append = T, sep = "\t", row = F, col = T, quote = F)
 } # end of function definition: WriteBiasesInNucleotideComposition()

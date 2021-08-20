@@ -220,7 +220,7 @@ WT3AT/
   WT3AT.h5
   minus.bedgraph
   plus.bedgraph
-  pos_sp_nt_freq.tsv
+  nt_freq_per_read_position.tsv
   metagene_normalized_profile_start_stop.pdf
   metagene_normalized_profile_start_stop.tsv
   read_counts_by_length.pdf
@@ -245,7 +245,7 @@ WTnone/
   WTnone.h5
   minus.bedgraph
   plus.bedgraph
-  pos_sp_nt_freq.tsv
+  nt_freq_per_read_position.tsv
   metagene_normalized_profile_start_stop.pdf
   metagene_normalized_profile_start_stop.tsv
   read_counts_by_length.pdf

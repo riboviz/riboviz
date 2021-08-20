@@ -615,7 +615,7 @@ def test_bam_to_h5_h5(expected_fixture, output_dir, sample):
 @pytest.mark.parametrize("file_name",
                          [workflow_r.METAGENE_START_STOP_READ_COUNTS_TSV,
                           workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_TSV,
-                          workflow_r.POS_SP_NT_FREQ_TSV,
+                          workflow_r.NT_FREQ_PER_READ_POSITION_TSV,
                           workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_TSV,
                           workflow_r.READ_COUNTS_BY_LENGTH_TSV,
                           workflow_r.READ_FRAME_PER_ORF_TSV,
