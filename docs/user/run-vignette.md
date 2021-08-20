@@ -222,8 +222,8 @@ WT3AT/
   pos_sp_nt_freq.tsv
   metagene_normalized_profile_start_stop.pdf
   metagene_normalized_profile_start_stop.tsv
-  read_lengths.pdf
-  read_lengths.tsv
+  read_counts_by_length.pdf
+  read_counts_by_length.tsv
   metagene_start_barplot_by_length.pdf
   metagene_start_ribogrid_by_length.pdf
   tpms.tsv
@@ -246,8 +246,8 @@ WTnone/
   pos_sp_nt_freq.tsv
   metagene_normalized_profile_start_stop.pdf
   metagene_normalized_profile_start_stop.tsv
-  read_lengths.pdf
-  read_lengths.tsv
+  read_counts_by_length.pdf
+  read_counts_by_length.tsv
   metagene_start_barplot_by_length.pdf
   metagene_start_ribogrid_by_length.pdf
   tpms.tsv

@@ -218,7 +218,7 @@ PlotReadLengths <- function(read_length_data){
 # save pdf
 SavePlotReadLengths <- function(read_len_plot) {
   
-  ggsave(read_len_plot, filename = file.path(output_dir, paste0(output_prefix, "read_lengths.pdf")))
+  ggsave(read_len_plot, filename = file.path(output_dir, paste0(output_prefix, "read_counts_by_length.pdf")))
   
   # return() # NO RETURN as writing out
   
@@ -227,7 +227,7 @@ SavePlotReadLengths <- function(read_len_plot) {
 # save read lengths plot and file
 WriteReadLengths <- function(read_length_data){
   
-  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "read_lengths.tsv"))
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "read_counts_by_length.tsv"))
   
   write_provenance_header(path_to_this_script, tsv_file_path)
   
