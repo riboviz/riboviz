@@ -227,7 +227,8 @@ WT3AT/
   read_counts_by_length.tsv
   metagene_start_barplot_by_length.pdf
   metagene_start_ribogrid_by_length.pdf
-  tpms.tsv
+  ORF_TPMs_and_counts.tsv
+  WT3AT_output_report.html
 WTnone/
   read_frame_per_ORF.tsv
   read_frame_per_ORF_filtered.tsv
@@ -252,7 +253,8 @@ WTnone/
   read_counts_by_length.tsv
   metagene_start_barplot_by_length.pdf
   metagene_start_ribogrid_by_length.pdf
-  tpms.tsv
+  ORF_TPMs_and_counts.tsv
+  WTnone_output_report.html
 read_counts_per_file_tsv
 TPMs_all_CDS_all_samples.tsv
 ```

@@ -623,7 +623,7 @@ def test_bam_to_h5_h5(expected_fixture, output_dir, sample):
                           workflow_r.ORF_TPMS_VS_FEATURES_TSV,
                           workflow_r.GENE_POSITION_LENGTH_COUNTS_TSV,
                           workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_LONG_TSV,
-                          workflow_r.TPMS_TSV])
+                          workflow_r.ORF_TPMS_AND_COUNTS_TSV])
 def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
                                  file_name):
     """
@@ -714,7 +714,7 @@ def test_analysis_outputs_html(expected_fixture, output_dir, sample, file_name):
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_collate_tpms_tsv(expected_fixture, output_dir):
+def test_collate_orf_tpms_and_counts_tsv(expected_fixture, output_dir):
     """
     Test ``collate_tpms.R`` TSV files for equality. See
     :py:func:`riboviz.utils.equal_tsv`.

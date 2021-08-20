@@ -28,7 +28,7 @@ METAGENE_NORMALIZED_PROFILE_START_STOP_PDF = "metagene_normalized_profile_start_
 """ ``generate_stats_figs.R`` output file. """
 ORF_TPMS_VS_FEATURES_PDF = "ORF_TPMs_vs_features.pdf"
 """ ``generate_stats_figs.R`` output file. """
-TPMS_TSV = "tpms.tsv"
+ORF_TPMS_AND_COUNTS_TSV = "ORF_TPMs_and_counts.tsv"
 """ ``generate_stats_figs.R`` output file. """
 NORMALIZED_DENSITY_APESITES_PER_CODON_TSV = "normalized_density_APEsites_per_codon.tsv"
 """ ``generate_stats_figs.R`` output file. """

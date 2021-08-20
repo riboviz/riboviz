@@ -1161,7 +1161,7 @@ process generateStatsFigs {
         each file(asite_disp_length_txt) from asite_disp_length_txt
     output:
         val sample_id into finished_sample_id
-        tuple val(sample_id), file("tpms.tsv") into tpms_tsv
+        tuple val(sample_id), file("ORF_TPMs_and_counts.tsv") into orf_tpms_and_counts_tsv
         tuple val(sample_id), file("metagene_start_stop_read_counts.pdf") \
             optional (! params.output_pdfs) into metagene_start_stop_read_counts_pdf
         tuple val(sample_id), file("metagene_start_stop_read_counts.tsv") \
@@ -1261,13 +1261,13 @@ process renameTpms {
     tag "${sample_id}"
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(tpms_tsv) from tpms_tsv
+        tuple val(sample_id), file(orf_tpms_and_counts_tsv) from orf_tpms_and_counts_tsv
     output:
         val(sample_id) into tpms_sample_id
         file "${sample_id}_tpms.tsv" into tpms_sample_tsv
     shell:
         """
-        cp ${tpms_tsv} ${sample_id}_tpms.tsv
+        cp ${orf_tpms_and_counts_tsv} ${sample_id}_tpms.tsv
         """
 }
 
@@ -1276,7 +1276,7 @@ process collateTpms {
     publishDir "${dir_out}", mode: 'copy', overwrite: true
     input:
         val sample_ids from tpms_sample_id.collect()
-        file tpms_tsvs from tpms_sample_tsv.collect()
+        file orf_tpms_and_counts_tsvs from tpms_sample_tsv.collect()
     output:
         file "TPMs_all_CDS_all_samples.tsv" into tpms_all_cds_all_samples_tsv
         val sample_ids into collate_tpms_sample_ids
@@ -1284,7 +1284,7 @@ process collateTpms {
         samples_tsvs = []
         for (i = 0; i < sample_ids.size(); i++) {
             samples_tsvs.add(sample_ids[i])
-            samples_tsvs.add(tpms_tsvs[i])
+            samples_tsvs.add(orf_tpms_and_counts_tsvs[i])
         }
         samples_tsvs = samples_tsvs.join(' ')
         """

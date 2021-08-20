@@ -716,7 +716,7 @@ CalculateGeneTranscriptsPerMillion <- function(gene_names, dataset, hd_file){
 
 WriteGeneTranscriptsPerMillion <-  function(tpms){
   # write out to *_tpms.tsv
-  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "tpms.tsv"))
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "ORF_TPMs_and_counts.tsv"))
   write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
     tpms,
