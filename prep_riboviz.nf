@@ -1370,6 +1370,12 @@ process staticHTML {
       """
 }
 
+if (params.run_static_html) {
+  count_reads_sample_ids = static_html_sample_ids
+} else {
+  count_reads_sample_ids = collate_tpms_sample_ids
+}
+
 process countReads {
     publishDir "${dir_out}", mode: 'copy', overwrite: true
     input:
@@ -1380,7 +1386,7 @@ process countReads {
         val ribosome_fqs_yaml from ribosome_fqs_yaml
         // Force dependency on output of 'staticHTML' so this process
         // is only run when all other processing has completed.
-        val samples_ids from static_html_sample_ids.collect()
+        val samples_ids from count_reads_sample_ids.collect()
     output:
         file "read_counts.tsv" into read_counts_tsv
     when:
