@@ -102,12 +102,24 @@ $ bash .command.sh
 Execution halted
 ```
 
+**Note:** If rerunning a step that invokes a Python command then you need to provide a	`PYTHONPATH` with the path to your `riboviz` directory. For example:
+
+```console
+$ PYTHONPATH=$HOME/riboviz bash .command.sh
+```
+
 Alternatively, the command in `.command.sh` can be rerun directly, which may be desirable if you want to change input or configuration parameters when debugging, without rerunning the workflow via Nextflow. For example:
 
 ```console
 $ Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R \
   --tpms-file=TPMs_collated.tsv \
   WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms
+```
+
+**Note:** If rerunning a step that invokes a Python command then you need to provide a	`PYTHONPATH` with the path to your `riboviz` directory. For example:
+
+```console
+$ PYTHONPATH=$HOME/riboviz python ...
 ```
 
 For R you may want to run the script interactively, as described in the previous session, in which case you can run:

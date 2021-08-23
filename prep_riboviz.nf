@@ -1407,9 +1407,14 @@ process countReads {
         """
 }
 
-finished_viz_sample_id
-    .ifEmpty { exit 1, "No sample was visualised successfully" }
-    .view { "Finished visualising sample: ${it}" }
+// Create handler for finished_viz_sample_id channel, output by
+// staticHTML, only if run_static_html is true i.e. if staticHTML
+// executes.
+if (params.run_static_html) {
+  finished_viz_sample_id
+      .ifEmpty { exit 1, "No sample was visualised successfully" }
+      .view { "Finished visualising sample: ${it}" }
+}
 
 workflow.onComplete {
     println "Workflow finished! (${workflow.success ? 'OK' : 'failed'})"
