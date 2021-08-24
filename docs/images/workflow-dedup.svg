@@ -46,7 +46,7 @@
 </g>
 <g id="clust8" class="cluster">
 <title>cluster_summary</title>
-<polygon fill="none" stroke="#000000" points="1453,-486 1453,-629 1731,-629 1731,-486 1453,-486"/>
+<polygon fill="none" stroke="#000000" points="1453,-486 1453,-629 1829,-629 1829,-486 1453,-486"/>
 <text text-anchor="middle" x="1482.5" y="-617" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">Summary</text>
 </g>
 <!-- input/CDS.fa -->
@@ -69,14 +69,14 @@
 <!-- statsfigs -->
 <g id="node27" class="node">
 <title>statsfigs</title>
-<polygon fill="none" stroke="#000000" points="1156.5,-458 1043.5,-458 1043.5,-422 1156.5,-422 1156.5,-458"/>
-<text text-anchor="middle" x="1100" y="-437.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">generate_stats_figs.R</text>
+<polygon fill="none" stroke="#000000" points="1134.5,-458 1021.5,-458 1021.5,-422 1134.5,-422 1134.5,-458"/>
+<text text-anchor="middle" x="1078" y="-437.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">generate_stats_figs.R</text>
 </g>
 <!-- input/CDS.fa&#45;&gt;statsfigs -->
 <g id="edge45" class="edge">
 <title>input/CDS.fa&#45;&gt;statsfigs</title>
-<path fill="none" stroke="#000000" d="M1398.1844,-2118.9204C1406.0808,-2105.2566 1418.7587,-2087.1716 1435,-2077 1449.9961,-2067.6083 1461.9106,-2081.9202 1474,-2069 1509.8592,-2030.6766 1490,-2004.484 1490,-1952 1490,-1952 1490,-1952 1490,-800 1490,-751.5162 1225.7493,-515.1405 1187,-486 1175.5724,-477.4061 1162.3189,-469.5151 1149.6545,-462.7859"/>
-<polygon fill="#000000" stroke="#000000" points="1151.063,-459.5742 1140.5715,-458.0978 1147.8524,-465.7945 1151.063,-459.5742"/>
+<path fill="none" stroke="#000000" d="M1398.1844,-2118.9204C1406.0808,-2105.2566 1418.7587,-2087.1716 1435,-2077 1449.9961,-2067.6083 1461.9106,-2081.9202 1474,-2069 1509.8592,-2030.6766 1490,-2004.484 1490,-1952 1490,-1952 1490,-1952 1490,-800 1490,-751.5162 1226.9802,-513.4273 1187,-486 1173.3245,-476.6183 1157.4325,-468.5786 1142.0826,-461.9677"/>
+<polygon fill="#000000" stroke="#000000" points="1143.1974,-458.6409 1132.6198,-458.0369 1140.5121,-465.1053 1143.1974,-458.6409"/>
 </g>
 <!-- input/CDS.gff3 -->
 <g id="node2" class="node">
@@ -98,8 +98,8 @@
 <!-- input/CDS.gff3&#45;&gt;statsfigs -->
 <g id="edge46" class="edge">
 <title>input/CDS.gff3&#45;&gt;statsfigs</title>
-<path fill="none" stroke="#000000" d="M1498.9244,-2118.9819C1522.0835,-2087.156 1566,-2018.0913 1566,-1952 1566,-1952 1566,-1952 1566,-800 1566,-748.4946 1269.9194,-511.2002 1225,-486 1206.7155,-475.7422 1185.7038,-466.9805 1166.19,-459.9418"/>
-<polygon fill="#000000" stroke="#000000" points="1167.3441,-456.6376 1156.7493,-456.6259 1165.0243,-463.2421 1167.3441,-456.6376"/>
+<path fill="none" stroke="#000000" d="M1498.9244,-2118.9819C1522.0835,-2087.156 1566,-2018.0913 1566,-1952 1566,-1952 1566,-1952 1566,-800 1566,-745.5869 1521.467,-748.4848 1483,-710 1376.1212,-603.0719 1360.6013,-556.763 1227,-486 1201.4371,-472.4604 1171.2563,-462.2097 1144.7657,-454.861"/>
+<polygon fill="#000000" stroke="#000000" points="1145.3766,-451.4011 1134.8109,-452.1859 1143.5599,-458.1612 1145.3766,-451.4011"/>
 </g>
 <!-- input/rRNA.fa -->
 <g id="node3" class="node">
@@ -133,8 +133,8 @@
 <!-- data&#45;&gt;statsfigs -->
 <g id="edge47" class="edge">
 <title>data&#45;&gt;statsfigs</title>
-<path fill="none" stroke="#000000" d="M1881.2453,-2092.9494C1800.6529,-2042.1919 1680,-1964.1715 1680,-1952 1680,-1952 1680,-1952 1680,-800 1680,-672.2642 1546.7231,-711.2596 1449,-629 1417.9763,-602.8854 1414.4047,-591.6552 1383,-566 1334.7822,-526.6098 1324.3969,-512.3806 1268,-486 1235.9919,-471.0277 1198.201,-460.1395 1166.5755,-452.7266"/>
-<polygon fill="#000000" stroke="#000000" points="1167.0668,-449.2489 1156.5393,-450.4411 1165.5125,-456.0742 1167.0668,-449.2489"/>
+<path fill="none" stroke="#000000" d="M1881.2453,-2092.9494C1800.6529,-2042.1919 1680,-1964.1715 1680,-1952 1680,-1952 1680,-1952 1680,-800 1680,-672.2642 1544.7362,-713.5637 1449,-629 1420.0199,-603.4019 1418.1965,-591.351 1389,-566 1342.81,-525.8937 1332.7627,-511.1505 1277,-486 1235.0729,-467.0898 1184.5454,-455.5331 1144.8962,-448.7329"/>
+<polygon fill="#000000" stroke="#000000" points="1145.2392,-445.2422 1134.8021,-447.0635 1144.0969,-452.1484 1145.2392,-445.2422"/>
 </g>
 <!-- ribosome_data0toI -->
 <g id="node5" class="node">
@@ -235,8 +235,8 @@
 <!-- umi_extract -->
 <g id="node13" class="node">
 <title>umi_extract</title>
-<polygon fill="none" stroke="#000000" points="1146,-1898 1054,-1898 1054,-1862 1146,-1862 1146,-1898"/>
-<text text-anchor="middle" x="1100" y="-1877.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">umi_tools extract</text>
+<polygon fill="none" stroke="#000000" points="1148,-1898 1056,-1898 1056,-1862 1148,-1862 1148,-1898"/>
+<text text-anchor="middle" x="1102" y="-1877.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">umi_tools extract</text>
 </g>
 <!-- tmp/&lt;SAMPLE_ID&gt;/extract_trim.fq -->
 <g id="node30" class="node">
@@ -246,8 +246,8 @@
 <!-- umi_extract&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/extract_trim.fq -->
 <g id="edge8" class="edge">
 <title>umi_extract&#45;&gt;tmp/&lt;SAMPLE_ID&gt;/extract_trim.fq</title>
-<path fill="none" stroke="#000000" d="M1097.7289,-1861.8314C1096.7664,-1854.131 1095.6218,-1844.9743 1094.5521,-1836.4166"/>
-<polygon fill="#000000" stroke="#000000" points="1098.0151,-1835.9019 1093.3017,-1826.4133 1091.0691,-1836.7702 1098.0151,-1835.9019"/>
+<path fill="none" stroke="#000000" d="M1099.2242,-1861.8314C1098.0478,-1854.131 1096.6489,-1844.9743 1095.3414,-1836.4166"/>
+<polygon fill="#000000" stroke="#000000" points="1098.7833,-1835.7699 1093.8131,-1826.4133 1091.8636,-1836.8272 1098.7833,-1835.7699"/>
 </g>
 <!-- tmp/&lt;SAMPLE_ID&gt;/rRNA_map.sam -->
 <g id="node31" class="node">
@@ -521,92 +521,92 @@
 <!-- pdfs -->
 <g id="node50" class="node">
 <title>pdfs</title>
-<polygon fill="none" stroke="#000000" stroke-dasharray="5,2" points="1003.5,-363 764.5,-363 764.5,-183 1003.5,-183 1003.5,-363"/>
-<text text-anchor="middle" x="884" y="-351" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/3nt_periodicity.pdf</text>
-<text text-anchor="middle" x="884" y="-339" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="884" y="-328" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/codon_ribodens.pdf</text>
-<text text-anchor="middle" x="884" y="-316" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="884" y="-305" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/read_lengths.pdf</text>
-<text text-anchor="middle" x="884" y="-293" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="884" y="-282" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/pos_sp_rpf_norm_reads.pdf</text>
-<text text-anchor="middle" x="884" y="-270" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="884" y="-259" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/features.pdf</text>
-<text text-anchor="middle" x="884" y="-247" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="884" y="-236" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/startcodon_ribogridbar.pdf</text>
-<text text-anchor="middle" x="884" y="-224" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="884" y="-213" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/startcodon_ribogrid.pdf</text>
-<text text-anchor="middle" x="884" y="-201" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="884" y="-190" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/3ntframe_propbygene.pdf&#13;</text>
+<polygon fill="none" stroke="#000000" stroke-dasharray="5,2" points="917.5,-363 602.5,-363 602.5,-183 917.5,-183 917.5,-363"/>
+<text text-anchor="middle" x="760" y="-351" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/metagene_start_stop_read_counts.pdf</text>
+<text text-anchor="middle" x="760" y="-339" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="760" y="-328" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/metagene_normalized_profile_start_stop.pdf</text>
+<text text-anchor="middle" x="760" y="-316" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="760" y="-305" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/ORF_TPMs_vs_features.pdf</text>
+<text text-anchor="middle" x="760" y="-293" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="760" y="-282" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/normalized_density_APEsites_per_codon.pdf</text>
+<text text-anchor="middle" x="760" y="-270" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="760" y="-259" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/metagene_start_barplot_by_length.pdf</text>
+<text text-anchor="middle" x="760" y="-247" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="760" y="-236" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/metagene_start_ribogrid_by_length.pdf</text>
+<text text-anchor="middle" x="760" y="-224" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="760" y="-213" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/frame_proportions_per_ORF.pdf</text>
+<text text-anchor="middle" x="760" y="-201" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="760" y="-190" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/read_counts_by_length.pdf</text>
 </g>
 <!-- statsfigs&#45;&gt;pdfs -->
 <g id="edge48" class="edge">
 <title>statsfigs&#45;&gt;pdfs</title>
-<path fill="none" stroke="#000000" d="M1068.1811,-421.9561C1051.3423,-411.9874 1030.5719,-399.0132 1013,-386 1006.0352,-380.8421 998.9863,-375.3961 991.9626,-369.7943"/>
-<polygon fill="#000000" stroke="#000000" points="993.7156,-366.7113 983.7356,-363.1546 989.3193,-372.1586 993.7156,-366.7113"/>
+<path fill="none" stroke="#000000" d="M1021.3809,-423.4947C992.425,-414.1284 957.0478,-401.2316 927,-386 916.2826,-380.5672 905.4369,-374.5598 894.6901,-368.2296"/>
+<polygon fill="#000000" stroke="#000000" points="896.4753,-365.2191 886.0969,-363.0886 892.8814,-371.2262 896.4753,-365.2191"/>
 </g>
 <!-- tsvs -->
 <g id="node51" class="node">
 <title>tsvs</title>
-<polygon fill="none" stroke="#000000" stroke-dasharray="5,2" points="746,-386 456,-386 456,-160 746,-160 746,-386"/>
-<text text-anchor="middle" x="601" y="-374" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/3nt_periodicity.tsv</text>
-<text text-anchor="middle" x="601" y="-362" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="601" y="-351" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/codon_ribodens.tsv</text>
-<text text-anchor="middle" x="601" y="-339" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="601" y="-328" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/read_lengths.tsv</text>
-<text text-anchor="middle" x="601" y="-316" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="601" y="-305" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/pos_sp_rpf_norm_reads.tsv</text>
-<text text-anchor="middle" x="601" y="-293" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="601" y="-282" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/pos_sp_nt_freq.tsv</text>
-<text text-anchor="middle" x="601" y="-270" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="601" y="-259" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/3ntframe_bygene.tsv</text>
-<text text-anchor="middle" x="601" y="-247" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="601" y="-236" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/gene_position_length_counts_5start.tsv</text>
-<text text-anchor="middle" x="601" y="-224" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="601" y="-213" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/codon_ribodens_gathered.tsv</text>
-<text text-anchor="middle" x="601" y="-201" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="601" y="-190" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/sequence_features.tsv</text>
-<text text-anchor="middle" x="601" y="-178" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="601" y="-167" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/3ntframe_bygene_filtered.tsv&#13;</text>
+<polygon fill="none" stroke="#000000" stroke-dasharray="5,2" points="584,-386 246,-386 246,-160 584,-160 584,-386"/>
+<text text-anchor="middle" x="415" y="-374" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/metagene_start_stop_read_counts.tsv</text>
+<text text-anchor="middle" x="415" y="-362" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="415" y="-351" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/metagene_normalized_profile_start_stop.tsv</text>
+<text text-anchor="middle" x="415" y="-339" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="415" y="-328" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/ORF_TPMs_vs_features.tsv</text>
+<text text-anchor="middle" x="415" y="-316" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="415" y="-305" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/normalized_density_APEsites_per_codon.tsv</text>
+<text text-anchor="middle" x="415" y="-293" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="415" y="-282" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/read_frame_per_ORF.tsv</text>
+<text text-anchor="middle" x="415" y="-270" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="415" y="-259" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/read_frame_per_ORF_filtered.tsv</text>
+<text text-anchor="middle" x="415" y="-247" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="415" y="-236" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/normalized_density_APEsites_per_codon_long.tsv</text>
+<text text-anchor="middle" x="415" y="-224" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="415" y="-213" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/read_counts_by_length.tsv</text>
+<text text-anchor="middle" x="415" y="-201" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="415" y="-190" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/nt_freq_per_read_position.tsv</text>
+<text text-anchor="middle" x="415" y="-178" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
+<text text-anchor="middle" x="415" y="-167" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/gene_position_length_counts_5start.tsv</text>
 </g>
 <!-- statsfigs&#45;&gt;tsvs -->
 <g id="edge49" class="edge">
 <title>statsfigs&#45;&gt;tsvs</title>
-<path fill="none" stroke="#000000" d="M1043.4715,-434.3877C959.6693,-425.5186 806.8923,-407.0879 756,-386 755.8991,-385.9582 755.7981,-385.9163 755.6972,-385.8743"/>
-<polygon fill="#000000" stroke="#000000" points="756.8896,-382.5752 746.3268,-381.7524 754.071,-388.9827 756.8896,-382.5752"/>
+<path fill="none" stroke="#000000" d="M1021.3596,-436.9071C914.8054,-430.582 687.5446,-414.5573 593.8876,-385.9201"/>
+<polygon fill="#000000" stroke="#000000" points="594.787,-382.5317 584.1942,-382.7394 592.6045,-389.1828 594.787,-382.5317"/>
 </g>
-<!-- output/&lt;SAMPLE_ID&gt;/tpms.tsv -->
+<!-- output/&lt;SAMPLE_ID&gt;/ORF_TPMs_and_counts.tsv -->
 <g id="node53" class="node">
-<title>output/&lt;SAMPLE_ID&gt;/tpms.tsv</title>
-<text text-anchor="middle" x="1100" y="-270.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/tpms.tsv</text>
+<title>output/&lt;SAMPLE_ID&gt;/ORF_TPMs_and_counts.tsv</title>
+<text text-anchor="middle" x="1057" y="-270.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/ORF_TPMs_and_counts.tsv</text>
 </g>
-<!-- statsfigs&#45;&gt;output/&lt;SAMPLE_ID&gt;/tpms.tsv -->
+<!-- statsfigs&#45;&gt;output/&lt;SAMPLE_ID&gt;/ORF_TPMs_and_counts.tsv -->
 <g id="edge50" class="edge">
-<title>statsfigs&#45;&gt;output/&lt;SAMPLE_ID&gt;/tpms.tsv</title>
-<path fill="none" stroke="#000000" d="M1100,-421.8102C1100,-392.8234 1100,-335.9192 1100,-301.4916"/>
-<polygon fill="#000000" stroke="#000000" points="1103.5001,-301.1674 1100,-291.1674 1096.5001,-301.1674 1103.5001,-301.1674"/>
+<title>statsfigs&#45;&gt;output/&lt;SAMPLE_ID&gt;/ORF_TPMs_and_counts.tsv</title>
+<path fill="none" stroke="#000000" d="M1075.7127,-421.8102C1072.0676,-392.8234 1064.912,-335.9192 1060.5828,-301.4916"/>
+<polygon fill="#000000" stroke="#000000" points="1064.0049,-300.6526 1059.2845,-291.1674 1057.0596,-301.526 1064.0049,-300.6526"/>
 </g>
 <!-- staticHTML -->
 <g id="node28" class="node">
 <title>staticHTML</title>
-<polygon fill="none" stroke="#000000" points="657.5,-124 544.5,-124 544.5,-88 657.5,-88 657.5,-124"/>
-<text text-anchor="middle" x="601" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">AnalysisOutputs.Rmd</text>
+<polygon fill="none" stroke="#000000" points="471.5,-124 358.5,-124 358.5,-88 471.5,-88 471.5,-124"/>
+<text text-anchor="middle" x="415" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">AnalysisOutputs.Rmd</text>
 </g>
 <!-- output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;_output_report.html -->
 <g id="node52" class="node">
 <title>output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;_output_report.html</title>
-<text text-anchor="middle" x="601" y="-31.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;_output_report.html</text>
+<text text-anchor="middle" x="415" y="-31.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;_output_report.html</text>
 </g>
 <!-- staticHTML&#45;&gt;output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;_output_report.html -->
 <g id="edge52" class="edge">
 <title>staticHTML&#45;&gt;output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;_output_report.html</title>
-<path fill="none" stroke="#000000" d="M601,-87.8314C601,-80.131 601,-70.9743 601,-62.4166"/>
-<polygon fill="#000000" stroke="#000000" points="604.5001,-62.4132 601,-52.4133 597.5001,-62.4133 604.5001,-62.4132"/>
+<path fill="none" stroke="#000000" d="M415,-87.8314C415,-80.131 415,-70.9743 415,-62.4166"/>
+<polygon fill="#000000" stroke="#000000" points="418.5001,-62.4132 415,-52.4133 411.5001,-62.4133 418.5001,-62.4132"/>
 </g>
 <!-- tmp/&lt;SAMPLE_ID&gt;/trim.fq&#45;&gt;umi_extract -->
 <g id="edge7" class="edge">
 <title>tmp/&lt;SAMPLE_ID&gt;/trim.fq&#45;&gt;umi_extract</title>
-<path fill="none" stroke="#000000" d="M1107.4766,-1933.8314C1106.4071,-1926.131 1105.1353,-1916.9743 1103.9468,-1908.4166"/>
-<polygon fill="#000000" stroke="#000000" points="1107.3999,-1907.8367 1102.5574,-1898.4133 1100.4664,-1908.7997 1107.3999,-1907.8367"/>
+<path fill="none" stroke="#000000" d="M1107.9813,-1933.8314C1107.1257,-1926.131 1106.1083,-1916.9743 1105.1574,-1908.4166"/>
+<polygon fill="#000000" stroke="#000000" points="1108.6289,-1907.9656 1104.0459,-1898.4133 1101.6717,-1908.7386 1108.6289,-1907.9656"/>
 </g>
 <!-- tmp/&lt;SAMPLE_ID&gt;/trim.fq&#45;&gt;count_reads -->
 <g id="edge56" class="edge">
@@ -743,14 +743,14 @@
 <!-- output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.h5&#45;&gt;statsfigs -->
 <g id="edge44" class="edge">
 <title>output/&lt;SAMPLE_ID&gt;/&lt;SAMPLE_ID&gt;.h5&#45;&gt;statsfigs</title>
-<path fill="none" stroke="#000000" d="M1083.5515,-493.8314C1085.9303,-486.0463 1088.7638,-476.7729 1091.4033,-468.1347"/>
-<polygon fill="#000000" stroke="#000000" points="1094.7987,-468.9996 1094.3737,-458.4133 1088.1042,-466.954 1094.7987,-468.9996"/>
+<path fill="none" stroke="#000000" d="M1078,-493.8314C1078,-486.131 1078,-476.9743 1078,-468.4166"/>
+<polygon fill="#000000" stroke="#000000" points="1081.5001,-468.4132 1078,-458.4133 1074.5001,-468.4133 1081.5001,-468.4132"/>
 </g>
 <!-- tsvs&#45;&gt;staticHTML -->
 <g id="edge51" class="edge">
 <title>tsvs&#45;&gt;staticHTML</title>
-<path fill="none" stroke="#000000" d="M601,-159.7591C601,-150.5356 601,-141.8689 601,-134.2989"/>
-<polygon fill="#000000" stroke="#000000" points="604.5001,-134.0554 601,-124.0554 597.5001,-134.0555 604.5001,-134.0554"/>
+<path fill="none" stroke="#000000" d="M415,-159.7591C415,-150.5356 415,-141.8689 415,-134.2989"/>
+<polygon fill="#000000" stroke="#000000" points="418.5001,-134.0554 415,-124.0554 411.5001,-134.0555 418.5001,-134.0554"/>
 </g>
 <!-- collate -->
 <g id="node54" class="node">
@@ -758,33 +758,33 @@
 <polygon fill="none" stroke="#000000" points="1544.5,-602 1461.5,-602 1461.5,-566 1544.5,-566 1544.5,-602"/>
 <text text-anchor="middle" x="1503" y="-581.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">collate_tpms.R</text>
 </g>
-<!-- output/&lt;SAMPLE_ID&gt;/tpms.tsv&#45;&gt;collate -->
+<!-- output/&lt;SAMPLE_ID&gt;/ORF_TPMs_and_counts.tsv&#45;&gt;collate -->
 <g id="edge53" class="edge">
-<title>output/&lt;SAMPLE_ID&gt;/tpms.tsv&#45;&gt;collate</title>
-<path fill="none" stroke="#000000" d="M1130.4148,-291.083C1187.5437,-325.6589 1313.7123,-404.9429 1409,-486 1412.7752,-489.2114 1452.1628,-530.5025 1478.7398,-558.4517"/>
-<polygon fill="#000000" stroke="#000000" points="1476.4296,-561.1015 1485.856,-565.9383 1481.5033,-556.2789 1476.4296,-561.1015"/>
+<title>output/&lt;SAMPLE_ID&gt;/ORF_TPMs_and_counts.tsv&#45;&gt;collate</title>
+<path fill="none" stroke="#000000" d="M1093.7398,-291.125C1160.105,-324.7303 1302.9246,-401.0598 1409,-486 1412.8688,-489.098 1452.227,-530.4247 1478.7729,-558.4117"/>
+<polygon fill="#000000" stroke="#000000" points="1476.4603,-561.0596 1485.8803,-565.9089 1481.5404,-556.2437 1476.4603,-561.0596"/>
 </g>
-<!-- output/TPMs_collated.tsv -->
+<!-- output/TPMs_all_CDS_all_samples.tsv -->
 <g id="node56" class="node">
-<title>output/TPMs_collated.tsv</title>
-<text text-anchor="middle" x="1525" y="-509.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/TPMs_collated.tsv</text>
+<title>output/TPMs_all_CDS_all_samples.tsv</title>
+<text text-anchor="middle" x="1555" y="-509.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/TPMs_all_CDS_all_samples.tsv</text>
 </g>
-<!-- collate&#45;&gt;output/TPMs_collated.tsv -->
+<!-- collate&#45;&gt;output/TPMs_all_CDS_all_samples.tsv -->
 <g id="edge54" class="edge">
-<title>collate&#45;&gt;output/TPMs_collated.tsv</title>
-<path fill="none" stroke="#000000" d="M1508.5515,-565.8314C1510.9303,-558.0463 1513.7638,-548.7729 1516.4033,-540.1347"/>
-<polygon fill="#000000" stroke="#000000" points="1519.7987,-540.9996 1519.3737,-530.4133 1513.1042,-538.954 1519.7987,-540.9996"/>
+<title>collate&#45;&gt;output/TPMs_all_CDS_all_samples.tsv</title>
+<path fill="none" stroke="#000000" d="M1516.1218,-565.8314C1522.0499,-557.6232 1529.1729,-547.7606 1535.6933,-538.7323"/>
+<polygon fill="#000000" stroke="#000000" points="1538.684,-540.5693 1541.7015,-530.4133 1533.0092,-536.4708 1538.684,-540.5693"/>
 </g>
-<!-- output/read_counts.tsv -->
+<!-- output/read_counts_per_file.tsv -->
 <g id="node57" class="node">
-<title>output/read_counts.tsv</title>
-<text text-anchor="middle" x="1665" y="-509.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/read_counts.tsv</text>
+<title>output/read_counts_per_file.tsv</title>
+<text text-anchor="middle" x="1744" y="-509.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/read_counts_per_file.tsv</text>
 </g>
-<!-- count_reads&#45;&gt;output/read_counts.tsv -->
+<!-- count_reads&#45;&gt;output/read_counts_per_file.tsv -->
 <g id="edge65" class="edge">
-<title>count_reads&#45;&gt;output/read_counts.tsv</title>
-<path fill="none" stroke="#000000" d="M1619.3929,-565.8314C1626.4904,-557.454 1635.048,-547.3531 1642.824,-538.1749"/>
-<polygon fill="#000000" stroke="#000000" points="1645.6061,-540.3056 1649.3999,-530.4133 1640.2652,-535.7807 1645.6061,-540.3056"/>
+<title>count_reads&#45;&gt;output/read_counts_per_file.tsv</title>
+<path fill="none" stroke="#000000" d="M1639.3279,-565.8314C1657.6493,-556.4089 1680.2102,-544.8062 1699.6895,-534.7883"/>
+<polygon fill="#000000" stroke="#000000" points="1701.3912,-537.8489 1708.6834,-530.1628 1698.1898,-531.6239 1701.3912,-537.8489"/>
 </g>
 </g>
 </svg>
