@@ -2,6 +2,17 @@
 # The positions to be averaged across should be provided by the user as a TSV file with the headings Gene and Pos
 # The TSV will provide info on the gene and nt position relative to the start codon for each of the features being averaged across
 
+# For testing, using a tsv file containing the following lines:
+
+# Gene	Pos
+# MIKE	5
+# MAT	7
+# MAT	5
+# MAT	6
+
+
+print('Starting process')
+
 source(here::here("rscripts", "read_count_functions.R"))
 source(here::here("rscripts", "stats_figs_block_functions.R"))
 
@@ -13,15 +24,38 @@ library(parallel)
 library(rhdf5)
 library(dplyr)
 
+suppressMessages(library(optparse))
 
-gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "tiny_2genes_20utrs.gff3")
-fasta <- '../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa'
-hd_file <- here::here("Mok-tinysim", "output", "A", "A.h5")
-dataset <- 'Mok-tinysim'
-min_read_length <- 10
-expand_width <- 2
-features_to_study <- read.delim('nt_testing.tsv')
-output_dir <- '.'
+option_list <- list(make_option(c('-i', '--input'),type = "character", help='Path input to h5 file'),
+                    make_option(c('-d', '--dataset'),type = "character", help='Name of the dataset being studied'),
+                    make_option(c('-g', '--gff'),type = "character", help='Path to the GFF3 file of the organism being studied'),
+                    make_option(c('-f', '--fasta'),type = "character", help='Path to the fasta file of the organsim being studied'),
+                    make_option(c('--feature_pos'), type = "character", help='A TSV file listing the Gene and Positions to normalize over'),
+                    make_option(c('-o', '--output'), type = "character", help='Path to output directory'),
+                    make_option(c('--expand_width'), type = "integer", help='the desired range either side of the feature of interest', default = 5),
+                    make_option(c('--minreadlen'),type = "integer", help='minimum read length', default = 10))
+
+opt <- optparse::parse_args(OptionParser(option_list = option_list))
+
+hd_file <- opt$input
+dataset <- opt$dataset
+gff <- opt$gff
+fasta <- opt$fasta
+features_to_study <- opt$feature_pos
+features_to_study <- read.delim(features_to_study)
+output_dir <- opt$output
+expand_width <- opt$expand_width
+startlen <- opt$startlen
+min_read_length <- opt$minreadlen
+
+# gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "tiny_2genes_20utrs.gff3")
+# fasta <- '../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa'
+# hd_file <- here::here("Mok-tinysim", "output", "A", "A.h5")
+# dataset <- 'Mok-tinysim'
+# min_read_length <- 10
+# expand_width <- 2
+# features_to_study <- read.delim('nt_testing.tsv')
+# output_dir <- '.'
 
 gff_df <- readGFFAsDf(gff)
 genome <- readDNAStringSet(fasta,format = "fasta")
@@ -30,6 +64,8 @@ names <- names(genome)
 # CreateNtAnnotation produces a tibble containing the gene name, the CDS nucleotide position and the Nucleotide
 # to be used to create meta feature plots based on nucleotide position rather than codon positon
 # also allows use on species where a codon table tsv file (ie yeast_codon_table.tsv) is not available, as uses the fasta file
+
+print('Create annotation')
 
 CreateNtAnnotation <- function(genome, names, gff_df){
   gene_seq_df <- data.frame(genome)
@@ -244,7 +280,7 @@ transcript_gene_pos_nt_reads <- suppressMessages(AddNtToPosCounts(gene_names, da
 # It then sets the position of the feature of interest to 0, and changes the positions of adjacent codons to be relative to the feature of interest
 # This is done for all occurrences of the feature of interest on all genes in the sample provided.
 
-
+print('Slice out positions of interest')
 
 ExpandFeatureRegionAllGenes <- function(gene_names, dataset, hd_file, 
                                         min_read_length,   
@@ -386,6 +422,8 @@ output_feature_info <- ExpandFeatureRegionAllGenes(gene_names, dataset, hd_file,
 
 ### Normalization ###
 
+print('Normalise positions of interest')
+
 # Normalization carried out within each expanded frame so that they are comparable 
 # Normalizes the expand_feature_region list generating a RelCount column with the normalization values
 
@@ -508,9 +546,9 @@ normalized_expand_list <- purrr::map(
 # 5 MAT       8     0 C                2     0 
 
 
-
-
 ### Overlaying the normalized expanded tibbles ###
+
+print('Overlay positions of interest')
 
 # Function to overlay graphs into a single graph. Need to generate a single tibble 
 # from NormalizedExpandList. Join by Rel_Pos, in RelCount need the mean for 
@@ -561,6 +599,8 @@ overlayed_tibbles <- OverlayedTable(normalized_expand_list, expand_width)
 # 4       1    0.938
 # 5       2    0.625
 
+print('Create Plot')
+
 overlayed_plot <- ggplot(overlayed_tibbles, mapping = aes(x = Rel_Pos, y = RelCount)) + 
   geom_line() +
   theme_bw() +
@@ -584,3 +624,5 @@ save_plot_pdf <- function(overlayed_plot, output_dir){
 }
 
 save_plot_pdf(overlayed_plot, output_dir)
+
+print('Done')
