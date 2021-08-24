@@ -129,15 +129,16 @@ output/<SAMPLE_ID>/metagene_start_ribogrid_by_length.pdf\n
 output/<SAMPLE_ID>/frame_proportions_per_ORF.pdf\n
 output/<SAMPLE_ID>/read_counts_by_length.pdf"] [shape=box, style=dashed]
 
-    tsvs [label="output/<SAMPLE_ID>/metagene_start_stop_read_counts.tsv\n
+    tsvs [label="output/<SAMPLE_ID>/normalized_density_APEsites_per_codon.tsv\n
+output/<SAMPLE_ID>/read_frame_per_ORF.tsv\n
+output/<SAMPLE_ID>/nt_freq_per_read_position.tsv\n"] [shape=box, style=dashed]
+
+    tsvs_for_static_html [label="output/<SAMPLE_ID>/metagene_start_stop_read_counts.tsv\n
 output/<SAMPLE_ID>/metagene_normalized_profile_start_stop.tsv\n
 output/<SAMPLE_ID>/ORF_TPMs_vs_features.tsv\n
-output/<SAMPLE_ID>/normalized_density_APEsites_per_codon.tsv\n
-output/<SAMPLE_ID>/read_frame_per_ORF.tsv\n
 output/<SAMPLE_ID>/read_frame_per_ORF_filtered.tsv\n
 output/<SAMPLE_ID>/normalized_density_APEsites_per_codon_long.tsv\n
 output/<SAMPLE_ID>/read_counts_by_length.tsv\n
-output/<SAMPLE_ID>/nt_freq_per_read_position.tsv\n
 output/<SAMPLE_ID>/gene_position_length_counts_5start.tsv"] [shape=box, style=dashed]
 
     "output/<SAMPLE_ID>/<SAMPLE_ID>_output_report.html" [shape=plaintext]
@@ -185,9 +186,10 @@ output/<SAMPLE_ID>/gene_position_length_counts_5start.tsv"] [shape=box, style=da
 
     statsfigs -> pdfs
     statsfigs -> tsvs
+    statsfigs -> tsvs_for_static_html
     statsfigs -> "output/<SAMPLE_ID>/ORF_TPMs_and_counts.tsv"
 
-    tsvs -> staticHTML
+    tsvs_for_static_html -> staticHTML
     staticHTML -> "output/<SAMPLE_ID>/<SAMPLE_ID>_output_report.html"
   }
 
