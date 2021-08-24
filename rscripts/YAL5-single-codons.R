@@ -750,13 +750,14 @@ if(length(feature_of_interest) == 1){
   print('Creating graph')
   overlayed_plot <- ggplot(overlayed_tibbles, mapping = aes(x = Rel_Pos, y = RelCount)) + 
     geom_line() +
-    theme_bw()+
+    theme_bw() +
     theme(text=element_text(size=14),
           axis.title=element_text(size=14, face='bold'),
           title = element_text(size = 14, face='bold'))+
     labs(title = paste0('Relative read counts around feature ', feature_of_interest),
          x = 'Position relative to feature of interest',
-         y = 'Relative read count', size = 2)
+         y = 'Relative read count', size = 2) + 
+    scale_x_continuous(breaks = seq(-expand_width, expand_width, 2))
   
   # save plot as PDF
   
