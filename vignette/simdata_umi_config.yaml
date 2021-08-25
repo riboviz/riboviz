@@ -39,8 +39,8 @@ nextflow_work_dir: work # Nextflow work directory (job submission).
 num_processes: 1 # Number of processes to parallelize over
 orf_fasta_file: vignette/input/yeast_YAL_CDS_w_250utrs.fa # ORF file to align to
 orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3 # GFF2/GFF3 file for ORFs
-orf_index_prefix: YAL_CDS_w_250 # ORF index file prefix, relative to dir_index 
-output_pdfs: TRUE # generate .pdfs for sample-related plots 
+orf_index_prefix: YAL_CDS_w_250 # ORF index file prefix, relative to dir_index
+output_pdfs: TRUE # generate .pdfs for sample-related plots
 primary_id: Name # Primary gene IDs to access the data (YAL001C, YAL003W, etc.)
 publish_index_tmp: FALSE # Publish index and temporary files to dir_index and dir_tmp? If FALSE, use symlinks.
 rpf: TRUE # Is the dataset an RPF or mRNA dataset?
