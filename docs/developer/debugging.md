@@ -92,7 +92,7 @@ Work dir:
 $ cd /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73/
 $ cat .command.sh 
 #!/bin/bash -ue
-Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --tpms-file=TPMs_collated.tsv             WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms.ts
+Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --tpms-file=TPMs_collated.tsv             WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms.tsv
 $ bash .command.sh 
 [1] "Created by: RiboViz"
 [1] "Date: 2021-06-24 06:08:35"
@@ -102,12 +102,24 @@ $ bash .command.sh
 Execution halted
 ```
 
+**Note:** If rerunning a step that invokes a Python command then you need to provide a	`PYTHONPATH` with the path to your `riboviz` directory. For example:
+
+```console
+$ PYTHONPATH=$HOME/riboviz bash .command.sh
+```
+
 Alternatively, the command in `.command.sh` can be rerun directly, which may be desirable if you want to change input or configuration parameters when debugging, without rerunning the workflow via Nextflow. For example:
 
 ```console
 $ Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R \
   --tpms-file=TPMs_collated.tsv \
-  WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms
+  WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms.tsv
+```
+
+**Note:** If rerunning a step that invokes a Python command then you need to provide a	`PYTHONPATH` with the path to your `riboviz` directory. For example:
+
+```console
+$ PYTHONPATH=$HOME/riboviz python ...
 ```
 
 For R you may want to run the script interactively, as described in the previous session, in which case you can run:
@@ -115,7 +127,7 @@ For R you may want to run the script interactively, as described in the previous
 ```console
 $ Rscript --vanilla --args \
   --tpms-file=TPMs_collated.tsv \
-  WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms
+  WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms.tsv
 ```
 
 then, within R, run:

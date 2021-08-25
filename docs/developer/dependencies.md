@@ -22,7 +22,7 @@ Finally, [Update Dependencies overview](#update-dependencies-overview).
 
 ### Tools not available as operating system packages
 
-Update [Install ttools not available as operating system packages](../user/install.md#install-tools-not-available-as-operating-system-packages) in [docs/user/install.md](../user/install.md):
+Update [Install tools not available as operating system packages](../user/install.md#install-tools-not-available-as-operating-system-packages) in [docs/user/install.md](../user/install.md):
 
 * Add an entry for the package to the 'Package Links' table.
 * Add a new subsection describing how to download, build, configure, install and check the package.
