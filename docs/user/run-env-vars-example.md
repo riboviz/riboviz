@@ -1,6 +1,6 @@
 # Run an example of a configuration using environment variable tokens
 
-[Environment variables and configuration tokens](./prep-riboviz-config.md#environment-variables-and-configuration-tokens) describes how the use of configuration tokens representing environment variables with their paths, and the use of symbolic links are supported. This page walks you through a runnable example, using the "vignette" dataset from [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./docs/user/run-vignette.md).
+[Environment variables and configuration tokens](./prep-riboviz-config.md#environment-variables-and-configuration-tokens) describes how the use of configuration tokens representing environment variables with their paths, and the use of symbolic links are supported. This page walks you through a runnable example, using the "vignette" dataset from [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md).
 
 Create and populate data, organisms, and samples directories:
 
@@ -12,7 +12,7 @@ $ mkdir -p ribo-samples/input
 $ cp riboviz/vignette/input/SRR10428* ribo-samples/input/
 ```
 
-Create directory with configuration with which you will run RiboViz:
+Create a directory with a configuration file:
 
 ```console
 $ mkdir ribo-run/
@@ -36,7 +36,7 @@ rrna_fasta_file: ${RIBOVIZ_ORGANISMS}/yeast_rRNA_R64-1-1.fa
 t_rna_file: ${RIBOVIZ_DATA}/yeast_tRNAs.tsv
 ```
 
-Run RiboViz:
+Run RiboViz, specifying values for the configuration tokens via environment variables:
 
 ```console
 $ RIBOVIZ_DATA=$HOME/ribo-data \
