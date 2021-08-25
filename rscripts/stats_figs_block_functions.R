@@ -842,7 +842,7 @@ gff_df_cds <- gff_df %>% filter(type=="CDS")
       right = end_pos[gene], 
       min_read_length = min_read_length, 
       a_site_displacement = a_site_displacement_min_read_length)
->>>>>>> trna_plot-363
+
   }) # Get codon-based position-specific reads for each gene
   names(out) <- gene_names
   
