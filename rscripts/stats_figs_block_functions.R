@@ -825,7 +825,7 @@ CalculateCodonSpecificRibosomeDensity <- function(t_rna_file, codon_positions_fi
   # Reads in an object named "codon_pos"
   
   # Pull CDS start and end positions
-gff_df_cds <- gff_df %>% filter(type=="CDS")
+  gff_df_cds <- gff_df %>% filter(type=="CDS")
 
   start_pos <- gff_df_cds$start
   end_pos <- gff_df_cds$end
