@@ -170,7 +170,7 @@ def helpMessage() {
       threshold, when generating statistics and figures (default 1)
     * 'dataset': Human-readable name of the dataset (default
        'dataset')
-    * 'do_pos_sp_nt_freq': Calculate position-specific nucleotide
+    * 'output_metagene_normalized_profile': Calculate position-specific nucleotide
       freqeuency? (default 'TRUE')
     * 'feature': Feature type (default 'CDS')
     * 'is_riboviz_gff': Does the GFF file contain 3 elements per gene
@@ -315,7 +315,7 @@ params.dedup_umis = false
 params.dir_index = "index"
 params.dir_out = "output"
 params.dir_tmp = "tmp"
-params.do_pos_sp_nt_freq = true
+params.output_metagene_normalized_profile = true
 params.extract_umis = false
 params.trim_5p_mismatches = true
 params.feature = "CDS"
@@ -1169,7 +1169,7 @@ process generateStatsFigs {
         tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
             into gene_position_length_counts_5start_tsv
         tuple val(sample_id), file("nt_freq_per_read_position.tsv") \
-            optional (! params.do_pos_sp_nt_freq) \
+            optional (! params.output_metagene_normalized_profile) \
             into nt_freq_per_read_position_tsv
         tuple val(sample_id), file("metagene_normalized_profile_start_stop.pdf") \
             optional (! params.output_pdfs) into metagene_normalized_profile_start_stop_pdf
@@ -1229,7 +1229,7 @@ process generateStatsFigs {
            --output-pdfs=${params.output_pdfs} \
            --rpf=${params.rpf} \
            --output-dir=. \
-           --do-pos-sp-nt-freq=${params.do_pos_sp_nt_freq} \
+           --output-metagene-normalized-profile=${params.output_metagene_normalized_profile} \
            ${t_rna_flag} \
            ${codon_positions_flag} \
            ${features_flag} \

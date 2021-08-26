@@ -78,7 +78,7 @@ option_list <- list(
               type = "character", default = NA,
               help = "features file, columns are gene features and rows are genes"
   ),
-  make_option("--do-pos-sp-nt-freq",
+  make_option("--output-metagene-normalized-profile",
               type = "logical", default = TRUE,
               help = "do calculate the position-specific nucleotide frequency"
   ),
@@ -262,9 +262,9 @@ DistributionOfLengthsMappedReads(gene_names, dataset, hd_file)
 #
 #
 
-if (!do_pos_sp_nt_freq) {
+if (!output_metagene_normalized_profile) {
 
-  print("NOT calculating position-specific nucleotide frequency - reason: do_pos_sp_nt_freq parameter set to FALSE")
+  print("NOT calculating position-specific nucleotide frequency - reason: output_metagene_normalized_profile parameter set to FALSE")
 
 } 
 
@@ -283,7 +283,7 @@ BiasesInNucleotideCompositionAlongMappedReadLengths <- function(gene_names, data
 
 } # end definition of function: BiasesInNucleotideCompositionAlongMappedReadLengths()
 
-if (do_pos_sp_nt_freq) {
+if (output_metagene_normalized_profile) {
   
   BiasesInNucleotideCompositionAlongMappedReadLengths(gene_names, dataset, hd_file, read_range, min_read_length)
 
