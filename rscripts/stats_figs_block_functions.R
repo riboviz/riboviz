@@ -39,19 +39,19 @@ CalculateThreeNucleotidePeriodicity <- function(gene_names, dataset, hd_file, gf
   #   $ Pos   : int  -49 -48 -47 -46 -45 -44 -43 -42 -41 -40 ...
   #   $ Counts: int  19030 13023 50280 19458 12573 46012 19043 13282 36968 20053 ...
   
-  three_nucleotide_periodicity_data <- bind_rows(
+  metagene_start_stop_read_counts_data <- bind_rows(
     gene_pos_counts_5start %>% mutate(End = "5'"),
     gene_pos_counts_3end %>% mutate(End = "3'")
   ) %>%
     mutate(End = factor(End, levels = c("5'", "3'")))
   # gives:
-  # > str(three_nucleotide_periodicity_data)
+  # > str(metagene_start_stop_read_counts_data)
   # Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	150 obs. of  3 variables:
   #   $ Pos   : int  -24 -23 -22 -21 -20 -19 -18 -17 -16 -15 ...
   #   $ Counts: int  285 318 307 386 291 347 840 330 475 355 ...
   #   $ End   : Factor w/ 2 levels "5'","3'": 1 1 1 1 1 1 1 1 1 1 ...
   
-  return(three_nucleotide_periodicity_data)
+  return(metagene_start_stop_read_counts_data)
   
 } # end CalculateThreeNucleotidePeriodicity() definition
 # gives:
@@ -72,11 +72,11 @@ CalculateThreeNucleotidePeriodicity <- function(gene_names, dataset, hd_file, gf
 #   # … with 140 more rows
 
 # define PlotThreeNucleotidePeriodicity() function with reasonable arguments
-PlotThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data){
+PlotThreeNucleotidePeriodicity <- function(metagene_start_stop_read_counts_data){
   
   # Plot
   three_nucleotide_periodicity_plot <- ggplot(
-    three_nucleotide_periodicity_data,
+    metagene_start_stop_read_counts_data,
     aes(x = Pos, y = Counts)) +
     geom_line() +
     facet_wrap(~End, scales = "free") +
@@ -155,11 +155,11 @@ SavePlotThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_plot
   # return() # NO RETURN as writing out
 } # end of function definition SavePlotThreeNucleotidePeriodicity()
 
-WriteThreeNucleotidePeriodicity <- function(three_nucleotide_periodicity_data) {
+WriteThreeNucleotidePeriodicity <- function(metagene_start_stop_read_counts_data) {
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "metagene_start_stop_read_counts.tsv"))
   write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
-    three_nucleotide_periodicity_data,
+    metagene_start_stop_read_counts_data,
     file = tsv_file_path,
     append = T,
     sep = "\t",
@@ -189,26 +189,26 @@ CalculateReadLengths <- function(gene_names, dataset, hd_file){
   })
   
   # sum reads of each length across all genes
-  read_length_data <- data.frame(
+  read_counts_by_length_data <- data.frame(
     Length = read_range,
     Counts = gene_sp_read_length %>%
       Reduce("+", .)
   )
   
   # return read length data
-  return(read_length_data)
+  return(read_counts_by_length_data)
   
 } # end definition of function CalculateReadLengths()
-# > str(read_length_data)
+# > str(read_counts_by_length_data)
 # 'data.frame':	41 obs. of  2 variables:
 #   $ Length: int  10 11 12 13 14 15 16 17 18 19 ...
 #   $ Counts: num  0 0 0 0 0 ...
 
 # plot function
-PlotReadLengths <- function(read_length_data){
+PlotReadLengths <- function(read_counts_by_length_data){
   
   # plot read lengths with counts
-  read_len_plot <- ggplot(read_length_data, aes(x = Length, y = Counts)) +
+  read_len_plot <- ggplot(read_counts_by_length_data, aes(x = Length, y = Counts)) +
     geom_bar(stat = "identity")
   
   return(read_len_plot)
@@ -225,14 +225,14 @@ SavePlotReadLengths <- function(read_len_plot) {
 } # end definition of function SavePlotReadLenths()
 
 # save read lengths plot and file
-WriteReadLengths <- function(read_length_data){
+WriteReadLengths <- function(read_counts_by_length_data){
   
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "read_counts_by_length.tsv"))
   
   write_provenance_header(path_to_this_script, tsv_file_path)
   
   write.table(
-    read_length_data,
+    read_counts_by_length_data,
     file = tsv_file_path,
     append = T,
     sep = "\t",
@@ -409,19 +409,19 @@ CalculateGeneReadFrames <- function(dataset, hd_file, gff_df, min_read_length, a
 # TODO
 
 FilterGeneReadFrames <- function(gene_read_frames_data, count_threshold){
-  gene_read_frame_data_filtered <- gene_read_frames_data %>%
+  read_frame_per_orf_filtered_data <- gene_read_frames_data %>%
     filter(Ct_fr0 + Ct_fr1 + Ct_fr2 > count_threshold)
   
-  return(gene_read_frame_data_filtered)
+  return(read_frame_per_orf_filtered_data)
 } # end FilterGeneReadFrames() definition
 # gives:
 # TODO
 
-WriteFilteredGeneReadFrames <- function(gene_read_frame_data_filtered){
+WriteFilteredGeneReadFrames <- function(read_frame_per_orf_filtered_data){
   tsv_file_path <- file.path(output_dir, paste0(output_prefix, "read_frame_per_ORF_filtered.tsv"))
   write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
-    gene_read_frame_data_filtered,
+    read_frame_per_orf_filtered_data,
     file = tsv_file_path,
     append = T,
     sep = "\t",
@@ -434,9 +434,9 @@ WriteFilteredGeneReadFrames <- function(gene_read_frame_data_filtered){
 # gives:
 # TODO
 
-PlotGeneReadFrames <- function(gene_read_frame_data_filtered){
+PlotGeneReadFrames <- function(read_frame_per_orf_filtered_data){
   
-  gene_read_frame_plot <- BoxplotReadFrameProportion(gene_read_frame_data_filtered)
+  gene_read_frame_plot <- BoxplotReadFrameProportion(read_frame_per_orf_filtered_data)
   
   return(gene_read_frame_plot)
 } # end PlotGeneReadFrames() definition

@@ -1383,12 +1383,12 @@ process staticHTML {
       script += "verbose='FALSE', "
       script += "yamlfile='\$PWD/${viz_params_config_file_yaml}', "
       script += "sampleid='!{sample_id}', "
-      script += "three_nucleotide_periodicity_data_file = '\$PWD/${sample_metagene_start_stop_read_counts_tsv}', "
+      script += "metagene_start_stop_read_counts_data_file = '\$PWD/${sample_metagene_start_stop_read_counts_tsv}', "
       script += "gene_position_length_counts_5start_file = '\$PWD/${sample_gene_position_length_counts_5start_tsv}', "
-      script += "read_length_data_file='\$PWD/${sample_read_counts_by_length_tsv}', "
+      script += "read_counts_by_length_data_file='\$PWD/${sample_read_counts_by_length_tsv}', "
       script += "metagene_normalized_profile_start_stop_data_file='\$PWD/${sample_metagene_normalized_profile_start_stop_tsv}' "
       if (is_asite_disp_length_file) {
-          script += ", gene_read_frames_filtered_data_file='\$PWD/${sample_read_frame_per_orf_filtered_tsv}'"
+          script += ", read_frame_per_orf_filtered_data_file='\$PWD/${sample_read_frame_per_orf_filtered_tsv}'"
       }
       if (is_t_rna_and_codon_positions_file) {
           script += ", normalized_density_apesites_per_codon_long_file='\$PWD/${sample_normalized_density_apesites_per_codon_long_tsv}'"

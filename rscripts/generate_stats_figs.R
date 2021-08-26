@@ -182,14 +182,14 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hd_file, gff_df) {
   print("Starting: Check for 3nt periodicity globally")
 
   # CalculateThreeNucleotidePeriodicity():
-  three_nucleotide_periodicity_data <- CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
+  metagene_start_stop_read_counts_data <- CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
 
   # CalculateGenePositionLengthCounts5Start():
   gene_poslen_counts_5start_df <- CalculateGenePositionLengthCounts5Start(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
   
   # PlotThreeNucleotidePeriodicity()
   if(output_pdfs){
-    three_nucleotide_periodicity_plot <- PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
+    three_nucleotide_periodicity_plot <- PlotThreeNucleotidePeriodicity(metagene_start_stop_read_counts_data)
     
     # run PlotStartCodonRiboGrid()
     metagene_start_ribogrid_by_length_plot <- PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
@@ -210,7 +210,7 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hd_file, gff_df) {
   } 
 
   # run WriteThreeNucleotidePeriodicity():
-  WriteThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
+  WriteThreeNucleotidePeriodicity(metagene_start_stop_read_counts_data)
   
   # WriteGenePositionLengthCounts5Start(): 
   WriteGenePositionLengthCounts5Start(gene_poslen_counts_5start_df)
@@ -233,11 +233,11 @@ ThreeNucleotidePeriodicity(gene_names, dataset, hd_file, gff_df)
 DistributionOfLengthsMappedReads <- function(gene_names, dataset, hd_file){
 
   # run CalculateReadLengths():
-  read_length_data <- CalculateReadLengths(gene_names, dataset, hd_file)
+  read_counts_by_length_data <- CalculateReadLengths(gene_names, dataset, hd_file)
 
   if(output_pdfs){
     # run PlotReadLengths():
-    read_len_plot <- PlotReadLengths(read_length_data)
+    read_len_plot <- PlotReadLengths(read_counts_by_length_data)
     # creates plot object
     
     # to run SavePlotReadLenths():
@@ -245,7 +245,7 @@ DistributionOfLengthsMappedReads <- function(gene_names, dataset, hd_file){
   }
   
   # to run WriteReadLengths():
-  WriteReadLengths(read_length_data)
+  WriteReadLengths(read_counts_by_length_data)
 
   print("Completed: Distribution of lengths of all mapped reads")
 
@@ -317,11 +317,11 @@ if (!is.na(asite_disp_length_file)) {
   gene_read_frames_data <- CalculateGeneReadFrames(dataset, hd_file, gff_df, min_read_length, asite_displacement_length)
 
   # filter gene_read_frames_data to remove counts over the count_threshold
-  gene_read_frame_data_filtered <- FilterGeneReadFrames(gene_read_frames_data, count_threshold)
+  read_frame_per_orf_filtered_data <- FilterGeneReadFrames(gene_read_frames_data, count_threshold)
   
   if(output_pdfs){
     # run PlotGeneReadFrames():
-    gene_read_frame_plot <- PlotGeneReadFrames(gene_read_frame_data_filtered)
+    gene_read_frame_plot <- PlotGeneReadFrames(read_frame_per_orf_filtered_data)
     # creates plot object
     
     # run SaveGeneReadFrames():
@@ -329,7 +329,7 @@ if (!is.na(asite_disp_length_file)) {
   }
 
   # run WriteFilteredGeneReadFrames():
-  WriteFilteredGeneReadFrames(gene_read_frame_data_filtered)
+  WriteFilteredGeneReadFrames(read_frame_per_orf_filtered_data)
   
   # run WriteGeneReadFrames():
   WriteGeneReadFrames(gene_read_frames_data)

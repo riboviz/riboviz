@@ -11,11 +11,11 @@ params:
   verbose: FALSE
   yamlfile: NA
   sampleid: NA
-  three_nucleotide_periodicity_data_file: NA
+  metagene_start_stop_read_counts_data_file: NA
   gene_position_length_counts_5start_file: NA
-  read_length_data_file: NA
+  read_counts_by_length_data_file: NA
   metagene_normalized_profile_start_stop_data_file: NA
-  gene_read_frames_filtered_data_file: NA
+  read_frame_per_orf_filtered_data_file: NA
   normalized_density_apesites_per_codon_long_file: NA
   ORF_TPMs_vs_features_file: NA
 ---
@@ -124,8 +124,8 @@ print_provenance(path_to_this_script)
 ### Load Data: 
 
 # three nucleotide periodicity
-three_nucleotide_periodicity_data <- read_tsv(
-  file = params$three_nucleotide_periodicity_data_file, 
+metagene_start_stop_read_counts_data <- read_tsv(
+  file = params$metagene_start_stop_read_counts_data_file, 
   skip = 4, # this avoids the provenance info
   col_names = TRUE) %>%
   mutate(End = factor(End, levels = c("5'", "3'")))
@@ -138,8 +138,8 @@ gene_poslen_counts_5start_df <- read_tsv(
 )
 
 # read length
-read_length_data <- read_tsv(
-  file = params$read_length_data_file, 
+read_counts_by_length_data <- read_tsv(
+  file = params$read_counts_by_length_data_file, 
   skip = 4, # this avoids the provenance info
   col_names = TRUE)
 
@@ -154,8 +154,8 @@ metagene_normalized_profile_start_stop_data <- read_tsv(
 
 # frame_proportions_per_ORF.pdf plot: read frame (conditional on `asite_disp_length_file`) 
 if (!is.na(readframe_plot)){
-  gene_read_frame_data_filtered <- read_tsv(
-    file = params$gene_read_frames_filtered_data_file, 
+  read_frame_per_orf_filtered_data <- read_tsv(
+    file = params$read_frame_per_orf_filtered_data_file, 
     skip = 4, # this avoids the provenance info
     col_names = TRUE)
 }
@@ -186,7 +186,7 @@ if(!is.na(codonspecificribosomedensitytrnacorrelation_plot)){
 ```{r plot_threenucleotideperiodicity, echo=FALSE}
 
 # three nucleotide periodicity
-PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
+PlotThreeNucleotidePeriodicity(metagene_start_stop_read_counts_data)
 ```
 
 ### Ribogrid: 
@@ -210,7 +210,7 @@ PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
 ```{r plot_readlength, echo=FALSE}
 
 # read length
-PlotReadLengths(read_length_data)
+PlotReadLengths(read_counts_by_length_data)
 ```
 
 ### Position specific distribution of reads:
@@ -228,7 +228,7 @@ PlotPositionSpecificDistributionOfReads(metagene_normalized_profile_start_stop_d
 # plot read frame
 if (!is.na(readframe_plot)){
   # run PlotGeneReadFrames():
-  PlotGeneReadFrames(gene_read_frame_data_filtered)
+  PlotGeneReadFrames(read_frame_per_orf_filtered_data)
 } else {
   print("read frame proportion by gene NOT plotted: required input files not provided")
 }
