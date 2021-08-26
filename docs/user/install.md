@@ -1,8 +1,16 @@
 # Install RiboViz and dependencies
 
-## About these instructions
+## Introduction
 
-These instructions written for Ubuntu and CentOS and tested upon Ubuntu 18.04 and CentOS 7. Other Linux flavours will require different commands to be run.
+This page contains the complete installation instructions for those wishing to run **RiboViz** under a variety of operating systems. It includes information on how to install all of the dependencies required by **RiboViz** along with how to access the **RiboViz** source code and finishes with links to our documentation on how to run **RiboViz** on an example dataset.
+
+**RiboViz** runs under Linux and full instructions are provided for Ubuntu and CentOS (these were tested upon Ubuntu 18.04 Ubuntu 20.04.02.0) and CentOS 7 (2009)). Windows users will either need to use a virtual machine or the Windows Subsystem for Linux (links to instructons on how to set these up are provided below). Mac OS users need check out the web sites for each dependency for information on how to install the dependency under Mac OS.
+
+---
+
+## Operating systems
+
+### Linux users
 
 You need to have permission to run `sudo` to install many of the dependencies. If you don't have `sudo` access you will have to ask a local system administrator to run these commands for you.
 
@@ -17,13 +25,15 @@ We suggest that you:
 
 ### Mac OS users
 
-We suggest that you check out the web sites for each prerequisite for information on how to install the prerequisites under Mac OS.
+We suggest that you check out the web sites for each dependency for information on how to install the dependency under Mac OS.
 
 ---
 
 ## Dependencies overview
 
-The following tables summarise the packages required by RiboViz. Instructions to install each dependency are given in the following sections. Only minimal installation instructions are given. For full information, see the documentation for each dependency.
+The following tables summarise the packages required by RiboViz. Instructions to install each dependency are given in the following sections.
+
+**Note:** Only minimal installation instructions are given. For full information, see the documentation for each dependency.
 
 The versions listed are those used by a RiboViz developer when preparing the current release. Other versions may also be acceptable, but see the constraints below.
 
@@ -48,7 +58,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | Nextflow | 20.04.1.5335 |
 | Hisat2 | 2.1.0 |
 | Bowtie | 1.2.2 |
-
+ 
 | R Package | Version |
 | --------- | ------- |
 | Biostrings | 2.54.0 |
@@ -72,7 +82,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | testthat | 3.0.1 |
 | tidyverse | 1.3.0 |
 | withr | 2.3.0 |
-
+ 
 | Python Package | Version | Package Manager |
 | -------------- | ------- | --------------- |
 | biopython | 1.77 | conda |
@@ -89,9 +99,9 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | pytest-cov | 2.10.1 | conda |
 | pyyaml | 5.3.1 | conda |
 | samtools | 1.9 | conda |
+| sphinx | 4.0.1 | conda |
 | umi_tools | 1.0.1 | conda |
-| sphinx | 3.2.0 | pip |
-
+ 
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
 * R: devtools, glue, lintr, roxygen2, styler, testthat, withr.
@@ -561,6 +571,9 @@ $ conda install -y -c bioconda umi_tools
 $ conda install -y -c bioconda nextflow=20
 ```
 
+
+**Note:** For some users, the workflow fails during invocation of `cutadapt` 3.2 or 3.4. If this arises then uninstall and reinstall `cutadapt` as documented in [Troubleshooting: cutadapt 3.x failure](./prep-riboviz-run-nextflow.md#troubleshooting-cutadapt-3x-failure).
+
 Check packages have installed command-line tools:
 
 ```console
@@ -628,7 +641,7 @@ samtools 1.9
 
 ---
 
-## Install Bioinformatics tools
+## Install tools not available as operating system packages
 
 | Package | Links |
 | ------- | ----- |
@@ -709,12 +722,20 @@ You can now check your installation by running RiboViz tests by running a "vigne
 
 Once you have run the "vignette", you can check your installation by running tests:
 
-* [Run vignette regression tests](../developer/testing.md#run-vignette-regression-tests).
+* [Run vignette integration tests](../developer/testing.md#run-vignette-integration-tests).
 * [Run Python tests and workflow tests](../developer/testing.md#run-python-tests-and-workflow-tests).
 
 ---
 
 ## Reference
+
+### Check names and versions of command-line tools, Python, and R packages
+
+Run:
+
+```console
+$ source bash/environment-tables.sh 
+```
 
 ### Check names and versions of Python packages
 

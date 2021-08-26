@@ -2,15 +2,7 @@
 
 ## Update Dependencies overview in Install RiboViz and dependencies
 
-To update the [Dependencies overview](../user/install.md#dependencies-overview) tables in [Install RiboViz and dependencies](../user/install.md):
-
-* Run:
-
-```console
-$ source bash/environment-tables.sh                                       
-```
-
-* Copy the Markdown tables output and paste into `docs/user/install.md`.
+See [Update Dependencies overview](./dependencies.md#update-dependencies-overview).
 
 ---
 
@@ -19,24 +11,24 @@ $ source bash/environment-tables.sh
 Create Sphinx pages to reference source code:
 
 ```console
-$ sphinx-apidoc -f -o code-docs/ riboviz
+$ sphinx-apidoc -f -o py-docs/ riboviz
 ```
 
 Create HTML documentation
 
 ```console
-$ cd code-docs
+$ cd py-docs
 $ make html
 ```
 
-Open `code-docs/_build/html/index.html` in a browser.
+Open `py-docs/_build/html/index.html` in a browser.
 
 ---
 
 ## How the template Sphinx documentation files were originally created
 
 ```console
-$ sphinx-quickstart code-docs
+$ sphinx-quickstart py-docs
 > Separate source and build directories (y/n) [n]: y
 > Project name: RiboViz
 > Author name(s): The University of Edinburgh; Rutgers University; University of California, Berkeley
@@ -44,7 +36,7 @@ $ sphinx-quickstart code-docs
 > Project language [en]: 
 ```
 
-Edit `code-docs/conf.py`:
+Edit `py-docs/conf.py`:
 
 * Uncomment:
 
@@ -80,7 +72,7 @@ extensions = [
 ]
 ```
 
-Edit `code-docs/index.rst` and replace content with:
+Edit `py-docs/index.rst` and replace content with:
 
 ```
 RiboViz code documentation

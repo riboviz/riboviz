@@ -407,7 +407,7 @@ def umi_tools_dedup_bam(tmp_dir, output_dir, sample):
     ``umi_tools dedup``.
 
     ``<tmp_dir>/<sample>`` is searched for a BAM file matching
-    :py:const:`riboviz.workflow_files.PRE_DEDUP_BAM` and
+    :py:const:`riboviz.workflow_files.DEDUP_BAM` and
     if this is found the reads in the output file
     ``<output_dir>/<sample>/<sample>.bam`` are counted.
 
@@ -424,16 +424,12 @@ def umi_tools_dedup_bam(tmp_dir, output_dir, sample):
     :return: ``pandas.core.frame.Series``, or ``None``
     :rtype: pandas.core.frame.Series
     """
-    # Look for pre_dedup.bam.
+    # Look for dedup.bam.
     files = glob.glob(
-        os.path.join(tmp_dir, sample, workflow_files.PRE_DEDUP_BAM))
+        os.path.join(tmp_dir, sample, workflow_files.DEDUP_BAM))
     if not files:
-        # Look for dedup.bam (Nextflow).
-        files = glob.glob(
-            os.path.join(tmp_dir, sample, workflow_files.DEDUP_BAM))
-        if not files:
-            # Deduplication was not done.
-            return None
+        # Deduplication was not done.
+        return None
     # Look for the BAM file output.
     files = glob.glob(os.path.join(
         output_dir, sample, sam_bam.BAM_FORMAT.format(sample)))
@@ -485,9 +481,9 @@ def count_reads_df(config_file, input_dir, tmp_dir, output_dir):
     for sample in tmp_samples:
         rows.append(cutadapt_fq(tmp_dir, sample))
         rows.append(hisat2_fq(tmp_dir, sample, workflow_files.NON_RRNA_FQ,
-                              "rRNA or other contaminating reads removed by alignment to rRNA index files"))
+                              "Reads that did not align to rRNA or other contaminating reads in rRNA index files"))
         rows.append(hisat2_sam(tmp_dir, sample, workflow_files.RRNA_MAP_SAM,
-                               "Reads with rRNA and other contaminating reads removed by alignment to rRNA index files"))
+                               "Reads aligned to rRNA and other contaminating reads in rRNA index files"))
         rows.append(hisat2_fq(tmp_dir, sample, workflow_files.UNALIGNED_FQ,
                               "Unaligned reads removed by alignment of remaining reads to ORFs index files"))
         rows.append(hisat2_sam(tmp_dir, sample, workflow_files.ORF_MAP_SAM,
@@ -576,6 +572,7 @@ def equal_read_counts(file1, file2, comment="#"):
         message += " in file: " + str(file1) + ":" + str(file2)
         error.args = (message,)
         raise
+
 
 if __name__ == '__main__':
 
