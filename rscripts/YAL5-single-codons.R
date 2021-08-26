@@ -1,11 +1,11 @@
-# Given an h5 file, GFF file and .tsv file, this script creates a metafeature plot 
-# for the feature of interest
+# This script uses a h5, GFF and .tsv file to create a metafeature plot
+# for the feature of interest. Currently works with codons.
 
-## TEST: run on TinySim Dataset 
+## TEST: run on TinySim Dataset
 
-print('Starting process')
+print("Starting process")
 
-# source packages and functions from rscripts 
+# source packages and functions from rscripts
 source(here::here("rscripts", "read_count_functions.R"))
 source(here::here("rscripts", "stats_figs_block_functions.R"))
 
@@ -15,31 +15,58 @@ suppressMessages(library(purrr))
 suppressMessages(library(dplyr))
 suppressMessages(library(optparse))
 
-option_list <- list(make_option(c('-i', '--input'),type = "character", help='Path input to h5 file'),
-                    make_option(c('-d', '--dataset'),type = "character", help='Name of the dataset being studied'),
-                    make_option(c('-g', '--gff'),type = "character", help='Path t the GFF3 file of the organism being studied'),
-                    make_option(c('-a', '--annotation'),type = "character", help='Path to codon table for organism'),
-                    make_option('--feature', type = "character", help='Feature of interest, e.g. codon'),
-                    make_option(c('-o', '--output'), type = "character", help='Path to output directory'),
-                    make_option(c('--expand_width'), type = "integer", help='the desired range either side of the feature of interest', default = 5),
-                    make_option(c('--frame'), type = "integer", help='reading frame to be studied', default = 0),
-                    make_option(c('--minreadlen'),type = "integer", help='minimum read length', default = 10),
-                    make_option(c('--filter_for_frame'),  type = "logical", help='Filter to include only the reads from the first nucleotide of a codon', default = TRUE),
-                    make_option(c('--snapdisp'),type = "integer", help='frame to filer to when using SnapToCodon', default = 0L))
+option_list <- list(make_option(c("-i", "--input"),
+                                type = "character",
+                                help = "Path input to h5 file"),
+                    make_option(c("-d", "--dataset"),
+                                type = "character",
+                                help = "Name of the dataset being studied"),
+                    make_option(c("-g", "--gff"),
+                                type = "character",
+                                help = "Path t the GFF3 file of the organism being studied"),
+                    make_option(c("-a", "--annotation"),
+                                type = "character",
+                                help = "Path to codon table for organism"),
+                    make_option("--feature",
+                                type = "character",
+                                help = "Feature of interest, e.g. codon"),
+                    make_option(c("-o", "--output"),
+                                type = "character",
+                                help = "Path to output directory"),
+                    make_option(c("--expand_width"),
+                                type = "integer",
+                                help = "the desired range either side of the feature of interest",
+                                default = 5),
+                    make_option(c("--frame"),
+                                type = "integer",
+                                help = "reading frame to be studied",
+                                default = 0),
+                    make_option(c("--minreadlen"),
+                                type = "integer",
+                                help = "minimum read length",
+                                default = 10),
+                    make_option(c("--filter_for_frame"),
+                                type = "logical",
+                                help = "Filter to include only the reads from the first nucleotide of a codon",
+                                default = TRUE),
+                    make_option(c("--snapdisp"),
+                                type = "integer",
+                                help = "frame to filer to when using SnapToCodon",
+                                default = 0L))
 
 opt <- optparse::parse_args(OptionParser(option_list = option_list))
 
 
 # hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
 # dataset <- "Mok-simYAL5"
-# feature_of_interest <- c('GCG','TCT', 'CGA')
+# feature_of_interest <- c("GCG","TCT", "CGA")
 # # check all codons
-# # feature_of_interest <- here::here('data', 'codons.tsv')
+# # feature_of_interest <- here::here("data", "codons.tsv")
 # expand_width = 5L
 # min_read_length <- 10
 # yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
 # gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
-# output_dir <- '.'
+# output_dir <- "."
 # filter_for_frame <- FALSE
 # snapdisp <- 0L
 
@@ -57,35 +84,36 @@ filter_for_frame <- opt$filter_for_frame
 snapdisp <- opt$snapdisp
 
 
-# If the list of codons is given in tsv format, the first column should contain the feature of interest (codons)
-# If a file is given it will be extracted into the expected format by the following if statement
-# otherwise, it it is assumed that the feture of interest is given in the format c("feature") 
+# If the list of codons is given in tsv format,
+# the first column should contain the feature of interest (codons)
 
-if(file.exists(feature_of_interest)){
+# If a file is given for the feature of interest,
+# the feature of interest it will be extracted by the following if statement
+
+if (file.exists(feature_of_interest)) {
   feature_of_interest <- read.csv(feature_of_interest)
-  feature_of_interest <- feature_of_interest[,1]
+  feature_of_interest <- feature_of_interest[, 1]
 }
-
 
 gff_df <- readGFFAsDf(gff)
 
 ## TEST: When running on tidy sim data set, the gff appears as follows
-# There are 2 genes, MAT and MIKE, which have CDSs flanked by 20nt 
+# There are 2 genes, MAT and MIKE, which have CDSs flanked by 20nt
 
 # > gff_df
 # # A tibble: 6 x 10
-# seqnames start   end width strand source   type  score phase Name 
+# seqnames start   end width strand source   type  score phase Name
 # <fct>    <int> <int> <int> <fct>  <fct>    <fct> <dbl> <int> <chr>
-#   1 MAT          1    20    20 +      ewallace UTR5     NA    NA MAT  
-# 2 MAT         21    32    12 +      ewallace CDS      NA    NA MAT  
-# 3 MAT         33    52    20 +      ewallace UTR3     NA    NA MAT  
-# 4 MIKE         1    20    20 +      ewallace UTR5     NA    NA MIKE 
-# 5 MIKE        21    35    15 +      ewallace CDS      NA    NA MIKE 
-# 6 MIKE        36    55    20 +      ewallace UTR3     NA    NA MIKE 
+#   1 MAT          1    20    20 +      ewallace UTR5     NA    NA MAT
+# 2 MAT         21    32    12 +      ewallace CDS      NA    NA MAT
+# 3 MAT         33    52    20 +      ewallace UTR3     NA    NA MAT
+# 4 MIKE         1    20    20 +      ewallace UTR5     NA    NA MIKE
+# 5 MIKE        21    35    15 +      ewallace CDS      NA    NA MIKE
+# 6 MIKE        36    55    20 +      ewallace UTR3     NA    NA MIKE
 
 gene_names <- unique(gff_df$Name)
 
-# Import the .tsv file of codon positions: 
+# Import the .tsv file of codon positions:
 
 yeast_codon_pos_i200 <- suppressMessages(readr::read_tsv(file = yeast_codon_table))
 
@@ -106,7 +134,8 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
                                          asite_displacement = c(15, 15, 15)
                                        ),
                                        snapdisp) {
-  reads_pos_length <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
+  reads_pos_length <- GetGeneDatamatrix(gene, dataset, hd_file) 
+  # Get the matrix of read counts
   reads_asitepos <- CalcAsiteFixed(
     reads_pos_length,
     min_read_length,
@@ -117,8 +146,8 @@ GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file, left, right,
 
 ## TEST:: CalAsiteFixed:
 #
-# mat_datamatrix <- GetGeneDatamatrix('MAT', dataset, hd_file)
-# mike_datamatrix <- GetGeneDatamatrix('MIKE', dataset, hd_file) 
+# mat_datamatrix <- GetGeneDatamatrix("MAT", dataset, hd_file)
+# mike_datamatrix <- GetGeneDatamatrix("MIKE", dataset, hd_file) 
 #
 # asite_mat <- CalcAsiteFixed(mat_datamatrix, min_read_length = 10, asite_displacement_length)
 # mat_tibble <- tibble(counts =asite_mat,
@@ -271,7 +300,7 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length, 
 #TEST: GetAllCodonPosCounts(): the unique gene names in column "Gene" match the genes in gene_names (unique(total_codon_pos_counts$Gene) = gene_names) = TRUE.
 #gives: 
 # > str(total_codon_pos_counts)
-# Classes 'tbl_df', 'tbl' and 'data.frame':   2749 observations of 3 variables:
+# Classes "tbl_df", "tbl" and "data.frame":   2749 observations of 3 variables:
 #   $ Gene    : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
 #   $ PosCodon: int  1 2 3 4 5 6 7 8 9 10 ...
 #   $ Count   : num  4249 825 1017 1176 1116 ...
@@ -423,7 +452,7 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
       
       transcript_gene_pos_poscodon_gene_interest <- dplyr::filter(transcript_gene_pos_poscodon_frame, Gene == gene)
       
-      gene_length <- filter(gff_df, gff_df$type == 'CDS' & gff_df$Name == gene)$width
+      gene_length <- filter(gff_df, gff_df$type == "CDS" & gff_df$Name == gene)$width
       
       if (interesting_features <= expand_width  |interesting_features + expand_width > gene_length/3) {
         return()
@@ -494,7 +523,7 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
 #TEST: ExpandFeatureRegionAllGenes(): number of observations in the output tibble = "expand_width" * 2 + 1, so if "expand_width" = 5L the number of observations should be 11
 #TEST: ExpandFeatureRegionAllGenes(): the position from "interesting_feature_positions" has "Rel_Pos" value 0 = TRUE
 #TEST: ExpandFeatureRegionAllGenes(): the column "Rel_Pos" goes from -"expand_width to +"expand_width"
-## Example, tidysim with feature_of_interest == 'GCC' and expand_width == '1L'
+## Example, tidysim with feature_of_interest == "GCC" and expand_width == "1L"
 # [[1]]
 # # A tibble: 3 x 5
 # Gene  PosCodon Count Codon Rel_Pos
@@ -507,14 +536,14 @@ ExpandFeatureRegionAllGenes <- function(yeast_codon_pos_i200,
 
 # 
 # if(length(output_feature_info) == 0){
-#   print('No occurrances of the feature of interest')
+#   print("No occurrances of the feature of interest")
 #   
 #   if(expand_width>1){
 #     
-#     print('Try script with an expand_width of 1L to check for occurances near to start or stop codon')
+#     print("Try script with an expand_width of 1L to check for occurances near to start or stop codon")
 #   }
 #   
-#   print('Done')
+#   print("Done")
 #   stop()
 # }
 # 
@@ -694,7 +723,7 @@ OverlayedTable <- function(normalized_expand_list, expand_width){
 #TEST: OverlayedTable(): RelCount is a numeric 
 #gives:
 # > str(overlayed_tibbles)
-# Classes 'tbl_df', 'tbl' and 'data.frame':   11 observations of 2 variables
+# Classes "tbl_df", "tbl" and "data.frame":   11 observations of 2 variables
 #   $ Rel_Pos : int  -5 -4 -3 -2 -1 0 1 2 3 4 ...
 #   $ RelCount: num  0.893 1.125 0.992 0.998 0.779 ...
 
@@ -710,7 +739,7 @@ if(length(feature_of_interest) == 1){
   
   # Run ExpandFeatureRegionAllGenes to get a list of occurrances of the codon of interest 
   
-  print(paste0('Finding occurances of ', feature_of_interest))
+  print(paste0("Finding occurances of ", feature_of_interest))
   output_feature_info <- suppressMessages(ExpandFeatureRegionAllGenes(yeast_codon_pos_i200 = yeast_codon_pos_i200, 
                                                                       gene_names = gene_names, dataset, hd_file, 
                                                                       min_read_length,   
@@ -720,20 +749,20 @@ if(length(feature_of_interest) == 1){
   # Check for the presence of the feature of interest. Output_feature_info being empty will cause problems with normalization
   
   if(length(output_feature_info) == 0){
-    print('No occurrances of the feature of interest')
+    print("No occurrances of the feature of interest")
     
     if(expand_width > 1){
       
-      print('Try script with an expand_width of 1L to check for occurances near to start or stop codon')
+      print("Try script with an expand_width of 1L to check for occurances near to start or stop codon")
     }
     
-    print('Done')
+    print("Done")
     stop()
   }
   
   # Run ExpandedRegionNormalization to calculate the relative number of reads mapping to each position arounf the feature of interest
   
-  print('Normalising read counts')
+  print("Normalising read counts")
   normalized_expand_list <- purrr::map(
     .x = output_feature_info,
     .f = ExpandedRegionNormalization,
@@ -742,37 +771,37 @@ if(length(feature_of_interest) == 1){
   
   # Run OverlayedTable to create an average of reads at positions at and around the feature of interest 
   
-  print('Overlaying tibbles for feature of interest and calculating the average relative reads at each position')
+  print("Overlaying tibbles for feature of interest and calculating the average relative reads at each position")
   overlayed_tibbles <- OverlayedTable(normalized_expand_list, expand_width) 
   
   # Create a graph using ggplot
   
-  print('Creating graph')
+  print("Creating graph")
   overlayed_plot <- ggplot(overlayed_tibbles, mapping = aes(x = Rel_Pos, y = RelCount)) + 
     geom_line() +
     theme_bw() +
     theme(text=element_text(size=14),
-          axis.title=element_text(size=14, face='bold'),
-          title = element_text(size = 14, face='bold'))+
-    labs(title = paste0('Relative read counts around feature ', feature_of_interest),
-         x = 'Position relative to feature of interest',
-         y = 'Relative read count', size = 2) + 
+          axis.title=element_text(size=14, face="bold"),
+          title = element_text(size = 14, face="bold"))+
+    labs(title = paste0("Relative read counts around feature ", feature_of_interest),
+         x = "Position relative to feature of interest",
+         y = "Relative read count", size = 2) + 
     scale_x_continuous(breaks = seq(-expand_width, expand_width, 2))
   
   # save plot as PDF
   
-  print('Save plot as PDF')
+  print("Save plot as PDF")
   save_plot_pdf <- function(overlayed_plot, output_dir){
     overlayed_plot %>%
       ggsave(
-        filename = file.path(output_dir, paste0("Meta_feature_plot_", feature_of_interest, '_', dataset,".pdf")),
+        filename = file.path(output_dir, paste0("Meta_feature_plot_", feature_of_interest, "_", dataset,".pdf")),
         width = 6, height = 5
       )
   }
   
   save_plot_pdf(overlayed_plot, output_dir)
   
-  print('Done')
+  print("Done")
   
   
 } else{
@@ -793,7 +822,7 @@ if(length(feature_of_interest) == 1){
     
     # Run ExpandFeatureRegionAllGenes to get a list of occurrances of the codon of interest 
     
-    print(paste0('Finding occurances of ', feature_being_studied))
+    print(paste0("Finding occurances of ", feature_being_studied))
     output_feature_info <- suppressMessages(ExpandFeatureRegionAllGenes(yeast_codon_pos_i200 = yeast_codon_pos_i200, 
                                                                         gene_names = gene_names, dataset, hd_file, 
                                                                         min_read_length,   
@@ -804,11 +833,11 @@ if(length(feature_of_interest) == 1){
     # Check for the presence of the feature of interest. Output_feature_info being empty will cause problems with normalization
     
     if(length(output_feature_info) == 0){
-      print(paste('No occurrances of', feature_being_studied))
+      print(paste("No occurrances of", feature_being_studied))
       
       if(expand_width > 1){
         
-        print('Use an expand_width of 1L to check for occurances near to start or stop codon')
+        print("Use an expand_width of 1L to check for occurances near to start or stop codon")
       }
       return()
     }
@@ -842,13 +871,15 @@ if(length(feature_of_interest) == 1){
                 min_read_length = min_read_length, 
                 gff_df = gff_df, expand_width = expand_width, remove_overhang = remove_overhang, filter_for_frame = filter_for_frame, snapdisp = snapdisp)
   
+  print("Ranking Codons based on relcount")
+  
   # Rearrange feature_rel_use to be in descending order, so features with the highest relative use are listed at the top
   
   feature_rel_use <- arrange(feature_rel_use, desc(RelCount))
   
-  #TEST::feature_rel_use should be of class 'tbl'
+  #TEST::feature_rel_use should be of class "tbl"
   #TEST::feature_rel_use should have 2 columns. feature_rel_use may not contain as many rows as features were initially input, as if no occurrences of features are found then they wont be included
-  #TEST::The headings of feature_rel_use should be 'Feature' and 'RelCount'
+  #TEST::The headings of feature_rel_use should be "Feature" and "RelCount"
   #EXAMPLE:: When run on tinysim, with expandwidth = 1, Filter_for_frame = False and using all codons as feature_of_interest, the following file is produced
   # NOTE:: position 4 of MIKE edited to contain GCC to test for occurrences where the feature of interest has reads at one position but not the other
   # Feature   RelCount
@@ -859,7 +890,14 @@ if(length(feature_of_interest) == 1){
   
   # Save feature_rel_use as a tsv file 
   
+  print(head(feature_rel_use, 5))
+  print(tail(feature_rel_use, 5))
+  
+  print("Saving table as TSV")
+  
   write.table(feature_rel_use, file = paste0("Feature_Relative_use_",dataset,".tsv"), sep = "\t", row.names = F, quote = F)
+  
+  print("Done")
   
   # Users can then look at feature_rel_use and see which features they want to investigate further, and can use as a single feature_of_interest input to produce a graph 
  
