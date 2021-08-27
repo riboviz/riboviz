@@ -214,6 +214,7 @@ WT3AT/
   codon_ribodens.tsv
   features.pdf
   WT3AT.h5
+  WT3AT.h5.1
   minus.bedgraph
   plus.bedgraph
   pos_sp_nt_freq.tsv
@@ -235,6 +236,7 @@ WTnone/
   codon_ribodens.tsv
   features.pdf
   WTnone.h5
+  WTnone.h5.1
   minus.bedgraph
   plus.bedgraph
   pos_sp_nt_freq.tsv
@@ -248,6 +250,7 @@ WTnone/
 read_counts.tsv
 TPMs_collated.tsv
 ```
+The number of `<SAMPLE_ID>.h5.*` files depends on the `num_processes` parameter in `vignette/vignette_config.yaml`. For example, if you change that parameter to 4, then there will be 4 files, `WTnone.h5.1`, `WTnone.h5.2`, `WTnone.h5.3` and `WTnone.h5.4`, in the output folder.
 
 For full information on what the workflow does and the files it outputs, see [What the RiboViz workflow does](./prep-riboviz-operation.md).
 
