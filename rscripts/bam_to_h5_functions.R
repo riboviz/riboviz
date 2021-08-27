@@ -1,7 +1,7 @@
 #' Convert BAM files to RiboViz HDF5 files.
 #'
-#' Given a GFF file and a BAM file, this script creates an HDF5 file
-#' with information about a feature (e.g. CDS, ORF, or uORF).
+#' Given a GFF file and a BAM file, this script creates some HDF5
+#' files with information about a feature (e.g. CDS, ORF, or uORF).
 #'
 #' See `BamToH5` below.
 #'
@@ -389,42 +389,46 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
   # Save HDF5.
   print(paste("Saving mapped reads in H5 file", hd_file))
 
+  # create the output hdf5_file
   rhdf5::h5createFile(hd_file)
 
-  # create multi-part HDF5 files, so different process can write in different file at the same time
-  processes=1:num_processes
-  gene_ids=1:length(genes)
-  fid=rhdf5::H5Fopen(hd_file)
+  processes <- 1:num_processes
+  gene_ids <- seq_len(length(genes))
+
+  # write base group.
+  # Close the file after use to prevent open the same file concurrently.
+  fid <- rhdf5::H5Fopen(hd_file)
   base_gid <- rhdf5::H5Gopen(fid, "/")
   rhdf5::H5Fclose(fid)
 
-  for (gene_id in gene_ids){
-    # create a symbolic link to link the multi-part HDF5 file with the target HDF5 file
-    tmp_hd_file <- paste(hd_file,(gene_id %% num_processes) +1,sep='.')
-    gene=genes[gene_id]
+  for (gene_id in gene_ids) {
+    # create a symbolic link to link HDF5 files back to target HDF5 file
+    tmp_hd_file <- paste(hd_file, (gene_id %% num_processes) + 1, sep = ".")
+    gene <- genes[gene_id]
     rhdf5::H5Lcreate_external(tmp_hd_file, gene, base_gid, gene)
   }
-  for (pid in processes){
-    # The reason of creating symbolic link first then create the multi-part HDF5 files is that
+  for (pid in processes) {
+    # Create HDF5 files for wach process, so different process can write into different file
+    # The reason of creating symbolic link first then create the HDF5 files is that
     # the HDF5 will use absolute path if the source file exists when creating the link.
-    # however, we want to use the relative path, so we have to first create link then create file.
-    tmp_hd_file <- paste(hd_file,pid,sep='.')
+    # However, we want to use the relative path, so we have to first create link then create file.
+    tmp_hd_file <- paste(hd_file, pid, sep = ".")
     rhdf5::h5createFile(tmp_hd_file)
   }
   # parallel the processes by writing in different HDF5 files
-  execution_return_list<-mclapply(
+  execution_return_list <- mclapply(
     processes,
-    function(pid){
-      for (gene_id in gene_ids){
-        if ((gene_id %% num_processes) != pid-1){
-          # we only store some gene on each process
+    function(pid) {
+      for (gene_id in gene_ids) {
+        if ((gene_id %% num_processes) != pid - 1) {
+          # we only store some gene on each process, so we skip the irrelevant genes
           next
         }
-        gene=genes[gene_id]
+        gene <- genes[gene_id]
         # Get matrix of read counts by position and length for the gene.
         gene_read_counts <- read_counts[[gene]]
         # calculate the HDF5 file to write in
-        tmp_hd_file <- paste(hd_file,(gene_id %% num_processes) +1,sep='.')
+        tmp_hd_file <- paste(hd_file, (gene_id %% num_processes) + 1, sep = ".")
         # Get gene location from GFF.
         gene_location <- gff[gff_pid == gene]
         # Get location of start and stop codon nucleotides.
@@ -437,14 +441,14 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
         }
         stop_codon_loc <- rtracklayer::end(gene_location[gene_location$type == feature]) - stop_codon_offset
         stop_cod <- stop_codon_loc:(stop_codon_loc + 2)
-      
-        fid <- rhdf5::H5Fopen(tmp_hd_file) 
+
+        fid <- rhdf5::H5Fopen(tmp_hd_file)
         # Create H5 groups for gene.
         rhdf5::h5createGroup(fid, gene)
         rhdf5::h5createGroup(fid, paste(gene, dataset, sep = "/"))
         rhdf5::h5createGroup(fid, paste(gene, dataset, "reads", sep = "/"))
         mapped_reads <- paste(gene, dataset, "reads", sep = "/")
-        
+
         gid <- rhdf5::H5Gopen(fid, mapped_reads)
         # Specify then write gene attributes.
         rhdf5::h5createAttribute(gid, "reads_total", c(1, 1))
@@ -492,7 +496,7 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
   )
   # Create symbolic link with alternate IDs, if required.
   if (!is.na(secondary_id)) {
-    fid=rhdf5::H5Fopen(hd_file)
+    fid <- rhdf5::H5Fopen(hd_file)
     base_gid <- rhdf5::H5Gopen(fid, "/")
     for (gene in genes) {
       if (alt_genes[[gene]] != gene) {
