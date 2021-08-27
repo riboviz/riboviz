@@ -735,11 +735,7 @@ def test_collate_orf_tpms_and_counts_tsv(expected_fixture, output_dir):
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-<<<<<<< HEAD
 def test_read_counts_per_file_tsv(count_reads, expected_fixture, output_dir):
-=======
-def test_read_counts_tsv(count_reads, expected_fixture, output_dir):
->>>>>>> develop
     """
     Test :py:mod:`riboviz.tools.count_reads` TSV files for
     equality. See :py:func:`riboviz.count_reads.equal_read_counts`.
