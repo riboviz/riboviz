@@ -120,30 +120,29 @@ data/standard_asite_disp_length.txt"] [shape=box, style=dashed]
     "output/<SAMPLE_ID>/minus.bedgraph" [shape=plaintext]
     "output/<SAMPLE_ID>/<SAMPLE_ID>.h5" [shape=plaintext]
 
-    pdfs [label="output/<SAMPLE_ID>/3nt_periodicity.pdf\n
-output/<SAMPLE_ID>/codon_ribodens.pdf\n
-output/<SAMPLE_ID>/read_lengths.pdf\n
-output/<SAMPLE_ID>/pos_sp_rpf_norm_reads.pdf\n
-output/<SAMPLE_ID>/features.pdf\n
-output/<SAMPLE_ID>/startcodon_ribogridbar.pdf\n
-output/<SAMPLE_ID>/startcodon_ribogrid.pdf\n
-output/<SAMPLE_ID>/3ntframe_propbygene.pdf
-"] [shape=box, style=dashed]
+    pdfs [label="output/<SAMPLE_ID>/metagene_start_stop_read_counts.pdf\n
+output/<SAMPLE_ID>/metagene_normalized_profile_start_stop.pdf\n
+output/<SAMPLE_ID>/ORF_TPMs_vs_features.pdf\n
+output/<SAMPLE_ID>/normalized_density_APEsites_per_codon.pdf\n
+output/<SAMPLE_ID>/metagene_start_barplot_by_length.pdf\n
+output/<SAMPLE_ID>/metagene_start_ribogrid_by_length.pdf\n
+output/<SAMPLE_ID>/frame_proportions_per_ORF.pdf\n
+output/<SAMPLE_ID>/read_counts_by_length.pdf"] [shape=box, style=dashed]
 
-    tsvs [label="output/<SAMPLE_ID>/3nt_periodicity.tsv\n
-output/<SAMPLE_ID>/codon_ribodens.tsv\n
-output/<SAMPLE_ID>/read_lengths.tsv\n
-output/<SAMPLE_ID>/pos_sp_rpf_norm_reads.tsv\n
-output/<SAMPLE_ID>/pos_sp_nt_freq.tsv\n
-output/<SAMPLE_ID>/3ntframe_bygene.tsv\n
-output/<SAMPLE_ID>/gene_position_length_counts_5start.tsv\n
-output/<SAMPLE_ID>/codon_ribodens_gathered.tsv\n
-output/<SAMPLE_ID>/sequence_features.tsv\n
-output/<SAMPLE_ID>/3ntframe_bygene_filtered.tsv
-"] [shape=box, style=dashed]
+    tsvs [label="output/<SAMPLE_ID>/normalized_density_APEsites_per_codon.tsv\n
+output/<SAMPLE_ID>/read_frame_per_ORF.tsv\n
+output/<SAMPLE_ID>/nt_freq_per_read_position.tsv\n"] [shape=box, style=dashed]
+
+    tsvs_for_static_html [label="output/<SAMPLE_ID>/metagene_start_stop_read_counts.tsv\n
+output/<SAMPLE_ID>/metagene_normalized_profile_start_stop.tsv\n
+output/<SAMPLE_ID>/ORF_TPMs_vs_features.tsv\n
+output/<SAMPLE_ID>/read_frame_per_ORF_filtered.tsv\n
+output/<SAMPLE_ID>/normalized_density_APEsites_per_codon_long.tsv\n
+output/<SAMPLE_ID>/read_counts_by_length.tsv\n
+output/<SAMPLE_ID>/gene_position_length_counts_5start.tsv"] [shape=box, style=dashed]
 
     "output/<SAMPLE_ID>/<SAMPLE_ID>_output_report.html" [shape=plaintext]
-    "output/<SAMPLE_ID>/tpms.tsv" [shape=plaintext]
+    "output/<SAMPLE_ID>/ORF_TPMs_and_counts.tsv" [shape=plaintext]
 
     "tmp/<FASTQ_FILE_NAME_PREFIX>_deplex/<SAMPLE_ID>.fastq" -> h21
     "index/rRNA.1|...|8.ht2" -> h21
@@ -187,9 +186,10 @@ output/<SAMPLE_ID>/3ntframe_bygene_filtered.tsv
 
     statsfigs -> pdfs
     statsfigs -> tsvs
-    statsfigs -> "output/<SAMPLE_ID>/tpms.tsv"
+    statsfigs -> tsvs_for_static_html
+    statsfigs -> "output/<SAMPLE_ID>/ORF_TPMs_and_counts.tsv"
 
-    tsvs -> staticHTML
+    tsvs_for_static_html -> staticHTML
     staticHTML -> "output/<SAMPLE_ID>/<SAMPLE_ID>_output_report.html"
   }
 
@@ -200,11 +200,11 @@ output/<SAMPLE_ID>/3ntframe_bygene_filtered.tsv
     collate [label="collate_tpms.R"] [shape=box]
     count_reads [label="count_reads.py"] [shape=box]
 
-    "output/TPMs_collated.tsv" [shape=plaintext]
-    "output/read_counts.tsv" [shape=plaintext]
+    "output/TPMs_all_CDS_all_samples.tsv" [shape=plaintext]
+    "output/read_counts_per_file.tsv" [shape=plaintext]
 
-    "output/<SAMPLE_ID>/tpms.tsv" -> collate
-    collate -> "output/TPMs_collated.tsv"
+    "output/<SAMPLE_ID>/ORF_TPMs_and_counts.tsv" -> collate
+    collate -> "output/TPMs_all_CDS_all_samples.tsv"
 
     "input/<FASTQ_FILE_NAME_PREFIX>.fastq.gz" [shape=plaintext]
     "input/<BARCODES>.tsv" [shape=plaintext]
@@ -221,7 +221,7 @@ output/<SAMPLE_ID>/3ntframe_bygene_filtered.tsv
     "tmp/<SAMPLE_ID>/trim_5p_mismatch.tsv" -> count_reads
     "tmp/<SAMPLE_ID>/orf_map_clean.sam" -> count_reads
     "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" -> count_reads
-    count_reads -> "output/read_counts.tsv"
+    count_reads -> "output/read_counts_per_file.tsv"
   }
 }
 

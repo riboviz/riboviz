@@ -78,7 +78,7 @@ option_list <- list(
               type = "character", default = NA,
               help = "features file, columns are gene features and rows are genes"
   ),
-  make_option("--do-pos-sp-nt-freq",
+  make_option("--output-metagene-normalized-profile",
               type = "logical", default = TRUE,
               help = "do calculate the position-specific nucleotide frequency"
   ),
@@ -182,35 +182,35 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hd_file, gff_df) {
   print("Starting: Check for 3nt periodicity globally")
 
   # CalculateThreeNucleotidePeriodicity():
-  three_nucleotide_periodicity_data <- CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
+  metagene_start_stop_read_counts_data <- CalculateThreeNucleotidePeriodicity(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
 
   # CalculateGenePositionLengthCounts5Start():
   gene_poslen_counts_5start_df <- CalculateGenePositionLengthCounts5Start(gene_names = gene_names, dataset = dataset, hd_file = hd_file, gff_df = gff_df)
   
   # PlotThreeNucleotidePeriodicity()
   if(output_pdfs){
-    three_nucleotide_periodicity_plot <- PlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
+    three_nucleotide_periodicity_plot <- PlotThreeNucleotidePeriodicity(metagene_start_stop_read_counts_data)
     
     # run PlotStartCodonRiboGrid()
-    start_codon_ribogrid_plot <- PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
+    metagene_start_ribogrid_by_length_plot <- PlotStartCodonRiboGrid(gene_poslen_counts_5start_df)
     # creates plot object
     
     # run SaveStartCodonRiboGrid():
-    SaveStartCodonRiboGrid(start_codon_ribogrid_plot)
+    SaveStartCodonRiboGrid(metagene_start_ribogrid_by_length_plot)
     
     # run PlotStartCodonRiboGridBar():
-    start_codon_ribogrid_bar_plot <- PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
+    metagene_start_ribogrid_by_length_bar_plot <- PlotStartCodonRiboGridBar(gene_poslen_counts_5start_df)
     # creates plot object
     
     # run SaveStartCodonRiboGridBar():
-    SaveStartCodonRiboGridBar(start_codon_ribogrid_bar_plot)
+    SaveStartCodonRiboGridBar(metagene_start_ribogrid_by_length_bar_plot)
     
     # run SavePlotThreeNucleotidePeriodicity():
     SavePlotThreeNucleotidePeriodicity(three_nucleotide_periodicity_plot)
   } 
 
   # run WriteThreeNucleotidePeriodicity():
-  WriteThreeNucleotidePeriodicity(three_nucleotide_periodicity_data)
+  WriteThreeNucleotidePeriodicity(metagene_start_stop_read_counts_data)
   
   # WriteGenePositionLengthCounts5Start(): 
   WriteGenePositionLengthCounts5Start(gene_poslen_counts_5start_df)
@@ -233,11 +233,11 @@ ThreeNucleotidePeriodicity(gene_names, dataset, hd_file, gff_df)
 DistributionOfLengthsMappedReads <- function(gene_names, dataset, hd_file){
 
   # run CalculateReadLengths():
-  read_length_data <- CalculateReadLengths(gene_names, dataset, hd_file)
+  read_counts_by_length_data <- CalculateReadLengths(gene_names, dataset, hd_file)
 
   if(output_pdfs){
     # run PlotReadLengths():
-    read_len_plot <- PlotReadLengths(read_length_data)
+    read_len_plot <- PlotReadLengths(read_counts_by_length_data)
     # creates plot object
     
     # to run SavePlotReadLenths():
@@ -245,7 +245,7 @@ DistributionOfLengthsMappedReads <- function(gene_names, dataset, hd_file){
   }
   
   # to run WriteReadLengths():
-  WriteReadLengths(read_length_data)
+  WriteReadLengths(read_counts_by_length_data)
 
   print("Completed: Distribution of lengths of all mapped reads")
 
@@ -262,9 +262,9 @@ DistributionOfLengthsMappedReads(gene_names, dataset, hd_file)
 #
 #
 
-if (!do_pos_sp_nt_freq) {
+if (!output_metagene_normalized_profile) {
 
-  print("NOT calculating position-specific nucleotide frequency - reason: do_pos_sp_nt_freq parameter set to FALSE")
+  print("NOT calculating position-specific nucleotide frequency - reason: output_metagene_normalized_profile parameter set to FALSE")
 
 } 
 
@@ -283,7 +283,7 @@ BiasesInNucleotideCompositionAlongMappedReadLengths <- function(gene_names, data
 
 } # end definition of function: BiasesInNucleotideCompositionAlongMappedReadLengths()
 
-if (do_pos_sp_nt_freq) {
+if (output_metagene_normalized_profile) {
   
   BiasesInNucleotideCompositionAlongMappedReadLengths(gene_names, dataset, hd_file, read_range, min_read_length)
 
@@ -317,11 +317,11 @@ if (!is.na(asite_disp_length_file)) {
   gene_read_frames_data <- CalculateGeneReadFrames(dataset, hd_file, gff_df, min_read_length, asite_displacement_length)
 
   # filter gene_read_frames_data to remove counts over the count_threshold
-  gene_read_frame_data_filtered <- FilterGeneReadFrames(gene_read_frames_data, count_threshold)
+  read_frame_per_orf_filtered_data <- FilterGeneReadFrames(gene_read_frames_data, count_threshold)
   
   if(output_pdfs){
     # run PlotGeneReadFrames():
-    gene_read_frame_plot <- PlotGeneReadFrames(gene_read_frame_data_filtered)
+    gene_read_frame_plot <- PlotGeneReadFrames(read_frame_per_orf_filtered_data)
     # creates plot object
     
     # run SaveGeneReadFrames():
@@ -329,7 +329,7 @@ if (!is.na(asite_disp_length_file)) {
   }
 
   # run WriteFilteredGeneReadFrames():
-  WriteFilteredGeneReadFrames(gene_read_frame_data_filtered)
+  WriteFilteredGeneReadFrames(read_frame_per_orf_filtered_data)
   
   # run WriteGeneReadFrames():
   WriteGeneReadFrames(gene_read_frames_data)
@@ -350,15 +350,15 @@ print("Starting: Position specific distribution of reads")
 # For RPF datasets, generate codon-based position-specific reads
 if (rpf) {
   
-  pos_sp_rpf_norm_reads_data <- CalculatePositionSpecificDistributionOfReads(gene_names, dataset, hd_file, buffer, min_read_length, count_threshold)
+  metagene_normalized_profile_start_stop_data <- CalculatePositionSpecificDistributionOfReads(gene_names, dataset, hd_file, buffer, min_read_length, count_threshold)
   
   if(output_pdfs){
-    pos_sp_rpf_norm_reads_plot <- PlotPositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
+    metagene_normalized_profile_start_stop_plot <- PlotPositionSpecificDistributionOfReads(metagene_normalized_profile_start_stop_data)
     
-    SavePositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_plot)
+    SavePositionSpecificDistributionOfReads(metagene_normalized_profile_start_stop_plot)
   }
 
-  WritePositionSpecificDistributionOfReads(pos_sp_rpf_norm_reads_data)
+  WritePositionSpecificDistributionOfReads(metagene_normalized_profile_start_stop_data)
 
 }
 

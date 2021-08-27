@@ -671,7 +671,7 @@ def test_run(tmpdir, config_file, validate_only, test_dir_lookup,
     """
     Validate and then, optionally, run workflow. If the workflow is
     run then check output directories and
-    :py:const:`riboviz.workflow_r.TPMS_COLLATED_TSV` exist.
+    :py:const:`riboviz.workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV` exist.
 
     :param tmpdir: Temporary directory (pytest built-in fixture)
     :type tmpdir: py._path.local.LocalPath
@@ -725,5 +725,5 @@ def test_run(tmpdir, config_file, validate_only, test_dir_lookup,
         outputs[param] = output
         assert os.path.exists(output), "{} does not exist".format(output)
     tpms_tsv = os.path.join(outputs[params.OUTPUT_DIR],
-                            workflow_r.TPMS_COLLATED_TSV)
+                            workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV)
     assert os.path.exists(tpms_tsv), "{} does not exist".format(tpms_tsv)

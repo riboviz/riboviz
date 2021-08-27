@@ -12,7 +12,7 @@ dir_index: vignette/index
 dir_in: vignette/input
 dir_out: vignette/output
 dir_tmp: vignette/tmp
-do_pos_sp_nt_freq: TRUE
+output_metagene_normalized_profile: TRUE
 extract_umis: FALSE
 feature: CDS
 features_file: NULL

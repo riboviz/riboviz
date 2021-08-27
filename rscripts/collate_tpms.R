@@ -47,7 +47,7 @@ if (interactive()) {
 
 option_list <- list(
   make_option("--tpms-file", type = "character",
-    default = "TPMs_collated.tsv",
+    default = "TPMs_all_CDS_all_samples.tsv",
     help = "Name of collated TPMs file"),
   make_option("--orf-fasta", type = "character", default = NA,
     help = "ORF FASTA file that was aligned to and from which ORF names are to be retrieved"),

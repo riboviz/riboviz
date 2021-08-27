@@ -83,7 +83,7 @@ RunCollateTpms <- function(collate_tpms, samples, tpms_file = NA,
   if (!is.na(tpms_file)) {
     tpms_path <- file.path(tpms_file)
   } else {
-    tpms_path <- file.path("TPMs_collated.tsv")
+    tpms_path <- file.path("TPMs_all_CDS_all_samples.tsv")
   }
   if ((expected_exit_code) != 0) {
     return(NULL)

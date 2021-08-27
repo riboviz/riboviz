@@ -26,7 +26,7 @@ Example::
     $ python -m riboviz.tools.count_reads
       -c vignette/vignette_config.yaml
       -i vignette/input/ -t vignette/tmp/ -o vignette/output/
-      -r read_counts.tsv
+      -r read_counts_per_file.tsv
     ...
     vignette/input/SRR1042855_s1mi.fastq.gz
     vignette/input/SRR1042864_s1mi.fastq.gz

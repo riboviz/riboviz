@@ -182,7 +182,7 @@ def check_tpms_collated_tsv(output_dir, sample_id, expected_num_columns):
     :param expected_num_columns: Expected number of columns in TSV file
     :type expected_num_columns: int
     """
-    tpms_tsv = os.path.join(output_dir, workflow_r.TPMS_COLLATED_TSV)
+    tpms_tsv = os.path.join(output_dir, workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV)
     tpms = pd.read_csv(tpms_tsv, sep="\t", comment="#")
     num_rows, num_columns = tpms.shape
     assert num_columns == expected_num_columns, \
