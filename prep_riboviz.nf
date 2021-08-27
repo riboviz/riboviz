@@ -185,18 +185,9 @@ def helpMessage() {
     * 'rpf': Is the dataset an RPF or mRNA dataset? (default 'TRUE')
     * 'secondary_id': Secondary gene IDs to access the data (COX1,
       EFB1, etc. or 'NULL') (default 'NULL')
-    * 'stop_in_cds': Are stop codons part of the CDS annotations in
-      GFF? (default 'FALSE') Used by 'bam_to_h5.R' only (and only
-      if 'is_riboviz_gff' is 'FALSE'). Note: this parameter is now
-      deprecated by 'stop_in_feature' and will be removed in a future
-      release. If both 'stop_in_feature' and 'stop_in_cds' are defined
-      then 'stop_in_feature' takes precedence.
     * 'stop_in_feature': Are stop codons part of the feature
-      annotations in GFF? If not provided and 'stop_in_cds' is
-      provided then the value of 'stop_in_cds' is used for
-      'stop_in_feature'. If both 'stop_in_feature' and 'stop_in_cds'
-      are defined then `stop_in_feature` takes precedence.
-      (default 'FALSE')
+      annotations in GFF? Used by 'bam_to_h5.R' only (and only
+      if 'is_riboviz_gff' is 'FALSE') (default 'FALSE').
 
     Visualization parameters:
 
@@ -334,7 +325,7 @@ params.primary_id = "Name"
 params.rpf = true
 params.run_static_html = true
 params.secondary_id = null
-params.stop_in_cds = false
+params.stop_in_feature = false
 params.samsort_memory = null
 params.validate_only = false
 params.skip_inputs = false
@@ -382,13 +373,6 @@ if (! params.secondary_id) {
     secondary_id = null
 } else {
     secondary_id = params.secondary_id
-}
-if (params.containsKey('stop_in_feature')) {
-    stop_in_feature = params.stop_in_feature
-} else if (params.containsKey('stop_in_cds')) {
-    stop_in_feature = params.stop_in_cds
-} else {
-    stop_in_feature = false
 }
 if (params.dedup_umis) {
     if (! params.extract_umis) {
@@ -1140,7 +1124,7 @@ process bamToH5 {
            --orf-gff-file=${orf_gff} \
            --is-riboviz-gff=${params.is_riboviz_gff} \
            --feature=${params.feature} \
-           --stop-in-feature=${stop_in_feature}
+           --stop-in-feature=${params.stop_in_feature}
         """
 }
 
