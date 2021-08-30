@@ -150,7 +150,19 @@ def input_fq(config_file, input_dir, pool=None):
 
 
 def _input_fq_count(sample_name, file_name):
-    # the same as original serial version, but written in a separate function that can be loaded by multiprocess apply_async
+    """
+    A function for multiprocessing.pool to apply_async.
+    The content is identical to the original input_fq function line 138-142, however, we
+    need to create a new function because the apply_async accepts functions.
+    The sample_name is the sample name, like "JEC21" and the file_name is the path to file.
+
+    :param sample_name: sample name
+    :type sample_name: str or unicode
+    :param file_name: path to file
+    :type file_name: str or unicode
+    :return: ``pandas.core.frame.Series``, or ``None``
+    :rtype: pandas.core.frame.Series
+    """
     try:
         num_reads = fastq.count_sequences(file_name)
         return pd.DataFrame(
