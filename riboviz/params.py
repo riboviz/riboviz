@@ -116,6 +116,13 @@ When validating configuration skip checks for existence of ribosome
 profiling data files.
 """
 
+TIME_OVERRIDE="time_override"
+""" Override the estimate time model by default time """
+TIME_MULT="time_mult"
+""" Multiplier of the estimate time """
+DEFAULT_TIME="default_time"
+""" Default time for override or missing task in the estimate model """
+
 R_LIBS = "r_libs"
 """ R libraries directory (job submission) (command-line only). """
 CONFIG_FILE = "config_file"

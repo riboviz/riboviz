@@ -60,6 +60,9 @@ configuration:
 * ``t_rna_file: null``
 * ``umi_regexp: null``
 * ``validate_only: false``
+* ``time_override: false``
+* ``time_mult: 3``
+* ``default_time: "2h"``
 
 The values of parameters ``rrna_index_prefix`` and
 ``orf_index_prefix`` are updated to be file names only, as, these are
@@ -132,7 +135,10 @@ UPDATES = {
     params.STOP_IN_FEATURE: False,
     params.TRIM_5P_MISMATCHES: True,
     params.T_RNA_FILE: None,
-    params.UMI_REGEXP: None
+    params.UMI_REGEXP: None,
+    params.TIME_OVERRIDE: False,
+    params.TIME_MULT: 3,
+    params.DEFAULT_TIME: "2h"
 }
 
 """

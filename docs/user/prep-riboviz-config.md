@@ -99,6 +99,10 @@ The workflow also supports the following configuration parameters. All directory
 | `t_rna_file` | tRNA estimates file (tab-separated values file) | Only if `codon_positions_file` is also provided | |
 | `umi_regexp` | UMI-tools-compliant regular expression to extract barcodes and UMIs. For details on the regular expression format, see UMI-tools documentation on [Barcode extraction](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#barcode-extraction) | Only if `extract_umis` is `true` | |
 | `validate_only ` | Validate configuration, check that mandatory parameters have been provided and that input files exist, then exit without running the workflow?  | No | `false` |
+| `time_override` | Override the estimate time model by default time, only working with SGE executor | No | `false` |
+| `time_mult` | Multiplier of the estimate time, only working with SGE executor | No | 3 |
+| `default_time` | Default time for override or missing task in the estimate model, only working with SGE executor | No | `2h` |
+
 
 ### Examples
 

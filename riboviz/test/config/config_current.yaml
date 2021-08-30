@@ -57,3 +57,6 @@ trim_5p_mismatches: TRUE
 t_rna_file: NULL
 umi_regexp: null
 validate_only: false
+time_override: false
+time_mult: 3
+default_time: "2h"
