@@ -138,7 +138,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `<SAMPLE_ID>.bam.bai`: BAM index file for `<SAMPLE_ID>.bam`.
 * `minus.bedgraph`: bedgraph of reads from minus strand (if `make_bedgraph: TRUE`).
 * `plus.bedgraph`: bedgraph of reads from plus strand (if `make_bedgraph: TRUE`).
-* `<SAMPLE_ID>.h5`, `<SAMPLE_ID>.h5.*`: length-sensitive alignments in compressed h5 format. The number of output files depends on the number of processes that `bam_to_h5.R` was run with.
+* `<SAMPLE_ID>.h5`, `<SAMPLE_ID>.h5.*`: length-sensitive alignments in compressed h5 format. The number of output files depends on the number of processes that `bam_to_h5.R` was run with (`num_processes`).
 * `metagene_start_stop_read_counts.tsv`
 * `metagene_start_stop_read_counts.pdf`
 * `gene_position_length_counts_5start.tsv`

@@ -260,7 +260,8 @@ WTnone/
 read_counts_per_file_tsv
 TPMs_all_CDS_all_samples.tsv
 ```
-The number of `<SAMPLE_ID>.h5.*` files depends on the `num_processes` parameter in `vignette/vignette_config.yaml`. For example, if you change that parameter to 4, then there will be 4 files, `WTnone.h5.1`, `WTnone.h5.2`, `WTnone.h5.3` and `WTnone.h5.4`, in the output folder.
+
+The number of `<SAMPLE_ID>.h5.*` files depends on the `num_processes` parameter in the configuration. For example, if you change that parameter to 4, then there will be 4 files, `WTnone.h5.1`, `WTnone.h5.2`, `WTnone.h5.3` and `WTnone.h5.4`, in the output folder.
 
 For full information on what the workflow does and the files it outputs, see [What the RiboViz workflow does](./prep-riboviz-operation.md).
 
