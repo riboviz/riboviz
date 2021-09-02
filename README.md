@@ -28,6 +28,7 @@ Usage:
 * [What the RiboViz workflow does](./docs/user/prep-riboviz-operation.md)
 * [Configuring the RiboViz workflow](./docs/user/prep-riboviz-config.md)
 * [Running the RiboViz Nextflow workflow](./docs/user/prep-riboviz-run-nextflow.md)
+* [riboviz output files and figures](./docs/user/riboviz_outputs.md)
 * [Running the RiboViz workflow on Eddie](./docs/user/run-on-eddie.md)
 * [Memory and storage](./docs/user/memory-storage.md). Information and advice relating to **RiboViz**'s memory and storage requirements.
 
