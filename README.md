@@ -19,8 +19,9 @@ Quick start:
 * [Install RiboViz and dependencies](./docs/user/install.md)
 * [Quick install scripts](./docs/user/quick-install.md) (Ubuntu and CentOS only)
 * [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./docs/user/run-vignette.md). Run a "vignette" of the **RiboViz** workflow to see **RiboViz**'s capabilities.
+* [Run an example of a configuration using environment variable tokens](./docs/user/run-env-vars-example.md).
 * [Run UMI extraction, deduplication and demultiplexing examples](./docs/user/run-dedup-demultiplex-examples.md). Run **RiboViz** on simulated data, to see how **RiboViz** handles duplicated and multiplexed data.
-* [Upgrade configuration files from RiboViz 1.x](./docs/user/upgrade-1x.md)
+* [Upgrade configuration files to current version](./docs/user/upgrade-config.md)
 
 Usage:
 
@@ -43,7 +44,7 @@ Command-line tools:
 | [riboviz.tools.get_cds_codons](./riboviz/tools/get_cds_codons.py) | Extract coding sequence codons and export as a tab-separated values file |
 | [riboviz.tools.subsample_bioseqfile](./riboviz/tools/subsample_bioseqfile.py) | Subsample an input FASTQ (or other sequencing) file, to produce a smaller file whose reads are randomly sampled from of the input with a fixed probability |
 | [riboviz.tools.trim_5p_mismatch](./riboviz/tools/trim_5p_mismatch.py) | Remove a single 5' mismatched nt and filter reads with more than a specified mismatches from a SAM file and save the trimming summary to a file (invoked as part of a workflow) |
-| [riboviz.tools.upgrade_config_file](./riboviz/tools/upgrade_config_file.py) | Upgrade workflow configuration file to be compatible with current configuration |
+| [riboviz.tools.upgrade_config_file](./riboviz/tools/upgrade_config_file.py) | [Upgrade configuration files to current version](./docs/user/upgrade-config.md) |
 
 ## Develop RiboViz
 

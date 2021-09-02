@@ -138,28 +138,34 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `<SAMPLE_ID>.bam.bai`: BAM index file for `<SAMPLE_ID>.bam`.
 * `minus.bedgraph`: bedgraph of reads from minus strand (if `make_bedgraph: TRUE`).
 * `plus.bedgraph`: bedgraph of reads from plus strand (if `make_bedgraph: TRUE`).
-* `<SAMPLE_ID>.h5`, `<SAMPLE_ID>.h5.*`: length-sensitive alignments in compressed h5 format. The number of output files depends on the number of processes that RiboViz is running with.
-* `3nt_periodicity.tsv`
-* `3nt_periodicity.pdf`
-* `read_lengths.tsv`
-* `read_lengths.pdf`
-* `pos_sp_nt_freq.tsv`
-* `pos_sp_rpf_norm_reads.pdf`
-* `pos_sp_rpf_norm_reads.tsv`
-* `features.pdf`: only output if `--features-file` was defined.
-* `tpms.tsv`
-* `codon_ribodens.tsv`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
-* `codon_ribodens.pdf`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
-* `startcodon_ribogridbar.pdf`
-* `startcodon_ribogrid.pdf`
-* `3ntframe_bygene.tsv`: only output if `--asite-disp-length-file` was defined.
-* `3ntframe_propbygene.pdf`: only output if `--asite-disp-length-file` was defined.
+* `<SAMPLE_ID>.h5`, `<SAMPLE_ID>.h5.*`: length-sensitive alignments in compressed h5 format. The number of output files depends on the number of processes that `bam_to_h5.R` was run with.
+* `metagene_start_stop_read_counts.tsv`
+* `metagene_start_stop_read_counts.pdf`
+* `gene_position_length_counts_5start.tsv`
+* `read_counts_by_length.tsv`
+* `read_counts_by_length.pdf`
+* `nt_freq_per_read_position.tsv`
+* `metagene_normalized_profile_start_stop.pdf`
+* `metagene_normalized_profile_start_stop.tsv`
+* `ORF_TPMs_vs_features.tsv`: only output if `--features-file` was defined.
+* `ORF_TPMs_vs_features.pdf`: only output if `--features-file` was defined.
+* `ORF_TPMs_and_counts.tsv`
+* `normalized_density_APEsites_per_codon.tsv`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
+* `normalized_density_APEsites_per_codon.pdf`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
+* `normalized_density_APEsites_per_codon_long.tsv` only output if `--t-rna-file` and `--codon-positions-file` were defined.
+* `metagene_start_barplot_by_length.pdf`
+* `metagene_start_ribogrid_by_length.pdf`
+* `read_frame_per_ORF.tsv`: only output if `--asite-disp-length-file` was defined.
+* `read_frame_per_ORF_filtered.tsv`: only output if `--asite-disp-length-file` was defined.
+* `frame_proportions_per_ORF.pdf`: only output if `--asite-disp-length-file` was defined.
 * `<SAMPLE_ID>_output_report.html`: only output if `run_static_html: TRUE`.
 
 In addition, the following files are also put into the output directory:
 
-* `TPMs_collated.tsv`: file with the transcripts per million (tpm) for all successfully processed samples.
-* `read_counts.tsv`: a [read counts file](#read-counts-file) (only if `count_reads: TRUE`).
+* `TPMs_all_CDS_all_samples.tsv`: file with the transcripts per million (tpm) for all successfully processed samples.
+* `read_counts_per_file.tsv`: a [read counts file](#read-counts-file) (only if `count_reads: TRUE`).
+
+More details on the output files can be found at [RiboViz output files and figures](./riboviz_outputs.md).
 
 ---
 
@@ -167,7 +173,7 @@ In addition, the following files are also put into the output directory:
 
 The workflow will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is produced by scanning input, temporary and output directories and counting the number of reads (sequences) processed by specific stages of a RiboViz workflow.
 
-The read counts file, `read_counts.tsv`, is written into the output directory.
+The read counts file, `read_counts_per_file_tsv`, is written into the output directory.
 
 The reads counts file is a tab-separated values (TSV) file with the following columns:
 
