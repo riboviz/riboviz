@@ -122,7 +122,7 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
   return(read_counts);
 }
 
-#' Convert BAM file to RiboViz HDF5 file.
+#' Convert BAM file to RiboViz HDF5 file(s).
 #'
 #' @param bam_file BAM input file (character).
 #' @param orf_gff_file GFF2/GFF3 Matched genome feature file,
@@ -170,7 +170,44 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
 #' * `stop_in_feature` states where the stop codon is located (true if
 #'   within the feature, false otherwise).
 #'
-#' On output, `hd5_file` has the following structure.
+#' An HDF5 file, `hd_file`, is created that has external links to
+#' complementary HDF5 files, named `<hd_file>.1`,  `<hd_file>.2`
+#' etc. each of which hold the data for a subset of genes. The number
+#' of data files depends on the number of processes
+#' (`num_processes`). For example, if `num_processes` is 1 then the
+#' output files will be `<hd_file>` (external links file) and
+#' `<hd_file>.1` (data file). If `num_processes` is 4 then the
+#' output files will be `<hd_file>` (external links file) and
+#' `<hd_file>.1`, `<hd_file>.2`, `<hd_file>.3`, `<hd_file>.4`
+#' (data files).  
+#'
+#' Each complementary HDF5 data file has approximately the same number
+#' of genes i.e. approximately number of genes / `num_processes`.
+#'
+#' On output, `hd_file` has the following structure:
+#'
+#' ```
+#' GROUP "/" {
+#'   EXTERNAL_LINK "<gene<1>>" {
+#'      TARGETFILE "<hd_file>.1"
+#'      TARGETPATH "<gene<1>>"
+#'   }
+#'  ...
+#'   EXTERNAL_LINK "<gene<m>>" {
+#'      TARGETFILE "<hd_file>.2"
+#'      TARGETPATH "<gene>m>>"
+#'   }
+#'  ...
+#'   EXTERNAL_LINK "<gene<n>>" {
+#'      TARGETFILE "<hd_file>.<num_processes>"
+#'      TARGETPATH "<gene<n>>"
+#'   }
+#' ...
+#' }
+#' ```
+#'
+#' The complementary HDF5 data files, `<hd_file>.<i>`, each have the
+#' following structure.
 #'
 #' The `reads` group, `/<gene>/<dataset>/reads`, for a `<gene>` has
 #' several attributes associated with it. These are summary statistics
@@ -187,9 +224,9 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
 #' | `reads_by_len` | Counts of number of ribosome sequences of each length | BAM file |
 #' | `reads_total` | Total number of ribosome sequences | BAM file. Equal to number of non-zero reads in `reads_by_len` |
 #'
-#' `hd5_file` is organized in a hierarchy,
-#' `/<gene>/<dataset>/reads/data`, where `<gene>` is each gene name in
-#' `bam_file` and `orf_gff_file`.
+#' Each complementary HDF5 data file, `<hd_file>.<i>`, is organized in
+#' a hierarchy, `/<gene>/<dataset>/reads/data`, where `<gene>` is each
+#' gene name in `bam_file` and `orf_gff_file`.
 #'
 #' The `data` table in `/<gene>/<dataset>/reads/data`, for a `<gene>`
 #' has the positions and lengths of ribosome sequences within the
@@ -199,12 +236,12 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
 #' `min_read_length` and the last row corresponds to reads of length
 #' `max_read_length`.
 #'
-#' A template HDF5 file, showing how the HDF5 file relates to
-#' the arguments to this function, and the contents of `orf_gff_file`
-#' and `bam_file` is as follows:
+#' A template HDF5 data file, showing how the complementary HDF5 data
+#' files relate to the arguments to this function, and the contents of
+#' `orf_gff_file` and `bam_file` is as follows:
 #'
 #' ```
-#' HDF5 "<file>.h5" {
+#' HDF5 "<hd_file>.<i>" {
 #' GROUP "/" {
 #'   GROUP "<gene>" {
 #'     GROUP "<dataset>" {
@@ -389,39 +426,43 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
   # Save HDF5.
   print(paste("Saving mapped reads in H5 file", hd_file))
 
-  # create the output hdf5_file
+  # Create the output HDF5 file.
   rhdf5::h5createFile(hd_file)
 
   processes <- 1:num_processes
   gene_ids <- seq_len(length(genes))
 
-  # write base group.
+  # Write base group.
   # Close the file after use to prevent open the same file concurrently.
   fid <- rhdf5::H5Fopen(hd_file)
   base_gid <- rhdf5::H5Gopen(fid, "/")
   rhdf5::H5Fclose(fid)
 
   for (gene_id in gene_ids) {
-    # create a symbolic link to link HDF5 files back to target HDF5 file
+    # Create a symbolic link to link HDF5 files back to target HDF5
+    # file.
     tmp_hd_file <- paste(hd_file, (gene_id %% num_processes) + 1, sep = ".")
     gene <- genes[gene_id]
     rhdf5::H5Lcreate_external(tmp_hd_file, gene, base_gid, gene)
   }
   for (pid in processes) {
-    # Create HDF5 files for wach process, so different process can write into different file
-    # The reason of creating symbolic link first then create the HDF5 files is that
-    # the HDF5 will use absolute path if the source file exists when creating the link.
-    # However, we want to use the relative path, so we have to first create link then create file.
+    # Create HDF5 files for each process, so different processes can
+    # write into different files. The reason for creating symbolic
+    # links first then creating the HDF5 files is that HDF5 will use
+    # the absolute path if the source file exists when creating the
+    # link. However, we want to use the relative path, so we have to
+    # first create link then create file.
     tmp_hd_file <- paste(hd_file, pid, sep = ".")
     rhdf5::h5createFile(tmp_hd_file)
   }
-  # parallel the processes by writing in different HDF5 files
+  # Parallelize the processes by writing in different HDF5 files.
   execution_return_list <- mclapply(
     processes,
     function(pid) {
       for (gene_id in gene_ids) {
         if ((gene_id %% num_processes) != pid - 1) {
-          # we only store some gene on each process, so we skip the irrelevant genes
+            # We only store some gene in each process, so skip the
+            # irrelevant genes.
           next
         }
         gene <- genes[gene_id]
@@ -491,8 +532,9 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
       }
     },
     mc.cores = num_processes,
+    # Use preschedule to prevent more than 1 process write the same
+    # file at the same time.
     mc.preschedule = TRUE
-    # uses preschedule to prevent more than 1 process write the same file at the same time.
   )
   # Create symbolic link with alternate IDs, if required.
   if (!is.na(secondary_id)) {
