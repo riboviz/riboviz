@@ -1320,7 +1320,6 @@ process staticHTML {
         file(sample_normalized_density_apesites_per_codon_long_tsv) \
 	from generate_stats_figs_static_html
     output:
-      // Force dependency on output to countread
       val sample_id into static_html_sample_ids
       val sample_id into finished_viz_sample_id
       file "${sample_id}_output_report.html" into static_html_html
@@ -1354,6 +1353,8 @@ process staticHTML {
       """
 }
 
+// Force dependency on output of staticHTML (if run) or collateTpms so
+// this process is only run when all other processing has completed.
 if (params.run_static_html) {
   count_reads_sample_ids = static_html_sample_ids
 } else {
@@ -1368,8 +1369,6 @@ process countReads {
         // process if 'nextflow run' is run with '-resume'.
         env PYTHONPATH from workflow.projectDir.toString()
         val ribosome_fqs_yaml from ribosome_fqs_yaml
-        // Force dependency on output of 'collateTpms' so this process
-        // is only run when all other processing has completed.
         val samples_ids from count_reads_sample_ids.collect()
     output:
         file "read_counts_per_file.tsv" into read_counts_per_file_tsv
