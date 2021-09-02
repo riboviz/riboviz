@@ -12,7 +12,7 @@ dir_in: data/simdata/ # Input directory
 dir_index: vignette/index # Built indices directory
 dir_out: vignette/simdata_umi_output # Output directory
 dir_tmp: vignette/simdata_umi_tmp # Intermediate files directory
-do_pos_sp_nt_freq: TRUE # Calculate position-specific nucleotide frequency?
+output_metagene_normalized_profile: TRUE # Calculate position-specific nucleotide frequency?
 extract_umis: TRUE # Extract UMIs if TRUE
 feature: CDS # Feature type
 features_file: data/yeast_features.tsv # Features to correlate with ORFs

@@ -197,9 +197,10 @@ riboviz/test/integration/test_integration.py::test_cutadapt_fq[vignette/tmp-WTno
 ...
 riboviz/test/integration/test_integration.py::test_bedtools_bedgraph[vignette/output-WTnone-minus.bedgraph] PASSED [ 52%]
 ...
-riboviz/test/integration/test_integration.py::test_generate_stats_figs_pdf[vignette/output-WT3AT-3ntframe_propbygene.pdf] PASSED [ 97%]
-riboviz/test/integration/test_integration.py::test_collate_tpms_tsv[vignette/output] PASSED [ 98%]
-riboviz/test/integration/test_integration.py::test_read_counts_tsv[vignette/output] PASSED [100%]
+riboviz/test/integration/test_integration.py::test_generate_stats_figs_pdf[vignette/output-True-WTnone-frame_proportions_per_ORF.pdf] PASSED [ 97%]
+...
+riboviz/test/integration/test_integration.py::test_collate_orf_tpms_and_counts_tsv[vignette/output] PASSED [ 98%]
+riboviz/test/integration/test_integration.py::test_read_counts_per_file_tsv[vignette/output] PASSED [100%]
 ```
 
 ### Tests for temporary demultiplexed sample files
