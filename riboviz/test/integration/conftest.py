@@ -191,15 +191,15 @@ def pytest_generate_tests(metafunc):
     fixtures = {
         "index_prefix": [config[params.ORF_INDEX_PREFIX],
                          config[params.RRNA_INDEX_PREFIX]],
-        "index_dir": [config[params.INDEX_DIR]],
-        "tmp_dir": [config[params.TMP_DIR]],
-        "output_dir": [config[params.OUTPUT_DIR]],
-        "output_pdfs": [utils.value_in_dict(params.OUTPUT_PDFS, config)],
-        "extract_umis": [utils.value_in_dict(params.EXTRACT_UMIS, config)],
-        "dedup_umis": [utils.value_in_dict(params.DEDUP_UMIS, config)],
-        "dedup_stats": [True if params.DEDUP_STATS not in config else utils.value_in_dict(params.DEDUP_STATS, config)],
-        "group_umis": [utils.value_in_dict(params.GROUP_UMIS, config)],
-        "count_reads": [utils.value_in_dict(params.COUNT_READS, config)]
+        params.INDEX_DIR: [config[params.INDEX_DIR]],
+        params.TMP_DIR: [config[params.TMP_DIR]],
+        params.OUTPUT_DIR: [config[params.OUTPUT_DIR]],
+        params.OUTPUT_PDFS: [utils.value_in_dict(params.OUTPUT_PDFS, config)],
+        params.EXTRACT_UMIS: [utils.value_in_dict(params.EXTRACT_UMIS, config)],
+        params.DEDUP_UMIS: [utils.value_in_dict(params.DEDUP_UMIS, config)],
+        params.DEDUP_STATS: [True if params.DEDUP_STATS not in config else utils.value_in_dict(params.DEDUP_STATS, config)],
+        params.GROUP_UMIS: [utils.value_in_dict(params.GROUP_UMIS, config)],
+        params.COUNT_READS: [utils.value_in_dict(params.COUNT_READS, config)]
     }
     if "sample" in metafunc.fixturenames:
         samples = []

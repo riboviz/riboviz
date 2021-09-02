@@ -155,51 +155,51 @@ def scratch_directory(tmpdir):
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("index", list(range(1, test.NUM_INDICES)))
-def test_hisat2_build_index(expected_fixture, index_dir, index_prefix, index):
+def test_hisat2_build_index(expected_fixture, dir_index, index_prefix, index):
     """
     Test ``hisat2-build`` index file sizes for equality. See
     :py:func:`riboviz.utils.equal_file_sizes`.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param index_dir: Index files directory, from configuration file
-    :type index_dir: str or unicode
+    :param dir_index: Index files directory, from configuration file
+    :type dir_index: str or unicode
     :param index_prefix: Index file name prefix
     :type index_prefix: str or unicode
     :param index: File name index
     :type index: int
     """
     file_name = hisat2.HT2_FORMAT.format(index_prefix, index)
-    index_dir_name = os.path.basename(os.path.normpath(index_dir))
+    dir_index_name = os.path.basename(os.path.normpath(dir_index))
     utils.equal_file_sizes(
-        os.path.join(expected_fixture, index_dir_name, file_name),
-        os.path.join(index_dir, file_name))
+        os.path.join(expected_fixture, dir_index_name, file_name),
+        os.path.join(dir_index, file_name))
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_cutadapt_fq(expected_fixture, tmp_dir, sample):
+def test_cutadapt_fq(expected_fixture, dir_tmp, sample):
     """
     Test ``cutadapt`` FASTQ files for equality. See
     :py:func:`riboviz.fastq.equal_fastq`.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param tmp_dir: Temporary directory, from configuration file
-    :type tmp_dir: str or unicode
+    :param dir_tmp: Temporary directory, from configuration file
+    :type dir_tmp: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     """
-    tmp_dir_name = os.path.basename(os.path.normpath(tmp_dir))
-    fastq.equal_fastq(os.path.join(expected_fixture, tmp_dir_name, sample,
+    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
+    fastq.equal_fastq(os.path.join(expected_fixture, dir_tmp_name, sample,
                                    workflow_files.ADAPTER_TRIM_FQ),
-                      os.path.join(tmp_dir, sample,
+                      os.path.join(dir_tmp, sample,
                                    workflow_files.ADAPTER_TRIM_FQ))
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_umitools_extract_fq(extract_umis, expected_fixture, tmp_dir,
+def test_umitools_extract_fq(extract_umis, expected_fixture, dir_tmp,
                              sample):
     """
     Test ``umi_tools extract`` FASTQ files for equality. See
@@ -212,18 +212,18 @@ def test_umitools_extract_fq(extract_umis, expected_fixture, tmp_dir,
     :type extract_umis: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param tmp_dir: Temporary directory, from configuration file
-    :type tmp_dir: str or unicode
+    :param dir_tmp: Temporary directory, from configuration file
+    :type dir_tmp: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     """
     if not extract_umis:
         pytest.skip('Skipped test applicable to UMI extraction')
-    tmp_dir_name = os.path.basename(os.path.normpath(tmp_dir))
+    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
     fastq.equal_fastq(
-        os.path.join(expected_fixture, tmp_dir_name, sample,
+        os.path.join(expected_fixture, dir_tmp_name, sample,
                      workflow_files.UMI_EXTRACT_FQ),
-        os.path.join(tmp_dir, sample, workflow_files.UMI_EXTRACT_FQ))
+        os.path.join(dir_tmp, sample, workflow_files.UMI_EXTRACT_FQ))
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
@@ -231,24 +231,24 @@ def test_umitools_extract_fq(extract_umis, expected_fixture, tmp_dir,
 @pytest.mark.parametrize("file_name", [
     workflow_files.NON_RRNA_FQ,
     workflow_files.UNALIGNED_FQ])
-def test_hisat_fq(expected_fixture, tmp_dir, sample, file_name):
+def test_hisat_fq(expected_fixture, dir_tmp, sample, file_name):
     """
     Test ``hisat`` FASTQ files for equality. See
     :py:func:`riboviz.fastq.equal_fastq`.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param tmp_dir: Temporary directory, from configuration file
-    :type tmp_dir: str or unicode
+    :param dir_tmp: Temporary directory, from configuration file
+    :type dir_tmp: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
     """
-    tmp_dir_name = os.path.basename(os.path.normpath(tmp_dir))
-    fastq.equal_fastq(os.path.join(expected_fixture, tmp_dir_name, sample,
+    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
+    fastq.equal_fastq(os.path.join(expected_fixture, dir_tmp_name, sample,
                                    file_name),
-                      os.path.join(tmp_dir, sample, file_name))
+                      os.path.join(dir_tmp, sample, file_name))
 
 
 def compare_sam_files(expected_directory, directory,
@@ -289,7 +289,7 @@ def compare_sam_files(expected_directory, directory,
 @pytest.mark.parametrize("file_name", [
     workflow_files.ORF_MAP_SAM,
     workflow_files.RRNA_MAP_SAM])
-def test_hisat2_sam(expected_fixture, tmp_dir, scratch_directory,
+def test_hisat2_sam(expected_fixture, dir_tmp, scratch_directory,
                     sample, file_name):
     """
     Test ``hisat`` SAM files for equality. The SAM files are sorted
@@ -298,8 +298,8 @@ def test_hisat2_sam(expected_fixture, tmp_dir, scratch_directory,
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param tmp_dir: Temporary directory, from configuration file
-    :type tmp_dir: str or unicode
+    :param dir_tmp: Temporary directory, from configuration file
+    :type dir_tmp: str or unicode
     :param scratch_directory: scratch files directory
     :type scratch_directory: str or unicode
     :param sample: sample name
@@ -307,13 +307,13 @@ def test_hisat2_sam(expected_fixture, tmp_dir, scratch_directory,
     :param file_name: file name
     :type file_name: str or unicode
     """
-    compare_sam_files(expected_fixture, tmp_dir, scratch_directory,
+    compare_sam_files(expected_fixture, dir_tmp, scratch_directory,
                       sample, file_name)
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_trim5p_mismatch_sam(expected_fixture, tmp_dir,
+def test_trim5p_mismatch_sam(expected_fixture, dir_tmp,
                              scratch_directory, sample):
     """
     Test :py:mod:`riboviz.tools.trim_5p_mismatch` SAM files for
@@ -322,43 +322,43 @@ def test_trim5p_mismatch_sam(expected_fixture, tmp_dir,
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param tmp_dir: Temporary directory, from configuration file
-    :type tmp_dir: str or unicode
+    :param dir_tmp: Temporary directory, from configuration file
+    :type dir_tmp: str or unicode
     :param scratch_directory: scratch files directory
     :type scratch_directory: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     """
-    compare_sam_files(expected_fixture, tmp_dir, scratch_directory,
+    compare_sam_files(expected_fixture, dir_tmp, scratch_directory,
                       sample, workflow_files.ORF_MAP_CLEAN_SAM)
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_trim5p_mismatch_tsv(expected_fixture, tmp_dir, sample):
+def test_trim5p_mismatch_tsv(expected_fixture, dir_tmp, sample):
     """
     Test :py:mod:`riboviz.tools.trim_5p_mismatch` TSV files for
     equality. See :py:func:`riboviz.utils.equal_tsv`.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param tmp_dir: Temporary directory, from configuration file
-    :type tmp_dir: str or unicode
+    :param dir_tmp: Temporary directory, from configuration file
+    :type dir_tmp: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     """
-    tmp_dir_name = os.path.basename(os.path.normpath(tmp_dir))
+    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
     utils.equal_tsv(
-        os.path.join(expected_fixture, tmp_dir_name, sample,
+        os.path.join(expected_fixture, dir_tmp_name, sample,
                      workflow_files.TRIM_5P_MISMATCH_TSV),
-        os.path.join(tmp_dir, sample,
+        os.path.join(dir_tmp, sample,
                      workflow_files.TRIM_5P_MISMATCH_TSV))
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_samtools_view_sort_index_orf_map_clean_bam(
-        expected_fixture, tmp_dir, sample):
+        expected_fixture, dir_tmp, sample):
     """
     Test ``samtools view | samtools sort`` BAM and ``samtools index``
     BAI files for equality. See :py:func:`riboviz.sam_bam.equal_bam` and
@@ -366,27 +366,27 @@ def test_samtools_view_sort_index_orf_map_clean_bam(
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param tmp_dir: Temporary directory, from configuration file
-    :type tmp_dir: str or unicode
+    :param dir_tmp: Temporary directory, from configuration file
+    :type dir_tmp: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     """
-    tmp_dir_name = os.path.basename(os.path.normpath(tmp_dir))
+    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
     sam_bam.equal_bam(
-        os.path.join(expected_fixture, tmp_dir_name, sample,
+        os.path.join(expected_fixture, dir_tmp_name, sample,
                      workflow_files.ORF_MAP_CLEAN_BAM),
-        os.path.join(tmp_dir, sample,
+        os.path.join(dir_tmp, sample,
                      workflow_files.ORF_MAP_CLEAN_BAM))
     bai_file_name = sam_bam.BAI_FORMAT.format(workflow_files.ORF_MAP_CLEAN_BAM)
     utils.equal_file_sizes(
-        os.path.join(expected_fixture, tmp_dir_name, sample,
+        os.path.join(expected_fixture, dir_tmp_name, sample,
                      bai_file_name),
-        os.path.join(tmp_dir, sample, bai_file_name))
+        os.path.join(dir_tmp, sample, bai_file_name))
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_samtools_index_dedup_bam(dedup_umis, tmp_dir, sample):
+def test_samtools_index_dedup_bam(dedup_umis, dir_tmp, sample):
     """
     Test ``samtools index`` BAM and BAI files. Check files exist only.
 
@@ -395,24 +395,24 @@ def test_samtools_index_dedup_bam(dedup_umis, tmp_dir, sample):
 
     :param dedup_umi: Was UMI deduplication configured?
     :type dedup_umis: bool
-    :param tmp_dir: Temporary directory, from configuration file
-    :type tmp_dir: str or unicode
+    :param dir_tmp: Temporary directory, from configuration file
+    :type dir_tmp: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     """
     if not dedup_umis:
         pytest.skip('Skipped test applicable to UMI deduplication')
-    actual_file = os.path.join(tmp_dir, sample, workflow_files.DEDUP_BAM)
+    actual_file = os.path.join(dir_tmp, sample, workflow_files.DEDUP_BAM)
     assert os.path.exists(actual_file), "Non-existent file: %s" % actual_file
     actual_bai_file = os.path.join(
-        tmp_dir, sample, sam_bam.BAI_FORMAT.format(workflow_files.DEDUP_BAM))
+        dir_tmp, sample, sam_bam.BAI_FORMAT.format(workflow_files.DEDUP_BAM))
     assert os.path.exists(actual_bai_file),\
         "Non-existent file: %s" % actual_bai_file
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_samtools_view_sort_index(dedup_umis, expected_fixture,
-                                  output_dir, sample):
+                                  dir_out, sample):
     """
     Test ``samtools view | samtools sort`` BAM and ``samtools index``
     BAI files for equality. See :py:func:`riboviz.sam_bam.equal_bam`
@@ -427,23 +427,23 @@ def test_samtools_view_sort_index(dedup_umis, expected_fixture,
     :type dedup_umis: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param output_dir: Output directory, from configuration file
-    :type output_dir: str or unicode
+    :param dir_out: Output directory, from configuration file
+    :type dir_out: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     """
     file_name = sam_bam.BAM_FORMAT.format(sample)
     bai_file_name = sam_bam.BAI_FORMAT.format(file_name)
-    output_dir_name = os.path.basename(os.path.normpath(output_dir))
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
     expected_file = os.path.join(
-        expected_fixture, output_dir_name, sample, file_name)
+        expected_fixture, dir_out_name, sample, file_name)
     if not os.path.exists(expected_file):
         pytest.skip('Skipped as expected file does not exist')
-    actual_file = os.path.join(output_dir, sample, file_name)
+    actual_file = os.path.join(dir_out, sample, file_name)
     assert os.path.exists(actual_file), "Non-existent file: %s" % actual_file
     expected_bai_file = os.path.join(
-        expected_fixture, output_dir_name, sample, bai_file_name)
-    actual_bai_file = os.path.join(output_dir, sample, bai_file_name)
+        expected_fixture, dir_out_name, sample, bai_file_name)
+    actual_bai_file = os.path.join(dir_out, sample, bai_file_name)
     assert os.path.exists(actual_bai_file),\
         "Non-existent file: %s" % actual_bai_file
     if dedup_umis:
@@ -458,7 +458,7 @@ def test_samtools_view_sort_index(dedup_umis, expected_fixture,
                                         "per_umi_per_position.tsv",
                                         "per_umi.tsv"])
 def test_umitools_dedup_stats_tsv(
-        dedup_umis, dedup_stats, expected_fixture, tmp_dir,
+        dedup_umis, dedup_stats, expected_fixture, dir_tmp,
         sample, stats_file):
     """
     Test ``umi_tools dedup --output-stats`` TSV files exist.
@@ -479,8 +479,8 @@ def test_umitools_dedup_stats_tsv(
     :type dedup_stats: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param tmp_dir: Temporary directory, from configuration file
-    :type tmp_dir: str or unicode
+    :param dir_tmp: Temporary directory, from configuration file
+    :type dir_tmp: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     :param stats_file: statistics file name
@@ -493,19 +493,19 @@ def test_umitools_dedup_stats_tsv(
     file_name = os.path.join(sample,
                              workflow_files.DEDUP_STATS_FORMAT.format(
                                  stats_file))
-    tmp_dir_name = os.path.basename(os.path.normpath(tmp_dir))
-    expected_file = os.path.join(expected_fixture, tmp_dir_name,
+    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
+    expected_file = os.path.join(expected_fixture, dir_tmp_name,
                                  file_name)
     if not os.path.exists(expected_file):
         pytest.skip('Skipped as expected file does not exist')
-    actual_file = os.path.join(tmp_dir, file_name)
+    actual_file = os.path.join(dir_tmp, file_name)
     assert os.path.exists(actual_file), "Non-existent file: %s" % actual_file
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_umitools_pre_dedup_group_tsv(
-        group_umis, expected_fixture, tmp_dir, sample):
+        group_umis, expected_fixture, dir_tmp, sample):
     """
     Test ``umi_tools group`` TSV files for equality. See
     :py:func:`riboviz.utils.equal_tsv`.
@@ -517,24 +517,24 @@ def test_umitools_pre_dedup_group_tsv(
     :type group_umis: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param tmp_dir: Temporary directory, from configuration file
-    :type tmp_dir: str or unicode
+    :param dir_tmp: Temporary directory, from configuration file
+    :type dir_tmp: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     """
     if not group_umis:
         pytest.skip('Skipped test applicable to UMI groups')
-    tmp_dir_name = os.path.basename(os.path.normpath(tmp_dir))
+    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
     utils.equal_tsv(
-        os.path.join(expected_fixture, tmp_dir_name, sample,
+        os.path.join(expected_fixture, dir_tmp_name, sample,
                      workflow_files.PRE_DEDUP_GROUPS_TSV),
-        os.path.join(tmp_dir, sample,
+        os.path.join(dir_tmp, sample,
                      workflow_files.PRE_DEDUP_GROUPS_TSV))
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_umitools_post_dedup_group_tsv(group_umis, tmp_dir, sample):
+def test_umitools_post_dedup_group_tsv(group_umis, dir_tmp, sample):
     """
     Test ``umi_tools group`` TSV file exists.
 
@@ -547,15 +547,15 @@ def test_umitools_post_dedup_group_tsv(group_umis, tmp_dir, sample):
 
     :param group_umis: Was UMI grouping configured?
     :type group_umis: bool
-    :param tmp_dir: Temporary directory, from configuration file
-    :type tmp_dir: str or unicode
+    :param dir_tmp: Temporary directory, from configuration file
+    :type dir_tmp: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     """
     if not group_umis:
         pytest.skip('Skipped test applicable to UMI groups')
     actual_file = os.path.join(
-        tmp_dir, sample, workflow_files.POST_DEDUP_GROUPS_TSV)
+        dir_tmp, sample, workflow_files.POST_DEDUP_GROUPS_TSV)
     assert os.path.exists(actual_file), "Non-existent file: %s" % actual_file
 
 
@@ -563,7 +563,7 @@ def test_umitools_post_dedup_group_tsv(group_umis, tmp_dir, sample):
 @pytest.mark.parametrize("file_name", [
     workflow_files.MINUS_BEDGRAPH,
     workflow_files.PLUS_BEDGRAPH])
-def test_bedtools_bedgraph(expected_fixture, output_dir, sample,
+def test_bedtools_bedgraph(expected_fixture, dir_out, sample,
                            file_name):
     """
     Test ``bedtools genomecov`` bedgraph files for equality. See
@@ -571,43 +571,43 @@ def test_bedtools_bedgraph(expected_fixture, output_dir, sample,
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param output_dir: Output directory, from configuration file
-    :type output_dir: str or unicode
+    :param dir_out: Output directory, from configuration file
+    :type dir_out: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
     """
-    output_dir_name = os.path.basename(os.path.normpath(output_dir))
-    expected_file = os.path.join(expected_fixture, output_dir_name,
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
+    expected_file = os.path.join(expected_fixture, dir_out_name,
                                  sample, file_name)
     if not os.path.exists(expected_file):
         pytest.skip('Skipped as expected file does not exist')
     bedgraph.equal_bedgraph(expected_file,
-                            os.path.join(output_dir, sample, file_name))
+                            os.path.join(dir_out, sample, file_name))
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_bam_to_h5_h5(expected_fixture, output_dir, sample):
+def test_bam_to_h5_h5(expected_fixture, dir_out, sample):
     """
     Test ``bam_to_h5.R`` H5 files for equality. See
     :py:func:`riboviz.h5.equal_h5`.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param output_dir: Output directory, from configuration file
-    :type output_dir: str or unicode
+    :param dir_out: Output directory, from configuration file
+    :type dir_out: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     """
     file_name = h5.H5_FORMAT.format(sample)
-    output_dir_name = os.path.basename(os.path.normpath(output_dir))
-    expected_file = os.path.join(expected_fixture, output_dir_name,
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
+    expected_file = os.path.join(expected_fixture, dir_out_name,
                                  sample, file_name)
     if not os.path.exists(expected_file):
         pytest.skip('Skipped as expected file does not exist')
     h5.equal_h5(expected_file,
-                os.path.join(output_dir, sample, file_name))
+                os.path.join(dir_out, sample, file_name))
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
@@ -623,7 +623,7 @@ def test_bam_to_h5_h5(expected_fixture, output_dir, sample):
                           workflow_r.GENE_POSITION_LENGTH_COUNTS_TSV,
                           workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_LONG_TSV,
                           workflow_r.ORF_TPMS_AND_COUNTS_TSV])
-def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
+def test_generate_stats_figs_tsv(expected_fixture, dir_out, sample,
                                  file_name):
     """
     Test ``generate_stats_figs.R`` TSV files for equality. See
@@ -631,21 +631,21 @@ def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param output_dir: Output directory, from configuration file
-    :type output_dir: str or unicode
+    :param dir_out: Output directory, from configuration file
+    :type dir_out: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
     """
-    output_dir_name = os.path.basename(os.path.normpath(output_dir))
-    expected_file = os.path.join(expected_fixture, output_dir_name,
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
+    expected_file = os.path.join(expected_fixture, dir_out_name,
                                  sample, file_name)
     if not os.path.exists(expected_file):
         pytest.skip('Skipped as expected file does not exist')
     utils.equal_tsv(
         expected_file,
-        os.path.join(output_dir, sample, file_name))
+        os.path.join(dir_out, sample, file_name))
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
@@ -658,15 +658,15 @@ def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
                           workflow_r.METAGENE_START_BARPLOT_BY_LENGTH_PDF,
                           workflow_r.METAGENE_START_RIBOGRID_BY_LENGTH_PDF,
                           workflow_r.FRAME_PROPORTIONS_PER_ORF_PDF])
-def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
+def test_generate_stats_figs_pdf(expected_fixture, dir_out, sample,
                                  file_name, output_pdfs):
     """
     Test ``generate_stats_figs.R`` PDF files exist.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param output_dir: Output directory, from configuration file
-    :type output_dir: str or unicode
+    :param dir_out: Output directory, from configuration file
+    :type dir_out: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     :param file_name: file name
@@ -676,66 +676,66 @@ def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
     """
     if not output_pdfs:
         pytest.skip('Skipped testing for pdfs as pdfs not generated')
-    output_dir_name = os.path.basename(os.path.normpath(output_dir))
-    expected_file = os.path.join(expected_fixture, output_dir_name,
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
+    expected_file = os.path.join(expected_fixture, dir_out_name,
                                  sample, file_name)
     if not os.path.exists(expected_file):
         pytest.skip('Skipped as expected file does not exist')
-    actual_file = os.path.join(output_dir, sample, file_name)
+    actual_file = os.path.join(dir_out, sample, file_name)
     assert os.path.exists(actual_file), "Non-existent file: %s" % actual_file
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name", [workflow_files.STATIC_HTML_FILE])
-def test_analysis_outputs_html(expected_fixture, output_dir, sample, file_name):
+def test_analysis_outputs_html(expected_fixture, dir_out, sample, file_name):
     """
     Test ``AnalysisOutputs.Rmd`` html files for equality. See
     :py:func:`riboviz.html.equal_html`.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param output_dir: Output directory, from configuration file
-    :type output_dir: str or unicode
+    :param dir_out: Output directory, from configuration file
+    :type dir_out: str or unicode
     :param sample: sample name
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
     """
     file_name = workflow_files.STATIC_HTML_FILE.format(sample)
-    output_dir_name = os.path.basename(os.path.normpath(output_dir))
-    expected_file = os.path.join(expected_fixture, output_dir_name,
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
+    expected_file = os.path.join(expected_fixture, dir_out_name,
                                  sample, file_name)
     if not os.path.exists(expected_file):
         pytest.skip('Skipped as expected file does not exist')
-    assert os.path.exists(os.path.join(output_dir, sample, file_name))
+    assert os.path.exists(os.path.join(dir_out, sample, file_name))
     html.equal_html(expected_file,
-                    os.path.join(output_dir, sample, file_name))
+                    os.path.join(dir_out, sample, file_name))
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_collate_orf_tpms_and_counts_tsv(expected_fixture, output_dir):
+def test_collate_orf_tpms_and_counts_tsv(expected_fixture, dir_out):
     """
     Test ``collate_tpms.R`` TSV files for equality. See
     :py:func:`riboviz.utils.equal_tsv`.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param output_dir: Output directory, from configuration file
-    :type output_dir: str or unicode
+    :param dir_out: Output directory, from configuration file
+    :type dir_out: str or unicode
     """
-    output_dir_name = os.path.basename(os.path.normpath(output_dir))
-    expected_file = os.path.join(expected_fixture, output_dir_name,
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
+    expected_file = os.path.join(expected_fixture, dir_out_name,
                                  workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV)
     if not os.path.exists(expected_file):
         pytest.skip('Skipped as expected file does not exist')
     utils.equal_tsv(expected_file,
-                    os.path.join(output_dir, workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV),
+                    os.path.join(dir_out, workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV),
                     ignore_row_order=True,
                     na_to_empty_str=True)
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_read_counts_per_file_tsv(count_reads, expected_fixture, output_dir):
+def test_read_counts_per_file_tsv(count_reads, expected_fixture, dir_out):
     """
     Test :py:mod:`riboviz.tools.count_reads` TSV files for
     equality. See :py:func:`riboviz.count_reads.equal_read_counts`.
@@ -744,13 +744,13 @@ def test_read_counts_per_file_tsv(count_reads, expected_fixture, output_dir):
     :type count_reads: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param output_dir: Output directory, from configuration file
-    :type output_dir: str or unicode
+    :param dir_out: Output directory, from configuration file
+    :type dir_out: str or unicode
     """
     if not count_reads:
         pytest.skip('Skipped test as read counts were not requested')
-    output_dir_name = os.path.basename(os.path.normpath(output_dir))
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
     count_reads_module.equal_read_counts(
-        os.path.join(expected_fixture, output_dir_name,
+        os.path.join(expected_fixture, dir_out_name,
                      workflow_files.READ_COUNTS_PER_FILE_FILE),
-        os.path.join(output_dir, workflow_files.READ_COUNTS_PER_FILE_FILE))
+        os.path.join(dir_out, workflow_files.READ_COUNTS_PER_FILE_FILE))
