@@ -3,39 +3,54 @@
 print('Starting')
 
 suppressMessages(library(here))
-suppressMessages(library(argparse))
+suppressMessages(library(optparse))
 source(here::here('rscripts','read_count_functions.R'))
 
-parser <- ArgumentParser()
-parser$add_argument('-i', '--input', help="input H5 file, Path to the H5 file containing the data to be studied", type="character")
-parser$add_argument('-c', '--compare', help='path H5 to compare with input file. Ideally a control file')
-parser$add_argument('-g', '--gff', help="Path to GFF3 file corresponding to the species being studies", type="character")
-parser$add_argument('--gene', help="Gene of interest, name used should match the name listed in H5 file so check format", type="character")
-parser$add_argument('-d', '--dataset', help='Name of the dataset being run, ie D-Sp_2018, should match the dataset listed in H5 file', type="character")
-parser$add_argument('-o', '--output', help='Output directory for plots')
-parser$add_argument('-t', '--treatment', help='Treatment used on the cells, for labelling of plots')
+option_list <- list(make_option(c("-i", "--input"),
+                                type = "character",
+                                help = "Path input to h5 file"),
+                    make_option(c("-c", "--compare"),
+                                type = "character",
+                                help = "path to H5 to be compared with input file. Ideally a control file"),
+                    make_option(c("-d", "--dataset"),
+                                type = "character",
+                                help = "Name of the dataset being studied"),
+                    make_option(c("-g", "--gff"),
+                                type = "character",
+                                help = "Path t the GFF3 file of the organism being studied"),
+                    make_option(c("-o", "--output"),
+                                type = "character",
+                                help = "Path to output directory",
+                                default = '.'),
+                    make_option("--gene",
+                                type = "character",
+                                help = "Gene of interest to be highlighted in plots",
+                                default = NULL),
+                    make_option(c("-t", "--treatment"),
+                                type = "character",
+                                help ='Treatment used on the cells, for labelling of plots',
+                                default = NULL),
+                    make_option("--read_threshold",
+                                type = "numeric",
+                                help = "The minimum reads per base value needed in both samples for a gene to be included in the plot",
+                                default = 0.02)
+)
+
+opt <- optparse::parse_args(OptionParser(option_list = option_list))
 
 
-args <- parser$parse_args()
 
-# h5_file_path <- args$input
-# comparison_file <- args$compare
-# gff_in <- args$gff
-# Gene_of_interest <- args$gene
-# dataset <- args$dataset
-# output_dir <- args$output
-# treatment <- args$treatment
+h5_file_path <- opt$input
+comparison_file <- opt$compare
+gff_in <- opt$gff
+Gene_of_interest <- opt$gene
+dataset <- opt$dataset
+output_dir <- opt$output
+treatment <- opt$treatment
+read_threshold <- opt$read_threshold
 
 ## functions 
 
-
-h5_file_path <- args$input
-comparison_file <- 'R-Sp_2020/wt.control.hs.ribo.1.h5'
-gff_in <- args$gff
-Gene_of_interest <- args$gene
-dataset <- args$dataset
-output_dir <- args$output
-treatment <- args$treatment
 
 # GeneFeatureTotalCountsPerBase takes a gene, splits it into features (5UTR and CDS),
 # and returns the reads per base in the features of that gene in the form of a tibble
@@ -87,7 +102,9 @@ GeneFeatureTotalCountsPerBase <- function(gene = gene, dataset = dataset, hd_fil
 # so it can be used in a nested map() function to apple to all datasets listed
 
 make_sample_tables <- function(gene_names, hd_file, dataset){
-  sample_table <- purrr::map_dfr(.x = gene_names[1:20], .f = GeneFeatureTotalCountsPerBase, hd_file = hd_file, dataset, startpos = 1)
+  
+  sample_table <- purrr::map_dfr(.x = gene_names, .f = GeneFeatureTotalCountsPerBase, hd_file = hd_file, dataset, startpos = 1)
+  
   return(sample_table)
 }
 
@@ -95,13 +112,15 @@ make_sample_tables <- function(gene_names, hd_file, dataset){
 # filter to remove those with infinite values or less than 0.02 reads per base. 
 # reduces chance that the observed change is due to random variation as a higher number is needed to be plotted
 
-filter_tables <- function(all_genes_comparison, all_genes_one_sample){
+filter_tables <- function(all_genes_comparison, all_genes_one_sample, read_threshold){
   
-  all_genes_comparison <- all_genes_comparison %>% filter(all_genes_comparison$fiveUTR_reads_per_base >= 0.02 & 
-                                                          all_genes_comparison$CDS_reads_per_base >= 0.02)
-  all_genes_one_sample <- all_genes_one_sample %>% filter(all_genes_one_sample$fiveUTR_reads_per_base >= 0.02 &
-                                                          all_genes_one_sample$CDS_reads_per_base >= 0.02 & 
+  all_genes_comparison <- all_genes_comparison %>% filter(all_genes_comparison$fiveUTR_reads_per_base >= read_threshold & 
+                                                          all_genes_comparison$CDS_reads_per_base >= read_threshold)
+  
+  all_genes_one_sample <- all_genes_one_sample %>% filter(all_genes_one_sample$fiveUTR_reads_per_base >= read_threshold &
+                                                          all_genes_one_sample$CDS_reads_per_base >= read_threshold & 
                                                           all_genes_one_sample$Gene %in% all_genes_comparison$Gene)
+  
   all_genes_comparison <- all_genes_comparison %>% filter(all_genes_comparison$Gene %in% all_genes_one_sample$Gene)
   
   ratio_change <- tibble(Gene = all_genes_one_sample$Gene,
@@ -131,8 +150,8 @@ plot_scatter_comparison <- function(ratio_change, highlighted_genes, treatment){
                   breaks = c(0.001, 0.01, 0.1, 1.0, 10.0, 100.0), 
                   labels = c(0.001, 0.01, 0.1, 1.0, 10.0, 100.0))+
     coord_equal(ratio = 1)+
-    labs(title = paste0(treatment, ', change in
-5UTR rpb:CDS rpb'),
+    labs(title = paste0(treatment, 'change in
+5UTR rpb:CDS rpb value'),
          x = '5UTR rpb/CDS rpb - control',
          y = '5UTR rpb/CDS rpb - treated')+
     theme(text=element_text(size=14),
@@ -169,16 +188,26 @@ if (!file.exists(gff_in)){
 
 
 print('Getting gene names')
+
   GFF <- readGFFAsDf(gff_in)
   gene_names <- levels(GFF$seqnames)
+  
 print('Creating sample tables')
+
   all_genes_one_sample <- make_sample_tables(gene_names, hd_file = h5_file_path, dataset)
   all_genes_comparison <- make_sample_tables(gene_names,hd_file = comparison_file, dataset)
+  
 print('removing genes with few or no reads in features')
-  ratio_change <- filter_tables(all_genes_comparison, all_genes_one_sample)
+
+  ratio_change <- filter_tables(all_genes_comparison, all_genes_one_sample, read_threshold)
   highlighted_genes <- ratio_change %>% filter(ratio_change$Gene %in% Gene_of_interest)
+  
 print('Creating UTR use comparison scatter plot')
+
   scatter_plot <- plot_scatter_comparison(ratio_change, highlighted_genes, treatment)
+  
 print('Saving Plots as PDF')
+
   save_plot_pdf(scatter_plot, output_dir)
+  
 print('Done')
