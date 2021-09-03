@@ -1,26 +1,40 @@
+# This script takes a h5 file and extracts the positions of reads for a gene of interest. 
 print('Loading required files')
 
 suppressMessages(library(getopt, quietly=T))
 suppressMessages(library(here))
-library(argparse)
+suppressMessages(library(optparse))
 
 source(here::here("rscripts", "read_count_functions.R"))
 source(here::here("rscripts", "stats_figs_block_functions.R"))
 
-parser <- ArgumentParser()
-parser$add_argument('-i', '--input', help="input H5 file, Path to the H5 file containing the data to be studied", type="character")
-parser$add_argument('-g', '--gff', help="Path to GFF3 file corresponding to the species being studies", type="character")
-parser$add_argument('--gene', help="Gene of interest, name used should match the name listed in H5 file so check format", type="character")
-parser$add_argument('-d', '--dataset', help='Name of the dataset being run, ie D-Sp_2018, should match the dataset listed in H5 file', type="character")
-parser$add_argument('-o', '--output', help='Output directory for plots')
 
-args <- parser$parse_args()
 
-file_url <- args$input
-gff_in <- args$gff
-Gene_of_interest <- args$gene
-dataset <- args$dataset
-output_dir <- args$output
+option_list <- list(make_option(c("-i", "--input"),
+                                type = "character",
+                                help = "Path input to h5 file"),
+                    make_option(c("-d", "--dataset"),
+                                type = "character",
+                                help = "Name of the dataset being studied"),
+                    make_option(c("-g", "--gff"),
+                                type = "character",
+                                help = "Path t the GFF3 file of the organism being studied"),
+                    make_option(c("-o", "--output"),
+                                type = "character",
+                                help = "Path to output directory"),
+                    make_option("--gene",
+                                type = "character",
+                                help = "Gene of interest, name used should match the name listed in H5 file so check format")
+)
+
+
+opt <- optparse::parse_args(OptionParser(option_list = option_list))
+
+file_url <- opt$input
+gff_in <- opt$gff
+Gene_of_interest <- opt$gene
+dataset <- opt$dataset
+output_dir <- opt$output
 
 
 ## Actual code
@@ -83,8 +97,8 @@ print('Creating reads on transcript plot')
 reads_on_transcript_plot <- ggplot(gene_Total_reads_at_position,aes(x = Pos, y = Counts))+
    theme_bw()+
    geom_col( width = 1, color = 'red')+
-   scale_y_continuous(limits = c(0, 50))+
-   labs(title = paste(strsplit(basename(file_url), '.h5'), ' - ', Gene_of_interest), 
+   scale_y_continuous(limits = c(0, max(gene_Total_reads_at_position)))+
+   labs(title = paste(dataset, strsplit(basename(file_url), '.h5'), ' - ', Gene_of_interest), 
         x = 'Position relative to start codon', y = 'Number of reads') +
    theme(axis.text=element_text(size=14),
          axis.title=element_text(size=14, face='bold'),
@@ -115,8 +129,8 @@ print('Creating reads per million plot')
 reads_per_million_plot <- ggplot(reads_per_million,aes(x = Pos, y = Counts))+
   theme_bw()+
   geom_col( width = 1, color = 'red')+
-  scale_y_continuous(limits = c(0, 50))+
-  labs(title = paste0(Gene_of_interest), 
+  scale_y_continuous(limits = c(0, max(gene_Total_reads_at_position)))+
+  labs(title = paste(dataset, strsplit(basename(file_url), '.h5'), ' - ', Gene_of_interest), 
        x = 'Position relative to start codon', y = 'Reads per million 
   reads (RPFs)') +
   theme(axis.text=element_text(size=14),
