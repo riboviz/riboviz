@@ -78,12 +78,13 @@ def invoke_count_reads():
         gff_lines = options.gff_lines
         num_process = options.num_process
         task = options.task.lower()
-        time=estimate_time.estimate_time(float(sample_size), int(gff_lines), int(num_process), task) / 60
+        time = estimate_time.estimate_time(float(sample_size), int(gff_lines), int(num_process), task) / 60
         if time > 126 or time < 0:
             time = 126
     except:
         exit(120)
     exit(int(time+1))
+
 
 if __name__ == "__main__":
     invoke_count_reads()
