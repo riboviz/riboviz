@@ -155,18 +155,18 @@ def scratch_directory(tmpdir):
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("index", list(range(1, test.NUM_INDICES)))
-def test_hisat2_build_index(expected_fixture, build_indices,
-                            dir_index, index_prefix, index):
+def test_hisat2_build_index(build_indices, expected_fixture, dir_index,
+                            index_prefix, index):
     """
     Test ``hisat2-build`` index file sizes for equality. See
     :py:func:`riboviz.utils.equal_file_sizes`.
 
     Skipped if :py:const:`riboviz.params.BUILD_INDICES` is ``false``.
 
-    :param expected_fixture: Expected data directory
-    :type expected_fixture: str or unicode
     :param build_indicex: Configuration parameter
     :type build_indices: boolean
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
     :param dir_index: Index files directory
     :type dir_index: str or unicode
     :param index_prefix: Index file name prefix
@@ -480,9 +480,9 @@ def test_umitools_dedup_stats_tsv(
     are removed by ``umi_tools dedup``, only the existence of the
     files is checked.
 
-    :param dedup_umi: Was UMI deduplication configured?
+    :param dedup_umi: Configuration parameter
     :type dedup_umis: bool
-    :param dedup_stats: Were UMI deduplication statistics enabled?
+    :param dedup_stats: Configuration parameter
     :type dedup_stats: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
@@ -512,15 +512,17 @@ def test_umitools_dedup_stats_tsv(
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_umitools_pre_dedup_group_tsv(
-        group_umis, expected_fixture, dir_tmp, sample):
+        dedup_umis, group_umis, expected_fixture, dir_tmp, sample):
     """
     Test ``umi_tools group`` TSV files for equality. See
     :py:func:`riboviz.utils.equal_tsv`.
 
-    If UMI grouping was not enabled in the configuration that
-    produced the data then this test is skipped.
+    Skipped if :py:const:`riboviz.params.DEDUP_UMIS` is ``false``
+    or :py:const:`riboviz.params.GROUP_UMIS` is ``false``.
 
-    :param group_umis: Was UMI grouping configured?
+    :param dedup_umis: Configuration parameter
+    :type dedup_umis: bool
+    :param group_umis: Configuration parameter
     :type group_umis: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
@@ -529,8 +531,10 @@ def test_umitools_pre_dedup_group_tsv(
     :param sample: Sample name
     :type sample: str or unicode
     """
+    if not dedup_umis:
+        pytest.skip('Skipped test as dedup_umis: '.format(dedup_umis))
     if not group_umis:
-        pytest.skip('Skipped test applicable to UMI groups')
+        pytest.skip('Skipped test as group_umis: '.format(group_umis))
     dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
     utils.equal_tsv(
         os.path.join(expected_fixture, dir_tmp_name, sample,
@@ -541,7 +545,8 @@ def test_umitools_pre_dedup_group_tsv(
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_umitools_post_dedup_group_tsv(group_umis, dir_tmp, sample):
+def test_umitools_post_dedup_group_tsv(
+        dedup_umis, group_umis, dir_tmp, sample):
     """
     Test ``umi_tools group`` TSV file exists.
 
@@ -549,18 +554,22 @@ def test_umitools_post_dedup_group_tsv(group_umis, dir_tmp, sample):
     are removed by ``umi_tools dedup``, only the existence of the file
     is checked.
 
-    If UMI grouping was not enabled in the configuration that
-    produced the data then this test is skipped.
+    Skipped if :py:const:`riboviz.params.DEDUP_UMIS` is ``false``
+    or :py:const:`riboviz.params.GROUP_UMIS` is ``false``.
 
-    :param group_umis: Was UMI grouping configured?
+    :param dedup_umis: Configuration parameter
+    :type dedup_umis: bool
+    :param group_umis: Configuration parameter
     :type group_umis: bool
     :param dir_tmp: Temporary directory
     :type dir_tmp: str or unicode
     :param sample: Sample name
     :type sample: str or unicode
     """
+    if not dedup_umis:
+        pytest.skip('Skipped test as dedup_umis: '.format(dedup_umis))
     if not group_umis:
-        pytest.skip('Skipped test applicable to UMI groups')
+        pytest.skip('Skipped test as group_umis: '.format(group_umis))
     actual_file = os.path.join(
         dir_tmp, sample, workflow_files.POST_DEDUP_GROUPS_TSV)
     assert os.path.exists(actual_file), "Non-existent file: %s" % actual_file
@@ -698,7 +707,7 @@ def test_generate_stats_figs_pdf(expected_fixture, dir_out, sample,
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name", [workflow_files.STATIC_HTML_FILE])
-def test_analysis_outputs_html(expected_fixture, run_static_html,
+def test_analysis_outputs_html(run_static_html, expected_fixture,
                                dir_out, sample, file_name):
     """
     Test ``AnalysisOutputs.Rmd`` html files for equality. See
@@ -706,10 +715,10 @@ def test_analysis_outputs_html(expected_fixture, run_static_html,
 
     Skipped if :py:const:`riboviz.params.RUN_STATIC_HTML` is ``false``.
 
-    :param expected_fixture: Expected data directory
-    :type expected_fixture: str or unicode
     :param run_static_html: Configuration parameter
     :type run_static_html: bool
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
     :param dir_out: Output directory
     :type dir_out: str or unicode
     :param sample: Sample name
@@ -751,17 +760,17 @@ def test_collate_orf_tpms_and_counts_tsv(expected_fixture, dir_out):
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_read_counts_per_file_tsv(expected_fixture, count_reads, dir_out):
+def test_read_counts_per_file_tsv(count_reads, expected_fixture, dir_out):
     """
     Test :py:mod:`riboviz.tools.count_reads` TSV files for
     equality. See :py:func:`riboviz.count_reads.equal_read_counts`.
 
     Skipped if :py:const:`riboviz.params.COUNT_READS` is ``false``.
 
-    :param expected_fixture: Expected data directory
-    :type expected_fixture: str or unicode
     :param count_reads: Configuration parameter
     :type count_reads: bool
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
     :param dir_out: Output directory
     :type dir_out: str or unicode
     """
