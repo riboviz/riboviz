@@ -266,11 +266,11 @@ def _estimate_related(task, sample_size, gff_size, core):
                     tmpy.append(i[2])
             int1d_tmp = interpolate.interp1d(tmpx, tmpy, bounds_error=False, fill_value="extrapolate")
             ay.append(int1d_tmp(sample_size))
-        # the execution time of hisat2ORF shakes, so we use linear regression.
-        if task != 'hisat2orf':
+        if True:
             int1d_tmp = interpolate.interp1d(ax, ay, bounds_error=False, fill_value="extrapolate")
             time = float(int1d_tmp(gff_size))
         else:
+        # set to false to use the linear regression
             slope, intercept, r, p, stderr = stats.linregress(ax, ay)
             time = slope * gff_size + intercept
 
