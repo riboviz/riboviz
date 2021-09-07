@@ -397,10 +397,9 @@ def test_samtools_index_dedup_bam(dedup_umis, dir_tmp, sample):
     """
     Test ``samtools index`` BAM and BAI files. Check files exist only.
 
-    If UMI deduplication was not enabled in the configuration that
-    produced the data then this test is skipped.
+    Skipped if :py:const:`riboviz.params.DEDUP_UMIS` is ``false``.
 
-    :param dedup_umi: Was UMI deduplication configured?
+    :param dedup_umi: Configuration parameter
     :type dedup_umis: bool
     :param dir_tmp: Temporary directory
     :type dir_tmp: str or unicode
@@ -408,7 +407,7 @@ def test_samtools_index_dedup_bam(dedup_umis, dir_tmp, sample):
     :type sample: str or unicode
     """
     if not dedup_umis:
-        pytest.skip('Skipped test applicable to UMI deduplication')
+        pytest.skip('Skipped test as dedup_umis: '.format(dedup_umis))
     actual_file = os.path.join(dir_tmp, sample, workflow_files.DEDUP_BAM)
     assert os.path.exists(actual_file), "Non-existent file: %s" % actual_file
     actual_bai_file = os.path.join(
