@@ -153,22 +153,18 @@ def pytest_generate_tests(metafunc):
         - ``index_prefix``: value of
           :py:const:`riboviz.params.ORF_INDEX_PREFIX` and
           :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
-        - ``index_dir``: value of
-          :py:const:`riboviz.params.INDEX_DIR`.
-        - ``tmp_dir``: value of :py:const:`riboviz.params.TMP_DIR`.
-        - ``output_dir``: value of
-          :py:const:`riboviz.params.OUTPUT_DIR`.
-        - ``extract_umis``: value of
-          :py:const:`riboviz.params.EXTRACT_UMIS`.
-        - ``dedup_umis``: value of
-          :py:const:`riboviz.params.DEDUP_UMIS`.
-        - ``dedup_stats``: value of
-          :py:const:`riboviz.params.DEDUP_STATS` or `TRUE` if
-          undefined
-        - ``group_umis``: value of
-          :py:const:`riboviz.params.GROUP_UMIS`.
-        - ``count_reads``: value of
-          :py:const:`riboviz.params.COUNT_READS`.
+        - ``<param>``: where ``<param>`` is a key from
+          :py:const:`riboviz.params.DEFAULT_FOLDER_VALUES` and the
+          value is either that from ``config``, if defined, or the
+          default from
+          :py:const:`riboviz.params.DEFAULT_FOLDER_VALUES`
+          otherwise.
+        - ``<param>``: where ``<param>`` is a key from
+          :py:const:`riboviz.params.DEFAULT_CONDITIONS` and the
+          value is either that from ``config``, if defined, or the
+          default from
+          :py:const:`riboviz.params.DEFAULT_CONDITIONS`
+          otherwise.
 
     :param metafunc: pytest test function inspection object
     :type metafunc: _pytest.python.Metafunc
@@ -183,24 +179,19 @@ def pytest_generate_tests(metafunc):
         "No such file: %s" % config_file
     with open(config_file, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
-
     # Replace environment variable tokens with environment variables
     # in configuration parameter values that support environment
     # variables
     environment.apply_env_to_config(config)
-    fixtures = {
-        "index_prefix": [config[params.ORF_INDEX_PREFIX],
-                         config[params.RRNA_INDEX_PREFIX]],
-        params.INDEX_DIR: [config[params.INDEX_DIR]],
-        params.TMP_DIR: [config[params.TMP_DIR]],
-        params.OUTPUT_DIR: [config[params.OUTPUT_DIR]],
-        params.OUTPUT_PDFS: [utils.value_in_dict(params.OUTPUT_PDFS, config)],
-        params.EXTRACT_UMIS: [utils.value_in_dict(params.EXTRACT_UMIS, config)],
-        params.DEDUP_UMIS: [utils.value_in_dict(params.DEDUP_UMIS, config)],
-        params.DEDUP_STATS: [True if params.DEDUP_STATS not in config else utils.value_in_dict(params.DEDUP_STATS, config)],
-        params.GROUP_UMIS: [utils.value_in_dict(params.GROUP_UMIS, config)],
-        params.COUNT_READS: [utils.value_in_dict(params.COUNT_READS, config)]
-    }
+    fixtures = {}
+    for param, default in params.DEFAULT_FOLDER_VALUES.items():
+        fixtures[param] = [default if param not in config
+                           else config[param]]
+    for param, default in params.DEFAULT_CONDITIONS.items():
+        fixtures[param] = [default if param not in config
+                           else utils.value_in_dict(param, config)]
+    fixtures["index_prefix"] = [config[params.ORF_INDEX_PREFIX],
+                                config[params.RRNA_INDEX_PREFIX]]
     if "sample" in metafunc.fixturenames:
         samples = []
         if params.FQ_FILES in config and config[params.FQ_FILES]:
