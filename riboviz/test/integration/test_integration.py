@@ -424,12 +424,12 @@ def test_samtools_view_sort_index(dedup_umis, expected_fixture,
     BAI files for equality. See :py:func:`riboviz.sam_bam.equal_bam`
     and :py:func:`riboviz.utils.equal_file_sizes`.
 
-    If UMI deduplication was enabled in the configuration that
-    produced the data then the only the existence of the files are
-    checked as these files can differ between runs depending on which
-    reads are removed by ``umi_tools dedup``.
+    If :py:const:`riboviz.params.DEDUP_UMIS` is ``false`` then
+    only the existence of the files are checked as these files can
+    differ between runs depending on which reads are removed by
+    ``umi_tools dedup``.
 
-    :param dedup_umi: Was UMI deduplication configured?
+    :param dedup_umi: Configuration parameter
     :type dedup_umis: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
