@@ -116,6 +116,36 @@ When validating configuration skip checks for existence of ribosome
 profiling data files.
 """
 
+DEFAULT_FOLDER_VALUES = {
+    INDEX_DIR: "index",
+    TMP_DIR: "tmp",
+    OUTPUT_DIR: "output"
+}
+"""
+Default values for folder parameters.
+Consistent with ``prep_riboviz.nf``.
+"""
+
+DEFAULT_CONDITIONS = {
+    BUILD_INDICES: True,
+    TRIM_5P_MISMATCHES: True,
+    EXTRACT_UMIS: False,
+    DEDUP_UMIS: False,
+    DEDUP_STATS: True,
+    GROUP_UMIS: False,
+    MAKE_BEDGRAPH: True,
+    RUN_STATIC_HTML: True,
+    COUNT_READS: True,
+    OUTPUT_PDFS: True,
+    OUTPUT_METAGENE_NORMALIZED_PROFILE: True,
+    PUBLISH_INDEX_TMP: False
+}
+"""
+Default values for conditional boolean parameters that affect which
+steps of the workflow are invoked and the files output.
+Consistent with  ``prep_riboviz.nf``.
+"""
+
 R_LIBS = "r_libs"
 """ R libraries directory (job submission) (command-line only). """
 CONFIG_FILE = "config_file"
