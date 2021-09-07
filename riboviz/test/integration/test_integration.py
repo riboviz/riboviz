@@ -470,15 +470,12 @@ def test_umitools_dedup_stats_tsv(
     """
     Test ``umi_tools dedup --output-stats`` TSV files exist.
 
-    If UMI deduplication was not enabled in the configuration that
-    produced the data then this test is skipped.
-
-    If UMI deduplication statistics were not enabled in the
-    configuration that produced the data then this test is skipped.
-
     As these files can differ between runs depending on which reads
     are removed by ``umi_tools dedup``, only the existence of the
     files is checked.
+
+    Skipped if :py:const:`riboviz.params.DEDUP_UMIS` is ``false``
+    or :py:const:`riboviz.params.DEDUP_STATS` is ``false``.
 
     :param dedup_umi: Configuration parameter
     :type dedup_umis: bool
@@ -494,9 +491,9 @@ def test_umitools_dedup_stats_tsv(
     :type stats_file: str or unicode
     """
     if not dedup_umis:
-        pytest.skip('Skipped test applicable to UMI deduplication')
+        pytest.skip('Skipped test as dedup_umis: '.format(dedup_umis))
     if not dedup_stats:
-        pytest.skip('Skipped test applicable to UMI deduplication statistics')
+        pytest.skip('Skipped test as dedup_stats: '.format(dedup_stats))
     file_name = os.path.join(sample,
                              workflow_files.DEDUP_STATS_FORMAT.format(
                                  stats_file))
