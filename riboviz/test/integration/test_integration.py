@@ -155,20 +155,27 @@ def scratch_directory(tmpdir):
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("index", list(range(1, test.NUM_INDICES)))
-def test_hisat2_build_index(expected_fixture, dir_index, index_prefix, index):
+def test_hisat2_build_index(expected_fixture, build_indices,
+                            dir_index, index_prefix, index):
     """
     Test ``hisat2-build`` index file sizes for equality. See
     :py:func:`riboviz.utils.equal_file_sizes`.
 
+    Skipped if :py:const:`riboviz.params.BUILD_INDICES` is ``false``.
+
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_index: Index files directory, from configuration file
+    :param build_indicex: Build indices?
+    :type build_indices: boolean
+    :param dir_index: Index files directory
     :type dir_index: str or unicode
     :param index_prefix: Index file name prefix
     :type index_prefix: str or unicode
     :param index: File name index
     :type index: int
     """
+    if not build_indices:
+        pytest.skip('Skipped test as build_indices: '.format(build_indices))
     file_name = hisat2.HT2_FORMAT.format(index_prefix, index)
     dir_index_name = os.path.basename(os.path.normpath(dir_index))
     utils.equal_file_sizes(
@@ -185,9 +192,9 @@ def test_cutadapt_fq(expected_fixture, dir_tmp, sample):
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory, from configuration file
+    :param dir_tmp: Temporary directory
     :type dir_tmp: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     """
     dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
@@ -212,9 +219,9 @@ def test_umitools_extract_fq(extract_umis, expected_fixture, dir_tmp,
     :type extract_umis: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory, from configuration file
+    :param dir_tmp: Temporary directory
     :type dir_tmp: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     """
     if not extract_umis:
@@ -238,9 +245,9 @@ def test_hisat_fq(expected_fixture, dir_tmp, sample, file_name):
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory, from configuration file
+    :param dir_tmp: Temporary directory
     :type dir_tmp: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
@@ -264,7 +271,7 @@ def compare_sam_files(expected_directory, directory,
     :type directory: str or unicode
     :param scratch_directory: scratch files directory
     :type scratch_directory: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
@@ -298,11 +305,11 @@ def test_hisat2_sam(expected_fixture, dir_tmp, scratch_directory,
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory, from configuration file
+    :param dir_tmp: Temporary directory
     :type dir_tmp: str or unicode
     :param scratch_directory: scratch files directory
     :type scratch_directory: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
@@ -322,11 +329,11 @@ def test_trim5p_mismatch_sam(expected_fixture, dir_tmp,
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory, from configuration file
+    :param dir_tmp: Temporary directory
     :type dir_tmp: str or unicode
     :param scratch_directory: scratch files directory
     :type scratch_directory: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     """
     compare_sam_files(expected_fixture, dir_tmp, scratch_directory,
@@ -342,9 +349,9 @@ def test_trim5p_mismatch_tsv(expected_fixture, dir_tmp, sample):
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory, from configuration file
+    :param dir_tmp: Temporary directory
     :type dir_tmp: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     """
     dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
@@ -366,9 +373,9 @@ def test_samtools_view_sort_index_orf_map_clean_bam(
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory, from configuration file
+    :param dir_tmp: Temporary directory
     :type dir_tmp: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     """
     dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
@@ -395,9 +402,9 @@ def test_samtools_index_dedup_bam(dedup_umis, dir_tmp, sample):
 
     :param dedup_umi: Was UMI deduplication configured?
     :type dedup_umis: bool
-    :param dir_tmp: Temporary directory, from configuration file
+    :param dir_tmp: Temporary directory
     :type dir_tmp: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     """
     if not dedup_umis:
@@ -427,9 +434,9 @@ def test_samtools_view_sort_index(dedup_umis, expected_fixture,
     :type dedup_umis: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_out: Output directory, from configuration file
+    :param dir_out: Output directory
     :type dir_out: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     """
     file_name = sam_bam.BAM_FORMAT.format(sample)
@@ -479,9 +486,9 @@ def test_umitools_dedup_stats_tsv(
     :type dedup_stats: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory, from configuration file
+    :param dir_tmp: Temporary directory
     :type dir_tmp: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     :param stats_file: statistics file name
     :type stats_file: str or unicode
@@ -517,9 +524,9 @@ def test_umitools_pre_dedup_group_tsv(
     :type group_umis: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory, from configuration file
+    :param dir_tmp: Temporary directory
     :type dir_tmp: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     """
     if not group_umis:
@@ -547,9 +554,9 @@ def test_umitools_post_dedup_group_tsv(group_umis, dir_tmp, sample):
 
     :param group_umis: Was UMI grouping configured?
     :type group_umis: bool
-    :param dir_tmp: Temporary directory, from configuration file
+    :param dir_tmp: Temporary directory
     :type dir_tmp: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     """
     if not group_umis:
@@ -571,9 +578,9 @@ def test_bedtools_bedgraph(expected_fixture, dir_out, sample,
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_out: Output directory, from configuration file
+    :param dir_out: Output directory
     :type dir_out: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
@@ -595,9 +602,9 @@ def test_bam_to_h5_h5(expected_fixture, dir_out, sample):
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_out: Output directory, from configuration file
+    :param dir_out: Output directory
     :type dir_out: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     """
     file_name = h5.H5_FORMAT.format(sample)
@@ -631,9 +638,9 @@ def test_generate_stats_figs_tsv(expected_fixture, dir_out, sample,
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_out: Output directory, from configuration file
+    :param dir_out: Output directory
     :type dir_out: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
@@ -665,9 +672,9 @@ def test_generate_stats_figs_pdf(expected_fixture, dir_out, sample,
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_out: Output directory, from configuration file
+    :param dir_out: Output directory
     :type dir_out: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
@@ -694,9 +701,9 @@ def test_analysis_outputs_html(expected_fixture, dir_out, sample, file_name):
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_out: Output directory, from configuration file
+    :param dir_out: Output directory
     :type dir_out: str or unicode
-    :param sample: sample name
+    :param sample: Sample name
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
@@ -720,7 +727,7 @@ def test_collate_orf_tpms_and_counts_tsv(expected_fixture, dir_out):
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_out: Output directory, from configuration file
+    :param dir_out: Output directory
     :type dir_out: str or unicode
     """
     dir_out_name = os.path.basename(os.path.normpath(dir_out))
@@ -744,7 +751,7 @@ def test_read_counts_per_file_tsv(count_reads, expected_fixture, dir_out):
     :type count_reads: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_out: Output directory, from configuration file
+    :param dir_out: Output directory
     :type dir_out: str or unicode
     """
     if not count_reads:
