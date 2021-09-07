@@ -698,13 +698,18 @@ def test_generate_stats_figs_pdf(expected_fixture, dir_out, sample,
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name", [workflow_files.STATIC_HTML_FILE])
-def test_analysis_outputs_html(expected_fixture, dir_out, sample, file_name):
+def test_analysis_outputs_html(expected_fixture, run_static_html,
+                               dir_out, sample, file_name):
     """
     Test ``AnalysisOutputs.Rmd`` html files for equality. See
     :py:func:`riboviz.html.equal_html`.
 
+    Skipped if :py:const:`riboviz.params.RUN_STATIC_HTML` is ``false``.
+
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
+    :param run_static_html: Configuration parameter
+    :type run_static_html: bool
     :param dir_out: Output directory
     :type dir_out: str or unicode
     :param sample: Sample name
@@ -712,12 +717,12 @@ def test_analysis_outputs_html(expected_fixture, dir_out, sample, file_name):
     :param file_name: file name
     :type file_name: str or unicode
     """
+    if not run_static_html:
+        pytest.skip('Skipped test as run_static_html: '.format(run_static_html))
     file_name = workflow_files.STATIC_HTML_FILE.format(sample)
     dir_out_name = os.path.basename(os.path.normpath(dir_out))
     expected_file = os.path.join(expected_fixture, dir_out_name,
                                  sample, file_name)
-    if not os.path.exists(expected_file):
-        pytest.skip('Skipped as expected file does not exist')
     assert os.path.exists(os.path.join(dir_out, sample, file_name))
     html.equal_html(expected_file,
                     os.path.join(dir_out, sample, file_name))
