@@ -320,13 +320,19 @@ def test_hisat2_sam(expected_fixture, dir_tmp, scratch_directory,
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_trim5p_mismatch_sam(expected_fixture, dir_tmp,
-                             scratch_directory, sample):
+def test_trim5p_mismatch_sam(
+        trim_5p_mismatches, expected_fixture, dir_tmp,
+        scratch_directory, sample):
     """
     Test :py:mod:`riboviz.tools.trim_5p_mismatch` SAM files for
     equality. The SAM files are sorted into temporary SAM files which
     are then compared. See :py:func:`compare_sam_files`.
 
+    Skipped if :py:const:`riboviz.params.TRIM_5P_MISMATCHES` is
+    ``false``.
+
+    :param trim_5p_mismatches: Configuration parameter
+    :type trim_5p_mismatches: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
     :param dir_tmp: Temporary directory
@@ -336,17 +342,26 @@ def test_trim5p_mismatch_sam(expected_fixture, dir_tmp,
     :param sample: Sample name
     :type sample: str or unicode
     """
+    if not trim_5p_mismatches:
+        pytest.skip('Skipped test as trim_5p_mismatches: '.format(
+            trim_5p_mismatches))
     compare_sam_files(expected_fixture, dir_tmp, scratch_directory,
                       sample, workflow_files.ORF_MAP_CLEAN_SAM)
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_trim5p_mismatch_tsv(expected_fixture, dir_tmp, sample):
+def test_trim5p_mismatch_tsv(
+        trim_5p_mismatches, expected_fixture, dir_tmp, sample):
     """
     Test :py:mod:`riboviz.tools.trim_5p_mismatch` TSV files for
     equality. See :py:func:`riboviz.utils.equal_tsv`.
 
+    Skipped if :py:const:`riboviz.params.TRIM_5P_MISMATCHES` is
+    ``false``.
+
+    :param trim_5p_mismatches: Configuration parameter
+    :type trim_5p_mismatches: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
     :param dir_tmp: Temporary directory
@@ -354,6 +369,9 @@ def test_trim5p_mismatch_tsv(expected_fixture, dir_tmp, sample):
     :param sample: Sample name
     :type sample: str or unicode
     """
+    if not trim_5p_mismatches:
+        pytest.skip('Skipped test as trim_5p_mismatches: '.format(
+            trim_5p_mismatches))
     dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
     utils.equal_tsv(
         os.path.join(expected_fixture, dir_tmp_name, sample,
