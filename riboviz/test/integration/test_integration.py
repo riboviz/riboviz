@@ -646,17 +646,11 @@ def test_bam_to_h5_h5(expected_fixture, dir_out, sample):
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name",
-                         [workflow_r.METAGENE_START_STOP_READ_COUNTS_TSV,
-                          workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_TSV,
-                          workflow_r.NT_FREQ_PER_READ_POSITION_TSV,
+                         [workflow_r.ORF_TPMS_AND_COUNTS_TSV,
+                          workflow_r.METAGENE_START_STOP_READ_COUNTS_TSV,
                           workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_TSV,
                           workflow_r.READ_COUNTS_BY_LENGTH_TSV,
-                          workflow_r.READ_FRAME_PER_ORF_TSV,
-                          workflow_r.READ_FRAME_PER_ORF_FILTERED_TSV,
-                          workflow_r.ORF_TPMS_VS_FEATURES_TSV,
-                          workflow_r.GENE_POSITION_LENGTH_COUNTS_TSV,
-                          workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_LONG_TSV,
-                          workflow_r.ORF_TPMS_AND_COUNTS_TSV])
+                          workflow_r.GENE_POSITION_LENGTH_COUNTS_TSV])
 def test_generate_stats_figs_tsv(expected_fixture, dir_out, sample,
                                  file_name):
     """
@@ -682,6 +676,121 @@ def test_generate_stats_figs_tsv(expected_fixture, dir_out, sample,
         os.path.join(dir_out, sample, file_name))
 
 
+
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("file_name",
+                         [workflow_r.NT_FREQ_PER_READ_POSITION_TSV])
+def test_generate_stats_figs_metagene_tsv(
+        expected_fixture, dir_out, sample, file_name):
+    """
+    Test ``generate_stats_figs.R`` TSV files for equality. See
+    :py:func:`riboviz.utils.equal_tsv`.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_out: Output directory
+    :type dir_out: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    :param file_name: file name
+    :type file_name: str or unicode
+    """
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
+    expected_file = os.path.join(expected_fixture, dir_out_name,
+                                 sample, file_name)
+    if not os.path.exists(expected_file):
+        pytest.skip('Skipped as expected file does not exist')
+    utils.equal_tsv(
+        expected_file,
+        os.path.join(dir_out, sample, file_name))
+
+
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("file_name",
+                         [workflow_r.ORF_TPMS_VS_FEATURES_TSV])
+def test_generate_stats_figs_features_tsv(expected_fixture, dir_out, sample,
+                                          file_name):
+    """
+    Test ``generate_stats_figs.R`` TSV files for equality. See
+    :py:func:`riboviz.utils.equal_tsv`.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_out: Output directory
+    :type dir_out: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    :param file_name: file name
+    :type file_name: str or unicode
+    """
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
+    expected_file = os.path.join(expected_fixture, dir_out_name,
+                                 sample, file_name)
+    if not os.path.exists(expected_file):
+        pytest.skip('Skipped as expected file does not exist')
+    utils.equal_tsv(
+        expected_file,
+        os.path.join(dir_out, sample, file_name))
+
+
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("file_name",
+                         [workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_TSV,
+                          workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_LONG_TSV])
+def test_generate_stats_figs_t_rna_codon_positions_tsv(
+        expected_fixture, dir_out, sample, file_name):
+    """
+    Test ``generate_stats_figs.R`` TSV files for equality. See
+    :py:func:`riboviz.utils.equal_tsv`.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_out: Output directory
+    :type dir_out: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    :param file_name: file name
+    :type file_name: str or unicode
+    """
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
+    expected_file = os.path.join(expected_fixture, dir_out_name,
+                                 sample, file_name)
+    if not os.path.exists(expected_file):
+        pytest.skip('Skipped as expected file does not exist')
+    utils.equal_tsv(
+        expected_file,
+        os.path.join(dir_out, sample, file_name))
+
+
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("file_name",
+                         [workflow_r.READ_FRAME_PER_ORF_TSV,
+                          workflow_r.READ_FRAME_PER_ORF_FILTERED_TSV])
+def test_generate_stats_figs_asite_disp_length_tsv(
+        expected_fixture, dir_out, sample, file_name):
+    """
+    Test ``generate_stats_figs.R`` TSV files for equality. See
+    :py:func:`riboviz.utils.equal_tsv`.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_out: Output directory
+    :type dir_out: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    :param file_name: file name
+    :type file_name: str or unicode
+    """
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
+    expected_file = os.path.join(expected_fixture, dir_out_name,
+                                 sample, file_name)
+    if not os.path.exists(expected_file):
+        pytest.skip('Skipped as expected file does not exist')
+    utils.equal_tsv(
+        expected_file,
+        os.path.join(dir_out, sample, file_name))
+
+    
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name",
                          [workflow_r.READ_COUNTS_BY_LENGTH_PDF,
