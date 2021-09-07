@@ -9,7 +9,15 @@
 * A h5 file - Produced by riboviz, lists all of the reads and their positions relative to the start codon.
 * A gff file - For an example species, this file can be found in `example-datasets` on the riboviz github, in the `annotation` folder of the relevant species.
 * A fasta file - For an example species, this file can be found in `example-datasets` on the riboviz github, in the `annotation` folder of the relevant species.
-* A tsv file of nt positions to be studied - This file lists the gene under the heading 'Gene' and the nt postion under the heading 'Pos'. This is created by the user to fit their research question.
+* A tsv file of nt positions to be studied - This file lists the gene under the heading 'Gene' and the nt postion under the heading 'Pos'. This is created by the user to fit their research question. For example: 
+
+```
+Gene	Pos
+MIKE	5
+MAT	7
+MAT	5
+MAT	6
+```
 
 ### Outputs
 
