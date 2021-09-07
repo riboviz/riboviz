@@ -12,7 +12,7 @@ When looking at the `metagene_start_stop_read_counts.pdf`, it is expected to see
 Descriptions of specific files can be located quickly using the following links:
 
 **Output files for an entire run**
-* [TPMs_all_CDS_all_samples](#tpms_all_cds_all_samplestsv)
+* [TPMs_all_CDS_all_samples.tsv](#tpms_all_cds_all_samplestsv)
 * [read_counts_per_file.tsv](#read_counts_per_filetsv)
 
 **Output files for each samples** 
@@ -43,7 +43,7 @@ Descriptions of specific files can be located quickly using the following links:
 * [frame_proportions_per_ORF.pdf](#frame_proportions_per_ORFpdf)
 
 After a riboviz run, many output files are produced within the output directory.
-The output directory is specified by the parameter `dir_out` in `config.yaml`.
+The output directory is specified by the parameter `dir_out` in the YAML configuration file.
 
 There are a few output files that collect information for an entire run.
 There are many output files that are specific to each sample, which are organized into a separate subdirectory for each sample. 
@@ -54,7 +54,7 @@ There are many output files that are specific to each sample, which are organize
 
 ## `TPMs_all_CDS_all_samples.tsv` 
 
-A tsv file with transcripts per million (tpm) for all genes from successfully processed samples. This file is produced by the script `collate_TPMs.R`. This script uses the `ORF_TPMs_and_counts.tsv` file from each processed sample and lists the tmps of each sample for each gene, allowing for comparison between samples. 
+A tsv file with transcripts per million (tpm) for all genes from successfully processed samples. This file is produced by the script `collate_TPMs.R`. This script uses the `ORF_TPMs_and_counts.tsv` file from each processed sample and lists the tpms of each sample for each gene, allowing for comparison between samples. 
 
 ```
 ORF	ANAPH_1	VEG_1
@@ -69,16 +69,56 @@ Q0070	22.8	0.7
 
 ## `read_counts_per_file.tsv` 
 
-A [read counts file](#read-counts-file) (only if `count_reads: TRUE`).
+A read counts file (only if `count_reads: TRUE`).
 
-A tsv file produced by `count_reads.py`. This file lists the sample being processed, the stage of the riboviz process, the path to the file being processed at that stage, the number of reads present at each stage, and includes a description of the process. The number of reads is expected to decrease between stages as reads are filtered and trimmed.
+The workflow will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is produced by scanning input, temporary and output directories and counting the number of reads (sequences) processed by specific stages of a RiboViz workflow.
+
+The read counts file, `read_counts_per_file.tsv`, is written into the output directory.
+
+The reads counts file is a tab-separated values (TSV) file with the following columns:
+
+* `SampleName`: Name of the sample to which this file belongs. This is
+  an empty value if the step was not sample-specific
+  (e.g. demultiplexing a multiplexed FASTQ file).
+* `Program`: Program that wrote the file. The special token
+  `input` denotes input files.
+* `File`: Path to file.
+* `NumReads`: Number of reads in the file.
+* `Description`: Human-readable description of the file contents.
+
+The following information is included:
+
+* Input files: number of reads in the FASTQ files used as inputs.
+* `cutadapt`: number of reads in the FASTQ file output.
+* `riboviz.tools.demultiplex_fastq`: FASTQ files output by
+  "demultiplex_fastq", using the information in the associated
+  `num_reads.tsv` summary files, or, if these can't be found, the
+  FASTQ files themselves.
+* `hisat2`: number of reads in the SAM file and FASTQ file output.
+* `riboviz.tools.trim_5p_mismatch`: number of reads in the SAM file
+  output as recorded in the `trim_5p_mismatch.tsv` summary file
+  output, or the SAM file itself, if the TSV file cannot be found (if
+  `trim_5p_mismatches: TRUE`)
+* `umi_tools dedup`: number of reads in the BAM file output.
+
+Here is an example of a read counts file produced when running the vignette:
 
 ```
 SampleName	Program	File	NumReads	Description
-VEG_1	input	/exports/csce/eddie/biology/groups/wallace_rna/riboviz-emma/riboviz/riboviz/B-Sc_2012/input/SRR387871.fastq.gz	21155927	input
-ANAPH_1	input	/exports/csce/eddie/biology/groups/wallace_rna/riboviz-emma/riboviz/riboviz/B-Sc_2012/input/SRR387890.fastq.gz	10210064	input
-ANAPH_1	cutadapt	/exports/csce/eddie/biology/groups/wallace_rna/riboviz-emma/riboviz/riboviz/B-Sc_2012/tmp/ANAPH_1/trim.fq	9458608	Reads after removal of sequencing library adapters
-ANAPH_1	hisat2	/exports/csce/eddie/biology/groups/wallace_rna/riboviz-emma/riboviz/riboviz/B-Sc_2012/tmp/ANAPH_1/nonrRNA.fq	5999936	rRNA or other contaminating reads removed by alignment to rRNA index files
+WTnone	input	vignette/input/SRR1042855_s1mi.fastq.gz	963571	input
+WT3AT	input	vignette/input/SRR1042864_s1mi.fastq.gz	1374448	input
+WT3AT	cutadapt	vignette/tmp/WT3AT/trim.fq	1373362	Reads after removal of sequencing library adapters
+WT3AT	hisat2	vignette/tmp/WT3AT/nonrRNA.fq	485226	rRNA or other contaminating reads removed by alignment to rRNA index files
+WT3AT	hisat2	vignette/tmp/WT3AT/rRNA_map.sam	2254078	Reads with rRNA and other contaminating reads removed by alignment to rRNA index files
+WT3AT	hisat2	vignette/tmp/WT3AT/unaligned.fq	476785	Unaligned reads removed by alignment of remaining reads to ORFs index files
+WT3AT	hisat2	vignette/tmp/WT3AT/orf_map.sam	8698	Reads aligned to ORFs index files
+WT3AT	riboviz.tools.trim_5p_mismatch	vignette/tmp/WT3AT/orf_map_clean.sam	8698	Reads after trimming of 5' mismatches and removal of those with more than 2 mismatches
+WTnone	cutadapt	vignette/tmp/WTnone/trim.fq	952343	Reads after removal of sequencing library adapters
+WTnone	hisat2	vignette/tmp/WTnone/nonrRNA.fq	466464	rRNA or other contaminating reads removed by alignment to rRNA index files
+WTnone	hisat2	vignette/tmp/WTnone/rRNA_map.sam	1430213	Reads with rRNA and other contaminating reads removed by alignment to rRNA index files
+WTnone	hisat2	vignette/tmp/WTnone/unaligned.fq	452266	Unaligned reads removed by alignment of remaining reads to ORFs index files
+WTnone	hisat2	vignette/tmp/WTnone/orf_map.sam	14516	Reads aligned to ORFs index files
+WTnone	riboviz.tools.trim_5p_mismatch	vignette/tmp/WTnone/orf_map_clean.sam	14516	Reads after trimming of 5' mismatches and removal of those with more than 2 mismatches
 ```
 
 
@@ -93,7 +133,7 @@ This output report in .html format contains a provenance section for the sample,
 
 Example of the top of the HTML file:
 
-<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/html_output.jpg" alt="html_output image" width="500"/>
+<img src="../images/output_images/html_output.jpg" alt="html_output image" width="500"/>
 
 Only output if `run_static_html: TRUE`. 
 
@@ -124,7 +164,7 @@ Almost all translated reads should be counted in open reading frames within `plu
 
 ## `<SAMPLE_ID>.h5` 
 
-Length-sensitive alignments of reads in compressed HDF5 format. This file is created from the sample BAM file using `Bam_to_H5.R`.
+Length-sensitive alignments of reads in compressed HDF5 format. This file is created from the sample BAM file using `bam_to_h5.R`.
 
 The HDF5 file, `<SAMPLE_ID>.h5`, has external links to complementary HDF5 files, named `<SAMPLE_ID>.h5.1`, `<SAMPLE_ID>.h5.2` etc. each of which hold the data for a subset of genes. The number of data files depends on the number of processes (`num_processes`). For example, if `num_processes` is 1 then the output files will be `<SAMPLE_ID>.h5` (external links file) and `<SAMPLE_ID>.h5.1` (data file). If `num_processes` is 4 then the output files will be `<SAMPLE_ID>.h5` (external links file) and `<SAMPLE_ID>.h5.1`, `<SAMPLE_ID>.h5.2`, `<SAMPLE_ID>.h5.3`, `<SAMPLE_ID>.h5.4` (data files). For more information, see [Structure of HDF5 data](../reference/hdf5-data.md).
 
@@ -149,13 +189,13 @@ Pos	Counts	End
 
 A meta feature plot showing the total number of reads present within a 75nt window around the start and stop codons. The reads occurring at each position for each gene are summed to give a total for each position, then plotted. It is expected to see a large peak just upstream of the start codon, due to ribosome binding being the slow step of translation. This is typically followed by regular repeating smaller peaks, known as 3nt periodicity, as the majority of reads will map to the first nucleotide of a codon. If the expected features are not seen, then it is possible that there is a problem with annotation files, the adapter listed in the config files or the dataset used is of low quality. 
 
-Good quality 3nt periodicity plot:
+Good quality meta feature plot:
 
-<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/3nt_periodicity.jpg" alt="Good quality 3nt_periodicity plot" width="500"/>
+<img src="../images/output_images/metagene_start_stop_read_counts.jpg" alt="Good quality 3nt_periodicity plot" width="500"/>
 
-3nt periodicity plot produced using incorrect annotation files:
+Meta feature plot produced using incorrect annotation files:
 
-<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/bad_3nt_periodicity.jpg" alt="poor quality 3nt_periodicity plot" width="500"/>
+<img src="../images/output_images/bad_metagene_start_stop_read_counts.jpg" alt="poor quality 3nt_periodicity plot" width="500"/>
 
 
 ## `read_counts_by_length.tsv`
@@ -179,7 +219,7 @@ A bar chart showing the lengths of the reads detected in the sample. It is expec
 
 Example read_counts_by_length plot:
 
-<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/read_lengths.jpg" alt="poor quality read_counts_by_length plot" width="500"/>
+<img src="../images/output_images/read_counts_by_length.jpg" alt="poor quality read_counts_by_length plot" width="500"/>
 
 
 ## `nt_freq_per_read_position.tsv`
@@ -196,17 +236,13 @@ Length	Position	Frame	A	C	G	T
 10	6	0	0	0	0	0
 ```
 
-*Potential names*
-
-read_nt_compostion, nt_freq_read_length, read_nt_freq
-
 ## `metagene_normalized_profile_start_stop.pdf`
 
 A plot that shows the mean number of reads mapping to each position upstream and downstream of the start and stop codon for all genes. It is expected to have a peak at the start codon, with the majority of following positions having a relatively consistent mean that is comparatively low to the mean observed at the start codon. 
 
-Example pos_sp_rpf_norm_reads plot:
+Example mean number of reads plot:
 
-<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/pos_sp_rpf_norm_reads.jpg" alt="pos_sp_rpf_norm_reads plot" width="500"/>
+<img src="../images/output_images/metagene_normalized_profile_start_stop.jpg" alt="pos_sp_rpf_norm_reads plot" width="500"/>
 
 
 
@@ -227,7 +263,16 @@ Position	Mean	SD	End
 
 ## `ORF_TPMs_vs_features.tsv`
 
-A tsv file showing the tpm of a set of features and a value for that feature. The features are Length_log10 (log10 of the gene length); uATGs (number of upstream start codons); FE_atg (Free Energy at ATG); FE_cap (Free Energy at the cap); utr (length of the UTR); utr_gc (GC content of the UTR); and polyA (3' polyA tail on mRNA). This is produced by combining the tpms file with the features file, if a features file is provided. This is done by `generate_stats_figs.R` during step "Correlations between TPMs of genes with their sequence-based features" using the functions `CalculateSequenceBasedFeatures` and `WriteSequenceBasedFeatures`.
+A tsv file showing the tpm of a set of features and a value for that feature. The features are:
+* Length_log10 (log10 of the gene length)
+* uATGs (number of upstream start codons)
+* FE_atg (Free Energy at ATG)
+* FE_cap (Free Energy at the cap)
+* utr (length of the UTR)
+* utr_gc (GC content of the UTR)
+* polyA (3' polyA tail on mRNA).
+
+This is produced by combining the tpms file with the features file, if a features file is provided. This is done by `generate_stats_figs.R` during step "Correlations between TPMs of genes with their sequence-based features" using the functions `CalculateSequenceBasedFeatures` and `WriteSequenceBasedFeatures`.
 
 ```
 ORF	tpm	Feature	Value
@@ -239,7 +284,7 @@ YAL008W	11.8454807087593	Length_log10	2.29666519026153
 YAL010C	4.82007633057095	Length_log10	2.69284691927723
 ```
 
-Only output if `--features-file` was defined.
+Only output if `features_file` was defined.
 
 
 ## `ORF_TPMs_vs_features.pdf` 
@@ -248,9 +293,9 @@ The features pdf relates the tpm value of different genes to a variety of differ
 
 Example features plot:
 
-<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/features.jpg" alt=" features plot" width="500"/>
+<img src="../images/output_images/ORF_TPMs_vs_features.jpg" alt=" features plot" width="500"/>
 
-Only output if `--features-file` was defined.
+Only output if `features_file` was defined.
 
  
 
@@ -273,7 +318,7 @@ Q0070	20	0.0103092783505155	0.66647646133505
 
 A tsv file showing the correlatation of different codons to features based on a provided tRNA file, which gives the Amino acids, the tRNA estimates, the tAI (tRNA Adaptation Index), Microarray values, and RNA.seq values for each codon. These are used to calculate mean ribosome-densities at the A/P/E sites for each codon.
 
-Produced by `generate_stats_figs` during step "Codon-specific ribosome densities for correlations with tRNAs" using functions `CalculateCodonSpecificRibosomeDensityTRNACorrelation` and `WriteCodonSpecificRibosomeDensityTRNACorrelation`.
+Produced by `generate_stats_figs.R` during step "Codon-specific ribosome densities for correlations with tRNAs" using functions `CalculateCodonSpecificRibosomeDensityTRNACorrelation` and `WriteCodonSpecificRibosomeDensityTRNACorrelation`.
 
 ```
 AA	Codon	tRNA	tAI	Microarray	RNA.seq	A	P	E
@@ -284,7 +329,7 @@ N	AAT	6.4	0.27032	        241984.64 70943.36	0.566975111040301	0.786255203154437
 T	ACA	4	0.246373	105862	47598	0.933640392583143	1.007034200634	1.11922337626619
 ```
 
-Only output if `--t-rna-file` and `--codon-positions-file` were defined.
+Only output if `t_rna_file` and `codon_positions_file` were defined.
 
 
 ## `normalized_density_APEsites_per_codon_long.tsv`
@@ -308,7 +353,7 @@ K	AAA	RNA.seq	82386	E	1.02770556029175
 
 ```
 
-Only output if `--t-rna-file` and `--codon-positions-file` were defined.
+Only output if `t_rna-file` and `codon_positions_file` were defined.
 
 
 
@@ -318,9 +363,9 @@ This plot shows a range of features and relates them to ribosome densitiy on the
 
 Example normalized_density_apesites_per_codon plot:
 
-<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/codon_ribodens.jpg" alt="codon_ribodens plot" width="500"/>
+<img src="../images/output_images/normalized_density_APEsites_per_codon.jpg" alt="codon_ribodens plot" width="500"/>
 
-Only output if `--t-rna-file` and `--codon-positions-file` were defined.
+Only output if `t_rna_file` and `codon_positions_file` were defined.
 
 
 ## `gene_position_length_counts_5start.tsv`
@@ -342,20 +387,20 @@ ReadLen	Pos	Counts
 
 ## `metagene_start_barplot_by_length.pdf`
 
-A meta-feature bar chart showing the number of reads occurring at positions around the start codons of genes, faceted by read length. As the majority of reads will be 28-31nt in length, only bar charts for lengths 26-32nt are shown. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the `3nt_periodicity.tsv` file. Note: the Y axis scale will vary for each read length. 
+A meta-feature bar chart showing the number of reads occurring at positions around the start codons of genes, faceted by read length. As the majority of reads will be 28-31nt in length, only bar charts for lengths 26-32nt are shown. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the `metagene_start_stop_read_counts.tsv` file. Note: the Y axis scale will vary for each read length. 
 
 Example metagene_start_barplot_by_length.pdf:
 
-<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/startcodon_ribogridbar.jpg" alt="startcodon_ribogridbar plot" width="500"/>
+<img src="../images/output_images/metagene_start_barplot_by_length.jpg" alt="startcodon_ribogridbar plot" width="500"/>
 
 
 ## `metagene_start_ribogrid_by_length.pdf`
 
-A meta-feature heatmap showing the number of reads occurring at positions around the start codons of genes with the y axis as read length, and the colour intensity showing read count. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, shown by an intense dark purple, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the `3nt_periodicity.tsv` file. 
+A meta-feature heatmap showing the number of reads occurring at positions around the start codons of genes with the y axis as read length, and the colour intensity showing read count. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, shown by an intense dark purple, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the `metagene_start_stop_read_counts.tsv` file. 
 
 Example metagene_start_ribogrid_by_length.pdf:
 
-<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/startcodon_ribogrid.jpg" alt="startcodon_ribogrid plot" width="500"/>
+<img src="../images/output_images/metagene_start_ribogrid_by_length.jpg" alt="startcodon_ribogrid plot" width="500"/>
 
 
 ## `read_frame_per_ORF.tsv` 
@@ -372,7 +417,7 @@ YAL064W-B	0	0	0	1	1	1
 YAL064C-A	0	0	0	1	1	1
 ```
 
-Only output if `--asite-disp-length-file` was defined.
+Only output if `asite_disp_length_file` was defined.
 
 ## `read_frame_per_ORF_filtered.tsv`
 
@@ -387,14 +432,14 @@ YAL059W	173	34	159	2.29896520195999e-09	0.339582970614079	4.5634250757101e-06
 YAL058W	43	4	31	3.99564191533441e-08	0.175807992651532	4.21595642555769e-06
 ```
 
-Only output if `--asite-disp-length-file` was defined.
+Only output if `asite_disp_length_file` was defined.
 
 ## `frame_proportions_per_ORF.pdf` 
 
 A box plot of the proportion of reads mapping to each nucleotide of a codon for each ORF, with the first codon being denoted as Frame 0, the second being Frame 1 and the 3rd being Frame 2. It is expected that the majority of reads will be mapping to the first nucleotide, Frame 0, so this box will be higher than the others. 
 
-Example 3ntframe_propbygene.pdf:
+Example frame_proportions_per_ORF plot:
 
-<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/3ntframe_propbygene.jpg" alt="3ntframe_propbygene plot" width="500"/>
+<img src="../images/output_images/frame_proportions_per_ORF.jpg" alt="3ntframe_propbygene plot" width="500"/>
 
-Only output if `--asite-disp-length-file` was defined.
+Only output if `asite_disp_length_file` was defined.
