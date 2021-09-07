@@ -165,7 +165,7 @@ def test_hisat2_build_index(expected_fixture, build_indices,
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param build_indicex: Build indices?
+    :param build_indicex: Configuration parameter
     :type build_indices: boolean
     :param dir_index: Index files directory
     :type dir_index: str or unicode
@@ -570,14 +570,18 @@ def test_umitools_post_dedup_group_tsv(group_umis, dir_tmp, sample):
 @pytest.mark.parametrize("file_name", [
     workflow_files.MINUS_BEDGRAPH,
     workflow_files.PLUS_BEDGRAPH])
-def test_bedtools_bedgraph(expected_fixture, dir_out, sample,
-                           file_name):
+def test_bedtools_bedgraph(expected_fixture, make_bedgraph, dir_out,
+                           sample, file_name):
     """
     Test ``bedtools genomecov`` bedgraph files for equality. See
     :py:func:`riboviz.bedgraph.equal_bedgraph`.
 
+    Skipped if :py:const:`riboviz.params.MAKE_BEDGRAPH` is ``false``.
+
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
+    :param make_bedgraph: Configuration parameter
+    :type make_bedgraph: bool
     :param dir_out: Output directory
     :type dir_out: str or unicode
     :param sample: Sample name
@@ -585,11 +589,11 @@ def test_bedtools_bedgraph(expected_fixture, dir_out, sample,
     :param file_name: file name
     :type file_name: str or unicode
     """
+    if not make_bedgraph:
+        pytest.skip('Skipped test as make_bedgraph: '.format(make_bedgraph))
     dir_out_name = os.path.basename(os.path.normpath(dir_out))
     expected_file = os.path.join(expected_fixture, dir_out_name,
                                  sample, file_name)
-    if not os.path.exists(expected_file):
-        pytest.skip('Skipped as expected file does not exist')
     bedgraph.equal_bedgraph(expected_file,
                             os.path.join(dir_out, sample, file_name))
 
