@@ -684,19 +684,20 @@ def test_generate_stats_figs_tsv(expected_fixture, dir_out, sample,
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name",
-                         [workflow_r.METAGENE_START_STOP_READ_COUNTS_PDF,
-                          workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_PDF,
-                          workflow_r.ORF_TPMS_VS_FEATURES_PDF,
-                          workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_PDF,
-                          workflow_r.READ_COUNTS_BY_LENGTH_PDF,
+                         [workflow_r.READ_COUNTS_BY_LENGTH_PDF,
+                          workflow_r.METAGENE_START_STOP_READ_COUNTS_PDF,
                           workflow_r.METAGENE_START_BARPLOT_BY_LENGTH_PDF,
                           workflow_r.METAGENE_START_RIBOGRID_BY_LENGTH_PDF,
-                          workflow_r.FRAME_PROPORTIONS_PER_ORF_PDF])
-def test_generate_stats_figs_pdf(expected_fixture, dir_out, sample,
-                                 file_name, output_pdfs):
+                          workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_PDF])
+def test_generate_stats_figs_pdf(
+        output_pdfs, expected_fixture, dir_out, sample, file_name):
     """
     Test ``generate_stats_figs.R`` PDF files exist.
 
+    Skipped if :py:const:`riboviz.params.OUTPUT_PDFS` is ``false``.
+
+    :param output_pdfs: Configuration parameter
+    :type output_pdfs: bool
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
     :param dir_out: Output directory
@@ -705,11 +706,105 @@ def test_generate_stats_figs_pdf(expected_fixture, dir_out, sample,
     :type sample: str or unicode
     :param file_name: file name
     :type file_name: str or unicode
-    :param output_pdfs: Whether pdfs will be generated
-    :type output_pdfs: bool
     """
     if not output_pdfs:
-        pytest.skip('Skipped testing for pdfs as pdfs not generated')
+        pytest.skip('Skipped test as output_pdfs: '.format(output_pdfs))
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
+    expected_file = os.path.join(expected_fixture, dir_out_name,
+                                 sample, file_name)
+    if not os.path.exists(expected_file):
+        pytest.skip('Skipped as expected file does not exist')
+    actual_file = os.path.join(dir_out, sample, file_name)
+    assert os.path.exists(actual_file), "Non-existent file: %s" % actual_file
+
+
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("file_name",
+                         [workflow_r.ORF_TPMS_VS_FEATURES_PDF])
+def test_generate_stats_figs_features_pdf(
+        output_pdfs, expected_fixture, dir_out, sample, file_name):
+    """
+    Test ``generate_stats_figs.R`` PDF files exist.
+
+    Skipped if :py:const:`riboviz.params.OUTPUT_PDFS` is ``false``.
+
+    :param output_pdfs: Configuration parameter
+    :type output_pdfs: bool
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_out: Output directory
+    :type dir_out: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    :param file_name: file name
+    :type file_name: str or unicode
+    """
+    if not output_pdfs:
+        pytest.skip('Skipped test as output_pdfs: '.format(output_pdfs))
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
+    expected_file = os.path.join(expected_fixture, dir_out_name,
+                                 sample, file_name)
+    if not os.path.exists(expected_file):
+        pytest.skip('Skipped as expected file does not exist')
+    actual_file = os.path.join(dir_out, sample, file_name)
+    assert os.path.exists(actual_file), "Non-existent file: %s" % actual_file
+
+
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("file_name",
+                         [workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_PDF])
+def test_generate_stats_figs_t_rna_codon_positions_pdf(
+        output_pdfs, expected_fixture, dir_out, sample, file_name):
+    """
+    Test ``generate_stats_figs.R`` PDF files exist.
+
+    Skipped if :py:const:`riboviz.params.OUTPUT_PDFS` is ``false``.
+
+    :param output_pdfs: Configuration parameter
+    :type output_pdfs: bool
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_out: Output directory
+    :type dir_out: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    :param file_name: file name
+    :type file_name: str or unicode
+    """
+    if not output_pdfs:
+        pytest.skip('Skipped test as output_pdfs: '.format(output_pdfs))
+    dir_out_name = os.path.basename(os.path.normpath(dir_out))
+    expected_file = os.path.join(expected_fixture, dir_out_name,
+                                 sample, file_name)
+    if not os.path.exists(expected_file):
+        pytest.skip('Skipped as expected file does not exist')
+    actual_file = os.path.join(dir_out, sample, file_name)
+    assert os.path.exists(actual_file), "Non-existent file: %s" % actual_file
+
+
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("file_name",
+                         [workflow_r.FRAME_PROPORTIONS_PER_ORF_PDF])
+def test_generate_stats_figs_asite_disp_length_pdf(
+        output_pdfs, expected_fixture, dir_out, sample, file_name):
+    """
+    Test ``generate_stats_figs.R`` PDF files exist.
+
+    Skipped if :py:const:`riboviz.params.OUTPUT_PDFS` is ``false``.
+
+    :param output_pdfs: Configuration parameter
+    :type output_pdfs: bool
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_out: Output directory
+    :type dir_out: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    :param file_name: file name
+    :type file_name: str or unicode
+    """
+    if not output_pdfs:
+        pytest.skip('Skipped test as output_pdfs: '.format(output_pdfs))
     dir_out_name = os.path.basename(os.path.normpath(dir_out))
     expected_file = os.path.join(expected_fixture, dir_out_name,
                                  sample, file_name)
