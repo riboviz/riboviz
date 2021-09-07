@@ -751,20 +751,22 @@ def test_collate_orf_tpms_and_counts_tsv(expected_fixture, dir_out):
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_read_counts_per_file_tsv(count_reads, expected_fixture, dir_out):
+def test_read_counts_per_file_tsv(expected_fixture, count_reads, dir_out):
     """
     Test :py:mod:`riboviz.tools.count_reads` TSV files for
     equality. See :py:func:`riboviz.count_reads.equal_read_counts`.
 
-    :param count_reads: Was count reading configured?
-    :type count_reads: bool
+    Skipped if :py:const:`riboviz.params.COUNT_READS` is ``false``.
+
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
+    :param count_reads: Configuration parameter
+    :type count_reads: bool
     :param dir_out: Output directory
     :type dir_out: str or unicode
     """
     if not count_reads:
-        pytest.skip('Skipped test as read counts were not requested')
+        pytest.skip('Skipped test as count_reads'.format(count_reads))
     dir_out_name = os.path.basename(os.path.normpath(dir_out))
     count_reads_module.equal_read_counts(
         os.path.join(expected_fixture, dir_out_name,
