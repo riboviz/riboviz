@@ -25,12 +25,20 @@ source(here::here('rscripts','read_count_functions.R'))
 
 parser <- ArgumentParser()
 parser$add_argument('-i', '--input',
-                    help="input H5 file, Path to the H5 file containing the data to be studied. Able to take multiple files, with file paths separated by a space",
+                    help="input H5 file, Path to the H5 file containing the data to be studied.
+                    Able to take multiple files, with file paths separated by a space",
                     type="character", nargs='+')
-parser$add_argument('-g', '--gff', help="Path to GFF3 file corresponding to the species being studies", type="character")
-parser$add_argument('--gene', help="Gene of interest, name used should match the name listed in H5 file so check format", type="character")
-parser$add_argument('-d', '--dataset', help='Name of the dataset being run, ie D-Sp_2018, should match the dataset listed in H5 file', type="character")
+parser$add_argument('-g', '--gff', help="Path to GFF3 file corresponding to the species being studies",
+                    type="character")
+parser$add_argument('--gene', help="Gene of interest,
+                    name used should match the name listed in H5 file so check format", 
+                    type="character", default = NULL)
+parser$add_argument('-d', '--dataset', help='Name of the dataset being run, 
+                    ie D-Sp_2018, should match the dataset listed in H5 file',
+                    type="character")
 parser$add_argument('-o', '--output', help='Output directory for plots',default=".")
+parser$add_arguments('--read_threshold', help='The minimum number of reads per base 
+                     needed for a gene to be plotted', default=0.02)
 
 args <- parser$parse_args()
 
@@ -39,6 +47,7 @@ gff_in <- args$gff
 Gene_of_interest <- args$gene
 dataset <- args$dataset
 output_dir <- args$output
+read_threshold <- args$read_threshold
 
 # GeneFeatureTotalCountsPerBase takes a gene, splits it into features (5UTR and CDS),
 # and returns the reads per base in the features of that gene in the form of a tibble
@@ -50,6 +59,7 @@ GeneFeatureTotalCountsPerBase <- function(gene = gene, dataset = dataset, hd_fil
   
   #make a matric to be processed for each gene
   # turn matric into a tidy datamatrix 
+  
   tmp_tidy <- TidyDatamatrix(
     GetGeneDatamatrix(gene = gene, dataset = dataset, hd_file = hd_file), 
     startpos = 1
@@ -114,9 +124,9 @@ ApplyGeneFeatureTotalCountsPerBaseToSamples <- function(gene = gene_names, datas
 # filter to remove those with infinite values or less than 0.02 reads per base. 
 # reduces chance that the observed change is due to random variation as a higher number is needed to be plotted
 
-filter_tables <- function(all_samples_all_genes){
-  all_samples_all_genes <- all_samples_all_genes %>% filter(all_samples_all_genes$fiveUTR_reads_per_base >= 0.02 &
-                                                              all_samples_all_genes$CDS_reads_per_base >= 0.02)
+filter_tables <- function(all_samples_all_genes, read_threshold){
+  all_samples_all_genes <- all_samples_all_genes %>% filter(all_samples_all_genes$fiveUTR_reads_per_base >= read_threshold &
+                                                              all_samples_all_genes$CDS_reads_per_base >= read_threshold)
   return(all_samples_all_genes)
 }
 
@@ -143,8 +153,9 @@ plot_boxplot <- function(all_samples_all_genes, highlighted){
     theme(text=element_text(size=14),
           axis.title=element_text(size=14, face='bold'),
           title = element_text(size = 16, face='bold'))+
-    labs(title = '5UTR:CDS usage in different samples',
-         y = '5UTR rpb/CDS rpb', size = 2)
+    labs(title = paste('5UTR:CDS usage in different samples from ', dataset ),
+         y = '5UTR rpb/CDS rpb', size = 2,
+         x = unlist(strsplit(input, '.h5')))
   return(box_plot)
 }
 
@@ -154,7 +165,7 @@ plot_boxplot <- function(all_samples_all_genes, highlighted){
 save_plot_pdf <- function(box_plot, output_dir){
   box_plot %>%
     ggsave(
-      filename = file.path(output_dir,"UTR_use_in_different_samples.pdf"),
+      filename = file.path(output_dir,paste0("UTR_use_in_different_samples_from_", dataset, ".pdf")),
       width = 6, height = 5
     )
 }
@@ -171,7 +182,7 @@ print('Creating table of samples')
                                           dataset = dataset,
                                           startpos = 1)
 print('Removing genes with few or no reads')
-  all_samples_all_genes <- filter_tables(all_samples_all_genes)
+  all_samples_all_genes <- filter_tables(all_samples_all_genes, read_threshold)
   highlighted <- all_samples_all_genes %>% 
     filter(all_samples_all_genes$Gene %in% Gene_of_interest)
 print('Plotting boxplot')
