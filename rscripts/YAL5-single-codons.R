@@ -1,5 +1,6 @@
-# This script uses a h5, GFF and .tsv file to create a metafeature plot
-# for the feature of interest. Currently works with codons.
+# This script uses a h5, GFF and .tsv file to create either a metafeature plot 
+# for a feature of interest, or a table comparing the relCount of multiple features of interest.
+# Currently works with codons.
 # Further documentation can be found at:
 # https://github.com/riboviz/riboviz/blob/codon-pairs-286/docs/user/YAL5-single-codons_usage.md
 
@@ -25,7 +26,7 @@ option_list <- list(make_option(c("-i", "--input"),
                                 help = "Name of the dataset being studied"),
                     make_option(c("-g", "--gff"),
                                 type = "character",
-                                help = "Path t the GFF3 file of the organism being studied"),
+                                help = "Path to the GFF3 file of the organism being studied"),
                     make_option(c("-a", "--annotation"),
                                 type = "character",
                                 help = "Path to codon table for organism"),
@@ -34,7 +35,8 @@ option_list <- list(make_option(c("-i", "--input"),
                                 help = "Feature of interest, e.g. codon"),
                     make_option(c("-o", "--output"),
                                 type = "character",
-                                help = "Path to output directory"),
+                                help = "Path to output directory",
+                                default = "."),
                     make_option(c("--expand_width"),
                                 type = "integer",
                                 help = "the desired range either side of the feature of interest",
@@ -49,31 +51,18 @@ option_list <- list(make_option(c("-i", "--input"),
                                 default = 10),
                     make_option(c("--filter_for_frame"),
                                 type = "logical",
-                                help = "Filter to include only the reads from the first nucleotide of a codon",
+                                help = "counts for all reading frames per codon 
+                                are summed and assigned to their corresponding codon. 
+                                You either keep all by not filtering (FALSE) or 
+                                filter for a specific reading frame (TRUE)",
                                 default = TRUE),
                     make_option(c("--snapdisp"),
                                 type = "integer",
-                                help = "frame to filer to when using SnapToCodon",
+                                help = "frame to filter to when using SnapToCodon",
                                 default = 0L))
 
 
 opt <- optparse::parse_args(OptionParser(option_list = option_list))
-
-
-# hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
-# dataset <- "Mok-simYAL5"
-# feature_of_interest <- 'CGA'
-# # check all codons
-# # feature_of_interest <- here::here("data", "codons.tsv")
-# expand_width = 5L
-# filtering_frame <- 0
-# min_read_length <- 10
-# yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
-# gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
-# output_dir <- "."
-# filter_for_frame <- FALSE
-# snapdisp <- 0L
-
 
 hd_file <- opt$input
 dataset <- opt$dataset
@@ -88,6 +77,20 @@ min_read_length <- opt$minreadlen
 filter_for_frame <- opt$filter_for_frame
 snapdisp <- opt$snapdisp
 
+hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
+dataset <- "Mok-simYAL5"
+feature_of_interest <- 'CGA'
+# # check all codons
+# # feature_of_interest <- here::here("data", "codons.tsv")
+# expand_width = 5L
+# filtering_frame <- 0
+# min_read_length <- 10
+yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
+gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
+# output_dir <- "."
+# filter_for_frame <- FALSE
+# snapdisp <- 0L
+
 ### Load in information ###
 
 
@@ -95,7 +98,7 @@ snapdisp <- opt$snapdisp
 # the first column should contain the feature of interest (codons)
 
 # If a file is given for the feature of interest,
-# the feature of interest it will be extracted by the following if statement
+# the feature of interest will be extracted by the following if statement
 
 if (file.exists(feature_of_interest)) {
   feature_of_interest <- read.csv(feature_of_interest)
@@ -104,20 +107,6 @@ if (file.exists(feature_of_interest)) {
 
 # read in GFF
 gff_df <- readGFFAsDf(gff)
-
-## TEST: When running on tidy sim data set, the gff appears as follows
-# There are 2 genes, MAT and MIKE, which have CDSs flanked by 20nt
-
-# > gff_df
-# # A tibble: 6 x 10
-# seqnames start   end width strand source   type  score phase Name
-# <fct>    <int> <int> <int> <fct>  <fct>    <fct> <dbl> <int> <chr>
-#   1 MAT          1    20    20 +      ewallace UTR5     NA    NA MAT
-# 2 MAT         21    32    12 +      ewallace CDS      NA    NA MAT
-# 3 MAT         33    52    20 +      ewallace UTR3     NA    NA MAT
-# 4 MIKE         1    20    20 +      ewallace UTR5     NA    NA MIKE
-# 5 MIKE        21    35    15 +      ewallace CDS      NA    NA MIKE
-# 6 MIKE        36    55    20 +      ewallace UTR3     NA    NA MIKE
 
 # Get gene_names
 gene_names <- unique(gff_df$Name)
@@ -134,92 +123,34 @@ yeast_codon_pos_i200 <- suppressMessages(readr::read_tsv(file = yeast_codon_tabl
 
 ### Functions to map number of reads to codon positions ###
 
-#' GetGeneCodonPosReads1dsnap(): uses snapgene to assign reads to codons.
-#' @param gene The gene to get datamatrix and reads for.
-#' @param dataset The name of dataset stored in .h5 file.
-#' @param hd_file The path to the .h5 hdf5 file holding read data for all genes,
-#' created from BAM files for dataset samples.
-#' @param min_read_length An integer, the minimum read length in H5 output;
-#' Default = 10 (set in generate_stats_figs.R from yaml)
-#' @param snapdisp An integer for additional displacement in the snapping
-#'
-#' @return A numeric object containing read numbers. each number represents
-#' reads at the next codon in the gene
 
-GetGeneCodonPosReads1dsnap <- function(gene, dataset, hd_file,
-                                       min_read_length, asite_displacement_length,
-                                       left, right,
-                                       snapdisp) {
-  # Get the matrix of read counts
-  reads_pos_length <- GetGeneDatamatrix(gene, dataset, hd_file)
 
-  # Assign reads to their A site nt, determined by read length
-  reads_asitepos <- CalcAsiteFixed(reads_pos_length,  
-                                   min_read_length,
-                                   asite_displacement_length
-  )
-  # Assign reads from nt positions to codon positions
-  SnapToCodon(reads_asitepos, left, right, snapdisp)
-}
-
-## TEST:: CalAsiteFixed:
-#
-# mat_datamatrix <- GetGeneDatamatrix("MAT", dataset, hd_file)
-# mike_datamatrix <- GetGeneDatamatrix("MIKE", dataset, hd_file)
-#
-# asite_mat <- CalcAsiteFixed(mat_datamatrix, min_read_length = 10,
-#                              asite_displacement_length)
-# mat_tibble <- tibble(counts =asite_mat,
-#                      pos = 1:length(asite_mat))
-#
-# mat_tibble <- tibble(pos = 1:length(asite_mat)
-#                      counts =asite_mat)
-#
-# asite_mike <- CalcAsiteFixed(mike_datamatrix, min_read_length = 10,
-#                 asite_displacement_length)
-# mike_tibble <- tibble(counts = asite_mike,
-#                       pos = 1:length(asite_mike))
-#
-# mike_tibble <- tibble(pos = 1:length(asite_mike)
-#                       counts =asite_mike)
-#
-# Expected contents of mat_tibble
-#
-# pos   counts
-# <int>  <dbl>
-# 19    1
-# 25    1
-# 26    1
-# 27    2
-#
-# Expected contents of mike_tibble
-#
-# pos   counts
-# <int>  <dbl>
-# 20    1
-# 25    1
-
+#' FilterForFrameFunction
 #' FilterForFrameFunction() is an alternate way of mapping reads to codons.
 #' Unlike SnapToCodon, FilterForFrameFunction only returns reads mapping to
 #' the first nucleotide of a codon for the desired frame.
 #'
-#' @param gene The gene to get datamatrix and reads for.
-#' @param dataset The name of dataset stored in .h5 file.
-#' @param hd_file The path to the .h5 hdf5 file holding read data for all genes,
+#' @param gene - Gene name to pull out read counts for
+#' @param dataset - The name of dataset stored in .h5 file.
+#' @param hd_file - The path to the .h5 hdf5 file holding read data for all genes,
 #' created from BAM files for dataset samples.
-#' @param gff_df The gff file in a dataframe format
-#' @param min_read_length An integer, the minimum read length in H5 output;
+#' @param min_read_length - An integer, the minimum read length in H5 output;
 #' Default = 10 (set in generate_stats_figs.R from yaml)
-#' @param filtering_frame The frame from which to select reads from.
+#' @param asite_displacement_length - 
+#' @param filtering_frame -  The frame from which to select reads from
+#' @param gff_df - The data frame version of the GFF3 file
 #'
-#' @return A numeric object containing read numbers. each number represents
-#' reads at the next codon in the gene
-
+#' @return - a list of numeric values (read counts) for a reading frame (0/1/2)
+#'
+#' @examples FilterForFrameFunction(gene, dataset, hd_file,
+#'                                  min_read_length,
+#'                                  asite_displacement_length,
+#'                                  gff_df,
+#'                                  filtering_frame)
 
 FilterForFrameFunction <- function(gene, dataset, hd_file,
                                    min_read_length, asite_displacement_length,
-                                   left, right,
-                                   filtering_frame) {
+                                   gff_df, filtering_frame) {
   
   # Get the matrix of read counts
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hd_file)
@@ -229,6 +160,17 @@ FilterForFrameFunction <- function(gene, dataset, hd_file,
                                    min_read_length,
                                    asite_displacement_length
   )
+  
+  # Get the gff rows for the gene being studied
+  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene)
+  
+  # Get the position of the start codon
+  left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
+                                   type == "CDS") %>%  select(start))
+  
+  # Get the position of the stop codon
+  right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
+                                    type == "CDS") %>%  select(end))
   
   # Extract the reads that map to the CDS
   cds_reads <- reads_asitepos[left:right]
@@ -263,27 +205,26 @@ FilterForFrameFunction <- function(gene, dataset, hd_file,
 }
 
 
-#' GetAllCodonPosCounts(): extracts A-site assigned counts for a list of genes
-#'
+
+
+
+#' GetAllCodonPosCounts
+#' 
 #' Applies the GetGeneCodonPosReads1dsnap() function to a list of genes and
-#'generates a tidy data frame (tibble) which contains the counts for all genes
-#' @param gene_names The list of all the genes in the sample 
-#' @param gene The gene from gene_names to get read lengths for.
-#' Used in GetAllCodonPosCounts1Gene
-#' @param dataset The name of dataset stored in .h5 file.
-#' @param hd_file The path to the .h5 hdf5 file holding read data for all genes,
+#' generates a tidy data frame (tibble) which contains the counts for all genes
+#' @param gene_names - The list of all the genes in the sample
+#' @param dataset - The name of dataset stored in .h5 file.
+#' @param hd_file - The path to the .h5 hdf5 file holding read data for all genes,
 #' created from BAM files for dataset samples.
-#' @param gff_df The gff file in a dataframe format
-#' @param min_read_length An integer, the minimum read length in H5 output;
-#' Default = 10 (set in generate_stats_figs.R from yaml)
-#' @param filter_for_frame Decides which method of asite assignment to use
-#' @param filtering_frame The frame from which to select reads from.
-#' @param snapdisp An integer for additional displacement in the snapping
+#' @param min_read_length 
+#' @param filter_for_frame 
+#' @param filtering_frame 
+#' @param snapdisp 
 #'
-#' @return a tibble which contains the columns "Gene", "PosCodon" and "Count"
-#' for a list of genes
-
-
+#' @return
+#' @export
+#'
+#' @examples
 GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length,
                                  filter_for_frame, filtering_frame, snapdisp) {
 
@@ -329,8 +270,8 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length,
       # This uses only the reads from the first nucleotide in the codon
       codon_counts_1_gene <- FilterForFrameFunction(gene, dataset, hd_file,
                                                     min_read_length,
-                                                    asite_displacement_length,
-                                                    left, right,
+                                                    asite_displacement_length, 
+                                                    gff_df,
                                                     filtering_frame)
       # str(codon_counts_1_gene)
       # num [1:207] 811 429 488 102 994 146 173 762 13 176
