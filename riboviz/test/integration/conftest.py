@@ -197,12 +197,20 @@ def pytest_generate_tests(metafunc):
         if params.FQ_FILES in config and config[params.FQ_FILES]:
             samples = list(config[params.FQ_FILES].keys())
         elif params.MULTIPLEX_FQ_FILES in config and config[params.MULTIPLEX_FQ_FILES]:
+            # Get samples from sample sheet.
             sample_sheet_file = os.path.join(
                 config[params.INPUT_DIR],
                 config[params.SAMPLE_SHEET])
             sample_sheet = sample_sheets.load_sample_sheet(
                 sample_sheet_file)
-            samples = list(sample_sheet[sample_sheets.SAMPLE_ID])
+            sample_sheet_samples = list(sample_sheet[sample_sheets.SAMPLE_ID])
+            # Get folder/file names from output directory. These
+            # include output folders for the samples which were
+            # demultiplexed and other files.
+            output_samples = os.listdir(config[params.OUTPUT_DIR])
+            # Get names of samples for which output files exist.
+            samples = list(set(sample_sheet_samples).intersection(
+                set(output_samples)))
         if test.VIGNETTE_MISSING_SAMPLE in samples:
             samples.remove(test.VIGNETTE_MISSING_SAMPLE)
         fixtures["sample"] = samples
