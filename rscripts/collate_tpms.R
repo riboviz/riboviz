@@ -11,6 +11,10 @@
 #' sample-specific columns, named by sample name, with the `tpm`
 #' values from the sample-specific files.
 #'
+#' If `--files-only` is `TRUE` then the basename of each sample
+#' file name will be used as the sample names in the sample-specific
+#' column header
+#'
 #' This script accepts the following command-line parameters:
 #'
 #' | Parameter | Description |
@@ -19,7 +23,8 @@
 #' | `--orf-fasta` | ORF FASTA file that was aligned to and from which ORF names are to be retrieved |
 #' | `--sort-orfs` | Sort ORF list lexicographically (default `FALSE`) |
 #' | `--digits` | Number of decimal places to be used in output (default 1) |
-#' | `<sample> <sample_tpms>` | Space-delimited list of one or more pairs of sample names and sample-specific TPMs files |
+#' | `--files-only` | Sample names are not provided with the sample-specific TPMs files? (default `FALSE`) |
+#' | `[<sample>] <sample_tpms_file>` | Space-delimited list of one or more pairs of sample names and sample-specific TPMs files (if `--files-only` is `FALSE`) or sample-specific TPMs files only (if `--files-only` is `TRUE`) |
 #'
 #' @export
 
@@ -54,8 +59,10 @@ option_list <- list(
   make_option("--sort-orfs", type = "logical", default = FALSE,
     help = "Sort ORF list lexicographically"),
   make_option("--digits", type = "integer", default = 1,
-    help = "Number of decimal places to be used in output"))
-
+    help = "Number of decimal places to be used in output"),
+  make_option("--files-only", type = "logical", default = FALSE,
+    help = "Sample names are not provided with the sample-specific TPMs files?")
+)
 
 print_provenance(get_Rscript_filename())
 
@@ -71,14 +78,20 @@ if (length(opt$args) == 0) {
 if ((length(opt$args) %% 2) != 0) {
   stop("Invalid <sample_name> <sample_file> list provided")
 }
-sample_names_files <- split(opt$args, ceiling(seq_along(opt$args) %% 2))
-sample_files <- sample_names_files[[1]]
-names(sample_files) <- sample_names_files[[2]]
 
+if (opt$options$files_only) {
+  sample_files <- opt$args
+  # Use file names as sample names.
+  names(sample_files) <- lapply(opt$args, basename)
+} else {
+  # Split into pairs of <sample> <sample_tpms_file>.
+  sample_names_files <- split(opt$args, ceiling(seq_along(opt$args) %% 2))
+  sample_files <- sample_names_files[[1]]
+  names(sample_files) <- sample_names_files[[2]]
+}
 CollateTpms(opt$options$tpms_file,
             opt$options$orf_fasta,
             sample_files,
             sort_orfs = opt$options$sort_orfs,
             digits = opt$options$digits)
-
 print("collate_tpms.R done")
