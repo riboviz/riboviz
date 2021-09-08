@@ -1106,7 +1106,7 @@ process bamToH5 {
             file(sample_bam_bai) from bam_to_h5_bam
         each file(orf_gff) from bam_to_h5_orf_gff
     output:
-        tuple val(sample_id), file("${sample_id}.h5") into h5s
+        tuple val(sample_id), file("${sample_id}.h5"), file("${sample_id}.h5.*") into h5s
     shell:
         secondary_id_flag = (secondary_id != null) \
             ? "--secondary-id=${secondary_id}" : ''
@@ -1136,7 +1136,7 @@ process generateStatsFigs {
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(sample_h5) from h5s
+        tuple val(sample_id), file(sample_h5), file("${sample_id}.h5.*") from h5s
         each file(orf_fasta) from generate_stats_figs_orf_fasta
         each file(orf_gff) from generate_stats_figs_orf_gff
         each file(t_rna_tsv) from t_rna_tsv
@@ -1278,43 +1278,6 @@ process collateTpms {
         """
 }
 
-process countReads {
-    publishDir "${dir_out}", mode: 'copy', overwrite: true
-    input:
-        // Use '.toString' to prevent changing hashes of
-        // 'workflow.projectDir' triggering reexecution of this
-        // process if 'nextflow run' is run with '-resume'.
-        env PYTHONPATH from workflow.projectDir.toString()
-        val ribosome_fqs_yaml from ribosome_fqs_yaml
-        // Force dependency on output of 'collateTpms' so this process
-        // is only run when all other processing has completed.
-        val samples_ids from collate_tpms_sample_ids
-    output:
-        file "read_counts_per_file.tsv" into read_counts_per_file_tsv
-    when:
-        params.count_reads
-    shell:
-        // 'workflow.projectDir' is directory into which outputs
-        // have been published.
-        // TODO: It would be preferable to:
-        // 1. Stage these directories into this process's
-        //    work directory. If this is possible, and how to do it,
-        //    if so, has not been determined.
-        // 2. Stage outputs from the processes for which reads
-        //    are to be counted into this process's work directory.
-        //    This would require a new implementation of
-        //    riboviz.tools.count_reads.
-        """
-        echo "${ribosome_fqs_yaml}" > ribosome_fqs.yaml
-        python -m riboviz.tools.count_reads \
-           -c ribosome_fqs.yaml \
-           -i ${file(dir_in).toAbsolutePath()} \
-           -t ${file(dir_tmp).toAbsolutePath()} \
-           -o ${file(dir_out).toAbsolutePath()} \
-           -r read_counts_per_file.tsv
-        """
-}
-
 Map viz_params = [:]
 if (is_asite_disp_length_file) {
     viz_params.asite_disp_length_file = asite_disp_length_file.toString()
@@ -1357,6 +1320,7 @@ process staticHTML {
         file(sample_normalized_density_apesites_per_codon_long_tsv) \
 	from generate_stats_figs_static_html
     output:
+      val sample_id into static_html_sample_ids
       val sample_id into finished_viz_sample_id
       file "${sample_id}_output_report.html" into static_html_html
     when:
@@ -1389,9 +1353,57 @@ process staticHTML {
       """
 }
 
-finished_viz_sample_id
-    .ifEmpty { exit 1, "No sample was visualised successfully" }
-    .view { "Finished visualising sample: ${it}" }
+// Force dependency on output of staticHTML (if run) or collateTpms so
+// this process is only run when all other processing has completed.
+if (params.run_static_html) {
+  count_reads_sample_ids = static_html_sample_ids
+} else {
+  count_reads_sample_ids = collate_tpms_sample_ids
+}
+
+process countReads {
+    publishDir "${dir_out}", mode: 'copy', overwrite: true
+    input:
+        // Use '.toString' to prevent changing hashes of
+        // 'workflow.projectDir' triggering reexecution of this
+        // process if 'nextflow run' is run with '-resume'.
+        env PYTHONPATH from workflow.projectDir.toString()
+        val ribosome_fqs_yaml from ribosome_fqs_yaml
+        val samples_ids from count_reads_sample_ids.collect()
+    output:
+        file "read_counts_per_file.tsv" into read_counts_per_file_tsv
+    when:
+        params.count_reads
+    shell:
+        // 'workflow.projectDir' is directory into which outputs
+        // have been published.
+        // TODO: It would be preferable to:
+        // 1. Stage these directories into this process's
+        //    work directory. If this is possible, and how to do it,
+        //    if so, has not been determined.
+        // 2. Stage outputs from the processes for which reads
+        //    are to be counted into this process's work directory.
+        //    This would require a new implementation of
+        //    riboviz.tools.count_reads.
+        """
+        echo "${ribosome_fqs_yaml}" > ribosome_fqs.yaml
+        python -m riboviz.tools.count_reads \
+           -c ribosome_fqs.yaml \
+           -i ${file(dir_in).toAbsolutePath()} \
+           -t ${file(dir_tmp).toAbsolutePath()} \
+           -o ${file(dir_out).toAbsolutePath()} \
+           -r read_counts_per_file.tsv
+        """
+}
+
+// Create handler for finished_viz_sample_id channel, output by
+// staticHTML, only if run_static_html is true i.e. if staticHTML
+// executes.
+if (params.run_static_html) {
+  finished_viz_sample_id
+      .ifEmpty { exit 1, "No sample was visualised successfully" }
+      .view { "Finished visualising sample: ${it}" }
+}
 
 workflow.onComplete {
     println "Workflow finished! (${workflow.success ? 'OK' : 'failed'})"
