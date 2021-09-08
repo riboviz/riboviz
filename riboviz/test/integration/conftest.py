@@ -154,18 +154,23 @@ def pytest_generate_tests(metafunc):
         - If sample name
           :py:const:`riboviz.test.VIGNETTE_MISSING_SAMPLE`
           is present, then it is removed from the sample names.
-    - ``index_prefix``: value of
+    - ``is_multiplexed``: list with ``False`` if
+      :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` defines one or
+      more files, ``True`` otherwise.
+    - ``index_prefix``: list with values of
       :py:const:`riboviz.params.ORF_INDEX_PREFIX` and
       :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
     - ``<param>``: where ``<param>`` is a key from
       :py:const:`riboviz.params.DEFAULT_FOLDER_VALUES` and the
-       value is either that from ``config``, if defined, or the
-      default from :py:const:`riboviz.params.DEFAULT_FOLDER_VALUES`
+       value is a list with either the value of the parameter from
+      ``config``, if defined, or the default from
+      :py:const:`riboviz.params.DEFAULT_FOLDER_VALUES`
       otherwise.
     - ``<param>``: where ``<param>`` is a key from
       :py:const:`riboviz.params.DEFAULT_CONDITIONS` and the
-      value is either that from ``config``, if defined, or the
-      default from :py:const:`riboviz.params.DEFAULT_CONDITIONS`
+       value is a list with either the value of the parameter from
+      ``config``, if defined, or the default from
+      :py:const:`riboviz.params.DEFAULT_CONDITIONS`
       otherwise.
 
     :param metafunc: pytest test function inspection object
@@ -197,8 +202,10 @@ def pytest_generate_tests(metafunc):
     if "sample" in metafunc.fixturenames:
         samples = []
         if params.FQ_FILES in config and config[params.FQ_FILES]:
+            fixtures["is_multiplexed"] = [False]
             samples = list(config[params.FQ_FILES].keys())
         elif params.MULTIPLEX_FQ_FILES in config and config[params.MULTIPLEX_FQ_FILES]:
+            fixtures["is_multiplexed"] = [True]
             # Get samples from sample sheet.
             sample_sheet_file = os.path.join(
                 config[params.INPUT_DIR],
