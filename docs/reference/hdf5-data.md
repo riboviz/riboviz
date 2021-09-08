@@ -53,6 +53,34 @@ If not `is_riboviz_gff` then:
 
 ## HDF5 file structure
 
+An HDF5 file, `hd_file`, is created that has external links to complementary HDF5 files, named `<hd_file>.1`, `<hd_file>.2` etc. each of which hold the data for a subset of genes. The number of data files depends on the number of processes (`num_processes`). For example, if `num_processes` is 1 then the output files will be `<hd_file>` (external links file) and `<hd_file>.1` (data file). If `num_processes` is 4 then the output files will be `<hd_file>` (external links file) and `<hd_file>.1`, `<hd_file>.2`, `<hd_file>.3`, `<hd_file>.4` (data files).
+
+Each complementary HDF5 data file has approximately the same number of genes i.e. approximately number of genes / `num_processes`.
+
+The HDF5 file, `hd_file`, has the following structure:
+
+```
+GROUP "/" {
+  EXTERNAL_LINK "<gene<1>>" {
+     TARGETFILE "<hd_file>.1"
+     TARGETPATH "<gene<1>>"
+  }
+ ...
+  EXTERNAL_LINK "<gene<m>>" {
+     TARGETFILE "<hd_file>.2"
+     TARGETPATH "<gene>m>>"
+  }
+ ...
+  EXTERNAL_LINK "<gene<n>>" {
+     TARGETFILE "<hd_file>.<num_processes>"
+     TARGETPATH "<gene<n>>"
+  }
+...
+}
+```
+
+The complementary HDF5 data files, `<hd_file>.<i>`, each have the following structure.
+
 The `reads` group, `/<gene>/<dataset>/reads`, for a `<gene>` has several attributes associated with it. These are summary statistics and other information about the gene and dataset within the `reads` group. The list of attributes are as follows.
 
 | Attribute | Description | Origin |
@@ -65,14 +93,14 @@ The `reads` group, `/<gene>/<dataset>/reads`, for a `<gene>` has several attribu
 | `reads_by_len` | Counts of number of ribosome sequences of each length | BAM file |
 | `reads_total` | Total number of ribosome sequences | BAM file. Equal to number of non-zero reads in `reads_by_len` |
 
-The HDF5 file is organized in a hierarchy, `/<gene>/<dataset>/reads/data`, where `<gene>` is each gene name in the BAM file and `orf_gff_file` passed to `bam_to_h5.R`.
+Each complementary HDF5 data file, `<hd_file>.<i>`, is organized in a hierarchy, `/<gene>/<dataset>/reads/data`, where `<gene>` is each gene name in `bam_file` and `orf_gff_file`.
 
 The `data` table in `/<gene>/<dataset>/reads/data`, for a `<gene>` has the positions and lengths of ribosome sequences within the organism data (determined from the BAM file). It is an integer table with each row representing a read length and columns representing nucleotide positions. The first row corresponds to reads of length `min_read_length` and the last row corresponds to reads of length `max_read_length`.
 
-A template HDF5 file, showing how the HDF5 file relates to information in the RiboViz configuration (and `bam_to_h5.R command-line parameters), `orf_gff_fasta` and a BAM file is as follows:
+A template HDF5 data file, showing how the complementary HDF5 data files relate to information in the RiboViz configuration (and `bam_to_h5.R command-line parameters), `orf_gff_fasta` and a BAM file is as follows:
 
 ```
-HDF5 "<file>.h5" {
+HDF5 "<hd_file>.<i>" {
 GROUP "/" {
    GROUP "<gene>" {
       GROUP "<dataset>" {

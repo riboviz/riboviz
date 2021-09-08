@@ -164,7 +164,11 @@ Almost all translated reads should be counted in open reading frames within `plu
 
 ## `<SAMPLE_ID>.h5` 
 
-Length-sensitive alignments of reads in compressed h5 format. This file is created from the sample Bam file using `bam_to_H5.R`. Information contained within the h5 file can be accessed using the functions `GetGeneDataMatrix` and `TidyGeneDataMatrix` in R, which will create a tibble showing the number of reads of each length occurring at each position in a gene. More useful functions for working with a h5 file are described in `rscripts/read_count_functions.R`.
+Length-sensitive alignments of reads in compressed HDF5 format. This file is created from the sample BAM file using `bam_to_h5.R`.
+
+The HDF5 file, `<SAMPLE_ID>.h5`, has external links to complementary HDF5 files, named `<SAMPLE_ID>.h5.1`, `<SAMPLE_ID>.h5.2` etc. each of which hold the data for a subset of genes. The number of data files depends on the number of processes (`num_processes`). For example, if `num_processes` is 1 then the output files will be `<SAMPLE_ID>.h5` (external links file) and `<SAMPLE_ID>.h5.1` (data file). If `num_processes` is 4 then the output files will be `<SAMPLE_ID>.h5` (external links file) and `<SAMPLE_ID>.h5.1`, `<SAMPLE_ID>.h5.2`, `<SAMPLE_ID>.h5.3`, `<SAMPLE_ID>.h5.4` (data files). For more information, see [Structure of HDF5 data](../reference/hdf5-data.md).
+
+Information contained within the HDF5 file can be accessed using the functions `GetGeneDataMatrix` and `TidyGeneDataMatrix` in R, which will create a tibble showing the number of reads of each length occurring at each position in a gene. More useful functions for working with a HDF5 file are described in `rscripts/read_count_functions.R`.
 
 ## `metagene_start_stop_read_counts.tsv`
 

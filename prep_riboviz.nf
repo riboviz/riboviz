@@ -1106,7 +1106,7 @@ process bamToH5 {
             file(sample_bam_bai) from bam_to_h5_bam
         each file(orf_gff) from bam_to_h5_orf_gff
     output:
-        tuple val(sample_id), file("${sample_id}.h5") into h5s
+        tuple val(sample_id), file("${sample_id}.h5"), file("${sample_id}.h5.*") into h5s
     shell:
         secondary_id_flag = (secondary_id != null) \
             ? "--secondary-id=${secondary_id}" : ''
@@ -1136,7 +1136,7 @@ process generateStatsFigs {
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(sample_h5) from h5s
+        tuple val(sample_id), file(sample_h5), file("${sample_id}.h5.*") from h5s
         each file(orf_fasta) from generate_stats_figs_orf_fasta
         each file(orf_gff) from generate_stats_figs_orf_gff
         each file(t_rna_tsv) from t_rna_tsv
