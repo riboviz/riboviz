@@ -150,6 +150,27 @@ def test_hisat2_build_index(build_indices, expected_fixture, dir_index,
         os.path.join(dir_index, file_name))
 
 
+def compare_fq_files(expected_fixture, dir_tmp, sample, file_name):
+    """
+    Test FASTQ files for equality. See
+    :py:func:`riboviz.fastq.equal_fastq`.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_tmp: Temporary directory
+    :type dir_tmp: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    :param file_name: File name
+    :type file_name: str or unicode
+    """
+    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
+    fastq.equal_fastq(os.path.join(expected_fixture, dir_tmp_name, sample,
+                                   file_name),
+                      os.path.join(dir_tmp, sample,
+                                   file_name))
+
+
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_cutadapt_fq(is_multiplexed, expected_fixture, dir_tmp, sample):
@@ -172,11 +193,8 @@ def test_cutadapt_fq(is_multiplexed, expected_fixture, dir_tmp, sample):
     if is_multiplexed:
         pytest.skip('Skipped test as is_multiplexed: {}'.format(
             is_multiplexed))
-    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
-    fastq.equal_fastq(os.path.join(expected_fixture, dir_tmp_name, sample,
-                                   workflow_files.ADAPTER_TRIM_FQ),
-                      os.path.join(dir_tmp, sample,
-                                   workflow_files.ADAPTER_TRIM_FQ))
+    compare_fq_files(expected_fixture, dir_tmp, sample,
+                     workflow_files.ADAPTER_TRIM_FQ)
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
@@ -207,11 +225,8 @@ def test_umitools_extract_fq(extract_umis, is_multiplexed,
     if is_multiplexed:
         pytest.skip('Skipped test as is_multiplexed: {}'.format(
             is_multiplexed))
-    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
-    fastq.equal_fastq(
-        os.path.join(expected_fixture, dir_tmp_name, sample,
-                     workflow_files.UMI_EXTRACT_FQ),
-        os.path.join(dir_tmp, sample, workflow_files.UMI_EXTRACT_FQ))
+    compare_fq_files(expected_fixture, dir_tmp, sample,
+                     workflow_files.UMI_EXTRACT_FQ)
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
@@ -233,10 +248,7 @@ def test_hisat_fq(expected_fixture, dir_tmp, sample, file_name):
     :param file_name: file name
     :type file_name: str or unicode
     """
-    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
-    fastq.equal_fastq(os.path.join(expected_fixture, dir_tmp_name, sample,
-                                   file_name),
-                      os.path.join(dir_tmp, sample, file_name))
+    compare_fq_files(expected_fixture, dir_tmp, sample, file_name)
 
 
 def compare_sam_files(expected_directory, directory,
@@ -494,6 +506,28 @@ def test_umitools_dedup_stats_tsv(
     assert os.path.exists(actual_file), "Non-existent file: %s" % actual_file
 
 
+def compare_tsv_files(expected_fixture, directory, sample, file_name):
+    """
+    Test TSV files for equality. See
+    :py:func:`riboviz.utils.equal_tsv`.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param directory: Actual data directory
+    :type directory: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    :param file_name: file name
+    :type file_name: str or unicode
+    """
+    directory_name = os.path.basename(os.path.normpath(directory))
+    expected_file = os.path.join(expected_fixture, directory_name,
+                                 sample, file_name)
+    utils.equal_tsv(
+        expected_file,
+        os.path.join(directory, sample, file_name))
+
+
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_umitools_pre_dedup_group_tsv(
@@ -520,12 +554,8 @@ def test_umitools_pre_dedup_group_tsv(
         pytest.skip('Skipped test as dedup_umis: {}'.format(dedup_umis))
     if not group_umis:
         pytest.skip('Skipped test as group_umis: {}'.format(group_umis))
-    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
-    utils.equal_tsv(
-        os.path.join(expected_fixture, dir_tmp_name, sample,
-                     workflow_files.PRE_DEDUP_GROUPS_TSV),
-        os.path.join(dir_tmp, sample,
-                     workflow_files.PRE_DEDUP_GROUPS_TSV))
+    compare_tsv_files(expected_fixture, dir_tmp, sample,
+                      workflow_files.PRE_DEDUP_GROUPS_TSV)
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
