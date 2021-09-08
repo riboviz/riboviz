@@ -19,7 +19,9 @@ pass onto integration test modules:
   used. Sample names are extracted from
   :py:const:`riboviz.params.FQ_FILES`. If, instead,
   :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` is provided then sample
-  names are extracted from the sample sheet file specified in
+  names are deduced from the names of folders in
+  :py:const:`riboviz.params.OUTPUT_DIR` cross-referenced with the
+  sample sheet file specified in
   :py:const:`riboviz.params.SAMPLE_SHEET`.
 """
 import os.path
@@ -29,7 +31,6 @@ from riboviz import environment
 from riboviz import params
 from riboviz import sample_sheets
 from riboviz import test
-from riboviz import utils
 
 EXPECTED = "--expected"
 """ Directory with expected data files command-line flag."""
@@ -134,37 +135,38 @@ def pytest_generate_tests(metafunc):
     """
     Parametrize tests using information within a configuration file.
 
-    * If :py:const:`CONFIG_FILE` has been provided then use this as a
-      configuration file, else use
-      :py:const:`riboviz.test.VIGNETTE_CONFIG`.
-    * Load configuration from file.
-    * Inspect each test fixture used by the test functions and \
-      configure with values from the configuration:
-        - ``sample``:
-            - If :py:const:`riboviz.params.FQ_FILES` is provided then
-              sample names are the keys from this value.
-            - If :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` is
-              provided then sample names are extracted from the sample
-              sheet file specified in
-              :py:const:`riboviz.params.SAMPLE_SHEET`.
-            - If sample name
-              :py:const:`riboviz.test.VIGNETTE_MISSING_SAMPLE`
-              is present, then it is removed from the sample names.
-        - ``index_prefix``: value of
-          :py:const:`riboviz.params.ORF_INDEX_PREFIX` and
-          :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
-        - ``<param>``: where ``<param>`` is a key from
-          :py:const:`riboviz.params.DEFAULT_FOLDER_VALUES` and the
-          value is either that from ``config``, if defined, or the
-          default from
-          :py:const:`riboviz.params.DEFAULT_FOLDER_VALUES`
-          otherwise.
-        - ``<param>``: where ``<param>`` is a key from
-          :py:const:`riboviz.params.DEFAULT_CONDITIONS` and the
-          value is either that from ``config``, if defined, or the
-          default from
-          :py:const:`riboviz.params.DEFAULT_CONDITIONS`
-          otherwise.
+    If :py:const:`CONFIG_FILE` has been provided then use this as a
+    configuration file, else use
+    :py:const:`riboviz.test.VIGNETTE_CONFIG`.
+
+    Load configuration from file.
+
+    Inspect each test fixture used by the test functions and \
+    configure with values from the configuration:
+    - ``sample``:
+        - If :py:const:`riboviz.params.FQ_FILES` is provided then
+          sample names are the keys from this value.
+        - If :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` then
+          sample names are deduced from the names of folders in
+          :py:const:`riboviz.params.OUTPUT_DIR` cross-referenced
+          with the sample sheet file specified in
+          :py:const:`riboviz.params.SAMPLE_SHEET`.
+        - If sample name
+          :py:const:`riboviz.test.VIGNETTE_MISSING_SAMPLE`
+          is present, then it is removed from the sample names.
+    - ``index_prefix``: value of
+      :py:const:`riboviz.params.ORF_INDEX_PREFIX` and
+      :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
+    - ``<param>``: where ``<param>`` is a key from
+      :py:const:`riboviz.params.DEFAULT_FOLDER_VALUES` and the
+       value is either that from ``config``, if defined, or the
+      default from :py:const:`riboviz.params.DEFAULT_FOLDER_VALUES`
+      otherwise.
+    - ``<param>``: where ``<param>`` is a key from
+      :py:const:`riboviz.params.DEFAULT_CONDITIONS` and the
+      value is either that from ``config``, if defined, or the
+      default from :py:const:`riboviz.params.DEFAULT_CONDITIONS`
+      otherwise.
 
     :param metafunc: pytest test function inspection object
     :type metafunc: _pytest.python.Metafunc
@@ -189,7 +191,7 @@ def pytest_generate_tests(metafunc):
                            else config[param]]
     for param, default in params.DEFAULT_CONDITIONS.items():
         fixtures[param] = [default if param not in config
-                           else utils.value_in_dict(param, config)]
+                           else config[param]]
     fixtures["index_prefix"] = [config[params.ORF_INDEX_PREFIX],
                                 config[params.RRNA_INDEX_PREFIX]]
     if "sample" in metafunc.fixturenames:
