@@ -161,16 +161,10 @@ def pytest_generate_tests(metafunc):
       :py:const:`riboviz.params.ORF_INDEX_PREFIX` and
       :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
     - ``<param>``: where ``<param>`` is a key from
-      :py:const:`riboviz.params.DEFAULT_FOLDER_VALUES` and the
+      :py:const:`riboviz.params.DEFAULT_VALUES` and the
        value is a list with either the value of the parameter from
       ``config``, if defined, or the default from
-      :py:const:`riboviz.params.DEFAULT_FOLDER_VALUES`
-      otherwise.
-    - ``<param>``: where ``<param>`` is a key from
-      :py:const:`riboviz.params.DEFAULT_CONDITIONS` and the
-       value is a list with either the value of the parameter from
-      ``config``, if defined, or the default from
-      :py:const:`riboviz.params.DEFAULT_CONDITIONS`
+      :py:const:`riboviz.params.DEFAULT_VALUES`
       otherwise.
 
     :param metafunc: pytest test function inspection object
@@ -191,10 +185,7 @@ def pytest_generate_tests(metafunc):
     # variables
     environment.apply_env_to_config(config)
     fixtures = {}
-    for param, default in params.DEFAULT_FOLDER_VALUES.items():
-        fixtures[param] = [default if param not in config
-                           else config[param]]
-    for param, default in params.DEFAULT_CONDITIONS.items():
+    for param, default in params.DEFAULT_VALUES.items():
         fixtures[param] = [default if param not in config
                            else config[param]]
     fixtures["index_prefix"] = [config[params.ORF_INDEX_PREFIX],

@@ -116,21 +116,14 @@ When validating configuration skip checks for existence of ribosome
 profiling data files.
 """
 
-DEFAULT_FOLDER_VALUES = {
+DEFAULT_VALUES = {
     INDEX_DIR: "index",
     TMP_DIR: "tmp",
     OUTPUT_DIR: "output",
     ASITE_DISP_LENGTH_FILE: None,
     CODON_POSITIONS_FILE: None,
     FEATURES_FILE: None,
-    T_RNA_FILE: None
-}
-"""
-Default values for folder parameters.
-Consistent with ``prep_riboviz.nf``.
-"""
-
-DEFAULT_CONDITIONS = {
+    T_RNA_FILE: None,
     BUILD_INDICES: True,
     TRIM_5P_MISMATCHES: True,
     EXTRACT_UMIS: False,
@@ -145,9 +138,7 @@ DEFAULT_CONDITIONS = {
     PUBLISH_INDEX_TMP: False
 }
 """
-Default values for conditional boolean parameters that affect which
-steps of the workflow are invoked and the files output.
-Consistent with  ``prep_riboviz.nf``.
+Default values for parameters. Consistent with ``prep_riboviz.nf``.
 """
 
 R_LIBS = "r_libs"
