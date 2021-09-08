@@ -170,7 +170,7 @@ def helpMessage() {
       threshold, when generating statistics and figures (default 1)
     * 'dataset': Human-readable name of the dataset (default
        'dataset')
-    * 'do_pos_sp_nt_freq': Calculate position-specific nucleotide
+    * 'output_metagene_normalized_profile': Calculate position-specific nucleotide
       freqeuency? (default 'TRUE')
     * 'feature': Feature type (default 'CDS')
     * 'is_riboviz_gff': Does the GFF file contain 3 elements per gene
@@ -306,7 +306,7 @@ params.dedup_umis = false
 params.dir_index = "index"
 params.dir_out = "output"
 params.dir_tmp = "tmp"
-params.do_pos_sp_nt_freq = true
+params.output_metagene_normalized_profile = true
 params.extract_umis = false
 params.trim_5p_mismatches = true
 params.feature = "CDS"
@@ -1145,50 +1145,50 @@ process generateStatsFigs {
         each file(asite_disp_length_txt) from asite_disp_length_txt
     output:
         val sample_id into finished_sample_id
-        tuple val(sample_id), file("tpms.tsv") into tpms_tsv
-        tuple val(sample_id), file("3nt_periodicity.pdf") \
-            optional (! params.output_pdfs) into nt3_periodicity_pdf
-        tuple val(sample_id), file("3nt_periodicity.tsv") \
-            into nt3_periodicity_tsv
+        tuple val(sample_id), file("ORF_TPMs_and_counts.tsv") into orf_tpms_and_counts_tsv
+        tuple val(sample_id), file("metagene_start_stop_read_counts.pdf") \
+            optional (! params.output_pdfs) into metagene_start_stop_read_counts_pdf
+        tuple val(sample_id), file("metagene_start_stop_read_counts.tsv") \
+            into metagene_start_stop_read_counts_tsv
         tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
             into gene_position_length_counts_5start_tsv
-        tuple val(sample_id), file("pos_sp_nt_freq.tsv") \
-            optional (! params.do_pos_sp_nt_freq) \
-            into pos_sp_nt_freq_tsv
-        tuple val(sample_id), file("pos_sp_rpf_norm_reads.pdf") \
-            optional (! params.output_pdfs) into pos_sp_rpf_norm_reads_pdf
-        tuple val(sample_id), file("pos_sp_rpf_norm_reads.tsv") \
-            into pos_sp_rpf_norm_reads_tsv
-        tuple val(sample_id), file("read_lengths.pdf") \
-            optional (! params.output_pdfs) into read_lengths_pdf
-        tuple val(sample_id), file("read_lengths.tsv") \
-            into read_lengths_tsv
-        tuple val(sample_id), file("startcodon_ribogridbar.pdf") \
-            optional (! params.output_pdfs) into start_codon_ribogridbar_pdf
-        tuple val(sample_id), file("startcodon_ribogrid.pdf") \
-            optional (! params.output_pdfs) into start_codon_ribogrid_pdf
-        tuple val(sample_id), file("codon_ribodens.pdf") \
+        tuple val(sample_id), file("nt_freq_per_read_position.tsv") \
+            optional (! params.output_metagene_normalized_profile) \
+            into nt_freq_per_read_position_tsv
+        tuple val(sample_id), file("metagene_normalized_profile_start_stop.pdf") \
+            optional (! params.output_pdfs) into metagene_normalized_profile_start_stop_pdf
+        tuple val(sample_id), file("metagene_normalized_profile_start_stop.tsv") \
+            into metagene_normalized_profile_start_stop_tsv
+        tuple val(sample_id), file("read_counts_by_length.pdf") \
+            optional (! params.output_pdfs) into read_counts_by_length_pdf
+        tuple val(sample_id), file("read_counts_by_length.tsv") \
+            into read_counts_by_length_tsv
+        tuple val(sample_id), file("metagene_start_barplot_by_length.pdf") \
+            optional (! params.output_pdfs) into metagene_start_barplot_by_length_pdf
+        tuple val(sample_id), file("metagene_start_ribogrid_by_length.pdf") \
+            optional (! params.output_pdfs) into metagene_start_ribogrid_by_length_pdf
+        tuple val(sample_id), file("normalized_density_APEsites_per_codon.pdf") \
             optional (! (is_t_rna_and_codon_positions_file && params.output_pdfs)) \
-            into codon_ribodens_pdf
-        tuple val(sample_id), file("codon_ribodens.tsv") \
+            into normalized_density_apesites_per_codon_pdf
+        tuple val(sample_id), file("normalized_density_APEsites_per_codon.tsv") \
             optional (! is_t_rna_and_codon_positions_file) \
-            into codon_ribodens_tsv
-        tuple val(sample_id), file("codon_ribodens_gathered.tsv") \
+            into normalized_density_apesites_per_codon_tsv
+        tuple val(sample_id), file("normalized_density_APEsites_per_codon_long.tsv") \
             optional (! is_t_rna_and_codon_positions_file) \
-            into codon_ribodens_gathered_tsv
-        tuple val(sample_id), file("features.pdf") \
-            optional (! (is_features_file && params.output_pdfs)) into features_pdf
-        tuple val(sample_id), file("sequence_features.tsv") \
-            optional (! is_features_file) into sequence_features_tsv
-        tuple val(sample_id), file("3ntframe_bygene.tsv") \
+            into normalized_density_apesites_per_codon_long_tsv
+        tuple val(sample_id), file("ORF_TPMs_vs_features.pdf") \
+            optional (! (is_features_file && params.output_pdfs)) into ORF_TPMs_vs_features_pdf
+        tuple val(sample_id), file("ORF_TPMs_vs_features.tsv") \
+            optional (! is_features_file) into ORF_TPMs_vs_features_tsv
+        tuple val(sample_id), file("read_frame_per_ORF.tsv") \
             optional (! is_asite_disp_length_file) \
-            into nt3frame_bygene_tsv
-        tuple val(sample_id), file("3ntframe_bygene_filtered.tsv") \
+            into read_frame_per_orf_tsv
+        tuple val(sample_id), file("read_frame_per_ORF_filtered.tsv") \
             optional (! is_asite_disp_length_file) \
-            into nt3frame_bygene_filtered_tsv
-        tuple val(sample_id), file("3ntframe_propbygene.pdf") \
+            into read_frame_per_orf_filtered_tsv
+        tuple val(sample_id), file("frame_proportions_per_ORF.pdf") \
             optional (! (is_asite_disp_length_file && params.output_pdfs)) \
-            into nt3frame_propbygene_pdf
+            into frame_proportions_per_orf_pdf
     shell:
         t_rna_flag = is_t_rna_and_codon_positions_file \
             ? "--t-rna-file=${t_rna_tsv}" : ''
@@ -1213,7 +1213,7 @@ process generateStatsFigs {
            --output-pdfs=${params.output_pdfs} \
            --rpf=${params.rpf} \
            --output-dir=. \
-           --do-pos-sp-nt-freq=${params.do_pos_sp_nt_freq} \
+           --output-metagene-normalized-profile=${params.output_metagene_normalized_profile} \
            ${t_rna_flag} \
            ${codon_positions_flag} \
            ${features_flag} \
@@ -1226,13 +1226,13 @@ process generateStatsFigs {
 // Join outputs from generateStatsFigs for staticHTML.
 // Join is done on first value of each tuple i.e. sample ID.
 generate_stats_figs_static_html =
-    nt3_periodicity_tsv
+    metagene_start_stop_read_counts_tsv
     .join(gene_position_length_counts_5start_tsv, remainder: true)
-    .join(read_lengths_tsv, remainder: true)
-    .join(pos_sp_rpf_norm_reads_tsv, remainder: true)
-    .join(nt3frame_bygene_filtered_tsv, remainder: true)
-    .join(sequence_features_tsv, remainder: true)
-    .join(codon_ribodens_gathered_tsv, remainder: true)
+    .join(read_counts_by_length_tsv, remainder: true)
+    .join(metagene_normalized_profile_start_stop_tsv, remainder: true)
+    .join(read_frame_per_orf_filtered_tsv, remainder: true)
+    .join(ORF_TPMs_vs_features_tsv, remainder: true)
+    .join(normalized_density_apesites_per_codon_long_tsv, remainder: true)
 
 finished_sample_id
     .ifEmpty { exit 1, "No sample was processed successfully" }
@@ -1245,13 +1245,13 @@ process renameTpms {
     tag "${sample_id}"
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(tpms_tsv) from tpms_tsv
+        tuple val(sample_id), file(orf_tpms_and_counts_tsv) from orf_tpms_and_counts_tsv
     output:
         val(sample_id) into tpms_sample_id
         file "${sample_id}_tpms.tsv" into tpms_sample_tsv
     shell:
         """
-        cp ${tpms_tsv} ${sample_id}_tpms.tsv
+        cp ${orf_tpms_and_counts_tsv} ${sample_id}_tpms.tsv
         """
 }
 
@@ -1260,20 +1260,20 @@ process collateTpms {
     publishDir "${dir_out}", mode: 'copy', overwrite: true
     input:
         val sample_ids from tpms_sample_id.collect()
-        file tpms_tsvs from tpms_sample_tsv.collect()
+        file orf_tpms_and_counts_tsvs from tpms_sample_tsv.collect()
     output:
-        file "TPMs_collated.tsv" into collate_tpms_tsv
+        file "TPMs_all_CDS_all_samples.tsv" into tpms_all_cds_all_samples_tsv
         val sample_ids into collate_tpms_sample_ids
     shell:
         samples_tsvs = []
         for (i = 0; i < sample_ids.size(); i++) {
             samples_tsvs.add(sample_ids[i])
-            samples_tsvs.add(tpms_tsvs[i])
+            samples_tsvs.add(orf_tpms_and_counts_tsvs[i])
         }
         samples_tsvs = samples_tsvs.join(' ')
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/collate_tpms.R \
-            --tpms-file=TPMs_collated.tsv \
+            --tpms-file=TPMs_all_CDS_all_samples.tsv \
             ${samples_tsvs}
         """
 }
@@ -1290,7 +1290,7 @@ process countReads {
         // is only run when all other processing has completed.
         val samples_ids from collate_tpms_sample_ids
     output:
-        file "read_counts.tsv" into read_counts_tsv
+        file "read_counts_per_file.tsv" into read_counts_per_file_tsv
     when:
         params.count_reads
     shell:
@@ -1311,7 +1311,7 @@ process countReads {
            -i ${file(dir_in).toAbsolutePath()} \
            -t ${file(dir_tmp).toAbsolutePath()} \
            -o ${file(dir_out).toAbsolutePath()} \
-           -r read_counts.tsv
+           -r read_counts_per_file.tsv
         """
 }
 
@@ -1348,13 +1348,13 @@ process staticHTML {
     input:
       file viz_params_config_file_yaml from viz_params_config_file_yaml
       tuple val(sample_id), \
-        file(sample_nt3_periodicity_tsv), \
+        file(sample_metagene_start_stop_read_counts_tsv), \
         file(sample_gene_position_length_counts_5start_tsv), \
-        file(sample_read_lengths_tsv), \
-        file(sample_pos_sp_rpf_norm_reads_tsv), \
-        file(sample_nt3frame_bygene_filtered_tsv), \
-        file(sample_sequence_features_tsv), \
-        file(sample_codon_ribodens_gathered_tsv) \
+        file(sample_read_counts_by_length_tsv), \
+        file(sample_metagene_normalized_profile_start_stop_tsv), \
+        file(sample_read_frame_per_orf_filtered_tsv), \
+        file(sample_ORF_TPMs_vs_features_tsv), \
+        file(sample_normalized_density_apesites_per_codon_long_tsv) \
 	from generate_stats_figs_static_html
     output:
       val sample_id into finished_viz_sample_id
@@ -1367,18 +1367,18 @@ process staticHTML {
       script += "verbose='FALSE', "
       script += "yamlfile='\$PWD/${viz_params_config_file_yaml}', "
       script += "sampleid='!{sample_id}', "
-      script += "three_nucleotide_periodicity_data_file = '\$PWD/${sample_nt3_periodicity_tsv}', "
+      script += "metagene_start_stop_read_counts_data_file = '\$PWD/${sample_metagene_start_stop_read_counts_tsv}', "
       script += "gene_position_length_counts_5start_file = '\$PWD/${sample_gene_position_length_counts_5start_tsv}', "
-      script += "read_length_data_file='\$PWD/${sample_read_lengths_tsv}', "
-      script += "pos_sp_rpf_norm_reads_data_file='\$PWD/${sample_pos_sp_rpf_norm_reads_tsv}' "
+      script += "read_counts_by_length_data_file='\$PWD/${sample_read_counts_by_length_tsv}', "
+      script += "metagene_normalized_profile_start_stop_data_file='\$PWD/${sample_metagene_normalized_profile_start_stop_tsv}' "
       if (is_asite_disp_length_file) {
-          script += ", gene_read_frames_filtered_data_file='\$PWD/${sample_nt3frame_bygene_filtered_tsv}'"
+          script += ", read_frame_per_orf_filtered_data_file='\$PWD/${sample_read_frame_per_orf_filtered_tsv}'"
       }
       if (is_t_rna_and_codon_positions_file) {
-          script += ", codon_ribodens_gathered_file='\$PWD/${sample_codon_ribodens_gathered_tsv}'"
+          script += ", normalized_density_apesites_per_codon_long_file='\$PWD/${sample_normalized_density_apesites_per_codon_long_tsv}'"
       }
       if (is_features_file) {
-          script += ", sequence_features_file='\$PWD/${sample_sequence_features_tsv}' "
+          script += ", ORF_TPMs_vs_features_file='\$PWD/${sample_ORF_TPMs_vs_features_tsv}' "
       }
       script += "), "
       script += "intermediates_dir = '\$PWD', "
