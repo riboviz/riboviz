@@ -119,7 +119,11 @@ profiling data files.
 DEFAULT_FOLDER_VALUES = {
     INDEX_DIR: "index",
     TMP_DIR: "tmp",
-    OUTPUT_DIR: "output"
+    OUTPUT_DIR: "output",
+    ASITE_DISP_LENGTH_FILE: None,
+    CODON_POSITIONS_FILE: None,
+    FEATURES_FILE: None,
+    T_RNA_FILE: None
 }
 """
 Default values for folder parameters.
