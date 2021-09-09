@@ -1150,8 +1150,8 @@ process generateStatsFigs {
             optional (! params.output_pdfs) into metagene_start_stop_read_counts_pdf
         tuple val(sample_id), file("metagene_start_stop_read_counts.tsv") \
             into metagene_start_stop_read_counts_tsv
-        tuple val(sample_id), file("gene_position_length_counts_5start.tsv") \
-            into gene_position_length_counts_5start_tsv
+        tuple val(sample_id), file("metagene_position_length_counts_5start.tsv") \
+            into metagene_position_length_counts_5start_tsv
         tuple val(sample_id), file("nt_freq_per_read_position.tsv") \
             optional (! params.output_metagene_normalized_profile) \
             into nt_freq_per_read_position_tsv
@@ -1227,7 +1227,7 @@ process generateStatsFigs {
 // Join is done on first value of each tuple i.e. sample ID.
 generate_stats_figs_static_html =
     metagene_start_stop_read_counts_tsv
-    .join(gene_position_length_counts_5start_tsv, remainder: true)
+    .join(metagene_position_length_counts_5start_tsv, remainder: true)
     .join(read_counts_by_length_tsv, remainder: true)
     .join(metagene_normalized_profile_start_stop_tsv, remainder: true)
     .join(read_frame_per_orf_filtered_tsv, remainder: true)
@@ -1312,7 +1312,7 @@ process staticHTML {
       file viz_params_config_file_yaml from viz_params_config_file_yaml
       tuple val(sample_id), \
         file(sample_metagene_start_stop_read_counts_tsv), \
-        file(sample_gene_position_length_counts_5start_tsv), \
+        file(sample_metagene_position_length_counts_5start_tsv), \
         file(sample_read_counts_by_length_tsv), \
         file(sample_metagene_normalized_profile_start_stop_tsv), \
         file(sample_read_frame_per_orf_filtered_tsv), \
@@ -1332,7 +1332,7 @@ process staticHTML {
       script += "yamlfile='\$PWD/${viz_params_config_file_yaml}', "
       script += "sampleid='!{sample_id}', "
       script += "metagene_start_stop_read_counts_data_file = '\$PWD/${sample_metagene_start_stop_read_counts_tsv}', "
-      script += "gene_position_length_counts_5start_file = '\$PWD/${sample_gene_position_length_counts_5start_tsv}', "
+      script += "metagene_position_length_counts_5start_file = '\$PWD/${sample_metagene_position_length_counts_5start_tsv}', "
       script += "read_counts_by_length_data_file='\$PWD/${sample_read_counts_by_length_tsv}', "
       script += "metagene_normalized_profile_start_stop_data_file='\$PWD/${sample_metagene_normalized_profile_start_stop_tsv}' "
       if (is_asite_disp_length_file) {

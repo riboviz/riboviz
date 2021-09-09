@@ -35,7 +35,7 @@ Descriptions of specific files can be located quickly using the following links:
 * [normalized_density_APEsites_per_codon.tsv](#normalized_density_APEsites_per_codontsv)
 * [normalized_density_APEsites_per_codon_long.tsv](#normalized_density_APEsites_per_codon_longtsv)
 * [normalized_density_APEsites_per_codon.pdf](#normalized_density_APEsites_per_codonpdf)
-* [gene_position_length_counts_5start.tsv](#gene_position_length_counts_5starttsv)
+* [metagene_position_length_counts_5start.tsv](#metagene_position_length_counts_5starttsv)
 * [metagene_start_barplot_by_length.pdf](#metagene_start_barplot_by_lengthpdf)
 * [metagene_start_ribogrid_by_length.pdf](#metagene_start_ribogrid_by_lengthpdf)
 * [read_frame_per_ORF.tsv](#read_frame_per_ORFtsv)
@@ -368,7 +368,7 @@ Example normalized_density_apesites_per_codon plot:
 Only output if `t_rna_file` and `codon_positions_file` were defined.
 
 
-## `gene_position_length_counts_5start.tsv`
+## `metagene_position_length_counts_5start.tsv`
 
 A TSV file containing the number of reads of different lengths mapping to positions around the start codon. This file is created by `generate_stats_figs.R` during step "Check for 3nt periodicity globally" by functions CalculateGenePositionLengthCounts5Start and WriteGenePositionLengthCounts5Start. 
 
@@ -387,7 +387,7 @@ ReadLen	Pos	Counts
 
 ## `metagene_start_barplot_by_length.pdf`
 
-A meta-feature bar chart showing the number of reads occurring at positions around the start codons of genes, faceted by read length. As the majority of reads will be 28-31nt in length, only bar charts for lengths 26-32nt are shown. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the `gene_position_length_counts_5start.tsv` file. Note: the Y axis scale will vary for each read length. 
+A meta-feature bar chart showing the number of reads occurring at positions around the start codons of genes, faceted by read length. As the majority of reads will be 28-31nt in length, only bar charts for lengths 26-32nt are shown. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the `metagene_position_length_counts_5start.tsv` file. Note: the Y axis scale will vary for each read length. 
 
 Example metagene_start_barplot_by_length.pdf:
 
@@ -396,7 +396,7 @@ Example metagene_start_barplot_by_length.pdf:
 
 ## `metagene_start_ribogrid_by_length.pdf`
 
-A meta-feature heatmap showing the number of reads occurring at positions around the start codons of genes with the y axis as read length, and the colour intensity showing read count. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, shown by an intense dark purple, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the `gene_position_length_counts_5start.tsv` file. 
+A meta-feature heatmap showing the number of reads occurring at positions around the start codons of genes with the y axis as read length, and the colour intensity showing read count. It is expected that each length will show a peak of reads just upstream of the start codon for all lengths, shown by an intense dark purple, and then an observable 3nt periodicity following the peak, which will be more distinct in the more common read lengths. This figure is created as part of `generate_stats_figs.R` step “Check for 3nt periodicity globally”, using data that is saved in the `metagene_position_length_counts_5start.tsv` file. 
 
 Example metagene_start_ribogrid_by_length.pdf:
 
