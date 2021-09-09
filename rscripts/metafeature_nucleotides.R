@@ -1,8 +1,11 @@
-# Uses the fasta file, gff and h5 file to produce a metafeature window averageing over positions of interest.
-# The positions to be averaged across should be provided by the user as a TSV file with the headings Gene and Pos
-# The TSV will provide info on the gene and nt position relative to the start codon for each of the features being averaged across
+# Uses the fasta file, gff and h5 file to produce a metafeature window averaging 
+# over positions of interest.
+# The positions to be averaged across should be provided by the user as a TSV file 
+# with the column headings "Gene" and "Pos"
+# The TSV will provide info on the gene and nt position relative to the
+# start codon for each of the features being averaged across
 
-# For testing, using a tsv file containing the following lines:
+# For testing, using a TSV file containing the following lines:
 
 # Gene	Pos
 # MIKE	5
@@ -11,7 +14,7 @@
 # MAT	6
 
 
-print('Starting process')
+print("Starting process")
 
 source(here::here("rscripts", "read_count_functions.R"))
 source(here::here("rscripts", "stats_figs_block_functions.R"))
@@ -26,14 +29,32 @@ library(dplyr)
 
 suppressMessages(library(optparse))
 
-option_list <- list(make_option(c('-i', '--input'),type = "character", help='Path input to h5 file'),
-                    make_option(c('-d', '--dataset'),type = "character", help='Name of the dataset being studied'),
-                    make_option(c('-g', '--gff'),type = "character", help='Path to the GFF3 file of the organism being studied'),
-                    make_option(c('-f', '--fasta'),type = "character", help='Path to the fasta file of the organsim being studied'),
-                    make_option(c('--feature_pos'), type = "character", help='A TSV file listing the Gene and Positions to normalize over'),
-                    make_option(c('-o', '--output'), type = "character", help='Path to output directory'),
-                    make_option(c('--expand_width'), type = "integer", help='the desired range either side of the feature of interest', default = 5),
-                    make_option(c('--minreadlen'),type = "integer", help='minimum read length', default = 10))
+option_list <- list(make_option(c("-i", "--input"),
+                                type = "character",
+                                help = "Path input to h5 file"),
+                    make_option(c("-d", "--dataset"),
+                                type = "character", 
+                                help = "Name of the dataset being studied"),
+                    make_option(c("-g", "--gff"),
+                                type = "character",
+                                help = "Path to the GFF3 file of the species being studied"),
+                    make_option(c("-f", "--fasta"),
+                                type = "character", 
+                                help = "Path to the fasta file of the species being studied"),
+                    make_option(c("--feature_pos"),
+                                type = "character",
+                                help = "A TSV file listing the Gene and Positions to normalize over"),
+                    make_option(c("-o", "--output"),
+                                type = "character",
+                                help = "Path to output directory"),
+                    make_option(c("--expand_width"),
+                                type = "integer", 
+                                help = "the desired range either side of the feature of interest", 
+                                default = 5),
+                    make_option(c("--minreadlen"),
+                                type = "integer",
+                                help = "minimum read length",
+                                default = 10))
 
 opt <- optparse::parse_args(OptionParser(option_list = option_list))
 
@@ -48,24 +69,29 @@ expand_width <- opt$expand_width
 startlen <- opt$startlen
 min_read_length <- opt$minreadlen
 
-# gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "tiny_2genes_20utrs.gff3")
-# fasta <- '../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa'
-# hd_file <- here::here("Mok-tinysim", "output", "A", "A.h5")
-# dataset <- 'Mok-tinysim'
-# min_read_length <- 10
-# expand_width <- 2
-# features_to_study <- read.delim('nt_testing.tsv')
-# output_dir <- '.'
+gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "tiny_2genes_20utrs.gff3")
+fasta <- "../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa"
+hd_file <- here::here("Mok-tinysim", "output", "A", "A.h5")
+dataset <- "Mok-tinysim"
+min_read_length <- 10
+expand_width <- 2
+features_to_study <- read.delim("test_nt.tsv")
+output_dir <- "."
 
 gff_df <- readGFFAsDf(gff)
 genome <- readDNAStringSet(fasta,format = "fasta")
 names <- names(genome)
 
+# set A site displacement lengths 
+asite_displacement_length <- data.frame(
+  read_length = c(28, 29, 30),
+  asite_displacement = c(15, 15, 15))
+
 # CreateNtAnnotation produces a tibble containing the gene name, the CDS nucleotide position and the Nucleotide
 # to be used to create meta feature plots based on nucleotide position rather than codon positon
-# also allows use on species where a codon table tsv file (ie yeast_codon_table.tsv) is not available, as uses the fasta file
+# also allows use on species where a codon table TSV file (ie yeast_codon_table.tsv) is not available, as uses the fasta file
 
-print('Create annotation')
+print("Create annotation")
 
 CreateNtAnnotation <- function(genome, names, gff_df){
   gene_seq_df <- data.frame(genome)
@@ -75,28 +101,28 @@ CreateNtAnnotation <- function(genome, names, gff_df){
   # MAT     AAAAAGAAAACAAAATAAAAATGGCCACATGATTTTTGTTTTCTTTTATTTT
   # MIKE ATAAAGTAAACTAAATTAAAATGATCAAGGAGTAATATTTGATTTCATTTAATTT
   
-  GeneSequenceTibble <- tibble(Gene = names, sequence = gene_seq_df$genome)
+  gene_sequence_tibble <- tibble(Gene = names, sequence = gene_seq_df$genome)
   
-  # head(GeneSequenceTibble)
+  # head(gene_sequence_tibble)
   # # A tibble: 2 x 2
   # Gene  sequence                                               
   # <chr> <chr>                                                  
   #   1 MAT   AAAAAGAAAACAAAATAAAAATGGCCACATGATTTTTGTTTTCTTTTATTTT   
   # 2 MIKE  ATAAAGTAAACTAAATTAAAATGATCAAGGAGTAATATTTGATTTCATTTAATTT
   
-  ConvertSequenceToNt <- function(.x, GeneSequenceTibble){
+  ConvertSequenceToNt <- function(.x, gene_sequence_tibble){
     gene <- .x
     
     subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene)
     
     left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(start))
-    # ie for gene 'MAT' left = 21
+    # ie for gene "MAT" left = 21
     
     right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(end))
-    # ie for gene 'MAT' right = 32
+    # ie for gene "MAT" right = 32
     
     print(gene)
-    gene_seq <- dplyr::filter(GeneSequenceTibble, GeneSequenceTibble$Gene == gene)
+    gene_seq <- dplyr::filter(gene_sequence_tibble, gene_sequence_tibble$Gene == gene)
     
     # > gene_seq
     # # A tibble: 1 x 2
@@ -104,8 +130,8 @@ CreateNtAnnotation <- function(genome, names, gff_df){
     # <chr> <chr>                                               
     # 1 MAT   AAAAAGAAAACAAAATAAAAATGGCCACATGATTTTTGTTTTCTTTTATTTT
     
-    seq <- unlist(strsplit(gene_seq$sequence, ''))[left:right]
-    # For gene 'MAT'
+    seq <- unlist(strsplit(gene_seq$sequence, ""))[left:right]
+    # For gene "MAT"
     # seq 
     # [1] "A" "T" "G" "G" "C" "C" "A" "C" "A" "T" "G" "A"
     
@@ -113,7 +139,7 @@ CreateNtAnnotation <- function(genome, names, gff_df){
     
   }
   
-  nt_tibble <- purrr::map_df(.x = names, .f = ConvertSequenceToNt, GeneSequenceTibble)
+  nt_tibble <- purrr::map_df(.x = names, .f = ConvertSequenceToNt, gene_sequence_tibble)
   
   # >  head(nt_tibble)
   # # A tibble: 6 x 3
@@ -149,7 +175,7 @@ CreateNtAnnotation <- function(genome, names, gff_df){
 
 # Get the location of reads on the transcript for an individual gene
 
-GetReadPositions <- function(gene, dataset, hd_file, asite_displacement_length ,reads_asitepos, left, right){
+GetReadPositions <- function(gene, dataset, hd_file, asite_displacement_length, left, right){
   
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
   
@@ -171,7 +197,7 @@ GetReadPositions <- function(gene, dataset, hd_file, asite_displacement_length ,
 
 # get the positions of reads for multiple genes and produce a tibble listing the gene, position and count. 
 
-GetAllPosCounts <- function(gene_names, dataset, hd_file, min_read_length){
+GetAllPosCounts <- function(gene_names, dataset, hd_file, min_read_length, asite_displacement_length){
   
   gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
   
@@ -182,12 +208,8 @@ GetAllPosCounts <- function(gene_names, dataset, hd_file, min_read_length){
     left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(start))
     
     right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene, type == "CDS") %>%  select(end))
-    
-    asite_displacement_length <- ReadAsiteDisplacementLengthFromFile(here::here("data", 
-                                                                                "yeast_standard_asite_disp_length.txt"))
-    
       
-    nt_counts_1_gene <- GetReadPositions(gene,dataset, hd_file, asite_displacement_length, left, right)
+    nt_counts_1_gene <- GetReadPositions(gene, dataset, hd_file, asite_displacement_length, left, right)
 
     nt_pos_counts <- tibble(Gene = gene,
                                Pos = 1:length(nt_counts_1_gene),
@@ -204,12 +226,13 @@ GetAllPosCounts <- function(gene_names, dataset, hd_file, min_read_length){
                                            dataset,
                                            hd_file,
                                            min_read_length,
+                                           asite_displacement_length
   )
   
   return (total_nt_pos_counts)
 }
 
-total_nt_pos_counts <- suppressMessages(GetAllPosCounts(gene_names, dataset, hd_file, min_read_length))
+total_nt_pos_counts <- suppressMessages(GetAllPosCounts(gene_names, dataset, hd_file, min_read_length, asite_displacement_length))
 
 # total_nt_pos_counts
 # # A tibble: 27 x 3
@@ -280,7 +303,7 @@ transcript_gene_pos_nt_reads <- suppressMessages(AddNtToPosCounts(gene_names, da
 # It then sets the position of the feature of interest to 0, and changes the positions of adjacent codons to be relative to the feature of interest
 # This is done for all occurrences of the feature of interest on all genes in the sample provided.
 
-print('Slice out positions of interest')
+print("Slice out positions of interest")
 
 ExpandFeatureRegionAllGenes <- function(gene_names, dataset, hd_file, 
                                         min_read_length,   
@@ -309,7 +332,7 @@ ExpandFeatureRegionAllGenes <- function(gene_names, dataset, hd_file,
       
       transcript_gene_pos_nt_gene_interest <- dplyr::filter(transcript_gene_pos_nt_reads, Gene == features$Gene)
       
-      gene_length <- filter(gff_df, gff_df$type == 'CDS' & gff_df$Name == features$Gene)$width
+      gene_length <- filter(gff_df, gff_df$type == "CDS" & gff_df$Name == features$Gene)$width
       
       # slice out a window based on the expand width, centered on the position listed in features, from transcript_gene_pos_nt_gene_interest
       
@@ -355,7 +378,7 @@ output_feature_info <- ExpandFeatureRegionAllGenes(gene_names, dataset, hd_file,
                                                    expand_width)
 
 
-# TO DO:: what happens if one of the features listed doesn't exist?
+# TO DO:: what happens if one of the features listed doesn"t exist?
 
 
 #TEST: ExpandFeatureRegionAllGenes(): creates an object of type "list" 
@@ -422,7 +445,7 @@ output_feature_info <- ExpandFeatureRegionAllGenes(gene_names, dataset, hd_file,
 
 ### Normalization ###
 
-print('Normalise positions of interest')
+print("Normalise positions of interest")
 
 # Normalization carried out within each expanded frame so that they are comparable 
 # Normalizes the expand_feature_region list generating a RelCount column with the normalization values
@@ -548,7 +571,7 @@ normalized_expand_list <- purrr::map(
 
 ### Overlaying the normalized expanded tibbles ###
 
-print('Overlay positions of interest')
+print("Overlay positions of interest")
 
 # Function to overlay graphs into a single graph. Need to generate a single tibble 
 # from NormalizedExpandList. Join by Rel_Pos, in RelCount need the mean for 
@@ -599,30 +622,30 @@ overlayed_tibbles <- OverlayedTable(normalized_expand_list, expand_width)
 # 4       1    0.938
 # 5       2    0.625
 
-print('Create Plot')
+print("Create Plot")
 
 overlayed_plot <- ggplot(overlayed_tibbles, mapping = aes(x = Rel_Pos, y = RelCount)) + 
   geom_line() +
   theme_bw() +
   theme(text=element_text(size=14),
-        axis.title=element_text(size=14, face='bold'),
-        title = element_text(size = 14, face='bold'))+
-  labs(title = paste0('Relative read counts arof positions of interest'),
-       x = 'Position relative to feature of interest',
-       y = 'Relative read count', size = 2) + 
+        axis.title=element_text(size=14, face="bold"),
+        title = element_text(size = 14, face="bold"))+
+  labs(title = paste0("Relative read counts arof positions of interest"),
+       x = "Position relative to feature of interest",
+       y = "Relative read count", size = 2) + 
   scale_x_continuous(breaks = seq(-expand_width, expand_width, 2))
 
 # save plot as PDF
 
-print('Save plot as PDF')
+print("Save plot as PDF")
 save_plot_pdf <- function(overlayed_plot, output_dir){
   overlayed_plot %>%
     ggsave(
-      filename = file.path(output_dir, paste0("Meta_feature_plot_positons_of_interest", '_', dataset,".pdf")),
+      filename = file.path(output_dir, paste0("Meta_feature_plot_positons_of_interest", "_", dataset,".pdf")),
       width = 6, height = 5
     )
 }
 
 save_plot_pdf(overlayed_plot, output_dir)
 
-print('Done')
+print("Done")
