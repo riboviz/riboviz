@@ -116,11 +116,11 @@ def input_fq(config_file, input_dir, pool=None):
     :type config_file: str or unicode
     :param input_dir: Directory
     :type input_dir: str or unicode
-    :param pool: multiprocessing pool object that the process will be\
+    :param pool: multiprocessing pool object that the process will be \
     joined into
     :type pool: multiprocessing.Pool
-    :return: list of ``pandas.core.frame.Series`` or ``[]`` if\
-    ``pool`` is not specified. If ``pool is specified, then the return\
+    :return: list of ``pandas.core.frame.Series`` or ``[]`` if \
+    ``pool`` is not specified. If ``pool`` is specified, then the return \
     list will be a list of ``multiprocessing.pool.ApplyResult``.
     :rtype: list(pandas.core.frame.Series) OR\
     list(multiprocessing.pool.ApplyResult).
