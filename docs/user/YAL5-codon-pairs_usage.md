@@ -79,8 +79,12 @@ Rscript rscripts/YAL5-codon-pairs.R
     -o .
 ```
 
+Running YAL5-codon-pairs.R with a single feature_of_interest argument produces the following output:
+
+<img src="https://github.com/swinterbourne/riboviz-work/blob/07fd91b8e9160cc38fa347a279f925945d0fd626/Meta_feature_plotCCA%20TGG.pdf" alt = "Meta feature plot CCA TGG" width="500"/>
+
 ### Multiple features of interest ###
-For the simulated dataset Mok-simYAL5 with a list of features of interest as the input file for `--feature` the command would be: 
+For the simulated dataset Mok-simYAL5 with a TSV containing multiple features of interest as the input file for `--feature` the command would be: 
 
 ```
 Rscript rscripts/YAL5-single-codons.R 
@@ -91,4 +95,21 @@ Rscript rscripts/YAL5-single-codons.R
     --asite_length data/yeast_standard_asite_disp_length.txt
     --feature data/codon-pairs.tsv 
     -o .
+```
+
+Running YAL5-codon-pairs.R with a TSV containing multiple features of interest produces a file containing the following output format:
+
+```
+Feature   RelCount
+CCA TGG   3.40715591538261
+AGA TGG   3.34611813441897
+GTA GTG   2.18925717667949
+TCA TAC   2.12036199095023
+ACC TGG   2.10540561441497
+TGG GGT   1.99480167325306
+AAG GAG   1.77114454698977
+GAC TAC   1.31659424229877
+TTC GGT   1.2634171688288
+GAT GAC   1.11758290171546
+GGT ACT   1.06256679686877
 ```
