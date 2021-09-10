@@ -143,7 +143,9 @@ def pytest_generate_tests(metafunc):
     Load configuration from file.
 
     Inspect each test fixture used by the test functions and \
-    configure with values from the configuration:
+    configure with values from the configuration.
+
+    The following test fixtures are defined:
     - ``sample``:
         - If :py:const:`riboviz.params.FQ_FILES` is provided then
           sample names are the keys from this value.
