@@ -139,7 +139,7 @@ output/<SAMPLE_ID>/ORF_TPMs_vs_features.tsv\n
 output/<SAMPLE_ID>/read_frame_per_ORF_filtered.tsv\n
 output/<SAMPLE_ID>/normalized_density_APEsites_per_codon_long.tsv\n
 output/<SAMPLE_ID>/read_counts_by_length.tsv\n
-output/<SAMPLE_ID>/gene_position_length_counts_5start.tsv"] [shape=box, style=dashed]
+output/<SAMPLE_ID>/metagene_position_length_counts_5start.tsv"] [shape=box, style=dashed]
 
     "output/<SAMPLE_ID>/<SAMPLE_ID>_output_report.html" [shape=plaintext]
     "output/<SAMPLE_ID>/ORF_TPMs_and_counts.tsv" [shape=plaintext]
