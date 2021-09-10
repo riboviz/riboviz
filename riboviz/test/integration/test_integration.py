@@ -671,7 +671,7 @@ def compare_tsv_files(expected_fixture, dir_out, sample, file_name):
                           workflow_r.METAGENE_START_STOP_READ_COUNTS_TSV,
                           workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_TSV,
                           workflow_r.READ_COUNTS_BY_LENGTH_TSV,
-                          workflow_r.GENE_POSITION_LENGTH_COUNTS_TSV])
+                          workflow_r.METAGENE_POSITION_LENGTH_COUNTS_TSV])
 def test_generate_stats_figs_tsv(expected_fixture, dir_out, sample,
                                  file_name):
     """

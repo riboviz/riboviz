@@ -141,7 +141,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `<SAMPLE_ID>.h5`, `<SAMPLE_ID>.h5.*`: length-sensitive alignments in compressed h5 format. The number of output files depends on the number of processes that `bam_to_h5.R` was run with (`num_processes`).
 * `metagene_start_stop_read_counts.tsv`
 * `metagene_start_stop_read_counts.pdf` (if `output_pdfs: TRUE`)
-* `gene_position_length_counts_5start.tsv`
+* `metagene_position_length_counts_5start.tsv`
 * `read_counts_by_length.tsv`
 * `read_counts_by_length.pdf` (if `output_pdfs: TRUE`)
 * `nt_freq_per_read_position.tsv` (if `metagene_normalized_profile_start_stop: TRUE`)
