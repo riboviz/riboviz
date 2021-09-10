@@ -197,7 +197,7 @@ If running with a configuration that used UMI extraction, deduplication and grou
 
 * UMI deduplication statistics files are not checked (files prefixed by `dedup_stats`).
 * UMI group file post-deduplication files, (`post_dedup_groups.tsv`) files can differ between runs depending on which reads are removed by `umi_tools dedup`, so only the existence of the file is checked.
-* BAM file output by deduplication (`<SAMPLE>.bam`) files can differ between runs depending on which reads are removed by `umi_tools dedup`, so only the existence of the file is checked.
+* BAM file output by deduplication (`dedup.bam`) files can differ between runs depending on which reads are removed by `umi_tools dedup`, so only the existence of the file is checked.
 
 ### Using your own expected results directory
 

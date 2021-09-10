@@ -146,6 +146,7 @@ def pytest_generate_tests(metafunc):
     configure with values from the configuration.
 
     The following test fixtures are defined:
+
     - ``sample``:
         - If :py:const:`riboviz.params.FQ_FILES` is provided then
           sample names are the keys from this value.
@@ -171,7 +172,7 @@ def pytest_generate_tests(metafunc):
       :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
     - ``<param>``: where ``<param>`` is a key from
       :py:const:`riboviz.params.DEFAULT_VALUES` and the
-       value is a list with either the value of the parameter from
+      value is a list with either the value of the parameter from
       ``config``, if defined, or the default from
       :py:const:`riboviz.params.DEFAULT_VALUES`
       otherwise.

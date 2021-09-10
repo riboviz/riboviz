@@ -65,7 +65,8 @@ deduplication and grouping then note that:
   (:py:const:`riboviz.workflow_files.POST_DEDUP_GROUPS_TSV`) can
   differ between runs depending on which reads are removed by
   ``umi_tools dedup``, so only the existence of the file is checked.
-* BAM file output by deduplication (``<SAMPLE>.bam``) can differ
+* BAM file output by deduplication
+  (:py:const:`riboviz.workflow_files.DEDUP_BAM`) can differ
   between runs depending on which reads are removed by ``umi_tools
   dedup``, so only the existence of the file is checked.
 """
@@ -312,8 +313,8 @@ def test_umitools_extract_fq(extract_umis, is_multiplexed,
 def test_multiplex_umitools_extract_fq(
         extract_umis, expected_fixture, dir_tmp, multiplex_name):
     """
-    Test ``umi_tools extract`` multiplexed FASTQ files for equality. See
-    :py:func:`riboviz.fastq.equal_fastq`.
+    Test ``umi_tools extract`` multiplexed FASTQ files for
+    equality. See :py:func:`riboviz.fastq.equal_fastq`.
 
     Skipped by ``pytest`` automatically if ``multiplex_name``
     fixture is not injected.
@@ -342,9 +343,9 @@ def test_multiplex_umitools_extract_fq(
 def test_multiplex_deplex_num_reads_tsv(
         expected_fixture, dir_tmp, multiplex_name):
     """
-    Test :py:const:`riboviz.tools.demultiplex_fastq`` FASTQ files
-    with unassigned reads for equality. See
-    :py:func:`compare_tsv_files`.
+    Test :py:const:`riboviz.tools.demultiplex_fastq`
+    :py:const:`riboviz.demultiplex_fastq.NUM_READS_FILE` for
+    equality. See :py:func:`compare_tsv_files`.
 
     Skipped by ``pytest`` automatically if ``multiplex_name``
     fixture is not injected.
@@ -373,7 +374,7 @@ def test_multiplex_deplex_num_reads_tsv(
 def test_multiplex_deplex_sample_fq(
         expected_fixture, dir_tmp, multiplex_name, sample):
     """
-    Test :py:const:`riboviz.tools.demultiplex_fastq`` FASTQ files
+    Test :py:const:`riboviz.tools.demultiplex_fastq` FASTQ files
     with sample-specific reads for equality. See
     :py:func:`compare_fq_files`.
 
@@ -399,9 +400,10 @@ def test_multiplex_deplex_sample_fq(
 def test_multiplex_deplex_unassigned_fq(
         expected_fixture, dir_tmp, multiplex_name):
     """
-    Test :py:const:`riboviz.tools.demultiplex_fastq`` FASTQ files
-    with unassigned reads for equality. See
-    :py:func:`compare_fq_files`.
+    Test :py:const:`riboviz.tools.demultiplex_fastq` FASTQ files
+    with unassigned reads (files with prefix 
+    :py:const:`riboviz.sample_sheets.UNASSIGNED_TAG`)  for
+    equality. See :py:func:`compare_fq_files`.
 
     Skipped by ``pytest`` automatically if ``multiplex_name``
     fixture is not injected.
@@ -756,8 +758,8 @@ def test_bedtools_bedgraph(expected_fixture, make_bedgraph, dir_out,
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_bam_to_h5_h5(expected_fixture, dir_out, sample):
     """
-    Test ``bam_to_h5.R`` H5 files for equality. See
-    :py:func:`riboviz.h5.equal_h5`.
+    Test :py:const:`riboviz.workflow_r.BAM_TO_H5_R` H5 files for
+    equality. See :py:func:`riboviz.h5.equal_h5`.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
@@ -785,8 +787,8 @@ def test_bam_to_h5_h5(expected_fixture, dir_out, sample):
 def test_generate_stats_figs_tsv(expected_fixture, dir_out, sample,
                                  file_name):
     """
-    Test ``generate_stats_figs.R`` TSV files for equality. See
-    :py:func:`compare_tsv_files`.
+    Test :py:const:`riboviz.workflow_r.GENERATE_STATS_FIGS_R`
+    TSV files for equality. See :py:func:`compare_tsv_files`.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
@@ -807,8 +809,8 @@ def test_generate_stats_figs_metagene_tsv(
         output_metagene_normalized_profile,
         expected_fixture, dir_out, sample, file_name):
     """
-    Test ``generate_stats_figs.R`` TSV files for equality. See
-    :py:func:`compare_tsv_files`.
+    Test :py:const:`riboviz.workflow_r.GENERATE_STATS_FIGS_R`
+    TSV files for equality. See :py:func:`compare_tsv_files`.
 
     Skipped if
     :py:const:`riboviz.params.OUTPUT_METAGENE_NORMALIZED_PROFILE` is
@@ -838,8 +840,8 @@ def test_generate_stats_figs_metagene_tsv(
 def test_generate_stats_figs_features_tsv(
         features_file, expected_fixture, dir_out, sample, file_name):
     """
-    Test ``generate_stats_figs.R`` TSV files for equality. See
-    :py:func:`compare_tsv_files`.
+    Test :py:const:`riboviz.workflow_r.GENERATE_STATS_FIGS_R`
+    TSV files for equality. See :py:func:`compare_tsv_files`.
 
     Skipped if :py:const:`riboviz.params.FEATURES_FILE` is
     ``None``.
@@ -870,8 +872,8 @@ def test_generate_stats_figs_t_rna_codon_positions_tsv(
         t_rna_file, codon_positions_file, expected_fixture, dir_out,
         sample, file_name):
     """
-    Test ``generate_stats_figs.R`` TSV files for equality. See
-    :py:func:`compare_tsv_files`.
+    Test :py:const:`riboviz.workflow_r.GENERATE_STATS_FIGS_R`
+    TSV files for equality. See :py:func:`compare_tsv_files`.
 
     Skipped if :py:const:`riboviz.params.T_RNA_FILE` is ``None`` or
     :py:const:`riboviz.params.CODON_POSITIONS_FILE` is ``None``.
@@ -906,8 +908,8 @@ def test_generate_stats_figs_asite_disp_length_tsv(
         asite_disp_length_file, expected_fixture, dir_out, sample,
         file_name):
     """
-    Test ``generate_stats_figs.R`` TSV files for equality. See
-    :py:func:`compare_tsv_files`.
+    Test :py:const:`riboviz.workflow_r.GENERATE_STATS_FIGS_R`
+    TSV files for equality. See :py:func:`compare_tsv_files`.
 
     Skipped if :py:const:`riboviz.params.ASITE_DISP_LENGTH_FILE` is
     ``None``.
@@ -956,7 +958,8 @@ def check_pdf_file_exists(dir_out, sample, file_name):
 def test_generate_stats_figs_pdf(
         output_pdfs, dir_out, sample, file_name):
     """
-    Test ``generate_stats_figs.R`` PDF files exist.
+    Test :py:const:`riboviz.workflow_r.GENERATE_STATS_FIGS_R`
+    PDF files exist. See :py:const:`check_pdf_file_exists`.
 
     Skipped if :py:const:`riboviz.params.OUTPUT_PDFS` is ``False``.
 
@@ -980,7 +983,8 @@ def test_generate_stats_figs_pdf(
 def test_generate_stats_figs_features_pdf(
         features_file, output_pdfs, dir_out, sample, file_name):
     """
-    Test ``generate_stats_figs.R`` PDF files exist.
+    Test :py:const:`riboviz.workflow_r.GENERATE_STATS_FIGS_R`
+    PDF files exist. See :py:const:`check_pdf_file_exists`.
 
     Skipped if :py:const:`riboviz.params.FEATURES_FILE` is
     ``None``.
@@ -1014,7 +1018,8 @@ def test_generate_stats_figs_t_rna_codon_positions_pdf(
         t_rna_file, codon_positions_file, output_pdfs, dir_out,
         sample, file_name):
     """
-    Test ``generate_stats_figs.R`` PDF files exist.
+    Test :py:const:`riboviz.workflow_r.GENERATE_STATS_FIGS_R`
+    PDF files exist. See :py:const:`check_pdf_file_exists`.
 
     Skipped if :py:const:`riboviz.params.T_RNA_FILE` is ``None`` or
     :py:const:`riboviz.params.CODON_POSITIONS_FILE` is ``None``.
@@ -1052,7 +1057,8 @@ def test_generate_stats_figs_asite_disp_length_pdf(
         asite_disp_length_file, output_pdfs, dir_out, sample,
         file_name):
     """
-    Test ``generate_stats_figs.R`` PDF files exist.
+    Test :py:const:`riboviz.workflow_r.GENERATE_STATS_FIGS_R`
+    PDF files exist. See :py:const:`check_pdf_file_exists`.
 
     Skipped if :py:const:`riboviz.params.ASITE_DISP_LENGTH_FILE` is
     ``None``.
@@ -1083,10 +1089,11 @@ def test_generate_stats_figs_asite_disp_length_pdf(
 def test_analysis_outputs_html(run_static_html, expected_fixture,
                                dir_out, sample, file_name):
     """
-    Test ``AnalysisOutputs.Rmd`` html files for equality. See
-    :py:func:`riboviz.html.equal_html`.
+    Test :py:const:`riboviz.workflow_r.ANALYSIS_OUTPUTS_RMD`
+    HTML files for equality. See :py:func:`riboviz.html.equal_html`.
 
-    Skipped if :py:const:`riboviz.params.RUN_STATIC_HTML` is ``False``.
+    Skipped if :py:const:`riboviz.params.RUN_STATIC_HTML` is
+    ``False``.
 
     :param run_static_html: Configuration parameter
     :type run_static_html: bool
@@ -1114,8 +1121,8 @@ def test_analysis_outputs_html(run_static_html, expected_fixture,
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_collate_orf_tpms_and_counts_tsv(expected_fixture, dir_out):
     """
-    Test ``collate_tpms.R`` TSV files for equality. See
-    :py:func:`riboviz.utils.equal_tsv`.
+    Test :py:const:`riboviz.workflow_r.COLLATE_TPMS_R` TSV files for
+    equality. See :py:func:`riboviz.utils.equal_tsv`.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
