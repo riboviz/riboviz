@@ -643,28 +643,6 @@ def test_bam_to_h5_h5(expected_fixture, dir_out, sample):
                 os.path.join(dir_out, sample, file_name))
 
 
-def compare_tsv_files(expected_fixture, dir_out, sample, file_name):
-    """
-    Test TSV files for equality. See
-    :py:func:`riboviz.utils.equal_tsv`.
-
-    :param expected_fixture: Expected data directory
-    :type expected_fixture: str or unicode
-    :param dir_out: Output directory
-    :type dir_out: str or unicode
-    :param sample: Sample name
-    :type sample: str or unicode
-    :param file_name: file name
-    :type file_name: str or unicode
-    """
-    dir_out_name = os.path.basename(os.path.normpath(dir_out))
-    expected_file = os.path.join(expected_fixture, dir_out_name,
-                                 sample, file_name)
-    utils.equal_tsv(
-        expected_file,
-        os.path.join(dir_out, sample, file_name))
-
-
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name",
                          [workflow_r.ORF_TPMS_AND_COUNTS_TSV,
