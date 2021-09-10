@@ -74,7 +74,7 @@ If a multiplexed file (`multiplex_fq_files`) is specified, then the workflow pro
 
 ## Index files
 
-Index files (HT2) are produced in the index directory (`dir_index`).
+Index files (HT2) are produced in the index directory (`dir_index`) (if `build_indices: TRUE`).
 
 By default, files in the index directory are symbolic links to files in the [Nextflow work/ directory](#nextflow-work-directory). To request Nextflow copy the index files into this directory set the `publish_index_tmp` parameter to `TRUE` in the workflow configuration file or provide the parameter `publish_index_tmp` when running the workflow using Nextflow.
 
@@ -89,16 +89,16 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `trim.fq`: adapter trimmed reads (if `fq_files` and not `multiplex_fq_files` are specified).
 * `nonrRNA.fq`: non-rRNA reads.
 * `rRNA_map.sam`: rRNA-mapped reads.
+* `unaligned.fq`: unaligned reads. These files can be used to find common contaminants or translated sequences not in the ORF annotation.
 * `orf_map.sam`: ORF-mapped reads.
 * `orf_map_clean.sam`: ORF-mapped reads with 5' mismatched nts trimmed (if `trim_5p_mismatches: TRUE`).
 * `trim_5p_mismatch.tsv`: number of reads processed, discarded, trimmed and written when trimming 5' mismatches from reads and removing reads with more than a set number of mismatches (if `trim_5p_mismatches: TRUE`).
-* `unaligned.fq`: unaligned reads. These files can be used to find common contaminants or translated sequences not in the ORF annotation.
 * `orf_map_clean.bam`: BAM file equivalent of `orf_map_clean.sam` if trimming is enabled (if `trim_5p_mismatches: TRUE`) OR `orf_map.sam` (if `trim_5p_mismatches: FALSE`). If deduplication is not enabled (if `dedup_umis: FALSE`) then this is copied to become the output file `<SAMPLE_ID>.bam` (see below).
 * `orf_map_clean.bam.bai`: BAM index file for the above. If deduplication is not enabled (if `dedup_umis: FALSE`) then this is copied to become the output file `<SAMPLE_ID>.bam.bai` (see below).
 
 If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specific files are also produced:
 
-* `extract_trim.fq`: adapter trimmed reads with UMIs extracted (if `fq_files` and not `multiplex_fq_files` are specified).
+* `extract_trim.fq`: adapter trimmed reads with UMIs extracted (if `extract_umis: TRUE` and `fq_files` and not `multiplex_fq_files` are specified).
 * `dedup.bam`: BAM file post deduplication. This is copied to become the output file `<SAMPLE_ID>.bam`.
 * `dedup.bam.bai`: BAM index file for the above. This is copied to become the output file `<SAMPLE_ID>.bam.bai`.
 * UMI groups pre- and post-deduplication (if `group_umis: TRUE`):
@@ -113,7 +113,7 @@ If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specifi
 If a multiplexed file (`multiplex_fq_files`) is specified, then the following files and directories are also written into the temporary directory:
 
 * `<FASTQ_FILE_NAME_PREFIX>_trim.fq`: FASTQ file post-adapter trimming, where `<FASTQ_FILE_NAME_PREFIX>` is the name of the file (without path or extension) in `multiplex_fq_files`.
-* `<FASTQ_FILE_NAME_PREFIX>_extract_trim.fq`: `<FASTQ_FILE_NAME_PREFIX_trim.fq` post-barcode and UMI extraction.
+* `<FASTQ_FILE_NAME_PREFIX>_extract_trim.fq`: `<FASTQ_FILE_NAME_PREFIX_trim.fq` post-barcode and UMI extraction (if `extract_umis: TRUE`).
 * `<FASTQ_FILE_NAME_PREFIX>_deplex/`: demultiplexing results directory including:
    - `num_reads.tsv`: a tab-separated values file with columns:
      - `SampleID`, copied from the sample sheet.
@@ -144,7 +144,7 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `metagene_position_length_counts_5start.tsv`
 * `read_counts_by_length.tsv`
 * `read_counts_by_length.pdf` (if `output_pdfs: TRUE`)
-* `nt_freq_per_read_position.tsv` (if `metagene_normalized_profile_start_stop: TRUE`)
+* `nt_freq_per_read_position.tsv` (if `output_metagene_normalized_profile: TRUE`)
 * `metagene_normalized_profile_start_stop.pdf` (if `output_pdfs: TRUE`)
 * `metagene_normalized_profile_start_stop.tsv`
 * `ORF_TPMs_vs_features.tsv` (if `features_file` was defined)

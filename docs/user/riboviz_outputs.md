@@ -197,6 +197,8 @@ Meta feature plot produced using incorrect annotation files:
 
 <img src="../images/output_images/bad_metagene_start_stop_read_counts.jpg" alt="poor quality 3nt_periodicity plot" width="500"/>
 
+Only output if `output_pdfs: TRUE`.
+
 
 ## `read_counts_by_length.tsv`
 
@@ -221,6 +223,8 @@ Example read_counts_by_length plot:
 
 <img src="../images/output_images/read_counts_by_length.jpg" alt="poor quality read_counts_by_length plot" width="500"/>
 
+Only output if `output_pdfs: TRUE`.
+
 
 ## `nt_freq_per_read_position.tsv`
 
@@ -236,6 +240,9 @@ Length	Position	Frame	A	C	G	T
 10	6	0	0	0	0	0
 ```
 
+Only output if `output_metagene_normalized_profile: TRUE`. 
+
+
 ## `metagene_normalized_profile_start_stop.pdf`
 
 A plot that shows the mean number of reads mapping to each position upstream and downstream of the start and stop codon for all genes. It is expected to have a peak at the start codon, with the majority of following positions having a relatively consistent mean that is comparatively low to the mean observed at the start codon. 
@@ -244,6 +251,7 @@ Example mean number of reads plot:
 
 <img src="../images/output_images/metagene_normalized_profile_start_stop.jpg" alt="pos_sp_rpf_norm_reads plot" width="500"/>
 
+Only output if `output_pdfs: TRUE`.
 
 
 ## `metagene_normalized_profile_start_stop.tsv`
@@ -295,9 +303,8 @@ Example features plot:
 
 <img src="../images/output_images/ORF_TPMs_vs_features.jpg" alt=" features plot" width="500"/>
 
-Only output if `features_file` was defined.
+Only output if `features_file` was defined and `output_pdfs: TRUE`.
 
- 
 
 ## `ORF_TPMs_and_counts.tsv`
 
@@ -365,7 +372,7 @@ Example normalized_density_apesites_per_codon plot:
 
 <img src="../images/output_images/normalized_density_APEsites_per_codon.jpg" alt="codon_ribodens plot" width="500"/>
 
-Only output if `t_rna_file` and `codon_positions_file` were defined.
+Only output if `t_rna_file` and `codon_positions_file` were defined and `output_pdfs: TRUE`.
 
 
 ## `metagene_position_length_counts_5start.tsv`
@@ -393,6 +400,8 @@ Example metagene_start_barplot_by_length.pdf:
 
 <img src="../images/output_images/metagene_start_barplot_by_length.jpg" alt="startcodon_ribogridbar plot" width="500"/>
 
+Only output if `output_pdfs: TRUE`.
+
 
 ## `metagene_start_ribogrid_by_length.pdf`
 
@@ -401,6 +410,8 @@ A meta-feature heatmap showing the number of reads occurring at positions around
 Example metagene_start_ribogrid_by_length.pdf:
 
 <img src="../images/output_images/metagene_start_ribogrid_by_length.jpg" alt="startcodon_ribogrid plot" width="500"/>
+
+Only output if `output_pdfs: TRUE`.
 
 
 ## `read_frame_per_ORF.tsv` 
@@ -442,4 +453,4 @@ Example frame_proportions_per_ORF plot:
 
 <img src="../images/output_images/frame_proportions_per_ORF.jpg" alt="3ntframe_propbygene plot" width="500"/>
 
-Only output if `asite_disp_length_file` was defined.
+Only output if `asite_disp_length_file` was defined and `output_pdfs: TRUE`.
