@@ -66,7 +66,7 @@ Available arguments:
 The examples assume that the user is running the script from the riboviz folder. 
 
 ### Single feature of interest ###
-For the simulated dataset Mok-simYAL5 with the aim of investigating the codon pair "TCC AAG" the command would be: 
+For the simulated dataset Mok-simYAL5 with the aim of investigating the codon pair "CCA TGG" the command would be: 
 
 ```
 Rscript rscripts/YAL5-codon-pairs.R 
@@ -75,13 +75,13 @@ Rscript rscripts/YAL5-codon-pairs.R
     -g ../example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3 
     -a data/yeast_codon_table.tsv
     --asite_length data/yeast_standard_asite_disp_length.txt
-    --feature "TCC AAG" 
+    --feature "CCA TGG" 
     -o .
 ```
 
-Running YAL5-codon-pairs.R with a single feature_of_interest argument produces the following output:
+Running `YAL5-codon-pairs.R` with a single feature_of_interest argument produces the following output:
 
-<img src="https://github.com/swinterbourne/riboviz-work/blob/07fd91b8e9160cc38fa347a279f925945d0fd626/Meta_feature_plotCCA%20TGG.pdf" alt = "Meta feature plot CCA TGG" width="500"/>
+<img src="https://github.com/swinterbourne/riboviz-work/blob/1b5d6f60e1db14245e76d0fe3130e5cece0854e4/Meta_feature_plot_CCA-TGG.png" alt = "Meta feature plot CCA TGG" width="500"/>
 
 ### Multiple features of interest ###
 For the simulated dataset Mok-simYAL5 with a TSV containing multiple features of interest as the input file for `--feature` the command would be: 
@@ -97,7 +97,7 @@ Rscript rscripts/YAL5-single-codons.R
     -o .
 ```
 
-Running YAL5-codon-pairs.R with a TSV containing multiple features of interest produces a file containing the following output format:
+Running `YAL5-codon-pairs.R` with a TSV containing multiple features of interest produces a file containing the following output format:
 
 ```
 Feature   RelCount
