@@ -370,6 +370,32 @@ def test_multiplex_deplex_num_reads_tsv(
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_multiplex_deplex_sample_fq(
+        expected_fixture, dir_tmp, multiplex_name, sample):
+    """
+    Test :py:const:`riboviz.tools.demultiplex_fastq`` FASTQ files
+    with sample-specific reads for equality. See
+    :py:func:`compare_fq_files`.
+
+    Skipped by ``pytest`` automatically if ``multiplex_name``
+    fixture is not injected.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_tmp: Temporary directory
+    :type dir_tmp: str or unicode
+    :param multiplex_name: Multiplexed FASTQ file name prefix
+    :type multiplex_name: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    """
+    deplex_dir = workflow_files.DEPLEX_DIR_FORMAT.format(multiplex_name)
+    compare_fq_files(
+        expected_fixture, dir_tmp, deplex_dir, fastq.FQ_FORMAT.format(sample))
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_multiplex_deplex_unassigned_fq(
         expected_fixture, dir_tmp, multiplex_name):
     """
@@ -388,8 +414,9 @@ def test_multiplex_deplex_unassigned_fq(
     :type multiplex_name: str or unicode
     """
     deplex_dir = workflow_files.DEPLEX_DIR_FORMAT.format(multiplex_name)
-    unassigned_fastq = fastq.FQ_FORMAT.format((sample_sheets.UNASSIGNED_TAG))
-    compare_fq_files(expected_fixture, dir_tmp, deplex_dir, unassigned_fastq)
+    compare_fq_files(
+        expected_fixture, dir_tmp, deplex_dir,
+        fastq.FQ_FORMAT.format(sample_sheets.UNASSIGNED_TAG))
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
