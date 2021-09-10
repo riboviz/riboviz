@@ -154,9 +154,14 @@ def pytest_generate_tests(metafunc):
         - If sample name
           :py:const:`riboviz.test.VIGNETTE_MISSING_SAMPLE`
           is present, then it is removed from the sample names.
+        - ``[]`` otherwise.
     - ``is_multiplexed``: list with ``False`` if
       :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` defines one or
       more files, ``True`` otherwise.
+    - ``multiplex_fq_files``: list of files from
+      :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` if
+      :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` defines one or
+      more files, ``[]`` otherwise.
     - ``index_prefix``: list with values of
       :py:const:`riboviz.params.ORF_INDEX_PREFIX` and
       :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
@@ -190,13 +195,19 @@ def pytest_generate_tests(metafunc):
                            else config[param]]
     fixtures["index_prefix"] = [config[params.ORF_INDEX_PREFIX],
                                 config[params.RRNA_INDEX_PREFIX]]
+    fixtures["is_multiplexed"] = [
+        params.MULTIPLEX_FQ_FILES in config
+        and config[params.MULTIPLEX_FQ_FILES]]
+    if "multiplex_fq_file" in metafunc.fixturenames:
+        multiplex_files = []
+        if params.MULTIPLEX_FQ_FILES in config and config[params.MULTIPLEX_FQ_FILES]:
+            multiplex_files = config[params.MULTIPLEX_FQ_FILES]
+        fixtures['multiplex_fq_file'] = multiplex_files
     if "sample" in metafunc.fixturenames:
         samples = []
         if params.FQ_FILES in config and config[params.FQ_FILES]:
-            fixtures["is_multiplexed"] = [False]
             samples = list(config[params.FQ_FILES].keys())
         elif params.MULTIPLEX_FQ_FILES in config and config[params.MULTIPLEX_FQ_FILES]:
-            fixtures["is_multiplexed"] = [True]
             # Get samples from sample sheet.
             sample_sheet_file = os.path.join(
                 config[params.INPUT_DIR],

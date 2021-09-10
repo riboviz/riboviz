@@ -643,12 +643,13 @@ def test_bam_to_h5_h5(expected_fixture, dir_out, sample):
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-@pytest.mark.parametrize("file_name",
-                         [workflow_r.ORF_TPMS_AND_COUNTS_TSV,
-                          workflow_r.METAGENE_START_STOP_READ_COUNTS_TSV,
-                          workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_TSV,
-                          workflow_r.READ_COUNTS_BY_LENGTH_TSV,
-                          workflow_r.METAGENE_POSITION_LENGTH_COUNTS_TSV])
+@pytest.mark.parametrize(
+    "file_name",
+    [workflow_r.ORF_TPMS_AND_COUNTS_TSV,
+     workflow_r.METAGENE_START_STOP_READ_COUNTS_TSV,
+     workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_TSV,
+     workflow_r.READ_COUNTS_BY_LENGTH_TSV,
+     workflow_r.METAGENE_POSITION_LENGTH_COUNTS_TSV])
 def test_generate_stats_figs_tsv(expected_fixture, dir_out, sample,
                                  file_name):
     """
@@ -729,9 +730,10 @@ def test_generate_stats_figs_features_tsv(
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-@pytest.mark.parametrize("file_name",
-                         [workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_TSV,
-                          workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_LONG_TSV])
+@pytest.mark.parametrize(
+    "file_name",
+    [workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_TSV,
+     workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_LONG_TSV])
 def test_generate_stats_figs_t_rna_codon_positions_tsv(
         t_rna_file, codon_positions_file, expected_fixture, dir_out,
         sample, file_name):
@@ -812,12 +814,13 @@ def check_pdf_file_exists(dir_out, sample, file_name):
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-@pytest.mark.parametrize("file_name",
-                         [workflow_r.READ_COUNTS_BY_LENGTH_PDF,
-                          workflow_r.METAGENE_START_STOP_READ_COUNTS_PDF,
-                          workflow_r.METAGENE_START_BARPLOT_BY_LENGTH_PDF,
-                          workflow_r.METAGENE_START_RIBOGRID_BY_LENGTH_PDF,
-                          workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_PDF])
+@pytest.mark.parametrize(
+    "file_name",
+    [workflow_r.READ_COUNTS_BY_LENGTH_PDF,
+     workflow_r.METAGENE_START_STOP_READ_COUNTS_PDF,
+     workflow_r.METAGENE_START_BARPLOT_BY_LENGTH_PDF,
+     workflow_r.METAGENE_START_RIBOGRID_BY_LENGTH_PDF,
+     workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_PDF])
 def test_generate_stats_figs_pdf(
         output_pdfs, dir_out, sample, file_name):
     """
@@ -872,8 +875,9 @@ def test_generate_stats_figs_features_pdf(
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-@pytest.mark.parametrize("file_name",
-                         [workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_PDF])
+@pytest.mark.parametrize(
+    "file_name",
+    [workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_PDF])
 def test_generate_stats_figs_t_rna_codon_positions_pdf(
         t_rna_file, codon_positions_file, output_pdfs, dir_out,
         sample, file_name):
@@ -990,7 +994,8 @@ def test_collate_orf_tpms_and_counts_tsv(expected_fixture, dir_out):
     expected_file = os.path.join(expected_fixture, dir_out_name,
                                  workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV)
     utils.equal_tsv(expected_file,
-                    os.path.join(dir_out, workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV),
+                    os.path.join(
+                        dir_out, workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV),
                     ignore_row_order=True,
                     na_to_empty_str=True)
 
@@ -1017,3 +1022,60 @@ def test_read_counts_per_file_tsv(count_reads, expected_fixture, dir_out):
         os.path.join(expected_fixture, dir_out_name,
                      workflow_files.READ_COUNTS_PER_FILE_FILE),
         os.path.join(dir_out, workflow_files.READ_COUNTS_PER_FILE_FILE))
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_multiplex_cutadapt_fq(expected_fixture, dir_tmp, multiplex_fq_file):
+    """
+    Test ``cutadapt`` multiplexed FASTQ files for equality. See
+    :py:func:`riboviz.fastq.equal_fastq`.
+
+    Skipped by ``pytest`` automatically if ``multiplex_fq_file``
+    fixture is not injected.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_tmp: Temporary directory
+    :type dir_tmp: str or unicode
+    :param multiplex_fq_file: Multiplexed FASTQ file
+    :type multiplex_fq_file: str or unicode
+    """
+    multiplex_name = os.path.splitext(fastq.strip_fastq_gz(
+        multiplex_fq_file))[0]
+    file_name = workflow_files.ADAPTER_TRIM_FQ_FORMAT.format(multiplex_name)
+    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
+    fastq.equal_fastq(os.path.join(expected_fixture, dir_tmp_name, file_name),
+                      os.path.join(dir_tmp, file_name))
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_multiplex_umitools_extract_fq(
+        extract_umis, expected_fixture, dir_tmp, multiplex_fq_file):
+    """
+    Test ``umi_tools extract`` multiplexed FASTQ files for equality. See
+    :py:func:`riboviz.fastq.equal_fastq`.
+
+    Skipped by ``pytest`` automatically if ``multiplex_fq_file``
+    fixture is not injected.
+
+    Skipped if :py:const:`riboviz.params.EXTRACT_UMIS` is ``False``.
+
+    :param extract_umi: Configuration parameter
+    :type extract_umis: bool
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_tmp: Temporary directory
+    :type dir_tmp: str or unicode
+    :param multiplex_fq_file: Multiplexed FASTQ file
+    :type multiplex_fq_file: str or unicode
+    """
+    if not extract_umis:
+        pytest.skip('Skipped test as extract_umis: {}'.format(extract_umis))
+    multiplex_name = os.path.splitext(fastq.strip_fastq_gz(
+        multiplex_fq_file))[0]
+    file_name = workflow_files.UMI_EXTRACT_FQ_FORMAT.format(multiplex_name)
+    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
+    fastq.equal_fastq(os.path.join(expected_fixture, dir_tmp_name, file_name),
+                      os.path.join(dir_tmp, file_name))
