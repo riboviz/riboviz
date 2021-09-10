@@ -74,12 +74,14 @@ import pytest
 import pysam
 from riboviz import bedgraph
 from riboviz import count_reads as count_reads_module
+from riboviz import demultiplex_fastq
 from riboviz import environment
 from riboviz import fastq
 from riboviz import h5
 from riboviz import html
 from riboviz import hisat2
 from riboviz import sam_bam
+from riboviz import sample_sheets
 from riboviz import utils
 from riboviz import workflow_files
 from riboviz import workflow_r
@@ -119,135 +121,46 @@ def scratch_directory(tmpdir):
     return tmpdir.mkdir("scratch")
 
 
-@pytest.mark.usefixtures("skip_index_tmp_fixture")
-@pytest.mark.usefixtures("prep_riboviz_fixture")
-@pytest.mark.parametrize("index", list(range(1, test.NUM_INDICES)))
-def test_hisat2_build_index(build_indices, expected_fixture, dir_index,
-                            index_prefix, index):
+def compare_tsv_files(expected_fixture, directory, subdirectory, file_name):
     """
-    Test ``hisat2-build`` index file sizes for equality. See
-    :py:func:`riboviz.utils.equal_file_sizes`.
+    Test TSV files for equality. See
+    :py:func:`riboviz.utils.equal_tsv`.
 
-    Skipped if :py:const:`riboviz.params.BUILD_INDICES` is ``False``.
-
-    :param build_indicex: Configuration parameter
-    :type build_indices: boolean
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_index: Index files directory
-    :type dir_index: str or unicode
-    :param index_prefix: Index file name prefix
-    :type index_prefix: str or unicode
-    :param index: File name index
-    :type index: int
+    :param directory: Directory
+    :type directory: str or unicode
+    :param subdirectory: Subdirectory
+    :type subdirectory: str or unicode
+    :param file_name: file name
+    :type file_name: str or unicode
     """
-    if not build_indices:
-        pytest.skip('Skipped test as build_indices: {}'.format(build_indices))
-    file_name = hisat2.HT2_FORMAT.format(index_prefix, index)
-    dir_index_name = os.path.basename(os.path.normpath(dir_index))
-    utils.equal_file_sizes(
-        os.path.join(expected_fixture, dir_index_name, file_name),
-        os.path.join(dir_index, file_name))
+    directory_name = os.path.basename(os.path.normpath(directory))
+    utils.equal_tsv(
+        os.path.join(expected_fixture, directory_name,
+                     subdirectory, file_name),
+        os.path.join(directory, subdirectory, file_name))
 
 
-def compare_fq_files(expected_fixture, dir_tmp, sample, file_name):
+def compare_fq_files(expected_fixture, directory, subdirectory, file_name):
     """
     Test FASTQ files for equality. See
     :py:func:`riboviz.fastq.equal_fastq`.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory
-    :type dir_tmp: str or unicode
-    :param sample: Sample name
-    :type sample: str or unicode
+    :param directory: Directory
+    :type directory: str or unicode
+    :param subdirectory: Subdirectory
+    :type subdirectory: str or unicode
     :param file_name: File name
     :type file_name: str or unicode
     """
-    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
-    fastq.equal_fastq(os.path.join(expected_fixture, dir_tmp_name, sample,
-                                   file_name),
-                      os.path.join(dir_tmp, sample,
-                                   file_name))
-
-
-@pytest.mark.usefixtures("skip_index_tmp_fixture")
-@pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_cutadapt_fq(is_multiplexed, expected_fixture, dir_tmp, sample):
-    """
-    Test ``cutadapt`` FASTQ files for equality. See
-    :py:func:`riboviz.fastq.equal_fastq`.
-
-    Skipped if ``is_multiplexed`` is ``True``.
-
-    :param is_multiplexed: Are the samples from multiplexed files?
-    :type is_multiplexed: bool
-    :param expected_fixture: Expected data directory
-    :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory
-    :type dir_tmp: str or unicode
-    :param sample: Sample name
-    :type sample: str or unicode
-    """
-    if is_multiplexed:
-        pytest.skip('Skipped test as is_multiplexed: {}'.format(
-            is_multiplexed))
-    compare_fq_files(expected_fixture, dir_tmp, sample,
-                     workflow_files.ADAPTER_TRIM_FQ)
-
-
-@pytest.mark.usefixtures("skip_index_tmp_fixture")
-@pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_umitools_extract_fq(extract_umis, is_multiplexed,
-                             expected_fixture, dir_tmp,
-                             sample):
-    """
-    Test ``umi_tools extract`` FASTQ files for equality. See
-    :py:func:`riboviz.fastq.equal_fastq`.
-
-    Skipped if :py:const:`riboviz.params.EXTRACT_UMIS` is ``False``
-    or if ``is_multiplexed`` is ``True``.
-
-    :param extract_umi: Configuration parameter
-    :type extract_umis: bool
-    :param is_multiplexed: Are the samples from multiplexed files?
-    :type is_multiplexed: bool
-    :param expected_fixture: Expected data directory
-    :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory
-    :type dir_tmp: str or unicode
-    :param sample: Sample name
-    :type sample: str or unicode
-    """
-    if not extract_umis:
-        pytest.skip('Skipped test as extract_umis: {}'.format(extract_umis))
-    if is_multiplexed:
-        pytest.skip('Skipped test as is_multiplexed: {}'.format(
-            is_multiplexed))
-    compare_fq_files(expected_fixture, dir_tmp, sample,
-                     workflow_files.UMI_EXTRACT_FQ)
-
-
-@pytest.mark.usefixtures("skip_index_tmp_fixture")
-@pytest.mark.usefixtures("prep_riboviz_fixture")
-@pytest.mark.parametrize("file_name", [
-    workflow_files.NON_RRNA_FQ,
-    workflow_files.UNALIGNED_FQ])
-def test_hisat_fq(expected_fixture, dir_tmp, sample, file_name):
-    """
-    Test ``hisat`` FASTQ files for equality. See
-    :py:func:`riboviz.fastq.equal_fastq`.
-
-    :param expected_fixture: Expected data directory
-    :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory
-    :type dir_tmp: str or unicode
-    :param sample: Sample name
-    :type sample: str or unicode
-    :param file_name: file name
-    :type file_name: str or unicode
-    """
-    compare_fq_files(expected_fixture, dir_tmp, sample, file_name)
+    directory_name = os.path.basename(os.path.normpath(directory))
+    fastq.equal_fastq(
+        os.path.join(
+            expected_fixture, directory_name, subdirectory, file_name),
+        os.path.join(directory, subdirectory, file_name))
 
 
 def compare_sam_files(expected_directory, directory,
@@ -281,6 +194,224 @@ def compare_sam_files(expected_directory, directory,
     pysam.sort("-o", expected_copy_file, expected_file)
     pysam.sort("-o", actual_copy_file, actual_file)
     sam_bam.equal_sam(expected_copy_file, actual_copy_file)
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("index", list(range(1, test.NUM_INDICES)))
+def test_hisat2_build_index(build_indices, expected_fixture, dir_index,
+                            index_prefix, index):
+    """
+    Test ``hisat2-build`` index file sizes for equality. See
+    :py:func:`riboviz.utils.equal_file_sizes`.
+
+    Skipped if :py:const:`riboviz.params.BUILD_INDICES` is ``False``.
+
+    :param build_indicex: Configuration parameter
+    :type build_indices: boolean
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_index: Index files directory
+    :type dir_index: str or unicode
+    :param index_prefix: Index file name prefix
+    :type index_prefix: str or unicode
+    :param index: File name index
+    :type index: int
+    """
+    if not build_indices:
+        pytest.skip('Skipped test as build_indices: {}'.format(build_indices))
+    file_name = hisat2.HT2_FORMAT.format(index_prefix, index)
+    dir_index_name = os.path.basename(os.path.normpath(dir_index))
+    utils.equal_file_sizes(
+        os.path.join(expected_fixture, dir_index_name, file_name),
+        os.path.join(dir_index, file_name))
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_cutadapt_fq(is_multiplexed, expected_fixture, dir_tmp, sample):
+    """
+    Test ``cutadapt`` FASTQ files for equality. See
+    :py:func:`compare_fq_files`.
+
+    Skipped if ``is_multiplexed`` is ``True``.
+
+    :param is_multiplexed: Are the samples from multiplexed files?
+    :type is_multiplexed: bool
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_tmp: Temporary directory
+    :type dir_tmp: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    """
+    if is_multiplexed:
+        pytest.skip('Skipped test as is_multiplexed: {}'.format(
+            is_multiplexed))
+    compare_fq_files(expected_fixture, dir_tmp, sample,
+                     workflow_files.ADAPTER_TRIM_FQ)
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_multiplex_cutadapt_fq(expected_fixture, dir_tmp, multiplex_name):
+    """
+    Test ``cutadapt`` multiplexed FASTQ files for equality. See
+    :py:func:`riboviz.fastq.equal_fastq`.
+
+    Skipped by ``pytest`` automatically if ``multiplex_name``
+    fixture is not injected.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_tmp: Temporary directory
+    :type dir_tmp: str or unicode
+    :param multiplex_name: Multiplexed FASTQ file name prefix
+    :type multiplex_name: str or unicode
+    """
+    file_name = workflow_files.ADAPTER_TRIM_FQ_FORMAT.format(multiplex_name)
+    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
+    fastq.equal_fastq(os.path.join(expected_fixture, dir_tmp_name, file_name),
+                      os.path.join(dir_tmp, file_name))
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_umitools_extract_fq(extract_umis, is_multiplexed,
+                             expected_fixture, dir_tmp,
+                             sample):
+    """
+    Test ``umi_tools extract`` FASTQ files for equality. See
+    :py:func:`compare_fq_files`.
+
+    Skipped if :py:const:`riboviz.params.EXTRACT_UMIS` is ``False``
+    or if ``is_multiplexed`` is ``True``.
+
+    :param extract_umi: Configuration parameter
+    :type extract_umis: bool
+    :param is_multiplexed: Are the samples from multiplexed files?
+    :type is_multiplexed: bool
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_tmp: Temporary directory
+    :type dir_tmp: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    """
+    if not extract_umis:
+        pytest.skip('Skipped test as extract_umis: {}'.format(extract_umis))
+    if is_multiplexed:
+        pytest.skip('Skipped test as is_multiplexed: {}'.format(
+            is_multiplexed))
+    compare_fq_files(expected_fixture, dir_tmp, sample,
+                     workflow_files.UMI_EXTRACT_FQ)
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_multiplex_umitools_extract_fq(
+        extract_umis, expected_fixture, dir_tmp, multiplex_name):
+    """
+    Test ``umi_tools extract`` multiplexed FASTQ files for equality. See
+    :py:func:`riboviz.fastq.equal_fastq`.
+
+    Skipped by ``pytest`` automatically if ``multiplex_name``
+    fixture is not injected.
+
+    Skipped if :py:const:`riboviz.params.EXTRACT_UMIS` is ``False``.
+
+    :param extract_umi: Configuration parameter
+    :type extract_umis: bool
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_tmp: Temporary directory
+    :type dir_tmp: str or unicode
+    :param multiplex_name: Multiplexed FASTQ file name prefix
+    :type multiplex_name: str or unicode
+    """
+    if not extract_umis:
+        pytest.skip('Skipped test as extract_umis: {}'.format(extract_umis))
+    file_name = workflow_files.UMI_EXTRACT_FQ_FORMAT.format(multiplex_name)
+    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
+    fastq.equal_fastq(os.path.join(expected_fixture, dir_tmp_name, file_name),
+                      os.path.join(dir_tmp, file_name))
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_multiplex_deplex_num_reads_tsv(
+        expected_fixture, dir_tmp, multiplex_name):
+    """
+    Test :py:const:`riboviz.tools.demultiplex_fastq`` FASTQ files
+    with unassigned reads for equality. See
+    :py:func:`compare_tsv_files`.
+
+    Skipped by ``pytest`` automatically if ``multiplex_name``
+    fixture is not injected.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_tmp: Temporary directory
+    :type dir_tmp: str or unicode
+    :param multiplex_name: Multiplexed FASTQ file name prefix
+    :type multiplex_name: str or unicode
+    """
+    deplex_dir = workflow_files.DEPLEX_DIR_FORMAT.format(multiplex_name)
+    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
+    # Override default TSV comparisons as some columns have string values.
+    utils.equal_tsv(
+        os.path.join(expected_fixture, dir_tmp_name, deplex_dir,
+                     demultiplex_fastq.NUM_READS_FILE),
+        os.path.join(dir_tmp, deplex_dir,
+                     demultiplex_fastq.NUM_READS_FILE),
+        ignore_row_order=True,
+        na_to_empty_str=True)
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_multiplex_deplex_unassigned_fq(
+        expected_fixture, dir_tmp, multiplex_name):
+    """
+    Test :py:const:`riboviz.tools.demultiplex_fastq`` FASTQ files
+    with unassigned reads for equality. See
+    :py:func:`compare_fq_files`.
+
+    Skipped by ``pytest`` automatically if ``multiplex_name``
+    fixture is not injected.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_tmp: Temporary directory
+    :type dir_tmp: str or unicode
+    :param multiplex_name: Multiplexed FASTQ file name prefix
+    :type multiplex_name: str or unicode
+    """
+    deplex_dir = workflow_files.DEPLEX_DIR_FORMAT.format(multiplex_name)
+    unassigned_fastq = fastq.FQ_FORMAT.format((sample_sheets.UNASSIGNED_TAG))
+    compare_fq_files(expected_fixture, dir_tmp, deplex_dir, unassigned_fastq)
+
+
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("file_name", [
+    workflow_files.NON_RRNA_FQ,
+    workflow_files.UNALIGNED_FQ])
+def test_hisat_fq(expected_fixture, dir_tmp, sample, file_name):
+    """
+    Test ``hisat`` FASTQ files for equality. See
+    :py:func:`compare_fq_files`.
+
+    :param expected_fixture: Expected data directory
+    :type expected_fixture: str or unicode
+    :param dir_tmp: Temporary directory
+    :type dir_tmp: str or unicode
+    :param sample: Sample name
+    :type sample: str or unicode
+    :param file_name: file name
+    :type file_name: str or unicode
+    """
+    compare_fq_files(expected_fixture, dir_tmp, sample, file_name)
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
@@ -347,7 +478,7 @@ def test_trim5p_mismatch_tsv(
         trim_5p_mismatches, expected_fixture, dir_tmp, sample):
     """
     Test :py:mod:`riboviz.tools.trim_5p_mismatch` TSV files for
-    equality. See :py:func:`riboviz.utils.equal_tsv`.
+    equality. See :py:func:`compare_tsv_files`.
 
     Skipped if :py:const:`riboviz.params.TRIM_5P_MISMATCHES` is
     ``False``.
@@ -364,12 +495,8 @@ def test_trim5p_mismatch_tsv(
     if not trim_5p_mismatches:
         pytest.skip('Skipped test as trim_5p_mismatches: {}'.format(
             trim_5p_mismatches))
-    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
-    utils.equal_tsv(
-        os.path.join(expected_fixture, dir_tmp_name, sample,
-                     workflow_files.TRIM_5P_MISMATCH_TSV),
-        os.path.join(dir_tmp, sample,
-                     workflow_files.TRIM_5P_MISMATCH_TSV))
+    compare_tsv_files(expected_fixture, dir_tmp, sample,
+                      workflow_files.TRIM_5P_MISMATCH_TSV)
 
 
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
@@ -505,35 +632,13 @@ def test_umitools_dedup_stats_tsv(
     assert os.path.exists(actual_file), "Non-existent file: %s" % actual_file
 
 
-def compare_tsv_files(expected_fixture, directory, sample, file_name):
-    """
-    Test TSV files for equality. See
-    :py:func:`riboviz.utils.equal_tsv`.
-
-    :param expected_fixture: Expected data directory
-    :type expected_fixture: str or unicode
-    :param directory: Actual data directory
-    :type directory: str or unicode
-    :param sample: Sample name
-    :type sample: str or unicode
-    :param file_name: file name
-    :type file_name: str or unicode
-    """
-    directory_name = os.path.basename(os.path.normpath(directory))
-    expected_file = os.path.join(expected_fixture, directory_name,
-                                 sample, file_name)
-    utils.equal_tsv(
-        expected_file,
-        os.path.join(directory, sample, file_name))
-
-
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 def test_umitools_pre_dedup_group_tsv(
         dedup_umis, group_umis, expected_fixture, dir_tmp, sample):
     """
     Test ``umi_tools group`` TSV files for equality. See
-    :py:func:`riboviz.utils.equal_tsv`.
+    :py:func:`compare_tsv_files`.
 
     Skipped if :py:const:`riboviz.params.DEDUP_UMIS` is ``False``
     or :py:const:`riboviz.params.GROUP_UMIS` is ``False``.
@@ -654,7 +759,7 @@ def test_generate_stats_figs_tsv(expected_fixture, dir_out, sample,
                                  file_name):
     """
     Test ``generate_stats_figs.R`` TSV files for equality. See
-    :py:func:`riboviz.utils.equal_tsv`.
+    :py:func:`compare_tsv_files`.
 
     :param expected_fixture: Expected data directory
     :type expected_fixture: str or unicode
@@ -676,7 +781,7 @@ def test_generate_stats_figs_metagene_tsv(
         expected_fixture, dir_out, sample, file_name):
     """
     Test ``generate_stats_figs.R`` TSV files for equality. See
-    :py:func:`riboviz.utils.equal_tsv`.
+    :py:func:`compare_tsv_files`.
 
     Skipped if
     :py:const:`riboviz.params.OUTPUT_METAGENE_NORMALIZED_PROFILE` is
@@ -707,7 +812,7 @@ def test_generate_stats_figs_features_tsv(
         features_file, expected_fixture, dir_out, sample, file_name):
     """
     Test ``generate_stats_figs.R`` TSV files for equality. See
-    :py:func:`riboviz.utils.equal_tsv`.
+    :py:func:`compare_tsv_files`.
 
     Skipped if :py:const:`riboviz.params.FEATURES_FILE` is
     ``None``.
@@ -739,7 +844,7 @@ def test_generate_stats_figs_t_rna_codon_positions_tsv(
         sample, file_name):
     """
     Test ``generate_stats_figs.R`` TSV files for equality. See
-    :py:func:`riboviz.utils.equal_tsv`.
+    :py:func:`compare_tsv_files`.
 
     Skipped if :py:const:`riboviz.params.T_RNA_FILE` is ``None`` or
     :py:const:`riboviz.params.CODON_POSITIONS_FILE` is ``None``.
@@ -775,7 +880,7 @@ def test_generate_stats_figs_asite_disp_length_tsv(
         file_name):
     """
     Test ``generate_stats_figs.R`` TSV files for equality. See
-    :py:func:`riboviz.utils.equal_tsv`.
+    :py:func:`compare_tsv_files`.
 
     Skipped if :py:const:`riboviz.params.ASITE_DISP_LENGTH_FILE` is
     ``None``.
@@ -991,13 +1096,14 @@ def test_collate_orf_tpms_and_counts_tsv(expected_fixture, dir_out):
     :type dir_out: str or unicode
     """
     dir_out_name = os.path.basename(os.path.normpath(dir_out))
-    expected_file = os.path.join(expected_fixture, dir_out_name,
-                                 workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV)
-    utils.equal_tsv(expected_file,
-                    os.path.join(
-                        dir_out, workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV),
-                    ignore_row_order=True,
-                    na_to_empty_str=True)
+    # Override default TSV comparisons as some columns have string values.
+    utils.equal_tsv(
+        os.path.join(expected_fixture, dir_out_name,
+                     workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV),
+        os.path.join(
+            dir_out, workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV),
+        ignore_row_order=True,
+        na_to_empty_str=True)
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
@@ -1022,60 +1128,3 @@ def test_read_counts_per_file_tsv(count_reads, expected_fixture, dir_out):
         os.path.join(expected_fixture, dir_out_name,
                      workflow_files.READ_COUNTS_PER_FILE_FILE),
         os.path.join(dir_out, workflow_files.READ_COUNTS_PER_FILE_FILE))
-
-
-@pytest.mark.usefixtures("skip_index_tmp_fixture")
-@pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_multiplex_cutadapt_fq(expected_fixture, dir_tmp, multiplex_fq_file):
-    """
-    Test ``cutadapt`` multiplexed FASTQ files for equality. See
-    :py:func:`riboviz.fastq.equal_fastq`.
-
-    Skipped by ``pytest`` automatically if ``multiplex_fq_file``
-    fixture is not injected.
-
-    :param expected_fixture: Expected data directory
-    :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory
-    :type dir_tmp: str or unicode
-    :param multiplex_fq_file: Multiplexed FASTQ file
-    :type multiplex_fq_file: str or unicode
-    """
-    multiplex_name = os.path.splitext(fastq.strip_fastq_gz(
-        multiplex_fq_file))[0]
-    file_name = workflow_files.ADAPTER_TRIM_FQ_FORMAT.format(multiplex_name)
-    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
-    fastq.equal_fastq(os.path.join(expected_fixture, dir_tmp_name, file_name),
-                      os.path.join(dir_tmp, file_name))
-
-
-@pytest.mark.usefixtures("skip_index_tmp_fixture")
-@pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_multiplex_umitools_extract_fq(
-        extract_umis, expected_fixture, dir_tmp, multiplex_fq_file):
-    """
-    Test ``umi_tools extract`` multiplexed FASTQ files for equality. See
-    :py:func:`riboviz.fastq.equal_fastq`.
-
-    Skipped by ``pytest`` automatically if ``multiplex_fq_file``
-    fixture is not injected.
-
-    Skipped if :py:const:`riboviz.params.EXTRACT_UMIS` is ``False``.
-
-    :param extract_umi: Configuration parameter
-    :type extract_umis: bool
-    :param expected_fixture: Expected data directory
-    :type expected_fixture: str or unicode
-    :param dir_tmp: Temporary directory
-    :type dir_tmp: str or unicode
-    :param multiplex_fq_file: Multiplexed FASTQ file
-    :type multiplex_fq_file: str or unicode
-    """
-    if not extract_umis:
-        pytest.skip('Skipped test as extract_umis: {}'.format(extract_umis))
-    multiplex_name = os.path.splitext(fastq.strip_fastq_gz(
-        multiplex_fq_file))[0]
-    file_name = workflow_files.UMI_EXTRACT_FQ_FORMAT.format(multiplex_name)
-    dir_tmp_name = os.path.basename(os.path.normpath(dir_tmp))
-    fastq.equal_fastq(os.path.join(expected_fixture, dir_tmp_name, file_name),
-                      os.path.join(dir_tmp, file_name))

@@ -28,6 +28,7 @@ import os.path
 import pytest
 import yaml
 from riboviz import environment
+from riboviz import fastq
 from riboviz import params
 from riboviz import sample_sheets
 from riboviz import test
@@ -158,7 +159,8 @@ def pytest_generate_tests(metafunc):
     - ``is_multiplexed``: list with ``False`` if
       :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` defines one or
       more files, ``True`` otherwise.
-    - ``multiplex_fq_files``: list of files from
+    - ``multiplex_name``: list of multiplexed file name prefixed,
+      without extensions, from
       :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` if
       :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` defines one or
       more files, ``[]`` otherwise.
@@ -198,11 +200,14 @@ def pytest_generate_tests(metafunc):
     fixtures["is_multiplexed"] = [
         params.MULTIPLEX_FQ_FILES in config
         and config[params.MULTIPLEX_FQ_FILES]]
-    if "multiplex_fq_file" in metafunc.fixturenames:
-        multiplex_files = []
+    if "multiplex_name" in metafunc.fixturenames:
+        multiplex_names = []
         if params.MULTIPLEX_FQ_FILES in config and config[params.MULTIPLEX_FQ_FILES]:
-            multiplex_files = config[params.MULTIPLEX_FQ_FILES]
-        fixtures['multiplex_fq_file'] = multiplex_files
+            multiplex_names = [
+                os.path.splitext(fastq.strip_fastq_gz(file_name))[0]
+                for file_name in config[params.MULTIPLEX_FQ_FILES]
+            ]
+        fixtures['multiplex_name'] = multiplex_names
     if "sample" in metafunc.fixturenames:
         samples = []
         if params.FQ_FILES in config and config[params.FQ_FILES]:
