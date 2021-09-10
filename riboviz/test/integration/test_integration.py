@@ -178,8 +178,7 @@ def test_cutadapt_fq(is_multiplexed, expected_fixture, dir_tmp, sample):
     Test ``cutadapt`` FASTQ files for equality. See
     :py:func:`riboviz.fastq.equal_fastq`.
 
-    Skipped if :py:const:`riboviz.params.EXTRACT_UMIS` is ``False``
-    or if ``is_multiplexed`` is ``True``.
+    Skipped if ``is_multiplexed`` is ``True``.
 
     :param is_multiplexed: Are the samples from multiplexed files?
     :type is_multiplexed: bool
