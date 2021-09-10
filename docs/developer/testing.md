@@ -177,10 +177,10 @@ Observe that the final directories in each path - `index`, `output`, `tmp` - are
 If `--check-index-tmp` is not provided (the default behaviour) then tests for index and temporary files will be skipped. An example of how this appears is as follows:
 
 ```console
-$ pytest -vs riboviz/test/integration/test_integration.py --expected=$HOME/test-data-20210804-411 --skip-workflow
+$ pytest -vs riboviz/test/integration/test_integration.py --expected=$HOME/test-data-2.1 --skip-workflow
 ...
 riboviz/test/integration/test_integration.py::test_hisat2_build_index[vignette/index-True-YAL_CDS_w_250-1] SKIPPED
-///
+...
 riboviz/test/integration/test_integration.py::test_hisat2_build_index[vignette/index-True-yeast_rRNA-8] SKIPPED
 riboviz/test/integration/test_integration.py::test_cutadapt_fq[vignette/tmp-False-WTnone] SKIPPED
 ...
@@ -189,12 +189,6 @@ riboviz/test/integration/test_integration.py::test_samtools_view_sort_index[vign
 riboviz/test/integration/test_integration.py::test_samtools_view_sort_index[vignette/output-False-WT3AT] PASSED
 riboviz/test/integration/test_integration.py::test_umitools_dedup_stats_tsv[vignette/tmp-False-False-WTnone-edit_distance.tsv] SKIPPED
 ...
-riboviz/test/integration/test_integration.py::test_umitools_post_dedup_group_tsv[vignette/tmp-False-False-WT3AT] SKIPPED
-riboviz/test/integration/test_integration.py::test_bedtools_bedgraph[vignette/output-True-WTnone-minus.bedgraph] PASSED
-...
-riboviz/test/integration/test_integration.py::test_read_counts_per_file_tsv[vignette/output-True] PASSED
-...
-================= 50 passed, 46 skipped, 315 warnings in 1.72s =================
 ```
 
 ### Tests for UMI extraction, deduplication and grouping
