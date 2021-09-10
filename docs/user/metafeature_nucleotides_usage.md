@@ -1,15 +1,15 @@
 # Running `metafeature_nucleotides.R`
 
-`metafeature_nucleotides.R` is an R script that will produce a profile averaging the reads occuring around given nucleotide positions.
+`metafeature_nucleotides.R` is an R script that will produce a profile averaging the reads occurring around given nucleotide positions.
 
 ### Inputs 
 
 `metafeature_nucleotides.R` requires 4 files as inputs:
 
-* A h5 file - Produced by riboviz, lists all of the reads and their positions relative to the start codon.
-* A gff file - For an example species, this file can be found in `example-datasets` on the riboviz github, in the `annotation` folder of the relevant species.
-* A fasta file - For an example species, this file can be found in `example-datasets` on the riboviz github, in the `annotation` folder of the relevant species.
-* A tsv file of nt positions to be studied - This file lists the gene under the heading 'Gene' and the nt postion under the heading 'Pos'. This is created by the user to fit their research question. For example: 
+* A H5 file - Produced by riboviz, lists all of the reads and their positions relative to the start codon.
+* A GFF3 file - For an example species, this file can be found in `example-datasets` on the riboviz Github, in the `annotation` folder of the relevant species.
+* A FASTA file - For an example species, this file can be found in `example-datasets` on the riboviz Github, in the `annotation` folder of the relevant species.
+* A TSV file of nt positions to be studied - This file lists the gene under the heading 'Gene' and the nt postion under the heading 'Pos'. This is created by the user to fit their research question. For example: 
 
 ```
 Gene	Pos
@@ -21,23 +21,22 @@ MAT	6
 
 ### Outputs
 
-`metafeature_nucleotides.R` will output a PDF containing a metafeature plot showing the avergage number of reads occuring at each position in a desired window around the position of interest. It is averaged over each position listed in the tsv file. 
+`metafeature_nucleotides.R` will output a PDF containing a metafeature plot showing the average number of reads occurring at each position in a desired window around the position of interest. It is averaged over each position listed in the tsv file. 
 
 ### Arguments 
 
-The optional arguments are 
+The arguments are: 
 
-```
-option_list <- list(make_option(c('-i', '--input'),type = "character", help='Path input to h5 file'),
-                    make_option(c('-d', '--dataset'),type = "character", help='Name of the dataset being studied'),
-                    make_option(c('-g', '--gff'),type = "character", help='Path to the GFF3 file of the organism being studied'),
-                    make_option(c('-f', '--fasta'),type = "character", help='Path to the fasta file of the organsim being studied'),
-                    make_option(c('--feature_pos'), type = "character", help='A TSV file listing the Gene and Positions to normalize over'),
-                    make_option(c('-o', '--output'), type = "character", help='Path to output directory'),
-                    make_option(c('--expand_width'), type = "integer", help='the desired range either side of the feature of interest', default = 5),
-                    make_option(c('--minreadlen'),type = "integer", help='minimum read length', default = 10))
 
-```
+* '-i', '--input' - Path input to H5 file
+* '-d', '--dataset' - Name of the dataset being studied
+* '-g', '--gff' - Path to the GFF3 file of the organism being studied
+* '-f', '--fasta' - Path to the FASTA file of the species being studied'),
+* '--feature_pos' - A TSV file listing the Gene and Positions to normalize over, under the headings `Gene` and `Pos`
+* '-o', '--output' - Path to output directory
+* '--expand_width' - The desired range either side of the feature of interest, default = 5
+* '--minreadlen' - The minimum read length, default = 10
+
 
 ### Command 
 
