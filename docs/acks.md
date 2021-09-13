@@ -2,11 +2,13 @@
 
 ## Authors
 
-* Edward Wallace, Felicity Anderson, Siyin Xue: [The Wallace Lab](https://ewallace.github.io/), The University of Edinburgh.
-* Premal Shah, John Favate, Bala Desinghu, Tongji Xing: [The Shah Lab](https://theshahlab.org/), Rutgers University.
-* Liana Lareau, Amanda Mok: [The Lareau Lab](http://www.lareaulab.org/), University of California, Berkeley.
-* Kostas Kavousannakis, Mike Jackson: [EPCC](https://www.epcc.ed.ac.uk/), The University of Edinburgh.
-* Oana Carja, Joshua Plotkin: The University of Pennsylvania.
+* Edward W.J. Wallace, Felicity Anderson, Anna Kurowska, Emma MacKenzie, Sophie M. Winterbourne, Siyin Xue: [The Wallace Lab](https://ewallace.github.io/), Institute for Cell Biology and SynthSys, School of Biological Sciences, The University of Edinburgh, Edinburgh, UK.
+* Premal Shah, Alexander L. Cope, John Favate, Peter Tilton, Tongji Xing: [The Shah Lab](https://theshahlab.org/), Department of Genetics, Rutgers University, Piscataway, NJ, USA.
+* Liana F. Lareau, Amanda Mok: [The Lareau Lab](http://www.lareaulab.org/), Center for Computational Biology, University of California, Berkeley, CA, USA.
+* Liana F. Lareau, Vikram Shivakumar: Department of Bioengineering, University of California, Berkeley, CA, USA.
+* Kostas Kavoussanakis, Michael Jackson, Junchen Liu: [EPCC](https://www.epcc.ed.ac.uk/), The University of Edinburgh, Edinburgh, UK.
+* Bala Desinghu: Office of Advanced Research Computing, Rutgers University, Piscataway, NJ, USA.
+* Oana Carja, Joshua Plotkin: The University of Pennsylvania, USA.
 
 ---
 

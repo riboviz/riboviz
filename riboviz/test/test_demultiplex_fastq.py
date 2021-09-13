@@ -258,7 +258,8 @@ def test_demultiplex(tmp_dir, file_format):
         riboviz.test.SIMDATA_DIR,
         "deplex",
         demultiplex_fastq.NUM_READS_FILE)
-    utils.equal_tsv(expected_num_reads, actual_num_reads)
+    utils.equal_tsv(expected_num_reads, actual_num_reads,
+                    na_to_empty_str=True)
     for tag in ["Tag0", "Tag1", "Tag2", "Unassigned"]:
         # Actual data has extension matching lower-case version
         # of multiplexed file's extension.
@@ -319,7 +320,8 @@ def test_demultiplex_gz(tmp_dir, file_format):
         riboviz.test.SIMDATA_DIR,
         "deplex",
         demultiplex_fastq.NUM_READS_FILE)
-    utils.equal_tsv(expected_num_reads, actual_num_reads)
+    utils.equal_tsv(expected_num_reads, actual_num_reads,
+                    na_to_empty_str=True)
     for tag in ["Tag0", "Tag1", "Tag2", "Unassigned"]:
         # Actual data has extension matching lower-case version
         # of multiplexed file's extension.
