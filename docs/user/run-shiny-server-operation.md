@@ -14,7 +14,7 @@ Once entered, the command will print out the something like the following
 "Listening on http://127.0.0.1:4254"
 ```
 
-The IP address provided can simply be pasted into a web browsers URL bar and will direct you to the shiny server which is now hosted from the local machine.
+The IP address provided can simply be pasted into a web browser's URL bar and will direct you to the shiny server which is now hosted from the local machine.
 
 ## Activating the shiny server on a headless machine
 
