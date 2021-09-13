@@ -26,9 +26,9 @@ The workflow prepares ribosome profiling data for by implementing a workflow tha
 
 ### Interactive Visualization
 
-An additional script within the riboviz codebase allows the generation of interactive plots from the dataset after the riboviz workflow has been completed.  
+An additional script within the RiboViz codebase allows the generation of interactive plots from the dataset after the RiboViz workflow has been completed.  
 
-A process within the main riboviz workflow (`createInteractiveVizParamsConfigFile`, within `prep-riboviz.nf`) generates a configuration yaml file specifically for this interactive visualization (`interactive_viz_config.yaml`, found in the `dir_out` directory), and users can then run `rscripts/run_shiny_server.R` using this additional yaml (as detailed within the specific [run-shiny-server-operation.md documentation](./run-run_shiny_server-operation.md)).  This generates a shiny app instance which users can view to explore their data.
+A process within the main RiboViz workflow (`createInteractiveVizParamsConfigFile`, within `prep-riboviz.nf`) generates a configuration yaml file specifically for this interactive visualization (`interactive_viz_config.yaml`, found in the `dir_out` directory), and users can then run `rscripts/run_shiny_server.R` using this additional yaml (as detailed within the specific [run-shiny-server-operation.md documentation](./run-run_shiny_server-operation.md)).  This generates a shiny app instance which users can view to explore their data.
 
 
 ---
@@ -172,7 +172,7 @@ In addition, the following files are also put into the output directory:
 
 * `TPMs_all_CDS_all_samples.tsv`: file with the transcripts per million (tpm) for all successfully processed samples.
 * `read_counts_per_file.tsv`: a read counts file. (only if `count_reads: TRUE`).
-* `interactive_viz_config.yaml`: this is a yaml file created by the workflow, for use with `rscripts/run_shiny_server.R` - an optional step which does not automatically run within the riboviz workflow and which allows users to generate interactive data visualization on the dataset.
+* `interactive_viz_config.yaml`: this is a yaml file created by the workflow, for use with `rscripts/run_shiny_server.R` - an optional step which does not automatically run within the RiboViz workflow and which allows users to generate interactive data visualization on the dataset.
 
 More details on the output files can be found at [RiboViz output files and figures](./riboviz_outputs.md).
 
