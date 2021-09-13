@@ -1,0 +1,12 @@
+# Created by: RiboViz
+# Date: 2020-05-14 07:24:36.501243
+# Command-line tool: /home/ubuntu/riboviz/riboviz/tools/create_fastq_simdata.py
+# File: /home/ubuntu/riboviz/riboviz/sample_sheets.py
+# Version: commit c0fa069811683e75822715b8da4c35e5ea7c4d99 date 2020-05-14 05:35:55-07:00
+SampleID	TagRead	NumReads
+Tag0	ACG	27
+Tag1	GAC	27
+Tag2	CGA	27
+Tag3	CCC	0
+Unassigned	NNNNNNNNN	9
+Total		90

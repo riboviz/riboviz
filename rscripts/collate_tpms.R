@@ -1,69 +1,97 @@
-library(tidyr)
-library(dplyr)
-library(readr)
-library(purrr)
-library(optparse)
+#' Collate TPMs
+#'
+#' Collate sample-specific TPMs files into a single file with data
+#' for all the samples.
+#'
+#' Each sample-specific TPMs file is assumed to be a tab-separated
+#' values (TSV) file with `ORF` and `tpm` columns (other columns
+#' are ignored.
+#'
+#' The collated TPMs file is a TSV file with an `ORF` column and
+#' sample-specific columns, named by sample name, with the `tpm`
+#' values from the sample-specific files.
+#'
+#' If `--files-only` is `TRUE` then the basename of each sample
+#' file name will be used as the sample names in the sample-specific
+#' column header
+#'
+#' This script accepts the following command-line parameters:
+#'
+#' | Parameter | Description |
+#' | --------- | ----------- |
+#' | `--tpms-file` | Name of collated TPMs file |
+#' | `--orf-fasta` | ORF FASTA file that was aligned to and from which ORF names are to be retrieved |
+#' | `--sort-orfs` | Sort ORF list lexicographically (default `FALSE`) |
+#' | `--digits` | Number of decimal places to be used in output (default 1) |
+#' | `--files-only` | Sample names are not provided with the sample-specific TPMs files? (default `FALSE`) |
+#' | `[<sample>] <sample_tpms_file>` | Space-delimited list of one or more pairs of sample names and sample-specific TPMs files (if `--files-only` is `FALSE`) or sample-specific TPMs files only (if `--files-only` is `TRUE`) |
+#'
+#' @export
 
-option_list <- list( 
-  make_option("--dir_out", type="character", default="./",
-              help="Output directory"),
-  make_option("--orf_fasta", type="character", default=NULL,
-              help="ORF file that was aligned to")
+suppressMessages(library(getopt, quietly = T))
+suppressMessages(library(here, quietly = T))
+suppressMessages(library(optparse, quietly = T))
+
+# Load local dependencies.
+if (interactive()) {
+  # Use hard-coded script name and assume script is in "rscripts"
+  # directory. This assumes that interactive R is being run within
+  # the parent of rscripts/ but imposes no other constraints on
+  # where rscripts/ or its parents are located.
+  self <- "collate_tpms.R"
+  path_to_self <- here("rscripts", self)
+  source(here::here("rscripts", "provenance.R"))
+  source(here::here("rscripts", "collate_tpms_functions.R"))
+} else {
+  # Deduce file name and path using reflection as before.
+  self <- getopt::get_Rscript_filename()
+  path_to_self <- self
+  source(file.path(dirname(self), "provenance.R"))
+  source(file.path(dirname(self), "collate_tpms_functions.R"))
+}
+
+option_list <- list(
+  make_option("--tpms-file", type = "character",
+    default = "TPMs_all_CDS_all_samples.tsv",
+    help = "Name of collated TPMs file"),
+  make_option("--orf-fasta", type = "character", default = NA,
+    help = "ORF FASTA file that was aligned to and from which ORF names are to be retrieved"),
+  make_option("--sort-orfs", type = "logical", default = FALSE,
+    help = "Sort ORF list lexicographically"),
+  make_option("--digits", type = "integer", default = 1,
+    help = "Number of decimal places to be used in output"),
+  make_option("--files-only", type = "logical", default = FALSE,
+    help = "Sample names are not provided with the sample-specific TPMs files?")
 )
 
-parser <- OptionParser(option_list=option_list)
-opts <- parse_args(parser, positional_arguments=TRUE)
+print_provenance(get_Rscript_filename())
 
-dir_out <- opts$options$dir_out
-samples <- opts$args
-orf_fasta  <- opts$options$orf_fasta
+opt <- parse_args(OptionParser(option_list = option_list),
+                  positional_arguments = TRUE,
+                  convert_hyphens_to_underscores = TRUE)
+print("collate_tpms.R running with parameters:")
+print(opt)
 
-get_tpms <- function(ffile, ORFs) {
-    # get tpm column from ffile
-    # checking that gene names are as expected
-    if(!file.exists(ffile)) {
-        warning(paste(ffile, "does not exist, returning empty list"))
-        return(NULL)
-    }
-    features_tab <- read_tsv(ffile)
-    if(!all.equal(features_tab$ORF,ORFs)) {
-        warning(paste("ORF names are not right in ", ffile))
-    }
-    return(features_tab$tpm)
+if (length(opt$args) == 0) {
+  stop("No <sample_name> <sample_file> list provided")
+}
+if ((length(opt$args) %% 2) != 0) {
+  stop("Invalid <sample_name> <sample_file> list provided")
 }
 
-get_tpms_bits <- function(fstem, ddir, fend, ORFs) {
-    # get_tpms but putting the filename together
-    get_tpms(paste0(ddir, "/", fstem, fend), ORFs)
+if (opt$options$files_only) {
+  sample_files <- opt$args
+  # Use file names as sample names.
+  names(sample_files) <- lapply(opt$args, basename)
+} else {
+  # Split into pairs of <sample> <sample_tpms_file>.
+  sample_names_files <- split(opt$args, ceiling(seq_along(opt$args) %% 2))
+  sample_files <- sample_names_files[[1]]
+  names(sample_files) <- sample_names_files[[2]]
 }
-
-# collate
-make_tpm_table <- function(dir_out, samples, orf_fasta, fend="_tpms.tsv") {
-    if(is.null(orf_fasta))
-    {
-         ORFs <- paste0(dir_out, "/", samples[1], fend) %>%
-            read_tsv() %>%
-            .$ORF
-    }
-    else
-    {
-        # TODO untested
-        print(paste("Taking ORFs from", orf_fasta))
-        library(Biostrings)
-        ORFs <- readDNAStringSet(orf_fasta) %>% names
-    }
-    tpm_list <- lapply(samples,
-                       get_tpms_bits,
-                       ddir=dir_out,
-                       fend=fend,
-                       ORFs=ORFs)
-    non_null_elts <- sapply(tpm_list,function(elt) !is.null(elt))
-    names(tpm_list) <- samples
-    bind_cols(ORF=ORFs, tpm_list[non_null_elts])
-}
-
-round1 <- function(x) round(x,digits=1)
-
-make_tpm_table(dir_out, samples, orf_fasta) %>%
-    mutate_if(is.numeric, round1) %>%
-    write_tsv(paste0(dir_out, "/", "TPMs_collated.tsv"))
+CollateTpms(opt$options$tpms_file,
+            opt$options$orf_fasta,
+            sample_files,
+            sort_orfs = opt$options$sort_orfs,
+            digits = opt$options$digits)
+print("collate_tpms.R done")

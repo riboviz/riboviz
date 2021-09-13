@@ -1,0 +1,208 @@
+digraph G {
+  graph [ fontname=Helvetica, fontsize=10, compound=true ]
+  node [ fontname=Helvetica, fontsize=10 ]
+  edge [ fontname=Helvetica, fontsize=10 ]
+
+  subgraph cluster_data {
+    label = "Data"
+    labeljust = "l"
+    style = dashed
+
+    subgraph cluster_organism {
+      label = "Organism data"
+      labeljust = "l"
+      style = dashed
+
+      "input/CDS.fa"  [shape=plaintext]
+      "input/CDS.gff3" [shape=plaintext]
+    }
+
+    subgraph cluster_contaminants {
+      label = "Contaminants"
+      labeljust = "l"
+      style = dashed
+
+      "input/rRNA.fa"  [shape=plaintext, fontsize=9]
+    }
+
+    subgraph cluster_additional_organism {
+      label = "Additional organism-specific data"
+      labeljust = "l"
+      style = dashed
+
+      data [label="data/codon_pos_i200.RData\n
+data/features.tsv\n
+data/tRNAs.tsv\n
+data/standard_asite_disp_length.txt"] [shape=box, style=dashed]
+    }
+
+    subgraph cluster_ribosome {
+      label = "Ribosome profiling data"
+      labeljust = "l"
+      style = dashed
+
+      ribosome_data0toI [label="..."] [shape=plaintext]
+      "input/<SAMPLE_ID>.fastq.gz" [shape=plaintext]
+      ribosome_dataItoN [label="..."] [shape=plaintext]
+    }
+  }
+  
+  subgraph cluster_indexing {
+    label = "Indexing"
+    labeljust = "l"
+
+    h2build1 [label="hisat2-build"] [shape=box]
+    h2build2 [label="hisat2-build"] [shape=box]
+
+    "index/rRNA.1|...|8.ht2" [shape=plaintext]
+    "index/CDS.1|...|8.ht2" [shape=plaintext]
+
+    "input/rRNA.fa" -> h2build1 -> "index/rRNA.1|...|8.ht2"
+    "input/CDS.fa" -> h2build2 -> "index/CDS.1|...|8.ht2"
+  }
+
+  subgraph cluster_per_sample_processing {
+    label = "Process <SAMPLE_ID>"
+    labeljust = "l"
+
+    cut [label="cutadapt"] [shape=box]
+    umi_extract [label="umi_tools extract"] [shape=box]
+    h21 [label="hisat2"] [shape=box]
+    h22 [label="hisat2"] [shape=box]
+    samindex [label="samtools index"] [shape=box]
+    samview [label="samtools view | samtools sort"] [shape=box]
+    umi_pre_group [label="umi_tools group"] [shape=box]
+    umi_dedup [label="umi_tools dedup"] [shape=box]
+    umi_post_group [label="umi_tools group"] [shape=box]
+    samindex_dedup [label="samtools index"] [shape=box]
+    trim [label="trim_5p_mismatch.py"] [shape=box]
+    bedplus [label="bedtools genomecov (+)"] [shape=box]
+    bedminus [label="bedtools genomecov (-)"] [shape=box]
+    bam2h5 [label="bam_to_h5.R"] [shape=box]
+    copy [label="copy"] [shape=box]
+    statsfigs [label="generate_stats_figs.R"] [shape=box]
+    staticHTML [label="AnalysisOutputs.Rmd"] [shape=box]
+
+    "tmp/<SAMPLE_ID>/trim.fq" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/extract_trim.fq" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/rRNA_map.sam" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/nonrRNA.fq" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/unaligned.fq" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/orf_map.sam" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/trim_5p_mismatch.tsv" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/orf_map_clean.sam" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/orf_map_clean.bam" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/orf_map_clean.bam+.bai" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/pre_dedup_groups.tsv" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/post_dedup_groups.tsv" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/dedup.bam" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/dedup.bam+.bai" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/dedup_stats_edit_distance.tsv" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/dedup_stats_per_umi.tsv" [shape=plaintext]
+    "tmp/<SAMPLE_ID>/dedup_stats_per_umi_per_position.tsv" [shape=plaintext]
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" [shape=plaintext]
+    "output/<SAMPLE_ID>/plus.bedgraph" [shape=plaintext]
+    "output/<SAMPLE_ID>/minus.bedgraph" [shape=plaintext]
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.h5" [shape=plaintext]
+
+    pdfs [label="output/<SAMPLE_ID>/metagene_start_stop_read_counts.pdf\n
+output/<SAMPLE_ID>/metagene_normalized_profile_start_stop.pdf\n
+output/<SAMPLE_ID>/ORF_TPMs_vs_features.pdf\n
+output/<SAMPLE_ID>/normalized_density_APEsites_per_codon.pdf\n
+output/<SAMPLE_ID>/metagene_start_barplot_by_length.pdf\n
+output/<SAMPLE_ID>/metagene_start_ribogrid_by_length.pdf\n
+output/<SAMPLE_ID>/frame_proportions_per_ORF.pdf\n
+output/<SAMPLE_ID>/read_counts_by_length.pdf"] [shape=box, style=dashed]
+
+    tsvs [label="output/<SAMPLE_ID>/normalized_density_APEsites_per_codon.tsv\n
+output/<SAMPLE_ID>/read_frame_per_ORF.tsv\n
+output/<SAMPLE_ID>/nt_freq_per_read_position.tsv\n"] [shape=box, style=dashed]
+
+    tsvs_for_static_html [label="output/<SAMPLE_ID>/metagene_start_stop_read_counts.tsv\n
+output/<SAMPLE_ID>/metagene_normalized_profile_start_stop.tsv\n
+output/<SAMPLE_ID>/ORF_TPMs_vs_features.tsv\n
+output/<SAMPLE_ID>/read_frame_per_ORF_filtered.tsv\n
+output/<SAMPLE_ID>/normalized_density_APEsites_per_codon_long.tsv\n
+output/<SAMPLE_ID>/read_counts_by_length.tsv\n
+output/<SAMPLE_ID>/gene_position_length_counts_5start.tsv"] [shape=box, style=dashed]
+
+    "output/<SAMPLE_ID>/<SAMPLE_ID>_output_report.html" [shape=plaintext]
+    "output/<SAMPLE_ID>/ORF_TPMs_and_counts.tsv" [shape=plaintext]
+
+    "input/<SAMPLE_ID>.fastq.gz" -> cut -> "tmp/<SAMPLE_ID>/trim.fq"
+    "tmp/<SAMPLE_ID>/trim.fq" -> umi_extract -> "tmp/<SAMPLE_ID>/extract_trim.fq"
+    "tmp/<SAMPLE_ID>/extract_trim.fq" -> h21
+    "index/rRNA.1|...|8.ht2" -> h21
+    h21 -> "tmp/<SAMPLE_ID>/rRNA_map.sam"
+    h21 -> "tmp/<SAMPLE_ID>/nonrRNA.fq"
+
+    "index/CDS.1|...|8.ht2" -> h22
+    "tmp/<SAMPLE_ID>/nonrRNA.fq" -> h22
+    h22 -> "tmp/<SAMPLE_ID>/unaligned.fq"
+    h22 -> "tmp/<SAMPLE_ID>/orf_map.sam"
+
+    "tmp/<SAMPLE_ID>/orf_map.sam" -> trim
+    trim -> "tmp/<SAMPLE_ID>/orf_map_clean.sam"
+    trim -> "tmp/<SAMPLE_ID>/trim_5p_mismatch.tsv"
+    "tmp/<SAMPLE_ID>/orf_map_clean.sam" -> samview -> "tmp/<SAMPLE_ID>/orf_map_clean.bam"
+    "tmp/<SAMPLE_ID>/orf_map_clean.bam" -> samindex
+    samindex -> "tmp/<SAMPLE_ID>/orf_map_clean.bam+.bai"
+
+    "tmp/<SAMPLE_ID>/orf_map_clean.bam+.bai" -> umi_pre_group -> "tmp/<SAMPLE_ID>/pre_dedup_groups.tsv"
+    "tmp/<SAMPLE_ID>/orf_map_clean.bam+.bai" -> umi_dedup
+    umi_dedup -> "tmp/<SAMPLE_ID>/dedup.bam"
+    umi_dedup -> "tmp/<SAMPLE_ID>/dedup_stats_edit_distance.tsv"
+    umi_dedup -> "tmp/<SAMPLE_ID>/dedup_stats_per_umi.tsv"
+    umi_dedup -> "tmp/<SAMPLE_ID>/dedup_stats_per_umi_per_position.tsv"
+    "tmp/<SAMPLE_ID>/dedup.bam" -> samindex_dedup -> "tmp/<SAMPLE_ID>/dedup.bam+.bai"
+    "tmp/<SAMPLE_ID>/dedup.bam+.bai" -> umi_post_group -> "tmp/<SAMPLE_ID>/post_dedup_groups.tsv"
+
+    "tmp/<SAMPLE_ID>/dedup.bam+.bai" -> copy -> "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai"
+
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" -> bedplus -> "output/<SAMPLE_ID>/plus.bedgraph"
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" -> bedminus -> "output/<SAMPLE_ID>/minus.bedgraph"
+
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" -> bam2h5
+    "input/CDS.gff3" -> bam2h5
+    bam2h5 -> "output/<SAMPLE_ID>/<SAMPLE_ID>.h5"
+
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.h5" -> statsfigs
+    "input/CDS.fa" -> statsfigs
+    "input/CDS.gff3" -> statsfigs
+    data -> statsfigs
+
+    statsfigs -> pdfs
+    statsfigs -> tsvs
+    statsfigs -> tsvs_for_static_html
+    statsfigs -> "output/<SAMPLE_ID>/ORF_TPMs_and_counts.tsv"
+
+    tsvs_for_static_html -> staticHTML
+    staticHTML -> "output/<SAMPLE_ID>/<SAMPLE_ID>_output_report.html"
+  }
+
+  subgraph cluster_summary {
+    label = "Summary"
+    labeljust = "l"
+
+    collate [label="collate_tpms.R"] [shape=box]
+    count_reads [label="count_reads.py"] [shape=box]
+
+    "output/TPMs_all_CDS_all_samples.tsv" [shape=plaintext]
+    "output/read_counts_per_file.tsv" [shape=plaintext]
+
+    "output/<SAMPLE_ID>/ORF_TPMs_and_counts.tsv" -> collate
+    collate -> "output/TPMs_all_CDS_all_samples.tsv"
+
+    "input/<SAMPLE_ID>.fastq.gz" -> count_reads
+    "tmp/<SAMPLE_ID>/trim.fq" -> count_reads
+    "tmp/<SAMPLE_ID>/rRNA_map.sam" -> count_reads
+    "tmp/<SAMPLE_ID>/nonrRNA.fq" -> count_reads
+    "tmp/<SAMPLE_ID>/unaligned.fq" -> count_reads
+    "tmp/<SAMPLE_ID>/orf_map.sam" -> count_reads
+    "tmp/<SAMPLE_ID>/orf_map.sam" -> count_reads
+    "tmp/<SAMPLE_ID>/trim_5p_mismatch.tsv" -> count_reads
+    "tmp/<SAMPLE_ID>/orf_map_clean.sam" -> count_reads
+    "output/<SAMPLE_ID>/<SAMPLE_ID>.bam+.bai" -> count_reads
+    count_reads -> "output/read_counts_per_file.tsv"
+  }
+}
