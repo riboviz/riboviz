@@ -24,12 +24,12 @@ NOTE: When giving multiple features of interest, the script is expecting them to
 ## Arguments ##
 Seven arguments are required for this script (the rest are set as defaults):
 - H5 file
-- sample dataset
+- Sample dataset
 - GFF3 file
-- species-specific codon table
-- feature of interest (one or more)
+- Species-specific codon table
+- Feature of interest (one or more)
 - A-site displacement length 
-- output directory 
+- Output directory 
 
 The arguments that have set defaults can be changed to alter how the script processes the data. The size of the expanded window can be adjusted, the desired reading frame can be filtered for (or counts for all reading frames can be kept) but these are not required as they have default values.
 
@@ -42,7 +42,7 @@ Rscript rscripts/YAL5-codons-pairs.R
 	-g [Path to GFF3 file] 
 	-a [Path to species-specific codon table]
         -- asite_length [Path to the A-site displacement length file]
-	--feature [individual feature to be studied or path to TSV file containing multiple features] 
+	--feature [Individual feature to be studied or path to TSV file containing multiple features] 
 	-o [Output directory]
 ```
 
@@ -52,7 +52,7 @@ Available arguments:
 '-d', '--dataset'. Name of the dataset being studied
 '-g', '--gff'. Path to the species-specific GFF3 file
 '-a', '--annotation'. Path to codon positions file for the species (TSV file)
-'--asite_lenght'. Path to species-specific A-site displacement length file
+'--asite_length'. Path to species-specific A-site displacement length file
 '--feature'. Feature of interest, e.g. codon pair 
 '-o', '--output'. Path to output directory, default = "."
 '--expand_width'.The desired range either side of the feature of interest, default = 5L
@@ -60,6 +60,8 @@ Available arguments:
 '--minreadlen'. Minimum read length, default = 10
 '--snapdisp'. Reading frame to filter for if `frame = TRUE`, default = 0L
 ```
+
+NOTE: The `asite_length` argument has a default file that is used for yeast datasets. This file can be found here: `riboviz/data/yeast_standard_asite_disp_length.txt`
 
 ## Examples ##
 
