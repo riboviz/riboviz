@@ -59,7 +59,14 @@ option_list <- list(make_option(c("-i", "--input"),
                     make_option(c("--snapdisp"),
                                 type = "integer",
                                 help = "frame to filter to when using SnapToCodon",
-                                default = 0L))
+                                default = 0L),
+                    make_option(c("--asite_length"),
+                                type = "character",
+                                help = "Path to asite_disp_length. Default is 
+                                specific for yeast when code is run from
+                                riboviz directory",
+                                default = "data/yeast_standard_asite_disp_length.txt")
+                    )
 
 
 opt <- optparse::parse_args(OptionParser(option_list = option_list))
@@ -76,6 +83,7 @@ filtering_frame <- opt$frame
 min_read_length <- opt$minreadlen
 filter_for_frame <- opt$filter_for_frame
 snapdisp <- opt$snapdisp
+asite_disp_path <- opt$asite_length
 
 hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
 dataset <- "Mok-simYAL5"
@@ -227,12 +235,12 @@ FilterForFrameFunction <- function(gene, gff_df, dataset, hd_file,
 #' @examples total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, gff_df, 
 #' dataset, hd_file, min_read_length, filter_for_frame, filtering_frame,  snapdisp)
 #' 
-GetAllCodonPosCounts <- function(gene_names, gff_df, dataset, hd_file, min_read_length,
+GetAllCodonPosCounts <- function(gene_names, gff_df, asite_disp_path, dataset, hd_file, min_read_length,
                                  filter_for_frame, filtering_frame, snapdisp) {
 
   # GetAllCodonPosCounts1Gene works for one gene, and calculates the read
   # counts at each codon position in that gene.
-  GetAllCodonPosCounts1Gene <- function(gene, gff_df, dataset, hd_file, min_read_length,
+  GetAllCodonPosCounts1Gene <- function(gene, gff_df, asite_disp_path, dataset, hd_file, min_read_length,
                                         filter_for_frame, filtering_frame, snapdisp) {
 
     # Get the gff rows for the gene being studied
@@ -247,9 +255,7 @@ GetAllCodonPosCounts <- function(gene_names, gff_df, dataset, hd_file, min_read_
                                       type == "CDS") %>%  select(end))
 
     # Get the Asite displacement for reads of different lengths
-    asite_displacement_length <- data.frame(
-      read_length = c(28, 29, 30),
-      asite_displacement = c(15, 15, 15))
+    asite_displacement_length <- suppressMessages(ReadAsiteDisplacementLengthFromFile(asite_disp_path))
 
     # Calculate reads at codon positions in desired way, decided by
     # filter_for_frame being TRUE or FAlSE (default = TRUE)
@@ -295,6 +301,7 @@ GetAllCodonPosCounts <- function(gene_names, gff_df, dataset, hd_file, min_read_
   total_codon_pos_counts <- purrr::map_dfr(.x = gene_names,
                                            .f = GetAllCodonPosCounts1Gene,
                                            gff_df,
+                                           asite_disp_path,
                                            dataset,
                                            hd_file,
                                            min_read_length,
@@ -306,6 +313,7 @@ GetAllCodonPosCounts <- function(gene_names, gff_df, dataset, hd_file, min_read_
   return(total_codon_pos_counts)
 }
 
+total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, gff_df, asite_disp_path, dataset, hd_file, min_read_length, filter_for_frame, filtering_frame,  snapdisp)
 
 #TEST: GetAllCodonPosCounts(): returns a tibble.
 #TEST: GetAllCodonPosCounts(): the tibble has 3 columns.
@@ -382,12 +390,12 @@ GetAllCodonPosCounts <- function(gene_names, gff_df, dataset, hd_file, min_read_
 #' @examples AddCodonNamesToCodonPosCounts(gene_names, gff_df, dataset, hd_file,
 #' min_read_length, filter_for_frame,filtering_frame, snapdisp,yeast_codon_pos_i200)
 #' 
-AddCodonNamesToCodonPosCounts <- function(gene_names, gff_df, dataset, hd_file, 
+AddCodonNamesToCodonPosCounts <- function(gene_names, gff_df, asite_disp_path, dataset, hd_file, 
                                           min_read_length, filter_for_frame,
                                           filtering_frame, snapdisp, yeast_codon_pos_i200) {
 
   # Create tibble of read counts and positions
-  total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, gff_df, dataset, 
+  total_codon_pos_counts <- GetAllCodonPosCounts(gene_names, gff_df, asite_disp_path, dataset, 
                                                  hd_file, min_read_length,
                                                  filter_for_frame, 
                                                  filtering_frame, snapdisp)
@@ -472,7 +480,8 @@ AddCodonNamesToCodonPosCounts <- function(gene_names, gff_df, dataset, hd_file,
 #' @examples     ExpandFeatureRegionAllGenes(gene_names, gff_df, dataset, hd_file, 
 #' min_read_length, filter_for_frame, filtering_frame, snapdisp, 
 #' yeast_codon_pos_i200,feature_of_interest,expand_width)
-ExpandFeatureRegionAllGenes <- function(gene_names, gff_df, dataset, hd_file, 
+ExpandFeatureRegionAllGenes <- function(gene_names, gff_df, asite_disp_path,
+                                        dataset, hd_file, 
                                 min_read_length,   
                                 filter_for_frame,
                                 filtering_frame, snapdisp, yeast_codon_pos_i200,
@@ -482,6 +491,7 @@ ExpandFeatureRegionAllGenes <- function(gene_names, gff_df, dataset, hd_file,
   # generate transcript_gene_poscodon_frame, tests and descriptions above
   transcript_gene_poscodon_frame <- AddCodonNamesToCodonPosCounts(gene_names,
                                                                   gff_df,
+                                                                  asite_disp_path,
                                                                   dataset, 
                                                                   hd_file, 
                                                                   min_read_length, 
@@ -858,7 +868,7 @@ if(length(feature_of_interest) == 1){
   
   print(paste0("Finding occurences of ", feature_of_interest))
   output_feature_info <- suppressMessages(
-    ExpandFeatureRegionAllGenes(gene_names, gff_df, dataset, hd_file, 
+    ExpandFeatureRegionAllGenes(gene_names, gff_df, asite_disp_path, dataset, hd_file, 
                                 min_read_length,   
                                 filter_for_frame,
                                 filtering_frame, snapdisp, yeast_codon_pos_i200,
