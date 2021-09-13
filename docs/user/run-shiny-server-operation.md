@@ -23,8 +23,6 @@ If you're running on a headless machine like a server, the shiny server will be 
 Rscript --vanilla run_shiny_server.R path/to/interactive_viz_config.yaml 1234
 ```
 
-You may need to forward that port. *A description of how to forward the port from the command line as opposed to doing it in VSC would be good here...*
-
 ## Description of tabs
 
 You can choose which samples you would like to view by checking the appropriate boxes at the top of the screen. Changes are not submitted until you press the `Apply Changes` button, after which the shiny app refreshes the interactive plots with your chosen selections.
@@ -45,7 +43,7 @@ This tab displays read length distributions.
 
 This tab displays graphs related to the positioning and the frame of the reads.
 
-### Normalized reads per position
+### Normalized reads by position
 
 This tab displays the normalized read coverage around start and stop sites in each of the samples.
 
