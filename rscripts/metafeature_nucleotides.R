@@ -58,7 +58,14 @@ option_list <- list(make_option(c("-i", "--input"),
                     make_option(c("--minreadlen"),
                                 type = "integer",
                                 help = "minimum read length",
-                                default = 10))
+                                default = 10),
+                    make_option(c("--asite_length"),
+                                type = "character",
+                                help = "Path to asite_disp_length. Default is 
+                                specific for yeast when code is run from
+                                riboviz directory",
+                                default = "data/yeast_standard_asite_disp_length.txt")
+)
 
 opt <- optparse::parse_args(OptionParser(option_list = option_list))
 
@@ -72,6 +79,7 @@ output_dir <- opt$output
 expand_width <- opt$expand_width
 startlen <- opt$startlen
 min_read_length <- opt$minreadlen
+asite_disp_path <- opt$asite_length
 
 # gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation",
 # "tiny_2genes_20utrs.gff3")
@@ -87,20 +95,30 @@ gff_df <- readGFFAsDf(gff)
 genome <- readDNAStringSet(fasta, format = "fasta")
 names <- names(genome)
 
-# set A site displacement lengths
-asite_displacement_length <- data.frame(
-  read_length = c(28, 29, 30),
-  asite_displacement = c(15, 15, 15))
 
-# CreateNtAnnotation produces a tibble containing the gene name,
+# Get the Asite displacement for reads of different lengths
+asite_displacement_length <- suppressMessages(ReadAsiteDisplacementLengthFromFile(asite_disp_path))
+
+print("Create annotation")
+
+#' CreateNtAnnotation
+#'CreateNtAnnotation produces a tibble containing the gene name,
 # the CDS nucleotide position and the Nucleotide
 # to be used to create meta feature plots based on
 # nucleotide position rather than codon positon
 # also allows use on species where a codon table TSV file
 # (ie yeast_codon_table.tsv) is not available, as uses the fasta file
 
-print("Create annotation")
-
+#' @param genome - The fasta file
+#' @param names - the names of all the genes in the sample
+#' @param gff_df - the dataframe version of the GFF
+#'
+#' @return - a tibble containing the gene name,
+# the CDS nucleotide position and the Nucleotide
+#' @export
+#'
+#' @examples CreateNtAnnotation(genome, names, gff_df)
+#' 
 CreateNtAnnotation <- function(genome, names, gff_df) {
   gene_seq_df <- data.frame(genome)
 
@@ -188,8 +206,22 @@ CreateNtAnnotation <- function(genome, names, gff_df) {
 
 # Get the location of reads on the transcript for an individual gene
 
+#' GetReadPositions
+#' Get the location of reads on the transcript for an individual gene
+#' @param gene - The gene being studied
+#' @param dataset - the name of the dataset
+#' @param hd_file - the H5 file
+#' @param asite_displacement_length - the asite displacement for a site assignment
+#'
+#' @return a list of number of reads, with the position in the list matching
+#' the position in the CDS
+#' @export
+#'
+#' @examples GetReadPositions(gene, dataset, hd_file,
+#' asite_displacement_length)
+
 GetReadPositions <- function(gene, dataset, hd_file, 
-                             asite_displacement_length, left, right){
+                             asite_displacement_length){
    
   # Get the matrix of read counts
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hd_file) 
@@ -213,16 +245,33 @@ GetReadPositions <- function(gene, dataset, hd_file,
   
 }
 
-# get the positions of reads for multiple genes and produce 
-# a tibble listing the gene, position and count. 
 
+
+#' GetAllPosCounts
+#' get the positions of reads for multiple genes and produce 
+#' a tibble listing the gene, position and count. 
+#'
+#' @param gene_names - A list of all the genes in a sample
+#' @param dataset - the dataset
+#' @param hd_file - the path to the H5 file
+#' @param min_read_length - the minimum read length, from the config file
+#' @param asite_displacement_length - the number of nt between the end of the 
+#' read and the A site
+#' @param gff_df the dataframe version of the GFF3
+#'
+#' @return a tibble listing the gene, position and count.
+#' @export
+#'
+#' @examples GetAllPosCounts(gene_names, dataset, hd_file, min_read_length,
+#' asite_displacement_length))
 GetAllPosCounts <- function(gene_names, dataset, hd_file,
-                            min_read_length, asite_displacement_length){
+                            min_read_length, asite_displacement_length, gff_df){
   
   gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
   
   GetAllPosCounts1Gene <- function(gene, dataset, hd_file, 
-                                   min_read_length, asite_displacement_length){
+                                   min_read_length, asite_displacement_length, 
+                                   gff_df){
     
     subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene) 
     
@@ -233,7 +282,7 @@ GetAllPosCounts <- function(gene_names, dataset, hd_file,
                                       type == "CDS") %>%  select(end))
       
     nt_counts_1_gene <- GetReadPositions(gene, dataset, hd_file,
-                                         asite_displacement_length, left, right)
+                                         asite_displacement_length)
 
     nt_pos_counts <- tibble(Gene = gene,
                                Pos = 1:length(nt_counts_1_gene),
@@ -250,7 +299,8 @@ GetAllPosCounts <- function(gene_names, dataset, hd_file,
                                            dataset,
                                            hd_file,
                                            min_read_length,
-                                           asite_displacement_length
+                                           asite_displacement_length,
+                                        gff_df
   )
   
   return (total_nt_pos_counts)
@@ -260,7 +310,8 @@ total_nt_pos_counts <- suppressMessages(GetAllPosCounts(gene_names,
                                                         dataset, 
                                                         hd_file, 
                                                         min_read_length,
-                                                        asite_displacement_length))
+                                                        asite_displacement_length,
+                                                        gff_df))
 
 # total_nt_pos_counts
 # # A tibble: 27 x 3
@@ -278,8 +329,26 @@ total_nt_pos_counts <- suppressMessages(GetAllPosCounts(gene_names,
 # 10 MAT      10     0
 
 
-# add the nucleotide identity to the total_nt_pos_counts tibble
 
+
+#' AddNtToPosCounts
+#' Add the nucleotide identity to the total_nt_pos_counts tibble
+#' @param gene_names - A list of all the genes in a sample
+#' @param dataset - the dataset
+#' @param hd_file - the path to the H5 file
+#' @param min_read_length - the minimum read length, from the config file
+#' @param asite_displacement_length - the number of nt between the end of the 
+#' read and the A site
+#' @param gff_df the dataframe version of the GFF3
+#' 
+#' @return  a tibble with all nucleotide positions in the cds of a 
+#' transcript, along with the number of reads mapping to each position, with the
+#' headings Gene, Pos, Count, and Nucleotide
+
+#' @export
+#'
+#' @examples AddNtToPosCounts(gene_names,dataset, hd_file, 
+#' min_read_length, gff_df, asite_displacement_length))
 AddNtToPosCounts <- function(gene_names, dataset, hd_file,
                              min_read_length, gff_df,
                              asite_displacement_length) {
@@ -288,7 +357,7 @@ AddNtToPosCounts <- function(gene_names, dataset, hd_file,
   
   total_nt_pos_counts <- GetAllPosCounts(gene_names, dataset, 
                                          hd_file, min_read_length, 
-                                         asite_displacement_length)
+                                         asite_displacement_length, gff_df)
   
   transcript_tibbles <- left_join(total_nt_pos_counts, nt_tibble,
                                   by = c("Pos", "Gene"), 
@@ -347,6 +416,24 @@ transcript_gene_pos_nt_reads <- suppressMessages(AddNtToPosCounts(gene_names,
 
 print("Slice out positions of interest")
 
+#' ExpandFeatureRegionAllGenes
+#'
+#' @param gene_names - A list of all the genes in a sample
+#' @param dataset - the dataset
+#' @param hd_file - the path to the H5 file
+#' @param min_read_length - the minimum read length, from the config file
+#' @param asite_displacement_length - the number of nt between the end of the 
+#' read and the A site
+#' @param gff_df the dataframe version of the GFF3
+#' @param features_to_study - a list of genes and positions to slice a window around
+#' @param expand_width 
+#'
+#' @return returns a list of tibbles, one for each feature of interest.
+#' @export
+#'
+#' @examples ExpandFeatureRegionAllGenes(gene_names, dataset, hd_file, min_read_length,
+#'  gff_df, features_to_study, expand_width, asite_displacement_length)
+#'  
 ExpandFeatureRegionAllGenes <- function(gene_names, dataset, hd_file, 
                                         min_read_length,   
                                         gff_df, features_to_study,
