@@ -24,7 +24,7 @@ The workflow prepares ribosome profiling data for by implementing a workflow tha
 * `riboviz.tools.count_reads`: count the number of reads (sequences) processed by specific stages of the workflow (local script, in `riboviz/tools/`).  
 * `AnalysisOutputs.Rmd`: the `staticHTML` Nextflow process runs an R markdown document which generates an HTML output report for each sample processed, using the analysed data (local script, in `rmarkdown/`)
 
-#### Interactive Visualization
+### Interactive Visualization
 
 An additional script within the riboviz codebase allows the generation of interactive plots from the dataset after the riboviz workflow has been completed.  
 
