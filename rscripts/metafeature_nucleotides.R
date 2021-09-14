@@ -81,15 +81,15 @@ startlen <- opt$startlen
 min_read_length <- opt$minreadlen
 asite_disp_path <- opt$asite_length
 
-# gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation",
-# "tiny_2genes_20utrs.gff3")
-# fasta <- "../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa"
-# hd_file <- here::here("Mok-tinysim", "output", "A", "A.h5")
-# dataset <- "Mok-tinysim"
-# min_read_length <- 10
-# expand_width <- 2
-# features_to_study <- read.delim("nt_testing.tsv")
-# output_dir <- "."
+gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation",
+"tiny_2genes_20utrs.gff3")
+fasta <- "../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa"
+hd_file <- here::here("Mok-tinysim", "output", "A", "A.h5")
+dataset <- "Mok-tinysim"
+min_read_length <- 10
+expand_width <- 2
+features_to_study <- read.delim("nt_testing.tsv")
+output_dir <- "."
 #
 gff_df <- readGFFAsDf(gff)
 genome <- readDNAStringSet(fasta, format = "fasta")
@@ -185,6 +185,15 @@ CreateNtAnnotation <- function(genome, names, gff_df) {
   
 }
 
+# TEST: CreateNtAnnotation() creates a tibble
+# TEST: CreateNtAnnotation() produces a tibble with 3 columns with the headings;
+# Gene, Pos and Nucleotide
+# TEST: CreateNtAnnotation() produces a tibble where The number of rows is equal
+# to the combined length of all all CDSs in the sample
+# TEST: CreateNtAnnotation() produces a tibble that includes all genes in the sample
+# in the Gene column
+ 
+
 # nt_tibble <- CreateNtAnnotation(genome, names, gff_df)
 
 # nt_tibble
@@ -245,6 +254,9 @@ GetReadPositions <- function(gene, dataset, hd_file,
   
 }
 
+# TEST: GetReadPositions() returns a numeric 
+# TEST: GetReadPositions () produces a numeric with the same length as the CDS of
+# the gene being studied.
 
 
 #' GetAllPosCounts
@@ -313,6 +325,12 @@ total_nt_pos_counts <- suppressMessages(GetAllPosCounts(gene_names,
                                                         asite_displacement_length,
                                                         gff_df))
 
+# TEST: GetAllPosCounts() returns a tibble
+# TEST: The tibble has 3 columns with the headings Gene, Pos, and Counts
+# TEST: The number of rows in the tibble is equal
+# to the combined length of all the CDSs in the sample
+# TEST: All genes in the sample are included in the Gene column
+
 # total_nt_pos_counts
 # # A tibble: 27 x 3
 # Gene    Pos Count
@@ -380,6 +398,12 @@ transcript_gene_pos_nt_reads <- suppressMessages(AddNtToPosCounts(gene_names,
                                                                   min_read_length, 
                                                                   gff_df, 
                                                                   asite_displacement_length))
+
+# TEST: GetAllPosCounts() returns a tibble
+# TEST: The tibble has 3 columns with the headings Gene, Pos, Count and Nucleotide
+# TEST: The number of rows in the tibble is equal
+# to the combined length of all the CDSs in the sample
+# TEST: All genes in the sample are included in the Gene column
 
 # the output is a tibble with all nucleotide positions in the cds of a 
 # transcript, along with the number of reads mapping to each position
