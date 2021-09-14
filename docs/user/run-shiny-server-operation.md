@@ -33,7 +33,7 @@ This tab displays a bar graph showing the number reads over the course of the pr
 
 ### TPM summary
 
-This tab displays a heatmap with sample to sample pairwise correlations based on $log_{10}(TPM)$ as well as TPM density plots showing the distribution of TPMs for each gene. This tab allows you to enter the name of gene from your data, doing so will draw a vertical black line on the density plots to show you where that gene lies among the distribution of TPMs.
+This tab displays a heatmap with sample to sample pairwise correlations based on $log_{10}(TPM)$ as well as TPM density plots showing the distribution of TPMs for each gene. This tab allows you to enter the name of a gene from your data, doing so will draw a vertical black line on the density plots to show you where that gene lies among the distribution of TPMs.
 
 ### Read length distributions
 

@@ -52,7 +52,7 @@ If sample files (`fq_files`) are specified, then the workflow processes the samp
    10. Write intermediate files produced above into a sample-specific directory, named using the sample ID, within the temporary directory (`dir_tmp`).
    11. Make length-sensitive alignments in compressed h5 format using `bam_to_h5.R`.
    12. Generate summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
-   13. Write output files produced above into an sample-specific directory, named using the sample ID, within the output directory (`dir_out`).
+   13. Write output files produced above into a sample-specific directory, named using the sample ID, within the output directory (`dir_out`).
 4. Collate TPMs across results, using `collate_tpms.R` and write into output directory (`dir_out`). Only the results from successfully-processed samples are collated.
 5. Count the number of reads (sequences) processed by specific stages if requested (if `count_reads: TRUE`).
 
