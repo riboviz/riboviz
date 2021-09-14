@@ -88,7 +88,7 @@ graph_cats <- data.frame(
 
 # Load the data frame and add the short names
 read_counts_df <-
-  read_tsv(here::here(yaml$dir_out, "read_counts.tsv"), skip = 5) %>%
+  read_tsv(here::here(yaml$dir_out, "read_counts_per_file.tsv"), skip = 5) %>%
   left_join(graph_cats, by = "Description") %>%
   filter(
     Description %in% graph_cats$Description &
@@ -104,7 +104,7 @@ read_counts_df <- read_counts_df %>%
 ### Read length distributions
 read_length_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- paste0(x, "/read_lengths.tsv")
+  file_loc <- paste0(x, "/read_counts_by_length.tsv")
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -113,7 +113,7 @@ read_length_df <- lapply(sample_names, function(x) {
 ### Periodicity line plot
 periodicity_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- paste0(x, "/3nt_periodicity.tsv")
+  file_loc <- paste0(x, "/metagene_start_stop_read_counts.tsv")
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -122,7 +122,7 @@ periodicity_df <- lapply(sample_names, function(x) {
 ### Read counts by frame bar plot
 frame_bar_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- paste0(x, "/3ntframe_bygene.tsv")
+  file_loc <- paste0(x, "/read_frame_per_ORF.tsv")
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -140,7 +140,7 @@ frame_bar_df <- lapply(sample_names, function(x) {
 ### Read counts by frame boxplot
 frame_box_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- paste0(x, "/3ntframe_bygene.tsv")
+  file_loc <- paste0(x, "/read_frame_per_ORF.tsv")
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -156,7 +156,7 @@ frame_box_df <- lapply(sample_names, function(x) {
 ### Position specific normalized reads
 pos_sp_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- paste0(x, "/pos_sp_rpf_norm_reads.tsv")
+  file_loc <- paste0(x, "/metagene_normalized_profile_start_stop.tsv")
   # read it in
   return(read_tsv(file_loc, skip = 4))
 }) %>%
@@ -164,7 +164,7 @@ pos_sp_df <- lapply(sample_names, function(x) {
 
 ### collated TPMs
 collated_tpms_df <-
-  read_tsv(here::here(yaml$dir_out, "TPMs_collated.tsv"), skip = 4)
+  read_tsv(here::here(yaml$dir_out, "TPMs_all_CDS_all_samples.tsv"), skip = 4)
 
 ### Ribogrid
 ribogrid_df <- lapply(sample_names, function(x) {
@@ -184,7 +184,7 @@ ribogrid_df <- lapply(sample_names, function(x) {
 if (any(names(yaml) == "features_file")) {
   if (length(yaml$features_file) > 0) {
     features_df <- lapply(sample_names, function(x) {
-      file_loc <- paste0(x, "/sequence_features.tsv")
+      file_loc <- paste0(x, "/ORF_TPMs_vs_features.tsv")
 
       return(read_tsv(file_loc, skip = 4))
     }) %>%
@@ -208,9 +208,9 @@ plot_theme <- theme_bw() +
 
 ### Start the server
 server <- function(input, output, session) {
-  ######################################
+  ##############################################################################
   # Read count summary
-  ######################################
+  ##############################################################################
 
   ### bar plot
   output$read_counts_bar_plot <- renderPlot({
@@ -357,7 +357,8 @@ server <- function(input, output, session) {
   output$periodicity_line_plot <- renderPlot({
     input$apply_changes
     isolate({
-      periodicity_df %>%
+      periodicity_df %>% 
+        mutate(End = factor(End, levels = c("5'", "3'"))) %>%
         filter(samplez %in% input$sample) %>%
         ggplot(., aes(x = Pos, y = Counts, color = samplez)) +
         geom_line() +
