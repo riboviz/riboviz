@@ -19,8 +19,7 @@
 #' created from BAM files for dataset samples.
 #' @param min_read_length integer, minimum read length in H5 output;
 #' Default = 10 (set in generate_stats_figs.R from yaml)
-#' @param snapdisp integer any additional displacement in the snapping,
-#' default = 0L
+#' @param snapdisp integer, additional displacement in the snapping, default = 0L
 #' @param asite_disp_path integer, lengths used for A-site assignment
 #' @param gff_df data.frame or tibble; riboviz-format GFF in tidy data format,
 #' as created by readGFFAsDf() from which to extract the UTRs and CDS widths.
@@ -53,9 +52,7 @@ FilterForFrame <- function(gene, dataset, hd_file, min_read_length,
   asite_disp_length <- suppressMessages(ReadAsiteDisplacementLengthFromFile(asite_disp_path))
   
   # Fetch the read counts for a single gene
-  reads_pos_length <- GetGeneDatamatrix(gene,
-                                        dataset,
-                                        hd_file)
+  reads_pos_length <- GetGeneDatamatrix(gene, dataset, hd_file)
   
   # Calculate A-site assigned counts
   reads_asitepos <- CalcAsiteFixed(reads_pos_length,
@@ -63,8 +60,7 @@ FilterForFrame <- function(gene, dataset, hd_file, min_read_length,
                                    asite_disp_length)
   
   # Fetch GFF values for a gene, e.g. gene = "YAL003W"
-  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df,
-                                         seqnames == gene)
+  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene)
   
   # Assign start position of the CDS, e.g. for YAL003W: 251
   left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
@@ -153,8 +149,7 @@ GetAllCodonPosCounts1Gene <- function(gene,
   asite_disp_length <- suppressMessages(ReadAsiteDisplacementLengthFromFile(asite_disp_path))
   
   # Fetch gff values for a gene, e.g. gene = YAL003W
-  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df,
-                                         seqnames == gene)
+  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene)
   
   # Assign start position of the CDS, e.g. for YAL003W: 251
   left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
@@ -242,8 +237,7 @@ GetAllCodonPosCounts1Gene <- function(gene,
 #' @param gff_df data.frame or tibble; riboviz-format GFF in tidy data format,
 #' as created by readGFFAsDf() from which to extract the UTRs and CDS widths.
 #'
-#' @return a tibble which contains the columns "Gene", "Pos" and "Count"
-#' for a list of genes
+#' @return tibble containing columns "Gene", "Pos" and "Count" for gene_names
 #'
 #' @example
 #' 
@@ -265,8 +259,7 @@ GetAllCodonPosCounts1Gene <- function(gene,
 #'                      min_read_length = 10,
 #'                      snapdisp = 0L,
 #'                      asite_disp_path = here::here(
-#'                        "data",
-#'                        "yeast_standard_asite_disp_length.txt"),
+#'                        "data", "yeast_standard_asite_disp_length.txt"),
 #'                      filter_for_frame = TRUE,
 #'                      gff_df)
 #'
@@ -356,8 +349,7 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length,
 #'                               min_read_length = 10,
 #'                               snapdisp = 0L,
 #'                               asite_disp_path = here::here(
-#'                                "data",
-#'                                "yeast_standard_asite_disp_length.txt"),
+#'                                "data", "yeast_standard_asite_disp_length.txt"),
 #'                               filter_for_frame = TRUE,
 #'                               gff_df)
 #'
@@ -417,8 +409,6 @@ AddCodonNamesToCodonPosCounts <- function(yeast_codon_pos_i200, gene_names,
 # gives:
 # > str(gene_pos_codon_counts)
 # Classes "tbl_df", "tbl" and "data.frame":   2,749 observations of 4 variables:
-# > str(gene_pos_codon_counts)
-# tibble [2,749 x 4] (S3: tbl_df/tbl/data.frame)
 #   $ Gene     : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
 #   $ Pos      : num  1 2 3 4 5 6 7 8 9 10 ...
 #   $ CodonPair: chr  "ATG GCA" "GCA TCC" "TCC ACC" "ACC GAT" ...
@@ -462,8 +452,7 @@ AddCodonNamesToCodonPosCounts <- function(yeast_codon_pos_i200, gene_names,
 #'                           min_read_length = 10,
 #'                           snapdisp = 0L,
 #'                           asite_disp_path = here::here(
-#'                              "data",
-#'                              "yeast_standard_asite_disp_length.txt"),
+#'                              "data", "yeast_standard_asite_disp_length.txt"),
 #'                           filter_for_frame = TRUE,
 #'                           feature_of_interest = "TCC AAG")
 #'
@@ -561,9 +550,6 @@ TranscriptForOneGene <- function(gene,
 #' Feature_of_interest has position 0, all adjacent codons are assigned relative
 #' positions.
 #'
-#' Uses the function AddCodonNamesToCodonPosCounts() to get counts aligned to
-#' positions and codons
-#'
 #' @param .tsv file from which to fetch the codon names associated with the CDS
 #' co-ordinates for each gene
 #' @param gene from gene_names
@@ -607,12 +593,10 @@ TranscriptForOneGene <- function(gene,
 #'                     min_read_length = 10,
 #'                     snapdisp = 0L,
 #'                     asite_disp_path = here::here(
-#'                       "data",
-#'                       "yeast_standard_asite_disp_length.txt"),
+#'                       "data", "yeast_standard_asite_disp_length.txt"),
 #'                     filter_for_frame = TRUE,
 #'                     feature_of_interest = "TCC AAG",
-#'                     expand_width = 5L
-#'                     )
+#'                     expand_width = 5L)
 #'
 #' @export
 ExpandFeatureRegion <- function(yeast_codon_pos_i200, gene_names, dataset,
@@ -715,8 +699,7 @@ ExpandFeatureRegion <- function(yeast_codon_pos_i200, gene_names, dataset,
                                       gff_df
   )
   
-  expand_feature_region <- unlist(expand_feature_region,
-                                  recursive = FALSE)
+  expand_feature_region <- unlist(expand_feature_region, recursive = FALSE)
   
   # remove NULLS, which represent features of interest occurring within one
   # expand width of the UTRs
@@ -744,33 +727,17 @@ ExpandFeatureRegion <- function(yeast_codon_pos_i200, gene_names, dataset,
 # List of 8 (showing 2)
 # Classes "tbl_df", "tbl" and "data.frame":   11 observations of 6 variables
 #   $ Gene     : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-#   $ CodonPos1: num  2 3 4 5 6 7 8 9 10 11 ...
-#   $ CodonPos2: num  3 4 5 6 7 8 9 10 11 12 ...
+#   $ Pos      : num  2 3 4 5 6 7 8 9 10 11 ...
 #   $ Count    : num  429 488 102 994 146 173 762 13 176 98 ...
 #   $ CodonPair: chr  "GCA TCC" "TCC ACC" "ACC GAT" "GAT TTC" ...
 #   $ RelPos   : int  -5 -4 -3 -2 -1 0 1 2 3 4 ...
 # Classes "tbl_df", "tbl" and "data.frame":   11 observations of 6 variables
 #   $ Gene     : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-#   $ CodonPos1: num  52 53 54 55 56 57 58 59 60 61 ...
-#   $ CodonPos2: num  53 54 55 56 57 58 59 60 61 62 ...
+#   $ Pos      : num  52 53 54 55 56 57 58 59 60 61 ...
 #   $ Count    : num  42 53 648 293 121 92 519 79 765 196 ...
 #   $ CodonPair: chr  "TTC AAC" "AAC CAC" "CAC ATC" "ATC GCT" ...
 #   $ RelPos   : int  -5 -4 -3 -2 -1 0 1 2 3 4 ...
 # ...
-
-
-expand_feature_region <- ExpandFeatureRegion(yeast_codon_pos_i200,
-                                             gene_names,
-                                             dataset,
-                                             hd_file,
-                                             gff_df,
-                                             min_read_length,
-                                             snapdisp = 0L,
-                                             asite_disp_path,
-                                             filter_for_frame = FALSE,
-                                             feature_of_interest = "AAA GCC",
-                                             expand_width)
-
 
 
 ### Normalisation ###
@@ -798,8 +765,8 @@ expand_feature_region <- ExpandFeatureRegion(yeast_codon_pos_i200,
 #' keeping and grouping all reading frames for each codon.
 #' @param feature_of_interest character, each incidence of the feature will be
 #' extracted from transcript_info_tibble
-#' @param expand_width integer which provides the number of positions on each
-#' side of the feature_of_interest to include in the window
+#' @param expand_width integer, provides number of positions each side of the 
+#' feature_of_interest to include in the window
 #'
 #' @return a list of normalized tibbles, where each tibble is an occurrence of
 #' the feature_of_interest
@@ -826,8 +793,7 @@ expand_feature_region <- ExpandFeatureRegion(yeast_codon_pos_i200,
 #'                             min_read_length = 10,
 #'                             snapdisp = 0L,
 #'                             asite_disp_path = here::here(
-#'                               "data",
-#'                               "yeast_standard_asite_disp_length.txt"),
+#'                               "data", "yeast_standard_asite_disp_length.txt"),
 #'                             filter_for_frame = TRUE,
 #'                             feature_of_interest = "TCC AAG",
 #'                             expand_width = 5L)
@@ -893,7 +859,7 @@ ExpandedRegionNormalisation <- function(yeast_codon_pos_i200,
 #      (tibble) (type(normalized_expand_list)) = TRUE
 #TEST: ExpandedRegionNormalisation(): the tibble contains 6 columns = TRUE
 #TEST: ExpandedRegionNormalisation(): the column names are %in% c("Gene",
-#      "CodonPos1", "CodonPos2", "Count", "RelPos", "RelCount")
+#      "Pos", "Count", "RelPos", "RelCount")
 #TEST: ExpandedRegionNormalisation(): number of observations in the output
 #      tibble = "expand_width"*2+1, if "expand_width" = 5L the number of
 #      observations should be 11
@@ -903,8 +869,7 @@ ExpandedRegionNormalisation <- function(yeast_codon_pos_i200,
 # > str(normalized_expanded_feature_region)
 # Classes "tbl_df", "tbl" and "data.frame":   11 observations of 6 variables
 #   $ Gene      : chr  "YAL003W" "YAL003W" "YAL003W" "YAL003W" ...
-#   $ CodonPos1 : num  2 3 4 5 6 7 8 9 10 11 ...
-#   $ CodonPos2 : num  3 4 5 6 7 8 9 10 11 12 ...
+#   $ Pos       : num  2 3 4 5 6 7 8 9 10 11 ...
 #   $ Count     : num  429 488 102 994 146 173 762 13 176 98 ...
 #   $ RelPos    : int  -5 -4 -3 -2 -1 0 1 2 3 4 ...
 #   $ RelCount  : num  1.347 1.532 0.32 3.12 0.458 ...
@@ -960,12 +925,10 @@ ExpandedRegionNormalisation <- function(yeast_codon_pos_i200,
 #'                  min_read_length = 10,
 #'                  snapdisp = 0L,
 #'                  asite_disp_path = here::here(
-#'                     "data",
-#'                     "yeast_standard_asite_disp_length.txt"),
+#'                     "data", "yeast_standard_asite_disp_length.txt"),
 #'                  filter_for_frame = TRUE,
 #'                  feature_of_interest = "TCC AAG",
-#'                  expand_width = 5L
-#'                  )
+#'                  expand_width = 5L)
 #'
 #' @export
 OverlayedTibble <- function(yeast_codon_pos_i200,
@@ -1070,8 +1033,7 @@ OverlayedTibble <- function(yeast_codon_pos_i200,
 #'                 min_read_length = 10,
 #'                 snapdisp = 0L,
 #'                 asite_disp_path = here::here(
-#'                     "data",
-#'                     "yeast_standard_asite_disp_length.txt"),
+#'                     "data", "yeast_standard_asite_disp_length.txt"),
 #'                 filter_for_frame = TRUE,
 #'                 feature_of_interest = "TCC AAG",
 #'                 expand_width = 5L)
@@ -1208,8 +1170,7 @@ FindAllFeatures <- function(yeast_codon_pos_i200,
 #'              min_read_length = 10,
 #'              snapdisp = 0L,
 #'              asite_disp_path = here::here(
-#'                "data",
-#'                "yeast_standard_asite_disp_length.txt"),
+#'                "data", "yeast_standard_asite_disp_length.txt"),
 #'              filter_for_frame = TRUE,
 #'              feature_of_interest = "TCC AAG",
 #'              expand_width = 5L,
