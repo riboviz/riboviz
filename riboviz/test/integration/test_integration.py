@@ -105,6 +105,7 @@ fixtures used by these tests.
 import os
 import pytest
 import pysam
+import yaml
 from riboviz import bedgraph
 from riboviz import count_reads as count_reads_module
 from riboviz import environment
@@ -112,6 +113,7 @@ from riboviz import fastq
 from riboviz import h5
 from riboviz import html
 from riboviz import hisat2
+from riboviz import params
 from riboviz import sam_bam
 from riboviz import utils
 from riboviz import workflow_files
@@ -754,3 +756,59 @@ def test_read_counts_per_file_tsv(count_reads, expected_fixture, output_dir):
         os.path.join(expected_fixture, output_dir_name,
                      workflow_files.READ_COUNTS_PER_FILE_FILE),
         os.path.join(output_dir, workflow_files.READ_COUNTS_PER_FILE_FILE))
+
+
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_interactive_viz_config_yaml(output_dir, dir_in, fq_files,
+                                     dataset, features_file,
+                                     sample_sheet):
+    """
+    Test contents of
+    :py:const:`riboviz.workflow_files.INTERACTIVE_VIZ_CONFIG_FILE`
+    using current configuration. The file contents are validated against
+    the current configuration, provided via test fixtures.
+
+    :param output_dir: Output directory
+    :type output_dir: str or unicode
+    :param dir_in: Configuration parameter
+    :type dir_in: str or unicode
+    :param fq_files: Configuration parameter
+    :type fq_files: list(str or unicode)
+    :param dataset: Configuration parameter
+    :type dataset: str or unicode
+    :param features_file: Configuration parameter
+    :type features_file: str or unicode
+    :param sample_sheet: Configuration parameter
+    :type sample_sheet: str or unicode
+    """
+    viz_config_file = os.path.join(output_dir,
+                                   workflow_files.INTERACTIVE_VIZ_CONFIG_FILE)
+    assert os.path.exists(viz_config_file), \
+        "Missing visualisation configuration file: {}".format(viz_config_file)
+    with open(viz_config_file, 'r') as f:
+        viz_config = yaml.load(f, yaml.SafeLoader)
+    assert viz_config is not None, "Empty configuration file"
+    assert os.path.abspath(viz_config[params.INPUT_DIR]) \
+        == os.path.abspath(dir_in), \
+        "Unexpected value for {}".format(params.INPUT_DIR)
+    assert fq_files == viz_config[params.FQ_FILES], \
+            "Unexpected value for {}".format(params.FQ_FILES)
+    assert os.path.abspath(viz_config[params.OUTPUT_DIR]) \
+        == os.path.abspath(output_dir), \
+        "Unexpected value for {}".format(params.OUTPUT_DIR)
+    assert viz_config[params.DATASET] == dataset, \
+        "Unexpected value for {}".format(params.DATASET)
+    if sample_sheet is None:
+        assert not viz_config[params.SAMPLE_SHEET], \
+        "Unexpected value for {}".format(params.SAMPLE_SHEET)
+    else:
+        assert os.path.abspath(viz_config[params.SAMPLE_SHEET]) \
+            == os.path.abspath(sample_sheet), \
+            "Unexpected value for {}".format(params.SAMPLE_SHEET)
+    if features_file is None:
+        assert not viz_config[params.FEATURES_FILE], \
+            "Unexpected value for {}".format(params.FEATURES_FILE)
+    else:
+        assert os.path.abspath(viz_config[params.FEATURES_FILE]) \
+            == os.path.abspath(features_file), \
+            "Unexpected value for {}".format(params.FEATURES_FILE)
