@@ -153,6 +153,16 @@ def pytest_generate_tests(metafunc):
         - ``index_prefix``: value of
           :py:const:`riboviz.params.ORF_INDEX_PREFIX` and
           :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
+        - :py:const.`riboviz.params.INPUT_DIR`: value of this
+          configuration parameter.
+        - :py:const.`riboviz.params.DATASET`: value of this
+          configuration parameter or ``dataset`` if undefined.
+        - :py:const.`riboviz.params.FEATURES_FILE`: value of this
+          configuration parameter or ``None`` if undefined.
+        - :py:const.`riboviz.params.SAMPLE_SHEET`: value of this
+          configuration parameter or ``None`` if undefined.
+        - :py:const.`riboviz.params.FQ_FILES`: value of this
+          configuration parameter or ``None`` if undefined.
         - ``index_dir``: value of
           :py:const:`riboviz.params.INDEX_DIR`.
         - ``tmp_dir``: value of :py:const:`riboviz.params.TMP_DIR`.
@@ -167,6 +177,8 @@ def pytest_generate_tests(metafunc):
           undefined
         - ``group_umis``: value of
           :py:const:`riboviz.params.GROUP_UMIS`.
+        - ``count_reads``: value of
+          :py:const:`riboviz.params.COUNT_READS`.
 
     :param metafunc: pytest test function inspection object
     :type metafunc: _pytest.python.Metafunc
@@ -189,14 +201,20 @@ def pytest_generate_tests(metafunc):
     fixtures = {
         "index_prefix": [config[params.ORF_INDEX_PREFIX],
                          config[params.RRNA_INDEX_PREFIX]],
+        params.INPUT_DIR: [config[params.INPUT_DIR]],
+        params.DATASET: [config[params.DATASET]],
+        params.FEATURES_FILE: [None if params.FEATURES_FILE not in config else config[params.FEATURES_FILE]],
+        params.SAMPLE_SHEET: [None if params.SAMPLE_SHEET not in config else config[params.SAMPLE_SHEET]],
+        params.FQ_FILES: [None if params.FQ_FILES not in config else config[params.FQ_FILES]],
         "index_dir": [config[params.INDEX_DIR]],
         "tmp_dir": [config[params.TMP_DIR]],
         "output_dir": [config[params.OUTPUT_DIR]],
-	"output_pdfs": [utils.value_in_dict(params.OUTPUT_PDFS, config)],
+        "output_pdfs": [utils.value_in_dict(params.OUTPUT_PDFS, config)],
         "extract_umis": [utils.value_in_dict(params.EXTRACT_UMIS, config)],
         "dedup_umis": [utils.value_in_dict(params.DEDUP_UMIS, config)],
         "dedup_stats": [True if params.DEDUP_STATS not in config else utils.value_in_dict(params.DEDUP_STATS, config)],
-        "group_umis": [utils.value_in_dict(params.GROUP_UMIS, config)]
+        "group_umis": [utils.value_in_dict(params.GROUP_UMIS, config)],
+        "count_reads": [utils.value_in_dict(params.COUNT_READS, config)]
     }
     if "sample" in metafunc.fixturenames:
         samples = []
