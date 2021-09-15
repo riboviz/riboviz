@@ -110,7 +110,7 @@ Note that nothing will be displayed at the command-line.
 
 On your local machine, in a browser, visit http://localhost:4254. You should see the Shiny visualisations.
 
-(these instructions were adapted from [Jupyter notebooks on Eddie](https://www.wiki.ed.ac.uk/display/geoinf/Jupyter+notebooks+on+Eddie))
+(these instructions were adapted from [Jupyter notebooks on Eddie](https://www.wiki.ed.ac.uk/display/geoinf/Jupyter+notebooks+on+Eddie) (University of Edinburgh users only))
 
 ## Description of tabs
 
