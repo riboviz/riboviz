@@ -44,3 +44,6 @@ READ_COUNTS_PER_FILE_FILE = "read_counts_per_file.tsv"
 """ Read counts file name. """
 STATIC_HTML_FILE = "{}_output_report.html"
 """ Analysis outputs HTML file name. """
+INTERACTIVE_VIZ_YAML = "interactive_viz_config.yaml"
+""" Interactive visualization code yaml file name. """
+
