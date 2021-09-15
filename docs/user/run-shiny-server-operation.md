@@ -16,12 +16,101 @@ Once entered, the command will print out the something like the following
 
 The IP address provided can simply be pasted into a web browser's URL bar and will direct you to the shiny server which is now hosted from the local machine.
 
+### Troubleshooting: `createTcpServer: address already in use`
+
+If you get an error like
+
+```
+Listening on http://127.0.0.1:4254
+createTcpServer: address already in use
+Error in .subset2(public_bind_env, "initialize")(...) : 
+  Failed to create server
+Calls: <Anonymous> ... startApp -> startServer -> <Anonymous> -> <Anonymous>
+Execution halted
+```
+
+then this means the default port, 4254, is already in use. You can specify another port to use as follows, for example:
+
+```console
+$ Rscript --vanilla run_shiny_server.R path/to/interactive_viz_config.yaml 1234
+```
+
 ## Activating the shiny server on a headless machine
 
-If you're running on a headless machine like a server, the shiny server will be hosted on said server. By default, the shiny server is sent to port `4254`. If this port is open, then the same command as above will allow you to access the shiny server. Alternatively, you can specify a port at the command line as in the following example which uses port `1234`.
+If you're running on a headless machine like a server, the shiny server will be hosted on said server. By default, the shiny server is sent to port `4254`. If this port is open, then the same command as above will allow you to access the shiny server.Alternatively, you can specify a port at the command line as in the following example which uses port `1234`.
+
+```console
+$ Rscript --vanilla run_shiny_server.R path/to/interactive_viz_config.yaml 1234
 ```
-Rscript --vanilla run_shiny_server.R path/to/interactive_viz_config.yaml 1234
+
+If the host you are using does not allow a browser to run within it, then you may need to use port forwarding to access the Shiny server. Here are a couple of examples of using port forwarding to access the Shiny server when it is run on a machine that does not allow the use of browsers. For more information see, for example, [SSH port forwarding - Example, command, server config](https://www.ssh.com/academy/ssh/tunneling/example#remote-forwarding).
+
+### Port forwarding to a remote host
+
+Within the host in which you ran RiboViz, start the Shiny server. For example:
+
+```console
+$ Rscript --vanilla run_shiny_server.R ../vignette/output/interactive_viz_config.yaml
 ```
+
+On your local machine, create an SSH tunnel to the host where you are running the Shiny server. For example:
+
+```console
+$ ssh -NL localhost:4254:localhost:4254 user@somehost.ac.uk
+```
+
+* `-N` instructs `ssh` to not execute a remote command i.e. forward connections only.
+* `-L localhost:4254:localhost:4254` instructs `ssh` to forward connections to `localhost:4254` on your local machine to `localhost:4254` on the remote host i.e. to the Shiny server you started on the remote host.
+
+On your local machine, in a browser, visit http://localhost:4254. You should see the Shiny visualisations.
+
+### Port forwarding and Eddie
+
+Log into Eddie and get name of login node you are connected to. For example:
+
+```console
+$ ssh <USER>@eddie.ecdf.ed.ac.uk
+$ hostname
+login01.ecdf.ed.ac.uk
+```
+
+Create an interactive session. For example:
+
+```console
+$ qlogin
+```
+
+From the interactive node, create an SSH tunnel back to the specific login node you were connected to. For example:
+
+```console
+$ ssh -NR :4254:localhost:4254 login01 &
+```
+
+* `-N` instructs `ssh` to not execute a remote command i.e. forward connections only.
+* `-R :4254:localhost:4254` instructs `ssh` forward connections to 4254 on the login node to `localhost:4254` on the interactive node.
+
+Within the interactive node, start the Shiny server. For example:
+
+```console
+$ source set_riboviz_env.sh
+$ cd riboviz
+$ Rscript --vanilla run_shiny_server.R ../vignette/output/interactive_viz_config.yaml
+```
+
+In a new terminal window on your local machine, create an SSH tunnel to the specific Eddie login node you are connected to, adding an `-ext` suffix to the login node name. For example:
+
+```console
+$ ssh -NL localhost:4254:localhost:4254 <USER>@login01-ext.ecdf.ed.ac.uk
+```
+
+* `-N` instructs `ssh` to not execute a remote command i.e. forward connections only.
+* `-L localhost:4254:localhost:4254` instructs `ssh` to forward connections to `localhost:4254` on your local machine to `localhost:4254` on the remote host the login node. There they will be forwarded, using the `ssh` session you created on the interactive node, on to `localhost:4254` on the interactive node i.e. to the Shiny server.
+
+Note that nothing will be displayed at the command-line.
+
+On your local machine, in a browser, visit http://localhost:4254. You should see the Shiny visualisations.
+
+(these instructions were adapted from [Jupyter notebooks on Eddie](https://www.wiki.ed.ac.uk/display/geoinf/Jupyter+notebooks+on+Eddie))
 
 ## Description of tabs
 
