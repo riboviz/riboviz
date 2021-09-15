@@ -1,6 +1,6 @@
 # This script uses a h5, GFF and .tsv file to create either a metafeature plot 
 # for a feature_of_interest, or a table comparing the RelCount of multiple features of interest.
-# Currently works with codons.
+# Currently designed for single codons.
 # Further documentation can be found at:
 # https://github.com/riboviz/riboviz/blob/codon-pairs-286/docs/user/YAL5-single-codons_usage.md
 
@@ -84,20 +84,6 @@ min_read_length <- opt$minreadlen
 filter_for_frame <- opt$filter_for_frame
 snapdisp <- opt$snapdisp
 asite_disp_path <- opt$asite_length
-
-hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
-dataset <- "Mok-simYAL5"
-feature_of_interest <- 'CGA'
-# # check all codons
-# # feature_of_interest <- here::here("data", "codons.tsv")
-# expand_width = 5L
-# filtering_frame <- 0
-min_read_length <- 10
-yeast_codon_table <- here::here("data", "yeast_codon_table.tsv")
-gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation", "Scer_YAL_5genes_w_250utrs.gff3")
-# output_dir <- "."
-# filter_for_frame <- FALSE
-# snapdisp <- 0L
 
 ### Load in information ###
 
