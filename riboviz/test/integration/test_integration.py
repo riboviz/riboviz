@@ -622,7 +622,7 @@ def test_bam_to_h5_h5(expected_fixture, output_dir, sample):
                           workflow_r.READ_FRAME_PER_ORF_TSV,
                           workflow_r.READ_FRAME_PER_ORF_FILTERED_TSV,
                           workflow_r.ORF_TPMS_VS_FEATURES_TSV,
-                          workflow_r.GENE_POSITION_LENGTH_COUNTS_TSV,
+                          workflow_r.METAGENE_POSITION_LENGTH_COUNTS_TSV,
                           workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_LONG_TSV,
                           workflow_r.ORF_TPMS_AND_COUNTS_TSV])
 def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,

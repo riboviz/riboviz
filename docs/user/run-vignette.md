@@ -209,7 +209,7 @@ WT3AT/
   frame_proportions_per_ORF.pdf
   metagene_start_stop_read_counts.pdf
   metagene_start_stop_read_counts.tsv
-  gene_position_length_counts_5start.tsv
+  metagene_position_length_counts_5start.tsv
   WT3AT.bam
   WT3AT.bam.bai
   normalized_density_APEsites_per_codon.pdf
@@ -236,7 +236,7 @@ WTnone/
   frame_proportions_per_ORF.pdf
   metagene_start_stop_read_counts.pdf
   metagene_start_stop_read_counts.tsv
-  gene_position_length_counts_5start.tsv
+  metagene_position_length_counts_5start.tsv
   WTnone.bam
   WTnone.bam.bai
   normalized_density_APEsites_per_codon.pdf

@@ -576,7 +576,7 @@
 <text text-anchor="middle" x="185" y="-212.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
 <text text-anchor="middle" x="185" y="-201.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/read_counts_by_length.tsv</text>
 <text text-anchor="middle" x="185" y="-189.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">&#13;</text>
-<text text-anchor="middle" x="185" y="-178.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/gene_position_length_counts_5start.tsv</text>
+<text text-anchor="middle" x="185" y="-178.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">output/&lt;SAMPLE_ID&gt;/metagene_position_length_counts_5start.tsv</text>
 </g>
 <!-- statsfigs&#45;&gt;tsvs_for_static_html -->
 <g id="edge50" class="edge">
