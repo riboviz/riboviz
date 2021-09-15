@@ -100,7 +100,7 @@ CalculateGenePositionLengthCounts5Start <- function(gene_names, dataset, hd_file
 
 WriteGenePositionLengthCounts5Start <- function(gene_poslen_counts_5start_df){
   # write out intermediate object
-  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "gene_position_length_counts_5start.tsv"))
+  tsv_file_path <- file.path(output_dir, paste0(output_prefix, "metagene_position_length_counts_5start.tsv"))
   write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
     gene_poslen_counts_5start_df,

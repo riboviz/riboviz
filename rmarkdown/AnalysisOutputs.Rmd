@@ -12,7 +12,7 @@ params:
   yamlfile: NA
   sampleid: NA
   metagene_start_stop_read_counts_data_file: NA
-  gene_position_length_counts_5start_file: NA
+  metagene_position_length_counts_5start_file: NA
   read_counts_by_length_data_file: NA
   metagene_normalized_profile_start_stop_data_file: NA
   read_frame_per_orf_filtered_data_file: NA
@@ -132,7 +132,7 @@ metagene_start_stop_read_counts_data <- read_tsv(
 
 # codon ribogrid & codon ribogrid bar
 gene_poslen_counts_5start_df <- read_tsv(
-  file = params$gene_position_length_counts_5start_file, 
+  file = params$metagene_position_length_counts_5start_file, 
   skip = 4, # this avoids the provenance info
   col_names = TRUE
 )
