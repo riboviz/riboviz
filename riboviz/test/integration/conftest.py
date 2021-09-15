@@ -207,7 +207,7 @@ def pytest_generate_tests(metafunc):
     fixtures["is_multiplexed"] = [
         params.MULTIPLEX_FQ_FILES in config
         and config[params.MULTIPLEX_FQ_FILES]]
-    fixtures[params.INPUT_DIR] = [config[params.INPUT_DIR]],
+    fixtures[params.INPUT_DIR] = [config[params.INPUT_DIR]]
     fixtures[params.FQ_FILES] = [None if params.FQ_FILES not in config else config[params.FQ_FILES]]
     if "multiplex_name" in metafunc.fixturenames:
         multiplex_names = []

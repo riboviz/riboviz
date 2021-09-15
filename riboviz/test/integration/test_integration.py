@@ -1167,7 +1167,7 @@ def test_read_counts_per_file_tsv(count_reads, expected_fixture, dir_out):
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_interactive_viz_config_yaml(output_dir, dir_in, fq_files,
+def test_interactive_viz_config_yaml(dir_out, dir_in, fq_files,
                                      dataset, features_file,
                                      sample_sheet):
     """
@@ -1176,8 +1176,8 @@ def test_interactive_viz_config_yaml(output_dir, dir_in, fq_files,
     using current configuration. The file contents are validated against
     the current configuration, provided via test fixtures.
 
-    :param output_dir: Output directory
-    :type output_dir: str or unicode
+    :param dir_out: Output directory
+    :type dir_out: str or unicode
     :param dir_in: Configuration parameter
     :type dir_in: str or unicode
     :param fq_files: Configuration parameter
@@ -1189,7 +1189,7 @@ def test_interactive_viz_config_yaml(output_dir, dir_in, fq_files,
     :param sample_sheet: Configuration parameter
     :type sample_sheet: str or unicode
     """
-    viz_config_file = os.path.join(output_dir,
+    viz_config_file = os.path.join(dir_out,
                                    workflow_files.INTERACTIVE_VIZ_CONFIG_FILE)
     assert os.path.exists(viz_config_file), \
         "Missing visualisation configuration file: {}".format(viz_config_file)
@@ -1202,7 +1202,7 @@ def test_interactive_viz_config_yaml(output_dir, dir_in, fq_files,
     assert fq_files == viz_config[params.FQ_FILES], \
             "Unexpected value for {}".format(params.FQ_FILES)
     assert os.path.abspath(viz_config[params.OUTPUT_DIR]) \
-        == os.path.abspath(output_dir), \
+        == os.path.abspath(dir_out), \
         "Unexpected value for {}".format(params.OUTPUT_DIR)
     assert viz_config[params.DATASET] == dataset, \
         "Unexpected value for {}".format(params.DATASET)
