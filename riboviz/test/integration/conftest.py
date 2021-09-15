@@ -176,6 +176,10 @@ def pytest_generate_tests(metafunc):
       ``config``, if defined, or the default from
       :py:const:`riboviz.params.DEFAULT_VALUES`
       otherwise.
+    - :py:const.`riboviz.params.INPUT_DIR`: value of this
+      configuration parameter.
+    - :py:const.`riboviz.params.FQ_FILES`: value of this
+      configuration parameter or ``None`` if undefined.
 
     :param metafunc: pytest test function inspection object
     :type metafunc: _pytest.python.Metafunc
@@ -203,6 +207,8 @@ def pytest_generate_tests(metafunc):
     fixtures["is_multiplexed"] = [
         params.MULTIPLEX_FQ_FILES in config
         and config[params.MULTIPLEX_FQ_FILES]]
+    fixtures[params.INPUT_DIR] = [config[params.INPUT_DIR]],
+    fixtures[params.FQ_FILES] = [None if params.FQ_FILES not in config else config[params.FQ_FILES]]
     if "multiplex_name" in metafunc.fixturenames:
         multiplex_names = []
         if params.MULTIPLEX_FQ_FILES in config and config[params.MULTIPLEX_FQ_FILES]:

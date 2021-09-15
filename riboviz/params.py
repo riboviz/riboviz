@@ -117,25 +117,27 @@ profiling data files.
 """
 
 DEFAULT_VALUES = {
-    INDEX_DIR: "index",
-    TMP_DIR: "tmp",
-    OUTPUT_DIR: "output",
     ASITE_DISP_LENGTH_FILE: None,
-    CODON_POSITIONS_FILE: None,
-    FEATURES_FILE: None,
-    T_RNA_FILE: None,
     BUILD_INDICES: True,
-    TRIM_5P_MISMATCHES: True,
-    EXTRACT_UMIS: False,
-    DEDUP_UMIS: False,
-    DEDUP_STATS: True,
-    GROUP_UMIS: False,
-    MAKE_BEDGRAPH: True,
-    RUN_STATIC_HTML: True,
+    CODON_POSITIONS_FILE: None,
     COUNT_READS: True,
-    OUTPUT_PDFS: True,
+    DATASET: "dataset",
+    DEDUP_STATS: True,
+    DEDUP_UMIS: False,
+    EXTRACT_UMIS: False,
+    FEATURES_FILE: None,
+    GROUP_UMIS: False,
+    INDEX_DIR: "index",
+    MAKE_BEDGRAPH: True,
+    OUTPUT_DIR: "output",
     OUTPUT_METAGENE_NORMALIZED_PROFILE: True,
-    PUBLISH_INDEX_TMP: False
+    OUTPUT_PDFS: True,
+    PUBLISH_INDEX_TMP: False,
+    RUN_STATIC_HTML: True,
+    SAMPLE_SHEET: None,
+    TMP_DIR: "tmp",
+    TRIM_5P_MISMATCHES: True,
+    T_RNA_FILE: None,
 }
 """
 Default values for parameters. Consistent with ``prep_riboviz.nf``.
