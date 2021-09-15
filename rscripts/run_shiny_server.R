@@ -32,13 +32,13 @@ FindSampleNames <- function(yaml_file) {
   # if there are no entries in fq_files, data is multiplexed
   if (is.null(yaml_file$fq_files)) {
     # get the names from the barcodes file
-    
+
     # this is location of the sample sheet
     sample_sheet_loc <- here::here(yaml_file$dir_in, yaml_file$sample_sheet)
 
     # get the sample names from it
     sample_names <- readr::read_tsv(sample_sheet_loc)$SampleID
-    
+
   } else {
     # it is not multiplexed, read the names from the yaml_file
     sample_names <- names(yaml_file$fq_files)
@@ -75,8 +75,8 @@ graph_cats <- data.frame(
   Description = c(
     "Demultiplexed reads",
     "Reads after removal of sequencing library adapters",
-    "Reads with rRNA & other contaminating reads removed by alignment to rRNA index files",
-    "Reads after trimming of 5' mismatches & removing those with >2 mismatches", 
+    "Reads with rRNA & other contaminants removed by aligning to rRNA index files",
+    "Reads after trimming of 5' mismatches & removing those with >2 mismatches",
     "Reads aligned to ORFs index files",
     "Deduplicated reads"
   ),
@@ -93,7 +93,7 @@ graph_cats <- data.frame(
 # Load the data frame and add the short names
 read_counts_df <-
   readr::read_tsv(
-    here::here(yaml$dir_out, "read_counts_per_file.tsv"), 
+    here::here(yaml$dir_out, "read_counts_per_file.tsv"),
     skip = 5
   ) %>%
   dplyr::left_join(graph_cats, by = "Description") %>%
@@ -179,7 +179,7 @@ pos_sp_df <- lapply(sample_names, function(x) {
 ### collated TPMs
 collated_tpms_df <-
   readr::read_tsv(
-    here::here(yaml$dir_out, "TPMs_all_CDS_all_samples.tsv"), 
+    here::here(yaml$dir_out, "TPMs_all_CDS_all_samples.tsv"),
     skip = 4
   )
 
@@ -195,8 +195,8 @@ ribogrid_df <- lapply(sample_names, function(x) {
 
 ### Gene features
 
-# this likely needs some work, but depends on the exact format of the feature 
-# file which isn't documented yet
+# this likely needs some work, but depends on the exact format of the
+# feature file which isn't documented yet
 
 if (any(names(yaml) == "features_file")) {
   if (length(yaml$features_file) > 0) {
@@ -225,7 +225,7 @@ plot_theme <- ggplot2::theme_bw() +
 
 ### Start the server
 server <- function(input, output, session) {
-  
+
   ##############################################################################
   # Read count summary
   ##############################################################################
@@ -254,24 +254,24 @@ server <- function(input, output, session) {
 
   ### Sample to sample cors
   # load the TPM df
-  cor.df <- collated_tpms_df %>%
+  cor_df <- collated_tpms_df %>%
     tibble::column_to_rownames("ORF")
 
   # get a fixed column order, alphabetical in this case
-  cor.cols <- sort(names(cor.df))
+  cor_cols <- sort(names(cor_df))
 
   # create correlations, fix col order
-  cor.df <- cor.df %>%
-    dplyr::select(all_of(cor.cols)) %>%
+  cor_df <- cor_df %>%
+    dplyr::select(all_of(cor_cols)) %>%
     apply(., 2, log10) %>%
-    na_if(.,-Inf) %>%
+    na_if(., -Inf) %>%
     cor(use = "pairwise.complete.obs")
 
   # remove lower triangle
-  cor.df[lower.tri(cor.df)] <- NA
+  cor_df[lower.tri(cor_df)] <- NA
 
   # convert to a df and reshape
-  cor.df2 <- tibble::as_tibble(cor.df, rownames = "samp1") %>%
+  cor_df2 <- tibble::as_tibble(cor_df, rownames = "samp1") %>%
     tidyr::pivot_longer(
       cols = where(is.numeric),
       names_to = "samp2",
@@ -279,19 +279,19 @@ server <- function(input, output, session) {
     ) %>%
     dplyr::filter(samp1 != samp2) %>%
     dplyr::mutate(
-      samp1 = factor(samp1, levels = cor.cols),
-      samp2 = factor(samp2, levels = cor.cols)
+      samp1 = factor(samp1, levels = cor_cols),
+      samp2 = factor(samp2, levels = cor_cols)
     )
 
   # find the floor of min correlation
-  min.cor <- floor(min(cor.df2$R, na.rm = TRUE) * 10) / 10
+  min.cor <- floor(min(cor_df2$R, na.rm = TRUE) * 10) / 10
 
   # plot it
   output$sample_cors_plot <- shiny::renderPlot({
     input$apply_changes
     shiny::isolate({
       ggplot2::ggplot(
-        cor.df2, 
+        cor_df2,
         aes(samp1, samp2, fill = R, label = signif(R, 2))) +
         geom_raster() +
         scale_fill_viridis_c(
@@ -336,7 +336,7 @@ server <- function(input, output, session) {
         geom_density(alpha = 0.5) +
         geom_vline(aes(xintercept = xint), size = 1) +
         scale_x_log10(labels = label_number_si()) +
-        facet_wrap( ~ samplez) +
+        facet_wrap(~ samplez) +
         scale_fill_discrete(guide = "none") +
         plot_theme +
         labs(title = "TPM distributions",
@@ -357,7 +357,7 @@ server <- function(input, output, session) {
         dplyr::filter(samplez %in% input$sample) %>%
         ggplot2::ggplot(., aes(Length, Counts, fill = samplez)) +
         geom_col(width = 1) +
-        facet_wrap( ~ samplez, scales = "free_y") +
+        facet_wrap(~ samplez, scales = "free_y") +
         scale_fill_discrete(name = NULL, guide = "none") +
         plot_theme +
         labs(title = "Read length distributions",
@@ -377,7 +377,7 @@ server <- function(input, output, session) {
   output$periodicity_line_plot <- shiny::renderPlot({
     input$apply_changes
     shiny::isolate({
-      periodicity_df %>% 
+      periodicity_df %>%
         dplyr::mutate(End = factor(End, levels = c("5'", "3'"))) %>%
         dplyr::filter(samplez %in% input$sample) %>%
         ggplot2::ggplot(., aes(x = Pos, y = Counts, color = samplez)) +
@@ -481,8 +481,8 @@ server <- function(input, output, session) {
         scale_fill_gradient(low = "white", high = "navy") +
         plot_theme +
         labs(
-          title = "Ribogrid", 
-          x = "Position of 5' end of read", 
+          title = "Ribogrid",
+          x = "Position of 5' end of read",
           y = "Read length"
         ) +
         facet_wrap(~ samplez)
@@ -506,8 +506,8 @@ server <- function(input, output, session) {
         facet_grid(ReadLen ~ samplez) +
         plot_theme +
         labs(
-          x = "Position of 5' end of read", 
-          y = "Read count", 
+          x = "Position of 5' end of read",
+          y = "Read count",
           title = "Ribogrid (bar)"
         )
     })
@@ -525,31 +525,32 @@ server <- function(input, output, session) {
   # maximum read positions
   genepos_range <- shiny::reactive(input$genepos_range)
 
-  sgribogrid_df <- shiny::reactive({lapply(sample_names, function(x) {
-    only_name <- stringr::str_split(x, "/") %>%
-      unlist() %>%
-      tail(1)
-    
-    file_loc <- here::here(
-      yaml$dir_out, 
-      paste0(only_name, "/", only_name, ".h5")
-    )
-    
-    ret <-
-      rhdf5::h5read(
-        file_loc, 
-        name = file.path(input$gene, yaml$dataset, "reads/data")
-      ) %>%
-      tibble::as_tibble() %>%
-      tibble::rowid_to_column("read_length") %>%
-      tidyr::pivot_longer(cols = starts_with("V"), names_to = "position") %>%
-      dplyr::mutate(position = as.numeric(str_remove(position, "V")))
+  sgribogrid_df <- shiny::reactive({
+    lapply(sample_names, function(x) {
+      only_name <- stringr::str_split(x, "/") %>%
+        unlist() %>%
+        tail(1)
 
-    rhdf5::h5closeAll()
+      file_loc <- here::here(
+        yaml$dir_out,
+        paste0(only_name, "/", only_name, ".h5")
+      )
 
-    return(ret)
-  }) %>%
-    dplyr::bind_rows(.id = "samplez")})
+      ret <-
+        rhdf5::h5read(
+          file_loc,
+          name = file.path(input$gene, yaml$dataset, "reads/data")
+        ) %>%
+        tibble::as_tibble() %>%
+        tibble::rowid_to_column("read_length") %>%
+        tidyr::pivot_longer(cols = starts_with("V"), names_to = "position") %>%
+        dplyr::mutate(position = as.numeric(str_remove(position, "V")))
+
+      rhdf5::h5closeAll()
+
+      return(ret)
+    }) %>%
+      dplyr::bind_rows(.id = "samplez")})
 
   output$gene_specific_slider <- shiny::renderUI({
 
@@ -614,7 +615,7 @@ server <- function(input, output, session) {
             facet_wrap(samplez ~ Feature, scales = "free") +
             scale_x_log10(
               labels = scales::trans_format(
-                "log10", 
+                "log10",
                 scales::math_format(10 ^ .x)
               )
             ) +
@@ -627,8 +628,8 @@ server <- function(input, output, session) {
                      Feature %in% input$feature) %>%
             dplyr::mutate(
               labz = ifelse(
-                ORF == input$gene2, 
-                "a_label", 
+                ORF == input$gene2,
+                "a_label",
                 "no_lab"
               )
             ) %>%
@@ -639,7 +640,7 @@ server <- function(input, output, session) {
             facet_wrap(samplez ~ Feature, scales = "free") +
             scale_x_log10(
               labels = scales::trans_format(
-                "log10", 
+                "log10",
                 scales::math_format(10 ^ .x)
               )
             ) +
@@ -651,9 +652,9 @@ server <- function(input, output, session) {
         }
       })
     })
-    
+
   } else {
-    
+
     output$features_plot <- shiny::renderPlot({
       input$apply_changes
       shiny::isolate({
