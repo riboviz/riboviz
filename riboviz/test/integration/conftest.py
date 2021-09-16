@@ -27,6 +27,7 @@ pass onto integration test modules:
 import os.path
 import pytest
 import yaml
+import riboviz
 from riboviz import environment
 from riboviz import fastq
 from riboviz import params
@@ -171,10 +172,10 @@ def pytest_generate_tests(metafunc):
       :py:const:`riboviz.params.ORF_INDEX_PREFIX` and
       :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
     - ``<param>``: where ``<param>`` is a key from
-      :py:const:`riboviz.params.DEFAULT_VALUES` and the
+      :py:const:`riboviz.params.DEFAULT_CONFIG_YAML` and the
       value is a list with either the value of the parameter from
       ``config``, if defined, or the default from
-      :py:const:`riboviz.params.DEFAULT_VALUES`
+      :py:const:`riboviz.params.DEFAULT_CONFIG_YAML`.
       otherwise.
     - :py:const:`riboviz.params.INPUT_DIR`: value of this
       configuration parameter.
@@ -194,16 +195,18 @@ def pytest_generate_tests(metafunc):
         "No such file: %s" % config_file
     with open(config_file, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
+    default_config_file = os.path.join(os.path.dirname(riboviz.__file__),
+                                       params.DEFAULT_CONFIG_YAML_FILE)
+    with open(default_config_file, "r") as f:
+        default_config = yaml.load(f, yaml.SafeLoader)
     # Replace environment variable tokens with environment variables
     # in configuration parameter values that support environment
     # variables
     environment.apply_env_to_config(config)
     fixtures = {}
-    for param, default in params.DEFAULT_VALUES.items():
+    for param, default in default_config.items():
         fixtures[param] = [default if param not in config
                            else config[param]]
-    fixtures[params.INPUT_DIR] = [config[params.INPUT_DIR]]
-    fixtures[params.FQ_FILES] = [None if params.FQ_FILES not in config else config[params.FQ_FILES]]
     fixtures["index_prefix"] = [config[params.ORF_INDEX_PREFIX],
                                 config[params.RRNA_INDEX_PREFIX]]
     fixtures["is_multiplexed"] = [

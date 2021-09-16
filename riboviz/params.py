@@ -116,31 +116,10 @@ When validating configuration skip checks for existence of ribosome
 profiling data files.
 """
 
-DEFAULT_VALUES = {
-    ASITE_DISP_LENGTH_FILE: None,
-    BUILD_INDICES: True,
-    CODON_POSITIONS_FILE: None,
-    COUNT_READS: True,
-    DATASET: "dataset",
-    DEDUP_STATS: True,
-    DEDUP_UMIS: False,
-    EXTRACT_UMIS: False,
-    FEATURES_FILE: None,
-    GROUP_UMIS: False,
-    INDEX_DIR: "index",
-    MAKE_BEDGRAPH: True,
-    OUTPUT_DIR: "output",
-    OUTPUT_METAGENE_NORMALIZED_PROFILE: True,
-    OUTPUT_PDFS: True,
-    PUBLISH_INDEX_TMP: False,
-    RUN_STATIC_HTML: True,
-    SAMPLE_SHEET: None,
-    TMP_DIR: "tmp",
-    TRIM_5P_MISMATCHES: True,
-    T_RNA_FILE: None,
-}
+DEFAULT_CONFIG_YAML_FILE = "default_config.yaml"
 """
-Default values for parameters. Consistent with ``prep_riboviz.nf``.
+Name of YAML configuration file with default values for parameters.
+Assumed to be in :py:mod:`riboviz`.
 """
 
 R_LIBS = "r_libs"
