@@ -403,7 +403,7 @@ def test_multiplex_deplex_unassigned_fq(
         expected_fixture, dir_tmp, multiplex_name):
     """
     Test :py:const:`riboviz.tools.demultiplex_fastq` FASTQ files
-    with unassigned reads (files with prefix 
+    with unassigned reads (files with prefix
     :py:const:`riboviz.sample_sheets.UNASSIGNED_TAG`)  for
     equality. See :py:func:`compare_fq_files`.
 
@@ -1200,7 +1200,7 @@ def test_interactive_viz_config_yaml(dir_out, dir_in, fq_files,
         == os.path.abspath(dir_in), \
         "Unexpected value for {}".format(params.INPUT_DIR)
     assert fq_files == viz_config[params.FQ_FILES], \
-            "Unexpected value for {}".format(params.FQ_FILES)
+        "Unexpected value for {}".format(params.FQ_FILES)
     assert os.path.abspath(viz_config[params.OUTPUT_DIR]) \
         == os.path.abspath(dir_out), \
         "Unexpected value for {}".format(params.OUTPUT_DIR)
@@ -1208,7 +1208,7 @@ def test_interactive_viz_config_yaml(dir_out, dir_in, fq_files,
         "Unexpected value for {}".format(params.DATASET)
     if sample_sheet is None:
         assert not viz_config[params.SAMPLE_SHEET], \
-        "Unexpected value for {}".format(params.SAMPLE_SHEET)
+            "Unexpected value for {}".format(params.SAMPLE_SHEET)
     else:
         assert os.path.abspath(viz_config[params.SAMPLE_SHEET]) \
             == os.path.abspath(sample_sheet), \
