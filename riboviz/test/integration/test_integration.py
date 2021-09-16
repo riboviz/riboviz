@@ -105,6 +105,7 @@ fixtures used by these tests.
 import os
 import pytest
 import pysam
+import yaml
 from riboviz import bedgraph
 from riboviz import count_reads as count_reads_module
 from riboviz import environment
@@ -112,6 +113,7 @@ from riboviz import fastq
 from riboviz import h5
 from riboviz import html
 from riboviz import hisat2
+from riboviz import params
 from riboviz import sam_bam
 from riboviz import utils
 from riboviz import workflow_files
@@ -612,17 +614,17 @@ def test_bam_to_h5_h5(expected_fixture, output_dir, sample):
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name",
-                         [workflow_r.THREE_NT_PERIODICITY_TSV,
-                          workflow_r.CODON_RIBODENS_TSV,
-                          workflow_r.POS_SP_NT_FREQ_TSV,
-                          workflow_r.POS_SP_RPF_NORM_READS_TSV,
-                          workflow_r.READ_LENGTHS_TSV,
-                          workflow_r.THREE_NT_FRAME_BY_GENE_TSV,
-                          workflow_r.THREE_NT_FRAME_BY_GENE_FILTERED_TSV,
-                          workflow_r.SEQUENCE_FEATURES_TSV,
-                          workflow_r.GENE_POSITION_LENGTH_COUNTS_TSV,
-                          workflow_r.CODON_RIBODENS_GATHERED_TSV,
-                          workflow_r.TPMS_TSV])
+                         [workflow_r.METAGENE_START_STOP_READ_COUNTS_TSV,
+                          workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_TSV,
+                          workflow_r.NT_FREQ_PER_READ_POSITION_TSV,
+                          workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_TSV,
+                          workflow_r.READ_COUNTS_BY_LENGTH_TSV,
+                          workflow_r.READ_FRAME_PER_ORF_TSV,
+                          workflow_r.READ_FRAME_PER_ORF_FILTERED_TSV,
+                          workflow_r.ORF_TPMS_VS_FEATURES_TSV,
+                          workflow_r.METAGENE_POSITION_LENGTH_COUNTS_TSV,
+                          workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_LONG_TSV,
+                          workflow_r.ORF_TPMS_AND_COUNTS_TSV])
 def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
                                  file_name):
     """
@@ -650,14 +652,14 @@ def test_generate_stats_figs_tsv(expected_fixture, output_dir, sample,
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name",
-                         [workflow_r.THREE_NT_PERIODICITY_PDF,
-                          workflow_r.CODON_RIBODENS_PDF,
-                          workflow_r.FEATURES_PDF,
-                          workflow_r.POS_SP_RPF_NORM_READS_PDF,
-                          workflow_r.READ_LENGTHS_PDF,
-                          workflow_r.START_CODON_RIBOGRID_BAR_PDF,
-                          workflow_r.START_CODON_RIBOGRID_PDF,
-                          workflow_r.THREE_NT_FRAME_PROP_BY_GENE_PDF])
+                         [workflow_r.METAGENE_START_STOP_READ_COUNTS_PDF,
+                          workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_PDF,
+                          workflow_r.ORF_TPMS_VS_FEATURES_PDF,
+                          workflow_r.METAGENE_NORMALIZED_PROFILE_START_STOP_PDF,
+                          workflow_r.READ_COUNTS_BY_LENGTH_PDF,
+                          workflow_r.METAGENE_START_BARPLOT_BY_LENGTH_PDF,
+                          workflow_r.METAGENE_START_RIBOGRID_BY_LENGTH_PDF,
+                          workflow_r.FRAME_PROPORTIONS_PER_ORF_PDF])
 def test_generate_stats_figs_pdf(expected_fixture, output_dir, sample,
                                  file_name, output_pdfs):
     """
@@ -713,7 +715,7 @@ def test_analysis_outputs_html(expected_fixture, output_dir, sample, file_name):
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_collate_tpms_tsv(expected_fixture, output_dir):
+def test_collate_orf_tpms_and_counts_tsv(expected_fixture, output_dir):
     """
     Test ``collate_tpms.R`` TSV files for equality. See
     :py:func:`riboviz.utils.equal_tsv`.
@@ -725,17 +727,17 @@ def test_collate_tpms_tsv(expected_fixture, output_dir):
     """
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
     expected_file = os.path.join(expected_fixture, output_dir_name,
-                                 workflow_r.TPMS_COLLATED_TSV)
+                                 workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV)
     if not os.path.exists(expected_file):
         pytest.skip('Skipped as expected file does not exist')
     utils.equal_tsv(expected_file,
-                    os.path.join(output_dir, workflow_r.TPMS_COLLATED_TSV),
+                    os.path.join(output_dir, workflow_r.TPMS_ALL_CDS_ALL_SAMPLES_TSV),
                     ignore_row_order=True,
                     na_to_empty_str=True)
 
 
 @pytest.mark.usefixtures("prep_riboviz_fixture")
-def test_read_counts_tsv(count_reads, expected_fixture, output_dir):
+def test_read_counts_per_file_tsv(count_reads, expected_fixture, output_dir):
     """
     Test :py:mod:`riboviz.tools.count_reads` TSV files for
     equality. See :py:func:`riboviz.count_reads.equal_read_counts`.
@@ -752,5 +754,61 @@ def test_read_counts_tsv(count_reads, expected_fixture, output_dir):
     output_dir_name = os.path.basename(os.path.normpath(output_dir))
     count_reads_module.equal_read_counts(
         os.path.join(expected_fixture, output_dir_name,
-                     workflow_files.READ_COUNTS_FILE),
-        os.path.join(output_dir, workflow_files.READ_COUNTS_FILE))
+                     workflow_files.READ_COUNTS_PER_FILE_FILE),
+        os.path.join(output_dir, workflow_files.READ_COUNTS_PER_FILE_FILE))
+
+
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+def test_interactive_viz_config_yaml(output_dir, dir_in, fq_files,
+                                     dataset, features_file,
+                                     sample_sheet):
+    """
+    Test contents of
+    :py:const:`riboviz.workflow_files.INTERACTIVE_VIZ_CONFIG_FILE`
+    using current configuration. The file contents are validated against
+    the current configuration, provided via test fixtures.
+
+    :param output_dir: Output directory
+    :type output_dir: str or unicode
+    :param dir_in: Configuration parameter
+    :type dir_in: str or unicode
+    :param fq_files: Configuration parameter
+    :type fq_files: list(str or unicode)
+    :param dataset: Configuration parameter
+    :type dataset: str or unicode
+    :param features_file: Configuration parameter
+    :type features_file: str or unicode
+    :param sample_sheet: Configuration parameter
+    :type sample_sheet: str or unicode
+    """
+    viz_config_file = os.path.join(output_dir,
+                                   workflow_files.INTERACTIVE_VIZ_CONFIG_FILE)
+    assert os.path.exists(viz_config_file), \
+        "Missing visualisation configuration file: {}".format(viz_config_file)
+    with open(viz_config_file, 'r') as f:
+        viz_config = yaml.load(f, yaml.SafeLoader)
+    assert viz_config is not None, "Empty configuration file"
+    assert os.path.abspath(viz_config[params.INPUT_DIR]) \
+        == os.path.abspath(dir_in), \
+        "Unexpected value for {}".format(params.INPUT_DIR)
+    assert fq_files == viz_config[params.FQ_FILES], \
+            "Unexpected value for {}".format(params.FQ_FILES)
+    assert os.path.abspath(viz_config[params.OUTPUT_DIR]) \
+        == os.path.abspath(output_dir), \
+        "Unexpected value for {}".format(params.OUTPUT_DIR)
+    assert viz_config[params.DATASET] == dataset, \
+        "Unexpected value for {}".format(params.DATASET)
+    if sample_sheet is None:
+        assert not viz_config[params.SAMPLE_SHEET], \
+        "Unexpected value for {}".format(params.SAMPLE_SHEET)
+    else:
+        assert os.path.abspath(viz_config[params.SAMPLE_SHEET]) \
+            == os.path.abspath(sample_sheet), \
+            "Unexpected value for {}".format(params.SAMPLE_SHEET)
+    if features_file is None:
+        assert not viz_config[params.FEATURES_FILE], \
+            "Unexpected value for {}".format(params.FEATURES_FILE)
+    else:
+        assert os.path.abspath(viz_config[params.FEATURES_FILE]) \
+            == os.path.abspath(features_file), \
+            "Unexpected value for {}".format(params.FEATURES_FILE)

@@ -58,7 +58,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | Nextflow | 20.04.1.5335 |
 | Hisat2 | 2.1.0 |
 | Bowtie | 1.2.2 |
- 
+
 | R Package | Version |
 | --------- | ------- |
 | Biostrings | 2.54.0 |
@@ -76,13 +76,15 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | roxygen2 | 7.1.1 |
 | Rsamtools | 2.2.3 |
 | rtracklayer | 1.46.0 |
+| scales | 1.1.1 |
 | shiny | 1.5.0 |
 | ShortRead | 1.44.3 |
 | styler | 1.3.2 |
 | testthat | 3.0.1 |
 | tidyverse | 1.3.0 |
 | withr | 2.3.0 |
- 
+| yaml | 2.2.1 |
+
 | Python Package | Version | Package Manager |
 | -------------- | ------- | --------------- |
 | biopython | 1.77 | conda |
@@ -101,7 +103,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | samtools | 1.9 | conda |
 | sphinx | 4.0.1 | conda |
 | umi_tools | 1.0.1 | conda |
- 
+
 Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
 * R: devtools, glue, lintr, roxygen2, styler, testthat, withr.
@@ -247,7 +249,7 @@ Your version of R can differ from that shown but must be version 3.6 or above.
 If you wish to install the latest version of R then [RStudio](https://docs.rstudio.com/) has instructions on how to do this at [Install R](https://docs.rstudio.com/resources/install-r/). For example, to install R 4.1.0:
 
 ```console
-$ sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm 
+$ sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 $ sudo yum-config-manager --enable "rhel-*-optional-rpms"
 $ export R_VERSION=4.1.0
 $ curl -O https://cdn.rstudio.com/r/centos-7/pkgs/R-${R_VERSION}-1-1.x86_64.rpm
@@ -275,6 +277,8 @@ R version 4.1.0 (2021-05-18) -- "Camp Pontanezen"
 | rmarkdown | [rmarkdown](https://cran.r-project.org/web/packages/rmarkdown/index.html) |
 | shiny | [shiny](https://cran.r-project.org/web/packages/shiny/index.html) |
 | tidyverse | [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) |
+| scales | [scales](https://cran.r-project.org/web/packages/scales/index.html) |
+| yaml | [yaml](https://cran.r-project.org/web/packages/yaml/index.html) |
 | Bioconductor Biostrings | [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html) |
 | Bioconductor Rsamtools | [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html) |
 | Bioconductor ShortRead | [ShortRead](https://bioconductor.org/packages/release/bioc/html/ShortRead.html) |
@@ -309,6 +313,8 @@ Install in R:
 > install.packages("rmarkdown")
 > install.packages("shiny")
 > install.packages("tidyverse")
+> install.packages("scales")
+> install.packages("yaml")
 ```
 
 The commands to install Bioconductor packages depend on your version of R. For full details:
@@ -744,7 +750,7 @@ Once you have run the "vignette", you can check your installation by running tes
 Run:
 
 ```console
-$ source bash/environment-tables.sh 
+$ source bash/environment-tables.sh
 ```
 
 ### Check names and versions of Python packages
