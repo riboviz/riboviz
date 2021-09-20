@@ -21,7 +21,7 @@ existing values are preserved):
 * ``rRNA_index`` => ``rrna_index_prefix``
 * ``stop_in_cds`` => ``stop_in_feature``
 * ``t_rna`` => ``t_rna_file``
-* ``do_pos_sp_nt_freq`` => ``output_metagene_normalized_profile``  
+* ``do_pos_sp_nt_freq`` => ``output_metagene_normalized_profile``
 
 Expected parameters added to the current release are added along
 with default values, if they are not already present in the
@@ -213,6 +213,6 @@ def upgrade_config_file(input_file, output_file=None):
     upgrade_config(config)
     if output_file is not None:
         with open(output_file, 'w') as f:
-            yaml.dump(config, f, default_flow_style=False)
+            yaml.dump(config, f, default_flow_style=False, sort_keys=False)
     else:
-        print((yaml.dump(config)))
+        print((yaml.dump(config, sort_keys=False)))
