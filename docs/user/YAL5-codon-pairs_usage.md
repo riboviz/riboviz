@@ -24,12 +24,12 @@ NOTE: When giving multiple features of interest, the script is expecting them to
 ## Arguments ##
 Seven arguments are required for this script (the rest are set as defaults):
 - H5 file
-- sample dataset
+- Sample dataset
 - GFF3 file
-- species-specific codon table
-- feature of interest (one or more)
+- Species-specific codon table
+- Feature of interest (one or more)
 - A-site displacement length 
-- output directory 
+- Output directory 
 
 The arguments that have set defaults can be changed to alter how the script processes the data. The size of the expanded window can be adjusted, the desired reading frame can be filtered for (or counts for all reading frames can be kept) but these are not required as they have default values.
 
@@ -42,7 +42,7 @@ Rscript rscripts/YAL5-codons-pairs.R
 	-g [Path to GFF3 file] 
 	-a [Path to species-specific codon table]
         -- asite_length [Path to the A-site displacement length file]
-	--feature [individual feature to be studied or path to TSV file containing multiple features] 
+	--feature [Individual feature to be studied or path to TSV file containing multiple features] 
 	-o [Output directory]
 ```
 
@@ -52,7 +52,7 @@ Available arguments:
 '-d', '--dataset'. Name of the dataset being studied
 '-g', '--gff'. Path to the species-specific GFF3 file
 '-a', '--annotation'. Path to codon positions file for the species (TSV file)
-'--asite_lenght'. Path to species-specific A-site displacement length file
+'--asite_length'. Path to species-specific A-site displacement length file
 '--feature'. Feature of interest, e.g. codon pair 
 '-o', '--output'. Path to output directory, default = "."
 '--expand_width'.The desired range either side of the feature of interest, default = 5L
@@ -61,12 +61,14 @@ Available arguments:
 '--snapdisp'. Reading frame to filter for if `frame = TRUE`, default = 0L
 ```
 
+NOTE: The `asite_length` argument has a default file that is used for yeast datasets. This file can be found here: `riboviz/data/yeast_standard_asite_disp_length.txt`
+
 ## Examples ##
 
 The examples assume that the user is running the script from the riboviz folder. 
 
 ### Single feature of interest ###
-For the simulated dataset Mok-simYAL5 with the aim of investigating the codon pair "TCC AAG" the command would be: 
+For the simulated dataset Mok-simYAL5 with the aim of investigating the codon pair "CCA TGG" the command would be: 
 
 ```
 Rscript rscripts/YAL5-codon-pairs.R 
@@ -75,11 +77,11 @@ Rscript rscripts/YAL5-codon-pairs.R
     -g ../example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3 
     -a data/yeast_codon_table.tsv
     --asite_length data/yeast_standard_asite_disp_length.txt
-    --feature "TCC AAG" 
+    --feature "CCA TGG" 
     -o .
 ```
 
-Running YAL5-codon-pairs.R with a single feature_of_interest argument produces a PDF with the following image:
+Running `YAL5-codon-pairs.R` with a single feature_of_interest argument produces the following output:
 
 <img src="../images/Meta_feature_plot_CCA_TGG_Mok-simYAL5.JPG" alt="CCA TGG Mok-simYAL5 meta feature plot" width="500"/>
 
@@ -97,7 +99,7 @@ Rscript rscripts/YAL5-single-codons.R
     -o .
 ```
 
-Running YAL5-codon-pairs.R with a TSV containing multiple features of interest produces a file containing the following output format:
+Running `YAL5-codon-pairs.R` with a TSV containing multiple features of interest produces a file containing the following output format:
 
 ```
 Feature   RelCount
