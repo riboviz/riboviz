@@ -79,9 +79,7 @@ Rscript rscripts/YAL5-codon-pairs.R
     -o .
 ```
 
-Running YAL5-codon-pairs.R with a single feature_of_interest argument produces the following output:
-
-<iframe src="../images/Meta_feature_plotCCA_TGG.pdf" alt = "Meta feature plot CCA TGG" width="500"></iframe>
+Running YAL5-codon-pairs.R with a single feature_of_interest argument produces the following output: [Meta_feature_plotCCA_TGG.pdf](../images/Meta_feature_plotCCA_TGG.pdf).
 
 ### Multiple features of interest ###
 For the simulated dataset Mok-simYAL5 with a TSV containing multiple features of interest as the input file for `--feature` the command would be: 
