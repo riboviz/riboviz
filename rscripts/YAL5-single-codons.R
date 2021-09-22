@@ -939,6 +939,7 @@ if(length(feature_of_interest) == 1){
 #'
 #'  @param gene_names - The list of all the genes in the sample
 #' @param gff_df - The gff file in a dataframe format
+#' @param asite_disp_path - The length from the end of a read to the A site
 #' @param dataset - The name of dataset stored in .h5 file.
 #' @param hd_file - The path to the .h5 hdf5 file holding read data for all genes,
 #' created from BAM files for dataset samples.
@@ -959,6 +960,7 @@ if(length(feature_of_interest) == 1){
 #' yeast_codon_pos_i200 = yeast_codon_pos_i200, 
 #' gene_names = gene_names, 
 #' gff_df = gff_df,
+#' asite_disp_path = asite_disp_path,
 #' dataset = dataset, 
 #' hd_file = hd_file,
 #' min_read_length = min_read_length,
@@ -967,7 +969,7 @@ if(length(feature_of_interest) == 1){
 #' filtering_frame = filtering_frame,
 #' snapdisp = snapdisp)
 #' 
-  FindAllFeatures <- function(gene_names, gff_df, dataset, hd_file, 
+  FindAllFeatures <- function(gene_names, gff_df, asite_disp_path, dataset, hd_file,
                               min_read_length,   
                               filter_for_frame,
                               filtering_frame, snapdisp, yeast_codon_pos_i200,
@@ -985,7 +987,7 @@ if(length(feature_of_interest) == 1){
     
     print(paste0("Finding occurences of ", feature_being_studied))
     output_feature_info <- suppressMessages(
-      ExpandFeatureRegionAllGenes(gene_names, gff_df, dataset, hd_file, 
+      ExpandFeatureRegionAllGenes(gene_names, gff_df, asite_disp_path, dataset, hd_file,
                                   min_read_length,   
                                   filter_for_frame,
                                   filtering_frame, snapdisp, yeast_codon_pos_i200,
@@ -1039,6 +1041,7 @@ if(length(feature_of_interest) == 1){
                                    yeast_codon_pos_i200 = yeast_codon_pos_i200, 
                                    gene_names = gene_names, 
                                    gff_df = gff_df,
+                                   asite_disp_path = asite_disp_path,
                                    dataset = dataset, 
                                    hd_file = hd_file,
                                    min_read_length = min_read_length,
