@@ -18,20 +18,21 @@ The second potential output is a table in the form of a TSV file. This is produc
 
 `YAL5-single-codons.R` requires six arguments:
 
-* '-i' or '--input': Path to the H5 input file.
-* '-d' or '--dataset': Name of the dataset of the sample being studied.
-* '-g' or '--gff': Path to the GFF3 file of the organism being studied.
-* '-a' or '--annotation': Path to codon table for the organism (TSV file).
-* '--feature': Feature of interest, e.g. 'CGA'. If multiple features (codons) are being studied then they should be contained within a TSV file.  
-* '-o' or '--output': Path to output directory.
+* `-i` or `--input`: Path to the H5 input file.
+* `-d` or `--dataset`: Name of the dataset of the sample being studied.
+* `-g` or `--gff`: Path to the GFF3 file of the organism being studied.
+* `-a` or `--annotation`: Path to codon table for the organism (TSV file).
+* `--feature`: Feature of interest, e.g. 'CGA'. If multiple features (codons) are being studied then they should be contained within a TSV file.  
+* `-o` or `--output`: Path to output directory.
 
 There are a number of optional arguments that can be used to change how `YAL5-single-codons.R` processes the data, such as if a reading frame is filtered for and which one, but these are not required as they have default values:
 
-* '--expand_width': The desired range either side of the feature of interest to be used for normalization, default = 5.
-* '--frame':  Reading frame to be studied, default = 0.
-* '--minreadlen': Minimum read length, default = 10.
-* '--filter_for_frame': Filter to include only the reads from one nucleotide of a codon, decided by the argument '--frame', default = TRUE.
-* '--snapdisp': Reading frame to filter for, if `--filter_for_frame = TRUE`, default = 0.
+* `--expand_width`: The desired range either side of the feature of interest to be used for normalization, default = 5.
+* `--frame`:  Reading frame to be studied, default = 0.
+* `--minreadlen`: Minimum read length, default = 10.
+* `--filter_for_frame`: Counts for all reading frames per codon are summed and assigned to their corresponding codon. Keep all by not filtering (FALSE) or filter for the specific reading frame, specified in `--frame`, (TRUE), default = TRUE.
+* `--snapdisp`: Reading frame to filter for, if `--filter_for_frame = TRUE`, default = 0.
+* '--asite_length': Path to species-specific A-site displacement length file, default = `data/yeast_standard_asite_disp_length.txt`.
 
 `YAL5-single-codons.R` can be run with the command:
 

@@ -39,9 +39,10 @@ This script requires seven arguments:
 There are a number of optional arguments that can be used to change how `YAL5-codon-pairs.R` processes the data, such as the size of the expanded window, the size of the desired reading frame (or counts for all reading frames can be kept) but these are not required as they have default values:
 
 * '--expand_width': The desired range either side of the feature of interest to be used for normalization, default = 5.
-* '--frame'. Keep all reads or filter for reading frame?, default = FALSE.
-* '--minreadlen': Minimum read length, default = 10.
-* '--snapdisp': Reading frame to filter for, if `--frame = TRUE`, default = 0.
+* `--frame`:  Reading frame to be studied, default = 0.
+* `--minreadlen`: Minimum read length, default = 10.
+* `--filter_for_frame`: Counts for all reading frames per codon are summed and assigned to their corresponding codon. Keep all by not filtering (FALSE) or filter for the specific reading frame, specified in `--frame`, (TRUE), default = TRUE.
+* `--snapdisp`: Reading frame to filter for, if `--filter_for_frame = TRUE`, default = 0.
 
 `YAL5-codon-pairs.R` can be run  with the command:
 
