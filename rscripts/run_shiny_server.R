@@ -186,7 +186,7 @@ collated_tpms_df <-
 ### Ribogrid
 ribogrid_df <- lapply(sample_names, function(x) {
   # path to the read length file
-  file_loc <- paste0(x, "/gene_position_length_counts_5start.tsv")
+  file_loc <- paste0(x, "/metagene_position_length_counts_5start.tsv")
   # read it in
   return(readr::read_tsv(file_loc, skip = 4))
 }) %>%
