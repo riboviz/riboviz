@@ -69,7 +69,7 @@ The examples assume that the script is being run from the riboviz folder
 Rscript rscripts/YAL5-single-codons.R -i Mok-simYAL5/output/A/A.h5 -d Mok-simYAL5 -g ../example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --feature CGA -o .
 ```
 
-Running `YAL5-single-codons.R` with a single feature_of_interest argument produces the following output:
+Running `YAL5-single-codons.R` with a single feature_of_interest argument produces a PDF with the following image:
 
 <img src="../images/Meta_feature_plot_CGA_Mok-simYAL5.JPG" alt="CGA Mok-simYAL5 meta feature plot" width="500"/>
 
