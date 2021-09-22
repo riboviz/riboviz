@@ -85,22 +85,6 @@ min_read_length <- opt$minreadlen
 snapdisp <- opt$snapdisp
 asite_disp_path <- opt$asite_length
 
-
-hd_file <- here::here("Mok-simYAL5", "output", "A", "A.h5")
-dataset <- "Mok-simYAL5"
-feature_of_interest <- "CCA TGG"
-feature_of_interest <- here::here("data", "codon-pairs.tsv")
-filter_for_frame <- FALSE
-min_read_length <- 10
-codon_pos_table <- here::here("data",
-                                "yeast_codon_table.tsv")
-asite_disp_path <- here::here("data",
-                                      "yeast_standard_asite_disp_length.txt")
-gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation",
-                  "Scer_YAL_5genes_w_250utrs.gff3")
-output_dir <- here::here(".")
-
-
 ### Load in information ###
 
 # If the list of codon pairs is given in .tsv format, the first column
