@@ -116,6 +116,12 @@ When validating configuration skip checks for existence of ribosome
 profiling data files.
 """
 
+DEFAULT_CONFIG_YAML_FILE = "default_config.yaml"
+"""
+Name of YAML configuration file with default values for parameters.
+Assumed to be in :py:mod:`riboviz`.
+"""
+
 R_LIBS = "r_libs"
 """ R libraries directory (job submission) (command-line only). """
 CONFIG_FILE = "config_file"
