@@ -71,7 +71,7 @@ Rscript rscripts/YAL5-single-codons.R -i Mok-simYAL5/output/A/A.h5 -d Mok-simYAL
 
 Running `YAL5-single-codons.R` with a single feature_of_interest argument produces the following output:
 
-<img src="https://github.com/3mma-mack/Riboviz-honours/blob/main/riboviz_images/Meta_feature_plot_CGA_Mok-simYAL5.JPG" alt="CGA Mok-simYAL5 meta feature plot" width="500"/>
+<img src="../images/Meta_feature_plot_CGA_Mok-simYAL5.JPG" alt="CGA Mok-simYAL5 meta feature plot" width="500"/>
 
 
 **Multiple features of interest**
