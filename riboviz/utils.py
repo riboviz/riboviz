@@ -7,55 +7,6 @@ import numpy as np
 import pandas as pd
 
 
-def value_in_dict(key, dictionary, allow_false_empty=False):
-    """
-    Check that a value is in a dictionary and the value is not
-    ``None``.
-
-    If dictionary is::
-
-        {
-         "A":1,
-         "B":None,
-         "C":{},"D":[],
-         "E":[1],
-         "F":True,
-         "G":False
-        }
-
-    then:
-
-    * ``value_in_dict("A", dictionary)`` is ``True``
-    * ``value_in_dict("B", dictionary)`` is ``False``
-    * ``value_in_dict("C", dictionary)`` is ``False``
-    * ``value_in_dict("D", dictionary)`` is ``False``
-    * ``value_in_dict("E", dictionary)`` is ``True``
-    * ``value_in_dict("F", dictionary)`` is ``True``
-    * ``value_in_dict("G", dictionary)`` is ``False``
-    * ``value_in_dict("A", dictionary, True)`` is ``True``
-    * ``value_in_dict("B", dictionary, True)`` is ``False``
-    * ``value_in_dict("C", dictionary, True)`` is ``True``
-    * ``value_in_dict("D", dictionary, True)`` is ``True``
-    * ``value_in_dict("E", dictionary, True)`` is ``True``
-    * ``value_in_dict("F", dictionary, True)`` is ``True``
-    * ``value_in_dict("G", dictionary, True)`` is ``True``
-
-    :param key: Key
-    :type key: -
-    :param dictionary: Dictionary
-    :type dictionary: dict
-    :param allow_false_empty: Allow ``False``, empty string, \
-    ``list`` or ``dict`` to be considered as an existing value
-    :type allow_false_empty: bool
-    :return: ``True`` or ``False``
-    :rtype: bool
-    """
-    is_in = key in dictionary and dictionary[key] is not None
-    if not allow_false_empty:
-        is_in = is_in and bool(dictionary[key])
-    return is_in
-
-
 def list_to_str(lst):
     """
     Convert list to space-delimited string.

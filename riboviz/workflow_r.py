@@ -11,6 +11,8 @@ GENERATE_STATS_FIGS_R = "generate_stats_figs.R"
 """ ``generate_stats_figs.R`` script. """
 COLLATE_TPMS_R = "collate_tpms.R"
 """ ``collate_tpms.R`` script. """
+ANALYSIS_OUTPUTS_RMD = "AnalysisOutputs.Rmd"
+""" ``AnalysisOutputs.Rmd`` script. """
 
 METAGENE_START_STOP_READ_COUNTS_TSV = "metagene_start_stop_read_counts.tsv"
 """ ``generate_stats_figs.R`` output file. """
