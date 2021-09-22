@@ -80,7 +80,7 @@ codon_pos_table <- opt$annotation
 feature_of_interest <- opt$feature
 output_dir <- opt$output
 expand_width <- opt$expand_width
-filter_for_frame <- opt$frame
+filter_for_frame <- opt$filter_for_frame
 min_read_length <- opt$minreadlen
 snapdisp <- opt$snapdisp
 asite_disp_path <- opt$asite_length
