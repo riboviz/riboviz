@@ -347,8 +347,8 @@ GetAllCodonPosCounts <- function(gene_names, dataset, hd_file, min_read_length,
                                             hd_file,
                                             min_read_length,
                                             snapdisp,
-                                            asite_disp_path)
-
+                                            asite_disp_path,
+			                    gff_df)
     }
 
     # Make a tibble which contains "Gene", "PosCodon" and "Count"
