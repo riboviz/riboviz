@@ -26,7 +26,7 @@ TEST_TEMPLATE = [
 def tmp_config_file():
     """
     Create a temporary file with a ``yaml`` suffix and containing
-    py:const:`TEST_CONFIG`.
+    :py:const:`TEST_CONFIG`.
 
     :return: path to temporary file
     :rtype: str or unicode
