@@ -21,7 +21,15 @@ The workflow prepares ribosome profiling data for by implementing a workflow tha
 * `bam_to_h5.R`: convert BAM to compressed H5 format (local script, in `rscripts/`)
 * `generate_stats_figs.R`: generate summary statistics, analyses plots and QC plots (local script, in `rscripts/`)
 * `collate_tpms.R`: collate TPMs across samples (local script, in `rscripts/`)
-* `riboviz.tools.count_reads`: count the number of reads (sequences) processed by specific stages of the workflow (local script, in `riboviz/tools/`).
+* `riboviz.tools.count_reads`: count the number of reads (sequences) processed by specific stages of the workflow (local script, in `riboviz/tools/`).  
+* `AnalysisOutputs.Rmd`: the `staticHTML` Nextflow process runs an R markdown document which generates an HTML output report for each sample processed, using the analysed data (local script, in `rmarkdown/`)
+
+### Interactive Visualization
+
+An additional script within the RiboViz codebase allows the generation of interactive plots from the dataset after the RiboViz workflow has been completed.  
+
+A process within the main RiboViz workflow (`createInteractiveVizParamsConfigFile`, within `prep-riboviz.nf`) generates a configuration yaml file specifically for this interactive visualization (`interactive_viz_config.yaml`, found in the `dir_out` directory), and users can then run `rscripts/run_shiny_server.R` using this additional YAML (as detailed within [How To Run the Riboviz Interactive Data Visualization On Your Data](./run-run_shiny_server-operation.md)).  This generates a shiny app instance which users can view to explore their data.
+
 
 ---
 
@@ -44,7 +52,7 @@ If sample files (`fq_files`) are specified, then the workflow processes the samp
    10. Write intermediate files produced above into a sample-specific directory, named using the sample ID, within the temporary directory (`dir_tmp`).
    11. Make length-sensitive alignments in compressed h5 format using `bam_to_h5.R`.
    12. Generate summary statistics, and analyses and QC plots for both RPF and mRNA datasets using `generate_stats_figs.R`. This includes estimated read counts, reads per base, and transcripts per million for each ORF in each sample.
-   13. Write output files produced above into an sample-specific directory, named using the sample ID, within the output directory (`dir_out`). 
+   13. Write output files produced above into a sample-specific directory, named using the sample ID, within the output directory (`dir_out`).
 4. Collate TPMs across results, using `collate_tpms.R` and write into output directory (`dir_out`). Only the results from successfully-processed samples are collated.
 5. Count the number of reads (sequences) processed by specific stages if requested (if `count_reads: TRUE`).
 
@@ -120,7 +128,7 @@ If a multiplexed file (`multiplex_fq_files`) is specified, then the following fi
      - `TagRead` (barcode), coped from the sample sheet.
      - `NumReads`, number of reads detected for each sample.
      - Row with `SampleID` with value `Unassigned` and `NumReads` value with the number of unassigned reads.
-     - Row with `SampleID` with value `Total` and `NumReads` value with the total number of reads processed. 
+     - Row with `SampleID` with value `Total` and `NumReads` value with the total number of reads processed.
   - `<SAMPLE_ID>.fastq`: Files with demultiplexed reads, where `<SAMPLE_ID>` is a value in the `SampleID` column of the sample sheet. There will be one file per sample.
   - `Unassigned.fastq`: A FASTQ file with the reads that did not match any `TagRead` (barcode) in the sample sheet.
 
@@ -138,82 +146,35 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `<SAMPLE_ID>.bam.bai`: BAM index file for `<SAMPLE_ID>.bam`.
 * `minus.bedgraph`: bedgraph of reads from minus strand (if `make_bedgraph: TRUE`).
 * `plus.bedgraph`: bedgraph of reads from plus strand (if `make_bedgraph: TRUE`).
-* `<SAMPLE_ID>.h5`: length-sensitive alignments in compressed h5 format.
-* `3nt_periodicity.tsv`
-* `3nt_periodicity.pdf`
-* `read_lengths.tsv`
-* `read_lengths.pdf`
-* `pos_sp_nt_freq.tsv`
-* `pos_sp_rpf_norm_reads.pdf`
-* `pos_sp_rpf_norm_reads.tsv`
-* `features.pdf`: only output if `--features-file` was defined.
-* `tpms.tsv`
-* `codon_ribodens.tsv`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
-* `codon_ribodens.pdf`: only output if `--t-rna-file` and `--codon-positions-file` were defined.
-* `startcodon_ribogridbar.pdf`
-* `startcodon_ribogrid.pdf`
-* `3ntframe_bygene.tsv`: only output if `--asite-disp-length-file` was defined.
-* `3ntframe_propbygene.pdf`: only output if `--asite-disp-length-file` was defined.
+* `<SAMPLE_ID>.h5`, `<SAMPLE_ID>.h5.*`: length-sensitive alignments in compressed h5 format. The number of output files depends on the number of processes that `bam_to_h5.R` was run with (`num_processes`).
+* `metagene_start_stop_read_counts.tsv`
+* `metagene_start_stop_read_counts.pdf`
+* `metagene_position_length_counts_5start.tsv`
+* `read_counts_by_length.tsv`
+* `read_counts_by_length.pdf`
+* `nt_freq_per_read_position.tsv`
+* `metagene_normalized_profile_start_stop.pdf`
+* `metagene_normalized_profile_start_stop.tsv`
+* `ORF_TPMs_vs_features.tsv`: only output if `features_file` was defined.
+* `ORF_TPMs_vs_features.pdf`: only output if `features_file` was defined.
+* `ORF_TPMs_and_counts.tsv`
+* `normalized_density_APEsites_per_codon.tsv`: only output if `t_rna_file` and `codon_positions_file` were defined.
+* `normalized_density_APEsites_per_codon.pdf`: only output if `t_rna_file` and `codon_positions_file` were defined.
+* `normalized_density_APEsites_per_codon_long.tsv` only output if `t_rna_file` and `codon_positions_file` were defined.
+* `metagene_start_barplot_by_length.pdf`
+* `metagene_start_ribogrid_by_length.pdf`
+* `read_frame_per_ORF.tsv`: only output if `asite_disp_length_file` was defined.
+* `read_frame_per_ORF_filtered.tsv`: only output if `asite_disp_length_file` was defined.
+* `frame_proportions_per_ORF.pdf`: only output if `asite_disp_length_file` was defined.
 * `<SAMPLE_ID>_output_report.html`: only output if `run_static_html: TRUE`.
 
 In addition, the following files are also put into the output directory:
 
-* `TPMs_collated.tsv`: file with the transcripts per million (tpm) for all successfully processed samples.
-* `read_counts.tsv`: a [read counts file](#read-counts-file) (only if `count_reads: TRUE`).
+* `TPMs_all_CDS_all_samples.tsv`: file with the transcripts per million (tpm) for all successfully processed samples.
+* `read_counts_per_file.tsv`: a read counts file. (only if `count_reads: TRUE`).
+* `interactive_viz_config.yaml`: this is a yaml file created by the workflow, for use with `rscripts/run_shiny_server.R` - an optional step which does not automatically run within the RiboViz workflow and which allows users to generate interactive data visualization on the dataset.
 
----
-
-## Read counts file
-
-The workflow will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is produced by scanning input, temporary and output directories and counting the number of reads (sequences) processed by specific stages of a RiboViz workflow.
-
-The read counts file, `read_counts.tsv`, is written into the output directory.
-
-The reads counts file is a tab-separated values (TSV) file with the following columns:
-
-* `SampleName`: Name of the sample to which this file belongs. This is
-  an empty value if the step was not sample-specific
-  (e.g. demultiplexing a multiplexed FASTQ file).
-* `Program`: Program that wrote the file. The special token
-  `input` denotes input files.
-* `File`: Path to file.
-* `NumReads`: Number of reads in the file.
-* `Description`: Human-readable description of the file contents.
-
-The following information is included:
-
-* Input files: number of reads in the FASTQ files used as inputs.
-* `cutadapt`: number of reads in the FASTQ file output.
-* `riboviz.tools.demultiplex_fastq`: FASTQ files output by
-  "demultiplex_fastq", using the information in the associated
-  `num_reads.tsv` summary files, or, if these can't be found, the
-  FASTQ files themselves.
-* `hisat2`: number of reads in the SAM file and FASTQ file output.
-* `riboviz.tools.trim_5p_mismatch`: number of reads in the SAM file
-  output as recorded in the `trim_5p_mismatch.tsv` summary file
-  output, or the SAM file itself, if the TSV file cannot be found (if
-  `trim_5p_mismatches: TRUE`)
-* `umi_tools dedup`: number of reads in the BAM file output.
-
-Here is an example of a read counts file produced when running the vignette:
-
-```
-SampleName	Program	File	NumReads	Description
-WTnone	input	vignette/input/SRR1042855_s1mi.fastq.gz	963571	input
-WT3AT	input	vignette/input/SRR1042864_s1mi.fastq.gz	1374448	input
-WT3AT	cutadapt	vignette/tmp/WT3AT/trim.fq	1373362	Reads after removal of sequencing library adapters
-WT3AT	hisat2	vignette/tmp/WT3AT/nonrRNA.fq	485226	rRNA or other contaminating reads removed by alignment to rRNA index files
-WT3AT	hisat2	vignette/tmp/WT3AT/rRNA_map.sam	2254078	Reads with rRNA and other contaminating reads removed by alignment to rRNA index files
-WT3AT	hisat2	vignette/tmp/WT3AT/unaligned.fq	476785	Unaligned reads removed by alignment of remaining reads to ORFs index files
-WT3AT	hisat2	vignette/tmp/WT3AT/orf_map.sam	8698	Reads aligned to ORFs index files
-WT3AT	riboviz.tools.trim_5p_mismatch	vignette/tmp/WT3AT/orf_map_clean.sam	8698	Reads after trimming of 5' mismatches and removal of those with more than 2 mismatches
-WTnone	cutadapt	vignette/tmp/WTnone/trim.fq	952343	Reads after removal of sequencing library adapters
-WTnone	hisat2	vignette/tmp/WTnone/nonrRNA.fq	466464	rRNA or other contaminating reads removed by alignment to rRNA index files
-WTnone	hisat2	vignette/tmp/WTnone/rRNA_map.sam	1430213	Reads with rRNA and other contaminating reads removed by alignment to rRNA index files
-WTnone	hisat2	vignette/tmp/WTnone/unaligned.fq	452266	Unaligned reads removed by alignment of remaining reads to ORFs index files
-WTnone	hisat2	vignette/tmp/WTnone/orf_map.sam	14516	Reads aligned to ORFs index files
-WTnone	riboviz.tools.trim_5p_mismatch	vignette/tmp/WTnone/orf_map_clean.sam	14516	Reads after trimming of 5' mismatches and removal of those with more than 2 mismatches
-```
+More details on the output files can be found at [RiboViz output files and figures](./riboviz_outputs.md).
 
 ---
 
@@ -272,7 +233,7 @@ The RiboViz workflow uses Nextflow's [publishDir](https://www.nextflow.io/docs/l
 
 For index and temporary files, `publishDir` is configured using the value of the `publish_index_tmp` parameter. If `FALSE` then files in the index (`dir_index`) and temporary (`dir_tmp`) directories are symbolically linked to those in `work/`. If `TRUE` then they are copied. Output files are always copied from `work/` into the output (`dir_out`) directory specified in the workflow configuration file.
 
-**Caution:** 
+**Caution:**
 
 * If `publish_index_tmp` is `FALSE` and the `work/` directory is deleted then the index and temporary files will no longer be accessible.
 * If the `work/` folder is deleted, then certain information will no longer be accessible via `nextflow log`.

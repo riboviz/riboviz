@@ -36,6 +36,7 @@ EXAMPLE_THRESHOLD = "example_threshold"
 vignette/vignette_config.yaml
 vignette/simdata_umi_config.yaml
 vignette/simdata_multiplex_config.yaml
+vignette/riboviz_env.yaml
 vignette/remote_vignette_config.yaml
 riboviz/test/config/vignette_config_current.yaml
 ```

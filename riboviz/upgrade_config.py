@@ -21,6 +21,7 @@ existing values are preserved):
 * ``rRNA_index`` => ``rrna_index_prefix``
 * ``stop_in_cds`` => ``stop_in_feature``
 * ``t_rna`` => ``t_rna_file``
+* ``do_pos_sp_nt_freq`` => ``output_metagene_normalized_profile``
 
 Expected parameters added to the current release are added along
 with default values, if they are not already present in the
@@ -32,7 +33,7 @@ configuration:
 * ``count_threshold: 64``
 * ``dedup_stats: false``
 * ``dedup_umis: false``
-* ``do_pos_sp_nt_freq: true``
+* ``output_metagene_normalized_profile: true``
 * ``extract_umis: false``
 * ``feature: CDS``
 * ``features_file: null``
@@ -104,7 +105,8 @@ RENAMES = {
     "rRNA_index": params.RRNA_INDEX_PREFIX,
     "ribovizGFF": params.IS_RIBOVIZ_GFF,
     "stop_in_cds": params.STOP_IN_FEATURE,
-    "t_rna": params.T_RNA_FILE
+    "t_rna": params.T_RNA_FILE,
+    "do_pos_sp_nt_freq": params.OUTPUT_METAGENE_NORMALIZED_PROFILE
 }
 """
 Renamed configuration parameters.
@@ -112,7 +114,7 @@ Renamed configuration parameters.
 
 UPDATES = {
     params.ASITE_DISP_LENGTH_FILE: None,
-    params.DO_POS_SP_NT_FREQ: True,
+    params.OUTPUT_METAGENE_NORMALIZED_PROFILE: True,
     params.CODON_POSITIONS_FILE: None,
     params.COUNT_READS: True,
     params.COUNT_THRESHOLD: 64,
@@ -211,6 +213,6 @@ def upgrade_config_file(input_file, output_file=None):
     upgrade_config(config)
     if output_file is not None:
         with open(output_file, 'w') as f:
-            yaml.dump(config, f, default_flow_style=False)
+            yaml.dump(config, f, default_flow_style=False, sort_keys=False)
     else:
-        print((yaml.dump(config)))
+        print((yaml.dump(config, sort_keys=False)))
