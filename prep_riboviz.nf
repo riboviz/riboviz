@@ -1362,7 +1362,9 @@ interactive_viz_params.dir_out = dir_out
 interactive_viz_params.dataset = params.dataset
 interactive_viz_params.fq_files = params.fq_files
 interactive_viz_params.sample_sheet = params.sample_sheet
-interactive_viz_params.features_file = features_file.toString()
+if (is_features_file) {
+    interactive_viz_params.features_file = features_file.toString()
+}
 interactive_viz_params_yaml = new Yaml().dump(interactive_viz_params)
 
 // create new yaml used only for interactive visualization (riboviz/#275, riboviz/#239)
