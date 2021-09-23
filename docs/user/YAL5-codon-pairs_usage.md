@@ -33,7 +33,7 @@ The second ptential output is a table in the form of a TSV file. This is produce
 * `-g` or `--gff`: Path to the GFF3 file of the species being studied.
 * `-a` or `--annotation`: Path to codon table for the species (TSV file)
 * `--asite_length`: Path to species-specific A-site displacement length file. An example can be found in `data/yeast_standard_asite_disp_length.txt`.
-* `--feature`: Feature (codon pair) of interest. If multiple features (codon pairs) are being studied then they should be contained within a TSV file.
+* `--feature`: Feature (codon pair) of interest. If multiple features (codon pairs) are being studied then they should be contained within a TSV file with a 'Codon pair' header.
 * `-o` or `--output`: Path to output directory, default ".".
 
 There are a number of optional arguments that can be used to change how `YAL5-codon-pairs.R` processes the data, such as the size of the expanded window, the size of the desired reading frame (or counts for all reading frames can be kept) but these are not required as they have default values:
@@ -98,16 +98,19 @@ $ Rscript rscripts/YAL5-codon-pairs.R \
 Running `YAL5-codon-pairs.R` with a TSV file containing multiple features of interest produces a file containing the following output format:
 
 ```
-Feature   RelCount
-CCA TGG   3.40715591538261
-AGA TGG   3.34611813441897
-GTA GTG   2.18925717667949
-TCA TAC   2.12036199095023
-ACC TGG   2.10540561441497
-TGG GGT   1.99480167325306
-AAG GAG   1.77114454698977
-GAC TAC   1.31659424229877
-TTC GGT   1.2634171688288
-GAT GAC   1.11758290171546
-GGT ACT   1.06256679686877
+$ cat Feature_Relative_use.tsv 
+Feature	RelCount
+TCA TAC	4.35117056856187
+TGG GGT	3.37584832195823
+CCA TGG	2.64338038234769
+GGT ACT	2.09842494819703
+GAC TAC	1.64597564484755
+GAT GAC	1.03749270563895
+AAG GAG	0.888791664708861
+GTA GTG	0.808476394849785
+AGA TGG	0.776561043802423
+TTC GGT	0.190249390825772
+ACC TGG	0.15017667844523
 ```
+
+**Note:** If the TSV file has only one codon pair then a PDF is output as for the Single feature of interest mode of operation.
