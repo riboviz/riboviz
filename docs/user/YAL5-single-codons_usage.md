@@ -22,7 +22,7 @@ The second potential output is a table in the form of a TSV file. This is produc
 * `-d` or `--dataset`: Name of the dataset of the sample being studied.
 * `-g` or `--gff`: Path to the GFF3 file of the organism being studied.
 * `-a` or `--annotation`: Path to codon table for the organism (TSV file).
-* `--feature`: Feature of interest, e.g. 'CGA'. If multiple features (codons) are being studied then they should be contained within a TSV file.  
+* `--feature`: Feature of interest, e.g. 'CGA'. If multiple features (codons) are being studied then they should be contained within a TSV file with a 'Codon' header.
 * `-o` or `--output`: Path to output directory.
 
 There are a number of optional arguments that can be used to change how `YAL5-single-codons.R` processes the data, such as if a reading frame is filtered for and which one, but these are not required as they have default values:
@@ -85,3 +85,5 @@ GTA	1.48627944639399
 AGC	1.47948869857231
 GTG	1.45266557210408
 ```
+
+**Note:** If the TSV file has only one codon then a PDF is output as for the Single feature of interest mode of operation.
