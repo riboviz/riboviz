@@ -26,19 +26,19 @@ The second ptential output is a table in the form of a TSV file. This is produce
 
 ## Execution
 
-This script requires seven arguments:
+`YAL5-codon-pairs.R` requires seven arguments:
 
-* '-i' or '--input': Path to the H5 input file.
-* '-d' or '--dataset': Name of the dataset of the sample being studied.
-* '-g' or '--gff': Path to the GFF3 file of the species being studied.
-* '-a' or '--annotation': Path to codon table for the species (TSV file)
-* '--asite_length': Path to species-specific A-site displacement length file. An example can be found in `data/yeast_standard_asite_disp_length.txt`.
-* '--feature': Feature (codon pair) of interest. If multiple features (codon pairs) are being studied then they should be contained within a TSV file.
-* '-o' or '--output': Path to output directory, default ".".
+* `-i` or `--input`: Path to the H5 input file.
+* `-d` or `--dataset`: Name of the dataset of the sample being studied.
+* `-g` or `--gff`: Path to the GFF3 file of the species being studied.
+* `-a` or `--annotation`: Path to codon table for the species (TSV file)
+* `--asite_length`: Path to species-specific A-site displacement length file. An example can be found in `data/yeast_standard_asite_disp_length.txt`.
+* `--feature`: Feature (codon pair) of interest. If multiple features (codon pairs) are being studied then they should be contained within a TSV file.
+* `-o` or `--output`: Path to output directory, default ".".
 
 There are a number of optional arguments that can be used to change how `YAL5-codon-pairs.R` processes the data, such as the size of the expanded window, the size of the desired reading frame (or counts for all reading frames can be kept) but these are not required as they have default values:
 
-* '--expand_width': The desired range either side of the feature of interest to be used for normalization, default = 5.
+* `--expand_width`: The desired range either side of the feature of interest to be used for normalization, default = 5.
 * `--frame`:  Reading frame to be studied, default = 0.
 * `--minreadlen`: Minimum read length, default = 10.
 * `--filter_for_frame`: Counts for all reading frames per codon are summed and assigned to their corresponding codon. Keep all by not filtering (FALSE) or filter for the specific reading frame, specified in `--frame`, (TRUE), default = TRUE.
