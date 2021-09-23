@@ -14,7 +14,7 @@ Read counts are fetched from the H5 file of a sample and the counts are assigned
 
 `YAL5-codon-pairs.R` calculates the normalised number of reads within a window surrounding each occurrence of the feature of interest (e.g. a codon pair) which are then overlayed to generate a single plot. Normalisation is carried out within a set window of codons adjacent to the feature of interest. The default value of this window is currently 5 codons either side of the feature of interest. 
 
-## Output files
+## Outputs
 
 There are  two potential outputs when running `YAL5-codon-pairs.R`.
 
@@ -24,7 +24,7 @@ The second ptential output is a table in the form of a TSV file. This is produce
 
 **Note:** When given a file with multiple features of interest, `YAL5-codon-pairs.R` expects them to be in the first column of the TSV file.
 
-## Arguments
+## Execution
 
 This script requires seven arguments:
 

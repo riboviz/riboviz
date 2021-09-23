@@ -14,7 +14,7 @@ The second potential output is a table in the form of a TSV file. This is produc
 
 **Note:** When given a file with multiple features of interest, `YAL5-single-codons.R` expects them to be in the first column of the TSV file.
 
-## Arguments
+## Execution
 
 `YAL5-single-codons.R` requires six arguments:
 
