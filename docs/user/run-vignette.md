@@ -204,50 +204,64 @@ Outputs in `vignette/output`:
 
 ```
 WT3AT/
-  3ntframe_bygene.tsv
-  3ntframe_propbygene.pdf
-  3nt_periodicity.pdf
-  3nt_periodicity.tsv
+  read_frame_per_ORF.tsv
+  read_frame_per_ORF_filtered.tsv
+  frame_proportions_per_ORF.pdf
+  metagene_start_stop_read_counts.pdf
+  metagene_start_stop_read_counts.tsv
+  metagene_position_length_counts_5start.tsv
   WT3AT.bam
   WT3AT.bam.bai
-  codon_ribodens.pdf
-  codon_ribodens.tsv
-  features.pdf
+  normalized_density_APEsites_per_codon.pdf
+  normalized_density_APEsites_per_codon.tsv
+  normalized_density_APEsites_per_codon_long.tsv
+  ORF_TPMs_vs_features.pdf
+  ORF_TPMs_vs_features.tsv
   WT3AT.h5
+  WT3AT.h5.1
   minus.bedgraph
   plus.bedgraph
-  pos_sp_nt_freq.tsv
-  pos_sp_rpf_norm_reads.pdf
-  pos_sp_rpf_norm_reads.tsv
-  read_lengths.pdf
-  read_lengths.tsv
-  startcodon_ribogridbar.pdf
-  startcodon_ribogrid.pdf
-  tpms.tsv
+  nt_freq_per_read_position.tsv
+  metagene_normalized_profile_start_stop.pdf
+  metagene_normalized_profile_start_stop.tsv
+  read_counts_by_length.pdf
+  read_counts_by_length.tsv
+  metagene_start_barplot_by_length.pdf
+  metagene_start_ribogrid_by_length.pdf
+  ORF_TPMs_and_counts.tsv
+  WT3AT_output_report.html
 WTnone/
-  3ntframe_bygene.tsv
-  3ntframe_propbygene.pdf
-  3nt_periodicity.pdf
-  3nt_periodicity.tsv
+  read_frame_per_ORF.tsv
+  read_frame_per_ORF_filtered.tsv
+  frame_proportions_per_ORF.pdf
+  metagene_start_stop_read_counts.pdf
+  metagene_start_stop_read_counts.tsv
+  metagene_position_length_counts_5start.tsv
   WTnone.bam
   WTnone.bam.bai
-  codon_ribodens.pdf
-  codon_ribodens.tsv
-  features.pdf
+  normalized_density_APEsites_per_codon.pdf
+  normalized_density_APEsites_per_codon.tsv
+  normalized_density_APEsites_per_codon_long.tsv
+  ORF_TPMs_vs_features.pdf
+  ORF_TPMs_vs_features.tsv
   WTnone.h5
+  WTnone.h5.1
   minus.bedgraph
   plus.bedgraph
-  pos_sp_nt_freq.tsv
-  pos_sp_rpf_norm_reads.pdf
-  pos_sp_rpf_norm_reads.tsv
-  read_lengths.pdf
-  read_lengths.tsv
-  startcodon_ribogridbar.pdf
-  startcodon_ribogrid.pdf
-  tpms.tsv
-read_counts.tsv
-TPMs_collated.tsv
+  nt_freq_per_read_position.tsv
+  metagene_normalized_profile_start_stop.pdf
+  metagene_normalized_profile_start_stop.tsv
+  read_counts_by_length.pdf
+  read_counts_by_length.tsv
+  metagene_start_barplot_by_length.pdf
+  metagene_start_ribogrid_by_length.pdf
+  ORF_TPMs_and_counts.tsv
+  WTnone_output_report.html
+read_counts_per_file_tsv
+TPMs_all_CDS_all_samples.tsv
 ```
+
+The number of `<SAMPLE_ID>.h5.*` files depends on the `num_processes` parameter in the configuration. For example, if you change that parameter to 4, then there will be 4 files, `WTnone.h5.1`, `WTnone.h5.2`, `WTnone.h5.3` and `WTnone.h5.4`, in the output folder.
 
 For full information on what the workflow does and the files it outputs, see [What the RiboViz workflow does](./prep-riboviz-operation.md).
 

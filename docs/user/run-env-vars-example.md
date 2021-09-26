@@ -16,25 +16,11 @@ Create a directory with a configuration file:
 
 ```console
 $ mkdir ribo-run/
-$ cp riboviz/vignette/vignette_config.yaml ribo-run/ribo_config.yaml
+$ cp riboviz/vignette/riboviz_env.yaml ribo-run
 $ cd ribo-run
 ```
 
-Edit `ribo_config.yaml` and update the following parameters to the values shown:
-
-```yaml
-asite_disp_length_file: ${RIBOVIZ_DATA}/yeast_standard_asite_disp_length.txt
-codon_positions_file: ${RIBOVIZ_DATA}/yeast_codon_pos_i200.RData
-dir_index: ${RIBOVIZ_SAMPLES}/index
-dir_in: ${RIBOVIZ_SAMPLES}/input
-dir_out: ${RIBOVIZ_SAMPLES}/output
-dir_tmp: ${RIBOVIZ_SAMPLES}/tmp
-features_file: ${RIBOVIZ_DATA}/yeast_features.tsv
-orf_gff_file: ${RIBOVIZ_ORGANISMS}/yeast_YAL_CDS_w_250utrs.gff3
-orf_fasta_file: ${RIBOVIZ_ORGANISMS}/yeast_YAL_CDS_w_250utrs.fa	
-rrna_fasta_file: ${RIBOVIZ_ORGANISMS}/yeast_rRNA_R64-1-1.fa
-t_rna_file: ${RIBOVIZ_DATA}/yeast_tRNAs.tsv
-```
+`riboviz_env.yaml` is a sample configuration, based on `vignette_config.yaml` but with tokens for paths to the input files expected by RiboViz.
 
 Run RiboViz, specifying values for the configuration tokens via environment variables:
 
@@ -42,7 +28,7 @@ Run RiboViz, specifying values for the configuration tokens via environment vari
 $ RIBOVIZ_DATA=$HOME/ribo-data \
   RIBOVIZ_ORGANISMS=$HOME/ribo-organisms \
   RIBOVIZ_SAMPLES=$HOME/ribo-samples \
-  nextflow run $HOME/riboviz/prep_riboviz.nf  -ansi-log false -params-file ribo_config.yaml
+  nextflow run $HOME/riboviz/prep_riboviz.nf  -ansi-log false -params-file riboviz_env.yaml
 ```
 
 Optionally, run integration tests:
@@ -52,5 +38,5 @@ $ RIBOVIZ_DATA=$HOME/ribo-data \
   RIBOVIZ_ORGANISMS=$HOME/ribo-organisms \
   RIBOVIZ_SAMPLES=$HOME/ribo-samples \
   pytest -vs $HOME/riboviz/riboviz/test/integration/test_integration.py \
-  --expected=$HOME/test-data-2.1 --skip-workflow --config-file ribo_config.yaml
+  --expected=$HOME/test-data-2.1 --skip-workflow --config-file riboviz_env.yaml
 ```

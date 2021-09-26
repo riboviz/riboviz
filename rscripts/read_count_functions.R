@@ -519,7 +519,7 @@ AllGenes3EndPositionLengthCountsTibble <- function(gene_names, dataset, hd_file,
 #' with three columns: "ReadLen", "Pos", "Counts" ; as created by TidyDatamatrix().
 #' Used for output of AllGenes5StartPositionLengthCountsTibble() and AllGenes3EndPositionLengthCountsTibble()
 #'
-#' @return ggplot object; e.g start_codon_ribogrid_plot
+#' @return ggplot object; e.g metagene_start_ribogrid_by_length_plot
 #'
 #' @examples
 #'  min_read_length <- 10
@@ -557,7 +557,7 @@ plot_ribogrid <- function(tidymat) {
 #' Used for output of AllGenes5StartPositionLengthCountsTibble() or AllGenes3EndPositionLengthCountsTibble()
 #' @param small_read_range numeric range of read lengths to plot barplots for (default: 26:32)
 #'
-#' @return ggplot object; e.g start_codon_ribogrid_bar_plot
+#' @return ggplot object; e.g metagene_start_ribogrid_by_length_bar_plot
 #'
 #' @examples
 #'  min_read_length <- 10

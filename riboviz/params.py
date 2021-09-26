@@ -75,7 +75,7 @@ statistics and figures.
 """
 DATASET = "dataset"
 """ Dataset name. """
-DO_POS_SP_NT_FREQ = "do_pos_sp_nt_freq"
+OUTPUT_METAGENE_NORMALIZED_PROFILE = "output_metagene_normalized_profile"
 """ Calculate position-specific nucleotide frequency? """
 FEATURE = "feature"
 """ Feature type """
@@ -114,6 +114,12 @@ SKIP_INPUTS = "skip_inputs"
 """
 When validating configuration skip checks for existence of ribosome
 profiling data files.
+"""
+
+DEFAULT_CONFIG_YAML_FILE = "default_config.yaml"
+"""
+Name of YAML configuration file with default values for parameters.
+Assumed to be in :py:mod:`riboviz`.
 """
 
 R_LIBS = "r_libs"

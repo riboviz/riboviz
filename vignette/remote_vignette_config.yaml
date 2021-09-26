@@ -12,7 +12,7 @@ dir_index: remote-vignette/index # Built indices directory
 dir_in: remote-vignette/input # Input directory
 dir_out: remote-vignette/output # Output directory
 dir_tmp: remote-vignette/tmp # Intermediate files directory
-do_pos_sp_nt_freq: TRUE # Calculate position-specific nucleotide frequency?
+output_metagene_normalized_profile: TRUE # Calculate position-specific nucleotide frequency?
 extract_umis: FALSE # Extract UMIs if TRUE
 feature: CDS # Feature type
 features_file: data/yeast_features.tsv # Features to correlate with ORFs
