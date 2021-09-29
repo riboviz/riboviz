@@ -21,18 +21,18 @@ MAT	6
 
 ## Outputs
 
-`metafeature_nucleotides.R` will output a PDF containing a metafeature plot showing the average number of reads occurring at each position in a desired window around the position of interest. It is averaged over each position listed in the tsv file. 
+`metafeature_nucleotides.R` will output a PDF containing a metafeature plot showing the average number of reads occurring at each position in a desired window around the position of interest. It is averaged over each position listed in the TSV file. 
 
 ## Usage
 
 `metafeature_nucleotides.R` requires N arguments:
 
-* `-i`, `--input`: Path to the H5 input file.
-* `-d`, `--dataset`: Name of the dataset being studied.
-* `-g`, `--gff`: Path to the GFF3 file of the organism being studied.
-* `-f`, `--fasta`: Path to the FASTA file of the species being studied.
+* `-i` or `--input`: Path to the H5 input file.
+* `-d` or `--dataset`: Name of the dataset being studied.
+* `-g` or `--gff`: Path to the GFF3 file of the organism being studied.
+* `-f` or  `--fasta`: Path to the FASTA file of the species being studied.
 * `--feature_pos`: A TSV file listing the Gene and Positions to normalize over, under the headings `Gene` and `Pos`.
-* `-o`, `--output`: Path to output directory.
+* `-o` or `--output`: Path to output directory.
 
 There are a number of optional arguments that can be used to change how `metafeature_nucleotides.R` processes the data. These are:
 
@@ -56,5 +56,5 @@ $ Rscript rscripts/metafeature_nucleotides.R
 ## Examples
 
 ```console
-R Rscript rscripts/metafeature_nucleotides.R -i Mok-tinysim/output/A/A.h5 -d Mok-tinysim -g ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 -f tiny_2genes_20utrs.fa --feature_pos [premade_tsv_file.tsv] -o .
+$ Rscript rscripts/metafeature_nucleotides.R -i Mok-tinysim/output/A/A.h5 -d Mok-tinysim -g ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 -f ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa --feature_pos data/feature_pos.tsv -o .
 ```
