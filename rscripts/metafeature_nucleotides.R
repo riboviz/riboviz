@@ -81,16 +81,6 @@ startlen <- opt$startlen
 min_read_length <- opt$minreadlen
 asite_disp_path <- opt$asite_length
 
-gff <- here::here("..", "example-datasets", "simulated", "mok", "annotation",
-"tiny_2genes_20utrs.gff3")
-fasta <- "../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa"
-hd_file <- here::here("Mok-tinysim", "output", "A", "A.h5")
-dataset <- "Mok-tinysim"
-min_read_length <- 10
-expand_width <- 2
-features_to_study <- read.delim("nt_testing.tsv")
-output_dir <- "."
-#
 gff_df <- readGFFAsDf(gff)
 genome <- readDNAStringSet(fasta, format = "fasta")
 names <- names(genome)
