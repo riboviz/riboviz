@@ -237,7 +237,7 @@ Data was imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb
 
 ## GFF and BAM files for testing `bam_to_h5.R`
 
-`data/Mok-tinysim-gffsam` folder.
+`data/Mok-tinysim` folder.
 
 Used by `rscripts/tests/testthat/test_bam_to_h5.R`.
 
@@ -285,12 +285,12 @@ Run RiboViz:
 $ nextflow run prep_riboviz.nf  -params-file Mok-tinysim_config.yaml -ansi-log false
 ```
 
-Create and populate `data/Mok-tinysim-gffsam`:
+Create and populate `data/Mok-tinysim`:
 
 ```console
-$ mkdir data/Mok-tinysim-gffsam
-$ samtools view -h Mok-tinysim/output/A/A.bam > data/Mok-tinysim-gffsam/A.sam
-$ cp ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 data/Mok-tinysim-gffsam/
+$ mkdir data/Mok-tinysim
+$ samtools view -h Mok-tinysim/output/A/A.bam > data/Mok-tinysim/A.sam
+$ cp ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 data/Mok-tinysim/
 ```
 
 ---

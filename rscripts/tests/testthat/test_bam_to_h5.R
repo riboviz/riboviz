@@ -27,8 +27,8 @@
 #' These tests assumes the following test data files exist:
 #'
 #' ```
-#' data/Mok-tinysim-gffsam/A.sam
-#' data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3
+#' data/Mok-tinysim/A.sam
+#' data/Mok-tinysim/tiny_2genes_20utrs.gff3
 #' ```
 #'
 #' At present, the following behaviours are not tested:
@@ -114,8 +114,8 @@ RunSamToBamToH5 <- function(bam_to_h5, sam_file, bam_file,
 
 testthat::test_that("Default", {
 
-  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
+  sam_file <- here::here("data/Mok-tinysim/A.sam")
+  orf_gff_file <- here::here("data/Mok-tinysim/tiny_2genes_20utrs.gff3")
   min_read_length <- 10
   max_read_length <- 50
   buffer <- 20
@@ -141,8 +141,8 @@ testthat::test_that("Default", {
 
 testthat::test_that("--is-riboviz-gff=FALSE", {
 
-  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
+  sam_file <- here::here("data/Mok-tinysim/A.sam")
+  orf_gff_file <- here::here("data/Mok-tinysim/tiny_2genes_20utrs.gff3")
   min_read_length <- 10
   max_read_length <- 50
   buffer <- 20
@@ -168,8 +168,8 @@ testthat::test_that("--is-riboviz-gff=FALSE", {
 
 testthat::test_that("--is-riboviz-gff=FALSE, --stop-in-feature=TRUE", {
 
-  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
+  sam_file <- here::here("data/Mok-tinysim/A.sam")
+  orf_gff_file <- here::here("data/Mok-tinysim/tiny_2genes_20utrs.gff3")
   min_read_length <- 10
   max_read_length <- 50
   buffer <- 20
@@ -195,8 +195,8 @@ testthat::test_that("--is-riboviz-gff=FALSE, --stop-in-feature=TRUE", {
 
 testthat::test_that("--feature=ORF", {
 
-  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
+  sam_file <- here::here("data/Mok-tinysim/A.sam")
+  orf_gff_file <- here::here("data/Mok-tinysim/tiny_2genes_20utrs.gff3")
   min_read_length <- 10
   max_read_length <- 50
   buffer <- 20
@@ -232,8 +232,8 @@ testthat::test_that("--feature=ORF", {
 
 testthat::test_that("--secondary-id=ID", {
 
-  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
+  sam_file <- here::here("data/Mok-tinysim/A.sam")
+  orf_gff_file <- here::here("data/Mok-tinysim/tiny_2genes_20utrs.gff3")
   min_read_length <- 10
   max_read_length <- 50
   buffer <- 20
@@ -269,8 +269,8 @@ testthat::test_that("--secondary-id=ID", {
 
 testthat::test_that("feature=Unknown", {
 
-  sam_file <- here::here("data/Mok-tinysim-gffsam/A.sam")
-  orf_gff_file <- here::here("data/Mok-tinysim-gffsam/tiny_2genes_20utrs.gff3")
+  sam_file <- here::here("data/Mok-tinysim/A.sam")
+  orf_gff_file <- here::here("data/Mok-tinysim/tiny_2genes_20utrs.gff3")
   min_read_length <- 10
   max_read_length <- 50
   buffer <- 20
