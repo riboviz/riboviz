@@ -55,7 +55,7 @@ The examples assume that `YAL5-single-codons.R` is being run from the riboviz fo
 Running on data from the simulated dataset Mok-simYAL5 with the aim of investigating the codon pair 'CGA', the command would be:
 
 ```console
-$ Rscript rscripts/YAL5-single-codons.R -i Mok-simYAL5/output/A/A.h5 -d Mok-simYAL5 -g ../example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --feature CGA -o .
+$ Rscript rscripts/YAL5-single-codons.R -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --feature CGA -o .
 ```
 
 Running `YAL5-single-codons.R` with a single feature of interest produces a PDF with the following image:
@@ -67,7 +67,7 @@ Running `YAL5-single-codons.R` with a single feature of interest produces a PDF 
 Running on data from the simulated dataset Mok-simYAL5 with the aim of investigating multiple codons, provided as a TSV file, the command would be:
 
 ```console
-$ Rscript rscripts/YAL5-single-codons.R -i Mok-simYAL5/output/A/A.h5 -d Mok-simYAL5 -g ../example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --feature data/codons.tsv -o .
+$ Rscript rscripts/YAL5-single-codons.R -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --feature data/codons.tsv -o .
 ```
 
 Running `YAL5-single-codons.R` with a TSV file containing multiple features of interest produces a file containing the following output format:

@@ -66,14 +66,7 @@ The examples assume that `YAL5-codon-pairs.R` is being run from the riboviz fold
 Running on data from the simulated dataset Mok-simYAL5 with the aim of investigating the codon pair 'CCA TGG' the command would be: 
 
 ```console
-Rscript rscripts/YAL5-codon-pairs.R \
-    -i Mok-simYAL5/output/A/A.h5 \
-    -d Mok-simYAL5 \
-    -g ../example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3 \
-    -a data/yeast_codon_table.tsv \
-    --asite_length data/yeast_standard_asite_disp_length.txt \
-    --feature "CCA TGG" \
-    -o .
+$ Rscript rscripts/YAL5-codon-pairs.R -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --asite_length data/yeast_standard_asite_disp_length.txt --feature "CCA TGG" -o . --minreadlen 10
 ```
 
 Running `YAL5-codon-pairs.R` with a single feature of interest argument produces a PDF with the following image:
@@ -85,14 +78,7 @@ Running `YAL5-codon-pairs.R` with a single feature of interest argument produces
 Running on data from the simulated dataset Mok-simYAL5 with the aim of investigating multiple codon pairs, provided as a TSV file, the command would be: 
 
 ```console
-$ Rscript rscripts/YAL5-codon-pairs.R \
-    -i Mok-simYAL5/output/A/A.h5 \
-    -d Mok-simYAL5 \
-    -g ../example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3 \
-    -a data/yeast_codon_table.tsv \
-    --asite_length data/yeast_standard_asite_disp_length.txt \
-    --feature data/codon-pairs.tsv \
-    -o .
+$ Rscript rscripts/YAL5-codon-pairs.R -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --asite_length data/yeast_standard_asite_disp_length.txt --feature data/codon-pairs.tsv -o .
 ```
 
 Running `YAL5-codon-pairs.R` with a TSV file containing multiple features of interest produces a file containing the following output format:
