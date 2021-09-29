@@ -711,3 +711,32 @@ Linux's `screen` command provides a virtual terminal multiplexer. It allows us t
 One use case is if we want to have one or more files open in editors while also running programs that use those files - for example editing source code and running a compiler, or editing configuration files and running an analysis program - without having to repeatedly open and close the files within the editor
 
 For a short introduction, see [Using the Linux `screen` command](./using-linux-screen.md).
+
+### Troubleshooting
+
+If RiboViz fails if run within the context of `screen` then you may have to reinitialise your environment using `source set-riboviz-env.sh`. For example, for one user, the following sequence of steps resulted in a failure of RiboViz to successfully run to completion:
+
+```console
+$ source set-riboviz-env.sh
+$ cd riboviz
+$ screen
+$ source activate riboviz
+$ nextflow prep_riboviz.nf -params-file vignette/vignette_config.yaml 
+```
+
+The failure encountered was:
+
+```
+/exports/igmm/software/pkg/el7/apps/R/3.6.3/lib64/R/bin/exec/R: error while loading shared libraries: libgfortran.so.4: cannot open shared object file: No such file or directory
+```
+
+In contrast, the following sequence of steps resulted in success:
+
+```console
+$ screen
+$ source set-riboviz-env.sh
+$ source activate riboviz    # If you didn't activate the 'riboviz' environment in 'set-riboviz-env.sh'.
+$ cd riboviz
+$ nextflow prep_riboviz.nf -params-file vignette/vignette_config.yaml 
+```
+
