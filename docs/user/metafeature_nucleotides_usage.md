@@ -56,5 +56,5 @@ $ Rscript rscripts/metafeature_nucleotides.R
 ## Examples
 
 ```console
-$ Rscript rscripts/metafeature_nucleotides.R -i Mok-tinysim/output/A/A.h5 -d Mok-tinysim -g ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 -f ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa --feature_pos data/feature_pos.tsv -o .
+$ Rscript rscripts/metafeature_nucleotides.R -i Mok-tinysim/output/A/A.h5 -d Mok-tinysim -g ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 -f ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa --feature_pos data/feature_pos.tsv -o . --minreadlen 10 --expand_width 2
 ```
