@@ -260,13 +260,17 @@ $ curl -LO https://github.com/amandamok/simRiboSeq/raw/master/simulation_runs/ri
 $ cd ../..
 ```
 
-Edit `Mok-simYAL5.yaml`:
+Edit `Mok-simYAL5.yaml` and update:
 
-```
+```yaml
 orf_fasta_file: ../../riboviz/example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.fa
 orf_gff_file: ../../riboviz/example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3
 rrna_fasta_file: ../../riboviz/example-datasets/fungi/saccharomyces/contaminants/Saccharomyces_cerevisiae_yeast_rRNA_R64-1-1.fa
-=>
+```
+
+to:
+
+```yaml
 orf_fasta_file: ../example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.fa
 orf_gff_file: ../xample-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3
 rrna_fasta_file: ../example-datasets/fungi/saccharomyces/contaminants/Saccharomyces_cerevisiae_yeast_rRNA_R64-1-1.fa
@@ -320,13 +324,17 @@ $ curl -LO https://github.com/amandamok/simRiboSeq/raw/master/simulation_runs/ri
 $ cd ../..
 ```
 
-Edit `Mok-tinysim.yaml`:
+Edit `Mok-tinysim.yaml` and update:
 
-```
+```yal
 orf_fasta_file: ../../riboviz/example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa
 orf_gff_file: ../../riboviz/example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3
 rrna_fasta_file: ../../riboviz/example-datasets/simulated/mok/contaminants/Sc_rRNA_example.fa
-=>
+```
+
+to:
+
+```yaml
 orf_fasta_file: ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa
 orf_gff_file: ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3
 rrna_fasta_file: ../example-datasets/simulated/mok/contaminants/Sc_rRNA_example.fa
