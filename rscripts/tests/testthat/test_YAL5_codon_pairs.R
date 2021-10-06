@@ -28,6 +28,7 @@
 #' data/yeast_standard_asite_disp_length.txt
 #' data/yeast_codon_table.tsv
 #' data/codon-pairs.tsv
+#' data/Mok-simYAL5/yal5-codon-pairs.tsv
 #' ```
 #'
 #' At present, the following behaviours are not tested:
@@ -47,6 +48,7 @@
 suppressMessages(library(glue, quietly = T))
 suppressMessages(library(here, quietly = T))
 suppressMessages(library(testthat, quietly = T))
+suppressMessages(library(tibble, quietly = T))
 suppressMessages(library(withr, quietly = T))
 
 yal5_codon_pairs <- here::here("rscripts/YAL5-codon-pairs.R")
@@ -111,6 +113,7 @@ testthat::test_that("--feature file", {
   annotation_file <- here::here("data/yeast_codon_table.tsv")
   feature <- here::here("data/codon-pairs.tsv")
   output_dir <- "."
+  expected_tsv <- here::here("data/Mok-simYAL5/yal5-codon-pairs.tsv")
 
   withr::with_tempdir({
     RunYal5CodonPairs(yal5_codon_pairs, h5_file, dataset,
@@ -120,5 +123,10 @@ testthat::test_that("--feature file", {
     output_path <- file.path(".", output_file)
     testthat::expect_true(file.exists(output_path),
          info = paste(output_path, "does not exist"))
+    actual_data <- tibble::as_tibble(
+        readr::read_tsv(output_path, comment = "#"))
   })
+  expected_data <- tibble::as_tibble(
+      readr::read_tsv(expected_tsv, comment = "#"))
+  testthat::expect_equal(expected_data, actual_data, info = "Data differs")
 })

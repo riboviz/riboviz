@@ -241,6 +241,8 @@ Used by:
 
 * `docs/user/YAL5-codon-pairs-usage.md`.
 * `docs/user/YAL5-single-codons-usage.md`.
+* `rscripts/tests/testthat/test_YAL_single_codons.R`
+* `rscripts/tests/testthat/test_YAL_codon_pairs.R`
 
 Created using:
 
@@ -296,6 +298,48 @@ $ cp ../example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3
 $ cp Mok-simYAL5/output/A/A.h5* data/Mok-simYAL5/
 ```
 
+
+
+---
+
+## Codons data (`data/Mok-simYAL5`)
+
+Files:
+
+```
+data/Mok-simYAL5/yal5-single-codons.tsv
+data/Mok-simYAL5/yal5-codon-pairs.tsv
+```
+
+Used by:
+
+* `rscripts/tests/testthat/test_YAL_single_codons.R`
+* `rscripts/tests/testthat/test_YAL_codon_pairs.R`
+
+Assumes existence of Simulated data (`data/Mok-simYAL5`) above.
+
+Created using
+
+* [riboviz](https://github.com/riboviz/riboviz), `refactor-codon-pairs-436` branch, commit 24fcd62 Wed Oct 6 04:29:01 2021.
+
+Create files:
+
+```console
+$ Rscript rscripts/YAL5-single-codons.R -i data/Mok-simYAL5/A.h5 \
+  -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 \
+  -a data/yeast_codon_table.tsv \
+  --asite_length=data/yeast_standard_asite_disp_length.txt \
+  --feature data/codons.tsv -o .
+$ mv Feature_Relative_use_Mok-simYAL5.tsv data/Mok-simYAL5/yal5-single-codons.tsv
+
+$ Rscript rscripts/YAL5-codon-pairs.R -i data/Mok-simYAL5/A.h5 \
+  -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 \
+  -a data/yeast_codon_table.tsv \
+  --asite_length data/yeast_standard_asite_disp_length.txt \
+  --feature data/codon-pairs.tsv -o .
+$ mv Feature_Relative_use.tsv data/Mok-simYAL5/yal5-codon-pairs.tsv
+```
+
 ---
 
 ## Simulated data (`data/Mok-tinysim`)
@@ -305,6 +349,7 @@ Used by:
 * `rscripts/tests/testthat/test_bam_to_h5.R`.
 * `docs/user/YAL5-codon-pairs-usage.md`.
 * `docs/user/metafeature-nucleotides-usage.md`.
+* `rscripts/tests/testthat/test_metafeature_nucleotides.R`
 
 Created using:
 
