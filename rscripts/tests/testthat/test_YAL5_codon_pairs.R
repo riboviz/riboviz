@@ -102,7 +102,7 @@ testthat::test_that("--feature codon", {
   })
 })
 
-testthat::test_that("--feature codon", {
+testthat::test_that("--feature file", {
 
   h5_file <- here::here("data/Mok-simYAL5/A.h5")
   dataset <- "Mok-simYAL5"
