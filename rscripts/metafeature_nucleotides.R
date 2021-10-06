@@ -13,19 +13,35 @@
 # MAT	5
 # MAT	6
 
-
 print("Starting process")
 
-source(here::here("rscripts", "read_count_functions.R"))
-source(here::here("rscripts", "stats_figs_block_functions.R"))
+suppressMessages(library(Biostrings))
+suppressMessages(library(rtracklayer))
+suppressMessages(library(stringr))
+suppressMessages(library(GenomicRanges))
+suppressMessages(library(parallel))
+suppressMessages(library(rhdf5))
+suppressMessages(library(dplyr))
 
-library(Biostrings)
-library(rtracklayer)
-library(stringr)
-library(GenomicRanges)
-library(parallel)
-library(rhdf5)
-library(dplyr)
+# Load local dependencies.
+if (interactive()) {
+  # Use hard-coded script name and assume script is in "rscripts"
+  # directory. This assumes that interactive R is being run within
+  # the parent of rscripts/ but imposes no other constraints on
+  # where rscripts/ or its parents are located.
+  self <- "metafeature_nucleotides.R"
+  path_to_self <- here("rscripts", self)
+  source(here::here("rscripts", "provenance.R"))
+  source(here::here("rscripts", "read_count_functions.R"))
+  source(here::here("rscripts", "stats_figs_block_functions.R"))
+} else {
+  # Deduce file name and path using reflection as before.
+  self <- getopt::get_Rscript_filename()
+  path_to_self <- self
+  source(file.path(dirname(self), "provenance.R"))
+  source(file.path(dirname(self), "read_count_functions.R"))
+  source(file.path(dirname(self), "stats_figs_block_functions.R"))
+}
 
 suppressMessages(library(optparse))
 
