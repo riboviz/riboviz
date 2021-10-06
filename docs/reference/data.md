@@ -239,8 +239,8 @@ Data was imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb
 
 Used by:
 
-* `docs/user/YAL5-codon-pairs_usage.md`.
-* `docs/user/YAL5-single-codons_usage.md`.
+* `docs/user/YAL5-codon-pairs-usage.md`.
+* `docs/user/YAL5-single-codons-usage.md`.
 
 Created using:
 
@@ -303,8 +303,8 @@ $ cp Mok-simYAL5/output/A/A.h5* data/Mok-simYAL5/
 Used by:
 
 * `rscripts/tests/testthat/test_bam_to_h5.R`.
-* `docs/user/YAL5-codon-pairs_usage.md`.
-* `docs/user/metafeature_nucleotides_usage.md`.
+* `docs/user/YAL5-codon-pairs-usage.md`.
+* `docs/user/metafeature-nucleotides-usage.md`.
 
 Created using:
 

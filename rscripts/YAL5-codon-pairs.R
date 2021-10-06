@@ -2,10 +2,6 @@
 # plot for a single feature_of_interest, or a table comparing the RelCount for
 # multiple features of interest. 
 
-# Further documentation is available at:
-# https://github.com/riboviz/riboviz/blob/codon-pairs-286/docs/user/YAL5-codon-pairs_usage.md
-
-
 ### TEST ###
 # run the script on the TinySim dataset. Documentation of tests in issue ticket
 # #402 "Writing tests for visualisation of feature scripts"

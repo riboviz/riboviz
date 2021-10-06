@@ -1,8 +1,6 @@
 # This script uses a h5, GFF and .tsv file to create either a metafeature plot 
 # for a feature_of_interest, or a table comparing the RelCount of multiple features of interest.
 # Currently designed for single codons.
-# Further documentation can be found at:
-# https://github.com/riboviz/riboviz/blob/codon-pairs-286/docs/user/YAL5-single-codons_usage.md
 
 ## TEST: run on TinySim Dataset
 
