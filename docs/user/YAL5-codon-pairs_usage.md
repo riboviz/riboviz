@@ -66,7 +66,7 @@ The examples assume that `YAL5-codon-pairs.R` is being run from the riboviz fold
 Running on data from the simulated dataset Mok-simYAL5 with the aim of investigating the codon pair 'CCA TGG' the command would be: 
 
 ```console
-$ Rscript rscripts/YAL5-codon-pairs.R -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --asite_length data/yeast_standard_asite_disp_length.txt --feature "CCA TGG" -o . --minreadlen 10
+$ Rscript rscripts/YAL5-codon-pairs.R -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --asite_length data/yeast_standard_asite_disp_length.txt --feature "CCA TGG" -o .
 ```
 
 Running `YAL5-codon-pairs.R` with a single feature of interest argument produces a PDF with the following image:
