@@ -29,7 +29,7 @@ MAT	6
 
 * `-i` or `--input`: Path to the H5 input file.
 * `-d` or `--dataset`: Name of the dataset being studied.
-* `-g` or `--gff`: Path to the GFF3 file of the organism being studied.
+* `-g` or `--gff`: Path to the GFF3 file of the species being studied.
 * `-f` or  `--fasta`: Path to the FASTA file of the species being studied.
 * `--feature_pos`: A TSV file listing the Gene and Positions to normalize over, under the headings `Gene` and `Pos`.
 * `-o` or `--output`: Path to output directory.
