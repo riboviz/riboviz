@@ -8,15 +8,31 @@
 
 print("Starting process")
 
-# source packages and functions from rscripts
-source(here::here("rscripts", "read_count_functions.R"))
-source(here::here("rscripts", "stats_figs_block_functions.R"))
-
 suppressMessages(library(ggplot2))
 suppressMessages(library(plotly))
 suppressMessages(library(purrr))
 suppressMessages(library(dplyr))
 suppressMessages(library(optparse))
+
+# Load local dependencies.
+if (interactive()) {
+  # Use hard-coded script name and assume script is in "rscripts"
+  # directory. This assumes that interactive R is being run within
+  # the parent of rscripts/ but imposes no other constraints on
+  # where rscripts/ or its parents are located.
+  self <- "YAL5-single-codons.R"
+  path_to_self <- here("rscripts", self)
+  source(here::here("rscripts", "provenance.R"))
+  source(here::here("rscripts", "read_count_functions.R"))
+  source(here::here("rscripts", "stats_figs_block_functions.R"))
+} else {
+  # Deduce file name and path using reflection as before.
+  self <- getopt::get_Rscript_filename()
+  path_to_self <- self
+  source(file.path(dirname(self), "provenance.R"))
+  source(file.path(dirname(self), "read_count_functions.R"))
+  source(file.path(dirname(self), "stats_figs_block_functions.R"))
+}
 
 option_list <- list(make_option(c("-i", "--input"),
                                 type = "character",
