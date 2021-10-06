@@ -53,9 +53,9 @@ yal5_single_codons <- here::here("rscripts/YAL5-single-codons.R")
 
 context("test_YAL5_single_codons.R")
 
-#' Run `YAL5_single_codons.R`.
+#' Run `YAL5-single-codons.R`.
 #'
-#' @param yal5_single_codons `YAL5_single_codons.R` path (character).
+#' @param yal5_single_codons `YAL5-single-codons.R` path (character).
 #' @param h5_file H5 input file (character).
 #' @param dataset Name of dataset of sample being studied (character).
 #' @param gff_file GFF feature file of organism being studied (character).
@@ -72,13 +72,13 @@ RunYal5SingleCodons <- function(yal5_single_codons, h5_file, dataset,
   gff_file, asite_file, annotation_file, feature, output_dir,
   exit_code = 0) {
 
-  cmd_template <- "Rscript --vanilla {yal5_single_codons} --input={h5_file} --dataset={dataset} --gff={gff_file} --asite_length={asite_file} --annotation={annotation_file} --feature={feature} --output={output_dir}"
+  cmd_template <- "Rscript --vanilla {yal5_single_codons} --input={h5_file} --dataset={dataset} --gff={gff_file} --asite_length={asite_file} --annotation={annotation_file} --feature='{feature}' --output={output_dir}"
   cmd <- glue::glue(cmd_template)
   print(cmd)
   actual_exit_code <- system(cmd)
-  print(paste0("'YAL5-single-codons.R' exit code: ", actual_exit_code))
+  print(paste0("Exit code: ", actual_exit_code))
   testthat::expect_equal(actual_exit_code, exit_code,
-    info = "Unexpected exit code from 'YAL5_single_codons.R'")
+    info = "Unexpected exit code")
 }
 
 testthat::test_that("--feature codon", {
