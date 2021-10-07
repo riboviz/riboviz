@@ -423,7 +423,7 @@ TranscriptForOneGene <- function(
 #' of the coding region
 ExpandRegions <- function(
   transcript_for_one_gene, transcript_gene_poscodon_frame, gene,
-  dataset, hd_file, expand_width) {
+  gff_df, dataset, hd_file, expand_width) {
 
   # Save applied transcript to another object remove problems with
   # purrr::map.
@@ -475,6 +475,7 @@ AllGeneInterestingFeatures <- function(
                                     .f = ExpandRegions,
                                     transcript_gene_poscodon_frame,
                                     gene,
+				    gff_df,
                                     dataset,
                                     hd_file,
                                     expand_width)
@@ -783,8 +784,10 @@ OverlayedTable <- function(normalized_expand_list, expand_width) {
 #'
 #' @param overlayed_plot Plot.
 #' @param feature_of_interest Feature of interest.
+#' @param dataset Dataset.
 #' @param output_dir Output directory.
-SavePlotPdf <- function(overlayed_plot, feature_of_interest, output_dir) {
+SavePlotPdf <- function(overlayed_plot, feature_of_interest, dataset,
+  output_dir) {
   overlayed_plot %>%
     ggsave(
       filename = file.path(output_dir,
@@ -941,13 +944,14 @@ if (length(feature_of_interest) == 1) {
     scale_x_continuous(breaks = seq(-expand_width, expand_width, 2))
   # Save plot as PDF.
   print("Save plot as PDF")
-  SavePlotPdf(overlayed_plot, feature_of_interest, output_dir)
+  SavePlotPdf(overlayed_plot, feature_of_interest, dataset, output_dir)
   print("Done")
 } else {
   # Use purrr::map to extract the RelCounts at position 0 of all
   # desired features of interest.
   feature_rel_use <- purrr::map_df(
-    .x = feature_of_interest, .f = FindAllFeatures,
+    .x = feature_of_interest,
+    .f = FindAllFeatures,
     yeast_codon_pos_i200 = yeast_codon_pos_i200,
     gene_names = gene_names,
     gff_df = gff_df,
