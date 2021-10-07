@@ -73,7 +73,7 @@ Running on data from the simulated dataset Mok-simYAL5 with the aim of investiga
 $ Rscript rscripts/YAL5-single-codons.R -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --asite_length data/yeast_standard_asite_disp_length.txt --feature data/codons.tsv -o .
 ```
 
-Running `YAL5-single-codons.R` with a TSV file, `Feature_Relative_use_<dataset>.tsv`, containing multiple features of interest produces a file containing the following output format:
+Running `YAL5-single-codons.R` with a TSV file with multiple features of interest produces a TSV file, `Feature_Relative_use_<dataset>.tsv`, containing the following output:
 
 ```console
 $ cat Feature_Relative_use_Mok-simYAL5.tsv 
