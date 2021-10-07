@@ -579,12 +579,12 @@ ExpandFeatureRegionAllGenes <- function(
 #' Change NaNs to zero.
 #'
 #' @param values Values.
-#' @return 0 if NaN else `value`.
-SetNaNToZero <- function(value) {
-  if (is.nan(value)) {
-    value <- 0
+#' @return 0 if NaN else `values`.
+SetNaNToZero <- function(values) {
+  if (is.nan(values)) {
+    values <- 0
   } else {
-    value <- value
+    values <- values
   }
 }
 
