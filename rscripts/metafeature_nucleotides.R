@@ -717,7 +717,7 @@ SavePlotPdf <- function(overlayed_plot, dataset, output_dir) {
       filename = file.path(
         output_dir,
         paste0(
-          "Meta_feature_plot_positons_of_interest", "_", dataset, ".pdf")),
+          "Meta_feature_plot_positions_of_interest", "_", dataset, ".pdf")),
       width = 6, height = 5
     )
 }

@@ -59,5 +59,4 @@ $ Rscript rscripts/metafeature_nucleotides.R
 $ Rscript rscripts/metafeature_nucleotides.R -i data/Mok-tinysim/A.h5 -d Mok-tinysim -g data/Mok-tinysim/tiny_2genes_20utrs.gff3 -f data/Mok-tinysim/tiny_2genes_20utrs.fa --asite_length data/yeast_standard_asite_disp_length.txt --feature_pos data/feature_pos.tsv -o . --expand_width 2
 ```
 
-Running `metafeature_nucleotides.R` produces a PDF, `Meta_feature_plot_positons_of_interest_<dataset>.pdf`.
-
+Running `metafeature_nucleotides.R` produces a PDF, `Meta_feature_plot_positions_of_interest_<dataset>.pdf`.

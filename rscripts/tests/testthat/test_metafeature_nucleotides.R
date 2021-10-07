@@ -94,7 +94,7 @@ testthat::test_that("Default", {
       gff_file, fasta_file, asite_file, feature_pos_file, output_dir,
       expand_width)
 
-    output_file <- "Meta_feature_plot_positons_of_interest_Mok-tinysim.pdf"
+    output_file <- "Meta_feature_plot_positions_of_interest_Mok-tinysim.pdf"
     output_path <- file.path(".", output_file)
     testthat::expect_true(file.exists(output_path),
          info = paste(output_path, "does not exist"))
