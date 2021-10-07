@@ -164,7 +164,7 @@ GetAllCodonPosCounts1Gene <- function(
                       %>%  select(end))
 
   # If all reads are to be kept.
-  if (filter_for_frame == FALSE) {
+  if (! filter_for_frame) {
     # Groups counts for all reading frames to their respective codon.
     codon_counts_1_gene <- GetGeneCodonPosReads1dsnap(
       gene, dataset, hd_file, left, right, min_read_length,
@@ -449,7 +449,7 @@ ExpandRegions <- function(
 AllGeneInterestingFeatures <- function(
   codon_pos_pair_i200, gene, gene_names, dataset, hd_file,
   min_read_length, feature_of_interest, gene_pos_codon_counts,
-  gff_df) {
+  gff_df, expand_width) {
 
   transcript_for_one_gene <- TranscriptForOneGene(gene,
                                                   gene_pos_codon_counts,
@@ -551,7 +551,8 @@ ExpandFeatureRegion <- function(
     min_read_length,
     feature_of_interest,
     gene_pos_codon_counts,
-    gff_df)
+    gff_df,
+    expand_width)
 
   expand_feature_region <- unlist(expand_feature_region,
                                   recursive = FALSE)
