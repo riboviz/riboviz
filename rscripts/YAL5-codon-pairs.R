@@ -702,19 +702,17 @@ SetNaNToZero <- function(values) {
 }
 
 #' Remove the occurrences of tibbles which contain NaN.
-CheckForNaN <- function(.x) {
-  normalized_expand_list <- .x
+CheckForNaN <- function(normalized_expand_list) {
   Relcount_values <- unlist(normalized_expand_list$RelCount)
-
   Relcount_values <- unlist(purrr::map(.x = Relcount_values,
                                        .f = SetNaNToZero))
-
-  dplyr::mutate(.x, RelCount = Relcount_values)
+  dplyr::mutate(normalized_expand_list, RelCount = Relcount_values)
 }
 
 # function to normalise each tibble before they can be overlayed
-Normalization <- function(.x, expand_width) {
-  dplyr::mutate(.x, RelCount = Count / sum(Count) * (2 * expand_width + 1))
+Normalization <- function(expand_feature_region, expand_width) {
+  dplyr::mutate(expand_feature_region,
+                RelCount = Count / sum(Count) * (2 * expand_width + 1))
 }
 
 #' ExpandedRegionNormalisation(): carries out normalization within
