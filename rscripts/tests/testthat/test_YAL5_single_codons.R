@@ -93,7 +93,7 @@ testthat::test_that("--feature codon", {
   feature <- "CGA"
   output_dir <- "."
 
-  withr::with_tempdir({
+#  withr::with_tempdir({
     RunYal5SingleCodons(yal5_single_codons, h5_file, dataset,
       gff_file, asite_file, annotation_file, feature, output_dir)
 
@@ -101,7 +101,7 @@ testthat::test_that("--feature codon", {
     output_path <- file.path(".", output_file)
     testthat::expect_true(file.exists(output_path),
          info = paste(output_path, "does not exist"))
-  })
+#  })
 })
 
 testthat::test_that("--feature file", {
@@ -115,7 +115,7 @@ testthat::test_that("--feature file", {
   output_dir <- "."
   expected_tsv <- here::here("data/Mok-simYAL5/yal5-single-codons.tsv")
 
-  withr::with_tempdir({
+#  withr::with_tempdir({
     RunYal5SingleCodons(yal5_single_codons, h5_file, dataset,
       gff_file, asite_file, annotation_file, feature, output_dir)
 
@@ -125,7 +125,7 @@ testthat::test_that("--feature file", {
          info = paste(output_path, "does not exist"))
     actual_data <- tibble::as_tibble(
         readr::read_tsv(output_path, comment = "#"))
-  })
+#  })
   expected_data <- tibble::as_tibble(
       readr::read_tsv(expected_tsv, comment = "#"))
   testthat::expect_equal(expected_data, actual_data, info = "Data differs")

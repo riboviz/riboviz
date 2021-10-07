@@ -401,8 +401,7 @@ AddCodonNamesToCodonPosCounts <- function(
 #' Take an individual gene as an input, then filter for the codon of
 #' interest on the gene being investigated.
 TranscriptForOneGene <- function(
-  gene, dataset, hd_file, min_read_length, gff_df, yeast_codon_pos_i200,
-  feature_of_interest, transcript_gene_poscodon_frame) {
+  gene, feature_of_interest, transcript_gene_poscodon_frame) {
 
   # Filter transcript_gene_poscodon_frame to only include features of
   # interest.
@@ -465,9 +464,7 @@ AllGeneInterestingFeatures <- function(
   # Select features of interest occurring on the gene being that the
   # function is being applied to in this purrr::map cycle.
   transcript_for_one_gene <- TranscriptForOneGene(
-    gene, dataset, hd_file,  min_read_length, gff_df,
-    yeast_codon_pos_i200, feature_of_interest,
-    transcript_gene_poscodon_frame)
+    gene, feature_of_interest, transcript_gene_poscodon_frame)
 
   # Apply ExpandRegion() to each occurrence of the feature_of_interest
   # on the gene being studied.
