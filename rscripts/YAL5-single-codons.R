@@ -740,7 +740,7 @@ SavePlotPdf <- function(overlayed_plot, feature_of_interest, dataset,
 #' @param snapdisp Frame to filter to.
 #' @param yeast_codon_pos_i200 List of all codons and positions from
 #' the sample being studied
-#' @param .x List of features being studied.
+#' @param feature_being_studied List of features being studied.
 #' @param expand_width Number of codons to take a slice of either side of.
 #' occurrences of the feature_of_interest
 #' @return Tibble of features and their RelCounts at position 0.
@@ -765,12 +765,8 @@ SavePlotPdf <- function(overlayed_plot, feature_of_interest, dataset,
 FindAllFeatures <- function(
   gene_names, gff_df, asite_disp_path, dataset, hd_file,
   min_read_length, filter_for_frame, filtering_frame, snapdisp,
- yeast_codon_pos_i200, .x, expand_width) {
+ yeast_codon_pos_i200, feature_being_studied, expand_width) {
 
-  # Set .x to feature_being_studied, allowing purrr::map to iterate
-  # over different features of interest without having problems due to
-  # .x being a changing vector.
-  feature_being_studied <- .x
   # Run ExpandFeatureRegionAllGenes to get a list of occurrences of
   # the feature of interest
   print(paste0("Finding occurences of ", feature_being_studied))
