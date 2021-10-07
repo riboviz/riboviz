@@ -25,12 +25,13 @@ MAT	6
 
 ## Usage
 
-`metafeature_nucleotides.R` requires N arguments:
+`metafeature_nucleotides.R` requires the following arguments:
 
 * `-i` or `--input`: Path to the H5 input file.
 * `-d` or `--dataset`: Name of the dataset being studied.
 * `-g` or `--gff`: Path to the GFF3 file of the species being studied.
 * `-f` or  `--fasta`: Path to the FASTA file of the species being studied.
+* `--asite_length`: Path to species-specific A-site displacement length file. An example can be found in `data/yeast_standard_asite_disp_length.txt`.
 * `--feature_pos`: A TSV file listing the Gene and Positions to normalize over, under the headings `Gene` and `Pos`.
 * `-o` or `--output`: Path to output directory.
 
@@ -38,8 +39,6 @@ There are a number of optional arguments that can be used to change how `metafea
 
 * `--expand_width`: The desired range either side of the feature of interest, default = 5
 * `--minreadlen`: Minimum read length, default = 10.
-* `--asite_length`: Path to species-specific A-site displacement length file, \
-default = `data/yeast_standard_asite_disp_length.txt`.
 
 `metafeature_nucleotides.R` can be run with the command:
 
@@ -49,6 +48,7 @@ $ Rscript rscripts/metafeature_nucleotides.R
         -d [Dataset] \
         -g [Path to GFF3 file] \
         -f [Path to FASTA file] \
+        --asite_length [Path to the A-site displacement length file] \
         --feature_pos [Path to feature positions file] \
         -o [Output directory]
 ```
@@ -56,5 +56,8 @@ $ Rscript rscripts/metafeature_nucleotides.R
 ## Examples
 
 ```console
-$ Rscript rscripts/metafeature_nucleotides.R -i data/Mok-tinysim/A.h5 -d Mok-tinysim -g data/Mok-tinysim/tiny_2genes_20utrs.gff3 -f data/Mok-tinysim/tiny_2genes_20utrs.fa --feature_pos data/feature_pos.tsv -o . --expand_width 2
+$ Rscript rscripts/metafeature_nucleotides.R -i data/Mok-tinysim/A.h5 -d Mok-tinysim -g data/Mok-tinysim/tiny_2genes_20utrs.gff3 -f data/Mok-tinysim/tiny_2genes_20utrs.fa --asite_length data/yeast_standard_asite_disp_length.txt --feature_pos data/feature_pos.tsv -o . --expand_width 2
 ```
+
+Running `metafeature_nucleotides.R` produces a PDF, `Meta_feature_plot_positons_of_interest_<dataset>.pdf`.
+

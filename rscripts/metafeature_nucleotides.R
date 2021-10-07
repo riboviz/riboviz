@@ -79,8 +79,7 @@ option_list <- list(make_option(c("-i", "--input"),
                                 type = "character",
                                 help = "Path to asite_disp_length. Default is
                                 specific for yeast when code is run from
-                                riboviz directory",
-                                default = "data/yeast_standard_asite_disp_length.txt")
+                                riboviz directory")
 )
 
 opt <- optparse::parse_args(OptionParser(option_list = option_list))

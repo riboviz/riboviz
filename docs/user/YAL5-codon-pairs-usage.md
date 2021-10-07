@@ -16,7 +16,7 @@ Read counts are fetched from the H5 file of a sample and the counts are assigned
 
 ## Outputs
 
-There are  two potential outputs when running `YAL5-codon-pairs.R`.
+There are two potential outputs when running `YAL5-codon-pairs.R`.
 
 The first potential output is a PDF of a graph plotting the average relative number of reads mapping to each position relative to the feature of interest within the desired window. This is produced if only one pair is given as a feature of interest, for example the codon pair "CGA GCC".
 
@@ -26,7 +26,7 @@ The second ptential output is a table in the form of a TSV file. This is produce
 
 ## Execution
 
-`YAL5-codon-pairs.R` requires seven arguments:
+`YAL5-codon-pairs.R` requires the following arguments:
 
 * `-i` or `--input`: Path to the H5 input file.
 * `-d` or `--dataset`: Name of the dataset of the sample being studied.
@@ -69,7 +69,7 @@ Running on data from the simulated dataset Mok-simYAL5 with the aim of investiga
 $ Rscript rscripts/YAL5-codon-pairs.R -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --asite_length data/yeast_standard_asite_disp_length.txt --feature "CCA TGG" -o .
 ```
 
-Running `YAL5-codon-pairs.R` with a single feature of interest argument produces a PDF with the following image:
+Running `YAL5-codon-pairs.R` with a single feature of interest argument produces a PDF, `Meta_feature_plot<feature>.pdf`, with the following image:
 
 <img src="../images/Meta_feature_plot_CCA_TGG_Mok-simYAL5.JPG" alt="CCA TGG Mok-simYAL5 meta feature plot" width="500"/>
 
@@ -81,7 +81,7 @@ Running on data from the simulated dataset Mok-simYAL5 with the aim of investiga
 $ Rscript rscripts/YAL5-codon-pairs.R -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --asite_length data/yeast_standard_asite_disp_length.txt --feature data/codon-pairs.tsv -o .
 ```
 
-Running `YAL5-codon-pairs.R` with a TSV file containing multiple features of interest produces a file containing the following output format:
+Running `YAL5-codon-pairs.R` with a TSV file, `Feature_Relative_use.tsv`, containing multiple features of interest produces a file containing the following output format:
 
 ```
 $ cat Feature_Relative_use.tsv 

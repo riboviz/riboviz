@@ -16,12 +16,13 @@ The second potential output is a table in the form of a TSV file. This is produc
 
 ## Execution
 
-`YAL5-single-codons.R` requires six arguments:
+`YAL5-single-codons.R` requires the following arguments:
 
 * `-i` or `--input`: Path to the H5 input file.
 * `-d` or `--dataset`: Name of the dataset of the sample being studied.
 * `-g` or `--gff`: Path to the GFF3 file of the organism being studied.
 * `-a` or `--annotation`: Path to codon table for the organism (TSV file).
+* `--asite_length`: Path to species-specific A-site displacement length file. An example can be found in `data/yeast_standard_asite_disp_length.txt`.
 * `--feature`: Feature of interest, e.g. 'CGA'. If multiple features (codons) are being studied then they should be contained within a TSV file with a 'Codon' header.
 * `-o` or `--output`: Path to output directory.
 
@@ -32,7 +33,8 @@ There are a number of optional arguments that can be used to change how `YAL5-si
 * `--minreadlen`: Minimum read length, default = 10.
 * `--filter_for_frame`: Counts for all reading frames per codon are summed and assigned to their corresponding codon. Keep all by not filtering (FALSE) or filter for the specific reading frame, specified in `--frame`, (TRUE), default = TRUE.
 * `--snapdisp`: Reading frame to filter for, if `--filter_for_frame = TRUE`, default = 0.
-* '--asite_length': Path to species-specific A-site displacement length file, default = `data/yeast_standard_asite_disp_length.txt`.
+
+default = `data/yeast_standard_asite_disp_length.txt`.
 
 `YAL5-single-codons.R` can be run with the command:
 
@@ -42,8 +44,9 @@ $ Rscript rscripts/YAL5-single-codons.R \
  	-d [Dataset] \
 	-g [Path to GFF3 file] \
 	-a [Path to codon table for organism] \
-	 --feature [individual feature to be studied or path to TSV file containing multiple features] \
-	-o [Output directory]
+        --asite_length [Path to the A-site displacement length file] \
+        --feature [individual feature to be studied or path to TSV file containing multiple features] \
+        -o [Output directory]
 ```
 
 ## Examples
@@ -55,10 +58,10 @@ The examples assume that `YAL5-single-codons.R` is being run from the riboviz fo
 Running on data from the simulated dataset Mok-simYAL5 with the aim of investigating the codon pair 'CGA', the command would be:
 
 ```console
-$ Rscript rscripts/YAL5-single-codons.R -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --feature CGA -o .
+$ Rscript rscripts/YAL5-single-codons.R -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --asite_length data/yeast_standard_asite_disp_length.txt --feature CGA -o .
 ```
 
-Running `YAL5-single-codons.R` with a single feature of interest produces a PDF with the following image:
+Running `YAL5-single-codons.R` with a single feature of interest produces a PDF, `Meta_feature_plot_<feature>_<dataset>.pdf`, mwith the following image:
 
 <img src="../images/Meta_feature_plot_CGA_Mok-simYAL5.JPG" alt="CGA Mok-simYAL5 meta feature plot" width="500"/>
 
@@ -67,10 +70,10 @@ Running `YAL5-single-codons.R` with a single feature of interest produces a PDF 
 Running on data from the simulated dataset Mok-simYAL5 with the aim of investigating multiple codons, provided as a TSV file, the command would be:
 
 ```console
-$ Rscript rscripts/YAL5-single-codons.R -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --feature data/codons.tsv -o .
+$ Rscript rscripts/YAL5-single-codons.R -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --asite_length data/yeast_standard_asite_disp_length.txt --feature data/codons.tsv -o .
 ```
 
-Running `YAL5-single-codons.R` with a TSV file containing multiple features of interest produces a file containing the following output format:
+Running `YAL5-single-codons.R` with a TSV file, `Feature_Relative_use_<dataset>.tsv`, containing multiple features of interest produces a file containing the following output format:
 
 ```console
 $ cat Feature_Relative_use_Mok-simYAL5.tsv 
