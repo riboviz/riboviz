@@ -232,6 +232,47 @@ FilterForFrame <- function(gene, dataset, hd_file, min_read_length,
 
 ### Fetch and format counts from the h5 file ###
 
+# Extracts read counts for each codon position for a single gene.
+GetAllCodonPosCounts1Gene <- function(
+  gene, dataset, hd_file, min_read_length, asite_disp_length,
+  asite_disp_path, snapdisp, filter_for_frame, gff_df) {
+
+  # Fetch gff values for a gene, e.g. gene = YAL003W.
+  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df,
+                                         seqnames == gene)
+
+  # Assign start position of the CDS, e.g. for YAL003W: 251.
+  left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
+                                   type == "CDS")
+                     %>%  select(start))
+
+  # Assign end position of the CDS, e.g. for YAL003W: 871.
+  right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
+                                    type == "CDS")
+                      %>%  select(end))
+
+  # If all reads are to be kept.
+  if (filter_for_frame == FALSE) {
+    # Groups counts for all reading frames to their respective codon.
+    codon_counts_1_gene <- GetGeneCodonPosReads1dsnap(
+      gene, dataset, hd_file, left, right, min_read_length,
+      asite_disp_length, snapdisp = snapdisp)
+  } else {
+    # Fetch counts for the reading frame of interest
+    codon_counts_1_gene <- FilterForFrame(
+      gene, dataset, hd_file, min_read_length, snapdisp,
+      asite_disp_path, gff_df)
+  }
+  # Make a tibble which contains "Gene", "PosCodon" and "Count".
+  codon_pos_counts <- tibble(Gene = gene,
+                             PosCodon = 1:length(codon_counts_1_gene),
+                             Count = codon_counts_1_gene)
+  as.data.frame(codon_pos_counts,
+                row.names = NULL,
+                optional = FALSE)
+  return(codon_pos_counts)
+}
+
 #' GetAllCodonPosCounts(): extracts A-site assigned counts for a list
 #' of genes
 #'
@@ -299,46 +340,6 @@ GetAllCodonPosCounts <- function(
   asite_disp_length <- suppressMessages(
     ReadAsiteDisplacementLengthFromFile(asite_disp_path))
 
-  # Extracts read counts for each codon position for a single gene.
-  GetAllCodonPosCounts1Gene <- function(
-    gene, dataset, hd_file, min_read_length, asite_disp_length,
-    asite_disp_path, snapdisp, filter_for_frame, gff_df) {
-
-    # Fetch gff values for a gene, e.g. gene = YAL003W.
-    subset_gff_df_by_gene <- dplyr::filter(.data = gff_df,
-                                           seqnames == gene)
-
-    # Assign start position of the CDS, e.g. for YAL003W: 251.
-    left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
-                                     type == "CDS")
-                       %>%  select(start))
-
-    # Assign end position of the CDS, e.g. for YAL003W: 871.
-    right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
-                                      type == "CDS")
-                        %>%  select(end))
-
-    # If all reads are to be kept.
-    if (filter_for_frame == FALSE) {
-      # Groups counts for all reading frames to their respective codon.
-      codon_counts_1_gene <- GetGeneCodonPosReads1dsnap(
-        gene, dataset, hd_file, left, right, min_read_length,
-        asite_disp_length, snapdisp = snapdisp)
-    } else {
-      # Fetch counts for the reading frame of interest
-      codon_counts_1_gene <- FilterForFrame(
-        gene, dataset, hd_file, min_read_length, snapdisp,
-        asite_disp_path, gff_df)
-    }
-    # Make a tibble which contains "Gene", "PosCodon" and "Count".
-    codon_pos_counts <- tibble(Gene = gene,
-                               PosCodon = 1:length(codon_counts_1_gene),
-                               Count = codon_counts_1_gene)
-    as.data.frame(codon_pos_counts,
-                  row.names = NULL,
-                  optional = FALSE)
-    return(codon_pos_counts)
-  }
   # Apply GetAllCodonPosCounts1Gene() to genes contained within gene_names
   all_codon_pos_counts <- purrr::map_dfr(
     .x = gene_names,
@@ -477,6 +478,86 @@ AddCodonNamesToCodonPosCounts <- function(
 
 ### Slice out and expand a frame around interesting features ###
 
+TranscriptForOneGene <- function(
+  gene, gene_pos_codon_counts, feature_of_interest) {
+
+  # Filter for the occurrences of the feature_of_interest
+  interesting_feature_tibble <- dplyr::filter(
+    gene_pos_codon_counts,
+    CodonPair == feature_of_interest)
+
+  # Filters for the gene of interest from interesting_feature_tibble
+  transcript_for_one_gene <- dplyr::filter(interesting_feature_tibble,
+                                           Gene == gene)
+
+  return(transcript_for_one_gene)
+}
+
+# Expand the region around an occurrence of the feature_of_interest
+ExpandRegions <- function(
+  transcript_for_one_gene, gene_pos_codon_counts, gene, gene_names,
+  hd_file, gff_df, expand_width) {
+
+  # assigns new name to the transcript_for_one_gene tibble
+  interesting_features <- transcript_for_one_gene
+
+  # filters gene_pos_codon_counts down to the gene being processed
+  gene_pos_codon_feature <- dplyr::filter(gene_pos_codon_counts,
+                                          Gene == gene)
+
+  # fetch gene length for gene being processed from the gff file
+  gene_length <- dplyr::filter(gff_df,
+                               gff_df$type == "CDS" &
+                                 gff_df$Name == gene) %>% select(width)
+
+  # if the window cannot be formed around the feature_of_interest
+  if (interesting_features <= expand_width  |
+      interesting_features + expand_width > gene_length / 3) {
+
+    return()
+  } else {
+    # if the window can be formed around the feature_of_interest
+    # slice and return the window around the feature_of_interest
+    expand_feature_region <- tibble(
+      dplyr::slice(gene_pos_codon_feature,
+                   (interesting_features - expand_width):(interesting_features + expand_width),
+                   each = FALSE),
+                   RelPos =  seq(- expand_width, expand_width))
+
+    if (dim(expand_feature_region)[1] == (2 * expand_width + 1)) {
+      return(expand_feature_region)
+    } else {
+      return()
+    }
+  }
+}
+
+# Takes gene_pos_codon_counts as inputs and select for positions
+# on separate genes
+AllGeneInterestingFeatures <- function(
+  codon_pos_pair_i200, gene, gene_names, dataset, hd_file,
+  min_read_length, feature_of_interest, gene_pos_codon_counts,
+  gff_df) {
+
+  transcript_for_one_gene <- TranscriptForOneGene(gene,
+                                                  gene_pos_codon_counts,
+                                                  feature_of_interest)
+
+  # The if statement ensures that feature positions that are
+  # less/more than the expand_width value are discarded
+  expand_feature_region <- purrr::map(
+    .x = transcript_for_one_gene$CodonPos1,
+    .f = ExpandRegions,
+    gene_pos_codon_counts,
+    gene,
+    gene_names,
+    hd_file,
+    gff_df,
+    expand_width)
+
+  return(expand_feature_region)
+}
+
 #' ExpandFeatureRegion(): Generates a window around each
 #' feature_of_interest across all genes in gene_names
 #'
@@ -548,89 +629,6 @@ ExpandFeatureRegion <- function(
     min_read_length, snapdisp, asite_disp_path, filter_for_frame,
     gff_df)
 
-  # Takes gene_pos_codon_counts as inputs and select for positions
-  # on separate genes
-  AllGeneInterestingFeatures <- function(
-    codon_pos_pair_i200, gene, gene_names, dataset, hd_file,
-    min_read_length, feature_of_interest, gene_pos_codon_counts,
-    gff_df) {
-
-    TranscriptForOneGene <- function(gene_names,
-                                     gene_pos_codon_counts,
-                                     feature_of_interest
-                                     ) {
-
-      # Filter for the occurrences of the feature_of_interest
-      interesting_feature_tibble <- dplyr::filter(
-        gene_pos_codon_counts,
-        CodonPair == feature_of_interest)
-
-      # Filters for the gene of interest from interesting_feature_tibble
-      transcript_for_one_gene <- dplyr::filter(interesting_feature_tibble,
-                                               Gene == gene)
-
-      return(transcript_for_one_gene)
-    }
-
-    transcript_for_one_gene <- TranscriptForOneGene(gene_names,
-                                                    gene_pos_codon_counts,
-                                                    feature_of_interest)
-
-    # Expand the region around an occurrence of the feature_of_interest
-    ExpandRegions <- function(transcript_for_one_gene,
-                              gene_pos_codon_counts,
-                              gene_names,
-                              hd_file,
-                              gff_df,
-                              expand_width) {
-
-      # assigns new name to the transcript_for_one_gene tibble
-      interesting_features <- transcript_for_one_gene
-
-      # filters gene_pos_codon_counts down to the gene being processed
-      gene_pos_codon_feature <- dplyr::filter(gene_pos_codon_counts,
-                                              Gene == gene)
-
-      # fetch gene length for gene being processed from the gff file
-      gene_length <- dplyr::filter(gff_df,
-                                   gff_df$type == "CDS" &
-                                     gff_df$Name == gene) %>% select(width)
-
-      # if the window cannot be formed around the feature_of_interest
-      if (interesting_features <= expand_width  |
-          interesting_features + expand_width > gene_length / 3) {
-
-        return()
-      } else {
-        # if the window can be formed around the feature_of_interest
-        # slice and return the window around the feature_of_interest
-        expand_feature_region <- tibble(
-          dplyr::slice(gene_pos_codon_feature,
-                       (interesting_features - expand_width):(interesting_features + expand_width),
-                       each = FALSE),
-                       RelPos =  seq(- expand_width, expand_width))
-
-        if (dim(expand_feature_region)[1] == (2 * expand_width + 1)) {
-          return(expand_feature_region)
-        } else {
-          return()
-        }
-      }
-    }
-    # The if statement ensures that feature positions that are
-    # less/more than the expand_width value are discarded
-    expand_feature_region <- purrr::map(
-      .x = transcript_for_one_gene$CodonPos1,
-      .f = ExpandRegions,
-      gene_pos_codon_counts,
-      gene,
-      gene_names = gene_names,
-      gff_df = gff_df,
-      expand_width = expand_width)
-
-    return(expand_feature_region)
-  }
-
   expand_feature_region <- purrr::map(
     .x = gene_names,
     .f = AllGeneInterestingFeatures,
@@ -689,6 +687,35 @@ ExpandFeatureRegion <- function(
 # ...
 
 ### Normalisation ###
+
+#' Change NaNs to zero.
+#'
+#' @param values Values.
+#' @return 0 if NaN else `values`.
+SetNaNToZero <- function(values) {
+  if (is.nan(values)) {
+    print("NaN present")
+    values <- 0
+  } else {
+    values <- values
+  }
+}
+
+#' Remove the occurrences of tibbles which contain NaN.
+CheckForNaN <- function(.x) {
+  normalized_expand_list <- .x
+  Relcount_values <- unlist(normalized_expand_list$RelCount)
+
+  Relcount_values <- unlist(purrr::map(.x = Relcount_values,
+                                       .f = SetNaNToZero))
+
+  dplyr::mutate(.x, RelCount = Relcount_values)
+}
+
+# function to normalise each tibble before they can be overlayed
+Normalization <- function(.x, expand_width) {
+  dplyr::mutate(.x, RelCount = Count / sum(Count) * (2 * expand_width + 1))
+}
 
 #' ExpandedRegionNormalisation(): carries out normalization within
 #' each expanded frame so that they are comparable
@@ -760,33 +787,10 @@ ExpandedRegionNormalisation <- function(
     min_read_length, snapdisp, asite_disp_path, filter_for_frame,
     feature_of_interest, expand_width)
 
-  # function to normalise each tibble before they can be overlayed
-  Normalization <- function(.x, expand_width) {
-    dplyr::mutate(.x, RelCount = Count / sum(Count) * (2 * expand_width + 1))
-  }
-
   normalized_expand_list <- purrr::map(.x = expand_feature_region,
                                        .f = Normalization,
                                        expand_width)
 
-  # function to remove the occurrences of tibbles which contain NaN
-  CheckForNaN <- function(.x) {
-    normalized_expand_list <- .x
-    Relcount_values <- unlist(normalized_expand_list$RelCount)
-
-    SetNaNToZero <- function(Relcount_values) {
-      if (is.nan(Relcount_values)) {
-        print("NaN present")
-        Relcount_values <- 0
-      } else {
-        Relcount_values <- Relcount_values
-      }
-    }
-    Relcount_values <- unlist(purrr::map(.x = Relcount_values,
-                                         .f = SetNaNToZero))
-
-    dplyr::mutate(.x, RelCount = Relcount_values)
-  }
   normalized_expand_list <- purrr::map(.x = normalized_expand_list,
                                        .f = CheckForNaN)
 }
@@ -1123,6 +1127,22 @@ GeneratePlot <- function(
 
 ### Run functions ###
 
+#' Save plot as a PDF.
+#'
+#' @param overlayed_plot Plot.
+#' @param feature_of_interest Feature of interest.
+#' @param output_dir Output directory.
+SavePlotPDF <- function(
+  overlayed_plot, feature_of_interest, output_dir) {
+  overlayed_plot %>%
+    ggsave(
+      filename = file.path(output_dir,
+                           paste0("Meta_feature_plot",
+                                  feature_of_interest, ".pdf")),
+      width = 6, height = 5
+    )
+}
+
 if (length(feature_of_interest) == 1) {
 
   # Run ExpandFeatureRegionAllGenes to get a list of occurrences of
@@ -1167,16 +1187,7 @@ if (length(feature_of_interest) == 1) {
     feature_of_interest, expand_width, size = 12)
 
   print("Save plot as PDF")
-  SavePlotPDF <- function(overlayed_plot, output_dir) {
-    overlayed_plot %>%
-      ggsave(
-        filename = file.path(output_dir,
-                             paste0("Meta_feature_plot",
-                                    feature_of_interest, ".pdf")),
-        width = 6, height = 5
-      )
-  }
-  SavePlotPDF(overlayed_plot, output_dir)
+  SavePlotPDF(overlayed_plot, feature_of_interest, output_dir)
   print("Done")
 } else {
   # Use purrr::map to extract the RelCounts at position 0 of all
