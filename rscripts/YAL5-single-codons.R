@@ -1,6 +1,6 @@
-# This script uses a h5, GFF and .tsv file to create either a
-# metafeature plot for a feature_of_interest, or a table comparing the
-# RelCount of multiple features of interest.
+# This script uses a H5, GFF and TSV file to create either a
+# metafeature plot for a feature of interest, or a table comparing the
+# RelCount of multiple features of interest. 
 # Currently designed for single codons.
 
 ## TEST::run on TinySim Dataset
@@ -33,92 +33,13 @@ if (interactive()) {
   source(file.path(dirname(self), "stats_figs_block_functions.R"))
 }
 
-option_list <- list(
-  make_option(c("-i", "--input"),
-              type = "character",
-              help = "Path input to h5 file"),
-  make_option(c("-d", "--dataset"),
-              type = "character",
-              help = "Name of the dataset being studied"),
-  make_option(c("-g", "--gff"),
-              type = "character",
-              help = "Path to the GFF3 file of the organism being studied"),
-  make_option(c("-a", "--annotation"),
-              type = "character",
-              help = "Path to codon table for organism"),
-  make_option("--feature",
-              type = "character",
-              help = "Feature of interest, e.g. codon"),
-  make_option(c("-o", "--output"),
-              type = "character",
-              help = "Path to output directory",
-              default = "."),
-  make_option(c("--expand_width"),
-              type = "integer",
-              help = "the desired range either side of the feature of
-                interest",
-              default = 5),
-  make_option(c("--frame"),
-              type = "integer",
-              help = "reading frame to be studied",
-              default = 0L),
-  make_option(c("--minreadlen"),
-              type = "integer",
-              help = "minimum read length",
-              default = 10),
-  make_option(c("--filter_for_frame"),
-              type = "logical",
-              help = "counts for all reading frames per codon are
-                summed and assigned to their corresponding codon.
-                You either keep all by not filtering (FALSE) or
-                filter for a specific reading frame (TRUE)",
-              default = TRUE),
-  make_option(c("--snapdisp"),
-              type = "integer",
-              help = "frame to filter to when using SnapToCodon",
-              default = 0L),
-  make_option(c("--asite_length"),
-              type = "character",
-              help = "Path to asite_disp_length. Default is specific
-                for yeast when code is run from riboviz directory")
-)
-
-opt <- optparse::parse_args(OptionParser(option_list = option_list))
-
-hd_file <- opt$input
-dataset <- opt$dataset
-gff <- opt$gff
-yeast_codon_table <- opt$annotation
-feature_of_interest <- opt$feature
-output_dir <- opt$output
-expand_width <- opt$expand_width
-startlen <- opt$startlen
-filtering_frame <- opt$frame
-min_read_length <- opt$minreadlen
-filter_for_frame <- opt$filter_for_frame
-snapdisp <- opt$snapdisp
-asite_disp_path <- opt$asite_length
-
-# If feature_of_interest is a file then load contents. The first
-# column of the file should contain the features of interest
-# (codons).
-if (file.exists(feature_of_interest)) {
-  feature_of_interest <- read.csv(feature_of_interest)
-  feature_of_interest <- feature_of_interest[, 1]
-}
-
-gff_df <- readGFFAsDf(gff)
-gene_names <- unique(gff_df$Name)
-yeast_codon_pos_i200 <- suppressMessages(
-    readr::read_tsv(file = yeast_codon_table))
-
 ### Functions to map number of reads to codon positions ###
 
 #' Map reads to codons.
 #'
 #' Unlike `SnapToCodon` in `read_count_functions.R`, this function
-#' only returns reads mapping to the first nucleotide of a codon for the
-#' desired frame.
+#' only returns reads mapping to the first nucleotide of a codon for
+#' the desired frame.
 #'
 #' @param gene Gene name to pull out read counts for.
 #' @param gff_df Data frame version of the GFF3 file contents.
@@ -140,30 +61,22 @@ FilterForFrameFunction <- function(
 
   # Get the matrix of read counts.
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hd_file)
-
   # Assign reads to their A site nt, determined by read length.
   reads_asitepos <- CalcAsiteFixed(reads_pos_length,
                                    min_read_length,
-                                   asite_displacement_length
-  )
-
+                                   asite_displacement_length)
   # Get the gff rows for the gene being studied.
-  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene)
-
+  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df,
+                                         seqnames == gene)
   # Get the position of the start codon.
   left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
                                    type == "CDS") %>%  select(start))
-
   # Get the position of the stop codon.
   right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
                                     type == "CDS") %>%  select(end))
-
   # Extract the reads that map to the CDS.
   cds_reads <- reads_asitepos[left:right]
-  # ie: num [1:621] 811 460 2978 429 251 ...
-
   cds_length <- length(cds_reads) / 3
-
   # Create a tibble, assigning a frame to each nt, so the first nt in
   # each frame has the corresponding frame identity.
   cds_reads_frames <- tibble(Count = cds_reads,
@@ -182,7 +95,7 @@ FilterForFrameFunction <- function(
 #' @param asite_disp_path Path to A-site file.
 #' @param dataset Name of dataset in H5 file.
 #' @param hd_file Path to H5 file holding read data for all genes.
-#' @param min_read_length Integer, the minimum read length in H5 file.
+#' @param min_read_length Minimum read length in H5 file (integer).
 #' @param filter_for_frame Method to use for assigning reads (logical).
 #' @param filtering_frame Frame from which to select reads from.
 #' @param snapdisp Frame to filter to.
@@ -193,21 +106,17 @@ GetAllCodonPosCounts1Gene <- function(
 
   # Get the gff rows for the gene being studied.
   subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene)
-
   # Get the position of the start codon.
   left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
                                    type == "CDS") %>%  select(start))
-
   # Get the position of the stop codon.
   right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
                                     type == "CDS") %>%  select(end))
-
   # Get the A-site displacement for reads of different lengths.
   asite_displacement_length <- suppressMessages(
     ReadAsiteDisplacementLengthFromFile(asite_disp_path))
-
   # Calculate reads at codon positions in the desired way.
-  if (filter_for_frame == FALSE) {
+  if (! filter_for_frame) {
     # Assign reads to positions, adds the reads from all three
     # nucleotides in the codon.
     codon_counts_1_gene <- GetGeneCodonPosReads1dsnap(
@@ -239,7 +148,7 @@ GetAllCodonPosCounts1Gene <- function(
 #' @param asite_disp_path Path to A-site file.
 #' @param dataset Name of dataset in H5 file.
 #' @param hd_file Path to H5 file holding read data for all genes.
-#' @param min_read_length Integer, the minimum read length in H5 file.
+#' @param min_read_length Minimum read length in H5 file (integer).
 #' @param filter_for_frame Method to use for assigning reads (logical).
 #' @param filtering_frame Frame from which to select reads from.
 #' @param snapdisp Frame to filter to.
@@ -329,7 +238,7 @@ GetAllCodonPosCounts <- function(
 #' @param asite_disp_path Path to A-site file.
 #' @param dataset Name of dataset in H5 file.
 #' @param hd_file Path to H5 file holding read data for all genes.
-#' @param min_read_length Integer, the minimum read length in H5 file.
+#' @param min_read_length Minimum read length in H5 file (integer).
 #' @param filter_for_frame Method to use for assigning reads (logical).
 #' @param filtering_frame Frame from which to select reads from.
 #' @param snapdisp Frame to filter to.
@@ -353,12 +262,10 @@ AddCodonNamesToCodonPosCounts <- function(
   total_codon_pos_counts <- GetAllCodonPosCounts(
     gene_names, gff_df, asite_disp_path, dataset, hd_file,
     min_read_length, filter_for_frame, filtering_frame, snapdisp)
-
   # Add codon identities.
   transcript_tibbles <- left_join(
     total_codon_pos_counts, yeast_codon_pos_i200,
     by = c("PosCodon", "Gene"), keep = FALSE, copy = TRUE)
-
   # Turn into a tibble.
   transcript_gene_poscodon_frame <- tibble(
     Gene = transcript_tibbles$Gene,
@@ -399,6 +306,11 @@ AddCodonNamesToCodonPosCounts <- function(
 
 #' Take an individual gene as an input, then filter for the codon of
 #' interest on the gene being investigated.
+#'
+#' @param gene Gene.
+#' @param feature_of_interest Feature of interest.
+#' @param transcript_gene_poscodon_frame
+#' @return transcript for one gene.
 TranscriptForOneGene <- function(
   gene, feature_of_interest, transcript_gene_poscodon_frame) {
 
@@ -407,11 +319,9 @@ TranscriptForOneGene <- function(
   interesting_feature_tibble <- dplyr::filter(
     transcript_gene_poscodon_frame,
     Codon == feature_of_interest)
-
   # Select only the gene that the function is being applied to.
   transcript_for_one_gene <- dplyr::filter(
     interesting_feature_tibble, Gene == gene)
-
   return(transcript_for_one_gene)
 }
 
@@ -419,6 +329,16 @@ TranscriptForOneGene <- function(
 #' interest in a gene (`transcript_gene_poscodon_frame`).
 #' Returns an empty tibble if the desired region hangs over the edge
 #' of the coding region
+#' 
+#' @param transcript_for_one_gene Transcript for one gene.
+#' @param transcript_gene_poscodon_frame
+#' @param gene Gene.
+#' @param gff_df Data frame version of the GFF3 file contents.
+#' @param dataset Name of dataset in H5 file.
+#' @param hd_file Path to H5 file holding read data for all genes.
+#' @param expand_width Number of codons to take a slice of either side
+#' of occurrences of the feature_of_interest
+#' @return feature information.
 ExpandRegions <- function(
   transcript_for_one_gene, transcript_gene_poscodon_frame, gene,
   gff_df, dataset, hd_file, expand_width) {
@@ -455,6 +375,18 @@ ExpandRegions <- function(
 }
 
 #' Select positions of the feature of interest on separate genes.
+#'
+#' @param gene Gene.
+#' @param gene_names List of all the genes in the sample,
+#' @param dataset Name of dataset in H5 file.
+#' @param hd_file Path to H5 file holding read data for all genes.
+#' @param min_read_length Minimum read length in H5 file (integer).
+#' @param gff_df Data frame version of the GFF3 file contents.
+#' @param yeast_codon_pos_i200 List of all codons and positions from
+#' the sample being studied
+#' @param feature_of_interest Feature being studied.
+#' @param transcript_gene_poscodon_frame
+#' @return feature information.
 AllGeneInterestingFeatures <- function(
   gene, gene_names, dataset, hd_file, min_read_length, gff_df,
   yeast_codon_pos_i200, feature_of_interest,
@@ -464,7 +396,6 @@ AllGeneInterestingFeatures <- function(
   # function is being applied to in this purrr::map cycle.
   transcript_for_one_gene <- TranscriptForOneGene(
     gene, feature_of_interest, transcript_gene_poscodon_frame)
-
   # Apply ExpandRegion() to each occurrence of the feature_of_interest
   # on the gene being studied.
   output_feature_info <- purrr::map(.x = transcript_for_one_gene$PosCodon,
@@ -494,15 +425,15 @@ AllGeneInterestingFeatures <- function(
 #' @param asite_disp_path Path to A-site file.
 #' @param dataset Name of dataset in H5 file.
 #' @param hd_file Path to H5 file holding read data for all genes.
-#' @param min_read_length Integer, the minimum read length in H5 file.
+#' @param min_read_length Minimum read length in H5 file (integer).
 #' @param filter_for_frame Method to use for assigning reads (logical).
 #' @param filtering_frame Frame from which to select reads from.
 #' @param snapdisp Frame to filter to.
 #' @param yeast_codon_pos_i200 List of all codons and positions from
-#' the sample being studied
+#' the sample being studied.
 #' @param feature_of_interest Feature being studied.
-#' @param expand_width Number of codons to take a slice of either side of.
-#' occurrences of the feature_of_interest
+#' @param expand_width Number of codons to take a slice of either side
+#' of occurrences of the feature_of_interest
 #' @return List of tibbles, each containing the columns `Gene`,
 #' `PosCodon`, `Count", `Codon`, `Rel_Pos`, for a window of positions
 #' determined by `expand_width` around an occurence of the
@@ -523,7 +454,6 @@ ExpandFeatureRegionAllGenes <- function(
     gene_names, gff_df, asite_disp_path, dataset, hd_file,
     min_read_length, filter_for_frame, filtering_frame, snapdisp,
     yeast_codon_pos_i200)
-
   # Apply AllGeneInterestingFeatures to each gene in the sample
   output_feature_info <- purrr::map(.x = gene_names,
                                     .f = AllGeneInterestingFeatures,
@@ -543,7 +473,6 @@ ExpandFeatureRegionAllGenes <- function(
   # within one expand_width of the UTRs.
   output_feature_info <- output_feature_info[
     !sapply(output_feature_info, is.null)]
-
   return(output_feature_info)
 }
 
@@ -587,6 +516,8 @@ SetNaNToZero <- function(values) {
   }
 }
 
+#' Change NaNs to 0s.
+#'
 #' Having NaNs in any table will cause problems during the overlay
 #' step. Changing them to 0 removes this problem, and takes into
 #' account that the NaNs are caused by no reads occurring.
@@ -608,12 +539,12 @@ CheckForNaN <- function(expanded_features, normalized_expand_tibble) {
 #' tibble for each occurrence of the feature_of_interest.
 #'
 #' @param expanded_features List of tidy format data frames (tibbles)
-# generated by the function ExpandFeatureRegion
+#' generated by the function ExpandFeatureRegion
 #' @param expand_width Integer which provides the number of positions
 #' on each side of the feature of interest to include in the window.
 #' @return List of tibbles which contain the normalized counts within
-# the window so that the feature is comparable despite overall varying
-# levels of expression between genes
+#' the window so that the feature is comparable despite overall varying
+#' levels of expression between genes
 #' @export
 #' @example
 #' ExpandedRegionNormalization(expanded_features, expand_width)
@@ -622,7 +553,6 @@ ExpandedRegionNormalization <- function(expanded_features, expand_width) {
   # Normalize the read counts.
   normalized_expand_tibble <- dplyr::mutate(
     expanded_features, RelCount = Count / sum(Count) * (2 * expand_width + 1))
-
   CheckForNaN(expanded_features, normalized_expand_tibble)
 }
 
@@ -806,7 +736,7 @@ SavePlotPdf <- function(overlayed_plot, feature_of_interest, dataset,
 #' @param asite_disp_path Path to A-site file.
 #' @param dataset Name of dataset in H5 file.
 #' @param hd_file Path to H5 file holding read data for all genes.
-#' @param min_read_length Integer, the minimum read length in H5 file.
+#' @param min_read_length Minimum read length in H5 file (integer).
 #' @param filter_for_frame Method to use for assigning reads (logical).
 #' @param filtering_frame Frame from which to select reads from.
 #' @param snapdisp Frame to filter to.
@@ -879,6 +809,88 @@ FindAllFeatures <- function(
     RelCount = filter(overlayed_tibbles,
                       overlayed_tibbles$Rel_Pos == 0)$RelCount)
 }
+
+
+
+
+option_list <- list(
+  make_option(c("-i", "--input"),
+              type = "character",
+              help = "Path input to h5 file"),
+  make_option(c("-d", "--dataset"),
+              type = "character",
+              help = "Name of the dataset being studied"),
+  make_option(c("-g", "--gff"),
+              type = "character",
+              help = "Path to the GFF3 file of the organism being studied"),
+  make_option(c("-a", "--annotation"),
+              type = "character",
+              help = "Path to codon table for organism"),
+  make_option("--feature",
+              type = "character",
+              help = "Feature of interest, e.g. codon"),
+  make_option(c("-o", "--output"),
+              type = "character",
+              help = "Path to output directory",
+              default = "."),
+  make_option(c("--expand_width"),
+              type = "integer",
+              help = "the desired range either side of the feature of
+                interest",
+              default = 5),
+  make_option(c("--frame"),
+              type = "integer",
+              help = "reading frame to be studied",
+              default = 0L),
+  make_option(c("--minreadlen"),
+              type = "integer",
+              help = "minimum read length",
+              default = 10),
+  make_option(c("--filter_for_frame"),
+              type = "logical",
+              help = "counts for all reading frames per codon are
+                summed and assigned to their corresponding codon.
+                You either keep all by not filtering (FALSE) or
+                filter for a specific reading frame (TRUE)",
+              default = TRUE),
+  make_option(c("--snapdisp"),
+              type = "integer",
+              help = "frame to filter to when using SnapToCodon",
+              default = 0L),
+  make_option(c("--asite_length"),
+              type = "character",
+              help = "Path to asite_disp_length. Default is specific
+                for yeast when code is run from riboviz directory")
+)
+
+opt <- optparse::parse_args(OptionParser(option_list = option_list))
+
+hd_file <- opt$input
+dataset <- opt$dataset
+gff <- opt$gff
+yeast_codon_table <- opt$annotation
+feature_of_interest <- opt$feature
+output_dir <- opt$output
+expand_width <- opt$expand_width
+startlen <- opt$startlen
+filtering_frame <- opt$frame
+min_read_length <- opt$minreadlen
+filter_for_frame <- opt$filter_for_frame
+snapdisp <- opt$snapdisp
+asite_disp_path <- opt$asite_length
+
+# If feature_of_interest is a file then load contents. The first
+# column of the file should contain the features of interest
+# (codons).
+if (file.exists(feature_of_interest)) {
+  feature_of_interest <- read.csv(feature_of_interest)
+  feature_of_interest <- feature_of_interest[, 1]
+}
+
+gff_df <- readGFFAsDf(gff)
+gene_names <- unique(gff_df$Name)
+yeast_codon_pos_i200 <- suppressMessages(
+    readr::read_tsv(file = yeast_codon_table))
 
 ## Main condition ##
 
