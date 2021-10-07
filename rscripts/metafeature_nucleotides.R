@@ -13,8 +13,6 @@
 # MAT	5
 # MAT	6
 
-print("Starting process")
-
 suppressMessages(library(Biostrings))
 suppressMessages(library(rtracklayer))
 suppressMessages(library(stringr))
@@ -42,66 +40,6 @@ if (interactive()) {
   source(file.path(dirname(self), "read_count_functions.R"))
   source(file.path(dirname(self), "stats_figs_block_functions.R"))
 }
-
-suppressMessages(library(optparse))
-
-option_list <- list(make_option(c("-i", "--input"),
-                                type = "character",
-                                help = "Path input to h5 file"),
-                    make_option(c("-d", "--dataset"),
-                                type = "character",
-                                help = "Name of the dataset being studied"),
-                    make_option(c("-g", "--gff"),
-                                type = "character",
-                                help = "Path to the GFF3 file
-                                of the species being studied"),
-                    make_option(c("-f", "--fasta"),
-                                type = "character",
-                                help = "Path to the fasta file
-                                of the species being studied"),
-                    make_option(c("--feature_pos"),
-                                type = "character",
-                                help = "A TSV file listing the
-                                Gene and Positions to normalize over"),
-                    make_option(c("-o", "--output"),
-                                type = "character",
-                                help = "Path to output directory"),
-                    make_option(c("--expand_width"),
-                                type = "integer",
-                                help = "the desired range either s
-                                ide of the feature of interest",
-                                default = 5),
-                    make_option(c("--minreadlen"),
-                                type = "integer",
-                                help = "minimum read length",
-                                default = 10),
-                    make_option(c("--asite_length"),
-                                type = "character",
-                                help = "Path to asite_disp_length. Default is
-                                specific for yeast when code is run from
-                                riboviz directory")
-)
-
-opt <- optparse::parse_args(OptionParser(option_list = option_list))
-
-hd_file <- opt$input
-dataset <- opt$dataset
-gff <- opt$gff
-fasta <- opt$fasta
-features_to_study <- opt$feature_pos
-features_to_study <- read.delim(features_to_study)
-output_dir <- opt$output
-expand_width <- opt$expand_width
-startlen <- opt$startlen
-min_read_length <- opt$minreadlen
-asite_disp_path <- opt$asite_length
-
-gff_df <- readGFFAsDf(gff)
-genome <- readDNAStringSet(fasta, format = "fasta")
-names <- names(genome)
-
-asite_displacement_length <- suppressMessages(
-  ReadAsiteDisplacementLengthFromFile(asite_disp_path))
 
 ConvertSequenceToNt <- function(gene, gene_sequence_tibble) {
   subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene)
@@ -721,6 +659,68 @@ SavePlotPdf <- function(overlayed_plot, dataset, output_dir) {
       width = 6, height = 5
     )
 }
+
+suppressMessages(library(optparse))
+
+option_list <- list(make_option(c("-i", "--input"),
+                                type = "character",
+                                help = "Path input to h5 file"),
+                    make_option(c("-d", "--dataset"),
+                                type = "character",
+                                help = "Name of the dataset being studied"),
+                    make_option(c("-g", "--gff"),
+                                type = "character",
+                                help = "Path to the GFF3 file
+                                of the species being studied"),
+                    make_option(c("-f", "--fasta"),
+                                type = "character",
+                                help = "Path to the fasta file
+                                of the species being studied"),
+                    make_option(c("--feature_pos"),
+                                type = "character",
+                                help = "A TSV file listing the
+                                Gene and Positions to normalize over"),
+                    make_option(c("-o", "--output"),
+                                type = "character",
+                                help = "Path to output directory"),
+                    make_option(c("--expand_width"),
+                                type = "integer",
+                                help = "the desired range either s
+                                ide of the feature of interest",
+                                default = 5),
+                    make_option(c("--minreadlen"),
+                                type = "integer",
+                                help = "minimum read length",
+                                default = 10),
+                    make_option(c("--asite_length"),
+                                type = "character",
+                                help = "Path to asite_disp_length. Default is
+                                specific for yeast when code is run from
+                                riboviz directory")
+)
+
+opt <- optparse::parse_args(OptionParser(option_list = option_list))
+
+hd_file <- opt$input
+dataset <- opt$dataset
+gff <- opt$gff
+fasta <- opt$fasta
+features_to_study <- opt$feature_pos
+features_to_study <- read.delim(features_to_study)
+output_dir <- opt$output
+expand_width <- opt$expand_width
+startlen <- opt$startlen
+min_read_length <- opt$minreadlen
+asite_disp_path <- opt$asite_length
+
+print("Starting process")
+
+gff_df <- readGFFAsDf(gff)
+genome <- readDNAStringSet(fasta, format = "fasta")
+names <- names(genome)
+
+asite_displacement_length <- suppressMessages(
+  ReadAsiteDisplacementLengthFromFile(asite_disp_path))
 
 print("Create annotation")
 total_nt_pos_counts <- suppressMessages(GetAllPosCounts(
