@@ -5,8 +5,6 @@
 
 ## TEST::run on TinySim Dataset
 
-print("Starting process")
-
 suppressMessages(library(ggplot2))
 suppressMessages(library(plotly))
 suppressMessages(library(purrr))
@@ -810,9 +808,6 @@ FindAllFeatures <- function(
                       overlayed_tibbles$Rel_Pos == 0)$RelCount)
 }
 
-
-
-
 option_list <- list(
   make_option(c("-i", "--input"),
               type = "character",
@@ -879,6 +874,8 @@ filter_for_frame <- opt$filter_for_frame
 snapdisp <- opt$snapdisp
 asite_disp_path <- opt$asite_length
 
+print("Starting process")
+
 # If feature_of_interest is a file then load contents. The first
 # column of the file should contain the features of interest
 # (codons).
@@ -891,8 +888,6 @@ gff_df <- readGFFAsDf(gff)
 gene_names <- unique(gff_df$Name)
 yeast_codon_pos_i200 <- suppressMessages(
     readr::read_tsv(file = yeast_codon_table))
-
-## Main condition ##
 
 # feature_of_interest may be provided as a single feature, i.e. a
 # codon, or a list of features.
