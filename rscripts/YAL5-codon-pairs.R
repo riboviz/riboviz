@@ -2,13 +2,9 @@
 # metafeature plot for a single feature_of_interest, or a table
 # comparing the RelCount for multiple features of interest.
 
-### TEST ###
-
 # TEST:: Run the script on the TinySim dataset. Documentation of tests
 # is in issue ticket #402 "Writing tests for visualisation of feature
 # scripts" (https://github.com/riboviz/riboviz/issues/402)
-
-print("Starting process")
 
 suppressMessages(library(ggplot2))
 suppressMessages(library(plotly))
@@ -37,90 +33,6 @@ if (interactive()) {
   source(file.path(dirname(self), "read_count_functions.R"))
   source(file.path(dirname(self), "stats_figs_block_functions.R"))
 }
-
-# Set optparse arguments
-option_list <- list(
-  make_option(c("-i", "--input"),
-              type = "character",
-              help = "Path input to h5 file"),
-  make_option(c("-d", "--dataset"),
-              type = "character",
-              help = "Name of dataset being studied"),
-  make_option(c("-g", "--gff"),
-              type = "character",
-              help = "Path to the GFF3 file"),
-  make_option(c("-a", "--annotation"),
-              type = "character",
-              help = "Path to codon positions table"),
-  make_option(c("--feature"),
-              type = "character",
-              help = "Feature of interest, e.g. codon pair"),
-  make_option(c("-o", "--output"),
-              type = "character",
-              help = "Path to output directory",
-              default = "."),
-  make_option(c("--expand_width"),
-              type = "integer",
-              help = "Range around feature_of_interest",
-              default = 5),
-  make_option(c("--frame"),
-              type = "integer",
-              help = "Reading frame to filter counts for",
-              default = 0),
-  make_option(c("--minreadlen"),
-              type = "integer",
-              help = "Minimum read length",
-              default = 10),
-  make_option(c("--filter_for_frame"),
-              type = "logical",
-              help = "Keep all or filter for a reading frame",
-              default = TRUE),
-  make_option(c("--snapdisp"),
-              type = "integer",
-              help = "Frame to snap with SnaptToCodon or filter to",
-              default = 0L),
-  make_option(c("--asite_length"),
-              type = "character",
-              help = "Path to asite_disp_length")
-)
-
-opt <- optparse::parse_args(OptionParser(option_list = option_list))
-
-hd_file <- opt$input
-dataset <- opt$dataset
-gff <- opt$gff
-codon_pos_table <- opt$annotation
-feature_of_interest <- opt$feature
-output_dir <- opt$output
-expand_width <- opt$expand_width
-filter_for_frame <- opt$filter_for_frame
-min_read_length <- opt$minreadlen
-snapdisp <- opt$snapdisp
-asite_disp_path <- opt$asite_length
-
-# If feature_of_interest is a file then load contents. The first
-# column of the file should contain the features of interest
-# (codons).
-if (file.exists(feature_of_interest)) {
-  feature_of_interest <- read.csv(feature_of_interest)
-  feature_of_interest <- feature_of_interest[, 1]
-}
-
-gff_df <- readGFFAsDf(gff)
-gene_names <- rhdf5::h5ls(hd_file,
-                          recursive = 1)$name
-
-yeast_codon_pos_i200 <- suppressMessages(readr::read_tsv
-                                         (file = codon_pos_table))
-# Extract codon pair positions.
-codon_pos_pair_i200 <- tibble::tibble(
-  Gene = yeast_codon_pos_i200$Gene,
-  CodonPos1 = yeast_codon_pos_i200$PosCodon,
-  CodonPos2 = dplyr::lead(yeast_codon_pos_i200$PosCodon),
-  CodonPair = paste(yeast_codon_pos_i200$Codon,
-                    (dplyr::lead(yeast_codon_pos_i200$Codon)
-                     %>% str_replace_all("ATG", "NA")))
-)
 
 ### Functions to map read counts to codon positions ###
 
@@ -1123,8 +1035,6 @@ GeneratePlot <- function(
 #TEST: GeneratePlot(): the x-axis is "Distance from codon pair (3nt)
 # and y-axis is "Normalised ribosomal occupancy"
 
-### Run functions ###
-
 #' Save plot as a PDF.
 #'
 #' @param overlayed_plot Plot.
@@ -1140,6 +1050,91 @@ SavePlotPDF <- function(
       width = 6, height = 5
     )
 }
+
+option_list <- list(
+  make_option(c("-i", "--input"),
+              type = "character",
+              help = "Path input to h5 file"),
+  make_option(c("-d", "--dataset"),
+              type = "character",
+              help = "Name of dataset being studied"),
+  make_option(c("-g", "--gff"),
+              type = "character",
+              help = "Path to the GFF3 file"),
+  make_option(c("-a", "--annotation"),
+              type = "character",
+              help = "Path to codon positions table"),
+  make_option(c("--feature"),
+              type = "character",
+              help = "Feature of interest, e.g. codon pair"),
+  make_option(c("-o", "--output"),
+              type = "character",
+              help = "Path to output directory",
+              default = "."),
+  make_option(c("--expand_width"),
+              type = "integer",
+              help = "Range around feature_of_interest",
+              default = 5),
+  make_option(c("--frame"),
+              type = "integer",
+              help = "Reading frame to filter counts for",
+              default = 0),
+  make_option(c("--minreadlen"),
+              type = "integer",
+              help = "Minimum read length",
+              default = 10),
+  make_option(c("--filter_for_frame"),
+              type = "logical",
+              help = "Keep all or filter for a reading frame",
+              default = TRUE),
+  make_option(c("--snapdisp"),
+              type = "integer",
+              help = "Frame to snap with SnaptToCodon or filter to",
+              default = 0L),
+  make_option(c("--asite_length"),
+              type = "character",
+              help = "Path to asite_disp_length")
+)
+
+opt <- optparse::parse_args(OptionParser(option_list = option_list))
+
+hd_file <- opt$input
+dataset <- opt$dataset
+gff <- opt$gff
+codon_pos_table <- opt$annotation
+feature_of_interest <- opt$feature
+output_dir <- opt$output
+expand_width <- opt$expand_width
+filter_for_frame <- opt$filter_for_frame
+min_read_length <- opt$minreadlen
+snapdisp <- opt$snapdisp
+asite_disp_path <- opt$asite_length
+
+print("Starting process")
+
+# If feature_of_interest is a file then load contents. The first
+# column of the file should contain the features of interest
+# (codons).
+if (file.exists(feature_of_interest)) {
+  feature_of_interest <- read.csv(feature_of_interest)
+  feature_of_interest <- feature_of_interest[, 1]
+}
+
+gff_df <- readGFFAsDf(gff)
+gene_names <- rhdf5::h5ls(hd_file,
+                          recursive = 1)$name
+
+yeast_codon_pos_i200 <- suppressMessages(readr::read_tsv
+                                         (file = codon_pos_table))
+# Extract codon pair positions.
+codon_pos_pair_i200 <- tibble::tibble(
+  Gene = yeast_codon_pos_i200$Gene,
+  CodonPos1 = yeast_codon_pos_i200$PosCodon,
+  CodonPos2 = dplyr::lead(yeast_codon_pos_i200$PosCodon),
+  CodonPair = paste(yeast_codon_pos_i200$Codon,
+                    (dplyr::lead(yeast_codon_pos_i200$Codon)
+                     %>% str_replace_all("ATG", "NA")))
+)
 
 if (length(feature_of_interest) == 1) {
 
