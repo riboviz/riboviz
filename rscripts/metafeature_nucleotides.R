@@ -104,6 +104,20 @@ names <- names(genome)
 asite_displacement_length <- suppressMessages(
   ReadAsiteDisplacementLengthFromFile(asite_disp_path))
 
+ConvertSequenceToNt <- function(gene, gene_sequence_tibble) {
+  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene)
+  left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
+                                   type == "CDS") %>%  select(start))
+  right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
+                                    type == "CDS") %>%  select(end))
+  print(gene)
+  gene_seq <- dplyr::filter(gene_sequence_tibble,
+                            gene_sequence_tibble$Gene == gene)
+  seq <- unlist(strsplit(gene_seq$sequence, ""))[left:right]
+  nt_tibble <- tibble(Gene = gene, Pos = 1:length(seq), Nucleotide = seq)
+  return(nt_tibble)
+}
+
 #' CreateNtAnnotation produces a tibble containing the gene name, the
 #' CDS nucleotide position and the Nucleotide to be used to create
 #' meta feature plots based on nucleotide position rather than codon
@@ -126,20 +140,6 @@ CreateNtAnnotation <- function(genome, names, gff_df) {
 
   gene_sequence_tibble <- tibble(Gene = names,
                                  sequence = gene_seq_df$genome)
-
-  ConvertSequenceToNt <- function(.x, gene_sequence_tibble) {
-    gene <- .x
-    subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene)
-    left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
-                                     type == "CDS") %>%  select(start))
-    right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
-                                      type == "CDS") %>%  select(end))
-    print(gene)
-    gene_seq <- dplyr::filter(gene_sequence_tibble,
-                              gene_sequence_tibble$Gene == gene)
-    seq <- unlist(strsplit(gene_seq$sequence, ""))[left:right]
-    nt_tibble <- tibble(Gene = gene, Pos = 1:length(seq), Nucleotide = seq)
-  }
   nt_tibble <- purrr::map_df(.x = names, .f = ConvertSequenceToNt,
                              gene_sequence_tibble)
 }
@@ -197,11 +197,30 @@ GetReadPositions <- function(gene, dataset, hd_file,
   right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
                                     type == "CDS") %>%  select(end))
   cds <- reads_asitepos[left:right]
+  return(cds)
 }
 
 # TEST: GetReadPositions() returns a numeric
 # TEST: GetReadPositions () produces a numeric with the same length as
 # the CDS of the gene being studied.
+
+GetAllPosCounts1Gene <- function(
+  gene, dataset, hd_file, min_read_length, asite_displacement_length,
+  gff_df) {
+
+  subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene)
+  left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
+                                   type == "CDS") %>%  select(start))
+  right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
+                                    type == "CDS") %>%  select(end))
+  nt_counts_1_gene <- GetReadPositions(gene, dataset, hd_file,
+                                       asite_displacement_length)
+  nt_pos_counts <- tibble(Gene = gene,
+                             Pos = 1:length(nt_counts_1_gene),
+                             Count = nt_counts_1_gene)
+  as.data.frame(nt_pos_counts, row.names = NULL, optional = FALSE)
+  return(nt_pos_counts)
+}
 
 #' Get the positions of reads for multiple genes and produce a tibble
 #' listing the gene, position and count.
@@ -226,23 +245,6 @@ GetAllPosCounts <- function(
 
   gene_names <- rhdf5::h5ls(hd_file, recursive = 1)$name
 
-  GetAllPosCounts1Gene <- function(
-    gene, dataset, hd_file, min_read_length,
-    asite_displacement_length,  gff_df) {
-
-    subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene)
-    left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
-                                     type == "CDS") %>%  select(start))
-    right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
-                                      type == "CDS") %>%  select(end))
-    nt_counts_1_gene <- GetReadPositions(gene, dataset, hd_file,
-                                         asite_displacement_length)
-    nt_pos_counts <- tibble(Gene = gene,
-                               Pos = 1:length(nt_counts_1_gene),
-                               Count = nt_counts_1_gene)
-    as.data.frame(nt_pos_counts, row.names = NULL, optional = FALSE)
-    return(nt_pos_counts)
-  }
   total_nt_pos_counts <- purrr::map_dfr(
     .x = gene_names, .f = GetAllPosCounts1Gene, dataset, hd_file,
     min_read_length, asite_displacement_length, gff_df
@@ -347,6 +349,49 @@ AddNtToPosCounts <- function(
 
 ###  Slice out window around interesting features ###
 
+#' take as inputs transcript_gene_pos_poscodon_frame
+#' and select for positions on separate genes
+#' Use transcript one gene as an input to ExpandRegions
+#' For each occurrence of a feature_of_interest on the gene being
+#' studied, slice out a window of positions around the feature of
+#' interest from transcript_gene_pos_poscodon_frame
+#' return an empty tibble if the desired region hangs over the edge
+#' of the coding region
+ExpandRegions <- function(rows, features_to_study,
+  transcript_gene_pos_nt_reads, gff_df, expand_width) {
+
+  # select the row of features
+  features <- features_to_study[rows, ]
+  print(features)
+  # filter to the relevant gene
+  transcript_gene_pos_nt_gene_interest <- dplyr::filter(
+    transcript_gene_pos_nt_reads,
+    Gene == features$Gene)
+
+  gene_length <- filter(
+    gff_df,
+    gff_df$type == "CDS" & gff_df$Name == features$Gene)$width
+
+  # slice out a window based on the expand width, centered on the
+  # position listed in features, from
+  # transcript_gene_pos_nt_gene_interest
+  if (features$Pos <= expand_width | features$Pos + expand_width > gene_length) {
+    return()
+  } else {
+    output_feature_info <- tibble(
+      dplyr::slice(transcript_gene_pos_nt_gene_interest,
+                   (features$Pos - expand_width):(features$Pos + expand_width),
+                   each = FALSE),
+      Rel_Pos =  seq(- expand_width, expand_width)
+    )
+    if (dim(output_feature_info)[1] == (2 * expand_width + 1)) {
+      return(output_feature_info)
+    } else {
+      return()
+    }
+  }
+}
+
 #' Take a slice out of transcript_gene_pos_nt_reads, centered on the
 #' position of the feature of interest. It then sets the position of
 #' the feature of interest to 0, and changes the positions of adjacent
@@ -383,48 +428,6 @@ ExpandFeatureRegionAllGenes <- function(
                      min_read_length, gff_df,
                      asite_displacement_length))
 
-  # take as inputs transcript_gene_pos_poscodon_frame
-  # and select for positions on separate genes
-  # Use transcript one gene as an input to ExpandRegions
-  # For each occurrence of a feature_of_interest on the gene being
-  # studied, slice out a window of positions around the feature of
-  # interest from transcript_gene_pos_poscodon_frame
-  # return an empty tibble if the desired region hangs over the edge
-  # of the coding region
-  ExpandRegions <- function(rows, features_to_study,
-                            transcript_gene_pos_nt_reads,
-                            gff_df, expand_width) {
-    # select the row of features
-    features <- features_to_study[rows, ]
-    print(features)
-    # filter to the relevant gene
-    transcript_gene_pos_nt_gene_interest <- dplyr::filter(
-      transcript_gene_pos_nt_reads,
-      Gene == features$Gene)
-
-    gene_length <- filter(
-      gff_df,
-      gff_df$type == "CDS" & gff_df$Name == features$Gene)$width
-
-    # slice out a window based on the expand width, centered on the
-    # position listed in features, from
-    # transcript_gene_pos_nt_gene_interest
-    if (features$Pos <= expand_width | features$Pos + expand_width > gene_length) {
-      return()
-    } else {
-      output_feature_info <- tibble(
-        dplyr::slice(transcript_gene_pos_nt_gene_interest,
-                     (features$Pos - expand_width):(features$Pos + expand_width),
-                     each = FALSE),
-        Rel_Pos =  seq(- expand_width, expand_width)
-      )
-      if (dim(output_feature_info)[1] == (2 * expand_width + 1)) {
-        return(output_feature_info)
-      } else {
-        return()
-      }
-    }
-  }
   # The if statement ensures that feature positions that are less/more
   # than the expand_width value are discarded
   # get the number of rows being studied and create a vector of 1 to n
@@ -435,7 +438,7 @@ ExpandFeatureRegionAllGenes <- function(
                                     .f = ExpandRegions,
                                     features_to_study,
                                     transcript_gene_pos_nt_reads,
-				    gff_df,
+                                    gff_df,
                                     expand_width)
   # produces a list containing an expanded window for each location
   # listed in features_to_study
@@ -516,6 +519,28 @@ ExpandFeatureRegionAllGenes <- function(
 
 ### Normalization ###
 
+#' Change NaNs to zero.
+#'
+#' @param values Values.
+#' @return 0 if NaN else `values`.
+SetNaNToZero <- function(values) {
+  if (is.nan(values)) {
+    values <- 0
+  } else {
+    values <- values
+  }
+}
+
+#' Having NaNs in any table will cause problems during the overlay
+#' step. Changing them to 0 removes this problem, and takes into
+#' account that the NaNs are caused by no reads occurring.
+CheckForNaN <- function(expanded_features, normalized_expand_tibble) {
+  relcount_values <- unlist(normalized_expand_tibble$RelCount)
+  relcount_values <- unlist(
+    purrr::map(.x = relcount_values, .f = SetNaNToZero))
+  dplyr::mutate(expanded_features, RelCount = relcount_values)
+}
+
 # Normalization carried out within each expanded frame so that they
 # are comparable
 # Normalizes the expand_feature_region list generating a RelCount
@@ -529,32 +554,20 @@ ExpandFeatureRegionAllGenes <- function(
 #' As this function is not looped it will only generate one normalized
 #' tibble for each occurrence of the feature of interest
 #'
-#' @param .x which is the list of tidy format data frames (tibbles)
-#' generated by the function ExpandFeatureRegion
+#' @param expanded_regions which is the list of tidy format data
+#; frames (tibbles) generated by the function ExpandFeatureRegion
 #' @param expand_width integer which provides the number of positions
 #' on each side of the feature of interest to include in the window
 #'
 #' @return the list of tibbles which contain the normalized counts
 #' within the window so that the feature is comparable despite overall
 #' varying levels of expression between genes
-ExpandedRegionNormalization <- function(.x, expand_width) {
-  normalized_expand_tibble <- dplyr::mutate(
-    .x, RelCount = Count / sum(Count) * (2 * expand_width + 1))
+ExpandedRegionNormalization <- function(expanded_regions, expand_width) {
 
-  CheckForNaN <- function(normalized_expand_tibble) {
-    relcount_values <- unlist(normalized_expand_tibble$RelCount)
-    SetNaNToZero <- function(relcount_values) {
-      if (is.nan(relcount_values)) {
-        relcount_values <- 0
-      } else {
-        relcount_values <- relcount_values
-      }
-    }
-    relcount_values <- unlist(purrr::map(
-      .x = relcount_values, .f = SetNaNToZero))
-    dplyr::mutate(.x, RelCount = relcount_values)
-  }
-  CheckForNaN(normalized_expand_tibble)
+  normalized_expand_tibble <- dplyr::mutate(
+    expanded_regions,
+    RelCount = Count / sum(Count) * (2 * expand_width + 1))
+  CheckForNaN(expanded_regions, normalized_expand_tibble)
 }
 
 #TEST: ExpandedRegionNormalization(): creates a tidy format data frame
