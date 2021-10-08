@@ -20,7 +20,7 @@ token is provided.
 
 def get_environment_vars():
     """
-    Get map from RiboViz environment variables, to their values,
+    Get map from riboviz environment variables, to their values,
     if defined. The environment variables are listed in
     :py:const:`riboviz.params.ENV_DIRS`,
 

@@ -20,9 +20,9 @@ $ cp riboviz/vignette/riboviz_env.yaml ribo-run
 $ cd ribo-run
 ```
 
-`riboviz_env.yaml` is a sample configuration, based on `vignette_config.yaml` but with tokens for paths to the input files expected by RiboViz.
+`riboviz_env.yaml` is a sample configuration, based on `vignette_config.yaml` but with tokens for paths to the input files expected by riboviz.
 
-Run RiboViz, specifying values for the configuration tokens via environment variables:
+Run riboviz, specifying values for the configuration tokens via environment variables:
 
 ```console
 $ RIBOVIZ_DATA=$HOME/ribo-data \

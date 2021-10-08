@@ -1,6 +1,6 @@
 # Git branching model
 
-RiboViz uses three classes of branch for development:
+riboviz uses three classes of branch for development:
 
 * `main` branch: the most stable branch. Releases are created as tags of specific versions from `main`.
 * `develop` branch: for ongoing development. At regular intervals this will be merged into `main`.

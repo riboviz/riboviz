@@ -36,7 +36,7 @@ Downsampled ribosome profiling data for *Saccharomyces cerevisiae* (yeast):
 * `vignette/input/SRR1042864_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type + 3-AT.
 * For information on the provenance of these files see [Downsampled ribosome profiling data from Saccharomyces cerevisiae](../reference/data.md#downsampled-ribosome-profiling-data-from-saccharomyces-cerevisiae)
 
-For full information on how to configure the workflow and its inputs, see [Configuring the RiboViz workflow](./prep-riboviz-config.md).
+For full information on how to configure the workflow and its inputs, see [Configuring the riboviz workflow](./prep-riboviz-config.md).
 
 ---
 
@@ -146,7 +146,7 @@ Finished processing sample: WT3AT
 Workflow finished! (OK)
 ```
 
-* For full information on how to run the Nextflow workflow, the options available, and troubleshooting advice, see [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md)
+* For full information on how to run the Nextflow workflow, the options available, and troubleshooting advice, see [Running the riboviz Nextflow workflow](./prep-riboviz-run-nextflow.md)
 
 ---
 
@@ -263,7 +263,7 @@ TPMs_all_CDS_all_samples.tsv
 
 The number of `<SAMPLE_ID>.h5.*` files depends on the `num_processes` parameter in the configuration. For example, if you change that parameter to 4, then there will be 4 files, `WTnone.h5.1`, `WTnone.h5.2`, `WTnone.h5.3` and `WTnone.h5.4`, in the output folder.
 
-For full information on what the workflow does and the files it outputs, see [What the RiboViz workflow does](./prep-riboviz-operation.md).
+For full information on what the workflow does and the files it outputs, see [What the riboviz workflow does](./prep-riboviz-operation.md).
 
 ---
 

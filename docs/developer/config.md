@@ -2,7 +2,7 @@
 
 ## Using directory configuration parameters in Nextflow
 
-Some configuration parameters take values that are absolute or relative paths to directories. These are listed in the [Configuring file paths and directories](../user/prep-riboviz-config.md#configuring-file-paths-and-directories) section in [Configuring the RiboViz workflow](../user/prep-riboviz-config.md) and the ones that are directories are reproduced below:
+Some configuration parameters take values that are absolute or relative paths to directories. These are listed in the [Configuring file paths and directories](../user/prep-riboviz-config.md#configuring-file-paths-and-directories) section in [Configuring the riboviz workflow](../user/prep-riboviz-config.md) and the ones that are directories are reproduced below:
 
 * `dir_in`
 * `dir_index`

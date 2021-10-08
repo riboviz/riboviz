@@ -1,4 +1,4 @@
-#' Convert BAM files to RiboViz HDF5 files.
+#' Convert BAM files to riboviz HDF5 files.
 #'
 #' Given a GFF file and a BAM file, this script creates some HDF5
 #' files with information about a feature (e.g. CDS, ORF, or uORF).
@@ -122,7 +122,7 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
   return(read_counts);
 }
 
-#' Convert BAM file to RiboViz HDF5 file(s).
+#' Convert BAM file to riboviz HDF5 file(s).
 #'
 #' @param bam_file BAM input file (character).
 #' @param orf_gff_file GFF2/GFF3 Matched genome feature file,

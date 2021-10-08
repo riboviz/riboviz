@@ -1,8 +1,8 @@
-# What the RiboViz workflow does
+# What the riboviz workflow does
 
-This page describes what the RiboViz workflow does.
+This page describes what the riboviz workflow does.
 
-Configuration parameters are shown in brackets and are described in [Configuring the RiboViz workflow](./prep-riboviz-config.md).
+Configuration parameters are shown in brackets and are described in [Configuring the riboviz workflow](./prep-riboviz-config.md).
 
 ---
 
@@ -26,9 +26,9 @@ The workflow prepares ribosome profiling data for by implementing a workflow tha
 
 ### Interactive Visualization
 
-An additional script within the RiboViz codebase allows the generation of interactive plots from the dataset after the RiboViz workflow has been completed.  
+An additional script within the riboviz codebase allows the generation of interactive plots from the dataset after the riboviz workflow has been completed.  
 
-A process within the main RiboViz workflow (`createInteractiveVizParamsConfigFile`, within `prep-riboviz.nf`) generates a configuration yaml file specifically for this interactive visualization (`interactive_viz_config.yaml`, found in the `dir_out` directory), and users can then run `rscripts/run_shiny_server.R` using this additional YAML (as detailed within [How To Run the Riboviz Interactive Data Visualization On Your Data](./run-run_shiny_server-operation.md)).  This generates a shiny app instance which users can view to explore their data.
+A process within the main riboviz workflow (`createInteractiveVizParamsConfigFile`, within `prep-riboviz.nf`) generates a configuration yaml file specifically for this interactive visualization (`interactive_viz_config.yaml`, found in the `dir_out` directory), and users can then run `rscripts/run_shiny_server.R` using this additional YAML (as detailed within [How To Run the riboviz Interactive Data Visualization On Your Data](./run-run_shiny_server-operation.md)).  This generates a shiny app instance which users can view to explore their data.
 
 
 ---
@@ -172,9 +172,9 @@ In addition, the following files are also put into the output directory:
 
 * `TPMs_all_CDS_all_samples.tsv`: file with the transcripts per million (tpm) for all successfully processed samples.
 * `read_counts_per_file.tsv`: a read counts file. (only if `count_reads: TRUE`).
-* `interactive_viz_config.yaml`: this is a yaml file created by the workflow, for use with `rscripts/run_shiny_server.R` - an optional step which does not automatically run within the RiboViz workflow and which allows users to generate interactive data visualization on the dataset.
+* `interactive_viz_config.yaml`: this is a yaml file created by the workflow, for use with `rscripts/run_shiny_server.R` - an optional step which does not automatically run within the riboviz workflow and which allows users to generate interactive data visualization on the dataset.
 
-More details on the output files can be found at [RiboViz output files and figures](./riboviz_outputs.md).
+More details on the output files can be found at [riboviz output files and figures](./riboviz_outputs.md).
 
 ---
 
@@ -229,7 +229,7 @@ yeast_rRNA.8.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yea
 
 The `.ht2` files are symbolic links to the outputs of the step `e5/ccf3e6`, an invocation of the process `buildIndicesrRNA`.
 
-The RiboViz workflow uses Nextflow's [publishDir](https://www.nextflow.io/docs/latest/process.html#publishdir) directive which allows files to be published to specific directories outwith `work/`.
+The riboviz workflow uses Nextflow's [publishDir](https://www.nextflow.io/docs/latest/process.html#publishdir) directive which allows files to be published to specific directories outwith `work/`.
 
 For index and temporary files, `publishDir` is configured using the value of the `publish_index_tmp` parameter. If `FALSE` then files in the index (`dir_index`) and temporary (`dir_tmp`) directories are symbolically linked to those in `work/`. If `TRUE` then they are copied. Output files are always copied from `work/` into the output (`dir_out`) directory specified in the workflow configuration file.
 
