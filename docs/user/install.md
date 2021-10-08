@@ -722,7 +722,7 @@ $ git clone https://github.com/riboviz/riboviz
 
 ---
 
-## Install RiboViz `riboviz-py` package
+## Install riboviz `riboviz-py` package
 
 Install `riboviz-py` from your clone of the Git repository:
 

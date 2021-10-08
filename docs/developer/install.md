@@ -63,7 +63,7 @@ To load the packages before use:
 
 ## Install `riboviz-py` for development (optional)
 
-To run the Nextflow workflow requires the Python scripts to have been installed via `pip install .`. This installs a `riboviz-py` package, with all RiboViz's Python source code into the current Python environment.
+To run the Nextflow workflow requires the Python scripts to have been installed via `pip install .`. This installs a `riboviz-py` package, with all riboviz's Python source code into the current Python environment.
 
 If one is working on Python scripts invoked by the workflow it can be time-consuming to repeatedly run `pip install .` after updating the scripts, before rerunning Nextflow.
 
