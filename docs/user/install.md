@@ -764,7 +764,7 @@ The Python packages and their versions will be listed.
 Run:
 
 ```console
-$ Rscript rscripts/list-r-packages.R
+$ Rscript rscripts/list_r_packages.R
 ```
 
 The R packages and their versions will be listed.
