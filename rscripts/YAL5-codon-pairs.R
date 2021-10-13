@@ -1052,6 +1052,129 @@ SavePlotPDF <- function(
     )
 }
 
+#' Create metafeature plot for feature of interest.
+#'
+#' @param hd_file Path to H5 file holding read data for all genes.
+#' @param dataset Name of dataset in H5 file.
+#' @param gff Path to the GFF3 file of the organism being studied"),
+#' @param codon_pos_table Path to codon positions table.
+#' @param feature_of_interest Feature of interest e.g. codon pair.
+#' @param output_dir Output directory.
+#' @param expand_width Number of codons to take a slice of either side
+#' of occurrences of the feature of interest.
+#' @param filter_for_frame Frame from which to select reads from.
+#' @param min_read_length Minimum read length in H5 file (integer).
+#' @param snapdisp Frame to filter to.
+#' @param asite_disp_path Path to A-site file.
+Yal5CodonPairs <- function(hd_file, dataset, gff, codon_pos_table,
+  feature_of_interest, output_dir = ".", expand_width = 5,
+  filter_for_frame = TRUE, min_read_length = 10, snapdisp = 0L,
+  asite_disp_path) {
+
+  print("Starting process")
+
+  # If feature_of_interest is a file then load contents. The first
+  # column of the file should contain the features of interest
+  # (codons).
+  if (file.exists(feature_of_interest)) {
+    feature_of_interest <- read.csv(feature_of_interest)
+    feature_of_interest <- feature_of_interest[, 1]
+  }
+
+  gff_df <- readGFFAsDf(gff)
+  gene_names <- rhdf5::h5ls(hd_file,
+                            recursive = 1)$name
+
+  yeast_codon_pos_i200 <- suppressMessages(readr::read_tsv
+                                           (file = codon_pos_table))
+  # Extract codon pair positions.
+  codon_pos_pair_i200 <- tibble::tibble(
+    Gene = yeast_codon_pos_i200$Gene,
+    CodonPos1 = yeast_codon_pos_i200$PosCodon,
+    CodonPos2 = dplyr::lead(yeast_codon_pos_i200$PosCodon),
+    CodonPair = paste(yeast_codon_pos_i200$Codon,
+                      (dplyr::lead(yeast_codon_pos_i200$Codon)
+                       %>% str_replace_all("ATG", "NA")))
+  )
+
+  if (length(feature_of_interest) == 1) {
+
+    # Run ExpandFeatureRegionAllGenes to get a list of occurrences of
+    # feature_of_interest
+    print(paste0("Finding occurrences of ", feature_of_interest))
+    expanded_feature <- suppressMessages(
+    ExpandFeatureRegion(codon_pos_pair_i200, gene_names, dataset,
+      hd_file, gff_df, min_read_length, snapdisp, asite_disp_path,
+      filter_for_frame, feature_of_interest, expand_width))
+
+    # Check for the presence of the
+    # feature_of_interest. expanded_feature being empty will cause
+    # problems with normalization
+    if (length(expanded_feature) == 0) {
+      print("No occurrences of the feature of interest")
+      if (expand_width > 1) {
+        print("Try expand_width = 1L to check for occurrences near to start or stop codon")
+      }
+      print("Done")
+      return()
+    }
+    # Run ExpandedRegionNormalisation() to calculate the relative number
+    # of reads mapping to each position around the feature_of_interest
+    print("Normalising read counts")
+    normalized_expand_list <- ExpandedRegionNormalisation(
+      codon_pos_pair_i200, gene_names, dataset, hd_file, gff_df,
+      min_read_length, snapdisp, asite_disp_path, filter_for_frame,
+      feature_of_interest, expand_width)
+
+    # Run OverlayedTibble() to create an average of reads at positions
+    # at and around the feature_of_interest
+    print("Overlaying tibbles for feature of interest and calculating the average relative reads at each position")
+    overlayed_tibbles <- OverlayedTibble(
+      codon_pos_pair_i200, gene_names, dataset, hd_file, gff_df,
+      min_read_length, snapdisp, asite_disp_path, filter_for_frame,
+      feature_of_interest, expand_width)
+
+    print("Creating graph")
+    overlayed_plot <- GeneratePlot(
+      codon_pos_pair_i200, gene_names, dataset, hd_file, gff_df,
+      min_read_length, snapdisp, asite_disp_path, filter_for_frame,
+      feature_of_interest, expand_width, size = 12)
+
+    print("Save plot as PDF")
+    SavePlotPDF(overlayed_plot, feature_of_interest, output_dir)
+    print("Done")
+  } else {
+    # Use purrr::map to extract the RelCounts at position 0 of all
+    # desired features of interest
+    feature_rel_use <- purrr::map_df(
+      .x = feature_of_interest,
+      .f = FindAllFeatures,
+      codon_pos_pair_i200 = codon_pos_pair_i200,
+      gene_names = gene_names,
+      dataset = dataset,
+      hd_file = hd_file,
+      min_read_length = min_read_length,
+      gff_df = gff_df,
+      expand_width = expand_width,
+      filter_for_frame = filter_for_frame,
+      snapdisp = snapdisp,
+      asite_disp_path = asite_disp_path)
+
+    # Rearrange feature_rel_use to be in descending order, so features
+    # with the highest relative use are listed at the top
+    feature_rel_use <- arrange(feature_rel_use, desc(RelCount))
+    # Save feature_rel_use as a tsv file
+    print(head(feature_rel_use, 5))
+    print(tail(feature_rel_use, 5))
+    print("Saving table as TSV")
+    write.table(feature_rel_use,
+                file = "Feature_Relative_use.tsv",
+                sep = "\t",
+                row.names = FALSE,
+                quote = FALSE)
+  }
+}
+ 
 option_list <- list(
   make_option(c("-i", "--input"),
               type = "character",
@@ -1111,104 +1234,6 @@ min_read_length <- opt$minreadlen
 snapdisp <- opt$snapdisp
 asite_disp_path <- opt$asite_length
 
-print("Starting process")
-
-# If feature_of_interest is a file then load contents. The first
-# column of the file should contain the features of interest
-# (codons).
-if (file.exists(feature_of_interest)) {
-  feature_of_interest <- read.csv(feature_of_interest)
-  feature_of_interest <- feature_of_interest[, 1]
-}
-
-gff_df <- readGFFAsDf(gff)
-gene_names <- rhdf5::h5ls(hd_file,
-                          recursive = 1)$name
-
-yeast_codon_pos_i200 <- suppressMessages(readr::read_tsv
-                                         (file = codon_pos_table))
-# Extract codon pair positions.
-codon_pos_pair_i200 <- tibble::tibble(
-  Gene = yeast_codon_pos_i200$Gene,
-  CodonPos1 = yeast_codon_pos_i200$PosCodon,
-  CodonPos2 = dplyr::lead(yeast_codon_pos_i200$PosCodon),
-  CodonPair = paste(yeast_codon_pos_i200$Codon,
-                    (dplyr::lead(yeast_codon_pos_i200$Codon)
-                     %>% str_replace_all("ATG", "NA")))
-)
-
-if (length(feature_of_interest) == 1) {
-
-  # Run ExpandFeatureRegionAllGenes to get a list of occurrences of
-  # feature_of_interest
-  print(paste0("Finding occurrences of ", feature_of_interest))
-  expanded_feature <- suppressMessages(
-  ExpandFeatureRegion(codon_pos_pair_i200, gene_names, dataset,
-    hd_file, gff_df, min_read_length, snapdisp, asite_disp_path,
-    filter_for_frame, feature_of_interest, expand_width))
-
-  # Check for the presence of the
-  # feature_of_interest. expanded_feature being empty will cause
-  # problems with normalization
-  if (length(expanded_feature) == 0) {
-    print("No occurrences of the feature of interest")
-    if (expand_width > 1) {
-      print("Try expand_width = 1L to check for occurrences near to start or stop codon")
-    }
-    print("Done")
-    stop()
-  }
-  # Run ExpandedRegionNormalisation() to calculate the relative number
-  # of reads mapping to each position around the feature_of_interest
-  print("Normalising read counts")
-  normalized_expand_list <- ExpandedRegionNormalisation(
-    codon_pos_pair_i200, gene_names, dataset, hd_file, gff_df,
-    min_read_length, snapdisp, asite_disp_path, filter_for_frame,
-    feature_of_interest, expand_width)
-
-  # Run OverlayedTibble() to create an average of reads at positions
-  # at and around the feature_of_interest
-  print("Overlaying tibbles for feature of interest and calculating the average relative reads at each position")
-  overlayed_tibbles <- OverlayedTibble(
-    codon_pos_pair_i200, gene_names, dataset, hd_file, gff_df,
-    min_read_length, snapdisp, asite_disp_path, filter_for_frame,
-    feature_of_interest, expand_width)
-
-  print("Creating graph")
-  overlayed_plot <- GeneratePlot(
-    codon_pos_pair_i200, gene_names, dataset, hd_file, gff_df,
-    min_read_length, snapdisp, asite_disp_path, filter_for_frame,
-    feature_of_interest, expand_width, size = 12)
-
-  print("Save plot as PDF")
-  SavePlotPDF(overlayed_plot, feature_of_interest, output_dir)
-  print("Done")
-} else {
-  # Use purrr::map to extract the RelCounts at position 0 of all
-  # desired features of interest
-  feature_rel_use <- purrr::map_df(.x = feature_of_interest,
-                                   .f = FindAllFeatures,
-                                   codon_pos_pair_i200 = codon_pos_pair_i200,
-                                   gene_names = gene_names,
-                                   dataset = dataset,
-                                   hd_file = hd_file,
-                                   min_read_length = min_read_length,
-                                   gff_df = gff_df,
-                                   expand_width = expand_width,
-                                   filter_for_frame = filter_for_frame,
-                                   snapdisp = snapdisp,
-                                   asite_disp_path = asite_disp_path)
-
-  # Rearrange feature_rel_use to be in descending order, so features
-  # with the highest relative use are listed at the top
-  feature_rel_use <- arrange(feature_rel_use, desc(RelCount))
-  # Save feature_rel_use as a tsv file
-  print(head(feature_rel_use, 5))
-  print(tail(feature_rel_use, 5))
-  print("Saving table as TSV")
-  write.table(feature_rel_use,
-              file = "Feature_Relative_use.tsv",
-              sep = "\t",
-              row.names = FALSE,
-              quote = FALSE)
-}
+Yal5CodonPairs(hd_file, dataset, gff, codon_pos_table,
+  feature_of_interest, output_dir, expand_width, filter_for_frame,
+  min_read_length, snapdisp, asite_disp_path)
