@@ -225,4 +225,4 @@ A snippet from an example HDF5 file is shown below.
 
 The figure below shows an example where `min_read_length` is 15 and `max_read_length` is 50:
 
-![H5 architecture](../images/h5_architecture.png)
+![H5 architecture](../images/h5-architecture.png)

@@ -133,7 +133,7 @@ This output report in .html format contains a provenance section for the sample,
 
 Example of the top of the HTML file:
 
-<img src="../images/outputs/html_output.jpg" alt="html_output image" width="500"/>
+<img src="../images/outputs/html-output.jpg" alt="html_output image" width="500"/>
 
 Only output if `run_static_html: TRUE`. 
 
@@ -191,11 +191,11 @@ A meta feature plot showing the total number of reads present within a 75nt wind
 
 Good quality meta feature plot:
 
-<img src="../images/outputs/metagene_start_stop_read_counts.jpg" alt="Good quality 3nt_periodicity plot" width="500"/>
+<img src="../images/outputs/metagene-start-stop-read-counts.jpg" alt="Good quality 3nt_periodicity plot" width="500"/>
 
 Meta feature plot produced using incorrect annotation files:
 
-<img src="../images/outputs/bad_metagene_start_stop_read_counts.jpg" alt="poor quality 3nt_periodicity plot" width="500"/>
+<img src="../images/outputs/bad-metagene-start-stop-read-counts.jpg" alt="poor quality 3nt_periodicity plot" width="500"/>
 
 Only output if `output_pdfs: TRUE`.
 
@@ -221,7 +221,7 @@ A bar chart showing the lengths of the reads detected in the sample. It is expec
 
 Example read_counts_by_length plot:
 
-<img src="../images/outputs/read_counts_by_length.jpg" alt="poor quality read_counts_by_length plot" width="500"/>
+<img src="../images/outputs/read-counts-by-length.jpg" alt="poor quality read_counts_by_length plot" width="500"/>
 
 Only output if `output_pdfs: TRUE`.
 
@@ -249,7 +249,7 @@ A plot that shows the mean number of reads mapping to each position upstream and
 
 Example mean number of reads plot:
 
-<img src="../images/outputs/metagene_normalized_profile_start_stop.jpg" alt="pos_sp_rpf_norm_reads plot" width="500"/>
+<img src="../images/outputs/metagene-normalized-profile-start-stop.jpg" alt="pos_sp_rpf_norm_reads plot" width="500"/>
 
 Only output if `output_pdfs: TRUE`.
 
@@ -301,7 +301,7 @@ The features pdf relates the tpm value of different genes to a variety of differ
 
 Example features plot:
 
-<img src="../images/outputs/ORF_TPMs_vs_features.jpg" alt=" features plot" width="500"/>
+<img src="../images/outputs/ORF-TPMs-vs-features.jpg" alt=" features plot" width="500"/>
 
 Only output if `features_file` was defined and `output_pdfs: TRUE`.
 
@@ -370,7 +370,7 @@ This plot shows a range of features and relates them to ribosome densitiy on the
 
 Example normalized_density_apesites_per_codon plot:
 
-<img src="../images/outputs/normalized_density_APEsites_per_codon.jpg" alt="codon_ribodens plot" width="500"/>
+<img src="../images/outputs/normalized-density-APEsites-per-codon.jpg" alt="codon_ribodens plot" width="500"/>
 
 Only output if `t_rna_file` and `codon_positions_file` were defined and `output_pdfs: TRUE`.
 
@@ -398,7 +398,7 @@ A meta-feature bar chart showing the number of reads occurring at positions arou
 
 Example metagene_start_barplot_by_length.pdf:
 
-<img src="../images/outputs/metagene_start_barplot_by_length.jpg" alt="startcodon_ribogridbar plot" width="500"/>
+<img src="../images/outputs/metagene-start-barplot-by-length.jpg" alt="startcodon_ribogridbar plot" width="500"/>
 
 Only output if `output_pdfs: TRUE`.
 
@@ -409,7 +409,7 @@ A meta-feature heatmap showing the number of reads occurring at positions around
 
 Example metagene_start_ribogrid_by_length.pdf:
 
-<img src="../images/outputs/metagene_start_ribogrid_by_length.jpg" alt="startcodon_ribogrid plot" width="500"/>
+<img src="../images/outputs/metagene-start-ribogrid-by-length.jpg" alt="startcodon_ribogrid plot" width="500"/>
 
 Only output if `output_pdfs: TRUE`.
 
@@ -451,6 +451,6 @@ A box plot of the proportion of reads mapping to each nucleotide of a codon for 
 
 Example frame_proportions_per_ORF plot:
 
-<img src="../images/outputs/frame_proportions_per_ORF.jpg" alt="3ntframe_propbygene plot" width="500"/>
+<img src="../images/outputs/frame-proportions-per-ORF.jpg" alt="3ntframe_propbygene plot" width="500"/>
 
 Only output if `asite_disp_length_file` was defined and `output_pdfs: TRUE`.
