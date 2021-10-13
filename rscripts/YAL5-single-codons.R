@@ -822,7 +822,7 @@ FindAllFeatures <- function(
 #' @param filter_for_frame Method to use for assigning reads (logical).
 #' @param snapdisp Frame to filter to.
 #' @param asite_disp_path Path to A-site file.
-Yal5SinglecCodons <- function(hd_file, dataset, gff, yeast_codon_table,
+Yal5SingleCodons <- function(hd_file, dataset, gff, yeast_codon_table,
   feature_of_interest, output_dir = ".", expand_width = 5,
   filtering_frame = 0L, min_read_length = 10, filter_for_frame = TRUE,
   snapdisp = 0L, asite_disp_path) {
@@ -1022,6 +1022,6 @@ filter_for_frame <- opt$filter_for_frame
 snapdisp <- opt$snapdisp
 asite_disp_path <- opt$asite_length
 
-Yal5SinglecCodons(hd_file, dataset, gff, yeast_codon_table,
+Yal5SingleCodons(hd_file, dataset, gff, yeast_codon_table,
   feature_of_interest, output_dir, expand_width, filtering_frame,
   min_read_length, filter_for_frame, snapdisp, asite_disp_path) 
