@@ -383,11 +383,13 @@ ExpandRegions <- function(
 #' @param yeast_codon_pos_i200 List of all codons and positions from
 #' the sample being studied
 #' @param feature_of_interest Feature being studied.
+#' @param expand_width Number of codons to take a slice of either side
+#' of occurrences of the feature_of_interest
 #' @param transcript_gene_poscodon_frame
 #' @return feature information.
 AllGeneInterestingFeatures <- function(
   gene, gene_names, dataset, hd_file, min_read_length, gff_df,
-  yeast_codon_pos_i200, feature_of_interest,
+  yeast_codon_pos_i200, feature_of_interest, expand_width,
   transcript_gene_poscodon_frame) {
 
   # Select features of interest occurring on the gene being that the
@@ -462,6 +464,7 @@ ExpandFeatureRegionAllGenes <- function(
                                     gff_df,
                                     yeast_codon_pos_i200,
                                     feature_of_interest,
+                                    expand_width,
                                     transcript_gene_poscodon_frame)
   # Givem a list for each gene, containing a list for each occurrence
   # of feature_of_interest, unlist to produce one list, containing
