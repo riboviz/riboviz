@@ -13,12 +13,8 @@ This page summarises style guidelines for the riboviz source code, documentation
 * [Configuration parameters](#configuration-parameters)
 * [Command-line tools](#command-line-tools)
   - [Command-line parameters](#command-line-parameters)
-  - [Python](#python)
-  - [R](#r)
-* [Handling missing configuration values](#handling-missing-configuration-values)
-  - [YAML `NULL` and Python `None`](#yaml-null-and-python-none)
-  - [Check for missing or `None` values in Python dictionaries](#check-for-missing-or-none-values-in-python-dictionaries)
-  - [`NULL` vs. `NA` in R command-line parsing](#null-vs-na-in-r-command-line parsing)
+  - [Python command-line tools](#python-command-line-tools)
+  - [R command-line tools](#r-command-line-tools)
 
 ---
 
