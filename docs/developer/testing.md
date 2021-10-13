@@ -7,7 +7,7 @@
 * [Run vignette integration tests](#run-vignette-integration-tests)
 * [Using the integration test suite](#using-the-integration-test-suite)
   - [Specifying values for environment variable configuration tokens](#specifying-values-for-environment-variable-configuration-tokens)
-- [Skipping tests for index and temporary files](#skipping-tests-for-index-and-temporary-files)
+  - [Skipping tests for index and temporary files](#skipping-tests-for-index-and-temporary-files)
   - [Using your own expected results directory](#using-your-own-expected-results-directory)
   - [How actual directories and files are compared to expected directories and files](#how-actual-directories-and-files-are-compared-to-expected-directories-and-files)
   - [Limitations of tests for UMI extraction, deduplication and grouping](#limitations-of-tests-for-umi-extraction-deduplication-and-grouping)
