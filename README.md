@@ -29,7 +29,7 @@ Usage:
 * [Configuring the riboviz workflow](./docs/user/prep-riboviz-config.md)
 * [Running the riboviz Nextflow workflow](./docs/user/prep-riboviz-run-nextflow.md)  
 * [How To Run the riboviz Interactive Data Visualization On Your Data](docs/user/run-run_shiny_server-operation.md)
-* [riboviz output files and figures](./docs/user/riboviz_outputs.md)
+* [riboviz output files and figures](./docs/user/riboviz-outputs.md)
 * [Running the riboviz workflow on Eddie](./docs/user/run-on-eddie.md)
 * [Memory and storage](./docs/user/memory-storage.md). Information and advice relating to **riboviz**'s memory and storage requirements.
 
