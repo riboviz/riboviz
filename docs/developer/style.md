@@ -8,7 +8,7 @@ This page summarises style guidelines for the riboviz source code, documentation
   - [Comments](#comments)
   - [Style checking Python code](#style-checking-python-code)
 * [R source code](#r-source-code)
-- [Comments](#comments)
+  - [Comments](#comments)
   - [Style check R code](#style-check-r-code)
 * [Configuration parameters](#configuration-parameters)
 * [Command-line tools](#command-line-tools)
@@ -18,7 +18,7 @@ This page summarises style guidelines for the riboviz source code, documentation
 * [Handling missing configuration values](#handling-missing-configuration-values)
   - [YAML `NULL` and Python `None`](#yaml-null-and-python-none)
   - [Check for missing or `None` values in Python dictionaries](#check-for-missing-or-none-values-in-python-dictionaries)
-  - [`NULL` vs. `NA` in R command-line parsing](#null-vs-na`-in-r-command-line parsing)
+  - [`NULL` vs. `NA` in R command-line parsing](#null-vs-na-in-r-command-line parsing)
 
 ---
 
