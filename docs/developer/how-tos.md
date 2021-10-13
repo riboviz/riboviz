@@ -2,12 +2,21 @@
 
 ## Clone conda environments
 
-If you want to install a new Python package to explore it without changing your current conda environment you can first clone your cona environment, then install the package into the clone. For example:
+If you want to install a new Python package to explore it without changing your current conda environment you can first clone your conda environment, then install the package into the clone. For example:
 
 ```console
 $ conda create --name riboviz-test-install --clone riboviz
 $ conda activate riboviz-test-install
 ```
+
+To remove an environment when you are finished with it you can run, for example:
+
+```console
+$ conda deactivate riboviz-test-install
+$ conda env remove --name riboviz-test-install
+```
+
+For more information, see conda's [Managing environments](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
 ---
 
