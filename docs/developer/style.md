@@ -5,10 +5,12 @@ This page summarises style guidelines for the riboviz source code, documentation
 
 * ['riboviz'](#riboviz)
 * [Python source code](#python-source-code)
-  - [Comments](#comments)
+  - [Python file names](#python-file-names)
+  - [Python comments](#python-comments)
   - [Style checking Python code](#style-checking-python-code)
 * [R source code](#r-source-code)
-  - [Comments](#comments)
+  - [R file names](#r-file-names)
+  - [R comments](#r-comments)
   - [Style check R code](#style-check-r-code)
 * [Configuration parameters](#configuration-parameters)
 * [Command-line tools](#command-line-tools)
@@ -32,7 +34,11 @@ Python code should be formatted to conform as far as possible to the [PEP 8 -- S
 
 The tools [pylint](https://pylint.org/) and [pycodestyle](https://pycodestyle.pycqa.org/en/latest/) can help by highlighting deviations from the coding style. See [Style checking Python code](#style-checking-python-code) below.
 
-### Comments
+### Python file names
+
+Python file names must be in snake-case i.e., all lower case and delimited by underscores, not hyphens. For example, `sample_sheets.py`, `get_cds_codons.py`.
+
+### Python comments
 
 Python code should be commented using [doc-strings](https://www.python.org/dev/peps/pep-0257/). The doc-strings should include [Sphinx](https://www.sphinx-doc.org/en/master/)-compliant [reStructuredText](https://docutils.sourceforge.io/rst.html) markup. Examples are given below.
 
@@ -129,7 +135,11 @@ R code should be commented using [Google’s R Style Guide](https://google.githu
 
 The packages [lintr](https://cran.r-project.org/package=lintr) and [styler](https://styler.r-lib.org/) can help by highlighting deviations from the coding style. See [Style checking R code](#style-checking-r-code) below.
 
-### Comments
+### R file names
+
+R file names must be in snake-case i.e., all lower case and delimited by underscores, not hyphens. For example, `generate_stats_figs.R`.
+
+### R Comments
 
 R code should be commented using [roxygen2](https://roxygen2.r-lib.org/)-compliant comments.
 
