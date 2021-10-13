@@ -1,5 +1,10 @@
 # Adding, using, renaming, and removing configuration parameters
 
+* [Adding new configuration parameters](#adding-new-configuration-parameters)
+* [Using directory configuration parameters in Nextflow](#using-directory-configuration-parameters-in-Nextflow)
+* [Renaming configuration parameters](#renaming-configuration-parameters)
+* [Removing configuration parameters](#removing-configuration-parameters)
+
 ## Adding new configuration parameters
 
 To add a new configuration parameter, make the following updates.
