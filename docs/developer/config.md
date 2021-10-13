@@ -48,7 +48,7 @@ $ pytest riboviz/test/test_upgrade_config.py
 
 Add the parameter and its description to the `helpMessage()` text.
 
-If the parameter is an optional parameter then, in the block starting with comment `Initialise and validate configuration.`, add a line defining the default value for the parameter. For example:
+If the parameter is an optional parameter then, in the block starting with comment `Initialise and validate configuration`, add a line defining the default value for the parameter. For example:
 
 ```
 params.example_config = 64
