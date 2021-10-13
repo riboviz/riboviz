@@ -41,7 +41,7 @@ if (interactive()) {
   source(file.path(dirname(self), "stats_figs_block_functions.R"))
 }
 
-ConvertSequenceToNt <- function(gene, gene_sequence_tibble) {
+ConvertSequenceToNt <- function(gene, gene_sequence_tibble, gff_df) {
   subset_gff_df_by_gene <- dplyr::filter(.data = gff_df, seqnames == gene)
   left <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
                                    type == "CDS") %>%  select(start))
@@ -78,7 +78,7 @@ CreateNtAnnotation <- function(genome, names, gff_df) {
   gene_sequence_tibble <- tibble(Gene = names,
                                  sequence = gene_seq_df$genome)
   nt_tibble <- purrr::map_df(.x = names, .f = ConvertSequenceToNt,
-                             gene_sequence_tibble)
+                             gene_sequence_tibble, gff_df)
 }
 
 # TEST: CreateNtAnnotation() creates a tibble
@@ -119,10 +119,10 @@ CreateNtAnnotation <- function(genome, names, gff_df) {
 #'
 #' @export
 #'
-#' @examples GetReadPositions(gene, dataset, hd_file,
-#' asite_displacement_length)
-GetReadPositions <- function(gene, dataset, hd_file,
-                             asite_displacement_length) {
+#' @examples GetReadPositions(gene, dataset, hd_file, gff_df,
+#' min_read_length, asite_displacement_length)
+GetReadPositions <- function(gene, dataset, hd_file, gff_df,
+                             min_read_length, asite_displacement_length) {
 
   # Get the matrix of read counts
   reads_pos_length <- GetGeneDatamatrix(gene, dataset, hd_file)
@@ -150,11 +150,12 @@ GetAllPosCounts1Gene <- function(
                                    type == "CDS") %>%  select(start))
   right <- as.numeric(dplyr::filter(.data = subset_gff_df_by_gene,
                                     type == "CDS") %>%  select(end))
-  nt_counts_1_gene <- GetReadPositions(gene, dataset, hd_file,
+  nt_counts_1_gene <- GetReadPositions(gene, dataset, hd_file, gff_df,
+                                       min_read_length,
                                        asite_displacement_length)
   nt_pos_counts <- tibble(Gene = gene,
-                             Pos = 1:length(nt_counts_1_gene),
-                             Count = nt_counts_1_gene)
+                          Pos = 1:length(nt_counts_1_gene),
+                          Count = nt_counts_1_gene)
   as.data.frame(nt_pos_counts, row.names = NULL, optional = FALSE)
   return(nt_pos_counts)
 }
@@ -231,10 +232,10 @@ GetAllPosCounts <- function(
 #' @examples AddNtToPosCounts(gene_names,dataset, hd_file,
 #' min_read_length, gff_df, asite_displacement_length))
 AddNtToPosCounts <- function(
-  gene_names, dataset, hd_file, min_read_length, gff_df,
+  gene_names, genome, dataset, hd_file, min_read_length, gff_df,
   asite_displacement_length) {
 
-  nt_tibble <- CreateNtAnnotation(genome, names, gff_df)
+  nt_tibble <- CreateNtAnnotation(genome, gene_names, gff_df)
 
   total_nt_pos_counts <- GetAllPosCounts(gene_names, dataset,
                                          hd_file, min_read_length,
@@ -357,11 +358,11 @@ ExpandRegions <- function(rows, features_to_study,
 #' asite_displacement_length)
 #'
 ExpandFeatureRegionAllGenes <- function(
-  gene_names, dataset, hd_file, min_read_length, gff_df,
+  gene_names, genome, dataset, hd_file, min_read_length, gff_df,
   features_to_study, expand_width, asite_displacement_length) {
 
   transcript_gene_pos_nt_reads <- suppressMessages(
-    AddNtToPosCounts(gene_names, dataset, hd_file,
+    AddNtToPosCounts(gene_names, genome, dataset, hd_file,
                      min_read_length, gff_df,
                      asite_displacement_length))
 
@@ -649,6 +650,11 @@ OverlayedTable <- function(normalized_expand_list, expand_width) {
 # 4       1    0.938
 # 5       2    0.625
 
+#' Save plot as a PDF.
+#'
+#' @param overlayed_plot Plot.
+#' @param dataset Dataset.
+#' @param output_dir Output directory.
 SavePlotPdf <- function(overlayed_plot, dataset, output_dir) {
   overlayed_plot %>%
     ggsave(
@@ -658,6 +664,77 @@ SavePlotPdf <- function(overlayed_plot, dataset, output_dir) {
           "Meta_feature_plot_positions_of_interest", "_", dataset, ".pdf")),
       width = 6, height = 5
     )
+}
+
+#' Create metafeature window averaged over positions of interest.
+#'
+#' @param hd_file Path to H5 file holding read data for all genes.
+#' @param dataset Name of dataset in H5 file.
+#' @param gff Path to the GFF3 file of the organism being studied"),
+#' @param fasta Path to the FASTA file of the organism being studied"),
+#' @param features_to_study Path to TSV file listing Gene and
+#' Positions to normalize over.
+#' @param output_dir Output directory.
+#' @param expand_width Number of codons to take a slice of either side
+#' of occurrences of the feature of interest.
+#' @param min_read_length Minimum read length in H5 file (integer).
+#' @param asite_disp_path Path to A-site file.
+MetaFeatureNucleotides <- function(hd_file, dataset, gff, fasta,
+  features_to_study, output_dir, expand_width = 5,
+  min_read_length = 10, asite_disp_path) {
+
+  features_to_study <- read.delim(features_to_study)
+
+  print("Starting process")
+
+  gff_df <- readGFFAsDf(gff)
+  genome <- readDNAStringSet(fasta, format = "fasta")
+  gene_names <- names(genome)
+
+  asite_displacement_length <- suppressMessages(
+    ReadAsiteDisplacementLengthFromFile(asite_disp_path))
+
+  print("Create annotation")
+  total_nt_pos_counts <- suppressMessages(GetAllPosCounts(
+    gene_names, dataset, hd_file,  min_read_length,
+    asite_displacement_length, gff_df))
+  transcript_gene_pos_nt_reads <- suppressMessages(AddNtToPosCounts(
+   gene_names, genome, dataset, hd_file, min_read_length, gff_df,
+   asite_displacement_length))
+
+  print("Slice out positions of interest")
+  output_feature_info <- ExpandFeatureRegionAllGenes(
+    gene_names, genome, dataset, hd_file, min_read_length, gff_df,
+   features_to_study, expand_width, asite_displacement_length)
+
+  print("Normalise positions of interest")
+  normalized_expand_list <- purrr::map(
+    .x = output_feature_info,
+    .f = ExpandedRegionNormalization,
+    expand_width
+  )
+
+  print("Overlay positions of interest")
+  overlayed_tibbles <- OverlayedTable(normalized_expand_list, expand_width)
+
+  print("Create Plot")
+  overlayed_plot <- ggplot(
+    overlayed_tibbles,
+    mapping = aes(x = Rel_Pos, y = RelCount)) +
+    geom_line() +
+    theme_bw() +
+    theme(text = element_text(size = 14),
+          axis.title = element_text(size = 14, face = "bold"),
+          title = element_text(size = 14, face = "bold")) +
+    labs(title = paste0("Relative read counts of positions of interest"),
+         x = "Position relative to feature of interest",
+         y = "Relative read count", size = 2) +
+    scale_x_continuous(breaks = seq(-expand_width, expand_width, 2))
+
+  print("Save plot as PDF")
+  SavePlotPdf(overlayed_plot, dataset, output_dir)
+
+  print("Done")
 }
 
 suppressMessages(library(optparse))
@@ -696,8 +773,7 @@ option_list <- list(make_option(c("-i", "--input"),
                                 type = "character",
                                 help = "Path to asite_disp_length. Default is
                                 specific for yeast when code is run from
-                                riboviz directory")
-)
+                                riboviz directory"))
 
 opt <- optparse::parse_args(OptionParser(option_list = option_list))
 
@@ -706,60 +782,11 @@ dataset <- opt$dataset
 gff <- opt$gff
 fasta <- opt$fasta
 features_to_study <- opt$feature_pos
-features_to_study <- read.delim(features_to_study)
 output_dir <- opt$output
 expand_width <- opt$expand_width
-startlen <- opt$startlen
 min_read_length <- opt$minreadlen
 asite_disp_path <- opt$asite_length
 
-print("Starting process")
-
-gff_df <- readGFFAsDf(gff)
-genome <- readDNAStringSet(fasta, format = "fasta")
-names <- names(genome)
-
-asite_displacement_length <- suppressMessages(
-  ReadAsiteDisplacementLengthFromFile(asite_disp_path))
-
-print("Create annotation")
-total_nt_pos_counts <- suppressMessages(GetAllPosCounts(
-  gene_names, dataset,  hd_file,  min_read_length,
-  asite_displacement_length, gff_df))
-transcript_gene_pos_nt_reads <- suppressMessages(AddNtToPosCounts(
- gene_names, dataset, hd_file, min_read_length, gff_df,
- asite_displacement_length))
-
-print("Slice out positions of interest")
-output_feature_info <- ExpandFeatureRegionAllGenes(
-  gene_names, dataset, hd_file, min_read_length, gff_df,
- features_to_study, expand_width, asite_displacement_length)
-
-print("Normalise positions of interest")
-normalized_expand_list <- purrr::map(
-  .x = output_feature_info,
-  .f = ExpandedRegionNormalization,
-  expand_width
-)
-
-print("Overlay positions of interest")
-overlayed_tibbles <- OverlayedTable(normalized_expand_list, expand_width)
-
-print("Create Plot")
-overlayed_plot <- ggplot(
-  overlayed_tibbles,
-  mapping = aes(x = Rel_Pos, y = RelCount)) +
-  geom_line() +
-  theme_bw() +
-  theme(text = element_text(size = 14),
-        axis.title = element_text(size = 14, face = "bold"),
-        title = element_text(size = 14, face = "bold")) +
-  labs(title = paste0("Relative read counts of positions of interest"),
-       x = "Position relative to feature of interest",
-       y = "Relative read count", size = 2) +
-  scale_x_continuous(breaks = seq(-expand_width, expand_width, 2))
-
-print("Save plot as PDF")
-SavePlotPdf(overlayed_plot, dataset, output_dir)
-
-print("Done")
+MetaFeatureNucleotides(hd_file, dataset, gff, fasta,
+  features_to_study, output_dir, expand_width, min_read_length,
+  asite_disp_path)
