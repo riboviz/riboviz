@@ -1,5 +1,20 @@
 # Developing and running tests
 
+
+* [Run Python tests and workflow tests](#run-python-tests-and-workflow-tests)
+* [Run R tests](#run-r-tests)
+* [Download vignette integration test data](#download-vignette-integration-test-data)
+* [Run vignette integration tests](#run-vignette-integration-tests)
+* [Using the integration test suite](#using-the-integration-test-suite)
+  - [Specifying values for environment variable configuration tokens](#specifying-values-for-environment-variable-configuration-tokens)
+- [Skipping tests for index and temporary files](#skipping-tests-for-index-and-temporary-files)
+  - [Using your own expected results directory](#using-your-own-expected-results-directory)
+  - [How actual directories and files are compared to expected directories and files](#how-actual-directories-and-files-are-compared-to-expected-directories-and-files)
+  - [Limitations of tests for UMI extraction, deduplication and grouping](#limitations-of-tests-for-umi-extraction-deduplication-and-grouping)
+* [Useful pytest flags](#useful-pytest-flags)
+
+---
+
 ## Run Python tests and workflow tests
 
 Run:
@@ -35,9 +50,9 @@ Test scripts can also be run from within R as follows (for example):
 
 ---
 
-## Run vignette integration tests
+## Download vignette integration test data
 
-Test data found within repositories prefixed `test-data-<YYYYMMDD>|<TAG>`, within the [riboviz](https://github.com/riboviz) project on GitHub. These contain output files from the workflow.
+Integration test data can be found within repositories prefixed `test-data-<YYYYMMDD>|<TAG>`, within the [riboviz](https://github.com/riboviz) project on GitHub. These contain output files from the workflow.
 
 **Note:** The most recent `test-data-<YYYYMMDD>` repository will be consistent with the most recent version of the code on the `develop` branch.
 
@@ -52,7 +67,13 @@ $ cd
 $ git clone https://github.com/riboviz/test-data-2.1
 ```
 
-Run the tests for the workflow (these may take a few minutes):
+---
+
+## Run vignette integration tests
+
+These assume you have vignette integration test data. See [Download vignette integration test data](#download-vignette-integration-test-data) above.
+
+Run the integration tests for the workflow (these may take a few minutes):
 
 ```console
 $ cd riboviz
@@ -70,7 +91,9 @@ $ pytest riboviz/test/integration/test_integration.py \
     --config-file=vignette/vignette_config.yaml
 ```
 
-**Note:** If you have already run the vignette, then add a `--skip-workflow` flag to the call to `pytest`.
+**Note:** If you have already run the vignette, then you can add a `--skip-workflow` flag to the call to `pytest`.
+
+**Troubleshooting: `PendingDeprecationWarning`**
 
 `PendingDeprecationWarning` `warnings` can be ignored.
 
@@ -139,7 +162,47 @@ $ RIBOVIZ_SAMPLES=<SAMPLES_DIRECTORY> \
     [--config-file=<CONFIG_FILE>]
 ```
 
-### Comparing actual directories and files to expected directories and files
+### Skipping tests for index and temporary files
+
+If `--check-index-tmp` is not provided (the default behaviour) then tests for index and temporary files will be skipped. An example of how this appears is as follows:
+
+```
+...
+riboviz/test/integration/test_integration.py::test_hisat2_build_index[vignette/index-True-YAL_CDS_w_250-1] SKIPPED
+...
+riboviz/test/integration/test_integration.py::test_hisat2_build_index[vignette/index-True-yeast_rRNA-8] SKIPPED
+riboviz/test/integration/test_integration.py::test_cutadapt_fq[vignette/tmp-False-WTnone] SKIPPED
+...
+riboviz/test/integration/test_integration.py::test_samtools_index_dedup_bam[vignette/tmp-False-WT3AT] SKIPPED
+riboviz/test/integration/test_integration.py::test_samtools_view_sort_index[vignette/output-False-WTnone] PASSED
+riboviz/test/integration/test_integration.py::test_samtools_view_sort_index[vignette/output-False-WT3AT] PASSED
+riboviz/test/integration/test_integration.py::test_umitools_dedup_stats_tsv[vignette/tmp-False-False-WTnone-edit_distance.tsv] SKIPPED
+...
+```
+
+### Using your own expected results directory
+
+After running a workflow using your own configuration file you can copy your index, temporary and output directories and then use those copies for future tests. One way to do this is to create a new folder with these results e.g.
+
+```console
+$ mkdir results-<BRANCH>-<COMMIT-HASH>
+$ cp -r <INDEX_DIRECTORY> results-<BRANCH>-<COMMIT-HASH>/
+$ cp -r <TMP_DIRECTORY> results-<BRANCH>-<COMMIT-HASH>/
+$ cp -r <OUTPUT_DIRECTORY> results-<BRANCH>-<COMMIT-HASH>/
+```
+
+**Note:** Keep the names of the original index, temporary and output directories. See [How actual directories and files are compared to expected directories and files](#how-actual-directories-and-files-are-compared-to-expected-directories-and-files) above).
+
+You can now provide this folder as a value for the `--expected` parameter. For example, after doing some development, you can run:
+
+```console
+$ pytest riboviz/test/integration/test_integration.py \
+    --expected=results-<BRANCH>-<COMMIT-HASH> \
+    --config-file=<CONFIG_FILE> \
+    --check-index-tmp
+```
+
+### How actual directories and files are compared to expected directories and files
 
 As the expected data directories (`--expected`) and those with the data to be tested may vary in their paths the following approach is used:
 
@@ -172,54 +235,13 @@ $HOME/results-mybranch-abcdefg/tmp
 
 Observe that the final directories in each path - `index`, `output`, `tmp` - are the same, though the paths to these differ.
 
-### Skipping tests for index and temporary files
-
-If `--check-index-tmp` is not provided (the default behaviour) then tests for index and temporary files will be skipped. An example of how this appears is as follows:
-
-```console
-$ pytest -vs riboviz/test/integration/test_integration.py --expected=$HOME/test-data-2.1 --skip-workflow
-...
-riboviz/test/integration/test_integration.py::test_hisat2_build_index[vignette/index-True-YAL_CDS_w_250-1] SKIPPED
-...
-riboviz/test/integration/test_integration.py::test_hisat2_build_index[vignette/index-True-yeast_rRNA-8] SKIPPED
-riboviz/test/integration/test_integration.py::test_cutadapt_fq[vignette/tmp-False-WTnone] SKIPPED
-...
-riboviz/test/integration/test_integration.py::test_samtools_index_dedup_bam[vignette/tmp-False-WT3AT] SKIPPED
-riboviz/test/integration/test_integration.py::test_samtools_view_sort_index[vignette/output-False-WTnone] PASSED
-riboviz/test/integration/test_integration.py::test_samtools_view_sort_index[vignette/output-False-WT3AT] PASSED
-riboviz/test/integration/test_integration.py::test_umitools_dedup_stats_tsv[vignette/tmp-False-False-WTnone-edit_distance.tsv] SKIPPED
-...
-```
-
-### Tests for UMI extraction, deduplication and grouping
+### Limitations of tests for UMI extraction, deduplication and grouping
 
 If running with a configuration that used UMI extraction, deduplication and grouping then:
 
 * UMI deduplication statistics files are not checked (files prefixed by `dedup_stats`).
 * UMI group file post-deduplication files, (`post_dedup_groups.tsv`) files can differ between runs depending on which reads are removed by `umi_tools dedup`, so only the existence of the file is checked.
 * BAM file output by deduplication (`dedup.bam`) files can differ between runs depending on which reads are removed by `umi_tools dedup`, so only the existence of the file is checked.
-
-### Using your own expected results directory
-
-After running a workflow using your own configuration file you can copy your index, temporary and output directories and then use those copies for future tests. One way to do this is to create a new folder with these results e.g.
-
-```console
-$ mkdir results-<BRANCH>-<COMMIT-HASH>
-$ cp -r <INDEX_DIRECTORY> results-<BRANCH>-<COMMIT-HASH>/
-$ cp -r <TMP_DIRECTORY> results-<BRANCH>-<COMMIT-HASH>/
-$ cp -r <OUTPUT_DIRECTORY> results-<BRANCH>-<COMMIT-HASH>/
-```
-
-**Note:** Keep the names of the original index, temporary and output directories. See [Comparing actual directories and files to expected directories and files](#comparing-actual-directories-and-files-to-expected-directories-and-files) above).
-
-You can now provide this folder as a value for the `--expected` parameter. For example, after doing some development, you can run:
-
-```console
-$ pytest riboviz/test/integration/test_integration.py \
-    --expected=results-<BRANCH>-<COMMIT-HASH> \
-    --config-file=<CONFIG_FILE> \
-    --check-index-tmp
-```
 
 ---
 
@@ -229,4 +251,3 @@ $ pytest riboviz/test/integration/test_integration.py \
 * `-v`: verbose mode, displays names of test functions run.
 * `-k`: run a specific test function.
 * `--cov-config=.coveragerc --cov-report term-missing --cov=riboviz`: create a test coverage report which includes the line numbers of statements that were not executed.
-
