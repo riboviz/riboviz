@@ -30,7 +30,7 @@ Please do **not** refer to the software as RiboViz, Riboviz, Ribo-Viz, Ribo-viz 
 
 Python code should be formatted to conform as far as possible to the [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/).
 
-The tools [pylint](https://pylint.org/) and [pycodestyle](https://pycodestyle.pycqa.org/en/latest/) can help by highlighting deviations from the coding style. See [Style checking Python code](#style-checking-python-code] below.
+The tools [pylint](https://pylint.org/) and [pycodestyle](https://pycodestyle.pycqa.org/en/latest/) can help by highlighting deviations from the coding style. See [Style checking Python code](#style-checking-python-code) below.
 
 ### Comments
 
@@ -127,7 +127,7 @@ $ pycodestyle riboviz/
 
 R code should be commented using [Google’s R Style Guide](https://google.github.io/styleguide/Rguide.html), a fork of [Tidyverse R Style guide](https://style.tidyverse.org/), where possible. The Google fork is largely the same as Tidyverse but differentiates more between functions (`BigCamelCase`) and variable names (`snake_case`) and does not assign to the right, for example.
 
-The packages [lintr](https://cran.r-project.org/package=lintr) and [styler](https://styler.r-lib.org/) can help by highlighting deviations from the coding style. See [Style checking R code](#style-checking-r-code] below.
+The packages [lintr](https://cran.r-project.org/package=lintr) and [styler](https://styler.r-lib.org/) can help by highlighting deviations from the coding style. See [Style checking R code](#style-checking-r-code) below.
 
 ### Comments
 
