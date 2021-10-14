@@ -84,7 +84,7 @@ def pytest_addoption(parser):
 @pytest.fixture(scope="module")
 def expected_fixture(request):
     """
-    Gets value for ``--expected`` command-line option.
+    Gets value for :py:const:`EXPECTED` command-line option.
 
     :param request: request
     :type request: _pytest.fixtures.SubRequest
@@ -102,7 +102,7 @@ def expected_fixture(request):
 @pytest.fixture(scope="module")
 def skip_workflow_fixture(request):
     """
-    Gets value for ``--skip-workflow`` command-line option.
+    Gets value for :py:const:`SKIP_WORKFLOW` command-line option.
 
     :param request: request
     :type request: _pytest.fixtures.SubRequest
@@ -115,8 +115,8 @@ def skip_workflow_fixture(request):
 @pytest.fixture(scope="module")
 def skip_index_tmp_fixture(request):
     """
-    Gets value for `--check-index-tmp` command-line option. If
-    ``False``, or undefined, invokes ``pytest.skip`` to skip
+    Gets value for :py:const:`CHECK_INDEX_TMP` command-line option.
+    If ``False``, or undefined, invokes ``pytest.skip`` to skip
     a test that uses this fixture.
 
     :param request: request
@@ -131,7 +131,7 @@ def skip_index_tmp_fixture(request):
 @pytest.fixture(scope="module")
 def config_fixture(request):
     """
-    Gets value for ``--config-file`` command-line option.
+    Gets value for :py:const:`CONFIG_FILE` command-line option.
 
     :param request: request
     :type request: _pytest.fixtures.SubRequest
@@ -165,8 +165,9 @@ def pytest_generate_tests(metafunc):
         - If :py:const:`riboviz.params.FQ_FILES` is provided then
           the sample names are the keys from this value.
         - If :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` then
-          sample names are deduced from the names of directories in
-          :py:const:`riboviz.params.OUTPUT_DIR` cross-referenced
+          sample names are deduced from the names of output
+          directories in the expected data directory,
+          :py:const:`EXPECTED`, cross-referenced
           with the sample sheet file specified in
           :py:const:`riboviz.params.SAMPLE_SHEET`.
         - If sample name
@@ -244,7 +245,11 @@ def pytest_generate_tests(metafunc):
             # Get folder/file names from output directory. These
             # include output folders for the samples which were
             # demultiplexed and other files.
-            output_samples = os.listdir(config[params.OUTPUT_DIR])
+            expected_dir = metafunc.config.getoption(EXPECTED)
+            expected_out = os.path.join(
+                expected_dir,
+                os.path.basename(os.path.normpath(config[params.OUTPUT_DIR])))
+            output_samples = os.listdir(expected_out)
             # Get names of samples for which output files exist.
             samples = list(set(sample_sheet_samples).intersection(
                 set(output_samples)))
