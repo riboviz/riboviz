@@ -209,7 +209,7 @@ Run the tests for `riboviz/upgrade_config.py` and check that they all pass:
 $ pytest riboviz/test/test_upgrade_config.py 
 ```
 
-Search for all references to the `riboviz/params.py` constant as it was prior to renaming, across all the Python code, and update these references.
+Search for all references to the `riboviz/params.py` constant as it was prior to renaming, across all the Python code, in `riboviz/` and its subdirectories, and update these references.
 
 ### 3. Update Nextflow, `prep_riboviz.nf`
 
@@ -221,7 +221,7 @@ Rename any Nextflow variables that include the parameter name. For example, if r
 
 ### 4. Update documentation
 
-Search for all occurrences of the parameter in the documentation and rename these.
+Search for all occurrences of the parameter in the documentation, in `docs/` and its subdirectories, and rename these.
 
 ### 5. Run all tests
 
@@ -257,7 +257,7 @@ Update `riboviz/upgrade_config.py`:
 * Remove any entry for the parameter from the 'Configuration parameters that have been renamed are updated' list in the module comment at the top of the file.
 * Add an entry for the parameter to the 'Configuration parameters that are now unused are removed' list in the module comment at the top of the file.
 * Remove any occurrence of the parameter from the `UPDATES` and `RENAMES` dictionaries.
-* Add an entry for the parameter n the `UNUSED` dictionary.
+* Add an entry for the parameter to the `UNUSED` dictionary.
 
 For example, if removing `deprecated_example`, then `UNUSED` would be updated to:
 ```python
@@ -281,7 +281,7 @@ Remove the parameter from the `helpMessage()` text.
 
 ### 4. Update documentation
 
-Search for all occurrences of the parameter in the documentation and remove these.
+Search for all occurrences of the parameter in the documentation, in `docs/` and its subdirectories, and remove these.
 
 ### 5. Run all tests
 
