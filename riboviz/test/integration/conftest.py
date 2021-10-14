@@ -177,10 +177,6 @@ def pytest_generate_tests(metafunc):
       ``config``, if defined, or the default from
       :py:const:`riboviz.params.DEFAULT_CONFIG_YAML`.
       otherwise.
-    - :py:const:`riboviz.params.INPUT_DIR`: value of this
-      configuration parameter.
-    - :py:const:`riboviz.params.FQ_FILES`: value of this
-      configuration parameter or ``None`` if undefined.
 
     :param metafunc: pytest test function inspection object
     :type metafunc: _pytest.python.Metafunc
