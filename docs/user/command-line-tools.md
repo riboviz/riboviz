@@ -33,7 +33,7 @@ For usage, run:
 $ python -m <TOOL> -h
 ```
 
-For example
+For example:
 
 ```console
 $ python -m riboviz.tools.check_fasta_gff -h
@@ -57,7 +57,7 @@ For usage, run:
 $ Rscript --vanilla <SCRIPT>  -h
 ```
 
-For example
+For example:
 
 ```console
 $ Rscript --vanilla rscripts/bam_to_h5.R  -h
