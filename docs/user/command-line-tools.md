@@ -30,7 +30,7 @@ The following additional command-line tools are also available:
 For usage, run:
 
 ```console
-$ python -m <TOOL> -h
+$ python -m <SCRIPT> -h
 ```
 
 For example:
