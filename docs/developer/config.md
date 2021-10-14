@@ -14,6 +14,7 @@ To add a new configuration parameter, make the following updates.
 Add the new parameter and its default value to each of the following example configuration files:
 
 ```
+riboviz/default_config.yaml
 vignette/remote_vignette_config.yaml
 vignette/riboviz_env.yaml
 vignette/simdata_multiplex_config.yaml
@@ -146,12 +147,13 @@ To rename a configuration parameter, make the following updates.
 Rename the parameter in each of the following example configuration files:
 
 ```
+riboviz/default_config.yaml
+riboviz/test/config/vignette_config_current.yaml
 vignette/remote_vignette_config.yaml
 vignette/riboviz_env.yaml
 vignette/simdata_multiplex_config.yaml
 vignette/simdata_umi_config.yaml
 vignette/vignette_config.yaml
-riboviz/test/config/vignette_config_current.yaml
 ```
 
 ### 2. Update Python code
@@ -240,12 +242,13 @@ To remove a configuration parameter that is no longer used, make the following u
 Remove the parameter in each of the following example configuration files:
 
 ```
+riboviz/default_config.yaml
+riboviz/test/config/vignette_config_current.yaml
 vignette/remote_vignette_config.yaml
 vignette/riboviz_env.yaml
 vignette/simdata_multiplex_config.yaml
 vignette/simdata_umi_config.yaml
 vignette/vignette_config.yaml
-riboviz/test/config/vignette_config_current.yaml
 ```
 
 ### 2. Update Python code
