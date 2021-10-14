@@ -56,7 +56,7 @@ For temporary and output files, update the workflow images, update the workflow 
 
 * Add the new file, with links from the process that creates it and to the process that consumes it, if applicable.
 * Update the workflow SVG images, `docs/images/*.svg`.
-* See [Updating workflow images](#documentation.md#updating-workflow-images) in [Writing and updating documentation](./documentation.md).
+* See [Updating workflow images](./documentation.md#updating-workflow-images) in [Writing and updating documentation](./documentation.md).
 
 ---
 
@@ -112,7 +112,7 @@ Update the workflow images:
 
 * Search for all occurrences of the file name in the workflow images, `docs/images/*.dot`, and update these.
 * Update the workflow SVG images, `docs/images/*.svg`.
-* See [Updating workflow images](#documentation.md#updating-workflow-images) in [Writing and updating documentation](./documentation.md).
+* See [Updating workflow images](./documentation.md#updating-workflow-images) in [Writing and updating documentation](./documentation.md).
 
 ---
 
@@ -150,4 +150,4 @@ Update the workflow images:
 
 * Search for all occurrences of the file name in the workflow images, `docs/images/*.dot`, and remove these.
 * Update the workflow SVG images, `docs/images/*.svg`.
-* See [Updating workflow images](#documentation.md#updating-workflow-images) in [Writing and updating documentation](./documentation.md).
+* See [Updating workflow images](./documentation.md#updating-workflow-images) in [Writing and updating documentation](./documentation.md).
