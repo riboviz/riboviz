@@ -27,9 +27,19 @@ EXAMPLE_FILE_TSV = "example_file.tsv"
 """ Example TSV file. """
 ```
 
+If the file name will include a sample ID or other content which may change from run to run then define a Python format string instead, using `{}` for the part of the file name that may change. For example `riboviz/workflow_files.py` defines the following constants for sample-specific files:
+
+```
+ADAPTER_TRIM_FQ_FORMAT = "{}_trim.fq"
+
+STATIC_HTML_FILE = "{}_output_report.html"
+```
+
 ### 2. Update integration tests
 
-TODO
+Write a test function in `riboviz/test/integration/test_integration.py` to validate the temporary or output file by comparing it to a temporary or output file in the integration test data directory.
+
+For information to help with writing an integration test, see [Writing an integration test](./testing.md#writing-an-integration-test.md) in [Developing and running tests](./testing.md).
 
 ### 3. Run integration tests
 
