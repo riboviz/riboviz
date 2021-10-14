@@ -17,6 +17,7 @@ This page summarises style guidelines for the riboviz source code, documentation
   - [Command-line parameters](#command-line-parameters)
   - [Python command-line tools](#python-command-line-tools)
   - [R command-line tools](#r-command-line-tools)
+* [Input and output file names](#input-and-output-file-names)
 
 ---
 
@@ -302,3 +303,11 @@ $features_file
 i.e. the options are present but with value `NA`.
 
 The function `is.na` (as opposed to `is.null`) can be used to check if a variable has value `NA`.
+
+---
+
+## Input and output file names
+
+riboviz-specifici input and output file names must be in snake-case i.e., lower case and delimited by underscores, not hyphens. Upper-case is permitted for acronyms e.g., `ORF`, `CDS`, `APE`, `TPMs`.
+
+For example, `vignette_config.yaml`, `read_counts_per_file.tsv`, `TPMs_all_CDS_all_samples.tsv`.
