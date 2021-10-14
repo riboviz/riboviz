@@ -1,5 +1,12 @@
 # Debugging
 
+* [Debugging R scripts with appropriate command-line arguments](#debugging-r-scripts-with-appropriate-command-line arguments)
+* [Debugging and Nextflow](#debugging and Nextflow
+  - [Debugging within Nextflow's `work/` step-specific directories](#debugging-within-nextflows-work-step-specific-directories)
+  - [Debugging within a directory emulating Nextflow's `work/` step-specific directories](#debugging-within-a-directory-emulating-nextflows-work-step-specific directories)
+
+---
+
 ## Debugging R scripts with appropriate command-line arguments
 
 To debug R scripts such as `generate_stats_figs.R` and `bam_to_h5.R`, they need to be run with the correct command-line arguments to discover the bug. R has good tools for interactive debugging, [explained in Hadley Wickham's chapter on debugging in R](https://adv-r.hadley.nz/debugging.html). However, interactive debugging tools such as `browser()` don't interrupt a call to `Rscript`. Instead you need to modify the call from:
