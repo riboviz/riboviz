@@ -6,7 +6,7 @@ These are the key steps in building a release.
 * Merge additional branches agreed for the release into the `develop` branch via creation of pull requests, again via the GitHub web interface.
 * Check [docs/acks.md](../acks.md), and update if necessary.
 * Check [docs/reference/references.md](../reference/references.md), and update if necessary.
-* Update software versions in `docs/user/install.md` - see [Update Dependencies overview](./dependencies.md#update-dependencies-overview).
+* Update software versions in `docs/user/install.md` - see [Updating Dependencies overview tables](./dependencies.md#updating-dependencies-overview-tables) in [Adding and updating dependencies](./dependencies.md).
 * Update the following documentation to refer to the current release version:
   - [docs/developer/releasing.md](./releasing.md) (this page)
   - [docs/developer/create-test-data-repository.md](./create-test-data-repository.md)

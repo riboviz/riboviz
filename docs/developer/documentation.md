@@ -1,11 +1,5 @@
 # Writing and updating documentation
 
-## Update Dependencies overview in Install riboviz and dependencies
-
-See [Update Dependencies overview](./dependencies.md#update-dependencies-overview).
-
----
-
 ## Create Sphinx documentation from Python
 
 Create Sphinx pages to reference source code:
