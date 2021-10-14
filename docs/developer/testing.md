@@ -16,8 +16,8 @@
   - [Comparing expected and actual files for equality](#comparing-expected-and-actual-files-for-equality)
   - [Anatomy of an integration test function](#anatomy-of-an-integration-test-function)
   - [Conditionally skipping tests](#conditionally-skipping-tests)
-  - [Further information pytest fixtures and parameters](#further-information-pytest-fixtures-and-parameters)
 * [Useful pytest flags](#useful-pytest-flags)
+* [Information on pytest fixtures and parameters](#information-on-pytest-fixtures-and-parameters)
 
 ---
 
@@ -400,14 +400,6 @@ def test_generate_stats_figs_t_rna_codon_positions_pdf(
     check_pdf_file_exists(dir_out, sample, file_name)
 ```
 
-### Further information pytest fixtures and parameters
-
-For information on pytest fixtures and parameters see:
-
-* [pytest fixtures: explicit, modular, scalable](https://docs.pytest.org/en/6.2.x/fixture.html)
-* [Parametrizing fixtures and test functions](https://docs.pytest.org/en/6.2.x/parametrize.html)
-* [Basic patterns and examples](https://docs.pytest.org/en/6.2.x/example/simple.html)
-
 ---
 
 ## Useful pytest flags
@@ -423,3 +415,11 @@ For information on pytest fixtures and parameters see:
 * [Removing temporary or output files](#removing-temporary-or-output-files)
 
 ---
+
+## Information on pytest fixtures and parameters
+
+The riboviz integration and Python unit tests make extensive use of pytest fixtures and parameterised tests. For more information on pytest fixtures and parameters see:
+
+* [pytest fixtures: explicit, modular, scalable](https://docs.pytest.org/en/6.2.x/fixture.html)
+* [Parametrizing fixtures and test functions](https://docs.pytest.org/en/6.2.x/parametrize.html)
+* [Basic patterns and examples](https://docs.pytest.org/en/6.2.x/example/simple.html)
