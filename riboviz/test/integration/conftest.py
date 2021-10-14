@@ -163,7 +163,7 @@ def pytest_generate_tests(metafunc):
     - ``is_multiplexed``: list with ``True`` if
       :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` defines one or
       more files, ``False`` otherwise.
-    - ``multiplex_name``: list of multiplexed file name prefixed,
+    - ``multiplex_name``: list of multiplexed file name prefixes,
       without extensions, from
       :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` if
       :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` defines one or
