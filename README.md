@@ -37,7 +37,7 @@ Usage:
 
 * [Install developer dependencies](./docs/developer/install.md)
 * [Git branching model](./docs/developer/git-branching-model.md)
-* [Style](./docs/developer/style.md): Style guidelines for the **riboviz** source code, documentation, configuration parameters and command-line parameters.
+* [Style](./docs/developer/style.md): Style guidelines for the **riboviz** source code, documentation, parameters and files.
 * [Debugging](./docs/developer/debugging.md)
 * [Adding, using, renaming, and removing configuration parameters](./docs/developer/config.md)
 * [Adding and updating dependencies](./docs/developer/dependencies.md)
