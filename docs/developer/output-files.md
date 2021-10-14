@@ -39,7 +39,7 @@ STATIC_HTML_FILE = "{}_output_report.html"
 
 Write a test function in `riboviz/test/integration/test_integration.py` to validate the temporary or output file by comparing it to a temporary or output file in the integration test data directory.
 
-For information to help with writing an integration test, see [Writing an integration test](./testing.md#writing-an-integration-test.md) in [Developing and running tests](./testing.md).
+For information to help with writing an integration test, see [Writing an integration test](./testing.md#writing-an-integration-test) in [Developing and running tests](./testing.md).
 
 ### 3. Run integration tests
 
