@@ -223,7 +223,7 @@ Rename any Nextflow variables that include the parameter name. For example, if r
 
 Search for all occurrences of the parameter in the documentation and rename these.
 
-### 5. Rerun all tests
+### 5. Run all tests
 
 * [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
 * [Run R tests](./testing.md#run-r-tests).
@@ -283,7 +283,7 @@ Remove the parameter from the `helpMessage()` text.
 
 Search for all occurrences of the parameter in the documentation and remove these.
 
-### 5. Rerun all tests
+### 5. Run all tests
 
 * [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
 * [Run R tests](./testing.md#run-r-tests).
