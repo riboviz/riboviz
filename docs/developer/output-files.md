@@ -25,6 +25,7 @@ For example:
 ```python
 EXAMPLE_FILE_TSV = "example_file.tsv"
 """ Example TSV file. """
+```
 
 ### 2. Update integration tests
 
