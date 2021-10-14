@@ -1,18 +1,8 @@
-# Adding, using, renaming, and removing temporary or output files
+# Adding, renaming, and removing temporary or output files
 
-
-## Adding temporary or output files
-## Renaming temporary or output files
-### 1. Update Nextflow workflow
-### 2. Update Python code
-### 3. Run all tests
-### 4. Update documentation
-## Removing temporary or output files
-### 1. Update Nextflow workflow
-### 2. Update Python code
-### 3. Run all tests
-### 4. Update documentation
-
+* [Adding temporary or output files](#adding-temporary-or-output-files)
+* [Renaming temporary or output files](#renaming-temporary-or-output-files)
+* [Removing temporary or output files](#removing-temporary-or-output-files)
 
 ---
 
