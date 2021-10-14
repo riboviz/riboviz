@@ -18,6 +18,10 @@ This page summarises style guidelines for the riboviz source code, documentation
   - [Python command-line tools](#python-command-line-tools)
   - [R command-line tools](#r-command-line-tools)
 * [Input and output file names](#input-and-output-file-names)
+* [Nextflow](#nextflow)
+* [Process names](#process-names)
+* [Channel names](#channel-names)
+* [Variable names](#variable-names)
 
 ---
 
@@ -308,6 +312,28 @@ The function `is.na` (as opposed to `is.null`) can be used to check if a variabl
 
 ## Input and output file names
 
-riboviz-specifici input and output file names must be in snake-case i.e., lower case and delimited by underscores, not hyphens. Upper-case is permitted for acronyms e.g., `ORF`, `CDS`, `APE`, `TPMs`.
+riboviz-specific input and output file names must be in snake-case i.e., lower case and delimited by underscores, not hyphens. Upper-case is permitted for acronyms e.g., `ORF`, `CDS`, `APE`, `TPMs`, `RNA`.
 
 For example, `vignette_config.yaml`, `read_counts_per_file.tsv`, `TPMs_all_CDS_all_samples.tsv`.
+
+---
+
+## Nextflow
+
+### Process names
+
+Nextflow process names must be in CamelCase with the first letter being lower-case. Upper-case is peromitted for acronyms e.g., `ORF`, `CDS`, `APE`, `TPMs`, `RNA`.
+
+For example, `buildIndicesrRNA`, `demultiplex`, `staticHTML`.
+
+### Channel names
+
+Nextflow channel names must be in snake-case i.e., lowe case and delimited by underscores, not hyphens.
+
+For channels which are file names ensure the channel name includes the file type as its last component, delimited by an underscore.
+
+For example, `multiplex_sample_sheet_tsv`, `sample_fq`
+
+### Variable names
+
+Nextflow variable names must be in snake-case i.e., lowe case and delimited by underscores, not hyphens.
