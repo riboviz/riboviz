@@ -1,7 +1,6 @@
 # Style
 
-This page summarises style guidelines for the riboviz source code, documentation, configuration parameters and command-line parameters.
-
+This page summarises style guidelines for the riboviz source code, documentation, parameters and files.
 
 * ['riboviz'](#riboviz)
 * [Python source code](#python-source-code)
@@ -19,9 +18,9 @@ This page summarises style guidelines for the riboviz source code, documentation
   - [R command-line tools](#r-command-line-tools)
 * [Input and output file names](#input-and-output-file-names)
 * [Nextflow](#nextflow)
-* [Process names](#process-names)
-* [Channel names](#channel-names)
-* [Variable names](#variable-names)
+  - [Process names](#process-names)
+  - [Channel names](#channel-names)
+  - [Variable names](#variable-names)
 
 ---
 
