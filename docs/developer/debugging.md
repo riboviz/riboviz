@@ -1,6 +1,6 @@
 # Debugging
 
-* [Debugging R scripts with appropriate command-line arguments](#debugging-r-scripts-with-appropriate-command-line arguments)
+* [Debugging R scripts with appropriate command-line arguments](#debugging-r-scripts-with-appropriate-command-line-arguments)
 * [Debugging and Nextflow](#debugging and Nextflow
   - [Debugging within Nextflow's `work/` step-specific directories](#debugging-within-nextflows-work-step-specific-directories)
   - [Debugging within a directory emulating Nextflow's `work/` step-specific directories](#debugging-within-a-directory-emulating-nextflows-work-step-specific directories)
