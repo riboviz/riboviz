@@ -15,6 +15,7 @@
   - [Integration test parameters](#integration-test-parameters)
   - [Comparing expected and actual files for equality](#comparing-expected-and-actual-files-for-equality)
   - [Anatomy of an integration test function](#anatomy-of-an-integration-test-function)
+  - [Conditionally skipping tests](#conditionally-skipping-tests)
   - [Further information pytest fixtures and parameters](#further-information-pytest-fixtures-and-parameters)
 * [Useful pytest flags](#useful-pytest-flags)
 
@@ -277,7 +278,7 @@ Additional fixtures, from which integration test functions can take values by de
 | `expected_fixture` | Value of `--expected` command-line option when the integration tests are run i.e., the integration test data. | `riboviz/test/integration/conftest.py` |
 | `config_fixture` | Value of `--config-file` command-line option when the integration tests are run (default `vignette/vignette_config.yaml`). | `riboviz/test/integration/conftest.py` |
 | `scratch_directory` | Scratch directory, created as a sub-directory of `tmpdir`, see below. | `riboviz/test/integration/test_integration.py` |
-| `tmpdir` | Temporary directory, unique to test invocation | Provided by `pytest`, see [Temporary directories and files](https://docs.pytest.org/en/6.2.x/tmpdir.html).
+| `tmpdir` | Temporary directory, unique to test invocation. | Provided by `pytest`, see [Temporary directories and files](https://docs.pytest.org/en/6.2.x/tmpdir.html).
 
 ### Integration test parameters
 
@@ -321,7 +322,7 @@ check_pdf_file_exists(dir_out, sample, file_name)
 
 As an example consider the following test:
 
-```
+```python
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 @pytest.mark.parametrize("file_name", [
@@ -370,6 +371,34 @@ If there are three samples defined in `fq_files` e.g., `WTnone` and `WT3AT`, and
 | `WTnone` | `rRNA_map_sam` |
 | `WT3AT`  | `orf_map_sam`  |
 | `WT3AT`  | `rRNA_map_sam` |
+
+### Conditionally skipping tests
+
+Tests can be conditionally skipped, based on the value of configuration parameters, as follows:
+
+* Declare the configuration parameter as an argument to the test function. It will then be passed in as a parameter, as described in [Integration test parameters](#integration-test-parameters) above.
+* Declare a conditional invocation of `pytest.skip` to tell pytest to skip the test depending on the desired condition.
+
+For example, the file `normalized_density_APEsites_per_codon.pdf` is only output by the workflow (specifically `generate_stats_figs.R`) if values for the configuration parameters `t_rna_file` and `codon_positions_file` are provided and also if the configuration parameter `output_pdfs` is `True`. If any of these conditions do not hold then no output file is produced and so, correspondingly, the test for this file should be skipped. The implementation of the corresponding test is as follows:
+
+```python
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize(
+    "file_name",
+    [workflow_r.NORMALIZED_DENSITY_APESITES_PER_CODON_PDF])
+def test_generate_stats_figs_t_rna_codon_positions_pdf(
+        t_rna_file, codon_positions_file, output_pdfs, dir_out,
+        sample, file_name):
+    if not t_rna_file:
+        pytest.skip('Skipped test as t_rna_file: {}'.format(
+            t_rna_file))
+    if not codon_positions_file:
+        pytest.skip('Skipped test as codon_positions_file: {}'.format(
+            codon_positions_file))
+    if not output_pdfs:
+        pytest.skip('Skipped test as output_pdfs: {}'.format(output_pdfs))
+    check_pdf_file_exists(dir_out, sample, file_name)
+```
 
 ### Further information pytest fixtures and parameters
 
