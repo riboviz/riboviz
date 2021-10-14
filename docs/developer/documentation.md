@@ -1,6 +1,12 @@
 # Writing and updating documentation
 
-## Create Sphinx documentation from Python
+* [Creating Sphinx documentation from Python comments](#creating-sphinx-documentation-from-python-comments)
+* [Creating template Sphinx documentation files](#creating-template-sphinx-documentation-files)
+* [Updating workflow images](#updating-workflow-images)
+
+---
+
+## Creating Sphinx documentation from Python comments
 
 Create Sphinx pages to reference source code:
 
@@ -19,7 +25,9 @@ Open `py-docs/_build/html/index.html` in a browser.
 
 ---
 
-## How the template Sphinx documentation files were originally created
+## Creating template Sphinx documentation files
+
+The template Sphinx documentation files were originally created as follows:
 
 ```console
 $ sphinx-quickstart py-docs
@@ -87,16 +95,22 @@ Indices and tables:
 
 ---
 
-## Update workflow images
+## Updating workflow images
 
-Workflow images in `docs/images/` are written in the open source [dot](https://graphviz.org/doc/info/lang.html) language from [GraphViz](https://www.graphviz.org/). For an overview, see [Drawing graphs with dot](https://www.graphviz.org/pdf/dotguide.pdf). GraphViz includes a command-line tool, `dot`, for converting dot files into image in various formats.
+Workflow images in `docs/images/` are written in the open source [dot](https://graphviz.org/doc/info/lang.html) language from [GraphViz](https://www.graphviz.org/). For an overview, see [Drawing graphs with dot](https://www.graphviz.org/pdf/dotguide.pdf).
 
-Convert `.dot` file to `.svg` file:
+If you update the `.dot` files, you should also update the corresponding `.svg` images. GraphViz includes a command-line tool, `dot`, for converting dot files into image in various formats.
+
+To convert a `.dot` file to an `.svg` file:
 
 ```console
 $ dot -Tsvg workflow.dot > workflow.svg
 ```
 
-When `.dot` files are updated, the corresponding `.svg` images should be updated also.
+Alternatively, to convert all `.dot` files in `docs/images/`, use the `Makefile`:
+
+```console
+$ make clean svgs
+```
 
 Alternatively, use an [Editor supporting live preview of GraphViz images](./install.md#editor-supporting-live-preview-of-graphviz-images-optional) that also allows these to be exported as `.svg` images.
