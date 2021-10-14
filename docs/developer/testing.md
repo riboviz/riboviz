@@ -10,6 +10,12 @@
   - [Using your own expected results directory](#using-your-own-expected-results-directory)
   - [How actual directories and files are compared to expected directories and files](#how-actual-directories-and-files-are-compared-to-expected-directories-and-files)
   - [Limitations of tests for UMI extraction, deduplication and grouping](#limitations-of-tests-for-umi-extraction-deduplication-and-grouping)
+* [Writing an integration test](#writing-an-integration-test)
+  - [Integration test fixtures](#integration-test-fixtures)
+  - [Integration test parameters](#integration-test-parameters)
+  - [Comparing expected and actual files for equality](#comparing-expected-and-actual-files-for-equality)
+  - [Anatomy of an integration test function](#anatomy-of-an-integration-test-function)
+  - [Further information pytest fixtures and parameters](#further-information-pytest-fixtures-and-parameters)
 * [Useful pytest flags](#useful-pytest-flags)
 
 ---
@@ -244,9 +250,147 @@ If running with a configuration that used UMI extraction, deduplication and grou
 
 ---
 
+## Writing an integration test
+
+Here, the key parts of the integration tests are described. This, along with the code already in `riboviz/test/integration/test_integration.py`, is intended to provide the information required to edit existing or write new integration tests to validate temporary or output files by comparing these to temporary or output files in the integration test data directory.
+
+### Integration test fixtures
+
+All integration test functions must use the fixture, `prep_riboviz_fixture`, (defined in `riboviz/test/integration/test_integration.py`) which ensures the workflow is run if the `--skip-workflow` command-line parameter is not provided when running the integration tests. This should be specified before the test function declaration as follows:
+
+```python
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+```
+
+All integration test functions to validate temporary files must use the fixture, `skip_index_tmp_fixture` (defined in `riboviz/test/integration/conftest.py`) whicn ensures the test is skipped if the `--check-index-tmp` command-line parameter is provided when running the integration tests. This should be specified before the test function declaration as follows:
+
+```python
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+```
+
+These fixtures are defined before the test functions as the test functions do not need to rely on values provided by the fixtures, only on their side-effects.
+
+Additional fixtures, from which integration test functions can take values by declaring arguments with the same name as the fixture, are as follows:
+
+| Fixture name | Description | File |
+| ------------ | ----------- | ---- |
+| `expected_fixture` | Value of `--expected` command-line option when the integration tests are run i.e., the integration test data. | `riboviz/test/integration/conftest.py` |
+| `config_fixture` | Value of `--config-file` command-line option when the integration tests are run (default `vignette/vignette_config.yaml`). | `riboviz/test/integration/conftest.py` |
+| `scratch_directory` | Scratch directory, created as a sub-directory of `tmpdir`, see below. | `riboviz/test/integration/test_integration.py` |
+| `tmpdir` | Temporary directory, unique to test invocation | Provided by `pytest`, see [Temporary directories and files](https://docs.pytest.org/en/6.2.x/tmpdir.html).
+
+### Integration test parameters
+
+The following parameters are available to parameterise integration test functions. These are derived from the YAML configuration file provided by the `--config-file` command-line option when the integration tests are run (default `vignette/vignette_config.yaml`). Test functions can use these parameters by declaring arguments with the same name as the parameter. The parameters (defined in `riboviz/test/integration/conftest.py`) are as follows.
+
+| Fixture name | Description |
+| ------------ | ----------- |
+| `sample` | If `fq_files` is defined in the configuration, then this parameter parameter has the sample names from this value. Else if `multiplex_fq_files` is defined in the configuration then this parameter has the sample names that are deduced from the names of directories in `dir_out` cross-referenced with the sample sheet file specified in `sample_sheet`. If any sample name is `NotHere` then it is removed. A test taking this parameter will be executed once for each sample in turn. |
+| `is_multiplexed` | `True` if `multiplex_fq_files` in the configuration defines one or more files, `False` otherwise. |
+| `multiplex_name` | Multiplexed file names prefixes, without extensions, from `multiplex_fq_files`, if any. A test taking this parameter will be executed for each such file in turn. |
+| `index_prefix` | Indexed file prefix values (`orf_index_prefix` and `rrna_index_prefix`). A test taking this parameter will be executed for each prefix in turn. |
+| `<param>` | `<param>` is a configuration parameter name. Its value will be taken from the configuration. For undefined values, default values are taken from `riboviz/default_config.yaml`. |
+
+### Comparing expected and actual files for equality
+
+The following functions are available for comparing files. See the function definitions for more information on the nature of the comparisons done.
+
+| File | Function |
+| ---- | -------- |
+| `riboviz/bedgraph.py` | `equal_bedgraph(file1, file2)` |
+| `riboviz/count_reads.py` | `equal_read_counts(file1, file2, comment="#")` |
+| `riboviz/fastq.py` | `equal_fastq(file1, file2)` |
+| `riboviz/h5.py` | `equal_h5(file1, file2)` |
+| `riboviz/html.py` | `equal_html(file1, file2)` |
+| `riboviz/sam_bam.py` | `equal_bam(file1, file2)` |
+| `riboviz/sam_bam.py` | `equal_sam(file1, file2)` |
+| `riboviz/utils.py` | `equal_file_names(file1, file2)` |
+| `riboviz/utils.py` | `equal_file_sizes(file1, file2)` |
+| `riboviz/utils.py` | `equal_tsv(file1, file2, tolerance=0.0001, ignore_row_order=False, comment="#", na_to_empty_str=False)` |
+
+Complementing these, the following helper functions are available for comparing files in in `riboviz/test/integration/test_integration`, for comparing files. See the function definitions for more information on the nature of the comparisons done.
+
+```python
+compare_tsv_files(expected_fixture, directory, subdirectory, file_name)
+compare_fq_files(expected_fixture, directory, subdirectory, file_name)
+compare_sam_files(expected_directory, directory, scratch_directory, sample, file_name)
+check_pdf_file_exists(dir_out, sample, file_name)
+```
+
+### Anatomy of an integration test function
+
+As an example consider the following test:
+
+```
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+@pytest.mark.parametrize("file_name", [
+    workflow_files.ORF_MAP_SAM,
+    workflow_files.RRNA_MAP_SAM])
+def test_hisat2_sam(expected_fixture, dir_tmp, scratch_directory,
+                    sample, file_name):
+    compare_sam_files(expected_fixture, dir_tmp, scratch_directory,
+                      sample, file_name)
+```
+
+This can be broken down as follows.
+
+```python
+@pytest.mark.usefixtures("skip_index_tmp_fixture")
+```
+
+The test function validates temporary files, so it uses the fixture `skip_index_tmp_fixture`, so it can be skipped if the `--check-index-tmp` command-line parameter is provided when running the integration tests.
+
+```python
+@pytest.mark.usefixtures("prep_riboviz_fixture")
+```
+
+In common with all integration test functions, it uses the fixture `prep_riboviz_fixture`, so that the workflow will be run prior to running the tests, unless the `--skip-workflow` command-line parameter is provided when running the integration tests.
+
+```python
+@pytest.mark.parametrize("file_name", [
+    workflow_files.ORF_MAP_SAM,
+    workflow_files.RRNA_MAP_SAM])
+def test_hisat2_sam(expected_fixture, dir_tmp, scratch_directory,
+                    sample, file_name):
+```
+
+The test function is parameterised to take two file names i.e. it will run twice, the first time with `workflow_files_ORF_MAP_SAM` (which has value `orf_map.sam`), the second time with `workflow_files.RRNA_MAP_SAM` (which has value `rRNA_map.sam`). It also takes the following fixtures and parameters:
+
+* `expected_fixture`: the fixture provides the location of the integration test data against which files are to be validated.
+* `dir_tmp`: the parameter provides the value of the `dir_tmp` configuration parameter.
+* `scratch_directory`: the fixture provides a scratch directory, a sub-directory of a temporary directory created by pytest.
+* `sample`: the parameter provides the name of each sample in turn.
+
+If there are three samples defined in `fq_files` e.g., `WTnone` and `WT3AT`, and as `file_name` has values `orf_map.sam` `rRNA_map.sam` then the combination of these parameters means that `test_hisat2_sam`  would be run for each of the following combinations of parameters
+
+| `sample` | `file_name`    | 
+| -------- | -------------- |
+| `WTnone` | `orf_map_sam`  |
+| `WTnone` | `rRNA_map_sam` |
+| `WT3AT`  | `orf_map_sam`  |
+| `WT3AT`  | `rRNA_map_sam` |
+
+### Further information pytest fixtures and parameters
+
+For information on pytest fixtures and parameters see:
+
+* [pytest fixtures: explicit, modular, scalable](https://docs.pytest.org/en/6.2.x/fixture.html)
+* [Parametrizing fixtures and test functions](https://docs.pytest.org/en/6.2.x/parametrize.html)
+* [Basic patterns and examples](https://docs.pytest.org/en/6.2.x/example/simple.html)
+
+---
+
 ## Useful pytest flags
 
 * `-s`: disable output capture so, for example, `print` messages are shown.
 * `-v`: verbose mode, displays names of test functions run.
 * `-k`: run a specific test function.
 * `--cov-config=.coveragerc --cov-report term-missing --cov=riboviz`: create a test coverage report which includes the line numbers of statements that were not executed.
+# Adding, renaming, and removing temporary or output files
+
+* [Adding temporary or output files](#adding-temporary-or-output-files)
+* [Renaming temporary or output files](#renaming-temporary-or-output-files)
+* [Removing temporary or output files](#removing-temporary-or-output-files)
+
+---
