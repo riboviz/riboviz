@@ -53,7 +53,7 @@ $ pytest riboviz/test/test_upgrade_config.py
 
 Add the parameter and its description to the `helpMessage()` text.
 
-If the parameter is an optional parameter then, in the block starting with comment `Initialise and validate configuration`, add a line defining the default value for the parameter. For example:
+If the parameter is an optional parameter then, in the block starting with comment 'Initialise and validate configuration', add a line defining the default value for the parameter. For example:
 
 ```
 params.example_config = 64
@@ -113,11 +113,11 @@ if (params.containsKey('example_file') && params.example_file) {
 
 ### 4. Update documentation
 
-Update `docs/user/prep-riboviz-config.md`, adding an entry for the parameter in the table within the `Configuration parameters` section.
+Update `docs/user/prep-riboviz-config.md`, adding an entry for the parameter in the table within the 'Configuration parameters' section.
 
-If the new parameter is a file or directory parameter, update `docs/user/prep-riboviz-config.md`, adding the new parameter to the `Configuring file paths and directories` section.
+If the new parameter is a file or directory parameter, update `docs/user/prep-riboviz-config.md`, adding the new parameter to the 'Configuring file paths and directories' section.
 
-If the new parameter is a directory parameter, update `docs/developer/how-tos.md`, adding the new parameter to the list in the `Using directory configuration parameters in Nextflow` section.
+If the new parameter is a directory parameter, update `docs/developer/how-tos.md`, adding the new parameter to the list in the 'Using directory configuration parameters in Nextflow' section.
 
 ---
 
@@ -172,7 +172,7 @@ NEW_EXAMPLE = "new_example"
 
 Update `riboviz/upgrade_config.py`:
 
-* Add an entry for the old parameter name and its new name to the `Configuration parameters that have been renamed are updated` list in the module comment at the top of the file.
+* Add an entry for the old parameter name and its new name to the 'Configuration parameters that have been renamed are updated' list in the module comment at the top of the file.
 * Add an entry for the old parameter name and its new name in the `RENAMES` dictionary.
 * Rename the parameter and to its new name in the `UPDATES` dictionary.
 
@@ -254,8 +254,8 @@ Update `riboviz/params.py`, removing the parameter and the associated Python con
 
 Update `riboviz/upgrade_config.py`:
 
-* Remove any entry for the parameter from the `Configuration parameters that have been renamed are updated` list in the module comment at the top of the file.
-* Add an entry for the parameter to the `Configuration parameters that are now unused are removed` list in the module comment at the top of the file.
+* Remove any entry for the parameter from the 'Configuration parameters that have been renamed are updated' list in the module comment at the top of the file.
+* Add an entry for the parameter to the 'Configuration parameters that are now unused are removed' list in the module comment at the top of the file.
 * Remove any occurrence of the parameter from the `UPDATES` and `RENAMES` dictionaries.
 * Add an entry for the parameter n the `UNUSED` dictionary.
 
