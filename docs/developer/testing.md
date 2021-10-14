@@ -1,6 +1,5 @@
 # Developing and running tests
 
-
 * [Run Python tests and workflow tests](#run-python-tests-and-workflow-tests)
 * [Run R tests](#run-r-tests)
 * [Download vignette integration test data](#download-vignette-integration-test-data)
