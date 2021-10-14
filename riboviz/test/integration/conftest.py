@@ -1,8 +1,8 @@
 """
 pytest plugin file for integration tests.
 
-This allows pytest to take in additional command-line parameters to
-pass onto integration test modules:
+This plugin allows pytest to take in additional command-line
+parameters to pass onto integration test modules:
 
 * ``--expected=<DIRECTORY>``: Directory with expected data files,
   against which files specified in the configuration file (see below)
@@ -23,6 +23,18 @@ pass onto integration test modules:
   :py:const:`riboviz.params.OUTPUT_DIR` cross-referenced with the
   sample sheet file specified in
   :py:const:`riboviz.params.SAMPLE_SHEET`.
+
+This plugin also parameterises tests with configuration from the
+configuration file provided via ``--config-file``.
+
+For more information on the patterns used in this file, see pytest's
+`Parametrizing fixtures and test functions
+<https://docs.pytest.org/en/6.2.x/parametrize.html>`_
+specifically `Basic pytest_generate_tests example
+<https://docs.pytest.org/en/6.2.x/parametrize.html#pytest-generate-tests>`_
+and the use of ``pytest_addoption`` to support custom command-line
+options and ``pytest_generate_tests`` to support custom
+parameterization.
 """
 import os.path
 import pytest
@@ -46,7 +58,7 @@ CONFIG_FILE = "--config-file"
 
 def pytest_addoption(parser):
     """
-    pytest configuration hook.
+    Add custom command-line parameters to pytest.
 
     :param parser: command-line parser
     :type parser: _pytest.config.argparsing.Parser
@@ -105,7 +117,7 @@ def skip_index_tmp_fixture(request):
     """
     Gets value for `--check-index-tmp` command-line option. If
     ``False``, or undefined, invokes ``pytest.skip`` to skip
-    test.
+    a test that uses this fixture.
 
     :param request: request
     :type request: _pytest.fixtures.SubRequest
@@ -135,24 +147,25 @@ def config_fixture(request):
 
 def pytest_generate_tests(metafunc):
     """
-    Parametrize tests using information within a configuration file.
+    Parametrize tests using information within a riboviz configuration
+    file. Behaviour is as follows:
 
-    If :py:const:`CONFIG_FILE` has been provided then use this as a
-    configuration file, else use
-    :py:const:`riboviz.test.VIGNETTE_CONFIG`.
+    * If :py:const:`CONFIG_FILE` has been provided then its value is
+      used as a configuration file, otherwise
+      :py:const:`riboviz.test.VIGNETTE_CONFIG` is used.
+    * The configuration is loaded from the configuration file.
+    * Each test function is inspected and values for parameters
+      injected into them.
 
-    Load configuration from file.
+    The following test parameters are defined. Any test function that
+    declares a parameter with one of these names will be parameterised
+    with the values for that parameter:
 
-    Inspect each test fixture used by the test functions and \
-    configure with values from the configuration.
-
-    The following test fixtures are defined:
-
-    - ``sample``:
+    * ``sample``:
         - If :py:const:`riboviz.params.FQ_FILES` is provided then
-          sample names are the keys from this value.
+          the sample names are the keys from this value.
         - If :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` then
-          sample names are deduced from the names of folders in
+          sample names are deduced from the names of directories in
           :py:const:`riboviz.params.OUTPUT_DIR` cross-referenced
           with the sample sheet file specified in
           :py:const:`riboviz.params.SAMPLE_SHEET`.
@@ -160,22 +173,22 @@ def pytest_generate_tests(metafunc):
           :py:const:`riboviz.test.VIGNETTE_MISSING_SAMPLE`
           is present, then it is removed from the sample names.
         - ``[]`` otherwise.
-    - ``is_multiplexed``: list with ``True`` if
+    * ``is_multiplexed``: list with ``True`` if
       :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` defines one or
       more files, ``False`` otherwise.
-    - ``multiplex_name``: list of multiplexed file name prefixes,
+    * ``multiplex_name``: list of multiplexed file name prefixes,
       without extensions, from
       :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` if
       :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` defines one or
       more files, ``[]`` otherwise.
-    - ``index_prefix``: list with values of
+    * ``index_prefix``: list with values of
       :py:const:`riboviz.params.ORF_INDEX_PREFIX` and
       :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
-    - ``<param>``: where ``<param>`` is a key from
-      :py:const:`riboviz.params.DEFAULT_CONFIG_YAML` and the
+    * ``<param>``: where ``<param>`` is a key from
+      :py:const:`riboviz.params.DEFAULT_CONFIG_YAML_FILE` and the
       value is a list with either the value of the parameter from
       ``config``, if defined, or the default from
-      :py:const:`riboviz.params.DEFAULT_CONFIG_YAML`.
+      :py:const:`riboviz.params.DEFAULT_CONFIG_YAML_FILE`.
       otherwise.
 
     :param metafunc: pytest test function inspection object
@@ -199,13 +212,13 @@ def pytest_generate_tests(metafunc):
     # in configuration parameter values that support environment
     # variables
     environment.apply_env_to_config(config)
-    fixtures = {}
+    test_params = {}
     for param, default in default_config.items():
-        fixtures[param] = [default if param not in config
-                           else config[param]]
-    fixtures["index_prefix"] = [config[params.ORF_INDEX_PREFIX],
-                                config[params.RRNA_INDEX_PREFIX]]
-    fixtures["is_multiplexed"] = [
+        test_params[param] = [default if param not in config
+                              else config[param]]
+    test_params["index_prefix"] = [config[params.ORF_INDEX_PREFIX],
+                                   config[params.RRNA_INDEX_PREFIX]]
+    test_params["is_multiplexed"] = [
         params.MULTIPLEX_FQ_FILES in config
         and config[params.MULTIPLEX_FQ_FILES]]
     if "multiplex_name" in metafunc.fixturenames:
@@ -215,7 +228,7 @@ def pytest_generate_tests(metafunc):
                 os.path.splitext(fastq.strip_fastq_gz(file_name))[0]
                 for file_name in config[params.MULTIPLEX_FQ_FILES]
             ]
-        fixtures['multiplex_name'] = multiplex_names
+        test_params['multiplex_name'] = multiplex_names
     if "sample" in metafunc.fixturenames:
         samples = []
         if params.FQ_FILES in config and config[params.FQ_FILES]:
@@ -237,7 +250,7 @@ def pytest_generate_tests(metafunc):
                 set(output_samples)))
         if test.VIGNETTE_MISSING_SAMPLE in samples:
             samples.remove(test.VIGNETTE_MISSING_SAMPLE)
-        fixtures["sample"] = samples
-    for fixture, value in fixtures.items():
-        if fixture in metafunc.fixturenames:
-            metafunc.parametrize(fixture, value)
+        test_params["sample"] = samples
+    for test_param, value in test_params.items():
+        if test_param in metafunc.fixturenames:
+            metafunc.parametrize(test_param, value)
