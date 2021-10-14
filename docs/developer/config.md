@@ -156,14 +156,14 @@ riboviz/test/config/vignette_config_current.yaml
 
 ### 2. Update Python code
 
-Update `riboviz/params.py`, renaming the parameter and the associated Python constant for the parameter. For example, if renaming `old_example` to `new_example`, and `riboviz.params` defines:
+Update `riboviz/params.py`, renaming the parameter and the associated Python constant for the parameter. For example, if renaming `old_example` to `new_example`, and `riboviz/params.py` defines:
 
 ```python
 OLD_EXAMPLE = "old_example"
 """ Example configuration parameter. """
 ```
 
-then `riboviz.params` would be updated to:
+then `riboviz/params.py` would be updated to:
 
 ```python
 NEW_EXAMPLE = "new_example"
@@ -176,7 +176,7 @@ Update `riboviz/upgrade_config.py`:
 * Add an entry for the old parameter name and its new name in the `RENAMES` dictionary.
 * Rename the parameter and to its new name in the `UPDATES` dictionary.
 
-For example, if renaming `old_example` to `new_example`, and `riboviz.upgrade_config` defines:
+For example, if renaming `old_example` to `new_example`, and `riboviz/upgrade_config.py` defines:
 
 ```python
 UPDATES = {
@@ -186,7 +186,7 @@ UPDATES = {
 }
 ```
 
-then `riboviz.upgrade_config` would be updated to:
+then `riboviz/upgrade_config.py` would be updated to:
 
 ```python
 RENAMES = {
@@ -209,7 +209,7 @@ Run the tests for `riboviz/upgrade_config.py` and check that they all pass:
 $ pytest riboviz/test/test_upgrade_config.py 
 ```
 
-Search for all references to the `riboviz.params` constant as it was prior to renaming, across all the Python code, and update these references.
+Search for all references to the `riboviz/params.py` constant as it was prior to renaming, across all the Python code, and update these references.
 
 ### 3. Update Nextflow, `prep_riboviz.nf`
 
