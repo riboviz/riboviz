@@ -13,9 +13,9 @@
 
 Update 'Install operating system packages' in `docs/user/install.md`:
 
-* Add an entry for the package to the `Package Links` table.
-* Add commands to the `Install on Ubuntu` and `Install on CentOS` subsections.
-* Add commands to the `Check packages have installed` subsection.
+* Add an entry for the package to the 'Package Links' table.
+* Add commands to the 'Install on Ubuntu' and 'Install on CentOS' subsections.
+* Add commands to the 'Check packages have installed' subsection.
 
 Add commands to "quick install scripts" (see current content of scripts for what is expected):
 
