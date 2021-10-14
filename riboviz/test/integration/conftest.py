@@ -160,9 +160,9 @@ def pytest_generate_tests(metafunc):
           :py:const:`riboviz.test.VIGNETTE_MISSING_SAMPLE`
           is present, then it is removed from the sample names.
         - ``[]`` otherwise.
-    - ``is_multiplexed``: list with ``False`` if
+    - ``is_multiplexed``: list with ``True`` if
       :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` defines one or
-      more files, ``True`` otherwise.
+      more files, ``False`` otherwise.
     - ``multiplex_name``: list of multiplexed file name prefixed,
       without extensions, from
       :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` if
