@@ -177,7 +177,7 @@ $ R
 
 **Note:**
 
-As commented above, `lint` checks code for confirmance to the Tidyverse R style guide which recommends `snake_case` function names. However, we prefer Google-style `CamelCase` function names. This means you can expect to see the following types of warnings when running `lint` on riboviz R code:
+As commented above, `lint` checks code for conformance to the Tidyverse R style guide which recommends `snake_case` function names. However, we prefer Google-style `CamelCase` function names. This means you can expect to see the following types of warnings when running `lint` on riboviz R code:
 
 ```
 rscripts/generate_stats_figs.R:179:1: style: Variable and function name style should be snake-case.
