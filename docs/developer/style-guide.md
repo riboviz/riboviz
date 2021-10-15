@@ -10,7 +10,7 @@ This page summarises style guidelines for the riboviz source code, documentation
 * [R source code](#r-source-code)
   - [R file names](#r-file-names)
   - [R comments](#r-comments)
-  - [Style check R code](#style-check-r-code)
+  - [Style checking R code](#style-checking-r-code)
 * [Configuration parameters](#configuration-parameters)
 * [Command-line tools](#command-line-tools)
   - [Command-line parameters](#command-line-parameters)
@@ -149,7 +149,7 @@ R code should be commented using [roxygen2](https://roxygen2.r-lib.org/)-complia
 
 See roxygen2's [Rd formatting](https://roxygen2.r-lib.org/articles/rd-formatting.html) for a comprehensive guide.
 
-### Style check R code
+### Style checking R code
 
 [lintr](https://cran.r-project.org/package=lintr) can be used to produce a programmatic output of style issues.
 
