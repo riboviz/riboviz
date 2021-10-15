@@ -273,7 +273,7 @@ If running with a configuration that used UMI extraction, deduplication and grou
 
 ## Writing an integration test
 
-Here, the key parts of the integration tests are described. This, along with the code already in `riboviz/test/integration/test_integration.py`, is intended to provide the information required to edit existing or write new integration tests to validate temporary or output files by comparing these to temporary or output files in the integration test data directory.
+Here, the key parts of the integration tests are described. This, along with the code already in `riboviz/test/integration/test_integration.py`, is intended to provide the information required to edit existing or write new integration tests to validate temporary or output files by comparing these to temporary or output files in an integration test data directory.
 
 ### Integration test fixtures
 
@@ -283,7 +283,7 @@ All integration test functions must use the fixture, `prep_riboviz_fixture`, (de
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 ```
 
-All integration test functions to validate temporary files must use the fixture, `skip_index_tmp_fixture` (defined in `riboviz/test/integration/conftest.py`) whicn ensures the test is skipped if the `--check-index-tmp` command-line parameter is provided when running the integration tests. This should be specified before the test function declaration as follows:
+All integration test functions to validate temporary files must use the fixture, `skip_index_tmp_fixture` (defined in `riboviz/test/integration/conftest.py`) which ensures the test is skipped if the `--check-index-tmp` command-line parameter is provided when running the integration tests. This should be specified before the test function declaration as follows:
 
 ```python
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
@@ -293,8 +293,8 @@ These fixtures are defined before the test functions as the test functions do no
 
 Additional fixtures, from which integration test functions can take values by declaring arguments with the same name as the fixture, are as follows:
 
-| Fixture name | Description | File |
-| ------------ | ----------- | ---- |
+| Fixture name | Description | Definition file |
+| ------------ | ----------- | --------------- |
 | `expected_fixture` | Value of `--expected` command-line option when the integration tests are run i.e., the integration test data. | `riboviz/test/integration/conftest.py` |
 | `config_fixture` | Value of `--config-file` command-line option when the integration tests are run (default `vignette/vignette_config.yaml`). | `riboviz/test/integration/conftest.py` |
 | `scratch_directory` | Scratch directory, created as a sub-directory of `tmpdir`, see below. | `riboviz/test/integration/test_integration.py` |
@@ -306,7 +306,7 @@ The following parameters are available to parameterise integration test function
 
 | Fixture name | Description |
 | ------------ | ----------- |
-| `sample` | If `fq_files` is defined in the configuration, then this parameter parameter has the sample names from this value. Else if `multiplex_fq_files` is defined in the configuration then this parameter has the sample names that are deduced from the names of directories in `dir_out` cross-referenced with the sample sheet file specified in `sample_sheet`. If any sample name is `NotHere` then it is removed. A test taking this parameter will be executed once for each sample in turn. |
+| `sample` | If `fq_files` is defined in the configuration, then this parameter parameter has the sample names from this value. Else if `multiplex_fq_files` is defined in the configuration then this parameter has the sample names that are deduced from the names of directories in `dir_out`, within the integration test data directory, cross-referenced with the sample sheet file specified in `sample_sheet`. If any sample name is `NotHere` then it is removed. A test taking this parameter will be executed once for each sample in turn. |
 | `is_multiplexed` | `True` if `multiplex_fq_files` in the configuration defines one or more files, `False` otherwise. |
 | `multiplex_name` | Multiplexed file names prefixes, without extensions, from `multiplex_fq_files`, if any. A test taking this parameter will be executed for each such file in turn. |
 | `index_prefix` | Indexed file prefix values (`orf_index_prefix` and `rrna_index_prefix`). A test taking this parameter will be executed for each prefix in turn. |
