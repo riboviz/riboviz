@@ -316,8 +316,8 @@ The following parameters are available to parameterise integration test function
 
 The following functions are available for comparing files. See the function definitions for more information on the nature of the comparisons done.
 
-| File | Function |
-| ---- | -------- |
+| Definition File | Function |
+| --------------- | -------- |
 | `riboviz/bedgraph.py` | `equal_bedgraph(file1, file2)` |
 | `riboviz/count_reads.py` | `equal_read_counts(file1, file2, comment="#")` |
 | `riboviz/fastq.py` | `equal_fastq(file1, file2)` |
@@ -329,7 +329,7 @@ The following functions are available for comparing files. See the function defi
 | `riboviz/utils.py` | `equal_file_sizes(file1, file2)` |
 | `riboviz/utils.py` | `equal_tsv(file1, file2, tolerance=0.0001, ignore_row_order=False, comment="#", na_to_empty_str=False)` |
 
-Complementing these, the following helper functions are available for comparing files in in `riboviz/test/integration/test_integration`, for comparing files. See the function definitions for more information on the nature of the comparisons done.
+Complementing these, the following helper functions are defined in `riboviz/test/integration/test_integration` for comparing files. See the function definitions for more information on the nature of the comparisons done.
 
 ```python
 compare_tsv_files(expected_fixture, directory, subdirectory, file_name)
