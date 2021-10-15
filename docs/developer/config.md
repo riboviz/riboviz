@@ -118,7 +118,7 @@ Update `docs/user/prep-riboviz-config.md`, adding an entry for the parameter in 
 
 If the new parameter is a file or directory parameter, update `docs/user/prep-riboviz-config.md`, adding the new parameter to the 'Configuring file paths and directories' section.
 
-If the new parameter is a directory parameter, update `docs/developer/how-tos.md`, adding the new parameter to the list in the 'Using directory configuration parameters in Nextflow' section.
+If the new parameter is a directory parameter, update `docs/developer/config.md`, adding the new parameter to the list in the 'Using directory configuration parameters in Nextflow' section.
 
 ---
 
