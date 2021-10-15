@@ -1,4 +1,4 @@
-# Style
+# Style guide
 
 This page summarises style guidelines for the riboviz source code, documentation, parameters and files.
 
