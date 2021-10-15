@@ -240,7 +240,7 @@ opts <- parse_args(parser,
 output_dir <- opts$options$output_dir
 ```
 
-**Use `default=NA` vs. `default=NULL`**
+**Use `default=NA` not `default=NULL`**
 
 If defining optional parameters that take no value by default then use `default=NA`, and **not** `default=NULL`, so that the option is in the variable holding the parsed options.
 
