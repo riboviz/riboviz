@@ -243,7 +243,7 @@ dir_out: vignette/output
 dir_tmp: vignette/tmp
 ```
 
-and `--expected` is `$HOME/results-mybranch-abcdefg` then the directories with the data to be tested are:
+and `--expected` is `$HOME/results-develop-abcdefg` then the directories with the data to be tested are:
 
 ```
 vignette/index
@@ -254,9 +254,9 @@ vignette/tmp
 and the directories with the expected data are:
 
 ```
-$HOME/results-mybranch-abcdefg/index
-$HOME/results-mybranch-abcdefg/output
-$HOME/results-mybranch-abcdefg/tmp
+$HOME/results-develop-abcdefg/index
+$HOME/results-develop-abcdefg/output
+$HOME/results-develop-abcdefg/tmp
 ```
 
 Observe that the final directories in each path - `index`, `output`, `tmp` - are the same, though the paths to these differ.
