@@ -311,7 +311,7 @@ The function `is.na` (as opposed to `is.null`) can be used to check if a variabl
 
 ## Input and output file names
 
-riboviz-specific input and output file names must be in snake-case i.e., lower case and delimited by underscores, not hyphens. Upper-case is permitted for acronyms e.g., `ORF`, `CDS`, `APE`, `TPMs`, `RNA`.
+riboviz-specific input and output file names must be in snake-case i.e., lower-case and delimited by underscores, not hyphens. Upper-case is permitted for acronyms e.g., `ORF`, `CDS`, `APE`, `TPMs`, `RNA`.
 
 For example, `vignette_config.yaml`, `read_counts_per_file.tsv`, `TPMs_all_CDS_all_samples.tsv`.
 
@@ -327,7 +327,7 @@ For example, `buildIndicesrRNA`, `demultiplex`, `staticHTML`.
 
 ### Channel names
 
-Nextflow channel names must be in snake-case i.e., lower case and delimited by underscores, not hyphens.
+Nextflow channel names must be in snake-case i.e., lower-case and delimited by underscores, not hyphens.
 
 For channels which are file names, ensure that the channel name includes the file type as its last component, delimited by an underscore.
 
@@ -335,4 +335,4 @@ For example, `multiplex_sample_sheet_tsv`, `sample_fq`
 
 ### Variable names
 
-Nextflow variable names must be in snake-case i.e., lower case and delimited by underscores, not hyphens.
+Nextflow variable names must be in snake-case i.e., lower-case and delimited by underscores, not hyphens.
