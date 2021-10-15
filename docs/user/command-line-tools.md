@@ -54,11 +54,11 @@ The following command-line tools are invoked in the riboviz workflow:
 For usage, run:
 
 ```console
-$ Rscript --vanilla <SCRIPT>  -h
+$ Rscript --vanilla <SCRIPT> -h
 ```
 
 For example:
 
 ```console
-$ Rscript --vanilla rscripts/bam_to_h5.R  -h
+$ Rscript --vanilla rscripts/bam_to_h5.R -h
 ```
