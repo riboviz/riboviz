@@ -1,5 +1,10 @@
 # Developer how-tos
 
+* [Clone conda environments](#clone-conda-environments)
+* [Understanding YAML `NULL` and Python `None`](#understanding-yaml-null-and-python-none)
+
+---
+
 ## Clone conda environments
 
 If you want to install a new Python package to explore it without changing your current conda environment you can first clone your conda environment, then install the package into the clone. For example:
@@ -20,7 +25,7 @@ For more information, see conda's [Managing environments](https://conda.io/proje
 
 ---             
 
-## YAML `NULL` and Python `None`
+## Understanding YAML `NULL` and Python `None`
 
 If a parameter in a YAML file has value `null`, `NULL` or no value at all then, after reading the file into Python (using the `yaml` library), it will have value `None`. For example, given a YAML file with:
 
