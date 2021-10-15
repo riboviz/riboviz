@@ -26,7 +26,7 @@ This page summarises style guidelines for the riboviz source code, documentation
 
 ## 'riboviz'
 
-The sofware is called 'riboviz', one word, all lower-case, no hyphens.
+The sofware is called 'riboviz', one word, lower-case, no hyphens.
 
 Please do **not** refer to the software as RiboViz, Riboviz, Ribo-Viz, Ribo-viz or ribo-viz.
 
@@ -40,7 +40,7 @@ The tools [pylint](https://pylint.org/) and [pycodestyle](https://pycodestyle.py
 
 ### Python file names
 
-Python file names must be in snake-case i.e., all lower case and delimited by underscores, not hyphens. For example, `sample_sheets.py`, `get_cds_codons.py`.
+Python file names must be in snake-case i.e., lower-case and delimited by underscores, not hyphens. For example, `sample_sheets.py`, `get_cds_codons.py`.
 
 ### Python comments
 
@@ -141,7 +141,7 @@ The packages [lintr](https://cran.r-project.org/package=lintr) and [styler](http
 
 ### R file names
 
-R file names must be in snake-case i.e., all lower case and delimited by underscores, not hyphens. For example, `generate_stats_figs.R`.
+R file names must be in snake-case i.e., lower-case and delimited by underscores, not hyphens. For example, `generate_stats_figs.R`.
 
 ### R Comments
 
@@ -189,7 +189,7 @@ ThreeNucleotidePeriodicity <- function(gene_names, dataset, hd_file, gff_df) {
 
 ## Configuration parameters
 
-Configuration parameters must be in snake-case i.e., all lower case and delimited by underscores, not hyphens. For example, `adapters` or `asite_disp_length_file` or `orf_gff_file`.
+Configuration parameters must be in snake-case i.e., lower-case and delimited by underscores, not hyphens. For example, `adapters` , `asite_disp_length_file`, `orf_gff_file`.
 
 ---
 
@@ -200,7 +200,7 @@ Configuration parameters must be in snake-case i.e., all lower case and delimite
 For consistency with bash and other command-line tools, command-line parameters should be implemented as one, or both, of:
 
 * A single alphanumeric character prefixed by a hyphen. For example, `-v`, `-c 123`, `-s GATC`.
-* A kebab-case token i.e., all lower case and delimited by hyphens, not underscores, and prefixed by two hyphens. For example, `--verbose`, `--control=123`, `--match-sequence=GATC`.
+* A kebab-case token i.e., lower-case and delimited by hyphens, not underscores, and prefixed by two hyphens. For example, `--verbose`, `--control=123`, `--match-sequence=GATC`.
 
 ### Python command-line tools
 
@@ -327,12 +327,12 @@ For example, `buildIndicesrRNA`, `demultiplex`, `staticHTML`.
 
 ### Channel names
 
-Nextflow channel names must be in snake-case i.e., lowe case and delimited by underscores, not hyphens.
+Nextflow channel names must be in snake-case i.e., lower case and delimited by underscores, not hyphens.
 
-For channels which are file names ensure the channel name includes the file type as its last component, delimited by an underscore.
+For channels which are file names, ensure that the channel name includes the file type as its last component, delimited by an underscore.
 
 For example, `multiplex_sample_sheet_tsv`, `sample_fq`
 
 ### Variable names
 
-Nextflow variable names must be in snake-case i.e., lowe case and delimited by underscores, not hyphens.
+Nextflow variable names must be in snake-case i.e., lower case and delimited by underscores, not hyphens.
