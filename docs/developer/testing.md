@@ -29,6 +29,8 @@ Run:
 $ pytest --ignore-glob="*integration*"
 ```
 
+**Troubleshooting: `PendingDeprecationWarning`**
+
 `PendingDeprecationWarning` `warnings` can be ignored.
 
 ---
@@ -132,7 +134,7 @@ The H5 files produced by riboviz (via invocation of the `bam_to_h5.R` script) ar
 
 ## Using the integration test suite
 
-`riboviz.test.integration.test_integration` is a integration test suite. The test suite runs the workflow using a given configuration file, then compares the results to a directory of pre-calculated results, specified by the user.
+`riboviz.test.integration.test_integration` is an integration test suite. The test suite runs the workflow using a given configuration file, then compares the results to a directory of pre-calculated results, specified by the user.
 
 Usage:
 
@@ -188,7 +190,7 @@ riboviz/test/integration/test_integration.py::test_umitools_dedup_stats_tsv[vign
 
 ### Using your own expected results directory
 
-After running a workflow using your own configuration file you can copy your index, temporary and output directories and then use those copies for future tests. One way to do this is to create a new folder with these results e.g.
+After running a workflow using your own configuration file you can copy your index, temporary and output directories and then use those copies for future tests. One way to do this is to create a new folder with these results. For example:
 
 ```console
 $ mkdir results-<BRANCH>-<COMMIT-HASH>
@@ -197,13 +199,31 @@ $ cp -r <TMP_DIRECTORY> results-<BRANCH>-<COMMIT-HASH>/
 $ cp -r <OUTPUT_DIRECTORY> results-<BRANCH>-<COMMIT-HASH>/
 ```
 
-**Note:** Keep the names of the original index, temporary and output directories. See [How actual directories and files are compared to expected directories and files](#how-actual-directories-and-files-are-compared-to-expected-directories-and-files) above).
+For example:
+
+```console
+$ mkdir results-develop-abcdefg
+$ cp -r vignette/index results-develop-abcdefg/
+$ cp -r vignette/tmp results-develop-abcdefg/
+$ cp -r vignette/output results-develop-abcdefg/
+```
+
+**Note:** Keep the names of the original index, temporary and output directories. See [How actual directories and files are compared to expected directories and files](#how-actual-directories-and-files-are-compared-to-expected-directories-and-files) below).
 
 You can now provide this folder as a value for the `--expected` parameter. For example, after doing some development, you can run:
 
 ```console
 $ pytest riboviz/test/integration/test_integration.py \
     --expected=results-<BRANCH>-<COMMIT-HASH> \
+    --config-file=<CONFIG_FILE> \
+    --check-index-tmp
+```
+
+For example:
+
+```console
+$ pytest riboviz/test/integration/test_integration.py \
+    --expected=results-develop-abcdefg \
     --config-file=<CONFIG_FILE> \
     --check-index-tmp
 ```
@@ -408,11 +428,6 @@ def test_generate_stats_figs_t_rna_codon_positions_pdf(
 * `-v`: verbose mode, displays names of test functions run.
 * `-k`: run a specific test function.
 * `--cov-config=.coveragerc --cov-report term-missing --cov=riboviz`: create a test coverage report which includes the line numbers of statements that were not executed.
-# Adding, renaming, and removing temporary or output files
-
-* [Adding temporary or output files](#adding-temporary-or-output-files)
-* [Renaming temporary or output files](#renaming-temporary-or-output-files)
-* [Removing temporary or output files](#removing-temporary-or-output-files)
 
 ---
 
