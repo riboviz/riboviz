@@ -277,13 +277,13 @@ Here, the key parts of the integration tests are described. This, along with the
 
 ### Integration test fixtures
 
-All integration test functions must use the fixture, `prep_riboviz_fixture`, (defined in `riboviz/test/integration/test_integration.py`) which ensures the workflow is run if the `--skip-workflow` command-line parameter is not provided when running the integration tests. This should be specified before the test function declaration as follows:
+All integration test functions must use the fixture, `prep_riboviz_fixture`, (defined in `riboviz/test/integration/test_integration.py`) which ensures the workflow is run if the `--skip-workflow` command-line parameter is not provided when running the integration tests. This is a module-wide fixture so is run once per invocation of `riboviz.test.integration.test_integration`. The fixture should be specified before the test function declaration as follows:
 
 ```python
 @pytest.mark.usefixtures("prep_riboviz_fixture")
 ```
 
-All integration test functions to validate temporary files must use the fixture, `skip_index_tmp_fixture` (defined in `riboviz/test/integration/conftest.py`) which ensures the test is skipped if the `--check-index-tmp` command-line parameter is provided when running the integration tests. This should be specified before the test function declaration as follows:
+All integration test functions to validate temporary files must use the fixture, `skip_index_tmp_fixture` (defined in `riboviz/test/integration/conftest.py`) which ensures the test is skipped if the `--check-index-tmp` command-line parameter is provided when running the integration tests. This is a module-wide fixture so is run once per invocation of `riboviz.test.integration.test_integration`. The fixture should be specified before the test function declaration as follows:
 
 ```python
 @pytest.mark.usefixtures("skip_index_tmp_fixture")
@@ -293,12 +293,12 @@ These fixtures are defined before the test functions as the test functions do no
 
 Additional fixtures, from which integration test functions can take values by declaring arguments with the same name as the fixture, are as follows:
 
-| Fixture name | Description | Definition file |
-| ------------ | ----------- | --------------- |
-| `expected_fixture` | Value of `--expected` command-line option when the integration tests are run i.e., the integration test data. | `riboviz/test/integration/conftest.py` |
-| `config_fixture` | Value of `--config-file` command-line option when the integration tests are run (default `vignette/vignette_config.yaml`). | `riboviz/test/integration/conftest.py` |
-| `scratch_directory` | Scratch directory, created as a sub-directory of `tmpdir`, see below. | `riboviz/test/integration/test_integration.py` |
-| `tmpdir` | Temporary directory, unique to test invocation. | Provided by `pytest`, see [Temporary directories and files](https://docs.pytest.org/en/6.2.x/tmpdir.html).
+| Fixture name | Description | Scope | Definition file |
+| ------------ | ----------- | ----- | --------------- |
+| `expected_fixture` | Value of `--expected` command-line option when the integration tests are run i.e., the integration test data. | module | `riboviz/test/integration/conftest.py` |
+| `config_fixture` | Value of `--config-file` command-line option when the integration tests are run (default `vignette/vignette_config.yaml`). | module | `riboviz/test/integration/conftest.py` |
+| `scratch_directory` | Scratch directory, created as a sub-directory of `tmpdir`, see below. | function | `riboviz/test/integration/test_integration.py` |
+| `tmpdir` | Temporary directory, unique to test invocation. | function | Provided by `pytest`, see [Temporary directories and files](https://docs.pytest.org/en/6.2.x/tmpdir.html).
 
 ### Integration test parameters
 
@@ -378,10 +378,10 @@ def test_hisat2_sam(expected_fixture, dir_tmp, scratch_directory,
 
 The test function is parameterised to take two file names i.e. it will run twice, the first time with `workflow_files_ORF_MAP_SAM` (which has value `orf_map.sam`), the second time with `workflow_files.RRNA_MAP_SAM` (which has value `rRNA_map.sam`). It also takes the following fixtures and parameters:
 
-* `expected_fixture`: the fixture provides the location of the integration test data against which files are to be validated.
-* `dir_tmp`: the parameter provides the value of the `dir_tmp` configuration parameter.
-* `scratch_directory`: the fixture provides a scratch directory, a sub-directory of a temporary directory created by pytest.
-* `sample`: the parameter provides the name of each sample in turn.
+* `expected_fixture`: fixture providing the location of the integration test data against which files are to be validated.
+* `dir_tmp`: parameter providing the value of the `dir_tmp` configuration parameter.
+* `scratch_directory`: fixture providing a scratch directory, a sub-directory of a temporary directory created by pytest.
+* `sample`: parameter providing the name of each sample in turn.
 
 If there are three samples defined in `fq_files` e.g., `WTnone` and `WT3AT`, and as `file_name` has values `orf_map.sam` `rRNA_map.sam` then the combination of these parameters means that `test_hisat2_sam`  would be run for each of the following combinations of parameters
 
