@@ -86,6 +86,51 @@ We recommend using the cluster filesystem (`/exports/[COLLEGE]/eddie/...`) for s
 
 If you do not have a group space, you can use your scratch directory (`/exports/eddie/scratch/$USER`)
 
+**Troubleshooting: files modified after new clone of repositories by permissions change**
+
+If you see lots of modified files in a newly cloned repository after running `git status` (such as this example from a newly cloned example-datasets repository), but you have NOT modified these files yourself:
+
+```
+$ git status
+
+# On branch main
+# Changes not staged for commit:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#	modified:   fungi/candida/annotation/Candida_albicans_CDS_with_120utrs.fa
+#	modified:   fungi/candida/annotation/Candida_albicans_CDS_with_120utrs.gff3
+#	modified:   fungi/candida/contaminants/Candida_albicans_rRNA_tRNA.fa
+#	modified:   fungi/saccharomyces/annotation/Saccharomyces_cerevisiae_yeast_CDS_w_250utrs.fa
+#	modified:   fungi/saccharomyces/annotation/Saccharomyces_cerevisiae_yeast_CDS_w_250utrs.gff3
+#	modified:   fungi/saccharomyces/contaminants/Saccharomyces_cerevisiae_yeast_rRNA_R64-1-1.fa
+#	modified:   simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.fa
+#	modified:   simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3
+#	modified:   simulated/mok/annotation/tiny_2genes_20utrs.gff3
+#	modified:   simulated/mok/contaminants/Sc_rRNA_example.fa
+#
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+You might have an issue with permission settings being inherited from folders above.  You can confirm this by using `git diff` to check how these files have been modified:
+```
+$ git diff fungi/candida/annotation/Candida_albicans_CDS_with_120utrs.fa
+
+ diff --git a/fungi/candida/annotation/Candida_albicans_CDS_with_120utrs.fa b/fun
+ old mode 100755
+ new mode 100644
+```
+This shows that files have had their executable bit settings changed. You can check permissions within the folder using `ls -l`.  If you see permissions set to `drwx--S---`, this suggests that there is an issue around file permissions which is likely to have been inherited from folders above.
+
+To resolve the issue, edit the permissions of this folder (in the following example: `riboviz-foldername`) using `chmod`:
+
+```
+$ cd /path/to/riboviz/folder
+
+$ chmod 0755 riboviz-foldername
+```
+
+The folder permissions after this, when viewed with `ls -l`, should look like `drwxr-sr-x`, without the `-S` flag indicating that the permissions are shared from folders above, and including executable status (ie. `x`).
+
 ---
 
 ## Interactive sessions
@@ -93,7 +138,7 @@ If you do not have a group space, you can use your scratch directory (`/exports/
 There are a limited number of nodes that accept interactive login sessions, to allow you to run interactive jobs or graphical  applications. To start an interactive session run `qlogin`. For running riboviz using nextflow, we recommend you request multiple cores and more than the default memory, for example:
 
 ```console
-$ qlogin -pe interactivemem 4 -l h_vmem=4G 
+$ qlogin -pe interactivemem 4 -l h_vmem=4G
 ```
 
 Here, `-pe interactivemem 4` means you ask for 4 cores in an interactive memory parallel environment. Also, `-l h_vmem=4G` means that you ask for 4GB RAM per core (16GB total in this example)
@@ -101,7 +146,7 @@ Here, `-pe interactivemem 4` means you ask for 4 cores in an interactive memory 
 We have also succeeded running on one core with 16GB memory, using:
 
 ```console
-$ qlogin -l h_vmem=16G 
+$ qlogin -l h_vmem=16G
 ```
 
 If you have access to a priority queue then you can use option `-P`:
@@ -239,7 +284,7 @@ For more information about the vignette, see [Map mRNA and ribosome protected re
 
 Computational work on Eddie is usually submitted to the cluster as batch jobs initiated from a login node. In order to submit a job you need to write a Grid Engine job submission script containing details of the program to run as well as requests for resources. Then, you submit this job script to the cluster with the `qsub` command.
 
-**Warning** - Jobs need to request appropriate resources (cores, memory) in order to run. We are still working out what riboviz needs, so this may take some trial and error. 
+**Warning** - Jobs need to request appropriate resources (cores, memory) in order to run. We are still working out what riboviz needs, so this may take some trial and error.
 
 See "Requesting resources" section below.
 
@@ -300,14 +345,14 @@ For full details on how to use `riboviz.tools.create_job_script`, see [Create jo
 
 **This section is work-in-progress**
 
-Jobs on Eddie need to request appropriate resources (cores, memory) in order to run. 
-If the submission script request less than the number of threads they need then jobs fail with strange error messages. If the job uses more memory than the submission script allows for, then the submission system kills the job. If you request too many resources, then the job queues for a long while (days or longer). 
+Jobs on Eddie need to request appropriate resources (cores, memory) in order to run.
+If the submission script request less than the number of threads they need then jobs fail with strange error messages. If the job uses more memory than the submission script allows for, then the submission system kills the job. If you request too many resources, then the job queues for a long while (days or longer).
 The memory requirements scale with the data, both genome/transcriptome size and number of reads. We have not yet profiled these or found ideal solutions.
 
 The key point is that requesting fewer cores but more memory makes it less likely that the memory will overflow. Also, nextflow does not actually control how many threads or memory the workflow steps take.
 
 A good start involves reserving available resources (`-R y`) of 4 nodes, 16GB/each:
- 
+
 ```
 -R y -pe mpi 4 -l h_vmem=16GB
 ```
@@ -339,7 +384,7 @@ $ qsub job_riboviz.sh
 If you have access to a priority queue, then you can add a line to the gridengine in the submission script, (or alternatively in the command line call to qsub):
 
 ```
-#$ -P <QUEUE_NAME> job_riboviz.sh 
+#$ -P <QUEUE_NAME> job_riboviz.sh
 ```
 
 You will see a message including job ID:
@@ -352,7 +397,7 @@ This will output the standard output from `prep_riboviz.nf` to a file, `riboviz-
 
 The contents of `riboviz-$JOB_ID-$HOSTNAME.o` should be the same as the standard output of [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow) above.
 
-An example job submission script for running the vignette using scratch space for outputs and using system links is available at [`jobs/vignette-submission-script.sh`](../../jobs/vignette-submission-script.sh) and uses a modified .yaml config file [`vignette/remote_vignette_config.yaml`](../../vignette/remote_vignette_config.yaml) as an input. 
+An example job submission script for running the vignette using scratch space for outputs and using system links is available at [`jobs/vignette-submission-script.sh`](../../jobs/vignette-submission-script.sh) and uses a modified .yaml config file [`vignette/remote_vignette_config.yaml`](../../vignette/remote_vignette_config.yaml) as an input.
 
 ### Monitoring jobs
 
@@ -519,7 +564,7 @@ We need to make sure we move back into the main riboviz folder, where we will be
 
 Eddie allows us to load the [SRA Toolkit](https://github.com/ncbi/sra-tools) module, including the utility `fasterq-dump` for downloading data files.  This utility has been included in SRA Toolkit since version 2.9.1. We recommend using `fasterq-dump` with `prefetch`, described below.
 
-<details><summary>Details on `fastq-dump` (Deprecated)</summary> 
+<details><summary>Details on `fastq-dump` (Deprecated)</summary>
 An earlier tool, `fastq-dump`, is also included in SRA Toolkit, however, you may find it is too slow for larger datasets, like `Wallace_2020_JEC21` which is around 50GB uncompressed. Even using the `--gzip` option to directly download the `.gz` file may be too slow.
 </details>
 
@@ -566,7 +611,7 @@ Alternatively, it is possible to download `.fastq.gz` format files of SRA data f
 
 ### Create `qsub` job submission script
 
-**Note:** we are working on automatically generating job submission scripts, see [riboviz#228](https://github.com/riboviz/riboviz/issues/228). 
+**Note:** we are working on automatically generating job submission scripts, see [riboviz#228](https://github.com/riboviz/riboviz/issues/228).
 This documentation gives an example and an overview of how they work for riboviz.
 
 Create the job submission script in `$HOME` or a location of your choosing, and name it something like `run_W-Cn-JEC21_2020.sh`.  
@@ -721,7 +766,7 @@ $ source set-riboviz-env.sh
 $ cd riboviz
 $ screen
 $ source activate riboviz
-$ nextflow prep_riboviz.nf -params-file vignette/vignette_config.yaml 
+$ nextflow prep_riboviz.nf -params-file vignette/vignette_config.yaml
 ```
 
 The failure encountered was:
@@ -737,6 +782,5 @@ $ screen
 $ source set-riboviz-env.sh
 $ source activate riboviz    # If you didn't activate the 'riboviz' environment in 'set-riboviz-env.sh'.
 $ cd riboviz
-$ nextflow prep_riboviz.nf -params-file vignette/vignette_config.yaml 
+$ nextflow prep_riboviz.nf -params-file vignette/vignette_config.yaml
 ```
-
