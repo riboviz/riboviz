@@ -6,7 +6,7 @@
   - [Style checking R code](#style-checking-r-code)
 * [R command-line tools](#r-command-line-tools)
   - [Defining command-line parameters](#defining-command-line-parameters)
-  - [Use `default=NA` not `default=NULL`](#use-default-na-not-default-null)
+  - [Use `default=NA` not `default=NULL`](#use-defaultna-not-defaultnull)
 * [Debugging R scripts with appropriate command-line arguments](#debugging-r-scripts-with-appropriate-command-line-arguments)
 
 ---
