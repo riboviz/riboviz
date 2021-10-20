@@ -4,6 +4,7 @@
   - [Process names](#process-names)
   - [Channel names](#channel-names)
   - [Variable names](#variable-names)
+* [Adding, updating or removing steps](#adding-updating-or-removing-steps)
 * [Debugging](#debugging)
   - [Debugging within Nextflow's `work/` step-specific directories](#debugging-within-nextflows-work-step-specific-directories)
   - [Debugging within a directory emulating Nextflow's `work/` step-specific directories](#debugging-within-a-directory-emulating-nextflows-work-step-specific-directories)
@@ -31,6 +32,17 @@ For example, `multiplex_sample_sheet_tsv`, `sample_fq`
 ### Variable names
 
 Nextflow variable names must be in snake-case i.e., lower-case and delimited by underscores, not hyphens.
+
+---
+
+## Adding, updating or removing steps
+
+If adding steps (processes) to the workflow, editing existing steps or removing steps from the workflow then:
+
+* Update the workflow descriptions in `docs/user/prep-riboviz-config.md` to reflect the changes you have made.
+* If you have changed configuration parameters, then see [Adding, using, renaming, and removing configuration parameters](./config.md)
+* If you have changed temporary or output files, then see [Adding, renaming, and removing temporary or output files](./output-files.md)
+* Update the workflow SVG images, `docs/images/*.svg` and see [Updating workflow images](./documentation.md#updating-workflow-images) in [Writing and updating documentation](./documentation.md).
 
 ---
 
