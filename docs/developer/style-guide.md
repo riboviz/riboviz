@@ -22,19 +22,19 @@ Please do **not** refer to the software as RiboViz, Riboviz, Ribo-Viz, Ribo-viz 
 
 ## Python style
 
-See [Python style](#python-style) in [Developing Python components](./dev-python.md).
+See [Python style](./dev-python.md#python-style) in [Developing Python components](./dev-python.md).
 
 ---
 
 ## R style
 
-See [R style](#r-style) in [Developing R components](./dev-r.md).
+See [R style](./dev-r.md#r-style) in [Developing R components](./dev-r.md).
 
 ---
 
 ## Nextflow style
 
-See [Nextflow style](#nextflow-style) in [Developing Nextflow workflow](./dev-nextflow.md).
+See [Nextflow style](./dev-nextflow.md#nextflow-style) in [Developing Nextflow workflow](./dev-nextflow.md).
 
 ---
 
