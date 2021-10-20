@@ -44,7 +44,7 @@ Usage:
 * [Adding, using, renaming, and removing configuration parameters](./docs/developer/config.md)
 * [Adding, renaming, and removing temporary or output files](./docs/developer/output-files.md)
 * [Adding and updating dependencies](./docs/developer/dependencies.md)
-* [Developing and running tests](./docs/developer/testing.md)
+* [Developing and running integration tests](./docs/developer/integration-tests.md)
 * [Creating a test data repository](./docs/developer/create-test-data-repository.md)
 * [Writing and updating documentation](./docs/developer/documentation.md)
 * [Building a release](./docs/developer/releasing.md)

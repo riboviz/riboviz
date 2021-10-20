@@ -39,7 +39,7 @@ STATIC_HTML_FILE = "{}_output_report.html"
 
 Write a test function in `riboviz/test/integration/test_integration.py` to validate the temporary or output file by comparing it to a temporary or output file in the integration test data directory.
 
-For information to help with writing an integration test, see [Writing an integration test](./testing.md#writing-an-integration-test) in [Developing and running tests](./testing.md).
+For information to help with writing an integration test, see [Writing an integration test](./integration-tests.md#writing-an-integration-test) in [Developing and running integration tests](./integration-tests.md).
 
 ### 3. Run integration tests
 
@@ -47,7 +47,7 @@ For the integration tests, tests will fail as the integration test data director
 
 * Run the workflow.
 * Copy the new file into the appropriate place in your integration test data directory.
-* [Run vignette integration tests](./testing.md#run-vignette-integration-tests).
+* [Run vignette integration tests](./integration-tests.md#run-vignette-integration-tests).
 
 ### 4. Update documentation
 
@@ -110,9 +110,9 @@ For the integration tests, tests will fail as the integration test data director
 
 Run all tests:
 
-* [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
-* [Run R tests](./testing.md#run-r-tests).
-* [Run vignette integration tests](./testing.md#run-vignette-integration-tests).
+* [Run Python tests and workflow tests](./dev-python.md#run-python-tests-and-workflow-tests).
+* [Run R tests](./dev-r.md#run-r-tests).
+* [Run vignette integration tests](./integration-tests.md#run-vignette-integration-tests).
 
 ### 4. Update documentation
 
@@ -148,9 +148,9 @@ Remove the file from your integration test data directory.
 
 Run all tests:
 
-* [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
-* [Run R tests](./testing.md#run-r-tests).
-* [Run vignette integration tests](./testing.md#run-vignette-integration-tests).
+* [Run Python tests and workflow tests](./dev-python.md#run-python-tests-and-workflow-tests).
+* [Run R tests](./dev-r.md#run-r-tests).
+* [Run vignette integration tests](./integration-tests.md#run-vignette-integration-tests).
 
 ### 4. Update documentation
 

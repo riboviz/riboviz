@@ -5,7 +5,10 @@
   - [Comments](#comments)
   - [Style checking Python code](#style-checking-python-code)
 * [Python command-line tools](#python-command-line-tools)
-  - [Defining command-line parameters](#defining-command-line-parameters)
+  - [Defining command-line parameters](#defining-command-line-parameters
+* [Run Python tests and workflow tests](#run-python-tests-and-workflow-tests)
+* [Useful pytest flags](#useful-pytest-flags)
+* [Information on pytest fixtures and parameters](#information-on-pytest-fixtures-and-parameters)
 
 ---
 
@@ -129,3 +132,37 @@ parser.add_argument("-o", "--output-dir", dest="output_dir", nargs='?',
 options = parser.parse_args()
 output_dir = options.output_dir
 ```
+
+---
+
+## Run Python tests and workflow tests
+
+Run:
+
+```console
+$ pytest --ignore-glob="*integration*"
+```
+
+**Troubleshooting: `PendingDeprecationWarning`**
+
+`PendingDeprecationWarning` `warnings` can be ignored.
+
+
+---
+
+## Useful pytest flags
+
+* `-s`: disable output capture so, for example, `print` messages are shown.
+* `-v`: verbose mode, displays names of test functions run.
+* `-k`: run a specific test function.
+* `--cov-config=.coveragerc --cov-report term-missing --cov=riboviz`: create a test coverage report which includes the line numbers of statements that were not executed.
+
+---
+
+## Information on pytest fixtures and parameters
+
+The riboviz integration and Python unit tests make extensive use of pytest fixtures and parameterised tests. For more information on pytest fixtures and parameters see:
+
+* [pytest fixtures: explicit, modular, scalable](https://docs.pytest.org/en/6.2.x/fixture.html)
+* [Parametrizing fixtures and test functions](https://docs.pytest.org/en/6.2.x/parametrize.html)
+* [Basic patterns and examples](https://docs.pytest.org/en/6.2.x/example/simple.html)

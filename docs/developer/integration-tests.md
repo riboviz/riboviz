@@ -1,7 +1,5 @@
-# Developing and running tests
+# Developing and running integration tests
 
-* [Run Python tests and workflow tests](#run-python-tests-and-workflow-tests)
-* [Run R tests](#run-r-tests)
 * [Download vignette integration test data](#download-vignette-integration-test-data)
 * [Run vignette integration tests](#run-vignette-integration-tests)
 * [Using the integration test suite](#using-the-integration-test-suite)
@@ -18,43 +16,6 @@
   - [Conditionally skipping tests](#conditionally-skipping-tests)
 * [Useful pytest flags](#useful-pytest-flags)
 * [Information on pytest fixtures and parameters](#information-on-pytest-fixtures-and-parameters)
-
----
-
-## Run Python tests and workflow tests
-
-Run:
-
-```console
-$ pytest --ignore-glob="*integration*"
-```
-
-**Troubleshooting: `PendingDeprecationWarning`**
-
-`PendingDeprecationWarning` `warnings` can be ignored.
-
----
-
-## Run R tests
-
-testthat-compliant tests for R scripts can be run as follows:
-
-```console
-$ Rscript rscripts/tests/testthat.R
-```
-
-Individual test scripts can be run as follows (for example):
-
-```console
-$ Rscript rscripts/tests/testthat/test_bam_to_h5.R 
-```
-
-Test scripts can also be run from within R as follows (for example):
-
-```R
-> library(testthat)
-> test_file("rscripts/tests/testthat/test_bam_to_h5.R")
-```
 
 ---
 
@@ -420,21 +381,12 @@ def test_generate_stats_figs_t_rna_codon_positions_pdf(
     check_pdf_file_exists(dir_out, sample, file_name)
 ```
 
----
-
 ## Useful pytest flags
 
-* `-s`: disable output capture so, for example, `print` messages are shown.
-* `-v`: verbose mode, displays names of test functions run.
-* `-k`: run a specific test function.
-* `--cov-config=.coveragerc --cov-report term-missing --cov=riboviz`: create a test coverage report which includes the line numbers of statements that were not executed.
+See [Useful pytest flags](./dev-python.md#useful-pytest-flags) in [Developing Python components](./dev-python.md).
 
 ---
 
 ## Information on pytest fixtures and parameters
 
-The riboviz integration and Python unit tests make extensive use of pytest fixtures and parameterised tests. For more information on pytest fixtures and parameters see:
-
-* [pytest fixtures: explicit, modular, scalable](https://docs.pytest.org/en/6.2.x/fixture.html)
-* [Parametrizing fixtures and test functions](https://docs.pytest.org/en/6.2.x/parametrize.html)
-* [Basic patterns and examples](https://docs.pytest.org/en/6.2.x/example/simple.html)
+See [Information on pytest fixtures and parameters](./dev-python.md#information-on-pytest-fixtures-and-parameters) in [Developing Python components](./dev-python.md).

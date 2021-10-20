@@ -6,8 +6,9 @@
   - [Style checking R code](#style-checking-r-code)
 * [R command-line tools](#r-command-line-tools)
   - [Defining command-line parameters](#defining-command-line-parameters)
-  - [Use `default=NA` not `default=NULL`](#use-default-na-not-default-null)
+  - [Use `default=NA` not `default=NULL`](#use-defaultna-not-defaultnull)
 * [Debugging R scripts with appropriate command-line arguments](#debugging-r-scripts-with-appropriate-command-line-arguments)
+* [Run R tests](#run-r-tests)
 
 ---
 
@@ -224,3 +225,25 @@ To debug a specific line of code, you could add a `browser()` statement in the s
 
 **Note:** at present, the riboviz R scripts `bam_to_h5.R`, `generate_stats_figs.R` and `collate_tpms.R` import other riboviz R scripts. If running these riboviz R scripts interactively, via `R` and `source`, then the directory in which they are run must be such that `rscripts` is a sibling of an ancestor of the directory in which the script is run interactively. For example, running a script interactively within a sub-sub-directory of Nextflow's `work/` directory or a `debug_gen_stats_figs` directory (as described in the next section) where either of these directories are in the same directory as `rscripts`.
 
+---
+
+## Run R tests
+
+testthat-compliant tests for R scripts can be run as follows:
+
+```console
+$ Rscript rscripts/tests/testthat.R
+```
+
+Individual test scripts can be run as follows (for example):
+
+```console
+$ Rscript rscripts/tests/testthat/test_bam_to_h5.R 
+```
+
+Test scripts can also be run from within R as follows (for example):
+
+```R
+> library(testthat)
+> test_file("rscripts/tests/testthat/test_bam_to_h5.R")
+```

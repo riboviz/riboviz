@@ -728,8 +728,9 @@ You can now check your installation by running riboviz tests by running a "vigne
 
 Once you have run the "vignette", you can check your installation by running tests:
 
-* [Run vignette integration tests](../developer/testing.md#run-vignette-integration-tests).
-* [Run Python tests and workflow tests](../developer/testing.md#run-python-tests-and-workflow-tests).
+* [Run vignette integration tests](../developer/integration-tests.md#run-vignette-integration-tests).
+* [Run Python tests and workflow tests](../developer/dev-python.md#run-python-tests-and-workflow-tests).
+* [Run R tests](../developer/dev-r.md#run-python-tests-and-workflow-tests).
 
 ---
 

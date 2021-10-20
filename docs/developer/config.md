@@ -227,9 +227,9 @@ Search for all occurrences of the parameter in the documentation, in `docs/` and
 
 ### 5. Run all tests
 
-* [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
-* [Run R tests](./testing.md#run-r-tests).
-* [Run vignette integration tests](./testing.md#run-vignette-integration-tests).
+* [Run Python tests and workflow tests](./dev-python.md#run-python-tests-and-workflow-tests).
+* [Run R tests](./dev-r.md#run-r-tests).
+* [Run vignette integration tests](./integration-test.md#run-vignette-integration-tests).
 
 ---
 
@@ -288,6 +288,6 @@ Search for all occurrences of the parameter in the documentation, in `docs/` and
 
 ### 5. Run all tests
 
-* [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
-* [Run R tests](./testing.md#run-r-tests).
-* [Run vignette integration tests](./testing.md#run-vignette-integration-tests).
+* [Run Python tests and workflow tests](./dev-python.md#run-python-tests-and-workflow-tests).
+* [Run R tests](./dev-r.md#run-r-tests).
+* [Run vignette integration tests](./integration-tests.md#run-vignette-integration-tests).
