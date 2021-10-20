@@ -730,7 +730,7 @@ Once you have run the "vignette", you can check your installation by running tes
 
 * [Run vignette integration tests](../developer/integration-tests.md#run-vignette-integration-tests).
 * [Run Python tests and workflow tests](../developer/dev-python.md#run-python-tests-and-workflow-tests).
-* [Run R tests](../developer/dev-r.md#run-python-tests-and-workflow-tests).
+* [Run R tests](../developer/dev-r.md#run-r-tests).
 
 ---
 
