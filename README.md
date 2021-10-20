@@ -38,8 +38,8 @@ Usage:
 * [Install developer dependencies](./docs/developer/install.md)
 * [Git branching model](./docs/developer/git-branching-model.md)
 * [Style guide](./docs/developer/style-guide.md): Style guidelines for the **riboviz** source code, documentation, parameters and files.
-* [Developing Python components](./docs/developer/dev-python.md).
-* [Developing R components](./docs/developer/dev-r.md).
+* [Developing Python components](./docs/developer/dev-python.md)
+* [Developing R components](./docs/developer/dev-r.md)
 * [Developing Nextflow workflow](./docs/developer/dev-nextflow.md)
 * [Adding, using, renaming, and removing configuration parameters](./docs/developer/config.md)
 * [Adding, renaming, and removing temporary or output files](./docs/developer/output-files.md)
