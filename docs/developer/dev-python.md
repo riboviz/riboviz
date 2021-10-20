@@ -1,0 +1,131 @@
+# Developing Python components
+
+* [Python style](#python-style)
+  - [File names](#file-names)
+  - [Comments](#comments)
+  - [Style checking Python code](#style-checking-python-code)
+* [Python command-line tools](#python-command-line-tools)
+  - [Defining command-line parameters](#defining-command-line-parameters)
+
+---
+
+## Python style
+
+Python code should be formatted to conform as far as possible to the [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/).
+
+The tools [pylint](https://pylint.org/) and [pycodestyle](https://pycodestyle.pycqa.org/en/latest/) can help by highlighting deviations from the coding style. See [Style checking Python code](#style-checking-python-code) below.
+
+See also the riboviz [Style guide](./style-guide.md).
+
+### File names
+
+Python file names must be in snake-case i.e., lower-case and delimited by underscores, not hyphens. For example, `sample_sheets.py`, `get_cds_codons.py`.
+
+### Comments
+
+Python code should be commented using [doc-strings](https://www.python.org/dev/peps/pep-0257/). The doc-strings should include [Sphinx](https://www.sphinx-doc.org/en/master/)-compliant [reStructuredText](https://docutils.sourceforge.io/rst.html) markup. Examples are given below.
+
+Modules should have a doc-string descring the module. For example:
+
+```python
+"""
+Workflow configuration parameter names.
+"""
+```
+
+Constants and module-level variable should have doc-strings briefly describing what they are. For example:
+
+```python
+INPUT_DIR = "dir_in"
+""" Input directory. """
+```
+
+Functions should have doc-strings describing what they do and their parameters, return values (if applicable) and any exceptions (if applicable). Types of parameters and return values should also be documented. For example:
+
+```python
+def load_sample_sheet(file_name, delimiter="\t", comment="#"):
+    """
+    Load a sample sheet from a file. The sample sheet is assumed to
+    have a header with column names ``SampleID`` and ``TagRead``.
+
+    :param file_name: File name
+    :type file_name: str or unicode
+    :param delimiter: Delimiter
+    :type delimiter: str or unicode
+    :param comment: Comment prefix
+    :type comment: str or unicode
+    :return: Sample sheet
+    :rtype: pandas.core.frame.DataFrame
+    :raise FileNotFoundError: If the file cannot be found or is \
+    not a file
+    :raise AssertionError: If there is no header with ``SampleID`` \
+    and ``TagRead`` columns.
+    """
+```
+
+To use fixed-width (teletype-style) text use ` `` ` (see the markup on `SampleID` and `TagRead` above).
+
+For references to other Python modules, functions or constants use Sphinx's `:py:` roles. For example:
+
+* Cross-reference to a module (`:py:mod:`):
+
+```python
+Count reads using :py:mod:`riboviz.tools.count_reads`.
+```
+
+* Cross-reference to a constant (`:py:constant:`):
+
+```python
+... also matching :py:const:`riboviz.workflow_files.UMI_EXTRACT_FQ` ...
+```
+
+* Cross-reference to a function (`:py:func:`):
+
+```python
+See :py:func:`riboviz.count_reads.count_reads` for information ...
+```
+
+Note that if the cross-reference is to an entity in the same module then only the local name of the entity needs to be specified. For example:
+
+```python
+See :py:func:`count_reads` for information ...
+```
+
+For examples and further information, see:
+
+* Sphinx's Python [Info field lists](https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists) on the Python fields that Sphinx can recognise.
+* Sphinx's [Cross-referencing Python objects](https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#cross-referencing-python-objects) on the available cross-references.
+* Sphinx's [The Python Domain](https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#the-python-domain).
+
+### Style checking Python code
+
+[pylint](https://pylint.org/) and [pycodestyle](https://pycodestyle.pycqa.org/en/latest/) can be run on individual files, groups of files or every file in a directory and its subdirectories. For example:
+
+```console
+$ pylint riboviz/check_fasta_gff.py
+$ pycodestyle riboviz/check_fasta_gff.py
+```
+```console
+$ pylint riboviz/
+$ pycodestyle riboviz/
+```
+
+---
+
+## Python command-line tools
+
+Python command-line tools must be placed within `riboviz/tools/` i.e. within the `riboviz.tools` module.
+
+Command-line parsing must be implemented using [argparse](https://docs.python.org/3/library/argparse.html).
+
+### Defining command-line parameters
+
+The `dest` parameter of `ArgumentParser.add_argument` can be use to explicitly define the Python variables into which a command-line parameter is to be placed. For example:
+
+```python
+parser = argparse.ArgumentParser(description="Program")
+parser.add_argument("-o", "--output-dir", dest="output_dir", nargs='?',
+                    help="Output directory")
+options = parser.parse_args()
+output_dir = options.output_dir
+```

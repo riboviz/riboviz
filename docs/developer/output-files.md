@@ -8,7 +8,7 @@
 
 ## Adding temporary or output files
 
-If you add a workflow step that creates a new temporary or output file, then **respect the riboviz file naming conventions**, see [Input and output file names](style-guide.md#input-and-output-file-names) and [Nextflow](style-guide.md#nextflow) in the [Style guide](./style-guide.md).
+If you add a workflow step that creates a new temporary or output file, then **respect the riboviz file naming conventions**, see [Input and output file names](style-guide.md#input-and-output-file-names)  in the [Style guide](./style-guide.md) and [Nextflow style](./dev-nextflow.md#nextflow-style) in [Developing Nextflow workflow](./dev-nextflow.md).
 
 You should also make the following updates.
 
@@ -72,7 +72,7 @@ For temporary and output files, update the workflow images, update the workflow 
 
 ## Renaming temporary or output files
 
-If renaming temporary or output files, then **respect the riboviz file naming conventions**, see [Input and output file names](style-guide.md#input-and-output-file-names) and [Nextflow](style-guide.md#nextflow) in the [Style guide](./style-guide.md).
+If renaming temporary or output files, then **respect the riboviz file naming conventions**, see [Input and output file names](style-guide.md#input-and-output-file-names)  in the [Style guide](./style-guide.md) and [Nextflow style](./dev-nextflow.md#nextflow-style) in [Developing Nextflow workflow](./dev-nextflow.md).
 
 You should also make the following updates.
 
