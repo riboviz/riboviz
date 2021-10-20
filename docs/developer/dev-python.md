@@ -5,7 +5,7 @@
   - [Comments](#comments)
   - [Style checking Python code](#style-checking-python-code)
 * [Python command-line tools](#python-command-line-tools)
-  - [Defining command-line parameters](#defining-command-line-parameters
+  - [Defining command-line parameters](#defining-command-line-parameters)
 * [Run Python tests and workflow tests](#run-python-tests-and-workflow-tests)
 * [Useful pytest flags](#useful-pytest-flags)
 * [Information on pytest fixtures and parameters](#information-on-pytest-fixtures-and-parameters)
