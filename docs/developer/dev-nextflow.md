@@ -1,76 +1,52 @@
-# Debugging
+# Developing Nextflow workflow
 
-## Debugging R scripts with appropriate command-line arguments
-
-To debug R scripts such as `generate_stats_figs.R` and `bam_to_h5.R`, they need to be run with the correct command-line arguments to discover the bug. R has good tools for interactive debugging, [explained in Hadley Wickham's chapter on debugging in R](https://adv-r.hadley.nz/debugging.html). However, interactive debugging tools such as `browser()` don't interrupt a call to `Rscript`. Instead you need to modify the call from:
-
-```console
-$ Rscript code_to_debug.R --myarg1 value1
-```
-
-to:
-
-```console
-$ R --args --myarg1 value1
-```
-
-then, from the R prompt run:
-
-```R
-> source('code_to_debug.R')
-```
-
-this will accept `debug()` and `browser()` statements run from the interactive R prompt.
-
-For example, in the vignette we call:
-
-```console
-$ Rscript --vanilla /home/ubuntu/riboviz/rscripts/generate_stats_figs.R \
-  --num-processes=1            --min-read-length=10 \
-  --max-read-length=50            --buffer=250 \
-  --primary-id=Name            --dataset=vignette \
-  --hd-file=WTnone.h5 \
-  --orf-fasta-file=yeast_YAL_CDS_w_250utrs.fa            --rpf=true \
-  --output-dir=.            --do-pos-sp-nt-freq=true \
-  --t-rna-file=yeast_tRNAs.tsv \
-  --codon-positions-file=yeast_codon_pos_i200.RData \
-  --features-file=yeast_features.tsv \
-  --orf-gff-file=yeast_YAL_CDS_w_250utrs.gff3 \
-  --asite-disp-length-file=yeast_standard_asite_disp_length.txt \
-  --count-threshold=64
-```
-
-But to interactively debug a new feature, we'd run:
-
-```console
-$ R --vanilla --args \
-  --num-processes=1            --min-read-length=10 \
-  --max-read-length=50            --buffer=250 \
-  --primary-id=Name            --dataset=vignette \
-  --hd-file=WTnone.h5 \
-  --orf-fasta-file=yeast_YAL_CDS_w_250utrs.fa            --rpf=true \
-  --output-dir=.            --do-pos-sp-nt-freq=true \
-  --t-rna-file=yeast_tRNAs.tsv \
-  --codon-positions-file=yeast_codon_pos_i200.RData \
-  --features-file=yeast_features.tsv \
-  --orf-gff-file=yeast_YAL_CDS_w_250utrs.gff3 \
-  --asite-disp-length-file=yeast_standard_asite_disp_length.txt \
-  --count-threshold=64
-```
-
-then:
-
-```R
-> source('<PATH_TO_RIBOVIZ_DIRECTORY>/rscripts/generate_stats_figs.R')
-```
-
-To debug a specific line of code, you could add a `browser()` statement in the source first. Alternatively, you could copy and paste the parts of the code you wanted to run, as long as earlier dependencies are run first (packages, importing command arguments, function definitions).
-
-**Note:** at present, the riboviz R scripts `bam_to_h5.R`, `generate_stats_figs.R` and `collate_tpms.R` import other riboviz R scripts. If running these riboviz R scripts interactively, via `R` and `source`, then the directory in which they are run must be such that `rscripts` is a sibling of an ancestor of the directory in which the script is run interactively. For example, running a script interactively within a sub-sub-directory of Nextflow's `work/` directory or a `debug_gen_stats_figs` directory (as described in the next section) where either of these directories are in the same directory as `rscripts`.
+* [Nextflow style](#nextflow-style)
+  - [Process names](#process-names)
+  - [Channel names](#channel-names)
+  - [Variable names](#variable-names)
+* [Adding, updating or removing steps](#adding-updating-or-removing-steps)
+* [Debugging](#debugging)
+  - [Debugging within Nextflow's `work/` step-specific directories](#debugging-within-nextflows-work-step-specific-directories)
+  - [Debugging within a directory emulating Nextflow's `work/` step-specific directories](#debugging-within-a-directory-emulating-nextflows-work-step-specific-directories)
 
 ---
 
-## Debugging and Nextflow
+## Nextflow style
+
+See also the riboviz [Style guide](./style-guide.md).
+
+### Process names
+
+Nextflow process names must be in CamelCase with the first letter being lower-case. Upper-case is peromitted for acronyms e.g., `ORF`, `CDS`, `APE`, `TPMs`, `RNA`.
+
+For example, `buildIndicesrRNA`, `demultiplex`, `staticHTML`.
+
+### Channel names
+
+Nextflow channel names must be in snake-case i.e., lower-case and delimited by underscores, not hyphens.
+
+For channels which are file names, ensure that the channel name includes the file type as its last component, delimited by an underscore.
+
+For example, `multiplex_sample_sheet_tsv`, `sample_fq`
+
+### Variable names
+
+Nextflow variable names must be in snake-case i.e., lower-case and delimited by underscores, not hyphens.
+
+---
+
+## Adding, updating or removing steps
+
+If adding steps (processes) to the workflow, editing existing steps or removing steps from the workflow then:
+
+* Update the workflow descriptions in `docs/user/prep-riboviz-config.md` to reflect the changes you have made.
+* If you have changed configuration parameters, then see [Adding, using, renaming, and removing configuration parameters](./config.md)
+* If you have changed temporary or output files, then see [Adding, renaming, and removing temporary or output files](./output-files.md)
+* Update the workflow SVG images, `docs/images/*.svg` and see [Updating workflow images](./documentation.md#updating-workflow-images) in [Writing and updating documentation](./documentation.md).
+
+---
+
+## Debugging
 
 Information on Debugging and Nextflow is provided in [Debugging](../user/prep-riboviz-run-nextflow.md#debugging) in [Running the riboviz Nextflow workflow](../user/prep-riboviz-run-nextflow.md). This section contains additional developer-specific information.
 

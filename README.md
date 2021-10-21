@@ -30,43 +30,39 @@ Usage:
 * [Generate YAML configuration file](https://riboviz.shinyapps.io/generate-yaml/). Use an online tool to generate a riboviz YAML configuration file.
 * [Running the riboviz Nextflow workflow](./docs/user/prep-riboviz-run-nextflow.md)  
 * [How To Run the riboviz Interactive Data Visualization On Your Data](docs/user/run-run_shiny_server-operation.md)
-* [Running the riboviz Nextflow workflow](./docs/user/prep-riboviz-run-nextflow.md)  
-* [riboviz output files and figures](./docs/user/riboviz_outputs.md)
+* [riboviz output files and figures](./docs/user/riboviz-outputs.md)
 * [Running the riboviz workflow on Eddie](./docs/user/run-on-eddie.md)
 * [Memory and storage](./docs/user/memory-storage.md). Information and advice relating to **riboviz**'s memory and storage requirements.
 
-Command-line tools:
-
-| Tool | Description |
-| ---- | ----------- |
-| [check_fasta_gff](./riboviz/tools/check_fasta_gff.py) | [Check FASTA and GFF files for coding sequence (CDS) features](./docs/user/check-fasta-gff.md) |
-| [count_reads](./riboviz/tools/count_reads.py) | Scan input, temporary and output directories and count the number of reads (sequences) processed by specific stages of a workflow (invoked as part of a workflow) |
-| [create_barcode_pairs](./riboviz/tools/create_barcode_pairs.py) | Create barcode pairs and write each pair plus the Hamming distance between then to a file of tab-separated values |
-| [create_fastq_simdata](./riboviz/tools/create_fastq_simdata.py) | Create simulated FASTQ files to test UMI/deduplication, adaptor trimming, anddemultiplexing. Files in `data/simdata/` were created using this tool |
-| [create_job_script](./riboviz/tools/create_job_script.py) | [Create job submission script from template](./docs/user/create-job-script.md) |
-| [demultiplex_fastq](./riboviz/tools/demultiplex_fastq.py) | Demultiplex FASTQ files using UMI-tools-compliant barcodes present within the FASTQ headers and a sample sheet file (invoked as part of a workflow) |
-| [get_cds_codons](./riboviz/tools/get_cds_codons.py) | Extract coding sequence codons and export as a tab-separated values file |
-| [subsample_bioseqfile](./riboviz/tools/subsample_bioseqfile.py) | Subsample an input FASTQ (or other sequencing) file, to produce a smaller file whose reads are randomly sampled from of the input with a fixed probability |
-| [trim_5p_mismatch](./riboviz/tools/trim_5p_mismatch.py) | Remove a single 5' mismatched nt and filter reads with more than a specified mismatches from a SAM file and save the trimming summary to a file (invoked as part of a workflow) |
-| [upgrade_config_file](./riboviz/tools/upgrade_config_file.py) | [Upgrade configuration files to current version](./docs/user/upgrade-config.md) |
-
 ## Develop riboviz
 
-* [Install developer dependencies](./docs/developer/install.md)
+General:
+
 * [Git branching model](./docs/developer/git-branching-model.md)
-* [Coding style](./docs/developer/coding-style.md)
-* [Debugging](./docs/developer/debugging.md)
-* [Using and adding configuration parameters](./docs/developer/config.md)
+* [Style guide](./docs/developer/style-guide.md): Style guidelines for the **riboviz** source code, documentation, parameters and files.
+
+Development:
+
+* [Install developer dependencies](./docs/developer/install.md)
+* [Developing Python components](./docs/developer/dev-python.md)
+* [Developing R components](./docs/developer/dev-r.md)
+* [Developing Nextflow workflow](./docs/developer/dev-nextflow.md)
+* [Adding, using, renaming, and removing configuration parameters](./docs/developer/config.md)
+* [Adding, renaming, and removing temporary or output files](./docs/developer/output-files.md)
 * [Adding and updating dependencies](./docs/developer/dependencies.md)
-* [Developing and running tests](./docs/developer/testing.md)
-* [Creating a test data repository](./docs/developer/create-test-data-repository.md)
+* [Developing and running integration tests](./docs/developer/integration-tests.md)
 * [Writing and updating documentation](./docs/developer/documentation.md)
+* [Related riboviz repositories](docs/developer/related-repositories.md)
+
+Releasing:
+
+* [Creating a test data repository](./docs/developer/create-test-data-repository.md)
 * [Building a release](./docs/developer/releasing.md)
 
 ## Reference
 
-* [Content and provenance of repository data files](./docs/reference/data.md)
-* [Structure of HDF5 data](./docs/reference/hdf5-data.md). Structure of HDF5 data files produced by `bam_to_h5.R`.
+* [riboviz command-line tools](docs/user/command-line-tools.md).
+* [Content and provenance of repository data files](./docs/reference/data.md).
 
 ## Releases
 
@@ -84,9 +80,11 @@ Command-line tools:
 
 To cite **riboviz**, please use both of the following references:
 
-riboviz: analysis and visualization of ribosome profiling datasets, Carja et al., BMC Bioinformatics 2017. doi:[10.1186/s12859-017-1873-8](https://doi.org/10.1186/s12859-017-1873-8).
+Cope AL, Anderson F, Favate J, Jackson M, Mok A, Kurowska A, MacKenzie E, Shivakumar V, Tilton P, Winterbourne SM, Xue S, Kavoussanakis K, Lareau LF, Shah P, Wallace EWJ. 2021. riboviz 2: A flexible and robust ribosome profiling data analysis and visualization workflow. bioRxiv. doi: [10.1101/2021.05.14.443910](https://doi.org/10.1101/2021.05.14.443910).
 
 Wallace, Edward; Anderson, Felicity; Kavoussanakis, Kostas; Jackson, Michael; Shah, Premal; Lareau, Liana; et al. (2021): riboviz: software for analysis and visualization of ribosome profiling datasets. figshare. Software. doi: [10.6084/m9.figshare.12624200](https://doi.org/10.6084/m9.figshare.12624200)
+
+riboviz: analysis and visualization of ribosome profiling datasets, Carja et al., BMC Bioinformatics 2017. doi:[10.1186/s12859-017-1873-8](https://doi.org/10.1186/s12859-017-1873-8).
 
 ## Acknowledgements
 

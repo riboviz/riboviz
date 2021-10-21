@@ -1,12 +1,17 @@
 # Adding and updating dependencies
 
-## Adding a new user dependency
+* [Adding new operating system packages](#adding-new-operating-system-packages)
+* [Adding tools not available as operating system packages](#adding-tools-not-available-as-operating-system-packages)
+* [Adding Python packages](#adding-python-packages)
+* [Adding R packages](#adding-r-packages)
+* [Updating existing dependencies](#updating-existing-dependencies)
+* [Updating Dependencies overview tables](#updating-dependencies-overview-tables)
 
-If you add a new user dependency - a new operating system package, Python package or R package, or another package - then made the following updates.
+---
 
-### Operating system packages
+## Adding new operating system packages
 
-Update [Install operating system packages](../user/install.md#install-operating-system-packages) in [docs/user/install.md](../user/install.md):
+Update 'Install operating system packages' in `docs/user/install.md`:
 
 * Add an entry for the package to the 'Package Links' table.
 * Add commands to the 'Install on Ubuntu' and 'Install on CentOS' subsections.
@@ -14,49 +19,61 @@ Update [Install operating system packages](../user/install.md#install-operating-
 
 Add commands to "quick install scripts" (see current content of scripts for what is expected):
 
-* [bash/install-ubuntu.sh](../../bash/install-ubuntu.sh).
-* [bash/install-centos.sh](../../bash/install-centos.sh).
-* [bash/environment-tables.sh](../../bash/environment-tables.sh), commands to capture versions of any command-line tools and echo these in a tabular format.
+* `bash/install-ubuntu.sh`
+* `bash/install-centos.sh`
+* `bash/environment-tables.sh`, add commands to capture versions of any command-line tools and echo these in a tabular format.
 
-Finally, [Update Dependencies overview](#update-dependencies-overview).
+Follow [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
 
-### Tools not available as operating system packages
+Consider, and discuss with the team, the implications of these changes on [Related riboviz repositories](./related-repositories.md).
 
-Update [Install tools not available as operating system packages](../user/install.md#install-tools-not-available-as-operating-system-packages) in [docs/user/install.md](../user/install.md):
+---
+
+## Adding tools not available as operating system packages
+
+Update 'Install tools not available as operating system packages' in `docs/user/install.md`:
 
 * Add an entry for the package to the 'Package Links' table.
 * Add a new subsection describing how to download, build, configure, install and check the package.
-* If the new tool needs the `PATH` configured or other environment variables set, then update commands in `setenv.sh` in [Create `setenv.sh` to configure paths](../user/install.md#create-setenvsh-to-configure-paths).
+* If the new tool needs the `PATH` configured or other environment variables set, then update commands in `setenv.sh` in 'Create `setenv.sh` to configure paths'.
 
 Add commands to "quick install scripts" (see current content of scripts for what is expected):
 
-* [bash/install-tools.sh](../../bash/install-tools.sh), also update commands to create `setenv.sh` if applicable.
-* [bash/environment-tables.sh](../../bash/environment-tables.sh), commands to capture versions of any command-line tools and echo these in a tabular format.
+* `bash/install-tools.sh`, also update commands to create `setenv.sh`, if applicable.
+* `bash/environment-tables.sh`, add commands to capture versions of any command-line tools and echo these in a tabular format.
 
-Finally, [Update Dependencies overview](#update-dependencies-overview).
+Follow [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
 
-### Python packages
+Consider, and discuss with the team, the implications of these changes on [Related riboviz repositories](./related-repositories.md).
 
-Update [Install Python packages](../user/install.md#install-python-packages) in [docs/user/install.md](../user/install.md):
+---
+
+## Adding Python packages
+
+Update 'Install Python packages' in `docs/user/install.md` or `docs/developer/install.md` (depending on whether the package is for all users or for developers only):
 
 * Add an entry for the package to the 'Package Links' table.
 * Add commands to the 'Install' commands.
-* Add commands to the 'Check packages have installed command-line tools' commands, if applicable.
+* For user-specific packages, add commands to the 'Check packages have installed command-line tools' commands, if applicable.
 
 Add commands to "quick install scripts" (see current content of scripts for what is expected):
 
-* [bash/install-py.sh](../../bash/install-py.sh).
-* [bash/environment-tables.sh](../../bash/environment-tables.sh), add `conda` package names to `CONDA_LIST` or `pip` package names to `PIP_LIST`.
+* `bash/install-py.sh`
+* `bash/environment-tables.sh`, add `conda` package names to `CONDA_LIST` or `pip` package names to `PIP_LIST`.
 
-Finally, [Update Dependencies overview](#update-dependencies-overview).
+Follow [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
 
-### R packages
+Consider, and discuss with the team, the implications of these changes on [Related riboviz repositories](./related-repositories.md).
 
-Update [Install R and packages required by R packages to be installed](../user/install.md#install-r-and-packages-required-by-r-packages-to-be-installed) in [docs/user/install.md](../user/install.md):
+---
+
+## Adding R packages
+
+Update 'Install R and packages required by R packages to be installed' in `docs/user/install.md`:
 
 * Add commands to install any operating system packages to 'Install on Ubuntu' and 'Install on CentOS' subsections.
 
-Update [Install R packages](../user/install.md#install-r-packages) in [docs/user/install.md](../user/install.md):
+Update 'Install R packages' in `docs/user/install.md` or `docs/developer/install.md` (depending on whether the package is for all users or for developers only):
 
 * Add an entry for the package to the 'Package Links' table.
 * Add commands to the 'Install in R' commands.
@@ -64,64 +81,37 @@ Update [Install R packages](../user/install.md#install-r-packages) in [docs/user
 
 Add commands to "quick install scripts" (see current content of scripts for what is expected):
 
-* [bash/install-r-ubuntu.sh](../../bash/install-r-ubuntu.sh), commands to install Ubuntu packages.
-* [bash/install-r-centos.sh](../../bash/install-r-centos.sh), commands to install CentOS packages.
-* [bash/install-r.R](../../bash/install-r.R), commands to install R packages.
-* [bash/install-r-3.4-bioconductor.R](../../bash/install-r-3.4-bioconductor.R), commands to install Bioconductor sub-packages under R 3.4.
-* [bash/install-r-3.5-bioconductor.R](../../bash/install-r-3.5-bioconductor.R), commands to install Bioconductor sub-packages under R 3.5+.
-* [bash/environment-tables.sh](../../bash/environment-tables.sh), add package names `R_LIST`.
+* `bash/install-r-ubuntu.sh`, commands to install Ubuntu packages.
+* `bash/install-r-centos.sh`, commands to install CentOS packages.
+* `bash/install-r.R`, commands to install R packages.
+* `bash/install-r-3.4-bioconductor.R`, commands to install Bioconductor sub-packages under R 3.4.
+* `bash/install-r-3.5-bioconductor.R`, commands to install Bioconductor sub-packages under R 3.5+.
+* `bash/environment-tables.sh`, add package names `R_LIST`.
 
-Finally, [Update Dependencies overview](#update-dependencies-overview).
+Follow [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
 
----
-
-## Adding a new developer dependency
-
-If you add a new developer dependency - a new Python package or R package - then made the following updates.
-
-### Python packages
-
-Update [Install Python packages](../developer/install.md#install-python-packages) in [docs/developer/install.md](../developer/install.md):
-
-* Add an entry for the package to the 'Package Links' table.
-* Add commands to the 'Install:' commands.
-
-Add commands to "quick install scripts" (see current content of scripts for what is expected):
-
-* [bash/install-py.sh](../../bash/install-py.sh).
-* [bash/environment-tables.sh](../../bash/environment-tables.sh), add `conda` package names to `CONDA_LIST` or `pip` package names to `PIP_LIST`.
-
-Finally, [Update Dependencies overview](#update-dependencies-overview).
-
-### R packages
-
-Update [Install R packages](../developer/install.md#install-r-packages) in [docs/developer/install.md](../developer/install.md):
-
-* Add an entry for the package to the 'Package Links' table.
-* Add commands to the 'Install:' commands.
-
-Add commands to "quick install scripts" (see current content of scripts for what is expected):
-
-* [bash/install-r.R](../../bash/install-r.R), commands to install R packages.
-* [bash/install-r-3.4-bioconductor.R](../../bash/install-r-3.4-bioconductor.R), commands to install Bioconductor sub-packages under R 3.4.
-* [bash/install-r-3.5-bioconductor.R](../../bash/install-r-3.5-bioconductor.R), commands to install Bioconductor sub-packages under R 3.5+.
-* [bash/environment-tables.sh](../../bash/environment-tables.sh), add package names `R_LIST`.
-
-Finally, [Update Dependencies overview](#update-dependencies-overview).
+Consider, and discuss with the team, the implications of these changes on [Related riboviz repositories](./related-repositories.md).
 
 ---
 
-## Update an existing dependency
+## Updating existing dependencies
 
-Run through the relevant subsection of [Adding a new dependency](#adding-a-new-dependency) or [Adding a new developer dependency](#adding-a-new-developer-dependency) updating the relevant content if necessary.
+Run through the section corresponding to the nature of the dependency being updated and make any required updates to documentation and scripts:
 
-Finally, [Update Dependencies overview](#update-dependencies-overview).
+* [Adding new operating system packages](#adding-new-operating-system-packages)
+* [Adding tools not available as operating system packages](#adding-tools-not-available-as-operating-system-packages)
+* [Adding Python packages](#adding-python-packages)
+* [Adding R packages](#adding-r-packages)
+
+Follow [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
+
+Consider, and discuss with the team, the implications of these changes on [Related riboviz repositories](./related-repositories.md).
 
 ---
 
-## Update Dependencies overview
+## Updating Dependencies overview tables
 
-To update the [Dependencies overview](#update-dependencies-overview) tables in [docs/user/install.md](../user/install.md):
+To update the 'Dependencies overview' tables in `docs/user/install.md`:
 
 * Run:
 
@@ -129,4 +119,6 @@ To update the [Dependencies overview](#update-dependencies-overview) tables in [
 $ source bash/environment-tables.sh                                       
 ```
 
-* Copy the Markdown tables output and paste into `docs/user/install.md`.
+* Copy the Markdown tables that are output and paste into `docs/user/install.md`.
+
+Consider also the implications on [Related riboviz repositories](./related-repositories.md).

@@ -173,7 +173,7 @@ In addition, the following files are also put into the output directory:
 * `read_counts_per_file.tsv`: a read counts file. (only if `count_reads: TRUE`).
 * `interactive_viz_config.yaml`: this is a yaml file created by the workflow, for use with `rscripts/run_shiny_server.R` - an optional step which does not automatically run within the riboviz workflow and which allows users to generate interactive data visualization on the dataset.
 
-More details on the output files can be found at [riboviz output files and figures](./riboviz_outputs.md).
+More details on the output files can be found at [riboviz output files and figures](./riboviz-outputs.md).
 
 ---
 

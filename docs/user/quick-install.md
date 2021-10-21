@@ -32,7 +32,7 @@ $ source bash/install-centos.sh
 Install R packages:
 
 ```console
-$ Rscript rscripts/install-r.R
+$ Rscript rscripts/install_r.R
 ```
 
 Check that R's library paths include your personal library:
