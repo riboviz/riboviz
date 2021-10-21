@@ -36,9 +36,14 @@ Usage:
 
 ## Develop riboviz
 
-* [Install developer dependencies](./docs/developer/install.md)
+General:
+
 * [Git branching model](./docs/developer/git-branching-model.md)
 * [Style guide](./docs/developer/style-guide.md): Style guidelines for the **riboviz** source code, documentation, parameters and files.
+
+Development:
+
+* [Install developer dependencies](./docs/developer/install.md)
 * [Developing Python components](./docs/developer/dev-python.md)
 * [Developing R components](./docs/developer/dev-r.md)
 * [Developing Nextflow workflow](./docs/developer/dev-nextflow.md)
@@ -46,8 +51,11 @@ Usage:
 * [Adding, renaming, and removing temporary or output files](./docs/developer/output-files.md)
 * [Adding and updating dependencies](./docs/developer/dependencies.md)
 * [Developing and running integration tests](./docs/developer/integration-tests.md)
-* [Creating a test data repository](./docs/developer/create-test-data-repository.md)
 * [Writing and updating documentation](./docs/developer/documentation.md)
+
+Releasing:
+
+* [Creating a test data repository](./docs/developer/create-test-data-repository.md)
 * [Building a release](./docs/developer/releasing.md)
 
 ## Reference
