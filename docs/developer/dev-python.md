@@ -130,6 +130,17 @@ Python command-line tools must be placed within `riboviz/tools/` i.e. within the
 
 Command-line parsing must be implemented using [argparse](https://docs.python.org/3/library/argparse.html).
 
+`riboviz.tools` scripts must not contain any functionality beyond defining and parsing command-line parameters then invoking the functionality of the script. The functionality of the script itself should be placed in module(s) under `riboviz`.
+
+`riboviz.tools` scripts must contain an entry point defined as follows:
+
+```
+if __name__ == "__main__":
+    main()
+```
+
+where the `main()` function is a function in the script responsible for parsingthe command-line parameters and invoking the functionality of the script itself, as defined in other `riboviz` module(s). See the existing `riboviz.tools` implementations for the pattern to use.
+
 ### Defining command-line parameters
 
 The `dest` parameter of `ArgumentParser.add_argument` can be use to explicitly define the Python variables into which a command-line parameter is to be placed. For example:
