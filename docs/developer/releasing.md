@@ -71,16 +71,13 @@ $ git push origin 2.1
 
 Download release from GitHub:
 
-* Visit https://github.com/riboviz/riboviz
-* Click Tags, https://github.com/riboviz/riboviz/tags
-* OR
-* Click Releases, https://github.com/riboviz/riboviz/releases
+* Visit https://github.com/riboviz/riboviz/tags OR https://github.com/riboviz/riboviz/releases
 * Click zip next to version to deposit.
-* This downloads URL https://github.com/riboviz/riboviz/archive/refs/tags/<TAG>.zip into a file `riboviz-<TAG>.zip`.
+* This downloads URL https://github.com/riboviz/riboviz/archive/refs/tags/\<TAG\>.zip into a file `riboviz-<TAG>.zip`.
 
 Update riboviz article:
 
-* Log in to figshare, https://figshare.com/
+* Log in to [figshare](https://figshare.com/).
 * Click Projects.
 * Click 'riboviz: analysis and visualization of ribosome profiling datasets'.
 * In the content table, 'riboviz: software for analysis and visualization of ribosome profiling datasets' row, click the cog icon and select 'Edit item'.
@@ -92,4 +89,4 @@ Update riboviz article:
 * Click Save changes.
 * Check Publish changes.
 
-**Note:** Each specific fighsare deposit has its own DOI e.g., [10.6084/m9.figshare.12624200.v1](https://doi.org/10.6084/m9.figshare.12624200.v1), [10.6084/m9.figshare.12624200.v2](https://doi.org/10.6084/m9.figshare.12624200.v2) etc, but the base fighare DOI, [10.6084/m9.figshare.12624200](https://doi.org/10.6084/m9.figshare.12624200), as listed on `README.md remains unchanged and always points to the most recent deposit.
+**Note:** Each specific fighsare deposit has its own DOI e.g., [10.6084/m9.figshare.12624200.v1](https://doi.org/10.6084/m9.figshare.12624200.v1), [10.6084/m9.figshare.12624200.v2](https://doi.org/10.6084/m9.figshare.12624200.v2) etc, but the base fighare DOI, [10.6084/m9.figshare.12624200](https://doi.org/10.6084/m9.figshare.12624200), as listed in `README.md` remains unchanged and always points to the most recent deposit.
