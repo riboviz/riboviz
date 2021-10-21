@@ -6,6 +6,7 @@ The process for building a release is as follows:
 2. [Check and update documentation](#2-check-and-update-documentation)
 3. [Test](#3-test)
 4. [Release](#4-release)
+5. [Update figshare deposit](#5-update-figshare-deposit)
 
 ---
 
@@ -61,3 +62,34 @@ $ git push origin 2.1
   - Enter Release title: 2.1
   - Enter Description: riboviz release 2.1 (RELEASE-DATE).
   - Click Publish release.
+
+---
+
+## 5. Update figshare deposit
+
+**Note:** This step can only be done by members of the private figshare 'riboviz: analysis and visualization of ribosome profiling datasets' project.
+
+Download release from GitHub:
+
+* Visit https://github.com/riboviz/riboviz
+* Click Tags, https://github.com/riboviz/riboviz/tags
+* OR
+* Click Releases, https://github.com/riboviz/riboviz/releases
+* Click zip next to version to deposit.
+* This downloads URL https://github.com/riboviz/riboviz/archive/refs/tags/<TAG>.zip into a file `riboviz-<TAG>.zip`.
+
+Update riboviz article:
+
+* Log in to figshare, https://figshare.com/
+* Click Projects.
+* Click 'riboviz: analysis and visualization of ribosome profiling datasets'.
+* In the content table, 'riboviz: software for analysis and visualization of ribosome profiling datasets' row, click the cog icon and select 'Edit item'.
+* Click the 'X' icon to next to riboviz-2.0.zip to remove that file. Previous deposits will not be affected.
+* Click browse.
+* Select `riboviz-<TAG>.zip` that you downloaded above.
+* Edit any fields that need updating e.g. Authors, Description, Funding, References etc.
+* Double-check that titles, authors (including spellings) and files are correct before publication. Correcting these after publication results in a new version being created by figshare. For more information, see figshare's [Can I edit or delete my research after it has been made public?](https://help.figshare.com/article/can-i-edit-or-delete-my-research-after-it-has-been-made-public).
+* Click Save changes.
+* Check Publish changes.
+
+**Note:** Each specific fighsare deposit has its own DOI e.g., [10.6084/m9.figshare.12624200.v1](https://doi.org/10.6084/m9.figshare.12624200.v1), [10.6084/m9.figshare.12624200.v2](https://doi.org/10.6084/m9.figshare.12624200.v2) etc, but the base fighare DOI, [10.6084/m9.figshare.12624200](https://doi.org/10.6084/m9.figshare.12624200), as listed on `README.md remains unchanged and always points to the most recent deposit.
