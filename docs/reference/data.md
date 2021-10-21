@@ -26,7 +26,7 @@ These files were created as follows:
 * The files `saccharomyces_cerevisiae_R64-2-1_20150113.gff` and `S288C_reference_sequence_R64-2-1_20150113.fsa` were extracted from the `.tgz` file.
 * The sequence and annotation files for the whole approximate *Saccharomyces cerevisiae* transcriptome were prepared using [script_for_transcript_annotation.Rmd](../../rmarkdown/script_for_transcript_annotation.Rmd).
 
-The files can be used as inputs to RiboViz. However, `yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were downsampled to provide a manageable data set for demonstration purposes, as described in the next section.
+The files can be used as inputs to riboviz. However, `yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were downsampled to provide a manageable data set for demonstration purposes, as described in the next section.
 
 ---
 
@@ -48,7 +48,7 @@ As the yeast data files described in the previous section are very large, these 
 
 The document [Appendix A1: Yeast Nomenclature Systematic Open Reading Frame (ORF) and Other Genetic Designations](https://onlinelibrary.wiley.com/doi/pdf/10.1002/9783527636778.app1) describes the ORF naming convention.
 
-The files can be used as inputs to RiboViz.
+The files can be used as inputs to riboviz.
 
 ---
 
@@ -66,7 +66,7 @@ This files was created as follows:
 * The file `rna_coding_R64-1-1_20110203.fasta` was extracted from the `.tgz` file.
 * Selected `RDN-n-n` sequences were copied and pasted from this file.
 
-The file can be used as an input to RiboViz.
+The file can be used as an input to riboviz.
 
 ---
 
@@ -209,11 +209,11 @@ deplex/Tag2.fastq
 deplex/Unassigned.fastq
 ```
 
-These files are simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication using UMI-tools when invoked from within the RiboViz workflow.
+These files are simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication using UMI-tools when invoked from within the riboviz workflow.
 
 These files were created by running [create_fastq_simdata](../../riboviz/tools/create_fastq_simdata.py).
 
-The files can be used as inputs to RiboViz.
+The files can be used as inputs to riboviz.
 
 ---
 
@@ -279,7 +279,7 @@ orf_gff_file: ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gf
 rrna_fasta_file: ../example-datasets/simulated/mok/contaminants/Sc_rRNA_example.fa
 ```
 
-Run RiboViz:
+Run riboviz:
 
 ```console
 $ nextflow run prep_riboviz.nf  -params-file Mok-tinysim_config.yaml -ansi-log false
@@ -306,7 +306,7 @@ riboviz/test/data/trim_5pos5neg.sam
 
 These files are used by `riboviz.test.test_trim_5p_mismatch` for testing `riboviz.trim_5p_mismatch`.
 
-These files were created by running RiboViz using `vignette/vignette_config.yaml` and the data in `vignette/input/`. Lines were copied and pasted from the SAM files output then these lines were manually edited to produce a desired range of outcomes.
+These files were created by running riboviz using `vignette/vignette_config.yaml` and the data in `vignette/input/`. Lines were copied and pasted from the SAM files output then these lines were manually edited to produce a desired range of outcomes.
 
 ### `riboviz.test.test_sam_bam` test data files
 
@@ -322,7 +322,7 @@ WTnone_rRNA_map_14_secondary.bam
 WTnone_rRNA_map_14_secondary.bam.bai
 ```
 
-The SAM files were created from the file `tmp/WTnone/rRNA_map.sam` from a run of the vignette (using RiboViz version commit 9efaf93, 08/10/2020):
+The SAM files were created from the file `tmp/WTnone/rRNA_map.sam` from a run of the vignette (using riboviz version commit 9efaf93, 08/10/2020):
 
 * `WTnone_rRNA_map_20.sam`: the first 20 sequences from `rRNA_map.sam`.
 * `WTnone_rRNA_map_6_primary.sam`: the 6 mapped (primary) sequences from `WTnone_rRNA_map_20.sam`.

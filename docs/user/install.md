@@ -1,10 +1,10 @@
-# Install RiboViz and dependencies
+# Install riboviz and dependencies
 
 ## Introduction
 
-This page contains the complete installation instructions for those wishing to run **RiboViz** under a variety of operating systems. It includes information on how to install all of the dependencies required by **RiboViz** along with how to access the **RiboViz** source code and finishes with links to our documentation on how to run **RiboViz** on an example dataset.
+This page contains the complete installation instructions for those wishing to run **riboviz** under a variety of operating systems. It includes information on how to install all of the dependencies required by **riboviz** along with how to access the **riboviz** source code and finishes with links to our documentation on how to run **riboviz** on an example dataset.
 
-**RiboViz** runs under Linux and full instructions are provided for Ubuntu and CentOS (these were tested upon Ubuntu 18.04 Ubuntu 20.04.02.0) and CentOS 7 (2009)). Windows users will either need to use a virtual machine or the Windows Subsystem for Linux (links to instructons on how to set these up are provided below). Mac OS users need check out the web sites for each dependency for information on how to install the dependency under Mac OS.
+**riboviz** runs under Linux and full instructions are provided for Ubuntu and CentOS (these were tested upon Ubuntu 18.04 Ubuntu 20.04.02.0) and CentOS 7 (2009)). Windows users will either need to use a virtual machine or the Windows Subsystem for Linux (links to instructons on how to set these up are provided below). Mac OS users need check out the web sites for each dependency for information on how to install the dependency under Mac OS.
 
 ---
 
@@ -21,7 +21,7 @@ We suggest that you:
 * Either, use a virtual machine running under [VMWare Workstation Player](https://www.vmware.com/uk/products/workstation-player.html) or [Oracle VirtualBox](https://www.virtualbox.org/). We provide quick-start instructions for using VMWare to:
   - [Deploy a Ubuntu Virtual Machine using VMWare on Windows 10](./deploy-ubuntu-vmware-windows.md).
   - [Deploy a CentOS Virtual Machine using VMWare on Windows 10](./deploy-centos-vmware-windows.md).
-* Or, use Windows Subsystem for Linux following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10). We have successfully installed and run RiboViz under WSL2 using Microsoft Store's [Ubuntu 18.04 LTS](https://www.microsoft.com/en-gb/p/ubuntu-1804-lts/9n9tngvndl3q).
+* Or, use Windows Subsystem for Linux following [Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10). We have successfully installed and run riboviz under WSL2 using Microsoft Store's [Ubuntu 18.04 LTS](https://www.microsoft.com/en-gb/p/ubuntu-1804-lts/9n9tngvndl3q).
 
 ### Mac OS users
 
@@ -31,11 +31,11 @@ We suggest that you check out the web sites for each dependency for information 
 
 ## Dependencies overview
 
-The following tables summarise the packages required by RiboViz. Instructions to install each dependency are given in the following sections.
+The following tables summarise the packages required by riboviz. Instructions to install each dependency are given in the following sections.
 
 **Note:** Only minimal installation instructions are given. For full information, see the documentation for each dependency.
 
-The versions listed are those used by a RiboViz developer when preparing the current release. Other versions may also be acceptable, but see the constraints below.
+The versions listed are those used by a riboviz developer when preparing the current release. Other versions may also be acceptable, but see the constraints below.
 
 | Command-line tool | Version |
 | ----------------- | ------- |
@@ -104,7 +104,7 @@ The versions listed are those used by a RiboViz developer when preparing the cur
 | sphinx | 4.0.1 | conda |
 | umi_tools | 1.0.1 | conda |
 
-Certain packages are only required if you plan to develop and extend RiboViz. These packages are (see [Install developer dependencies](../developer/install.md)):
+Certain packages are only required if you plan to develop and extend riboviz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
 * R: devtools, glue, lintr, roxygen2, styler, testthat, withr.
 * Python: pycodestyle, pylint, pytest-cov, sphinx.
@@ -513,7 +513,7 @@ $ conda create --name riboviz python=3.7
 
 If you have an environment which has both `python` and `python3`, such as can arise when you are using a system that has both Python 2 and Python 3 packages centrally installed, then please note the following.
 
-The RiboViz workflow invokes both Python and R scripts. It invokes Python scripts using the command `python`. If you have a system that has both `python`, which invokes Python 2, and `python3`, which invokes Python 3, then the workflow will fail as RiboViz's Python scripts are Python 3-compatible only.
+The riboviz workflow invokes both Python and R scripts. It invokes Python scripts using the command `python`. If you have a system that has both `python`, which invokes Python 2, and `python3`, which invokes Python 3, then the workflow will fail as riboviz's Python scripts are Python 3-compatible only.
 
 A workaround is to create a local `bin` directory with a symbolic link called `python` which points to Python 3 (and similarly for `pip` and `pip3`). This can be done as follows:
 
@@ -712,9 +712,9 @@ $ source set-riboviz-env.sh
 
 ---
 
-## Get RiboViz
+## Get riboviz
 
-Get RiboViz:
+Get riboviz:
 
 ```console
 $ git clone https://github.com/riboviz/riboviz
@@ -734,7 +734,7 @@ $ pip install .
 
 ## Check installation
 
-You can now check your installation by running RiboViz tests by running a "vignette" of the **RiboViz** workflow to see **RiboViz**'s capabilities. See [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md).
+You can now check your installation by running riboviz tests by running a "vignette" of the **riboviz** workflow to see **riboviz**'s capabilities. See [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md).
 
 Once you have run the "vignette", you can check your installation by running tests:
 

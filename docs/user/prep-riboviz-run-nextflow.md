@@ -1,6 +1,6 @@
-# Running the RiboViz Nextflow workflow
+# Running the riboviz Nextflow workflow
 
-This page describes how to run the Nextflow workflow, `prep_riboviz.nf`. It is assumed you are familiar with [Configuring the RiboViz workflow](./prep-riboviz-config.md).
+This page describes how to run the Nextflow workflow, `prep_riboviz.nf`. It is assumed you are familiar with [Configuring the riboviz workflow](./prep-riboviz-config.md).
 
 Contents:
 
@@ -25,7 +25,7 @@ Contents:
 * [Debugging](#debugging)
 * [Generating reports](#generating-reports)
   - [Troubleshooting: WARN To render the execution DAG in the required format it is required to install Graphviz](#troubleshooting-warn-to-render-the-execution-dag-in-the-required-format-it-is-required-to-install-graphviz)
-* [Invoking the workflow from outwith the RiboViz home directory](#invoking-the-workflow-from-outwith-the-riboviz-home-directory)
+* [Invoking the workflow from outwith the riboviz home directory](#invoking-the-workflow-from-outwith-the-riboviz-home-directory)
 
 ---
 
@@ -259,7 +259,7 @@ The workflow will then execute, displaying information on each step as it is exe
 
 ### Troubleshooting: `Error executing process staticHTML` and `AnalysisOutputs.Rmd`
 
-If your version of RiboViz is from a `.zip` or `.tar.gz` file downloaded from GitHub or Figshare (i.e. not a clone of the repository from GitHub) then you may see the following error during execution of a `staticHTML` step of the workflow. For example:
+If your version of riboviz is from a `.zip` or `.tar.gz` file downloaded from GitHub or Figshare (i.e. not a clone of the repository from GitHub) then you may see the following error during execution of a `staticHTML` step of the workflow. For example:
 
 ```console
 ...
@@ -292,7 +292,7 @@ Workflow finished! (failed)
 ...
 ```
 
-If this arises then create a `.here` file in your RiboViz directory:
+If this arises then create a `.here` file in your riboviz directory:
 
 ```console
 $ touch .here
@@ -300,7 +300,7 @@ $ touch .here
 
 and rerun the workflow.
 
-If the problem still arises then it is recommended you use a clone of the `riboviz` repository from GitHub. Please also add information to the issue "Fix bug with AnalysisOutputs.Rmd use of 'here' if `.git` is not present" [#352](https://github.com/riboviz/riboviz/issues/352). It is unclear why this arises but it is hoped, when RiboViz moves its R code into a package that this problem will no longer arise.
+If the problem still arises then it is recommended you use a clone of the `riboviz` repository from GitHub. Please also add information to the issue "Fix bug with AnalysisOutputs.Rmd use of 'here' if `.git` is not present" [#352](https://github.com/riboviz/riboviz/issues/352). It is unclear why this arises but it is hoped, when riboviz moves its R code into a package that this problem will no longer arise.
 
 ### Troubleshooting: `samtools sort: couldn't allocate memory for bam_mem`
 
@@ -381,7 +381,7 @@ Usage and configuration information can be viewed via use of the `--help` flag:
 $ nextflow run prep_riboviz.nf --help
 ```
 
-Note that `--help` displays RiboViz-specific workflow help, whereas `-help` display's the `nextflow run` command's in-built help.
+Note that `--help` displays riboviz-specific workflow help, whereas `-help` display's the `nextflow run` command's in-built help.
 
 ---
 
@@ -803,7 +803,7 @@ This is cutadapt 1.18 with Python 3.7.6Command line parameters: --trim-n -O 1 -m
 ```
 ```console
 $ nextflow log big_majorana -f stdout,stderr -filter "name == 'collateTpms (WT3AT, WTnone)'"
-[1] "Created by: RiboViz"[1] "Date: 2021-06-24 05:43:14"[1] "File: /home/ubuntu/riboviz/rscripts/collate_tpms.R"[1] "Version: commit 144d95ab228a2da71b9a92912a24b26c37f4a64e date 2021-06-21 08:11:03 GMT"[1] "collate_tpms.R running with parameters:"$options$options$tpms_file[1] "TPMs_all_CDS_all_samples.tsv"	Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Error: Can't recycle `ORF` (size 4) to match `WTnone` (size 68).Backtrace:     ¦  1. +-global::CollateTpms(...)  2. ¦ +-`%>%`(...)  3. ¦ ¦ +-base::eval(lhs, parent, parent)  4. ¦ ¦   +-base::eval(lhs, parent, parent)  5. ¦ +-global::MakeTpmTable(orf_fasta, samples, sort_orfs = sort_orfs)  6. ¦   +-dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])  7. ¦     +-vctrs::vec_cbind(!!!dots, .name_repair = .name_repair)  8. +-vctrs::stop_incompatible_size(...)  9.   +-vctrs:::stop_incompatible(...) 10.     +-vctrs:::stop_vctrs(...)Execution halted
+[1] "Created by: riboviz"[1] "Date: 2021-06-24 05:43:14"[1] "File: /home/ubuntu/riboviz/rscripts/collate_tpms.R"[1] "Version: commit 144d95ab228a2da71b9a92912a24b26c37f4a64e date 2021-06-21 08:11:03 GMT"[1] "collate_tpms.R running with parameters:"$options$options$tpms_file[1] "TPMs_all_CDS_all_samples.tsv"	Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Parsed with column specification:cols(  ORF = col_character(),  readcount = col_double(),  rpb = col_double(),  tpm = col_double())Error: Can't recycle `ORF` (size 4) to match `WTnone` (size 68).Backtrace:     ¦  1. +-global::CollateTpms(...)  2. ¦ +-`%>%`(...)  3. ¦ ¦ +-base::eval(lhs, parent, parent)  4. ¦ ¦   +-base::eval(lhs, parent, parent)  5. ¦ +-global::MakeTpmTable(orf_fasta, samples, sort_orfs = sort_orfs)  6. ¦   +-dplyr::bind_cols(ORF = orfs, tpm_list[non_null_elts])  7. ¦     +-vctrs::vec_cbind(!!!dots, .name_repair = .name_repair)  8. +-vctrs::stop_incompatible_size(...)  9.   +-vctrs:::stop_incompatible(...) 10.     +-vctrs:::stop_vctrs(...)Execution halted
 ```
 
 Only the first few lines of the output are shown. If, as for `cutadapt (WTnone)`, there were no error messages, then `-` is displayed. The information may not be readable. How to view the complete record of output and error messages for a step is described below.
@@ -840,7 +840,7 @@ The complete list of output and error messages captured by Nextflow for the step
 
 ```console
 $ cat /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73/.command.out 
-[1] "Created by: RiboViz"
+[1] "Created by: riboviz"
 [1] "Date: 2021-06-24 05:43:14"
 [1] "File: /home/ubuntu/riboviz/rscripts/collate_tpms.R"
 [1] "Version: commit 144d95ab228a2da71b9a92912a24b26c37f4a64e date 2021-06-21 08:11:03 GMT"
@@ -912,7 +912,7 @@ In this example, inspecting the input files reveals the problem:
 
 ```console
 $ cat /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73/WT3AT_tpms.tsv 
-# Created by: RiboViz
+# Created by: riboviz
 # Date: 2021-06-24 03:20:00
 # File: /home/ubuntu/riboviz/rscripts/generate_stats_figs.R
 # Version: commit 144d95ab228a2da71b9a92912a24b26c37f4a64e date 2021-06-21 08:11:03 GMT
@@ -922,7 +922,7 @@ YAL002W	8	0.00206611570247934	365.829752221778
 YAL003W	379	0.567365269461078	100458.602437955
 YAL005C	2668	1.3502024291498	239069.002530875
 $ cat /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73/WTnone_tpms.tsv 
-# Created by: RiboViz
+# Created by: riboviz
 # Date: 2021-06-24 03:19:51
 # File: /home/ubuntu/riboviz/rscripts/generate_stats_figs.R
 # Version: commit 144d95ab228a2da71b9a92912a24b26c37f4a64e date 2021-06-21 08:11:03 GMT
@@ -946,7 +946,7 @@ As the Nextflow `work/` subdirectory includes the bash script with the command t
 ```console
 $ cd /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73/
 $ bash .command.sh 
-[1] "Created by: RiboViz"
+[1] "Created by: riboviz"
 [1] "Date: 2021-06-24 06:08:35"
 ...
   9.   +-vctrs:::stop_incompatible(...)
@@ -991,7 +991,7 @@ For more information see [DAG visualisation](https://www.nextflow.io/docs/latest
 
 ---
 
-## Invoking the workflow from outwith the RiboViz home directory
+## Invoking the workflow from outwith the riboviz home directory
 
 The workflow can be invoked from any directory, by providing the path to the workflow. For example:
 

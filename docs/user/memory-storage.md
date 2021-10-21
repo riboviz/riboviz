@@ -1,14 +1,14 @@
 # Memory and storage
 
-Information and advice relating to RiboViz's memory and storage requirements.
+Information and advice relating to riboviz's memory and storage requirements.
 
 ---
 
 ## Memory requirements
 
-The memory requirements of RiboViz depend upon the datasets being processed.
+The memory requirements of riboviz depend upon the datasets being processed.
 
-The RiboViz developers use development environments with 8-16GB RAM. This has been found to be adequate to handle the vignette - [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md). Multiple full size yeast datasets have been successfully processed on developers' own machines with 16GB RAM available.
+The riboviz developers use development environments with 8-16GB RAM. This has been found to be adequate to handle the vignette - [Map mRNA and ribosome protected reads to transcriptome and collect data into an HDF5 file](./run-vignette.md). Multiple full size yeast datasets have been successfully processed on developers' own machines with 16GB RAM available.
 
 One developer had issues when running the vignette as batch job on the University of Edinburgh ECDF Linux Compute Cluster) [Eddie](https://www.ed.ac.uk/information-services/research-support/research-computing/ecdf/high-performance-computing). Their job requested an 8GB node but this was terminated as the job exceeded this. On requesting a 16GB node, the job ran to success, with the system reporting that almost 14GB has been used. It is unclear at present as to why this is.
 
@@ -24,9 +24,9 @@ The workflow sets `--output-stats` by default. If you find you are having issues
 dedup_stats: FALSE
 ```
 
-### Profiling RiboViz's memory requirements
+### Profiling riboviz's memory requirements
 
-We have a ticket for a future release to Profile RiboViz to determine memory requirements [#179](https://github.com/riboviz/riboviz/issues/179). In the meantime, welcome contributions from users as to the memory requirements of your analyses, both when running the vignette and your own analyses. Please record an indication of the hardware and operating system you used, the memory you had available and the size of your input files (FASTA, GFF ans FASTQ files) (both bytes and number of lines).
+We have a ticket for a future release to Profile riboviz to determine memory requirements [#179](https://github.com/riboviz/riboviz/issues/179). In the meantime, welcome contributions from users as to the memory requirements of your analyses, both when running the vignette and your own analyses. Please record an indication of the hardware and operating system you used, the memory you had available and the size of your input files (FASTA, GFF ans FASTQ files) (both bytes and number of lines).
 
 ---
 
