@@ -107,6 +107,8 @@ For examples and further information, see:
 * Sphinx's [Cross-referencing Python objects](https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#cross-referencing-python-objects) on the available cross-references.
 * Sphinx's [The Python Domain](https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#the-python-domain).
 
+See below for information on [Creating Sphinx documentation from Python comments](#creating-sphinx-documentation-from-python-comments).
+
 ### Style checking Python code
 
 [pylint](https://pylint.org/) and [pycodestyle](https://pycodestyle.pycqa.org/en/latest/) can be run on individual files, groups of files or every file in a directory and its subdirectories. For example:
@@ -159,7 +161,14 @@ $ cd py-docs
 $ make html
 ```
 
+If there are errors in the comment formatting then these will be displayed.
+
 Open `py-docs/_build/html/index.html` in a browser.
+
+Manually check the rendered comments to see that they have no errors that cannot be caught during the build. These include whether or not you have:
+
+* Marked up ` ``teletype font`` ` text correctly.
+* Defined cross-references to modules, constants, and functions correctly.
 
 ### Creating template Sphinx documentation files
 
