@@ -3,9 +3,9 @@
 The process for building a release is as follows:
 
 * [1. Merge agreed pull requests and branches](#1-merge-agreed-pull-requests-and-branches)
-* [2. Check and update documentation](2-check-and-update-documentation)
-* [3. Test](3-test)
-* [4. Release](4-release)
+* [2. Check and update documentation](#2-check-and-update-documentation)
+* [3. Test](#3-test)
+* [4. Release](#4-release)
 
 ---
 
