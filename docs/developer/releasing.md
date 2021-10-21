@@ -81,7 +81,7 @@ Update riboviz article:
 * Click Projects.
 * Click 'riboviz: analysis and visualization of ribosome profiling datasets'.
 * In the content table, 'riboviz: software for analysis and visualization of ribosome profiling datasets' row, click the cog icon and select Edit item.
-* Click the 'X' icon to next to riboviz-2.0.zip to remove that file. Previous deposits will not be affected.
+* Click the 'X' icon to next to `riboviz-<OLD_TAG>.zip` to remove that file. Previous deposits will not be affected.
 * Click browse.
 * Select `riboviz-<TAG>.zip` that you downloaded above.
 * Edit any fields that need updating e.g. Authors, Description, Funding, References etc.
