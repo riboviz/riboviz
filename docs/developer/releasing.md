@@ -72,7 +72,7 @@ $ git push origin 2.1
 Download release from GitHub:
 
 * Visit https://github.com/riboviz/riboviz/tags
-* Click 'Source code (zip)' for version to deposit.
+* Click 'zip' for version to deposit.
 * This downloads URL https://github.com/riboviz/riboviz/archive/refs/tags/TAG.zip into a file `riboviz-<TAG>.zip`.
 
 Update riboviz article:
