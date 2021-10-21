@@ -394,7 +394,7 @@ $ nextflow run prep_riboviz.nf -ansi-log false -params-file Mok-tinysim_config.y
 Run workflow:
 
 ```console
-$ nextflow run prep_riboviz.nf -ansi-log false -params-file Mok-tinysim_config.yaml --validate_only
+$ nextflow run prep_riboviz.nf -ansi-log false -params-file Mok-tinysim_config.yaml
 ```
 
 Create and populate `data/Mok-simYAL5`:
