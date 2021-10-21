@@ -5,7 +5,7 @@ The process for creating a test data repository is as follows:
 1. [Create a repository on GitHub](#1-create-a-repository-on-github)
 2. [Clone a local copy of the new repository](#2-clone-a-local-copy-of-the-new-repository)
 3. [Copy vignette data into the repository](#3-copy-vignette-data-into-the-repository)
-4. [Create `README.md`](#4-create-readme.md)
+4. [Create `README.md`](#4-create-readme-md)
 5. [Add, commit and push data](#5-add-commit-and-push-data)
 
 
