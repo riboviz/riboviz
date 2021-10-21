@@ -71,7 +71,7 @@ Q0070	22.8	0.7
 
 A read counts file (only if `count_reads: TRUE`).
 
-The workflow will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is produced by scanning input, temporary and output directories and counting the number of reads (sequences) processed by specific stages of a RiboViz workflow.
+The workflow will summarise information about the number of reads in the input files and in the output files produced at each step of the workflow. This summary is produced by scanning input, temporary and output directories and counting the number of reads (sequences) processed by specific stages of a riboviz workflow.
 
 The read counts file, `read_counts_per_file.tsv`, is written into the output directory.
 

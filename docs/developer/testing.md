@@ -97,7 +97,7 @@ ATTRIBUTE "rhdf5-NA.OK" {
 }
 ```
 
-The H5 files produced by RiboViz (via invocation of the `bam_to_h5.R` script) are used by downstream processing steps (notably `generate_stats_figs.R`) so these failures can be ignored if all other integration tests pass.
+The H5 files produced by riboviz (via invocation of the `bam_to_h5.R` script) are used by downstream processing steps (notably `generate_stats_figs.R`) so these failures can be ignored if all other integration tests pass.
 
 ---
 

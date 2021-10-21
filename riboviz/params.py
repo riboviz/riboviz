@@ -126,7 +126,7 @@ R_LIBS = "r_libs"
 """ R libraries directory (job submission) (command-line only). """
 CONFIG_FILE = "config_file"
 """
-RiboViz YAML configuration file (job submission) (command-line only).
+riboviz YAML configuration file (job submission) (command-line only).
 """
 NEXTFLOW_DAG_FILE = "nextflow_dag_file"
 """
@@ -231,16 +231,16 @@ ENV_INPUT_PARAMS = [ASITE_DISP_LENGTH_FILE,
                     RRNA_FASTA_FILE,
                     T_RNA_FILE]
 """
-Names of input parameters whose values can include RiboViz environment
+Names of input parameters whose values can include riboviz environment
 variables.
 """
 ENV_OUTPUT_PARAMS = [INDEX_DIR, OUTPUT_DIR, TMP_DIR]
 """
-Names of output parameters whose values can include RiboViz environment
+Names of output parameters whose values can include riboviz environment
 variables.
 """
 ENV_PARAMS = ENV_INPUT_PARAMS + ENV_OUTPUT_PARAMS
 """
-Names of parameters whose values can include RiboViz environment
+Names of parameters whose values can include riboviz environment
 variables.
 """
