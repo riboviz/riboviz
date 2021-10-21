@@ -7,6 +7,7 @@
 * [R command-line tools](#r-command-line-tools)
   - [Defining command-line parameters](#defining-command-line-parameters)
   - [Use `default=NA` not `default=NULL`](#use-defaultna-not-defaultnull)
+  - [Adding, renaming, and removing command-line tools](#adding-renaming-and-removing-command-line-tools)
 * [Debugging R scripts with appropriate command-line arguments](#debugging-r-scripts-with-appropriate-command-line-arguments)
 * [Run R tests](#run-r-tests)
 
@@ -154,6 +155,12 @@ $features_file
 i.e. the options are present but with value `NA`.
 
 The function `is.na` (as opposed to `is.null`) can be used to check if a variable has value `NA`.
+
+### Adding, renaming, and removing command-line tools
+
+If adding, renaming or removing command-line tools:
+
+* Update 'R command-line tools' table in `docs/user/command-line-tools.md`.
 
 ---
 

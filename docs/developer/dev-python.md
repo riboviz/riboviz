@@ -6,6 +6,7 @@
   - [Style checking Python code](#style-checking-python-code)
 * [Python command-line tools](#python-command-line-tools)
   - [Defining command-line parameters](#defining-command-line-parameters)
+  - [Adding, renaming, and removing command-line tools](#adding-renaming-and-removing-command-line-tools)
 * [Comments and documentation](#comments-and-documentation)
   - [Creating Sphinx documentation from Python comments](#creating-sphinx-documentation-from-python-comments)
   - [Creating template Sphinx documentation files](#creating-template-sphinx-documentation-files)
@@ -152,6 +153,12 @@ parser.add_argument("-o", "--output-dir", dest="output_dir", nargs='?',
 options = parser.parse_args()
 output_dir = options.output_dir
 ```
+
+### Adding, renaming, and removing command-line tools
+
+If adding, renaming or removing	command-line tools:
+
+* Update 'Python command-line tools' table in `docs/user/command-line-tools.md`.
 
 ---
 
