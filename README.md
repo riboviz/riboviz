@@ -49,7 +49,6 @@ Usage:
 * [Creating a test data repository](./docs/developer/create-test-data-repository.md)
 * [Writing and updating documentation](./docs/developer/documentation.md)
 * [Building a release](./docs/developer/releasing.md)
-* Miscellaneous [Developer How-tos](./docs/developer/how-tos.md)
 
 ## Reference
 
