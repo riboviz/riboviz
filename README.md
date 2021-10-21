@@ -52,6 +52,7 @@ Development:
 * [Adding and updating dependencies](./docs/developer/dependencies.md)
 * [Developing and running integration tests](./docs/developer/integration-tests.md)
 * [Writing and updating documentation](./docs/developer/documentation.md)
+* [Related riboviz repositories](docs/developer/related-repositories.md)
 
 Releasing:
 

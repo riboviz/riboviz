@@ -23,7 +23,9 @@ Add commands to "quick install scripts" (see current content of scripts for what
 * `bash/install-centos.sh`
 * `bash/environment-tables.sh`, add commands to capture versions of any command-line tools and echo these in a tabular format.
 
-Finally, see [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
+Follow [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
+
+Consider, and discuss with the team, the implications of these changes on [Related riboviz repositories](./related-repositories.md).
 
 ---
 
@@ -40,7 +42,9 @@ Add commands to "quick install scripts" (see current content of scripts for what
 * `bash/install-tools.sh`, also update commands to create `setenv.sh`, if applicable.
 * `bash/environment-tables.sh`, add commands to capture versions of any command-line tools and echo these in a tabular format.
 
-Finally, [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
+Follow [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
+
+Consider, and discuss with the team, the implications of these changes on [Related riboviz repositories](./related-repositories.md).
 
 ---
 
@@ -57,7 +61,9 @@ Add commands to "quick install scripts" (see current content of scripts for what
 * `bash/install-py.sh`
 * `bash/environment-tables.sh`, add `conda` package names to `CONDA_LIST` or `pip` package names to `PIP_LIST`.
 
-Finally, [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
+Follow [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
+
+Consider, and discuss with the team, the implications of these changes on [Related riboviz repositories](./related-repositories.md).
 
 ---
 
@@ -82,7 +88,9 @@ Add commands to "quick install scripts" (see current content of scripts for what
 * `bash/install-r-3.5-bioconductor.R`, commands to install Bioconductor sub-packages under R 3.5+.
 * `bash/environment-tables.sh`, add package names `R_LIST`.
 
-Finally, [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
+Follow [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
+
+Consider, and discuss with the team, the implications of these changes on [Related riboviz repositories](./related-repositories.md).
 
 ---
 
@@ -95,7 +103,9 @@ Run through the section corresponding to the nature of the dependency being upda
 * [Adding Python packages](#adding-python-packages)
 * [Adding R packages](#adding-r-packages)
 
-Finally, [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
+Follow [Updating Dependencies overview tables](#updating-dependencies-overview-tables).
+
+Consider, and discuss with the team, the implications of these changes on [Related riboviz repositories](./related-repositories.md).
 
 ---
 
@@ -110,3 +120,5 @@ $ source bash/environment-tables.sh
 ```
 
 * Copy the Markdown tables that are output and paste into `docs/user/install.md`.
+
+Consider also the implications on [Related riboviz repositories](./related-repositories.md).

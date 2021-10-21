@@ -120,6 +120,10 @@ If the new parameter is a file or directory parameter, update `docs/user/prep-ri
 
 If the new parameter is a directory parameter, update `docs/developer/config.md`, adding the new parameter to the list in the 'Using directory configuration parameters in Nextflow' section.
 
+### 5. Consider related riboviz repositories
+
+Consider, and discuss with the team, the implications of these changes on [Related riboviz repositories](./related-repositories.md).
+
 ---
 
 ## Using directory configuration parameters in Nextflow                        
@@ -231,6 +235,10 @@ Search for all occurrences of the parameter in the documentation, in `docs/` and
 * [Run R tests](./dev-r.md#run-r-tests).
 * [Run vignette integration tests](./integration-tests.md#run-vignette-integration-tests).
 
+### 6. Consider related riboviz repositories
+
+Consider, and discuss with the team, the implications of these changes on [Related riboviz repositories](./related-repositories.md).
+
 ---
 
 ## Removing configuration parameters
@@ -291,3 +299,7 @@ Search for all occurrences of the parameter in the documentation, in `docs/` and
 * [Run Python tests and workflow tests](./dev-python.md#run-python-tests-and-workflow-tests).
 * [Run R tests](./dev-r.md#run-r-tests).
 * [Run vignette integration tests](./integration-tests.md#run-vignette-integration-tests).
+
+### 6. Consider related riboviz repositories
+
+Consider, and discuss with the team, the implications of these changes on [Related riboviz repositories](./related-repositories.md).
