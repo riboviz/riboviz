@@ -27,8 +27,10 @@ Usage:
 
 * [What the riboviz workflow does](./docs/user/prep-riboviz-operation.md)
 * [Configuring the riboviz workflow](./docs/user/prep-riboviz-config.md)
+* [Generate YAML configuration file](https://riboviz.shinyapps.io/generate-yaml/). Use an online tool to generate a riboviz YAML configuration file.
 * [Running the riboviz Nextflow workflow](./docs/user/prep-riboviz-run-nextflow.md)  
 * [How To Run the riboviz Interactive Data Visualization On Your Data](docs/user/run-run_shiny_server-operation.md)
+* [Running the riboviz Nextflow workflow](./docs/user/prep-riboviz-run-nextflow.md)  
 * [riboviz output files and figures](./docs/user/riboviz_outputs.md)
 * [Running the riboviz workflow on Eddie](./docs/user/run-on-eddie.md)
 * [Memory and storage](./docs/user/memory-storage.md). Information and advice relating to **riboviz**'s memory and storage requirements.
