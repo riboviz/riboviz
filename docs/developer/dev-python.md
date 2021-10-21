@@ -14,8 +14,8 @@
   - [Useful pytest flags](#useful-pytest-flags)
   - [Information on pytest fixtures and parameters](#information-on-pytest-fixtures-and-parameters)
 * [Miscellaneous](#miscellaneous)
-* [Clone conda environments](#clone-conda-environments)
-* [Understanding YAML `NULL` and Python `None`](#understanding-yaml-null-and-python-none)
+  - [Clone conda environments](#clone-conda-environments)
+  - [Understanding YAML `NULL` and Python `None`](#understanding-yaml-null-and-python-none)
 
 ---
 
