@@ -2,7 +2,7 @@
 
 ## Using directory configuration parameters in Nextflow
 
-Some configuration parameters take values that are absolute or relative paths to directories. These are listed in the [Configuring file paths and directories](../user/prep-riboviz-config.md#configuring-file-paths-and-directories) section in [Configuring the RiboViz workflow](../user/prep-riboviz-config.md) and the ones that are directories are reproduced below:
+Some configuration parameters take values that are absolute or relative paths to directories. These are listed in the [Configuring file paths and directories](../user/prep-riboviz-config.md#configuring-file-paths-and-directories) section in [Configuring the riboviz workflow](../user/prep-riboviz-config.md) and the ones that are directories are reproduced below:
 
 * `dir_in`
 * `dir_index`
@@ -19,7 +19,7 @@ If writing Nextflow code or processes that uses one of these configuration param
 
 ## Adding configuration parameters
 
-If a new configuration parameter is added to the YAML configuration file and to the Nextflow workflow then the following updates need to be done.
+If a new configuration parameter is added to the YAML configuration file and to the Nextflow workflow then the following updates also must be done.
 
 1. Add a Python constant for the parameter to `riboviz/params.py`. For example:
 
@@ -33,6 +33,7 @@ EXAMPLE_THRESHOLD = "example_threshold"
 2. Add an entry for the parameter, and its default value, to each of:
 
 ```
+riboviz/default_config.yaml
 vignette/vignette_config.yaml
 vignette/simdata_umi_config.yaml
 vignette/simdata_multiplex_config.yaml
@@ -41,36 +42,21 @@ vignette/remote_vignette_config.yaml
 riboviz/test/config/vignette_config_current.yaml
 ```
 
-3. Update the "Upgrade configuration files" code, `riboviz/upgrade_config.py`:
-   - Add the parameter and its default value to the module comment. If there is no default value then use the value `null`. For example:
-
-    ```
-    * ``example_file: null``
-    * ``example_threshold: 64``
-    ```
-
-   - Add the parameter to the `UPDATES` dictionary. For example, if the parameter was `some_setting` as above then add a mapping from its associated `riboviz.params` value to its default value. If there is no default value then use the value `None`. For example:
-
-    ```python
-    params.EXAMPLE_FILE: None,
-    params.EXAMPLE_THRESHOLD: 64,
-    ```
-
-4. Run the tests for `riboviz/upgrade_config.py` and ensure they all pass:
+3. Run the tests for `riboviz/upgrade_config.py` and ensure they all pass:
 
 ```console
 $ pytest riboviz/test/test_upgrade_config.py 
 ```
 
-5. Add an entry for the parameter in the [Configuration parameters](../user/prep-riboviz-config.md#configuration-parameters) table in [docs/user/prep-riboviz-config.md](../user/prep-riboviz-config.md).
+4. Add an entry for the parameter in the [Configuration parameters](../user/prep-riboviz-config.md#configuration-parameters) table in [docs/user/prep-riboviz-config.md](../user/prep-riboviz-config.md).
 
-6. If the parameter is optional and has a default value then add the parameter and its default value to `prep_riboviz.nf` e.g.
+5. If the parameter is optional and has a default value then add the parameter and its default value to Nextflow, `prep_riboviz.nf`, e.g.:
 
 ```
 params.example_threshold = 64
 ```
 
-7. If the configuration parameter takes a value that is an absolute or relative path to a file or directory then see [Adding path configuration parameters to Nextflow](#adding-path-configuration-parameters-to-nextflow) below.
+6. If the configuration parameter takes a value that is an absolute or relative path to a file or directory then see [Adding path configuration parameters to Nextflow](#adding-path-configuration-parameters-to-nextflow) below.
 
 ---
 

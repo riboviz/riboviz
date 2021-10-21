@@ -31,7 +31,7 @@ The output file is a TSV file with columns:
 
 For example::
 
-    # Created by: RiboViz
+    # Created by: riboviz
     # Date: 2020-02-12 06:34:50.340316
     # Command-line tool: /home/ubuntu/riboviz/riboviz/tools/count_reads.py
     # File: /home/ubuntu/riboviz/riboviz/count_reads.py
@@ -57,7 +57,6 @@ from riboviz import provenance
 from riboviz import sam_bam
 from riboviz import sample_sheets
 from riboviz import trim_5p_mismatch
-from riboviz import utils
 from riboviz import workflow_files
 from riboviz.tools import demultiplex_fastq as demultiplex_fastq_tools_module
 from riboviz.tools import trim_5p_mismatch as trim_5p_mismatch_tools_module
@@ -117,11 +116,11 @@ def input_fq(config_file, input_dir, pool=None):
     :type config_file: str or unicode
     :param input_dir: Directory
     :type input_dir: str or unicode
-    :param pool: multiprocessing pool object that the process will be\
+    :param pool: multiprocessing pool object that the process will be \
     joined into
     :type pool: multiprocessing.Pool
-    :return: list of ``pandas.core.frame.Series`` or ``[]`` if\
-    ``pool`` is not specified. If ``pool is specified, then the return\
+    :return: list of ``pandas.core.frame.Series`` or ``[]`` if \
+    ``pool`` is not specified. If ``pool`` is specified, then the return \
     list will be a list of ``multiprocessing.pool.ApplyResult``.
     :rtype: list(pandas.core.frame.Series) OR\
     list(multiprocessing.pool.ApplyResult).
@@ -129,13 +128,14 @@ def input_fq(config_file, input_dir, pool=None):
     with open(config_file, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
     rows = []
-    if utils.value_in_dict(params.FQ_FILES, config):
+    if params.FQ_FILES in config and config[params.FQ_FILES] is not None:
         sample_files = [(sample_name, os.path.join(input_dir, file_name))
                         for sample_name, file_name in
                         list(config[params.FQ_FILES].items())]
     else:
         sample_files = []
-    if utils.value_in_dict(params.MULTIPLEX_FQ_FILES, config):
+    if params.MULTIPLEX_FQ_FILES in config \
+       and config[params.MULTIPLEX_FQ_FILES] is not None:
         multiplex_files = [("", os.path.join(input_dir, file_name))
                            for file_name in config[params.MULTIPLEX_FQ_FILES]]
     else:

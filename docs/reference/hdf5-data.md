@@ -10,7 +10,7 @@ To learn more about accessing and manipulating HDF5 files in R, see Bioconductor
 
 Given a GFF file and a BAM file, `bam_to_h5.R` creates an HDF5 file with information about a feature (e.g. CDS, ORF, or uORF).
 
-It is passed the following configuration parameters from the RiboViz configuration (see [Configuring the RiboViz workflow](../user/prep-riboviz-config.md)):
+It is passed the following configuration parameters from the riboviz configuration (see [Configuring the riboviz workflow](../user/prep-riboviz-config.md)):
 
 | Parameter | Description |
 | --------- | ----------- |
@@ -97,7 +97,7 @@ Each complementary HDF5 data file, `<hd_file>.<i>`, is organized in a hierarchy,
 
 The `data` table in `/<gene>/<dataset>/reads/data`, for a `<gene>` has the positions and lengths of ribosome sequences within the organism data (determined from the BAM file). It is an integer table with each row representing a read length and columns representing nucleotide positions. The first row corresponds to reads of length `min_read_length` and the last row corresponds to reads of length `max_read_length`.
 
-A template HDF5 data file, showing how the complementary HDF5 data files relate to information in the RiboViz configuration (and `bam_to_h5.R command-line parameters), `orf_gff_fasta` and a BAM file is as follows:
+A template HDF5 data file, showing how the complementary HDF5 data files relate to information in the riboviz configuration (and `bam_to_h5.R command-line parameters), `orf_gff_fasta` and a BAM file is as follows:
 
 ```
 HDF5 "<hd_file>.<i>" {

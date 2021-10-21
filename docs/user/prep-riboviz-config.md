@@ -1,6 +1,6 @@
-# Configuring the RiboViz workflow
+# Configuring the riboviz workflow
 
-This page describes the inputs that the RiboViz workflow requires and how it is configured.
+This page describes the inputs that the riboviz workflow requires and how it is configured.
 
 ---
 
@@ -220,7 +220,7 @@ t_rna_file: ${RIBOVIZ_DATA}/yeast_tRNAs.tsv
 
 Which, if any, token you use in each of the configuration parameters is entirely up to you. No checks are made to see which specific token is used with which configuration parameter.
 
-[Defining values for environment variables](./prep-riboviz-run-nextflow.md#defining-values-for-environment-variables) in [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md) describes how to define values for these environment variables so that their values can be applied when the workflow is run.
+[Defining values for environment variables](./prep-riboviz-run-nextflow.md#defining-values-for-environment-variables) in [Running the riboviz Nextflow workflow](./prep-riboviz-run-nextflow.md) describes how to define values for these environment variables so that their values can be applied when the workflow is run.
 
 **Note:** If a configuration file contains environment variable tokens then you **must** provide values for these when running the workflow.
 
@@ -269,7 +269,7 @@ $ mkdir -p example/vignette
 $ mkdir -p example/vignette/input
 ```
 
-Create symbolic links to all the input files, where `$HOME/riboviz` is the path to RiboViz home directory, which can be relative to the current directory or absolute:
+Create symbolic links to all the input files, where `$HOME/riboviz` is the path to riboviz home directory, which can be relative to the current directory or absolute:
 
 ```console
 $ cd example/data

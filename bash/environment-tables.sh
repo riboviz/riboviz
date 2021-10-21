@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Print version information for the command-line tools, Python
-# packages and R packages required by RiboViz as 3 tables, each in
+# packages and R packages required by riboviz as 3 tables, each in
 # Markdown format.
 #
 # Run this script in the "riboviz" home directory, as it uses

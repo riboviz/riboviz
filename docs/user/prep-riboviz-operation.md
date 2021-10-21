@@ -1,8 +1,8 @@
-# What the RiboViz workflow does
+# What the riboviz workflow does
 
-This page describes what the RiboViz workflow does.
+This page describes what the riboviz workflow does.
 
-Configuration parameters are shown in brackets and are described in [Configuring the RiboViz workflow](./prep-riboviz-config.md).
+Configuration parameters are shown in brackets and are described in [Configuring the riboviz workflow](./prep-riboviz-config.md).
 
 ---
 
@@ -26,9 +26,9 @@ The workflow prepares ribosome profiling data for by implementing a workflow tha
 
 ### Interactive Visualization
 
-An additional script within the RiboViz codebase allows the generation of interactive plots from the dataset after the RiboViz workflow has been completed.  
+An additional script within the riboviz codebase allows the generation of interactive plots from the dataset after the riboviz workflow has been completed.  
 
-A process within the main RiboViz workflow (`createInteractiveVizParamsConfigFile`, within `prep-riboviz.nf`) generates a configuration yaml file specifically for this interactive visualization (`interactive_viz_config.yaml`, found in the `dir_out` directory), and users can then run `rscripts/run_shiny_server.R` using this additional YAML (as detailed within [How To Run the Riboviz Interactive Data Visualization On Your Data](./run-run_shiny_server-operation.md)).  This generates a shiny app instance which users can view to explore their data.
+A process within the main riboviz workflow (`createInteractiveVizParamsConfigFile`, within `prep-riboviz.nf`) generates a configuration yaml file specifically for this interactive visualization (`interactive_viz_config.yaml`, found in the `dir_out` directory), and users can then run `rscripts/run_shiny_server.R` using this additional YAML (as detailed within [How To Run the riboviz Interactive Data Visualization On Your Data](./run-run_shiny_server-operation.md)).  This generates a shiny app instance which users can view to explore their data.
 
 
 ---
@@ -82,9 +82,9 @@ If a multiplexed file (`multiplex_fq_files`) is specified, then the workflow pro
 
 ## Index files
 
-Index files (HT2) are produced in the index directory (`dir_index`).
+Index files (HT2) are produced in the index directory (`dir_index`) (if `build_indices: TRUE`).
 
-By default, files in the index directory are symbolic links to files in the [Nextflow work/ directory](#nextflow-work-directory). To request Nextflow copy the index files into this directory set the `publish_index_tmp` parameter to `TRUE` in the workflow configuration file or provide the parameter `--publish_index_tmp` when running the workflow using Nextflow.
+By default, files in the index directory are symbolic links to files in the [Nextflow work/ directory](#nextflow-work-directory). To request Nextflow copy the index files into this directory set the `publish_index_tmp` parameter to `TRUE` in the workflow configuration file or provide the parameter `publish_index_tmp` when running the workflow using Nextflow.
 
 ---
 
@@ -94,19 +94,19 @@ Intermediate files are produced within the temporary directory (`dir_tmp`).
 
 For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-specific subdirectory (`<SAMPLE_ID>`):
 
-* `trim.fq`: adapter trimmed reads. This is not present if a multiplexed file (`multiplex_fq_files`) is specified.
+* `trim.fq`: adapter trimmed reads (if `fq_files` and not `multiplex_fq_files` are specified).
 * `nonrRNA.fq`: non-rRNA reads.
 * `rRNA_map.sam`: rRNA-mapped reads.
+* `unaligned.fq`: unaligned reads. These files can be used to find common contaminants or translated sequences not in the ORF annotation.
 * `orf_map.sam`: ORF-mapped reads.
-* `orf_map_clean.sam`: ORF-mapped reads with mismatched nt trimmed (if `params.trim_5p_mismatches: TRUE`).
-* `trim_5p_mismatch.tsv`: number of reads processed, discarded, trimmed and written when trimming 5' mismatches from reads and removing reads with more than a set number of mismatches (if `params.trim_5p_mismatches: TRUE`).
-* `unaligned.sam`: unaligned reads. These files can be used to find common contaminants or translated sequences not in the ORF annotation.
-* `orf_map_clean.bam`: BAM file equivalent of `orf_map_clean.sam`, ORF-mapped reads, and, if trimming is enabled (if `params.trim_5p_mismatches: TRUE`), with 5' mismatches trimmed. If deduplication is not enabled (if `dedup_umis: FALSE`) then this is copied to become the output file `<SAMPLE_ID>.bam` (see below).
+* `orf_map_clean.sam`: ORF-mapped reads with 5' mismatched nts trimmed (if `trim_5p_mismatches: TRUE`).
+* `trim_5p_mismatch.tsv`: number of reads processed, discarded, trimmed and written when trimming 5' mismatches from reads and removing reads with more than a set number of mismatches (if `trim_5p_mismatches: TRUE`).
+* `orf_map_clean.bam`: BAM file equivalent of `orf_map_clean.sam` if trimming is enabled (if `trim_5p_mismatches: TRUE`) OR `orf_map.sam` (if `trim_5p_mismatches: FALSE`). If deduplication is not enabled (if `dedup_umis: FALSE`) then this is copied to become the output file `<SAMPLE_ID>.bam` (see below).
 * `orf_map_clean.bam.bai`: BAM index file for the above. If deduplication is not enabled (if `dedup_umis: FALSE`) then this is copied to become the output file `<SAMPLE_ID>.bam.bai` (see below).
 
 If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specific files are also produced:
 
-* `extract_trim.fq`: adapter trimmed reads with UMIs extracted. This is not present if a multiplexed file (`multiplex_fq_files`) is specified.
+* `extract_trim.fq`: adapter trimmed reads with UMIs extracted (if `extract_umis: TRUE` and `fq_files` and not `multiplex_fq_files` are specified).
 * `dedup.bam`: BAM file post deduplication. This is copied to become the output file `<SAMPLE_ID>.bam`.
 * `dedup.bam.bai`: BAM index file for the above. This is copied to become the output file `<SAMPLE_ID>.bam.bai`.
 * UMI groups pre- and post-deduplication (if `group_umis: TRUE`):
@@ -121,7 +121,7 @@ If deduplication is enabled (if `dedup_umis: TRUE`) the following sample-specifi
 If a multiplexed file (`multiplex_fq_files`) is specified, then the following files and directories are also written into the temporary directory:
 
 * `<FASTQ_FILE_NAME_PREFIX>_trim.fq`: FASTQ file post-adapter trimming, where `<FASTQ_FILE_NAME_PREFIX>` is the name of the file (without path or extension) in `multiplex_fq_files`.
-* `<FASTQ_FILE_NAME_PREFIX>_extract_trim.fq`: `<FASTQ_FILE_NAME_PREFIX_trim.fq` post-barcode and UMI extraction.
+* `<FASTQ_FILE_NAME_PREFIX>_extract_trim.fq`: `<FASTQ_FILE_NAME_PREFIX_trim.fq` post-barcode and UMI extraction (if `extract_umis: TRUE`).
 * `<FASTQ_FILE_NAME_PREFIX>_deplex/`: demultiplexing results directory including:
    - `num_reads.tsv`: a tab-separated values file with columns:
      - `SampleID`, copied from the sample sheet.
@@ -132,7 +132,7 @@ If a multiplexed file (`multiplex_fq_files`) is specified, then the following fi
   - `<SAMPLE_ID>.fastq`: Files with demultiplexed reads, where `<SAMPLE_ID>` is a value in the `SampleID` column of the sample sheet. There will be one file per sample.
   - `Unassigned.fastq`: A FASTQ file with the reads that did not match any `TagRead` (barcode) in the sample sheet.
 
-By default, files in the temporary directory are symbolic links to files in the [Nextflow work/ directory](#nextflow-work-directory). To request Nextflow copy the index files into this directory set the `publish_index_tmp` parameter to `TRUE` in the workflow configuration file or provide the parameter `--publish_index_tmp` when running the workflow using Nextflow.
+By default, files in the temporary directory are symbolic links to files in the [Nextflow work/ directory](#nextflow-work-directory). To request Nextflow copy the index files into this directory set the `publish_index_tmp` parameter to `TRUE` in the workflow configuration file or provide the parameter `publish_index_tmp` when running the workflow using Nextflow.
 
 ---
 
@@ -148,33 +148,33 @@ For each sample (`<SAMPLE_ID>`), intermediate files are produced in a sample-spe
 * `plus.bedgraph`: bedgraph of reads from plus strand (if `make_bedgraph: TRUE`).
 * `<SAMPLE_ID>.h5`, `<SAMPLE_ID>.h5.*`: length-sensitive alignments in compressed h5 format. The number of output files depends on the number of processes that `bam_to_h5.R` was run with (`num_processes`).
 * `metagene_start_stop_read_counts.tsv`
-* `metagene_start_stop_read_counts.pdf`
+* `metagene_start_stop_read_counts.pdf` (if `output_pdfs: TRUE`)
 * `metagene_position_length_counts_5start.tsv`
 * `read_counts_by_length.tsv`
-* `read_counts_by_length.pdf`
-* `nt_freq_per_read_position.tsv`
-* `metagene_normalized_profile_start_stop.pdf`
+* `read_counts_by_length.pdf` (if `output_pdfs: TRUE`)
+* `nt_freq_per_read_position.tsv` (if `output_metagene_normalized_profile: TRUE`)
+* `metagene_normalized_profile_start_stop.pdf` (if `output_pdfs: TRUE`)
 * `metagene_normalized_profile_start_stop.tsv`
-* `ORF_TPMs_vs_features.tsv`: only output if `features_file` was defined.
-* `ORF_TPMs_vs_features.pdf`: only output if `features_file` was defined.
+* `ORF_TPMs_vs_features.tsv` (if `features_file` was defined)
+* `ORF_TPMs_vs_features.pdf` (if `features_file` was defined and `output_pdfs: TRUE`)
 * `ORF_TPMs_and_counts.tsv`
-* `normalized_density_APEsites_per_codon.tsv`: only output if `t_rna_file` and `codon_positions_file` were defined.
-* `normalized_density_APEsites_per_codon.pdf`: only output if `t_rna_file` and `codon_positions_file` were defined.
-* `normalized_density_APEsites_per_codon_long.tsv` only output if `t_rna_file` and `codon_positions_file` were defined.
-* `metagene_start_barplot_by_length.pdf`
-* `metagene_start_ribogrid_by_length.pdf`
-* `read_frame_per_ORF.tsv`: only output if `asite_disp_length_file` was defined.
-* `read_frame_per_ORF_filtered.tsv`: only output if `asite_disp_length_file` was defined.
-* `frame_proportions_per_ORF.pdf`: only output if `asite_disp_length_file` was defined.
-* `<SAMPLE_ID>_output_report.html`: only output if `run_static_html: TRUE`.
+* `normalized_density_APEsites_per_codon.tsv` (if `t_rna_file` and `codon_positions_file` were defined)
+* `normalized_density_APEsites_per_codon.pdf` (if `t_rna_file` and `codon_positions-file` were defined and `output_pdfs: TRUE`)
+ * `normalized_density_APEsites_per_codon_long.tsv`  (if `t_rna_file` and `codon_positions_file` were defined)
+* `metagene_start_barplot_by_length.pdf` (if `output_pdfs: TRUE`)
+* `metagene_start_ribogrid_by_length.pdf` (if `output_pdfs: TRUE`)
+* `read_frame_per_ORF.tsv` (if `asite_disp_length_file` was defined)
+* `read_frame_per_ORF_filtered.tsv` (if `asite_disp_length_file` was defined)
+* `frame_proportions_per_ORF.pdf` (if `asite_disp_length_file` was defined and `output_pdfs: TRUE`)
+ * `<SAMPLE_ID>_output_report.html` (if `run_static_html: TRUE`)
 
 In addition, the following files are also put into the output directory:
 
 * `TPMs_all_CDS_all_samples.tsv`: file with the transcripts per million (tpm) for all successfully processed samples.
 * `read_counts_per_file.tsv`: a read counts file. (only if `count_reads: TRUE`).
-* `interactive_viz_config.yaml`: this is a yaml file created by the workflow, for use with `rscripts/run_shiny_server.R` - an optional step which does not automatically run within the RiboViz workflow and which allows users to generate interactive data visualization on the dataset.
+* `interactive_viz_config.yaml`: this is a yaml file created by the workflow, for use with `rscripts/run_shiny_server.R` - an optional step which does not automatically run within the riboviz workflow and which allows users to generate interactive data visualization on the dataset.
 
-More details on the output files can be found at [RiboViz output files and figures](./riboviz_outputs.md).
+More details on the output files can be found at [riboviz output files and figures](./riboviz_outputs.md).
 
 ---
 
@@ -229,7 +229,7 @@ yeast_rRNA.8.ht2	/home/ubuntu/riboviz/work/e5/ccf3e6388cde7038658d88a79e81d1/yea
 
 The `.ht2` files are symbolic links to the outputs of the step `e5/ccf3e6`, an invocation of the process `buildIndicesrRNA`.
 
-The RiboViz workflow uses Nextflow's [publishDir](https://www.nextflow.io/docs/latest/process.html#publishdir) directive which allows files to be published to specific directories outwith `work/`.
+The riboviz workflow uses Nextflow's [publishDir](https://www.nextflow.io/docs/latest/process.html#publishdir) directive which allows files to be published to specific directories outwith `work/`.
 
 For index and temporary files, `publishDir` is configured using the value of the `publish_index_tmp` parameter. If `FALSE` then files in the index (`dir_index`) and temporary (`dir_tmp`) directories are symbolically linked to those in `work/`. If `TRUE` then they are copied. Output files are always copied from `work/` into the output (`dir_out`) directory specified in the workflow configuration file.
 

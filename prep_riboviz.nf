@@ -4,7 +4,7 @@ import org.yaml.snakeyaml.Yaml
 
 /*
 ===================================
-RiboViz ribosome profiling workflow
+riboviz ribosome profiling workflow
 ===================================
 */
 
