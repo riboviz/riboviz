@@ -62,7 +62,6 @@ Releasing:
 
 * [riboviz command-line tools](docs/user/command-line-tools.md).
 * [Content and provenance of repository data files](./docs/reference/data.md).
-* [Structure of HDF5 data](./docs/reference/hdf5-data.md). Structure of HDF5 data files produced by `bam_to_h5.R`.
 
 ## Releases
 
