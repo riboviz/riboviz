@@ -6,9 +6,14 @@
   - [Style checking Python code](#style-checking-python-code)
 * [Python command-line tools](#python-command-line-tools)
   - [Defining command-line parameters](#defining-command-line-parameters)
-* [Run Python tests and workflow tests](#run-python-tests-and-workflow-tests)
-* [Useful pytest flags](#useful-pytest-flags)
-* [Information on pytest fixtures and parameters](#information-on-pytest-fixtures-and-parameters)
+* [Comments and documentation](#comments-and-documentation)
+  - [Creating Sphinx documentation from Python comments](#creating-sphinx-documentation-from-python-comments)
+  - [Creating template Sphinx documentation files](#creating-template-sphinx-documentation-files)
+* [Testing](#testing)
+  - [Run Python tests and workflow tests](#run-python-tests-and-workflow-tests)
+  - [Useful pytest flags](#useful-pytest-flags)
+  - [Information on pytest fixtures and parameters](#information-on-pytest-fixtures-and-parameters)
+* [Miscellaneous](#miscellaneous)
 * [Clone conda environments](#clone-conda-environments)
 * [Understanding YAML `NULL` and Python `None`](#understanding-yaml-null-and-python-none)
 
@@ -137,7 +142,98 @@ output_dir = options.output_dir
 
 ---
 
-## Run Python tests and workflow tests
+## Comments and documentation
+
+### Creating Sphinx documentation from Python comments
+
+Create Sphinx pages to reference source code:
+
+```console
+$ sphinx-apidoc -f -o py-docs/ riboviz
+```
+
+Create HTML documentation
+
+```console
+$ cd py-docs
+$ make html
+```
+
+Open `py-docs/_build/html/index.html` in a browser.
+
+### Creating template Sphinx documentation files
+
+The template Sphinx documentation files were originally created as follows:
+
+```console
+$ sphinx-quickstart py-docs
+> Separate source and build directories (y/n) [n]: y
+> Project name: riboviz
+> Author name(s): The University of Edinburgh; Rutgers University; University of California, Berkeley
+> Project release []: 
+> Project language [en]: 
+```
+
+Edit `py-docs/conf.py`:
+
+* Uncomment:
+
+```python
+# import os
+# import sys
+```
+
+* Replace:
+
+```python
+# sys.path.insert(0, os.path.abspath('.'))
+```
+
+* with:
+
+```python
+sys.path.insert(0, os.path.abspath('..'))
+```
+
+* Update:
+
+```python
+extensions = [
+]
+```
+
+* to:
+
+```python
+extensions = [
+    'sphinx.ext.autodoc'
+]
+```
+
+Edit `py-docs/index.rst` and replace content with:
+
+```
+riboviz code documentation
+==========================
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Code documentation
+
+   modules
+
+Indices and tables:
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+```
+
+---
+
+## Testing
+
+### Run Python tests and workflow tests
 
 Run:
 
@@ -149,19 +245,14 @@ $ pytest --ignore-glob="*integration*"
 
 `PendingDeprecationWarning` `warnings` can be ignored.
 
-
----
-
-## Useful pytest flags
+### Useful pytest flags
 
 * `-s`: disable output capture so, for example, `print` messages are shown.
 * `-v`: verbose mode, displays names of test functions run.
 * `-k`: run a specific test function.
 * `--cov-config=.coveragerc --cov-report term-missing --cov=riboviz`: create a test coverage report which includes the line numbers of statements that were not executed.
 
----
-
-## Information on pytest fixtures and parameters
+### Information on pytest fixtures and parameters
 
 The riboviz integration and Python unit tests make extensive use of pytest fixtures and parameterised tests. For more information on pytest fixtures and parameters see:
 
@@ -171,7 +262,9 @@ The riboviz integration and Python unit tests make extensive use of pytest fixtu
 
 ---
 
-## Clone conda environments
+## Miscellaneous
+
+### Clone conda environments
 
 If you want to install a new Python package to explore it without changing your current conda environment you can first clone your conda environment, then install the package into the clone. For example:
 
@@ -189,9 +282,7 @@ $ conda env remove --name riboviz-test-install
 
 For more information, see conda's [Managing environments](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
----             
-
-## Understanding YAML `NULL` and Python `None`
+### Understanding YAML `NULL` and Python `None`
 
 If a parameter in a YAML file has value `null`, `NULL` or no value at all then, after reading the file into Python (using the `yaml` library), it will have value `None`. For example, given a YAML file with:
 
