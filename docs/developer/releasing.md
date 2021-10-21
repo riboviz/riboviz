@@ -71,16 +71,16 @@ $ git push origin 2.1
 
 Download release from GitHub:
 
-* Visit https://github.com/riboviz/riboviz/tags OR https://github.com/riboviz/riboviz/releases
-* Click zip next to version to deposit.
-* This downloads URL https://github.com/riboviz/riboviz/archive/refs/tags/\<TAG\>.zip into a file `riboviz-<TAG>.zip`.
+* Visit https://github.com/riboviz/riboviz/tags
+* Click 'Source code (zip)' for version to deposit.
+* This downloads URL https://github.com/riboviz/riboviz/archive/refs/tags/TAG.zip into a file `riboviz-<TAG>.zip`.
 
 Update riboviz article:
 
 * Log in to [figshare](https://figshare.com/).
 * Click Projects.
 * Click 'riboviz: analysis and visualization of ribosome profiling datasets'.
-* In the content table, 'riboviz: software for analysis and visualization of ribosome profiling datasets' row, click the cog icon and select 'Edit item'.
+* In the content table, 'riboviz: software for analysis and visualization of ribosome profiling datasets' row, click the cog icon and select Edit item.
 * Click the 'X' icon to next to riboviz-2.0.zip to remove that file. Previous deposits will not be affected.
 * Click browse.
 * Select `riboviz-<TAG>.zip` that you downloaded above.
