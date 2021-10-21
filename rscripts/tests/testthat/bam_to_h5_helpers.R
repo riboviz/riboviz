@@ -265,7 +265,7 @@ ValidateSecondaryLink <- function(h5_file, primary_name, secondary_name) {
     info = "Primary data does not equal secondary data")
 }
 
-#' Validate H5 data within a RiboViz H5 data file.
+#' Validate H5 data within a riboviz H5 data file.
 #'
 #' @param h5_file H5 file with data to be validated
 #' (character).

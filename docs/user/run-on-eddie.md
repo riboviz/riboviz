@@ -1,23 +1,23 @@
-# Running the RiboViz workflow on Eddie
+# Running the riboviz workflow on Eddie
 
-This page describes how you can run **RiboViz** on [Eddie](https://www.ed.ac.uk/information-services/research-support/research-computing/ecdf/high-performance-computing), The University of Edinburgh ECDF Linux Compute Cluster.
+This page describes how you can run **riboviz** on [Eddie](https://www.ed.ac.uk/information-services/research-support/research-computing/ecdf/high-performance-computing), The University of Edinburgh ECDF Linux Compute Cluster.
 
 **Note:** This information is for University of Edinburgh users only.
-However, these guidelines may be useful for running **RiboViz** in other HPC systems.
+However, these guidelines may be useful for running **riboviz** in other HPC systems.
 
 The Eddie service documentation is on the University of Edinburgh [wiki](https://www.wiki.ed.ac.uk/display/ResearchServices/Eddie),
 
-All Python and R packages required to run **RiboViz** have been installed in `/exports/csce/eddie/biology/groups/wallace_rna` on Eddie
+All Python and R packages required to run **riboviz** have been installed in `/exports/csce/eddie/biology/groups/wallace_rna` on Eddie
 
 Contents:
 
 * [Logging in](#logging-in)
 * [Configure Anaconda enviroment](#configure-anaconda-enviroment)
-* [Get Riboviz and example-datasets](#get-riboviz-and-example-datasets)
+* [Get riboviz and example-datasets](#get-riboviz-and-example-datasets)
 * [Interactive sessions](#interactive-sessions)
 * [Set up your environment from scratch (optional)](#set-up-your-environment-from-scratch-optional)
 * [Create `set-riboviz-env.sh`](#create-set-riboviz-envsh)
-* [Run a "vignette" of the RiboViz workflow](#run-a-vignette-of-the-riboviz-workflow)
+* [Run a "vignette" of the riboviz workflow](#run-a-vignette-of-the-riboviz-workflow)
 * [Job submission](#job-submission)
   - [Requesting resources](#requesting-resources)
   - [Submitting jobs](#submitting-jobs)
@@ -33,6 +33,8 @@ Contents:
    - [Submit job](#submit-job)
    - [Checking outputs](#checking-outputs)
    - [Moving and downloading outputs](#moving-and-downloading-outputs)
+* [Hints and tips](#hints-and-tips)
+  - [Using the Linux `screen` command](#using-the-linux-screen-command)
 
 ---
 
@@ -67,9 +69,9 @@ pkgs_dirs:
 
 ---
 
-## Get **RiboViz** and example-datasets
+## Get **riboviz** and example-datasets
 
-Get **RiboViz** and example-datasets:
+Get **riboviz** and example-datasets:
 
 ```console
 $ mkdir riboviz
@@ -80,7 +82,7 @@ $ git clone https://github.com/riboviz/example-datasets
 
 **Note:** Your home directory space is enough for running a vignette but is not enough for running a full-size dataset.
 
-We recommend using the cluster filesystem (`/exports/[COLLEGE]/eddie/...`) for storing **RiboViz** and `example-datasets`.
+We recommend using the cluster filesystem (`/exports/[COLLEGE]/eddie/...`) for storing **riboviz** and `example-datasets`.
 
 If you do not have a group space, you can use your scratch directory (`/exports/eddie/scratch/$USER`)
 
@@ -108,7 +110,7 @@ If you have access to a priority queue then you can use option `-P`:
 $ qlogin -pe interactivemem 4 -l h_vmem=4G -P <QUEUE_NAME>
 ```
 
-RiboViz team members have access to the priority queue `bio_wallace_rna_riboviz`.
+riboviz team members have access to the priority queue `bio_wallace_rna_riboviz`.
 
 See [Interactive sessions](https://www.wiki.ed.ac.uk/display/ResearchServices/Interactive+Sessions) for more information.
 
@@ -133,7 +135,7 @@ Either way, you have to wait for a free node to become available or for Eddie to
 
 ### Activate Anaconda
 
-`/exports/csce/eddie/biology/groups/wallace_rna` has Anaconda packages (in `anaconda`) and all the Python packages required by **RiboViz** are there, accessible as a `riboviz` conda environment.
+`/exports/csce/eddie/biology/groups/wallace_rna` has Anaconda packages (in `anaconda`) and all the Python packages required by **riboviz** are there, accessible as a `riboviz` conda environment.
 
 ```console
 $ source activate riboviz
@@ -184,9 +186,9 @@ $ source set-riboviz-env.sh
 
 ---
 
-## Run a "vignette" of the **RiboViz** workflow
+## Run a "vignette" of the **riboviz** workflow
 
-Change into the **RiboViz** repository:
+Change into the **riboviz** repository:
 
 ```console
 $ cd riboviz/riboviz
@@ -241,7 +243,7 @@ Computational work on Eddie is usually submitted to the cluster as batch jobs in
 
 See "Requesting resources" section below.
 
-Here is an example job script for the vignette, named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
+Here is an example job script for the vignette, named `job_riboviz.sh` in your `riboviz` directory to run a **riboviz** workflow:
 
 ```
 #!/bin/sh
@@ -281,7 +283,7 @@ nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-lo
 
 We provide a Python script, `riboviz.tools.create_job_script`, which creates a job submission script using the template in [jobs/eddie-template.sh](../../jobs/eddie-template.sh).
 
-You can run this to create a job script named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
+You can run this to create a job script named `job_riboviz.sh` in your `riboviz` directory to run a **riboviz** workflow:
 
 ```console
 $ python -m riboviz.tools.create_job_script \
@@ -322,7 +324,7 @@ This is work in progress. A temporary solution involving ringfenced nodes is des
 
 ### Submitting jobs
 
-Change into the **RiboViz** repository:
+Change into the **riboviz** repository:
 
 ```console
 $ cd riboviz/riboviz
@@ -348,7 +350,7 @@ Your job <job-ID> ("jobname") has been submitted
 
 This will output the standard output from `prep_riboviz.nf` to a file, `riboviz-$JOB_ID-$HOSTNAME.o`, in the current working directory, and errors to a file, `riboviz_vignette-$JOB_ID-$HOSTNAME.e`.
 
-The contents of `riboviz-$JOB_ID-$HOSTNAME.o` should be the same as the standard output of [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow) above.
+The contents of `riboviz-$JOB_ID-$HOSTNAME.o` should be the same as the standard output of [Run a "vignette" of the riboviz workflow in an interactive node](#run-a-vignette-of-the-riboviz-workflow) above.
 
 An example job submission script for running the vignette using scratch space for outputs and using system links is available at [`jobs/vignette-submission-script.sh`](../../jobs/vignette-submission-script.sh) and uses a modified .yaml config file [`vignette/remote_vignette_config.yaml`](../../vignette/remote_vignette_config.yaml) as an input. 
 
@@ -680,7 +682,7 @@ If you run the `example-dataset` in your scratch space, remember to move the out
 
 The job submission should create two files: an output file `JOB_NAME-$JOB_ID-$HOSTNAME.o` and an error file `$JOB_NAME-$JOB_ID-$HOSTNAME.e`.  These are the best place to start looking after a job has completed, to check if it has run successfully.
 
-The output file will contain the standard output from the nextflow run, and will provide you with information needed if you need to debug the run. For more information, see [Debugging](./prep-riboviz-run-nextflow.md#debugging) in [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md).
+The output file will contain the standard output from the nextflow run, and will provide you with information needed if you need to debug the run. For more information, see [Debugging](./prep-riboviz-run-nextflow.md#debugging) in [Running the riboviz Nextflow workflow](./prep-riboviz-run-nextflow.md).
 
 The output files will be in `/exports/eddie/scratch/$USER/Wallace_2020_JEC21/output/`.
 
@@ -697,3 +699,44 @@ You can check the file sizes using `du -ch` to get an idea of how much space you
 Files older than one month are removed from this directory automatically.
 
 See [Storage](https://www.wiki.ed.ac.uk/display/ResearchServices/Storage) for more information.
+
+---
+
+## Hints and tips
+
+### Using the Linux `screen` command
+
+Linux's `screen` command provides a virtual terminal multiplexer. It allows us to run a number of different sessions (or windows, or virtual terminals) withina single terminal, or console, window. This can be useful if we do not have access to a graphical user interface with multiple windows, which is the case when using EDDIE.
+
+One use case is if we want to have one or more files open in editors while also running programs that use those files - for example editing source code and running a compiler, or editing configuration files and running an analysis program - without having to repeatedly open and close the files within the editor
+
+For a short introduction, see [Using the Linux `screen` command](./using-linux-screen.md).
+
+### Troubleshooting
+
+If riboviz fails if run within the context of `screen` then you may have to reinitialise your environment using `source set-riboviz-env.sh`. For example, for one user, the following sequence of steps resulted in a failure of riboviz to successfully run to completion:
+
+```console
+$ source set-riboviz-env.sh
+$ cd riboviz
+$ screen
+$ source activate riboviz
+$ nextflow prep_riboviz.nf -params-file vignette/vignette_config.yaml 
+```
+
+The failure encountered was:
+
+```
+/exports/igmm/software/pkg/el7/apps/R/3.6.3/lib64/R/bin/exec/R: error while loading shared libraries: libgfortran.so.4: cannot open shared object file: No such file or directory
+```
+
+In contrast, the following sequence of steps resulted in success:
+
+```console
+$ screen
+$ source set-riboviz-env.sh
+$ source activate riboviz    # If you didn't activate the 'riboviz' environment in 'set-riboviz-env.sh'.
+$ cd riboviz
+$ nextflow prep_riboviz.nf -params-file vignette/vignette_config.yaml 
+```
+

@@ -22,7 +22,7 @@ def load_bedgraph(bed_file):
         - Chromosome (string)
         - Chromosome start coordinate (integer)
         - Chromosome end coordinate (integer)
-        - Data value (integer, as RiboViz uses bedGraphs for counts)
+        - Data value (integer, as riboviz uses bedGraphs for counts)
 
     The ``DataFrame`` returned has four column names: ``Chromosome``,
     ``Start``, ``End``, ``Data``.

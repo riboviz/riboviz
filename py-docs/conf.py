@@ -17,8 +17,8 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'RiboViz'
-copyright = '2020, The University of Edinburgh; Rutgers University; University of California, Berkeley'
+project = 'riboviz'
+copyright = '2016-2021, The University of Edinburgh; Rutgers University; University of California, Berkeley'
 author = 'The University of Edinburgh; Rutgers University; University of California, Berkeley'
 
 

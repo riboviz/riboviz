@@ -21,45 +21,12 @@ existing values are preserved):
 * ``rRNA_index`` => ``rrna_index_prefix``
 * ``stop_in_cds`` => ``stop_in_feature``
 * ``t_rna`` => ``t_rna_file``
+* ``do_pos_sp_nt_freq`` => ``output_metagene_normalized_profile``
 
 Expected parameters added to the current release are added along
 with default values, if they are not already present in the
-configuration:
-
-* ``asite_disp_length_file: null``
-* ``codon_positions_file: null``
-* ``count_reads: true``
-* ``count_threshold: 64``
-* ``dedup_stats: false``
-* ``dedup_umis: false``
-* ``do_pos_sp_nt_freq: true``
-* ``extract_umis: false``
-* ``feature: CDS``
-* ``features_file: null``
-* ``group_umis: false``
-* ``job_email: null``
-* ``job_email_events: beas``
-* ``job_memory: 8G``
-* ``job_name: riboviz``
-* ``job_num_cpus: 4``
-* ``job_parallel_env: mpi``
-* ``job_runtime: '48:00:00'``
-* ``multiplex_fq_files: null``
-* ``nextflow_dag_file: nextflow-dag.html``
-* ``nextflow_report_file: nextflow-report.html``
-* ``nextflow_timeline_file: nextflow-timeline.html``
-* ``nextflow_trace_file: nextflow-trace.tsv``
-* ``nextflow_work_dir: work``
-* ``output_pdfs: true``
-* ``publish_index_tmp: false``
-* ``run_static_html: true``
-* ``sample_sheet: null``
-* ``samsort_memory: null``
-* ``stop_in_feature: false``
-* ``trim_5p_mismatches: true``
-* ``t_rna_file: null``
-* ``umi_regexp: null``
-* ``validate_only: false``
+configuration. These are taken from file
+:py:const:`riboviz.params.DEFAULT_CONFIG_YAML`.
 
 The values of parameters ``rrna_index_prefix`` and
 ``orf_index_prefix`` are updated to be file names only, as, these are
@@ -85,6 +52,7 @@ Configuration parameters that are now unused are removed:
 import os
 import os.path
 import yaml
+import riboviz
 from riboviz import params
 
 
@@ -104,7 +72,8 @@ RENAMES = {
     "rRNA_index": params.RRNA_INDEX_PREFIX,
     "ribovizGFF": params.IS_RIBOVIZ_GFF,
     "stop_in_cds": params.STOP_IN_FEATURE,
-    "t_rna": params.T_RNA_FILE
+    "t_rna": params.T_RNA_FILE,
+    "do_pos_sp_nt_freq": params.OUTPUT_METAGENE_NORMALIZED_PROFILE
 }
 """
 Renamed configuration parameters.
@@ -112,7 +81,7 @@ Renamed configuration parameters.
 
 UPDATES = {
     params.ASITE_DISP_LENGTH_FILE: None,
-    params.DO_POS_SP_NT_FREQ: True,
+    params.OUTPUT_METAGENE_NORMALIZED_PROFILE: True,
     params.CODON_POSITIONS_FILE: None,
     params.COUNT_READS: True,
     params.COUNT_THRESHOLD: 64,
@@ -154,35 +123,30 @@ Unused configuration parameters for removal.
 def upgrade_config(config):
     """
     Upgrade workflow configuration to be compatible with current
-    configuration.
+    configuration. New parameters and default values are taken from
+    :py:const:`riboviz.params.DEFAULT_CONFIG_YAML`.
 
     :param config: Configuration
     :type config: dict
     """
+    default_config_file = os.path.join(os.path.dirname(riboviz.__file__),
+                                       params.DEFAULT_CONFIG_YAML_FILE)
+    with open(default_config_file, "r") as f:
+        default_config = yaml.load(f, yaml.SafeLoader)
     # Rename existing parameters.
     for (old_key, new_key) in list(RENAMES.items()):
         if old_key in config:
             value = config[old_key]
             del config[old_key]
             config[new_key] = value
-
     # Add new parameters.
-    for (key, value) in list(UPDATES.items()):
+    for (key, value) in list(default_config.items()):
         if key not in config:
             config[key] = value
-    # Remove params.NEXTFLOW_RESUME as it is a command-line only
-    # configuration parameter.
-    job_config = params.DEFAULT_JOB_CONFIG.copy()
-    del job_config[params.NEXTFLOW_RESUME]
-    for (key, value) in list(job_config.items()):
-        if key not in config:
-            config[key] = value
-
     # Index prefixes are now relative to params.DIR_INDEX
     for key in [params.RRNA_INDEX_PREFIX, params.ORF_INDEX_PREFIX]:
         prefix = os.path.split(config[key])[1]
         config[key] = prefix
-
     # Removed unused parameters.
     for key in UNUSED:
         if key in config:
@@ -211,6 +175,6 @@ def upgrade_config_file(input_file, output_file=None):
     upgrade_config(config)
     if output_file is not None:
         with open(output_file, 'w') as f:
-            yaml.dump(config, f, default_flow_style=False)
+            yaml.dump(config, f, default_flow_style=False, sort_keys=False)
     else:
-        print((yaml.dump(config)))
+        print((yaml.dump(config, sort_keys=False)))
