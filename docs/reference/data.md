@@ -235,62 +235,176 @@ Data was imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb
 
 ---
 
-## GFF and BAM files for testing `bam_to_h5.R`
+## Simulated data (`data/Mok-simYAL5`)
 
-`data/Mok-tinysim-gffsam` folder.
+Used by:
 
-Used by `rscripts/tests/testthat/test_bam_to_h5.R`.
+* `docs/user/YAL5-codon-pairs-usage.md`.
+* `docs/user/YAL5-single-codons-usage.md`.
+* `rscripts/tests/testthat/test_YAL_single_codons.R`
+* `rscripts/tests/testthat/test_YAL_codon_pairs.R`
 
 Created using:
 
-* [riboviz](https://github.com/riboviz/riboviz), `test-bam-to-h5-238` branch, 7b944eb, Wed Feb 3 07:57:11 2021.
-* [example-datasets](https://github.com/riboviz/example-datasets/), `origin` branch, commit 24c2fe4, Mon Jan 18 17:21:17 2021.
-* [amandamok/simRiboSeq](https://github.com/amandamok/simRiboSeq), `master` branch, commit 8367709, Wed Jan 13 13:51:18 2021.
+* [riboviz](https://github.com/riboviz/riboviz), `develop` branch, commit 6f0d1aa, Thu Sep 23 08:22:08 2021.
+* [example-datasets](https://github.com/riboviz/example-datasets), `main` branch, commit dacb20, Wed Sep 22 14:42:35 2021.
+* [amandamok/simRiboSeq](https://github.com/amandamok/simRiboSeq/), `master` branch, commit e11a7d2, Mon Mar 29 01:50:39 2021.
 
-Get `example-datasets`:
-
-```console
-$ git clone https://github.com/riboviz/example-datasets/
-```
-
-Get `amandamok/simRiboSeq`:
+Get configuration and data:
 
 ```console
-$ git clone https://github.com/amandamok/simRiboSeq/
-$ ls simRiboSeq/simulation_runs/riboviz/
-...
-tiny_2genes.fq
-```
-
-Create configuration files directory in `riboviz`:
-
-```console
+$ git clone https://github.com/riboviz/example-datasets 
 $ cd riboviz
+$ python -m riboviz.tools.upgrade_config_file -i ../example-datasets/simulated/mok/Mok-simYAL5_config.yaml -o Mok-simYAL5_config.yaml
+$ mkdir -p Mok-simYAL5/input
+$ cd Mok-simYAL5/input
+$ curl -LO https://github.com/amandamok/simRiboSeq/raw/master/simulation_runs/riboviz/simRiboviz.fq.gz
+$ cd ../..
+```
+
+Edit `Mok-simYAL5.yaml` and update:
+
+```yaml
+orf_fasta_file: ../../riboviz/example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.fa
+orf_gff_file: ../../riboviz/example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3
+rrna_fasta_file: ../../riboviz/example-datasets/fungi/saccharomyces/contaminants/Saccharomyces_cerevisiae_yeast_rRNA_R64-1-1.fa
+```
+
+to:
+
+```yaml
+orf_fasta_file: ../example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.fa
+orf_gff_file: ../xample-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3
+rrna_fasta_file: ../example-datasets/fungi/saccharomyces/contaminants/Saccharomyces_cerevisiae_yeast_rRNA_R64-1-1.fa
+```
+
+Validate configuration:
+
+```console
+$ nextflow run prep_riboviz.nf -ansi-log false -params-file Mok-simYAL5_config.yaml --validate_only
+```
+
+Run workflow:
+
+```console
+$ nextflow run prep_riboviz.nf -ansi-log false -params-file Mok-simYAL5_config.yaml
+```
+
+Create and populate `data/Mok-simYAL5`:
+
+```console
+$ mkdir data/Mok-simYAL5
+$ cp ../example-datasets/simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3 data/Mok-simYAL5/
+$ cp Mok-simYAL5/output/A/A.h5* data/Mok-simYAL5/
+```
+
+
+
+---
+
+## Codons data (`data/Mok-simYAL5`)
+
+Files:
+
+```
+data/Mok-simYAL5/yal5-single-codons.tsv
+data/Mok-simYAL5/yal5-codon-pairs.tsv
+```
+
+Used by:
+
+* `rscripts/tests/testthat/test_YAL_single_codons.R`
+* `rscripts/tests/testthat/test_YAL_codon_pairs.R`
+
+Assumes existence of Simulated data (`data/Mok-simYAL5`) above.
+
+Created using
+
+* [riboviz](https://github.com/riboviz/riboviz), `refactor-codon-pairs-436` branch, commit 24fcd62 Wed Oct 6 04:29:01 2021.
+
+Create files:
+
+```console
+$ Rscript rscripts/YAL5-single-codons.R -i data/Mok-simYAL5/A.h5 \
+  -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 \
+  -a data/yeast_codon_table.tsv \
+  --asite_length=data/yeast_standard_asite_disp_length.txt \
+  --feature data/codons.tsv -o .
+$ mv Feature_Relative_use_Mok-simYAL5.tsv data/Mok-simYAL5/yal5-single-codons.tsv
+
+$ Rscript rscripts/YAL5-codon-pairs.R -i data/Mok-simYAL5/A.h5 \
+  -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 \
+  -a data/yeast_codon_table.tsv \
+  --asite_length data/yeast_standard_asite_disp_length.txt \
+  --feature data/codon-pairs.tsv -o .
+$ mv Feature_Relative_use.tsv data/Mok-simYAL5/yal5-codon-pairs.tsv
+```
+
+---
+
+## Simulated data (`data/Mok-tinysim`)
+
+Used by:
+
+* `rscripts/tests/testthat/test_bam_to_h5.R`.
+* `docs/user/YAL5-codon-pairs-usage.md`.
+* `docs/user/metafeature-nucleotides-usage.md`.
+* `rscripts/tests/testthat/test_metafeature_nucleotides.R`
+
+Created using:
+
+* [riboviz](https://github.com/riboviz/riboviz), `develop` branch, commit 6f0d1aa, Thu Sep 23 08:22:08 2021.
+* [example-datasets](https://github.com/riboviz/example-datasets), `main` branch, commit dacb20, Wed Sep 22 14:42:35 2021.
+* [amandamok/simRiboSeq](https://github.com/amandamok/simRiboSeq/), `master` branch, commit e11a7d2, Mon Mar 29 01:50:39 2021.
+
+Get configuration and data:
+
+```console
+$ git clone https://github.com/riboviz/example-datasets 
+$ cd riboviz
+$ python -m riboviz.tools.upgrade_config_file -i ../example-datasets/simulated/mok/Mok-tinysim_config.yaml -o Mok-tinysim_config.yaml 
 $ mkdir -p Mok-tinysim/input
-$ cp ../simRiboSeq/simulation_runs/riboviz/tiny_2genes.fq Mok-tinysim/input/
-$ cp ../example-datasets/simulated/mok/Mok-tinysim_config.yaml .
+$ cd Mok-tinysim/input
+$ curl -LO https://github.com/amandamok/simRiboSeq/raw/master/simulation_runs/riboviz/tiny_2genes.fq
+$ cd ../..
 ```
 
-Edit `.yaml `and change `../../riboviz/` to `../`:
+Edit `Mok-tinysim.yaml` and update:
 
+```yal
+orf_fasta_file: ../../riboviz/example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa
+orf_gff_file: ../../riboviz/example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3
+rrna_fasta_file: ../../riboviz/example-datasets/simulated/mok/contaminants/Sc_rRNA_example.fa
 ```
+
+to:
+
+```yaml
 orf_fasta_file: ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa
 orf_gff_file: ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3
 rrna_fasta_file: ../example-datasets/simulated/mok/contaminants/Sc_rRNA_example.fa
 ```
 
-Run riboviz:
+Validate configuration:
 
 ```console
-$ nextflow run prep_riboviz.nf  -params-file Mok-tinysim_config.yaml -ansi-log false
+$ nextflow run prep_riboviz.nf -ansi-log false -params-file Mok-tinysim_config.yaml --validate_only
 ```
 
-Create and populate `data/Mok-tinysim-gffsam`:
+Run workflow:
 
 ```console
-$ mkdir data/Mok-tinysim-gffsam
-$ samtools view -h Mok-tinysim/output/A/A.bam > data/Mok-tinysim-gffsam/A.sam
-$ cp ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 data/Mok-tinysim-gffsam/
+$ nextflow run prep_riboviz.nf -ansi-log false -params-file Mok-tinysim_config.yaml
+```
+
+Create and populate `data/Mok-simYAL5`:
+
+```console
+$ mkdir data/Mok-tinysim
+$ samtools view -h Mok-tinysim/output/A/A.bam > data/Mok-tinysim/A.sam
+$ cp ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 data/Mok-tinysim/
+$ cp ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa data/Mok-tinysim/
+$ cp Mok-tinysim/output/A/A.h5* data/Mok-tinysim/
 ```
 
 ---

@@ -1,0 +1,18 @@
+##gff-version 3
+##source-version rtracklayer 1.38.3
+##date 2018-02-10
+YAL038W	rtracklayer	UTR5	1	250	.	+	.	Name=YAL038W
+YAL038W	rtracklayer	CDS	251	1753	.	+	.	Name=YAL038W
+YAL038W	rtracklayer	UTR3	1754	2003	.	+	.	Name=YAL038W
+YAL035W	rtracklayer	UTR5	1	250	.	+	.	Name=YAL035W
+YAL035W	rtracklayer	CDS	251	3259	.	+	.	Name=YAL035W
+YAL035W	rtracklayer	UTR3	3260	3509	.	+	.	Name=YAL035W
+YAL012W	rtracklayer	UTR5	1	250	.	+	.	Name=YAL012W
+YAL012W	rtracklayer	CDS	251	1435	.	+	.	Name=YAL012W
+YAL012W	rtracklayer	UTR3	1436	1685	.	+	.	Name=YAL012W
+YAL005C	rtracklayer	UTR5	1	250	.	+	.	Name=YAL005C
+YAL005C	rtracklayer	CDS	251	2179	.	+	.	Name=YAL005C
+YAL005C	rtracklayer	UTR3	2180	2429	.	+	.	Name=YAL005C
+YAL003W	rtracklayer	UTR5	1	250	.	+	.	Name=YAL003W
+YAL003W	rtracklayer	CDS	251	871	.	+	.	Name=YAL003W
+YAL003W	rtracklayer	UTR3	872	1121	.	+	.	Name=YAL003W
