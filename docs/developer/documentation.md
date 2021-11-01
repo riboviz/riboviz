@@ -1,6 +1,6 @@
 # Writing and updating documentation
 
-## Update Dependencies overview in Install RiboViz and dependencies
+## Update Dependencies overview in Install riboviz and dependencies
 
 See [Update Dependencies overview](./dependencies.md#update-dependencies-overview).
 
@@ -30,7 +30,7 @@ Open `py-docs/_build/html/index.html` in a browser.
 ```console
 $ sphinx-quickstart py-docs
 > Separate source and build directories (y/n) [n]: y
-> Project name: RiboViz
+> Project name: riboviz
 > Author name(s): The University of Edinburgh; Rutgers University; University of California, Berkeley
 > Project release []: 
 > Project language [en]: 
@@ -75,7 +75,7 @@ extensions = [
 Edit `py-docs/index.rst` and replace content with:
 
 ```
-RiboViz code documentation
+riboviz code documentation
 ==========================
 
 .. toctree::

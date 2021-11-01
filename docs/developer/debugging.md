@@ -66,13 +66,13 @@ then:
 
 To debug a specific line of code, you could add a `browser()` statement in the source first. Alternatively, you could copy and paste the parts of the code you wanted to run, as long as earlier dependencies are run first (packages, importing command arguments, function definitions).
 
-**Note:** at present, the RiboViz R scripts `bam_to_h5.R`, `generate_stats_figs.R` and `collate_tpms.R` import other RiboViz R scripts. If running these RiboViz R scripts interactively, via `R` and `source`, then the directory in which they are run must be such that `rscripts` is a sibling of an ancestor of the directory in which the script is run interactively. For example, running a script interactively within a sub-sub-directory of Nextflow's `work/` directory or a `debug_gen_stats_figs` directory (as described in the next section) where either of these directories are in the same directory as `rscripts`.
+**Note:** at present, the riboviz R scripts `bam_to_h5.R`, `generate_stats_figs.R` and `collate_tpms.R` import other riboviz R scripts. If running these riboviz R scripts interactively, via `R` and `source`, then the directory in which they are run must be such that `rscripts` is a sibling of an ancestor of the directory in which the script is run interactively. For example, running a script interactively within a sub-sub-directory of Nextflow's `work/` directory or a `debug_gen_stats_figs` directory (as described in the next section) where either of these directories are in the same directory as `rscripts`.
 
 ---
 
 ## Debugging and Nextflow
 
-Information on Debugging and Nextflow is provided in [Debugging](../user/prep-riboviz-run-nextflow.md#debugging) in [Running the RiboViz Nextflow workflow](../user/prep-riboviz-run-nextflow.md). This section contains additional developer-specific information.
+Information on Debugging and Nextflow is provided in [Debugging](../user/prep-riboviz-run-nextflow.md#debugging) in [Running the riboviz Nextflow workflow](../user/prep-riboviz-run-nextflow.md). This section contains additional developer-specific information.
 
 ### Debugging within Nextflow's `work/` step-specific directories
 
@@ -92,9 +92,9 @@ Work dir:
 $ cd /home/ubuntu/riboviz/work/38/784d89646ff067d5fa9bedcdd4db73/
 $ cat .command.sh 
 #!/bin/bash -ue
-Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --tpms-file=TPMs_collated.tsv             WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms.tsv
+Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R             --tpms-file=TPMs_all_CDS_all_samples.tsv             WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms.tsv
 $ bash .command.sh 
-[1] "Created by: RiboViz"
+[1] "Created by: riboviz"
 [1] "Date: 2021-06-24 06:08:35"
 ...
   9.   +-vctrs:::stop_incompatible(...)
@@ -112,7 +112,7 @@ Alternatively, the command in `.command.sh` can be rerun directly, which may be 
 
 ```console
 $ Rscript --vanilla /home/ubuntu/riboviz/rscripts/collate_tpms.R \
-  --tpms-file=TPMs_collated.tsv \
+  --tpms-file=TPMs_all_CDS_all_samples.tsv \
   WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms.tsv
 ```
 
@@ -126,7 +126,7 @@ For R you may want to run the script interactively, as described in the previous
 
 ```console
 $ Rscript --vanilla --args \
-  --tpms-file=TPMs_collated.tsv \
+  --tpms-file=TPMs_all_CDS_all_samples.tsv \
   WT3AT WT3AT_tpms.tsv WTnone WTnone_tpms.tsv
 ```
 

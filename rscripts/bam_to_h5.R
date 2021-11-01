@@ -1,4 +1,4 @@
-#' Convert BAM files to RiboViz HDF5 files.
+#' Convert BAM files to riboviz HDF5 files.
 #'
 #' Given a GFF file and a BAM file, this script creates an HDF5 file
 #' with information about a feature (e.g. CDS, ORF, or uORF).

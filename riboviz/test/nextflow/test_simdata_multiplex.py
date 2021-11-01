@@ -14,7 +14,7 @@ also in ``data/simdata/``. Collated TPMs are also validated.
 
 Each test function is configured with the module-level fixture
 :py:func:`riboviz.test.nextflow.nextflow_fixture` to ensure
-that ``nextflow run prep_riboviz.nf``` is run once before the
+that ``nextflow run prep_riboviz.nf`` is run once before the
 test functions are run.
 """
 import os

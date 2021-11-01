@@ -1,4 +1,4 @@
-RiboViz code documentation
+riboviz code documentation
 ==========================
 
 .. toctree::

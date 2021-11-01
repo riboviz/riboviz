@@ -1,5 +1,5 @@
 r = getOption("repos")
-r["CRAN"] = "https://cloud.r-project.org" 
+r["CRAN"] = "https://cloud.r-project.org"
 options(repos = r)
 dir.create(path = Sys.getenv("R_LIBS_USER"), showWarnings=FALSE, recursive=TRUE)
 install.packages("RcppRoll", lib=Sys.getenv("R_LIBS_USER"))
@@ -9,7 +9,9 @@ install.packages("knitr", lib=Sys.getenv("R_LIBS_USER"))
 install.packages("optparse", lib=Sys.getenv("R_LIBS_USER"))
 install.packages("plotly", lib=Sys.getenv("R_LIBS_USER"))
 install.packages("rmarkdown", lib=Sys.getenv("R_LIBS_USER"))
+install.packages("scales", lib=Sys.getenv("R_LIBS_USER"))
 install.packages("shiny", lib=Sys.getenv("R_LIBS_USER"))
+install.packages("yaml", lib=Sys.getenv("R_LIBS_USER"))
 install.packages("tidyverse", lib=Sys.getenv("R_LIBS_USER"))
 install.packages("BiocManager", lib=Sys.getenv("R_LIBS_USER"))
 BiocManager::install("Rsamtools", lib=Sys.getenv("R_LIBS_USER"))

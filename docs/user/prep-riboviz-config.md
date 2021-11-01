@@ -1,6 +1,6 @@
-# Configuring the RiboViz workflow
+# Configuring the riboviz workflow
 
-This page describes the inputs that the RiboViz workflow requires and how it is configured.
+This page describes the inputs that the riboviz workflow requires and how it is configured.
 
 ---
 
@@ -55,7 +55,6 @@ The workflow also supports the following configuration parameters. All directory
 | `dir_index` | Built indices directory | No | `index` |
 | `dir_out` | Output directory | No | `output` |
 | `dir_tmp` | Intermediate files directory | No | `tmp` |
-| `do_pos_sp_nt_freq` | Calculate position-specific nucleotide freqeuency? | No | `true` |
 | `extract_umis` | Extract UMIs after adapter trimming? | No | `false` |
 | `feature` | Feature type | No | `CDS` |
 | `features_file` | Features to correlate with ORFs (tab-separated values file) | No | |
@@ -82,6 +81,7 @@ The workflow also supports the following configuration parameters. All directory
 | `orf_fasta_file` | Transcript sequences file containing both coding regions and flanking regions (FASTA file) | Yes | |
 | `orf_gff_file` | Matched genome feature file, specifying coding sequences locations (start and stop coordinates) within the transcripts (GTF/GFF3 file) | Yes | |
 | `orf_index_prefix` | Prefix for ORF index files, relative to `<dir_index>` | Yes | |
+| `output_metagene_normalized_profile` | Calculate position-specific nucleotide freqeuency? | No | `true` |
 | `output_pdfs` | Generate .pdfs for sample-related plots | No | `true` |
 | `primary_id` | Primary gene IDs to access the data (YAL001C, YAL003W, etc.) | No | `Name` |
 | `publish_index_tmp` | Publish index and temporary files to `<dir_index>` and `<dir_tmp>`? If `true` copy index and temporary files from Nextflow's `work/` directory, else use symbolic links only (see [Nextflow `work/` directory](../user/prep-riboviz-operation.md#nextflow-work-directory)). | No | `false` |
@@ -220,7 +220,7 @@ t_rna_file: ${RIBOVIZ_DATA}/yeast_tRNAs.tsv
 
 Which, if any, token you use in each of the configuration parameters is entirely up to you. No checks are made to see which specific token is used with which configuration parameter.
 
-[Defining values for environment variables](./prep-riboviz-run-nextflow.md#defining-values-for-environment-variables) in [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md) describes how to define values for these environment variables so that their values can be applied when the workflow is run.
+[Defining values for environment variables](./prep-riboviz-run-nextflow.md#defining-values-for-environment-variables) in [Running the riboviz Nextflow workflow](./prep-riboviz-run-nextflow.md) describes how to define values for these environment variables so that their values can be applied when the workflow is run.
 
 **Note:** If a configuration file contains environment variable tokens then you **must** provide values for these when running the workflow.
 
@@ -269,7 +269,7 @@ $ mkdir -p example/vignette
 $ mkdir -p example/vignette/input
 ```
 
-Create symbolic links to all the input files, where `$HOME/riboviz` is the path to RiboViz home directory, which can be relative to the current directory or absolute:
+Create symbolic links to all the input files, where `$HOME/riboviz` is the path to riboviz home directory, which can be relative to the current directory or absolute:
 
 ```console
 $ cd example/data

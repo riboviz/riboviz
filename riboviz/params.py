@@ -75,7 +75,7 @@ statistics and figures.
 """
 DATASET = "dataset"
 """ Dataset name. """
-DO_POS_SP_NT_FREQ = "do_pos_sp_nt_freq"
+OUTPUT_METAGENE_NORMALIZED_PROFILE = "output_metagene_normalized_profile"
 """ Calculate position-specific nucleotide frequency? """
 FEATURE = "feature"
 """ Feature type """
@@ -116,11 +116,17 @@ When validating configuration skip checks for existence of ribosome
 profiling data files.
 """
 
+DEFAULT_CONFIG_YAML_FILE = "default_config.yaml"
+"""
+Name of YAML configuration file with default values for parameters.
+Assumed to be in :py:mod:`riboviz`.
+"""
+
 R_LIBS = "r_libs"
 """ R libraries directory (job submission) (command-line only). """
 CONFIG_FILE = "config_file"
 """
-RiboViz YAML configuration file (job submission) (command-line only).
+riboviz YAML configuration file (job submission) (command-line only).
 """
 NEXTFLOW_DAG_FILE = "nextflow_dag_file"
 """
@@ -225,16 +231,16 @@ ENV_INPUT_PARAMS = [ASITE_DISP_LENGTH_FILE,
                     RRNA_FASTA_FILE,
                     T_RNA_FILE]
 """
-Names of input parameters whose values can include RiboViz environment
+Names of input parameters whose values can include riboviz environment
 variables.
 """
 ENV_OUTPUT_PARAMS = [INDEX_DIR, OUTPUT_DIR, TMP_DIR]
 """
-Names of output parameters whose values can include RiboViz environment
+Names of output parameters whose values can include riboviz environment
 variables.
 """
 ENV_PARAMS = ENV_INPUT_PARAMS + ENV_OUTPUT_PARAMS
 """
-Names of parameters whose values can include RiboViz environment
+Names of parameters whose values can include riboviz environment
 variables.
 """
