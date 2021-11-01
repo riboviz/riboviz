@@ -317,7 +317,7 @@ H5close()
 ### Prepare GRCh38 annotations
 ```{r, eval=FALSE}
 # Download annotations from here - https://www.gencodegenes.org/releases/21.html
-mouse_annot <- readGFFAsGRanges("gencode.vM14.annotation.gff3.gz")
+mouse_annot <- readGFFAsGRanges("/data/riboseq/Supp/seqs/mouse/vm14_current/gencode.vM14.annotation.gff3.gz")
 
 # Create a new transcript id column without versions ()
 mcols(mouse_annot)$tid <- sapply(strsplit(mouse_annot$transcript_id,"\\."), `[`, 1)
@@ -328,7 +328,7 @@ mcols(mouse_annot)$tid <- sapply(strsplit(mouse_annot$transcript_id,"\\."), `[`,
 # Download appris annotations from here - http://appris.bioinfo.cnio.es/
 
 # Read in Appris list
-appris <- read.table("mouse_appris_data.principal.txt")
+appris <- read.table("/data/riboseq/Supp/seqs/mouse/vm14_current/mouse_appris_data.principal.txt")
 
 # Get a list of all principal transcripts and pick the first principal transcript in genes with multiple principal transcripts
 all_enstt <- appris %>% 
@@ -344,7 +344,7 @@ all_enstt <- appris %>%
 # Download CDNA seqs from here - http://ftp.ensembl.org/pub/release-83/fasta/mus_musculus/cdna/
 
 # Read in CDNA sequences
-cdna_all <- readDNAStringSet("./Mus_musculus.GRCm38.cdna.all.fa.gz")
+cdna_all <- readDNAStringSet("/data/riboseq/Supp/seqs/mouse/vm14_current/Mus_musculus.GRCm38.cdna.all.fa")
 cdna_names <- sapply(strsplit(names(cdna_all)," "), `[`, 1)
 names(cdna_all) <- sapply(strsplit(cdna_names,"\\."), `[`, 1)
 
@@ -352,8 +352,8 @@ names(cdna_all) <- sapply(strsplit(cdna_names,"\\."), `[`, 1)
 cdna_sub <- cdna_all[names(cdna_all) %in% all_enstt$X3]
 
 # Exon and CDS annotations
-exon_annot <- hsap_annot[hsap_annot$type=="exon"]
-cds_annot <- hsap_annot[hsap_annot$type=="CDS"]
+exon_annot <- mouse_annot[mouse_annot$type=="exon"]
+cds_annot <- mouse_annot[mouse_annot$type=="CDS"]
 
 filt.transcripts <- exon_annot[exon_annot$tid %in% names(cdna_sub)] %>% 
   as_tibble() %>% 
