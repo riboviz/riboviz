@@ -79,35 +79,6 @@ RENAMES = {
 Renamed configuration parameters.
 """
 
-UPDATES = {
-    params.ASITE_DISP_LENGTH_FILE: None,
-    params.OUTPUT_METAGENE_NORMALIZED_PROFILE: True,
-    params.CODON_POSITIONS_FILE: None,
-    params.COUNT_READS: True,
-    params.COUNT_THRESHOLD: 64,
-    params.DEDUP_STATS: False,
-    params.DEDUP_UMIS: False,
-    params.EXTRACT_UMIS: False,
-    params.FEATURE: "CDS",
-    params.FEATURES_FILE: None,
-    params.FQ_FILES: None,
-    params.GROUP_UMIS: False,
-    params.MULTIPLEX_FQ_FILES: None,
-    params.OUTPUT_PDFS: True,
-    params.PUBLISH_INDEX_TMP: False,
-    params.RUN_STATIC_HTML: True,
-    params.SAMPLE_SHEET: None,
-    params.SAMSORT_MEMORY: None,
-    params.STOP_IN_FEATURE: False,
-    params.TRIM_5P_MISMATCHES: True,
-    params.T_RNA_FILE: None,
-    params.UMI_REGEXP: None
-}
-
-"""
-Map from configuration parameters to default values for parameters.
-"""
-
 UNUSED = [
     "aligner",
     "isTestRun",
