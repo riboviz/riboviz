@@ -20,7 +20,7 @@ vignette/riboviz_env.yaml
 vignette/simdata_multiplex_config.yaml
 vignette/simdata_umi_config.yaml
 vignette/vignette_config.yaml
-riboviz/test/config/vignette_config_current.yaml
+riboviz/test/config/config_current.yaml
 ```
 
 ### 2. Update Python code
