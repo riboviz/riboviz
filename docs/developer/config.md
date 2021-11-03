@@ -23,6 +23,8 @@ vignette/vignette_config.yaml
 riboviz/test/config/config_current.yaml
 ```
 
+If there is no default value then use the value `null`.
+
 ### 2. Update Python code
 
 Update `riboviz/params.py`, creating a Python constant for the new parameter. For example:
@@ -31,18 +33,6 @@ Update `riboviz/params.py`, creating a Python constant for the new parameter. Fo
 EXAMPLE_CONFIG = "example_config"
 """ Example configuration parameter. """
 ```
-
-Update `riboviz/upgrade_config.py`, adding the new parameter and its default value to the `UPDATES` dictionary. For example:
-
-```python
-UPDATES = {
-    ...
-    params.EXAMPLE_CONFIG = 64,
-    ...
-}
-```
-
-If there is no default value then use the value `None`.
 
 Run the tests for `riboviz/upgrade_config.py` and check that they all pass:
 
@@ -180,19 +170,8 @@ Update `riboviz/upgrade_config.py`:
 
 * Add an entry for the old parameter name and its new name to the 'Configuration parameters that have been renamed are updated' list in the module comment at the top of the file.
 * Add an entry for the old parameter name and its new name in the `RENAMES` dictionary.
-* Rename the parameter and to its new name in the `UPDATES` dictionary.
 
-For example, if renaming `old_example` to `new_example`, and `riboviz/upgrade_config.py` defines:
-
-```python
-UPDATES = {
-    ...
-    params.OLD_EXAMPLE = 64,
-    ...
-}
-```
-
-then `riboviz/upgrade_config.py` would be updated to:
+For example, if renaming `old_example` to `new_example` then `riboviz/upgrade_config.py` would be updated to:
 
 ```python
 RENAMES = {
@@ -200,13 +179,6 @@ RENAMES = {
     "old_example": params.NEW_EXAMPLE,
     ...
 }
-
-UPDATES = {
-    ...
-    params.NEW_EXAMPLE = 64,
-    ...
-}
-
 ```
 
 Run the tests for `riboviz/upgrade_config.py` and check that they all pass:
@@ -267,10 +239,11 @@ Update `riboviz/upgrade_config.py`:
 
 * Remove any entry for the parameter from the 'Configuration parameters that have been renamed are updated' list in the module comment at the top of the file.
 * Add an entry for the parameter to the 'Configuration parameters that are now unused are removed' list in the module comment at the top of the file.
-* Remove any occurrence of the parameter from the `UPDATES` and `RENAMES` dictionaries.
+* Remove any occurrence of the parameter from the `RENAMES` dictionaries.
 * Add an entry for the parameter to the `UNUSED` dictionary.
 
 For example, if removing `deprecated_example`, then `UNUSED` would be updated to:
+
 ```python
 UNUSED = {
     ...
