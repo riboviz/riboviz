@@ -293,8 +293,9 @@ if (params.help) {
 /*
 Initialise and validate configuration.
 
-Initialise optional variables to avoid "WARN: Access to undefined
-parameter '<PARAM>'" errors.
+First initialise optional variables to default values.
+This avoids "WARN: Access to undefined parameter '<PARAM>'" errors.
+Note that parameter values in the config file override these defaults.
 */
 
 params.buffer = 250
