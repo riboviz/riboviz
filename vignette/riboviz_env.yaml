@@ -20,6 +20,7 @@ fq_files:
   WT3AT: SRR1042864_s1mi.fastq.gz
   NotHere: example_missing_file.fastq.gz
 group_umis: false
+hisat2_orf_params: -k 2 --no-spliced-alignment --rna-strandness F --no-unal
 is_riboviz_gff: true
 job_email: null
 job_email_events: beas
