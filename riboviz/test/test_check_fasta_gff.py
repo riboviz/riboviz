@@ -130,7 +130,7 @@ def test_get_fasta_sequence_ids(tmpdir):
     """
     fasta_file = tmpdir.join("fasta.fasta")
     fasta_seq_ids = ["SeqID_{}".format(i) for i in range(0, 5)]
-    with open(fasta_file, "w") as f:
+    with open(fasta_file, 'w') as f:
         for seq_id in fasta_seq_ids:
             record = SeqRecord(Seq("GATTACCA"),
                                id=seq_id,

@@ -102,7 +102,7 @@ def get_fasta_sequence_ids(fasta):
     if not os.path.exists(fasta) or (not os.path.isfile(fasta)):
         raise FileNotFoundError(fasta)
     seq_ids = set()
-    with open(fasta, "r") as f:
+    with open(fasta, 'r') as f:
         # 'fasta' is https://biopython.org/wiki/SeqIO file type.
         for record in SeqIO.parse(f, "fasta"):
             seq_ids.add(record.id)
@@ -329,11 +329,11 @@ def write_issues_to_csv(issues, csv_file, header={}, delimiter="\t"):
     :type delimiter: str or unicode
     """
     provenance.write_provenance_header(__file__, csv_file)
-    with open(csv_file, "a") as f:
+    with open(csv_file, 'a', newline='') as f:
         for key, value in header.items():
             f.write("# {}: {}\n".format(key, value))
-    with open(csv_file, "a") as f:
-        writer = csv.writer(f, delimiter=delimiter, lineterminator='\n')
+    with open(csv_file, 'a', newline='') as f:
+        writer = csv.writer(f, delimiter=delimiter, lineterminator=os.linesep)
         writer.writerow([SEQUENCE, FEATURE, ISSUE_TYPE, ISSUE_DATA])
         for (sequence_id, feature_id, issue_type, issue_data) in issues:
             writer.writerow([sequence_id, feature_id, issue_type,
