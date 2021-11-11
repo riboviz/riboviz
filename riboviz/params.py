@@ -62,6 +62,11 @@ ORF_INDEX_PREFIX = "orf_index_prefix"
 RRNA_INDEX_PREFIX = "rrna_index_prefix"
 """ ORF index file name prefix. """
 
+HISAT2_ORF_PARAMS = "hisat2_orf_params"
+"""
+Command-line parameters for hisat2 invocation to align ORFs to index files.
+"""
+
 ADAPTERS = "adapters"
 """ Illumina sequencing adapter to remove. """
 MAKE_BEDGRAPH = "make_bedgraph"
