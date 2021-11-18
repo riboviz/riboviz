@@ -3,7 +3,6 @@
 *.fai
 *.pyc
 *~
-*~
 .DS_Store
 .RData
 .Rhistory
