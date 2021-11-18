@@ -210,8 +210,8 @@ def write_feature_codons_to_csv(feature_codons, csv_file, delimiter="\t"):
     :type delimiter: str or unicode
     """
     provenance.write_provenance_header(__file__, csv_file)
-    with open(csv_file, "a") as f:
-        writer = csv.writer(f, delimiter=delimiter, lineterminator='\n')
+    with open(csv_file, 'a', newline='') as f:
+        writer = csv.writer(f, delimiter=delimiter, lineterminator=os.linesep)
         writer.writerow([GENE, POS, CODON])
         for feature_id, codons in list(feature_codons.items()):
             for pos, codon in zip(range(0, len(codons)), codons):
