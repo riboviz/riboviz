@@ -85,7 +85,7 @@ The workflow also supports the following configuration parameters. All directory
 | `output_metagene_normalized_profile` | Calculate position-specific nucleotide freqeuency? | No | `true` |
 | `output_pdfs` | Generate .pdfs for sample-related plots | No | `true` |
 | `primary_id` | Primary gene IDs to access the data (YAL001C, YAL003W, etc.) | No | `Name` |
-| `publish_index_tmp` | Publish index and temporary files to `<dir_index>` and `<dir_tmp>`? If `true` copy index and temporary files from Nextflow's `work/` directory, else use symbolic links only (see [Nextflow `work/` directory](../user/prep-riboviz-operation.md#nextflow-work-directory)). | No | `false` |
+| `publish_index_tmp` | Publish index and temporary files to `<dir_index>` and `<dir_tmp>`? If `false` (default) create symbolic links to these files in the [Nextflow `work/` directory](../user/prep-riboviz-operation.md#nextflow-work-directory). If `true`, copy the index and temporary files from Nextflow's `work/` directory. As copies of both the index files and temporary files can take up many gigabytes of space, setting `publish_index_tmp` to `true` is **not recommended** in general. | No | `false` |
 | `rpf` | Is the dataset an RPF or mRNA dataset? | No | `true` |
 | `rrna_fasta_file` | Ribosomal rRNA and other contaminant sequences to avoid aligning to (FASTA file) | Yes | |
 | `rrna_index_prefix` | Prefix for rRNA index files, relative to `<dir_index>` | Yes | |

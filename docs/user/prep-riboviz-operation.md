@@ -84,7 +84,9 @@ If a multiplexed file (`multiplex_fq_files`) is specified, then the workflow pro
 
 Index files (HT2) are produced in the index directory (`dir_index`) (if `build_indices: TRUE`).
 
-By default, files in the index directory are symbolic links to files in the [Nextflow work/ directory](#nextflow-work-directory). To request Nextflow copy the index files into this directory set the `publish_index_tmp` parameter to `TRUE` in the workflow configuration file or provide the parameter `publish_index_tmp` when running the workflow using Nextflow.
+This directory provides easy access to the index files created and used in the workflow, and which can also be used for troubleshooting. By default, files in this index directory are **symbolic links** to files in the [Nextflow work/ directory](#nextflow-work-directory). This means that if the Nextflow `work/` directory is deleted, then the index files will no longer be accessible.
+
+To request that Nextflow copy index files into the `dir_index` directory, set the `publish_index_tmp` parameter to `TRUE` in the workflow configuration file or provide the parameter `--publish_index_tmp` when running the workflow using Nextflow. Please note, however, that, as this creates copies of both the index files and temporary files (which can take up many gigabytes of space), setting `publish_index_tmp` is **not recommended** in general.
 
 ---
 
@@ -132,7 +134,9 @@ If a multiplexed file (`multiplex_fq_files`) is specified, then the following fi
   - `<SAMPLE_ID>.fastq`: Files with demultiplexed reads, where `<SAMPLE_ID>` is a value in the `SampleID` column of the sample sheet. There will be one file per sample.
   - `Unassigned.fastq`: A FASTQ file with the reads that did not match any `TagRead` (barcode) in the sample sheet.
 
-By default, files in the temporary directory are symbolic links to files in the [Nextflow work/ directory](#nextflow-work-directory). To request Nextflow copy the index files into this directory set the `publish_index_tmp` parameter to `TRUE` in the workflow configuration file or provide the parameter `publish_index_tmp` when running the workflow using Nextflow.
+This directory provides easy access to the temporary, or intermediate, files created and used in the workflow which can also be used for troubleshooting. By default, files in this temporary directory are **symbolic links** to files in the [Nextflow work/ directory](#nextflow-work-directory). This means that if the Nextflow `work/` directory is deleted, then the temporary files will no longer be accessible.
+
+To request that Nextflow copy temporary files into the `dir_tmp` directory, set the `publish_index_tmp` parameter to `TRUE` in the workflow configuration file or provide the parameter `--publish_index_tmp` when running the workflow using Nextflow. Please note, however, that, as this creates copies of both the index files and temporary files (which can take up many gigabytes of space), setting `publish_index_tmp` is **not recommended** in general.
 
 ---
 
@@ -236,6 +240,7 @@ For index and temporary files, `publishDir` is configured using the value of the
 **Caution:**
 
 * If `publish_index_tmp` is `FALSE` and the `work/` directory is deleted then the index and temporary files will no longer be accessible.
+* If `publish_index_tmp` is `TRUE` then `dir_tmp` will be populated with copies of temporary files which can take up many gigabytes of space.  Setting `publish_index_tmp` is **not recommended** in general.
 * If the `work/` folder is deleted, then certain information will no longer be accessible via `nextflow log`.
 * If the `work/` folder is deleted, then `the `-resume` flag has no effect and the whole workflow will be rerun.
 
