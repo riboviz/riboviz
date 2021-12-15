@@ -80,6 +80,8 @@ Cope AL, Anderson F, Favate J, Jackson M, Mok A, Kurowska A, MacKenzie E, Shivak
 
 Wallace, Edward; Anderson, Felicity; Kavoussanakis, Kostas; Jackson, Michael; Shah, Premal; Lareau, Liana; et al. (2021): riboviz: software for analysis and visualization of ribosome profiling datasets. figshare. Software. doi: [10.6084/m9.figshare.12624200](https://doi.org/10.6084/m9.figshare.12624200)
 
+The reference for riboviz version 1, which focused on yeast, is:
+
 riboviz: analysis and visualization of ribosome profiling datasets, Carja et al., BMC Bioinformatics 2017. doi:[10.1186/s12859-017-1873-8](https://doi.org/10.1186/s12859-017-1873-8).
 
 ## Acknowledgements
