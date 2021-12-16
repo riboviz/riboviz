@@ -28,7 +28,7 @@ The workflow prepares ribosome profiling data for by implementing a workflow tha
 
 An additional script within the riboviz codebase allows the generation of interactive plots from the dataset after the riboviz workflow has been completed.  
 
-A process within the main riboviz workflow (`createInteractiveVizParamsConfigFile`, within `prep-riboviz.nf`) generates a configuration yaml file specifically for this interactive visualization (`interactive_viz_config.yaml`, found in the `dir_out` directory), and users can then run `rscripts/run_shiny_server.R` using this additional YAML (as detailed within [How To Run the riboviz Interactive Data Visualization On Your Data](./run_shiny_server-operation.md)).  This generates a shiny app instance which users can view to explore their data.
+A process within the main riboviz workflow (`createInteractiveVizParamsConfigFile`, within `prep-riboviz.nf`) generates a configuration yaml file specifically for this interactive visualization (`interactive_viz_config.yaml`, found in the `dir_out` directory), and users can then run `rscripts/run_shiny_server.R` using this additional YAML (as detailed within [How To Run the riboviz Interactive Data Visualization On Your Data](./run-shiny-server-operation.md)).  This generates a shiny app instance which users can view to explore their data.
 
 
 ---
