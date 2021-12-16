@@ -23,7 +23,7 @@
 
 Development of riboviz is currently supported by the following:
 
-* [BBSRC-NSF/BIO Lead Agency](https://bbsrc.ukri.org/funding/filter/2018-nsfbio-lead-agency-scheme/) collaboration funding:
+* BBSRC-NSF/BIO Lead Agency collaboration funding:
   - BBSRC grant number BB/S018506/1, "riboviz for reliable, reproducible and rigorous quantification of protein synthesis from ribosome profiling data", 05/2019-04/2022, awarded to Edward Wallace,
   - NSF/BIO grant number 1936046, "Collaborative Research: BBSRC: riboviz for reliable, reproducible and rigorous quantification of protein synthesis from ribosome profiling data", 07/2019-06/2022, awarded to Premal Shah and Liana Lareau.
 * NIH grant R35 GM124976, "Dynamics and evolution of translational regulation", 10/2017-08/2022, awarded to Premal Shah.
