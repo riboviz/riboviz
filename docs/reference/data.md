@@ -155,7 +155,7 @@ The data is from the paper Guydosh N.R. and Green R. "[Dom34 rescues ribosomes i
 * SRX386986: GSM1279570: wild-type no additive, [SRR1042855](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042855)
 * SRX386995: GSM1279579: wild-type plus 3-AT, [SRR1042864](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042864)
 
-In July 2017, these files were imported using NCBI's [fastq-dump](https://ncbi.github.io/sra-tools/fastq-dump.html) and gzipped to produce:
+In July 2017, these files were imported using NCBI's `fastq-dump` and gzipped to produce:
 
 ```
 SRR1042855.fastq.gz
@@ -163,6 +163,8 @@ SRR1042864.fastq.gz
 ```
 
 (these files are not in the repository)
+
+Note: [The NCBI SRA (Sequence Read Archive)](https://github.com/ncbi/sra-tools) comments that "With release 2.9.1 of sra-tools we have finally made available the tool fasterq-dump, a replacement for the much older `fastq-dump` and `fastq-dump` is still supported as it handles more corner cases than `fasterq-dump`, but it is likely to be deprecated in the future."
 
 These files can alternatively be accessed via [SRA Explorer](https://ewels.github.io/sra-explorer/#):
 
