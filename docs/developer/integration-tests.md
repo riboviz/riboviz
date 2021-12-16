@@ -33,7 +33,7 @@ Download test data, for example:
 
 ```console
 $ cd
-$ git clone https://github.com/riboviz/test-data-2.1
+$ git clone https://github.com/riboviz/test-data-2.2
 ```
 
 ---
@@ -56,7 +56,7 @@ For example:
 ```console
 $ cd riboviz
 $ pytest riboviz/test/integration/test_integration.py \
-    --expected=$HOME/test-data-2.1 \
+    --expected=$HOME/test-data-2.2 \
     --config-file=vignette/vignette_config.yaml
 ```
 

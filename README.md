@@ -64,7 +64,8 @@ Releasing:
 
 | Release | Description |
 | ------- | ----------- |
-| [2.1](https://github.com/riboviz/riboviz/releases/tag/2.1) | 2.1, current stable release |
+| [2.2](https://github.com/riboviz/riboviz/releases/tag/2.2) | 2.2, current stable release |
+| [2.1](https://github.com/riboviz/riboviz/releases/tag/2.1) | 2.1 |
 | [2.0](https://github.com/riboviz/riboviz/releases/tag/2.0) | 2.0 |
 | [2.0.beta](https://github.com/riboviz/riboviz/releases/tag/2.0.beta) | 2.0 beta release |
 | [1.1.0](https://github.com/riboviz/riboviz/releases/tag/1.1.0) | Most recent version prior to commencement of BBSRC/NSF riboviz project |
