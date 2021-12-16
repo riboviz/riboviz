@@ -12,7 +12,9 @@ The process for creating a test data repository is as follows:
 
 ## Caution
 
-Any repository hosted on GitHub should not exceed 1GB in size. GitHub's [What is my disk quota?](https://help.github.com/en/github/managing-large-files/what-is-my-disk-quota) comments "If your repository exceeds 1GB, you might receive a polite email from GitHub Support requesting that you reduce the size of the repository to bring it back down."
+Any repository hosted on GitHub should not exceed 1GB in size. 
+
+GitHub's [About large files on GitHub](https://help.github.com/en/github/managing-large-files/what-is-my-disk-quota) comments that they "recommend repositories remain small, ideally less than 1 GB" and that "If you attempt to add or update a file that is larger than 50 MB, you will receive a warning from Git."
 
 ---
 
