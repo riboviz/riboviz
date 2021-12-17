@@ -1,8 +1,8 @@
 """
 pytest plugin file for integration tests.
 
-This allows pytest to take in additional command-line parameters to
-pass onto integration test modules:
+This plugin allows pytest to take in additional command-line
+parameters to pass onto integration test modules:
 
 * ``--expected=<DIRECTORY>``: Directory with expected data files,
   against which files specified in the configuration file (see below)
@@ -19,17 +19,32 @@ pass onto integration test modules:
   used. Sample names are extracted from
   :py:const:`riboviz.params.FQ_FILES`. If, instead,
   :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` is provided then sample
-  names are extracted from the sample sheet file specified in
+  names are deduced from the names of folders in
+  :py:const:`riboviz.params.OUTPUT_DIR` cross-referenced with the
+  sample sheet file specified in
   :py:const:`riboviz.params.SAMPLE_SHEET`.
+
+This plugin also parameterises tests with configuration from the
+configuration file provided via ``--config-file``.
+
+For more information on the patterns used in this file, see pytest's
+`Parametrizing fixtures and test functions
+<https://docs.pytest.org/en/6.2.x/parametrize.html>`_
+specifically `Basic pytest_generate_tests example
+<https://docs.pytest.org/en/6.2.x/parametrize.html#pytest-generate-tests>`_
+and the use of ``pytest_addoption`` to support custom command-line
+options and ``pytest_generate_tests`` to support custom
+parameterization.
 """
 import os.path
 import pytest
 import yaml
+import riboviz
 from riboviz import environment
+from riboviz import fastq
 from riboviz import params
 from riboviz import sample_sheets
 from riboviz import test
-from riboviz import utils
 
 EXPECTED = "--expected"
 """ Directory with expected data files command-line flag."""
@@ -43,7 +58,7 @@ CONFIG_FILE = "--config-file"
 
 def pytest_addoption(parser):
     """
-    pytest configuration hook.
+    Add custom command-line parameters to pytest.
 
     :param parser: command-line parser
     :type parser: _pytest.config.argparsing.Parser
@@ -69,7 +84,7 @@ def pytest_addoption(parser):
 @pytest.fixture(scope="module")
 def expected_fixture(request):
     """
-    Gets value for ``--expected`` command-line option.
+    Gets value for :py:const:`EXPECTED` command-line option.
 
     :param request: request
     :type request: _pytest.fixtures.SubRequest
@@ -87,7 +102,7 @@ def expected_fixture(request):
 @pytest.fixture(scope="module")
 def skip_workflow_fixture(request):
     """
-    Gets value for ``--skip-workflow`` command-line option.
+    Gets value for :py:const:`SKIP_WORKFLOW` command-line option.
 
     :param request: request
     :type request: _pytest.fixtures.SubRequest
@@ -100,9 +115,9 @@ def skip_workflow_fixture(request):
 @pytest.fixture(scope="module")
 def skip_index_tmp_fixture(request):
     """
-    Gets value for `--check-index-tmp` command-line option. If
-    ``False``, or undefined, invokes ``pytest.skip`` to skip
-    test.
+    Gets value for :py:const:`CHECK_INDEX_TMP` command-line option.
+    If ``False``, or undefined, invokes ``pytest.skip`` to skip
+    a test that uses this fixture.
 
     :param request: request
     :type request: _pytest.fixtures.SubRequest
@@ -116,7 +131,7 @@ def skip_index_tmp_fixture(request):
 @pytest.fixture(scope="module")
 def config_fixture(request):
     """
-    Gets value for ``--config-file`` command-line option.
+    Gets value for :py:const:`CONFIG_FILE` command-line option.
 
     :param request: request
     :type request: _pytest.fixtures.SubRequest
@@ -132,53 +147,50 @@ def config_fixture(request):
 
 def pytest_generate_tests(metafunc):
     """
-    Parametrize tests using information within a configuration file.
+    Parametrize tests using information within a riboviz configuration
+    file. Behaviour is as follows:
 
-    * If :py:const:`CONFIG_FILE` has been provided then use this as a
-      configuration file, else use
-      :py:const:`riboviz.test.VIGNETTE_CONFIG`.
-    * Load configuration from file.
-    * Inspect each test fixture used by the test functions and \
-      configure with values from the configuration:
-        - ``sample``:
-            - If :py:const:`riboviz.params.FQ_FILES` is provided then
-              sample names are the keys from this value.
-            - If :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` is
-              provided then sample names are extracted from the sample
-              sheet file specified in
-              :py:const:`riboviz.params.SAMPLE_SHEET`.
-            - If sample name
-              :py:const:`riboviz.test.VIGNETTE_MISSING_SAMPLE`
-              is present, then it is removed from the sample names.
-        - ``index_prefix``: value of
-          :py:const:`riboviz.params.ORF_INDEX_PREFIX` and
-          :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
-        - :py:const.`riboviz.params.INPUT_DIR`: value of this
-          configuration parameter.
-        - :py:const.`riboviz.params.DATASET`: value of this
-          configuration parameter or ``dataset`` if undefined.
-        - :py:const.`riboviz.params.FEATURES_FILE`: value of this
-          configuration parameter or ``None`` if undefined.
-        - :py:const.`riboviz.params.SAMPLE_SHEET`: value of this
-          configuration parameter or ``None`` if undefined.
-        - :py:const.`riboviz.params.FQ_FILES`: value of this
-          configuration parameter or ``None`` if undefined.
-        - ``index_dir``: value of
-          :py:const:`riboviz.params.INDEX_DIR`.
-        - ``tmp_dir``: value of :py:const:`riboviz.params.TMP_DIR`.
-        - ``output_dir``: value of
-          :py:const:`riboviz.params.OUTPUT_DIR`.
-        - ``extract_umis``: value of
-          :py:const:`riboviz.params.EXTRACT_UMIS`.
-        - ``dedup_umis``: value of
-          :py:const:`riboviz.params.DEDUP_UMIS`.
-        - ``dedup_stats``: value of
-          :py:const:`riboviz.params.DEDUP_STATS` or `TRUE` if
-          undefined
-        - ``group_umis``: value of
-          :py:const:`riboviz.params.GROUP_UMIS`.
-        - ``count_reads``: value of
-          :py:const:`riboviz.params.COUNT_READS`.
+    * If :py:const:`CONFIG_FILE` has been provided then its value is
+      used as a configuration file, otherwise
+      :py:const:`riboviz.test.VIGNETTE_CONFIG` is used.
+    * The configuration is loaded from the configuration file.
+    * Each test function is inspected and values for parameters
+      injected into them.
+
+    The following test parameters are defined. Any test function that
+    declares a parameter with one of these names will be parameterised
+    with the values for that parameter:
+
+    * ``sample``:
+        - If :py:const:`riboviz.params.FQ_FILES` is provided then
+          the sample names are the keys from this value.
+        - If :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` then
+          sample names are deduced from the names of output
+          directories in the expected data directory,
+          :py:const:`EXPECTED`, cross-referenced
+          with the sample sheet file specified in
+          :py:const:`riboviz.params.SAMPLE_SHEET`.
+        - If sample name
+          :py:const:`riboviz.test.VIGNETTE_MISSING_SAMPLE`
+          is present, then it is removed from the sample names.
+        - ``[]`` otherwise.
+    * ``is_multiplexed``: list with ``True`` if
+      :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` defines one or
+      more files, ``False`` otherwise.
+    * ``multiplex_name``: list of multiplexed file name prefixes,
+      without extensions, from
+      :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` if
+      :py:const:`riboviz.params.MULTIPLEX_FQ_FILES` defines one or
+      more files, ``[]`` otherwise.
+    * ``index_prefix``: list with values of
+      :py:const:`riboviz.params.ORF_INDEX_PREFIX` and
+      :py:const:`riboviz.params.RRNA_INDEX_PREFIX`.
+    * ``<param>``: where ``<param>`` is a key from
+      :py:const:`riboviz.params.DEFAULT_CONFIG_YAML_FILE` and the
+      value is a list with either the value of the parameter from
+      ``config``, if defined, or the default from
+      :py:const:`riboviz.params.DEFAULT_CONFIG_YAML_FILE`.
+      otherwise.
 
     :param metafunc: pytest test function inspection object
     :type metafunc: _pytest.python.Metafunc
@@ -193,43 +205,57 @@ def pytest_generate_tests(metafunc):
         "No such file: %s" % config_file
     with open(config_file, 'r') as f:
         config = yaml.load(f, yaml.SafeLoader)
-
+    default_config_file = os.path.join(os.path.dirname(riboviz.__file__),
+                                       params.DEFAULT_CONFIG_YAML_FILE)
+    with open(default_config_file, "r") as f:
+        default_config = yaml.load(f, yaml.SafeLoader)
     # Replace environment variable tokens with environment variables
     # in configuration parameter values that support environment
     # variables
     environment.apply_env_to_config(config)
-    fixtures = {
-        "index_prefix": [config[params.ORF_INDEX_PREFIX],
-                         config[params.RRNA_INDEX_PREFIX]],
-        params.INPUT_DIR: [config[params.INPUT_DIR]],
-        params.DATASET: [config[params.DATASET]],
-        params.FEATURES_FILE: [None if params.FEATURES_FILE not in config else config[params.FEATURES_FILE]],
-        params.SAMPLE_SHEET: [None if params.SAMPLE_SHEET not in config else config[params.SAMPLE_SHEET]],
-        params.FQ_FILES: [None if params.FQ_FILES not in config else config[params.FQ_FILES]],
-        "index_dir": [config[params.INDEX_DIR]],
-        "tmp_dir": [config[params.TMP_DIR]],
-        "output_dir": [config[params.OUTPUT_DIR]],
-        "output_pdfs": [utils.value_in_dict(params.OUTPUT_PDFS, config)],
-        "extract_umis": [utils.value_in_dict(params.EXTRACT_UMIS, config)],
-        "dedup_umis": [utils.value_in_dict(params.DEDUP_UMIS, config)],
-        "dedup_stats": [True if params.DEDUP_STATS not in config else utils.value_in_dict(params.DEDUP_STATS, config)],
-        "group_umis": [utils.value_in_dict(params.GROUP_UMIS, config)],
-        "count_reads": [utils.value_in_dict(params.COUNT_READS, config)]
-    }
+    test_params = {}
+    for param, default in default_config.items():
+        test_params[param] = [default if param not in config
+                              else config[param]]
+    test_params["index_prefix"] = [config[params.ORF_INDEX_PREFIX],
+                                   config[params.RRNA_INDEX_PREFIX]]
+    test_params["is_multiplexed"] = [
+        params.MULTIPLEX_FQ_FILES in config
+        and config[params.MULTIPLEX_FQ_FILES]]
+    if "multiplex_name" in metafunc.fixturenames:
+        multiplex_names = []
+        if params.MULTIPLEX_FQ_FILES in config and config[params.MULTIPLEX_FQ_FILES]:
+            multiplex_names = [
+                os.path.splitext(fastq.strip_fastq_gz(file_name))[0]
+                for file_name in config[params.MULTIPLEX_FQ_FILES]
+            ]
+        test_params['multiplex_name'] = multiplex_names
     if "sample" in metafunc.fixturenames:
         samples = []
         if params.FQ_FILES in config and config[params.FQ_FILES]:
             samples = list(config[params.FQ_FILES].keys())
         elif params.MULTIPLEX_FQ_FILES in config and config[params.MULTIPLEX_FQ_FILES]:
+            # Get samples from sample sheet.
             sample_sheet_file = os.path.join(
                 config[params.INPUT_DIR],
                 config[params.SAMPLE_SHEET])
             sample_sheet = sample_sheets.load_sample_sheet(
                 sample_sheet_file)
-            samples = list(sample_sheet[sample_sheets.SAMPLE_ID])
+            sample_sheet_samples = list(sample_sheet[sample_sheets.SAMPLE_ID])
+            # Get folder/file names from output directory. These
+            # include output folders for the samples which were
+            # demultiplexed and other files.
+            expected_dir = metafunc.config.getoption(EXPECTED)
+            expected_out = os.path.join(
+                expected_dir,
+                os.path.basename(os.path.normpath(config[params.OUTPUT_DIR])))
+            output_samples = os.listdir(expected_out)
+            # Get names of samples for which output files exist.
+            samples = list(set(sample_sheet_samples).intersection(
+                set(output_samples)))
         if test.VIGNETTE_MISSING_SAMPLE in samples:
             samples.remove(test.VIGNETTE_MISSING_SAMPLE)
-        fixtures["sample"] = samples
-    for fixture, value in fixtures.items():
-        if fixture in metafunc.fixturenames:
-            metafunc.parametrize(fixture, value)
+        test_params["sample"] = samples
+    for test_param, value in test_params.items():
+        if test_param in metafunc.fixturenames:
+            metafunc.parametrize(test_param, value)

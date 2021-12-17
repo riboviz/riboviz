@@ -1,6 +1,6 @@
 
 ---
-title: "Riboviz Analysis Outputs"
+title: "riboviz Analysis Outputs"
 output: 
   html_document:
     toc: true

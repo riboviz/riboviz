@@ -1,6 +1,6 @@
 # Git branching model
 
-RiboViz uses three classes of branch for development:
+riboviz uses three classes of branch for development:
 
 * `main` branch: the most stable branch. Releases are created as tags of specific versions from `main`.
 * `develop` branch: for ongoing development. At regular intervals this will be merged into `main`.
@@ -30,10 +30,11 @@ To request that a branch be merged into `develop`:
 
 1. Merge the current version of `develop` into your local branch.
 2. Resolve conflicts, if any, and commit the fixes.
-3. [Run Python tests and workflow tests](./testing.md#run-python-tests-and-workflow-tests).
-4. [Run vignette integration tests](./testing.md#run-vignette-integration-tests).
-5. Make fixes to resolve any test failures. If unsure then ask another member of the team for advice.
-6. When all tests are passing for your branch, create a new pull request.
+3. [Run Python tests and workflow tests](./dev-python.md#run-python-tests-and-workflow-tests).
+4. [Run R tests](./dev-r.md#run-r-tests).
+5. [Run vignette integration tests](./integration-tests.md#run-vignette-integration-tests).
+6. Make fixes to resolve any test failures. If unsure then ask another member of the team for advice.
+7. When all tests are passing for your branch, create a new pull request.
 
 Decisions to merge development branches into `develop` are made by Edward Wallace, Felicity Anderson, Kostas Kavoussanakis and Mike Jackon.
 

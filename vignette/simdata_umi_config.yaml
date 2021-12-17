@@ -19,6 +19,7 @@ features_file: data/yeast_features.tsv # Features to correlate with ORFs
 fq_files: # fastq files to be processed, relative to dir_in
   umi5_umi3: umi5_umi3_umi_adaptor.fastq
 group_umis: TRUE # Summarise UMI groups before and after deduplication, if TRUE
+hisat2_orf_params: -k 2 --no-spliced-alignment --rna-strandness F --no-unal # hisat2ORF parameters
 is_riboviz_gff: TRUE # Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3
 job_email_events: beas # Events triggering emails about batch job (job submission). Any combination of b - begin, e - end, a - abort, s - suspend.
 job_email: null # E-mail address for batch job events (job submission).

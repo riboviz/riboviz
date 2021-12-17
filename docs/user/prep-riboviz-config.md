@@ -1,6 +1,6 @@
-# Configuring the RiboViz workflow
+# Configuring the riboviz workflow
 
-This page describes the inputs that the RiboViz workflow requires and how it is configured.
+This page describes the inputs that the riboviz workflow requires and how it is configured.
 
 ---
 
@@ -60,6 +60,7 @@ The workflow also supports the following configuration parameters. All directory
 | `features_file` | Features to correlate with ORFs (tab-separated values file) | No | |
 | `fq_files` |  List of FASTQ files to be processed, relative to `<dir_in>`. Each list member consists of identifier key with a file name value (e.g. `WT3AT: SRR1042864_s1mi.fastq.gz`). | Only if `multiplex_fq_files` is not provided | |
 | `group_umis` | Summarise UMI groups both pre- and post-deduplication, using UMI-tools? Useful for debugging. | No | `false` |
+| `hisat2_orf_params` | Command-line parameters for hisat2 invocation to align ORFs to index files. riboviz is designed to be used on positive strand transcriptome files and for that purpose the default parameters (which specifies forward RNA-strandness and no spliced alignment) are very important. Do **not** change these parameters unless you intentionally wish to explore other behaviours (for example, to use riboviz for genome alignment). **If** you do decide to change the parameters then a full list of possible hisat2 parameters can be seen by running `hisat2 -h` or consulting the [hisat2 Manual](http://daehwankimlab.github.io/hisat2/manual/). **Note:** only parameters that control the behaviour of hisat2 should be specified here. Input or output file names **cannot** be specified. | No  | `"-k 2 --no-spliced-alignment --rna-strandness F --no-unal"` |
 | `is_riboviz_gff` | Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3? Used by `bam_to_h5.R` only. | No | `true` |
 | `job_email_events` | Events triggering emails about batch job. Any combination of `b`(begin), `e` (end), `a` (abort), `s` (suspend). (see [Create job submission script from template](./create-job-script.md)) | No | `beas` |
 | `job_email` | E-mail address for batch job events (see [Create job submission script from template](./create-job-script.md)) | No | `null` |
@@ -84,7 +85,7 @@ The workflow also supports the following configuration parameters. All directory
 | `output_metagene_normalized_profile` | Calculate position-specific nucleotide freqeuency? | No | `true` |
 | `output_pdfs` | Generate .pdfs for sample-related plots | No | `true` |
 | `primary_id` | Primary gene IDs to access the data (YAL001C, YAL003W, etc.) | No | `Name` |
-| `publish_index_tmp` | Publish index and temporary files to `<dir_index>` and `<dir_tmp>`? If `true` copy index and temporary files from Nextflow's `work/` directory, else use symbolic links only (see [Nextflow `work/` directory](../user/prep-riboviz-operation.md#nextflow-work-directory)). | No | `false` |
+| `publish_index_tmp` | Publish index and temporary files to `<dir_index>` and `<dir_tmp>`? If `false` (default) create symbolic links to these files in the [Nextflow `work/` directory](../user/prep-riboviz-operation.md#nextflow-work-directory). If `true`, copy the index and temporary files from Nextflow's `work/` directory. As copies of both the index files and temporary files can take up many gigabytes of space, setting `publish_index_tmp` to `true` is **not recommended** in general. | No | `false` |
 | `rpf` | Is the dataset an RPF or mRNA dataset? | No | `true` |
 | `rrna_fasta_file` | Ribosomal rRNA and other contaminant sequences to avoid aligning to (FASTA file) | Yes | |
 | `rrna_index_prefix` | Prefix for rRNA index files, relative to `<dir_index>` | Yes | |
@@ -220,7 +221,7 @@ t_rna_file: ${RIBOVIZ_DATA}/yeast_tRNAs.tsv
 
 Which, if any, token you use in each of the configuration parameters is entirely up to you. No checks are made to see which specific token is used with which configuration parameter.
 
-[Defining values for environment variables](./prep-riboviz-run-nextflow.md#defining-values-for-environment-variables) in [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md) describes how to define values for these environment variables so that their values can be applied when the workflow is run.
+[Defining values for environment variables](./prep-riboviz-run-nextflow.md#defining-values-for-environment-variables) in [Running the riboviz Nextflow workflow](./prep-riboviz-run-nextflow.md) describes how to define values for these environment variables so that their values can be applied when the workflow is run.
 
 **Note:** If a configuration file contains environment variable tokens then you **must** provide values for these when running the workflow.
 
@@ -269,7 +270,7 @@ $ mkdir -p example/vignette
 $ mkdir -p example/vignette/input
 ```
 
-Create symbolic links to all the input files, where `$HOME/riboviz` is the path to RiboViz home directory, which can be relative to the current directory or absolute:
+Create symbolic links to all the input files, where `$HOME/riboviz` is the path to riboviz home directory, which can be relative to the current directory or absolute:
 
 ```console
 $ cd example/data

@@ -21,6 +21,7 @@ fq_files: # fastq files to be processed, relative to dir_in
   WT3AT: SRR1042864_s1mi.fastq.gz
   NotHere: example_missing_file.fastq.gz # Test case for missing file
 group_umis: FALSE # Summarise UMI groups before and after deduplication, if TRUE
+hisat2_orf_params: -k 2 --no-spliced-alignment --rna-strandness F --no-unal # hisat2ORF parameters
 is_riboviz_gff: TRUE # Does the GFF file contain 3 elements per gene - UTR5, CDS, and UTR3
 make_bedgraph: TRUE # Output bedgraph files, as TSV, in addition to h5?
 max_read_length: 50 # Maximum read length in H5 output
