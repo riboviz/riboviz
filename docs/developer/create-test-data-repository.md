@@ -36,7 +36,7 @@ Create a repository:
 ## 2. Clone a local copy of the new repository
 
 ```console
-$ git clone https://github.com/riboviz/<REPOSITORY>
+$ git clone git@github.com:riboviz/<REPOSITORY>
 ```
 
 ---
