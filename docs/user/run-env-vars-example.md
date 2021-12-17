@@ -38,5 +38,5 @@ $ RIBOVIZ_DATA=$HOME/ribo-data \
   RIBOVIZ_ORGANISMS=$HOME/ribo-organisms \
   RIBOVIZ_SAMPLES=$HOME/ribo-samples \
   pytest -vs $HOME/riboviz/riboviz/test/integration/test_integration.py \
-  --expected=$HOME/test-data-2.1 --skip-workflow --config-file riboviz_env.yaml
+  --expected=$HOME/test-data-2.2 --skip-workflow --config-file riboviz_env.yaml
 ```
