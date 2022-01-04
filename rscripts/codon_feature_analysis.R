@@ -411,8 +411,10 @@ FilterForFeatureOfInterest <- function(
   return(transcript_feature_tibble)
 }
 
+
+
 # Expand the region around an occurrence of the feature_of_interest
-ExpandRegions <- function(
+ExpandRegionsAroundFeature <- function(
   feature_location, gene_pos_codon_counts, gene, gff_df, expand_width) {
 
   # filters gene_pos_codon_counts down to the gene being processed
@@ -448,7 +450,7 @@ ExpandRegions <- function(
 
 # Takes gene_pos_codon_counts as inputs and select for positions
 # on separate genes
-AllGeneInterestingFeatures <- function(
+InterestingFeaturePerGene <- function(
   gene, feature_of_interest, gene_pos_codon_counts, 
   gff_df, expand_width) {
 
@@ -460,7 +462,7 @@ AllGeneInterestingFeatures <- function(
   # less/more than the expand_width value are discarded
   expand_feature_region <- purrr::map(
     .x = features_for_one_gene$CodonPos1,
-    .f = ExpandRegions,
+    .f = ExpandRegionsAroundFeature,
     gene_pos_codon_counts,
     gene,
     gff_df,
@@ -528,7 +530,7 @@ AllGeneInterestingFeatures <- function(
 #'                     )
 #'
 #' @export
-ExpandFeatureRegion <- function(
+ExpandFeatureRegionForAllGenes <- function(
   gene_pos_codon_counts, gene_names, gff_df,
   feature_of_interest, expand_width) {
   # Fetch the assigned read counts for genes in gene_names
@@ -539,7 +541,7 @@ ExpandFeatureRegion <- function(
  
   expand_feature_region <- purrr::map(
     .x = gene_names,
-    .f = AllGeneInterestingFeatures,
+    .f = InterestingFeaturePerGene,
     feature_of_interest,
     gene_pos_codon_counts,
     gff_df,
@@ -683,7 +685,7 @@ ExpandedRegionNormalisation <- function(
 
   # fetch the expanded tibbles for each occurrence of the
   # feature_of_interest
-  expand_feature_region <- ExpandFeatureRegion(
+  expand_feature_region <- ExpandFeatureRegionForAllGenes(
     gene_pos_codon_counts, gene_names, gff_df,
     feature_of_interest, expand_width)
   
@@ -891,7 +893,7 @@ OverlayedTibble <- function(
 #'                 expand_width = 5L)
 #'
 #'@export
-FindAllOccurences <- function(
+FindFeature <- function(
   feature_of_interest, gene_pos_codon_counts, gene_names,
   gff_df, expand_width) {
   
@@ -922,7 +924,7 @@ FindAllOccurences <- function(
   # the normalised and overlayed relative counts around the
   # feature_of_interest
   overlayed_tibbles <- tibble::tibble(
-    RelPos = seq(- expand_width, expand_width),
+    RelPos = seq(-expand_width, expand_width),
     RelCount = joined_rows$RelCount)
 
 
@@ -989,7 +991,6 @@ CodonFeatureAnalysis <- function(hd_file, dataset, gff, codon_pos_table,
                             recursive = 1)$name
 
   codon_pos <- suppressMessages(read_tsv(file = codon_pos_table))
-  # Extract codon pair positions.
 
   ## This operation is relatively quick. Can make even if not doing codon pairs analysis
   codon_pos <- tibble::tibble(
@@ -1002,6 +1003,7 @@ CodonFeatureAnalysis <- function(hd_file, dataset, gff, codon_pos_table,
   )
   codon_pos <- codon_pos %>% mutate(CodonPair=paste(Codon_1,Codon_2))
 
+  ## Create table with codon counts per codon per gene
   gene_pos_codon_counts <- AddCodonNamesToCodonPosCounts(
     codon_pos, gene_names, dataset, hd_file,
     min_read_length, asite_disp_length, filter_for_frame,
@@ -1010,7 +1012,7 @@ CodonFeatureAnalysis <- function(hd_file, dataset, gff, codon_pos_table,
   ## Map over different features of interest
   feature_rel_use <- purrr::map_df(
     .x = feature_of_interest,
-    .f = FindAllOccurences,
+    .f = FindFeature,
     gene_pos_codon_counts = gene_pos_codon_counts,
     gene_names = gene_names,
     gff_df = gff_df,
