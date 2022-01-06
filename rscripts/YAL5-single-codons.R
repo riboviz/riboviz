@@ -18,10 +18,10 @@ if (interactive()) {
   # the parent of rscripts/ but imposes no other constraints on
   # where rscripts/ or its parents are located.
   self <- "YAL5-single-codons.R"
-  path_to_self <- here("rscripts", self)
-  source(here::here("rscripts", "provenance.R"))
-  source(here::here("rscripts", "read_count_functions.R"))
-  source(here::here("rscripts", "stats_figs_block_functions.R"))
+  path_to_self <- here::here("riboviz","rscripts", self)
+  source(here::here("riboviz","rscripts", "provenance.R"))
+  source(here::here("riboviz","rscripts", "read_count_functions.R"))
+  source(here::here("riboviz","rscripts", "stats_figs_block_functions.R"))
 } else {
   # Deduce file name and path using reflection as before.
   self <- getopt::get_Rscript_filename()
@@ -396,6 +396,9 @@ AllGeneInterestingFeatures <- function(
   # function is being applied to in this purrr::map cycle.
   transcript_for_one_gene <- TranscriptForOneGene(
     gene, feature_of_interest, transcript_gene_poscodon_frame)
+  
+  # if (feature_of_interest == "TAT")
+  #   print(transcript_for_one_gene)
   # Apply ExpandRegion() to each occurrence of the feature_of_interest
   # on the gene being studied.
   output_feature_info <- purrr::map(.x = transcript_for_one_gene$PosCodon,
@@ -782,6 +785,7 @@ FindAllFeatures <- function(
   # Check for the presence of the feature of interest.
   # Output_feature_info being empty will cause problems with
   # normalization.
+  print(output_feature_info)
   if (length(output_feature_info) == 0) {
     print(paste("No occurrences of", feature_being_studied))
     if (expand_width > 1) {
@@ -856,7 +860,7 @@ Yal5SingleCodons <- function(hd_file, dataset, gff, yeast_codon_table,
         gene_names, gff_df, asite_disp_path, dataset, hd_file,
         min_read_length, filter_for_frame, filtering_frame, snapdisp,
         yeast_codon_pos_i200, feature_of_interest, expand_width))
-
+  print(output_feature_info)
     # Check for the presence of the
     # feature_of_interest. Output_feature_info being
     # empty will cause problems with normalization
@@ -1007,21 +1011,20 @@ option_list <- list(
                 for yeast when code is run from riboviz directory")
 )
 
-opt <- optparse::parse_args(OptionParser(option_list = option_list))
+#opt <- optparse::parse_args(OptionParser(option_list = option_list))
 
-hd_file <- opt$input
-dataset <- opt$dataset
-gff <- opt$gff
-yeast_codon_table <- opt$annotation
-feature_of_interest <- opt$feature
-output_dir <- opt$output
-expand_width <- opt$expand_width
-filtering_frame <- opt$frame
-min_read_length <- opt$minreadlen
-filter_for_frame <- opt$filter_for_frame
-snapdisp <- opt$snapdisp
-asite_disp_path <- opt$asite_length
-
+hd_file <- "data/Mok-simYAL5/A.h5"
+dataset <- "Mok-simYAL5"
+gff <- "data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3"
+asite_disp_path <- "data/yeast_standard_asite_disp_length.txt"
+yeast_codon_table <- "data/yeast_codon_table.tsv"
+feature_of_interest <- "TAT"
+output_dir <- "."
+output_file <- "Feature_Relative_use_Mok-simYAL5.tsv"
+min_read_length <- 10
+expand_width <- 5
+filter_for_frame <- TRUE
+snapdisp <- filtering_frame <-  0
 Yal5SingleCodons(hd_file, dataset, gff, yeast_codon_table,
   feature_of_interest, output_dir, expand_width, filtering_frame,
   min_read_length, filter_for_frame, snapdisp, asite_disp_path) 

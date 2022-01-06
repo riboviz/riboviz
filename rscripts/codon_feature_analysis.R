@@ -18,10 +18,9 @@ if (interactive()) {
   # where rscripts/ or its parents are located.
   this_script <- "codon_feature_analysis.R"
   path_to_this_script <- here::here("rscripts", this_script)
-  source(here::here("riboviz","rscripts", "provenance.R"))
-  source(here::here("riboviz","rscripts", "read_count_functions.R"))
-  source(here::here("riboviz","rscripts", "stats_figs_block_functions.R"))
-  source(here::here("riboviz","rscripts", "stats_figs_block_functions.R"))
+  source(here::here("rscripts", "provenance.R"))
+  source(here::here("rscripts", "read_count_functions.R"))
+  source(here::here("rscripts", "stats_figs_block_functions.R"))
 } else {
   # Deduce file name and path using reflection as before.
   this_script <- getopt::get_Rscript_filename()
@@ -363,15 +362,15 @@ AddCodonNamesToCodonPosCounts <- function(
 
   return(gene_pos_codon_counts)
 }
-#TEST: AddCodonNamesToCodonPosCounts(): creates a tibble = TRUE
-#TEST: AddCodonNamesToCodonPosCounts(): the tibble contains columns =
+#TEST: FilterForFeatureOfInterestPerGene(): creates a tibble = TRUE
+#TEST: FilterForFeatureOfInterestPerGene(): the tibble contains columns =
 # TRUE
-#TEST: AddCodonNamesToCodonPosCounts(): number of observations in the
+#TEST: FilterForFeatureOfInterestPerGene(): number of observations in the
 # output tibble = sum of CDS (codon co-ordinates) for all genes in
 # gene_names.
-#TEST: AddCodonNamesToCodonPosCounts(): the column names are %in%
+#TEST: FilterForFeatureOfInterestPerGene(): the column names are %in%
 # c("Gene", "CodonPos1", "CodonPos2", "Count", "CodonPair")
-#TEST: AddCodonNamesToCodonPosCounts(): the unique gene names in
+#TEST: FilterForFeatureOfInterestPerGene(): the unique gene names in
 # column "Gene" match the genes in gene_names
 # (unique(all_codon_pos_counts$Gene) = gene_names) = TRUE.
 # gives:
@@ -385,7 +384,7 @@ AddCodonNamesToCodonPosCounts <- function(
 #   $ CodonPair: chr  "ATG GCA" "GCA TCC" "TCC ACC" "ACC GAT" ...
 
 ### Slice out and expand a frame around interesting features ###
-FilterForFeatureOfInterest <- function(
+FilterForFeatureOfInterestPerGene <- function(
   gene, gene_pos_codon_counts, feature_of_interest) {
 
   # Check if feature of interest is single codon 
@@ -411,6 +410,18 @@ FilterForFeatureOfInterest <- function(
   return(transcript_feature_tibble)
 }
 
+
+FilterForFeatureOfInterest <- function(
+  feature_of_interest, gene_pos_codon_counts, gene_names) {
+  
+  feature_across_genes_tibble <- purrr::map(
+    .x = gene_names,
+    .f = FilterForFeatureOfInterestPerGene,
+    gene_pos_codon_counts = gene_pos_codon_counts,
+    feature_of_interest = feature_of_interest
+  )
+  return(feature_across_genes_tibble)
+}
 
 
 # Expand the region around an occurrence of the feature_of_interest
@@ -451,22 +462,16 @@ ExpandRegionsAroundFeature <- function(
 # Takes gene_pos_codon_counts as inputs and select for positions
 # on separate genes
 InterestingFeaturePerGene <- function(
-  gene, feature_of_interest, gene_pos_codon_counts, 
+  feature_of_interest, gene_pos_codon_counts, 
   gff_df, expand_width) {
-
-  features_for_one_gene <- FilterForFeatureOfInterest(gene,
-                                                  gene_pos_codon_counts,
-                                                  feature_of_interest)
  
-  # The if statement ensures that feature positions that are
-  # less/more than the expand_width value are discarded
   expand_feature_region <- purrr::map(
-    .x = features_for_one_gene$CodonPos1,
+    .x = feature_of_interest$CodonPos1,
     .f = ExpandRegionsAroundFeature,
-    gene_pos_codon_counts,
-    gene,
-    gff_df,
-    expand_width)
+    gene_pos_codon_counts = gene_pos_codon_counts,
+    gene = unique(feature_of_interest$Gene),
+    gff_df = gff_df,
+    expand_width = expand_width)
   return(expand_feature_region)
 }
 
@@ -531,18 +536,12 @@ InterestingFeaturePerGene <- function(
 #'
 #' @export
 ExpandFeatureRegionForAllGenes <- function(
-  gene_pos_codon_counts, gene_names, gff_df,
+  gene_pos_codon_counts, gff_df,
   feature_of_interest, expand_width) {
-  # Fetch the assigned read counts for genes in gene_names
-  # gene_pos_codon_counts <- AddCodonNamesToCodonPosCounts(
-  #   codon_pos, gene_names, dataset, hd_file,
-  #   min_read_length, asite_disp_length, filter_for_frame,
-  #   gff_df)
- 
+
   expand_feature_region <- purrr::map(
-    .x = gene_names,
+    .x = feature_of_interest,
     .f = InterestingFeaturePerGene,
-    feature_of_interest,
     gene_pos_codon_counts,
     gff_df,
     expand_width)
@@ -686,11 +685,10 @@ ExpandedRegionNormalisation <- function(
   # fetch the expanded tibbles for each occurrence of the
   # feature_of_interest
   expand_feature_region <- ExpandFeatureRegionForAllGenes(
-    gene_pos_codon_counts, gene_names, gff_df,
+    gene_pos_codon_counts, gff_df,
     feature_of_interest, expand_width)
   
   if (length(expand_feature_region) == 0) {
-    print(paste("No occurrences of", feature_of_interest))
     if (expand_width > 1) {
       print("Use expand_width = 1L to check for occurrences near to start or stop codon")
     }
@@ -899,15 +897,21 @@ CodonFeatureAnalysis <- function(hd_file, dataset, gff, codon_pos_table,
     min_read_length, asite_disp_length, filter_for_frame,
     gff_df)
   
+  features_per_gene <- purrr::map(
+    .x = feature_of_interest,
+    .f = FilterForFeatureOfInterest,
+    gene_pos_codon_counts = gene_pos_codon_counts,
+    gene_names = gene_names)
+  
   ## Map over different features of interest
   feature_rel_use <- purrr::map_df(
-    .x = feature_of_interest,
+    .x = features_per_gene,
     .f = FindFeature,
     gene_pos_codon_counts = gene_pos_codon_counts,
     gene_names = gene_names,
     gff_df = gff_df,
     expand_width = expand_width,
-    .id="Codon")
+    .id="Feature")
 
   return(feature_rel_use)
 
@@ -917,7 +921,7 @@ FilterFeatureTableByRelativePosition <-function(feature_table,relative_pos = 0)
 {
   # Create a new tibble listing the feature being studied, and the
   # RelCount at position 0, ie RelCount at the feature_of_interest
-  feature_table_filter <- feature_table %>% filter(RelPos == 0) %>% dplyr::select(Codon,RelCount)
+  feature_table_filter <- feature_table %>% filter(RelPos == 0) %>% dplyr::select(Feature,RelCount)
   feature_table_filter <- arrange(feature_table_filter, desc(RelCount))
   return(feature_table_filter)
 }
@@ -996,18 +1000,90 @@ dataset <- "Mok-simYAL5"
 gff <- "data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3"
 asite_disp_path <- "data/yeast_standard_asite_disp_length.txt"
 codon_pos_table <- "data/yeast_codon_table.tsv"
-feature_of_interest <- "data/codon-pairs.tsv"
+feature_of_interest <- "data/codons.tsv"
 output_dir <- "."
 output_file <- "Feature_Relative_use_Mok-simYAL5.tsv"
 min_read_length <- 10
 expand_width <- 5
 filter_for_frame <- 0
 
-feature_rel_use <- CodonFeatureAnalysis(hd_file, dataset, gff, codon_pos_table,
-  feature_of_interest, output_dir, expand_width, filter_for_frame,
-  min_read_length, asite_disp_path)
 
+if (file.exists(feature_of_interest)) {
+  feature_of_interest <- suppressMessages(read_tsv(feature_of_interest,col_types=cols()))
+  feature_of_interest <- unname(unlist(feature_of_interest[, 1]))
+  names(feature_of_interest) <- feature_of_interest
+} 
 
+if (file.exists(asite_disp_path))
+{
+  asite_displacement_length <- suppressMessages(ReadAsiteDisplacementLengthFromFile(asite_disp_path))
+} else{
+  stop("ERROR: A-site offset file not found.")
+}
+
+gff_df <- readGFFAsDf(gff)
+
+gff_df <- gff_df %>% dplyr::filter(type == "CDS")
+
+gene_names <- rhdf5::h5ls(hd_file,
+                          recursive = 1)$name
+
+codon_pos <- suppressMessages(read_tsv(file = codon_pos_table))
+
+## This operation is relatively quick. Can make even if not doing codon pairs analysis
+codon_pos <- tibble::tibble(
+  Gene = codon_pos$Gene,
+  CodonPos1 = codon_pos$PosCodon,
+  CodonPos2 = dplyr::lead(codon_pos$PosCodon),
+  Codon_1 = codon_pos$Codon,
+  Codon_2 = (dplyr::lead(codon_pos$Codon)
+             %>% str_replace_all("ATG", "NA"))
+)
+codon_pos <- codon_pos %>% mutate(CodonPair=paste(Codon_1,Codon_2))
+
+## Create table with codon counts per codon per gene
+gene_pos_codon_counts <- AddCodonNamesToCodonPosCounts(
+  codon_pos, gene_names, dataset, hd_file,
+  min_read_length, asite_displacement_length, filter_for_frame,
+  gff_df)
+
+features_per_gene <- purrr::map(
+  .x = feature_of_interest,
+  .f = FilterForFeatureOfInterest,
+  gene_pos_codon_counts = gene_pos_codon_counts,
+  gene_names = gene_names)
+
+feature_rel_use <- purrr::map_df(
+  .x = features_per_gene,
+  .f = FindFeature,
+  gene_pos_codon_counts = gene_pos_codon_counts,
+  gene_names = gene_names,
+  gff_df = gff_df,
+  expand_width = expand_width,
+  .id="Feature")
+
+# feature_rel_use <- CodonFeatureAnalysis(hd_file, dataset, gff, codon_pos_table,
+#   feature_of_interest, output_dir, expand_width, filter_for_frame,
+#   min_read_length, asite_disp_path)
+
+# 
 feature_rel_use_pos0 <- FilterFeatureTableByRelativePosition(feature_rel_use)
 #WriteCodonFeatureAnalysis(output_dir,feature_rel_use_pos0)
+plot(feature_rel_use_pos0$RelCount,test.single$RelCount)
 
+fake <- data.frame(Gene = c(gene_names,gene_names),CodonPos=c(rep(25,5),rep(50,5)),Feature=c(rep("25th",5),rep("50th",5)))
+fake.split <- fake %>% 
+  left_join(gene_pos_codon_counts,by=c("Gene","CodonPos"="CodonPos1")) %>% 
+  dplyr::rename(CodonPos1=CodonPos) %>%
+  group_by(Feature) %>% 
+  split(f = as.factor(.$Feature)) %>% ## using base::split because will name list based on Feature.
+  purrr::map(~.x %>% ungroup() %>% select(-Feature) %>% group_by(Gene) %>% group_split())
+feature_rel_use_test <- purrr::map_df(
+  .x = fake.split,
+  .f = FindFeature,
+  gene_pos_codon_counts = gene_pos_codon_counts,
+  gene_names = gene_names,
+  gff_df = gff_df,
+  expand_width = expand_width,
+  .id="Feature")
+feature_rel_use_test_pos0 <- FilterFeatureTableByRelativePosition(feature_rel_use_test)
