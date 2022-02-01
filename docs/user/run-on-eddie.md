@@ -459,7 +459,7 @@ Please also note the paths in the YAML configuration file we will be using from 
 
 ```console
 $ cd example-datasets
-$ git checkout master
+$ git checkout main
 $ cd ..   # back to $HOME/riboviz
 $ cd riboviz
 $ git checkout develop
@@ -469,7 +469,7 @@ Check you have this file structure:
 
 ```
 $HOME/riboviz/riboviz           # branch: develop
-$HOME/riboviz/example-datasets  # branch: master
+$HOME/riboviz/example-datasets  # branch: main
 ```
 
 This will give you access to the correct config.yaml, annotation and contaminants files.
