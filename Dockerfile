@@ -46,3 +46,9 @@ RUN conda install -n bowtie tbb=2020.2
 
 # Make hisat2 and bowtie visible to python environment
 ENV PATH="$PATH:/opt/conda/envs/hisat2/bin:/opt/conda/envs/bowtie/bin"
+
+# Add Riboviz inside the python environment
+COPY setup.cfg install/setup.cfg
+COPY setup.py install/setup.py
+COPY riboviz install/riboviz
+RUN conda run -n py pip install -e install/
