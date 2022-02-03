@@ -1,0 +1,10 @@
+{
+    "build": {
+        "dockerfile": "../Dockerfile",
+        "context": "..",
+    },
+    "extensions": [
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+    ],
+}

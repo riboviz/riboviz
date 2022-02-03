@@ -1,0 +1,23 @@
+name: py
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - jupyter
+  - biopython
+  - cutadapt
+  - gffutils
+  - gitpython
+  - h5py
+  - nextflow
+  - pandas
+  - pycodestyle
+  - pylint
+  - pysam
+  - pytest
+  - pytest-cov
+  - pyyaml
+  - samtools
+  - sphinx
+  - umi_tools
