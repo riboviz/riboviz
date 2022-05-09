@@ -31,7 +31,7 @@ The output file is a TSV file with columns:
 
 For example::
 
-    # Created by: RiboViz
+    # Created by: riboviz
     # Date: 2020-02-12 06:34:50.340316
     # Command-line tool: /home/ubuntu/riboviz/riboviz/tools/count_reads.py
     # File: /home/ubuntu/riboviz/riboviz/count_reads.py

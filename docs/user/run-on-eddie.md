@@ -13,11 +13,11 @@ Contents:
 
 * [Logging in](#logging-in)
 * [Configure Anaconda enviroment](#configure-anaconda-enviroment)
-* [Get Riboviz and example-datasets](#get-riboviz-and-example-datasets)
+* [Get riboviz and example-datasets](#get-riboviz-and-example-datasets)
 * [Interactive sessions](#interactive-sessions)
 * [Set up your environment from scratch (optional)](#set-up-your-environment-from-scratch-optional)
 * [Create `set-riboviz-env.sh`](#create-set-riboviz-envsh)
-* [Run a "vignette" of the RiboViz workflow](#run-a-vignette-of-the-riboviz-workflow)
+* [Run a "vignette" of the riboviz workflow](#run-a-vignette-of-the-riboviz-workflow)
 * [Job submission](#job-submission)
   - [Requesting resources](#requesting-resources)
   - [Submitting jobs](#submitting-jobs)
@@ -118,7 +118,7 @@ If you have access to a priority queue then you can use option `-P`:
 $ qlogin -pe interactivemem 4 -l h_vmem=4G -P <QUEUE_NAME>
 ```
 
-RiboViz team members have access to the priority queue `bio_wallace_rna_riboviz`.
+riboviz team members have access to the priority queue `bio_wallace_rna_riboviz`.
 
 See [Interactive sessions](https://www.wiki.ed.ac.uk/display/ResearchServices/Interactive+Sessions) for more information.
 
@@ -183,6 +183,7 @@ $ source set-riboviz-env.sh
 ## Run a "vignette" of the **riboviz** workflow
 
 Change into your **riboviz** repository:
+
 
 ```console
 $ cd riboviz/riboviz
@@ -318,7 +319,7 @@ This is work in progress. A temporary solution involving ringfenced nodes is des
 
 ### Submitting jobs
 
-Change into your **tiboviz** repository:
+Change into your **riboviz** repository:
 
 ```console
 $ cd riboviz/riboviz
@@ -344,7 +345,7 @@ Your job <job-ID> ("jobname") has been submitted
 
 This will output the standard output from `prep_riboviz.nf` to a file, `riboviz-$JOB_ID-$HOSTNAME.o`, in the current working directory, and errors to a file, `riboviz_vignette-$JOB_ID-$HOSTNAME.e`.
 
-The contents of `riboviz-$JOB_ID-$HOSTNAME.o` should be the same as the standard output of [Run a "vignette" of the RiboViz workflow in an interactive node](#run-a-vignette-of-the-RiboViz-workflow) above.
+The contents of `riboviz-$JOB_ID-$HOSTNAME.o` should be the same as the standard output of [Run a "vignette" of the riboviz workflow in an interactive node](#run-a-vignette-of-the-riboviz-workflow) above.
 
 An example job submission script for running the vignette using scratch space for outputs and using system links is available at [`jobs/vignette-submission-script.sh`](../../jobs/vignette-submission-script.sh) and uses a modified .yaml config file [`vignette/remote_vignette_config.yaml`](../../vignette/remote_vignette_config.yaml) as an input.
 
@@ -447,13 +448,13 @@ In this example, we're using the Wallace et al. 2020 *Cryptococcus neoformans* '
 
 To run the `Wallace_2020_JEC21` dataset on Eddie, logout from any interactive node you may be logged into (for example, if you were running the vignette example above) and ensure you are within the `example-datasets` repository at $HOME/riboviz/example-datasets and that you are in the correct git branch for both riboviz and example-datasets repositories.
 
-NOTE: the following sections are here for information as it might be helpful in explaining to new users what these steps do, and how to adjust these steps for your own data.  These steps (except [initial setup of SRA Toolkit](#download-fastq-data-files-from-the-short-read-archive-sra-initial-setup)) are included in the sample job submission script for the Wallace_2020_JEC21 dataset, so you don't have to carry out these steps manually if you plan to run the [job submission script](#create-qsub-job-submission-script) and you can skip straight there if you want to try running the script.
+NOTE: the following sections are here for information as it might be helpful in explaining to new users what these steps do, and how to adjust these steps for your own data.  These steps (except [Download fastq data files from the Short Read Archive (SRA): initial setup](#download-fastq-data-files-from-the-short-read-archive-sra-initial-setup)) are included in the sample job submission script for the Wallace_2020_JEC21 dataset, so you don't have to carry out these steps manually if you plan to run the [job submission script](#create-qsub-job-submission-script) and you can skip straight there if you want to try running the script.
 
 Please also note the paths in the YAML configuration file we will be using from the `example-datasets` directory are just a reference. You should check and edit the paths according to your directory structure.
 
 ```console
 $ cd example-datasets
-$ git checkout master
+$ git checkout main
 $ cd ..   # back to $HOME/riboviz
 $ cd riboviz
 $ git checkout develop
@@ -463,7 +464,7 @@ Check you have this file structure:
 
 ```
 $HOME/riboviz/riboviz           # branch: develop
-$HOME/riboviz/example-datasets  # branch: master
+$HOME/riboviz/example-datasets  # branch: main
 ```
 
 This will give you access to the correct config.yaml, annotation and contaminants files.
@@ -676,7 +677,7 @@ If you run the `example-dataset` in your scratch space, remember to move the out
 
 The job submission should create two files: an output file `JOB_NAME-$JOB_ID-$HOSTNAME.o` and an error file `$JOB_NAME-$JOB_ID-$HOSTNAME.e`.  These are the best place to start looking after a job has completed, to check if it has run successfully.
 
-The output file will contain the standard output from the nextflow run, and will provide you with information needed if you need to debug the run. For more information, see [Debugging](./prep-riboviz-run-nextflow.md#debugging) in [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md).
+The output file will contain the standard output from the nextflow run, and will provide you with information needed if you need to debug the run. For more information, see [Debugging](./prep-riboviz-run-nextflow.md#debugging) in [Running the riboviz Nextflow workflow](./prep-riboviz-run-nextflow.md).
 
 The output files will be in `/exports/eddie/scratch/$USER/Wallace_2020_JEC21/output/`.
 
@@ -738,7 +739,7 @@ For a short introduction, see [Using the Linux `screen` command](./using-linux-s
 
 ### Troubleshooting: riboviz fails from within `screen`
 
-If RiboViz fails if run within the context of `screen` then you may have to reinitialise your environment using `source set-riboviz-env.sh`. For example, for one user, the following sequence of steps resulted in a failure of RiboViz to successfully run to completion:
+If riboviz fails if run within the context of `screen` then you may have to reinitialise your environment using `source set-riboviz-env.sh`. For example, for one user, the following sequence of steps resulted in a failure of riboviz to successfully run to completion:
 
 ```console
 $ source set-riboviz-env.sh

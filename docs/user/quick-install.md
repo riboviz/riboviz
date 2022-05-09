@@ -1,6 +1,6 @@
 # Quick install scripts
 
-`bash/` contains simple bash scripts to automate some of the installation of **riboviz**'s dependencies. They are the manual commands of [Install RiboViz and dependencies](./install.md) in bash script form.
+`bash/` contains simple bash scripts to automate some of the installation of **riboviz**'s dependencies. They are the manual commands of [Install riboviz and dependencies](./install.md) in bash script form.
 
 These scripts were written for Ubuntu 18.04 and CentOS 7.4.
 
@@ -32,7 +32,7 @@ $ source bash/install-centos.sh
 Install R packages:
 
 ```console
-$ Rscript rscripts/install-r.R
+$ Rscript rscripts/install_r.R
 ```
 
 Check that R's library paths include your personal library:

@@ -5,7 +5,7 @@
 | Package | conda channel | Links |
 | ------- | ------------- | ----- |
 | pycodestyle | default | [readthedocs](https://pycodestyle.readthedocs.io/), [GitHub](https://github.com/pycqa/pycodestyle) |
-| pylint | default | [Pylint](https://www.pylint.org/), [BitBucket](https://bitbucket.org/logilab/pylint.org) |
+| pylint | default | [Pylint](https://www.pylint.org/), [GitHub](https://github.com/PyCQA/pylint/) |
 | pytest-cov | default | [pytest-cov](https://pytest-cov.readthedocs.io), [GitHub](https://github.com/pytest-dev/pytest-cov) |
 | Sphinx | default | [Sphinx](https://www.sphinx-doc.org/) |
 

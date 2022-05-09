@@ -1,4 +1,4 @@
-# RiboViz test data <DD>/<MM>/<YYYY>
+# riboviz test data <DD>/<MM>/<YYYY>
 
 Provenance:
 

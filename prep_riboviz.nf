@@ -4,7 +4,7 @@ import org.yaml.snakeyaml.Yaml
 
 /*
 ===================================
-RiboViz ribosome profiling workflow
+riboviz ribosome profiling workflow
 ===================================
 */
 
@@ -117,6 +117,12 @@ def helpMessage() {
     Adapter trimming:
 
     * 'adapters': Illumina sequencing adapter(s) to remove.
+
+    Alignment:
+
+    * 'hisat2_orf_params': Command-line parameters for hisat2
+      invocation to align ORFs to index files
+      (default "-k 2 --no-spliced-alignment --rna-strandness F --no-unal")
 
     Barcode and UMI extraction, deduplication, demultiplexing:
 
@@ -293,8 +299,9 @@ if (params.help) {
 /*
 Initialise and validate configuration.
 
-Initialise optional variables to avoid "WARN: Access to undefined
-parameter '<PARAM>'" errors.
+First initialise optional variables to default values.
+This avoids "WARN: Access to undefined parameter '<PARAM>'" errors.
+Note that parameter values in the config file override these defaults.
 */
 
 params.buffer = 250
@@ -307,6 +314,7 @@ params.dir_index = "index"
 params.dir_out = "output"
 params.dir_tmp = "tmp"
 params.output_metagene_normalized_profile = true
+params.hisat2_orf_params = "-k 2 --no-spliced-alignment --rna-strandness F --no-unal"
 params.extract_umis = false
 params.trim_5p_mismatches = true
 params.feature = "CDS"
@@ -903,8 +911,7 @@ process hisat2ORF {
     shell:
         """
         hisat2 --version
-        hisat2 -p ${params.num_processes} -k 2 \
-            --no-spliced-alignment --rna-strandness F --no-unal \
+        hisat2 -p ${params.num_processes} ${params.hisat2_orf_params} \
             --un unaligned.fq -x ${params.orf_index_prefix} \
             -S orf_map.sam -U ${sample_fq}
         """
