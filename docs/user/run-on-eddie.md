@@ -34,7 +34,11 @@ Contents:
    - [Checking outputs](#checking-outputs)
    - [Moving and downloading outputs](#moving-and-downloading-outputs)
 * [Hints and tips](#hints-and-tips)
+  - [Troubleshooting general hints](#troubleshooting-general-hints-files-permissions-debug-with-small-data)
+  - [Troubleshooting: fail to enter interactive node](#troubleshooting-fail-to-enter-interactive-node)
   - [Using the Linux `screen` command](#using-the-linux-screen-command)
+  - [Troubleshooting: riboviz fails from within screen](#troubleshooting-riboviz-fails-from-within-screen)
+  - [Troubleshooting: files modified after new clone of repositories by permissions change](#troubleshooting-files-modified-after-new-clone-of-repositories-by-permissions-change)
 
 ---
 
@@ -692,7 +696,7 @@ See [Storage](https://www.wiki.ed.ac.uk/display/ResearchServices/Storage) for mo
 
 ---
 
-# Hints, tips, and Troubleshooting
+# Hints and Tips
 
 ## Troubleshooting general hints: files, permissions, debug with small data
 
@@ -708,7 +712,7 @@ In our experience, the errors on Eddie are likely to be:
 6. Eddie is down or scratch storage under threat.
 
 
-## Troubleshooting: fail to enter interactive node**
+## Troubleshooting: fail to enter interactive node
 
 If you see an error message like:
 
