@@ -37,7 +37,7 @@ def parse_command_line_options():
     return options
 
 
-def invoke_create_fastq_simdata():
+def main():
     """
     Parse command-line options then invoke
     :py:func:`riboviz.create_fastq_simdata.create_fastq_simdata`.
@@ -48,4 +48,4 @@ def invoke_create_fastq_simdata():
 
 
 if __name__ == "__main__":
-    invoke_create_fastq_simdata()
+    main()

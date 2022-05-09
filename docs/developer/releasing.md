@@ -14,6 +14,7 @@ The process for building a release is as follows:
 
 * Merge all pull requests agreed for the release into the `develop` branch, via the GitHub web interface.
 * Merge additional branches agreed for the release into the `develop` branch via creation of pull requests, again via the GitHub web interface.
+* Update `__version_info__` value in `riboviz/__init__.py`.
 
 ---
 

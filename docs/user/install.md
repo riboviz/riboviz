@@ -103,6 +103,7 @@ The versions listed are those used by a riboviz developer when preparing the cur
 | samtools | 1.9 | conda |
 | sphinx | 4.0.1 | conda |
 | umi_tools | 1.0.1 | conda |
+| riboviz-py | 2.1 | pip |
 
 Certain packages are only required if you plan to develop and extend riboviz. These packages are (see [Install developer dependencies](../developer/install.md)):
 
@@ -718,6 +719,16 @@ Get riboviz:
 
 ```console
 $ git clone https://github.com/riboviz/riboviz
+```
+
+---
+
+## Install riboviz `riboviz-py` package
+
+Install `riboviz-py` from your clone of the Git repository:
+
+```console
+$ pip install .
 ```
 
 ---

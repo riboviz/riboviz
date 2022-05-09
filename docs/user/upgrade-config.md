@@ -2,12 +2,12 @@
 
 riboviz regularly evolves its configuration. This includes the prerequisites riboviz needs, how riboviz is used and also the structure of riboviz's YAML configuration files. Consult the appropriate sections of the documentation for details.
 
-To assist your migration to the current version of riboviz, we include a tool to help you upgrade your YAML configuration files, `riboviz.tools.upgrade_config_file`.
+To assist your migration to the current version of riboviz, we include a tool to help you upgrade your YAML configuration files, `upgrade_config_file`.
 
 The tool can be used as follows:
 
 ```console
-$ python -m riboviz.tools.upgrade_config_file -i <INPUT_FILE> [-o <OUTPUT_FILE>]
+$ upgrade_config_file -i <INPUT_FILE> [-o <OUTPUT_FILE>]
 ```
 
 where:
@@ -18,8 +18,7 @@ where:
 For example:
 
 ```console
-$ python -m riboviz.tools.upgrade_config_file \
-    -i /home/user/riboviz-data/config.yaml -o nu_config.yaml 
+$ upgrade_config_file -i /home/user/riboviz-data/config.yaml -o nu_config.yaml 
 ```
 
 **Note:** it is strongly recommended that you visually inspect the updated configuration to ensure the updates reflect your local environment. This especially relates to any file paths.

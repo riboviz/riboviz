@@ -90,12 +90,12 @@ The following information is included:
 
 * Input files: number of reads in the FASTQ files used as inputs.
 * `cutadapt`: number of reads in the FASTQ file output.
-* `riboviz.tools.demultiplex_fastq`: FASTQ files output by
+* `demultiplex_fastq`: FASTQ files output by
   "demultiplex_fastq", using the information in the associated
   `num_reads.tsv` summary files, or, if these can't be found, the
   FASTQ files themselves.
 * `hisat2`: number of reads in the SAM file and FASTQ file output.
-* `riboviz.tools.trim_5p_mismatch`: number of reads in the SAM file
+* `trim_5p_mismatch`: number of reads in the SAM file
   output as recorded in the `trim_5p_mismatch.tsv` summary file
   output, or the SAM file itself, if the TSV file cannot be found (if
   `trim_5p_mismatches: TRUE`)

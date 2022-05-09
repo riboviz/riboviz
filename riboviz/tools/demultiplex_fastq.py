@@ -128,7 +128,7 @@ def parse_command_line_options():
     return options
 
 
-def invoke_demultiplex_fastq():
+def main():
     """
     Parse command-line options then invoke
     :py:func:`riboviz.demultiplex_fastq.demultiplex`.
@@ -150,4 +150,4 @@ def invoke_demultiplex_fastq():
 
 
 if __name__ == "__main__":
-    invoke_demultiplex_fastq()
+    main()

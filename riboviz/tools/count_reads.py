@@ -92,7 +92,7 @@ def parse_command_line_options():
     return options
 
 
-def invoke_count_reads():
+def main():
     """
     Parse command-line options then invoke
     :py:func:`riboviz.count_reads.count_reads`.
@@ -109,4 +109,4 @@ def invoke_count_reads():
 
 
 if __name__ == "__main__":
-    invoke_count_reads()
+    main()
