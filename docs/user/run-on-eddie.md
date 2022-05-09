@@ -1,13 +1,13 @@
-# Running the RiboViz workflow on Eddie
+# Running the riboviz workflow on Eddie
 
-This page describes how you can run **RiboViz** on [Eddie](https://www.ed.ac.uk/information-services/research-support/research-computing/ecdf/high-performance-computing), The University of Edinburgh ECDF Linux Compute Cluster.
+This page describes how you can run **riboviz** on [Eddie](https://www.ed.ac.uk/information-services/research-support/research-computing/ecdf/high-performance-computing), The University of Edinburgh ECDF Linux Compute Cluster.
 
 **Note:** This information is for University of Edinburgh users only.
-However, these guidelines may be useful for running **RiboViz** in other HPC systems.
+However, these guidelines may be useful for running **riboviz** in other HPC systems.
 
 The Eddie service documentation is on the University of Edinburgh [wiki](https://www.wiki.ed.ac.uk/display/ResearchServices/Eddie),
 
-All Python and R packages required to run **RiboViz** have been installed in `/exports/csce/eddie/biology/groups/wallace_rna` on Eddie
+All Python and R packages required to run **riboviz** have been installed in `/exports/csce/eddie/biology/groups/wallace_rna` on Eddie
 
 Contents:
 
@@ -69,9 +69,9 @@ pkgs_dirs:
 
 ---
 
-## Get **RiboViz** and example-datasets
+## Get **riboviz** and example-datasets
 
-Get **RiboViz** and example-datasets:
+Get **riboviz** and example-datasets:
 
 ```console
 $ mkdir riboviz
@@ -80,56 +80,15 @@ $ git clone https://github.com/riboviz/riboviz
 $ git clone https://github.com/riboviz/example-datasets
 ```
 
-**Note:** Your home directory space is enough for running a vignette but is not enough for running a full-size dataset.
+This creates your personal clone of the riboviz and example datasets. You can switch between branches, make commits, etc., there, without disturbing other users.
 
-We recommend using the cluster filesystem (`/exports/[COLLEGE]/eddie/...`) for storing **RiboViz** and `example-datasets`.
+### Don't work in your home directory for full-size datasets
+
+Your home directory space is enough for running a vignette but is not enough for running a full-size dataset.
+
+We recommend using the cluster filesystem (`/exports/[COLLEGE]/eddie/...`) for storing **riboviz** and `example-datasets`.
 
 If you do not have a group space, you can use your scratch directory (`/exports/eddie/scratch/$USER`)
-
-**Troubleshooting: files modified after new clone of repositories by permissions change**
-
-If you see lots of modified files in a newly cloned repository after running `git status` (such as this example from a newly cloned example-datasets repository), but you have NOT modified these files yourself:
-
-```
-$ git status
-
-# On branch main
-# Changes not staged for commit:
-#   (use "git add <file>..." to update what will be committed)
-#   (use "git checkout -- <file>..." to discard changes in working directory)
-#
-#	modified:   fungi/candida/annotation/Candida_albicans_CDS_with_120utrs.fa
-#	modified:   fungi/candida/annotation/Candida_albicans_CDS_with_120utrs.gff3
-#	modified:   fungi/candida/contaminants/Candida_albicans_rRNA_tRNA.fa
-#	modified:   fungi/saccharomyces/annotation/Saccharomyces_cerevisiae_yeast_CDS_w_250utrs.fa
-#	modified:   fungi/saccharomyces/annotation/Saccharomyces_cerevisiae_yeast_CDS_w_250utrs.gff3
-#	modified:   fungi/saccharomyces/contaminants/Saccharomyces_cerevisiae_yeast_rRNA_R64-1-1.fa
-#	modified:   simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.fa
-#	modified:   simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3
-#	modified:   simulated/mok/annotation/tiny_2genes_20utrs.gff3
-#	modified:   simulated/mok/contaminants/Sc_rRNA_example.fa
-#
-no changes added to commit (use "git add" and/or "git commit -a")
-```
-You might have an issue with permission settings being inherited from folders above.  You can confirm this by using `git diff` to check how these files have been modified:
-```
-$ git diff fungi/candida/annotation/Candida_albicans_CDS_with_120utrs.fa
-
- diff --git a/fungi/candida/annotation/Candida_albicans_CDS_with_120utrs.fa b/fun
- old mode 100755
- new mode 100644
-```
-This shows that files have had their executable bit settings changed. You can check permissions within the folder using `ls -l`.  If you see permissions set to `drwx--S---`, this suggests that there is an issue around file permissions which is likely to have been inherited from folders above.
-
-To resolve the issue, edit the permissions of this folder (in the following example: `riboviz-foldername`) using `chmod`:
-
-```
-$ cd /path/to/riboviz/folder
-
-$ chmod 0755 riboviz-foldername
-```
-
-The folder permissions after this, when viewed with `ls -l`, should look like `drwxr-sr-x`, without the `-S` flag indicating that the permissions are shared from folders above, and including executable status (ie. `x`).
 
 ---
 
@@ -159,20 +118,6 @@ RiboViz team members have access to the priority queue `bio_wallace_rna_riboviz`
 
 See [Interactive sessions](https://www.wiki.ed.ac.uk/display/ResearchServices/Interactive+Sessions) for more information.
 
-**Troubleshooting: fail to enter interactive node**
-
-If you see:
-
-```
-Your job 2674903 ("QLOGIN") has been submitted
-waiting for interactive job to be scheduled ...timeout (5 s) expired while waiting on socket fd 9
-
-Your "qlogin" request could not be scheduled, try again later.
-```
-
-There may be no free nodes at present. Alternatively, Eddie may be under maintenance. You can check Eddie's status on the [Information Systems Alerts](https://alerts.is.ed.ac.uk/).
-
-Either way, you have to wait for a free node to become available or for Eddie to come back up. It usually won't take too long.
 
 ---
 
@@ -180,7 +125,7 @@ Either way, you have to wait for a free node to become available or for Eddie to
 
 ### Activate Anaconda
 
-`/exports/csce/eddie/biology/groups/wallace_rna` has Anaconda packages (in `anaconda`) and all the Python packages required by **RiboViz** are there, accessible as a `riboviz` conda environment.
+`/exports/csce/eddie/biology/groups/wallace_rna` has Anaconda packages (in `anaconda`) and all the Python packages required by **riboviz** are there, accessible as a `riboviz` conda environment.
 
 ```console
 $ source activate riboviz
@@ -231,9 +176,9 @@ $ source set-riboviz-env.sh
 
 ---
 
-## Run a "vignette" of the **RiboViz** workflow
+## Run a "vignette" of the **riboviz** workflow
 
-Change into the **RiboViz** repository:
+Change into your **riboviz** repository:
 
 ```console
 $ cd riboviz/riboviz
@@ -288,7 +233,7 @@ Computational work on Eddie is usually submitted to the cluster as batch jobs in
 
 See "Requesting resources" section below.
 
-Here is an example job script for the vignette, named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
+Here is an example job script for the vignette, named `job_riboviz.sh` in your `riboviz` directory to run a **riboviz** workflow:
 
 ```
 #!/bin/sh
@@ -328,7 +273,7 @@ nextflow run prep_riboviz.nf -params-file vignette/vignette_config.yaml -ansi-lo
 
 We provide a Python script, `riboviz.tools.create_job_script`, which creates a job submission script using the template in [jobs/eddie-template.sh](../../jobs/eddie-template.sh).
 
-You can run this to create a job script named `job_riboviz.sh` in your `riboviz` directory to run a **RiboViz** workflow:
+You can run this to create a job script named `job_riboviz.sh` in your `riboviz` directory to run a **riboviz** workflow:
 
 ```console
 $ python -m riboviz.tools.create_job_script \
@@ -369,7 +314,7 @@ This is work in progress. A temporary solution involving ringfenced nodes is des
 
 ### Submitting jobs
 
-Change into the **RiboViz** repository:
+Change into your **tiboviz** repository:
 
 ```console
 $ cd riboviz/riboviz
@@ -749,6 +694,35 @@ See [Storage](https://www.wiki.ed.ac.uk/display/ResearchServices/Storage) for mo
 
 ## Hints and tips
 
+### Troubleshooting general hints: files, permissions, debug with small data
+
+As for any debugging step or anything else with riboviz, it is better to fail fast.
+
+In our experience, the errors on Eddie are likely to be:
+
+1. You are trying to run a big dataset and failing slowly so can't tell what the error is. Make a small subsampled version of your input data with 1-2 samples of 100,000 reads each and try to fail/debug fast by running in an interactive session. Then move up to 1million reads. Then try bigger.
+3. Your filenames/filepaths are wrong. Debug with `--validate_only` flag, see [validate configuration](https://github.com/riboviz/riboviz/blob/main/docs/user/prep-riboviz-run-nextflow.md#validate-configuration).
+4. Your filenames/filepaths are still wrong. Check everything again and try editing your [environment variables](https://github.com/riboviz/riboviz/blob/main/docs/user/prep-riboviz-run-nextflow.md#defining-values-for-environment-variables).
+5. You have requested the wrong resources: too big and you will wait for ages, too small and it will quit. Try to vary those following the instructions above on this page. If your data are small enough to run in an interactive session, that is easier.
+6. Eddie is down.
+
+
+### Troubleshooting: fail to enter interactive node**
+
+If you see an error message like:
+
+```
+Your job 2674903 ("QLOGIN") has been submitted
+waiting for interactive job to be scheduled ...timeout (5 s) expired while waiting on socket fd 9
+
+Your "qlogin" request could not be scheduled, try again later.
+```
+
+There may be no free nodes at present. Alternatively, Eddie may be under maintenance. You can check Eddie's status on the [Information Systems Alerts](https://alerts.is.ed.ac.uk/).
+
+Either way, you have to wait for a free node to become available or for Eddie to come back up. It usually won't take too long.
+
+
 ### Using the Linux `screen` command
 
 Linux's `screen` command provides a virtual terminal multiplexer. It allows us to run a number of different sessions (or windows, or virtual terminals) withina single terminal, or console, window. This can be useful if we do not have access to a graphical user interface with multiple windows, which is the case when using EDDIE.
@@ -757,7 +731,7 @@ One use case is if we want to have one or more files open in editors while also 
 
 For a short introduction, see [Using the Linux `screen` command](./using-linux-screen.md).
 
-### Troubleshooting
+### Troubleshooting: riboviz fails from within `screen`
 
 If RiboViz fails if run within the context of `screen` then you may have to reinitialise your environment using `source set-riboviz-env.sh`. For example, for one user, the following sequence of steps resulted in a failure of RiboViz to successfully run to completion:
 
@@ -784,3 +758,48 @@ $ source activate riboviz    # If you didn't activate the 'riboviz' environment 
 $ cd riboviz
 $ nextflow prep_riboviz.nf -params-file vignette/vignette_config.yaml
 ```
+
+### Troubleshooting: files modified after new clone of repositories by permissions change 
+
+If you see lots of modified files in a newly cloned repository after running `git status` (such as this example from a newly cloned example-datasets repository), but you have NOT modified these files yourself:
+
+```
+$ git status
+
+# On branch main
+# Changes not staged for commit:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#	modified:   fungi/candida/annotation/Candida_albicans_CDS_with_120utrs.fa
+#	modified:   fungi/candida/annotation/Candida_albicans_CDS_with_120utrs.gff3
+#	modified:   fungi/candida/contaminants/Candida_albicans_rRNA_tRNA.fa
+#	modified:   fungi/saccharomyces/annotation/Saccharomyces_cerevisiae_yeast_CDS_w_250utrs.fa
+#	modified:   fungi/saccharomyces/annotation/Saccharomyces_cerevisiae_yeast_CDS_w_250utrs.gff3
+#	modified:   fungi/saccharomyces/contaminants/Saccharomyces_cerevisiae_yeast_rRNA_R64-1-1.fa
+#	modified:   simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.fa
+#	modified:   simulated/mok/annotation/Scer_YAL_5genes_w_250utrs.gff3
+#	modified:   simulated/mok/annotation/tiny_2genes_20utrs.gff3
+#	modified:   simulated/mok/contaminants/Sc_rRNA_example.fa
+#
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+You might have an issue with permission settings being inherited from folders above.  You can confirm this by using `git diff` to check how these files have been modified:
+```
+$ git diff fungi/candida/annotation/Candida_albicans_CDS_with_120utrs.fa
+
+ diff --git a/fungi/candida/annotation/Candida_albicans_CDS_with_120utrs.fa b/fun
+ old mode 100755
+ new mode 100644
+```
+This shows that files have had their executable bit settings changed. You can check permissions within the folder using `ls -l`.  If you see permissions set to `drwx--S---`, this suggests that there is an issue around file permissions which is likely to have been inherited from folders above.
+
+To resolve the issue, edit the permissions of this folder (in the following example: `riboviz-foldername`) using `chmod`:
+
+```
+$ cd /path/to/riboviz/folder
+
+$ chmod 0755 riboviz-foldername
+```
+
+The folder permissions after this, when viewed with `ls -l`, should look like `drwxr-sr-x`, without the `-S` flag indicating that the permissions are shared from folders above, and including executable status (ie. `x`).
