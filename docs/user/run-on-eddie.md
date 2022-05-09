@@ -692,22 +692,23 @@ See [Storage](https://www.wiki.ed.ac.uk/display/ResearchServices/Storage) for mo
 
 ---
 
-## Hints and tips
+# Hints, tips, and Troubleshooting
 
-### Troubleshooting general hints: files, permissions, debug with small data
+## Troubleshooting general hints: files, permissions, debug with small data
 
 As for any debugging step or anything else with riboviz, it is better to fail fast.
 
 In our experience, the errors on Eddie are likely to be:
 
 1. You are trying to run a big dataset and failing slowly so can't tell what the error is. Make a small subsampled version of your input data with 1-2 samples of 100,000 reads each and try to fail/debug fast by running in an interactive session. Then move up to 1million reads. Then try bigger.
-3. Your filenames/filepaths are wrong. Debug with `--validate_only` flag, see [validate configuration](https://github.com/riboviz/riboviz/blob/main/docs/user/prep-riboviz-run-nextflow.md#validate-configuration).
-4. Your filenames/filepaths are still wrong. Check everything again and try editing your [environment variables](https://github.com/riboviz/riboviz/blob/main/docs/user/prep-riboviz-run-nextflow.md#defining-values-for-environment-variables).
+2. Your filenames/filepaths are wrong. Debug with `--validate_only` flag, see [validate configuration](https://github.com/riboviz/riboviz/blob/main/docs/user/prep-riboviz-run-nextflow.md#validate-configuration).
+3. Your filenames/filepaths are still wrong. Check everything again and try editing your [environment variables](https://github.com/riboviz/riboviz/blob/main/docs/user/prep-riboviz-run-nextflow.md#defining-values-for-environment-variables).
+4. You have run out of quota in your home or scratch space. Check where you are working, try to change it, delete anything unnecessary.
 5. You have requested the wrong resources: too big and you will wait for ages, too small and it will quit. Try to vary those following the instructions above on this page. If your data are small enough to run in an interactive session, that is easier.
-6. Eddie is down.
+6. Eddie is down or scratch storage under threat.
 
 
-### Troubleshooting: fail to enter interactive node**
+## Troubleshooting: fail to enter interactive node**
 
 If you see an error message like:
 
@@ -723,7 +724,7 @@ There may be no free nodes at present. Alternatively, Eddie may be under mainten
 Either way, you have to wait for a free node to become available or for Eddie to come back up. It usually won't take too long.
 
 
-### Using the Linux `screen` command
+## Using the Linux `screen` command
 
 Linux's `screen` command provides a virtual terminal multiplexer. It allows us to run a number of different sessions (or windows, or virtual terminals) withina single terminal, or console, window. This can be useful if we do not have access to a graphical user interface with multiple windows, which is the case when using EDDIE.
 
@@ -759,7 +760,7 @@ $ cd riboviz
 $ nextflow prep_riboviz.nf -params-file vignette/vignette_config.yaml
 ```
 
-### Troubleshooting: files modified after new clone of repositories by permissions change 
+## Troubleshooting: files modified after new clone of repositories by permissions change 
 
 If you see lots of modified files in a newly cloned repository after running `git status` (such as this example from a newly cloned example-datasets repository), but you have NOT modified these files yourself:
 
