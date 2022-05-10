@@ -26,7 +26,7 @@ These files were created as follows:
 * The files `saccharomyces_cerevisiae_R64-2-1_20150113.gff` and `S288C_reference_sequence_R64-2-1_20150113.fsa` were extracted from the `.tgz` file.
 * The sequence and annotation files for the whole approximate *Saccharomyces cerevisiae* transcriptome were prepared using [script_for_transcript_annotation.Rmd](../../rmarkdown/script_for_transcript_annotation.Rmd).
 
-The files can be used as inputs to RiboViz. However, `yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were downsampled to provide a manageable data set for demonstration purposes, as described in the next section.
+The files can be used as inputs to riboviz. However, `yeast_CDS_w_250utrs.fa` and `yeast_CDS_w_250utrs.gff3` were downsampled to provide a manageable data set for demonstration purposes, as described in the next section.
 
 ---
 
@@ -48,7 +48,7 @@ As the yeast data files described in the previous section are very large, these 
 
 The document [Appendix A1: Yeast Nomenclature Systematic Open Reading Frame (ORF) and Other Genetic Designations](https://onlinelibrary.wiley.com/doi/pdf/10.1002/9783527636778.app1) describes the ORF naming convention.
 
-The files can be used as inputs to RiboViz.
+The files can be used as inputs to riboviz.
 
 ---
 
@@ -66,21 +66,43 @@ This files was created as follows:
 * The file `rna_coding_R64-1-1_20110203.fasta` was extracted from the `.tgz` file.
 * Selected `RDN-n-n` sequences were copied and pasted from this file.
 
-The file can be used as an input to RiboViz.
+The file can be used as an input to riboviz.
 
 ---
 
 ## Additional yeast-specific data
 
-Position of codons within each gene (the numbering ignores the first 200 codons):
+### Position of codons within each gene 
+
+```
+data/yeast_codon_table.tsv
+```
+
+This file was produced using  [script_for_transcript_annotation.Rmd](../../rmarkdown/script_for_transcript_annotation.Rmd) as part of the preparation described in [Saccharomyces cerevisiae (yeast) genome and annotation data](#saccharomyces-cerevisiae-yeast-genome-and-annotation-data) above.
+
+An identical table (differing only in the commented lines in the header) is produced by:
+
+```
+python -m riboviz.tools.get_cds_codons \
+        -f data/yeast_CDS_w_250utrs.fa \
+        -g data/yeast_CDS_w_250utrs.gff3 \
+        -c data/yeast_codon_table_alternative.tsv
+```
+
+#### Obsolete version whose numbering ignores the first 200 codons
 
 ```
 data/yeast_codon_pos_i200.RData
 ```
 
-This file was produced using [script_for_transcript_annotation.Rmd](../../rmarkdown/script_for_transcript_annotation.Rmd) as part of the preparation described in [Saccharomyces cerevisiae (yeast) genome and annotation data](#saccharomyces-cerevisiae-yeast-genome-and-annotation-data) above.
+This file was produced using version 1.0 of [script_for_transcript_annotation.Rmd](../../rmarkdown/script_for_transcript_annotation.Rmd).
 
-Features to correlate with ORFs:
+The file contains data identical from codon position 201 onwards of the data in `data/yeast_codon_table.tsv`.
+
+The `.Rdata` file is obsolete as of March 2021, and will be removed once we have updated the code section `CalculateCodonSpecificRibosomeDensity` to use input data formatted from `data/yeast_codon_table.tsv` instead
+
+
+### Features to correlate with ORFs:
 
 ```
 data/yeast_features.tsv
@@ -96,7 +118,7 @@ Data within this file was derived as follows:
 6. `FE_cap`: Estimated from 2. using sequences of length 70 nts from the 5' end of the mRNA transcript with folding energies calculated at 37 degress Centigrade following [Supplementary Methods](https://www.cell.com/cms/10.1016/j.celrep.2016.01.043/attachment/257faf34-ff8f-4071-a642-bfdb531c75b8/mmc1) for Weinberg et al. 2016 "Improved Ribosome-Footprint and mRNA Measurements Provide Insights into Dynamics and Regulation of Yeast Translation", Cell Reports, 14(7), 23 February 2016, 1787-1799 doi: [10.1016/j.celrep.2016.01.043](https://doi.org/10.1016/j.celrep.2016.01.043). Calculations were done using [RNAfold](https://www.tbi.univie.ac.at/RNA/RNAfold.1.html) in the [ViennaRNA](https://www.tbi.univie.ac.at/RNA/) package.
 7. `FE_atg`: Estimated from 30 nt upstream from ATG.
 
-tRNA estimates:
+### tRNA estimates:
 
 ```
 data/yeast_tRNAs.tsv
@@ -133,7 +155,7 @@ The data is from the paper Guydosh N.R. and Green R. "[Dom34 rescues ribosomes i
 * SRX386986: GSM1279570: wild-type no additive, [SRR1042855](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042855)
 * SRX386995: GSM1279579: wild-type plus 3-AT, [SRR1042864](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1042864)
 
-In July 2017, these files were imported using NCBI's [fastq-dump](https://ncbi.github.io/sra-tools/fastq-dump.html) and gzipped to produce:
+In July 2017, these files were imported using NCBI's `fastq-dump` and gzipped to produce:
 
 ```
 SRR1042855.fastq.gz
@@ -141,6 +163,8 @@ SRR1042864.fastq.gz
 ```
 
 (these files are not in the repository)
+
+Note: [The NCBI SRA (Sequence Read Archive)](https://github.com/ncbi/sra-tools) comments that "With release 2.9.1 of sra-tools we have finally made available the tool fasterq-dump, a replacement for the much older `fastq-dump` and `fastq-dump` is still supported as it handles more corner cases than `fasterq-dump`, but it is likely to be deprecated in the future."
 
 These files can alternatively be accessed via [SRA Explorer](https://ewels.github.io/sra-explorer/#):
 
@@ -187,11 +211,11 @@ deplex/Tag2.fastq
 deplex/Unassigned.fastq
 ```
 
-These files are simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication using UMI-tools when invoked from within the RiboViz workflow.
+These files are simple simulated FASTQ files to test adaptor trimming, UMI extraction and deduplication using UMI-tools when invoked from within the riboviz workflow.
 
 These files were created by running [riboviz.tools.create_fastq_simdata](../../riboviz/tools/create_fastq_simdata.py).
 
-The files can be used as inputs to RiboViz.
+The files can be used as inputs to riboviz.
 
 ---
 
@@ -213,6 +237,66 @@ Data was imported from https://github.com/ewallace/pyRNATagSeq, commit 6ffd465fb
 
 ---
 
+## GFF and BAM files for testing `bam_to_h5.R`
+
+`data/Mok-tinysim-gffsam` folder.
+
+Used by `rscripts/tests/testthat/test_bam_to_h5.R`.
+
+Created using:
+
+* [riboviz](https://github.com/riboviz/riboviz), `test-bam-to-h5-238` branch, 7b944eb, Wed Feb 3 07:57:11 2021.
+* [example-datasets](https://github.com/riboviz/example-datasets/), `origin` branch, commit 24c2fe4, Mon Jan 18 17:21:17 2021.
+* [amandamok/simRiboSeq](https://github.com/amandamok/simRiboSeq), `master` branch, commit 8367709, Wed Jan 13 13:51:18 2021.
+
+Get `example-datasets`:
+
+```console
+$ git clone https://github.com/riboviz/example-datasets/
+```
+
+Get `amandamok/simRiboSeq`:
+
+```console
+$ git clone https://github.com/amandamok/simRiboSeq/
+$ ls simRiboSeq/simulation_runs/riboviz/
+...
+tiny_2genes.fq
+```
+
+Create configuration files directory in `riboviz`:
+
+```console
+$ cd riboviz
+$ mkdir -p Mok-tinysim/input
+$ cp ../simRiboSeq/simulation_runs/riboviz/tiny_2genes.fq Mok-tinysim/input/
+$ cp ../example-datasets/simulated/mok/Mok-tinysim_config.yaml .
+```
+
+Edit `.yaml `and change `../../riboviz/` to `../`:
+
+```
+orf_fasta_file: ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.fa
+orf_gff_file: ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3
+rrna_fasta_file: ../example-datasets/simulated/mok/contaminants/Sc_rRNA_example.fa
+```
+
+Run riboviz:
+
+```console
+$ nextflow run prep_riboviz.nf  -params-file Mok-tinysim_config.yaml -ansi-log false
+```
+
+Create and populate `data/Mok-tinysim-gffsam`:
+
+```console
+$ mkdir data/Mok-tinysim-gffsam
+$ samtools view -h Mok-tinysim/output/A/A.bam > data/Mok-tinysim-gffsam/A.sam
+$ cp ../example-datasets/simulated/mok/annotation/tiny_2genes_20utrs.gff3 data/Mok-tinysim-gffsam/
+```
+
+---
+
 ## `riboviz/test/` test data files
 
 ### `riboviz.test.test_trim_5p_mismatch` test data files
@@ -224,7 +308,7 @@ riboviz/test/data/trim_5pos5neg.sam
 
 These files are used by `riboviz.test.test_trim_5p_mismatch` for testing `riboviz.trim_5p_mismatch`.
 
-These files were created by running RiboViz using `vignette/vignette_config.yaml` and the data in `vignette/input/`. Lines were copied and pasted from the SAM files output then these lines were manually edited to produce a desired range of outcomes.
+These files were created by running riboviz using `vignette/vignette_config.yaml` and the data in `vignette/input/`. Lines were copied and pasted from the SAM files output then these lines were manually edited to produce a desired range of outcomes.
 
 ### `riboviz.test.test_sam_bam` test data files
 
@@ -240,7 +324,7 @@ WTnone_rRNA_map_14_secondary.bam
 WTnone_rRNA_map_14_secondary.bam.bai
 ```
 
-The SAM files were created from the file `tmp/WTnone/rRNA_map.sam` from a run of the vignette (using RiboViz version commit 9efaf93, 08/10/2020):
+The SAM files were created from the file `tmp/WTnone/rRNA_map.sam` from a run of the vignette (using riboviz version commit 9efaf93, 08/10/2020):
 
 * `WTnone_rRNA_map_20.sam`: the first 20 sequences from `rRNA_map.sam`.
 * `WTnone_rRNA_map_6_primary.sam`: the 6 mapped (primary) sequences from `WTnone_rRNA_map_20.sam`.

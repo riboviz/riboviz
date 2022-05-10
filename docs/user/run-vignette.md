@@ -36,7 +36,7 @@ Downsampled ribosome profiling data for *Saccharomyces cerevisiae* (yeast):
 * `vignette/input/SRR1042864_s1mi.fastq.gz`: ~1mi-sampled RPFs wild-type + 3-AT.
 * For information on the provenance of these files see [Downsampled ribosome profiling data from Saccharomyces cerevisiae](../reference/data.md#downsampled-ribosome-profiling-data-from-saccharomyces-cerevisiae)
 
-For full information on how to configure the workflow and its inputs, see [Configuring the RiboViz workflow](./prep-riboviz-config.md).
+For full information on how to configure the workflow and its inputs, see [Configuring the riboviz workflow](./prep-riboviz-config.md).
 
 ---
 
@@ -51,10 +51,10 @@ $ conda activate riboviz
 
 If you have not already done so, set the paths to Hisat2 and Bowtie:
 
-* If you followed [Create `setenv.sh` to configure paths](./install.md#create-setenvsh-to-configure-paths), then run:
+* If you followed [Create `set-riboviz-env.sh` to configure paths](./install.md#create-set-riboviz-envsh-to-configure-paths), then run:
 
 ```console
-$ source $HOME/setenv.sh
+$ source $HOME/set-riboviz-env.sh
 ```
 
 * Otherwise, run the following (your directory names may be different, depending on the versions of Hisat2 and Bowtie you have):
@@ -84,34 +84,7 @@ num_processes: 4
 
 ---
 
-## Dry run workflow (Python workflow only)
-
-The Python workflow supports a `-d` (or `--dry-run`) command-line parameter which can "dry run" the workflow. This validates the configuration without executing the workflow steps.
-
-**Tip:** we strongly recommend doing a dry run before doing a live run on data you have not processed before.
-
-Run workflow in dry run mode:
-
-```console
-$ python -m riboviz.tools.prep_riboviz -d -c vignette/vignette_config.yaml
-```
-
-where:
-
-* `-d`: flag to enable the dry run.
-* `vignette/vignette_config.yaml`: path to the vignette configuration file.
-
-### Troubleshooting: `This script needs to be run under Python 3`
-
-This warning arises if you try and run the workflow under Python 2. You can only run the workflow under Python 3.
-
-### Troubleshooting: `File not found: vignette/input/example_missing_file.fastq.gz`
-
-This warning is expected and can be ignored. The vignette configuration file intentionally includes a reference to a missing input file. This demonstrates that if processing of one sample fails it does not block the processing of the other samples.
-
----
-
-## Validate configuration (Nextflow workflow only)
+## Validate configuration
 
 The Nextflow workflow supports a `--validate_only` command-line parameter which allows for the workflow configuration to be validated without running the workflow.
 
@@ -128,65 +101,13 @@ No such sample file (NotHere): example_missing_file.fastq.gz
 Validated configuration
 ```
 
-### Troubleshooting: `No such file (NotHere): example_missing_file.fastq.gz` (Nextflow workflow)
+### Troubleshooting: `No such file (NotHere): example_missing_file.fastq.gz`
 
 This warning is expected and can be ignored. The vignette configuration file intentionally includes a reference to a missing input file. This demonstrates that if processing of one sample fails it does not block the processing of the other samples.
 
 ---
 
 ## Run the workflow
-
-To run the Python workflow:
-
-```console
-$ python -m riboviz.tools.prep_riboviz -c vignette/vignette_config.yaml
-Running under Python: 3.7.3 (default, Mar 27 2019, 22:11:17)
-[GCC 7.3.0]
-Created by: RiboViz Date: 2020-05-21 04:23:53.072951 Command-line
-tool: /home/ubuntu/riboviz/riboviz/tools/prep_riboviz.py File:
-/home/ubuntu/riboviz/riboviz/tools/prep_riboviz.py Version: commit
-5ecebd6d842fd9e090d16a36f8c0656e5c82b710 date 2020-05-21 04:22:14-07:00
-Configuration file: vignette/vignette_config.yaml
-Command file: run_riboviz_vignette.sh
-Number of processes: 1
-Build indices for alignment, if necessary/requested
-Build indices for alignment (vignette/input/yeast_rRNA_R64-1-1.fa). Log: vignette/logs/20200521-042353/hisat2_build_r_rna.log
-Build indices for alignment (vignette/input/yeast_YAL_CDS_w_250utrs.fa). Log: vignette/logs/20200521-042353/hisat2_build_orf.log
-Processing samples
-Processing sample: WTnone
-Processing file: vignette/input/SRR1042855_s1mi.fastq.gz
-Cut out sequencing library adapters. Log: vignette/logs/20200521-042353/WTnone/01_cutadapt.log
-Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: vignette/logs/20200521-042353/WTnone/02_hisat2_rrna.log
-Align remaining reads to ORFs index files using hisat2. Log: vignette/logs/20200521-042353/WTnone/03_hisat2_orf.log
-Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: vignette/logs/20200521-042353/WTnone/04_trim_5p_mismatch.log
-Convert SAM to BAM and sort on genome. Log: vignette/logs/20200521-042353/WTnone/05_samtools_view_sort.log
-Index BAM file. Log: vignette/logs/20200521-042353/WTnone/06_samtools_index.log
-Calculate transcriptome coverage for + strand and save as a bedgraph. Log: vignette/logs/20200521-042353/WTnone/07_bedtools_genome_cov_plus.log
-Calculate transcriptome coverage for - strand and save as a bedgraph. Log: vignette/logs/20200521-042353/WTnone/08_bedtools_genome_cov_minus.log
-Make length-sensitive alignments in H5 format. Log: vignette/logs/20200521-042353/WTnone/09_bam_to_h5.log
-Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets. Log: vignette/logs/20200521-042353/WTnone/10_generate_stats_figs.log
-Finished processing sample: vignette/input/SRR1042855_s1mi.fastq.gz
-Processing sample: WT3AT
-Processing file: vignette/input/SRR1042864_s1mi.fastq.gz
-Cut out sequencing library adapters. Log: vignette/logs/20200521-042353/WT3AT/01_cutadapt.log
-Remove rRNA or other contaminating reads by alignment to rRNA index files. Log: vignette/logs/20200521-042353/WT3AT/02_hisat2_rrna.log
-Align remaining reads to ORFs index files using hisat2. Log: vignette/logs/20200521-042353/WT3AT/03_hisat2_orf.log
-Trim 5' mismatches from reads and remove reads with more than 2 mismatches. Log: vignette/logs/20200521-042353/WT3AT/04_trim_5p_mismatch.log
-Convert SAM to BAM and sort on genome. Log: vignette/logs/20200521-042353/WT3AT/05_samtools_view_sort.log
-Index BAM file. Log: vignette/logs/20200521-042353/WT3AT/06_samtools_index.log
-Calculate transcriptome coverage for + strand and save as a bedgraph. Log: vignette/logs/20200521-042353/WT3AT/07_bedtools_genome_cov_plus.log
-Calculate transcriptome coverage for - strand and save as a bedgraph. Log: vignette/logs/20200521-042353/WT3AT/08_bedtools_genome_cov_minus.log
-Make length-sensitive alignments in H5 format. Log: vignette/logs/20200521-042353/WT3AT/09_bam_to_h5.log
-Create summary statistics, and analyses and QC plots for both RPF and mRNA datasets. Log: vignette/logs/20200521-042353/WT3AT/10_generate_stats_figs.log
-Finished processing sample: vignette/input/SRR1042864_s1mi.fastq.gz
-File not found: vignette/input/example_missing_file.fastq.gz
-Finished processing 3 samples, 1 failed
-Collate TPMs across sample results. Log: vignette/logs/20200521-042353/collate_tpms.log
-Count reads. Log: vignette/logs/20200521-042353/count_reads.log
-Completed
-```
-
-* For full information on how to run the Python workflow, the options available, and troubleshooting advice, see [Running the RiboViz Python workflow](./prep-riboviz-run-python.md)
 
 To run the Nextflow workflow:
 
@@ -225,7 +146,7 @@ Finished processing sample: WT3AT
 Workflow finished! (OK)
 ```
 
-* For full information on how to run the Nextflow workflow, the options available, and troubleshooting advice, see [Running the RiboViz Nextflow workflow](./prep-riboviz-run-nextflow.md)
+* For full information on how to run the Nextflow workflow, the options available, and troubleshooting advice, see [Running the riboviz Nextflow workflow](./prep-riboviz-run-nextflow.md)
 
 ---
 
@@ -259,8 +180,8 @@ Intermediate outputs in `vignette/tmp`:
 ```
 WT3AT/
   nonrRNA.fq
-  orf_map_clean.bam     # Nextflow workflow only
-  orf_map_clean.bam.bai # Nextflow workflow only
+  orf_map_clean.bam
+  orf_map_clean.bam.bai
   orf_map_clean.sam
   orf_map.sam
   rRNA_map.sam
@@ -269,8 +190,8 @@ WT3AT/
   unaligned.fq
 WTnone/
   nonrRNA.fq
-  orf_map_clean.bam     # Nextflow workflow only
-  orf_map_clean.bam.bai # Nextflow workflow only
+  orf_map_clean.bam
+  orf_map_clean.bam.bai
   orf_map_clean.sam
   orf_map.sam
   rRNA_map.sam
@@ -283,52 +204,66 @@ Outputs in `vignette/output`:
 
 ```
 WT3AT/
-  3ntframe_bygene.tsv
-  3ntframe_propbygene.pdf
-  3nt_periodicity.pdf
-  3nt_periodicity.tsv
+  read_frame_per_ORF.tsv
+  read_frame_per_ORF_filtered.tsv
+  frame_proportions_per_ORF.pdf
+  metagene_start_stop_read_counts.pdf
+  metagene_start_stop_read_counts.tsv
+  metagene_position_length_counts_5start.tsv
   WT3AT.bam
   WT3AT.bam.bai
-  codon_ribodens.pdf
-  codon_ribodens.tsv
-  features.pdf
+  normalized_density_APEsites_per_codon.pdf
+  normalized_density_APEsites_per_codon.tsv
+  normalized_density_APEsites_per_codon_long.tsv
+  ORF_TPMs_vs_features.pdf
+  ORF_TPMs_vs_features.tsv
   WT3AT.h5
+  WT3AT.h5.1
   minus.bedgraph
   plus.bedgraph
-  pos_sp_nt_freq.tsv
-  pos_sp_rpf_norm_reads.pdf
-  pos_sp_rpf_norm_reads.tsv
-  read_lengths.pdf
-  read_lengths.tsv
-  startcodon_ribogridbar.pdf
-  startcodon_ribogrid.pdf
-  tpms.tsv
+  nt_freq_per_read_position.tsv
+  metagene_normalized_profile_start_stop.pdf
+  metagene_normalized_profile_start_stop.tsv
+  read_counts_by_length.pdf
+  read_counts_by_length.tsv
+  metagene_start_barplot_by_length.pdf
+  metagene_start_ribogrid_by_length.pdf
+  ORF_TPMs_and_counts.tsv
+  WT3AT_output_report.html
 WTnone/
-  3ntframe_bygene.tsv
-  3ntframe_propbygene.pdf
-  3nt_periodicity.pdf
-  3nt_periodicity.tsv
+  read_frame_per_ORF.tsv
+  read_frame_per_ORF_filtered.tsv
+  frame_proportions_per_ORF.pdf
+  metagene_start_stop_read_counts.pdf
+  metagene_start_stop_read_counts.tsv
+  metagene_position_length_counts_5start.tsv
   WTnone.bam
   WTnone.bam.bai
-  codon_ribodens.pdf
-  codon_ribodens.tsv
-  features.pdf
+  normalized_density_APEsites_per_codon.pdf
+  normalized_density_APEsites_per_codon.tsv
+  normalized_density_APEsites_per_codon_long.tsv
+  ORF_TPMs_vs_features.pdf
+  ORF_TPMs_vs_features.tsv
   WTnone.h5
+  WTnone.h5.1
   minus.bedgraph
   plus.bedgraph
-  pos_sp_nt_freq.tsv
-  pos_sp_rpf_norm_reads.pdf
-  pos_sp_rpf_norm_reads.tsv
-  read_lengths.pdf
-  read_lengths.tsv
-  startcodon_ribogridbar.pdf
-  startcodon_ribogrid.pdf
-  tpms.tsv
-read_counts.tsv
-TPMs_collated.tsv
+  nt_freq_per_read_position.tsv
+  metagene_normalized_profile_start_stop.pdf
+  metagene_normalized_profile_start_stop.tsv
+  read_counts_by_length.pdf
+  read_counts_by_length.tsv
+  metagene_start_barplot_by_length.pdf
+  metagene_start_ribogrid_by_length.pdf
+  ORF_TPMs_and_counts.tsv
+  WTnone_output_report.html
+read_counts_per_file_tsv
+TPMs_all_CDS_all_samples.tsv
 ```
 
-For full information on what the workflow does and the files it outputs, see [What the RiboViz workflow does](./prep-riboviz-operation.md).
+The number of `<SAMPLE_ID>.h5.*` files depends on the `num_processes` parameter in the configuration. For example, if you change that parameter to 4, then there will be 4 files, `WTnone.h5.1`, `WTnone.h5.2`, `WTnone.h5.3` and `WTnone.h5.4`, in the output folder.
+
+For full information on what the workflow does and the files it outputs, see [What the riboviz workflow does](./prep-riboviz-operation.md).
 
 ---
 
@@ -340,17 +275,15 @@ Before rerunning the vignette, delete the auto-generated index, temporary, logs 
 $ rm -rf vignette/index
 $ rm -rf vignette/tmp
 $ rm -rf vignette/output
-$ rm -rf vignette/logs  # Python workflow only
 ```
 
-Delete the log files and the bash script (Python workflow only):
+Delete the working directories:
 
 ```console
-$ rm riboviz.*.log
-$ rm run_riboviz_vignette.sh
+$ rm -rf work
 ```
 
-You might also want to do this if you have run the vignette with a missing R package, and then want to run it again from scratch.
+You might also want to do this if you have run the vignette with an error (for example, a missing R package), and then want to run it again from scratch.
 
 ---
 

@@ -1,0 +1,60 @@
+adapters: CTGTAGGCACC
+asite_disp_length_file: ${RIBOVIZ_DATA}/yeast_standard_asite_disp_length.txt
+buffer: 250
+build_indices: true
+codon_positions_file: ${RIBOVIZ_DATA}/yeast_codon_pos_i200.RData
+count_reads: true
+count_threshold: 64
+dataset: vignette
+dedup_stats: false
+dedup_umis: false
+dir_in: ${RIBOVIZ_SAMPLES}/input
+dir_index: ${RIBOVIZ_SAMPLES}/index
+dir_out: ${RIBOVIZ_SAMPLES}/output
+dir_tmp: ${RIBOVIZ_SAMPLES}/tmp
+extract_umis: false
+feature: CDS
+features_file: ${RIBOVIZ_DATA}/yeast_features.tsv
+fq_files:
+  WTnone: SRR1042855_s1mi.fastq.gz
+  WT3AT: SRR1042864_s1mi.fastq.gz
+  NotHere: example_missing_file.fastq.gz
+group_umis: false
+hisat2_orf_params: -k 2 --no-spliced-alignment --rna-strandness F --no-unal
+is_riboviz_gff: true
+job_email: null
+job_email_events: beas
+job_memory: 8G
+job_name: riboviz
+job_num_cpus: 4
+job_parallel_env: mpi
+job_runtime: '48:00:00'
+make_bedgraph: true
+max_read_length: 50
+min_read_length: 10
+multiplex_fq_files: null
+nextflow_dag_file: nextflow-dag.html
+nextflow_report_file: nextflow-report.html
+nextflow_timeline_file: nextflow-timeline.html
+nextflow_trace_file: nextflow-trace.tsv
+nextflow_work_dir: work
+num_processes: 1
+orf_fasta_file: ${RIBOVIZ_ORGANISMS}/yeast_YAL_CDS_w_250utrs.fa
+orf_gff_file: ${RIBOVIZ_ORGANISMS}/yeast_YAL_CDS_w_250utrs.gff3
+orf_index_prefix: YAL_CDS_w_250
+output_metagene_normalized_profile: true
+output_pdfs: true
+primary_id: Name
+publish_index_tmp: false
+rpf: true
+rrna_fasta_file: ${RIBOVIZ_ORGANISMS}/yeast_rRNA_R64-1-1.fa
+rrna_index_prefix: yeast_rRNA
+run_static_html: true
+sample_sheet: null
+samsort_memory: null
+secondary_id: null
+stop_in_feature: false
+t_rna_file: ${RIBOVIZ_DATA}/yeast_tRNAs.tsv
+trim_5p_mismatches: true
+umi_regexp: null
+validate_only: false
