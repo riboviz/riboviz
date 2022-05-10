@@ -349,8 +349,8 @@ print("Starting: Position specific distribution of reads")
 
 # For RPF datasets, generate codon-based position-specific reads
 if (rpf) {
-  
-  metagene_normalized_profile_start_stop_data <- CalculatePositionSpecificDistributionOfReads(gene_names, dataset, hd_file, buffer, min_read_length, count_threshold)
+
+  metagene_normalized_profile_start_stop_data <- CalculatePositionSpecificDistributionOfReads(gene_names, dataset, hd_file, gff_df, min_read_length, count_threshold, asite_displacement_length)
   
   if(output_pdfs){
     metagene_normalized_profile_start_stop_plot <- PlotPositionSpecificDistributionOfReads(metagene_normalized_profile_start_stop_data)
@@ -475,7 +475,8 @@ if (!is.na(t_rna_file) & !is.na(codon_positions_file)) {
 
   if (rpf) {
     
-    cod_dens_tRNA_data <- CalculateCodonSpecificRibosomeDensity(t_rna_file, codon_positions_file, gene_names, hd_file, dataset, buffer, count_threshold)
+
+    cod_dens_tRNA_data <- CalculateCodonSpecificRibosomeDensity(t_rna_file, codon_positions_file, gene_names, hd_file, dataset, gff_df, count_threshold, asite_displacement_length)
     
     cod_dens_tRNA_wide <- GatherCodonSpecificRibosomeDensityTRNACorrelation(cod_dens_tRNA_data)
     
