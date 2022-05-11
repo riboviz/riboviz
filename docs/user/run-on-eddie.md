@@ -237,6 +237,7 @@ Computational work on Eddie is usually submitted to the cluster as batch jobs in
 **Warning** - Jobs need to request appropriate resources (cores, memory) in order to run. We are still working out what riboviz needs, so this may take some trial and error.
 
 See "Requesting resources" section below.
+**Reminder**- Please note the paths in the below script and in the YAML configuration file from the example-datasets directory are just a reference. You should check and edit the paths according to your directory structure.
 
 Here is an example job script for the vignette, named `job_riboviz.sh` in your `riboviz` directory to run a **riboviz** workflow:
 
