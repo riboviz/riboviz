@@ -106,10 +106,10 @@ $ qlogin -pe interactivemem 4 -l h_vmem=4G
 
 Here, `-pe interactivemem 4` means you ask for 4 cores in an interactive memory parallel environment. Also, `-l h_vmem=4G` means that you ask for 4GB RAM per core (16GB total in this example)
 
-We have also succeeded running on one core with 16GB memory, using:
+For running the vignette it has been proven that 1 core and 4G does not work but 1 core and 8G works so the command is the following:
 
 ```console
-$ qlogin -l h_vmem=16G
+$ qlogin -l h_vmem=8G 
 ```
 
 If you have access to a priority queue then you can use option `-P`:
