@@ -120,6 +120,13 @@ $ qlogin -pe interactivemem 4 -l h_vmem=4G -P <QUEUE_NAME>
 
 riboviz team members have access to the priority queue `bio_wallace_rna_riboviz`.
 
+Note: to avoid node-specific problems you can long into a specific node using:
+
+```console
+$ -q *@node1h21 
+```
+Reminder: the node you may want to access may not be available. 
+
 See [Interactive sessions](https://www.wiki.ed.ac.uk/display/ResearchServices/Interactive+Sessions) for more information.
 
 
