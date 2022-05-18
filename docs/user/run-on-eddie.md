@@ -534,7 +534,7 @@ $ module load igmm/apps/sratoolkit/2.10.8
 $ vdb-config --interactive
 ```
 
-then follow the interactive prompts (using tab to navigate through the menus) and edit the `CACHE` > `Set Default Import Path` section to change the workspace location.
+then follow the interactive prompts (using tab to navigate through the menus) and edit the `CACHE` > `Set location of user-repository` section to change the workspace location.
 
 This path adjusts where the tool puts your cache directory, which could get very large (100s of GB). We recommend using your scratch space `/exports/eddie/scratch/$USER/ncbi`, where `$USER` is replaced by your username.
 
