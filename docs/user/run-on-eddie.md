@@ -314,6 +314,7 @@ A good start involves reserving available resources (`-R y`) of 4 nodes, 16GB/ea
 ```
 -R y -pe mpi 4 -l h_vmem=16GB
 ```
+It is best to specify these resources within the job submission file so it is easier to keep track of the resources used in each submission and which of them worked. 
 
 This tended to start within a few hours; but still was killed unpredictably on larger datasets.
 
