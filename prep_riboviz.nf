@@ -1,5 +1,6 @@
 #!/usr/bin/env nextflow
 
+nextflow.enable.dsl = 1
 import org.yaml.snakeyaml.Yaml
 
 /*
