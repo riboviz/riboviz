@@ -1188,7 +1188,8 @@ feature_rel_use <- CodonFeatureAnalysis(hd_file, dataset, gff, codon_pos_table,
 features <- unique(feature_rel_use$Feature)
  
 feature_rel_use_pos0 <- FilterFeatureTableByRelativePosition(feature_rel_use)
-WriteCodonFeatureAnalysis(output_dir,feature_rel_use_pos0)
+#WriteCodonFeatureAnalysis(output_dir,feature_rel_use_pos0)
+WriteCodonFeatureAnalysis(output_dir,feature_rel_use)
 
 list_of_plots <- purrr::map(features,
           GeneratePositionFeaturePlot,feature_rel_use = feature_rel_use, expand_width = expand_width
