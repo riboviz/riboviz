@@ -946,16 +946,6 @@ CodonFeatureAnalysis <- function(hd_file, dataset, gff, codon_pos_table,
 
 }
 
-FilterFeatureTableByRelativePosition <-function(feature_table,relative_pos = 0)
-{
-  # Create a new tibble listing the feature being studied, and the
-  # RelCount at position 0, ie RelCount at the feature_of_interest
-  feature_table_filter <- feature_table %>% filter(RelPos == 0) %>% dplyr::select(Feature,RelCount)
-  feature_table_filter <- arrange(feature_table_filter, desc(RelCount))
-  return(feature_table_filter)
-}
-
-
 #' Create metafeature plot for feature of interest.
 #'
 #' @param input.df input data.frame or tibble with columns
@@ -1187,8 +1177,7 @@ feature_rel_use <- CodonFeatureAnalysis(hd_file, dataset, gff, codon_pos_table,
 
 features <- unique(feature_rel_use$Feature)
  
-feature_rel_use_pos0 <- FilterFeatureTableByRelativePosition(feature_rel_use)
-WriteCodonFeatureAnalysis(output_dir,feature_rel_use_pos0)
+WriteCodonFeatureAnalysis(output_dir,feature_rel_use)
 
 list_of_plots <- purrr::map(features,
           GeneratePositionFeaturePlot,feature_rel_use = feature_rel_use, expand_width = expand_width
