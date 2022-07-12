@@ -69,8 +69,7 @@ if (interactive()) {
 #'                min_read_length = 10,
 #'                snapdisp = 0L,
 #'                asite_disp_path = here::here(
-#'                  "data", "yeast_standard_asite_disp_length.txt"),
-#'                gff_df)
+#'                  "data", "yeast_standard_asite_disp_length.txt"))
 #'
 #' @export
 
@@ -112,16 +111,20 @@ GetCDSReads <- function(
 #' @param hd_file Path to H5 file holding read data for all genes.
 #' @param min_read_length Minimum read length in H5 file (integer).
 #' @param filter_for_frame integer (0, 1, or 2), reading frame to use. If NULL, 
-#' data from all reading frames are combined. 
+#' data from all reading frames are combined.
+#' @param feature_type feature type to take from gff, default "CDS".
 #' @return Read counts at each codon position.
 GetAllCodonPosCounts1Gene <- function(
   gene,  gff_df, dataset, hd_file, min_read_length, asite_disp_length,
-  filter_for_frame = NULL)
+  filter_for_frame = NULL,
+  feature_type = "CDS")
 {
 
-  # Fetch gff values for a gene, e.g. gene = YAL003W.
+  # Fetch gff values for a gene, e.g. gene = YAL003W
+  # Only take the CDS feature
   subset_gff_df_by_gene <- dplyr::filter(.data = gff_df,
-                                         seqnames == gene)
+                                         seqnames == gene,
+                                         type == feature_type)
 
   # Assign start position of the CDS, e.g. for YAL003W: 251.
   start <- as.numeric(subset_gff_df_by_gene %>% 
@@ -274,7 +277,7 @@ GetAllCodonPosCounts <- function(
 # 9 MIKE         5     0
 #
 # This is expected as only reads mapping to the first nucleotide of
-# the codon are retained.ß
+# the codon are retained.
 
 WriteCodonFeatureAnalysis <-function(output_dir,feature_table)
 {
@@ -492,8 +495,6 @@ SummariseCountsByFeatureAndRelPos <-
       assertthat::has_name(features_gene_poscodon, 
                            feature_var))
     
-    # feature_var = enquo(feature_var)
-    
     features_gene_poscodon %>%
       dplyr::group_by(.data[[feature_var]]) %>%
       dplyr::summarise(
@@ -576,20 +577,62 @@ is_codon_feature_analysis <- opt$is_codon_feature
 # filter_for_frame <- 0
 # is_codon_feature_analysis <- TRUE
 
-feature_rel_use <- CodonFeatureAnalysis(hd_file, dataset, gff, codon_pos_table,
-  feature_of_interest, output_dir, expand_width, filter_for_frame,
-  min_read_length, asite_disp_path,is_codon_feature_analysis = is_codon_feature_analysis)
+# Load gff as a data frame
+gff_df <- readGFFAsDf(gff)
 
-features <- unique(feature_rel_use$Feature)
- 
-WriteCodonFeatureAnalysis(output_dir,feature_rel_use)
+gene_names <- gff_df %>%
+  dplyr::filter(type == "CDS") %>%
+  dplyr::pull(seqnames) %>%
+  unique()
 
-list_of_plots <- purrr::map(features,
-          GeneratePositionFeaturePlot,feature_rel_use = feature_rel_use, expand_width = expand_width
-)
+# Load codon position table
+gene_pos_codon_counts <- readr::read_tsv(codon_pos_table, comment = "#")
 
-purrr::map2(list_of_plots,
-            features, 
-            SaveFeatureAnalysisPlotPDF,
-            output_dir = output_dir
-)
+
+# Get the counts for each gene and position
+all_codon_pos_counts <- GetAllCodonPosCounts(
+  gene_names,
+  dataset, 
+  hd_file = hd_file, 
+  min_read_length = min_read_length,
+  filter_for_frame = filter_for_frame, 
+  asite_disp_length = readr::read_tsv(asite_disp_path, 
+                                      comment = "#", 
+                                      show_col_types = FALSE), 
+  gff_df = gff_df)
+
+# Test that I can run on just AAA codon
+# This  is commented
+codon_rel_use_AAAonly <-
+  gene_pos_codon_counts %>%
+  dplyr::filter(Codon == "AAA",
+                Gene %in% gene_names) %>%
+  SummariseCountsByFeatureAndRelPos(
+    feature_var = "Codon",
+    gene_pos_codon_counts = all_codon_pos_counts,
+    expand_width = 5,
+    min_count = 1, na.rm = TRUE)
+
+# WARNING: RUNS SLOWLY
+codon_rel_use <- 
+  gene_pos_codon_counts %>%
+  dplyr::filter(Gene %in% gene_names) %>%
+  SummariseCountsByFeatureAndRelPos(
+    feature_var = "Codon",
+    gene_pos_codon_counts = all_codon_pos_counts, 
+    expand_width = 5,
+    min_count = 1, na.rm = TRUE) 
+
+# features <- unique(feature_rel_use$Feature)
+#  
+# WriteCodonFeatureAnalysis(output_dir,feature_rel_use)
+# 
+# list_of_plots <- purrr::map(features,
+#           GeneratePositionFeaturePlot,feature_rel_use = feature_rel_use, expand_width = expand_width
+# )
+# 
+# purrr::map2(list_of_plots,
+#             features, 
+#             SaveFeatureAnalysisPlotPDF,
+#             output_dir = output_dir
+# )
