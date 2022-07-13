@@ -127,11 +127,11 @@ GetAllCodonPosCounts1Gene <- function(
                                          type == feature_type)
 
   # Assign start position of the CDS, e.g. for YAL003W: 251.
-  start <- as.numeric(subset_gff_df_by_gene %>% 
+  start <- as.integer(subset_gff_df_by_gene %>% 
                       dplyr::select(start))
 
   # Assign end position of the CDS, e.g. for YAL003W: 871.
-  end <- as.numeric(subset_gff_df_by_gene %>% 
+  end <- as.integer(subset_gff_df_by_gene %>% 
                       dplyr::select(end))
   
   cds_reads <- GetCDSReads(gene, start, end, dataset, hd_file, min_read_length,
@@ -217,7 +217,8 @@ GetAllCodonPosCounts <- function(
   asite_disp_length, filter_for_frame, gff_df) {
   
   # Apply GetAllCodonPosCounts1Gene() to genes contained within gene_names
-  all_codon_pos_counts <- purrr::map_dfr(
+  all_codon_pos_counts <- 
+    purrr::map_dfr(
     .x = gene_names,
     .f = GetAllCodonPosCounts1Gene,
     dataset = dataset,
@@ -225,7 +226,8 @@ GetAllCodonPosCounts <- function(
     min_read_length = min_read_length,
     asite_disp_length = asite_disp_length,
     filter_for_frame = filter_for_frame,
-    gff_df = gff_df)
+    gff_df = gff_df) %>%
+    dplyr::mutate(Gene = factor(Gene, levels = gene_names))
 
   return(all_codon_pos_counts)
 }
@@ -443,14 +445,16 @@ ExpandWindowNormGenePosCodon <-
     return(gene_poscodon_window)
 }
 
-#' For all Gene, PosCodon, ExpandWindowNormGenePosCodon
+#' For all features in a table ExpandWindowNormGenePosCodon
+#' 
+#' Uses rowwise() to summarise for each row (Gene, PosCodon)
 #'
 ExpandWindowsNormGenePosCodon <-
   function(features_gene_poscodon,
            gene_pos_codon_counts, expand_width,
            min_count = 1, na.rm = TRUE) {
     features_gene_poscodon %>%
-      dplyr::group_by(Gene,PosCodon) %>%
+      rowwise() %>%
       dplyr::summarise(
         ExpandWindowNormGenePosCodon(
           gene = Gene, 
@@ -460,7 +464,7 @@ ExpandWindowsNormGenePosCodon <-
           select_relposonly = TRUE,
           min_count = min_count, 
           na.rm = na.rm),
-        .groups = "keep")
+        .groups = "drop")
   }
 
 CalculateSummaryCountByRelPos <- function(windows_counts_relpos, na.rm = TRUE) {
@@ -468,7 +472,7 @@ CalculateSummaryCountByRelPos <- function(windows_counts_relpos, na.rm = TRUE) {
     dplyr::group_by(RelPos) %>%
     dplyr::summarise(RelCount = mean(RelCount, na.rm = na.rm),
                      TotCount = sum(Count, na.rm = na.rm),
-                     .groups = "keep")
+                     .groups = "drop")
 }
 
 SummariseCountsByRelPos <- 
@@ -495,15 +499,16 @@ SummariseCountsByFeatureAndRelPos <-
       assertthat::has_name(features_gene_poscodon, 
                            feature_var))
     
+    # here we use dplyr::do, which has been superseded
+    # TO DO: rewrite using nest_by and across workflow
     features_gene_poscodon %>%
       dplyr::group_by(.data[[feature_var]]) %>%
-      dplyr::summarise(
+      dplyr::do(
         SummariseCountsByRelPos(features_gene_poscodon = .,
                                 gene_pos_codon_counts = gene_pos_codon_counts, 
                                 expand_width = expand_width,
                                 min_count = min_count, 
-                                na.rm = na.rm),
-        .groups = "keep")
+                                na.rm = na.rm))
   }
 
 ##### Command-line options and core script
@@ -583,7 +588,7 @@ gff_df <- readGFFAsDf(gff)
 gene_names <- levels(gff_df$seqnames)
 
 # Load codon position table
-gene_pos_codon_counts <- 
+gene_pos_codon_table <- 
   readr::read_tsv(codon_pos_table, comment = "#",
                   col_types = "cic")
 
@@ -602,7 +607,7 @@ all_codon_pos_counts <- GetAllCodonPosCounts(
 
 # Test that I can run on just AAA codon
 codon_rel_use_AAAonly <-
-  gene_pos_codon_counts %>%
+  gene_pos_codon_table %>%
   dplyr::filter(Codon == "AAA",
                 Gene %in% gene_names) %>%
   SummariseCountsByFeatureAndRelPos(
@@ -612,7 +617,7 @@ codon_rel_use_AAAonly <-
     min_count = 1, na.rm = TRUE)
 
 codon_rel_use_AAAGGG <-
-  gene_pos_codon_counts %>%
+  gene_pos_codon_table %>%
   dplyr::filter(Codon %in% c("AAA","GGG"),
                 Gene %in% gene_names) %>%
   SummariseCountsByFeatureAndRelPos(
@@ -624,7 +629,7 @@ codon_rel_use_AAAGGG <-
 # Run for all codons
 # WARNING: RUNS SLOWLY (~30mins) so commented out now.
 # codon_rel_use <- 
-#   gene_pos_codon_counts %>%
+#   gene_pos_codon_table %>%
 #   dplyr::filter(Gene %in% gene_names) %>%
 #   SummariseCountsByFeatureAndRelPos(
 #     feature_var = "Codon",
