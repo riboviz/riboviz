@@ -580,13 +580,12 @@ is_codon_feature_analysis <- opt$is_codon_feature
 # Load gff as a data frame
 gff_df <- readGFFAsDf(gff)
 
-gene_names <- gff_df %>%
-  dplyr::filter(type == "CDS") %>%
-  dplyr::pull(seqnames) %>%
-  unique()
+gene_names <- levels(gff_df$seqnames)
 
 # Load codon position table
-gene_pos_codon_counts <- readr::read_tsv(codon_pos_table, comment = "#")
+gene_pos_codon_counts <- 
+  readr::read_tsv(codon_pos_table, comment = "#",
+                  col_types = "cic")
 
 
 # Get the counts for each gene and position
@@ -602,7 +601,6 @@ all_codon_pos_counts <- GetAllCodonPosCounts(
   gff_df = gff_df)
 
 # Test that I can run on just AAA codon
-# This  is commented
 codon_rel_use_AAAonly <-
   gene_pos_codon_counts %>%
   dplyr::filter(Codon == "AAA",
@@ -613,15 +611,27 @@ codon_rel_use_AAAonly <-
     expand_width = 5,
     min_count = 1, na.rm = TRUE)
 
-# WARNING: RUNS SLOWLY
-codon_rel_use <- 
+codon_rel_use_AAAGGG <-
   gene_pos_codon_counts %>%
-  dplyr::filter(Gene %in% gene_names) %>%
+  dplyr::filter(Codon %in% c("AAA","GGG"),
+                Gene %in% gene_names) %>%
   SummariseCountsByFeatureAndRelPos(
     feature_var = "Codon",
-    gene_pos_codon_counts = all_codon_pos_counts, 
+    gene_pos_codon_counts = all_codon_pos_counts,
     expand_width = 5,
-    min_count = 1, na.rm = TRUE) 
+    min_count = 1, na.rm = TRUE)
+
+# Run for all codons
+# WARNING: RUNS SLOWLY (~30mins) so commented out now.
+# codon_rel_use <- 
+#   gene_pos_codon_counts %>%
+#   dplyr::filter(Gene %in% gene_names) %>%
+#   SummariseCountsByFeatureAndRelPos(
+#     feature_var = "Codon",
+#     gene_pos_codon_counts = all_codon_pos_counts, 
+#     expand_width = 5,
+#     min_count = 1, na.rm = TRUE) 
+# summaryRprof() %>% View()
 
 # features <- unique(feature_rel_use$Feature)
 #  
