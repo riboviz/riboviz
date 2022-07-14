@@ -434,7 +434,7 @@ ExpandWindowNormGenePosCodon <-
       NormalizeFilterWindow(min_count = min_count, 
                             na.rm = na.rm)
     
-    if(select_relposonly & nrow(gene_poscodon_window) > 0) {
+    if(select_relposonly & nrow(gene_poscodon_window) > 0 & ncol(gene_poscodon_window) > 0) {
       # This removes Gene, PosCodon from output while keeping RelPos
       # It's designed to remove problems overwriting columns when running 
       # group_by(Gene, PosCodon) %>% summarise(ExpandWindowNormGenePosCodon,...)
@@ -448,7 +448,9 @@ ExpandWindowNormGenePosCodon <-
 #' For all features in a table ExpandWindowNormGenePosCodon
 #' 
 #' Uses rowwise() to summarise for each row (Gene, PosCodon)
-#'
+#' 
+#' TO DO: need additional function to count how many instances of the windows there are
+#' 
 ExpandWindowsNormGenePosCodon <-
   function(features_gene_poscodon,
            gene_pos_codon_counts, expand_width,
@@ -467,12 +469,18 @@ ExpandWindowsNormGenePosCodon <-
         .groups = "drop")
   }
 
+
 CalculateSummaryCountByRelPos <- function(windows_counts_relpos, na.rm = TRUE) {
-  windows_counts_relpos %>%
-    dplyr::group_by(RelPos) %>%
-    dplyr::summarise(RelCount = mean(RelCount, na.rm = na.rm),
-                     TotCount = sum(Count, na.rm = na.rm),
-                     .groups = "drop")
+  if( nrow(windows_counts_relpos) > 0 & ncol(windows_counts_relpos) > 0) {
+    windows_counts_relpos %>%
+      dplyr::group_by(RelPos) %>%
+      dplyr::summarise(RelCount = mean(RelCount, na.rm = na.rm),
+                       TotCount = sum(Count, na.rm = na.rm),
+                       .groups = "drop") %>%
+      return() 
+  } else {
+    return(tibble())
+  }
 }
 
 SummariseCountsByRelPos <- 
@@ -499,16 +507,15 @@ SummariseCountsByFeatureAndRelPos <-
       assertthat::has_name(features_gene_poscodon, 
                            feature_var))
     
-    # here we use dplyr::do, which has been superseded
-    # TO DO: rewrite using nest_by and across workflow
     features_gene_poscodon %>%
-      dplyr::group_by(.data[[feature_var]]) %>%
-      dplyr::do(
-        SummariseCountsByRelPos(features_gene_poscodon = .,
+      dplyr::nest_by(.data[[feature_var]]) %>%
+      dplyr::summarise(
+        SummariseCountsByRelPos(features_gene_poscodon = data,
                                 gene_pos_codon_counts = gene_pos_codon_counts, 
                                 expand_width = expand_width,
                                 min_count = min_count, 
-                                na.rm = na.rm))
+                                na.rm = na.rm),
+        .groups = "keep")
   }
 
 ##### Command-line options and core script
@@ -569,6 +576,7 @@ min_read_length <- opt$minreadlen
 asite_disp_path <- opt$asite_length
 is_codon_feature_analysis <- opt$is_codon_feature
 
+# This block of code gives example options for testing
 # hd_file <- "data/Mok-simYAL5/A.h5"
 # dataset <- "Mok-simYAL5"
 # gff <- "data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3"
@@ -605,38 +613,17 @@ all_codon_pos_counts <- GetAllCodonPosCounts(
                                       show_col_types = FALSE), 
   gff_df = gff_df)
 
-# Test that I can run on just AAA codon
-codon_rel_use_AAAonly <-
-  gene_pos_codon_table %>%
-  dplyr::filter(Codon == "AAA",
-                Gene %in% gene_names) %>%
-  SummariseCountsByFeatureAndRelPos(
-    feature_var = "Codon",
-    gene_pos_codon_counts = all_codon_pos_counts,
-    expand_width = 5,
-    min_count = 1, na.rm = TRUE)
-
-codon_rel_use_AAAGGG <-
-  gene_pos_codon_table %>%
-  dplyr::filter(Codon %in% c("AAA","GGG"),
-                Gene %in% gene_names) %>%
-  SummariseCountsByFeatureAndRelPos(
-    feature_var = "Codon",
-    gene_pos_codon_counts = all_codon_pos_counts,
-    expand_width = 5,
-    min_count = 1, na.rm = TRUE)
 
 # Run for all codons
-# WARNING: RUNS SLOWLY (~30mins) so commented out now.
-# codon_rel_use <- 
-#   gene_pos_codon_table %>%
-#   dplyr::filter(Gene %in% gene_names) %>%
-#   SummariseCountsByFeatureAndRelPos(
-#     feature_var = "Codon",
-#     gene_pos_codon_counts = all_codon_pos_counts, 
-#     expand_width = 5,
-#     min_count = 1, na.rm = TRUE) 
-# summaryRprof() %>% View()
+codon_rel_use <-
+  gene_pos_codon_table %>%
+  dplyr::filter(Gene %in% gene_names) %>%
+  SummariseCountsByFeatureAndRelPos(
+    feature_var = "Codon",
+    gene_pos_codon_counts = all_codon_pos_counts,
+    expand_width = 5,
+    min_count = 1, na.rm = TRUE)
+
 
 # features <- unique(feature_rel_use$Feature)
 #  
