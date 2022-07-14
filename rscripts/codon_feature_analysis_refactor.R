@@ -5,6 +5,9 @@
 
 ## TEST::run on TinySim Dataset
 
+# Example: 
+# Rscript rscripts/codon_feature_analysis_refactor.R --filter_for_frame 0 -i data/Mok-simYAL5/A.h5 -d Mok-simYAL5 -g data/Mok-simYAL5/Scer_YAL_5genes_w_250utrs.gff3 -a data/yeast_codon_table.tsv --asite_length data/yeast_standard_asite_disp_length.txt -o .
+# This assumes that example-datasets is in the same parent directory as riboviz
 
 
 suppressMessages(library(tidyverse))
@@ -281,10 +284,12 @@ GetAllCodonPosCounts <- function(
 # This is expected as only reads mapping to the first nucleotide of
 # the codon are retained.
 
-WriteCodonFeatureAnalysis <-function(output_dir,feature_table)
+WriteFeatureAnalysis <-function(feature_table,
+                                filename = "feature_relpos_relcount.tsv",
+                                output_dir = ".")
 {
   # Save file
-  tsv_file_path <- file.path(output_dir, "feature_analysis.tsv")
+  tsv_file_path <- file.path(output_dir, filename)
   write_provenance_header(path_to_this_script, tsv_file_path)
   write.table(
     feature_table,
@@ -303,14 +308,9 @@ WriteCodonFeatureAnalysis <-function(output_dir,feature_table)
 #' GeneratePositionFeaturePlot(): Generates a metafeature plot around the
 #' feature_of_interest
 #'
-#' Fetches the overlayed tibble using the function overlayed_tibbles()
-#'
 #' @param feature_rel_use tibble with columns:
-#' "Feature" (character, each feature of interest provided by user)
 #' "RelPos" (integer, position relative to feature of interest, which is at position 0)
-#' "RelCount (double, relative ribosome counts at each relative position)
-#' @param feature_of_interest character, each incidence of the feature
-#' will be extracted from transcript_info_tibble
+#' "RelCount (double, relative counts at each relative position)
 #' @param expand_width integer which provides the number of positions
 #' on each side of the feature_of_interest to include in the window
 #' 
@@ -319,66 +319,35 @@ WriteCodonFeatureAnalysis <-function(output_dir,feature_table)
 #'
 #' @example
 #'
-#' gff_df <- readGFFAsDf(here::here("..",
-#'                                  "example-datasets",
-#'                                  "simulated",
-#'                                  "mok",
-#'                                  "annotation",
-#'                                  "Scer_YAL_5genes_w_250utrs.gff3"))
-#' feature_rel_use <- CodonFeatureAnalysis(hd_file, dataset, gff_df, codon_pos_table,
-#'                             feature_of_interest = "TCC AAG", output_dir, expand_width = 5L, filter_for_frame,
-#'                             min_read_length, asite_disp_path)
-#' GeneratePlot(feature_of_interest = "TCC AAG",
-#'              feature_rel_use,
+#' feature_rel_use <- tibble(RelPos = seq(-5L,5L), RelCount = dnorm(RelPos))
+#' GeneratePositionFeaturePlot(feature_rel_use,
 #'              expand_width = 5L)
 #'
 #' @export
-GeneratePositionFeaturePlot <- function(feature_of_interest,
-    feature_rel_use, expand_width) {
-  
-  feature_rel_use_filt <- feature_rel_use %>% 
-                                      filter(Feature == feature_of_interest)
-  overlayed_plot <- ggplot(
-    feature_rel_use_filt,
+GenerateRelPosRelCountPlot <- function(feature_rel_use, expand_width) {
+  ggplot(
+    feature_rel_use,
     mapping = aes(x = RelPos,
                   y = RelCount)) +
     geom_line() +
-    theme_bw() +
     theme(text = element_text(size = 12),
           axis.title = element_text(size = 10, face = "bold"),
           title = element_text(size = 12, face = "bold")) +
-    labs(title = feature_of_interest,
-         x = "Position relative to feature of interest",
-         y = "Normalised ribosomal occupancy", size = 2) +
-    scale_x_continuous(breaks = seq(-expand_width, expand_width, 1))
-  
-  return(overlayed_plot)
+    labs(x = "Relative Position",
+         y = "Normalised occupancy", size = 2) +
+    scale_x_continuous(breaks = seq(-expand_width, expand_width, 1)) +
+    theme_bw() +
+    theme(panel.grid = element_blank(), strip.background = element_blank())
 }
-#TEST: GeneratePositionFeaturePlot(): produces a single plot =TRUE
-#TEST: GeneratePositionFeaturePlot(): title is <feature_of_interest>
-#TEST: GeneratePositionFeaturePlot(): the x-axis is "Position relative to feature of interest"
-# and y-axis is "Normalised ribosomal occupancy"
-
-#' Save plot as a PDF.
-#'
-#' @param overlayed_plot Plot.
-#' @param feature_of_interest Feature of interest.
-#' @param output_dir Output directory.
-SaveFeatureAnalysisPlotPDF <- function(
-  overlayed_plot, feature_of_interest, output_dir) {
-  overlayed_plot %>%
-    ggsave(
-      filename = file.path(output_dir,
-                           paste0("Meta_feature_plot",
-                                  feature_of_interest, ".pdf")),
-      width = 6, height = 5
-    )
-}
+# TEST: GenerateRelPosRelCountPlot(): produces a single plot =TRUE
 
 
 ##### Calculation functions July 2022
 
 #' Expand the window around a gene, poscodon of interest
+#' 
+#' Return an empty output if the window extends beyond either end of the gene.
+#' 
 ExpandWindowGenePosCodon <- function(
   gene, poscodon, gene_pos_codon_counts, expand_width) {
   
@@ -399,6 +368,7 @@ ExpandWindowGenePosCodon <- function(
              dplyr::mutate(RelPos =  seq(-expand_width, expand_width))
     )
   } else {
+    # window extends beyond an end of gene
     return(tibble())
   }
 }
@@ -624,17 +594,14 @@ codon_rel_use <-
     expand_width = 5,
     min_count = 1, na.rm = TRUE)
 
+# Write the output 
+WriteFeatureAnalysis(codon_rel_use, filename = "codon_relpos_relcount.tsv", output_dir = output_dir)
 
-# features <- unique(feature_rel_use$Feature)
-#  
-# WriteCodonFeatureAnalysis(output_dir,feature_rel_use)
-# 
-# list_of_plots <- purrr::map(features,
-#           GeneratePositionFeaturePlot,feature_rel_use = feature_rel_use, expand_width = expand_width
-# )
-# 
-# purrr::map2(list_of_plots,
-#             features, 
-#             SaveFeatureAnalysisPlotPDF,
-#             output_dir = output_dir
-# )
+# Generate and save faceted plot
+codon_rel_use_plot <- GenerateRelPosRelCountPlot(codon_rel_use, expand_width = 5L) + 
+  facet_wrap(~Codon)
+
+ggsave(codon_rel_use_plot,
+       filename = file.path(output_dir,
+                            paste0("codon_rel_use_plot_faceted.pdf")),
+       width = 8, height = 8)
