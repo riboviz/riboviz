@@ -341,8 +341,29 @@ GenerateRelPosRelCountPlot <- function(feature_rel_use, expand_width) {
 }
 # TEST: GenerateRelPosRelCountPlot(): produces a single plot =TRUE
 
+CalculateCodonPairTable1Gene <- function(codon_poscodon_1gene) {
+  # Currently this mostly works but
+  assertthat::assert_that(
+    assertthat::are_equal(codon_poscodon_1gene$PosCodon,
+                          seq(min(codon_poscodon_1gene$PosCodon),
+                              max(codon_poscodon_1gene$PosCodon))),
+    msg = "codon_poscodon_1gene does not have PosCodons in integer sequence")
+  
+  codon_poscodon_1gene %>%
+    dplyr::mutate(CodonNext = dplyr::lead(codon_poscodon_1gene$Codon),
+                  CodonPair = paste(Codon, CodonNext, sep = "_") %>%
+                    replace(nrow(codon_poscodon_1gene), NA))
+}
 
-##### Calculation functions July 2022
+CalculateCodonPairTable <- function(features_gene_poscodon) {
+  assertthat::assert_that(
+    assertthat::has_name(features_gene_poscodon, 
+                         c("Gene", "PosCodon", "Codon")))
+  features_gene_poscodon %>%
+    dplyr::nest_by(Gene) %>%
+    dplyr::summarise(CalculateCodonPairTable1Gene(data),
+                     .groups = "drop")
+}
 
 #' Expand the window around a gene, poscodon of interest
 #' 
