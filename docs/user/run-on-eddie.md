@@ -144,8 +144,11 @@ $ source activate riboviz
 
 ### Configure R packages path
 
+This path contains a set of pre-installed R packages that work with R 3.6.3.
+If you're using a different version of R, testing different kinds of package functionality, or working ina. different research group, please use a different path.
+
 ```console
-$ export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
+$ export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_riboviz
 ```
 
 ### Load necessary modules on node
@@ -168,7 +171,7 @@ You can create a script named `set-riboviz-env.sh` for above commands to set up 
 
 ```
 #!/usr/bin/env bash
-export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
+export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_riboviz
 module load igmm/apps/BEDTools
 module load igmm/apps/bowtie
 module load igmm/apps/hdf5
