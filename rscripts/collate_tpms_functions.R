@@ -1,11 +1,11 @@
 #' Collate TPMs functions.
 #'
-#' Collate sample-specific TPMs files into a single file with data
-#' for all the samples.
+#' Collate sample-specific TPMs and counts from sample-specific
+#' files into a single file with data for all the samples.
 #'
 #' Each sample-specific TPMs file is assumed to be a tab-separated
 #' values (TSV) file with `ORF` and `tpm` columns (other columns
-#' are ignored.
+#' are ignored).
 #'
 #' The collated TPMs file is a TSV file with an `ORF` column and
 #' sample-specific columns, named by sample name, with the `tpm`
@@ -45,26 +45,27 @@ if (interactive()) {
 #' Warnings are printed if `tpms_file` does not exist or if the `ORF`
 #' column is inconsistent with `orfs`.
 #'
-#' @param tpms_file TPMs file (character).
+#' @param values_file file containing TPMs or other value (character).
 #' @param orfs Sorted list of ORFs (character).
 #' @param sort_orfs sort ORF list lexicographically (logical)
+#' @param values_from column name, defaults to "tpm"
 #' @return List of TPMs, consistent with order of `orfs` (double).
 #'
 #' @export
-LoadTpms <- function(tpms_file, orfs, sort_orfs = FALSE) {
+LoadTpms <- function(values_file, orfs, values_from = "tpm", sort_orfs = FALSE) {
   print(paste0("Loading TPMs from: ", tpms_file))
-  if (!file.exists(tpms_file)) {
-    warning(paste(tpms_file, "does not exist, returning empty list"))
+  if (!file.exists(values_file)) {
+    warning(paste(values_file, "does not exist, returning empty list"))
     return(NULL)
   }
-  features <- readr::read_tsv(tpms_file, comment = "#")
+  features <- readr::read_tsv(values_file, comment = "#")
   if (sort_orfs) {
     features <- features[order(features$ORF), ]
   }
   if (isFALSE(all.equal(features$ORF, orfs))) {
-    warning(paste("Inconsistent ORF names in", tpms_file))
+    warning(paste("Inconsistent ORF names in", values_file))
   }
-  return(features$tpm)
+  return(features[[values_from]])
 }
 
 #' Collate TPMs from sample-specific files and return collated TPMs.
@@ -83,7 +84,7 @@ LoadTpms <- function(tpms_file, orfs, sort_orfs = FALSE) {
 #' (data.frame).
 #'
 #' @export
-MakeTpmTable <- function(orf_fasta, samples, sort_orfs = FALSE) {
+MakeTpmTable <- function(orf_fasta, samples, values_from = "tpm", sort_orfs = FALSE) {
   if (is.na(orf_fasta)) {
     tpms_file <- samples[[1]]
     print(paste("Loading ORFs from:", tpms_file))
@@ -99,6 +100,7 @@ MakeTpmTable <- function(orf_fasta, samples, sort_orfs = FALSE) {
   tpm_list <- lapply(samples,
                      LoadTpms,
                      orfs = orfs,
+                     values_from = values_from,
                      sort_orfs = sort_orfs)
   non_null_elts <- sapply(tpm_list, function(elt) !is.null(elt))
   names(tpm_list) <- names(samples)
@@ -118,10 +120,14 @@ MakeTpmTable <- function(orf_fasta, samples, sort_orfs = FALSE) {
 #' output (integer).
 #'
 #' @export
-CollateTpms <- function(tpms_file, orf_fasta, samples, sort_orfs = FALSE,
+CollateTpms <- function(tpms_file, orf_fasta, samples, 
+                        values_from = "tpm", sort_orfs = FALSE,
                         digits = 1) {
   write_provenance_header(get_Rscript_filename(), tpms_file)
-  MakeTpmTable(orf_fasta, samples, sort_orfs = sort_orfs) %>%
+  MakeTpmTable(orf_fasta, 
+               samples,
+               values_from = values_from, 
+               sort_orfs = sort_orfs) %>%
     dplyr::mutate_if(is.numeric, round, digits = digits) %>%
     readr::write_tsv(tpms_file, col_names = TRUE, append = TRUE)
 }
