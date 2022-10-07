@@ -21,7 +21,7 @@
 #' | --------- | ----------- |
 #' | `--tpms-file` | Name of collated TPMs file |
 #' | `--orf-fasta` | ORF FASTA file that was aligned to and from which ORF names are to be retrieved |
-#' | `--vales-from` | Column name to use for values to collate (default `tpm`) |
+#' | `--values-from` | Column name to use for values to collate (default `tpm`) |
 #' | `--sort-orfs` | Sort ORF list lexicographically (default `FALSE`) |
 #' | `--digits` | Number of decimal places to be used in output (default 1) |
 #' | `--files-only` | Sample names are not provided with the sample-specific TPMs files? (default `FALSE`) |
@@ -92,8 +92,8 @@ if (opt$options$files_only) {
   sample_files <- sample_names_files[[1]]
   names(sample_files) <- sample_names_files[[2]]
 }
-CollateTpms(opt$options$tpms_file,
-            opt$options$orf_fasta,
+CollateTpms(values_file = opt$options$tpms_file,
+            orfs = opt$options$orf_fasta,
             sample_files,
             values_from = opt$options$values_from,
             sort_orfs = opt$options$sort_orfs,
