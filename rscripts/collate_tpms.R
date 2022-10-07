@@ -93,8 +93,8 @@ if (opt$options$files_only) {
   names(sample_files) <- sample_names_files[[2]]
 }
 CollateTpms(values_file = opt$options$tpms_file,
-            orfs = opt$options$orf_fasta,
-            sample_files,
+            orf_fasta = opt$options$orf_fasta,
+            samples = sample_files,
             values_from = opt$options$values_from,
             sort_orfs = opt$options$sort_orfs,
             digits = opt$options$digits)
