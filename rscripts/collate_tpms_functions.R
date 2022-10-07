@@ -42,7 +42,7 @@ if (interactive()) {
 #' column is consistent with given `orfs`, and, if so, return `tpm`
 #' column.
 #'
-#' Warnings are printed if `tpms_file` does not exist or if the `ORF`
+#' Warnings are printed if `values_file` does not exist or if the `ORF`
 #' column is inconsistent with `orfs`.
 #'
 #' @param values_file file containing TPMs or other value (character).
@@ -53,7 +53,7 @@ if (interactive()) {
 #'
 #' @export
 LoadTpms <- function(values_file, orfs, values_from = "tpm", sort_orfs = FALSE) {
-  print(paste0("Loading TPMs from: ", tpms_file))
+  print(paste0("Loading TPMs from: ", values_file))
   if (!file.exists(values_file)) {
     warning(paste(values_file, "does not exist, returning empty list"))
     return(NULL)
@@ -86,9 +86,9 @@ LoadTpms <- function(values_file, orfs, values_from = "tpm", sort_orfs = FALSE) 
 #' @export
 MakeTpmTable <- function(orf_fasta, samples, values_from = "tpm", sort_orfs = FALSE) {
   if (is.na(orf_fasta)) {
-    tpms_file <- samples[[1]]
-    print(paste("Loading ORFs from:", tpms_file))
-    orfs <- tpms_file %>% readr::read_tsv(comment = "#") %>% .$ORF
+    values_file <- samples[[1]]
+    print(paste("Loading ORFs from:", values_file))
+    orfs <- values_file %>% readr::read_tsv(comment = "#") %>% .$ORF
   } else {
     suppressMessages(library(Biostrings, quietly = T))
     print(paste("Loading ORFs from:", orf_fasta))
@@ -110,7 +110,7 @@ MakeTpmTable <- function(orf_fasta, samples, values_from = "tpm", sort_orfs = FA
 
 #' Collate TPMs from sample-specific files and saved collated TPMs.
 #'
-#' @param tpms_file Name of collated TPMs file (character).
+#' @param values_file Name of collated TPMs file (character).
 #' @param orf_fasta ORF FASTA file that was aligned to and from which
 #' ORF names are to be retrieved (character).
 #' @param samples List of sample files (where `names` attribute of
@@ -120,14 +120,14 @@ MakeTpmTable <- function(orf_fasta, samples, values_from = "tpm", sort_orfs = FA
 #' output (integer).
 #'
 #' @export
-CollateTpms <- function(tpms_file, orf_fasta, samples, 
+CollateTpms <- function(values_file, orf_fasta, samples, 
                         values_from = "tpm", sort_orfs = FALSE,
                         digits = 1) {
-  write_provenance_header(get_Rscript_filename(), tpms_file)
+  write_provenance_header(get_Rscript_filename(), values_file)
   MakeTpmTable(orf_fasta, 
                samples,
                values_from = values_from, 
                sort_orfs = sort_orfs) %>%
     dplyr::mutate_if(is.numeric, round, digits = digits) %>%
-    readr::write_tsv(tpms_file, col_names = TRUE, append = TRUE)
+    readr::write_tsv(values_file, col_names = TRUE, append = TRUE)
 }
