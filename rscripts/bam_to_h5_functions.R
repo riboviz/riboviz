@@ -56,10 +56,10 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
       rtracklayer::end(gene_location) + right_flank
   } else {
     # Multiple exon gene.
-    rtracklayer::start(gene_location)[rtracklayer::start(gene_location) == min(rtracklayer::start(gene_location))] <-
-      rtracklayer::start(gene_location)[rtracklayer::start(gene_location) == min(rtracklayer::start(gene_location))] - left_flank
-    rtracklayer::end(gene_location)[rtracklayer::end(gene_location) == max(rtracklayer::end(gene_location))] <-
-      rtracklayer::end(gene_location)[rtracklayer::end(gene_location) == max(rtracklayer::end(gene_location))] + right_flank
+    rtracklayer::start(gene_location)[rtracklayer::start(gene_location$start) == min(rtracklayer::start(gene_location$start))] <-
+      rtracklayer::start(gene_location$start)[rtracklayer::start(gene_location$start) == min(rtracklayer::start(gene_location$start))] - left_flank
+    rtracklayer::end(gene_location)[rtracklayer::end(gene_location$end) == max(rtracklayer::end(gene_location$end))] <-
+      rtracklayer::end(gene_location$end)[rtracklayer::end(gene_location$end) == max(rtracklayer::end(gene_location$end))] + right_flank
   }
 
   # Read gene's strand, pos, qwidth data from BAM file.
@@ -499,24 +499,24 @@ BamToH5 <- function(bam_file, orf_gff_file, feature, min_read_length,
         rhdf5::h5createAttribute(gid, "stop_codon_pos", c(1, 3))
         rhdf5::h5createAttribute(gid, "reads_by_len", c(1, length(read_lengths)))
         rhdf5::h5createAttribute(gid, "lengths", c(1, length(read_lengths)))
-        rhdf5::h5writeAttribute.integer(sum(gene_read_counts),
-                                        gid,
-                                        name = "reads_total")
+        rhdf5:::h5writeAttribute.integer(sum(gene_read_counts),
+                                         gid,
+                                         name = "reads_total")
         # Though start_codon_loc is an integer, start_codon_loc - 1
         # is a double, so cast back to integer so H5 type is
         # H5T_STD_I32LE and not H5T_IEEE_F64LE.
-        rhdf5::h5writeAttribute.integer(as.integer(start_codon_loc - 1),
-                                        gid,
-                                        name = "buffer_left")
-        rhdf5::h5writeAttribute.integer((ncol(gene_read_counts) - stop_cod[3]),
-                                        gid,
-                                        name = "buffer_right")
-        rhdf5::h5writeAttribute.integer(start_cod, gid, name = "start_codon_pos")
-        rhdf5::h5writeAttribute.integer(stop_cod, gid, name = "stop_codon_pos")
-        rhdf5::h5writeAttribute.integer(read_lengths, gid, name = "lengths")
-        rhdf5::h5writeAttribute.integer(apply(gene_read_counts, 1, sum),
-                                gid,
-                                name = "reads_by_len")
+        rhdf5:::h5writeAttribute.integer(as.integer(start_codon_loc - 1),
+                                         gid,
+                                         name = "buffer_left")
+        rhdf5:::h5writeAttribute.integer((ncol(gene_read_counts) - stop_cod[3]),
+                                         gid,
+                                         name = "buffer_right")
+        rhdf5:::h5writeAttribute.integer(start_cod, gid, name = "start_codon_pos")
+        rhdf5:::h5writeAttribute.integer(stop_cod, gid, name = "stop_codon_pos")
+        rhdf5:::h5writeAttribute.integer(read_lengths, gid, name = "lengths")
+        rhdf5:::h5writeAttribute.integer(apply(gene_read_counts, 1, sum),
+                                 gid,
+                                 name = "reads_by_len")
         # Specify a dataset within the gene group to store the values and
         # degree of compression, then write the dataset.
         read_data <- paste(mapped_reads, "data", sep = "/")
