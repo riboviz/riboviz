@@ -56,10 +56,10 @@ ReadsToCountMatrix <- function(gene_location, bam_file, read_lengths,
       rtracklayer::end(gene_location) + right_flank
   } else {
     # Multiple exon gene.
-    rtracklayer::start(gene_location)[rtracklayer::start(gene_location$start) == min(rtracklayer::start(gene_location$start))] <-
-      rtracklayer::start(gene_location$start)[rtracklayer::start(gene_location$start) == min(rtracklayer::start(gene_location$start))] - left_flank
-    rtracklayer::end(gene_location)[rtracklayer::end(gene_location$end) == max(rtracklayer::end(gene_location$end))] <-
-      rtracklayer::end(gene_location$end)[rtracklayer::end(gene_location$end) == max(rtracklayer::end(gene_location$end))] + right_flank
+    rtracklayer::start(gene_location)[rtracklayer::start(gene_location) == min(rtracklayer::start(gene_location))] <-
+      rtracklayer::start(gene_location)[rtracklayer::start(gene_location) == min(rtracklayer::start(gene_location))] - left_flank
+    rtracklayer::end(gene_location)[rtracklayer::end(gene_location) == max(rtracklayer::end(gene_location))] <-
+      rtracklayer::end(gene_location)[rtracklayer::end(gene_location) == max(rtracklayer::end(gene_location))] + right_flank
   }
 
   # Read gene's strand, pos, qwidth data from BAM file.
