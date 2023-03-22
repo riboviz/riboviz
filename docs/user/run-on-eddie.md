@@ -106,10 +106,10 @@ $ qlogin -pe interactivemem 4 -l h_vmem=4G
 
 Here, `-pe interactivemem 4` means you ask for 4 cores in an interactive memory parallel environment. Also, `-l h_vmem=4G` means that you ask for 4GB RAM per core (16GB total in this example)
 
-We have also succeeded running on one core with 16GB memory, using:
+For running the vignette it has been proven that 1 core and 4G does not work but 1 core and 8G works so the command is the following:
 
 ```console
-$ qlogin -l h_vmem=16G
+$ qlogin -l h_vmem=8G 
 ```
 
 If you have access to a priority queue then you can use option `-P`:
@@ -119,6 +119,13 @@ $ qlogin -pe interactivemem 4 -l h_vmem=4G -P <QUEUE_NAME>
 ```
 
 riboviz team members have access to the priority queue `bio_wallace_rna_riboviz`.
+
+Note: to avoid node-specific problems you can long into a specific node using:
+
+```console
+$ -q *@node1h21 
+```
+Reminder: the node you may want to access may not be available. 
 
 See [Interactive sessions](https://www.wiki.ed.ac.uk/display/ResearchServices/Interactive+Sessions) for more information.
 
@@ -137,8 +144,11 @@ $ source activate riboviz
 
 ### Configure R packages path
 
+This path contains a set of pre-installed R packages that work with R 3.6.3.
+If you're using a different version of R, testing different kinds of package functionality, or working ina. different research group, please use a different path.
+
 ```console
-$ export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
+$ export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_riboviz
 ```
 
 ### Load necessary modules on node
@@ -161,7 +171,7 @@ You can create a script named `set-riboviz-env.sh` for above commands to set up 
 
 ```
 #!/usr/bin/env bash
-export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
+export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_riboviz
 module load igmm/apps/BEDTools
 module load igmm/apps/bowtie
 module load igmm/apps/hdf5
@@ -237,6 +247,7 @@ Computational work on Eddie is usually submitted to the cluster as batch jobs in
 **Warning** - Jobs need to request appropriate resources (cores, memory) in order to run. We are still working out what riboviz needs, so this may take some trial and error.
 
 See "Requesting resources" section below.
+**Reminder**- Please note the paths in the below script and in the YAML configuration file from the example-datasets directory are just a reference. You should check and edit the paths according to your directory structure.
 
 Here is an example job script for the vignette, named `job_riboviz.sh` in your `riboviz` directory to run a **riboviz** workflow:
 
@@ -306,6 +317,7 @@ A good start involves reserving available resources (`-R y`) of 4 nodes, 16GB/ea
 ```
 -R y -pe mpi 4 -l h_vmem=16GB
 ```
+It is best to specify these resources within the job submission file so it is easier to keep track of the resources used in each submission and which of them worked. 
 
 This tended to start within a few hours; but still was killed unpredictably on larger datasets.
 
@@ -525,7 +537,7 @@ $ module load igmm/apps/sratoolkit/2.10.8
 $ vdb-config --interactive
 ```
 
-then follow the interactive prompts (using tab to navigate through the menus) and edit the `CACHE` > `Set Default Import Path` section to change the workspace location.
+then follow the interactive prompts (using tab to navigate through the menus) and edit the `CACHE` > `Set location of user-repository` section to change the workspace location.
 
 This path adjusts where the tool puts your cache directory, which could get very large (100s of GB). We recommend using your scratch space `/exports/eddie/scratch/$USER/ncbi`, where `$USER` is replaced by your username.
 
