@@ -290,7 +290,7 @@ $ python -m riboviz.tools.create_job_script \
     -i jobs/eddie-template.sh \
     -o job_riboviz.sh \
     --config-file vignette/vignette_config.yaml \
-    --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary \
+    --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_ICP \
     --job-runtime "01:00:00"
 ```
 
