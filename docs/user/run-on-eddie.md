@@ -144,7 +144,7 @@ $ source activate riboviz
 ### Configure R packages path
 
 ```console
-$ export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
+$ export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_ICP
 ```
 
 ### Load necessary modules on node
@@ -155,7 +155,7 @@ $ module load igmm/apps/bowtie
 $ module load igmm/apps/hdf5
 $ module load igmm/apps/HISAT2
 $ module load igmm/apps/pigz
-$ module load igmm/apps/R/3.6.3
+$ module load igmm/apps/R/4.1.3
 $ module load anaconda
 ```
 
@@ -167,13 +167,13 @@ You can create a script named `set-riboviz-env.sh` for above commands to set up 
 
 ```
 #!/usr/bin/env bash
-export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
+export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_ICP
 module load igmm/apps/BEDTools
 module load igmm/apps/bowtie
 module load igmm/apps/hdf5
 module load igmm/apps/HISAT2
 module load igmm/apps/pigz
-module load igmm/apps/R/3.6.3
+module load igmm/apps/R/4.1.3
 module load anaconda
 source activate riboviz
 ```
@@ -267,13 +267,13 @@ Here is an example job script for the vignette, named `job_riboviz.sh` in your `
 # Initialise the environment modules
 . /etc/profile.d/modules.sh
 
-export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
+export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_ICP
 module load igmm/apps/BEDTools
 module load igmm/apps/bowtie
 module load igmm/apps/hdf5
 module load igmm/apps/HISAT2
 module load igmm/apps/pigz
-module load igmm/apps/R/3.6.3
+module load igmm/apps/R/4.1.3
 module load anaconda
 source activate riboviz
 
@@ -290,7 +290,7 @@ $ python -m riboviz.tools.create_job_script \
     -i jobs/eddie-template.sh \
     -o job_riboviz.sh \
     --config-file vignette/vignette_config.yaml \
-    --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary \
+    --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_ICP \
     --job-runtime "01:00:00"
 ```
 
@@ -469,7 +469,7 @@ Check you have this file structure:
 
 ```
 $HOME/riboviz/riboviz           # branch: develop
-$HOME/riboviz/example-datasets  # branch: master
+$HOME/riboviz/example-datasets  # branch: main
 ```
 
 This will give you access to the correct config.yaml, annotation and contaminants files.
@@ -503,7 +503,7 @@ Now we copy the yaml across from the example-datasets folder, into our main ribo
 
 ```console
 $ mkdir annotation
-$ cp /exports/eddie/scratch/s1919303/riboviz/example-datasets/fungi/cryptococcus/annotation/JEC21_10p_up12dwn9_CDS_with_120bputrs.fa annotation
+$ cp /exports/eddie/scratch/$USER/riboviz/example-datasets/fungi/cryptococcus/annotation/JEC21_10p_up12dwn9_CDS_with_120bputrs.fa annotation
 
 # copy yaml into the riboviz/Wallace_2020_JEC21 folder, rename it
 # cp [example-datasets version yaml] [our 'local' riboviz folder version]
@@ -530,7 +530,7 @@ $ module load igmm/apps/sratoolkit/2.10.8
 $ vdb-config --interactive
 ```
 
-then follow the interactive prompts (using tab to navigate through the menus) and edit the `CACHE` > `Set Default Import Path` section to change the workspace location.
+then follow the interactive prompts (using tab to navigate through the menus) and edit the `CACHE` > `Set location of user-repository` section to change the workspace location.
 
 This path adjusts where the tool puts your cache directory, which could get very large (100s of GB). We recommend using your scratch space `/exports/eddie/scratch/$USER/ncbi`, where `$USER` is replaced by your username.
 
@@ -595,14 +595,14 @@ Create the job submission script in `$HOME` or a location of your choosing, and 
 . /etc/profile.d/modules.sh
 
 #!/usr/bin/env bash
-export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary
+export R_LIBS=/exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_ICP
 module load openmpi
 module load igmm/apps/BEDTools
 module load igmm/apps/bowtie
 module load igmm/apps/hdf5
 module load igmm/apps/HISAT2
 module load igmm/apps/pigz
-module load igmm/apps/R/3.6.3
+module load igmm/apps/R/4.1.3
 module load anaconda
 source activate riboviz
 
@@ -672,7 +672,7 @@ Note that by default Nextflow uses a local work/ directory (ie. in `$HOME/ribovi
 Check that you are in the same location as your submission script, or remember to add that path to your `qsub` command.
 
 ```console
-$ cd /exports/eddie/scratch/s1919303/riboviz/riboviz/
+$ cd $HOME/riboviz/riboviz/
 $ qsub [Your-script]
 ```
 
@@ -684,7 +684,7 @@ The job submission should create two files: an output file `JOB_NAME-$JOB_ID-$HO
 
 The output file will contain the standard output from the nextflow run, and will provide you with information needed if you need to debug the run. For more information, see [Debugging](./prep-riboviz-run-nextflow.md#debugging) in [Running the riboviz Nextflow workflow](./prep-riboviz-run-nextflow.md).
 
-The output files will be in `/exports/eddie/scratch/$USER/Wallace_2020_JEC21/output/`.
+The output files will be in `$HOME/riboviz/riboviz/Wallace_2020_JEC21/output/`.
 
 Another file worth checking if you are uncertain how a nextflow run performed is the `.nextflow.log` file found in `$HOME/riboviz/riboviz`.
 
@@ -692,7 +692,7 @@ Another file worth checking if you are uncertain how a nextflow run performed is
 
 If you run the example-dataset in your scratch space as detailed in these instructions, remember to move the output data to DataStore or other persistent storage after the jobs have finished.  
 
-Alternatively, you can use `scp` and `scp -r` to transfer the files and folders via the commandline to a local machine (e.g. `scp -r $USER@eddie.ecdf.ed.ac.uk:/exports/eddie/scratch/$USER/Wallace_2020_JEC21/output/* $HOME/Downloads/` to download all of the output files from the scratch space to the user's local Downloads file).
+Alternatively, you can use `scp` and `scp -r` to transfer the files and folders via the commandline from either scratch or your $HOME directory to a local machine (e.g. `scp -r $USER@eddie.ecdf.ed.ac.uk:/exports/eddie/scratch/$USER/Wallace_2020_JEC21/output/* $HOME/Downloads/` to download all of the output files from the scratch space to the user's local Downloads file or `$USER@eddie.ecdf.ed.ac.uk:$HOME/riboviz/riboviz/Wallace_2020_JEC21/output/* $HOME/Downloads/` to download it from your remote directory to your local computer).
 
 You can check the file sizes using `du -ch` to get an idea of how much space you will need to have available before transferring the files.  The `/input` files for this example dataset total ~18GB, the `/output` files total ~8GB, but the total size of the `Wallace_2020_JEC21` folder on scratch after a successful run currently comes to 551GB!
 

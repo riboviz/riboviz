@@ -66,7 +66,7 @@ Examples:
 $ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
     -o run_B-Sc_2012.sh \
     --config-file ~/data-folder/Brar_2012_Meiosis_RPF_6-samples_CDS_w_250utrs_config.yaml \
-    --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary \
+    --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_ICP \
     --job-name B-Sc_2012 --job-runtime 48:00:00 \
     --job-memory 8G --job-num-cpus 16 \
     --validate-only
@@ -75,7 +75,7 @@ $ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
 $ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
     -o run_B-Sc_2012.sh \
     --config-file ~/data-folder/Brar_2012_Meiosis_RPF_6-samples_CDS_w_250utrs_config.yaml \
-    --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary \
+    --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_ICP \
     --job-name B-Sc_2012 --job-runtime 48:00:00 \
     --job-memory 8G --job-num-cpus 16
 ```
@@ -83,7 +83,7 @@ $ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
 $ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
     -o run_W-Cn-H99_2020.sh \
     --config-file ~/data-folder/Brar_2012_Meiosis_RPF_6-samples_CDS_w_250utrs_config.yaml \
-    --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary \
+    --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_ICP \
     --job-name W-Cn-H99_2020 --job-runtime 48:00:00 \
     --job-memory 8G --job-num-cpus 16 \
     --validate-only
@@ -92,7 +92,7 @@ $ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
 $ python -m riboviz.tools.create_job_script -i jobs/eddie-template.sh \
     -o run_W-Cn-H99_2020.sh \
     --config-file ~/data-folder/Brar_2012_Meiosis_RPF_6-samples_CDS_w_250utrs_config.yaml \
-    --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary \
+    --r-libs /exports/csce/eddie/biology/groups/wallace_rna/Rlibrary_ICP \
     --job-name W-Cn-H99_2020 --job-runtime 48:00:00 \
     --job-memory 8G --job-num-cpus 16
 ```
