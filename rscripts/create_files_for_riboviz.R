@@ -24,7 +24,7 @@ parser$add_argument("--h5_file",help="File name for createing H5 file. If not in
 parser$add_argument("--codon_data_file",help="File name for codon position .Rdata file. If not initialized, file will not be created.",type="character",default=NULL)
 parser$add_argument("--num_cores",help="Number of cores to use for parallelizable processes.",type="integer",default=1)
 parser$add_argument("--codons_exclude",help="Exclude the first n codons when creating codon_data_file, where n is specified by this argument",default=0)
-parser$add_argument("--remove_trailing",help="Remove trailing info from names to be used for CDS, e.g. remove anything after '_' or '.'",type="character",default="_|\\.")
+parser$add_argument("--remove_trailing",help="Remove trailing info from names to be used for CDS, e.g. remove anything after '_' or '.'",type="character",default=NULL)
 parser$add_argument("--filter_seq",help="A comma-separated list of filtering criteria to apply to the GFF3 file, e.g. 'type:CDS,orf_classification:Verified,orf_classification:Uncharacterized'. Use 'notNA' to filter values that are NA, e.g. 'orf_classification:!NA'.",type="character",default="type:CDS")
 parser$add_argument("--exons_preordered",help="Some GFF3 files have exons pre-ordered such that exon with start codon is listed first. Effects how multi-exon genes will be combined.",action="store_true")
 
@@ -345,6 +345,18 @@ if(!dir.exists(output_dir)){
   dir.create(output_dir)
 }
 
+# input <- "/data2/cope/Comparative_translation/Data/Seq/lachancea_kluyveri.fas"
+# gff <- "/data2/cope/Comparative_translation/Data/Seq/lachancea_kluyveri.max.gtf"
+# outpur_dir <- "/data2/cope/Comparative_translation/Data/Seq/"
+# output_cds <- "test.cds"
+# output_gff <- "test.gff"
+# seq_id <- "gene_id"
+# buffer <- 250
+# num_cores <- 8
+# remove_trailing <- NULL
+# exons_preordered <- FALSE
+# filter_seq <- "type:CDS,type:start_codon,type:stop_codon"
+
 print("Reading in Genome...")
 genome <- readInGenomeFasta(input)
 print("Done")
@@ -368,9 +380,13 @@ if (!is.null(remove_trailing))
   print("Removing trailing values on gene ids...")
   annot <- removeTrailing(gff = annot, column=seq_id, regex = remove_trailing)
   print("Done")
+} else
+{
+  annot$Name <- mcols(annot)[[seq_id]]
 }
 print("Creating riboviz-style CDS...")
 gff_annot <- annot
+names(genome) <- sapply(strsplit(names(genome)," "), `[`, 1)
 
 
 tmp_gff <- sapply(unique(gff_annot$Name),
