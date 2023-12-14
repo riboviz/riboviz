@@ -23,8 +23,8 @@ Usage::
                           otherwise use 'ID' (default 'false')
     --cds-feature-format CDS_FEATURE_FORMAT
                           CDS feature name format for CDS features
-                          which do not define ``ID`` or
-                          ``Name`` attributes. This format is applied
+                          which do not define 'ID' or
+                          'Name' attributes. This format is applied
                           to the sequence ID to create a feature
                           name.
 

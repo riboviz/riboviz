@@ -160,7 +160,7 @@ def test_create_barcode_pairs_0(tmp_file):
     :type tmp_file: str or unicode
     """
     barcodes_umis.create_barcode_pairs(tmp_file, length=0)
-    with open(tmp_file) as csv_file:
+    with open(tmp_file, 'r', newline='') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter="\t")
         rows = [row for row in csv_reader]
     assert len(rows) == 0, "Expected zero rows"
@@ -180,7 +180,7 @@ def test_create_barcode_pairs_1(tmp_file, delimiter):
     barcodes_umis.create_barcode_pairs(tmp_file,
                                        length=1,
                                        delimiter=delimiter)
-    with open(tmp_file) as csv_file:
+    with open(tmp_file, 'r', newline='') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=delimiter)
         rows = [row for row in csv_reader]
     assert len(rows) == 2 ** len(barcodes_umis.NUCLEOTIDES)

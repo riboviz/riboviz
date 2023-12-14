@@ -1,0 +1,30 @@
+dir_in: vignette/input
+dir_out: vignette/output
+dir_tmp: vignette/tmp
+rRNA_fasta: vignette/input/yeast_rRNA_R64-1-1.fa
+orf_fasta: vignette/input/yeast_YAL_CDS_w_250utrs.fa
+orf_gff_file: vignette/input/yeast_YAL_CDS_w_250utrs.gff3
+aligner: hisat2
+build_indices: TRUE
+make_bedgraph: TRUE
+dir_index: vignette/index
+rRNA_index: vignette/index/yeast_rRNA
+orf_index: vignette/index/YAL_CDS_w_250
+fq_files:
+  WTnone: SRR1042855_s1mi.fastq.gz
+  WT3AT: SRR1042864_s1mi.fastq.gz
+  NotHere: example_missing_file.fastq.gz
+adapters: CTGTAGGCACC
+nprocesses: 1
+MinReadLen: 10
+MaxReadLen: 50
+Buffer: 250
+PrimaryID: Name
+SecondID: NULL
+dataset: vignette
+StopInCDS: FALSE
+isTestRun: FALSE
+rpf: TRUE
+ribovizGFF: TRUE
+features_file: NULL
+do_pos_sp_nt_freq: TRUE

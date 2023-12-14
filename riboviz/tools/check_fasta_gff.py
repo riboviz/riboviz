@@ -21,7 +21,7 @@ Usage::
                           otherwise use 'ID' (default 'false')
     --feature-format FEATURE_FORMAT
                           Feature name format for features which do
-                          not define ``ID`` or ``Name``
+                          not define 'ID' or 'Name'
                           attributes. This format is applied to the
                           sequence ID to create a feature name.
     --start-codon START_CODON [START_CODON ...]

@@ -320,7 +320,7 @@ def demultiplex(sample_sheet_file,
     print(("All {} reads processed".format(total_reads)))
 
     # Purge files with no reads.
-    for (sample_id, index) in zip(sample_ids, range(len(sample_ids))):
+    for (_, index) in zip(sample_ids, range(len(sample_ids))):
         if num_reads[index] == 0:
             os.remove(read1_split_files[index])
             if is_paired_end:

@@ -23,7 +23,8 @@ def equal_h5(file1, file2):
     running ``h5diff``
     """
     # TODO implement in-Python comparison.
-    cmd = ["h5diff", "-q", file1, file2]
+    cmd = ["h5diff", "-q", "--follow-symlinks",
+           file1, file2]
     return_code = subprocess.call(cmd)
     assert return_code == 0,\
         "Non-zero return code (%d) from %s" % (

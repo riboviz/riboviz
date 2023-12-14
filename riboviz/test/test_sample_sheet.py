@@ -100,6 +100,7 @@ def test_load_sample_sheet_non_sample_sheet(tmp_file, header):
     with open(tmp_file, 'w', newline='') as csv_file:
         writer = csv.DictWriter(csv_file,
                                 delimiter="\t",
+                                lineterminator=os.linesep,
                                 fieldnames=header)
         writer.writeheader()
     with pytest.raises(AssertionError):

@@ -45,7 +45,7 @@ def write_provenance(file_handle, file_path, prefix="# ", eol="\n"):
 
     The header has form::
 
-        <prefix> Created by: RiboViz
+        <prefix> Created by: riboviz
         <prefix> Date: <YYYY>-<MM>-<DD> <HH>:<MM>:<SS>.<SSSSS>
         <prefix> Command-line tool: <MAIN_MODULE>
         <prefix> File: <file_path>
@@ -64,7 +64,7 @@ def write_provenance(file_handle, file_path, prefix="# ", eol="\n"):
     :param eol: End of line character
     :type eol: str or unicode
     """
-    file_handle.write("{}Created by: RiboViz{}".format(prefix, eol))
+    file_handle.write("{}Created by: riboviz{}".format(prefix, eol))
     file_handle.write("{}Date: {}{}".format(prefix, datetime.today(), eol))
     import __main__
     if hasattr(__main__, "__file__"):
