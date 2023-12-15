@@ -254,6 +254,7 @@ writeRibovizStyleGFF <- function(gff,output_dir,output_gff)
 }
 
 
+
 #' Creata .Rdata object storing codon positions
 #' @param seq CDS sequences as DNAStringSet object
 #' @param gff GRanges object 
@@ -268,7 +269,21 @@ createCodonPositionRData <- function(seq,gff,codon_position_object,output_dir,st
   
   seq <- DNAStringSet(seq,start=start_pos+1) # Trim the first 200 codons from each CDS
   seq <- seq[width(seq)%%3==0] # Ignore any transcripts with frame-shifts
-  cods <- sapply(sapply(seq,codons),as.character) # Split the sequences into codons
+  # cods <- sapply(
+  #   sapply(seq,function(x)
+  #     {
+  #     sst <- strsplit(x, "")[[1]]
+  #     paste0(sst[c(TRUE, FALSE, FALSE)], sst[c(FALSE, TRUE, FALSE)], sst[c(FALSE, FALSE, TRUE)])
+  #   }),
+  #   as.character
+  # ) # Split the sequences into codons
+  # 
+  # 
+  cods <- sapply(seq,function(x)
+    {
+      sst <- strsplit(as.character(x), "")[[1]]
+      paste0(sst[c(TRUE, FALSE, FALSE)], sst[c(FALSE, TRUE, FALSE)], sst[c(FALSE, FALSE, TRUE)])
+    }) # Split the sequences into codons
   
   
   codon_pos <- sapply(names(GENETIC_CODE),
@@ -345,17 +360,6 @@ if(!dir.exists(output_dir)){
   dir.create(output_dir)
 }
 
-# input <- "/data2/cope/Comparative_translation/Data/Seq/lachancea_kluyveri.fas"
-# gff <- "/data2/cope/Comparative_translation/Data/Seq/lachancea_kluyveri.max.gtf"
-# outpur_dir <- "/data2/cope/Comparative_translation/Data/Seq/"
-# output_cds <- "test.cds"
-# output_gff <- "test.gff"
-# seq_id <- "gene_id"
-# buffer <- 250
-# num_cores <- 8
-# remove_trailing <- NULL
-# exons_preordered <- FALSE
-# filter_seq <- "type:CDS,type:start_codon,type:stop_codon"
 
 print("Reading in Genome...")
 genome <- readInGenomeFasta(input)
