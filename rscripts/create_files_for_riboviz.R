@@ -27,6 +27,8 @@ parser$add_argument("--codons_exclude",help="Exclude the first n codons when cre
 parser$add_argument("--remove_trailing",help="Remove trailing info from names to be used for CDS, e.g. remove anything after '_' or '.'",type="character",default=NULL)
 parser$add_argument("--filter_seq",help="A comma-separated list of filtering criteria to apply to the GFF3 file, e.g. 'type:CDS,orf_classification:Verified,orf_classification:Uncharacterized'. Use 'notNA' to filter values that are NA, e.g. 'orf_classification:!NA'.",type="character",default="type:CDS")
 parser$add_argument("--exons_preordered",help="Some GFF3 files have exons pre-ordered such that exon with start codon is listed first. Effects how multi-exon genes will be combined.",action="store_true")
+parser$add_argument("--start_codons",help="Valid start codons",type="character",default="ATG")
+parser$add_argument("--remove_sequences_wo_start_codons",help="Remove sequences with invalid start codons (as determined by --start_codons argument)",action="store_true")
 
 args <- parser$parse_args()
 input <- args$input
@@ -43,6 +45,10 @@ codons_exclude <- args$codons_exclude
 remove_trailing <- args$remove_trailing
 filter_seq <- args$filter_seq
 exons_preordered <- args$exons_preordered
+start_codons <- args$start_codons
+remove_sequences <- args$remove_sequences_wo_start_codons
+
+
 
 ##### Helper functions #########################################################
 
@@ -267,18 +273,8 @@ createCodonPositionRData <- function(seq,gff,codon_position_object,output_dir,st
   seq <- seq[gff[gff$type=="CDS"]]
   seq <- seq[width(seq)>start_pos] 
   
-  seq <- DNAStringSet(seq,start=start_pos+1) # Trim the first 200 codons from each CDS
+  seq <- DNAStringSet(seq,start=start_pos+1)
   seq <- seq[width(seq)%%3==0] # Ignore any transcripts with frame-shifts
-  # cods <- sapply(
-  #   sapply(seq,function(x)
-  #     {
-  #     sst <- strsplit(x, "")[[1]]
-  #     paste0(sst[c(TRUE, FALSE, FALSE)], sst[c(FALSE, TRUE, FALSE)], sst[c(FALSE, FALSE, TRUE)])
-  #   }),
-  #   as.character
-  # ) # Split the sequences into codons
-  # 
-  # 
   cods <- sapply(seq,function(x)
     {
       sst <- strsplit(as.character(x), "")[[1]]
@@ -360,7 +356,6 @@ if(!dir.exists(output_dir)){
   dir.create(output_dir)
 }
 
-
 print("Reading in Genome...")
 genome <- readInGenomeFasta(input)
 print("Done")
@@ -425,9 +420,27 @@ for(i in unique(names(cds_flank_seq))){
   }
   cc <- cc+1
 }
+
 output_seq <- DNAStringSet(output_seqlist)
 names(output_seq) <- unique(names(cds_flank_seq))
 cds <- output_seq
+
+if (remove_sequences)
+{
+  start_codons <- unlist(str_split(start_codons,";"))
+  start_codon_per_gene <- sapply(cds,function(x){
+    as.character(x[(buffer+1):(buffer+3)])
+    })
+  bad_genes_start <- which(!start_codon_per_gene %in% start_codons)
+  stop_codon_per_gene <- sapply(cds,function(x){
+    length_seq <- length(x)
+    as.character(x[(length_seq-buffer-2):(length_seq-buffer)])
+  })
+  bad_genes_stop <- which(!stop_codon_per_gene %in% c("TAG","TAA","TGA"))
+  bad_genes <- unique(c(bad_genes_start,bad_genes_stop))
+  cds <- cds[-bad_genes]
+}
+
 print("Done")
 print("Writing riboviz-style CDS to file...")
 writeRibovizStyleCDS(cds,output_dir,output_cds)
@@ -443,7 +456,12 @@ print("Done")
 if (!is.null(codon_data_file))
 {
   print("Creating codon position .Rdata file...")
-  createCodonPositionRData(seq = cds, gff = riboviz_gff, codon_position_object = codon_data_file, output_dir = output_dir,start_pos = codons_exclude, num_cores = num_cores)
+  createCodonPositionRData(seq = cds, 
+                           gff = riboviz_gff, 
+                           codon_position_object = codon_data_file, 
+                           output_dir = output_dir,
+                           start_pos = codons_exclude, 
+                           num_cores = num_cores)
   print("Done")
 }
 
