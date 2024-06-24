@@ -606,6 +606,7 @@ barplot_ribogrid <- function(tidymat, small_read_range = 26:32) {
 #' @param left integer, used in subsetting codon positions; e.g. "left = (buffer - 15)" as in CalculatePositionSpecificDistributionOfReads() usage
 #' @param right integer, used in subsetting codon positions; e.g. "right = (buffer + 11)" as in CalculatePositionSpecificDistributionOfReads() usage
 #' @param min_read_length integer, minimum read length in H5 output; Default = 10 (set in generate_stats_figs.R from yaml)
+#' @param a_site_displacement data.frame, contains A-site displacement for each read length
 #'
 #' @return matrix of codon-specific reads
 #'
@@ -617,20 +618,24 @@ barplot_ribogrid <- function(tidymat, small_read_range = 26:32) {
 #' # returns matrix: num [1:122] 0 0 0 0 0 0 0 0 0 0 ...
 #'
 #' @export
-GetCodonPositionReads <- function(gene, dataset, hd_file = hd_file, left, right, min_read_length) {
-  length_id <- 28 - min_read_length + 1
+GetCodonPositionReads <- function(gene, dataset, hd_file = hd_file, left, right, min_read_length, a_site_displacement) {
+  length_id <- a_site_displacement$read_length - min_read_length + 1
   reads_pos <- GetGeneDatamatrix(gene, dataset, hd_file) # Get the matrix of read counts
-  reads_pos_subset <- reads_pos[, left:(dim(reads_pos)[2] - right)] # Subset positions such that only CDS codon-mapped reads are considered
-  end_reads_pos_subset <- ncol(reads_pos_subset) # Number of columns of the subset
 
-  l28 <- RcppRoll::roll_suml(reads_pos_subset[length_id, 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[14, 2:end_reads_pos_subset]), 3)] # Map reads of length 28 to codons
-  l29 <- RcppRoll::roll_suml(reads_pos_subset[(length_id + 1), 2:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[15, 2:end_reads_pos_subset]), 3)] # Map reads of length 29 to codons
-  l30 <- RcppRoll::roll_suml(reads_pos_subset[(length_id + 2), 1:end_reads_pos_subset], n = 3, fill = NULL)[seq(1, length(reads_pos_subset[16, 1:end_reads_pos_subset]), 3)] # Map reads of length 30 to codons
+  reads <- lapply(length_id,function(x){
+    offset <- unlist(a_site_displacement %>% filter(read_length == (x - 1 + min_read_length)) %>% dplyr::select(asite_displacement))
+    reads_pos[x, ] <- reads_pos[x, ] %>% dplyr::lag(n = offset, default = 0)
+    l <- RcppRoll::roll_suml(reads_pos[x, left:right], n = 3, fill = NULL)[seq(1, length(reads_pos[x, left:right]), 3)]
+    l
+  })
 
-  cod_sp_counts <- l28 + l29 + l30 # Sum of reads of lengths 28-30 at each codon
+  ## Note from @acope3: bind_rows() didn't work because not named list (I think). Use do.call for now, tidy up later.
+  reads <- do.call("rbind",reads)
+  cod_sp_counts <- colSums(reads)
   cod_sp_counts <- cod_sp_counts[1:(length(cod_sp_counts) - 1)]
   return(cod_sp_counts)
 }
+
 #TEST: GetCodonPositionReads(): does it return a matrix? TRUE
 
 #' GetMRNACoverage(): Calculate nucleotide-specific coverage
