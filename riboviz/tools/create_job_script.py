@@ -83,7 +83,7 @@ def parse_command_line_options():
     return parser.parse_args()
 
 
-def invoke_create_job_script():
+def main():
     """
     Parse command-line options then invoke
     :py:mod:`riboviz.create_job_script.create_job_script`.
@@ -109,4 +109,4 @@ def invoke_create_job_script():
 
 
 if __name__ == "__main__":
-    invoke_create_job_script()
+    main()

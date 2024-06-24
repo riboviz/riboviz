@@ -44,7 +44,7 @@ def parse_command_line_options():
     return options
 
 
-def invoke_create_barcode_pairs():
+def main():
     """
     Parse command-line options then invoke
     :py:func:`riboviz.barcodes_umis.create_barcode_pairs`.
@@ -56,4 +56,4 @@ def invoke_create_barcode_pairs():
 
 
 if __name__ == "__main__":
-    invoke_create_barcode_pairs()
+    main()

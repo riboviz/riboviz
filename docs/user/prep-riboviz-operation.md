@@ -13,15 +13,15 @@ The workflow prepares ribosome profiling data for by implementing a workflow tha
 * `hisat2-build`: build rRNA and ORF indices.
 * `cutadapt`: cut adapters.
 * `hisat2`: align reads.
-* `riboviz.tools.trim_5p_mismatch`: trim 5' mismatches from reads and remove reads with more than a set number of mismatches (local script, in `riboviz/tools/`).
+* `trim_5p_mismatch`: trim 5' mismatches from reads and remove reads with more than a set number of mismatches (local script, in `riboviz/tools/`).
 * `umi_tools` (`extract`, `dedup`, `group`): extract barcodes and UMIs, deduplicate reads and group reads.
-* `riboviz.tools.demultiplex_fastq`: demultiplex multiplexed files (local script, in `riboviz/tools/`).
+* `demultiplex_fastq`: demultiplex multiplexed files (local script, in `riboviz/tools/`).
 * `samtools` (`view`, `sort`, `index`): convert SAM files to BAM files and index.
 * `bedtools` (`genomecov`): export transcriptome coverage as bedgraphs.
 * `bam_to_h5.R`: convert BAM to compressed H5 format (local script, in `rscripts/`)
 * `generate_stats_figs.R`: generate summary statistics, analyses plots and QC plots (local script, in `rscripts/`)
 * `collate_tpms.R`: collate TPMs across samples (local script, in `rscripts/`)
-* `riboviz.tools.count_reads`: count the number of reads (sequences) processed by specific stages of the workflow (local script, in `riboviz/tools/`).  
+* `count_reads`: count the number of reads (sequences) processed by specific stages of the workflow (local script, in `riboviz/tools/`).
 * `AnalysisOutputs.Rmd`: the `staticHTML` Nextflow process runs an R markdown document which generates an HTML output report for each sample processed, using the analysed data (local script, in `rmarkdown/`)
 
 ### Interactive Visualization
@@ -29,7 +29,6 @@ The workflow prepares ribosome profiling data for by implementing a workflow tha
 An additional script within the riboviz codebase allows the generation of interactive plots from the dataset after the riboviz workflow has been completed.  
 
 A process within the main riboviz workflow (`createInteractiveVizParamsConfigFile`, within `prep-riboviz.nf`) generates a configuration yaml file specifically for this interactive visualization (`interactive_viz_config.yaml`, found in the `dir_out` directory), and users can then run `rscripts/run_shiny_server.R` using this additional YAML (as detailed within [How To Run the riboviz Interactive Data Visualization On Your Data](./run-shiny-server-operation.md)).  This generates a shiny app instance which users can view to explore their data.
-
 
 ---
 

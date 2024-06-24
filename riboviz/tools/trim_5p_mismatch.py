@@ -79,7 +79,7 @@ def parse_command_line_options():
     return options
 
 
-def invoke_trim_5p_mismatch():
+def main():
     """
     Parse command-line options then invoke
     :py:func:`riboviz.trim_5p_mismatch.trim_5p_mismatch_file`.
@@ -99,4 +99,4 @@ def invoke_trim_5p_mismatch():
 
 
 if __name__ == "__main__":
-    invoke_trim_5p_mismatch()
+    main()

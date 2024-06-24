@@ -109,4 +109,8 @@ for pkg in ${CONDA_LIST[@]}; do
     # to remove multiple spaces.
     echo "| $pkg | $PKG_VERSION | conda |"
 done
+RIBOVIZ_PY=riboviz-py
+RIBOVIZ_PIP_PKG=$(pip list | grep $RIBOVIZ_PY)
+RIBOVIZ_PKG_VERSION=$(echo "$RIBOVIZ_PIP_PKG" | grep -iw "$RIBOVIZ_PY " | tr -s " " | cut -d" " -f2)
+echo "| $RIBOVIZ_PY | $RIBOVIZ_PKG_VERSION | pip |"
 echo " "

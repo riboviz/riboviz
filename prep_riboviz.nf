@@ -808,10 +808,6 @@ process demultiplex {
         mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
-        // Use '.toString' to prevent changing hashes of
-        // 'workflow.projectDir' triggering reexecution of this
-        // process if 'nextflow run' is run with '-resume'.
-        env PYTHONPATH from workflow.projectDir.toString()
         tuple val(multiplex_id), file(multiplex_fq) from trimmed_multiplex_fq
         each file(sample_sheet_tsv) from deplex_multiplex_sample_sheet_tsv
     output:
@@ -820,8 +816,8 @@ process demultiplex {
         file("*.f*") into demultiplex_fq
     shell:
         """
-        python -m riboviz.tools.demultiplex_fastq \
-            -1 ${multiplex_fq} -s ${sample_sheet_tsv} -o . -m 2
+        demultiplex_fastq \
+          -1 ${multiplex_fq} -s ${sample_sheet_tsv} -o . -m 2
         """
 }
 
@@ -931,10 +927,7 @@ process trim5pMismatches {
         mode: publish_index_tmp_type, overwrite: true
     errorStrategy 'ignore'
     input:
-        // Use '.toString' to prevent changing hashes of
-        // 'workflow.projectDir' triggering reexecution of this
-        // process if 'nextflow run' is run with '-resume'.
-        env PYTHONPATH from workflow.projectDir.toString()
+
         tuple val(sample_id), file(sample_sam) from trim_5p_branch.trim_5p_fq
     output:
         tuple val(sample_id), file("orf_map_clean.sam") \
@@ -943,7 +936,7 @@ process trim5pMismatches {
             into trim_summary_tsv
     shell:
         """
-        python -m riboviz.tools.trim_5p_mismatch -m 2 \
+        trim_5p_mismatch -m 2 \
             -i ${sample_sam} -o orf_map_clean.sam -s trim_5p_mismatch.tsv
         """
 }
@@ -1400,10 +1393,6 @@ if (params.run_static_html) {
 process countReads {
     publishDir "${dir_out}", mode: 'copy', overwrite: true
     input:
-        // Use '.toString' to prevent changing hashes of
-        // 'workflow.projectDir' triggering reexecution of this
-        // process if 'nextflow run' is run with '-resume'.
-        env PYTHONPATH from workflow.projectDir.toString()
         val ribosome_fqs_yaml from ribosome_fqs_yaml
         val samples_ids from count_reads_sample_ids.collect()
     output:
@@ -1423,7 +1412,7 @@ process countReads {
         //    riboviz.tools.count_reads.
         """
         echo "${ribosome_fqs_yaml}" > ribosome_fqs.yaml
-        python -m riboviz.tools.count_reads \
+        count_reads \
            -c ribosome_fqs.yaml \
            -i ${file(dir_in).toAbsolutePath()} \
            -t ${file(dir_tmp).toAbsolutePath()} \

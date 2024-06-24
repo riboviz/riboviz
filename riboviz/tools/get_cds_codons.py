@@ -80,7 +80,7 @@ def parse_command_line_options():
     return options
 
 
-def invoke_get_cds_codons():
+def main():
     """
     Parse command-line options then invoke
     :py:func:`riboviz.get_cds_codons.get_cds_codons_file`.
@@ -109,4 +109,4 @@ def invoke_get_cds_codons():
 
 
 if __name__ == "__main__":
-    invoke_get_cds_codons()
+    main()

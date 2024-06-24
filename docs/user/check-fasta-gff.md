@@ -1,9 +1,9 @@
 # Check FASTA and GFF files for coding sequence (CDS) features
 
-`riboviz.tools.check_fasta_gff` checks FASTA and GGF files for coding sequence (CDS) features. It can be run as follows:
+`check_fasta_gff` checks FASTA and GGF files for coding sequence (CDS) features. It can be run as follows:
 
 ```console
-$ python -m riboviz.tools.check_fasta_gff [-h] \
+$ check_fasta_gff [-h] \
          -f FASTA -g GFF [-o FEATURES_ISSUES] \
          [--use-feature-name] \
          [--feature-format FEATURE_FORMAT]
@@ -56,7 +56,7 @@ The following issues are reported for sequences defined in the GFF file:
 Example:
 
 ```console
-$ python -m riboviz.tools.check_fasta_gff \
+$ check_fasta_gff \
     -f vignette/input/yeast_YAL_CDS_w_250utrs.fa \
     -g vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
     -o check_vignette_YAL.tsv
@@ -111,8 +111,7 @@ YAL001C	YAL001C	InternalStopCodon
 Example with `-v` verbose mode:
 
 ```console
-
-$ python -m riboviz.tools.check_fasta_gff \
+$ check_fasta_gff \
     -f vignette/input/yeast_YAL_CDS_w_250utrs.fa \
     -g vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
     -o check_vignette_YAL.tsv -v
@@ -149,7 +148,7 @@ Sequence YAL001C feature YAL001C has an internal stop codon
 Example with `--start-codon`:
 
 ```console
-$ python -m riboviz.tools.check_fasta_gff \
+$ check_fasta_gff \
      -f vignette/input/yeast_YAL_CDS_w_250utrs.fa \
      -g vignette/input/yeast_YAL_CDS_w_250utrs.gff3 \
      -o check_vignette_YAL.tsv \
@@ -186,8 +185,7 @@ Sequence YAL001C feature YAL001C has an internal stop codon
 An example with more issues:
 
 ```console
-
-$ python -m riboviz.tools.check_fasta_gff \
+$ check_fasta_gff \
      -f data/yeast_CDS_w_250utrs.fa \
      -g data/yeast_CDS_w_250utrs.gff3 \
      -o check_data_CDS.tsv -v

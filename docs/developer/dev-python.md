@@ -159,6 +159,7 @@ output_dir = options.output_dir
 If adding, renaming or removing	command-line tools:
 
 * Update 'Python command-line tools' table in `docs/user/command-line-tools.md`.
+* Update `console_scripts` value  in `[options.entry_points]` in `setup.cfg`.
 
 ---
 

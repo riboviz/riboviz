@@ -1,5 +1,6 @@
 *.bai
 *.db
+*.egg-info/
 *.fai
 *.pyc
 *~
@@ -12,6 +13,7 @@
 .idea/
 .nextflow*
 __pycache__
+build/
 oldData/
 py-docs/_build/
 py-docs/modules.rst

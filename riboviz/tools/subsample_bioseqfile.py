@@ -89,7 +89,7 @@ def parse_command_line_options():
     return options
 
 
-def invoke_subsample_bioseqfile():
+def main():
     """
     Parse command-line options then invoke
     See :py:func:`riboviz.subsample_bioseqfile.subsample_bioseqfile`
@@ -114,4 +114,4 @@ def invoke_subsample_bioseqfile():
 
 
 if __name__ == "__main__":
-    invoke_subsample_bioseqfile()
+    main()

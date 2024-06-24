@@ -30,3 +30,5 @@ conda install -y pytest-cov
 conda install -y pylint
 conda install -y pycodestyle
 conda install -y sphinx
+# riboviz-py
+pip install .
