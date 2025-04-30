@@ -641,240 +641,180 @@ if (params.validate_only) {
     exit 0, "Validated configuration"
 }
 
-/*
-Indexing.
-*/
 
-// Split channels for use in multiple downstream processes.
-orf_fasta.into { build_indices_orf_fasta; generate_stats_figs_orf_fasta }
-orf_gff.into { bam_to_h5_orf_gff; generate_stats_figs_orf_gff }
+workflow buildIndices {
 
-process buildIndicesrRNA {
-    tag "${params.rrna_index_prefix}"
-    publishDir "${dir_index}", mode: publish_index_tmp_type, overwrite: true
-    input:
-        file rrna_fasta from rrna_fasta
-    output:
-        file "${params.rrna_index_prefix}.*.ht2" into built_rrna_index_ht2
-    when:
-        params.build_indices
-    shell:
-        """
-        hisat2-build --version
-        hisat2-build ${rrna_fasta} ${params.rrna_index_prefix}
-        """
+    take:
+    path rrna_fasta
+    path orf_fasta
+
+    main:
+    rrna_fasta_ch = Channel.fromPath(rrna_fasta)
+    built_rrna_index_ht2 = buildIndicesrRNA(rrna_fasta_ch)
+    
+    orf_fasta_ch = Channel.fromPath(orf_fasta)
+    built_orf_index_ht2 = buildIndicesORF(orf_fasta_ch)
+
+    emit:
+    built_rrna_index_ht2
+    built_orf_index_ht2
+
 }
-
-process buildIndicesORF {
-    tag "${params.orf_index_prefix}"
-    publishDir "${dir_index}", mode: publish_index_tmp_type, overwrite: true
-    input:
-        file orf_fasta from build_indices_orf_fasta
-    output:
-        file "${params.orf_index_prefix}.*.ht2" into built_orf_index_ht2
-    when:
-        params.build_indices
-    shell:
-        """
-        hisat2-build --version
-        hisat2-build ${orf_fasta} ${params.orf_index_prefix}
-        """
-}
-
-// Combine "[pre_]built_rrna|orf_index_ht2" channels for downstream
-// processing. Due to foregoing behaviour conditional on
-// 'params.build_indices' one one of 'pre_built_rrna|orf_index_ht2' or
-// 'built_rrna|orf_index_ht2' will have content.
-rrna_index_ht2 = pre_built_rrna_index_ht2.mix(built_rrna_index_ht2)
-orf_index_ht2 = pre_built_orf_index_ht2.mix(built_orf_index_ht2)
 
 /*
 Sample file (fq_files)-specific processes.
 */
 
-process cutAdapters {
-    tag "${sample_id}"
-    errorStrategy 'ignore'
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
-    input:
-        tuple val(sample_id), file(sample_fq) \
-            from sample_id_fq.collect{ id, file -> [id, file] }
-    output:
-        tuple val(sample_id), file("trim.fq") into cut_fq
-    when:
-        (! is_multiplexed)
-    shell:
-        """
-        cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} \
-            -o trim.fq ${sample_fq} -j 0
-        """
+workflow preprocessReads{
+
+    take:
+    sample_id_fq
+
+
+    main:
+    
+    cut_fq = cutAdapters(sample_id_fq.collect{ id, file -> [id, file] })
+    // Route 'cut_fq' channel outputs depending on whether UMIs are to be
+    // extracted or not.
+    cut_fq.branch {
+        umi_fq: params.extract_umis
+        non_umi_fq: ! params.extract_umis
+    }
+    .set { cut_fq_branch }
+
+    if (params.extract_umis)
+    {
+      umi_extract_fq = extractUmis(cut_fq_branch.umi_fq)
+    }
+    trimmed_fq = cut_fq_branch.non_umi_fq
+          .mix(umi_extract_fq)
+
+    emit:
+    trimmed_fq
 }
 
-// Route 'cut_fq' channel outputs depending on whether UMIs are to be
-// extracted or not.
-cut_fq.branch {
-    umi_fq: params.extract_umis
-    non_umi_fq: ! params.extract_umis
+workflow preprocessMultiplexedReads{
+
 }
-.set { cut_fq_branch }
+      take:
+      multiplex_id_fq
 
-process extractUmis {
-    tag "${sample_id}"
-    errorStrategy 'ignore'
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
-    input:
-        tuple val(sample_id), file(sample_fq) \
-            from cut_fq_branch.umi_fq
-    output:
-        tuple val(sample_id), file("extract_trim.fq") \
-            into umi_extract_fq
-    when:
-        params.extract_umis && (! is_multiplexed)
-    shell:
-        """
-        umi_tools extract -I ${sample_fq} \
-            --bc-pattern="${params.umi_regexp}" \
-            --extract-method=regex -S extract_trim.fq
-        """
-}
+      main:
 
-/*
-Multiplexed files (multiplex_fq_files)-specific processes.
-*/
+      cut_multiplex_fq = cutAdaptersMultiplex(multiplex_id_fq.collect{ id, file -> [id, file] })
 
-process cutAdaptersMultiplex {
-    tag "${multiplex_id}"
-    errorStrategy 'ignore'
-    publishDir "${dir_tmp}", mode: publish_index_tmp_type, overwrite: true
-    input:
-        tuple val(multiplex_id), file(multiplex_fq) \
-            from multiplex_id_fq.collect{ id, file -> [id, file] }
-    output:
-        tuple val(multiplex_id), file("${multiplex_id}_trim.fq") \
-            into cut_multiplex_fq
-    when:
-        is_multiplexed
-    shell:
-        """
-        cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} \
-            -o ${multiplex_id}_trim.fq ${multiplex_fq} -j 0
-        """
-}
+      // Route 'cut_multiplex_fq' channel outputs depending on whether UMIs
+      // are to be extracted or not.
+      cut_multiplex_fq.branch {
+          umi_fq: params.extract_umis
+          non_umi_fq: ! params.extract_umis
+      }
+      .set { cut_multiplex_fq_branch }
 
-// Route 'cut_multiplex_fq' channel outputs depending on whether UMIs
-// are to be extracted or not.
-cut_multiplex_fq.branch {
-    umi_fq: params.extract_umis
-    non_umi_fq: ! params.extract_umis
-}
-.set { cut_multiplex_fq_branch }
+      if (params.extract_umis)
+      {
+        umi_extract_multiplex_fq = extractUmis(cut_multiplex.fq_branch.umi_fq)
+      }
 
-process extractUmisMultiplex {
-    tag "${multiplex_id}"
-    errorStrategy 'ignore'
-    publishDir "${dir_tmp}", mode: publish_index_tmp_type, overwrite: true
-    input:
-        tuple val(multiplex_id), file(multiplex_fq) \
-            from cut_multiplex_fq_branch.umi_fq
-    output:
-        tuple val(multiplex_id), file("${multiplex_id}_extract_trim.fq") \
-            into umi_extract_multiplex_fq
-    when:
-        params.extract_umis && is_multiplexed
-    shell:
-        """
-        umi_tools extract -I ${multiplex_fq} \
-            --bc-pattern="${params.umi_regexp}" \
-            --extract-method=regex -S ${multiplex_id}_extract_trim.fq
-        """
-}
+      // Combine channels for downstream processing. By definition of
+      // 'cut_multiplex_fq.branch' only one of the input channels will have
+      // content.
+      trimmed_multiplex_fq = cut_multiplex_fq_branch.non_umi_fq
+          .mix(umi_extract_multiplex_fq)
 
-// Combine channels for downstream processing. By definition of
-// 'cut_multiplex_fq.branch' only one of the input channels will have
-// content.
-trimmed_multiplex_fq = cut_multiplex_fq_branch.non_umi_fq
-    .mix(umi_extract_multiplex_fq)
+      // Split channel for use in multiple downstream processes.
+      // multiplex_sample_sheet_tsv.into {
+      //     report_multiplex_sample_sheet_tsv; deplex_multiplex_sample_sheet_tsv
+      // }
 
-// Split channel for use in multiple downstream processes.
-multiplex_sample_sheet_tsv.into {
-    report_multiplex_sample_sheet_tsv; deplex_multiplex_sample_sheet_tsv
-}
+      demultiplex(trimmed_multiplex_fq, multiplex_sample_sheet_tsv)
+      demultiplex_fq = demultiplex.out.demultiplex_fq
+      demultiplex_num_reads_tsv = demultiplex.out.demultiplex_num_reads_tsv
+      // 'demultiplex_fq' outputs a single list with all the output
+      // files. Extract sample IDs from file basenames, filter out
+      // 'Unassigned' and output tuples of sample IDs and file names as
+      // separate items onto a new channel.
+      demultiplex_samples_fq = demultiplex_fq
+            .flatten()
+            // Use file basename as sample ID.
+            .map { [it.baseName, it] }
+            // If file was '.fastq|fq.gz' then basename will include
+            // '.fq|fastq' so strip that off too.
+            .map { n, f -> [n.endsWith(".fq") ? n - ".fq" : n, f] }
+            .map { n, f -> [n.endsWith(".fastq") ? n - ".fastq" : n, f] }
+            .filter { n, f -> n != "Unassigned" }
+            //.into { report_demultiplex_samples_fq; demultiplex_samples_fq }
 
-process demultiplex {
-    tag "${multiplex_id}"
-    publishDir "${dir_tmp}/${multiplex_id}_deplex", \
-        mode: publish_index_tmp_type, overwrite: true
-    errorStrategy 'ignore'
-    input:
-        // Use '.toString' to prevent changing hashes of
-        // 'workflow.projectDir' triggering reexecution of this
-        // process if 'nextflow run' is run with '-resume'.
-        env PYTHONPATH from workflow.projectDir.toString()
-        tuple val(multiplex_id), file(multiplex_fq) from trimmed_multiplex_fq
-        each file(sample_sheet_tsv) from deplex_multiplex_sample_sheet_tsv
-    output:
-        tuple val(multiplex_id), file("num_reads.tsv") \
-                into demultiplex_num_reads_tsv
-        file("*.f*") into demultiplex_fq
-    shell:
-        """
-        python -m riboviz.tools.demultiplex_fastq \
-            -1 ${multiplex_fq} -s ${sample_sheet_tsv} -o . -m 2
-        """
+      demultiplex_sample_ids = demultiplex_samples_fq
+          .map { n, f -> n }
+          .toList() // [] if none
+          .view { "Demultiplexed samples: ${it}"}
+          // Wrap list in list, so 'merge' below doesn't append lists
+          .map { it -> [it] }
+
+      multiplex_sample_sheet_ids = multiplex_sample_sheet_tsv
+          // Extract original sample IDs from sample sheet
+          .splitCsv(header: true, sep: '\t')
+          .map { row -> row.SampleID } // No output if no 'SampleID' column
+          .toList() // [] if no 'SampleID' column
+          // Wrap list in list, so 'merge' below doesn't append lists
+          .map { it -> [it] }
+
+      multiplex_sample_sheet_ids
+          .merge(demultiplex_sample_ids)
+          .map { a, b -> a - b}
+          .view { "Non-demultiplexed samples: ${it}" }
+
+
+      /*
+      Sample-specific processes.
+
+      Common to both sample files (fq_files) and demultiplexed files.
+      */
+
+      // Combine channels for downstream processing. By definition of
+      // upstream conditions and processes, only one of the channels
+      // will have content.
+      trimmed_fq = cut_fq_branch.non_umi_fq
+          .mix(umi_extract_fq)
+          .mix(demultiplex_samples_fq)
+
+    emit:
+    trimmed_fq
+
 }
 
-// 'demultiplex_fq' outputs a single list with all the output
-// files. Extract sample IDs from file basenames, filter out
-// 'Unassigned' and output tuples of sample IDs and file names as
-// separate items onto a new channel.
-demultiplex_fq
-    .flatten()
-    // Use file basename as sample ID.
-    .map { [it.baseName, it] }
-    // If file was '.fastq|fq.gz' then basename will include
-    // '.fq|fastq' so strip that off too.
-    .map { n, f -> [n.endsWith(".fq") ? n - ".fq" : n, f] }
-    .map { n, f -> [n.endsWith(".fastq") ? n - ".fastq" : n, f] }
-    .filter { n, f -> n != "Unassigned" }
-    .into { report_demultiplex_samples_fq; demultiplex_samples_fq }
+workflow {
+    // Split channels for use in multiple downstream processes.
 
-if (is_multiplexed) {
+    //orf_fasta.into { build_indices_orf_fasta; generate_stats_figs_orf_fasta }
+    //orf_gff.into { bam_to_h5_orf_gff; generate_stats_figs_orf_gff }
 
-    demultiplex_sample_ids = report_demultiplex_samples_fq
-        .map { n, f -> n }
-        .toList() // [] if none
-        .view { "Demultiplexed samples: ${it}"}
-        // Wrap list in list, so 'merge' below doesn't append lists
-        .map { it -> [it] }
+    if (params.build_indices)
+    {
+      buildIndices(rrna_fasta,orf_fasta)
+      rrna_index_ht2 = buildIndices.out.built_rrna_index_ht2
+      orf_index_ht2 = buildIndices.out.built_orf_index_ht2
+    } 
+    else
+    {
+      rrna_index_ht2 = pre_built_rrna_index_ht2
+      orf_index_ht2 = pre_built_orf_index_ht2
+    }
 
-    multiplex_sample_sheet_ids = report_multiplex_sample_sheet_tsv
-        // Extract original sample IDs from sample sheet
-        .splitCsv(header: true, sep: '\t')
-        .map { row -> row.SampleID } // No output if no 'SampleID' column
-        .toList() // [] if no 'SampleID' column
-        // Wrap list in list, so 'merge' below doesn't append lists
-        .map { it -> [it] }
+    if (is_multiplexed)
+    {
+      trimmed_fq = preprocessReads(sample_id_fq)
+    } else {
+      trimmed_fq = preprocessReads(multiplex_id_fq)
+    }
 
-    multiplex_sample_sheet_ids
-        .merge(demultiplex_sample_ids)
-        .map { a, b -> a - b}
-        .view { "Non-demultiplexed samples: ${it}" }
+
+    
 }
 
-/*
-Sample-specific processes.
 
-Common to both sample files (fq_files) and demultiplexed files.
-*/
 
-// Combine channels for downstream processing. By definition of
-// upstream conditions and processes, only one of the channels
-// will have content.
-trimmed_fq = cut_fq_branch.non_umi_fq
-    .mix(umi_extract_fq)
-    .mix(demultiplex_samples_fq)
 
 process hisat2rRNA {
     tag "${sample_id}"
