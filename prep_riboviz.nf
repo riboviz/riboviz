@@ -989,7 +989,7 @@ workflow {
     if (params.run_static_html) {
       count_reads_sample_ids = generateHTML.out.static_html_sample_ids
     } else {
-      count_reads_sample_ids = cvisualizeResults.out.count_reads_sample_ids
+      count_reads_sample_ids = visualizeResults.out.count_reads_sample_ids
     }
 
     if (params.count_reads)
