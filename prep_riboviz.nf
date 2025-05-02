@@ -2,6 +2,12 @@
 
 import org.yaml.snakeyaml.Yaml
 
+include { buildIndicesrRNA; buildIndicesORF} from './modules/build_indices'
+include { cutAdaptes; extractUmis; cutAdaptersMultiplex; extractUmisMultiplex; demultiplex} from './modules/preprocess'
+include { hisat2rRNA; hisat2ORF} from './modules/alignment'
+include { trim5pMismatches; samViewSort; groupUmisPreDedup; dedupUmis; groupUmisPostDedup; outputBams; makeBedgraphs; bamToH5} from './modules/postprocess'
+include { generateStatsFigs; renameTpms; collateTpms; createVizParamsConfigFile; staticHTML; createInteractiveVizParamsConfigFile} from './modules/visualization_and_stats'
+
 /*
 ===================================
 riboviz ribosome profiling workflow
@@ -645,15 +651,12 @@ if (params.validate_only) {
 workflow buildIndices {
 
     take:
-    path rrna_fasta
-    path orf_fasta
+    rrna_fasta
+    orf_fasta
 
     main:
-    rrna_fasta_ch = Channel.fromPath(rrna_fasta)
-    built_rrna_index_ht2 = buildIndicesrRNA(rrna_fasta_ch)
-    
-    orf_fasta_ch = Channel.fromPath(orf_fasta)
-    built_orf_index_ht2 = buildIndicesORF(orf_fasta_ch)
+    built_rrna_index_ht2 = buildIndicesrRNA(rrna_fasta)
+    built_orf_index_ht2 = buildIndicesORF(orf_fasta)
 
     emit:
     built_rrna_index_ht2
@@ -670,7 +673,6 @@ workflow preprocessReads{
     take:
     sample_id_fq
 
-
     main:
     
     cut_fq = cutAdapters(sample_id_fq.collect{ id, file -> [id, file] })
@@ -682,10 +684,8 @@ workflow preprocessReads{
     }
     .set { cut_fq_branch }
 
-    if (params.extract_umis)
-    {
-      umi_extract_fq = extractUmis(cut_fq_branch.umi_fq)
-    }
+    umi_extract_fq = extractUmis(cut_fq_branch.umi_fq)
+    
     trimmed_fq = cut_fq_branch.non_umi_fq
           .mix(umi_extract_fq)
 
@@ -711,11 +711,8 @@ workflow preprocessMultiplexedReads{
       }
       .set { cut_multiplex_fq_branch }
 
-      if (params.extract_umis)
-      {
-        umi_extract_multiplex_fq = extractUmis(cut_multiplex.fq_branch.umi_fq)
-      }
-
+      umi_extract_multiplex_fq = extractUmis(cut_multiplex_fq_branch.umi_fq)
+      
       // Combine channels for downstream processing. By definition of
       // 'cut_multiplex_fq.branch' only one of the input channels will have
       // content.
@@ -784,12 +781,148 @@ workflow preprocessMultiplexedReads{
 
 }
 
+
+workflow postProcessMappedReads{
+  take:
+  trim_5p_mismatches
+  orf_gff
+
+  main:
+  // Route 'trim_5p_branch' channel outputs depending on whether mismatched
+    // 5' base are to be trimmed or not
+    trim_5p_mismatches.branch {
+        trim_5p_fq: params.trim_5p_mismatches
+        non_trim_5p_fq: ! params.trim_5p_mismatches
+    }
+    .set { trim_5p_branch }
+
+    trim5pMismatches(trim_5p_branch.trim_5p_fq)
+    trim_orf_map_sam = trim5pMismatches.out.trim_orf_map_sam
+    
+    // Combine channels for downstream processing. By definition of
+    // upstream conditions and processes, only one of the channels
+    // will have content.
+    trimmed_5p_fq = trim_5p_branch.non_trim_5p_fq
+        .mix(trim_orf_map_sam)
+
+    orf_map_bam = samViewSort(trimmed_5p_fq)
+    // Route "orf_map_bam" channel outputs depending on whether UMIs are
+    // to be deduplicated or not.
+    orf_map_bam.branch {
+        dedup_bam: params.dedup_umis
+        non_dedup_bam: ! params.dedup_umis
+    }
+    .set { orf_map_bam_branch }
+
+    // Split channel for use in multiple downstream processes.
+    orf_map_bam_branch.dedup_bam.into {
+        pre_dedup_group_bam; pre_dedup_bam
+      }
+
+    if (params.dedup_umis && params.group_umis)
+    {
+      groupUmisPreDedup(orf_map_bam_branch.dedup_bam)
+    }
+
+    dedup_bam = dedupUmis(orf_map_bam_branch.dedup_bam)
+
+    if (params.dedup_umis && params.group_umis)
+    {
+      groupUmisPostDedup(dedup_bam)
+    }
+
+
+    // Combine channels for downstream processing. By definition of
+    // 'orf_map_bam_branch' only one of the input channels will have
+    // content.
+    pre_output_bam = orf_map_bam_branch.non_dedup_bam.mix(dedup_bam)
+    output_bam = outputBams(pre_output_bam)
+    
+    if (params.make_bedgraph)
+    {
+      makeBedgraphs(output_bam)
+    }
+
+    h5s = bamToH5(output_bam)
+
+    emit:
+    h5s
+
+}
+
+
+workflow visualizeResults{
+  take:
+  h5s
+  orf_fasta
+  orf_gff
+  t_rna_tsv
+  codon_positions_rdata
+  features_tsv
+  asite_disp_length_txt
+
+
+  main:
+
+  generateStatsFigs(h5s,orf_fasta,orf_gff,t_rna_tsv,codon_positions_rdata,features_tsv,asite_disp_length_txt)
+  // Join outputs from generateStatsFigs for staticHTML.
+  // Join is done on first value of each tuple i.e. sample ID.
+  generate_stats_figs_static_html =
+      metagene_start_stop_read_counts_tsv
+      .join(metagene_position_length_counts_5start_tsv, remainder: true)
+      .join(read_counts_by_length_tsv, remainder: true)
+      .join(metagene_normalized_profile_start_stop_tsv, remainder: true)
+      .join(read_frame_per_orf_filtered_tsv, remainder: true)
+      .join(ORF_TPMs_vs_features_tsv, remainder: true)
+      .join(normalized_density_apesites_per_codon_long_tsv, remainder: true)
+
+  finished_sample_id
+      .ifEmpty { exit 1, "No sample was processed successfully" }
+      .view { "Finished processing sample: ${it}" }
+
+  renameTpms(generateStatsFigs.out.orf_tpms_and_counts_tsv)
+  collateTpms(renameTpms.out.tpms_sample_id.collect(),renameTpms.out.tpms_sample_tsv.collect())
+
+  count_reads_sample_ids = collateTpms.out.collate_tpms_sample_ids.collect()
+
+  emit:
+  generate_stats_figs_static_html
+  count_reads_sample_ids
+  
+
+workflow generateHTML {
+  take:
+  generate_stats_figs_static_html
+  viz_params_yaml
+  interactive_viz_params_yaml
+
+  main:
+
+  viz_params_config_file_yaml = createVizParamsConfigFile(viz_params_yaml)
+  staticHTML(viz_params_config_file_yaml,generate_stats_figs_static_html)
+
+  createInteractiveVizParamsConfigFile(interactive_viz_params_yaml)
+  static_html_sample_ids = staticHTML.out.static_html_sample_ids.collect()
+  
+  emit:
+  static_html_sample_ids
+
+}
+
+
+workflow finalReadCount {
+  take:
+  ribosome_fqs_yaml
+  count_reads_sample_ids
+
+  main:
+
+  countReads(ribosome_fqs_yaml,count_reads_sample_ids)
+
+}
+
 workflow {
-    // Split channels for use in multiple downstream processes.
-
-    //orf_fasta.into { build_indices_orf_fasta; generate_stats_figs_orf_fasta }
-    //orf_gff.into { bam_to_h5_orf_gff; generate_stats_figs_orf_gff }
-
+    
     if (params.build_indices)
     {
       buildIndices(rrna_fasta,orf_fasta)
@@ -806,580 +939,80 @@ workflow {
     {
       trimmed_fq = preprocessReads(sample_id_fq)
     } else {
-      trimmed_fq = preprocessReads(multiplex_id_fq)
+      trimmed_fq = preprocessMultiplexedReads(multiplex_id_fq)
     }
 
+    hisat2rRNA(trimmed_fq,rrna_index_ht2)
+    hisat2ORF(hisat2.rRNA.non_rrna_fq,orf_index_ht2)
+    trim_5p_mismatches = hisat2ORF.out.trim_5p_mismatches
 
-    
+    h5s = postProcessMappedReads(trim_5p_mismatches,orf_gff)
+    visualizeResults(h5s,orf_fasta,orf_gff,t_rna_tsv,codon_positions_rdata,features_tsv,asite_disp_length_txt)
+
+
+    Map viz_params = [:]
+    if (is_asite_disp_length_file) {
+        viz_params.asite_disp_length_file = asite_disp_length_file.toString()
+    }
+    if (is_codon_positions_file) {
+        viz_params.codon_positions_file = codon_positions_file.toString()
+    }
+    if (is_features_file) {
+        viz_params.features_file = features_file.toString()
+    }
+    if (is_t_rna_file) {
+        viz_params.t_rna_file = t_rna_file.toString()
+    }
+
+    viz_params_yaml = new Yaml().dump(viz_params)
+
+    // collect only parameters needed for interactive visualization (riboviz/#275)
+    // NOTE: fq_files, dataset & sample_sheet don't use environment tokens, are relative to dir_in
+    // however dir_in, dir_out and features_file MAY use environment tokens but these are handled above in the script
+    Map interactive_viz_params = [:]
+    interactive_viz_params.dir_in = dir_in
+    interactive_viz_params.dir_out = dir_out
+    interactive_viz_params.dataset = params.dataset
+    interactive_viz_params.fq_files = params.fq_files
+    interactive_viz_params.sample_sheet = params.sample_sheet
+    if (is_features_file) {
+        interactive_viz_params.features_file = features_file.toString()
+    }
+    interactive_viz_params_yaml = new Yaml().dump(interactive_viz_params)
+
+    if (params.run_static_html) {
+      generateHTML(visualizeResults.out.generate_stats_figs_static_html,viz_params_yaml,interactive_viz_params_yaml)
+    }
+
+    // Force dependency on output of staticHTML (if run) or collateTpms so
+    // this process is only run when all other processing has completed.
+    if (params.run_static_html) {
+      count_reads_sample_ids = generateHTML.out.static_html_sample_ids
+    } else {
+      count_reads_sample_ids = cvisualizeResults.out.count_reads_sample_ids
+    }
+
+    if (params.count_reads)
+    {
+      finalReadCount(ribosome_fqs_yaml,count_reads_sample_ids)
+    }
+
+    // Create handler for finished_viz_sample_id channel, output by
+    // staticHTML, only if run_static_html is true i.e. if staticHTML
+    // executes.
+    if (params.run_static_html) {
+      finished_viz_sample_id
+          .ifEmpty { exit 1, "No sample was visualised successfully" }
+          .view { "Finished visualising sample: ${it}" }
+  }
+}
+
+
 }
 
 
 
 
-process hisat2rRNA {
-    tag "${sample_id}"
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
-    errorStrategy 'ignore'
-    input:
-        tuple val(sample_id), file(sample_fq) from trimmed_fq
-        each file(rrna_index_ht2) from rrna_index_ht2
-    output:
-        tuple val(sample_id), file("nonrRNA.fq") into non_rrna_fq
-        tuple val(sample_id), file("rRNA_map.sam") into rrna_map_sam
-    shell:
-        """
-        hisat2 --version
-        hisat2 -p ${params.num_processes} -N 1 -k 1 \
-            --un nonrRNA.fq --no-unal \
-            -x ${params.rrna_index_prefix} \
-            -S rRNA_map.sam -U ${sample_fq}
-        """
-}
-
-process hisat2ORF {
-    tag "${sample_id}"
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
-    errorStrategy 'ignore'
-    input:
-        tuple val(sample_id), file(sample_fq) from non_rrna_fq
-        each file(orf_index_ht2) from orf_index_ht2
-    output:
-        tuple val(sample_id), file("unaligned.fq") into unaligned_fq
-        tuple val(sample_id), file("orf_map.sam") into trim_5p_mismatches
-    shell:
-        """
-        hisat2 --version
-        hisat2 -p ${params.num_processes} ${params.hisat2_orf_params} \
-            --un unaligned.fq -x ${params.orf_index_prefix} \
-            -S orf_map.sam -U ${sample_fq}
-        """
-}
-
-// Route 'trim_5p_branch' channel outputs depending on whether mismatched
-// 5' base are to be trimmed or not
-trim_5p_mismatches.branch {
-    trim_5p_fq: params.trim_5p_mismatches
-    non_trim_5p_fq: ! params.trim_5p_mismatches
-}
-.set { trim_5p_branch }
-
-process trim5pMismatches {
-    tag "${sample_id}"
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
-    errorStrategy 'ignore'
-    input:
-        // Use '.toString' to prevent changing hashes of
-        // 'workflow.projectDir' triggering reexecution of this
-        // process if 'nextflow run' is run with '-resume'.
-        env PYTHONPATH from workflow.projectDir.toString()
-        tuple val(sample_id), file(sample_sam) from trim_5p_branch.trim_5p_fq
-    output:
-        tuple val(sample_id), file("orf_map_clean.sam") \
-            into trim_orf_map_sam
-        tuple val(sample_id), file("trim_5p_mismatch.tsv") \
-            into trim_summary_tsv
-    shell:
-        """
-        python -m riboviz.tools.trim_5p_mismatch -m 2 \
-            -i ${sample_sam} -o orf_map_clean.sam -s trim_5p_mismatch.tsv
-        """
-}
-
-// Combine channels for downstream processing. By definition of
-// upstream conditions and processes, only one of the channels
-// will have content.
-trimmed_5p_fq = trim_5p_branch.non_trim_5p_fq
-    .mix(trim_orf_map_sam)
-
-process samViewSort {
-    tag "${sample_id}"
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
-    errorStrategy 'ignore'
-    input:
-        tuple val(sample_id), file(sample_sam) from trimmed_5p_fq
-    output:
-        tuple val(sample_id), file("orf_map_clean.bam"), \
-            file("orf_map_clean.bam.bai") into orf_map_bam
-    shell:
-        memory = params.samsort_memory != null ? "-m ${params.samsort_memory}" : ""
-        """
-        samtools --version
-        samtools view -b ${sample_sam} | samtools sort ${memory} \
-            -@ ${params.num_processes} -O bam -o orf_map_clean.bam -
-        samtools index orf_map_clean.bam
-        """
-}
-
-// Route "orf_map_bam" channel outputs depending on whether UMIs are
-// to be deduplicated or not.
-orf_map_bam.branch {
-    dedup_bam: params.dedup_umis
-    non_dedup_bam: ! params.dedup_umis
-}
-.set { orf_map_bam_branch }
-
-// Split channel for use in multiple downstream processes.
-orf_map_bam_branch.dedup_bam.into {
-    pre_dedup_group_bam; pre_dedup_bam
-}
-
-process groupUmisPreDedup {
-    tag "${sample_id}"
-    errorStrategy 'ignore'
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
-    input:
-        tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
-            from pre_dedup_group_bam
-    output:
-        tuple val(sample_id), file("pre_dedup_groups.tsv") \
-            into pre_dedup_group_tsv
-    when:
-        params.dedup_umis && params.group_umis
-    shell:
-        """
-        umi_tools group -I ${sample_bam} --group-out pre_dedup_groups.tsv
-        """
-}
-
-process dedupUmis {
-    tag "${sample_id}"
-    errorStrategy 'ignore'
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
-    input:
-        tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
-            from pre_dedup_bam
-    output:
-        tuple val(sample_id), file("dedup.bam"), \
-            file("dedup.bam.bai") into dedup_bam
-        tuple val(sample_id), file("dedup_stats*.tsv") \
-            optional (! params.dedup_stats) \
-            into dedup_stats_tsv
-    when:
-        params.dedup_umis
-    shell:
-        output_stats_flag = params.dedup_stats \
-            ? "--output-stats=dedup_stats" : ''
-        """
-        umi_tools dedup -I ${sample_bam} -S dedup.bam ${output_stats_flag}
-        samtools --version
-        samtools index dedup.bam
-        """
-}
-
-// Split channel for use in multiple downstream processes.
-dedup_bam.into { post_dedup_group_bam; post_dedup_bam }
-
-process groupUmisPostDedup {
-    tag "${sample_id}"
-    errorStrategy 'ignore'
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
-    input:
-        tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
-            from post_dedup_group_bam
-    output:
-        tuple val(sample_id), file("post_dedup_groups.tsv") \
-            into post_dedup_group_tsv
-    when:
-        params.dedup_umis && params.group_umis
-    shell:
-        """
-        umi_tools group -I ${sample_bam} --group-out post_dedup_groups.tsv
-        """
-}
-
-// Combine channels for downstream processing. By definition of
-// 'orf_map_bam_branch' only one of the input channels will have
-// content.
-pre_output_bam = orf_map_bam_branch.non_dedup_bam.mix(post_dedup_bam)
-
-process outputBams {
-    tag "${sample_id}"
-    publishDir "${dir_out}/${sample_id}", \
-        mode: 'copy', overwrite: true
-    errorStrategy 'ignore'
-    input:
-        tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
-            from pre_output_bam
-    output:
-        tuple val(sample_id), file("${sample_id}.bam"), \
-            file("${sample_id}.bam.bai") into output_bam
-    shell:
-        """
-        cp ${sample_bam} ${sample_id}.bam
-        cp ${sample_bam_bai} ${sample_id}.bam.bai
-        """
-}
-
-// Split channel for use in multiple downstream processes.
-output_bam.into { bedgraph_bam; bam_to_h5_bam }
-
-process makeBedgraphs {
-    tag "${sample_id}"
-    publishDir "${dir_out}/${sample_id}", \
-        mode: 'copy', overwrite: true
-    errorStrategy 'ignore'
-    input:
-        tuple val(sample_id), file(sample_bam), file(sample_bam_bai) \
-            from bedgraph_bam
-    output:
-        tuple val(sample_id), file("plus.bedgraph"), \
-            file("minus.bedgraph") into bedgraph
-    when:
-        params.make_bedgraph
-    shell:
-        """
-        bedtools --version
-        bedtools genomecov -ibam ${sample_bam} -trackline -bga -5 \
-            -strand + > plus.bedgraph
-        bedtools genomecov -ibam ${sample_bam} -trackline -bga -5 \
-            -strand - > minus.bedgraph
-        """
-}
-
-process bamToH5 {
-    tag "${sample_id}"
-    publishDir "${dir_out}/${sample_id}", \
-        mode: 'copy', overwrite: true
-    errorStrategy 'ignore'
-    input:
-        tuple val(sample_id), file(sample_bam), \
-            file(sample_bam_bai) from bam_to_h5_bam
-        each file(orf_gff) from bam_to_h5_orf_gff
-    output:
-        tuple val(sample_id), file("${sample_id}.h5"), file("${sample_id}.h5.*") into h5s
-    shell:
-        secondary_id_flag = (secondary_id != null) \
-            ? "--secondary-id=${secondary_id}" : ''
-        """
-        Rscript --vanilla ${workflow.projectDir}/rscripts/bam_to_h5.R \
-           --num-processes=${params.num_processes} \
-           --min-read-length=${params.min_read_length} \
-           --max-read-length=${params.max_read_length} \
-           --buffer=${params.buffer} \
-           --primary-id=${params.primary_id} \
-           ${secondary_id_flag} \
-           --dataset=${params.dataset} \
-           --bam-file=${sample_bam} \
-           --hd-file=${sample_id}.h5 \
-           --orf-gff-file=${orf_gff} \
-           --is-riboviz-gff=${params.is_riboviz_gff} \
-           --feature=${params.feature} \
-           --stop-in-feature=${params.stop_in_feature}
-        """
-}
-
-// Optional inputs implementation follows pattern
-// https://github.com/nextflow-io/patterns/blob/master/optional-input.nf.
-process generateStatsFigs {
-    tag "${sample_id}"
-    publishDir "${dir_out}/${sample_id}", \
-        mode: 'copy', overwrite: true
-    errorStrategy 'ignore'
-    input:
-        tuple val(sample_id), file(sample_h5), file("${sample_id}.h5.*") from h5s
-        each file(orf_fasta) from generate_stats_figs_orf_fasta
-        each file(orf_gff) from generate_stats_figs_orf_gff
-        each file(t_rna_tsv) from t_rna_tsv
-        each file(codon_positions_rdata) from codon_positions_rdata
-        each file(features_tsv) from features_tsv
-        each file(asite_disp_length_txt) from asite_disp_length_txt
-    output:
-        val sample_id into finished_sample_id
-        tuple val(sample_id), file("ORF_TPMs_and_counts.tsv") into orf_tpms_and_counts_tsv
-        tuple val(sample_id), file("metagene_start_stop_read_counts.pdf") \
-            optional (! params.output_pdfs) into metagene_start_stop_read_counts_pdf
-        tuple val(sample_id), file("metagene_start_stop_read_counts.tsv") \
-            into metagene_start_stop_read_counts_tsv
-        tuple val(sample_id), file("metagene_position_length_counts_5start.tsv") \
-            into metagene_position_length_counts_5start_tsv
-        tuple val(sample_id), file("nt_freq_per_read_position.tsv") \
-            optional (! params.output_metagene_normalized_profile) \
-            into nt_freq_per_read_position_tsv
-        tuple val(sample_id), file("metagene_normalized_profile_start_stop.pdf") \
-            optional (! params.output_pdfs) into metagene_normalized_profile_start_stop_pdf
-        tuple val(sample_id), file("metagene_normalized_profile_start_stop.tsv") \
-            into metagene_normalized_profile_start_stop_tsv
-        tuple val(sample_id), file("read_counts_by_length.pdf") \
-            optional (! params.output_pdfs) into read_counts_by_length_pdf
-        tuple val(sample_id), file("read_counts_by_length.tsv") \
-            into read_counts_by_length_tsv
-        tuple val(sample_id), file("metagene_start_barplot_by_length.pdf") \
-            optional (! params.output_pdfs) into metagene_start_barplot_by_length_pdf
-        tuple val(sample_id), file("metagene_start_ribogrid_by_length.pdf") \
-            optional (! params.output_pdfs) into metagene_start_ribogrid_by_length_pdf
-        tuple val(sample_id), file("normalized_density_APEsites_per_codon.pdf") \
-            optional (! (is_t_rna_and_codon_positions_file && params.output_pdfs)) \
-            into normalized_density_apesites_per_codon_pdf
-        tuple val(sample_id), file("normalized_density_APEsites_per_codon.tsv") \
-            optional (! is_t_rna_and_codon_positions_file) \
-            into normalized_density_apesites_per_codon_tsv
-        tuple val(sample_id), file("normalized_density_APEsites_per_codon_long.tsv") \
-            optional (! is_t_rna_and_codon_positions_file) \
-            into normalized_density_apesites_per_codon_long_tsv
-        tuple val(sample_id), file("ORF_TPMs_vs_features.pdf") \
-            optional (! (is_features_file && params.output_pdfs)) into ORF_TPMs_vs_features_pdf
-        tuple val(sample_id), file("ORF_TPMs_vs_features.tsv") \
-            optional (! is_features_file) into ORF_TPMs_vs_features_tsv
-        tuple val(sample_id), file("read_frame_per_ORF.tsv") \
-            optional (! is_asite_disp_length_file) \
-            into read_frame_per_orf_tsv
-        tuple val(sample_id), file("read_frame_per_ORF_filtered.tsv") \
-            optional (! is_asite_disp_length_file) \
-            into read_frame_per_orf_filtered_tsv
-        tuple val(sample_id), file("frame_proportions_per_ORF.pdf") \
-            optional (! (is_asite_disp_length_file && params.output_pdfs)) \
-            into frame_proportions_per_orf_pdf
-    shell:
-        t_rna_flag = is_t_rna_and_codon_positions_file \
-            ? "--t-rna-file=${t_rna_tsv}" : ''
-        codon_positions_flag = is_t_rna_and_codon_positions_file \
-            ? "--codon-positions-file=${codon_positions_rdata}" : ''
-        features_flag = is_features_file \
-            ? "--features-file=${features_tsv}" : ''
-        asite_disp_length_flag = is_asite_disp_length_file \
-            ? "--asite-disp-length-file=${asite_disp_length_txt}" : ''
-        count_threshold_flag = params.containsKey('count_threshold') \
-            ? "--count-threshold=${params['count_threshold']}": ''
-        """
-        Rscript --vanilla ${workflow.projectDir}/rscripts/generate_stats_figs.R \
-           --num-processes=${params.num_processes} \
-           --min-read-length=${params.min_read_length} \
-           --max-read-length=${params.max_read_length} \
-           --buffer=${params.buffer} \
-           --primary-id=${params.primary_id} \
-           --dataset=${params.dataset} \
-           --hd-file=${sample_h5} \
-           --orf-fasta-file=${orf_fasta} \
-           --output-pdfs=${params.output_pdfs} \
-           --rpf=${params.rpf} \
-           --output-dir=. \
-           --output-metagene-normalized-profile=${params.output_metagene_normalized_profile} \
-           ${t_rna_flag} \
-           ${codon_positions_flag} \
-           ${features_flag} \
-           --orf-gff-file=${orf_gff} \
-           ${asite_disp_length_flag} \
-           ${count_threshold_flag}
-        """
-}
-
-// Join outputs from generateStatsFigs for staticHTML.
-// Join is done on first value of each tuple i.e. sample ID.
-generate_stats_figs_static_html =
-    metagene_start_stop_read_counts_tsv
-    .join(metagene_position_length_counts_5start_tsv, remainder: true)
-    .join(read_counts_by_length_tsv, remainder: true)
-    .join(metagene_normalized_profile_start_stop_tsv, remainder: true)
-    .join(read_frame_per_orf_filtered_tsv, remainder: true)
-    .join(ORF_TPMs_vs_features_tsv, remainder: true)
-    .join(normalized_density_apesites_per_codon_long_tsv, remainder: true)
-
-finished_sample_id
-    .ifEmpty { exit 1, "No sample was processed successfully" }
-    .view { "Finished processing sample: ${it}" }
-
-// Prefix sample-specific TPMs files, tpms.tsv, with sample ID so all
-// sample-specific TPMs files can be staged into the same directory
-// for running collateTpms.
-process renameTpms {
-    tag "${sample_id}"
-    errorStrategy 'ignore'
-    input:
-        tuple val(sample_id), file(orf_tpms_and_counts_tsv) from orf_tpms_and_counts_tsv
-    output:
-        val(sample_id) into tpms_sample_id
-        file "${sample_id}_tpms.tsv" into tpms_sample_tsv
-    shell:
-        """
-        cp ${orf_tpms_and_counts_tsv} ${sample_id}_tpms.tsv
-        """
-}
-
-process collateTpms {
-    tag "${sample_ids.join(', ')}"
-    publishDir "${dir_out}", mode: 'copy', overwrite: true
-    input:
-        val sample_ids from tpms_sample_id.collect()
-        file orf_tpms_and_counts_tsvs from tpms_sample_tsv.collect()
-    output:
-        file "TPMs_all_CDS_all_samples.tsv" into tpms_all_cds_all_samples_tsv
-        val sample_ids into collate_tpms_sample_ids
-    shell:
-        samples_tsvs = []
-        for (i = 0; i < sample_ids.size(); i++) {
-            samples_tsvs.add(sample_ids[i])
-            samples_tsvs.add(orf_tpms_and_counts_tsvs[i])
-        }
-        samples_tsvs = samples_tsvs.join(' ')
-        """
-        Rscript --vanilla ${workflow.projectDir}/rscripts/collate_tpms.R \
-            --tpms-file=TPMs_all_CDS_all_samples.tsv \
-            ${samples_tsvs}
-        """
-}
-
-Map viz_params = [:]
-if (is_asite_disp_length_file) {
-    viz_params.asite_disp_length_file = asite_disp_length_file.toString()
-}
-if (is_codon_positions_file) {
-    viz_params.codon_positions_file = codon_positions_file.toString()
-}
-if (is_features_file) {
-    viz_params.features_file = features_file.toString()
-}
-if (is_t_rna_file) {
-    viz_params.t_rna_file = t_rna_file.toString()
-}
-viz_params_yaml = new Yaml().dump(viz_params)
-
-process createVizParamsConfigFile {
-    input:
-      val viz_params_yaml from viz_params_yaml
-     output:
-      file "config.yaml" into viz_params_config_file_yaml
-    shell:
-      """
-      echo "${viz_params_yaml}" > "config.yaml"
-      """
-}
-
-process staticHTML {
-    tag "${sample_id}"
-    publishDir "${dir_out}/${sample_id}", \
-    mode: 'copy', overwrite: true
-    input:
-      file viz_params_config_file_yaml from viz_params_config_file_yaml
-      tuple val(sample_id), \
-        file(sample_metagene_start_stop_read_counts_tsv), \
-        file(sample_metagene_position_length_counts_5start_tsv), \
-        file(sample_read_counts_by_length_tsv), \
-        file(sample_metagene_normalized_profile_start_stop_tsv), \
-        file(sample_read_frame_per_orf_filtered_tsv), \
-        file(sample_ORF_TPMs_vs_features_tsv), \
-        file(sample_normalized_density_apesites_per_codon_long_tsv) \
-	from generate_stats_figs_static_html
-    output:
-      val sample_id into static_html_sample_ids
-      val sample_id into finished_viz_sample_id
-      file "${sample_id}_output_report.html" into static_html_html
-    when:
-      params.run_static_html
-    shell:
-      script = "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd',"
-      script += "params = list("
-      script += "verbose='FALSE', "
-      script += "yamlfile='\$PWD/${viz_params_config_file_yaml}', "
-      script += "sampleid='!{sample_id}', "
-      script += "metagene_start_stop_read_counts_data_file = '\$PWD/${sample_metagene_start_stop_read_counts_tsv}', "
-      script += "metagene_position_length_counts_5start_file = '\$PWD/${sample_metagene_position_length_counts_5start_tsv}', "
-      script += "read_counts_by_length_data_file='\$PWD/${sample_read_counts_by_length_tsv}', "
-      script += "metagene_normalized_profile_start_stop_data_file='\$PWD/${sample_metagene_normalized_profile_start_stop_tsv}' "
-      if (is_asite_disp_length_file) {
-          script += ", read_frame_per_orf_filtered_data_file='\$PWD/${sample_read_frame_per_orf_filtered_tsv}'"
-      }
-      if (is_t_rna_and_codon_positions_file) {
-          script += ", normalized_density_apesites_per_codon_long_file='\$PWD/${sample_normalized_density_apesites_per_codon_long_tsv}'"
-      }
-      if (is_features_file) {
-          script += ", ORF_TPMs_vs_features_file='\$PWD/${sample_ORF_TPMs_vs_features_tsv}' "
-      }
-      script += "), "
-      script += "intermediates_dir = '\$PWD', "
-      script += "output_format = 'html_document', "
-      script += "output_file = '\$PWD/${sample_id}_output_report.html')"
-      """
-      Rscript -e "${script}"
-      """
-}
-
-// collect only parameters needed for interactive visualization (riboviz/#275)
-// NOTE: fq_files, dataset & sample_sheet don't use environment tokens, are relative to dir_in
-// however dir_in, dir_out and features_file MAY use environment tokens but these are handled above in the script
-Map interactive_viz_params = [:]
-interactive_viz_params.dir_in = dir_in
-interactive_viz_params.dir_out = dir_out
-interactive_viz_params.dataset = params.dataset
-interactive_viz_params.fq_files = params.fq_files
-interactive_viz_params.sample_sheet = params.sample_sheet
-if (is_features_file) {
-    interactive_viz_params.features_file = features_file.toString()
-}
-interactive_viz_params_yaml = new Yaml().dump(interactive_viz_params)
-
-// create new yaml used only for interactive visualization (riboviz/#275, riboviz/#239)
-// this will write out the required params to a new yaml file
-// for use by run_shiny_server.R script.
-process createInteractiveVizParamsConfigFile {
-    publishDir "${dir_out}", mode: 'copy', overwrite: true
-    input:
-      val interactive_viz_params_yaml from interactive_viz_params_yaml
-     output:
-      file "interactive_viz_config.yaml" into interactive_viz_params_config_file_yaml
-    shell:
-      """
-      echo "${interactive_viz_params_yaml}" > "interactive_viz_config.yaml"
-      """
-}
-
-// Force dependency on output of staticHTML (if run) or collateTpms so
-// this process is only run when all other processing has completed.
-if (params.run_static_html) {
-  count_reads_sample_ids = static_html_sample_ids
-} else {
-  count_reads_sample_ids = collate_tpms_sample_ids
-}
-
-process countReads {
-    publishDir "${dir_out}", mode: 'copy', overwrite: true
-    input:
-        // Use '.toString' to prevent changing hashes of
-        // 'workflow.projectDir' triggering reexecution of this
-        // process if 'nextflow run' is run with '-resume'.
-        env PYTHONPATH from workflow.projectDir.toString()
-        val ribosome_fqs_yaml from ribosome_fqs_yaml
-        val samples_ids from count_reads_sample_ids.collect()
-    output:
-        file "read_counts_per_file.tsv" into read_counts_per_file_tsv
-    when:
-        params.count_reads
-    shell:
-        // 'workflow.projectDir' is directory into which outputs
-        // have been published.
-        // TODO: It would be preferable to:
-        // 1. Stage these directories into this process's
-        //    work directory. If this is possible, and how to do it,
-        //    if so, has not been determined.
-        // 2. Stage outputs from the processes for which reads
-        //    are to be counted into this process's work directory.
-        //    This would require a new implementation of
-        //    riboviz.tools.count_reads.
-        """
-        echo "${ribosome_fqs_yaml}" > ribosome_fqs.yaml
-        python -m riboviz.tools.count_reads \
-           -c ribosome_fqs.yaml \
-           -i ${file(dir_in).toAbsolutePath()} \
-           -t ${file(dir_tmp).toAbsolutePath()} \
-           -o ${file(dir_out).toAbsolutePath()} \
-           -r read_counts_per_file.tsv
-        """
-}
-
-// Create handler for finished_viz_sample_id channel, output by
-// staticHTML, only if run_static_html is true i.e. if staticHTML
-// executes.
-if (params.run_static_html) {
-  finished_viz_sample_id
-      .ifEmpty { exit 1, "No sample was visualised successfully" }
-      .view { "Finished visualising sample: ${it}" }
-}
 
 workflow.onComplete {
     println "Workflow finished! (${workflow.success ? 'OK' : 'failed'})"
