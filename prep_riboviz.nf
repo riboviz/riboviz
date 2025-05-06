@@ -695,7 +695,6 @@ workflow preprocessReads{
 
 workflow preprocessMultiplexedReads{
 
-}
       take:
       multiplex_id_fq
 
