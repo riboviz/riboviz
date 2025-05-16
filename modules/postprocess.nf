@@ -2,18 +2,15 @@
 
 process trim5pMismatches {
     tag "${sample_id}"
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
+    publishDir "${params.dir_tmp_env}/${sample_id}", \
+        mode: "${params.publish_index_tmp_type}", overwrite: true
     errorStrategy 'ignore'
     input:
-        // Use '.toString' to prevent changing hashes of
-        // 'workflow.projectDir' triggering reexecution of this
-        // process if 'nextflow run' is run with '-resume'.
-        env PYTHONPATH from workflow.projectDir.toString()
-        tuple val(sample_id), file(sample_sam)
+        env PYTHONPATH
+        tuple val(sample_id), path(sample_sam)
     output:
-        tuple val(sample_id), file("orf_map_clean.sam"), emit: trim_orf_map_sam
-        tuple val(sample_id), file("trim_5p_mismatch.tsv"), emit: trim_summary_tsv
+        tuple val(sample_id), path("orf_map_clean.sam"), emit: trim_orf_map_sam
+        tuple val(sample_id), path("trim_5p_mismatch.tsv"), emit: trim_summary_tsv
     shell:
         """
         python -m riboviz.tools.trim_5p_mismatch -m 2 \
@@ -23,13 +20,13 @@ process trim5pMismatches {
 
 process samViewSort {
     tag "${sample_id}"
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
+    publishDir "${params.dir_tmp_env}/${sample_id}", \
+        mode: "${params.publish_index_tmp_type}", overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(sample_sam) from trimmed_5p_fq
+        tuple val(sample_id), path(sample_sam)
     output:
-        tuple val(sample_id), file("orf_map_clean.bam"), file("orf_map_clean.bam.bai"), emit: orf_map_bam
+        tuple val(sample_id), path("orf_map_clean.bam"), path("orf_map_clean.bam.bai"), emit: orf_map_bam
     shell:
         memory = params.samsort_memory != null ? "-m ${params.samsort_memory}" : ""
         """
@@ -45,12 +42,12 @@ process samViewSort {
 process groupUmisPreDedup {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
+    publishDir "${params.dir_tmp_env}/${sample_id}", \
+        mode: "${params.publish_index_tmp_type}", overwrite: true
     input:
-        tuple val(sample_id), file(sample_bam), file(sample_bam_bai)
+        tuple val(sample_id), path(sample_bam), path(sample_bam_bai)
     output:
-        tuple val(sample_id), file("pre_dedup_groups.tsv") \
+        tuple val(sample_id), path("pre_dedup_groups.tsv") \
             , emit: pre_dedup_group_tsv
     shell:
         """
@@ -61,14 +58,14 @@ process groupUmisPreDedup {
 process dedupUmis {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
+    publishDir "${params.dir_tmp_env}/${sample_id}", \
+        mode: "${params.publish_index_tmp_type}", overwrite: true
     input:
-        tuple val(sample_id), file(sample_bam), file(sample_bam_bai) 
+        tuple val(sample_id), path(sample_bam), path(sample_bam_bai) 
     output:
-        tuple val(sample_id), file("dedup.bam"), \
-            file("dedup.bam.bai"), emit: dedup_bam
-        tuple val(sample_id), file("dedup_stats*.tsv") \
+        tuple val(sample_id), path("dedup.bam"), \
+            path("dedup.bam.bai"), emit: dedup_bam
+        tuple val(sample_id), path("dedup_stats*.tsv") \
             optional (! params.dedup_stats) \
             , emit: dedup_stats_tsv
     shell:
@@ -86,12 +83,12 @@ process dedupUmis {
 process groupUmisPostDedup {
     tag "${sample_id}"
     errorStrategy 'ignore'
-    publishDir "${dir_tmp}/${sample_id}", \
-        mode: publish_index_tmp_type, overwrite: true
+    publishDir "${params.dir_tmp_env}/${sample_id}", \
+        mode: "${params.publish_index_tmp_type}", overwrite: true
     input:
-        tuple val(sample_id), file(sample_bam), file(sample_bam_bai)
+        tuple val(sample_id), path(sample_bam), path(sample_bam_bai)
     output:
-        tuple val(sample_id), file("post_dedup_groups.tsv"), emit: post_dedup_group_tsv
+        tuple val(sample_id), path("post_dedup_groups.tsv"), emit: post_dedup_group_tsv
     shell:
         """
         umi_tools group -I ${sample_bam} --group-out post_dedup_groups.tsv
@@ -101,14 +98,14 @@ process groupUmisPostDedup {
 
 process outputBams {
     tag "${sample_id}"
-    publishDir "${dir_out}/${sample_id}", \
+    publishDir "${params.dir_out_env}/${sample_id}", \
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(sample_bam), file(sample_bam_bai)
+        tuple val(sample_id), path(sample_bam), path(sample_bam_bai)
     output:
-        tuple val(sample_id), file("${sample_id}.bam"), \
-            file("${sample_id}.bam.bai"), emit: output_bam
+        tuple val(sample_id), path("${sample_id}.bam"), \
+            path("${sample_id}.bam.bai"), emit: output_bam
     shell:
         """
         cp ${sample_bam} ${sample_id}.bam
@@ -120,14 +117,14 @@ process outputBams {
 
 process makeBedgraphs {
     tag "${sample_id}"
-    publishDir "${dir_out}/${sample_id}", \
+    publishDir "${params.dir_out_env}/${sample_id}", \
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(sample_bam), file(sample_bam_bai)
+        tuple val(sample_id), path(sample_bam), path(sample_bam_bai)
     output:
-        tuple val(sample_id), file("plus.bedgraph"), \
-            file("minus.bedgraph"), emit: bedgraph
+        tuple val(sample_id), path("plus.bedgraph"), \
+            path("minus.bedgraph"), emit: bedgraph
     shell:
         """
         bedtools --version
@@ -140,18 +137,18 @@ process makeBedgraphs {
 
 process bamToH5 {
     tag "${sample_id}"
-    publishDir "${dir_out}/${sample_id}", \
+    publishDir "${params.dir_out_env}/${sample_id}", \
         mode: 'copy', overwrite: true
     errorStrategy 'ignore'
     input:
-        tuple val(sample_id), file(sample_bam), \
-            file(sample_bam_bai)
-        each file(orf_gff)
+        tuple val(sample_id), path(sample_bam), \
+            path(sample_bam_bai)
+        each path(orf_gff)
     output:
-        tuple val(sample_id), file("${sample_id}.h5"), file("${sample_id}.h5.*"), emit: h5s
+        tuple val(sample_id), path("${sample_id}.h5"), path("${sample_id}.h5.*"), emit: h5s
     shell:
-        secondary_id_flag = (secondary_id != null) \
-            ? "--secondary-id=${secondary_id}" : ''
+        secondary_id_flag = (params.secondary_id != null) \
+            ? "--secondary-id=${params.secondary_id}" : ''
         """
         Rscript --vanilla ${workflow.projectDir}/rscripts/bam_to_h5.R \
            --num-processes=${params.num_processes} \

@@ -6,11 +6,11 @@ Indexing.
 
 process buildIndicesrRNA {
     tag "${params.rrna_index_prefix}"
-    publishDir "${dir_index}", mode: publish_index_tmp_type, overwrite: true
+    publishDir "${params.dir_index_env}", mode: "${params.publish_index_tmp_type}", overwrite: true
     input:
-        file rrna_fasta
+        path rrna_fasta
     output:
-        file "${params.rrna_index_prefix}.*.ht2", emit: built_rrna_index_ht2
+        path "${params.rrna_index_prefix}.*.ht2", emit: built_rrna_index_ht2
     shell:
         """
         hisat2-build --version
@@ -20,11 +20,11 @@ process buildIndicesrRNA {
 
 process buildIndicesORF {
     tag "${params.orf_index_prefix}"
-    publishDir "${dir_index}", mode: publish_index_tmp_type, overwrite: true
+    publishDir "${params.dir_index_env}", mode: "${params.publish_index_tmp_type}", overwrite: true
     input:
-        file orf_fasta
+        path orf_fasta
     output:
-        file "${params.orf_index_prefix}.*.ht2", emit: built_orf_index_ht2
+        path "${params.orf_index_prefix}.*.ht2", emit: built_orf_index_ht2
     shell:
         """
         hisat2-build --version

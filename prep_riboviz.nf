@@ -2,11 +2,6 @@
 
 import org.yaml.snakeyaml.Yaml
 
-include { buildIndicesrRNA; buildIndicesORF} from './modules/build_indices'
-include { cutAdaptes; extractUmis; cutAdaptersMultiplex; extractUmisMultiplex; demultiplex} from './modules/preprocess'
-include { hisat2rRNA; hisat2ORF} from './modules/alignment'
-include { trim5pMismatches; samViewSort; groupUmisPreDedup; dedupUmis; groupUmisPostDedup; outputBams; makeBedgraphs; bamToH5} from './modules/postprocess'
-include { generateStatsFigs; renameTpms; collateTpms; createVizParamsConfigFile; staticHTML; createInteractiveVizParamsConfigFile} from './modules/visualization_and_stats'
 
 /*
 ===================================
@@ -286,8 +281,7 @@ def replace_tokens(string, token_replacements)
 {
     for (token_replace in token_replacements)
     {
-        if (string.indexOf(token_replace.key) >= 0)
-	{
+        if (string.indexOf(token_replace.key) >= 0) {
             return string.replace(token_replace.key, token_replace.value)
         }
     }
@@ -346,11 +340,11 @@ params.skip_inputs = false
 
 if (params.publish_index_tmp)
 {
-     publish_index_tmp_type = 'copy'
+     params.publish_index_tmp_type = 'copy'
 }
 else
 {
-    publish_index_tmp_type = 'symlink'
+    params.publish_index_tmp_type = 'symlink'
 }
 
 if (params.validate_only) {
@@ -383,11 +377,11 @@ if (params.max_read_length < 1) {
 if (params.max_read_length < params.min_read_length) {
     exit 1, "Maximum read length in H5 output (max_read_length) must be >= minimum read length (min_read_length)"
 }
-if (! params.secondary_id) {
-    secondary_id = null
-} else {
-    secondary_id = params.secondary_id
-}
+//if (! params.secondary_id) {
+//    secondary_id = null
+//} else {
+//    secondary_id = params.secondary_id
+//}
 if (params.dedup_umis) {
     if (! params.extract_umis) {
         println("Warning: deduplication was requested (dedup_umi: TRUE) but UMI extraction was not (extract_umis: FALSE)")
@@ -434,10 +428,10 @@ Apply environment variables to paths
 if (! params.containsKey('dir_in')) {
     exit 1, "Undefined input directory (dir_in)"
 }
-dir_in = replace_tokens(params.dir_in, riboviz_env_paths)
-dir_index = replace_tokens(params.dir_index, riboviz_env_paths)
-dir_out = replace_tokens(params.dir_out, riboviz_env_paths)
-dir_tmp = replace_tokens(params.dir_tmp, riboviz_env_paths)
+params.dir_in_env = replace_tokens(params.dir_in, riboviz_env_paths)
+params.dir_index_env = replace_tokens(params.dir_index, riboviz_env_paths)
+params.dir_out_env = replace_tokens(params.dir_out, riboviz_env_paths)
+params.dir_tmp_env = replace_tokens(params.dir_tmp, riboviz_env_paths)
 
 /*
 Validate input files.
@@ -448,12 +442,12 @@ multiplex_id_fq = [:]
 multiplex_sample_sheet_tsv = Channel.empty()
 is_multiplexed = false
 if (params.validate_only && params.skip_inputs) {
-    println("Skipping checks for existence of of ribosome profiling input files (dir_in|fq_files|multiplex_fq_files|sample_sheet)")
+    println("Skipping checks for existence of of ribosome profiling input files (params.dir_in_env|fq_files|multiplex_fq_files|sample_sheet)")
 }
 if ((! params.validate_only) || (! params.skip_inputs)) {
-    if (! file(dir_in).exists())
+    if (! file(params.dir_in_env).exists())
     {
-        exit 1, "No such directory (dir_in): $dir_in"
+        exit 1, "No such directory (dir_in): $params.dir_in_env"
     }
 }
 if ((! params.fq_files) && (! params.multiplex_fq_files)) {
@@ -464,7 +458,7 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     if ((! params.validate_only) || (! params.skip_inputs)) {
         // Filter 'params.fq_files' down to those samples that exist.
         for (entry in params.fq_files) {
-            sample_fq = file("${dir_in}/${entry.value}")
+            sample_fq = file("${params.dir_in_env}/${entry.value}")
             if (sample_fq.exists()) {
                 sample_id_fq[entry.key] = sample_fq
             } else {
@@ -479,7 +473,7 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     if ((! params.validate_only) || (! params.skip_inputs)) {
         // Filter 'params.multiplex_fq_files' down to those files that exist.
         for (entry in params.multiplex_fq_files) {
-            multiplex_fq = file("${dir_in}/${entry}")
+            multiplex_fq = file("${params.dir_in_env}/${entry}")
             if (multiplex_fq.exists()) {
                 // Use file base name as key, ensuring that if file
                 // has extension '.fastq.gz' or '.fq.gz' then both
@@ -502,7 +496,7 @@ if ((! params.fq_files) && (! params.multiplex_fq_files)) {
     if (! params.containsKey('sample_sheet')) {
         exit 1, "Undefined sample sheet (sample_sheet)"
     }
-    sample_sheet = file("${dir_in}/${params.sample_sheet}")
+    sample_sheet = file("${params.dir_in_env}/${params.sample_sheet}")
     if ((! params.validate_only) || (! params.skip_inputs)) {
         if (! sample_sheet.exists()) {
             exit 1, "No such sample sheet (sample_sheet): ${sample_sheet}"
@@ -525,19 +519,19 @@ ribosome_fqs_yaml = new Yaml().dump(ribosome_fqs)
 
 // Non-sample-specific input files.
 if (! params.build_indices) {
-    rrna_index_prefix = file("${dir_index}/${params.rrna_index_prefix}.*.ht2")
+    rrna_index_prefix = file("${params.dir_index_env}/${params.rrna_index_prefix}.*.ht2")
     if (! rrna_index_prefix) {
-        exit 1, "No such rRNA index files (rrna_index_prefix): ${dir_index}/${params.rrna_index_prefix}.*.ht2"
+        exit 1, "No such rRNA index files (rrna_index_prefix): ${params.dir_index_env}/${params.rrna_index_prefix}.*.ht2"
     }
     pre_built_rrna_index_ht2 = Channel
         .fromPath(rrna_index_prefix, checkIfExists: true)
         .collect()
-    orf_index_prefix = file("${dir_index}/${params.orf_index_prefix}.*.ht2")
+    orf_index_prefix = file("${params.dir_index_env}/${params.orf_index_prefix}.*.ht2")
     if (! orf_index_prefix) {
-        exit 1, "No such ORF index files (orf_index_prefix): ${dir_index}/${params.orf_index_prefix}.*.ht2"
+        exit 1, "No such ORF index files (orf_index_prefix): ${params.dir_index_env}/${params.orf_index_prefix}.*.ht2"
     }
     pre_built_orf_index_ht2 = Channel
-        .fromPath("${dir_index}/${params.orf_index_prefix}.*.ht2",
+        .fromPath("${params.dir_index_env}/${params.orf_index_prefix}.*.ht2",
                   checkIfExists: true)
         .collect()
 } else {
@@ -590,10 +584,10 @@ if (params.containsKey('t_rna_file') && params.t_rna_file) {
         exit 1, "No such tRNA estimates file (t_rna_file): ${t_rna_file}"
     }
     t_rna_tsv = Channel.fromPath(t_rna_file, checkIfExists: true)
-    is_t_rna_file = true
+    params.is_t_rna_file = true
 } else {
     t_rna_tsv = file("Missing_t_rna_file")
-    is_t_rna_file = false
+    params.is_t_rna_file = false
 }
 if (params.containsKey('codon_positions_file')
     && params.codon_positions_file) {
@@ -604,15 +598,15 @@ if (params.containsKey('codon_positions_file')
     }
     codon_positions_rdata = Channel.fromPath(codon_positions_file,
                                              checkIfExists: true)
-    is_codon_positions_file = true
+    params.is_codon_positions_file = true
 } else {
     codon_positions_rdata = file("Missing_codon_positions_file")
-    is_codon_positions_file = false
+    params.is_codon_positions_file = false
 }
-if (is_t_rna_file && is_codon_positions_file) {
-    is_t_rna_and_codon_positions_file = true
-} else if ((! is_t_rna_file) && (! is_codon_positions_file)) {
-    is_t_rna_and_codon_positions_file = false
+if (params.is_t_rna_file && params.is_codon_positions_file) {
+    params.is_t_rna_and_codon_positions_file = true
+} else if ((! params.is_t_rna_file) && (! params.is_codon_positions_file)) {
+    params.is_t_rna_and_codon_positions_file = false
 } else {
     exit 1, "Either both tRNA estimates (t_rna_file) and codon positions (codon_positions_file) must be defined or neither must be defined"
 }
@@ -623,10 +617,10 @@ if (params.containsKey('features_file') && params.features_file) {
         exit 1, "No such features file (features_file): ${features_file}"
     }
     features_tsv = Channel.fromPath(features_file, checkIfExists: true)
-    is_features_file = true
+    params.is_features_file = true
 } else {
     features_tsv = file("Missing_features_file")
-    is_features_file = false
+    params.is_features_file = false
 }
 if (params.containsKey('asite_disp_length_file')
     && params.asite_disp_length_file) {
@@ -637,15 +631,21 @@ if (params.containsKey('asite_disp_length_file')
     }
     asite_disp_length_txt = Channel.fromPath(asite_disp_length_file,
                                              checkIfExists: true)
-    is_asite_disp_length_file = true
+    params.is_asite_disp_length_file = true
 } else {
     asite_disp_length_txt = file("Missing_aside_disp_length_file")
-    is_asite_disp_length_file = false
+    params.is_asite_disp_length_file = false
 }
 
 if (params.validate_only) {
     exit 0, "Validated configuration"
 }
+
+include { buildIndicesrRNA; buildIndicesORF } from './modules/build_indices'
+include { cutAdapters; extractUmis; cutAdaptersMultiplex; extractUmisMultiplex; demultiplex } from './modules/preprocess'
+include { hisat2rRNA; hisat2ORF } from './modules/alignment'
+include { trim5pMismatches; samViewSort; groupUmisPreDedup; dedupUmis; groupUmisPostDedup; outputBams; makeBedgraphs; bamToH5 } from './modules/postprocess'
+include { generateStatsFigs; renameTpms; collateTpms; createVizParamsConfigFile; staticHTML; createInteractiveVizParamsConfigFile; countReads } from './modules/visualization_and_stats'
 
 
 workflow buildIndices {
@@ -675,7 +675,7 @@ workflow preprocessReads{
 
     main:
     
-    cut_fq = cutAdapters(sample_id_fq.collect{ id, file -> [id, file] })
+    cut_fq = cutAdapters(Channel.from(sample_id_fq.collect{ id, file -> tuple(id, file) }))
     // Route 'cut_fq' channel outputs depending on whether UMIs are to be
     // extracted or not.
     cut_fq.branch {
@@ -700,7 +700,7 @@ workflow preprocessMultiplexedReads{
 
       main:
 
-      cut_multiplex_fq = cutAdaptersMultiplex(multiplex_id_fq.collect{ id, file -> [id, file] })
+      cut_multiplex_fq = cutAdaptersMultiplex(Channel.from(multiplex_id_fq.collect{ id, file -> tuple(id, file) }))
 
       // Route 'cut_multiplex_fq' channel outputs depending on whether UMIs
       // are to be extracted or not.
@@ -723,7 +723,10 @@ workflow preprocessMultiplexedReads{
       //     report_multiplex_sample_sheet_tsv; deplex_multiplex_sample_sheet_tsv
       // }
 
-      demultiplex(trimmed_multiplex_fq, multiplex_sample_sheet_tsv)
+      // Use '.toString' to prevent changing hashes of
+      // 'workflow.projectDir' triggering reexecution of this
+      // process if 'nextflow run' is run with '-resume'.
+      demultiplex(workflow.projectDir.toString(),trimmed_multiplex_fq, multiplex_sample_sheet_tsv)
       demultiplex_fq = demultiplex.out.demultiplex_fq
       demultiplex_num_reads_tsv = demultiplex.out.demultiplex_num_reads_tsv
       // 'demultiplex_fq' outputs a single list with all the output
@@ -771,8 +774,8 @@ workflow preprocessMultiplexedReads{
       // Combine channels for downstream processing. By definition of
       // upstream conditions and processes, only one of the channels
       // will have content.
-      trimmed_fq = cut_fq_branch.non_umi_fq
-          .mix(umi_extract_fq)
+      trimmed_fq = cut_multiplex_fq_branch.non_umi_fq
+          .mix(umi_extract_multiplex_fq)
           .mix(demultiplex_samples_fq)
 
     emit:
@@ -782,67 +785,61 @@ workflow preprocessMultiplexedReads{
 
 
 workflow postProcessMappedReads{
-  take:
-  trim_5p_mismatches
-  orf_gff
+  
+    take:
+    trim_5p_mismatches
+    orf_gff
+  
+    main:
+    // Route 'trim_5p_branch' channel outputs depending on whether mismatched
+      // 5' base are to be trimmed or not
+      trim_5p_mismatches.branch {
+          trim_5p_fq: params.trim_5p_mismatches
+          non_trim_5p_fq: ! params.trim_5p_mismatches
+      }
+      .set { trim_5p_branch }
+  
+  
+      // Use '.toString' to prevent changing hashes of
+      // 'workflow.projectDir' triggering reexecution of this
+      // process if 'nextflow run' is run with '-resume'.
+      trim5pMismatches(workflow.projectDir.toString(),trim_5p_branch.trim_5p_fq)
+      trim_orf_map_sam = trim5pMismatches.out.trim_orf_map_sam
 
-  main:
-  // Route 'trim_5p_branch' channel outputs depending on whether mismatched
-    // 5' base are to be trimmed or not
-    trim_5p_mismatches.branch {
-        trim_5p_fq: params.trim_5p_mismatches
-        non_trim_5p_fq: ! params.trim_5p_mismatches
-    }
-    .set { trim_5p_branch }
 
-    trim5pMismatches(trim_5p_branch.trim_5p_fq)
-    trim_orf_map_sam = trim5pMismatches.out.trim_orf_map_sam
-    
-    // Combine channels for downstream processing. By definition of
-    // upstream conditions and processes, only one of the channels
-    // will have content.
-    trimmed_5p_fq = trim_5p_branch.non_trim_5p_fq
-        .mix(trim_orf_map_sam)
-
-    orf_map_bam = samViewSort(trimmed_5p_fq)
-    // Route "orf_map_bam" channel outputs depending on whether UMIs are
-    // to be deduplicated or not.
-    orf_map_bam.branch {
-        dedup_bam: params.dedup_umis
-        non_dedup_bam: ! params.dedup_umis
-    }
-    .set { orf_map_bam_branch }
-
-    // Split channel for use in multiple downstream processes.
-    orf_map_bam_branch.dedup_bam.into {
-        pre_dedup_group_bam; pre_dedup_bam
+      // Combine channels for downstream processing. By definition of
+      // upstream conditions and processes, only one of the channels
+      // will have content.
+      trimmed_5p_fq = trim_5p_branch.non_trim_5p_fq
+          .mix(trim_orf_map_sam)
+  
+      orf_map_bam = samViewSort(trimmed_5p_fq)
+      // Route "orf_map_bam" channel outputs depending on whether UMIs are
+      // to be deduplicated or not.
+      orf_map_bam.branch {
+          dedup_bam: params.dedup_umis
+          non_dedup_bam: ! params.dedup_umis
+      }
+      .set { orf_map_bam_branch }
+      dedup_bam = Channel.empty()
+      if (params.dedup_umis && params.group_umis)
+      {
+        groupUmisPreDedup(orf_map_bam_branch.dedup_bam)
+        dedup_bam = dedupUmis(orf_map_bam_branch.dedup_bam)
+        groupUmisPostDedup(dedup_bam)
       }
 
-    if (params.dedup_umis && params.group_umis)
-    {
-      groupUmisPreDedup(orf_map_bam_branch.dedup_bam)
-    }
-
-    dedup_bam = dedupUmis(orf_map_bam_branch.dedup_bam)
-
-    if (params.dedup_umis && params.group_umis)
-    {
-      groupUmisPostDedup(dedup_bam)
-    }
-
-
-    // Combine channels for downstream processing. By definition of
-    // 'orf_map_bam_branch' only one of the input channels will have
-    // content.
-    pre_output_bam = orf_map_bam_branch.non_dedup_bam.mix(dedup_bam)
-    output_bam = outputBams(pre_output_bam)
-    
-    if (params.make_bedgraph)
-    {
-      makeBedgraphs(output_bam)
-    }
-
-    h5s = bamToH5(output_bam)
+      // Combine channels for downstream processing. By definition of
+      // 'orf_map_bam_branch' only one of the input channels will have
+      // content.
+      pre_output_bam = orf_map_bam_branch.non_dedup_bam.mix(dedup_bam)
+      output_bam = outputBams(pre_output_bam)
+      if (params.make_bedgraph)
+      {
+        makeBedgraphs(output_bam)
+      }
+  
+      h5s = bamToH5(output_bam,orf_gff)
 
     emit:
     h5s
@@ -862,20 +859,19 @@ workflow visualizeResults{
 
 
   main:
-
   generateStatsFigs(h5s,orf_fasta,orf_gff,t_rna_tsv,codon_positions_rdata,features_tsv,asite_disp_length_txt)
   // Join outputs from generateStatsFigs for staticHTML.
   // Join is done on first value of each tuple i.e. sample ID.
   generate_stats_figs_static_html =
-      metagene_start_stop_read_counts_tsv
-      .join(metagene_position_length_counts_5start_tsv, remainder: true)
-      .join(read_counts_by_length_tsv, remainder: true)
-      .join(metagene_normalized_profile_start_stop_tsv, remainder: true)
-      .join(read_frame_per_orf_filtered_tsv, remainder: true)
-      .join(ORF_TPMs_vs_features_tsv, remainder: true)
-      .join(normalized_density_apesites_per_codon_long_tsv, remainder: true)
+      generateStatsFigs.out.metagene_start_stop_read_counts_tsv
+      .join(generateStatsFigs.out.metagene_position_length_counts_5start_tsv, remainder: true)
+      .join(generateStatsFigs.out.read_counts_by_length_tsv, remainder: true)
+      .join(generateStatsFigs.out.metagene_normalized_profile_start_stop_tsv, remainder: true)
+      .join(generateStatsFigs.out.read_frame_per_orf_filtered_tsv, remainder: true)
+      .join(generateStatsFigs.out.ORF_TPMs_vs_features_tsv, remainder: true)
+      .join(generateStatsFigs.out.normalized_density_apesites_per_codon_long_tsv, remainder: true)
 
-  finished_sample_id
+  generateStatsFigs.out.finished_sample_id
       .ifEmpty { exit 1, "No sample was processed successfully" }
       .view { "Finished processing sample: ${it}" }
 
@@ -887,6 +883,7 @@ workflow visualizeResults{
   emit:
   generate_stats_figs_static_html
   count_reads_sample_ids
+}
   
 
 workflow generateHTML {
@@ -903,6 +900,15 @@ workflow generateHTML {
   createInteractiveVizParamsConfigFile(interactive_viz_params_yaml)
   static_html_sample_ids = staticHTML.out.static_html_sample_ids.collect()
   
+  // Create handler for finished_viz_sample_id channel, output by
+  // staticHTML, only if run_static_html is true i.e. if staticHTML
+  // executes.
+  if (params.run_static_html) {
+    staticHTML.out.finished_viz_sample_id
+        .ifEmpty { exit 1, "No sample was visualised successfully" }
+         .view { "Finished visualising sample: ${it}" }
+  }
+  
   emit:
   static_html_sample_ids
 
@@ -915,8 +921,10 @@ workflow finalReadCount {
   count_reads_sample_ids
 
   main:
-
-  countReads(ribosome_fqs_yaml,count_reads_sample_ids)
+  // Use '.toString' to prevent changing hashes of
+  // 'workflow.projectDir' triggering reexecution of this
+  // process if 'nextflow run' is run with '-resume'.
+  countReads(workflow.projectDir.toString(),ribosome_fqs_yaml,count_reads_sample_ids)
 
 }
 
@@ -933,8 +941,7 @@ workflow {
       rrna_index_ht2 = pre_built_rrna_index_ht2
       orf_index_ht2 = pre_built_orf_index_ht2
     }
-
-    if (is_multiplexed)
+    if (!is_multiplexed)
     {
       trimmed_fq = preprocessReads(sample_id_fq)
     } else {
@@ -942,74 +949,56 @@ workflow {
     }
 
     hisat2rRNA(trimmed_fq,rrna_index_ht2)
-    hisat2ORF(hisat2.rRNA.non_rrna_fq,orf_index_ht2)
+    hisat2ORF(hisat2rRNA.out.non_rrna_fq,orf_index_ht2)
     trim_5p_mismatches = hisat2ORF.out.trim_5p_mismatches
 
     h5s = postProcessMappedReads(trim_5p_mismatches,orf_gff)
     visualizeResults(h5s,orf_fasta,orf_gff,t_rna_tsv,codon_positions_rdata,features_tsv,asite_disp_length_txt)
 
-
     Map viz_params = [:]
-    if (is_asite_disp_length_file) {
+    if (params.is_asite_disp_length_file) {
         viz_params.asite_disp_length_file = asite_disp_length_file.toString()
     }
-    if (is_codon_positions_file) {
+    if (params.is_codon_positions_file) {
         viz_params.codon_positions_file = codon_positions_file.toString()
     }
-    if (is_features_file) {
+    if (params.is_features_file) {
         viz_params.features_file = features_file.toString()
     }
-    if (is_t_rna_file) {
+    if (params.is_t_rna_file) {
         viz_params.t_rna_file = t_rna_file.toString()
     }
 
-    viz_params_yaml = new Yaml().dump(viz_params)
+   viz_params_yaml = new Yaml().dump(viz_params)
 
     // collect only parameters needed for interactive visualization (riboviz/#275)
     // NOTE: fq_files, dataset & sample_sheet don't use environment tokens, are relative to dir_in
     // however dir_in, dir_out and features_file MAY use environment tokens but these are handled above in the script
     Map interactive_viz_params = [:]
-    interactive_viz_params.dir_in = dir_in
-    interactive_viz_params.dir_out = dir_out
+    interactive_viz_params.dir_in = params.dir_in_env
+    interactive_viz_params.dir_out = params.dir_out_env
     interactive_viz_params.dataset = params.dataset
     interactive_viz_params.fq_files = params.fq_files
     interactive_viz_params.sample_sheet = params.sample_sheet
-    if (is_features_file) {
+    if (params.is_features_file) {
         interactive_viz_params.features_file = features_file.toString()
     }
     interactive_viz_params_yaml = new Yaml().dump(interactive_viz_params)
 
     if (params.run_static_html) {
       generateHTML(visualizeResults.out.generate_stats_figs_static_html,viz_params_yaml,interactive_viz_params_yaml)
-    }
-
-    // Force dependency on output of staticHTML (if run) or collateTpms so
-    // this process is only run when all other processing has completed.
-    if (params.run_static_html) {
       count_reads_sample_ids = generateHTML.out.static_html_sample_ids
     } else {
       count_reads_sample_ids = visualizeResults.out.count_reads_sample_ids
     }
-
+    
     if (params.count_reads)
     {
       finalReadCount(ribosome_fqs_yaml,count_reads_sample_ids)
     }
 
-    // Create handler for finished_viz_sample_id channel, output by
-    // staticHTML, only if run_static_html is true i.e. if staticHTML
-    // executes.
-    if (params.run_static_html) {
-      finished_viz_sample_id
-          .ifEmpty { exit 1, "No sample was visualised successfully" }
-          .view { "Finished visualising sample: ${it}" }
-  }
+    
 }
-
-
-}
-
-
 
 
 
