@@ -417,9 +417,9 @@ if (! file(data_dir).exists())
 }
 // Create mapping from environment variable tokens to directories.
 riboviz_env_paths = [:]
-riboviz_env_paths['${RIBOVIZ_SAMPLES}'] = samples_dir
-riboviz_env_paths['${RIBOVIZ_ORGANISMS}'] = organisms_dir
-riboviz_env_paths['${RIBOVIZ_DATA}'] = data_dir
+riboviz_env_paths['\${RIBOVIZ_SAMPLES}'] = samples_dir
+riboviz_env_paths['\${RIBOVIZ_ORGANISMS}'] = organisms_dir
+riboviz_env_paths['\${RIBOVIZ_DATA}'] = data_dir
 
 /*
 Apply environment variables to paths
@@ -718,11 +718,6 @@ workflow preprocessMultiplexedReads{
       trimmed_multiplex_fq = cut_multiplex_fq_branch.non_umi_fq
           .mix(umi_extract_multiplex_fq)
 
-      // Split channel for use in multiple downstream processes.
-      // multiplex_sample_sheet_tsv.into {
-      //     report_multiplex_sample_sheet_tsv; deplex_multiplex_sample_sheet_tsv
-      // }
-
       // Use '.toString' to prevent changing hashes of
       // 'workflow.projectDir' triggering reexecution of this
       // process if 'nextflow run' is run with '-resume'.
@@ -774,9 +769,15 @@ workflow preprocessMultiplexedReads{
       // Combine channels for downstream processing. By definition of
       // upstream conditions and processes, only one of the channels
       // will have content.
-      trimmed_fq = cut_multiplex_fq_branch.non_umi_fq
-          .mix(umi_extract_multiplex_fq)
-          .mix(demultiplex_samples_fq)
+      
+      //umi_extract_multiplex_fq | view
+      
+      //trimmed_fq = cut_multiplex_fq_branch.non_umi_fq
+      //    .mix(umi_extract_multiplex_fq)
+      //    .mix(demultiplex_samples_fq)
+          
+      trimmed_fq = demultiplex_samples_fq
+      
 
     emit:
     trimmed_fq
@@ -821,18 +822,16 @@ workflow postProcessMappedReads{
           non_dedup_bam: ! params.dedup_umis
       }
       .set { orf_map_bam_branch }
-      dedup_bam = Channel.empty()
+      pre_output_bam = Channel.empty()
       if (params.dedup_umis && params.group_umis)
       {
         groupUmisPreDedup(orf_map_bam_branch.dedup_bam)
         dedup_bam = dedupUmis(orf_map_bam_branch.dedup_bam)
-        groupUmisPostDedup(dedup_bam)
+        groupUmisPostDedup(dedup_bam.dedup_bam)
+        pre_output_bam = dedup_bam.dedup_bam
+      } else {
+        pre_output_bam = orf_map_bam_branch.non_dedup_bam
       }
-
-      // Combine channels for downstream processing. By definition of
-      // 'orf_map_bam_branch' only one of the input channels will have
-      // content.
-      pre_output_bam = orf_map_bam_branch.non_dedup_bam.mix(dedup_bam)
       output_bam = outputBams(pre_output_bam)
       if (params.make_bedgraph)
       {
@@ -859,18 +858,42 @@ workflow visualizeResults{
 
 
   main:
+  
+  missing_options = h5s.map{ sample_id, sample_h5, sample_h5_star -> sample_id}.combine(Channel.fromPath("."))
+  
   generateStatsFigs(h5s,orf_fasta,orf_gff,t_rna_tsv,codon_positions_rdata,features_tsv,asite_disp_length_txt)
+  
+  if (params.is_asite_disp_length_file) {
+        read_frame_per_orf_filtered_tsv = generateStatsFigs.out.read_frame_per_orf_filtered_tsv
+  } else {
+        read_frame_per_orf_filtered_tsv = missing_options
+  }
+  if (params.is_t_rna_and_codon_positions_file) {
+        normalized_density_apesites_per_codon_long_tsv = generateStatsFigs.out.normalized_density_apesites_per_codon_long_tsv
+  } else {
+        normalized_density_apesites_per_codon_long_tsv = missing_options
+  }
+  if (params.is_features_file) {
+        ORF_TPMs_vs_features_tsv = generateStatsFigs.out.ORF_TPMs_vs_features_tsv
+  } else {
+        ORF_TPMs_vs_features_tsv = missing_options
+  }
+  
+  
+  
   // Join outputs from generateStatsFigs for staticHTML.
   // Join is done on first value of each tuple i.e. sample ID.
+
   generate_stats_figs_static_html =
       generateStatsFigs.out.metagene_start_stop_read_counts_tsv
       .join(generateStatsFigs.out.metagene_position_length_counts_5start_tsv, remainder: true)
       .join(generateStatsFigs.out.read_counts_by_length_tsv, remainder: true)
       .join(generateStatsFigs.out.metagene_normalized_profile_start_stop_tsv, remainder: true)
-      .join(generateStatsFigs.out.read_frame_per_orf_filtered_tsv, remainder: true)
-      .join(generateStatsFigs.out.ORF_TPMs_vs_features_tsv, remainder: true)
-      .join(generateStatsFigs.out.normalized_density_apesites_per_codon_long_tsv, remainder: true)
-
+      .join(read_frame_per_orf_filtered_tsv, remainder: true)
+      .join(ORF_TPMs_vs_features_tsv, remainder: true)
+      .join(normalized_density_apesites_per_codon_long_tsv, remainder: true)
+  
+  
   generateStatsFigs.out.finished_sample_id
       .ifEmpty { exit 1, "No sample was processed successfully" }
       .view { "Finished processing sample: ${it}" }
@@ -929,7 +952,7 @@ workflow finalReadCount {
 }
 
 workflow {
-    
+   
     if (params.build_indices)
     {
       buildIndices(rrna_fasta,orf_fasta)

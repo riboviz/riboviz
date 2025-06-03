@@ -162,7 +162,7 @@ process staticHTML {
       val(sample_id), emit: finished_viz_sample_id
       path("${sample_id}_output_report.html"), emit: static_html_html
   
-    shell:
+    script:
       script = "rmarkdown::render('${workflow.projectDir}/rmarkdown/AnalysisOutputs.Rmd',"
       script += "params = list("
       script += "verbose='FALSE', "

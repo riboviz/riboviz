@@ -16,7 +16,7 @@ process cutAdapters {
     shell:
         """
         cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} \
-            -o trim.fq ${sample_fq} -j 1
+            -o trim.fq ${sample_fq} -j ${params.num_processes}
         """
 }
 
@@ -52,7 +52,7 @@ process cutAdaptersMultiplex {
     shell:
         """
         cutadapt --trim-n -O 1 -m 5 -a ${params.adapters} \
-            -o ${multiplex_id}_trim.fq ${multiplex_fq} -j 0
+            -o ${multiplex_id}_trim.fq ${multiplex_fq} -j ${params.num_processes}
         """
 }
 

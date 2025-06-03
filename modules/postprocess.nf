@@ -66,8 +66,7 @@ process dedupUmis {
         tuple val(sample_id), path("dedup.bam"), \
             path("dedup.bam.bai"), emit: dedup_bam
         tuple val(sample_id), path("dedup_stats*.tsv") \
-            optional (! params.dedup_stats) \
-            , emit: dedup_stats_tsv
+            , emit: dedup_stats_tsv, optional: (! params.dedup_stats) 
     shell:
         output_stats_flag = params.dedup_stats \
             ? "--output-stats=dedup_stats" : ''
